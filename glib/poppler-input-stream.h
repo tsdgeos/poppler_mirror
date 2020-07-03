@@ -23,27 +23,24 @@
 
 #include <gio/gio.h>
 #ifndef __GI_SCANNER__
-#include <Object.h>
-#include <Stream.h>
+#    include <Object.h>
+#    include <Stream.h>
 
-class PopplerInputStream: public BaseSeekInputStream {
+class PopplerInputStream : public BaseSeekInputStream
+{
 public:
-
-  PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
-                     Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
-  ~PopplerInputStream() override;
-  BaseStream *copy() override;
-  Stream *makeSubStream(Goffset start, bool limited,
-                        Goffset lengthA, Object &&dictA) override;
+    PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
+    ~PopplerInputStream() override;
+    BaseStream *copy() override;
+    Stream *makeSubStream(Goffset start, bool limited, Goffset lengthA, Object &&dictA) override;
 
 private:
+    Goffset currentPos() const override;
+    void setCurrentPos(Goffset offset) override;
+    Goffset read(char *buffer, Goffset count) override;
 
-  Goffset currentPos() const override;
-  void setCurrentPos(Goffset offset) override;
-  Goffset read(char *buffer, Goffset count) override;
-
-  GInputStream *inputStream;
-  GCancellable *cancellable;
+    GInputStream *inputStream;
+    GCancellable *cancellable;
 };
 
 #endif /* __GI_SCANNER__ */

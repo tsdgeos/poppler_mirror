@@ -54,12 +54,13 @@ LinkAction::LinkAction() = default;
 
 LinkAction::~LinkAction() = default;
 
-std::unique_ptr<LinkAction> LinkAction::parseDest(const Object *obj) {
-  auto action = std::unique_ptr<LinkAction>(new LinkGoTo(obj));
-  if (!action->isOk()) {
-    action.reset();
-  }
-  return action;
+std::unique_ptr<LinkAction> LinkAction::parseDest(const Object *obj)
+{
+    auto action = std::unique_ptr<LinkAction>(new LinkGoTo(obj));
+    if (!action->isOk()) {
+        action.reset();
+    }
+    return action;
 }
 
 std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI)
@@ -68,385 +69,387 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const Goo
     return parseAction(obj, baseURI, &seenNextActions);
 }
 
-std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI,
-                                    std::set<int> *seenNextActions) {
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions)
+{
 
-  if (!obj->isDict()) {
-      error(errSyntaxWarning, -1, "parseAction: Bad annotation action for URI '{0:s}'",
-            baseURI ? baseURI->c_str() : "NULL");
-      return nullptr;
-  }
+    if (!obj->isDict()) {
+        error(errSyntaxWarning, -1, "parseAction: Bad annotation action for URI '{0:s}'", baseURI ? baseURI->c_str() : "NULL");
+        return nullptr;
+    }
 
-  std::unique_ptr<LinkAction> action;
-  Object obj2 = obj->dictLookup("S");
+    std::unique_ptr<LinkAction> action;
+    Object obj2 = obj->dictLookup("S");
 
-  // GoTo action
-  if (obj2.isName("GoTo")) {
-    Object obj3 = obj->dictLookup("D");
-    action = std::make_unique<LinkGoTo>(&obj3);
+    // GoTo action
+    if (obj2.isName("GoTo")) {
+        Object obj3 = obj->dictLookup("D");
+        action = std::make_unique<LinkGoTo>(&obj3);
 
-  // GoToR action
-  } else if (obj2.isName("GoToR")) {
-    Object obj3 = obj->dictLookup("F");
-    Object obj4 = obj->dictLookup("D");
-    action = std::make_unique<LinkGoToR>(&obj3, &obj4);
+        // GoToR action
+    } else if (obj2.isName("GoToR")) {
+        Object obj3 = obj->dictLookup("F");
+        Object obj4 = obj->dictLookup("D");
+        action = std::make_unique<LinkGoToR>(&obj3, &obj4);
 
-  // Launch action
-  } else if (obj2.isName("Launch")) {
-    action = std::make_unique<LinkLaunch>(obj);
+        // Launch action
+    } else if (obj2.isName("Launch")) {
+        action = std::make_unique<LinkLaunch>(obj);
 
-  // URI action
-  } else if (obj2.isName("URI")) {
-    Object obj3 = obj->dictLookup("URI");
-    action = std::make_unique<LinkURI>(&obj3, baseURI);
+        // URI action
+    } else if (obj2.isName("URI")) {
+        Object obj3 = obj->dictLookup("URI");
+        action = std::make_unique<LinkURI>(&obj3, baseURI);
 
-  // Named action
-  } else if (obj2.isName("Named")) {
-    Object obj3 = obj->dictLookup("N");
-    action = std::make_unique<LinkNamed>(&obj3);
+        // Named action
+    } else if (obj2.isName("Named")) {
+        Object obj3 = obj->dictLookup("N");
+        action = std::make_unique<LinkNamed>(&obj3);
 
-  // Movie action
-  } else if (obj2.isName("Movie")) {
-    action = std::make_unique<LinkMovie>(obj);
+        // Movie action
+    } else if (obj2.isName("Movie")) {
+        action = std::make_unique<LinkMovie>(obj);
 
-  // Rendition action
-  } else if (obj2.isName("Rendition")) {
-    action = std::make_unique<LinkRendition>(obj);
+        // Rendition action
+    } else if (obj2.isName("Rendition")) {
+        action = std::make_unique<LinkRendition>(obj);
 
-  // Sound action
-  } else if (obj2.isName("Sound")) {
-    action = std::make_unique<LinkSound>(obj);
+        // Sound action
+    } else if (obj2.isName("Sound")) {
+        action = std::make_unique<LinkSound>(obj);
 
-  // JavaScript action
-  } else if (obj2.isName("JavaScript")) {
-    Object obj3 = obj->dictLookup("JS");
-    action = std::make_unique<LinkJavaScript>(&obj3);
+        // JavaScript action
+    } else if (obj2.isName("JavaScript")) {
+        Object obj3 = obj->dictLookup("JS");
+        action = std::make_unique<LinkJavaScript>(&obj3);
 
-  // Set-OCG-State action
-  } else if (obj2.isName("SetOCGState")) {
-    action = std::make_unique<LinkOCGState>(obj);
+        // Set-OCG-State action
+    } else if (obj2.isName("SetOCGState")) {
+        action = std::make_unique<LinkOCGState>(obj);
 
-  // Hide action
-  } else if (obj2.isName("Hide")) {
-    action = std::make_unique<LinkHide>(obj);
+        // Hide action
+    } else if (obj2.isName("Hide")) {
+        action = std::make_unique<LinkHide>(obj);
 
-  // ResetForm action
-  } else if (obj2.isName("ResetForm")) {
-    action = std::make_unique<LinkResetForm>(obj);
+        // ResetForm action
+    } else if (obj2.isName("ResetForm")) {
+        action = std::make_unique<LinkResetForm>(obj);
 
-  // unknown action
-  } else if (obj2.isName()) {
-    action = std::make_unique<LinkUnknown>(obj2.getName());
+        // unknown action
+    } else if (obj2.isName()) {
+        action = std::make_unique<LinkUnknown>(obj2.getName());
 
-  // action is missing or wrong type
-  } else {
-    error(errSyntaxWarning, -1, "parseAction: Unknown annotation action object: URI = '{0:s}'",
-          baseURI ? baseURI->c_str() : "NULL");
-    action = nullptr;
-  }
+        // action is missing or wrong type
+    } else {
+        error(errSyntaxWarning, -1, "parseAction: Unknown annotation action object: URI = '{0:s}'", baseURI ? baseURI->c_str() : "NULL");
+        action = nullptr;
+    }
 
-  if (action && !action->isOk()) {
-    action.reset();
-    return nullptr;
-  }
+    if (action && !action->isOk()) {
+        action.reset();
+        return nullptr;
+    }
 
-  if (!action) {
-    return nullptr;
-  }
+    if (!action) {
+        return nullptr;
+    }
 
-  // parse the next actions
-  const Object nextObj = obj->dictLookup("Next");
-  std::vector<std::unique_ptr<LinkAction> > actionList;
-  if (nextObj.isDict()) {
+    // parse the next actions
+    const Object nextObj = obj->dictLookup("Next");
+    std::vector<std::unique_ptr<LinkAction>> actionList;
+    if (nextObj.isDict()) {
 
-    // Prevent circles in the tree by checking the ref against used refs in
-    // our current tree branch.
-    const Object &nextRefObj = obj->dictLookupNF("Next");
-    if (nextRefObj.isRef()) {
-        const Ref ref = nextRefObj.getRef();
-        if (!seenNextActions->insert(ref.num).second) {
-            error(errSyntaxWarning, -1, "parseAction: Circular next actions detected.");
-            return action;
+        // Prevent circles in the tree by checking the ref against used refs in
+        // our current tree branch.
+        const Object &nextRefObj = obj->dictLookupNF("Next");
+        if (nextRefObj.isRef()) {
+            const Ref ref = nextRefObj.getRef();
+            if (!seenNextActions->insert(ref.num).second) {
+                error(errSyntaxWarning, -1, "parseAction: Circular next actions detected.");
+                return action;
+            }
+        }
+
+        actionList.reserve(1);
+        actionList.push_back(parseAction(&nextObj, nullptr, seenNextActions));
+    } else if (nextObj.isArray()) {
+        const Array *a = nextObj.getArray();
+        const int n = a->getLength();
+        actionList.reserve(n);
+        for (int i = 0; i < n; ++i) {
+            const Object obj3 = a->get(i);
+            if (!obj3.isDict()) {
+                error(errSyntaxWarning, -1, "parseAction: Next array does not contain only dicts");
+                continue;
+            }
+
+            // Similar circle check as above.
+            const Object &obj3Ref = a->getNF(i);
+            if (obj3Ref.isRef()) {
+                const Ref ref = obj3Ref.getRef();
+                if (!seenNextActions->insert(ref.num).second) {
+                    error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
+                    return action;
+                }
+            }
+
+            actionList.push_back(parseAction(&obj3, nullptr, seenNextActions));
         }
     }
 
-    actionList.reserve(1);
-    actionList.push_back(parseAction(&nextObj, nullptr, seenNextActions));
-  } else if (nextObj.isArray()) {
-    const Array *a = nextObj.getArray();
-    const int n = a->getLength();
-    actionList.reserve(n);
-    for (int i = 0; i < n; ++i) {
-      const Object obj3 = a->get(i);
-      if (!obj3.isDict()) {
-        error(errSyntaxWarning, -1, "parseAction: Next array does not contain only dicts");
-        continue;
-      }
+    action->nextActionList = std::move(actionList);
 
-      // Similar circle check as above.
-      const Object &obj3Ref = a->getNF(i);
-      if (obj3Ref.isRef()) {
-          const Ref ref = obj3Ref.getRef();
-          if (!seenNextActions->insert(ref.num).second) {
-              error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
-              return action;
-          }
-      }
-
-      actionList.push_back(parseAction(&obj3, nullptr, seenNextActions));
-    }
-  }
-
-  action->nextActionList = std::move(actionList);
-
-  return action;
+    return action;
 }
 
-const std::vector<std::unique_ptr<LinkAction> >& LinkAction::nextActions() const {
-  return nextActionList;
+const std::vector<std::unique_ptr<LinkAction>> &LinkAction::nextActions() const
+{
+    return nextActionList;
 }
 
 //------------------------------------------------------------------------
 // LinkDest
 //------------------------------------------------------------------------
 
-LinkDest::LinkDest(const Array *a) {
-  // initialize fields
-  left = bottom = right = top = zoom = 0;
-  changeLeft = changeTop = changeZoom = false;
-  ok = false;
+LinkDest::LinkDest(const Array *a)
+{
+    // initialize fields
+    left = bottom = right = top = zoom = 0;
+    changeLeft = changeTop = changeZoom = false;
+    ok = false;
 
-  // get page
-  if (a->getLength() < 2) {
-    error(errSyntaxWarning, -1, "Annotation destination array is too short");
-    return;
-  }
-  const Object &obj0 = a->getNF(0);
-  if (obj0.isInt()) {
-    pageNum = obj0.getInt() + 1;
-    pageIsRef = false;
-  } else if (obj0.isRef()) {
-    pageRef = obj0.getRef();
-    pageIsRef = true;
-  } else {
-    error(errSyntaxWarning, -1, "Bad annotation destination");
-    return;
-  }
-
-  // get destination type
-  Object obj1 = a->get(1);
-
-  // XYZ link
-  if (obj1.isName("XYZ")) {
-    kind = destXYZ;
-    if (a->getLength() < 3) {
-      changeLeft = false;
+    // get page
+    if (a->getLength() < 2) {
+        error(errSyntaxWarning, -1, "Annotation destination array is too short");
+        return;
+    }
+    const Object &obj0 = a->getNF(0);
+    if (obj0.isInt()) {
+        pageNum = obj0.getInt() + 1;
+        pageIsRef = false;
+    } else if (obj0.isRef()) {
+        pageRef = obj0.getRef();
+        pageIsRef = true;
     } else {
-      Object obj2 = a->get(2);
-      if (obj2.isNull()) {
-	changeLeft = false;
-      } else if (obj2.isNum()) {
-	changeLeft = true;
-	left = obj2.getNum();
-      } else {
-	error(errSyntaxWarning, -1, "Bad annotation destination position");
-	return;
-      }
-    }
-    if (a->getLength() < 4) {
-      changeTop = false;
-    } else {
-      Object obj2 = a->get(3);
-      if (obj2.isNull()) {
-	changeTop = false;
-      } else if (obj2.isNum()) {
-	changeTop = true;
-	top = obj2.getNum();
-      } else {
-	error(errSyntaxWarning, -1, "Bad annotation destination position");
-	return;
-      }
-    }
-    if (a->getLength() < 5) {
-      changeZoom = false;
-    } else {
-      Object obj2 = a->get(4);
-      if (obj2.isNull()) {
-	changeZoom = false;
-      } else if (obj2.isNum()) {
-	zoom = obj2.getNum();
-	changeZoom = (zoom == 0) ? false : true;
-      } else {
-	error(errSyntaxWarning, -1, "Bad annotation destination position");
-	return;
-      }
+        error(errSyntaxWarning, -1, "Bad annotation destination");
+        return;
     }
 
-  // Fit link
-  } else if (obj1.isName("Fit")) {
-    kind = destFit;
+    // get destination type
+    Object obj1 = a->get(1);
 
-  // FitH link
-  } else if (obj1.isName("FitH")) {
-    kind = destFitH;
-    if (a->getLength() < 3) {
-      changeTop = false;
+    // XYZ link
+    if (obj1.isName("XYZ")) {
+        kind = destXYZ;
+        if (a->getLength() < 3) {
+            changeLeft = false;
+        } else {
+            Object obj2 = a->get(2);
+            if (obj2.isNull()) {
+                changeLeft = false;
+            } else if (obj2.isNum()) {
+                changeLeft = true;
+                left = obj2.getNum();
+            } else {
+                error(errSyntaxWarning, -1, "Bad annotation destination position");
+                return;
+            }
+        }
+        if (a->getLength() < 4) {
+            changeTop = false;
+        } else {
+            Object obj2 = a->get(3);
+            if (obj2.isNull()) {
+                changeTop = false;
+            } else if (obj2.isNum()) {
+                changeTop = true;
+                top = obj2.getNum();
+            } else {
+                error(errSyntaxWarning, -1, "Bad annotation destination position");
+                return;
+            }
+        }
+        if (a->getLength() < 5) {
+            changeZoom = false;
+        } else {
+            Object obj2 = a->get(4);
+            if (obj2.isNull()) {
+                changeZoom = false;
+            } else if (obj2.isNum()) {
+                zoom = obj2.getNum();
+                changeZoom = (zoom == 0) ? false : true;
+            } else {
+                error(errSyntaxWarning, -1, "Bad annotation destination position");
+                return;
+            }
+        }
+
+        // Fit link
+    } else if (obj1.isName("Fit")) {
+        kind = destFit;
+
+        // FitH link
+    } else if (obj1.isName("FitH")) {
+        kind = destFitH;
+        if (a->getLength() < 3) {
+            changeTop = false;
+        } else {
+            Object obj2 = a->get(2);
+            if (obj2.isNull()) {
+                changeTop = false;
+            } else if (obj2.isNum()) {
+                changeTop = true;
+                top = obj2.getNum();
+            } else {
+                error(errSyntaxWarning, -1, "Bad annotation destination position");
+                kind = destFit;
+            }
+        }
+
+        // FitV link
+    } else if (obj1.isName("FitV")) {
+        if (a->getLength() < 3) {
+            error(errSyntaxWarning, -1, "Annotation destination array is too short");
+            return;
+        }
+        kind = destFitV;
+        Object obj2 = a->get(2);
+        if (obj2.isNull()) {
+            changeLeft = false;
+        } else if (obj2.isNum()) {
+            changeLeft = true;
+            left = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+
+        // FitR link
+    } else if (obj1.isName("FitR")) {
+        if (a->getLength() < 6) {
+            error(errSyntaxWarning, -1, "Annotation destination array is too short");
+            return;
+        }
+        kind = destFitR;
+        Object obj2 = a->get(2);
+        if (obj2.isNum()) {
+            left = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+        obj2 = a->get(3);
+        if (obj2.isNum()) {
+            bottom = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+        obj2 = a->get(4);
+        if (obj2.isNum()) {
+            right = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+        obj2 = a->get(5);
+        if (obj2.isNum()) {
+            top = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+
+        // FitB link
+    } else if (obj1.isName("FitB")) {
+        kind = destFitB;
+
+        // FitBH link
+    } else if (obj1.isName("FitBH")) {
+        if (a->getLength() < 3) {
+            error(errSyntaxWarning, -1, "Annotation destination array is too short");
+            return;
+        }
+        kind = destFitBH;
+        Object obj2 = a->get(2);
+        if (obj2.isNull()) {
+            changeTop = false;
+        } else if (obj2.isNum()) {
+            changeTop = true;
+            top = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+
+        // FitBV link
+    } else if (obj1.isName("FitBV")) {
+        if (a->getLength() < 3) {
+            error(errSyntaxWarning, -1, "Annotation destination array is too short");
+            return;
+        }
+        kind = destFitBV;
+        Object obj2 = a->get(2);
+        if (obj2.isNull()) {
+            changeLeft = false;
+        } else if (obj2.isNum()) {
+            changeLeft = true;
+            left = obj2.getNum();
+        } else {
+            error(errSyntaxWarning, -1, "Bad annotation destination position");
+            kind = destFit;
+        }
+
+        // unknown link kind
     } else {
-      Object obj2 = a->get(2);
-      if (obj2.isNull()) {
-	changeTop = false;
-      } else if (obj2.isNum()) {
-	changeTop = true;
-	top = obj2.getNum();
-      } else {
-	error(errSyntaxWarning, -1, "Bad annotation destination position");
-	kind = destFit;
-      }
+        error(errSyntaxWarning, -1, "Unknown annotation destination type");
+        return;
     }
 
-  // FitV link
-  } else if (obj1.isName("FitV")) {
-    if (a->getLength() < 3) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      return;
-    }
-    kind = destFitV;
-    Object obj2 = a->get(2);
-    if (obj2.isNull()) {
-      changeLeft = false;
-    } else if (obj2.isNum()) {
-      changeLeft = true;
-      left = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-
-  // FitR link
-  } else if (obj1.isName("FitR")) {
-    if (a->getLength() < 6) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      return;
-    }
-    kind = destFitR;
-    Object obj2 = a->get(2);
-    if (obj2.isNum()) {
-      left = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-    obj2 = a->get(3);
-    if (obj2.isNum()) {
-      bottom = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-    obj2 = a->get(4);
-    if (obj2.isNum()) {
-      right = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-    obj2 = a->get(5);
-    if (obj2.isNum()) {
-      top = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-
-  // FitB link
-  } else if (obj1.isName("FitB")) {
-    kind = destFitB;
-
-  // FitBH link
-  } else if (obj1.isName("FitBH")) {
-    if (a->getLength() < 3) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      return;
-    }
-    kind = destFitBH;
-    Object obj2 = a->get(2);
-    if (obj2.isNull()) {
-      changeTop = false;
-    } else if (obj2.isNum()) {
-      changeTop = true;
-      top = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-
-  // FitBV link
-  } else if (obj1.isName("FitBV")) {
-    if (a->getLength() < 3) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      return;
-    }
-    kind = destFitBV;
-    Object obj2 = a->get(2);
-    if (obj2.isNull()) {
-      changeLeft = false;
-    } else if (obj2.isNum()) {
-      changeLeft = true;
-      left = obj2.getNum();
-    } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
-    }
-
-  // unknown link kind
-  } else {
-    error(errSyntaxWarning, -1, "Unknown annotation destination type");
-    return;
-  }
-
-  ok = true;
+    ok = true;
 }
 
-LinkDest::LinkDest(const LinkDest *dest) {
-  kind = dest->kind;
-  pageIsRef = dest->pageIsRef;
-  if (pageIsRef)
-    pageRef = dest->pageRef;
-  else
-    pageNum = dest->pageNum;
-  left = dest->left;
-  bottom = dest->bottom;
-  right = dest->right;
-  top = dest->top;
-  zoom = dest->zoom;
-  changeLeft = dest->changeLeft;
-  changeTop = dest->changeTop;
-  changeZoom = dest->changeZoom;
-  ok = true;
+LinkDest::LinkDest(const LinkDest *dest)
+{
+    kind = dest->kind;
+    pageIsRef = dest->pageIsRef;
+    if (pageIsRef)
+        pageRef = dest->pageRef;
+    else
+        pageNum = dest->pageNum;
+    left = dest->left;
+    bottom = dest->bottom;
+    right = dest->right;
+    top = dest->top;
+    zoom = dest->zoom;
+    changeLeft = dest->changeLeft;
+    changeTop = dest->changeTop;
+    changeZoom = dest->changeZoom;
+    ok = true;
 }
 
 //------------------------------------------------------------------------
 // LinkGoTo
 //------------------------------------------------------------------------
 
-LinkGoTo::LinkGoTo(const Object *destObj) {
-  // named destination
-  if (destObj->isName()) {
-    namedDest = std::make_unique<GooString>(destObj->getName());
-  } else if (destObj->isString()) {
-    namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
+LinkGoTo::LinkGoTo(const Object *destObj)
+{
+    // named destination
+    if (destObj->isName()) {
+        namedDest = std::make_unique<GooString>(destObj->getName());
+    } else if (destObj->isString()) {
+        namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
 
-  // destination dictionary
-  } else if (destObj->isArray()) {
-    dest = std::make_unique<LinkDest>(destObj->getArray());
-    if (!dest->isOk()) {
-      dest.reset();
+        // destination dictionary
+    } else if (destObj->isArray()) {
+        dest = std::make_unique<LinkDest>(destObj->getArray());
+        if (!dest->isOk()) {
+            dest.reset();
+        }
+
+        // error
+    } else {
+        error(errSyntaxWarning, -1, "Illegal annotation destination");
     }
-
-  // error
-  } else {
-    error(errSyntaxWarning, -1, "Illegal annotation destination");
-  }
 }
 
 LinkGoTo::~LinkGoTo() = default;
@@ -455,30 +458,31 @@ LinkGoTo::~LinkGoTo() = default;
 // LinkGoToR
 //------------------------------------------------------------------------
 
-LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj) {
-  // get file name
-  Object obj1 = getFileSpecNameForPlatform (fileSpecObj);
-  if (obj1.isString()) {
-    fileName = std::unique_ptr<GooString>(obj1.getString()->copy());
-  }
-
-  // named destination
-  if (destObj->isName()) {
-    namedDest = std::make_unique<GooString>(destObj->getName());
-  } else if (destObj->isString()) {
-    namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
-
-  // destination dictionary
-  } else if (destObj->isArray()) {
-    dest = std::make_unique<LinkDest>(destObj->getArray());
-    if (!dest->isOk()) {
-      dest.reset();
+LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj)
+{
+    // get file name
+    Object obj1 = getFileSpecNameForPlatform(fileSpecObj);
+    if (obj1.isString()) {
+        fileName = std::unique_ptr<GooString>(obj1.getString()->copy());
     }
 
-  // error
-  } else {
-    error(errSyntaxWarning, -1, "Illegal annotation destination");
-  }
+    // named destination
+    if (destObj->isName()) {
+        namedDest = std::make_unique<GooString>(destObj->getName());
+    } else if (destObj->isString()) {
+        namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
+
+        // destination dictionary
+    } else if (destObj->isArray()) {
+        dest = std::make_unique<LinkDest>(destObj->getArray());
+        if (!dest->isOk()) {
+            dest.reset();
+        }
+
+        // error
+    } else {
+        error(errSyntaxWarning, -1, "Illegal annotation destination");
+    }
 }
 
 LinkGoToR::~LinkGoToR() = default;
@@ -487,78 +491,80 @@ LinkGoToR::~LinkGoToR() = default;
 // LinkLaunch
 //------------------------------------------------------------------------
 
-LinkLaunch::LinkLaunch(const Object *actionObj) {
+LinkLaunch::LinkLaunch(const Object *actionObj)
+{
 
-  if (actionObj->isDict()) {
-    Object obj1 = actionObj->dictLookup("F");
-    if (!obj1.isNull()) {
-      Object obj3 = getFileSpecNameForPlatform (&obj1);
-      if (obj3.isString()) {
-	fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
-      }
-    } else {
+    if (actionObj->isDict()) {
+        Object obj1 = actionObj->dictLookup("F");
+        if (!obj1.isNull()) {
+            Object obj3 = getFileSpecNameForPlatform(&obj1);
+            if (obj3.isString()) {
+                fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
+            }
+        } else {
 #ifdef _WIN32
-      obj1 = actionObj->dictLookup("Win");
+            obj1 = actionObj->dictLookup("Win");
 #else
-      //~ This hasn't been defined by Adobe yet, so assume it looks
-      //~ just like the Win dictionary until they say otherwise.
-      obj1 = actionObj->dictLookup("Unix");
+            //~ This hasn't been defined by Adobe yet, so assume it looks
+            //~ just like the Win dictionary until they say otherwise.
+            obj1 = actionObj->dictLookup("Unix");
 #endif
-      if (obj1.isDict()) {
-	Object obj2 = obj1.dictLookup("F");
-	Object obj3 = getFileSpecNameForPlatform (&obj2);
-	if (obj3.isString()) {
-	  fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
-	}
-	obj2 = obj1.dictLookup("P");
-	if (obj2.isString()) {
-	  params = std::unique_ptr<GooString>(obj2.getString()->copy());
-	}
-      } else {
-	error(errSyntaxWarning, -1, "Bad launch-type link action");
-      }
+            if (obj1.isDict()) {
+                Object obj2 = obj1.dictLookup("F");
+                Object obj3 = getFileSpecNameForPlatform(&obj2);
+                if (obj3.isString()) {
+                    fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
+                }
+                obj2 = obj1.dictLookup("P");
+                if (obj2.isString()) {
+                    params = std::unique_ptr<GooString>(obj2.getString()->copy());
+                }
+            } else {
+                error(errSyntaxWarning, -1, "Bad launch-type link action");
+            }
+        }
     }
-  }
 }
 
 //------------------------------------------------------------------------
 // LinkURI
 //------------------------------------------------------------------------
 
-LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
-  hasURIFlag = false;
-  if (uriObj->isString()) {
-    hasURIFlag = true;
-    const std::string& uri2 = uriObj->getString()->toStr();
-    size_t n = strcspn(uri2.c_str(), "/:");
-    if (n < uri2.size() && uri2[n] == ':') {
-      // "http:..." etc.
-      uri = uri2;
-    } else if (!uri2.compare(0,4,"www.")) {
-      // "www.[...]" without the leading "http://"
-      uri = "http://" + uri2;
+LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI)
+{
+    hasURIFlag = false;
+    if (uriObj->isString()) {
+        hasURIFlag = true;
+        const std::string &uri2 = uriObj->getString()->toStr();
+        size_t n = strcspn(uri2.c_str(), "/:");
+        if (n < uri2.size() && uri2[n] == ':') {
+            // "http:..." etc.
+            uri = uri2;
+        } else if (!uri2.compare(0, 4, "www.")) {
+            // "www.[...]" without the leading "http://"
+            uri = "http://" + uri2;
+        } else {
+            // relative URI
+            if (baseURI) {
+                uri = baseURI->toStr();
+                if (uri.size() > 0) {
+                    char c = uri.back();
+                    if (c != '/' && c != '?') {
+                        uri += '/';
+                    }
+                }
+                if (uri2[0] == '/') {
+                    uri.append(uri2.c_str() + 1, uri2.size() - 1);
+                } else {
+                    uri += uri2;
+                }
+            } else {
+                uri = uri2;
+            }
+        }
     } else {
-      // relative URI
-      if (baseURI) {
-	uri = baseURI->toStr();
-	if (uri.size() > 0) {
-	  char c = uri.back();
-	  if (c != '/' && c != '?') {
-	    uri += '/';
-	  }
-	}
-	if (uri2[0] == '/') {
-	  uri.append(uri2.c_str() + 1, uri2.size() - 1);
-	} else {
-	  uri += uri2;
-	}
-      } else {
-	uri = uri2;
-      }
+        error(errSyntaxWarning, -1, "Illegal URI-type link");
     }
-  } else {
-    error(errSyntaxWarning, -1, "Illegal URI-type link");
-  }
 }
 
 LinkURI::~LinkURI() = default;
@@ -567,12 +573,13 @@ LinkURI::~LinkURI() = default;
 // LinkNamed
 //------------------------------------------------------------------------
 
-LinkNamed::LinkNamed(const Object *nameObj) {
-  hasNameFlag = false;
-  if (nameObj->isName()) {
-    name = (nameObj->getName()) ? nameObj->getName() : "";
-    hasNameFlag = true;
-  }
+LinkNamed::LinkNamed(const Object *nameObj)
+{
+    hasNameFlag = false;
+    if (nameObj->isName()) {
+        name = (nameObj->getName()) ? nameObj->getName() : "";
+        hasNameFlag = true;
+    }
 }
 
 LinkNamed::~LinkNamed() = default;
@@ -581,43 +588,40 @@ LinkNamed::~LinkNamed() = default;
 // LinkMovie
 //------------------------------------------------------------------------
 
-LinkMovie::LinkMovie(const Object *obj) {
-  annotRef = Ref::INVALID();
-  hasAnnotTitleFlag = false;
+LinkMovie::LinkMovie(const Object *obj)
+{
+    annotRef = Ref::INVALID();
+    hasAnnotTitleFlag = false;
 
-  const Object &annotationObj = obj->dictLookupNF("Annotation");
-  if (annotationObj.isRef()) {
-    annotRef = annotationObj.getRef();
-  }
+    const Object &annotationObj = obj->dictLookupNF("Annotation");
+    if (annotationObj.isRef()) {
+        annotRef = annotationObj.getRef();
+    }
 
-  Object tmp = obj->dictLookup("T");
-  if (tmp.isString()) {
-    annotTitle = tmp.getString()->toStr();
-    hasAnnotTitleFlag = true;
-  }
+    Object tmp = obj->dictLookup("T");
+    if (tmp.isString()) {
+        annotTitle = tmp.getString()->toStr();
+        hasAnnotTitleFlag = true;
+    }
 
-  if ((!hasAnnotTitleFlag) && (annotRef == Ref::INVALID())) {
-    error(errSyntaxError, -1,
-	  "Movie action is missing both the Annot and T keys");
-  }
+    if ((!hasAnnotTitleFlag) && (annotRef == Ref::INVALID())) {
+        error(errSyntaxError, -1, "Movie action is missing both the Annot and T keys");
+    }
 
-  tmp = obj->dictLookup("Operation");
-  if (tmp.isName()) {
-    const char *name = tmp.getName();
-    
-    if (!strcmp(name, "Play")) {
-      operation = operationTypePlay;
+    tmp = obj->dictLookup("Operation");
+    if (tmp.isName()) {
+        const char *name = tmp.getName();
+
+        if (!strcmp(name, "Play")) {
+            operation = operationTypePlay;
+        } else if (!strcmp(name, "Stop")) {
+            operation = operationTypeStop;
+        } else if (!strcmp(name, "Pause")) {
+            operation = operationTypePause;
+        } else if (!strcmp(name, "Resume")) {
+            operation = operationTypeResume;
+        }
     }
-    else if (!strcmp(name, "Stop")) {
-      operation = operationTypeStop;
-    }
-    else if (!strcmp(name, "Pause")) {
-      operation = operationTypePause;
-    }
-    else if (!strcmp(name, "Resume")) {
-      operation = operationTypeResume;
-    }
-  }
 }
 
 LinkMovie::~LinkMovie() = default;
@@ -626,38 +630,38 @@ LinkMovie::~LinkMovie() = default;
 // LinkSound
 //------------------------------------------------------------------------
 
-LinkSound::LinkSound(const Object *soundObj) {
-  volume = 1.0;
-  sync = false;
-  repeat = false;
-  mix = false;
-  sound = nullptr;
-  if (soundObj->isDict())
-  {
-    // volume
-    Object tmp = soundObj->dictLookup("Volume");
-    if (tmp.isNum()) {
-      volume = tmp.getNum();
+LinkSound::LinkSound(const Object *soundObj)
+{
+    volume = 1.0;
+    sync = false;
+    repeat = false;
+    mix = false;
+    sound = nullptr;
+    if (soundObj->isDict()) {
+        // volume
+        Object tmp = soundObj->dictLookup("Volume");
+        if (tmp.isNum()) {
+            volume = tmp.getNum();
+        }
+        // sync
+        tmp = soundObj->dictLookup("Synchronous");
+        if (tmp.isBool()) {
+            sync = tmp.getBool();
+        }
+        // repeat
+        tmp = soundObj->dictLookup("Repeat");
+        if (tmp.isBool()) {
+            repeat = tmp.getBool();
+        }
+        // mix
+        tmp = soundObj->dictLookup("Mix");
+        if (tmp.isBool()) {
+            mix = tmp.getBool();
+        }
+        // 'Sound' object
+        tmp = soundObj->dictLookup("Sound");
+        sound = Sound::parseSound(&tmp);
     }
-    // sync
-    tmp = soundObj->dictLookup("Synchronous");
-    if (tmp.isBool()) {
-      sync = tmp.getBool();
-    }
-    // repeat
-    tmp = soundObj->dictLookup("Repeat");
-    if (tmp.isBool()) {
-      repeat = tmp.getBool();
-    }
-    // mix
-    tmp = soundObj->dictLookup("Mix");
-    if (tmp.isBool()) {
-      mix = tmp.getBool();
-    }
-    // 'Sound' object
-    tmp = soundObj->dictLookup("Sound");
-    sound = Sound::parseSound(&tmp);
-  }
 }
 
 LinkSound::~LinkSound() = default;
@@ -666,150 +670,150 @@ LinkSound::~LinkSound() = default;
 // LinkRendition
 //------------------------------------------------------------------------
 
-LinkRendition::LinkRendition(const Object *obj) {
-  operation = NoRendition;
-  media = nullptr;
-  int operationCode = -1;
+LinkRendition::LinkRendition(const Object *obj)
+{
+    operation = NoRendition;
+    media = nullptr;
+    int operationCode = -1;
 
-  screenRef = Ref::INVALID();
+    screenRef = Ref::INVALID();
 
-  if (obj->isDict()) {
-    Object tmp = obj->dictLookup("JS");
-    if (!tmp.isNull()) {
-      if (tmp.isString()) {
-        js = tmp.getString()->toStr();
-      } else if (tmp.isStream()) {
-        Stream *stream = tmp.getStream();
-	stream->fillString(js);
-      } else {
-        error(errSyntaxWarning, -1, "Invalid Rendition Action: JS not string or stream");
-      }
+    if (obj->isDict()) {
+        Object tmp = obj->dictLookup("JS");
+        if (!tmp.isNull()) {
+            if (tmp.isString()) {
+                js = tmp.getString()->toStr();
+            } else if (tmp.isStream()) {
+                Stream *stream = tmp.getStream();
+                stream->fillString(js);
+            } else {
+                error(errSyntaxWarning, -1, "Invalid Rendition Action: JS not string or stream");
+            }
+        }
+
+        tmp = obj->dictLookup("OP");
+        if (tmp.isInt()) {
+            operationCode = tmp.getInt();
+            if (js.empty() && (operationCode < 0 || operationCode > 4)) {
+                error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
+            } else {
+                // retrieve rendition object
+                Object renditionObj = obj->dictLookup("R");
+                if (renditionObj.isDict()) {
+                    media = new MediaRendition(&renditionObj);
+                } else if (operationCode == 0 || operationCode == 4) {
+                    error(errSyntaxWarning, -1, "Invalid Rendition Action: no R field with op = {0:d}", operationCode);
+                    renditionObj.setToNull();
+                }
+
+                const Object &anObj = obj->dictLookupNF("AN");
+                if (anObj.isRef()) {
+                    screenRef = anObj.getRef();
+                } else if (operation >= 0 && operation <= 4) {
+                    error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
+                }
+            }
+
+            switch (operationCode) {
+            case 0:
+                operation = PlayRendition;
+                break;
+            case 1:
+                operation = StopRendition;
+                break;
+            case 2:
+                operation = PauseRendition;
+                break;
+            case 3:
+                operation = ResumeRendition;
+                break;
+            case 4:
+                operation = PlayRendition;
+                break;
+            }
+        } else if (js == "") {
+            error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");
+        }
     }
-
-    tmp = obj->dictLookup("OP");
-    if (tmp.isInt()) {
-      operationCode = tmp.getInt();
-      if (js.empty() && (operationCode < 0 || operationCode > 4)) {
-        error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
-      } else {
-        // retrieve rendition object
-        Object renditionObj = obj->dictLookup("R");
-        if (renditionObj.isDict()) {
-          media = new MediaRendition(&renditionObj);
-	} else if (operationCode == 0 || operationCode == 4) {
-          error(errSyntaxWarning, -1, "Invalid Rendition Action: no R field with op = {0:d}", operationCode);
-	  renditionObj.setToNull();
-	}
-
-	const Object &anObj = obj->dictLookupNF("AN");
-	if (anObj.isRef()) {
-	  screenRef = anObj.getRef();
-	} else if (operation >= 0 && operation <= 4) {
-	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
-	}
-      }
-
-      switch (operationCode) {
-        case 0:
-          operation = PlayRendition;
-          break;
-        case 1:
-          operation = StopRendition;
-          break;
-        case 2:
-          operation = PauseRendition;
-          break;
-        case 3:
-          operation = ResumeRendition;
-          break;
-        case 4:
-          operation = PlayRendition;
-          break;
-      }
-    } else if (js=="") {
-      error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");
-    }
-  }
 }
 
-LinkRendition::~LinkRendition() {
-  delete media;
+LinkRendition::~LinkRendition()
+{
+    delete media;
 }
-
 
 //------------------------------------------------------------------------
 // LinkJavaScript
 //------------------------------------------------------------------------
 
-LinkJavaScript::LinkJavaScript(Object *jsObj) {
-  isValid = false;
+LinkJavaScript::LinkJavaScript(Object *jsObj)
+{
+    isValid = false;
 
-  if (jsObj->isString()) {
-    js = jsObj->getString()->toStr();
-    isValid = true;
-  }
-  else if (jsObj->isStream()) {
-    Stream *stream = jsObj->getStream();
-    stream->fillString(js);
-    isValid = true;
-  }
+    if (jsObj->isString()) {
+        js = jsObj->getString()->toStr();
+        isValid = true;
+    } else if (jsObj->isStream()) {
+        Stream *stream = jsObj->getStream();
+        stream->fillString(js);
+        isValid = true;
+    }
 }
 
 LinkJavaScript::~LinkJavaScript() = default;
 
 Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
 {
-  Dict *linkDict = new Dict(xref);
-  linkDict->add("S", Object(objName, "JavaScript"));
-  linkDict->add("JS", Object(js.copy()));
+    Dict *linkDict = new Dict(xref);
+    linkDict->add("S", Object(objName, "JavaScript"));
+    linkDict->add("JS", Object(js.copy()));
 
-  return Object(linkDict);
+    return Object(linkDict);
 }
 
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-LinkOCGState::LinkOCGState(const Object *obj)
-: isValid(true)
+LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
 {
-  Object obj1 = obj->dictLookup("State");
-  if (obj1.isArray()) {
-    StateList stList;
+    Object obj1 = obj->dictLookup("State");
+    if (obj1.isArray()) {
+        StateList stList;
 
-    for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-      const Object &obj2 = obj1.arrayGetNF(i);
-      if (obj2.isName()) {
+        for (int i = 0; i < obj1.arrayGetLength(); ++i) {
+            const Object &obj2 = obj1.arrayGetNF(i);
+            if (obj2.isName()) {
+                if (!stList.list.empty())
+                    stateList.push_back(stList);
+
+                const char *name = obj2.getName();
+                stList.list.clear();
+                if (!strcmp(name, "ON")) {
+                    stList.st = On;
+                } else if (!strcmp(name, "OFF")) {
+                    stList.st = Off;
+                } else if (!strcmp(name, "Toggle")) {
+                    stList.st = Toggle;
+                } else {
+                    error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", name);
+                    isValid = false;
+                }
+            } else if (obj2.isRef()) {
+                stList.list.push_back(obj2.getRef());
+            } else {
+                error(errSyntaxWarning, -1, "Invalid item in OCG Action State array");
+                isValid = false;
+            }
+        }
+        // Add the last group
         if (!stList.list.empty())
-	  stateList.push_back(stList);
-
-	const char *name = obj2.getName();
-	stList.list.clear();
-	if (!strcmp (name, "ON")) {
-	  stList.st = On;
-	} else if (!strcmp (name, "OFF")) {
-	  stList.st = Off;
-	} else if (!strcmp (name, "Toggle")) {
-	  stList.st = Toggle;
-	} else {
-	  error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", name);
-	  isValid = false;
-	}
-      } else if (obj2.isRef()) {
-	  stList.list.push_back(obj2.getRef());
-      } else {
-        error(errSyntaxWarning, -1, "Invalid item in OCG Action State array");
+            stateList.push_back(stList);
+    } else {
+        error(errSyntaxWarning, -1, "Invalid OCGState action");
         isValid = false;
-      }
     }
-    // Add the last group
-    if (!stList.list.empty())
-      stateList.push_back(stList);
-  } else {
-    error(errSyntaxWarning, -1, "Invalid OCGState action");
-    isValid = false;
-  }
 
-  preserveRB = obj->dictLookup("PreserveRB").getBoolWithDefaultValue(true);
+    preserveRB = obj->dictLookup("PreserveRB").getBoolWithDefaultValue(true);
 }
 
 LinkOCGState::~LinkOCGState() = default;
@@ -818,21 +822,22 @@ LinkOCGState::~LinkOCGState() = default;
 // LinkHide
 //------------------------------------------------------------------------
 
-LinkHide::LinkHide(const Object *hideObj) {
-  hasTargetNameFlag = false;
-  show = false; // Default
+LinkHide::LinkHide(const Object *hideObj)
+{
+    hasTargetNameFlag = false;
+    show = false; // Default
 
-  if (hideObj->isDict()) {
-      const Object targetObj = hideObj->dictLookup("T");
-      if (targetObj.isString()) {
-	targetName = targetObj.getString()->toStr();
-        hasTargetNameFlag = true;
-      }
-      const Object shouldHide = hideObj->dictLookup("H");
-      if (shouldHide.isBool()) {
-	show = !shouldHide.getBool();
-      }
-  }
+    if (hideObj->isDict()) {
+        const Object targetObj = hideObj->dictLookup("T");
+        if (targetObj.isString()) {
+            targetName = targetObj.getString()->toStr();
+            hasTargetNameFlag = true;
+        }
+        const Object shouldHide = hideObj->dictLookup("H");
+        if (shouldHide.isBool()) {
+            show = !shouldHide.getBool();
+        }
+    }
 }
 
 LinkHide::~LinkHide() = default;
@@ -841,34 +846,35 @@ LinkHide::~LinkHide() = default;
 // LinkResetForm
 //------------------------------------------------------------------------
 
-LinkResetForm::LinkResetForm(const Object *obj) {
-  Object obj1;
+LinkResetForm::LinkResetForm(const Object *obj)
+{
+    Object obj1;
 
-  exclude = false;
+    exclude = false;
 
-  obj1 = obj->dictLookup("Fields");
-  if (obj1.isArray()) {
-    fields.resize(obj1.arrayGetLength());
-    for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-      const Object &obj2 = obj1.arrayGetNF(i);
-      if (obj2.isName())
-        fields[i] = std::string (obj2.getName ());
-      else if (obj2.isRef()) {
-        fields[i] = std::to_string(obj2.getRef().num);
-        fields[i].append(" ");
-        fields[i].append(std::to_string(obj2.getRef().gen));
-        fields[i].append(" R");
-      }
+    obj1 = obj->dictLookup("Fields");
+    if (obj1.isArray()) {
+        fields.resize(obj1.arrayGetLength());
+        for (int i = 0; i < obj1.arrayGetLength(); ++i) {
+            const Object &obj2 = obj1.arrayGetNF(i);
+            if (obj2.isName())
+                fields[i] = std::string(obj2.getName());
+            else if (obj2.isRef()) {
+                fields[i] = std::to_string(obj2.getRef().num);
+                fields[i].append(" ");
+                fields[i].append(std::to_string(obj2.getRef().gen));
+                fields[i].append(" R");
+            }
+        }
     }
-  }
 
-  obj1 = obj->dictLookup("Flags");
-  if (obj1.isInt()) {
-    int flags = obj1.getInt();
+    obj1 = obj->dictLookup("Flags");
+    if (obj1.isInt()) {
+        int flags = obj1.getInt();
 
-    if (flags & 0x1)
-      exclude = true;
-  }
+        if (flags & 0x1)
+            exclude = true;
+    }
 }
 
 LinkResetForm::~LinkResetForm() = default;
@@ -877,8 +883,9 @@ LinkResetForm::~LinkResetForm() = default;
 // LinkUnknown
 //------------------------------------------------------------------------
 
-LinkUnknown::LinkUnknown(const char *actionA) {
-  action = std::string(actionA ? actionA : "");
+LinkUnknown::LinkUnknown(const char *actionA)
+{
+    action = std::string(actionA ? actionA : "");
 }
 
 LinkUnknown::~LinkUnknown() = default;
@@ -887,22 +894,24 @@ LinkUnknown::~LinkUnknown() = default;
 // Links
 //------------------------------------------------------------------------
 
-Links::Links(Annots *annots) {
-  if (!annots)
-    return;
+Links::Links(Annots *annots)
+{
+    if (!annots)
+        return;
 
-  for (int i = 0; i < annots->getNumAnnots(); ++i) {
-    Annot *annot = annots->getAnnot(i);
+    for (int i = 0; i < annots->getNumAnnots(); ++i) {
+        Annot *annot = annots->getAnnot(i);
 
-    if (annot->getType() != Annot::typeLink)
-      continue;
+        if (annot->getType() != Annot::typeLink)
+            continue;
 
-    annot->incRefCnt();
-    links.push_back(static_cast<AnnotLink *>(annot));
-  }
+        annot->incRefCnt();
+        links.push_back(static_cast<AnnotLink *>(annot));
+    }
 }
 
-Links::~Links() {
-  for (AnnotLink *link : links)
-    link->decRefCnt();
+Links::~Links()
+{
+    for (AnnotLink *link : links)
+        link->decRefCnt();
 }

@@ -17,10 +17,10 @@ void TestLexer::testNumbers()
     char data[] = "0 1 -1 2147483647 -2147483647 2147483648 -2147483648 4294967297 -2147483649 0.1 1.1 -1.1 2147483647.1 -2147483647.1 2147483648.1 -2147483648.1 4294967297.1 -2147483649.1 9223372036854775807 18446744073709551615";
     MemStream *stream = new MemStream(data, 0, strlen(data), Object(objNull));
     Lexer *lexer = new Lexer(nullptr, stream);
-    QVERIFY( lexer );
-    
+    QVERIFY(lexer);
+
     Object obj;
-    
+
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt);
     QCOMPARE(obj.getInt(), 0);
@@ -44,10 +44,10 @@ void TestLexer::testNumbers()
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
     QCOMPARE(obj.getInt64(), 2147483648ll);
-      
+
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt);
-    QCOMPARE(obj.getInt(), -2147483647-1);
+    QCOMPARE(obj.getInt(), -2147483647 - 1);
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
@@ -80,7 +80,7 @@ void TestLexer::testNumbers()
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objReal);
     QCOMPARE(obj.getReal(), 2147483648.1);
-      
+
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objReal);
     QCOMPARE(obj.getReal(), -2147483648.1);
@@ -106,4 +106,3 @@ void TestLexer::testNumbers()
 
 QTEST_GUILESS_MAIN(TestLexer)
 #include "check_lexer.moc"
-

@@ -24,183 +24,186 @@
 #include "PageLabelInfo.h"
 #include "PageLabelInfo_p.h"
 
-PageLabelInfo::Interval::Interval(Object *dict, int baseA) {
-  style = None;
-  Object obj = dict->dictLookup("S");
-  if (obj.isName()) {
-    if (obj.isName("D")) {
-      style = Arabic;
-    } else if (obj.isName("R")) {
-      style = UppercaseRoman;
-    } else if (obj.isName("r")) {
-      style = LowercaseRoman;
-    } else if (obj.isName("A")) {
-      style = UppercaseLatin;
-    } else if (obj.isName("a")) {
-      style = LowercaseLatin;
+PageLabelInfo::Interval::Interval(Object *dict, int baseA)
+{
+    style = None;
+    Object obj = dict->dictLookup("S");
+    if (obj.isName()) {
+        if (obj.isName("D")) {
+            style = Arabic;
+        } else if (obj.isName("R")) {
+            style = UppercaseRoman;
+        } else if (obj.isName("r")) {
+            style = LowercaseRoman;
+        } else if (obj.isName("A")) {
+            style = UppercaseLatin;
+        } else if (obj.isName("a")) {
+            style = LowercaseLatin;
+        }
     }
-  }
 
-  obj = dict->dictLookup("P");
-  if (obj.isString()) {
-    const auto str = obj.getString();
-    prefix.assign(str->c_str(), str->getLength());
-  }
+    obj = dict->dictLookup("P");
+    if (obj.isString()) {
+        const auto str = obj.getString();
+        prefix.assign(str->c_str(), str->getLength());
+    }
 
-  obj = dict->dictLookup("St");
-  if (obj.isInt())
-    first = obj.getInt();
-  else
-    first = 1;
+    obj = dict->dictLookup("St");
+    if (obj.isInt())
+        first = obj.getInt();
+    else
+        first = 1;
 
-  base = baseA;
+    base = baseA;
 }
 
-PageLabelInfo::PageLabelInfo(Object *tree, int numPages) {
-  parse(tree);
+PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
+{
+    parse(tree);
 
-  if (intervals.empty())
-    return;
+    if (intervals.empty())
+        return;
 
-  auto curr = intervals.begin();
-  for(auto next = curr + 1; next != intervals.end(); ++next, ++curr) {
-    curr->length = std::max(0, next->base - curr->base);
-  }
-  curr->length = std::max(0, numPages - curr->base);
+    auto curr = intervals.begin();
+    for (auto next = curr + 1; next != intervals.end(); ++next, ++curr) {
+        curr->length = std::max(0, next->base - curr->base);
+    }
+    curr->length = std::max(0, numPages - curr->base);
 }
 
-void PageLabelInfo::parse(Object *tree) {
-  // leaf node
-  Object nums = tree->dictLookup("Nums");
-  if (nums.isArray()) {
-    for (int i = 0; i < nums.arrayGetLength(); i += 2) {
-      Object obj = nums.arrayGet(i);
-      if (!obj.isInt()) {
-	continue;
-      }
-      int base = obj.getInt();
-      obj = nums.arrayGet(i + 1);
-      if (!obj.isDict()) {
-	continue;
-      }
+void PageLabelInfo::parse(Object *tree)
+{
+    // leaf node
+    Object nums = tree->dictLookup("Nums");
+    if (nums.isArray()) {
+        for (int i = 0; i < nums.arrayGetLength(); i += 2) {
+            Object obj = nums.arrayGet(i);
+            if (!obj.isInt()) {
+                continue;
+            }
+            int base = obj.getInt();
+            obj = nums.arrayGet(i + 1);
+            if (!obj.isDict()) {
+                continue;
+            }
 
-      intervals.emplace_back(&obj, base);
+            intervals.emplace_back(&obj, base);
+        }
     }
-  }
 
-  Object kids = tree->dictLookup("Kids");
-  if (kids.isArray()) {
-    for (int i = 0; i < kids.arrayGetLength(); ++i) {
-      Object kid = kids.arrayGet(i);
-      if (kid.isDict())
-	parse(&kid);
+    Object kids = tree->dictLookup("Kids");
+    if (kids.isArray()) {
+        for (int i = 0; i < kids.arrayGetLength(); ++i) {
+            Object kid = kids.arrayGet(i);
+            if (kid.isDict())
+                parse(&kid);
+        }
     }
-  }
 }
 
 bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
-  const char *const str = label->c_str();
-  const std::size_t strLen = label->getLength();
-  const bool strUnicode = label->hasUnicodeMarker();
-  int number;
-  bool ok;
+    const char *const str = label->c_str();
+    const std::size_t strLen = label->getLength();
+    const bool strUnicode = label->hasUnicodeMarker();
+    int number;
+    bool ok;
 
-  for (const auto& interval : intervals) {
-    const std::size_t prefixLen = interval.prefix.size();
-    if (strLen < prefixLen || interval.prefix.compare(0, prefixLen, str, prefixLen) != 0)
-      continue;
+    for (const auto &interval : intervals) {
+        const std::size_t prefixLen = interval.prefix.size();
+        if (strLen < prefixLen || interval.prefix.compare(0, prefixLen, str, prefixLen) != 0)
+            continue;
 
-    switch (interval.style) {
-    case Interval::Arabic:
-      std::tie(number, ok) = fromDecimal(str + prefixLen, str + strLen, strUnicode);
-      if (ok && number - interval.first < interval.length) {
-    *index = interval.base + number - interval.first;
-	return true;
-      }
-      break;
-    case Interval::LowercaseRoman:
-    case Interval::UppercaseRoman:
-      number = fromRoman(str + prefixLen);
-      if (number >= 0 && number - interval.first < interval.length) {
-    *index = interval.base + number - interval.first;
-	return true;
-      }
-      break;
-    case Interval::UppercaseLatin:
-    case Interval::LowercaseLatin:
-      number = fromLatin(str + prefixLen);
-      if (number >= 0 && number - interval.first < interval.length) {
-    *index = interval.base + number - interval.first;
-	return true;
-      }
-      break;
-    case Interval::None:
-      break;
+        switch (interval.style) {
+        case Interval::Arabic:
+            std::tie(number, ok) = fromDecimal(str + prefixLen, str + strLen, strUnicode);
+            if (ok && number - interval.first < interval.length) {
+                *index = interval.base + number - interval.first;
+                return true;
+            }
+            break;
+        case Interval::LowercaseRoman:
+        case Interval::UppercaseRoman:
+            number = fromRoman(str + prefixLen);
+            if (number >= 0 && number - interval.first < interval.length) {
+                *index = interval.base + number - interval.first;
+                return true;
+            }
+            break;
+        case Interval::UppercaseLatin:
+        case Interval::LowercaseLatin:
+            number = fromLatin(str + prefixLen);
+            if (number >= 0 && number - interval.first < interval.length) {
+                *index = interval.base + number - interval.first;
+                return true;
+            }
+            break;
+        case Interval::None:
+            break;
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 
 bool PageLabelInfo::indexToLabel(int index, GooString *label) const
 {
-  char buffer[32];
-  int base, number;
-  const Interval *matching_interval;
-  GooString number_string;
+    char buffer[32];
+    int base, number;
+    const Interval *matching_interval;
+    GooString number_string;
 
-  base = 0;
-  matching_interval = nullptr;
-  for (const auto& interval : intervals) {
-    if (base <= index && index < base + interval.length) {
-      matching_interval = &interval;
-      break;
+    base = 0;
+    matching_interval = nullptr;
+    for (const auto &interval : intervals) {
+        if (base <= index && index < base + interval.length) {
+            matching_interval = &interval;
+            break;
+        }
+        base += interval.length;
     }
-    base += interval.length;
-  }
 
-  if (!matching_interval)
-    return false;
+    if (!matching_interval)
+        return false;
 
-  number = index - base + matching_interval->first;
-  switch (matching_interval->style) {
-  case Interval::Arabic:
-    snprintf (buffer, sizeof(buffer), "%d", number);
-    number_string.append(buffer);
-    break;
-  case Interval::LowercaseRoman:
-    toRoman(number, &number_string, false);
-    break;
-  case Interval::UppercaseRoman:
-    toRoman(number, &number_string, true);
-    break;
-  case Interval::LowercaseLatin:
-    toLatin(number, &number_string, false);
-    break;
-  case Interval::UppercaseLatin:
-    toLatin(number, &number_string, true);
-    break;
-  case Interval::None:
-    break;
-  }
+    number = index - base + matching_interval->first;
+    switch (matching_interval->style) {
+    case Interval::Arabic:
+        snprintf(buffer, sizeof(buffer), "%d", number);
+        number_string.append(buffer);
+        break;
+    case Interval::LowercaseRoman:
+        toRoman(number, &number_string, false);
+        break;
+    case Interval::UppercaseRoman:
+        toRoman(number, &number_string, true);
+        break;
+    case Interval::LowercaseLatin:
+        toLatin(number, &number_string, false);
+        break;
+    case Interval::UppercaseLatin:
+        toLatin(number, &number_string, true);
+        break;
+    case Interval::None:
+        break;
+    }
 
-  label->clear();
-  label->append(matching_interval->prefix.c_str(), matching_interval->prefix.size());
-  if (label->hasUnicodeMarker()) {
-      int i, len;
-      char ucs2_char[2];
+    label->clear();
+    label->append(matching_interval->prefix.c_str(), matching_interval->prefix.size());
+    if (label->hasUnicodeMarker()) {
+        int i, len;
+        char ucs2_char[2];
 
-      /* Convert the ascii number string to ucs2 and append. */
-      len = number_string.getLength ();
-      ucs2_char[0] = 0;
-      for (i = 0; i < len; ++i) {
-	  ucs2_char[1] = number_string.getChar(i);
-	  label->append(ucs2_char, 2);
-      }
-  } else {
-      label->append(&number_string);
-  }
+        /* Convert the ascii number string to ucs2 and append. */
+        len = number_string.getLength();
+        ucs2_char[0] = 0;
+        for (i = 0; i < len; ++i) {
+            ucs2_char[1] = number_string.getChar(i);
+            label->append(ucs2_char, 2);
+        }
+    } else {
+        label->append(&number_string);
+    }
 
-  return true;
+    return true;
 }

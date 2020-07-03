@@ -27,84 +27,88 @@ class OptionalContentGroup;
 
 //------------------------------------------------------------------------
 
-class OCGs {
+class OCGs
+{
 public:
+    OCGs(Object *ocgObject, XRef *xref);
 
-  OCGs(Object *ocgObject, XRef *xref);
+    OCGs(const OCGs &) = delete;
+    OCGs &operator=(const OCGs &) = delete;
 
-  OCGs(const OCGs &) = delete;
-  OCGs& operator=(const OCGs &) = delete;
+    // Is OCGS valid?
+    bool isOk() const { return ok; }
 
-  // Is OCGS valid?
-  bool isOk() const { return ok; }
-  
-  bool hasOCGs() const;
-  const std::unordered_map< Ref, std::unique_ptr< OptionalContentGroup > > &getOCGs() const { return optionalContentGroups; }
+    bool hasOCGs() const;
+    const std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> &getOCGs() const { return optionalContentGroups; }
 
-  OptionalContentGroup* findOcgByRef( const Ref ref);
+    OptionalContentGroup *findOcgByRef(const Ref ref);
 
-  Array* getOrderArray() 
-    { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
-  Array* getRBGroupsArray() 
-    { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
+    Array *getOrderArray() { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
+    Array *getRBGroupsArray() { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
 
-  bool optContentIsVisible( const Object *dictRef );
+    bool optContentIsVisible(const Object *dictRef);
 
 private:
-  bool ok;
+    bool ok;
 
-  bool evalOCVisibilityExpr(const Object *expr, int recursion);
-  bool allOn( Array *ocgArray );
-  bool allOff( Array *ocgArray );
-  bool anyOn( Array *ocgArray );
-  bool anyOff( Array *ocgArray );
+    bool evalOCVisibilityExpr(const Object *expr, int recursion);
+    bool allOn(Array *ocgArray);
+    bool allOff(Array *ocgArray);
+    bool anyOn(Array *ocgArray);
+    bool anyOff(Array *ocgArray);
 
-  std::unordered_map< Ref, std::unique_ptr< OptionalContentGroup > > optionalContentGroups;
+    std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> optionalContentGroups;
 
-  Object order;
-  Object rbgroups;
-  XRef *m_xref;
+    Object order;
+    Object rbgroups;
+    XRef *m_xref;
 };
 
 //------------------------------------------------------------------------
 
-class OptionalContentGroup {
+class OptionalContentGroup
+{
 public:
-  enum State { On, Off };
+    enum State
+    {
+        On,
+        Off
+    };
 
-  // Values from the optional content usage dictionary.
-  enum UsageState {
-    ocUsageOn,
-    ocUsageOff,
-    ocUsageUnset
-  };
+    // Values from the optional content usage dictionary.
+    enum UsageState
+    {
+        ocUsageOn,
+        ocUsageOff,
+        ocUsageUnset
+    };
 
-  OptionalContentGroup(Dict *dict);
+    OptionalContentGroup(Dict *dict);
 
-  OptionalContentGroup(GooString *label);
+    OptionalContentGroup(GooString *label);
 
-  ~OptionalContentGroup();
+    ~OptionalContentGroup();
 
-  OptionalContentGroup(const OptionalContentGroup &) = delete;
-  OptionalContentGroup& operator=(const OptionalContentGroup &) = delete;
+    OptionalContentGroup(const OptionalContentGroup &) = delete;
+    OptionalContentGroup &operator=(const OptionalContentGroup &) = delete;
 
-  const GooString* getName() const;
+    const GooString *getName() const;
 
-  Ref getRef() const;
-  void setRef(const Ref ref);
+    Ref getRef() const;
+    void setRef(const Ref ref);
 
-  State getState() const { return m_state; };
-  void setState(State state) { m_state = state; };
+    State getState() const { return m_state; };
+    void setState(State state) { m_state = state; };
 
-  UsageState getViewState() const { return viewState; }
-  UsageState getPrintState() const { return printState; }
+    UsageState getViewState() const { return viewState; }
+    UsageState getPrintState() const { return printState; }
 
 private:
-  GooString *m_name;
-  Ref m_ref;
-  State m_state;
-  UsageState viewState;	 // suggested state when viewing
-  UsageState printState; // suggested state when printing
+    GooString *m_name;
+    Ref m_ref;
+    State m_state;
+    UsageState viewState; // suggested state when viewing
+    UsageState printState; // suggested state when printing
 };
 
 //------------------------------------------------------------------------

@@ -25,8 +25,8 @@
 
 struct BuiltinFontWidth
 {
-  const char *name;
-  unsigned short width;
+    const char *name;
+    unsigned short width;
 };
 
 #endif

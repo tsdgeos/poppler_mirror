@@ -4,7 +4,7 @@
 
 #include <QtCore/QFile>
 
-class TestActualText: public QObject
+class TestActualText : public QObject
 {
     Q_OBJECT
 public:
@@ -12,6 +12,7 @@ public:
 private slots:
     void checkActualText1();
     void checkActualText2();
+
 private:
     void checkActualText(Poppler::Document *doc);
 };
@@ -19,9 +20,9 @@ private:
 void TestActualText::checkActualText(Poppler::Document *doc)
 {
     Poppler::Page *page = doc->page(0);
-    QVERIFY( page );
+    QVERIFY(page);
 
-    QCOMPARE( page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog.") );
+    QCOMPARE(page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog."));
 
     delete page;
 }
@@ -30,7 +31,7 @@ void TestActualText::checkActualText1()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
-    QVERIFY( doc );
+    QVERIFY(doc);
 
     checkActualText(doc);
 
@@ -44,7 +45,7 @@ void TestActualText::checkActualText2()
 
     Poppler::Document *doc;
     doc = Poppler::Document::load(&file);
-    QVERIFY( doc );
+    QVERIFY(doc);
 
     checkActualText(doc);
 
@@ -54,4 +55,3 @@ void TestActualText::checkActualText2()
 QTEST_GUILESS_MAIN(TestActualText)
 
 #include "check_actualtext.moc"
-

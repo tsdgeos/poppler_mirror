@@ -41,11 +41,8 @@ extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
 
 extern Unicode unicodeToUpper(Unicode c);
 
-extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
-				     int *out_len, int **indices);
+extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices);
 
-extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
-				     int *out_len, int **indices,
-				     bool reverseRTL);
+extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices, bool reverseRTL);
 
 #endif

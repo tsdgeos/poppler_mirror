@@ -36,162 +36,149 @@
 // Object
 //------------------------------------------------------------------------
 
-static const char *objTypeNames[numObjTypes] = {
-  "boolean",
-  "integer",
-  "real",
-  "string",
-  "name",
-  "null",
-  "array",
-  "dictionary",
-  "stream",
-  "ref",
-  "cmd",
-  "error",
-  "eof",
-  "none",
-  "integer64",
-  "dead"
-};
+static const char *objTypeNames[numObjTypes] = { "boolean", "integer", "real", "string", "name", "null", "array", "dictionary", "stream", "ref", "cmd", "error", "eof", "none", "integer64", "dead" };
 
-Object Object::copy() const {
-  CHECK_NOT_DEAD;
+Object Object::copy() const
+{
+    CHECK_NOT_DEAD;
 
-  Object obj;
-  std::memcpy(reinterpret_cast<void*>(&obj), this, sizeof(Object));
+    Object obj;
+    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object));
 
-  switch (type) {
-  case objString:
-    obj.string = string->copy();
-    break;
-  case objName:
-  case objCmd:
-    obj.cString = copyString(cString);
-    break;
-  case objArray:
-    array->incRef();
-    break;
-  case objDict:
-    dict->incRef();
-    break;
-  case objStream:
-    stream->incRef();
-    break;
-  default:
-    break;
-  }
+    switch (type) {
+    case objString:
+        obj.string = string->copy();
+        break;
+    case objName:
+    case objCmd:
+        obj.cString = copyString(cString);
+        break;
+    case objArray:
+        array->incRef();
+        break;
+    case objDict:
+        dict->incRef();
+        break;
+    case objStream:
+        stream->incRef();
+        break;
+    default:
+        break;
+    }
 
-  return obj;
+    return obj;
 }
 
-Object Object::fetch(XRef *xref, int recursion) const {
-  CHECK_NOT_DEAD;
+Object Object::fetch(XRef *xref, int recursion) const
+{
+    CHECK_NOT_DEAD;
 
-  return (type == objRef && xref) ?
-         xref->fetch(ref, recursion) : copy();
+    return (type == objRef && xref) ? xref->fetch(ref, recursion) : copy();
 }
 
-void Object::free() {
-  switch (type) {
-  case objString:
-    delete string;
-    break;
-  case objName:
-  case objCmd:
-    gfree(cString);
-    break;
-  case objArray:
-    if (!array->decRef()) {
-      delete array;
+void Object::free()
+{
+    switch (type) {
+    case objString:
+        delete string;
+        break;
+    case objName:
+    case objCmd:
+        gfree(cString);
+        break;
+    case objArray:
+        if (!array->decRef()) {
+            delete array;
+        }
+        break;
+    case objDict:
+        if (!dict->decRef()) {
+            delete dict;
+        }
+        break;
+    case objStream:
+        if (!stream->decRef()) {
+            delete stream;
+        }
+        break;
+    default:
+        break;
     }
-    break;
-  case objDict:
-    if (!dict->decRef()) {
-      delete dict;
-    }
-    break;
-  case objStream:
-    if (!stream->decRef()) {
-      delete stream;
-    }
-    break;
-  default:
-    break;
-  }
-  type = objNone;
+    type = objNone;
 }
 
-const char *Object::getTypeName() const {
-  return objTypeNames[type];
+const char *Object::getTypeName() const
+{
+    return objTypeNames[type];
 }
 
-void Object::print(FILE *f) const {
-  int i;
+void Object::print(FILE *f) const
+{
+    int i;
 
-  switch (type) {
-  case objBool:
-    fprintf(f, "%s", booln ? "true" : "false");
-    break;
-  case objInt:
-    fprintf(f, "%d", intg);
-    break;
-  case objReal:
-    fprintf(f, "%g", real);
-    break;
-  case objString:
-    fprintf(f, "(");
-    fwrite(string->c_str(), 1, string->getLength(), f);
-    fprintf(f, ")");
-    break;
-  case objName:
-    fprintf(f, "/%s", cString);
-    break;
-  case objNull:
-    fprintf(f, "null");
-    break;
-  case objArray:
-    fprintf(f, "[");
-    for (i = 0; i < arrayGetLength(); ++i) {
-      if (i > 0)
-	fprintf(f, " ");
-      const Object &obj = arrayGetNF(i);
-      obj.print(f);
-    }
-    fprintf(f, "]");
-    break;
-  case objDict:
-    fprintf(f, "<<");
-    for (i = 0; i < dictGetLength(); ++i) {
-      fprintf(f, " /%s ", dictGetKey(i));
-      const Object &obj = dictGetValNF(i);
-      obj.print(f);
-    }
-    fprintf(f, " >>");
-    break;
-  case objStream:
-    fprintf(f, "<stream>");
-    break;
-  case objRef:
-    fprintf(f, "%d %d R", ref.num, ref.gen);
-    break;
-  case objCmd:
-    fprintf(f, "%s", cString);
-    break;
-  case objError:
-    fprintf(f, "<error>");
-    break;
-  case objEOF:
-    fprintf(f, "<EOF>");
-    break;
-  case objNone:
-    fprintf(f, "<none>");
-    break;
+    switch (type) {
+    case objBool:
+        fprintf(f, "%s", booln ? "true" : "false");
+        break;
+    case objInt:
+        fprintf(f, "%d", intg);
+        break;
+    case objReal:
+        fprintf(f, "%g", real);
+        break;
+    case objString:
+        fprintf(f, "(");
+        fwrite(string->c_str(), 1, string->getLength(), f);
+        fprintf(f, ")");
+        break;
+    case objName:
+        fprintf(f, "/%s", cString);
+        break;
+    case objNull:
+        fprintf(f, "null");
+        break;
+    case objArray:
+        fprintf(f, "[");
+        for (i = 0; i < arrayGetLength(); ++i) {
+            if (i > 0)
+                fprintf(f, " ");
+            const Object &obj = arrayGetNF(i);
+            obj.print(f);
+        }
+        fprintf(f, "]");
+        break;
+    case objDict:
+        fprintf(f, "<<");
+        for (i = 0; i < dictGetLength(); ++i) {
+            fprintf(f, " /%s ", dictGetKey(i));
+            const Object &obj = dictGetValNF(i);
+            obj.print(f);
+        }
+        fprintf(f, " >>");
+        break;
+    case objStream:
+        fprintf(f, "<stream>");
+        break;
+    case objRef:
+        fprintf(f, "%d %d R", ref.num, ref.gen);
+        break;
+    case objCmd:
+        fprintf(f, "%s", cString);
+        break;
+    case objError:
+        fprintf(f, "<error>");
+        break;
+    case objEOF:
+        fprintf(f, "<EOF>");
+        break;
+    case objNone:
+        fprintf(f, "<none>");
+        break;
     case objDead:
-    fprintf(f, "<dead>");
-    break;
-  case objInt64:
-    fprintf(f, "%lld", int64g);
-    break;
-  }
+        fprintf(f, "<dead>");
+        break;
+    case objInt64:
+        fprintf(f, "%lld", int64g);
+        break;
+    }
 }

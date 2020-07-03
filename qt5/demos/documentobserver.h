@@ -27,12 +27,12 @@ class Document;
 
 class DocumentObserver
 {
-friend class PdfViewer;
+    friend class PdfViewer;
 
 public:
     virtual ~DocumentObserver();
     DocumentObserver(const DocumentObserver &) = delete;
-    DocumentObserver& operator=(const DocumentObserver &) = delete;
+    DocumentObserver &operator=(const DocumentObserver &) = delete;
 
     virtual void documentLoaded() = 0;
     virtual void documentClosed() = 0;
@@ -41,7 +41,7 @@ public:
 protected:
     DocumentObserver();
 
-    Poppler::Document* document() const;
+    Poppler::Document *document() const;
     void setPage(int page);
     int page() const;
     void reloadPage();

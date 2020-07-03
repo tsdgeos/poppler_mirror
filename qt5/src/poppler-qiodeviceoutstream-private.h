@@ -29,8 +29,8 @@ namespace Poppler {
 
 class QIODeviceOutStream : public OutStream
 {
-  public:
-    QIODeviceOutStream(QIODevice* device);
+public:
+    QIODeviceOutStream(QIODevice *device);
     ~QIODeviceOutStream() override;
 
     void close() override;
@@ -38,7 +38,7 @@ class QIODeviceOutStream : public OutStream
     void put(char c) override;
     void printf(const char *format, ...) override;
 
-  private:
+private:
     QIODevice *m_device;
 };
 

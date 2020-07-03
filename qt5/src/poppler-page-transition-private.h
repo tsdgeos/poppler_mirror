@@ -24,8 +24,9 @@ class Object;
 
 namespace Poppler {
 
-class PageTransitionParams {
-  public:
+class PageTransitionParams
+{
+public:
     Object *dictObj;
 };
 

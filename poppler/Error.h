@@ -33,19 +33,20 @@
 #include "goo/gfile.h"
 #include "goo/GooString.h"
 
-enum ErrorCategory {
-  errSyntaxWarning,    // PDF syntax error which can be worked around;
-                       //   output will probably be correct
-  errSyntaxError,      // PDF syntax error which can be worked around;
-                       //   output will probably be incorrect
-  errConfig,           // error in Xpdf config info (xpdfrc file, etc.)
-  errCommandLine,      // error in user-supplied parameters, action not
-                       //   allowed, etc. (only used by command-line tools)
-  errIO,               // error in file I/O
-  errNotAllowed,       // action not allowed by PDF permission bits
-  errUnimplemented,    // unimplemented PDF feature - display will be
-                       //   incorrect
-  errInternal          // internal error - malfunction within the Xpdf code
+enum ErrorCategory
+{
+    errSyntaxWarning, // PDF syntax error which can be worked around;
+                      //   output will probably be correct
+    errSyntaxError, // PDF syntax error which can be worked around;
+                    //   output will probably be incorrect
+    errConfig, // error in Xpdf config info (xpdfrc file, etc.)
+    errCommandLine, // error in user-supplied parameters, action not
+                    //   allowed, etc. (only used by command-line tools)
+    errIO, // error in file I/O
+    errNotAllowed, // action not allowed by PDF permission bits
+    errUnimplemented, // unimplemented PDF feature - display will be
+                      //   incorrect
+    errInternal // internal error - malfunction within the Xpdf code
 };
 
 using ErrorCallback = void (*)(ErrorCategory category, Goffset pos, const char *msg);

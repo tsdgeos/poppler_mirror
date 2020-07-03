@@ -26,8 +26,7 @@
 
 static const int PageRole = Qt::UserRole + 1;
 
-ThumbnailsDock::ThumbnailsDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+ThumbnailsDock::ThumbnailsDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_list = new QListWidget(this);
     setWidget(m_list);
@@ -35,13 +34,10 @@ ThumbnailsDock::ThumbnailsDock(QWidget *parent)
     m_list->setViewMode(QListView::ListMode);
     m_list->setMovement(QListView::Static);
     m_list->setVerticalScrollMode(QListView::ScrollPerPixel);
-    connect(m_list, &QListWidget::itemActivated,
-            this, &ThumbnailsDock::slotItemActivated);
+    connect(m_list, &QListWidget::itemActivated, this, &ThumbnailsDock::slotItemActivated);
 }
 
-ThumbnailsDock::~ThumbnailsDock()
-{
-}
+ThumbnailsDock::~ThumbnailsDock() { }
 
 void ThumbnailsDock::fillInfo()
 {
@@ -81,4 +77,3 @@ void ThumbnailsDock::slotItemActivated(QListWidgetItem *item)
 
     setPage(item->data(PageRole).toInt());
 }
-

@@ -50,19 +50,14 @@
 
 using namespace poppler;
 
-document_private::document_private(GooString *file_path, const std::string &owner_password,
-                                   const std::string &user_password)
-    : document_private()
+document_private::document_private(GooString *file_path, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(file_path, &goo_owner_password, &goo_user_password);
 }
 
-document_private::document_private(byte_array *file_data,
-                                   const std::string &owner_password,
-                                   const std::string &user_password)
-    : document_private()
+document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     file_data->swap(doc_data);
     MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
@@ -71,10 +66,7 @@ document_private::document_private(byte_array *file_data,
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
 }
 
-document_private::document_private(const char *file_data, int file_data_length,
-                                   const std::string &owner_password,
-                                   const std::string &user_password)
-    : document_private()
+document_private::document_private(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
@@ -84,14 +76,7 @@ document_private::document_private(const char *file_data, int file_data_length,
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
 }
 
-document_private::document_private()
-    : GlobalParamsIniter(detail::error_function)
-    , doc(nullptr)
-    , raw_doc_data(nullptr)
-    , raw_doc_data_length(0)
-    , is_locked(false)
-{
-}
+document_private::document_private() : GlobalParamsIniter(detail::error_function), doc(nullptr), raw_doc_data(nullptr), raw_doc_data_length(0), is_locked(false) { }
 
 document_private::~document_private()
 {
@@ -100,7 +85,7 @@ document_private::~document_private()
     delete doc;
 }
 
-document* document_private::check_document(document_private *doc, byte_array *file_data)
+document *document_private::check_document(document_private *doc, byte_array *file_data)
 {
     if (doc->doc->isOk() || doc->doc->getErrorCode() == errEncrypted) {
         if (doc->doc->getErrorCode() == errEncrypted) {
@@ -162,11 +147,7 @@ document* document_private::check_document(document_private *doc, byte_array *fi
  attachments.
  */
 
-
-document::document(document_private &dd)
-    : d(&dd)
-{
-}
+document::document(document_private &dd) : d(&dd) { }
 
 document::~document()
 {
@@ -191,14 +172,11 @@ bool document::unlock(const std::string &owner_password, const std::string &user
     if (d->is_locked) {
         document_private *newdoc = nullptr;
         if (d->doc_data.size() > 0) {
-            newdoc = new document_private(&d->doc_data,
-                                          owner_password, user_password);
+            newdoc = new document_private(&d->doc_data, owner_password, user_password);
         } else if (d->raw_doc_data) {
-            newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length,
-                                          owner_password, user_password);
+            newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);
         } else {
-            newdoc = new document_private(new GooString(d->doc->getFileName()),
-                                          owner_password, user_password);
+            newdoc = new document_private(new GooString(d->doc->getFileName()), owner_password, user_password);
         }
         if (!newdoc->doc->isOk()) {
             d->doc_data.swap(newdoc->doc_data);
@@ -393,7 +371,7 @@ bool document::set_info_date(const std::string &key, time_type val)
     if (val == time_type(-1)) {
         goo_date = nullptr;
     } else {
-        time_t t = static_cast<time_t> (val);
+        time_t t = static_cast<time_t>(val);
         goo_date = timeToDateString(&t);
     }
 
@@ -702,7 +680,7 @@ bool document::set_creation_date(time_type creation_date)
     if (creation_date == time_type(-1)) {
         goo_creation_date = nullptr;
     } else {
-        time_t t = static_cast<time_t> (creation_date);
+        time_t t = static_cast<time_t>(creation_date);
         goo_creation_date = timeToDateString(&t);
     }
 
@@ -747,7 +725,7 @@ bool document::set_modification_date(time_type mod_date)
     if (mod_date == time_type(-1)) {
         goo_mod_date = nullptr;
     } else {
-        time_t t = static_cast<time_t> (mod_date);
+        time_t t = static_cast<time_t>(mod_date);
         goo_mod_date = timeToDateString(&t);
     }
 
@@ -875,7 +853,7 @@ int document::pages() const
 
  \returns a new page object or NULL
  */
-page* document::create_page(const ustring &label) const
+page *document::create_page(const ustring &label) const
 {
     std::unique_ptr<GooString> goolabel(detail::ustring_to_unicode_GooString(label));
     int index = 0;
@@ -894,7 +872,7 @@ page* document::create_page(const ustring &label) const
 
  \returns a new page object or NULL
  */
-page* document::create_page(int index) const
+page *document::create_page(int index) const
 {
     if (index >= 0 && index < d->doc->getNumPages()) {
         page *p = new page(d, index);
@@ -936,7 +914,7 @@ std::vector<font_info> document::fonts() const
 
  \returns a new font iterator
  */
-font_iterator* document::create_font_iterator(int start_page) const
+font_iterator *document::create_font_iterator(int start_page) const
 {
     return new font_iterator(start_page, d);
 }
@@ -946,7 +924,7 @@ font_iterator* document::create_font_iterator(int start_page) const
 
  \returns a new toc object if a TOC is available, NULL otherwise
  */
-toc* document::create_toc() const
+toc *document::create_toc() const
 {
     return toc_private::load_from_outline(d->doc->getOutline());
 }
@@ -1008,9 +986,9 @@ std::map<std::string, destination> document::create_destination_map() const
 
     // Iterate from name-dict
     const int nDests = catalog->numDests();
-    for (int i = 0; i < nDests; ++i ) {
-        std::string key(catalog->getDestsName (i));
-        std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest (i);
+    for (int i = 0; i < nDests; ++i) {
+        std::string key(catalog->getDestsName(i));
+        std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest(i);
 
         if (link_dest) {
             destination dest(new destination_private(link_dest.get(), d->doc));
@@ -1021,10 +999,9 @@ std::map<std::string, destination> document::create_destination_map() const
 
     // Iterate from name-tree
     const int nDestsNameTree = catalog->numDestNameTree();
-    for (int i = 0; i < nDestsNameTree; ++i ) {
-        std::string key(catalog->getDestNameTreeName (i)->c_str (),
-                        catalog->getDestNameTreeName (i)->getLength ());
-        std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest (i);
+    for (int i = 0; i < nDestsNameTree; ++i) {
+        std::string key(catalog->getDestNameTreeName(i)->c_str(), catalog->getDestNameTreeName(i)->getLength());
+        std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
 
         if (link_dest) {
             destination dest(new destination_private(link_dest.get(), d->doc));
@@ -1073,13 +1050,9 @@ bool document::save_a_copy(const std::string &file_name) const
  \returns a new document if the load succeeded (even if the document is locked),
           NULL otherwise
  */
-document* document::load_from_file(const std::string &file_name,
-                                   const std::string &owner_password,
-                                   const std::string &user_password)
+document *document::load_from_file(const std::string &file_name, const std::string &owner_password, const std::string &user_password)
 {
-    document_private *doc = new document_private(
-                                new GooString(file_name.c_str()),
-                                owner_password, user_password);
+    document_private *doc = new document_private(new GooString(file_name.c_str()), owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }
 
@@ -1093,16 +1066,13 @@ document* document::load_from_file(const std::string &file_name,
  \returns a new document if the load succeeded (even if the document is locked),
           NULL otherwise
  */
-document* document::load_from_data(byte_array *file_data,
-                                   const std::string &owner_password,
-                                   const std::string &user_password)
+document *document::load_from_data(byte_array *file_data, const std::string &owner_password, const std::string &user_password)
 {
     if (!file_data || file_data->size() < 10) {
         return nullptr;
     }
 
-    document_private *doc = new document_private(
-                                file_data, owner_password, user_password);
+    document_private *doc = new document_private(file_data, owner_password, user_password);
     return document_private::check_document(doc, file_data);
 }
 
@@ -1120,17 +1090,12 @@ document* document::load_from_data(byte_array *file_data,
 
  \since 0.16
  */
-document* document::load_from_raw_data(const char *file_data,
-                                       int file_data_length,
-                                       const std::string &owner_password,
-                                       const std::string &user_password)
+document *document::load_from_raw_data(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password)
 {
     if (!file_data || file_data_length < 10) {
         return nullptr;
     }
 
-    document_private *doc = new document_private(
-                                file_data, file_data_length,
-                                owner_password, user_password);
+    document_private *doc = new document_private(file_data, file_data_length, owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }

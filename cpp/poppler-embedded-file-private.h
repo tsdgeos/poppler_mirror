@@ -22,8 +22,7 @@
 
 class FileSpec;
 
-namespace poppler
-{
+namespace poppler {
 
 class embedded_file_private
 {
@@ -32,9 +31,9 @@ public:
     ~embedded_file_private();
 
     embedded_file_private(const embedded_file_private &) = delete;
-    embedded_file_private& operator=(const embedded_file_private &) = delete;
+    embedded_file_private &operator=(const embedded_file_private &) = delete;
 
-    static embedded_file* create(FileSpec *fs);
+    static embedded_file *create(FileSpec *fs);
 
     FileSpec *file_spec;
 };

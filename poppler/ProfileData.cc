@@ -15,18 +15,17 @@
 // ProfileData
 //------------------------------------------------------------------------
 
-void
-ProfileData::addElement (double elapsed) {
-	if (count == 0) {
-		min = elapsed;
-		max = elapsed;
-	} else {
-		if (elapsed < min)
-			min = elapsed;
-		if (elapsed > max)
-			max = elapsed;
-	}
-	total += elapsed;
-	count ++;
+void ProfileData::addElement(double elapsed)
+{
+    if (count == 0) {
+        min = elapsed;
+        max = elapsed;
+    } else {
+        if (elapsed < min)
+            min = elapsed;
+        if (elapsed > max)
+            max = elapsed;
+    }
+    total += elapsed;
+    count++;
 }
-

@@ -33,56 +33,61 @@
 #include "GooCheckedOps.h"
 
 /// Same as malloc, but prints error message and exits if malloc() returns NULL.
-inline void *gmalloc(size_t size, bool checkoverflow = false) {
-  if (size == 0) {
-    return nullptr;
-  }
+inline void *gmalloc(size_t size, bool checkoverflow = false)
+{
+    if (size == 0) {
+        return nullptr;
+    }
 
-  if (void *p = std::malloc(size)) {
-    return p;
-  }
+    if (void *p = std::malloc(size)) {
+        return p;
+    }
 
-  std::fputs("Out of memory\n", stderr);
+    std::fputs("Out of memory\n", stderr);
 
-  if (checkoverflow) {
-    return nullptr;
-  }
+    if (checkoverflow) {
+        return nullptr;
+    }
 
-  std::abort();
+    std::abort();
 }
 
-inline void *gmalloc_checkoverflow(size_t size) {
-  return gmalloc(size, true);
+inline void *gmalloc_checkoverflow(size_t size)
+{
+    return gmalloc(size, true);
 }
 
 /// Same as free
-inline void gfree(void *p) {
-  std::free(p);
+inline void gfree(void *p)
+{
+    std::free(p);
 }
 
 /// Same as realloc, but prints error message and exits if realloc() returns NULL.
 /// If <p> is NULL, calls malloc() instead of realloc().
-inline void *grealloc(void *p, size_t size, bool checkoverflow = false) {
-  if (size == 0) {
-    gfree(p);
-    return nullptr;
-  }
+inline void *grealloc(void *p, size_t size, bool checkoverflow = false)
+{
+    if (size == 0) {
+        gfree(p);
+        return nullptr;
+    }
 
-  if (void *q = p ? std::realloc(p, size) : std::malloc(size)) {
-    return q;
-  }
+    if (void *q = p ? std::realloc(p, size) : std::malloc(size)) {
+        return q;
+    }
 
-  std::fputs("Out of memory\n", stderr);
+    std::fputs("Out of memory\n", stderr);
 
-  if (checkoverflow) {
-    return nullptr;
-  }
+    if (checkoverflow) {
+        return nullptr;
+    }
 
-  std::abort();
+    std::abort();
 }
 
-inline void *grealloc_checkoverflow(void *p, size_t size) {
-  return grealloc(p, size, true);
+inline void *grealloc_checkoverflow(void *p, size_t size)
+{
+    return grealloc(p, size, true);
 }
 
 /*
@@ -94,89 +99,96 @@ inline void *grealloc_checkoverflow(void *p, size_t size) {
  * the application if a overflow is detected.
  */
 
-inline void *gmallocn(int count, int size, bool checkoverflow = false) {
-  if (count == 0) {
-    return nullptr;
-  }
-
-  int bytes;
-  if (count < 0 || size <= 0 || checkedMultiply(count, size, &bytes)) {
-    std::fputs("Bogus memory allocation size\n", stderr);
-
-    if (checkoverflow) {
-      return nullptr;
+inline void *gmallocn(int count, int size, bool checkoverflow = false)
+{
+    if (count == 0) {
+        return nullptr;
     }
 
-    std::abort();
-  }
+    int bytes;
+    if (count < 0 || size <= 0 || checkedMultiply(count, size, &bytes)) {
+        std::fputs("Bogus memory allocation size\n", stderr);
 
-  return gmalloc(bytes, checkoverflow);
-}
+        if (checkoverflow) {
+            return nullptr;
+        }
 
-inline void *gmallocn_checkoverflow(int count, int size) {
-  return gmallocn(count, size, true);
-}
-
-inline void *gmallocn3(int width, int height, int size, bool checkoverflow = false) {
-  if (width == 0 || height == 0) {
-    return nullptr;
-  }
-
-  int count;
-  int bytes;
-  if (width < 0 || height < 0 || size <= 0 || checkedMultiply(width, height, &count) || checkedMultiply(count, size, &bytes)) {
-    std::fputs("Bogus memory allocation size\n", stderr);
-
-    if (checkoverflow) {
-      return nullptr;
+        std::abort();
     }
 
-    std::abort();
-  }
-
-  return gmalloc(bytes, checkoverflow);
+    return gmalloc(bytes, checkoverflow);
 }
 
-inline void *greallocn(void *p, int count, int size, bool checkoverflow = false, bool free_p = true) {
-  if (count == 0) {
-    if (free_p) {
-      gfree(p);
-    }
-    return nullptr;
-  }
-
-  int bytes;
-  if (count < 0 || size <= 0 || checkedMultiply(count, size, &bytes)) {
-    std::fputs("Bogus memory allocation size\n", stderr);
-
-    if (checkoverflow) {
-      if (free_p) {
-        gfree(p);
-      }
-      return nullptr;
-    }
-
-    std::abort();
-  }
-
-  return grealloc(p, bytes, checkoverflow);
+inline void *gmallocn_checkoverflow(int count, int size)
+{
+    return gmallocn(count, size, true);
 }
 
-inline void *greallocn_checkoverflow(void *p, int count, int size) {
-  return greallocn(p, count, size, true);
+inline void *gmallocn3(int width, int height, int size, bool checkoverflow = false)
+{
+    if (width == 0 || height == 0) {
+        return nullptr;
+    }
+
+    int count;
+    int bytes;
+    if (width < 0 || height < 0 || size <= 0 || checkedMultiply(width, height, &count) || checkedMultiply(count, size, &bytes)) {
+        std::fputs("Bogus memory allocation size\n", stderr);
+
+        if (checkoverflow) {
+            return nullptr;
+        }
+
+        std::abort();
+    }
+
+    return gmalloc(bytes, checkoverflow);
+}
+
+inline void *greallocn(void *p, int count, int size, bool checkoverflow = false, bool free_p = true)
+{
+    if (count == 0) {
+        if (free_p) {
+            gfree(p);
+        }
+        return nullptr;
+    }
+
+    int bytes;
+    if (count < 0 || size <= 0 || checkedMultiply(count, size, &bytes)) {
+        std::fputs("Bogus memory allocation size\n", stderr);
+
+        if (checkoverflow) {
+            if (free_p) {
+                gfree(p);
+            }
+            return nullptr;
+        }
+
+        std::abort();
+    }
+
+    return grealloc(p, bytes, checkoverflow);
+}
+
+inline void *greallocn_checkoverflow(void *p, int count, int size)
+{
+    return greallocn(p, count, size, true);
 }
 
 /// Allocate memory and copy a string into it.
-inline char *copyString(const char *s) {
-  char *r = static_cast<char *>(gmalloc(std::strlen(s) + 1, false));
-  return std::strcpy(r, s);
+inline char *copyString(const char *s)
+{
+    char *r = static_cast<char *>(gmalloc(std::strlen(s) + 1, false));
+    return std::strcpy(r, s);
 }
 
 /// Allocate memory and copy a limited-length string to it.
-inline char *copyString(const char *s, size_t n) {
-  char *r = static_cast<char *>(gmalloc(n + 1, false));
-  r[n] = '\0';
-  return std::strncpy(r, s, n);
+inline char *copyString(const char *s, size_t n)
+{
+    char *r = static_cast<char *>(gmalloc(n + 1, false));
+    r[n] = '\0';
+    return std::strncpy(r, s, n);
 }
 
 #endif // GMEM_H

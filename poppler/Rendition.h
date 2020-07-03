@@ -1,7 +1,7 @@
 //*********************************************************************************
 //                               Rendition.h
 //---------------------------------------------------------------------------------
-// 
+//
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
@@ -27,135 +27,138 @@
 
 #include "Object.h"
 
-struct MediaWindowParameters {
+struct MediaWindowParameters
+{
 
-  MediaWindowParameters();
-  ~MediaWindowParameters();
+    MediaWindowParameters();
+    ~MediaWindowParameters();
 
-  // parse from a floating window parameters dictionary
-  void parseFWParams(Object* obj);
+    // parse from a floating window parameters dictionary
+    void parseFWParams(Object *obj);
 
-  enum MediaWindowType {
-    windowFloating = 0,
-    windowFullscreen,
-    windowHidden,
-    windowEmbedded
-  };
+    enum MediaWindowType
+    {
+        windowFloating = 0,
+        windowFullscreen,
+        windowHidden,
+        windowEmbedded
+    };
 
-  enum MediaWindowRelativeTo {
-    windowRelativeToDocument = 0,
-    windowRelativeToApplication,
-    windowRelativeToDesktop
-  };
+    enum MediaWindowRelativeTo
+    {
+        windowRelativeToDocument = 0,
+        windowRelativeToApplication,
+        windowRelativeToDesktop
+    };
 
+    // DEFAULT VALUE
 
-                                         // DEFAULT VALUE
+    MediaWindowType type; // movieWindowEmbedded
 
-  MediaWindowType type;                  // movieWindowEmbedded
-  
+    int width; // -1
+    int height; // -1
 
-  int width;                             // -1
-  int height;                            // -1
-  
-  // floating window position
-  MediaWindowRelativeTo relativeTo;      // windowRelativeToDocument (or to desktop)
-  double XPosition;                      // 0.5
-  double YPosition;                      // 0.5
+    // floating window position
+    MediaWindowRelativeTo relativeTo; // windowRelativeToDocument (or to desktop)
+    double XPosition; // 0.5
+    double YPosition; // 0.5
 
-  bool hasTitleBar;                      // true
-  bool hasCloseButton;                   // true
-  bool isResizeable;                     // true
+    bool hasTitleBar; // true
+    bool hasCloseButton; // true
+    bool isResizeable; // true
 };
 
+struct MediaParameters
+{
 
-struct MediaParameters {
+    MediaParameters();
+    ~MediaParameters();
 
-  MediaParameters();
-  ~MediaParameters();
+    // parse from a "Media Play Parameters" dictionary
+    void parseMediaPlayParameters(Object *playObj);
+    // parse from a "Media Screen Parameters" dictionary
+    void parseMediaScreenParameters(Object *screenObj);
 
-  // parse from a "Media Play Parameters" dictionary
-  void parseMediaPlayParameters(Object* playObj);
-  // parse from a "Media Screen Parameters" dictionary
-  void parseMediaScreenParameters(Object* screenObj);
+    enum MediaFittingPolicy
+    {
+        fittingMeet = 0,
+        fittingSlice,
+        fittingFill,
+        fittingScroll,
+        fittingHidden,
+        fittingUndefined
+    };
 
-  enum MediaFittingPolicy {
-    fittingMeet = 0,
-    fittingSlice,
-    fittingFill,
-    fittingScroll,
-    fittingHidden,
-    fittingUndefined
-  };
+    struct Color
+    {
+        double r, g, b;
+    };
 
-  struct Color {
-    double r, g, b;
-  };
+    int duration; // 0
 
-  int duration;                      // 0
+    int volume; // 100
 
-  int volume;                              // 100
+    // defined in media play parameters, p 770
+    // correspond to 'fit' SMIL's attribute
+    MediaFittingPolicy fittingPolicy; // fittingUndefined
 
-  // defined in media play parameters, p 770
-  // correspond to 'fit' SMIL's attribute
-  MediaFittingPolicy fittingPolicy;        // fittingUndefined
+    bool autoPlay; // true
 
-  bool autoPlay;                          // true
+    // repeat count, can be real values, 0 means forever
+    double repeatCount; // 1.0
 
-  // repeat count, can be real values, 0 means forever
-  double repeatCount;                      // 1.0
+    // background color                      // black = (0.0 0.0 0.0)
+    Color bgColor;
 
-  // background color                      // black = (0.0 0.0 0.0)
-  Color bgColor;
-  
-  // opacity in [0.0 1.0]
-  double opacity;                          // 1.0
-  
+    // opacity in [0.0 1.0]
+    double opacity; // 1.0
 
-  bool showControls;                      // false
+    bool showControls; // false
 
-  MediaWindowParameters windowParams;
+    MediaWindowParameters windowParams;
 };
 
-class MediaRendition {
- public:
-  MediaRendition(Object *obj);
-  MediaRendition(const MediaRendition &other);
-  ~MediaRendition();
-  MediaRendition& operator=(const MediaRendition &) = delete;
+class MediaRendition
+{
+public:
+    MediaRendition(Object *obj);
+    MediaRendition(const MediaRendition &other);
+    ~MediaRendition();
+    MediaRendition &operator=(const MediaRendition &) = delete;
 
-  bool isOk () const { return ok; }
+    bool isOk() const { return ok; }
 
-  const MediaParameters* getMHParameters() const { return &MH; }
-  const MediaParameters* getBEParameters() const { return &BE; }
+    const MediaParameters *getMHParameters() const { return &MH; }
+    const MediaParameters *getBEParameters() const { return &BE; }
 
-  const GooString* getContentType() const { return contentType; }
-  const GooString* getFileName() const { return fileName; }
+    const GooString *getContentType() const { return contentType; }
+    const GooString *getFileName() const { return fileName; }
 
-  bool getIsEmbedded() const { return isEmbedded; }
-  Stream* getEmbbededStream() const { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
-  const Object* getEmbbededStreamObject() const { return isEmbedded ? &embeddedStreamObject : nullptr; }
-  // write embedded stream to file
-  void outputToFile(FILE*);
+    bool getIsEmbedded() const { return isEmbedded; }
+    Stream *getEmbbededStream() const { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
+    const Object *getEmbbededStreamObject() const { return isEmbedded ? &embeddedStreamObject : nullptr; }
+    // write embedded stream to file
+    void outputToFile(FILE *);
 
-  MediaRendition* copy() const;
+    MediaRendition *copy() const;
 
- private:
-  bool ok;
+private:
+    bool ok;
 
-  // "Must Honor" parameters
-  MediaParameters MH;
-  // "Best Effort" parameters
-  MediaParameters BE;
+    // "Must Honor" parameters
+    MediaParameters MH;
+    // "Best Effort" parameters
+    MediaParameters BE;
 
-  bool isEmbedded;
+    bool isEmbedded;
 
-  GooString* contentType;
+    GooString *contentType;
 
-  // if it's embedded
-  Object embeddedStreamObject;
+    // if it's embedded
+    Object embeddedStreamObject;
 
-  // if it's not embedded
-  GooString* fileName;
+    // if it's not embedded
+    GooString *fileName;
 };
 
 #endif /* _RENDITION_H_ */

@@ -20,13 +20,12 @@
 // The LocalPDFDocBuilder implements a PDFDocBuilder for local files.
 //------------------------------------------------------------------------
 
-class LocalPDFDocBuilder : public PDFDocBuilder {
+class LocalPDFDocBuilder : public PDFDocBuilder
+{
 
 public:
-  PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr,
-                      GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
-  bool supports(const GooString &uri) override;
-
+    PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
+    bool supports(const GooString &uri) override;
 };
 
 #endif /* LOCALPDFDOCBUILDER_H */

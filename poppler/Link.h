@@ -48,525 +48,521 @@ class Annots;
 // LinkAction
 //------------------------------------------------------------------------
 
-enum LinkActionKind {
-  actionGoTo,			// go to destination
-  actionGoToR,			// go to destination in new file
-  actionLaunch,			// launch app (or open document)
-  actionURI,			// URI
-  actionNamed,			// named action
-  actionMovie,			// movie action
-  actionRendition,		// rendition action
-  actionSound,			// sound action
-  actionJavaScript,		// JavaScript action
-  actionOCGState,               // Set-OCG-State action
-  actionHide,			// Hide action
-  actionResetForm,		// ResetForm action
-  actionUnknown			// anything else
+enum LinkActionKind
+{
+    actionGoTo, // go to destination
+    actionGoToR, // go to destination in new file
+    actionLaunch, // launch app (or open document)
+    actionURI, // URI
+    actionNamed, // named action
+    actionMovie, // movie action
+    actionRendition, // rendition action
+    actionSound, // sound action
+    actionJavaScript, // JavaScript action
+    actionOCGState, // Set-OCG-State action
+    actionHide, // Hide action
+    actionResetForm, // ResetForm action
+    actionUnknown // anything else
 };
 
-class LinkAction {
+class LinkAction
+{
 public:
+    LinkAction();
+    LinkAction(const LinkAction &) = delete;
+    LinkAction &operator=(const LinkAction &other) = delete;
 
-  LinkAction();
-  LinkAction(const LinkAction &) = delete;
-  LinkAction& operator=(const LinkAction &other) = delete;
+    // Destructor.
+    virtual ~LinkAction();
 
-  // Destructor.
-  virtual ~LinkAction();
+    // Was the LinkAction created successfully?
+    virtual bool isOk() const = 0;
 
-  // Was the LinkAction created successfully?
-  virtual bool isOk() const = 0;
+    // Check link action type.
+    virtual LinkActionKind getKind() const = 0;
 
-  // Check link action type.
-  virtual LinkActionKind getKind() const = 0;
+    // Parse a destination (old-style action) name, string, or array.
+    static std::unique_ptr<LinkAction> parseDest(const Object *obj);
 
-  // Parse a destination (old-style action) name, string, or array.
-  static std::unique_ptr<LinkAction> parseDest(const Object *obj);
+    // Parse an action dictionary.
+    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI = nullptr);
 
-  // Parse an action dictionary.
-  static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI = nullptr);
-
-  // A List of the next actions to execute in order.
-  const std::vector<std::unique_ptr<LinkAction> >& nextActions() const;
+    // A List of the next actions to execute in order.
+    const std::vector<std::unique_ptr<LinkAction>> &nextActions() const;
 
 private:
-  static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
+    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  std::vector<std::unique_ptr<LinkAction> > nextActionList;
+    std::vector<std::unique_ptr<LinkAction>> nextActionList;
 };
 
 //------------------------------------------------------------------------
 // LinkDest
 //------------------------------------------------------------------------
 
-enum LinkDestKind {
-  destXYZ,
-  destFit,
-  destFitH,
-  destFitV,
-  destFitR,
-  destFitB,
-  destFitBH,
-  destFitBV
+enum LinkDestKind
+{
+    destXYZ,
+    destFit,
+    destFitH,
+    destFitV,
+    destFitR,
+    destFitB,
+    destFitBH,
+    destFitBV
 };
 
-class LinkDest {
+class LinkDest
+{
 public:
+    // Build a LinkDest from the array.
+    LinkDest(const Array *a);
 
-  // Build a LinkDest from the array.
-  LinkDest(const Array *a);
+    // Copy a LinkDest.
+    LinkDest *copy() const { return new LinkDest(this); }
 
-  // Copy a LinkDest.
-  LinkDest *copy() const { return new LinkDest(this); }
+    // Was the LinkDest created successfully?
+    bool isOk() const { return ok; }
 
-  // Was the LinkDest created successfully?
-  bool isOk() const { return ok; }
-
-  // Accessors.
-  LinkDestKind getKind() const { return kind; }
-  bool isPageRef() const { return pageIsRef; }
-  int getPageNum() const { return pageNum; }
-  Ref getPageRef() const { return pageRef; }
-  double getLeft() const { return left; }
-  double getBottom() const { return bottom; }
-  double getRight() const { return right; }
-  double getTop() const { return top; }
-  double getZoom() const { return zoom; }
-  bool getChangeLeft() const { return changeLeft; }
-  bool getChangeTop() const { return changeTop; }
-  bool getChangeZoom() const { return changeZoom; }
+    // Accessors.
+    LinkDestKind getKind() const { return kind; }
+    bool isPageRef() const { return pageIsRef; }
+    int getPageNum() const { return pageNum; }
+    Ref getPageRef() const { return pageRef; }
+    double getLeft() const { return left; }
+    double getBottom() const { return bottom; }
+    double getRight() const { return right; }
+    double getTop() const { return top; }
+    double getZoom() const { return zoom; }
+    bool getChangeLeft() const { return changeLeft; }
+    bool getChangeTop() const { return changeTop; }
+    bool getChangeZoom() const { return changeZoom; }
 
 private:
+    LinkDestKind kind; // destination type
+    bool pageIsRef; // is the page a reference or number?
+    union {
+        Ref pageRef; // reference to page
+        int pageNum; // one-relative page number
+    };
+    double left, bottom; // position
+    double right, top;
+    double zoom; // zoom factor
+    bool changeLeft, changeTop; // which position components to change:
+    bool changeZoom; //   destXYZ uses all three;
+                     //   destFitH/BH use changeTop;
+                     //   destFitV/BV use changeLeft
+    bool ok; // set if created successfully
 
-  LinkDestKind kind;		// destination type
-  bool pageIsRef;		// is the page a reference or number?
-  union {
-    Ref pageRef;		// reference to page
-    int pageNum;		// one-relative page number
-  };
-  double left, bottom;		// position
-  double right, top;
-  double zoom;			// zoom factor
-  bool changeLeft, changeTop;	// which position components to change:
-  bool changeZoom;		//   destXYZ uses all three;
-				//   destFitH/BH use changeTop;
-				//   destFitV/BV use changeLeft
-  bool ok;			// set if created successfully
-
-  LinkDest(const LinkDest *dest);
+    LinkDest(const LinkDest *dest);
 };
 
 //------------------------------------------------------------------------
 // LinkGoTo
 //------------------------------------------------------------------------
 
-class LinkGoTo: public LinkAction {
+class LinkGoTo : public LinkAction
+{
 public:
+    // Build a LinkGoTo from a destination (dictionary, name, or string).
+    LinkGoTo(const Object *destObj);
 
-  // Build a LinkGoTo from a destination (dictionary, name, or string).
-  LinkGoTo(const Object *destObj);
+    ~LinkGoTo() override;
 
-  ~LinkGoTo() override;
+    // Was the LinkGoTo created successfully?
+    bool isOk() const override { return dest || namedDest; }
 
-  // Was the LinkGoTo created successfully?
-  bool isOk() const override { return dest || namedDest; }
-
-  // Accessors.
-  LinkActionKind getKind() const override { return actionGoTo; }
-  const LinkDest *getDest() const { return dest.get(); }
-  const GooString *getNamedDest() const { return namedDest.get(); }
+    // Accessors.
+    LinkActionKind getKind() const override { return actionGoTo; }
+    const LinkDest *getDest() const { return dest.get(); }
+    const GooString *getNamedDest() const { return namedDest.get(); }
 
 private:
-
-  std::unique_ptr<LinkDest> dest;		// regular destination (nullptr for remote
-				//   link with bad destination)
-  std::unique_ptr<GooString> namedDest;	// named destination (only one of dest and
-				//   and namedDest may be non-nullptr)
+    std::unique_ptr<LinkDest> dest; // regular destination (nullptr for remote
+                                    //   link with bad destination)
+    std::unique_ptr<GooString> namedDest; // named destination (only one of dest and
+                                          //   and namedDest may be non-nullptr)
 };
 
 //------------------------------------------------------------------------
 // LinkGoToR
 //------------------------------------------------------------------------
 
-class LinkGoToR: public LinkAction {
+class LinkGoToR : public LinkAction
+{
 public:
+    // Build a LinkGoToR from a file spec (dictionary) and destination
+    // (dictionary, name, or string).
+    LinkGoToR(Object *fileSpecObj, Object *destObj);
 
-  // Build a LinkGoToR from a file spec (dictionary) and destination
-  // (dictionary, name, or string).
-  LinkGoToR(Object *fileSpecObj, Object *destObj);
+    ~LinkGoToR() override;
 
-  ~LinkGoToR() override;
+    // Was the LinkGoToR created successfully?
+    bool isOk() const override { return fileName && (dest || namedDest); }
 
-  // Was the LinkGoToR created successfully?
-  bool isOk() const override { return fileName && (dest || namedDest); }
-
-  // Accessors.
-  LinkActionKind getKind() const override { return actionGoToR; }
-  const GooString *getFileName() const { return fileName.get(); }
-  const LinkDest *getDest() const { return dest.get(); }
-  const GooString *getNamedDest() const { return namedDest.get(); }
+    // Accessors.
+    LinkActionKind getKind() const override { return actionGoToR; }
+    const GooString *getFileName() const { return fileName.get(); }
+    const LinkDest *getDest() const { return dest.get(); }
+    const GooString *getNamedDest() const { return namedDest.get(); }
 
 private:
-
-  std::unique_ptr<GooString> fileName;		// file name
-  std::unique_ptr<LinkDest> dest;		// regular destination (nullptr for remote
-				//   link with bad destination)
-  std::unique_ptr<GooString> namedDest;	// named destination (only one of dest and
-				//   and namedDest may be non-nullptr)
+    std::unique_ptr<GooString> fileName; // file name
+    std::unique_ptr<LinkDest> dest; // regular destination (nullptr for remote
+                                    //   link with bad destination)
+    std::unique_ptr<GooString> namedDest; // named destination (only one of dest and
+                                          //   and namedDest may be non-nullptr)
 };
 
 //------------------------------------------------------------------------
 // LinkLaunch
 //------------------------------------------------------------------------
 
-class LinkLaunch: public LinkAction {
+class LinkLaunch : public LinkAction
+{
 public:
+    // Build a LinkLaunch from an action dictionary.
+    LinkLaunch(const Object *actionObj);
 
-  // Build a LinkLaunch from an action dictionary.
-  LinkLaunch(const Object *actionObj);
+    // Was the LinkLaunch created successfully?
+    bool isOk() const override { return fileName != nullptr; }
 
-  // Was the LinkLaunch created successfully?
-  bool isOk() const override { return fileName != nullptr; }
-
-  // Accessors.
-  LinkActionKind getKind() const override { return actionLaunch; }
-  const GooString *getFileName() const { return fileName.get(); }
-  const GooString *getParams() const { return params.get(); }
+    // Accessors.
+    LinkActionKind getKind() const override { return actionLaunch; }
+    const GooString *getFileName() const { return fileName.get(); }
+    const GooString *getParams() const { return params.get(); }
 
 private:
-
-  std::unique_ptr<GooString> fileName;		// file name
-  std::unique_ptr<GooString> params;		// parameters
+    std::unique_ptr<GooString> fileName; // file name
+    std::unique_ptr<GooString> params; // parameters
 };
 
 //------------------------------------------------------------------------
 // LinkURI
 //------------------------------------------------------------------------
 
-class LinkURI: public LinkAction {
+class LinkURI : public LinkAction
+{
 public:
+    // Build a LinkURI given the URI (string) and base URI.
+    LinkURI(const Object *uriObj, const GooString *baseURI);
 
-  // Build a LinkURI given the URI (string) and base URI.
-  LinkURI(const Object *uriObj, const GooString *baseURI);
+    ~LinkURI() override;
 
-  ~LinkURI() override;
+    // Was the LinkURI created successfully?
+    bool isOk() const override { return hasURIFlag; }
 
-  // Was the LinkURI created successfully?
-  bool isOk() const override { return hasURIFlag; }
-
-  // Accessors.
-  LinkActionKind getKind() const override { return actionURI; }
-  const std::string& getURI() const { return uri; }
+    // Accessors.
+    LinkActionKind getKind() const override { return actionURI; }
+    const std::string &getURI() const { return uri; }
 
 private:
-
-  std::string uri;			// the URI
-  bool hasURIFlag;
+    std::string uri; // the URI
+    bool hasURIFlag;
 };
 
 //------------------------------------------------------------------------
 // LinkNamed
 //------------------------------------------------------------------------
 
-class LinkNamed: public LinkAction {
+class LinkNamed : public LinkAction
+{
 public:
+    // Build a LinkNamed given the action name.
+    LinkNamed(const Object *nameObj);
 
-  // Build a LinkNamed given the action name.
-  LinkNamed(const Object *nameObj);
+    ~LinkNamed() override;
 
-  ~LinkNamed() override;
+    bool isOk() const override { return hasNameFlag; }
 
-  bool isOk() const override { return hasNameFlag; }
-
-  LinkActionKind getKind() const override { return actionNamed; }
-  const std::string& getName() const { return name; }
+    LinkActionKind getKind() const override { return actionNamed; }
+    const std::string &getName() const { return name; }
 
 private:
-
-  std::string name;
-  bool hasNameFlag;
+    std::string name;
+    bool hasNameFlag;
 };
-
 
 //------------------------------------------------------------------------
 // LinkMovie
 //------------------------------------------------------------------------
 
-class LinkMovie: public LinkAction {
+class LinkMovie : public LinkAction
+{
 public:
+    enum OperationType
+    {
+        operationTypePlay,
+        operationTypePause,
+        operationTypeResume,
+        operationTypeStop
+    };
 
-  enum OperationType {
-    operationTypePlay,
-    operationTypePause,
-    operationTypeResume,
-    operationTypeStop
-  };
+    LinkMovie(const Object *obj);
 
-  LinkMovie(const Object *obj);
+    ~LinkMovie() override;
 
-  ~LinkMovie() override;
+    bool isOk() const override { return hasAnnotRef() || hasAnnotTitleFlag; }
+    LinkActionKind getKind() const override { return actionMovie; }
 
-  bool isOk() const override { return hasAnnotRef() || hasAnnotTitleFlag; }
-  LinkActionKind getKind() const override { return actionMovie; }
+    // a movie action stores either an indirect reference to a movie annotation
+    // or the movie annotation title
 
-  // a movie action stores either an indirect reference to a movie annotation
-  // or the movie annotation title
+    bool hasAnnotRef() const { return annotRef != Ref::INVALID(); }
+    bool hasAnnotTitle() const { return hasAnnotTitleFlag; }
+    const Ref *getAnnotRef() const { return &annotRef; }
+    const std::string &getAnnotTitle() const { return annotTitle; }
 
-  bool hasAnnotRef() const { return annotRef != Ref::INVALID(); }
-  bool hasAnnotTitle() const { return hasAnnotTitleFlag; }
-  const Ref *getAnnotRef() const { return &annotRef; }
-  const std::string& getAnnotTitle() const { return annotTitle; }
-
-  OperationType getOperation() const { return operation; }
+    OperationType getOperation() const { return operation; }
 
 private:
+    Ref annotRef; // Annotation
+    std::string annotTitle; // T
+    bool hasAnnotTitleFlag;
 
-  Ref annotRef;            // Annotation
-  std::string annotTitle;  // T
-  bool hasAnnotTitleFlag;
-
-  OperationType operation; // Operation
+    OperationType operation; // Operation
 };
-
 
 //------------------------------------------------------------------------
 // LinkRendition
 //------------------------------------------------------------------------
 
-class LinkRendition: public LinkAction {
+class LinkRendition : public LinkAction
+{
 public:
-  /**
-   * Describes the possible rendition operations.
-   */
-  enum RenditionOperation {
-    NoRendition,
-    PlayRendition,
-    StopRendition,
-    PauseRendition,
-    ResumeRendition
-  };
+    /**
+     * Describes the possible rendition operations.
+     */
+    enum RenditionOperation
+    {
+        NoRendition,
+        PlayRendition,
+        StopRendition,
+        PauseRendition,
+        ResumeRendition
+    };
 
-  LinkRendition(const Object *Obj);
+    LinkRendition(const Object *Obj);
 
-  ~LinkRendition() override;
+    ~LinkRendition() override;
 
-  bool isOk() const override { return true; }
+    bool isOk() const override { return true; }
 
-  LinkActionKind getKind() const override { return actionRendition; }
+    LinkActionKind getKind() const override { return actionRendition; }
 
-  bool hasScreenAnnot() const { return screenRef != Ref::INVALID(); }
-  Ref getScreenAnnot() const { return screenRef; }
+    bool hasScreenAnnot() const { return screenRef != Ref::INVALID(); }
+    Ref getScreenAnnot() const { return screenRef; }
 
-  RenditionOperation getOperation() const { return operation; }
+    RenditionOperation getOperation() const { return operation; }
 
-  const MediaRendition* getMedia() const { return media; }
+    const MediaRendition *getMedia() const { return media; }
 
-  const std::string& getScript() const { return js; }
+    const std::string &getScript() const { return js; }
 
 private:
+    Ref screenRef;
+    RenditionOperation operation;
 
-  Ref screenRef;
-  RenditionOperation operation;
+    MediaRendition *media;
 
-  MediaRendition* media;
-
-  std::string js;
+    std::string js;
 };
 
 //------------------------------------------------------------------------
 // LinkSound
 //------------------------------------------------------------------------
 
-class LinkSound: public LinkAction {
+class LinkSound : public LinkAction
+{
 public:
+    LinkSound(const Object *soundObj);
 
-  LinkSound(const Object *soundObj);
+    ~LinkSound() override;
 
-  ~LinkSound() override;
+    bool isOk() const override { return sound != nullptr; }
 
-  bool isOk() const override { return sound != nullptr; }
+    LinkActionKind getKind() const override { return actionSound; }
 
-  LinkActionKind getKind() const override { return actionSound; }
-
-  double getVolume() const { return volume; }
-  bool getSynchronous() const { return sync; }
-  bool getRepeat() const { return repeat; }
-  bool getMix() const { return mix; }
-  Sound *getSound() const { return sound.get(); }
+    double getVolume() const { return volume; }
+    bool getSynchronous() const { return sync; }
+    bool getRepeat() const { return repeat; }
+    bool getMix() const { return mix; }
+    Sound *getSound() const { return sound.get(); }
 
 private:
-
-  double volume;
-  bool sync;
-  bool repeat;
-  bool mix;
-  std::unique_ptr<Sound> sound;
+    double volume;
+    bool sync;
+    bool repeat;
+    bool mix;
+    std::unique_ptr<Sound> sound;
 };
 
 //------------------------------------------------------------------------
 // LinkJavaScript
 //------------------------------------------------------------------------
 
-class LinkJavaScript: public LinkAction {
+class LinkJavaScript : public LinkAction
+{
 public:
+    // Build a LinkJavaScript given the action name.
+    LinkJavaScript(Object *jsObj);
 
-  // Build a LinkJavaScript given the action name.
-  LinkJavaScript(Object *jsObj);
+    ~LinkJavaScript() override;
 
-  ~LinkJavaScript() override;
+    bool isOk() const override { return isValid; }
 
-  bool isOk() const override { return isValid; }
+    LinkActionKind getKind() const override { return actionJavaScript; }
+    const std::string &getScript() const { return js; }
 
-  LinkActionKind getKind() const override { return actionJavaScript; }
-  const std::string& getScript() const { return js; }
-
-  static Object createObject(XRef *xref, const GooString &js);
+    static Object createObject(XRef *xref, const GooString &js);
 
 private:
-
-  std::string js;
-  bool isValid;
+    std::string js;
+    bool isValid;
 };
 
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-class LinkOCGState: public LinkAction {
+class LinkOCGState : public LinkAction
+{
 public:
-  LinkOCGState(const Object *obj);
+    LinkOCGState(const Object *obj);
 
-  ~LinkOCGState() override;
+    ~LinkOCGState() override;
 
-  bool isOk() const override { return isValid; }
+    bool isOk() const override { return isValid; }
 
-  LinkActionKind getKind() const override { return actionOCGState; }
+    LinkActionKind getKind() const override { return actionOCGState; }
 
-  enum State { On, Off, Toggle};
-  struct StateList {
-    StateList() = default;
-    ~StateList() = default;
-    State st;
-    std::vector<Ref> list;
-  };
+    enum State
+    {
+        On,
+        Off,
+        Toggle
+    };
+    struct StateList
+    {
+        StateList() = default;
+        ~StateList() = default;
+        State st;
+        std::vector<Ref> list;
+    };
 
-  const std::vector<StateList>& getStateList() const { return stateList; }
-  bool getPreserveRB() const { return preserveRB; }
+    const std::vector<StateList> &getStateList() const { return stateList; }
+    bool getPreserveRB() const { return preserveRB; }
 
 private:
-  std::vector<StateList> stateList;
-  bool isValid;
-  bool preserveRB;
+    std::vector<StateList> stateList;
+    bool isValid;
+    bool preserveRB;
 };
 
 //------------------------------------------------------------------------
 // LinkHide
 //------------------------------------------------------------------------
 
-class LinkHide: public LinkAction {
+class LinkHide : public LinkAction
+{
 public:
-  LinkHide(const Object *hideObj);
+    LinkHide(const Object *hideObj);
 
-  ~LinkHide() override;
+    ~LinkHide() override;
 
-  bool isOk() const override { return hasTargetNameFlag; }
-  LinkActionKind getKind() const override { return actionHide; }
+    bool isOk() const override { return hasTargetNameFlag; }
+    LinkActionKind getKind() const override { return actionHide; }
 
-  // According to spec the target can be either:
-  // a) A text string containing the fully qualified name of the target
-  //    field.
-  // b) An indirect reference to an annotation dictionary.
-  // c) An array of "such dictionaries or text strings".
-  //
-  // While b / c appear to be very uncommon and can't easily be
-  // created with Adobe Acrobat DC. So only support hide
-  // actions with named targets (yet).
-  bool hasTargetName() const { return hasTargetNameFlag; }
-  const std::string& getTargetName() const { return targetName; }
+    // According to spec the target can be either:
+    // a) A text string containing the fully qualified name of the target
+    //    field.
+    // b) An indirect reference to an annotation dictionary.
+    // c) An array of "such dictionaries or text strings".
+    //
+    // While b / c appear to be very uncommon and can't easily be
+    // created with Adobe Acrobat DC. So only support hide
+    // actions with named targets (yet).
+    bool hasTargetName() const { return hasTargetNameFlag; }
+    const std::string &getTargetName() const { return targetName; }
 
-  // Should this action show or hide.
-  bool isShowAction() const { return show; }
+    // Should this action show or hide.
+    bool isShowAction() const { return show; }
 
 private:
-
-  bool hasTargetNameFlag;
-  std::string targetName;
-  bool show;
+    bool hasTargetNameFlag;
+    std::string targetName;
+    bool show;
 };
 
 //------------------------------------------------------------------------
 // LinkResetForm
 //------------------------------------------------------------------------
 
-class LinkResetForm: public LinkAction {
+class LinkResetForm : public LinkAction
+{
 public:
+    // Build a LinkResetForm.
+    LinkResetForm(const Object *nameObj);
 
-  // Build a LinkResetForm.
-  LinkResetForm(const Object *nameObj);
+    ~LinkResetForm() override;
 
-  ~LinkResetForm() override;
+    bool isOk() const override { return true; }
 
-  bool isOk() const override { return true; }
+    LinkActionKind getKind() const override { return actionResetForm; }
 
-  LinkActionKind getKind() const override { return actionResetForm; }
-
-  const std::vector<std::string>& getFields() const { return fields; }
-  bool getExclude() const { return exclude; }
+    const std::vector<std::string> &getFields() const { return fields; }
+    bool getExclude() const { return exclude; }
 
 private:
-
-  std::vector<std::string> fields;
-  bool exclude;
+    std::vector<std::string> fields;
+    bool exclude;
 };
-
 
 //------------------------------------------------------------------------
 // LinkUnknown
 //------------------------------------------------------------------------
 
-class LinkUnknown: public LinkAction {
+class LinkUnknown : public LinkAction
+{
 public:
+    // Build a LinkUnknown with the specified action type.
+    LinkUnknown(const char *actionA);
 
-  // Build a LinkUnknown with the specified action type.
-  LinkUnknown(const char *actionA);
+    ~LinkUnknown() override;
 
-  ~LinkUnknown() override;
+    // Was the LinkUnknown create successfully?
+    // Yes: nothing can go wrong when creating LinkUnknown objects
+    bool isOk() const override { return true; }
 
-  // Was the LinkUnknown create successfully?
-  // Yes: nothing can go wrong when creating LinkUnknown objects
-  bool isOk() const override { return true; }
-
-  // Accessors.
-  LinkActionKind getKind() const override { return actionUnknown; }
-  const std::string& getAction() const { return action; }
+    // Accessors.
+    LinkActionKind getKind() const override { return actionUnknown; }
+    const std::string &getAction() const { return action; }
 
 private:
-
-  std::string action;		// action subtype
+    std::string action; // action subtype
 };
 
 //------------------------------------------------------------------------
 // Links
 //------------------------------------------------------------------------
 
-class Links {
+class Links
+{
 public:
+    // Extract links from array of annotations.
+    Links(Annots *annots);
 
-  // Extract links from array of annotations.
-  Links(Annots *annots);
+    // Destructor.
+    ~Links();
 
-  // Destructor.
-  ~Links();
+    Links(const Links &) = delete;
+    Links &operator=(const Links &) = delete;
 
-  Links(const Links &) = delete;
-  Links& operator=(const Links &) = delete;
-
-  // Iterate through list of links.
-  int getNumLinks() const { return links.size(); }
-  AnnotLink *getLink(int i) const { return links[i]; }
+    // Iterate through list of links.
+    int getNumLinks() const { return links.size(); }
+    AnnotLink *getLink(int i) const { return links[i]; }
 
 private:
-
-  std::vector<AnnotLink *> links;
+    std::vector<AnnotLink *> links;
 };
 
 #endif

@@ -31,35 +31,35 @@ typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
 // FoFiBase
 //------------------------------------------------------------------------
 
-class FoFiBase {
+class FoFiBase
+{
 public:
-  FoFiBase(const FoFiBase &) = delete;
-  FoFiBase& operator=(const FoFiBase &other) = delete;
+    FoFiBase(const FoFiBase &) = delete;
+    FoFiBase &operator=(const FoFiBase &other) = delete;
 
-  virtual ~FoFiBase();
+    virtual ~FoFiBase();
 
 protected:
+    FoFiBase(const char *fileA, int lenA, bool freeFileDataA);
+    static char *readFile(const char *fileName, int *fileLen);
 
-  FoFiBase(const char *fileA, int lenA, bool freeFileDataA);
-  static char *readFile(const char *fileName, int *fileLen);
+    // S = signed / U = unsigned
+    // 8/16/32/Var = word length, in bytes
+    // BE = big endian
+    int getS8(int pos, bool *ok) const;
+    int getU8(int pos, bool *ok) const;
+    int getS16BE(int pos, bool *ok) const;
+    int getU16BE(int pos, bool *ok) const;
+    int getS32BE(int pos, bool *ok) const;
+    unsigned int getU32BE(int pos, bool *ok) const;
+    unsigned int getU32LE(int pos, bool *ok) const;
+    unsigned int getUVarBE(int pos, int size, bool *ok) const;
 
-  // S = signed / U = unsigned
-  // 8/16/32/Var = word length, in bytes
-  // BE = big endian
-  int getS8(int pos, bool *ok) const;
-  int getU8(int pos, bool *ok) const;
-  int getS16BE(int pos, bool *ok) const;
-  int getU16BE(int pos, bool *ok) const;
-  int getS32BE(int pos, bool *ok) const;
-  unsigned int getU32BE(int pos, bool *ok) const;
-  unsigned int getU32LE(int pos, bool *ok) const;
-  unsigned int getUVarBE(int pos, int size, bool *ok) const;
+    bool checkRegion(int pos, int size) const;
 
-  bool checkRegion(int pos, int size) const;
-
-  const unsigned char *file;
-  int len;
-  bool freeFileData;
+    const unsigned char *file;
+    int len;
+    bool freeFileData;
 };
 
 #endif

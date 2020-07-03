@@ -32,105 +32,96 @@
 #include "poppler-private.h"
 #include "poppler-embeddedfile-private.h"
 
-namespace Poppler
-{
+namespace Poppler {
 
-EmbeddedFileData::EmbeddedFileData(FileSpec *fs)
-	: filespec(fs)
-{
-}
+EmbeddedFileData::EmbeddedFileData(FileSpec *fs) : filespec(fs) { }
 
 EmbeddedFileData::~EmbeddedFileData()
 {
-	delete filespec;
+    delete filespec;
 }
 
 EmbFile *EmbeddedFileData::embFile() const
 {
-	return filespec->isOk() ? filespec->getEmbeddedFile() : nullptr;
+    return filespec->isOk() ? filespec->getEmbeddedFile() : nullptr;
 }
 
-
-EmbeddedFile::EmbeddedFile(EmbFile *embfile)
-	: m_embeddedFile(nullptr)
+EmbeddedFile::EmbeddedFile(EmbFile *embfile) : m_embeddedFile(nullptr)
 {
-	assert(!"You must not use this private constructor!");
+    assert(!"You must not use this private constructor!");
 }
 
-EmbeddedFile::EmbeddedFile(EmbeddedFileData &dd)
-	: m_embeddedFile(&dd)
-{
-}
+EmbeddedFile::EmbeddedFile(EmbeddedFileData &dd) : m_embeddedFile(&dd) { }
 
 EmbeddedFile::~EmbeddedFile()
 {
-	delete m_embeddedFile;
+    delete m_embeddedFile;
 }
 
 QString EmbeddedFile::name() const
 {
-	const GooString *goo = m_embeddedFile->filespec->getFileName();
-	return goo ? UnicodeParsedString(goo) : QString();
+    const GooString *goo = m_embeddedFile->filespec->getFileName();
+    return goo ? UnicodeParsedString(goo) : QString();
 }
 
 QString EmbeddedFile::description() const
 {
-	const GooString *goo = m_embeddedFile->filespec->getDescription();
-	return goo ? UnicodeParsedString(goo) : QString();
+    const GooString *goo = m_embeddedFile->filespec->getDescription();
+    return goo ? UnicodeParsedString(goo) : QString();
 }
 
 int EmbeddedFile::size() const
 {
-	return m_embeddedFile->embFile() ? m_embeddedFile->embFile()->size() : -1;
+    return m_embeddedFile->embFile() ? m_embeddedFile->embFile()->size() : -1;
 }
 
 QDateTime EmbeddedFile::modDate() const
 {
-	const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->modDate() : nullptr;
-	return goo ? convertDate(goo->c_str()) : QDateTime();
+    const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->modDate() : nullptr;
+    return goo ? convertDate(goo->c_str()) : QDateTime();
 }
 
 QDateTime EmbeddedFile::createDate() const
 {
-	const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : nullptr;
-	return goo ? convertDate(goo->c_str()) : QDateTime();
+    const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : nullptr;
+    return goo ? convertDate(goo->c_str()) : QDateTime();
 }
 
 QByteArray EmbeddedFile::checksum() const
 {
-	const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : nullptr;
-	return goo ? QByteArray::fromRawData(goo->c_str(), goo->getLength()) : QByteArray();
+    const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : nullptr;
+    return goo ? QByteArray::fromRawData(goo->c_str(), goo->getLength()) : QByteArray();
 }
 
 QString EmbeddedFile::mimeType() const
 {
-	const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : nullptr;
-	return goo ? QString(goo->c_str()) : QString();
+    const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : nullptr;
+    return goo ? QString(goo->c_str()) : QString();
 }
 
 QByteArray EmbeddedFile::data()
 {
-	if (!isValid())
-		return QByteArray();
-	Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : nullptr;
-	if (!stream)
-		return QByteArray();
-	
-	stream->reset();
-	int dataLen = 0;
-	QByteArray fileArray;
-	int i;
-	while ( (i = stream->getChar()) != EOF) {
-		fileArray[dataLen] = (char)i;
-		++dataLen;
-	}
-	fileArray.resize(dataLen);
-	return fileArray;
+    if (!isValid())
+        return QByteArray();
+    Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : nullptr;
+    if (!stream)
+        return QByteArray();
+
+    stream->reset();
+    int dataLen = 0;
+    QByteArray fileArray;
+    int i;
+    while ((i = stream->getChar()) != EOF) {
+        fileArray[dataLen] = (char)i;
+        ++dataLen;
+    }
+    fileArray.resize(dataLen);
+    return fileArray;
 }
 
 bool EmbeddedFile::isValid() const
 {
-	return m_embeddedFile->filespec->isOk();
+    return m_embeddedFile->filespec->isOk();
 }
 
 }

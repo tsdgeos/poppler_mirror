@@ -30,154 +30,154 @@
 
 namespace Poppler {
 
-OutlineItem::OutlineItem() : m_data{new OutlineItemData{nullptr, nullptr}} {}
+OutlineItem::OutlineItem() : m_data { new OutlineItemData { nullptr, nullptr } } { }
 
-OutlineItem::OutlineItem(OutlineItemData *data) : m_data{data} {}
+OutlineItem::OutlineItem(OutlineItemData *data) : m_data { data } { }
 
 OutlineItem::~OutlineItem()
 {
-  delete m_data;
-  m_data = nullptr;
+    delete m_data;
+    m_data = nullptr;
 }
 
-OutlineItem::OutlineItem(const OutlineItem &other) : m_data{new OutlineItemData{*other.m_data}} {}
+OutlineItem::OutlineItem(const OutlineItem &other) : m_data { new OutlineItemData { *other.m_data } } { }
 
 OutlineItem &OutlineItem::operator=(const OutlineItem &other)
 {
-  if (this == &other)
+    if (this == &other)
+        return *this;
+
+    auto *data = new OutlineItemData { *other.m_data };
+    qSwap(m_data, data);
+    delete data;
+
     return *this;
-
-  auto *data = new OutlineItemData{*other.m_data};
-  qSwap(m_data, data);
-  delete data;
-
-  return *this;
 }
 
-OutlineItem::OutlineItem(OutlineItem &&other) noexcept : m_data{other.m_data}
+OutlineItem::OutlineItem(OutlineItem &&other) noexcept : m_data { other.m_data }
 {
-  other.m_data = nullptr;
+    other.m_data = nullptr;
 }
 
 OutlineItem &OutlineItem::operator=(OutlineItem &&other) noexcept
 {
-  qSwap(m_data, other.m_data);
+    qSwap(m_data, other.m_data);
 
-  return *this;
+    return *this;
 }
 
 bool OutlineItem::isNull() const
 {
-  return !m_data->data;
+    return !m_data->data;
 }
 
 QString OutlineItem::name() const
 {
-  QString &name = m_data->name;
+    QString &name = m_data->name;
 
-  if (name.isEmpty()) {
-    if (const ::OutlineItem *data = m_data->data) {
-      name = unicodeToQString(data->getTitle(), data->getTitleLength());
+    if (name.isEmpty()) {
+        if (const ::OutlineItem *data = m_data->data) {
+            name = unicodeToQString(data->getTitle(), data->getTitleLength());
+        }
     }
-  }
 
-  return name;
+    return name;
 }
 
 bool OutlineItem::isOpen() const
 {
-  bool isOpen = false;
+    bool isOpen = false;
 
-  if (const ::OutlineItem *data = m_data->data) {
-    isOpen = data->isOpen();
-  }
+    if (const ::OutlineItem *data = m_data->data) {
+        isOpen = data->isOpen();
+    }
 
-  return isOpen;
+    return isOpen;
 }
 
 QSharedPointer<const LinkDestination> OutlineItem::destination() const
 {
-  QSharedPointer<const LinkDestination> &destination = m_data->destination;
+    QSharedPointer<const LinkDestination> &destination = m_data->destination;
 
-  if (!destination) {
-    if (const ::OutlineItem *data = m_data->data) {
-      if (const ::LinkAction *action = data->getAction()) {
-	if (action->getKind() == actionGoTo) {
-	  const auto *linkGoTo = static_cast<const LinkGoTo *>(action);
-	  destination.reset(new LinkDestination(LinkDestinationData(linkGoTo->getDest(), linkGoTo->getNamedDest(), m_data->documentData, false)));
-	} else if (action->getKind() == actionGoToR) {
-	  const auto *linkGoToR = static_cast<const LinkGoToR *>(action);
-	  const bool external = linkGoToR->getFileName() != nullptr;
-	  destination.reset(new LinkDestination(LinkDestinationData(linkGoToR->getDest(), linkGoToR->getNamedDest(), m_data->documentData, external)));
-	}
-      }
+    if (!destination) {
+        if (const ::OutlineItem *data = m_data->data) {
+            if (const ::LinkAction *action = data->getAction()) {
+                if (action->getKind() == actionGoTo) {
+                    const auto *linkGoTo = static_cast<const LinkGoTo *>(action);
+                    destination.reset(new LinkDestination(LinkDestinationData(linkGoTo->getDest(), linkGoTo->getNamedDest(), m_data->documentData, false)));
+                } else if (action->getKind() == actionGoToR) {
+                    const auto *linkGoToR = static_cast<const LinkGoToR *>(action);
+                    const bool external = linkGoToR->getFileName() != nullptr;
+                    destination.reset(new LinkDestination(LinkDestinationData(linkGoToR->getDest(), linkGoToR->getNamedDest(), m_data->documentData, external)));
+                }
+            }
+        }
     }
-  }
 
-  return destination;
+    return destination;
 }
 
 QString OutlineItem::externalFileName() const
 {
-  QString &externalFileName = m_data->externalFileName;
+    QString &externalFileName = m_data->externalFileName;
 
-  if (externalFileName.isEmpty()) {
-    if (const ::OutlineItem *data = m_data->data) {
-      if (const ::LinkAction *action = data->getAction()) {
-	if (action->getKind() == actionGoToR) {
-	  if (const GooString *fileName = static_cast<const LinkGoToR *>(action)->getFileName()) {
-	    externalFileName = UnicodeParsedString(fileName);
-	  }
-	}
-      }
+    if (externalFileName.isEmpty()) {
+        if (const ::OutlineItem *data = m_data->data) {
+            if (const ::LinkAction *action = data->getAction()) {
+                if (action->getKind() == actionGoToR) {
+                    if (const GooString *fileName = static_cast<const LinkGoToR *>(action)->getFileName()) {
+                        externalFileName = UnicodeParsedString(fileName);
+                    }
+                }
+            }
+        }
     }
-  }
 
-  return externalFileName;
+    return externalFileName;
 }
 
 QString OutlineItem::uri() const
 {
-  QString &uri = m_data->uri;
+    QString &uri = m_data->uri;
 
-  if (uri.isEmpty()) {
-    if (const ::OutlineItem *data = m_data->data) {
-      if (const ::LinkAction *action = data->getAction()) {
-	if (action->getKind() == actionURI) {
-	  uri = UnicodeParsedString(static_cast<const LinkURI *>(action)->getURI());
-	}
-      }
+    if (uri.isEmpty()) {
+        if (const ::OutlineItem *data = m_data->data) {
+            if (const ::LinkAction *action = data->getAction()) {
+                if (action->getKind() == actionURI) {
+                    uri = UnicodeParsedString(static_cast<const LinkURI *>(action)->getURI());
+                }
+            }
+        }
     }
-  }
 
-  return uri;
+    return uri;
 }
 
 bool OutlineItem::hasChildren() const
 {
-  bool result = false;
+    bool result = false;
 
-  if (::OutlineItem *data = m_data->data) {
-    result = data->hasKids();
-  }
+    if (::OutlineItem *data = m_data->data) {
+        result = data->hasKids();
+    }
 
-  return result;
+    return result;
 }
 
 QVector<OutlineItem> OutlineItem::children() const
 {
-  QVector<OutlineItem> result;
+    QVector<OutlineItem> result;
 
-  if (::OutlineItem *data = m_data->data) {
-    data->open();
-    if (const std::vector<::OutlineItem*> *kids = data->getKids()) {
-      for (void *kid : *kids) {
-	result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(kid), m_data->documentData}});
-      }
+    if (::OutlineItem *data = m_data->data) {
+        data->open();
+        if (const std::vector<::OutlineItem *> *kids = data->getKids()) {
+            for (void *kid : *kids) {
+                result.push_back(OutlineItem { new OutlineItemData { static_cast<::OutlineItem *>(kid), m_data->documentData } });
+            }
+        }
     }
-  }
 
-  return result;
+    return result;
 }
 
 }

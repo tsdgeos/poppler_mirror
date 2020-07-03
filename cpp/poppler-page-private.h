@@ -25,8 +25,7 @@
 
 class Page;
 
-namespace poppler
-{
+namespace poppler {
 
 class document_private;
 class page_transition;
@@ -39,15 +38,14 @@ public:
     ~page_private();
 
     page_private(const page_private &) = delete;
-    page_private& operator=(const page_private &) = delete;
+    page_private &operator=(const page_private &) = delete;
 
     document_private *doc;
     Page *page;
     int index;
     page_transition *transition;
 
-    static inline page_private* get(const poppler::page *p)
-    { return const_cast<poppler::page *>(p)->d; }
+    static inline page_private *get(const poppler::page *p) { return const_cast<poppler::page *>(p)->d; }
 
     std::vector<font_info> font_info_cache;
     bool font_info_cache_initialized;

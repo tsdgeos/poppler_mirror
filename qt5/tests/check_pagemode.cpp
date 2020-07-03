@@ -2,7 +2,7 @@
 
 #include <poppler-qt5.h>
 
-class TestPageMode: public QObject
+class TestPageMode : public QObject
 {
     Q_OBJECT
 public:
@@ -19,9 +19,9 @@ void TestPageMode::checkNone()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf");
-    QVERIFY( doc );
-  
-    QCOMPARE( doc->pageMode(), Poppler::Document::UseNone );
+    QVERIFY(doc);
+
+    QCOMPARE(doc->pageMode(), Poppler::Document::UseNone);
 
     delete doc;
 }
@@ -30,9 +30,9 @@ void TestPageMode::checkFullScreen()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/FullScreen.pdf");
-    QVERIFY( doc );
+    QVERIFY(doc);
 
-    QCOMPARE( doc->pageMode(), Poppler::Document::FullScreen );
+    QCOMPARE(doc->pageMode(), Poppler::Document::FullScreen);
 
     delete doc;
 }
@@ -41,9 +41,9 @@ void TestPageMode::checkAttachments()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseAttachments.pdf");
-    QVERIFY( doc );
-  
-    QCOMPARE( doc->pageMode(), Poppler::Document::UseAttach );
+    QVERIFY(doc);
+
+    QCOMPARE(doc->pageMode(), Poppler::Document::UseAttach);
 
     delete doc;
 }
@@ -52,9 +52,9 @@ void TestPageMode::checkThumbs()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseThumbs.pdf");
-    QVERIFY( doc );
+    QVERIFY(doc);
 
-    QCOMPARE( doc->pageMode(), Poppler::Document::UseThumbs );
+    QCOMPARE(doc->pageMode(), Poppler::Document::UseThumbs);
 
     delete doc;
 }
@@ -63,13 +63,12 @@ void TestPageMode::checkOC()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseOC.pdf");
-    QVERIFY( doc );
+    QVERIFY(doc);
 
-    QCOMPARE( doc->pageMode(), Poppler::Document::UseOC );
+    QCOMPARE(doc->pageMode(), Poppler::Document::UseOC);
 
     delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestPageMode)
 #include "check_pagemode.moc"
-

@@ -33,14 +33,14 @@ class LinkDestination;
 
 struct OutlineItemData
 {
-  OutlineItemData(::OutlineItem *oi, DocumentData *dd) : data{oi}, documentData{dd} {}
-  ::OutlineItem *data;
-  DocumentData *documentData;
+    OutlineItemData(::OutlineItem *oi, DocumentData *dd) : data { oi }, documentData { dd } { }
+    ::OutlineItem *data;
+    DocumentData *documentData;
 
-  mutable QString name;
-  mutable QSharedPointer<const LinkDestination> destination;
-  mutable QString externalFileName;
-  mutable QString uri;
+    mutable QString name;
+    mutable QSharedPointer<const LinkDestination> destination;
+    mutable QString externalFileName;
+    mutable QString uri;
 };
 
 }

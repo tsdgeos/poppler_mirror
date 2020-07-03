@@ -20,41 +20,46 @@
 
 #ifdef ENABLE_LIBPNG
 
-#include "ImgWriter.h"
+#    include "ImgWriter.h"
 
 struct PNGWriterPrivate;
 
 class PNGWriter : public ImgWriter
 {
 public:
+    /* RGB        - 3 bytes/pixel
+     * RGBA       - 4 bytes/pixel
+     * GRAY       - 1 byte/pixel
+     * MONOCHROME - 8 pixels/byte
+     * RGB48      - 6 bytes/pixel
+     */
+    enum Format
+    {
+        RGB,
+        RGBA,
+        GRAY,
+        MONOCHROME,
+        RGB48
+    };
 
-  /* RGB        - 3 bytes/pixel
-   * RGBA       - 4 bytes/pixel
-   * GRAY       - 1 byte/pixel
-   * MONOCHROME - 8 pixels/byte
-   * RGB48      - 6 bytes/pixel
-   */
-  enum Format { RGB, RGBA, GRAY, MONOCHROME, RGB48 };
+    PNGWriter(Format format = RGB);
+    ~PNGWriter() override;
 
-  PNGWriter(Format format = RGB);
-  ~PNGWriter() override;
+    PNGWriter(const PNGWriter &other) = delete;
+    PNGWriter &operator=(const PNGWriter &other) = delete;
 
-  PNGWriter(const PNGWriter &other) = delete;
-  PNGWriter& operator=(const PNGWriter &other) = delete;
+    void setICCProfile(const char *name, unsigned char *data, int size);
+    void setSRGBProfile();
 
-  void setICCProfile(const char *name, unsigned char *data, int size);
-  void setSRGBProfile();
+    bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
 
+    bool writePointers(unsigned char **rowPointers, int rowCount) override;
+    bool writeRow(unsigned char **row) override;
 
-  bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
-
-  bool writePointers(unsigned char **rowPointers, int rowCount) override;
-  bool writeRow(unsigned char **row) override;
-
-  bool close() override;
+    bool close() override;
 
 private:
-  PNGWriterPrivate *priv;
+    PNGWriterPrivate *priv;
 };
 
 #endif

@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _SELECTIONS_H_
-#define _SELECTIONS_H_
+#    define _SELECTIONS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_selections_create_widget (PopplerDocument *document);
+GtkWidget *pgd_selections_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

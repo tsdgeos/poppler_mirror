@@ -44,22 +44,20 @@
 
 #include "config.h"
 
-namespace
-{
+namespace {
 
 struct MiniIconv
 {
-    MiniIconv(const char *to_code, const char *from_code)
-        : i_(iconv_open(to_code, from_code))
-    {}
+    MiniIconv(const char *to_code, const char *from_code) : i_(iconv_open(to_code, from_code)) { }
     ~MiniIconv()
-    { if (is_valid()) iconv_close(i_); }
+    {
+        if (is_valid())
+            iconv_close(i_);
+    }
     MiniIconv(const MiniIconv &) = delete;
-    MiniIconv& operator=(const MiniIconv &) = delete;
-    bool is_valid() const
-    { return i_ != (iconv_t)-1; }
-    operator iconv_t() const
-    { return i_; }
+    MiniIconv &operator=(const MiniIconv &) = delete;
+    bool is_valid() const { return i_ != (iconv_t)-1; }
+    operator iconv_t() const { return i_; }
     iconv_t i_;
 };
 
@@ -203,28 +201,15 @@ using namespace poppler;
  The case sensitivity.
 */
 
+noncopyable::noncopyable() { }
 
-noncopyable::noncopyable()
-{
-}
+noncopyable::~noncopyable() { }
 
-noncopyable::~noncopyable()
-{
-}
+ustring::ustring() { }
 
+ustring::ustring(size_type len, value_type ch) : std::basic_string<value_type>(len, ch) { }
 
-ustring::ustring()
-{
-}
-
-ustring::ustring(size_type len, value_type ch)
-    : std::basic_string<value_type>(len, ch)
-{
-}
-
-ustring::~ustring()
-{
-}
+ustring::~ustring() { }
 
 byte_array ustring::to_utf8() const
 {
@@ -241,9 +226,9 @@ byte_array ustring::to_utf8() const
         return byte_array();
     }
     const value_type *me_data = data();
-    byte_array str(size()*sizeof(value_type));
+    byte_array str(size() * sizeof(value_type));
     char *str_data = &str[0];
-    size_t me_len_char = size()*sizeof(value_type);
+    size_t me_len_char = size() * sizeof(value_type);
     size_t str_len_left = str.size();
     size_t ir = iconv(ic, (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
     if ((ir == (size_t)-1) && (errno == E2BIG)) {
@@ -294,7 +279,7 @@ ustring ustring::from_utf8(const char *str, int len)
     }
 
     // +1, because iconv inserts byte order marks
-    ustring ret(len+1, 0);
+    ustring ret(len + 1, 0);
     char *ret_data = reinterpret_cast<char *>(&ret[0]);
     char *str_data = const_cast<char *>(str);
     size_t str_len_char = len;
@@ -302,7 +287,7 @@ ustring ustring::from_utf8(const char *str, int len)
     size_t ir = iconv(ic, (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
     if ((ir == (size_t)-1) && (errno == E2BIG)) {
         const size_t delta = ret_data - reinterpret_cast<char *>(&ret[0]);
-        ret_len_left += ret.size()*sizeof(ustring::value_type);
+        ret_len_left += ret.size() * sizeof(ustring::value_type);
         ret.resize(ret.size() * 2);
         ret_data = reinterpret_cast<char *>(&ret[0]) + delta;
         ir = iconv(ic, (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
@@ -310,7 +295,7 @@ ustring ustring::from_utf8(const char *str, int len)
             return ustring();
         }
     }
-    ret.resize(ret.size() - ret_len_left/sizeof(ustring::value_type));
+    ret.resize(ret.size() - ret_len_left / sizeof(ustring::value_type));
 
     return ret;
 }
@@ -329,7 +314,6 @@ ustring ustring::from_latin1(const std::string &str)
     return ret;
 }
 
-
 /**
  Converts a string representing a PDF date to a value compatible with time_t.
  */
@@ -339,15 +323,14 @@ time_type poppler::convert_date(const std::string &date)
     return dateStringToTime(&gooDateStr);
 }
 
-std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
+std::ostream &poppler::operator<<(std::ostream &stream, const byte_array &array)
 {
     stream << "[";
     const std::ios_base::fmtflags f = stream.flags();
     std::hex(stream);
     const char *data = &array[0];
     const byte_array::size_type out_len = std::min<byte_array::size_type>(array.size(), 50);
-    for (byte_array::size_type i = 0; i < out_len; ++i)
-    {
+    for (byte_array::size_type i = 0; i < out_len; ++i) {
         if (i != 0) {
             stream << " ";
         }

@@ -8,11 +8,11 @@
 
 #include "SplashBitmap.h"
 
-#define WIN_CLASS_NAME  "PDFTEST_PDF_WIN"
+#define WIN_CLASS_NAME "PDFTEST_PDF_WIN"
 #define COL_WINDOW_BG RGB(0xff, 0xff, 0xff)
 
-static HWND             gHwndSplash;
-static HBRUSH           gBrushBg;
+static HWND gHwndSplash;
+static HBRUSH gBrushBg;
 
 static SplashBitmap *gBmpSplash;
 
@@ -43,12 +43,13 @@ static HBITMAP createDIBitmapCommon(SplashBitmap *bmp, HDC hdc)
     bmih.biPlanes = 1;
     bmih.biBitCount = 24;
     bmih.biCompression = BI_RGB;
-    bmih.biSizeImage = bmpDy * bmpRowSize;;
+    bmih.biSizeImage = bmpDy * bmpRowSize;
+    ;
     bmih.biXPelsPerMeter = bmih.biYPelsPerMeter = 0;
     bmih.biClrUsed = bmih.biClrImportant = 0;
 
-    unsigned char* bmpData = bmp->getDataPtr();
-    HBITMAP hbmp = ::CreateDIBitmap(hdc, &bmih, CBM_INIT, bmpData, (BITMAPINFO *)&bmih , DIB_RGB_COLORS);
+    unsigned char *bmpData = bmp->getDataPtr();
+    HBITMAP hbmp = ::CreateDIBitmap(hdc, &bmih, CBM_INIT, bmpData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS);
     return hbmp;
 }
 
@@ -68,20 +69,17 @@ static void stretchDIBitsCommon(SplashBitmap *bmp, HDC hdc, int leftMargin, int 
     // but splash is currently setup to return a full colour bitmap
     bmih.biBitCount = 24;
     bmih.biCompression = BI_RGB;
-    bmih.biSizeImage = bmpDy * bmpRowSize;;
+    bmih.biSizeImage = bmpDy * bmpRowSize;
+    ;
     bmih.biXPelsPerMeter = bmih.biYPelsPerMeter = 0;
     bmih.biClrUsed = bmih.biClrImportant = 0;
     SplashColorPtr bmpData = bmp->getDataPtr();
 
     ::StretchDIBits(hdc,
-        // destination rectangle
-        -leftMargin, -topMargin, pageDx, pageDy,
-        // source rectangle
-        0, 0, bmpDx, bmpDy,
-        bmpData,
-        (BITMAPINFO *)&bmih ,
-        DIB_RGB_COLORS,
-        SRCCOPY);
+                    // destination rectangle
+                    -leftMargin, -topMargin, pageDx, pageDy,
+                    // source rectangle
+                    0, 0, bmpDx, bmpDy, bmpData, (BITMAPINFO *)&bmih, DIB_RGB_COLORS, SRCCOPY);
 }
 
 /* Set the client area size of the window 'hwnd' to 'dx'/'dy'. */
@@ -110,7 +108,7 @@ static void resizeClientAreaToRenderedBitmap(HWND hwnd, SplashBitmap *bmp, int x
 
 static void drawBitmap(HWND hwnd, SplashBitmap *bmp)
 {
-    PAINTSTRUCT     ps;
+    PAINTSTRUCT ps;
 
     HDC hdc = BeginPaint(hwnd, &ps);
     SetBkMode(hdc, TRANSPARENT);
@@ -146,48 +144,47 @@ static void onPaint(HWND hwnd)
 
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    switch (message)
-    {
-        case WM_CREATE:
-            // do nothing
-            break;
+    switch (message) {
+    case WM_CREATE:
+        // do nothing
+        break;
 
-        case WM_ERASEBKGND:
-            return TRUE;
+    case WM_ERASEBKGND:
+        return TRUE;
 
-        case WM_PAINT:
-            /* it might happen that we get WM_PAINT after destroying a window */
-            onPaint(hwnd);
-            break;
+    case WM_PAINT:
+        /* it might happen that we get WM_PAINT after destroying a window */
+        onPaint(hwnd);
+        break;
 
-        case WM_DESTROY:
-            /* WM_DESTROY might be sent as a result of File\Close, in which case CloseWindow() has already been called */
-            break;
+    case WM_DESTROY:
+        /* WM_DESTROY might be sent as a result of File\Close, in which case CloseWindow() has already been called */
+        break;
 
-        default:
-            return DefWindowProc(hwnd, message, wParam, lParam);
+    default:
+        return DefWindowProc(hwnd, message, wParam, lParam);
     }
     return 0;
 }
 
 static BOOL registerWinClass(void)
 {
-    WNDCLASSEX  wcex;
-    ATOM        atom;
+    WNDCLASSEX wcex;
+    ATOM atom;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = NULL;
-    wcex.hIcon          = NULL;
-    wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground  = NULL;
-    wcex.lpszMenuName   = NULL;
-    wcex.lpszClassName  = WIN_CLASS_NAME;
-    wcex.hIconSm        = NULL;
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = NULL;
+    wcex.hIcon = NULL;
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = NULL;
+    wcex.lpszMenuName = NULL;
+    wcex.lpszClassName = WIN_CLASS_NAME;
+    wcex.hIconSm = NULL;
 
     atom = RegisterClassEx(&wcex);
     if (atom)
@@ -205,13 +202,7 @@ static bool initWinIfNecessary(void)
 
     gBrushBg = CreateSolidBrush(COL_WINDOW_BG);
 
-    gHwndSplash = CreateWindow(
-        WIN_CLASS_NAME, "Splash",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0,
-        CW_USEDEFAULT, 0,
-        NULL, NULL,
-        NULL, NULL);
+    gHwndSplash = CreateWindow(WIN_CLASS_NAME, "Splash", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, NULL, NULL);
 
     if (!gHwndSplash)
         return false;
@@ -222,8 +213,8 @@ static bool initWinIfNecessary(void)
 
 static void pumpMessages(void)
 {
-    BOOL    isMessage;
-    MSG     msg;
+    BOOL isMessage;
+    MSG msg;
 
     for (;;) {
         isMessage = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
@@ -268,5 +259,3 @@ void PreviewBitmapSplash(SplashBitmap *bmpSplash)
     gBmpSplash = bmpSplash;
     UpdateWindows();
 }
-
-

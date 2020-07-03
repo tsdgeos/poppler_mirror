@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _PRINT_H_
-#define _PRINT_H_
+#    define _PRINT_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_print_create_widget (PopplerDocument *document);
+GtkWidget *pgd_print_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

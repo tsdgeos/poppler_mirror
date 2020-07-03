@@ -20,13 +20,12 @@
 // The StdinPDFDocBuilder implements a PDFDocBuilder that read from stdin.
 //------------------------------------------------------------------------
 
-class StdinPDFDocBuilder : public PDFDocBuilder {
+class StdinPDFDocBuilder : public PDFDocBuilder
+{
 
 public:
-  PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr,
-                      GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
-  bool supports(const GooString &uri) override;
-
+    PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
+    bool supports(const GooString &uri) override;
 };
 
 #endif /* STDINPDFDOCBUILDER_H */

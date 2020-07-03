@@ -29,25 +29,24 @@ struct NameToCharCodeEntry;
 
 //------------------------------------------------------------------------
 
-class NameToCharCode {
+class NameToCharCode
+{
 public:
+    NameToCharCode();
+    ~NameToCharCode();
 
-  NameToCharCode();
-  ~NameToCharCode();
+    NameToCharCode(const NameToCharCode &) = delete;
+    NameToCharCode &operator=(const NameToCharCode &) = delete;
 
-  NameToCharCode(const NameToCharCode &) = delete;
-  NameToCharCode& operator=(const NameToCharCode &) = delete;
-
-  void add(const char *name, CharCode c);
-  CharCode lookup(const char *name) const;
+    void add(const char *name, CharCode c);
+    CharCode lookup(const char *name) const;
 
 private:
+    int hash(const char *name) const;
 
-  int hash(const char *name) const;
-
-  NameToCharCodeEntry *tab;
-  int size;
-  int len;
+    NameToCharCodeEntry *tab;
+    int size;
+    int len;
 };
 
 #endif

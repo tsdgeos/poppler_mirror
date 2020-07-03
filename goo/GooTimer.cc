@@ -22,70 +22,71 @@
 // GooTimer
 //------------------------------------------------------------------------
 
-GooTimer::GooTimer() {
-  start();
-}
-
-void GooTimer::start() {
-#ifdef HAVE_GETTIMEOFDAY
-  gettimeofday(&start_time, nullptr);
-#elif defined(_WIN32)
-  QueryPerformanceCounter(&start_time);
-#endif
-  active = true;
-}
-
-void GooTimer::stop() {
-#ifdef HAVE_GETTIMEOFDAY
-  gettimeofday(&end_time, nullptr);
-#elif defined(_WIN32)
-  QueryPerformanceCounter(&end_time);
-#endif
-  active = false;
-}
-
-#ifdef HAVE_GETTIMEOFDAY
-double GooTimer::getElapsed()
+GooTimer::GooTimer()
 {
-  double total;
-  struct timeval elapsed;
+    start();
+}
 
-  if (active)
+void GooTimer::start()
+{
+#ifdef HAVE_GETTIMEOFDAY
+    gettimeofday(&start_time, nullptr);
+#elif defined(_WIN32)
+    QueryPerformanceCounter(&start_time);
+#endif
+    active = true;
+}
+
+void GooTimer::stop()
+{
+#ifdef HAVE_GETTIMEOFDAY
     gettimeofday(&end_time, nullptr);
+#elif defined(_WIN32)
+    QueryPerformanceCounter(&end_time);
+#endif
+    active = false;
+}
 
-  if (start_time.tv_usec > end_time.tv_usec) {
-      end_time.tv_usec += USEC_PER_SEC;
-      end_time.tv_sec--;
-  }
+#ifdef HAVE_GETTIMEOFDAY
+double GooTimer::getElapsed()
+{
+    double total;
+    struct timeval elapsed;
 
-  elapsed.tv_usec = end_time.tv_usec - start_time.tv_usec;
-  elapsed.tv_sec = end_time.tv_sec - start_time.tv_sec;
+    if (active)
+        gettimeofday(&end_time, nullptr);
 
-  total = elapsed.tv_sec + ((double) elapsed.tv_usec / 1e6);
-  if (total < 0)
-      total = 0;
+    if (start_time.tv_usec > end_time.tv_usec) {
+        end_time.tv_usec += USEC_PER_SEC;
+        end_time.tv_sec--;
+    }
 
-  return total;
+    elapsed.tv_usec = end_time.tv_usec - start_time.tv_usec;
+    elapsed.tv_sec = end_time.tv_sec - start_time.tv_sec;
+
+    total = elapsed.tv_sec + ((double)elapsed.tv_usec / 1e6);
+    if (total < 0)
+        total = 0;
+
+    return total;
 }
 #elif defined(_WIN32)
 double GooTimer::getElapsed()
 {
-  LARGE_INTEGER   freq;
-  double          time_in_secs;
-  QueryPerformanceFrequency(&freq);
+    LARGE_INTEGER freq;
+    double time_in_secs;
+    QueryPerformanceFrequency(&freq);
 
-  if (active)
-    QueryPerformanceCounter(&end_time);
+    if (active)
+        QueryPerformanceCounter(&end_time);
 
-  time_in_secs = (double)(end_time.QuadPart-start_time.QuadPart)/(double)freq.QuadPart;
-  return time_in_secs * 1000.0;
-
+    time_in_secs = (double)(end_time.QuadPart - start_time.QuadPart) / (double)freq.QuadPart;
+    return time_in_secs * 1000.0;
 }
 #else
 double GooTimer::getElapsed()
 {
-#warning "no support for GooTimer"
-  return 0;
+#    warning "no support for GooTimer"
+    return 0;
 }
 #endif
-

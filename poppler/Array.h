@@ -41,49 +41,49 @@ class XRef;
 // Array
 //------------------------------------------------------------------------
 
-class Array {
+class Array
+{
 public:
+    // Constructor.
+    Array(XRef *xrefA);
 
-  // Constructor.
-  Array(XRef *xrefA);
+    // Destructor.
+    ~Array();
 
-  // Destructor.
-  ~Array();
+    Array(const Array &) = delete;
+    Array &operator=(const Array &) = delete;
 
-  Array(const Array &) = delete;
-  Array& operator=(const Array &) = delete;
+    // Get number of elements.
+    int getLength() const { return elems.size(); }
 
-  // Get number of elements.
-  int getLength() const { return elems.size(); }
+    // Copy array with new xref
+    Array *copy(XRef *xrefA) const;
 
-  // Copy array with new xref
-  Array *copy(XRef *xrefA) const;
+    // Add an element
+    // elem becomes a dead object after this call
+    void add(Object &&elem);
 
-  // Add an element
-  // elem becomes a dead object after this call
-  void add(Object &&elem);
+    // Remove an element by position
+    void remove(int i);
 
-  // Remove an element by position
-  void remove(int i);
-
-  // Accessors.
-  Object get(int i, int recursion = 0) const;
-  // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
-  Object get(int i, Ref *returnRef, int recursion = 0) const;
-  const Object &getNF(int i) const;
-  bool getString(int i, GooString *string) const;
+    // Accessors.
+    Object get(int i, int recursion = 0) const;
+    // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
+    Object get(int i, Ref *returnRef, int recursion = 0) const;
+    const Object &getNF(int i) const;
+    bool getString(int i, GooString *string) const;
 
 private:
-  friend class Object; // for incRef/decRef
+    friend class Object; // for incRef/decRef
 
-  // Reference counting.
-  int incRef() { return ++ref; }
-  int decRef() { return --ref; }
+    // Reference counting.
+    int incRef() { return ++ref; }
+    int decRef() { return --ref; }
 
-  XRef *xref;			// the xref table for this PDF file
-  std::vector<Object> elems;		// array of elements
-  std::atomic_int ref;			// reference count
-  mutable std::recursive_mutex mutex;
+    XRef *xref; // the xref table for this PDF file
+    std::vector<Object> elems; // array of elements
+    std::atomic_int ref; // reference count
+    mutable std::recursive_mutex mutex;
 };
 
 #endif

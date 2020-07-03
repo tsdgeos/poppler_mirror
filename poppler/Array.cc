@@ -36,77 +36,82 @@
 // Array
 //------------------------------------------------------------------------
 
-#define arrayLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
+#define arrayLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
 
-Array::Array(XRef *xrefA) {
-  xref = xrefA;
-  ref = 1;
+Array::Array(XRef *xrefA)
+{
+    xref = xrefA;
+    ref = 1;
 }
 
-Array::~Array() {
+Array::~Array() { }
+
+Array *Array::copy(XRef *xrefA) const
+{
+    arrayLocker();
+    Array *a = new Array(xrefA);
+    a->elems.reserve(elems.size());
+    for (const auto &elem : elems) {
+        a->elems.push_back(elem.copy());
+    }
+    return a;
 }
 
-Array *Array::copy(XRef *xrefA) const {
-  arrayLocker();
-  Array *a = new Array(xrefA);
-  a->elems.reserve(elems.size());
-  for (const auto& elem : elems) {
-    a->elems.push_back(elem.copy());
-  }
-  return a;
+void Array::add(Object &&elem)
+{
+    arrayLocker();
+    elems.push_back(std::move(elem));
 }
 
-void Array::add(Object &&elem) {
-  arrayLocker();
-  elems.push_back(std::move(elem));
+void Array::remove(int i)
+{
+    arrayLocker();
+    if (i < 0 || std::size_t(i) >= elems.size()) {
+        assert(i >= 0 && std::size_t(i) < elems.size());
+        return;
+    }
+    elems.erase(elems.begin() + i);
 }
 
-void Array::remove(int i) {
-  arrayLocker();
-  if (i < 0 || std::size_t(i) >= elems.size()) {
-    assert(i >= 0 && std::size_t(i) < elems.size());
-    return;
-  }
-  elems.erase(elems.begin() + i);
-}
-
-Object Array::get(int i, int recursion) const {
-  if (i < 0 || std::size_t(i) >= elems.size()) {
-    return Object(objNull);
-  }
-  return elems[i].fetch(xref, recursion);
+Object Array::get(int i, int recursion) const
+{
+    if (i < 0 || std::size_t(i) >= elems.size()) {
+        return Object(objNull);
+    }
+    return elems[i].fetch(xref, recursion);
 }
 
 Object Array::get(int i, Ref *returnRef, int recursion) const
 {
-  if (i < 0 || std::size_t(i) >= elems.size()) {
-    *returnRef = Ref::INVALID();
-    return Object(objNull);
-  }
-  if (elems[i].getType() == objRef) {
-    *returnRef = elems[i].getRef();
-  } else {
-    *returnRef = Ref::INVALID();
-  }
-  return elems[i].fetch(xref, recursion);
+    if (i < 0 || std::size_t(i) >= elems.size()) {
+        *returnRef = Ref::INVALID();
+        return Object(objNull);
+    }
+    if (elems[i].getType() == objRef) {
+        *returnRef = elems[i].getRef();
+    } else {
+        *returnRef = Ref::INVALID();
+    }
+    return elems[i].fetch(xref, recursion);
 }
 
-const Object &Array::getNF(int i) const {
-  if (i < 0 || std::size_t(i) >= elems.size()) {
-    static Object nullObj(objNull);
-    return nullObj;
-  }
-  return elems[i];
+const Object &Array::getNF(int i) const
+{
+    if (i < 0 || std::size_t(i) >= elems.size()) {
+        static Object nullObj(objNull);
+        return nullObj;
+    }
+    return elems[i];
 }
 
 bool Array::getString(int i, GooString *string) const
 {
-  const Object &obj = getNF(i);
-  if (obj.isString()) {
-    string->clear();
-    string->append(obj.getString());
-    return true;
-  } else {
-    return false;
-  }
+    const Object &obj = getNF(i);
+    if (obj.isString()) {
+        string->clear();
+        string->append(obj.getString());
+        return true;
+    } else {
+        return false;
+    }
 }

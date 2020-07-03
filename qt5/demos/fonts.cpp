@@ -27,8 +27,7 @@ static QString yesNoStatement(bool value)
     return value ? QStringLiteral("yes") : QStringLiteral("no");
 }
 
-FontsDock::FontsDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+FontsDock::FontsDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_table = new QTableWidget(this);
     setWidget(m_table);
@@ -38,9 +37,7 @@ FontsDock::FontsDock(QWidget *parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-FontsDock::~FontsDock()
-{
-}
+FontsDock::~FontsDock() { }
 
 void FontsDock::fillInfo()
 {
@@ -48,7 +45,7 @@ void FontsDock::fillInfo()
     m_table->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Type") << tr("Embedded") << tr("Subset") << tr("File"));
     m_table->setRowCount(fonts.count());
     int i = 0;
-    Q_FOREACH(const Poppler::FontInfo &font, fonts) {
+    Q_FOREACH (const Poppler::FontInfo &font, fonts) {
         if (font.name().isNull()) {
             m_table->setItem(i, 0, new QTableWidgetItem(QStringLiteral("[none]")));
         } else {
@@ -68,4 +65,3 @@ void FontsDock::documentClosed()
     m_table->setRowCount(0);
     AbstractInfoDock::documentClosed();
 }
-

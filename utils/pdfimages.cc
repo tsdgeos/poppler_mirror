@@ -69,173 +69,148 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
-static const ArgDesc argDesc[] = {
-  {"-f",      argInt,      &firstPage,     0,
-   "first page to convert"},
-  {"-l",      argInt,      &lastPage,      0,
-   "last page to convert"},
+static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
+                                   { "-l", argInt, &lastPage, 0, "last page to convert" },
 #ifdef ENABLE_LIBPNG
-  {"-png",      argFlag,     &enablePNG,      0,
-   "change the default output format to PNG"},
+                                   { "-png", argFlag, &enablePNG, 0, "change the default output format to PNG" },
 #endif
 #ifdef ENABLE_LIBTIFF
-  {"-tiff",      argFlag,     &enableTiff,      0,
-   "change the default output format to TIFF"},
+                                   { "-tiff", argFlag, &enableTiff, 0, "change the default output format to TIFF" },
 #endif
-  {"-j",      argFlag,     &dumpJPEG,      0,
-   "write JPEG images as JPEG files"},
-  {"-jp2",      argFlag,     &dumpJP2,      0,
-   "write JPEG2000 images as JP2 files"},
-  {"-jbig2",      argFlag,     &dumpJBIG2,      0,
-   "write JBIG2 images as JBIG2 files"},
-  {"-ccitt",      argFlag,     &dumpCCITT,      0,
-   "write CCITT images as CCITT files"},
-  {"-all",      argFlag,     &allFormats,    0,
-   "equivalent to -png -tiff -j -jp2 -jbig2 -ccitt"},
-  {"-list",   argFlag,     &listImages,      0,
-   "print list of images instead of saving"},
-  {"-opw",    argString,   ownerPassword,  sizeof(ownerPassword),
-   "owner password (for encrypted files)"},
-  {"-upw",    argString,   userPassword,   sizeof(userPassword),
-   "user password (for encrypted files)"},
-  {"-p",      argFlag,     &pageNames,     0,
-   "include page numbers in output file names"},
-  {"-q",      argFlag,     &quiet,         0,
-   "don't print any messages or errors"},
-  {"-v",      argFlag,     &printVersion,  0,
-   "print copyright and version info"},
-  {"-h",      argFlag,     &printHelp,     0,
-   "print usage information"},
-  {"-help",   argFlag,     &printHelp,     0,
-   "print usage information"},
-  {"--help",  argFlag,     &printHelp,     0,
-   "print usage information"},
-  {"-?",      argFlag,     &printHelp,     0,
-   "print usage information"},
-  {}
-};
+                                   { "-j", argFlag, &dumpJPEG, 0, "write JPEG images as JPEG files" },
+                                   { "-jp2", argFlag, &dumpJP2, 0, "write JPEG2000 images as JP2 files" },
+                                   { "-jbig2", argFlag, &dumpJBIG2, 0, "write JBIG2 images as JBIG2 files" },
+                                   { "-ccitt", argFlag, &dumpCCITT, 0, "write CCITT images as CCITT files" },
+                                   { "-all", argFlag, &allFormats, 0, "equivalent to -png -tiff -j -jp2 -jbig2 -ccitt" },
+                                   { "-list", argFlag, &listImages, 0, "print list of images instead of saving" },
+                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
+                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
+                                   { "-p", argFlag, &pageNames, 0, "include page numbers in output file names" },
+                                   { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
+                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
+                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
+                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
+                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
+                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+                                   {} };
 
-int main(int argc, char *argv[]) {
-  PDFDoc *doc;
-  GooString *fileName;
-  char *imgRoot = nullptr;
-  GooString *ownerPW, *userPW;
-  ImageOutputDev *imgOut;
-  bool ok;
-  int exitCode;
+int main(int argc, char *argv[])
+{
+    PDFDoc *doc;
+    GooString *fileName;
+    char *imgRoot = nullptr;
+    GooString *ownerPW, *userPW;
+    ImageOutputDev *imgOut;
+    bool ok;
+    int exitCode;
 
-  Win32Console win32Console(&argc, &argv);
-  exitCode = 99;
+    Win32Console win32Console(&argc, &argv);
+    exitCode = 99;
 
-  // parse args
-  ok = parseArgs(argDesc, &argc, argv);
-  if (!ok || (listImages && argc != 2) || (!listImages && argc != 3) || printVersion || printHelp) {
-    fprintf(stderr, "pdfimages version %s\n", PACKAGE_VERSION);
-    fprintf(stderr, "%s\n", popplerCopyright);
-    fprintf(stderr, "%s\n", xpdfCopyright);
-    if (!printVersion) {
-      printUsage("pdfimages", "<PDF-file> <image-root>", argDesc);
+    // parse args
+    ok = parseArgs(argDesc, &argc, argv);
+    if (!ok || (listImages && argc != 2) || (!listImages && argc != 3) || printVersion || printHelp) {
+        fprintf(stderr, "pdfimages version %s\n", PACKAGE_VERSION);
+        fprintf(stderr, "%s\n", popplerCopyright);
+        fprintf(stderr, "%s\n", xpdfCopyright);
+        if (!printVersion) {
+            printUsage("pdfimages", "<PDF-file> <image-root>", argDesc);
+        }
+        if (printVersion || printHelp)
+            exitCode = 0;
+        goto err0;
     }
-    if (printVersion || printHelp)
-      exitCode = 0;
-    goto err0;
-  }
-  fileName = new GooString(argv[1]);
-  if (!listImages)
-    imgRoot = argv[2];
+    fileName = new GooString(argv[1]);
+    if (!listImages)
+        imgRoot = argv[2];
 
-  // read config file
-  globalParams = std::make_unique<GlobalParams>();
-  if (quiet) {
-    globalParams->setErrQuiet(quiet);
-  }
+    // read config file
+    globalParams = std::make_unique<GlobalParams>();
+    if (quiet) {
+        globalParams->setErrQuiet(quiet);
+    }
 
-  // open PDF file
-  if (ownerPassword[0] != '\001') {
-    ownerPW = new GooString(ownerPassword);
-  } else {
-    ownerPW = nullptr;
-  }
-  if (userPassword[0] != '\001') {
-    userPW = new GooString(userPassword);
-  } else {
-    userPW = nullptr;
-  }
-  if (fileName->cmp("-") == 0) {
-      delete fileName;
-      fileName = new GooString("fd://0");
-  }
-
-  doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
-  delete fileName;
-
-  if (userPW) {
-    delete userPW;
-  }
-  if (ownerPW) {
-    delete ownerPW;
-  }
-  if (!doc->isOk()) {
-    exitCode = 1;
-    goto err1;
-  }
-
-  // check for copy permission
-#ifdef ENFORCE_PERMISSIONS
-  if (!doc->okToCopy()) {
-    error(errNotAllowed, -1, "Copying of images from this document is not allowed.");
-    exitCode = 3;
-    goto err1;
-  }
-#endif
-
-  // get page range
-  if (firstPage < 1)
-    firstPage = 1;
-  if (firstPage > doc->getNumPages()) {
-    error(errCommandLine, -1,
-          "Wrong page range given: the first page ({0:d}) can not be larger then the number of pages in the document ({1:d}).",
-          firstPage, doc->getNumPages());
-    goto err1;
-  }
-  if (lastPage < 1 || lastPage > doc->getNumPages())
-    lastPage = doc->getNumPages();
-  if (lastPage < firstPage) {
-    error(errCommandLine, -1,
-          "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).",
-          firstPage, lastPage);
-    goto err1;
-  }
-
-  // write image files
-  imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
-  if (imgOut->isOk()) {
-    if (allFormats) {
-      imgOut->enablePNG(true);
-      imgOut->enableTiff(true);
-      imgOut->enableJpeg(true);
-      imgOut->enableJpeg2000(true);
-      imgOut->enableJBig2(true);
-      imgOut->enableCCITT(true);
+    // open PDF file
+    if (ownerPassword[0] != '\001') {
+        ownerPW = new GooString(ownerPassword);
     } else {
-      imgOut->enablePNG(enablePNG);
-      imgOut->enableTiff(enableTiff);
-      imgOut->enableJpeg(dumpJPEG);
-      imgOut->enableJpeg2000(dumpJP2);
-      imgOut->enableJBig2(dumpJBIG2);
-      imgOut->enableCCITT(dumpCCITT);
+        ownerPW = nullptr;
     }
-    doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
-                      true, false, false);
-  }
-  delete imgOut;
+    if (userPassword[0] != '\001') {
+        userPW = new GooString(userPassword);
+    } else {
+        userPW = nullptr;
+    }
+    if (fileName->cmp("-") == 0) {
+        delete fileName;
+        fileName = new GooString("fd://0");
+    }
 
-  exitCode = 0;
+    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    delete fileName;
 
-  // clean up
- err1:
-  delete doc;
- err0:
+    if (userPW) {
+        delete userPW;
+    }
+    if (ownerPW) {
+        delete ownerPW;
+    }
+    if (!doc->isOk()) {
+        exitCode = 1;
+        goto err1;
+    }
 
-  return exitCode;
+    // check for copy permission
+#ifdef ENFORCE_PERMISSIONS
+    if (!doc->okToCopy()) {
+        error(errNotAllowed, -1, "Copying of images from this document is not allowed.");
+        exitCode = 3;
+        goto err1;
+    }
+#endif
+
+    // get page range
+    if (firstPage < 1)
+        firstPage = 1;
+    if (firstPage > doc->getNumPages()) {
+        error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be larger then the number of pages in the document ({1:d}).", firstPage, doc->getNumPages());
+        goto err1;
+    }
+    if (lastPage < 1 || lastPage > doc->getNumPages())
+        lastPage = doc->getNumPages();
+    if (lastPage < firstPage) {
+        error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
+        goto err1;
+    }
+
+    // write image files
+    imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
+    if (imgOut->isOk()) {
+        if (allFormats) {
+            imgOut->enablePNG(true);
+            imgOut->enableTiff(true);
+            imgOut->enableJpeg(true);
+            imgOut->enableJpeg2000(true);
+            imgOut->enableJBig2(true);
+            imgOut->enableCCITT(true);
+        } else {
+            imgOut->enablePNG(enablePNG);
+            imgOut->enableTiff(enableTiff);
+            imgOut->enableJpeg(dumpJPEG);
+            imgOut->enableJpeg2000(dumpJP2);
+            imgOut->enableJBig2(dumpJBIG2);
+            imgOut->enableCCITT(dumpCCITT);
+        }
+        doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0, true, false, false);
+    }
+    delete imgOut;
+
+    exitCode = 0;
+
+    // clean up
+err1:
+    delete doc;
+err0:
+
+    return exitCode;
 }

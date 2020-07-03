@@ -18,15 +18,12 @@
 
 #include "fonts.h"
 
-AbstractInfoDock::AbstractInfoDock(QWidget *parent)
-    : QDockWidget(parent), m_filled(false)
+AbstractInfoDock::AbstractInfoDock(QWidget *parent) : QDockWidget(parent), m_filled(false)
 {
     connect(this, &AbstractInfoDock::visibilityChanged, this, &AbstractInfoDock::slotVisibilityChanged);
 }
 
-AbstractInfoDock::~AbstractInfoDock()
-{
-}
+AbstractInfoDock::~AbstractInfoDock() { }
 
 void AbstractInfoDock::documentLoaded()
 {
@@ -53,4 +50,3 @@ void AbstractInfoDock::slotVisibilityChanged(bool visible)
         m_filled = true;
     }
 }
-

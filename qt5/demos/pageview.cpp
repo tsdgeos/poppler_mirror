@@ -29,25 +29,16 @@
 #include <QtGui/QPixmap>
 #include <QDebug>
 
-PageView::PageView(QWidget *parent)
-    : QScrollArea(parent)
-    , m_zoom(1.0)
-    , m_rotation(0)
-    , m_dpiX(QApplication::desktop()->physicalDpiX())
-    , m_dpiY(QApplication::desktop()->physicalDpiY())
+PageView::PageView(QWidget *parent) : QScrollArea(parent), m_zoom(1.0), m_rotation(0), m_dpiX(QApplication::desktop()->physicalDpiX()), m_dpiY(QApplication::desktop()->physicalDpiY())
 {
     m_imageLabel = new QLabel(this);
     m_imageLabel->resize(0, 0);
     setWidget(m_imageLabel);
 }
 
-PageView::~PageView()
-{
-}
+PageView::~PageView() { }
 
-void PageView::documentLoaded()
-{
-}
+void PageView::documentLoaded() { }
 
 void PageView::documentClosed()
 {
@@ -104,4 +95,3 @@ void PageView::slotRotationChanged(int value)
     }
     reloadPage();
 }
-

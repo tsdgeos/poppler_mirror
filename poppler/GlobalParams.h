@@ -68,173 +68,172 @@ extern std::unique_ptr<GlobalParams> globalParams;
 
 //------------------------------------------------------------------------
 
-enum SysFontType {
-  sysFontPFA,
-  sysFontPFB,
-  sysFontTTF,
-  sysFontTTC
+enum SysFontType
+{
+    sysFontPFA,
+    sysFontPFB,
+    sysFontTTF,
+    sysFontTTC
 };
 
 //------------------------------------------------------------------------
 
-enum PSLevel {
-  psLevel1,
-  psLevel1Sep,
-  psLevel2,
-  psLevel2Sep,
-  psLevel3,
-  psLevel3Sep
+enum PSLevel
+{
+    psLevel1,
+    psLevel1Sep,
+    psLevel2,
+    psLevel2Sep,
+    psLevel3,
+    psLevel3Sep
 };
 
 //------------------------------------------------------------------------
 
 //------------------------------------------------------------------------
 
-class GlobalParams {
+class GlobalParams
+{
 public:
+    // Initialize the global parameters
+    GlobalParams(const char *customPopplerDataDir = nullptr);
 
-  // Initialize the global parameters
-  GlobalParams(const char *customPopplerDataDir = nullptr);
+    ~GlobalParams();
 
-  ~GlobalParams();
+    GlobalParams(const GlobalParams &) = delete;
+    GlobalParams &operator=(const GlobalParams &) = delete;
 
-  GlobalParams(const GlobalParams &) = delete;
-  GlobalParams& operator=(const GlobalParams &) = delete;
+    void setupBaseFonts(const char *dir);
 
-  void setupBaseFonts(const char *dir);
+    //----- accessors
 
-  //----- accessors
+    CharCode getMacRomanCharCode(const char *charName);
 
-  CharCode getMacRomanCharCode(const char *charName);
+    // Return Unicode values for character names.  Used for general text
+    // extraction.
+    Unicode mapNameToUnicodeText(const char *charName);
 
-  // Return Unicode values for character names.  Used for general text
-  // extraction.
-  Unicode mapNameToUnicodeText(const char *charName);
+    // Return Unicode values for character names.  Used for glyph
+    // lookups or text extraction with ZapfDingbats fonts.
+    Unicode mapNameToUnicodeAll(const char *charName);
 
-  // Return Unicode values for character names.  Used for glyph
-  // lookups or text extraction with ZapfDingbats fonts.
-  Unicode mapNameToUnicodeAll(const char *charName);
+    UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
+    FILE *getUnicodeMapFile(const std::string &encodingName);
+    FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
+    FILE *findToUnicodeFile(const GooString *name);
+    GooString *findFontFile(const GooString *fontName);
+    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+    GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
+    bool getPSExpandSmaller();
+    bool getPSShrinkLarger();
+    PSLevel getPSLevel();
+    std::string getTextEncodingName() const;
+    bool getOverprintPreview() { return overprintPreview; }
+    bool getPrintCommands();
+    bool getProfileCommands();
+    bool getErrQuiet();
 
-  UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
-  FILE *getUnicodeMapFile(const std::string &encodingName);
-  FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
-  FILE *findToUnicodeFile(const GooString *name);
-  GooString *findFontFile(const GooString *fontName);
-  GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
-  GooString *findSystemFontFile(const GfxFont *font, SysFontType *type,
-			      int *fontNum, GooString *substituteFontName = nullptr,
-		              const GooString *base14Name = nullptr);
-  bool getPSExpandSmaller();
-  bool getPSShrinkLarger();
-  PSLevel getPSLevel();
-  std::string getTextEncodingName() const;
-  bool getOverprintPreview() { return overprintPreview; }
-  bool getPrintCommands();
-  bool getProfileCommands();
-  bool getErrQuiet();
+    CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
+    const UnicodeMap *getUnicodeMap(const std::string &encodingName);
+    CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
+    const UnicodeMap *getTextEncoding();
 
-  CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
-  const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-  CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
-  const UnicodeMap *getTextEncoding();
+    const UnicodeMap *getUtf8Map();
 
-  const UnicodeMap *getUtf8Map();
+    std::vector<GooString *> *getEncodingNames();
 
-  std::vector<GooString*> *getEncodingNames();
+    //----- functions to set parameters
+    void addFontFile(const GooString *fontName, const GooString *path);
+    void setPSExpandSmaller(bool expand);
+    void setPSShrinkLarger(bool shrink);
+    void setPSLevel(PSLevel level);
+    void setTextEncoding(const char *encodingName);
+    void setOverprintPreview(bool overprintPreviewA);
+    void setPrintCommands(bool printCommandsA);
+    void setProfileCommands(bool profileCommandsA);
+    void setErrQuiet(bool errQuietA);
 
-  //----- functions to set parameters
-  void addFontFile(const GooString *fontName, const GooString *path);
-  void setPSExpandSmaller(bool expand);
-  void setPSShrinkLarger(bool shrink);
-  void setPSLevel(PSLevel level);
-  void setTextEncoding(const char *encodingName);
-  void setOverprintPreview(bool overprintPreviewA);
-  void setPrintCommands(bool printCommandsA);
-  void setProfileCommands(bool profileCommandsA);
-  void setErrQuiet(bool errQuietA);
-
-  static bool parseYesNo2(const char *token, bool *flag);
+    static bool parseYesNo2(const char *token, bool *flag);
 
 private:
+    void parseNameToUnicode(const GooString *name);
 
-  void parseNameToUnicode(const GooString *name);
+    void scanEncodingDirs();
+    void addCIDToUnicode(const GooString *collection, const GooString *fileName);
+    void addUnicodeMap(const GooString *encodingName, const GooString *fileName);
+    void addCMapDir(const GooString *collection, const GooString *dir);
 
-  void scanEncodingDirs();
-  void addCIDToUnicode(const GooString *collection, const GooString *fileName);
-  void addUnicodeMap(const GooString *encodingName, const GooString *fileName);
-  void addCMapDir(const GooString *collection, const GooString *dir);
+    //----- static tables
 
-  //----- static tables
+    NameToCharCode * // mapping from char name to
+            macRomanReverseMap; //   MacRomanEncoding index
 
-  NameToCharCode *		// mapping from char name to
-    macRomanReverseMap;		//   MacRomanEncoding index
+    //----- user-modifiable settings
 
-  //----- user-modifiable settings
-
-  NameToCharCode *		// mapping from char name to Unicode for ZapfDingbats
-    nameToUnicodeZapfDingbats;
-  NameToCharCode *		// mapping from char name to Unicode for text
-    nameToUnicodeText;		// extraction
-  // files for mappings from char collections
-  // to Unicode, indexed by collection name
-  std::unordered_map<std::string, std::string> cidToUnicodes;
-  // mappings from Unicode to char codes,
-  // indexed by encoding name
-  std::unordered_map<std::string, UnicodeMap> residentUnicodeMaps;
-  // files for mappings from Unicode to char
-  // codes, indexed by encoding name
-  std::unordered_map<std::string, std::string> unicodeMaps;
-  // list of CMap dirs, indexed by collection
-  std::unordered_multimap<std::string, std::string> cMapDirs;
-  std::vector<GooString*> *toUnicodeDirs;		// list of ToUnicode CMap dirs
-  bool baseFontsInitialized;
+    NameToCharCode * // mapping from char name to Unicode for ZapfDingbats
+            nameToUnicodeZapfDingbats;
+    NameToCharCode * // mapping from char name to Unicode for text
+            nameToUnicodeText; // extraction
+    // files for mappings from char collections
+    // to Unicode, indexed by collection name
+    std::unordered_map<std::string, std::string> cidToUnicodes;
+    // mappings from Unicode to char codes,
+    // indexed by encoding name
+    std::unordered_map<std::string, UnicodeMap> residentUnicodeMaps;
+    // files for mappings from Unicode to char
+    // codes, indexed by encoding name
+    std::unordered_map<std::string, std::string> unicodeMaps;
+    // list of CMap dirs, indexed by collection
+    std::unordered_multimap<std::string, std::string> cMapDirs;
+    std::vector<GooString *> *toUnicodeDirs; // list of ToUnicode CMap dirs
+    bool baseFontsInitialized;
 #ifdef _WIN32
-  // windows font substitutes (for CID fonts)
-  std::unordered_map<std::string, std::string> substFiles;
+    // windows font substitutes (for CID fonts)
+    std::unordered_map<std::string, std::string> substFiles;
 #endif
-  // font files: font name mapped to path
-  std::unordered_map<std::string, std::string> fontFiles;
-  SysFontList *sysFonts;	// system fonts
-  bool psExpandSmaller;	// expand smaller pages to fill paper
-  bool psShrinkLarger;		// shrink larger pages to fit paper
-  PSLevel psLevel;		// PostScript level to generate
-  GooString *textEncoding;	// encoding (unicodeMap) to use for text
-				//   output
-  bool overprintPreview;	// enable overprint preview
-  bool printCommands;		// print the drawing commands
-  bool profileCommands;	// profile the drawing commands
-  bool errQuiet;		// suppress error messages?
+    // font files: font name mapped to path
+    std::unordered_map<std::string, std::string> fontFiles;
+    SysFontList *sysFonts; // system fonts
+    bool psExpandSmaller; // expand smaller pages to fill paper
+    bool psShrinkLarger; // shrink larger pages to fit paper
+    PSLevel psLevel; // PostScript level to generate
+    GooString *textEncoding; // encoding (unicodeMap) to use for text
+                             //   output
+    bool overprintPreview; // enable overprint preview
+    bool printCommands; // print the drawing commands
+    bool profileCommands; // profile the drawing commands
+    bool errQuiet; // suppress error messages?
 
-  CharCodeToUnicodeCache *cidToUnicodeCache;
-  CharCodeToUnicodeCache *unicodeToUnicodeCache;
-  UnicodeMapCache *unicodeMapCache;
-  CMapCache *cMapCache;
+    CharCodeToUnicodeCache *cidToUnicodeCache;
+    CharCodeToUnicodeCache *unicodeToUnicodeCache;
+    UnicodeMapCache *unicodeMapCache;
+    CMapCache *cMapCache;
 
-  const UnicodeMap *utf8Map;
-  
-  mutable std::recursive_mutex mutex;
-  mutable std::recursive_mutex unicodeMapCacheMutex;
-  mutable std::recursive_mutex cMapCacheMutex;
+    const UnicodeMap *utf8Map;
 
-  const char *popplerDataDir;
+    mutable std::recursive_mutex mutex;
+    mutable std::recursive_mutex unicodeMapCacheMutex;
+    mutable std::recursive_mutex cMapCacheMutex;
+
+    const char *popplerDataDir;
 };
 
 class GlobalParamsIniter
 {
 public:
-  GlobalParamsIniter(ErrorCallback errorCallback);
-  ~GlobalParamsIniter();
+    GlobalParamsIniter(ErrorCallback errorCallback);
+    ~GlobalParamsIniter();
 
-  GlobalParamsIniter(const GlobalParamsIniter &) = delete;
-  GlobalParamsIniter &operator=(const GlobalParamsIniter &) = delete;
+    GlobalParamsIniter(const GlobalParamsIniter &) = delete;
+    GlobalParamsIniter &operator=(const GlobalParamsIniter &) = delete;
 
-  static bool setCustomDataDir(const std::string &dir);
+    static bool setCustomDataDir(const std::string &dir);
 
 private:
-  static std::mutex mutex;
-  static int count;
+    static std::mutex mutex;
+    static int count;
 
-  static std::string customDataDir;
+    static std::string customDataDir;
 };
 
 #endif

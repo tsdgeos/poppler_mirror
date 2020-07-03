@@ -34,17 +34,14 @@
 
 using namespace poppler;
 
-embedded_file_private::embedded_file_private(FileSpec *fs)
-    : file_spec(fs)
-{
-}
+embedded_file_private::embedded_file_private(FileSpec *fs) : file_spec(fs) { }
 
 embedded_file_private::~embedded_file_private()
 {
     delete file_spec;
 }
 
-embedded_file* embedded_file_private::create(FileSpec *fs)
+embedded_file *embedded_file_private::create(FileSpec *fs)
 {
     return new embedded_file(*new embedded_file_private(fs));
 }
@@ -55,11 +52,7 @@ embedded_file* embedded_file_private::create(FileSpec *fs)
  Represents a file embedded in a PDF %document.
  */
 
-
-embedded_file::embedded_file(embedded_file_private &dd)
-    : d(&dd)
-{
-}
+embedded_file::embedded_file(embedded_file_private &dd) : d(&dd) { }
 
 /**
  Destroys the embedded file.

@@ -20,14 +20,10 @@
 #include <cstring>
 #include <sstream>
 
-InMemoryFile::InMemoryFile()
-    : iohead(0)
-    , fptr(nullptr)
-{
-}
+InMemoryFile::InMemoryFile() : iohead(0), fptr(nullptr) { }
 
 #ifdef HAVE_IN_MEMORY_FILE_FOPENCOOKIE
-ssize_t InMemoryFile::_read(char* buf, size_t sz)
+ssize_t InMemoryFile::_read(char *buf, size_t sz)
 {
     auto toRead = std::min<size_t>(data.size() - iohead, sz);
     memcpy(&buf[0], &data[iohead], toRead);
@@ -35,21 +31,27 @@ ssize_t InMemoryFile::_read(char* buf, size_t sz)
     return toRead;
 }
 
-ssize_t InMemoryFile::_write(const char* buf, size_t sz)
+ssize_t InMemoryFile::_write(const char *buf, size_t sz)
 {
     if (iohead + sz > data.size())
         data.resize(iohead + sz);
     memcpy(&data[iohead], buf, sz);
     iohead += sz;
-    return sz;        
+    return sz;
 }
 
-int InMemoryFile::_seek(off64_t* offset, int whence)
+int InMemoryFile::_seek(off64_t *offset, int whence)
 {
     switch (whence) {
-        case SEEK_SET: iohead  = (*offset); break;
-        case SEEK_CUR: iohead += (*offset); break;
-        case SEEK_END: iohead -= (*offset); break;
+    case SEEK_SET:
+        iohead = (*offset);
+        break;
+    case SEEK_CUR:
+        iohead += (*offset);
+        break;
+    case SEEK_END:
+        iohead -= (*offset);
+        break;
     }
     (*offset) = std::min<off64_t>(std::max<off64_t>(iohead, 0l), data.size());
     iohead = static_cast<size_t>(*offset);
@@ -57,7 +59,7 @@ int InMemoryFile::_seek(off64_t* offset, int whence)
 }
 #endif // def HAVE_IN_MEMORY_FILE_FOPENCOOKIE
 
-FILE* InMemoryFile::open(const char* mode)
+FILE *InMemoryFile::open(const char *mode)
 {
 #ifdef HAVE_IN_MEMORY_FILE_FOPENCOOKIE
     if (fptr != nullptr) {
@@ -65,14 +67,18 @@ FILE* InMemoryFile::open(const char* mode)
         return nullptr; // maybe there's some legit reason for it, whoever comes up with one can remove this line
     }
     static const cookie_io_functions_t methods = {
-        /* .read = */ [](void* self, char* buf, size_t sz) { return ((InMemoryFile*)self)->_read(buf, sz); },
-        /* .write = */ [](void* self, const char* buf, size_t sz) { return ((InMemoryFile*)self)->_write(buf, sz); },
-        /* .seek = */ [](void* self, off64_t* offset, int whence) { return ((InMemoryFile*)self)->_seek(offset, whence); },
-        /* .close = */ [](void* self) { ((InMemoryFile*)self)->fptr = nullptr; return 0; },
+        /* .read = */ [](void *self, char *buf, size_t sz) { return ((InMemoryFile *)self)->_read(buf, sz); },
+        /* .write = */ [](void *self, const char *buf, size_t sz) { return ((InMemoryFile *)self)->_write(buf, sz); },
+        /* .seek = */ [](void *self, off64_t *offset, int whence) { return ((InMemoryFile *)self)->_seek(offset, whence); },
+        /* .close = */
+        [](void *self) {
+            ((InMemoryFile *)self)->fptr = nullptr;
+            return 0;
+        },
     };
     return fptr = fopencookie(this, mode, methods);
 #else
-    fprintf (stderr, "If you can read this, your platform does not support the features necessary to achieve your goals.");
+    fprintf(stderr, "If you can read this, your platform does not support the features necessary to achieve your goals.");
     return nullptr;
 #endif
 }

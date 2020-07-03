@@ -20,12 +20,12 @@
 #include <poppler.h>
 
 #ifndef _OUTLINE_H_
-#define _OUTLINE_H_
+#    define _OUTLINE_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_outline_create_widget (PopplerDocument *document);
+GtkWidget *pgd_outline_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 
-#endif /* _OUTLINE_H_ */ 
+#endif /* _OUTLINE_H_ */

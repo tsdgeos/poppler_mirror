@@ -20,45 +20,43 @@
 #include "config.h"
 #include "poppler-input-stream.h"
 
-PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA,
-                                       Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
-  : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA))
+PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA))
 {
-  inputStream = (GInputStream *)g_object_ref(inputStreamA);
-  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
+    inputStream = (GInputStream *)g_object_ref(inputStreamA);
+    cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
 }
 
 PopplerInputStream::~PopplerInputStream()
 {
-  close();
-  g_object_unref(inputStream);
-  if (cancellable)
-    g_object_unref(cancellable);
+    close();
+    g_object_unref(inputStream);
+    if (cancellable)
+        g_object_unref(cancellable);
 }
 
-BaseStream *PopplerInputStream::copy() {
-  return new PopplerInputStream(inputStream, cancellable, start, limited, length, dict.copy());
-}
-
-Stream *PopplerInputStream::makeSubStream(Goffset startA, bool limitedA,
-                                          Goffset lengthA, Object &&dictA)
+BaseStream *PopplerInputStream::copy()
 {
-  return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
+    return new PopplerInputStream(inputStream, cancellable, start, limited, length, dict.copy());
+}
+
+Stream *PopplerInputStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+{
+    return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
 }
 
 Goffset PopplerInputStream::currentPos() const
 {
-  GSeekable *seekable = G_SEEKABLE(inputStream);
-  return g_seekable_tell(seekable);
+    GSeekable *seekable = G_SEEKABLE(inputStream);
+    return g_seekable_tell(seekable);
 }
 
 void PopplerInputStream::setCurrentPos(Goffset offset)
 {
-  GSeekable *seekable = G_SEEKABLE(inputStream);
-  g_seekable_seek(seekable, offset, G_SEEK_SET, cancellable, nullptr);
+    GSeekable *seekable = G_SEEKABLE(inputStream);
+    g_seekable_seek(seekable, offset, G_SEEK_SET, cancellable, nullptr);
 }
 
 Goffset PopplerInputStream::read(char *buffer, Goffset count)
 {
-  return g_input_stream_read(inputStream, buffer, count, cancellable, nullptr);
+    return g_input_stream_read(inputStream, buffer, count, cancellable, nullptr);
 }

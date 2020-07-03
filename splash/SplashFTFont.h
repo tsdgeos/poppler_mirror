@@ -37,39 +37,35 @@ class SplashFTFontFile;
 // SplashFTFont
 //------------------------------------------------------------------------
 
-class SplashFTFont: public SplashFont {
+class SplashFTFont : public SplashFont
+{
 public:
+    SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA, const SplashCoord *textMatA);
 
-  SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
-	       const SplashCoord *textMatA);
+    ~SplashFTFont() override;
 
-  ~SplashFTFont() override;
+    // Munge xFrac and yFrac before calling SplashFont::getGlyph.
+    bool getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
 
-  // Munge xFrac and yFrac before calling SplashFont::getGlyph.
-  bool getGlyph(int c, int xFrac, int yFrac,
-		 SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
+    // Rasterize a glyph.  The <xFrac> and <yFrac> values are the same
+    // as described for getGlyph.
+    bool makeGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
 
-  // Rasterize a glyph.  The <xFrac> and <yFrac> values are the same
-  // as described for getGlyph.
-  bool makeGlyph(int c, int xFrac, int yFrac,
-		  SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
+    // Return the path for a glyph.
+    SplashPath *getGlyphPath(int c) override;
 
-  // Return the path for a glyph.
-  SplashPath *getGlyphPath(int c) override;
-
-  // Return the advance of a glyph. (in 0..1 range)
-  double getGlyphAdvance(int c) override;
+    // Return the advance of a glyph. (in 0..1 range)
+    double getGlyphAdvance(int c) override;
 
 private:
-
-  FT_Size sizeObj;
-  FT_Matrix matrix;
-  FT_Matrix textMatrix;
-  SplashCoord textScale;
-  int size;
-  bool enableFreeTypeHinting;
-  bool enableSlightHinting;
-  bool isOk;
+    FT_Size sizeObj;
+    FT_Matrix matrix;
+    FT_Matrix textMatrix;
+    SplashCoord textScale;
+    int size;
+    bool enableFreeTypeHinting;
+    bool enableSlightHinting;
+    bool isOk;
 };
 
 #endif

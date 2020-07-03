@@ -35,47 +35,30 @@ class SplashFTFontEngine;
 // SplashFTFontFile
 //------------------------------------------------------------------------
 
-class SplashFTFontFile: public SplashFontFile {
+class SplashFTFontFile : public SplashFontFile
+{
 public:
+    static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA);
+    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA);
+    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA = 0);
 
-  static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA,
-				       SplashFontFileID *idA,
-				       SplashFontSrc *src, const char **encA);
-  static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA,
-					 SplashFontFileID *idA,
-					 SplashFontSrc *src,
-					 int *codeToGIDA, int codeToGIDLenA);
-  static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA,
-					  SplashFontFileID *idA,
-					  SplashFontSrc *src,
-					  int *codeToGIDA,
-					  int codeToGIDLenA,
-					  int faceIndexA=0);
+    ~SplashFTFontFile() override;
 
-  ~SplashFTFontFile() override;
-
-  // Create a new SplashFTFont, i.e., a scaled instance of this font
-  // file.
-  SplashFont *makeFont(SplashCoord *mat,
-		       const SplashCoord *textMat) override;
+    // Create a new SplashFTFont, i.e., a scaled instance of this font
+    // file.
+    SplashFont *makeFont(SplashCoord *mat, const SplashCoord *textMat) override;
 
 private:
+    SplashFTFontFile(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, FT_Face faceA, int *codeToGIDA, int codeToGIDLenA, bool trueTypeA, bool type1A);
 
-  SplashFTFontFile(SplashFTFontEngine *engineA,
-		   SplashFontFileID *idA,
-		   SplashFontSrc *src,
-		   FT_Face faceA,
-		   int *codeToGIDA, int codeToGIDLenA,
-		   bool trueTypeA, bool type1A);
+    SplashFTFontEngine *engine;
+    FT_Face face;
+    int *codeToGID;
+    int codeToGIDLen;
+    bool trueType;
+    bool type1;
 
-  SplashFTFontEngine *engine;
-  FT_Face face;
-  int *codeToGID;
-  int codeToGIDLen;
-  bool trueType;
-  bool type1;
-
-  friend class SplashFTFont;
+    friend class SplashFTFont;
 };
 
 #endif

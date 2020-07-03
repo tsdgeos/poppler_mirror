@@ -22,87 +22,87 @@
 
 PopplerCachedFileLoader::PopplerCachedFileLoader(GInputStream *inputStreamA, GCancellable *cancellableA, goffset lengthA)
 {
-  inputStream = (GInputStream *)g_object_ref(inputStreamA);
-  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
-  length = lengthA;
-  url = nullptr;
-  cachedFile = nullptr;
+    inputStream = (GInputStream *)g_object_ref(inputStreamA);
+    cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
+    length = lengthA;
+    url = nullptr;
+    cachedFile = nullptr;
 }
 
 PopplerCachedFileLoader::~PopplerCachedFileLoader()
 {
-  g_object_unref(inputStream);
-  if (cancellable)
-    g_object_unref(cancellable);
+    g_object_unref(inputStream);
+    if (cancellable)
+        g_object_unref(cancellable);
 }
 
 size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
 {
-  size_t size;
-  gssize bytesRead;
-  char buf[CachedFileChunkSize];
+    size_t size;
+    gssize bytesRead;
+    char buf[CachedFileChunkSize];
 
-  url = urlA;
-  cachedFile = cachedFileA;
+    url = urlA;
+    cachedFile = cachedFileA;
 
-  if (length != (goffset)-1)
-    return length;
+    if (length != (goffset)-1)
+        return length;
 
-  if (G_IS_FILE_INPUT_STREAM(inputStream)) {
-    GFileInfo *info;
+    if (G_IS_FILE_INPUT_STREAM(inputStream)) {
+        GFileInfo *info;
 
-    info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM (inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, nullptr);
-    if (!info) {
-      error(errInternal, -1, "Failed to get size of '{0:t}'.", urlA);
-      return (size_t)-1;
+        info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM(inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, nullptr);
+        if (!info) {
+            error(errInternal, -1, "Failed to get size of '{0:t}'.", urlA);
+            return (size_t)-1;
+        }
+
+        length = g_file_info_get_size(info);
+        g_object_unref(info);
+
+        return length;
     }
 
-    length = g_file_info_get_size(info);
-    g_object_unref(info);
+    // Unknown stream length, read the whole stream and return the size.
+    CachedFileWriter writer = CachedFileWriter(cachedFile, nullptr);
+    size = 0;
+    do {
+        bytesRead = g_input_stream_read(inputStream, buf, CachedFileChunkSize, cancellable, nullptr);
+        if (bytesRead == -1)
+            break;
 
-    return length;
-  }
+        writer.write(buf, bytesRead);
+        size += bytesRead;
+    } while (bytesRead > 0);
 
-  // Unknown stream length, read the whole stream and return the size.
-  CachedFileWriter writer = CachedFileWriter(cachedFile, nullptr);
-  size = 0;
-  do {
-    bytesRead = g_input_stream_read(inputStream, buf, CachedFileChunkSize, cancellable, nullptr);
-    if (bytesRead == -1)
-      break;
-
-    writer.write(buf, bytesRead);
-    size += bytesRead;
-  } while (bytesRead > 0);
-
-  return size;
+    return size;
 }
 
 int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
 {
-  char buf[CachedFileChunkSize];
-  gssize bytesRead;
-  size_t rangeBytesRead, bytesToRead, size;
+    char buf[CachedFileChunkSize];
+    gssize bytesRead;
+    size_t rangeBytesRead, bytesToRead, size;
 
-  if (length == (goffset)-1)
+    if (length == (goffset)-1)
+        return 0;
+
+    size = 0;
+    for (const ByteRange &range : ranges) {
+        bytesToRead = MIN(CachedFileChunkSize, range.length);
+        rangeBytesRead = 0;
+        g_seekable_seek(G_SEEKABLE(inputStream), range.offset, G_SEEK_SET, cancellable, nullptr);
+        do {
+            bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, nullptr);
+            if (bytesRead == -1)
+                return -1;
+
+            writer->write(buf, bytesRead);
+            size += bytesRead;
+            rangeBytesRead += bytesRead;
+            bytesToRead = range.length - rangeBytesRead;
+        } while (bytesRead > 0 && bytesToRead > 0);
+    }
+
     return 0;
-
-  size = 0;
-  for (const ByteRange &range : ranges) {
-    bytesToRead = MIN(CachedFileChunkSize, range.length);
-    rangeBytesRead = 0;
-    g_seekable_seek(G_SEEKABLE(inputStream), range.offset, G_SEEK_SET, cancellable, nullptr);
-    do {
-      bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, nullptr);
-      if (bytesRead == -1)
-        return -1;
-
-      writer->write(buf, bytesRead);
-      size += bytesRead;
-      rangeBytesRead += bytesRead;
-      bytesToRead = range.length - rangeBytesRead;
-    } while (bytesRead > 0 && bytesToRead > 0);
-  }
-
-  return 0;
 }

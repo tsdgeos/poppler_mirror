@@ -34,74 +34,75 @@
 class GfxFont;
 class PDFDoc;
 
-class FontInfo {
+class FontInfo
+{
 public:
-  enum Type {
-    unknown,
-    Type1,
-    Type1C,
-    Type1COT,
-    Type3,
-    TrueType,
-    TrueTypeOT,
-    CIDType0,
-    CIDType0C,
-    CIDType0COT,
-    CIDTrueType,
-    CIDTrueTypeOT
-  };
-    
-  // Constructor.
-  FontInfo(GfxFont *fontA, XRef *xrefA);
-  // Copy constructor
-  FontInfo(const FontInfo& f);
-  // Destructor.
-  ~FontInfo();
+    enum Type
+    {
+        unknown,
+        Type1,
+        Type1C,
+        Type1COT,
+        Type3,
+        TrueType,
+        TrueTypeOT,
+        CIDType0,
+        CIDType0C,
+        CIDType0COT,
+        CIDTrueType,
+        CIDTrueTypeOT
+    };
 
-  FontInfo& operator=(const FontInfo &) = delete;
+    // Constructor.
+    FontInfo(GfxFont *fontA, XRef *xrefA);
+    // Copy constructor
+    FontInfo(const FontInfo &f);
+    // Destructor.
+    ~FontInfo();
 
-  const GooString *getName() const     { return name; };
-  const GooString *getSubstituteName() const { return substituteName; };
-  const GooString *getFile() const      { return file; };
-  const GooString *getEncoding() const      { return encoding; };
-  Type       getType() const      { return type; };
-  bool      getEmbedded() const  { return emb; };
-  bool      getSubset() const    { return subset; };
-  bool      getToUnicode() const { return hasToUnicode; };
-  Ref        getRef() const       { return fontRef; };
-  Ref        getEmbRef() const    { return embRef; };
+    FontInfo &operator=(const FontInfo &) = delete;
+
+    const GooString *getName() const { return name; };
+    const GooString *getSubstituteName() const { return substituteName; };
+    const GooString *getFile() const { return file; };
+    const GooString *getEncoding() const { return encoding; };
+    Type getType() const { return type; };
+    bool getEmbedded() const { return emb; };
+    bool getSubset() const { return subset; };
+    bool getToUnicode() const { return hasToUnicode; };
+    Ref getRef() const { return fontRef; };
+    Ref getEmbRef() const { return embRef; };
 
 private:
-  GooString *name;
-  GooString *substituteName;
-  GooString *file;
-  GooString *encoding;
-  Type type;
-  bool emb;
-  bool subset;
-  bool hasToUnicode;
-  Ref fontRef;
-  Ref embRef;
+    GooString *name;
+    GooString *substituteName;
+    GooString *file;
+    GooString *encoding;
+    Type type;
+    bool emb;
+    bool subset;
+    bool hasToUnicode;
+    Ref fontRef;
+    Ref embRef;
 };
 
-class FontInfoScanner {
+class FontInfoScanner
+{
 public:
+    // Constructor.
+    FontInfoScanner(PDFDoc *doc, int firstPage = 0);
+    // Destructor.
+    ~FontInfoScanner();
 
-  // Constructor.
-  FontInfoScanner(PDFDoc *doc, int firstPage = 0);
-  // Destructor.
-  ~FontInfoScanner();
-
-  std::vector<FontInfo*> scan(int nPages);
+    std::vector<FontInfo *> scan(int nPages);
 
 private:
+    PDFDoc *doc;
+    int currentPage;
+    std::unordered_set<int> fonts;
+    std::unordered_set<int> visitedObjects;
 
-  PDFDoc *doc;
-  int currentPage;
-  std::unordered_set<int> fonts;
-  std::unordered_set<int> visitedObjects;
-
-  void scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo*> *fontsList);
+    void scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo *> *fontsList);
 };
 
 #endif

@@ -22,21 +22,22 @@
 
 #include <gio/gio.h>
 #ifndef __GI_SCANNER__
-#include <CachedFile.h>
+#    include <CachedFile.h>
 
-class PopplerCachedFileLoader: public CachedFileLoader {
+class PopplerCachedFileLoader : public CachedFileLoader
+{
 public:
-  PopplerCachedFileLoader(GInputStream* inputStreamA, GCancellable *cancellableA, goffset lengthA = -1);
-  ~PopplerCachedFileLoader() override;
-  size_t init(GooString *url, CachedFile* cachedFile) override;
-  int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
+    PopplerCachedFileLoader(GInputStream *inputStreamA, GCancellable *cancellableA, goffset lengthA = -1);
+    ~PopplerCachedFileLoader() override;
+    size_t init(GooString *url, CachedFile *cachedFile) override;
+    int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
 
 private:
-  GInputStream *inputStream;
-  GCancellable *cancellable;
-  goffset length;
-  GooString *url;
-  CachedFile *cachedFile;
+    GInputStream *inputStream;
+    GCancellable *cancellable;
+    goffset length;
+    GooString *url;
+    CachedFile *cachedFile;
 };
 
 #endif /* __GI_SCANNER__ */

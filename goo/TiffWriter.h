@@ -18,42 +18,50 @@
 
 #ifdef ENABLE_LIBTIFF
 
-#include <sys/types.h>
-#include "ImgWriter.h"
+#    include <sys/types.h>
+#    include "ImgWriter.h"
 
 struct TiffWriterPrivate;
 
 class TiffWriter : public ImgWriter
 {
 public:
-  /* RGB                 - 3 bytes/pixel
-   * RGBA_PREMULTIPLIED  - 4 bytes/pixel premultiplied by alpha
-   * GRAY                - 1 byte/pixel
-   * MONOCHROME          - 8 pixels/byte
-   * CMYK                - 4 bytes/pixel
-   * RGB48               - 6 bytes/pixel
-   */
-  enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK, RGB48 };
+    /* RGB                 - 3 bytes/pixel
+     * RGBA_PREMULTIPLIED  - 4 bytes/pixel premultiplied by alpha
+     * GRAY                - 1 byte/pixel
+     * MONOCHROME          - 8 pixels/byte
+     * CMYK                - 4 bytes/pixel
+     * RGB48               - 6 bytes/pixel
+     */
+    enum Format
+    {
+        RGB,
+        RGBA_PREMULTIPLIED,
+        GRAY,
+        MONOCHROME,
+        CMYK,
+        RGB48
+    };
 
-  TiffWriter(Format format = RGB);
-  ~TiffWriter() override;
+    TiffWriter(Format format = RGB);
+    ~TiffWriter() override;
 
-  TiffWriter(const TiffWriter &other) = delete;
-  TiffWriter& operator=(const TiffWriter &other) = delete;
+    TiffWriter(const TiffWriter &other) = delete;
+    TiffWriter &operator=(const TiffWriter &other) = delete;
 
-  void setCompressionString(const char *compressionStringArg);
+    void setCompressionString(const char *compressionStringArg);
 
-  bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI) override;
+    bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI) override;
 
-  bool writePointers(unsigned char **rowPointers, int rowCount) override;
-  bool writeRow(unsigned char **rowData) override;
+    bool writePointers(unsigned char **rowPointers, int rowCount) override;
+    bool writeRow(unsigned char **rowData) override;
 
-  bool supportCMYK() override { return true; }
+    bool supportCMYK() override { return true; }
 
-  bool close() override;
+    bool close() override;
 
 private:
-  TiffWriterPrivate *priv;
+    TiffWriterPrivate *priv;
 };
 
 #endif

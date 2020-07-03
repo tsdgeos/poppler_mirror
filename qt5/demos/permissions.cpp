@@ -22,8 +22,7 @@
 
 #include <QtWidgets/QListWidget>
 
-PermissionsDock::PermissionsDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+PermissionsDock::PermissionsDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_table = new QListWidget(this);
     setWidget(m_table);
@@ -31,20 +30,18 @@ PermissionsDock::PermissionsDock(QWidget *parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-PermissionsDock::~PermissionsDock()
-{
-}
+PermissionsDock::~PermissionsDock() { }
 
 void PermissionsDock::fillInfo()
 {
-#define ADD_ROW(title, function) \
-do { \
-    QListWidgetItem *item = new QListWidgetItem(); \
-    item->setFlags(item->flags() & ~Qt::ItemIsEnabled); \
-    item->setText(QStringLiteral(title)); \
-    item->setCheckState(document()->function() ? Qt::Checked : Qt::Unchecked); \
-    m_table->addItem(item); \
-} while (0)
+#define ADD_ROW(title, function)                                                                                                                                                                                                               \
+    do {                                                                                                                                                                                                                                       \
+        QListWidgetItem *item = new QListWidgetItem();                                                                                                                                                                                         \
+        item->setFlags(item->flags() & ~Qt::ItemIsEnabled);                                                                                                                                                                                    \
+        item->setText(QStringLiteral(title));                                                                                                                                                                                                  \
+        item->setCheckState(document()->function() ? Qt::Checked : Qt::Unchecked);                                                                                                                                                             \
+        m_table->addItem(item);                                                                                                                                                                                                                \
+    } while (0)
     ADD_ROW("Print", okToPrint);
     ADD_ROW("PrintHiRes", okToPrintHighRes);
     ADD_ROW("Change", okToChange);
@@ -62,4 +59,3 @@ void PermissionsDock::documentClosed()
     m_table->clear();
     AbstractInfoDock::documentClosed();
 }
-

@@ -18,6 +18,6 @@
 
 #include <string>
 
-std::string gbasename(const char* filename);
+std::string gbasename(const char *filename);
 
 #endif // ndef GBASENAME_H

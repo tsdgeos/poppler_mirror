@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _ANNOTS_H_
-#define _ANNOTS_H_
+#    define _ANNOTS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_annots_create_widget (PopplerDocument *document);
+GtkWidget *pgd_annots_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

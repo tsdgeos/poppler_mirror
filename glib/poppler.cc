@@ -20,7 +20,7 @@
 #include "poppler.h"
 
 #ifndef __GI_SCANNER__
-#include <Error.h>
+#    include <Error.h>
 #endif
 
 #include "poppler-private.h"
@@ -40,42 +40,40 @@
  * on error domains.
  */
 
-GQuark poppler_error_quark (void)
+GQuark poppler_error_quark(void)
 {
-  static GQuark q = 0;
+    static GQuark q = 0;
 
-  if (q == 0)
-    q = g_quark_from_static_string ("poppler-quark");
+    if (q == 0)
+        q = g_quark_from_static_string("poppler-quark");
 
-  return q;
+    return q;
 }
 
 /**
  * poppler_get_backend:
- * 
+ *
  * Returns the backend compiled into the poppler library.
- * 
+ *
  * Return value: The backend used by poppler
  **/
-PopplerBackend
-poppler_get_backend (void)
+PopplerBackend poppler_get_backend(void)
 {
-  return POPPLER_BACKEND_CAIRO;
+    return POPPLER_BACKEND_CAIRO;
 }
 
 static const char poppler_version[] = PACKAGE_VERSION;
 
 /**
  * poppler_get_version:
- * 
+ *
  * Returns the version of poppler in use.  This result is not to be freed.
- * 
+ *
  * Return value: the version of poppler.
  **/
-const char *
-poppler_get_version (void)
+const char *poppler_get_version(void)
 {
-  return poppler_version;
+    return poppler_version;
 }
 
 /* We want to install an error callback so that PDF syntax warnings etc
@@ -83,29 +81,13 @@ poppler_get_version (void)
  * going to stderr.
  */
 
-void
-_poppler_error_cb (ErrorCategory category,
-                   Goffset pos,
-                   const char *message)
+void _poppler_error_cb(ErrorCategory category, Goffset pos, const char *message)
 {
-  static const char * const cat_str[] = {
-    "Syntax warning",
-    "Syntax error",
-    nullptr,
-    nullptr,
-    "IO error",
-    nullptr,
-    "Unimplemented feature",
-    "Internal error"
-  };
+    static const char *const cat_str[] = { "Syntax warning", "Syntax error", nullptr, nullptr, "IO error", nullptr, "Unimplemented feature", "Internal error" };
 
-  /* The following will never occur in poppler-glib */
-  if (category == errConfig ||
-      category == errCommandLine ||
-      category == errNotAllowed)
-    return;
+    /* The following will never occur in poppler-glib */
+    if (category == errConfig || category == errCommandLine || category == errNotAllowed)
+        return;
 
-  g_log (G_LOG_DOMAIN, G_LOG_LEVEL_INFO,
-         "%s at position %" G_GOFFSET_FORMAT ": %s",
-         cat_str[category], (goffset) pos, message);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "%s at position %" G_GOFFSET_FORMAT ": %s", cat_str[category], (goffset)pos, message);
 }

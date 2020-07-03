@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _TAGGEDSTRUCT_H_
-#define _TAGGEDSTRUCT_H_
+#    define _TAGGEDSTRUCT_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_taggedstruct_create_widget (PopplerDocument *document);
+GtkWidget *pgd_taggedstruct_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

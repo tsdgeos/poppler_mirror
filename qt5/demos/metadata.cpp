@@ -22,8 +22,7 @@
 
 #include <QtWidgets/QTextEdit>
 
-MetadataDock::MetadataDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+MetadataDock::MetadataDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_edit = new QTextEdit(this);
     setWidget(m_edit);
@@ -32,9 +31,7 @@ MetadataDock::MetadataDock(QWidget *parent)
     m_edit->setReadOnly(true);
 }
 
-MetadataDock::~MetadataDock()
-{
-}
+MetadataDock::~MetadataDock() { }
 
 void MetadataDock::fillInfo()
 {
@@ -46,4 +43,3 @@ void MetadataDock::documentClosed()
     m_edit->clear();
     AbstractInfoDock::documentClosed();
 }
-

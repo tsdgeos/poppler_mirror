@@ -41,60 +41,60 @@
 #include "numberofcharacters.h"
 #include <libgen.h>
 
-static const char * getReadableSigState(SignatureValidationStatus sig_vs)
+static const char *getReadableSigState(SignatureValidationStatus sig_vs)
 {
-  switch(sig_vs) {
+    switch (sig_vs) {
     case SIGNATURE_VALID:
-      return "Signature is Valid.";
+        return "Signature is Valid.";
 
     case SIGNATURE_INVALID:
-      return "Signature is Invalid.";
+        return "Signature is Invalid.";
 
     case SIGNATURE_DIGEST_MISMATCH:
-      return "Digest Mismatch.";
+        return "Digest Mismatch.";
 
     case SIGNATURE_DECODING_ERROR:
-      return "Document isn't signed or corrupted data.";
+        return "Document isn't signed or corrupted data.";
 
     case SIGNATURE_NOT_VERIFIED:
-      return "Signature has not yet been verified.";
+        return "Signature has not yet been verified.";
 
     default:
-      return "Unknown Validation Failure.";
-  }
+        return "Unknown Validation Failure.";
+    }
 }
 
-static const char * getReadableCertState(CertificateValidationStatus cert_vs)
+static const char *getReadableCertState(CertificateValidationStatus cert_vs)
 {
-  switch(cert_vs) {
+    switch (cert_vs) {
     case CERTIFICATE_TRUSTED:
-      return "Certificate is Trusted.";
+        return "Certificate is Trusted.";
 
     case CERTIFICATE_UNTRUSTED_ISSUER:
-      return "Certificate issuer isn't Trusted.";
+        return "Certificate issuer isn't Trusted.";
 
     case CERTIFICATE_UNKNOWN_ISSUER:
-      return "Certificate issuer is unknown.";
+        return "Certificate issuer is unknown.";
 
     case CERTIFICATE_REVOKED:
-      return "Certificate has been Revoked.";
+        return "Certificate has been Revoked.";
 
     case CERTIFICATE_EXPIRED:
-      return "Certificate has Expired";
+        return "Certificate has Expired";
 
     case CERTIFICATE_NOT_VERIFIED:
-      return "Certificate has not yet been verified.";
+        return "Certificate has not yet been verified.";
 
     default:
-      return "Unknown issue with Certificate or corrupted data.";
-  }
+        return "Unknown issue with Certificate or corrupted data.";
+    }
 }
 
 static char *getReadableTime(time_t unix_time)
 {
-  char * time_str = (char *) gmalloc(64);
-  strftime(time_str, 64, "%b %d %Y %H:%M:%S", localtime(&unix_time));
-  return time_str;
+    char *time_str = (char *)gmalloc(64);
+    strftime(time_str, 64, "%b %d %Y %H:%M:%S", localtime(&unix_time));
+    return time_str;
 }
 
 static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, const char *filename)
@@ -127,148 +127,134 @@ static bool printHelp = false;
 static bool dontVerifyCert = false;
 static bool dumpSignatures = false;
 
-static const ArgDesc argDesc[] = {
-  {"-nssdir", argGooString, &nssDir,     0,
-   "path to directory of libnss3 database"},
-  {"-nocert", argFlag,     &dontVerifyCert,     0,
-   "don't perform certificate validation"},
-  {"-dump",   argFlag,     &dumpSignatures,     0,
-   "dump all signatures into current directory"},
+static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
+                                   { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
+                                   { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
 
-  {"-v",      argFlag,     &printVersion,  0,
-   "print copyright and version info"},
-  {"-h",      argFlag,     &printHelp,     0,
-   "print usage information"},
-  {"-help",   argFlag,     &printHelp,     0,
-   "print usage information"},
-  {"-?",      argFlag,     &printHelp,     0,
-   "print usage information"},
-  {}
-};
-
+                                   { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
+                                   { "-h", argFlag, &printHelp, 0, "print usage information" },
+                                   { "-help", argFlag, &printHelp, 0, "print usage information" },
+                                   { "-?", argFlag, &printHelp, 0, "print usage information" },
+                                   {} };
 
 int main(int argc, char *argv[])
 {
-  char *time_str = nullptr;
-  globalParams = std::make_unique<GlobalParams>();
+    char *time_str = nullptr;
+    globalParams = std::make_unique<GlobalParams>();
 
-  Win32Console win32Console(&argc, &argv);
+    Win32Console win32Console(&argc, &argv);
 
-  const bool ok = parseArgs(argDesc, &argc, argv);
+    const bool ok = parseArgs(argDesc, &argc, argv);
 
-  if (!ok || argc != 2 || printVersion || printHelp) {
-    fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
-    fprintf(stderr, "%s\n", popplerCopyright);
-    fprintf(stderr, "%s\n", xpdfCopyright);
-    if (!printVersion) {
-      printUsage("pdfsig", "<PDF-file>", argDesc);
-    }
-    if (printVersion || printHelp)
-      return 0;
-    return 99;
-  }
-
-  std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[argc - 1]);
-
-  SignatureHandler::setNSSDir(nssDir);
-
-  // open PDF file
-  std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
-
-  if (!doc->isOk()) {
-    return 1;
-  }
-
-  const std::vector<FormFieldSignature*> signatures = doc->getSignatureFields();
-  const unsigned int sigCount = signatures.size();
-
-  if (sigCount >= 1) {
-    if (dumpSignatures) {
-      printf("Dumping Signatures: %u\n", sigCount);
-      for (unsigned int i = 0; i < sigCount; i++) {
-        const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
-        if (!dumpingOk) {
-	  return 3;
+    if (!ok || argc != 2 || printVersion || printHelp) {
+        fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
+        fprintf(stderr, "%s\n", popplerCopyright);
+        fprintf(stderr, "%s\n", xpdfCopyright);
+        if (!printVersion) {
+            printUsage("pdfsig", "<PDF-file>", argDesc);
         }
-      }
-      return 0;
+        if (printVersion || printHelp)
+            return 0;
+        return 99;
+    }
+
+    std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[argc - 1]);
+
+    SignatureHandler::setNSSDir(nssDir);
+
+    // open PDF file
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
+
+    if (!doc->isOk()) {
+        return 1;
+    }
+
+    const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
+    const unsigned int sigCount = signatures.size();
+
+    if (sigCount >= 1) {
+        if (dumpSignatures) {
+            printf("Dumping Signatures: %u\n", sigCount);
+            for (unsigned int i = 0; i < sigCount; i++) {
+                const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
+                if (!dumpingOk) {
+                    return 3;
+                }
+            }
+            return 0;
+        } else {
+            printf("Digital Signature Info of: %s\n", fileName->c_str());
+        }
     } else {
-      printf("Digital Signature Info of: %s\n", fileName->c_str());
+        printf("File '%s' does not contain any signatures\n", fileName->c_str());
+        return 2;
     }
-  } else {
-    printf("File '%s' does not contain any signatures\n", fileName->c_str());
-    return 2;
-  }
 
-  for (unsigned int i = 0; i < sigCount; i++) {
-    const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */);
-    printf("Signature #%u:\n", i+1);
-    printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
-    printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
-    printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
-    printf("  - Signing Hash Algorithm: ");
-    switch (sig_info->getHashAlgorithm())
-    {
-      case HASH_AlgMD2:
-        printf("MD2\n");
-        break;
-      case HASH_AlgMD5:
-        printf("MD5\n");
-        break;
-      case HASH_AlgSHA1:
-        printf("SHA1\n");
-        break;
-      case HASH_AlgSHA256:
-        printf("SHA-256\n");
-        break;
-      case HASH_AlgSHA384:
-        printf("SHA-384\n");
-        break;
-      case HASH_AlgSHA512:
-        printf("SHA-512\n");
-        break;
-      case HASH_AlgSHA224:
-        printf("SHA-224\n");
-        break;
-      default:
-        printf("unknown\n");
+    for (unsigned int i = 0; i < sigCount; i++) {
+        const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */);
+        printf("Signature #%u:\n", i + 1);
+        printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
+        printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
+        printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
+        printf("  - Signing Hash Algorithm: ");
+        switch (sig_info->getHashAlgorithm()) {
+        case HASH_AlgMD2:
+            printf("MD2\n");
+            break;
+        case HASH_AlgMD5:
+            printf("MD5\n");
+            break;
+        case HASH_AlgSHA1:
+            printf("SHA1\n");
+            break;
+        case HASH_AlgSHA256:
+            printf("SHA-256\n");
+            break;
+        case HASH_AlgSHA384:
+            printf("SHA-384\n");
+            break;
+        case HASH_AlgSHA512:
+            printf("SHA-512\n");
+            break;
+        case HASH_AlgSHA224:
+            printf("SHA-224\n");
+            break;
+        default:
+            printf("unknown\n");
+        }
+        printf("  - Signature Type: ");
+        switch (signatures.at(i)->getSignatureType()) {
+        case adbe_pkcs7_sha1:
+            printf("adbe.pkcs7.sha1\n");
+            break;
+        case adbe_pkcs7_detached:
+            printf("adbe.pkcs7.detached\n");
+            break;
+        case ETSI_CAdES_detached:
+            printf("ETSI.CAdES.detached\n");
+            break;
+        default:
+            printf("unknown\n");
+        }
+        std::vector<Goffset> ranges = signatures.at(i)->getSignedRangeBounds();
+        if (ranges.size() == 4) {
+            printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
+            Goffset checked_file_size;
+            GooString *signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
+            if (signature && checked_file_size == ranges[3]) {
+                printf("  - Total document signed\n");
+            } else {
+                printf("  - Not total document signed\n");
+            }
+            delete signature;
+        }
+        printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
+        gfree(time_str);
+        if (sig_info->getSignatureValStatus() != SIGNATURE_VALID || dontVerifyCert) {
+            continue;
+        }
+        printf("  - Certificate Validation: %s\n", getReadableCertState(sig_info->getCertificateValStatus()));
     }
-    printf("  - Signature Type: ");
-    switch (signatures.at(i)->getSignatureType())
-    {
-      case adbe_pkcs7_sha1:
-        printf("adbe.pkcs7.sha1\n");
-        break;
-      case adbe_pkcs7_detached:
-        printf("adbe.pkcs7.detached\n");
-        break;
-      case ETSI_CAdES_detached:
-        printf("ETSI.CAdES.detached\n");
-        break;
-      default:
-        printf("unknown\n");
-    }
-    std::vector<Goffset> ranges = signatures.at(i)->getSignedRangeBounds();
-    if (ranges.size() == 4)
-    {
-      printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n",
-             ranges[0], ranges[1], ranges[2], ranges[3]);
-      Goffset checked_file_size;
-      GooString* signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
-      if (signature && checked_file_size == ranges[3]) {
-        printf("  - Total document signed\n");
-      } else {
-        printf("  - Not total document signed\n");
-      }
-      delete signature;
-    }
-    printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
-    gfree(time_str);
-    if (sig_info->getSignatureValStatus() != SIGNATURE_VALID || dontVerifyCert) {
-      continue;
-    }
-    printf("  - Certificate Validation: %s\n", getReadableCertState(sig_info->getCertificateValStatus()));
-  }
 
-  return 0;
+    return 0;
 }

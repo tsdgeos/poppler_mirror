@@ -75,8 +75,7 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
     ustring::value_type u;
     if (is_unicode) {
         while (i < len) {
-            u = is_unicodeLE ? ((data[i + 1] & 0xff) << 8) | (data[i] & 0xff)
-                             : ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
+            u = is_unicodeLE ? ((data[i + 1] & 0xff) << 8) | (data[i] & 0xff) : ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
             i += 2;
             ret[ret_index++] = u;
         }
@@ -102,7 +101,7 @@ ustring detail::unicode_to_ustring(const Unicode *u, int length)
     return str;
 }
 
-GooString* detail::ustring_to_unicode_GooString(const ustring &str)
+GooString *detail::ustring_to_unicode_GooString(const ustring &str)
 {
     const size_t len = str.size() * 2 + 2;
     const ustring::value_type *me = str.data();

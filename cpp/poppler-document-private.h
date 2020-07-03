@@ -30,8 +30,7 @@
 
 #include <vector>
 
-namespace poppler
-{
+namespace poppler {
 
 class document;
 class embedded_file;
@@ -39,16 +38,12 @@ class embedded_file;
 class document_private : private GlobalParamsIniter
 {
 public:
-    document_private(GooString *file_path, const std::string &owner_password,
-                     const std::string &user_password);
-    document_private(byte_array *file_data, const std::string &owner_password,
-                     const std::string &user_password);
-    document_private(const char *file_data, int file_data_length,
-                     const std::string &owner_password,
-                     const std::string &user_password);
+    document_private(GooString *file_path, const std::string &owner_password, const std::string &user_password);
+    document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password);
+    document_private(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password);
     ~document_private();
 
-    static document* check_document(document_private *doc, byte_array *file_data);
+    static document *check_document(document_private *doc, byte_array *file_data);
 
     PDFDoc *doc;
     byte_array doc_data;
@@ -56,6 +51,7 @@ public:
     int raw_doc_data_length;
     bool is_locked;
     std::vector<embedded_file *> embedded_files;
+
 private:
     document_private();
 };

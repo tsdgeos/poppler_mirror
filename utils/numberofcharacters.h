@@ -13,14 +13,13 @@
 
 static int numberOfCharacters(unsigned int n)
 {
-  int charNum = 0;
-  while (n >= 10)
-  {
-    n = n / 10;
+    int charNum = 0;
+    while (n >= 10) {
+        n = n / 10;
+        charNum++;
+    }
     charNum++;
-  }
-  charNum++;
-  return charNum;
+    return charNum;
 }
 
 #endif

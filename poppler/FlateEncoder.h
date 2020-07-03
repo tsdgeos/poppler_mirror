@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include <cstddef>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 #include <cstring>
 #include <cctype>
@@ -37,34 +37,31 @@ extern "C" {
 // FlateEncoder
 //------------------------------------------------------------------------
 
-class FlateEncoder: public FilterStream {
+class FlateEncoder : public FilterStream
+{
 public:
-
-  FlateEncoder(Stream *strA);
-  ~FlateEncoder() override;
-  StreamKind getKind() const override { return strWeird; }
-  void reset() override;
-  int getChar() override
-    { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
-  int lookChar() override
-    { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
-  GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
-  bool isBinary(bool last = true) override { return true; }
-  bool isEncoder() override { return true; }
+    FlateEncoder(Stream *strA);
+    ~FlateEncoder() override;
+    StreamKind getKind() const override { return strWeird; }
+    void reset() override;
+    int getChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
+    int lookChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
+    GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
+    bool isBinary(bool last = true) override { return true; }
+    bool isEncoder() override { return true; }
 
 private:
+    static const int inBufSize = 16384;
+    static const int outBufSize = inBufSize;
+    unsigned char inBuf[inBufSize];
+    unsigned char outBuf[outBufSize];
+    unsigned char *outBufPtr;
+    unsigned char *outBufEnd;
+    bool inBufEof;
+    bool outBufEof;
+    z_stream zlib_stream;
 
-  static const int inBufSize = 16384;
-  static const int outBufSize = inBufSize;
-  unsigned char inBuf[ inBufSize ];
-  unsigned char outBuf[ outBufSize ];
-  unsigned char *outBufPtr;
-  unsigned char *outBufEnd;
-  bool inBufEof;
-  bool outBufEof;
-  z_stream zlib_stream;
-
-  bool fillBuf();
+    bool fillBuf();
 };
 
 #endif

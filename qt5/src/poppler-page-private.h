@@ -31,26 +31,26 @@ class LinkAction;
 class Page;
 class TextPage;
 
-namespace Poppler
-{
+namespace Poppler {
 
 class DocumentData;
 class PageTransition;
 
-class PageData {
+class PageData
+{
 public:
-  Link* convertLinkActionToLink(::LinkAction * a, const QRectF &linkArea);
+    Link *convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea);
 
-  DocumentData *parentDoc;
-  ::Page *page;
-  int index;
-  PageTransition *transition;
+    DocumentData *parentDoc;
+    ::Page *page;
+    int index;
+    PageTransition *transition;
 
-  static Link* convertLinkActionToLink(::LinkAction * a, DocumentData *parentDoc, const QRectF &linkArea);
-  
-  TextPage *prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
-  bool performSingleTextSearch(TextPage* textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics);
-  QList<QRectF> performMultipleTextSearch(TextPage* textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics);
+    static Link *convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
+
+    TextPage *prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
+    bool performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics);
+    QList<QRectF> performMultipleTextSearch(TextPage *textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics);
 };
 
 }

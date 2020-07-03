@@ -22,67 +22,68 @@
 class Dict;
 class PDFDoc;
 
-
 class StructTreeRoot
 {
 public:
-  StructTreeRoot(PDFDoc *docA, Dict *rootDict);
-  ~StructTreeRoot();
+    StructTreeRoot(PDFDoc *docA, Dict *rootDict);
+    ~StructTreeRoot();
 
-  StructTreeRoot& operator=(const StructTreeRoot &) = delete;
-  StructTreeRoot(const StructTreeRoot &) = delete;
+    StructTreeRoot &operator=(const StructTreeRoot &) = delete;
+    StructTreeRoot(const StructTreeRoot &) = delete;
 
-  PDFDoc *getDoc() { return doc; }
-  Dict *getRoleMap() { return roleMap.isDict() ? roleMap.getDict() : nullptr; }
-  Dict *getClassMap() { return classMap.isDict() ? classMap.getDict() : nullptr; }
-  unsigned getNumChildren() const { return elements.size(); }
-  const StructElement *getChild(int i) const { return elements.at(i); }
-  StructElement *getChild(int i) { return elements.at(i); }
+    PDFDoc *getDoc() { return doc; }
+    Dict *getRoleMap() { return roleMap.isDict() ? roleMap.getDict() : nullptr; }
+    Dict *getClassMap() { return classMap.isDict() ? classMap.getDict() : nullptr; }
+    unsigned getNumChildren() const { return elements.size(); }
+    const StructElement *getChild(int i) const { return elements.at(i); }
+    StructElement *getChild(int i) { return elements.at(i); }
 
-  void appendChild(StructElement *element) {
-    if (element && element->isOk()) {
-      elements.push_back(element);
+    void appendChild(StructElement *element)
+    {
+        if (element && element->isOk()) {
+            elements.push_back(element);
+        }
     }
-  }
 
-  const StructElement *findParentElement(int key, unsigned mcid = 0) const {
-    auto it = parentTree.find(key);
-    if (it != parentTree.end()) {
-      if (mcid < it->second.size()) {
-	return it->second[mcid].element;
-      }
+    const StructElement *findParentElement(int key, unsigned mcid = 0) const
+    {
+        auto it = parentTree.find(key);
+        if (it != parentTree.end()) {
+            if (mcid < it->second.size()) {
+                return it->second[mcid].element;
+            }
+        }
+        return nullptr;
     }
-    return nullptr;
-  }
 
 private:
-  typedef std::vector<StructElement*> ElemPtrArray;
+    typedef std::vector<StructElement *> ElemPtrArray;
 
-  // Structure for items in /ParentTree, it keeps a mapping of
-  // object references and pointers to StructElement objects.
-  struct Parent {
-    Ref            ref;
-    StructElement *element;
+    // Structure for items in /ParentTree, it keeps a mapping of
+    // object references and pointers to StructElement objects.
+    struct Parent
+    {
+        Ref ref;
+        StructElement *element;
 
-    Parent(): element(nullptr) { ref = Ref::INVALID(); }
-    Parent(const Parent &p) = default;
-    Parent& operator=(const Parent &) = default;
-    ~Parent() {}
-  };
+        Parent() : element(nullptr) { ref = Ref::INVALID(); }
+        Parent(const Parent &p) = default;
+        Parent &operator=(const Parent &) = default;
+        ~Parent() { }
+    };
 
-  PDFDoc *doc;
-  Object roleMap;
-  Object classMap;
-  ElemPtrArray elements;
-  std::map<int, std::vector<Parent> > parentTree;
-  std::multimap<Ref, Parent*> refToParentMap;
+    PDFDoc *doc;
+    Object roleMap;
+    Object classMap;
+    ElemPtrArray elements;
+    std::map<int, std::vector<Parent>> parentTree;
+    std::multimap<Ref, Parent *> refToParentMap;
 
-  void parse(Dict *rootDict);
-  void parseNumberTreeNode(Dict *node);
-  void parentTreeAdd(const Ref objectRef, StructElement *element);
+    void parse(Dict *rootDict);
+    void parseNumberTreeNode(Dict *node);
+    void parentTreeAdd(const Ref objectRef, StructElement *element);
 
-  friend class StructElement;
+    friend class StructElement;
 };
 
 #endif
-

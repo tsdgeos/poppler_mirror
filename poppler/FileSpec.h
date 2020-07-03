@@ -18,65 +18,67 @@
 
 #include "Object.h"
 
-class EmbFile {
+class EmbFile
+{
 public:
-  EmbFile(Object &&efStream);
-  ~EmbFile();
+    EmbFile(Object &&efStream);
+    ~EmbFile();
 
-  EmbFile(const EmbFile &) = delete;
-  EmbFile& operator=(const EmbFile &) = delete;
+    EmbFile(const EmbFile &) = delete;
+    EmbFile &operator=(const EmbFile &) = delete;
 
-  int size() const { return m_size; }
-  const GooString *modDate() const { return m_modDate; }
-  const GooString *createDate() const { return m_createDate; }
-  const GooString *checksum() const { return m_checksum; }
-  const GooString *mimeType() const { return m_mimetype; }
-  Object *streamObject() { return &m_objStr; }
-  Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
-  bool isOk() const { return m_objStr.isStream(); }
-  bool save(const char *path);
+    int size() const { return m_size; }
+    const GooString *modDate() const { return m_modDate; }
+    const GooString *createDate() const { return m_createDate; }
+    const GooString *checksum() const { return m_checksum; }
+    const GooString *mimeType() const { return m_mimetype; }
+    Object *streamObject() { return &m_objStr; }
+    Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
+    bool isOk() const { return m_objStr.isStream(); }
+    bool save(const char *path);
 
 private:
-  bool save2(FILE *f);
+    bool save2(FILE *f);
 
-  int m_size;
-  GooString *m_createDate;
-  GooString *m_modDate;
-  GooString *m_checksum;
-  GooString *m_mimetype;
-  Object m_objStr;
+    int m_size;
+    GooString *m_createDate;
+    GooString *m_modDate;
+    GooString *m_checksum;
+    GooString *m_mimetype;
+    Object m_objStr;
 };
 
-class FileSpec {
+class FileSpec
+{
 public:
-  FileSpec(const Object *fileSpec);
-  ~FileSpec();
+    FileSpec(const Object *fileSpec);
+    ~FileSpec();
 
-  FileSpec(const FileSpec &) = delete;
-  FileSpec& operator=(const FileSpec &) = delete;
+    FileSpec(const FileSpec &) = delete;
+    FileSpec &operator=(const FileSpec &) = delete;
 
-  bool isOk() const { return ok; }
+    bool isOk() const { return ok; }
 
-  const GooString *getFileName() const { return fileName; }
-  GooString *getFileNameForPlatform();
-  const GooString *getDescription() const { return desc; }
-  EmbFile *getEmbeddedFile();
+    const GooString *getFileName() const { return fileName; }
+    GooString *getFileNameForPlatform();
+    const GooString *getDescription() const { return desc; }
+    EmbFile *getEmbeddedFile();
 
-  static Object newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName);
+    static Object newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName);
 
 private:
-  bool ok;
+    bool ok;
 
-  Object fileSpec;
+    Object fileSpec;
 
-  GooString *fileName;         // F, UF, DOS, Mac, Unix
-  GooString *platformFileName;
-  Object fileStream;           // Ref to F entry in UF
-  EmbFile *embFile;
-  GooString *desc;             // Desc
+    GooString *fileName; // F, UF, DOS, Mac, Unix
+    GooString *platformFileName;
+    Object fileStream; // Ref to F entry in UF
+    EmbFile *embFile;
+    GooString *desc; // Desc
 };
 
-Object getFileSpecName (const Object *fileSpec);
-Object getFileSpecNameForPlatform (const Object *fileSpec);
+Object getFileSpecName(const Object *fileSpec);
+Object getFileSpecNameForPlatform(const Object *fileSpec);
 
 #endif /* FILE_SPEC_H */

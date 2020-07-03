@@ -26,11 +26,9 @@
 
 G_BEGIN_DECLS
 
-
-#define POPPLER_TYPE_ATTACHMENT             (poppler_attachment_get_type ())
-#define POPPLER_ATTACHMENT(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ATTACHMENT, PopplerAttachment))
-#define POPPLER_IS_ATTACHMENT(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ATTACHMENT))
-
+#define POPPLER_TYPE_ATTACHMENT (poppler_attachment_get_type())
+#define POPPLER_ATTACHMENT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ATTACHMENT, PopplerAttachment))
+#define POPPLER_IS_ATTACHMENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ATTACHMENT))
 
 /**
  * PopplerAttachmentSaveFunc:
@@ -49,44 +47,34 @@ G_BEGIN_DECLS
  *
  * Returns: %TRUE if successful, %FALSE (with @error set) if failed.
  */
-typedef gboolean (*PopplerAttachmentSaveFunc) (const gchar  *buf,
-					       gsize         count,
-					       gpointer      data,
-					       GError      **error);
+typedef gboolean (*PopplerAttachmentSaveFunc)(const gchar *buf, gsize count, gpointer data, GError **error);
 
 /* GTime is deprecated, but is part of our ABI here (see #715, #765). */
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 struct _PopplerAttachment
 {
-  GObject parent;
+    GObject parent;
 
-  gchar *name;
-  gchar *description;
-  gsize size;
-  GTime mtime;
-  GTime ctime;
-  GString *checksum;
+    gchar *name;
+    gchar *description;
+    gsize size;
+    GTime mtime;
+    GTime ctime;
+    GString *checksum;
 };
 G_GNUC_END_IGNORE_DEPRECATIONS
 
 typedef struct _PopplerAttachmentClass
 {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 } PopplerAttachmentClass;
 
-
 POPPLER_PUBLIC
-GType     poppler_attachment_get_type         (void) G_GNUC_CONST;
+GType poppler_attachment_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
-gboolean  poppler_attachment_save             (PopplerAttachment          *attachment,
-					       const char                 *filename,
-					       GError                    **error);
+gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *filename, GError **error);
 POPPLER_PUBLIC
-gboolean  poppler_attachment_save_to_callback (PopplerAttachment          *attachment,
-					       PopplerAttachmentSaveFunc   save_func,
-					       gpointer                    user_data,
-					       GError                    **error);
-
+gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, PopplerAttachmentSaveFunc save_func, gpointer user_data, GError **error);
 
 G_END_DECLS
 

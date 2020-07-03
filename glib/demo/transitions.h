@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _TRANSITIONS_H_
-#define _TRANSITIONS_H_
+#    define _TRANSITIONS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_transitions_create_widget (PopplerDocument *document);
+GtkWidget *pgd_transitions_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 
