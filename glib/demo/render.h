@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _RENDER_H_
-#define _RENDER_H_
+#    define _RENDER_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_render_create_widget (PopplerDocument *document);
+GtkWidget *pgd_render_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

@@ -22,31 +22,31 @@ private slots:
 
 void TestPageLabelInfo::testFromDecimal()
 {
-  std::string str{"2342"};
-  const auto res = fromDecimal(str.data(), str.data() + str.size(), false);
-  QCOMPARE(res.first, 2342);
-  QCOMPARE(res.second, true);
+    std::string str { "2342" };
+    const auto res = fromDecimal(str.data(), str.data() + str.size(), false);
+    QCOMPARE(res.first, 2342);
+    QCOMPARE(res.second, true);
 }
 
 void TestPageLabelInfo::testFromDecimalUnicode()
 {
-  std::unique_ptr<GooString> str(Poppler::QStringToUnicodeGooString(QString::fromLocal8Bit("2342")));
-  const auto res = fromDecimal(str->c_str(), str->c_str() + str->getLength(), str->hasUnicodeMarker());
+    std::unique_ptr<GooString> str(Poppler::QStringToUnicodeGooString(QString::fromLocal8Bit("2342")));
+    const auto res = fromDecimal(str->c_str(), str->c_str() + str->getLength(), str->hasUnicodeMarker());
 #ifndef HAVE_CODECVT
-  QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
+    QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
 #endif
-  QCOMPARE(res.first, 2342);
+    QCOMPARE(res.first, 2342);
 #ifndef HAVE_CODECVT
-  QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
+    QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
 #endif
-  QCOMPARE(res.second, true);
+    QCOMPARE(res.second, true);
 }
 
 void TestPageLabelInfo::testToRoman()
 {
     GooString str;
     toRoman(177, &str, false);
-    QCOMPARE (str.c_str(), "clxxvii");
+    QCOMPARE(str.c_str(), "clxxvii");
 }
 
 void TestPageLabelInfo::testFromRoman()
@@ -70,4 +70,3 @@ void TestPageLabelInfo::testFromLatin()
 
 QTEST_GUILESS_MAIN(TestPageLabelInfo)
 #include "check_pagelabelinfo.moc"
-

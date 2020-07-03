@@ -36,79 +36,87 @@
 #include "CharTypes.h"
 #include <vector>
 
-class HtmlFontColor{
- private:
-   unsigned int r;
-   unsigned int g;
-   unsigned int b;
-   bool Ok(unsigned int xcol){ return xcol<=255;}
-   GooString *convtoX(unsigned  int xcol) const;
- public:
-   HtmlFontColor():r(0),g(0),b(0){}
-   HtmlFontColor(GfxRGB rgb);
-   HtmlFontColor(const HtmlFontColor& x){r=x.r;g=x.g;b=x.b;}
-   HtmlFontColor& operator=(const HtmlFontColor &x){
-     r=x.r;g=x.g;b=x.b;
-     return *this;
-   }
-   ~HtmlFontColor(){};
-   GooString* toString() const;
-   bool isEqual(const HtmlFontColor& col) const{
-     return ((r==col.r)&&(g==col.g)&&(b==col.b));
-   }
-} ;  
+class HtmlFontColor
+{
+private:
+    unsigned int r;
+    unsigned int g;
+    unsigned int b;
+    bool Ok(unsigned int xcol) { return xcol <= 255; }
+    GooString *convtoX(unsigned int xcol) const;
 
-
-class HtmlFont{
- private:
-   int size;
-   int lineSize;
-   bool italic;
-   bool bold;
-   bool rotOrSkewed;
-   std::string familyName;
-   GooString *FontName;
-   HtmlFontColor color;
-   double rotSkewMat[4]; // only four values needed for rotation and skew
-public:  
-
-   HtmlFont(GfxFont *font,int _size, GfxRGB rgb);
-   HtmlFont(const HtmlFont& x);
-   HtmlFont& operator=(const HtmlFont& x);
-   HtmlFontColor getColor() const {return color;}
-   ~HtmlFont();
-   GooString* getFullName();
-   bool isItalic() const {return italic;}
-   bool isBold() const {return bold;}
-   bool isRotOrSkewed() const { return rotOrSkewed; }
-   int getSize() const {return size;}
-   int getLineSize() const {return lineSize;}
-   void setLineSize(int _lineSize) { lineSize = _lineSize; }
-   void setRotMat(const double * const mat)
-   { rotOrSkewed = true; memcpy(rotSkewMat, mat, sizeof(rotSkewMat)); }
-   const double *getRotMat() const { return rotSkewMat; }
-   GooString* getFontName();
-   static GooString* HtmlFilter(const Unicode* u, int uLen); //char* s);
-   bool isEqual(const HtmlFont& x) const;
-   bool isEqualIgnoreBold(const HtmlFont& x) const;
-   void print() const {printf("font: %s (%s) %d %s%s\n", FontName->c_str(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : "");};
+public:
+    HtmlFontColor() : r(0), g(0), b(0) { }
+    HtmlFontColor(GfxRGB rgb);
+    HtmlFontColor(const HtmlFontColor &x)
+    {
+        r = x.r;
+        g = x.g;
+        b = x.b;
+    }
+    HtmlFontColor &operator=(const HtmlFontColor &x)
+    {
+        r = x.r;
+        g = x.g;
+        b = x.b;
+        return *this;
+    }
+    ~HtmlFontColor() {};
+    GooString *toString() const;
+    bool isEqual(const HtmlFontColor &col) const { return ((r == col.r) && (g == col.g) && (b == col.b)); }
 };
 
-class HtmlFontAccu{
+class HtmlFont
+{
 private:
-  std::vector<HtmlFont> accu;
-  
+    int size;
+    int lineSize;
+    bool italic;
+    bool bold;
+    bool rotOrSkewed;
+    std::string familyName;
+    GooString *FontName;
+    HtmlFontColor color;
+    double rotSkewMat[4]; // only four values needed for rotation and skew
 public:
-  HtmlFontAccu();
-  ~HtmlFontAccu();
-  HtmlFontAccu(const HtmlFontAccu &) = delete;
-  HtmlFontAccu& operator=(const HtmlFontAccu &) = delete;
-  int AddFont(const HtmlFont& font);
-  const HtmlFont *Get(int i) const {
-    return &accu[i];
-  } 
-  GooString* CSStyle(int i, int j = 0);
-  int size() const {return accu.size();}
-  
-};  
+    HtmlFont(GfxFont *font, int _size, GfxRGB rgb);
+    HtmlFont(const HtmlFont &x);
+    HtmlFont &operator=(const HtmlFont &x);
+    HtmlFontColor getColor() const { return color; }
+    ~HtmlFont();
+    GooString *getFullName();
+    bool isItalic() const { return italic; }
+    bool isBold() const { return bold; }
+    bool isRotOrSkewed() const { return rotOrSkewed; }
+    int getSize() const { return size; }
+    int getLineSize() const { return lineSize; }
+    void setLineSize(int _lineSize) { lineSize = _lineSize; }
+    void setRotMat(const double *const mat)
+    {
+        rotOrSkewed = true;
+        memcpy(rotSkewMat, mat, sizeof(rotSkewMat));
+    }
+    const double *getRotMat() const { return rotSkewMat; }
+    GooString *getFontName();
+    static GooString *HtmlFilter(const Unicode *u, int uLen); // char* s);
+    bool isEqual(const HtmlFont &x) const;
+    bool isEqualIgnoreBold(const HtmlFont &x) const;
+    void print() const { printf("font: %s (%s) %d %s%s\n", FontName->c_str(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : ""); };
+};
+
+class HtmlFontAccu
+{
+private:
+    std::vector<HtmlFont> accu;
+
+public:
+    HtmlFontAccu();
+    ~HtmlFontAccu();
+    HtmlFontAccu(const HtmlFontAccu &) = delete;
+    HtmlFontAccu &operator=(const HtmlFontAccu &) = delete;
+    int AddFont(const HtmlFont &font);
+    const HtmlFont *Get(int i) const { return &accu[i]; }
+    GooString *CSStyle(int i, int j = 0);
+    int size() const { return accu.size(); }
+};
 #endif

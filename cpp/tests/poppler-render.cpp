@@ -33,19 +33,12 @@ bool show_formats = false;
 char out_filename[4096];
 int doc_page = 0;
 
-static const ArgDesc the_args[] = {
-    { "-f",                    argFlag,  &show_formats,        0,
-      "show supported output image formats" },
-    { "--page",                argInt,   &doc_page,            0,
-      "select page to render" },
-    { "-o",                    argString, &out_filename,       sizeof(out_filename),
-      "output filename for the resulting PNG image" },
-    { "-h",                    argFlag,  &show_help,           0,
-      "print usage information" },
-    { "--help",                argFlag,  &show_help,           0,
-      "print usage information" },
-    { nullptr, argFlag, nullptr, 0, nullptr }
-};
+static const ArgDesc the_args[] = { { "-f", argFlag, &show_formats, 0, "show supported output image formats" },
+                                    { "--page", argInt, &doc_page, 0, "select page to render" },
+                                    { "-o", argString, &out_filename, sizeof(out_filename), "output filename for the resulting PNG image" },
+                                    { "-h", argFlag, &show_help, 0, "print usage information" },
+                                    { "--help", argFlag, &show_help, 0, "print usage information" },
+                                    { nullptr, argFlag, nullptr, 0, nullptr } };
 
 static void error(const std::string &msg)
 {
@@ -56,8 +49,7 @@ static void error(const std::string &msg)
 
 int main(int argc, char *argv[])
 {
-    if (!parseArgs(the_args, &argc, argv)
-        || (argc < 2 && !show_formats) || show_help) {
+    if (!parseArgs(the_args, &argc, argv) || (argc < 2 && !show_formats) || show_help) {
         printUsage(argv[0], "DOCUMENT", the_args);
         exit(1);
     }

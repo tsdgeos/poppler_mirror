@@ -34,57 +34,32 @@ class Link;
 class LinkPrivate
 {
 public:
-    LinkPrivate( const QRectF &area )
-        : linkArea( area )
-    {
-    }
+    LinkPrivate(const QRectF &area) : linkArea(area) { }
 
-    virtual ~LinkPrivate()
-    {
-        qDeleteAll(nextLinks);
-    }
+    virtual ~LinkPrivate() { qDeleteAll(nextLinks); }
 
-    static LinkPrivate *get( Link *link )
-    {
-        return link->d_ptr;
-    }
+    static LinkPrivate *get(Link *link) { return link->d_ptr; }
 
     LinkPrivate(const LinkPrivate &) = delete;
-    LinkPrivate& operator=(const LinkPrivate &) = delete;
+    LinkPrivate &operator=(const LinkPrivate &) = delete;
 
     QRectF linkArea;
-    QVector <Link *> nextLinks;
+    QVector<Link *> nextLinks;
 };
-
-
 
 class LinkOCGStatePrivate : public LinkPrivate
 {
 public:
-    LinkOCGStatePrivate( const QRectF &area,
-                         const std::vector<::LinkOCGState::StateList>& sList,
-                         bool pRB )
-        : LinkPrivate( area )
-        , stateList( sList )
-        , preserveRB( pRB )
-    {
-    }
+    LinkOCGStatePrivate(const QRectF &area, const std::vector<::LinkOCGState::StateList> &sList, bool pRB) : LinkPrivate(area), stateList(sList), preserveRB(pRB) { }
 
     std::vector<::LinkOCGState::StateList> stateList;
     bool preserveRB;
 };
 
-
-
 class LinkHidePrivate : public LinkPrivate
 {
 public:
-    LinkHidePrivate( const QRectF &area, const QString &tName, bool show )
-        : LinkPrivate( area )
-        , targetName( tName )
-        , isShow( show )
-    {
-    }
+    LinkHidePrivate(const QRectF &area, const QString &tName, bool show) : LinkPrivate(area), targetName(tName), isShow(show) { }
 
     QString targetName;
     bool isShow;

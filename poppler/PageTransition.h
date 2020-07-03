@@ -28,75 +28,78 @@
 //------------------------------------------------------------------------
 
 // if changed remember to keep in sync with frontend enums
-enum PageTransitionType {
-  transitionReplace = 0,
-  transitionSplit,
-  transitionBlinds,
-  transitionBox,
-  transitionWipe,
-  transitionDissolve,
-  transitionGlitter,
-  transitionFly,
-  transitionPush,
-  transitionCover,
-  transitionUncover,
-  transitionFade
+enum PageTransitionType
+{
+    transitionReplace = 0,
+    transitionSplit,
+    transitionBlinds,
+    transitionBox,
+    transitionWipe,
+    transitionDissolve,
+    transitionGlitter,
+    transitionFly,
+    transitionPush,
+    transitionCover,
+    transitionUncover,
+    transitionFade
 };
 
 // if changed remember to keep in sync with frontend enums
-enum PageTransitionAlignment {
-  transitionHorizontal = 0,
-  transitionVertical
+enum PageTransitionAlignment
+{
+    transitionHorizontal = 0,
+    transitionVertical
 };
 
 // if changed remember to keep in sync with frontend enums
-enum PageTransitionDirection {
-  transitionInward = 0,
-  transitionOutward
+enum PageTransitionDirection
+{
+    transitionInward = 0,
+    transitionOutward
 };
 
-class PageTransition {
+class PageTransition
+{
 public:
-  // Construct a Page Transition.
-  PageTransition (Object *trans);
+    // Construct a Page Transition.
+    PageTransition(Object *trans);
 
-  // Destructor.
-  ~PageTransition ();
+    // Destructor.
+    ~PageTransition();
 
-  // Was the Page Transition created successfully?
-  bool isOk() const { return ok; }
+    // Was the Page Transition created successfully?
+    bool isOk() const { return ok; }
 
-  // Get type
-  PageTransitionType getType() const { return type; }
+    // Get type
+    PageTransitionType getType() const { return type; }
 
-  // Get duration
-  double getDuration() const { return duration; }
+    // Get duration
+    double getDuration() const { return duration; }
 
-  // Get alignment
-  PageTransitionAlignment getAlignment() const { return alignment; }
+    // Get alignment
+    PageTransitionAlignment getAlignment() const { return alignment; }
 
-  // Get direction
-  PageTransitionDirection getDirection() const { return direction; }
+    // Get direction
+    PageTransitionDirection getDirection() const { return direction; }
 
-  // Get angle
-  int getAngle() const { return angle; }
+    // Get angle
+    int getAngle() const { return angle; }
 
-  // Get scale
-  double getScale() const { return scale; }
+    // Get scale
+    double getScale() const { return scale; }
 
-  // Is rectangular?
-  bool isRectangular() const { return rectangular; }
+    // Is rectangular?
+    bool isRectangular() const { return rectangular; }
 
 private:
-  
-  PageTransitionType type;           // transition style
-  double duration;                   // duration of the effect in seconds
-  PageTransitionAlignment alignment; // dimension of the effect
-  PageTransitionDirection direction; // direction of motion
-  int angle;                         // direction in degrees
-  double scale;                      // scale
-  bool rectangular;                 // is the area to be flown in rectangular?
-  bool ok;                          // set if created successfully
+    PageTransitionType type; // transition style
+    double duration; // duration of the effect in seconds
+    PageTransitionAlignment alignment; // dimension of the effect
+    PageTransitionDirection direction; // direction of motion
+    int angle; // direction in degrees
+    double scale; // scale
+    bool rectangular; // is the area to be flown in rectangular?
+    bool ok; // set if created successfully
 };
 
 #endif /* PAGE_TRANSITION_H */

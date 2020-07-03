@@ -27,41 +27,39 @@
 
 class PDFDoc;
 
-class JSInfo {
+class JSInfo
+{
 public:
+    // Constructor.
+    JSInfo(PDFDoc *doc, int firstPage = 0);
 
-  // Constructor.
-  JSInfo(PDFDoc *doc, int firstPage = 0);
+    // Destructor.
+    ~JSInfo();
 
-  // Destructor.
-  ~JSInfo();
+    // scan for JS in the PDF
+    void scanJS(int nPages);
 
-  // scan for JS in the PDF
-  void scanJS(int nPages);
+    // scan and print JS in the PDF
+    void scanJS(int nPages, FILE *fout, const UnicodeMap *uMap);
 
-  // scan and print JS in the PDF
-  void scanJS(int nPages, FILE *fout, const UnicodeMap *uMap);
+    // scan but exit after finding first JS in the PDF
+    void scanJS(int nPages, bool stopOnFirstJS);
 
-  // scan but exit after finding first JS in the PDF
-  void scanJS(int nPages, bool stopOnFirstJS);
-
-  // return true if PDF contains JavaScript
-  bool containsJS();
+    // return true if PDF contains JavaScript
+    bool containsJS();
 
 private:
+    PDFDoc *doc;
+    int currentPage;
+    bool hasJS;
+    bool print;
+    FILE *file;
+    const UnicodeMap *uniMap;
+    bool onlyFirstJS; /* stop scanning after finding first JS */
 
-  PDFDoc *doc;
-  int currentPage;
-  bool hasJS;
-  bool print;
-  FILE *file;
-  const UnicodeMap *uniMap;
-  bool onlyFirstJS; /* stop scanning after finding first JS */
-
-  void scan(int nPages);
-  void scanLinkAction(LinkAction *link, const char *action);
-  void printJS(const GooString *js);
-
+    void scan(int nPages);
+    void scanLinkAction(LinkAction *link, const char *action);
+    void printJS(const GooString *js);
 };
 
 #endif

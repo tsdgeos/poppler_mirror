@@ -31,8 +31,7 @@
 
 using namespace poppler;
 
-destination_private::destination_private(const LinkDest *ld, PDFDoc *doc)
-  : pdf_doc(doc)
+destination_private::destination_private(const LinkDest *ld, PDFDoc *doc) : pdf_doc(doc)
 {
     if (!ld) {
         type = destination::unknown;
@@ -164,11 +163,7 @@ destination_private::destination_private(const LinkDest *ld, PDFDoc *doc)
  the entire height of its bounding box within the window
 */
 
-
-destination::destination(destination_private *dd)
-  : d(dd)
-{
-}
+destination::destination(destination_private *dd) : d(dd) { }
 
 /**
  Move constructor.
@@ -196,8 +191,7 @@ int destination::page_number() const
 {
     if (d->page_number_unresolved) {
         d->page_number_unresolved = false;
-        d->page_number =
-            d->pdf_doc->findPage(d->page_ref);
+        d->page_number = d->pdf_doc->findPage(d->page_ref);
     }
 
     return d->page_number;
@@ -270,7 +264,7 @@ bool destination::is_change_zoom() const
 /**
  Move assignment operator.
  */
-destination& destination::operator=(destination &&other) noexcept
+destination &destination::operator=(destination &&other) noexcept
 {
     if (this != &other) {
         d = other.d;

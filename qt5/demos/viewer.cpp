@@ -43,8 +43,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 
-PdfViewer::PdfViewer(QWidget *parent)
-    : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
+PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
 
@@ -84,8 +83,7 @@ PdfViewer::PdfViewer(QWidget *parent)
     act->setCheckable(true);
     act->setData(QVariant::fromValue(1));
     m_settingsRenderBackendGrp->addAction(act);
-    connect(m_settingsRenderBackendGrp, &QActionGroup::triggered,
-            this, &PdfViewer::slotRenderBackend);
+    connect(m_settingsRenderBackendGrp, &QActionGroup::triggered, this, &PdfViewer::slotRenderBackend);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     // TODO Use modern syntax when depending on Qt 5.6
@@ -149,7 +147,7 @@ PdfViewer::PdfViewer(QWidget *parent)
     viewMenu->addAction(optContentDock->toggleViewAction());
     m_observers.append(optContentDock);
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->m_viewer = this;
     }
 
@@ -175,17 +173,14 @@ void PdfViewer::loadDocument(const QString &file)
 {
     Poppler::Document *newdoc = Poppler::Document::load(file);
     if (!newdoc) {
-        QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file,
-                           QMessageBox::Ok, this);
+        QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
         msgbox.exec();
         return;
     }
 
     while (newdoc->isLocked()) {
         bool ok = true;
-        QString password = QInputDialog::getText(this, tr("Document Password"),
-                                                 tr("Please insert the password of the document:"),
-                                                 QLineEdit::Password, QString(), &ok);
+        QString password = QInputDialog::getText(this, tr("Document Password"), tr("Please insert the password of the document:"), QLineEdit::Password, QString(), &ok);
         if (!ok) {
             delete newdoc;
             return;
@@ -201,7 +196,7 @@ void PdfViewer::loadDocument(const QString &file)
     m_doc->setRenderHint(Poppler::Document::Antialiasing, m_settingsGfxAAAct->isChecked());
     m_doc->setRenderBackend((Poppler::Document::RenderBackend)m_settingsRenderBackendGrp->checkedAction()->data().toInt());
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
         obs->pageChanged(0);
     }
@@ -215,7 +210,7 @@ void PdfViewer::closeDocument()
         return;
     }
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->documentClosed();
     }
 
@@ -251,8 +246,7 @@ void PdfViewer::slotSaveCopy()
     converter->setOutputFileName(fileName);
     converter->setPDFOptions(converter->pdfOptions() & ~Poppler::PDFConverter::WithChanges);
     if (!converter->convert()) {
-        QMessageBox msgbox(QMessageBox::Critical, tr("Save Error"), tr("Cannot export to:\n%1").arg(fileName),
-                           QMessageBox::Ok, this);
+        QMessageBox msgbox(QMessageBox::Critical, tr("Save Error"), tr("Cannot export to:\n%1").arg(fileName), QMessageBox::Ok, this);
     }
     delete converter;
 }
@@ -275,7 +269,7 @@ void PdfViewer::slotToggleTextAA(bool value)
 
     m_doc->setRenderHint(Poppler::Document::TextAntialiasing, value);
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->pageChanged(m_currentPage);
     }
 }
@@ -288,7 +282,7 @@ void PdfViewer::slotToggleGfxAA(bool value)
 
     m_doc->setRenderHint(Poppler::Document::Antialiasing, value);
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->pageChanged(m_currentPage);
     }
 }
@@ -301,14 +295,14 @@ void PdfViewer::slotRenderBackend(QAction *act)
 
     m_doc->setRenderBackend((Poppler::Document::RenderBackend)act->data().toInt());
 
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->pageChanged(m_currentPage);
     }
 }
 
 void PdfViewer::setPage(int page)
 {
-    Q_FOREACH(DocumentObserver *obs, m_observers) {
+    Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->pageChanged(page);
     }
 
@@ -319,4 +313,3 @@ int PdfViewer::page() const
 {
     return m_currentPage;
 }
-

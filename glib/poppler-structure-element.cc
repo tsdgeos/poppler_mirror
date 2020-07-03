@@ -21,17 +21,16 @@
 #include "config.h"
 
 #ifndef __GI_SCANNER__
-#include <StructTreeRoot.h>
-#include <StructElement.h>
-#include <GlobalParams.h>
-#include <UnicodeMap.h>
-#include <cmath>
+#    include <StructTreeRoot.h>
+#    include <StructElement.h>
+#    include <GlobalParams.h>
+#    include <UnicodeMap.h>
+#    include <cmath>
 #endif /* !__GI_SCANNER__ */
 
 #include "poppler.h"
 #include "poppler-private.h"
 #include "poppler-structure-element.h"
-
 
 /**
  * SECTION:poppler-structure-element
@@ -47,52 +46,42 @@
 
 typedef struct _PopplerStructureElementClass
 {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 } PopplerStructureElementClass;
 
-G_DEFINE_TYPE (PopplerStructureElement, poppler_structure_element, G_TYPE_OBJECT)
+G_DEFINE_TYPE(PopplerStructureElement, poppler_structure_element, G_TYPE_OBJECT)
 
-static PopplerStructureElement *
-_poppler_structure_element_new (PopplerDocument *document, const StructElement *element)
+static PopplerStructureElement *_poppler_structure_element_new(PopplerDocument *document, const StructElement *element)
 {
-  PopplerStructureElement *poppler_structure_element;
+    PopplerStructureElement *poppler_structure_element;
 
-  g_assert (POPPLER_IS_DOCUMENT (document));
-  g_assert (element);
+    g_assert(POPPLER_IS_DOCUMENT(document));
+    g_assert(element);
 
-  poppler_structure_element = (PopplerStructureElement *) g_object_new (POPPLER_TYPE_STRUCTURE_ELEMENT, nullptr, NULL);
-  poppler_structure_element->document = (PopplerDocument *) g_object_ref (document);
-  poppler_structure_element->elem = element;
+    poppler_structure_element = (PopplerStructureElement *)g_object_new(POPPLER_TYPE_STRUCTURE_ELEMENT, nullptr, NULL);
+    poppler_structure_element->document = (PopplerDocument *)g_object_ref(document);
+    poppler_structure_element->elem = element;
 
-  return poppler_structure_element;
+    return poppler_structure_element;
 }
 
+static void poppler_structure_element_init(PopplerStructureElement *poppler_structure_element) { }
 
-static void
-poppler_structure_element_init (PopplerStructureElement *poppler_structure_element)
+static void poppler_structure_element_finalize(GObject *object)
 {
+    PopplerStructureElement *poppler_structure_element = POPPLER_STRUCTURE_ELEMENT(object);
+
+    /* poppler_structure_element->elem is owned by the StructTreeRoot */
+    g_object_unref(poppler_structure_element->document);
+
+    G_OBJECT_CLASS(poppler_structure_element_parent_class)->finalize(object);
 }
 
-
-static void
-poppler_structure_element_finalize (GObject *object)
+static void poppler_structure_element_class_init(PopplerStructureElementClass *klass)
 {
-  PopplerStructureElement *poppler_structure_element = POPPLER_STRUCTURE_ELEMENT (object);
-
-  /* poppler_structure_element->elem is owned by the StructTreeRoot */
-  g_object_unref (poppler_structure_element->document);
-
-  G_OBJECT_CLASS (poppler_structure_element_parent_class)->finalize (object);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    gobject_class->finalize = poppler_structure_element_finalize;
 }
-
-
-static void
-poppler_structure_element_class_init (PopplerStructureElementClass *klass)
-{
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-  gobject_class->finalize = poppler_structure_element_finalize;
-}
-
 
 /**
  * poppler_structure_element_get_kind:
@@ -102,320 +91,226 @@ poppler_structure_element_class_init (PopplerStructureElementClass *klass)
  *
  * Since: 0.26
  */
-PopplerStructureElementKind
-poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_element)
+PopplerStructureElementKind poppler_structure_element_get_kind(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), POPPLER_STRUCTURE_ELEMENT_CONTENT);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, POPPLER_STRUCTURE_ELEMENT_CONTENT);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), POPPLER_STRUCTURE_ELEMENT_CONTENT);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, POPPLER_STRUCTURE_ELEMENT_CONTENT);
 
-  switch (poppler_structure_element->elem->getType ())
-    {
-      case StructElement::MCID:
+    switch (poppler_structure_element->elem->getType()) {
+    case StructElement::MCID:
         return POPPLER_STRUCTURE_ELEMENT_CONTENT;
-      case StructElement::OBJR:
+    case StructElement::OBJR:
         return POPPLER_STRUCTURE_ELEMENT_OBJECT_REFERENCE;
-      case StructElement::Document:
+    case StructElement::Document:
         return POPPLER_STRUCTURE_ELEMENT_DOCUMENT;
-      case StructElement::Part:
+    case StructElement::Part:
         return POPPLER_STRUCTURE_ELEMENT_PART;
-      case StructElement::Art:
+    case StructElement::Art:
         return POPPLER_STRUCTURE_ELEMENT_ARTICLE;
-      case StructElement::Sect:
+    case StructElement::Sect:
         return POPPLER_STRUCTURE_ELEMENT_SECTION;
-      case StructElement::Div:
+    case StructElement::Div:
         return POPPLER_STRUCTURE_ELEMENT_DIV;
-      case StructElement::Span:
+    case StructElement::Span:
         return POPPLER_STRUCTURE_ELEMENT_SPAN;
-      case StructElement::Quote:
+    case StructElement::Quote:
         return POPPLER_STRUCTURE_ELEMENT_QUOTE;
-      case StructElement::Note:
+    case StructElement::Note:
         return POPPLER_STRUCTURE_ELEMENT_NOTE;
-      case StructElement::Reference:
+    case StructElement::Reference:
         return POPPLER_STRUCTURE_ELEMENT_REFERENCE;
-      case StructElement::BibEntry:
+    case StructElement::BibEntry:
         return POPPLER_STRUCTURE_ELEMENT_BIBENTRY;
-      case StructElement::Code:
+    case StructElement::Code:
         return POPPLER_STRUCTURE_ELEMENT_CODE;
-      case StructElement::Link:
+    case StructElement::Link:
         return POPPLER_STRUCTURE_ELEMENT_LINK;
-      case StructElement::Annot:
+    case StructElement::Annot:
         return POPPLER_STRUCTURE_ELEMENT_ANNOT;
-      case StructElement::BlockQuote:
+    case StructElement::BlockQuote:
         return POPPLER_STRUCTURE_ELEMENT_BLOCKQUOTE;
-      case StructElement::Caption:
+    case StructElement::Caption:
         return POPPLER_STRUCTURE_ELEMENT_CAPTION;
-      case StructElement::NonStruct:
+    case StructElement::NonStruct:
         return POPPLER_STRUCTURE_ELEMENT_NONSTRUCT;
-      case StructElement::TOC:
+    case StructElement::TOC:
         return POPPLER_STRUCTURE_ELEMENT_TOC;
-      case StructElement::TOCI:
+    case StructElement::TOCI:
         return POPPLER_STRUCTURE_ELEMENT_TOC_ITEM;
-      case StructElement::Index:
+    case StructElement::Index:
         return POPPLER_STRUCTURE_ELEMENT_INDEX;
-      case StructElement::Private:
+    case StructElement::Private:
         return POPPLER_STRUCTURE_ELEMENT_PRIVATE;
-      case StructElement::P:
+    case StructElement::P:
         return POPPLER_STRUCTURE_ELEMENT_PARAGRAPH;
-      case StructElement::H:
+    case StructElement::H:
         return POPPLER_STRUCTURE_ELEMENT_HEADING;
-      case StructElement::H1:
+    case StructElement::H1:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_1;
-      case StructElement::H2:
+    case StructElement::H2:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_2;
-      case StructElement::H3:
+    case StructElement::H3:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_3;
-      case StructElement::H4:
+    case StructElement::H4:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_4;
-      case StructElement::H5:
+    case StructElement::H5:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_5;
-      case StructElement::H6:
+    case StructElement::H6:
         return POPPLER_STRUCTURE_ELEMENT_HEADING_6;
-      case StructElement::L:
+    case StructElement::L:
         return POPPLER_STRUCTURE_ELEMENT_LIST;
-      case StructElement::LI:
+    case StructElement::LI:
         return POPPLER_STRUCTURE_ELEMENT_LIST_ITEM;
-      case StructElement::Lbl:
+    case StructElement::Lbl:
         return POPPLER_STRUCTURE_ELEMENT_LIST_LABEL;
-      case StructElement::LBody:
+    case StructElement::LBody:
         return POPPLER_STRUCTURE_ELEMENT_LIST_BODY;
-      case StructElement::Table:
+    case StructElement::Table:
         return POPPLER_STRUCTURE_ELEMENT_TABLE;
-      case StructElement::TR:
+    case StructElement::TR:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_ROW;
-      case StructElement::TH:
+    case StructElement::TH:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_HEADING;
-      case StructElement::TD:
+    case StructElement::TD:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_DATA;
-      case StructElement::THead:
+    case StructElement::THead:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_HEADER;
-      case StructElement::TFoot:
+    case StructElement::TFoot:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_FOOTER;
-      case StructElement::TBody:
+    case StructElement::TBody:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_BODY;
-      case StructElement::Ruby:
+    case StructElement::Ruby:
         return POPPLER_STRUCTURE_ELEMENT_RUBY;
-      case StructElement::RB:
+    case StructElement::RB:
         return POPPLER_STRUCTURE_ELEMENT_RUBY_BASE_TEXT;
-      case StructElement::RT:
+    case StructElement::RT:
         return POPPLER_STRUCTURE_ELEMENT_RUBY_ANNOT_TEXT;
-      case StructElement::RP:
+    case StructElement::RP:
         return POPPLER_STRUCTURE_ELEMENT_RUBY_PUNCTUATION;
-      case StructElement::Warichu:
+    case StructElement::Warichu:
         return POPPLER_STRUCTURE_ELEMENT_WARICHU;
-      case StructElement::WT:
+    case StructElement::WT:
         return POPPLER_STRUCTURE_ELEMENT_WARICHU_TEXT;
-      case StructElement::WP:
+    case StructElement::WP:
         return POPPLER_STRUCTURE_ELEMENT_WARICHU_PUNCTUATION;
-      case StructElement::Figure:
+    case StructElement::Figure:
         return POPPLER_STRUCTURE_ELEMENT_FIGURE;
-      case StructElement::Formula:
+    case StructElement::Formula:
         return POPPLER_STRUCTURE_ELEMENT_FORMULA;
-      case StructElement::Form:
+    case StructElement::Form:
         return POPPLER_STRUCTURE_ELEMENT_FORM;
 
-      /* There should never be elements of type StructElement::Unknown */
-      case StructElement::Unknown:
-        g_assert_not_reached ();
+    /* There should never be elements of type StructElement::Unknown */
+    case StructElement::Unknown:
+        g_assert_not_reached();
     }
 
-  g_assert_not_reached ();
-  return POPPLER_STRUCTURE_ELEMENT_CONTENT;
+    g_assert_not_reached();
+    return POPPLER_STRUCTURE_ELEMENT_CONTENT;
 }
 
-
-template <typename EnumType>
-struct EnumNameValue {
-  const gchar *name;
-  EnumType     value;
-
-  static const EnumNameValue<EnumType> values[];
-  static const Attribute::Type attribute_type;
-};
-
-#define ENUM_VALUES(E, A) \
-  template<> const Attribute::Type EnumNameValue<E>::attribute_type = Attribute::A; \
-  template<> const EnumNameValue<E> EnumNameValue<E>::values[] =
-
-ENUM_VALUES (PopplerStructurePlacement, Placement)
+template<typename EnumType>
+struct EnumNameValue
 {
-  { "Block",  POPPLER_STRUCTURE_PLACEMENT_BLOCK  },
-  { "Inline", POPPLER_STRUCTURE_PLACEMENT_INLINE },
-  { "Before", POPPLER_STRUCTURE_PLACEMENT_BEFORE },
-  { "Start",  POPPLER_STRUCTURE_PLACEMENT_START  },
-  { "End",    POPPLER_STRUCTURE_PLACEMENT_END    },
-  { }
+    const gchar *name;
+    EnumType value;
+
+    static const EnumNameValue<EnumType> values[];
+    static const Attribute::Type attribute_type;
 };
 
-ENUM_VALUES (PopplerStructureWritingMode, WritingMode)
-{
-  { "LrTb", POPPLER_STRUCTURE_WRITING_MODE_LR_TB },
-  { "RlTb", POPPLER_STRUCTURE_WRITING_MODE_RL_TB },
-  { "TbRl", POPPLER_STRUCTURE_WRITING_MODE_TB_RL },
-  { }
+#define ENUM_VALUES(E, A)                                                                                                                                                                                                                      \
+    template<>                                                                                                                                                                                                                                 \
+    const Attribute::Type EnumNameValue<E>::attribute_type = Attribute::A;                                                                                                                                                                     \
+    template<>                                                                                                                                                                                                                                 \
+    const EnumNameValue<E> EnumNameValue<E>::values[] =
+
+ENUM_VALUES(PopplerStructurePlacement, Placement) { { "Block", POPPLER_STRUCTURE_PLACEMENT_BLOCK }, { "Inline", POPPLER_STRUCTURE_PLACEMENT_INLINE }, { "Before", POPPLER_STRUCTURE_PLACEMENT_BEFORE },
+                                                    { "Start", POPPLER_STRUCTURE_PLACEMENT_START }, { "End", POPPLER_STRUCTURE_PLACEMENT_END },       {} };
+
+ENUM_VALUES(PopplerStructureWritingMode, WritingMode) { { "LrTb", POPPLER_STRUCTURE_WRITING_MODE_LR_TB }, { "RlTb", POPPLER_STRUCTURE_WRITING_MODE_RL_TB }, { "TbRl", POPPLER_STRUCTURE_WRITING_MODE_TB_RL }, {} };
+
+ENUM_VALUES(PopplerStructureBorderStyle, BorderStyle) { { "None", POPPLER_STRUCTURE_BORDER_STYLE_NONE },     { "Hidden", POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN },
+                                                        { "Dotted", POPPLER_STRUCTURE_BORDER_STYLE_DOTTED }, { "Dashed", POPPLER_STRUCTURE_BORDER_STYLE_DASHED },
+                                                        { "Solid", POPPLER_STRUCTURE_BORDER_STYLE_SOLID },   { "Double", POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE },
+                                                        { "Groove", POPPLER_STRUCTURE_BORDER_STYLE_GROOVE }, { "Inset", POPPLER_STRUCTURE_BORDER_STYLE_INSET },
+                                                        { "Outset", POPPLER_STRUCTURE_BORDER_STYLE_OUTSET }, {} };
+
+ENUM_VALUES(PopplerStructureTextAlign,
+            TextAlign) { { "Start", POPPLER_STRUCTURE_TEXT_ALIGN_START }, { "Center", POPPLER_STRUCTURE_TEXT_ALIGN_CENTER }, { "End", POPPLER_STRUCTURE_TEXT_ALIGN_END }, { "Justify", POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY }, {} };
+
+ENUM_VALUES(PopplerStructureBlockAlign,
+            BlockAlign) { { "Before", POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE }, { "Middle", POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE }, { "After", POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER }, { "Justify", POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY }, {} };
+
+ENUM_VALUES(PopplerStructureInlineAlign, InlineAlign) { { "Start", POPPLER_STRUCTURE_INLINE_ALIGN_START }, { "Center", POPPLER_STRUCTURE_INLINE_ALIGN_CENTER }, { "End", POPPLER_STRUCTURE_INLINE_ALIGN_END }, {} };
+
+ENUM_VALUES(PopplerStructureTextDecoration, TextDecorationType) { { "None", POPPLER_STRUCTURE_TEXT_DECORATION_NONE },
+                                                                  { "Underline", POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE },
+                                                                  { "Overline", POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE },
+                                                                  { "LineThrough", POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
+                                                                  {} };
+
+ENUM_VALUES(PopplerStructureRubyAlign, RubyAlign) { { "Start", POPPLER_STRUCTURE_RUBY_ALIGN_START },     { "Center", POPPLER_STRUCTURE_RUBY_ALIGN_CENTER },         { "End", POPPLER_STRUCTURE_RUBY_ALIGN_END },
+                                                    { "Justify", POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY }, { "Distribute", POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE }, {} };
+
+ENUM_VALUES(PopplerStructureRubyPosition, RubyPosition) {
+    { "Before", POPPLER_STRUCTURE_RUBY_POSITION_BEFORE }, { "After", POPPLER_STRUCTURE_RUBY_POSITION_AFTER }, { "Warichu", POPPLER_STRUCTURE_RUBY_POSITION_WARICHU }, { "Inline", POPPLER_STRUCTURE_RUBY_POSITION_INLINE }, {}
 };
 
-ENUM_VALUES (PopplerStructureBorderStyle, BorderStyle)
-{
-  { "None",   POPPLER_STRUCTURE_BORDER_STYLE_NONE   },
-  { "Hidden", POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN },
-  { "Dotted", POPPLER_STRUCTURE_BORDER_STYLE_DOTTED },
-  { "Dashed", POPPLER_STRUCTURE_BORDER_STYLE_DASHED },
-  { "Solid",  POPPLER_STRUCTURE_BORDER_STYLE_SOLID  },
-  { "Double", POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE },
-  { "Groove", POPPLER_STRUCTURE_BORDER_STYLE_GROOVE },
-  { "Inset",  POPPLER_STRUCTURE_BORDER_STYLE_INSET  },
-  { "Outset", POPPLER_STRUCTURE_BORDER_STYLE_OUTSET },
-  { }
-};
+ENUM_VALUES(PopplerStructureGlyphOrientation, GlyphOrientationVertical) { { "Auto", POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO }, { "90", POPPLER_STRUCTURE_GLYPH_ORIENTATION_90 },
+                                                                          { "180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },   { "270", POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
+                                                                          { "360", POPPLER_STRUCTURE_GLYPH_ORIENTATION_0 },     { "-90", POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
+                                                                          { "-180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },  {} };
 
-ENUM_VALUES (PopplerStructureTextAlign, TextAlign)
-{
-  { "Start",   POPPLER_STRUCTURE_TEXT_ALIGN_START   },
-  { "Center",  POPPLER_STRUCTURE_TEXT_ALIGN_CENTER  },
-  { "End",     POPPLER_STRUCTURE_TEXT_ALIGN_END     },
-  { "Justify", POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY },
-  { }
-};
+ENUM_VALUES(PopplerStructureListNumbering, ListNumbering) { { "None", POPPLER_STRUCTURE_LIST_NUMBERING_NONE },
+                                                            { "Disc", POPPLER_STRUCTURE_LIST_NUMBERING_DISC },
+                                                            { "Circle", POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE },
+                                                            { "Square", POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE },
+                                                            { "Decimal", POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL },
+                                                            { "UpperRoman", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN },
+                                                            { "LowerRoman", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
+                                                            { "UpperAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
+                                                            { "LowerAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
+                                                            {} };
 
-ENUM_VALUES (PopplerStructureBlockAlign, BlockAlign)
-{
-  { "Before",  POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE  },
-  { "Middle",  POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE  },
-  { "After",   POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER   },
-  { "Justify", POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY },
-  { }
-};
+ENUM_VALUES(PopplerStructureFormRole,
+            Role) { { "rb", POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON }, { "cb", POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX }, { "pb", POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON }, { "tv", POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE }, {} };
 
-ENUM_VALUES (PopplerStructureInlineAlign, InlineAlign)
-{
-  { "Start",  POPPLER_STRUCTURE_INLINE_ALIGN_START  },
-  { "Center", POPPLER_STRUCTURE_INLINE_ALIGN_CENTER },
-  { "End",    POPPLER_STRUCTURE_INLINE_ALIGN_END    },
-  { }
-};
+ENUM_VALUES(PopplerStructureFormState, checked) { { "on", POPPLER_STRUCTURE_FORM_STATE_ON }, { "off", POPPLER_STRUCTURE_FORM_STATE_OFF }, { "neutral", POPPLER_STRUCTURE_FORM_STATE_NEUTRAL }, {} };
 
-ENUM_VALUES (PopplerStructureTextDecoration, TextDecorationType)
-{
-  { "None",        POPPLER_STRUCTURE_TEXT_DECORATION_NONE        },
-  { "Underline",   POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE   },
-  { "Overline",    POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE    },
-  { "LineThrough", POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureRubyAlign, RubyAlign)
-{
-  { "Start",      POPPLER_STRUCTURE_RUBY_ALIGN_START      },
-  { "Center",     POPPLER_STRUCTURE_RUBY_ALIGN_CENTER     },
-  { "End",        POPPLER_STRUCTURE_RUBY_ALIGN_END        },
-  { "Justify",    POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY    },
-  { "Distribute", POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureRubyPosition, RubyPosition)
-{
-  { "Before",  POPPLER_STRUCTURE_RUBY_POSITION_BEFORE  },
-  { "After",   POPPLER_STRUCTURE_RUBY_POSITION_AFTER   },
-  { "Warichu", POPPLER_STRUCTURE_RUBY_POSITION_WARICHU },
-  { "Inline",  POPPLER_STRUCTURE_RUBY_POSITION_INLINE  },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureGlyphOrientation, GlyphOrientationVertical)
-{
-  { "Auto", POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO },
-  { "90",   POPPLER_STRUCTURE_GLYPH_ORIENTATION_90   },
-  { "180",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_180  },
-  { "270",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270  },
-  { "360",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_0    },
-  { "-90",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270  },
-  { "-180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180  },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureListNumbering, ListNumbering)
-{
-  { "None",       POPPLER_STRUCTURE_LIST_NUMBERING_NONE        },
-  { "Disc",       POPPLER_STRUCTURE_LIST_NUMBERING_DISC        },
-  { "Circle",     POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE      },
-  { "Square",     POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE      },
-  { "Decimal",    POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL     },
-  { "UpperRoman", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN },
-  { "LowerRoman", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
-  { "UpperAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
-  { "LowerAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureFormRole, Role)
-{
-  { "rb", POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON },
-  { "cb", POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX     },
-  { "pb", POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON  },
-  { "tv", POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE   },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureFormState, checked)
-{
-  { "on",      POPPLER_STRUCTURE_FORM_STATE_ON      },
-  { "off",     POPPLER_STRUCTURE_FORM_STATE_OFF     },
-  { "neutral", POPPLER_STRUCTURE_FORM_STATE_NEUTRAL },
-  { }
-};
-
-ENUM_VALUES (PopplerStructureTableScope, Scope)
-{
-  { "Row",    POPPLER_STRUCTURE_TABLE_SCOPE_ROW    },
-  { "Column", POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN },
-  { "Both",   POPPLER_STRUCTURE_TABLE_SCOPE_BOTH   },
-  { }
-};
+ENUM_VALUES(PopplerStructureTableScope, Scope) { { "Row", POPPLER_STRUCTURE_TABLE_SCOPE_ROW }, { "Column", POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN }, { "Both", POPPLER_STRUCTURE_TABLE_SCOPE_BOTH }, {} };
 
 #undef ENUM_VALUES
 
-
-template <typename EnumType>
-static EnumType
-name_to_enum (Object *name_value)
+template<typename EnumType>
+static EnumType name_to_enum(Object *name_value)
 {
-  /*
-   * Non-NULL names must always be valid because Poppler
-   * discards the invalid attributes when parsing them.
-   */
-  g_assert (name_value != nullptr);
+    /*
+     * Non-NULL names must always be valid because Poppler
+     * discards the invalid attributes when parsing them.
+     */
+    g_assert(name_value != nullptr);
 
-  for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values ; item->name; item++)
-    if (name_value->isName (item->name))
-      return item->value;
+    for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values; item->name; item++)
+        if (name_value->isName(item->name))
+            return item->value;
 
-  g_assert_not_reached ();
-  return static_cast<EnumType> (-1);
+    g_assert_not_reached();
+    return static_cast<EnumType>(-1);
 }
 
-
-template <typename EnumType>
-static EnumType
-attr_to_enum (PopplerStructureElement *poppler_structure_element)
+template<typename EnumType>
+static EnumType attr_to_enum(PopplerStructureElement *poppler_structure_element)
 {
-  const Attribute *attr =
-      poppler_structure_element->elem->findAttribute (EnumNameValue<EnumType>::attribute_type, true);
-  return name_to_enum<EnumType> ((attr != nullptr)
-                                 ? attr->getValue ()
-                                 : Attribute::getDefaultValue (EnumNameValue<EnumType>::attribute_type));
+    const Attribute *attr = poppler_structure_element->elem->findAttribute(EnumNameValue<EnumType>::attribute_type, true);
+    return name_to_enum<EnumType>((attr != nullptr) ? attr->getValue() : Attribute::getDefaultValue(EnumNameValue<EnumType>::attribute_type));
 }
 
-
-static inline Object *
-attr_value_or_default (PopplerStructureElement *poppler_structure_element,
-                       Attribute::Type          attribute_type)
+static inline Object *attr_value_or_default(PopplerStructureElement *poppler_structure_element, Attribute::Type attribute_type)
 {
-  const Attribute *attr =
-      poppler_structure_element->elem->findAttribute (attribute_type, true);
-  return attr ? attr->getValue () : Attribute::getDefaultValue (attribute_type);
+    const Attribute *attr = poppler_structure_element->elem->findAttribute(attribute_type, true);
+    return attr ? attr->getValue() : Attribute::getDefaultValue(attribute_type);
 }
-
 
 /**
  * poppler_structure_element_get_page:
@@ -428,19 +323,17 @@ attr_value_or_default (PopplerStructureElement *poppler_structure_element,
  *
  * Since: 0.26
  */
-gint
-poppler_structure_element_get_page (PopplerStructureElement *poppler_structure_element)
+gint poppler_structure_element_get_page(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), -1);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, -1);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), -1);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, -1);
 
-  Ref ref;
-  if (poppler_structure_element->elem->getPageRef (ref))
-    {
-      return poppler_structure_element->document->doc->findPage(ref) - 1;
+    Ref ref;
+    if (poppler_structure_element->elem->getPageRef(ref)) {
+        return poppler_structure_element->document->doc->findPage(ref) - 1;
     }
 
-  return -1;
+    return -1;
 }
 
 /**
@@ -453,13 +346,12 @@ poppler_structure_element_get_page (PopplerStructureElement *poppler_structure_e
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_is_content (PopplerStructureElement *poppler_structure_element)
+gboolean poppler_structure_element_is_content(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, FALSE);
 
-  return poppler_structure_element->elem->isContent ();
+    return poppler_structure_element->elem->isContent();
 }
 
 /**
@@ -472,13 +364,12 @@ poppler_structure_element_is_content (PopplerStructureElement *poppler_structure
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_is_inline (PopplerStructureElement *poppler_structure_element)
+gboolean poppler_structure_element_is_inline(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, FALSE);
 
-  return poppler_structure_element->elem->isInline ();
+    return poppler_structure_element->elem->isInline();
 }
 
 /**
@@ -491,13 +382,12 @@ poppler_structure_element_is_inline (PopplerStructureElement *poppler_structure_
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_is_block (PopplerStructureElement *poppler_structure_element)
+gboolean poppler_structure_element_is_block(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, FALSE);
 
-  return poppler_structure_element->elem->isBlock ();
+    return poppler_structure_element->elem->isBlock();
 }
 
 /**
@@ -511,13 +401,12 @@ poppler_structure_element_is_block (PopplerStructureElement *poppler_structure_e
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_is_grouping (PopplerStructureElement *poppler_structure_element)
+gboolean poppler_structure_element_is_grouping(PopplerStructureElement *poppler_structure_element)
 {
-    g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-    g_return_val_if_fail (poppler_structure_element->elem != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, FALSE);
 
-    return poppler_structure_element->elem->isGrouping ();
+    return poppler_structure_element->elem->isGrouping();
 }
 
 /**
@@ -531,14 +420,13 @@ poppler_structure_element_is_grouping (PopplerStructureElement *poppler_structur
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_id (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_id(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  const GooString *string = poppler_structure_element->elem->getID ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getID();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -551,14 +439,13 @@ poppler_structure_element_get_id (PopplerStructureElement *poppler_structure_ele
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_title (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_title(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  const GooString *string = poppler_structure_element->elem->getTitle ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getTitle();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -574,17 +461,16 @@ poppler_structure_element_get_title (PopplerStructureElement *poppler_structure_
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_abbreviation (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_abbreviation(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  if (poppler_structure_element->elem->getType () != StructElement::Span)
-    return nullptr;
+    if (poppler_structure_element->elem->getType() != StructElement::Span)
+        return nullptr;
 
-  const GooString *string = poppler_structure_element->elem->getExpandedAbbr ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getExpandedAbbr();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -599,14 +485,13 @@ poppler_structure_element_get_abbreviation (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_language (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_language(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  const GooString *string = poppler_structure_element->elem->getLanguage ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getLanguage();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -625,14 +510,13 @@ poppler_structure_element_get_language (PopplerStructureElement *poppler_structu
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_alt_text (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_alt_text(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  const GooString *string = poppler_structure_element->elem->getAltText ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getAltText();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -653,14 +537,13 @@ poppler_structure_element_get_alt_text (PopplerStructureElement *poppler_structu
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_actual_text (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_actual_text(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  const GooString *string = poppler_structure_element->elem->getActualText ();
-  return string ? _poppler_goo_string_to_utf8 (string) : nullptr;
+    const GooString *string = poppler_structure_element->elem->getActualText();
+    return string ? _poppler_goo_string_to_utf8(string) : nullptr;
 }
 
 /**
@@ -676,36 +559,29 @@ poppler_structure_element_get_actual_text (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_text (PopplerStructureElement     *poppler_structure_element,
-                                    PopplerStructureGetTextFlags flags)
+gchar *poppler_structure_element_get_text(PopplerStructureElement *poppler_structure_element, PopplerStructureGetTextFlags flags)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-
-  GooString *string =
-      poppler_structure_element->elem->getText (flags & POPPLER_STRUCTURE_GET_TEXT_RECURSIVE);
-  gchar *result = string ? _poppler_goo_string_to_utf8 (string) : nullptr;
-  delete string;
-  return result;
+    GooString *string = poppler_structure_element->elem->getText(flags & POPPLER_STRUCTURE_GET_TEXT_RECURSIVE);
+    gchar *result = string ? _poppler_goo_string_to_utf8(string) : nullptr;
+    delete string;
+    return result;
 }
 
 struct _PopplerStructureElementIter
 {
-  PopplerDocument *document;
-  union {
-    const StructElement  *elem;
-    const StructTreeRoot *root;
-  };
-  gboolean is_root;
-  unsigned index;
+    PopplerDocument *document;
+    union {
+        const StructElement *elem;
+        const StructTreeRoot *root;
+    };
+    gboolean is_root;
+    unsigned index;
 };
 
-POPPLER_DEFINE_BOXED_TYPE (PopplerStructureElementIter,
-                           poppler_structure_element_iter,
-                           poppler_structure_element_iter_copy,
-                           poppler_structure_element_iter_free)
+POPPLER_DEFINE_BOXED_TYPE(PopplerStructureElementIter, poppler_structure_element_iter, poppler_structure_element_iter_copy, poppler_structure_element_iter_free)
 
 /**
  * poppler_structure_element_iter_copy:
@@ -718,17 +594,16 @@ POPPLER_DEFINE_BOXED_TYPE (PopplerStructureElementIter,
  *
  * Since: 0.26
  */
-PopplerStructureElementIter *
-poppler_structure_element_iter_copy (PopplerStructureElementIter *iter)
+PopplerStructureElementIter *poppler_structure_element_iter_copy(PopplerStructureElementIter *iter)
 {
-  PopplerStructureElementIter *new_iter;
+    PopplerStructureElementIter *new_iter;
 
-  g_return_val_if_fail (iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, NULL);
 
-  new_iter = g_slice_dup (PopplerStructureElementIter, iter);
-  new_iter->document = (PopplerDocument *) g_object_ref (new_iter->document);
+    new_iter = g_slice_dup(PopplerStructureElementIter, iter);
+    new_iter->document = (PopplerDocument *)g_object_ref(new_iter->document);
 
-  return new_iter;
+    return new_iter;
 }
 
 /**
@@ -739,14 +614,13 @@ poppler_structure_element_iter_copy (PopplerStructureElementIter *iter)
  *
  * Since: 0.26
  */
-void
-poppler_structure_element_iter_free (PopplerStructureElementIter *iter)
+void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
 {
-  if (G_UNLIKELY (iter == nullptr))
-    return;
+    if (G_UNLIKELY(iter == nullptr))
+        return;
 
-  g_object_unref (iter->document);
-  g_slice_free (PopplerStructureElementIter, iter);
+    g_object_unref(iter->document);
+    g_slice_free(PopplerStructureElementIter, iter);
 }
 
 /**
@@ -788,26 +662,25 @@ poppler_structure_element_iter_free (PopplerStructureElementIter *iter)
  *
  * Since: 0.26
  */
-PopplerStructureElementIter *
-poppler_structure_element_iter_new (PopplerDocument *poppler_document)
+PopplerStructureElementIter *poppler_structure_element_iter_new(PopplerDocument *poppler_document)
 {
-  PopplerStructureElementIter *iter;
+    PopplerStructureElementIter *iter;
 
-  g_return_val_if_fail (POPPLER_IS_DOCUMENT (poppler_document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(poppler_document), NULL);
 
-  const StructTreeRoot *root = poppler_document->doc->getStructTreeRoot ();
-  if (root == nullptr)
-    return nullptr;
+    const StructTreeRoot *root = poppler_document->doc->getStructTreeRoot();
+    if (root == nullptr)
+        return nullptr;
 
-  if (root->getNumChildren () == 0)
-    return nullptr;
+    if (root->getNumChildren() == 0)
+        return nullptr;
 
-  iter = g_slice_new0 (PopplerStructureElementIter);
-  iter->document = (PopplerDocument *) g_object_ref (poppler_document);
-  iter->is_root = TRUE;
-  iter->root = root;
+    iter = g_slice_new0(PopplerStructureElementIter);
+    iter->document = (PopplerDocument *)g_object_ref(poppler_document);
+    iter->is_root = TRUE;
+    iter->root = root;
 
-  return iter;
+    return iter;
 }
 
 /**
@@ -822,18 +695,15 @@ poppler_structure_element_iter_new (PopplerDocument *poppler_document)
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_iter_next (PopplerStructureElementIter *iter)
+gboolean poppler_structure_element_iter_next(PopplerStructureElementIter *iter)
 {
-  unsigned elements;
+    unsigned elements;
 
-  g_return_val_if_fail (iter != nullptr, FALSE);
+    g_return_val_if_fail(iter != nullptr, FALSE);
 
-  elements = iter->is_root
-    ? iter->root->getNumChildren ()
-    : iter->elem->getNumChildren ();
+    elements = iter->is_root ? iter->root->getNumChildren() : iter->elem->getNumChildren();
 
-  return ++iter->index < elements;
+    return ++iter->index < elements;
 }
 
 /**
@@ -846,16 +716,13 @@ poppler_structure_element_iter_next (PopplerStructureElementIter *iter)
  *
  * Since: 0.26
  */
-PopplerStructureElement *
-poppler_structure_element_iter_get_element (PopplerStructureElementIter *iter)
+PopplerStructureElement *poppler_structure_element_iter_get_element(PopplerStructureElementIter *iter)
 {
-  g_return_val_if_fail (iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, NULL);
 
-  const StructElement *elem = iter->is_root
-    ? iter->root->getChild (iter->index)
-    : iter->elem->getChild (iter->index);
+    const StructElement *elem = iter->is_root ? iter->root->getChild(iter->index) : iter->elem->getChild(iter->index);
 
-  return _poppler_structure_element_new (iter->document, elem);
+    return _poppler_structure_element_new(iter->document, elem);
 }
 
 /**
@@ -870,90 +737,81 @@ poppler_structure_element_iter_get_element (PopplerStructureElementIter *iter)
  *
  * Since: 0.26
  */
-PopplerStructureElementIter *
-poppler_structure_element_iter_get_child (PopplerStructureElementIter *parent)
+PopplerStructureElementIter *poppler_structure_element_iter_get_child(PopplerStructureElementIter *parent)
 {
-  const StructElement *elem;
+    const StructElement *elem;
 
-  g_return_val_if_fail (parent != nullptr, NULL);
+    g_return_val_if_fail(parent != nullptr, NULL);
 
-  elem = parent->is_root
-    ? parent->root->getChild (parent->index)
-    : parent->elem->getChild (parent->index);
+    elem = parent->is_root ? parent->root->getChild(parent->index) : parent->elem->getChild(parent->index);
 
-  if (elem->getNumChildren () > 0)
-    {
-      PopplerStructureElementIter *child = g_slice_new0 (PopplerStructureElementIter);
-      child->document = (PopplerDocument *) g_object_ref (parent->document);
-      child->elem = elem;
-      return child;
+    if (elem->getNumChildren() > 0) {
+        PopplerStructureElementIter *child = g_slice_new0(PopplerStructureElementIter);
+        child->document = (PopplerDocument *)g_object_ref(parent->document);
+        child->elem = elem;
+        return child;
     }
 
-  return nullptr;
+    return nullptr;
 }
 
-
-struct _PopplerTextSpan {
-  gchar *text;
-  gchar *font_name;
-  guint  flags;
-  PopplerColor color;
-};
-
-POPPLER_DEFINE_BOXED_TYPE (PopplerTextSpan,
-                           poppler_text_span,
-                           poppler_text_span_copy,
-                           poppler_text_span_free)
-
-enum {
-  POPPLER_TEXT_SPAN_FIXED_WIDTH = (1 << 0),
-  POPPLER_TEXT_SPAN_SERIF       = (1 << 1),
-  POPPLER_TEXT_SPAN_ITALIC      = (1 << 2),
-  POPPLER_TEXT_SPAN_BOLD        = (1 << 3),
-};
-
-static PopplerTextSpan *
-text_span_poppler_text_span (const TextSpan& span)
+struct _PopplerTextSpan
 {
-    PopplerTextSpan *new_span = g_slice_new0 (PopplerTextSpan);
-    if (GooString *text = span.getText ())
-      new_span->text = _poppler_goo_string_to_utf8 (text);
+    gchar *text;
+    gchar *font_name;
+    guint flags;
+    PopplerColor color;
+};
 
-    new_span->color.red = colToDbl (span.getColor ().r) * 65535;
-    new_span->color.green = colToDbl (span.getColor ().g) * 65535;
-    new_span->color.blue = colToDbl (span.getColor ().b) * 65535;
+POPPLER_DEFINE_BOXED_TYPE(PopplerTextSpan, poppler_text_span, poppler_text_span_copy, poppler_text_span_free)
 
-    if (span.getFont ())
-      {
+enum
+{
+    POPPLER_TEXT_SPAN_FIXED_WIDTH = (1 << 0),
+    POPPLER_TEXT_SPAN_SERIF = (1 << 1),
+    POPPLER_TEXT_SPAN_ITALIC = (1 << 2),
+    POPPLER_TEXT_SPAN_BOLD = (1 << 3),
+};
+
+static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
+{
+    PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
+    if (GooString *text = span.getText())
+        new_span->text = _poppler_goo_string_to_utf8(text);
+
+    new_span->color.red = colToDbl(span.getColor().r) * 65535;
+    new_span->color.green = colToDbl(span.getColor().g) * 65535;
+    new_span->color.blue = colToDbl(span.getColor().b) * 65535;
+
+    if (span.getFont()) {
         // GfxFont sometimes does not have a family name but there
         // is always a font name that can be used as fallback.
-        const GooString *font_name = span.getFont ()->getFamily ();
+        const GooString *font_name = span.getFont()->getFamily();
         if (font_name == nullptr)
-          font_name = span.getFont ()->getName ();
+            font_name = span.getFont()->getName();
 
-        new_span->font_name = _poppler_goo_string_to_utf8 (font_name);
-        if (span.getFont ()->isFixedWidth ())
-          new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
-        if (span.getFont ()->isSerif ())
+        new_span->font_name = _poppler_goo_string_to_utf8(font_name);
+        if (span.getFont()->isFixedWidth())
+            new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
+        if (span.getFont()->isSerif())
             new_span->flags |= POPPLER_TEXT_SPAN_SERIF;
-        if (span.getFont ()->isItalic ())
+        if (span.getFont()->isItalic())
             new_span->flags |= POPPLER_TEXT_SPAN_ITALIC;
-        if (span.getFont ()->isBold ())
+        if (span.getFont()->isBold())
             new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
 
         /* isBold() can return false for some fonts whose weight is heavy */
-        switch (span.getFont ()->getWeight ())
-          {
-          case GfxFont::W500:
-          case GfxFont::W600:
-          case GfxFont::W700:
-          case GfxFont::W800:
-          case GfxFont::W900:
+        switch (span.getFont()->getWeight()) {
+        case GfxFont::W500:
+        case GfxFont::W600:
+        case GfxFont::W700:
+        case GfxFont::W800:
+        case GfxFont::W900:
             new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
-          default:
+        default:
             break;
-          }
-      }
+        }
+    }
 
     return new_span;
 }
@@ -968,18 +826,17 @@ text_span_poppler_text_span (const TextSpan& span)
  *
  * Since: 0.26
  */
-PopplerTextSpan *
-poppler_text_span_copy (PopplerTextSpan *poppler_text_span)
+PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span)
 {
-  PopplerTextSpan *new_span;
+    PopplerTextSpan *new_span;
 
-  g_return_val_if_fail (poppler_text_span != nullptr, NULL);
+    g_return_val_if_fail(poppler_text_span != nullptr, NULL);
 
-  new_span = g_slice_dup (PopplerTextSpan, poppler_text_span);
-  new_span->text = g_strdup (poppler_text_span->text);
-  if (poppler_text_span->font_name)
-    new_span->font_name = g_strdup (poppler_text_span->font_name);
-  return new_span;
+    new_span = g_slice_dup(PopplerTextSpan, poppler_text_span);
+    new_span->text = g_strdup(poppler_text_span->text);
+    if (poppler_text_span->font_name)
+        new_span->font_name = g_strdup(poppler_text_span->font_name);
+    return new_span;
 }
 
 /**
@@ -990,15 +847,14 @@ poppler_text_span_copy (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-void
-poppler_text_span_free (PopplerTextSpan *poppler_text_span)
+void poppler_text_span_free(PopplerTextSpan *poppler_text_span)
 {
-  if (G_UNLIKELY (poppler_text_span == nullptr))
-    return;
+    if (G_UNLIKELY(poppler_text_span == nullptr))
+        return;
 
-  g_free (poppler_text_span->text);
-  g_free (poppler_text_span->font_name);
-  g_slice_free (PopplerTextSpan, poppler_text_span);
+    g_free(poppler_text_span->text);
+    g_free(poppler_text_span->font_name);
+    g_slice_free(PopplerTextSpan, poppler_text_span);
 }
 
 /**
@@ -1011,12 +867,11 @@ poppler_text_span_free (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-gboolean
-poppler_text_span_is_fixed_width_font (PopplerTextSpan *poppler_text_span)
+gboolean poppler_text_span_is_fixed_width_font(PopplerTextSpan *poppler_text_span)
 {
-  g_return_val_if_fail (poppler_text_span != nullptr, FALSE);
+    g_return_val_if_fail(poppler_text_span != nullptr, FALSE);
 
-  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_FIXED_WIDTH);
+    return (poppler_text_span->flags & POPPLER_TEXT_SPAN_FIXED_WIDTH);
 }
 
 /**
@@ -1029,12 +884,11 @@ poppler_text_span_is_fixed_width_font (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-gboolean
-poppler_text_span_is_serif_font (PopplerTextSpan *poppler_text_span)
+gboolean poppler_text_span_is_serif_font(PopplerTextSpan *poppler_text_span)
 {
-  g_return_val_if_fail (poppler_text_span != nullptr, FALSE);
+    g_return_val_if_fail(poppler_text_span != nullptr, FALSE);
 
-  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_SERIF);
+    return (poppler_text_span->flags & POPPLER_TEXT_SPAN_SERIF);
 }
 
 /**
@@ -1047,12 +901,11 @@ poppler_text_span_is_serif_font (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-gboolean
-poppler_text_span_is_bold_font (PopplerTextSpan *poppler_text_span)
+gboolean poppler_text_span_is_bold_font(PopplerTextSpan *poppler_text_span)
 {
-  g_return_val_if_fail (poppler_text_span != nullptr, FALSE);
+    g_return_val_if_fail(poppler_text_span != nullptr, FALSE);
 
-  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_BOLD);
+    return (poppler_text_span->flags & POPPLER_TEXT_SPAN_BOLD);
 }
 
 /**
@@ -1064,14 +917,12 @@ poppler_text_span_is_bold_font (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-void
-poppler_text_span_get_color (PopplerTextSpan *poppler_text_span,
-                             PopplerColor *color)
+void poppler_text_span_get_color(PopplerTextSpan *poppler_text_span, PopplerColor *color)
 {
-  g_return_if_fail (poppler_text_span != nullptr);
-  g_return_if_fail (color != nullptr);
+    g_return_if_fail(poppler_text_span != nullptr);
+    g_return_if_fail(color != nullptr);
 
-  *color = poppler_text_span->color;
+    *color = poppler_text_span->color;
 }
 
 /**
@@ -1084,12 +935,11 @@ poppler_text_span_get_color (PopplerTextSpan *poppler_text_span,
  *
  * Since: 0.26
  */
-const gchar *
-poppler_text_span_get_text (PopplerTextSpan *poppler_text_span)
+const gchar *poppler_text_span_get_text(PopplerTextSpan *poppler_text_span)
 {
-  g_return_val_if_fail (poppler_text_span != nullptr, NULL);
+    g_return_val_if_fail(poppler_text_span != nullptr, NULL);
 
-  return poppler_text_span->text;
+    return poppler_text_span->text;
 }
 
 /**
@@ -1103,12 +953,11 @@ poppler_text_span_get_text (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-const gchar *
-poppler_text_span_get_font_name (PopplerTextSpan *poppler_text_span)
+const gchar *poppler_text_span_get_font_name(PopplerTextSpan *poppler_text_span)
 {
-  g_return_val_if_fail (poppler_text_span != nullptr, NULL);
+    g_return_val_if_fail(poppler_text_span != nullptr, NULL);
 
-  return poppler_text_span->font_name;
+    return poppler_text_span->font_name;
 }
 
 /**
@@ -1137,27 +986,25 @@ poppler_text_span_get_font_name (PopplerTextSpan *poppler_text_span)
  *
  * Since: 0.26
  */
-PopplerTextSpan **
-poppler_structure_element_get_text_spans (PopplerStructureElement *poppler_structure_element,
-                                          guint                   *n_text_spans)
+PopplerTextSpan **poppler_structure_element_get_text_spans(PopplerStructureElement *poppler_structure_element, guint *n_text_spans)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
-  g_return_val_if_fail (n_text_spans != nullptr, NULL);
-  g_return_val_if_fail (poppler_structure_element->elem != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
+    g_return_val_if_fail(n_text_spans != nullptr, NULL);
+    g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-  if (!poppler_structure_element->elem->isContent ())
-    return nullptr;
+    if (!poppler_structure_element->elem->isContent())
+        return nullptr;
 
-  const TextSpanArray spans(poppler_structure_element->elem->getTextSpans ());
-  PopplerTextSpan **text_spans = g_new0 (PopplerTextSpan*, spans.size ());
+    const TextSpanArray spans(poppler_structure_element->elem->getTextSpans());
+    PopplerTextSpan **text_spans = g_new0(PopplerTextSpan *, spans.size());
 
-  size_t i = 0;
-  for (const TextSpan &s : spans)
-    text_spans[i++] = text_span_poppler_text_span (s);
+    size_t i = 0;
+    for (const TextSpan &s : spans)
+        text_spans[i++] = text_span_poppler_text_span(s);
 
-  *n_text_spans = spans.size ();
+    *n_text_spans = spans.size();
 
-  return text_spans;
+    return text_spans;
 }
 
 /* General Layout Attributes */
@@ -1172,12 +1019,10 @@ poppler_structure_element_get_text_spans (PopplerStructureElement *poppler_struc
  *
  * Since: 0.26
  */
-PopplerStructurePlacement
-poppler_structure_element_get_placement (PopplerStructureElement *poppler_structure_element)
+PopplerStructurePlacement poppler_structure_element_get_placement(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element),
-                        EnumNameValue<PopplerStructurePlacement>::values[0].value);
-  return attr_to_enum<PopplerStructurePlacement> (poppler_structure_element);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), EnumNameValue<PopplerStructurePlacement>::values[0].value);
+    return attr_to_enum<PopplerStructurePlacement>(poppler_structure_element);
 }
 
 /**
@@ -1191,34 +1036,25 @@ poppler_structure_element_get_placement (PopplerStructureElement *poppler_struct
  *
  * Since: 0.26
  */
-PopplerStructureWritingMode
-poppler_structure_element_get_writing_mode (PopplerStructureElement *poppler_structure_element)
+PopplerStructureWritingMode poppler_structure_element_get_writing_mode(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element),
-                        EnumNameValue<PopplerStructureWritingMode>::values[0].value);
-  return attr_to_enum<PopplerStructureWritingMode> (poppler_structure_element);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), EnumNameValue<PopplerStructureWritingMode>::values[0].value);
+    return attr_to_enum<PopplerStructureWritingMode>(poppler_structure_element);
 }
 
-
-static void
-convert_border_style (Object *object, PopplerStructureBorderStyle *values)
+static void convert_border_style(Object *object, PopplerStructureBorderStyle *values)
 {
-  g_assert (object != nullptr);
-  g_assert (values != nullptr);
+    g_assert(object != nullptr);
+    g_assert(values != nullptr);
 
-  if (object->isArray ())
-    {
-      g_assert (object->arrayGetLength () == 4);
-      for (guint i = 0; i < 4; i++)
-        {
-          Object item = object->arrayGet (i);
-          values[i] = name_to_enum<PopplerStructureBorderStyle> (&item);
+    if (object->isArray()) {
+        g_assert(object->arrayGetLength() == 4);
+        for (guint i = 0; i < 4; i++) {
+            Object item = object->arrayGet(i);
+            values[i] = name_to_enum<PopplerStructureBorderStyle>(&item);
         }
-    }
-  else
-    {
-      values[0] = values[1] = values[2] = values[3] =
-        name_to_enum<PopplerStructureBorderStyle> (object);
+    } else {
+        values[0] = values[1] = values[2] = values[3] = name_to_enum<PopplerStructureBorderStyle>(object);
     }
 }
 
@@ -1234,43 +1070,36 @@ convert_border_style (Object *object, PopplerStructureBorderStyle *values)
  *
  * Since: 0.26
  */
-void
-poppler_structure_element_get_border_style (PopplerStructureElement     *poppler_structure_element,
-                                            PopplerStructureBorderStyle *border_styles)
+void poppler_structure_element_get_border_style(PopplerStructureElement *poppler_structure_element, PopplerStructureBorderStyle *border_styles)
 {
-  g_return_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element));
-  g_return_if_fail (border_styles != nullptr);
+    g_return_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element));
+    g_return_if_fail(border_styles != nullptr);
 
-  convert_border_style (attr_value_or_default (poppler_structure_element,
-                                               Attribute::BorderStyle),
-                        border_styles);
+    convert_border_style(attr_value_or_default(poppler_structure_element, Attribute::BorderStyle), border_styles);
 }
 
-static inline void
-convert_doubles_array (Object *object, gdouble **values, guint *n_values)
+static inline void convert_doubles_array(Object *object, gdouble **values, guint *n_values)
 {
-  g_assert (object->isArray ());
-  g_assert (n_values != nullptr);
-  g_assert (values != nullptr);
+    g_assert(object->isArray());
+    g_assert(n_values != nullptr);
+    g_assert(values != nullptr);
 
-  *n_values = object->arrayGetLength ();
-  gdouble* doubles = g_new (gdouble, *n_values);
+    *n_values = object->arrayGetLength();
+    gdouble *doubles = g_new(gdouble, *n_values);
 
-  for (guint i = 0; i < *n_values; i++)
-    {
-      doubles[i] = object->arrayGet (i).getNum ();
+    for (guint i = 0; i < *n_values; i++) {
+        doubles[i] = object->arrayGet(i).getNum();
     }
 }
 
-static inline void
-convert_color (Object *object, PopplerColor *color)
+static inline void convert_color(Object *object, PopplerColor *color)
 {
-  g_assert (color != nullptr);
-  g_assert (object->isArray () && object->arrayGetLength () != 3);
+    g_assert(color != nullptr);
+    g_assert(object->isArray() && object->arrayGetLength() != 3);
 
-  color->red = object->arrayGet (0).getNum () * 65535;
-  color->green = object->arrayGet (1).getNum () * 65535;
-  color->blue = object->arrayGet (2).getNum () * 65535;
+    color->red = object->arrayGet(0).getNum() * 65535;
+    color->green = object->arrayGet(1).getNum() * 65535;
+    color->blue = object->arrayGet(2).getNum() * 65535;
 }
 
 /**
@@ -1287,19 +1116,17 @@ convert_color (Object *object, PopplerColor *color)
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_color (PopplerStructureElement *poppler_structure_element,
-                                     PopplerColor            *color)
+gboolean poppler_structure_element_get_color(PopplerStructureElement *poppler_structure_element, PopplerColor *color)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (color != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(color != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Color);
-  if (value == nullptr)
-    return FALSE;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Color);
+    if (value == nullptr)
+        return FALSE;
 
-  convert_color (value, color);
-  return TRUE;
+    convert_color(value, color);
+    return TRUE;
 }
 
 /**
@@ -1315,19 +1142,17 @@ poppler_structure_element_get_color (PopplerStructureElement *poppler_structure_
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_background_color (PopplerStructureElement *poppler_structure_element,
-                                                PopplerColor            *color)
+gboolean poppler_structure_element_get_background_color(PopplerStructureElement *poppler_structure_element, PopplerColor *color)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (color != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(color != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BackgroundColor);
-  if (value == nullptr)
-    return FALSE;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BackgroundColor);
+    if (value == nullptr)
+        return FALSE;
 
-  convert_color (value, color);
-  return TRUE;
+    convert_color(value, color);
+    return TRUE;
 }
 
 /**
@@ -1348,55 +1173,44 @@ poppler_structure_element_get_background_color (PopplerStructureElement *poppler
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_border_color (PopplerStructureElement *poppler_structure_element,
-                                            PopplerColor            *colors)
+gboolean poppler_structure_element_get_border_color(PopplerStructureElement *poppler_structure_element, PopplerColor *colors)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (colors != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(colors != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BorderColor);
-  if (value == nullptr)
-    return FALSE;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderColor);
+    if (value == nullptr)
+        return FALSE;
 
-  g_assert (value->isArray ());
-  if (value->arrayGetLength () == 4)
-    {
-      // One color per side.
-      for (guint i = 0; i < 4; i++)
-        {
-          Object item = value->arrayGet (i);
-          convert_color (&item, &colors[i]);
+    g_assert(value->isArray());
+    if (value->arrayGetLength() == 4) {
+        // One color per side.
+        for (guint i = 0; i < 4; i++) {
+            Object item = value->arrayGet(i);
+            convert_color(&item, &colors[i]);
         }
-    }
-  else
-    {
-      // Same color in all sides.
-      g_assert (value->arrayGetLength () == 3);
-      convert_color (value, &colors[0]);
-      colors[1] = colors[2] = colors[3] = colors[0];
+    } else {
+        // Same color in all sides.
+        g_assert(value->arrayGetLength() == 3);
+        convert_color(value, &colors[0]);
+        colors[1] = colors[2] = colors[3] = colors[0];
     }
 
-  return TRUE;
+    return TRUE;
 }
 
-static inline void
-convert_double_or_4_doubles (Object *object, gdouble *value)
+static inline void convert_double_or_4_doubles(Object *object, gdouble *value)
 {
-  g_assert (object != nullptr);
+    g_assert(object != nullptr);
 
-  if (object->isArray ())
-    {
-      g_assert (object->arrayGetLength () == 4);
-      for (guint i = 0; i < 4; i++)
-        {
-          value[i] = object->arrayGet (i).getNum ();
+    if (object->isArray()) {
+        g_assert(object->arrayGetLength() == 4);
+        for (guint i = 0; i < 4; i++) {
+            value[i] = object->arrayGet(i).getNum();
         }
-    }
-  else
-    {
-      g_assert (object->isNum ());
-      value[0] = value[1] = value[2] = value[3] = object->getNum ();
+    } else {
+        g_assert(object->isNum());
+        value[0] = value[1] = value[2] = value[3] = object->getNum();
     }
 }
 
@@ -1416,19 +1230,17 @@ convert_double_or_4_doubles (Object *object, gdouble *value)
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_border_thickness (PopplerStructureElement *poppler_structure_element,
-                                                gdouble                 *border_thicknesses)
+gboolean poppler_structure_element_get_border_thickness(PopplerStructureElement *poppler_structure_element, gdouble *border_thicknesses)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
-  g_return_val_if_fail (border_thicknesses != nullptr, FALSE);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
+    g_return_val_if_fail(border_thicknesses != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BorderThickness);
-  if (value == nullptr)
-    return FALSE;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderThickness);
+    if (value == nullptr)
+        return FALSE;
 
-  convert_double_or_4_doubles (value, border_thicknesses);
-  return TRUE;
+    convert_double_or_4_doubles(value, border_thicknesses);
+    return TRUE;
 }
 
 /**
@@ -1443,16 +1255,12 @@ poppler_structure_element_get_border_thickness (PopplerStructureElement *poppler
  *
  * Since: 0.26
  */
-void
-poppler_structure_element_get_padding (PopplerStructureElement *poppler_structure_element,
-                                       gdouble                 *paddings)
+void poppler_structure_element_get_padding(PopplerStructureElement *poppler_structure_element, gdouble *paddings)
 {
-  g_return_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element));
-  g_return_if_fail (paddings != nullptr);
+    g_return_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element));
+    g_return_if_fail(paddings != nullptr);
 
-  convert_double_or_4_doubles (attr_value_or_default (poppler_structure_element,
-                                                      Attribute::Padding),
-                               paddings);
+    convert_double_or_4_doubles(attr_value_or_default(poppler_structure_element, Attribute::Padding), paddings);
 }
 
 /* Layout Attributes for block-level structure elements */
@@ -1467,11 +1275,10 @@ poppler_structure_element_get_padding (PopplerStructureElement *poppler_structur
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_space_before (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_space_before(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::SpaceBefore)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::SpaceBefore)->getNum();
 }
 
 /**
@@ -1484,11 +1291,10 @@ poppler_structure_element_get_space_before (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_space_after (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_space_after(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::SpaceAfter)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::SpaceAfter)->getNum();
 }
 
 /**
@@ -1501,11 +1307,10 @@ poppler_structure_element_get_space_after (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_start_indent (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_start_indent(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::StartIndent)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::StartIndent)->getNum();
 }
 
 /**
@@ -1518,11 +1323,10 @@ poppler_structure_element_get_start_indent (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_end_indent (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_end_indent(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::EndIndent)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::EndIndent)->getNum();
 }
 
 /**
@@ -1535,11 +1339,10 @@ poppler_structure_element_get_end_indent (PopplerStructureElement *poppler_struc
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_text_indent (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_text_indent(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::TextIndent)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::TextIndent)->getNum();
 }
 
 /**
@@ -1553,12 +1356,10 @@ poppler_structure_element_get_text_indent (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-PopplerStructureTextAlign
-poppler_structure_element_get_text_align (PopplerStructureElement *poppler_structure_element)
+PopplerStructureTextAlign poppler_structure_element_get_text_align(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
-                        EnumNameValue<PopplerStructureTextAlign>::values[0].value);
-  return attr_to_enum<PopplerStructureTextAlign> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), EnumNameValue<PopplerStructureTextAlign>::values[0].value);
+    return attr_to_enum<PopplerStructureTextAlign>(poppler_structure_element);
 }
 
 /**
@@ -1573,26 +1374,24 @@ poppler_structure_element_get_text_align (PopplerStructureElement *poppler_struc
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_bounding_box (PopplerStructureElement *poppler_structure_element,
-                                            PopplerRectangle        *bounding_box)
+gboolean poppler_structure_element_get_bounding_box(PopplerStructureElement *poppler_structure_element, PopplerRectangle *bounding_box)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), FALSE);
-  g_return_val_if_fail (bounding_box != nullptr, FALSE);
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), FALSE);
+    g_return_val_if_fail(bounding_box != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BBox);
-  if (value == nullptr)
-    return FALSE;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BBox);
+    if (value == nullptr)
+        return FALSE;
 
-  gdouble dimensions[4];
-  convert_double_or_4_doubles (value, dimensions);
+    gdouble dimensions[4];
+    convert_double_or_4_doubles(value, dimensions);
 
-  bounding_box->x1 = dimensions[0];
-  bounding_box->y1 = dimensions[1];
-  bounding_box->x2 = dimensions[2];
-  bounding_box->y2 = dimensions[3];
+    bounding_box->x1 = dimensions[0];
+    bounding_box->y1 = dimensions[1];
+    bounding_box->x2 = dimensions[2];
+    bounding_box->y2 = dimensions[3];
 
-  return TRUE;
+    return TRUE;
 }
 
 /**
@@ -1607,12 +1406,11 @@ poppler_structure_element_get_bounding_box (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_width (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_width(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Width);
-  return value->isName ("Auto") ? -1.0 : value->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Width);
+    return value->isName("Auto") ? -1.0 : value->getNum();
 }
 
 /**
@@ -1627,12 +1425,11 @@ poppler_structure_element_get_width (PopplerStructureElement *poppler_structure_
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_height (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_height(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Height);
-  return value->isName ("Auto") ? -1.0 : value->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Height);
+    return value->isName("Auto") ? -1.0 : value->getNum();
 }
 
 /**
@@ -1645,12 +1442,10 @@ poppler_structure_element_get_height (PopplerStructureElement *poppler_structure
  *
  * Since: 0.26
  */
-PopplerStructureBlockAlign
-poppler_structure_element_get_block_align (PopplerStructureElement *poppler_structure_element)
+PopplerStructureBlockAlign poppler_structure_element_get_block_align(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
-                        EnumNameValue<PopplerStructureBlockAlign>::values[0].value);
-  return attr_to_enum<PopplerStructureBlockAlign> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), EnumNameValue<PopplerStructureBlockAlign>::values[0].value);
+    return attr_to_enum<PopplerStructureBlockAlign>(poppler_structure_element);
 }
 
 /**
@@ -1663,12 +1458,10 @@ poppler_structure_element_get_block_align (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-PopplerStructureInlineAlign
-poppler_structure_element_get_inline_align (PopplerStructureElement *poppler_structure_element)
+PopplerStructureInlineAlign poppler_structure_element_get_inline_align(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
-                        EnumNameValue<PopplerStructureInlineAlign>::values[0].value);
-  return attr_to_enum<PopplerStructureInlineAlign> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), EnumNameValue<PopplerStructureInlineAlign>::values[0].value);
+    return attr_to_enum<PopplerStructureInlineAlign>(poppler_structure_element);
 }
 
 /**
@@ -1683,16 +1476,12 @@ poppler_structure_element_get_inline_align (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-void
-poppler_structure_element_get_table_border_style (PopplerStructureElement     *poppler_structure_element,
-                                                  PopplerStructureBorderStyle *border_styles)
+void poppler_structure_element_get_table_border_style(PopplerStructureElement *poppler_structure_element, PopplerStructureBorderStyle *border_styles)
 {
-  g_return_if_fail (poppler_structure_element_is_block (poppler_structure_element));
-  g_return_if_fail (border_styles != nullptr);
+    g_return_if_fail(poppler_structure_element_is_block(poppler_structure_element));
+    g_return_if_fail(border_styles != nullptr);
 
-  convert_border_style (attr_value_or_default (poppler_structure_element,
-                                               Attribute::TBorderStyle),
-                        border_styles);
+    convert_border_style(attr_value_or_default(poppler_structure_element, Attribute::TBorderStyle), border_styles);
 }
 
 /**
@@ -1708,16 +1497,12 @@ poppler_structure_element_get_table_border_style (PopplerStructureElement     *p
  *
  * Since: 0.26
  */
-void
-poppler_structure_element_get_table_padding (PopplerStructureElement *poppler_structure_element,
-                                             gdouble                 *paddings)
+void poppler_structure_element_get_table_padding(PopplerStructureElement *poppler_structure_element, gdouble *paddings)
 {
-  g_return_if_fail (poppler_structure_element_is_block (poppler_structure_element));
-  g_return_if_fail (paddings != nullptr);
+    g_return_if_fail(poppler_structure_element_is_block(poppler_structure_element));
+    g_return_if_fail(paddings != nullptr);
 
-  convert_double_or_4_doubles (attr_value_or_default (poppler_structure_element,
-                                                      Attribute::TPadding),
-                               paddings);
+    convert_double_or_4_doubles(attr_value_or_default(poppler_structure_element, Attribute::TPadding), paddings);
 }
 
 /* Layout Attributes for inline-level structure elements */
@@ -1733,11 +1518,10 @@ poppler_structure_element_get_table_padding (PopplerStructureElement *poppler_st
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_baseline_shift (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_baseline_shift(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
-  return attr_value_or_default (poppler_structure_element, Attribute::BaselineShift)->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), NAN);
+    return attr_value_or_default(poppler_structure_element, Attribute::BaselineShift)->getNum();
 }
 
 /**
@@ -1753,12 +1537,11 @@ poppler_structure_element_get_baseline_shift (PopplerStructureElement *poppler_s
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_line_height (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_line_height(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::LineHeight);
-  return (value->isName ("Normal") || value->isName ("Auto")) ? -1.0 : value->getNum ();
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), NAN);
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::LineHeight);
+    return (value->isName("Normal") || value->isName("Auto")) ? -1.0 : value->getNum();
 }
 
 /**
@@ -1776,19 +1559,17 @@ poppler_structure_element_get_line_height (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-gboolean
-poppler_structure_element_get_text_decoration_color (PopplerStructureElement *poppler_structure_element,
-                                                     PopplerColor            *color)
+gboolean poppler_structure_element_get_text_decoration_color(PopplerStructureElement *poppler_structure_element, PopplerColor *color)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), FALSE);
-  g_return_val_if_fail (color != nullptr, FALSE);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), FALSE);
+    g_return_val_if_fail(color != nullptr, FALSE);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::TextDecorationColor);
-  if (value == nullptr)
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationColor);
+    if (value == nullptr)
+        return FALSE;
+
+    convert_color(value, color);
     return FALSE;
-
-  convert_color (value, color);
-  return FALSE;
 }
 
 /**
@@ -1804,13 +1585,12 @@ poppler_structure_element_get_text_decoration_color (PopplerStructureElement *po
  *
  * Since: 0.26
  */
-gdouble
-poppler_structure_element_get_text_decoration_thickness (PopplerStructureElement *poppler_structure_element)
+gdouble poppler_structure_element_get_text_decoration_thickness(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), NAN);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::TextDecorationThickness);
-  return (value == nullptr) ? NAN : value->getNum ();
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationThickness);
+    return (value == nullptr) ? NAN : value->getNum();
 }
 
 /**
@@ -1824,12 +1604,10 @@ poppler_structure_element_get_text_decoration_thickness (PopplerStructureElement
  *
  * Since: 0.26
  */
-PopplerStructureTextDecoration
-poppler_structure_element_get_text_decoration_type (PopplerStructureElement *poppler_structure_element)
+PopplerStructureTextDecoration poppler_structure_element_get_text_decoration_type(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
-                        EnumNameValue<PopplerStructureTextDecoration>::values[0].value);
-  return attr_to_enum<PopplerStructureTextDecoration> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), EnumNameValue<PopplerStructureTextDecoration>::values[0].value);
+    return attr_to_enum<PopplerStructureTextDecoration>(poppler_structure_element);
 }
 
 /**
@@ -1843,12 +1621,10 @@ poppler_structure_element_get_text_decoration_type (PopplerStructureElement *pop
  *
  * Since: 0.26
  */
-PopplerStructureRubyAlign
-poppler_structure_element_get_ruby_align (PopplerStructureElement *poppler_structure_element)
+PopplerStructureRubyAlign poppler_structure_element_get_ruby_align(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
-                        EnumNameValue<PopplerStructureRubyAlign>::values[0].value);
-  return attr_to_enum<PopplerStructureRubyAlign> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), EnumNameValue<PopplerStructureRubyAlign>::values[0].value);
+    return attr_to_enum<PopplerStructureRubyAlign>(poppler_structure_element);
 }
 
 /**
@@ -1862,12 +1638,10 @@ poppler_structure_element_get_ruby_align (PopplerStructureElement *poppler_struc
  *
  * Since: 0.26
  */
-PopplerStructureRubyPosition
-poppler_structure_element_get_ruby_position (PopplerStructureElement *poppler_structure_element)
+PopplerStructureRubyPosition poppler_structure_element_get_ruby_position(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
-                        EnumNameValue<PopplerStructureRubyPosition>::values[0].value);
-  return attr_to_enum<PopplerStructureRubyPosition> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), EnumNameValue<PopplerStructureRubyPosition>::values[0].value);
+    return attr_to_enum<PopplerStructureRubyPosition>(poppler_structure_element);
 }
 
 /**
@@ -1881,12 +1655,10 @@ poppler_structure_element_get_ruby_position (PopplerStructureElement *poppler_st
  *
  * Since: 0.26
  */
-PopplerStructureGlyphOrientation
-poppler_structure_element_get_glyph_orientation (PopplerStructureElement *poppler_structure_element)
+PopplerStructureGlyphOrientation poppler_structure_element_get_glyph_orientation(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
-                        EnumNameValue<PopplerStructureGlyphOrientation>::values[0].value);
-  return attr_to_enum<PopplerStructureGlyphOrientation> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), EnumNameValue<PopplerStructureGlyphOrientation>::values[0].value);
+    return attr_to_enum<PopplerStructureGlyphOrientation>(poppler_structure_element);
 }
 
 /* Column Attributes */
@@ -1902,12 +1674,10 @@ poppler_structure_element_get_glyph_orientation (PopplerStructureElement *popple
  *
  * Since: 0.26
  */
-guint
-poppler_structure_element_get_column_count (PopplerStructureElement *poppler_structure_element)
+guint poppler_structure_element_get_column_count(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), 0);
-  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
-                                                    Attribute::ColumnCount)->getInt ());
+    g_return_val_if_fail(poppler_structure_element_is_grouping(poppler_structure_element), 0);
+    return static_cast<guint>(attr_value_or_default(poppler_structure_element, Attribute::ColumnCount)->getInt());
 }
 
 /**
@@ -1934,23 +1704,20 @@ poppler_structure_element_get_column_count (PopplerStructureElement *poppler_str
  *
  * Since: 0.26
  */
-gdouble *
-poppler_structure_element_get_column_gaps (PopplerStructureElement *poppler_structure_element,
-                                           guint                   *n_values)
+gdouble *poppler_structure_element_get_column_gaps(PopplerStructureElement *poppler_structure_element, guint *n_values)
 {
-  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), NULL);
-  g_return_val_if_fail (n_values != nullptr, NULL);
+    g_return_val_if_fail(poppler_structure_element_is_grouping(poppler_structure_element), NULL);
+    g_return_val_if_fail(n_values != nullptr, NULL);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::ColumnGap);
-  if (value == nullptr)
-    {
-      *n_values = static_cast<guint> (-1);
-      return nullptr;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnGap);
+    if (value == nullptr) {
+        *n_values = static_cast<guint>(-1);
+        return nullptr;
     }
 
-  gdouble *result = nullptr;
-  convert_doubles_array (value, &result, n_values);
-  return result;
+    gdouble *result = nullptr;
+    convert_doubles_array(value, &result, n_values);
+    return result;
 }
 
 /**
@@ -1969,20 +1736,18 @@ poppler_structure_element_get_column_gaps (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-gdouble *
-poppler_structure_element_get_column_widths (PopplerStructureElement *poppler_structure_element,
-                                             guint                   *n_values)
+gdouble *poppler_structure_element_get_column_widths(PopplerStructureElement *poppler_structure_element, guint *n_values)
 {
-  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), NULL);
-  g_return_val_if_fail (n_values != nullptr, NULL);
+    g_return_val_if_fail(poppler_structure_element_is_grouping(poppler_structure_element), NULL);
+    g_return_val_if_fail(n_values != nullptr, NULL);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::ColumnWidths);
-  if (value == nullptr)
-    return nullptr;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnWidths);
+    if (value == nullptr)
+        return nullptr;
 
-  gdouble *result = nullptr;
-  convert_doubles_array (value, &result, n_values);
-  return result;
+    gdouble *result = nullptr;
+    convert_doubles_array(value, &result, n_values);
+    return result;
 }
 
 /* List Attribute */
@@ -1997,12 +1762,10 @@ poppler_structure_element_get_column_widths (PopplerStructureElement *poppler_st
  *
  * Since: 0.26
  */
-PopplerStructureListNumbering
-poppler_structure_element_get_list_numbering (PopplerStructureElement *poppler_structure_element)
+PopplerStructureListNumbering poppler_structure_element_get_list_numbering(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_LIST_ITEM,
-                        EnumNameValue<PopplerStructureListNumbering>::values[0].value);
-  return attr_to_enum<PopplerStructureListNumbering> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_LIST_ITEM, EnumNameValue<PopplerStructureListNumbering>::values[0].value);
+    return attr_to_enum<PopplerStructureListNumbering>(poppler_structure_element);
 }
 
 /* PrintField Attributes */
@@ -2019,20 +1782,18 @@ poppler_structure_element_get_list_numbering (PopplerStructureElement *poppler_s
  *
  * Since: 0.26
  */
-PopplerStructureFormRole
-poppler_structure_element_get_form_role (PopplerStructureElement *poppler_structure_element)
+PopplerStructureFormRole poppler_structure_element_get_form_role(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM,
-                        EnumNameValue<PopplerStructureFormRole>::values[0].value);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, EnumNameValue<PopplerStructureFormRole>::values[0].value);
 
-  /*
-   * The Role attribute can actually be undefined.
-   */
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Role);
-  if (value == nullptr)
-    return POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED;
+    /*
+     * The Role attribute can actually be undefined.
+     */
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Role);
+    if (value == nullptr)
+        return POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED;
 
-  return name_to_enum<PopplerStructureFormRole> (value);
+    return name_to_enum<PopplerStructureFormRole>(value);
 }
 
 /**
@@ -2046,12 +1807,10 @@ poppler_structure_element_get_form_role (PopplerStructureElement *poppler_struct
  *
  * Since: 0.26
  */
-PopplerStructureFormState
-poppler_structure_element_get_form_state (PopplerStructureElement *poppler_structure_element)
+PopplerStructureFormState poppler_structure_element_get_form_state(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM,
-                        EnumNameValue<PopplerStructureFormState>::values[0].value);
-  return attr_to_enum<PopplerStructureFormState> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, EnumNameValue<PopplerStructureFormState>::values[0].value);
+    return attr_to_enum<PopplerStructureFormState>(poppler_structure_element);
 }
 
 /**
@@ -2072,21 +1831,20 @@ poppler_structure_element_get_form_state (PopplerStructureElement *poppler_struc
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_form_description (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_form_description(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, NULL);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, NULL);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Desc);
-  if (value == nullptr)
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Desc);
+    if (value == nullptr)
+        return nullptr;
+    if (value->isString())
+        return _poppler_goo_string_to_utf8(value->getString());
+    if (value->isName())
+        return g_strdup(value->getName());
+
+    g_assert_not_reached();
     return nullptr;
-  if (value->isString ())
-    return _poppler_goo_string_to_utf8 (value->getString ());
-  if (value->isName ())
-    return g_strdup (value->getName ());
-
-  g_assert_not_reached ();
-  return nullptr;
 }
 
 /* Table Attributes */
@@ -2101,12 +1859,10 @@ poppler_structure_element_get_form_description (PopplerStructureElement *poppler
  *
  * Since: 0.26
  */
-guint
-poppler_structure_element_get_table_row_span (PopplerStructureElement *poppler_structure_element)
+guint poppler_structure_element_get_table_row_span(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
-  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
-                                                    Attribute::RowSpan)->getInt ());
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
+    return static_cast<guint>(attr_value_or_default(poppler_structure_element, Attribute::RowSpan)->getInt());
 }
 
 /**
@@ -2119,12 +1875,10 @@ poppler_structure_element_get_table_row_span (PopplerStructureElement *poppler_s
  *
  * Since: 0.26
  */
-guint
-poppler_structure_element_get_table_column_span (PopplerStructureElement *poppler_structure_element)
+guint poppler_structure_element_get_table_column_span(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
-  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
-                                                    Attribute::ColSpan)->getInt ());
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
+    return static_cast<guint>(attr_value_or_default(poppler_structure_element, Attribute::ColSpan)->getInt());
 }
 
 /**
@@ -2144,33 +1898,31 @@ poppler_structure_element_get_table_column_span (PopplerStructureElement *popple
  *
  * Since: 0.26
  */
-gchar **
-poppler_structure_element_get_table_headers (PopplerStructureElement *poppler_structure_element)
+gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, NULL);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, NULL);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Headers);
-  if (value == nullptr)
-    return nullptr;
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Headers);
+    if (value == nullptr)
+        return nullptr;
 
-  g_assert (value->isArray ());
+    g_assert(value->isArray());
 
-  const guint n_values = value->arrayGetLength ();
-  gchar **result = g_new0 (gchar*, n_values + 1);
+    const guint n_values = value->arrayGetLength();
+    gchar **result = g_new0(gchar *, n_values + 1);
 
-  for (guint i = 0; i < n_values; i++)
-    {
-      Object item = value->arrayGet (i);
+    for (guint i = 0; i < n_values; i++) {
+        Object item = value->arrayGet(i);
 
-      if (item.isString ())
-        result[i] = _poppler_goo_string_to_utf8 (item.getString ());
-      else if (item.isName ())
-        result[i] = g_strdup (item.getName ());
-      else
-        g_assert_not_reached ();
+        if (item.isString())
+            result[i] = _poppler_goo_string_to_utf8(item.getString());
+        else if (item.isName())
+            result[i] = g_strdup(item.getName());
+        else
+            g_assert_not_reached();
     }
 
-  return result;
+    return result;
 }
 
 /**
@@ -2183,12 +1935,10 @@ poppler_structure_element_get_table_headers (PopplerStructureElement *poppler_st
  *
  * Since: 0.26
  */
-PopplerStructureTableScope
-poppler_structure_element_get_table_scope (PopplerStructureElement *poppler_structure_element)
+PopplerStructureTableScope poppler_structure_element_get_table_scope(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE,
-                        EnumNameValue<PopplerStructureTableScope>::values[0].value);
-  return attr_to_enum<PopplerStructureTableScope> (poppler_structure_element);
+    g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, EnumNameValue<PopplerStructureTableScope>::values[0].value);
+    return attr_to_enum<PopplerStructureTableScope>(poppler_structure_element);
 }
 
 /**
@@ -2210,19 +1960,18 @@ poppler_structure_element_get_table_scope (PopplerStructureElement *poppler_stru
  *
  * Since: 0.26
  */
-gchar *
-poppler_structure_element_get_table_summary (PopplerStructureElement *poppler_structure_element)
+gchar *poppler_structure_element_get_table_summary(PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
+    g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
 
-  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Summary);
-  if (value == nullptr)
+    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Summary);
+    if (value == nullptr)
+        return nullptr;
+    if (value->isString())
+        return _poppler_goo_string_to_utf8(value->getString());
+    if (value->isName())
+        return g_strdup(value->getName());
+
+    g_assert_not_reached();
     return nullptr;
-  if (value->isString ())
-    return _poppler_goo_string_to_utf8 (value->getString ());
-  if (value->isName ())
-    return g_strdup (value->getName ());
-
-  g_assert_not_reached ();
-  return nullptr;
 }

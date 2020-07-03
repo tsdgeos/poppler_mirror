@@ -30,21 +30,21 @@ class DocumentData;
 
 class BaseConverterPrivate
 {
-	public:
-		BaseConverterPrivate();
-		virtual ~BaseConverterPrivate();
+public:
+    BaseConverterPrivate();
+    virtual ~BaseConverterPrivate();
 
-		BaseConverterPrivate(const BaseConverterPrivate &) = delete;
-		BaseConverterPrivate& operator=(const BaseConverterPrivate &) = delete;
+    BaseConverterPrivate(const BaseConverterPrivate &) = delete;
+    BaseConverterPrivate &operator=(const BaseConverterPrivate &) = delete;
 
-		QIODevice* openDevice();
-		void closeDevice();
+    QIODevice *openDevice();
+    void closeDevice();
 
-		DocumentData *document;
-		QString outputFileName;
-		QIODevice *iodev;
-		bool ownIodev : 1;
-		BaseConverter::Error lastError;
+    DocumentData *document;
+    QString outputFileName;
+    QIODevice *iodev;
+    bool ownIodev : 1;
+    BaseConverter::Error lastError;
 };
 
 }

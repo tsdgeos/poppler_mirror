@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _FIND_H_
-#define _FIND_H_
+#    define _FIND_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_find_create_widget (PopplerDocument *document);
+GtkWidget *pgd_find_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

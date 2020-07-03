@@ -11,39 +11,38 @@
 
 #include <poppler-qt5.h>
 
-class PDFDisplay : public QWidget           // picture display widget
+class PDFDisplay : public QWidget // picture display widget
 {
     Q_OBJECT
 public:
-    PDFDisplay( Poppler::Document *d, bool arthur, QWidget *parent = nullptr );
+    PDFDisplay(Poppler::Document *d, bool arthur, QWidget *parent = nullptr);
     ~PDFDisplay() override;
     void setShowTextRects(bool show);
     void display();
+
 protected:
-    void paintEvent( QPaintEvent * ) override;
-    void keyPressEvent( QKeyEvent * ) override;
-    void mousePressEvent( QMouseEvent * ) override;
+    void paintEvent(QPaintEvent *) override;
+    void keyPressEvent(QKeyEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+
 private:
     int m_currentPage;
     QImage image;
     Poppler::Document *doc;
     QString backendString;
     bool showTextRects;
-    QList<Poppler::TextBox*> textRects;
+    QList<Poppler::TextBox *> textRects;
 };
 
-PDFDisplay::PDFDisplay( Poppler::Document *d, bool arthur, QWidget *parent ) : QWidget( parent )
+PDFDisplay::PDFDisplay(Poppler::Document *d, bool arthur, QWidget *parent) : QWidget(parent)
 {
     showTextRects = false;
     doc = d;
     m_currentPage = 0;
-    if (arthur)
-    {
+    if (arthur) {
         backendString = QStringLiteral("Arthur");
         doc->setRenderBackend(Poppler::Document::ArthurBackend);
-    }
-    else
-    {
+    } else {
         backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
     }
@@ -66,17 +65,15 @@ void PDFDisplay::display()
             image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
             qDeleteAll(textRects);
-            if (showTextRects)
-            {
+            if (showTextRects) {
                 QPainter painter(&image);
                 painter.setPen(Qt::red);
                 textRects = page->textList();
-                foreach(Poppler::TextBox *tb, textRects)
-                {
+                foreach (Poppler::TextBox *tb, textRects) {
                     painter.drawRect(tb->boundingBox());
                 }
-            }
-            else textRects.clear();
+            } else
+                textRects.clear();
             update();
             delete page;
         }
@@ -91,84 +88,70 @@ PDFDisplay::~PDFDisplay()
     delete doc;
 }
 
-void PDFDisplay::paintEvent( QPaintEvent *e )
+void PDFDisplay::paintEvent(QPaintEvent *e)
 {
-    QPainter paint( this );                     // paint widget
+    QPainter paint(this); // paint widget
     if (!image.isNull()) {
-	paint.drawImage(0, 0, image);
+        paint.drawImage(0, 0, image);
     } else {
-	qWarning() << "null image";
+        qWarning() << "null image";
     }
 }
 
-void PDFDisplay::keyPressEvent( QKeyEvent *e )
+void PDFDisplay::keyPressEvent(QKeyEvent *e)
 {
-  if (e->key() == Qt::Key_Down)
-  {
-    if (m_currentPage + 1 < doc->numPages())
-    {
-      m_currentPage++;
-      display();
+    if (e->key() == Qt::Key_Down) {
+        if (m_currentPage + 1 < doc->numPages()) {
+            m_currentPage++;
+            display();
+        }
+    } else if (e->key() == Qt::Key_Up) {
+        if (m_currentPage > 0) {
+            m_currentPage--;
+            display();
+        }
+    } else if (e->key() == Qt::Key_Q) {
+        exit(0);
     }
-  }
-  else if (e->key() == Qt::Key_Up)
-  {
-    if (m_currentPage > 0)
-    {
-      m_currentPage--;
-      display();
-    }
-  }
-  else if (e->key() == Qt::Key_Q)
-  {
-      exit(0);
-  }
 }
 
-void PDFDisplay::mousePressEvent( QMouseEvent *e )
+void PDFDisplay::mousePressEvent(QMouseEvent *e)
 {
-  int i = 0;
-  foreach(Poppler::TextBox *tb, textRects)
-  {
-    if (tb->boundingBox().contains(e->pos()))
-    {
-      const QString tt = QStringLiteral("Text: \"%1\"\nIndex in text list: %2").arg(tb->text()).arg(i);
-      QToolTip::showText(e->globalPos(), tt, this);
-      break;
+    int i = 0;
+    foreach (Poppler::TextBox *tb, textRects) {
+        if (tb->boundingBox().contains(e->pos())) {
+            const QString tt = QStringLiteral("Text: \"%1\"\nIndex in text list: %2").arg(tb->text()).arg(i);
+            QToolTip::showText(e->globalPos(), tt, this);
+            break;
+        }
+        ++i;
     }
-    ++i;
-  }
 }
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
-    QApplication a( argc, argv );               // QApplication required!
+    QApplication a(argc, argv); // QApplication required!
 
-    if ( argc < 2 ||
-        (argc == 3 && strcmp(argv[2], "-extract") != 0 && strcmp(argv[2], "-arthur") != 0 && strcmp(argv[2], "-textRects") != 0) ||
-        argc > 3)
-    {
-	// use argument as file name
-	qWarning() << "usage: test-poppler-qt5 filename [-extract|-arthur|-textRects]";
-	exit(1);
+    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-extract") != 0 && strcmp(argv[2], "-arthur") != 0 && strcmp(argv[2], "-textRects") != 0) || argc > 3) {
+        // use argument as file name
+        qWarning() << "usage: test-poppler-qt5 filename [-extract|-arthur|-textRects]";
+        exit(1);
     }
-  
+
     Poppler::Document *doc = Poppler::Document::load(QFile::decodeName(argv[1]));
-    if (!doc)
-    {
-	qWarning() << "doc not loaded";
-	exit(1);
+    if (!doc) {
+        qWarning() << "doc not loaded";
+        exit(1);
     }
 
-    if (doc->isLocked())
-    {
-	qWarning() << "document locked (needs password)";
-	exit(0);
+    if (doc->isLocked()) {
+        qWarning() << "document locked (needs password)";
+        exit(0);
     }
-  
+
     // output some meta-data
     int major = 0, minor = 0;
-    doc->getPdfVersion( &major, &minor );
+    doc->getPdfVersion(&major, &minor);
     qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(major).arg(minor));
     qDebug() << "          Title: " << doc->info(QStringLiteral("Title"));
     qDebug() << "        Subject: " << doc->info(QStringLiteral("Subject"));
@@ -188,18 +171,17 @@ int main( int argc, char **argv )
     qDebug() << "      Page mode: " << doc->pageMode();
     qDebug() << "       Metadata: " << doc->metadata();
 
-    if ( doc->hasEmbeddedFiles() ) {
+    if (doc->hasEmbeddedFiles()) {
         qDebug() << "Embedded files:";
-        foreach( Poppler::EmbeddedFile *file, doc->embeddedFiles() ) {
-	    qDebug() << "   " << file->name();
-	}
-	qDebug();
+        foreach (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
+            qDebug() << "   " << file->name();
+        }
+        qDebug();
     } else {
         qDebug() << "No embedded files";
     }
 
-    if (doc->numPages() <= 0)
-    {
+    if (doc->numPages() <= 0) {
         delete doc;
         qDebug() << "Doc has no pages";
         return 0;
@@ -207,33 +189,29 @@ int main( int argc, char **argv )
 
     {
         Poppler::Page *page = doc->page(0);
-        if (page)
-        {
-            qDebug() << "Page 1 size: " << page->pageSize().width()/72 << "inches x " << page->pageSize().height()/72 << "inches";
+        if (page) {
+            qDebug() << "Page 1 size: " << page->pageSize().width() / 72 << "inches x " << page->pageSize().height() / 72 << "inches";
             delete page;
         }
     }
 
-    if (argc == 2 || (argc == 3 && strcmp(argv[2], "-arthur") == 0) || (argc == 3 && strcmp(argv[2], "-textRects") == 0))
-    {
+    if (argc == 2 || (argc == 3 && strcmp(argv[2], "-arthur") == 0) || (argc == 3 && strcmp(argv[2], "-textRects") == 0)) {
         bool useArthur = (argc == 3 && strcmp(argv[2], "-arthur") == 0);
-        PDFDisplay test( doc, useArthur );        // create picture display
+        PDFDisplay test(doc, useArthur); // create picture display
         test.setWindowTitle(QStringLiteral("Poppler-Qt5 Test"));
         test.setShowTextRects(argc == 3 && strcmp(argv[2], "-textRects") == 0);
         test.display();
-        test.show();                            // show it
+        test.show(); // show it
 
-        return a.exec();                        // start event loop
-    }
-    else
-    {
-	Poppler::Page *page = doc->page(0);
+        return a.exec(); // start event loop
+    } else {
+        Poppler::Page *page = doc->page(0);
 
-	QLabel *l = new QLabel(page->text(QRectF()), nullptr);
-	l->show();
-	delete page;
-	delete doc;
-	return a.exec();
+        QLabel *l = new QLabel(page->text(QRectF()), nullptr);
+        l->show();
+        delete page;
+        delete doc;
+        return a.exec();
     }
 }
 

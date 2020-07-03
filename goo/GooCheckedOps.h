@@ -16,59 +16,64 @@
 #include <limits>
 #include <type_traits>
 
-template<typename T> inline bool checkedAssign(long long lz, T *z) {
-  static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(),
-    "The max of long long type must be larger to perform overflow checks.");
-  static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(),
-    "The min of long long type must be smaller to perform overflow checks.");
+template<typename T>
+inline bool checkedAssign(long long lz, T *z)
+{
+    static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(), "The max of long long type must be larger to perform overflow checks.");
+    static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(), "The min of long long type must be smaller to perform overflow checks.");
 
-  if (lz > (std::numeric_limits<T>::max)() ||
-    lz < (std::numeric_limits<T>::min)()) {
-    return true;
-  }
+    if (lz > (std::numeric_limits<T>::max)() || lz < (std::numeric_limits<T>::min)()) {
+        return true;
+    }
 
-  *z = static_cast<T>(lz);
-  return false;
+    *z = static_cast<T>(lz);
+    return false;
 }
 
 #ifndef __has_builtin
-  #define __has_builtin(x) 0
+#    define __has_builtin(x) 0
 #endif
 
-template<typename T> inline bool checkedAdd(T x, T y, T *z) {
+template<typename T>
+inline bool checkedAdd(T x, T y, T *z)
+{
 #if __GNUC__ >= 5 || __has_builtin(__builtin_add_overflow)
-  return __builtin_add_overflow(x, y, z);
+    return __builtin_add_overflow(x, y, z);
 #else
-  const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
-  return checkedAssign(lz, z);
+    const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
+    return checkedAssign(lz, z);
 #endif
 }
 
-template<typename T> inline bool checkedSubtraction(T x, T y, T *z) {
+template<typename T>
+inline bool checkedSubtraction(T x, T y, T *z)
+{
 #if __GNUC__ >= 5 || __has_builtin(__builtin_sub_overflow)
-  return __builtin_sub_overflow(x, y, z);
+    return __builtin_sub_overflow(x, y, z);
 #else
-  const auto lz = static_cast<long long>(x) - static_cast<long long>(y);
-  return checkedAssign(lz, z);
+    const auto lz = static_cast<long long>(x) - static_cast<long long>(y);
+    return checkedAssign(lz, z);
 #endif
 }
 
-template<typename T> inline bool checkedMultiply(T x, T y, T *z) {
+template<typename T>
+inline bool checkedMultiply(T x, T y, T *z)
+{
 #if __GNUC__ >= 5 || __has_builtin(__builtin_mul_overflow)
-  return __builtin_mul_overflow(x, y, z);
+    return __builtin_mul_overflow(x, y, z);
 #else
-  const auto lz = static_cast<long long>(x) * static_cast<long long>(y);
-  return checkedAssign(lz, z);
+    const auto lz = static_cast<long long>(x) * static_cast<long long>(y);
+    return checkedAssign(lz, z);
 #endif
 }
 
-template<typename T> inline T safeAverage(T a, T b) {
-  static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(),
-    "The max of long long type must be larger to perform overflow checks.");
-  static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(),
-    "The min of long long type must be smaller to perform overflow checks.");
+template<typename T>
+inline T safeAverage(T a, T b)
+{
+    static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(), "The max of long long type must be larger to perform overflow checks.");
+    static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(), "The min of long long type must be smaller to perform overflow checks.");
 
-  return static_cast<T>((static_cast<long long>(a) + static_cast<long long>(b)) / 2);
+    return static_cast<T>((static_cast<long long>(a) + static_cast<long long>(b)) / 2);
 }
 
 #endif // GOO_CHECKED_OPS_H

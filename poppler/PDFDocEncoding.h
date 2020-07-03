@@ -33,6 +33,6 @@ class GooString;
 
 extern const Unicode pdfDocEncoding[256];
 
-char* pdfDocEncodingToUTF16 (const std::string& orig, int* length);
+char *pdfDocEncodingToUTF16(const std::string &orig, int *length);
 
 #endif

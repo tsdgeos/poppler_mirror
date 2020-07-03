@@ -48,16 +48,16 @@ void TestGooString::testInsertData()
 void TestGooString::testInsert()
 {
     {
-    GooString goo;
-    goo.insert(0, ".");
-    goo.insert(0, "This is a very long long test string");
-    QCOMPARE(goo.c_str(), "This is a very long long test string.");
+        GooString goo;
+        goo.insert(0, ".");
+        goo.insert(0, "This is a very long long test string");
+        QCOMPARE(goo.c_str(), "This is a very long long test string.");
     }
     {
-    GooString goo;
-    goo.insert(0, "second-part-third-part");
-    goo.insert(0, "first-part-");
-    QCOMPARE(goo.c_str(), "first-part-second-part-third-part");
+        GooString goo;
+        goo.insert(0, "second-part-third-part");
+        goo.insert(0, "first-part-");
+        QCOMPARE(goo.c_str(), "first-part-second-part-third-part");
     }
 }
 
@@ -76,28 +76,24 @@ void TestGooString::testFormat()
         QCOMPARE(goo->c_str(), "-10,-a,-A,-12,-1010");
     }
     {
-        const QScopedPointer<GooString> goo(GooString::format("{0:c}{1:c}{2:c}{3:c}",
-            'T', (char)'E', (short)'S', (int)'T'));
+        const QScopedPointer<GooString> goo(GooString::format("{0:c}{1:c}{2:c}{3:c}", 'T', (char)'E', (short)'S', (int)'T'));
         QCOMPARE(goo->c_str(), "TEST");
 
         const QScopedPointer<GooString> goo2(GooString::format("{0:s} {1:t}", "TEST", goo.data()));
         QCOMPARE(goo2->c_str(), "TEST TEST");
     }
     {
-        const QScopedPointer<GooString> goo(GooString::format("{0:ud} {1:d} {2:d}",
-            UINT_MAX, INT_MAX, INT_MIN));
+        const QScopedPointer<GooString> goo(GooString::format("{0:ud} {1:d} {2:d}", UINT_MAX, INT_MAX, INT_MIN));
         const QByteArray expected = QStringLiteral("%1 %2 %3").arg(UINT_MAX).arg(INT_MAX).arg(INT_MIN).toLatin1();
         QCOMPARE(goo->c_str(), expected.constData());
     }
     {
-        const QScopedPointer<GooString> goo(GooString::format("{0:uld} {1:ld} {2:ld}",
-            ULONG_MAX, LONG_MAX, LONG_MIN));
+        const QScopedPointer<GooString> goo(GooString::format("{0:uld} {1:ld} {2:ld}", ULONG_MAX, LONG_MAX, LONG_MIN));
         const QByteArray expected = QStringLiteral("%1 %2 %3").arg(ULONG_MAX).arg(LONG_MAX).arg(LONG_MIN).toLatin1();
         QCOMPARE(goo->c_str(), expected.constData());
     }
     {
-        const QScopedPointer<GooString> goo(GooString::format("{0:ulld} {1:lld} {2:lld}",
-            ULLONG_MAX, LLONG_MAX, LLONG_MIN));
+        const QScopedPointer<GooString> goo(GooString::format("{0:ulld} {1:lld} {2:lld}", ULLONG_MAX, LLONG_MAX, LLONG_MIN));
         const QByteArray expected = QStringLiteral("%1 %2 %3").arg(ULLONG_MAX).arg(LLONG_MAX).arg(LLONG_MIN).toLatin1();
         QCOMPARE(goo->c_str(), expected.constData());
     }
@@ -127,40 +123,39 @@ void TestGooString::testFormat()
 
 void TestGooString::testFromNullptr()
 {
-  {
-    GooString str{static_cast<const GooString*>(nullptr)};
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str { static_cast<const GooString *>(nullptr) };
+        QCOMPARE(str.getLength(), 0);
+    }
 
-  {
-    GooString str;
-    str.Set(static_cast<const GooString*>(nullptr));
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str;
+        str.Set(static_cast<const GooString *>(nullptr));
+        QCOMPARE(str.getLength(), 0);
+    }
 
-  {
-    GooString str{static_cast<const char*>(nullptr)};
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str { static_cast<const char *>(nullptr) };
+        QCOMPARE(str.getLength(), 0);
+    }
 
-  {
-    GooString str{static_cast<const char*>(nullptr), 0};
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str { static_cast<const char *>(nullptr), 0 };
+        QCOMPARE(str.getLength(), 0);
+    }
 
-  {
-    GooString str;
-    str.Set(static_cast<const char*>(nullptr));
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str;
+        str.Set(static_cast<const char *>(nullptr));
+        QCOMPARE(str.getLength(), 0);
+    }
 
-  {
-    GooString str;
-    str.Set(static_cast<const char*>(nullptr), 0);
-    QCOMPARE(str.getLength(), 0);
-  }
+    {
+        GooString str;
+        str.Set(static_cast<const char *>(nullptr), 0);
+        QCOMPARE(str.getLength(), 0);
+    }
 }
 
 QTEST_GUILESS_MAIN(TestGooString)
 #include "check_goostring.moc"
-

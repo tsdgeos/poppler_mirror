@@ -19,27 +19,25 @@ class BaseStream;
 // Linearization
 //------------------------------------------------------------------------
 
-class Linearization {
+class Linearization
+{
 public:
+    Linearization(BaseStream *str);
+    ~Linearization();
 
-  Linearization(BaseStream *str);
-  ~Linearization();
-
-  unsigned int getLength() const;
-  unsigned int getHintsOffset() const;
-  unsigned int getHintsLength() const;
-  unsigned int getHintsOffset2() const;
-  unsigned int getHintsLength2() const;
-  int getObjectNumberFirst() const;
-  unsigned int getEndFirst() const;
-  int getNumPages() const;
-  unsigned int getMainXRefEntriesOffset() const;
-  int getPageFirst() const;
+    unsigned int getLength() const;
+    unsigned int getHintsOffset() const;
+    unsigned int getHintsLength() const;
+    unsigned int getHintsOffset2() const;
+    unsigned int getHintsLength2() const;
+    int getObjectNumberFirst() const;
+    unsigned int getEndFirst() const;
+    int getNumPages() const;
+    unsigned int getMainXRefEntriesOffset() const;
+    int getPageFirst() const;
 
 private:
-
-  Object linDict;
-
+    Object linDict;
 };
 
 #endif

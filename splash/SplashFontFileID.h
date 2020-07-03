@@ -25,14 +25,14 @@
 // SplashFontFileID
 //------------------------------------------------------------------------
 
-class SplashFontFileID {
+class SplashFontFileID
+{
 public:
-
-  SplashFontFileID();
-  virtual ~SplashFontFileID();
-  SplashFontFileID(const SplashFontFileID &) = delete;
-  SplashFontFileID& operator=(const SplashFontFileID &) = delete;
-  virtual bool matches(SplashFontFileID *id) = 0;
+    SplashFontFileID();
+    virtual ~SplashFontFileID();
+    SplashFontFileID(const SplashFontFileID &) = delete;
+    SplashFontFileID &operator=(const SplashFontFileID &) = delete;
+    virtual bool matches(SplashFontFileID *id) = 0;
 };
 
 #endif

@@ -33,51 +33,43 @@
 // Parser
 //------------------------------------------------------------------------
 
-class Parser {
+class Parser
+{
 public:
+    // Constructor.
+    Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA);
+    Parser(XRef *xrefA, Object *objectA, bool allowStreamsA);
 
-  // Constructor.
-  Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA);
-  Parser(XRef *xrefA, Object *objectA, bool allowStreamsA);
+    // Destructor.
+    ~Parser();
 
-  // Destructor.
-  ~Parser();
+    Parser(const Parser &) = delete;
+    Parser &operator=(const Parser &) = delete;
 
-  Parser(const Parser &) = delete;
-  Parser& operator=(const Parser &) = delete;
+    // Get the next object from the input stream.  If <simpleOnly> is
+    // true, do not parse compound objects (arrays, dictionaries, or
+    // streams).
+    Object getObj(bool simpleOnly = false, const unsigned char *fileKey = nullptr, CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0, int objNum = 0, int objGen = 0, int recursion = 0, bool strict = false);
 
-  // Get the next object from the input stream.  If <simpleOnly> is
-  // true, do not parse compound objects (arrays, dictionaries, or
-  // streams).
-  Object getObj(bool simpleOnly = false,
-		 const unsigned char *fileKey = nullptr,
-		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
-		 int objNum = 0, int objGen = 0, int recursion = 0,
-		 bool strict = false);
-  
-  Object getObj(int recursion);
-  template<typename T> Object getObj(T) = delete;
+    Object getObj(int recursion);
+    template<typename T>
+    Object getObj(T) = delete;
 
-  // Get stream.
-  Stream *getStream() { return lexer.getStream(); }
+    // Get stream.
+    Stream *getStream() { return lexer.getStream(); }
 
-  // Get current position in file.
-  Goffset getPos() { return lexer.getPos(); }
+    // Get current position in file.
+    Goffset getPos() { return lexer.getPos(); }
 
 private:
+    Lexer lexer; // input stream
+    bool allowStreams; // parse stream objects?
+    Object buf1, buf2; // next two tokens
+    int inlineImg; // set when inline image data is encountered
 
-  Lexer lexer;			// input stream
-  bool allowStreams;		// parse stream objects?
-  Object buf1, buf2;		// next two tokens
-  int inlineImg;		// set when inline image data is encountered
-
-  Stream *makeStream(Object &&dict, const unsigned char *fileKey,
-		     CryptAlgorithm encAlgorithm, int keyLength,
-		     int objNum, int objGen, int recursion,
-		     bool strict);
-  void shift(int objNum = -1);
-  void shift(const char *cmdA, int objNum);
+    Stream *makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict);
+    void shift(int objNum = -1);
+    void shift(const char *cmdA, int objNum);
 };
 
 #endif
-

@@ -13,28 +13,27 @@
 
 #include <random>
 
-namespace
-{
+namespace {
 
-auto& grandom_engine()
+auto &grandom_engine()
 {
-  static thread_local std::default_random_engine engine{std::random_device{}()};
-  return engine;
+    static thread_local std::default_random_engine engine { std::random_device {}() };
+    return engine;
 }
 
 }
 
 void grandom_fill(unsigned char *buff, int size)
 {
-  auto& engine = grandom_engine();
-  std::uniform_int_distribution<unsigned short> distribution{std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max()};
-  for (int index = 0; index < size; ++index) {
-    buff[index] = distribution(engine);
-  }
+    auto &engine = grandom_engine();
+    std::uniform_int_distribution<unsigned short> distribution { std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max() };
+    for (int index = 0; index < size; ++index) {
+        buff[index] = distribution(engine);
+    }
 }
 
 double grandom_double()
 {
-  auto& engine = grandom_engine();
-  return std::generate_canonical<double, std::numeric_limits<double>::digits>(engine);
+    auto &engine = grandom_engine();
+    return std::generate_canonical<double, std::numeric_limits<double>::digits>(engine);
 }

@@ -5,55 +5,45 @@
 
 #include <poppler-qt5.h>
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
-    QGuiApplication a( argc, argv );               // QApplication required!
+    QGuiApplication a(argc, argv); // QApplication required!
 
-    if ( argc < 2 ||
-        (argc == 3 && strcmp(argv[2], "-arthur") != 0) ||
-        argc > 3)
-    {
+    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-arthur") != 0) || argc > 3) {
         // use argument as file name
         qWarning() << "usage: test-render-to-file-qt5 filename [-arthur]";
         exit(1);
     }
-  
+
     Poppler::Document *doc = Poppler::Document::load(QFile::decodeName(argv[1]));
-    if (!doc)
-    {
+    if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
     }
 
-    if (doc->isLocked())
-    {
+    if (doc->isLocked()) {
         qWarning() << "document locked (needs password)";
         exit(0);
     }
-  
-    if (doc->numPages() <= 0)
-    {
+
+    if (doc->numPages() <= 0) {
         delete doc;
         qDebug() << "Doc has no pages";
         return 0;
     }
 
     QString backendString;
-    if (argc == 3 && strcmp(argv[2], "-arthur") == 0)
-    {
+    if (argc == 3 && strcmp(argv[2], "-arthur") == 0) {
         backendString = QStringLiteral("Arthur");
         doc->setRenderBackend(Poppler::Document::ArthurBackend);
-    }
-    else
-    {
+    } else {
         backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
     }
     doc->setRenderHint(Poppler::Document::Antialiasing, true);
     doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
-    
-    for (int i = 0; i < doc->numPages(); ++i)
-    {
+
+    for (int i = 0; i < doc->numPages(); ++i) {
         Poppler::Page *page = doc->page(i);
         if (page) {
             qDebug() << "Rendering page using" << backendString << "backend: " << i;
@@ -64,6 +54,6 @@ int main( int argc, char **argv )
             delete page;
         }
     }
-    
+
     return 0;
 }

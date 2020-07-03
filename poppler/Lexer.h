@@ -32,81 +32,81 @@
 
 class XRef;
 
-#define tokBufSize 128		// size of token buffer
+#define tokBufSize 128 // size of token buffer
 
 //------------------------------------------------------------------------
 // Lexer
 //------------------------------------------------------------------------
 
-class Lexer {
+class Lexer
+{
 public:
+    // Construct a lexer for a single stream.  Deletes the stream when
+    // lexer is deleted.
+    Lexer(XRef *xrefA, Stream *str);
 
-  // Construct a lexer for a single stream.  Deletes the stream when
-  // lexer is deleted.
-  Lexer(XRef *xrefA, Stream *str);
+    // Construct a lexer for a stream or array of streams (assumes obj
+    // is either a stream or array of streams).
+    Lexer(XRef *xrefA, Object *obj);
 
-  // Construct a lexer for a stream or array of streams (assumes obj
-  // is either a stream or array of streams).
-  Lexer(XRef *xrefA, Object *obj);
+    // Destructor.
+    ~Lexer();
 
-  // Destructor.
-  ~Lexer();
+    Lexer(const Lexer &) = delete;
+    Lexer &operator=(const Lexer &) = delete;
 
-  Lexer(const Lexer &) = delete;
-  Lexer& operator=(const Lexer &) = delete;
+    // Get the next object from the input stream.
+    Object getObj(int objNum = -1);
+    Object getObj(const char *cmdA, int objNum);
+    template<typename T>
+    Object getObj(T) = delete;
 
-  // Get the next object from the input stream.
-  Object getObj(int objNum = -1);
-  Object getObj(const char *cmdA, int objNum);
-  template<typename T> Object getObj(T) = delete;
+    // Skip to the beginning of the next line in the input stream.
+    void skipToNextLine();
 
-  // Skip to the beginning of the next line in the input stream.
-  void skipToNextLine();
+    // Skip over one character.
+    void skipChar() { getChar(); }
 
-  // Skip over one character.
-  void skipChar() { getChar(); }
+    // Get stream.
+    Stream *getStream() { return curStr.isStream() ? curStr.getStream() : nullptr; }
 
-  // Get stream.
-  Stream *getStream()
-    { return curStr.isStream() ? curStr.getStream() : nullptr; }
+    // Get current position in file.  This is only used for error
+    // messages.
+    Goffset getPos() const { return curStr.isStream() ? curStr.getStream()->getPos() : -1; }
 
-  // Get current position in file.  This is only used for error
-  // messages.
-  Goffset getPos() const
-    { return curStr.isStream() ? curStr.getStream()->getPos() : -1; }
+    // Set position in file.
+    void setPos(Goffset pos)
+    {
+        if (curStr.isStream())
+            curStr.getStream()->setPos(pos);
+    }
 
-  // Set position in file.
-  void setPos(Goffset pos)
-    { if (curStr.isStream()) curStr.getStream()->setPos(pos); }
+    // Returns true if <c> is a whitespace character.
+    static bool isSpace(int c);
 
-  // Returns true if <c> is a whitespace character.
-  static bool isSpace(int c);
+    // often (e.g. ~30% on PDF Refernce 1.6 pdf file from Adobe site) getChar
+    // is called right after lookChar. In order to avoid expensive re-doing
+    // getChar() of underlying stream, we cache the last value found by
+    // lookChar() in lookCharLastValueCached. A special value
+    // LOOK_VALUE_NOT_CACHED that should never be part of stream indicates
+    // that no value was cached
+    static const int LOOK_VALUE_NOT_CACHED = -3;
+    int lookCharLastValueCached;
 
-
-  // often (e.g. ~30% on PDF Refernce 1.6 pdf file from Adobe site) getChar
-  // is called right after lookChar. In order to avoid expensive re-doing
-  // getChar() of underlying stream, we cache the last value found by
-  // lookChar() in lookCharLastValueCached. A special value 
-  // LOOK_VALUE_NOT_CACHED that should never be part of stream indicates
-  // that no value was cached
-  static const int LOOK_VALUE_NOT_CACHED = -3;
-  int lookCharLastValueCached;
-
-  XRef *getXRef() const { return xref; }
-  bool hasXRef() const { return xref != nullptr; }
+    XRef *getXRef() const { return xref; }
+    bool hasXRef() const { return xref != nullptr; }
 
 private:
+    int getChar(bool comesFromLook = false);
+    int lookChar();
 
-  int getChar(bool comesFromLook = false);
-  int lookChar();
+    Array *streams; // array of input streams
+    int strPtr; // index of current stream
+    Object curStr; // current stream
+    bool freeArray; // should lexer free the streams array?
+    char tokBuf[tokBufSize]; // temporary token buffer
 
-  Array *streams;		// array of input streams
-  int strPtr;			// index of current stream
-  Object curStr;		// current stream
-  bool freeArray;		// should lexer free the streams array?
-  char tokBuf[tokBufSize];	// temporary token buffer
-
-  XRef *xref;
+    XRef *xref;
 };
 
 #endif

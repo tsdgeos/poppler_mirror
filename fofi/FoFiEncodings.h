@@ -28,8 +28,8 @@
 // Type 1 and 1C font data
 //------------------------------------------------------------------------
 
-extern const char * const fofiType1StandardEncoding[256];
-extern const char * const fofiType1ExpertEncoding[256];
+extern const char *const fofiType1StandardEncoding[256];
+extern const char *const fofiType1ExpertEncoding[256];
 
 //------------------------------------------------------------------------
 // Type 1C font data

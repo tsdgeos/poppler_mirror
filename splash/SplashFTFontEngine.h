@@ -37,40 +37,37 @@ class SplashFontSrc;
 // SplashFTFontEngine
 //------------------------------------------------------------------------
 
-class SplashFTFontEngine {
+class SplashFTFontEngine
+{
 public:
+    static SplashFTFontEngine *init(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHinting);
 
-  static SplashFTFontEngine *init(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHinting);
+    ~SplashFTFontEngine();
 
-  ~SplashFTFontEngine();
+    SplashFTFontEngine(const SplashFTFontEngine &) = delete;
+    SplashFTFontEngine &operator=(const SplashFTFontEngine &) = delete;
 
-  SplashFTFontEngine(const SplashFTFontEngine&) = delete;
-  SplashFTFontEngine& operator=(const SplashFTFontEngine&) = delete;
-
-  // Load fonts.
-  SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
-  SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
-  SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
-  SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
-  SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src,
-                                      int *codeToGID, int codeToGIDLen);
-  SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src,
-				   int *codeToGID, int codeToGIDLen, int faceIndex = 0);
-  bool getAA() { return aa; }
-  void setAA(bool aaA) { aa = aaA; }
+    // Load fonts.
+    SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
+    SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen);
+    SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex = 0);
+    bool getAA() { return aa; }
+    void setAA(bool aaA) { aa = aaA; }
 
 private:
+    SplashFTFontEngine(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHintingA, FT_Library libA);
 
-  SplashFTFontEngine(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHintingA, FT_Library libA);
+    bool aa;
+    bool enableFreeTypeHinting;
+    bool enableSlightHinting;
+    FT_Library lib;
+    bool useCIDs;
 
-  bool aa;
-  bool enableFreeTypeHinting;
-  bool enableSlightHinting;
-  FT_Library lib;
-  bool useCIDs;
-
-  friend class SplashFTFontFile;
-  friend class SplashFTFont;
+    friend class SplashFTFontFile;
+    friend class SplashFTFont;
 };
 
 #endif

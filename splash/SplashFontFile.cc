@@ -24,7 +24,7 @@
 
 #include <cstdio>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -35,81 +35,89 @@
 // SplashFontFile
 //------------------------------------------------------------------------
 
-SplashFontFile::SplashFontFile(SplashFontFileID *idA, SplashFontSrc *srcA) {
-  id = idA;
-  src = srcA;
-  src->ref();
-  refCnt = 0;
-  doAdjustMatrix = false;
+SplashFontFile::SplashFontFile(SplashFontFileID *idA, SplashFontSrc *srcA)
+{
+    id = idA;
+    src = srcA;
+    src->ref();
+    refCnt = 0;
+    doAdjustMatrix = false;
 }
 
-SplashFontFile::~SplashFontFile() {
-  src->unref();
-  delete id;
+SplashFontFile::~SplashFontFile()
+{
+    src->unref();
+    delete id;
 }
 
-void SplashFontFile::incRefCnt() {
-  ++refCnt;
+void SplashFontFile::incRefCnt()
+{
+    ++refCnt;
 }
 
-void SplashFontFile::decRefCnt() {
-  if (!--refCnt) {
-    delete this;
-  }
+void SplashFontFile::decRefCnt()
+{
+    if (!--refCnt) {
+        delete this;
+    }
 }
 
 //
 
-SplashFontSrc::SplashFontSrc() {
-  isFile = false;
-  deleteSrc = false;
-  fileName = nullptr;
-  buf = nullptr;
-  refcnt = 1;
+SplashFontSrc::SplashFontSrc()
+{
+    isFile = false;
+    deleteSrc = false;
+    fileName = nullptr;
+    buf = nullptr;
+    refcnt = 1;
 }
 
-SplashFontSrc::~SplashFontSrc() {
-  if (deleteSrc) {
-    if (isFile) {
-      if (fileName)
-	unlink(fileName->c_str());
-    } else {
-      if (buf)
-	gfree(buf);
+SplashFontSrc::~SplashFontSrc()
+{
+    if (deleteSrc) {
+        if (isFile) {
+            if (fileName)
+                unlink(fileName->c_str());
+        } else {
+            if (buf)
+                gfree(buf);
+        }
     }
-  }
 
-  if (isFile && fileName)
-    delete fileName;
+    if (isFile && fileName)
+        delete fileName;
 }
 
-void SplashFontSrc::ref() {
-  refcnt++;
+void SplashFontSrc::ref()
+{
+    refcnt++;
 }
 
-void SplashFontSrc::unref() {
-  if (! --refcnt)
-    delete this;
+void SplashFontSrc::unref()
+{
+    if (!--refcnt)
+        delete this;
 }
 
 void SplashFontSrc::setFile(GooString *file, bool del)
 {
-  isFile = true;
-  fileName = file->copy();
-  deleteSrc = del;
+    isFile = true;
+    fileName = file->copy();
+    deleteSrc = del;
 }
 
 void SplashFontSrc::setFile(const char *file, bool del)
 {
-  isFile = true;
-  fileName = new GooString(file);
-  deleteSrc = del;
+    isFile = true;
+    fileName = new GooString(file);
+    deleteSrc = del;
 }
 
 void SplashFontSrc::setBuf(char *bufA, int bufLenA, bool del)
 {
-  isFile = false;
-  buf = bufA;
-  bufLen = bufLenA;
-  deleteSrc = del;
+    isFile = false;
+    buf = bufA;
+    bufLen = bufLenA;
+    deleteSrc = del;
 }

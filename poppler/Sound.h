@@ -28,53 +28,55 @@ class Stream;
 
 //------------------------------------------------------------------------
 
-enum SoundKind {
-  soundEmbedded,		// embedded sound
-  soundExternal			// external sound
+enum SoundKind
+{
+    soundEmbedded, // embedded sound
+    soundExternal // external sound
 };
 
-enum SoundEncoding {
-  soundRaw,			// raw encoding
-  soundSigned,			// twos-complement values
-  soundMuLaw,			// mu-law-encoded samples
-  soundALaw			// A-law-encoded samples
+enum SoundEncoding
+{
+    soundRaw, // raw encoding
+    soundSigned, // twos-complement values
+    soundMuLaw, // mu-law-encoded samples
+    soundALaw // A-law-encoded samples
 };
 
 class Sound
 {
 public:
-  // Try to parse the Object obj
-  static std::unique_ptr<Sound> parseSound(Object *obj);
+    // Try to parse the Object obj
+    static std::unique_ptr<Sound> parseSound(Object *obj);
 
-  // Destructor
-  ~Sound();
+    // Destructor
+    ~Sound();
 
-  Sound(const Sound &) = delete;
-  Sound& operator=(const Sound &) = delete;
+    Sound(const Sound &) = delete;
+    Sound &operator=(const Sound &) = delete;
 
-  const Object *getObject() const { return &streamObj; }
-  Stream *getStream();
+    const Object *getObject() const { return &streamObj; }
+    Stream *getStream();
 
-  SoundKind getSoundKind() const { return kind; }
-  const std::string &getFileName() const { return fileName; }
-  double getSamplingRate() const { return samplingRate; }
-  int getChannels() const { return channels; }
-  int getBitsPerSample() const { return bitsPerSample; }
-  SoundEncoding getEncoding() const { return encoding; }
+    SoundKind getSoundKind() const { return kind; }
+    const std::string &getFileName() const { return fileName; }
+    double getSamplingRate() const { return samplingRate; }
+    int getChannels() const { return channels; }
+    int getBitsPerSample() const { return bitsPerSample; }
+    SoundEncoding getEncoding() const { return encoding; }
 
-  Sound *copy() const;
+    Sound *copy() const;
 
 private:
-  // Create a sound. The Object obj is ensured to be a Stream with a Dict
-  Sound(const Object *obj, bool readAttrs = true);
+    // Create a sound. The Object obj is ensured to be a Stream with a Dict
+    Sound(const Object *obj, bool readAttrs = true);
 
-  Object streamObj;
-  SoundKind kind;
-  std::string fileName;
-  double samplingRate;
-  int channels;
-  int bitsPerSample;
-  SoundEncoding encoding;
+    Object streamObj;
+    SoundKind kind;
+    std::string fileName;
+    double samplingRate;
+    int channels;
+    int bitsPerSample;
+    SoundEncoding encoding;
 };
 
 #endif

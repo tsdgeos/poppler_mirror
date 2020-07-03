@@ -24,40 +24,36 @@
 
 namespace Poppler {
 
-QIODeviceInStream::QIODeviceInStream(QIODevice *device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
-  : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA))
-  , m_device(device)
-{
-}
+QIODeviceInStream::QIODeviceInStream(QIODevice *device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA)), m_device(device) { }
 
 QIODeviceInStream::~QIODeviceInStream()
 {
-  close();
+    close();
 }
 
 BaseStream *QIODeviceInStream::copy()
 {
-  return new QIODeviceInStream(m_device, start, limited, length, dict.copy());
+    return new QIODeviceInStream(m_device, start, limited, length, dict.copy());
 }
 
 Stream *QIODeviceInStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
-  return new QIODeviceInStream(m_device, startA, limitedA, lengthA, std::move(dictA));
+    return new QIODeviceInStream(m_device, startA, limitedA, lengthA, std::move(dictA));
 }
 
 Goffset QIODeviceInStream::currentPos() const
 {
-  return m_device->pos();
+    return m_device->pos();
 }
 
 void QIODeviceInStream::setCurrentPos(Goffset offset)
 {
-  m_device->seek(offset);
+    m_device->seek(offset);
 }
 
 Goffset QIODeviceInStream::read(char *buffer, Goffset count)
 {
-  return m_device->read(buffer, count);
+    return m_device->read(buffer, count);
 }
 
 }

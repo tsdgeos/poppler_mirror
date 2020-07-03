@@ -14,24 +14,27 @@ private slots:
     void benchSetToNull();
 };
 
-void TestObject::benchDefaultConstructor() {
-  QBENCHMARK {
+void TestObject::benchDefaultConstructor()
+{
+    QBENCHMARK {
+        Object obj;
+    }
+}
+
+void TestObject::benchMoveConstructor()
+{
+    QBENCHMARK {
+        Object src;
+        Object dst { std::move(src) };
+    }
+}
+
+void TestObject::benchSetToNull()
+{
     Object obj;
-  }
-}
-
-void TestObject::benchMoveConstructor() {
-  QBENCHMARK {
-    Object src;
-    Object dst{std::move(src)};
-  }
-}
-
-void TestObject::benchSetToNull() {
-  Object obj;
-  QBENCHMARK {
-    obj.setToNull();
-  }
+    QBENCHMARK {
+        obj.setToNull();
+    }
 }
 
 QTEST_GUILESS_MAIN(TestObject)

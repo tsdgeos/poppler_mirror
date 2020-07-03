@@ -22,8 +22,7 @@
 
 #include "poppler-image.h"
 
-namespace poppler
-{
+namespace poppler {
 
 class image_private
 {
@@ -32,7 +31,7 @@ public:
     ~image_private();
 
     image_private(const image_private &) = delete;
-    image_private& operator=(const image_private &) = delete;
+    image_private &operator=(const image_private &) = delete;
 
     static image_private *create_data(int width, int height, image::format_enum format);
     static image_private *create_data(char *data, int width, int height, image::format_enum format);

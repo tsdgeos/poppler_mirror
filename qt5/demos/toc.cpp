@@ -30,18 +30,12 @@
 
 struct Node
 {
-    Node(Poppler::OutlineItem &&item, int row, Node *parent)
-        : m_row(row), m_parent(parent), m_item(std::move(item))
-    {
-    }
+    Node(Poppler::OutlineItem &&item, int row, Node *parent) : m_row(row), m_parent(parent), m_item(std::move(item)) { }
 
-    ~Node()
-    {
-        qDeleteAll(m_children);
-    }
+    ~Node() { qDeleteAll(m_children); }
 
     Node(const Node &) = delete;
-    Node& operator=(const Node &) = delete;
+    Node &operator=(const Node &) = delete;
 
     int m_row;
     Node *m_parent;
@@ -52,84 +46,75 @@ struct Node
 class TocModel : public QAbstractItemModel
 {
     Q_OBJECT
-    public:
-        TocModel(QVector<Poppler::OutlineItem> &&items, QObject *parent)
-            : QAbstractItemModel(parent)
-        {
+public:
+    TocModel(QVector<Poppler::OutlineItem> &&items, QObject *parent) : QAbstractItemModel(parent)
+    {
+        for (int i = 0; i < items.count(); ++i) {
+            m_topItems << new Node(std::move(items[i]), i, nullptr);
+        }
+    }
+
+    ~TocModel() override { qDeleteAll(m_topItems); }
+
+    QVariant data(const QModelIndex &index, int role) const override
+    {
+        if (role != Qt::DisplayRole)
+            return {};
+
+        Node *n = static_cast<Node *>(index.internalPointer());
+        return n->m_item.name();
+    }
+
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override
+    {
+        Node *p = static_cast<Node *>(parent.internalPointer());
+        const QVector<Node *> &children = p ? p->m_children : m_topItems;
+
+        return createIndex(row, column, children[row]);
+    }
+
+    QModelIndex parent(const QModelIndex &child) const override
+    {
+        Node *n = static_cast<Node *>(child.internalPointer());
+        if (n->m_parent == nullptr)
+            return QModelIndex();
+        else
+            return createIndex(n->m_parent->m_row, 0, n->m_parent);
+    }
+
+    int rowCount(const QModelIndex &parent) const override
+    {
+        Node *n = static_cast<Node *>(parent.internalPointer());
+        if (!n) {
+            return m_topItems.count();
+        }
+
+        if (n->m_children.isEmpty() && !n->m_item.isNull()) {
+            QVector<Poppler::OutlineItem> items = n->m_item.children();
             for (int i = 0; i < items.count(); ++i) {
-                m_topItems << new Node(std::move(items[i]), i, nullptr);
+                n->m_children << new Node(std::move(items[i]), i, n);
             }
         }
 
-        ~TocModel() override
-        {
-            qDeleteAll(m_topItems);
-        }
+        return n->m_children.count();
+    }
 
-        QVariant data(const QModelIndex &index, int role) const override
-        {
-            if (role != Qt::DisplayRole)
-                return {};
+    bool hasChildren(const QModelIndex &parent) const override
+    {
+        Node *n = static_cast<Node *>(parent.internalPointer());
+        if (!n)
+            return true;
 
-            Node *n = static_cast<Node*>(index.internalPointer());
-            return n->m_item.name();
-        }
+        return n->m_item.hasChildren();
+    }
 
-        QModelIndex index(int row, int column, const QModelIndex &parent) const override
-        {
-            Node *p = static_cast<Node*>(parent.internalPointer());
-            const QVector<Node *> &children = p ? p->m_children : m_topItems;
+    int columnCount(const QModelIndex &parent) const override { return 1; }
 
-            return createIndex(row, column, children[row]);
-        }
-
-        QModelIndex parent(const QModelIndex &child) const override
-        {
-            Node *n = static_cast<Node*>(child.internalPointer());
-            if (n->m_parent == nullptr)
-                return QModelIndex();
-            else
-                return createIndex(n->m_parent->m_row, 0, n->m_parent);
-        }
-
-        int rowCount(const QModelIndex &parent) const override
-        {
-            Node *n = static_cast<Node*>(parent.internalPointer());
-            if (!n) {
-                return m_topItems.count();
-            }
-
-            if (n->m_children.isEmpty() && !n->m_item.isNull()) {
-                QVector<Poppler::OutlineItem> items = n->m_item.children();
-                for (int i = 0; i < items.count(); ++i) {
-                    n->m_children << new Node(std::move(items[i]), i, n);
-                }
-            }
-
-            return n->m_children.count();
-        }
-
-        bool hasChildren(const QModelIndex &parent) const override
-        {
-            Node *n = static_cast<Node*>(parent.internalPointer());
-            if (!n)
-                return true;
-
-            return n->m_item.hasChildren();
-        }
-
-        int columnCount(const QModelIndex &parent) const override
-        {
-            return 1;
-        }
-
-    private:
-        QVector<Node *> m_topItems;
-
+private:
+    QVector<Node *> m_topItems;
 };
 
-TocDock::TocDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+TocDock::TocDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_tree = new QTreeView(this);
     setWidget(m_tree);
@@ -139,16 +124,14 @@ TocDock::TocDock(QWidget *parent)
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-TocDock::~TocDock()
-{
-}
+TocDock::~TocDock() { }
 
 void TocDock::expandItemModels(const QModelIndex &parent)
 {
-    TocModel *model = static_cast<TocModel*>(m_tree->model());
+    TocModel *model = static_cast<TocModel *>(m_tree->model());
     for (int i = 0; i < model->rowCount(parent); ++i) {
         QModelIndex index = model->index(i, 0, parent);
-        Node *n = static_cast<Node*>(index.internalPointer());
+        Node *n = static_cast<Node *>(index.internalPointer());
         if (n->m_item.isOpen()) {
             m_tree->setExpanded(index, true);
             expandItemModels(index);

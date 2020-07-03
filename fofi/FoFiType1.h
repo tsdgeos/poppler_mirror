@@ -29,43 +29,41 @@
 // FoFiType1
 //------------------------------------------------------------------------
 
-class FoFiType1: public FoFiBase {
+class FoFiType1 : public FoFiBase
+{
 public:
+    // Create a FoFiType1 object from a memory buffer.
+    static FoFiType1 *make(const char *fileA, int lenA);
 
-  // Create a FoFiType1 object from a memory buffer.
-  static FoFiType1 *make(const char *fileA, int lenA);
+    // Create a FoFiType1 object from a file on disk.
+    static FoFiType1 *load(const char *fileName);
 
-  // Create a FoFiType1 object from a file on disk.
-  static FoFiType1 *load(const char *fileName);
+    ~FoFiType1() override;
 
-  ~FoFiType1() override;
+    // Return the font name.
+    const char *getName();
 
-  // Return the font name.
-  const char *getName();
+    // Return the encoding, as an array of 256 names (any of which may
+    // be NULL).
+    char **getEncoding();
 
-  // Return the encoding, as an array of 256 names (any of which may
-  // be NULL).
-  char **getEncoding();
+    // Return the font matrix as an array of six numbers.
+    void getFontMatrix(double *mat);
 
-  // Return the font matrix as an array of six numbers.
-  void getFontMatrix(double *mat);
-
-  // Write a version of the Type 1 font file with a new encoding.
-  void writeEncoded(const char **newEncoding,
-		    FoFiOutputFunc outputFunc, void *outputStream) const;
+    // Write a version of the Type 1 font file with a new encoding.
+    void writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc, void *outputStream) const;
 
 private:
+    FoFiType1(const char *fileA, int lenA, bool freeFileDataA);
 
-  FoFiType1(const char *fileA, int lenA, bool freeFileDataA);
+    char *getNextLine(char *line) const;
+    void parse();
+    void undoPFB();
 
-  char *getNextLine(char *line) const;
-  void parse();
-  void undoPFB();
-
-  char *name;
-  char **encoding;
-  double fontMatrix[6];
-  bool parsed;
+    char *name;
+    char **encoding;
+    double fontMatrix[6];
+    bool parsed;
 };
 
 #endif

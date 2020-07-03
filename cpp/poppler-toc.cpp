@@ -1,4 +1,4 @@
-  /*
+/*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -30,21 +30,17 @@
 
 using namespace poppler;
 
-toc_private::toc_private()
-{
-}
+toc_private::toc_private() { }
 
-toc_private::~toc_private()
-{
-}
+toc_private::~toc_private() { }
 
-toc* toc_private::load_from_outline(Outline *outline)
+toc *toc_private::load_from_outline(Outline *outline)
 {
     if (!outline) {
         return nullptr;
     }
 
-    const std::vector<OutlineItem*> *items = outline->getItems();
+    const std::vector<OutlineItem *> *items = outline->getItems();
     if (!items || items->size() < 1) {
         return nullptr;
     }
@@ -56,10 +52,7 @@ toc* toc_private::load_from_outline(Outline *outline)
     return newtoc;
 }
 
-toc_item_private::toc_item_private()
-    : is_open(false)
-{
-}
+toc_item_private::toc_item_private() : is_open(false) { }
 
 toc_item_private::~toc_item_private()
 {
@@ -74,7 +67,7 @@ void toc_item_private::load(const OutlineItem *item)
     is_open = item->isOpen();
 }
 
-void toc_item_private::load_children(const std::vector<OutlineItem*> *items)
+void toc_item_private::load_children(const std::vector<OutlineItem *> *items)
 {
     const int num_items = items->size();
     children.resize(num_items);
@@ -86,7 +79,7 @@ void toc_item_private::load_children(const std::vector<OutlineItem*> *items)
         children[i] = new_item;
 
         item->open();
-        const std::vector<OutlineItem*> *item_children = item->getKids();
+        const std::vector<OutlineItem *> *item_children = item->getKids();
         if (item_children) {
             new_item->d->load_children(item_children);
         }
@@ -101,11 +94,7 @@ void toc_item_private::load_children(const std::vector<OutlineItem*> *items)
  The TOC of a PDF %document is represented as a tree of items.
  */
 
-
-toc::toc()
-    : d(new toc_private())
-{
-}
+toc::toc() : d(new toc_private()) { }
 
 /**
  Destroys the TOC.
@@ -124,7 +113,7 @@ toc::~toc()
 
  \returns the root "item"
  */
-toc_item* toc::root() const
+toc_item *toc::root() const
 {
     return &d->root;
 }
@@ -141,11 +130,7 @@ toc_item* toc::root() const
  An iterator for the children of a TOC item.
  */
 
-
-toc_item::toc_item()
-    : d(new toc_item_private())
-{
-}
+toc_item::toc_item() : d(new toc_item_private()) { }
 
 /**
  Destroys the TOC item.

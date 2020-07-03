@@ -13,7 +13,6 @@
 //
 //========================================================================
 
-
 #ifndef JPEG2000STREAM_H
 #define JPEG2000STREAM_H
 
@@ -23,34 +22,33 @@
 
 struct JPXStreamPrivate;
 
-class JPXStream: public FilterStream {
+class JPXStream : public FilterStream
+{
 public:
+    JPXStream(Stream *strA);
+    ~JPXStream() override;
 
-  JPXStream(Stream *strA);
-  ~JPXStream() override;
+    JPXStream(const JPXStream &other) = delete;
+    JPXStream &operator=(const JPXStream &other) = delete;
 
-  JPXStream(const JPXStream &other) = delete;
-  JPXStream& operator=(const JPXStream &other) = delete;
+    StreamKind getKind() const override { return strJPX; }
+    void reset() override;
+    void close() override;
+    Goffset getPos() override;
+    int getChar() override;
+    int lookChar() override;
+    GooString *getPSFilter(int psLevel, const char *indent) override;
+    bool isBinary(bool last = true) override;
+    void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
 
-  StreamKind getKind() const override { return strJPX; }
-  void reset() override;
-  void close() override;
-  Goffset getPos() override;
-  int getChar() override;
-  int lookChar() override;
-  GooString *getPSFilter(int psLevel, const char *indent) override;
-  bool isBinary(bool last = true) override;
-  void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
+    int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
 
-  int readStream(int nChars, unsigned char *buffer) {
-    return str->doGetChars(nChars, buffer);
-  }
 private:
-  JPXStreamPrivate *priv;
+    JPXStreamPrivate *priv;
 
-  void init();
-  bool hasGetChars() override { return true; }
-  int getChars(int nChars, unsigned char *buffer) override;
+    void init();
+    bool hasGetChars() override { return true; }
+    int getChars(int nChars, unsigned char *buffer) override;
 };
 
 #endif

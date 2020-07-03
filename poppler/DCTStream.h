@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <csetjmp>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 #include <cstring>
 #include <cctype>
@@ -38,45 +38,47 @@ extern "C" {
 #include <jerror.h>
 }
 
-struct str_src_mgr {
+struct str_src_mgr
+{
     struct jpeg_source_mgr pub;
     JOCTET buffer;
     Stream *str;
     int index;
 };
 
-struct str_error_mgr {
-  struct jpeg_error_mgr pub;
-  jmp_buf setjmp_buffer;
-  int width;
-  int height;
+struct str_error_mgr
+{
+    struct jpeg_error_mgr pub;
+    jmp_buf setjmp_buffer;
+    int width;
+    int height;
 };
 
-class DCTStream: public FilterStream {
+class DCTStream : public FilterStream
+{
 public:
-
-  DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
-  ~DCTStream() override;
-  StreamKind getKind() const override { return strDCT; }
-  void reset() override;
-  int getChar() override;
-  int lookChar() override;
-  GooString *getPSFilter(int psLevel, const char *indent) override;
-  bool isBinary(bool last = true) override;
+    DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
+    ~DCTStream() override;
+    StreamKind getKind() const override { return strDCT; }
+    void reset() override;
+    int getChar() override;
+    int lookChar() override;
+    GooString *getPSFilter(int psLevel, const char *indent) override;
+    bool isBinary(bool last = true) override;
 
 private:
-  void init();
+    void init();
 
-  bool hasGetChars() override { return true; }
-  int getChars(int nChars, unsigned char *buffer) override;
+    bool hasGetChars() override { return true; }
+    int getChars(int nChars, unsigned char *buffer) override;
 
-  int colorXform;
-  JSAMPLE *current;
-  JSAMPLE *limit;
-  struct jpeg_decompress_struct cinfo;
-  struct str_error_mgr err;
-  struct str_src_mgr src;
-  JSAMPARRAY row_buffer;
+    int colorXform;
+    JSAMPLE *current;
+    JSAMPLE *limit;
+    struct jpeg_decompress_struct cinfo;
+    struct str_error_mgr err;
+    struct str_src_mgr src;
+    JSAMPARRAY row_buffer;
 };
 
-#endif 
+#endif

@@ -2,7 +2,7 @@
 
 #include <poppler-qt5.h>
 
-class TestPermissions: public QObject
+class TestPermissions : public QObject
 {
     Q_OBJECT
 public:
@@ -15,32 +15,31 @@ void TestPermissions::permissions1()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
-    QVERIFY( doc );
-  
+    QVERIFY(doc);
+
     // we are allowed to print
-    QVERIFY( doc->okToPrint() );
+    QVERIFY(doc->okToPrint());
 
     // we are not allowed to change
-    QVERIFY( !(doc->okToChange()) );
+    QVERIFY(!(doc->okToChange()));
 
     // we are not allowed to copy or extract content
-    QVERIFY( !(doc->okToCopy()) );
+    QVERIFY(!(doc->okToCopy()));
 
     // we are not allowed to print at high resolution
-    QVERIFY( !(doc->okToPrintHighRes()) );
+    QVERIFY(!(doc->okToPrintHighRes()));
 
     // we are not allowed to fill forms
-    QVERIFY( !(doc->okToFillForm()) );
+    QVERIFY(!(doc->okToFillForm()));
 
     // we are allowed to extract content for accessibility
-    QVERIFY( doc->okToExtractForAccessibility() );
+    QVERIFY(doc->okToExtractForAccessibility());
 
     // we are allowed to assemble this document
-    QVERIFY( doc->okToAssemble() );
+    QVERIFY(doc->okToAssemble());
 
     delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestPermissions)
 #include "check_permissions.moc"
-

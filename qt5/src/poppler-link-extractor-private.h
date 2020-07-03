@@ -24,15 +24,14 @@
 
 #include <QtCore/QList>
 
-namespace Poppler
-{
+namespace Poppler {
 
 class Link;
 class PageData;
 
 class LinkExtractorOutputDev : public OutputDev
 {
-  public:
+public:
     LinkExtractorOutputDev(PageData *data);
     ~LinkExtractorOutputDev() override;
 
@@ -43,13 +42,13 @@ class LinkExtractorOutputDev : public OutputDev
     void processLink(::AnnotLink *link) override;
 
     // our stuff
-    QList< Link* > links();
+    QList<Link *> links();
 
-  private:
+private:
     PageData *m_data;
     double m_pageCropWidth;
     double m_pageCropHeight;
-    QList< Link* > m_links;
+    QList<Link *> m_links;
 };
 
 }

@@ -12,15 +12,8 @@ void PreviewBitmapInit();
 void PreviewBitmapDestroy();
 void PreviewBitmapSplash(SplashBitmap *bmpSplash);
 
-void PreviewBitmapSplash(SplashBitmap *bmpSplash)
-{
-}
+void PreviewBitmapSplash(SplashBitmap *bmpSplash) { }
 
-void PreviewBitmapDestroy()
-{
-}
+void PreviewBitmapDestroy() { }
 
-void PreviewBitmapInit()
-{
-}
-
+void PreviewBitmapInit() { }

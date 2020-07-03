@@ -36,95 +36,88 @@ typedef struct _PopplerMediaClass PopplerMediaClass;
 
 struct _PopplerMedia
 {
-  GObject   parent_instance;
+    GObject parent_instance;
 
-  gchar  *filename;
+    gchar *filename;
 
-  gchar  *mime_type;
-  Object stream;
+    gchar *mime_type;
+    Object stream;
 };
 
 struct _PopplerMediaClass
 {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (PopplerMedia, poppler_media, G_TYPE_OBJECT)
+G_DEFINE_TYPE(PopplerMedia, poppler_media, G_TYPE_OBJECT)
 
-static void
-poppler_media_finalize (GObject *object)
+static void poppler_media_finalize(GObject *object)
 {
-  PopplerMedia *media = POPPLER_MEDIA(object);
+    PopplerMedia *media = POPPLER_MEDIA(object);
 
-  if (media->filename) {
-    g_free (media->filename);
-    media->filename = nullptr;
-  }
+    if (media->filename) {
+        g_free(media->filename);
+        media->filename = nullptr;
+    }
 
-  if (media->mime_type) {
-    g_free (media->mime_type);
-    media->mime_type = nullptr;
-  }
+    if (media->mime_type) {
+        g_free(media->mime_type);
+        media->mime_type = nullptr;
+    }
 
-  media->stream = Object();
+    media->stream = Object();
 
-  G_OBJECT_CLASS (poppler_media_parent_class)->finalize (object);
+    G_OBJECT_CLASS(poppler_media_parent_class)->finalize(object);
 }
 
-static void
-poppler_media_class_init (PopplerMediaClass *klass)
+static void poppler_media_class_init(PopplerMediaClass *klass)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
-  gobject_class->finalize = poppler_media_finalize;
+    gobject_class->finalize = poppler_media_finalize;
 }
 
-static void
-poppler_media_init (PopplerMedia *media)
+static void poppler_media_init(PopplerMedia *media) { }
+
+PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
 {
-}
+    PopplerMedia *media;
 
-PopplerMedia *
-_poppler_media_new (const MediaRendition *poppler_media)
-{
-  PopplerMedia *media;
+    g_assert(poppler_media != nullptr);
 
-  g_assert (poppler_media != nullptr);
+    media = POPPLER_MEDIA(g_object_new(POPPLER_TYPE_MEDIA, nullptr));
 
-  media = POPPLER_MEDIA (g_object_new (POPPLER_TYPE_MEDIA, nullptr));
+    if (poppler_media->getIsEmbedded()) {
+        const GooString *mime_type;
 
-  if (poppler_media->getIsEmbedded()) {
-    const GooString* mime_type;
+        media->stream = poppler_media->getEmbbededStreamObject()->copy();
+        mime_type = poppler_media->getContentType();
+        if (mime_type)
+            media->mime_type = g_strdup(mime_type->c_str());
+    } else {
+        media->filename = g_strdup(poppler_media->getFileName()->c_str());
+    }
 
-    media->stream = poppler_media->getEmbbededStreamObject()->copy();
-    mime_type = poppler_media->getContentType();
-    if (mime_type)
-      media->mime_type = g_strdup (mime_type->c_str());
-  } else {
-    media->filename = g_strdup (poppler_media->getFileName()->c_str());
-  }
-
-  return media;
+    return media;
 }
 
 /**
-* poppler_media_get_filename:
-* @poppler_media: a #PopplerMedia
-*
-* Returns the media clip filename, in case of non-embedded media. filename might be
-* a local relative or absolute path or a URI
-*
-* Return value: a filename, return value is owned by #PopplerMedia and should not be freed
-*
-* Since: 0.14
-*/
-const gchar *
-poppler_media_get_filename (PopplerMedia *poppler_media)
+ * poppler_media_get_filename:
+ * @poppler_media: a #PopplerMedia
+ *
+ * Returns the media clip filename, in case of non-embedded media. filename might be
+ * a local relative or absolute path or a URI
+ *
+ * Return value: a filename, return value is owned by #PopplerMedia and should not be freed
+ *
+ * Since: 0.14
+ */
+const gchar *poppler_media_get_filename(PopplerMedia *poppler_media)
 {
-  g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), NULL);
-  g_return_val_if_fail (!poppler_media->stream.isStream(), NULL);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), NULL);
+    g_return_val_if_fail(!poppler_media->stream.isStream(), NULL);
 
-  return poppler_media->filename;
+    return poppler_media->filename;
 }
 
 /**
@@ -140,12 +133,11 @@ poppler_media_get_filename (PopplerMedia *poppler_media)
  *
  * Since: 0.14
  */
-gboolean
-poppler_media_is_embedded (PopplerMedia *poppler_media)
+gboolean poppler_media_is_embedded(PopplerMedia *poppler_media)
 {
-  g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
 
-  return poppler_media->stream.isStream();
+    return poppler_media->stream.isStream();
 }
 
 /**
@@ -158,35 +150,25 @@ poppler_media_is_embedded (PopplerMedia *poppler_media)
  *
  * Since: 0.14
  */
-const gchar *
-poppler_media_get_mime_type (PopplerMedia *poppler_media)
+const gchar *poppler_media_get_mime_type(PopplerMedia *poppler_media)
 {
-  g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), NULL);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), NULL);
 
-  return poppler_media->mime_type;
+    return poppler_media->mime_type;
 }
 
-static gboolean
-save_helper (const gchar  *buf,
-	     gsize         count,
-	     gpointer      data,
-	     GError      **error)
+static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
 {
-  FILE *f = (FILE *) data;
-  gsize n;
+    FILE *f = (FILE *)data;
+    gsize n;
 
-  n = fwrite (buf, 1, count, f);
-  if (n != count)
-    {
-      g_set_error (error,
-		   G_FILE_ERROR,
-		   g_file_error_from_errno (errno),
-		   "Error writing to media file: %s",
-		   g_strerror (errno));
-      return FALSE;
+    n = fwrite(buf, 1, count, f);
+    if (n != count) {
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), "Error writing to media file: %s", g_strerror(errno));
+        return FALSE;
     }
 
-  return TRUE;
+    return TRUE;
 }
 
 /**
@@ -204,48 +186,33 @@ save_helper (const gchar  *buf,
  *
  * Since: 0.14
  */
-gboolean
-poppler_media_save (PopplerMedia *poppler_media,
-		    const char   *filename,
-		    GError      **error)
+gboolean poppler_media_save(PopplerMedia *poppler_media, const char *filename, GError **error)
 {
-  gboolean result;
-  FILE *f;
+    gboolean result;
+    FILE *f;
 
-  g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
-  g_return_val_if_fail (poppler_media->stream.isStream(), FALSE);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
+    g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
-  f = openFile (filename, "wb");
+    f = openFile(filename, "wb");
 
-  if (f == nullptr)
-    {
-      gchar *display_name = g_filename_display_name (filename);
-      g_set_error (error,
-		   G_FILE_ERROR,
-		   g_file_error_from_errno (errno),
-		   "Failed to open '%s' for writing: %s",
-		   display_name,
-		   g_strerror (errno));
-      g_free (display_name);
-      return FALSE;
+    if (f == nullptr) {
+        gchar *display_name = g_filename_display_name(filename);
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), "Failed to open '%s' for writing: %s", display_name, g_strerror(errno));
+        g_free(display_name);
+        return FALSE;
     }
 
-  result = poppler_media_save_to_callback (poppler_media, save_helper, f, error);
+    result = poppler_media_save_to_callback(poppler_media, save_helper, f, error);
 
-  if (fclose (f) < 0)
-    {
-      gchar *display_name = g_filename_display_name (filename);
-      g_set_error (error,
-		   G_FILE_ERROR,
-		   g_file_error_from_errno (errno),
-		   "Failed to close '%s', all data may not have been saved: %s",
-		   display_name,
-		   g_strerror (errno));
-      g_free (display_name);
-      return FALSE;
+    if (fclose(f) < 0) {
+        gchar *display_name = g_filename_display_name(filename);
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), "Failed to close '%s', all data may not have been saved: %s", display_name, g_strerror(errno));
+        g_free(display_name);
+        return FALSE;
     }
 
-  return result;
+    return result;
 }
 
 #define BUF_SIZE 1024
@@ -267,50 +234,40 @@ poppler_media_save (PopplerMedia *poppler_media,
  *
  * Since: 0.14
  */
-gboolean
-poppler_media_save_to_callback (PopplerMedia        *poppler_media,
-				PopplerMediaSaveFunc save_func,
-				gpointer             user_data,
-				GError             **error)
+gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMediaSaveFunc save_func, gpointer user_data, GError **error)
 {
-  Stream *stream;
-  gchar buf[BUF_SIZE];
-  int i;
-  gboolean eof_reached = FALSE;
+    Stream *stream;
+    gchar buf[BUF_SIZE];
+    int i;
+    gboolean eof_reached = FALSE;
 
-  g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
-  g_return_val_if_fail (poppler_media->stream.isStream(), FALSE);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
+    g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
-  stream = poppler_media->stream.getStream();
-  stream->reset();
+    stream = poppler_media->stream.getStream();
+    stream->reset();
 
-  do
-    {
-      int data;
+    do {
+        int data;
 
-      for (i = 0; i < BUF_SIZE; i++)
-	{
-	  data = stream->getChar ();
-	  if (data == EOF)
-	    {
-	      eof_reached = TRUE;
-	      break;
-	    }
-	  buf[i] = data;
-	}
+        for (i = 0; i < BUF_SIZE; i++) {
+            data = stream->getChar();
+            if (data == EOF) {
+                eof_reached = TRUE;
+                break;
+            }
+            buf[i] = data;
+        }
 
-      if (i > 0)
-	{
-	  if (! (save_func) (buf, i, user_data, error))
-	    {
-	      stream->close ();
-	      return FALSE;
-	    }
-	}
-    }
-  while (! eof_reached);
+        if (i > 0) {
+            if (!(save_func)(buf, i, user_data, error)) {
+                stream->close();
+                return FALSE;
+            }
+        }
+    } while (!eof_reached);
 
-  stream->close ();
+    stream->close();
 
-  return TRUE;
+    return TRUE;
 }

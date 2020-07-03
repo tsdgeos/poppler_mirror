@@ -23,41 +23,43 @@ template<typename Key, typename Item>
 class PopplerCache
 {
 public:
-  PopplerCache(const PopplerCache &) = delete;
-  PopplerCache& operator=(const PopplerCache &other) = delete;
+    PopplerCache(const PopplerCache &) = delete;
+    PopplerCache &operator=(const PopplerCache &other) = delete;
 
-  PopplerCache(std::size_t cacheSizeA) { entries.reserve(cacheSizeA); }
+    PopplerCache(std::size_t cacheSizeA) { entries.reserve(cacheSizeA); }
 
-  /* The item returned is owned by the cache */
-  Item *lookup(const Key &key) {
-    if (!entries.empty() && entries.front().first == key) {
-      return entries.front().second.get();
+    /* The item returned is owned by the cache */
+    Item *lookup(const Key &key)
+    {
+        if (!entries.empty() && entries.front().first == key) {
+            return entries.front().second.get();
+        }
+
+        for (auto it = entries.begin(); it != entries.end(); ++it) {
+            if (it->first == key) {
+                auto *item = it->second.get();
+
+                std::rotate(entries.begin(), it, std::next(it));
+
+                return item;
+            }
+        }
+
+        return nullptr;
     }
 
-    for (auto it = entries.begin(); it != entries.end(); ++it) {
-      if (it->first == key) {
-	auto *item = it->second.get();
+    /* The key and item pointers ownership is taken by the cache */
+    void put(const Key &key, Item *item)
+    {
+        if (entries.size() == entries.capacity()) {
+            entries.pop_back();
+        }
 
-	std::rotate(entries.begin(), it, std::next(it));
-
-	return item;
-      }
+        entries.emplace(entries.begin(), key, std::unique_ptr<Item> { item });
     }
-
-    return nullptr;
-  }
-    
-  /* The key and item pointers ownership is taken by the cache */
-  void put(const Key &key, Item *item) {
-    if (entries.size() == entries.capacity()) {
-      entries.pop_back();
-    }
-
-    entries.emplace(entries.begin(), key, std::unique_ptr<Item>{item});
-  }
 
 private:
-  std::vector<std::pair<Key, std::unique_ptr<Item>>> entries;
+    std::vector<std::pair<Key, std::unique_ptr<Item>>> entries;
 };
 
 #endif

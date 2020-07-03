@@ -28,15 +28,14 @@ namespace Poppler {
 
 class QIODeviceInStream : public BaseSeekInputStream
 {
-  public:
-    QIODeviceInStream(QIODevice* device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
+public:
+    QIODeviceInStream(QIODevice *device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~QIODeviceInStream() override;
 
     BaseStream *copy() override;
-    Stream *makeSubStream(Goffset startA, bool limitedA,
-                          Goffset lengthA, Object &&dictA) override;
+    Stream *makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
 
-  private:
+private:
     Goffset currentPos() const override;
     void setCurrentPos(Goffset offset) override;
     Goffset read(char *buffer, Goffset count) override;

@@ -20,12 +20,12 @@
 #include <poppler.h>
 
 #ifndef _LAYERS_H_
-#define _LAYERS_H_
+#    define _LAYERS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_layers_create_widget (PopplerDocument *document);
+GtkWidget *pgd_layers_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 
-#endif /* _LAYERS_H_ */ 
+#endif /* _LAYERS_H_ */

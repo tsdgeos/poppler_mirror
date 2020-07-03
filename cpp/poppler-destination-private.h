@@ -27,8 +27,7 @@
 class PDFDoc;
 class LinkDest;
 
-namespace poppler
-{
+namespace poppler {
 
 class destination_private
 {

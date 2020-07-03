@@ -22,8 +22,7 @@
 
 #include <QtWidgets/QTableWidget>
 
-InfoDock::InfoDock(QWidget *parent)
-    : AbstractInfoDock(parent)
+InfoDock::InfoDock(QWidget *parent) : AbstractInfoDock(parent)
 {
     m_table = new QTableWidget(this);
     setWidget(m_table);
@@ -33,9 +32,7 @@ InfoDock::InfoDock(QWidget *parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-InfoDock::~InfoDock()
-{
-}
+InfoDock::~InfoDock() { }
 
 void InfoDock::fillInfo()
 {
@@ -46,7 +43,7 @@ void InfoDock::fillInfo()
     dateKeys << QStringLiteral("CreationDate");
     dateKeys << QStringLiteral("ModDate");
     int i = 0;
-    Q_FOREACH(const QString &date, dateKeys) {
+    Q_FOREACH (const QString &date, dateKeys) {
         const int id = keys.indexOf(date);
         if (id != -1) {
             m_table->setItem(i, 0, new QTableWidgetItem(date));
@@ -55,7 +52,7 @@ void InfoDock::fillInfo()
             keys.removeAt(id);
         }
     }
-    Q_FOREACH(const QString &key, keys) {
+    Q_FOREACH (const QString &key, keys) {
         m_table->setItem(i, 0, new QTableWidgetItem(key));
         m_table->setItem(i, 1, new QTableWidgetItem(document()->info(key)));
         ++i;
@@ -68,4 +65,3 @@ void InfoDock::documentClosed()
     m_table->setRowCount(0);
     AbstractInfoDock::documentClosed();
 }
-

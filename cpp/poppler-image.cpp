@@ -31,13 +31,13 @@
 #include <config.h>
 #include "ImgWriter.h"
 #if defined(ENABLE_LIBPNG)
-#include "PNGWriter.h"
+#    include "PNGWriter.h"
 #endif
 #if defined(ENABLE_LIBJPEG)
-#include "JpegWriter.h"
+#    include "JpegWriter.h"
 #endif
 #if defined(ENABLE_LIBTIFF)
-#include "TiffWriter.h"
+#    include "TiffWriter.h"
 #endif
 #include "NetPBMWriter.h"
 
@@ -49,15 +49,21 @@
 
 namespace {
 
-struct FileCloser {
-    inline FileCloser(FILE *ff)
-        : f(ff) {}
-    inline ~FileCloser()
-    { (void)close(); }
+struct FileCloser
+{
+    inline FileCloser(FILE *ff) : f(ff) { }
+    inline ~FileCloser() { (void)close(); }
     FileCloser(const FileCloser &) = delete;
-    FileCloser& operator=(const FileCloser &) = delete;
+    FileCloser &operator=(const FileCloser &) = delete;
     inline bool close()
-    { if (f) { const int c = fclose(f); f = nullptr; return c == 0; } return true; }
+    {
+        if (f) {
+            const int c = fclose(f);
+            f = nullptr;
+            return c == 0;
+        }
+        return true;
+    }
 
     FILE *f;
 };
@@ -99,17 +105,7 @@ NetPBMWriter::Format pnm_format(poppler::image::format_enum format)
 
 using namespace poppler;
 
-image_private::image_private(int iwidth, int iheight, image::format_enum iformat)
-    : ref(1)
-    , data(nullptr)
-    , width(iwidth)
-    , height(iheight)
-    , bytes_per_row(0)
-    , bytes_num(0)
-    , format(iformat)
-    , own_data(true)
-{
-}
+image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : ref(1), data(nullptr), width(iwidth), height(iheight), bytes_per_row(0), bytes_num(0), format(iformat), own_data(true) { }
 
 image_private::~image_private()
 {
@@ -182,14 +178,10 @@ image_private *image_private::create_data(char *data, int width, int height, ima
  format_gray8 and format_bgr24 were introduced in poppler 0.65.
 */
 
-
 /**
  Construct an invalid image.
  */
-image::image()
-    : d(nullptr)
-{
-}
+image::image() : d(nullptr) { }
 
 /**
  Construct a new image.
@@ -201,10 +193,7 @@ image::image()
  \param iheight the height for the image
  \param iformat the format for the bits of the image
  */
-image::image(int iwidth, int iheight, image::format_enum iformat)
-    : d(image_private::create_data(iwidth, iheight, iformat))
-{
-}
+image::image(int iwidth, int iheight, image::format_enum iformat) : d(image_private::create_data(iwidth, iheight, iformat)) { }
 
 /**
  Construct a new image.
@@ -217,16 +206,12 @@ image::image(int iwidth, int iheight, image::format_enum iformat)
  \param iheight the height for the image
  \param iformat the format for the bits of the image
  */
-image::image(char *idata, int iwidth, int iheight, image::format_enum iformat)
-    : d(image_private::create_data(idata, iwidth, iheight, iformat))
-{
-}
+image::image(char *idata, int iwidth, int iheight, image::format_enum iformat) : d(image_private::create_data(idata, iwidth, iheight, iformat)) { }
 
 /**
  Copy constructor.
  */
-image::image(const image &img)
-    : d(img.d)
+image::image(const image &img) : d(img.d)
 {
     if (d) {
         ++d->ref;
@@ -496,7 +481,7 @@ std::vector<std::string> image::supported_image_formats()
 /**
  Assignment operator.
  */
-image& image::operator=(const image &img)
+image &image::operator=(const image &img)
 {
     if (this == &img)
         return *this;

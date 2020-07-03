@@ -39,123 +39,126 @@
 
 //------------------------------------------------------------------------
 
-Outline::Outline(const Object *outlineObj, XRef *xref) {
-  items = nullptr;
-  if (!outlineObj->isDict()) {
-    return;
-  }
-  const Object &first = outlineObj->dictLookupNF("First");
-  items = OutlineItem::readItemList(nullptr, &first, xref);
+Outline::Outline(const Object *outlineObj, XRef *xref)
+{
+    items = nullptr;
+    if (!outlineObj->isDict()) {
+        return;
+    }
+    const Object &first = outlineObj->dictLookupNF("First");
+    items = OutlineItem::readItemList(nullptr, &first, xref);
 }
 
-Outline::~Outline() {
-  if (items) {
-    for (auto entry : *items) {
-      delete entry;
+Outline::~Outline()
+{
+    if (items) {
+        for (auto entry : *items) {
+            delete entry;
+        }
+        delete items;
     }
-    delete items;
-  }
 }
 
 //------------------------------------------------------------------------
 
-OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA) {
-  Object obj1;
+OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA)
+{
+    Object obj1;
 
-  refNum = refNumA;
-  parent = parentA;
-  xref = xrefA;
-  title = nullptr;
-  kids = nullptr;
-
-
-  obj1 = dict->lookup("Title");
-  if (obj1.isString()) {
-    const GooString *s = obj1.getString();
-    titleLen = TextStringToUCS4(s, &title);
-  } else {
-    titleLen = 0;
-  }
-
-  obj1 = dict->lookup("Dest");
-  if (!obj1.isNull()) {
-    action = LinkAction::parseDest(&obj1);
-  } else {
-    obj1 = dict->lookup("A");
-    if (!obj1.isNull()) {
-      action = LinkAction::parseAction(&obj1);
-    }
-  }
-
-  firstRef = dict->lookupNF("First").copy();
-  lastRef = dict->lookupNF("Last").copy();
-  nextRef = dict->lookupNF("Next").copy();
-
-  startsOpen = false;
-  obj1 = dict->lookup("Count");
-  if (obj1.isInt()) {
-    if (obj1.getInt() > 0) {
-      startsOpen = true;
-    }
-  }
-}
-
-OutlineItem::~OutlineItem() {
-  close();
-  if (title) {
-    gfree(title);
-  }
-}
-
-std::vector<OutlineItem*> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
-  auto items = new std::vector<OutlineItem*>();
-
-  char* alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
-  memset(alreadyRead, 0, xrefA->getNumObjects());
-
-  OutlineItem *parentO = parent;
-  while (parentO) {
-    alreadyRead[parentO->refNum] = 1;
-    parentO = parentO->parent;
-  }
-
-  const Object *p = firstItemRef;
-  while (p->isRef() && 
-	 (p->getRefNum() >= 0) && 
-         (p->getRefNum() < xrefA->getNumObjects()) &&
-         !alreadyRead[p->getRefNum()]) {
-    Object obj = p->fetch(xrefA);
-    if (!obj.isDict()) {
-      break;
-    }
-    alreadyRead[p->getRefNum()] = 1;
-    OutlineItem *item = new OutlineItem(obj.getDict(), p->getRefNum(), parent, xrefA);
-    items->push_back(item);
-    p = &item->nextRef;
-  }
-
-  gfree(alreadyRead);
-
-  if (items->empty()) {
-    delete items;
-    items = nullptr;
-  }
-
-  return items;
-}
-
-void OutlineItem::open() {
-  if (!kids) {
-    kids = readItemList(this, &firstRef, xref);
-  }
-}
-
-void OutlineItem::close() {
-  if (kids) {
-    for (auto entry : *kids) {
-      delete entry;
-    }
-    delete kids;
+    refNum = refNumA;
+    parent = parentA;
+    xref = xrefA;
+    title = nullptr;
     kids = nullptr;
-  }
+
+    obj1 = dict->lookup("Title");
+    if (obj1.isString()) {
+        const GooString *s = obj1.getString();
+        titleLen = TextStringToUCS4(s, &title);
+    } else {
+        titleLen = 0;
+    }
+
+    obj1 = dict->lookup("Dest");
+    if (!obj1.isNull()) {
+        action = LinkAction::parseDest(&obj1);
+    } else {
+        obj1 = dict->lookup("A");
+        if (!obj1.isNull()) {
+            action = LinkAction::parseAction(&obj1);
+        }
+    }
+
+    firstRef = dict->lookupNF("First").copy();
+    lastRef = dict->lookupNF("Last").copy();
+    nextRef = dict->lookupNF("Next").copy();
+
+    startsOpen = false;
+    obj1 = dict->lookup("Count");
+    if (obj1.isInt()) {
+        if (obj1.getInt() > 0) {
+            startsOpen = true;
+        }
+    }
+}
+
+OutlineItem::~OutlineItem()
+{
+    close();
+    if (title) {
+        gfree(title);
+    }
+}
+
+std::vector<OutlineItem *> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA)
+{
+    auto items = new std::vector<OutlineItem *>();
+
+    char *alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
+    memset(alreadyRead, 0, xrefA->getNumObjects());
+
+    OutlineItem *parentO = parent;
+    while (parentO) {
+        alreadyRead[parentO->refNum] = 1;
+        parentO = parentO->parent;
+    }
+
+    const Object *p = firstItemRef;
+    while (p->isRef() && (p->getRefNum() >= 0) && (p->getRefNum() < xrefA->getNumObjects()) && !alreadyRead[p->getRefNum()]) {
+        Object obj = p->fetch(xrefA);
+        if (!obj.isDict()) {
+            break;
+        }
+        alreadyRead[p->getRefNum()] = 1;
+        OutlineItem *item = new OutlineItem(obj.getDict(), p->getRefNum(), parent, xrefA);
+        items->push_back(item);
+        p = &item->nextRef;
+    }
+
+    gfree(alreadyRead);
+
+    if (items->empty()) {
+        delete items;
+        items = nullptr;
+    }
+
+    return items;
+}
+
+void OutlineItem::open()
+{
+    if (!kids) {
+        kids = readItemList(this, &firstRef, xref);
+    }
+}
+
+void OutlineItem::close()
+{
+    if (kids) {
+        for (auto entry : *kids) {
+            delete entry;
+        }
+        delete kids;
+        kids = nullptr;
+    }
 }

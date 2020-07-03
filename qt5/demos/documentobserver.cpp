@@ -20,16 +20,11 @@
 
 #include "viewer.h"
 
-DocumentObserver::DocumentObserver()
-    : m_viewer(nullptr)
-{
-}
+DocumentObserver::DocumentObserver() : m_viewer(nullptr) { }
 
-DocumentObserver::~DocumentObserver()
-{
-}
+DocumentObserver::~DocumentObserver() { }
 
-Poppler::Document* DocumentObserver::document() const
+Poppler::Document *DocumentObserver::document() const
 {
     return m_viewer->m_doc;
 }

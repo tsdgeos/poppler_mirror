@@ -14,19 +14,21 @@
 // ProfileData
 //------------------------------------------------------------------------
 
-class ProfileData {
+class ProfileData
+{
 public:
-  void addElement (double elapsed);
+    void addElement(double elapsed);
 
-  int getCount () const { return count; }
-  double getTotal () const { return total; }
-  double getMin () const { return max; }
-  double getMax () const { return max; }
+    int getCount() const { return count; }
+    double getTotal() const { return total; }
+    double getMin() const { return max; }
+    double getMax() const { return max; }
+
 private:
-  int count = 0;      // size of <elems> array
-  double total = 0.0; // number of elements in array
-  double min = 0.0;   // reference count
-  double max = 0.0;   // reference count
+    int count = 0; // size of <elems> array
+    double total = 0.0; // number of elements in array
+    double min = 0.0; // reference count
+    double max = 0.0; // reference count
 };
 
 #endif

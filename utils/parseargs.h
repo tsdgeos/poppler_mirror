@@ -31,34 +31,36 @@ extern "C" {
 /*
  * Argument kinds.
  */
-typedef enum {
-  argFlag,			/* flag (present / not-present) */
-				/*   [val: bool *]             */
-  argInt,			/* integer arg    */
-				/*   [val: int *] */
-  argFP,			/* floating point arg */
-				/*   [val: double *]  */
-  argString,			/* string arg      */
-				/*   [val: char *] */
-  argGooString,			/* string arg      */
-				/*   [val: GooString *] */
-  /* dummy entries -- these show up in the usage listing only; */
-  /* useful for X args, for example                            */
-  argFlagDummy,
-  argIntDummy,
-  argFPDummy,
-  argStringDummy
+typedef enum
+{
+    argFlag, /* flag (present / not-present) */
+    /*   [val: bool *]             */
+    argInt, /* integer arg    */
+    /*   [val: int *] */
+    argFP, /* floating point arg */
+    /*   [val: double *]  */
+    argString, /* string arg      */
+    /*   [val: char *] */
+    argGooString, /* string arg      */
+    /*   [val: GooString *] */
+    /* dummy entries -- these show up in the usage listing only; */
+    /* useful for X args, for example                            */
+    argFlagDummy,
+    argIntDummy,
+    argFPDummy,
+    argStringDummy
 } ArgKind;
 
 /*
  * Argument descriptor.
  */
-typedef struct {
-  const char *arg;		/* the command line switch */
-  ArgKind kind;			/* kind of arg */
-  void *val;			/* place to store value */
-  int size;			/* for argString: size of string */
-  const char *usage;		/* usage string */
+typedef struct
+{
+    const char *arg; /* the command line switch */
+    ArgKind kind; /* kind of arg */
+    void *val; /* place to store value */
+    int size; /* for argString: size of string */
+    const char *usage; /* usage string */
 } ArgDesc;
 
 /*

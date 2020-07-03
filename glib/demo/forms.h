@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _FORMS_H_
-#define _FORMS_H_
+#    define _FORMS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_forms_create_widget (PopplerDocument *document);
+GtkWidget *pgd_forms_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

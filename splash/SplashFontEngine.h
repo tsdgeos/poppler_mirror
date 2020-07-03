@@ -44,53 +44,45 @@ class SplashFontSrc;
 // SplashFontEngine
 //------------------------------------------------------------------------
 
-class SplashFontEngine {
+class SplashFontEngine
+{
 public:
+    // Create a font engine.
+    SplashFontEngine(bool enableFreeType, bool enableFreeTypeHinting, bool enableSlightHinting, bool aa);
 
-  // Create a font engine.
-  SplashFontEngine(
-		   bool enableFreeType,
-		   bool enableFreeTypeHinting,
-		   bool enableSlightHinting,
-		   bool aa);
+    ~SplashFontEngine();
 
-  ~SplashFontEngine();
+    SplashFontEngine(const SplashFontEngine &) = delete;
+    SplashFontEngine &operator=(const SplashFontEngine &) = delete;
 
-  SplashFontEngine(const SplashFontEngine &) = delete;
-  SplashFontEngine& operator=(const SplashFontEngine &) = delete;
+    // Get a font file from the cache.  Returns NULL if there is no
+    // matching entry in the cache.
+    SplashFontFile *getFontFile(SplashFontFileID *id);
 
-  // Get a font file from the cache.  Returns NULL if there is no
-  // matching entry in the cache.
-  SplashFontFile *getFontFile(SplashFontFileID *id);
+    // Load fonts - these create new SplashFontFile objects.
+    SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
+    SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
+    SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen);
+    SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex = 0);
 
-  // Load fonts - these create new SplashFontFile objects.
-  SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-  SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-  SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-  SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
-  SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src,
-                                      int *codeToGID, int codeToGIDLen);
-  SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src,
-				   int *codeToGID, int codeToGIDLen, int faceIndex = 0);
-
-  // Get a font - this does a cache lookup first, and if not found,
-  // creates a new SplashFont object and adds it to the cache.  The
-  // matrix, mat = textMat * ctm:
-  //    [ mat[0] mat[1] ]
-  //    [ mat[2] mat[3] ]
-  // specifies the font transform in PostScript style:
-  //    [x' y'] = [x y] * mat
-  // Note that the Splash y axis points downward.
-  SplashFont *getFont(SplashFontFile *fontFile,
-		      const SplashCoord *textMat, const SplashCoord *ctm);
-  bool getAA();
-  void setAA(bool aa);
+    // Get a font - this does a cache lookup first, and if not found,
+    // creates a new SplashFont object and adds it to the cache.  The
+    // matrix, mat = textMat * ctm:
+    //    [ mat[0] mat[1] ]
+    //    [ mat[2] mat[3] ]
+    // specifies the font transform in PostScript style:
+    //    [x' y'] = [x y] * mat
+    // Note that the Splash y axis points downward.
+    SplashFont *getFont(SplashFontFile *fontFile, const SplashCoord *textMat, const SplashCoord *ctm);
+    bool getAA();
+    void setAA(bool aa);
 
 private:
+    std::array<SplashFont *, 16> fontCache;
 
-  std::array<SplashFont*,16> fontCache;
-
-  SplashFTFontEngine *ftEngine;
+    SplashFTFontEngine *ftEngine;
 };
 
 #endif

@@ -22,40 +22,45 @@
 
 #ifdef ENABLE_LIBJPEG
 
-#include <sys/types.h>
-#include "ImgWriter.h"
+#    include <sys/types.h>
+#    include "ImgWriter.h"
 
 struct JpegWriterPrivate;
 
 class JpegWriter : public ImgWriter
 {
 public:
-  /* RGB                 - 3 bytes/pixel
-   * GRAY                - 1 byte/pixel
-   * CMYK                - 4 bytes/pixel
-   */
-  enum Format { RGB, GRAY, CMYK };
+    /* RGB                 - 3 bytes/pixel
+     * GRAY                - 1 byte/pixel
+     * CMYK                - 4 bytes/pixel
+     */
+    enum Format
+    {
+        RGB,
+        GRAY,
+        CMYK
+    };
 
-  JpegWriter(int quality, bool progressive, Format format = RGB);
-  JpegWriter(Format format = RGB);
-  ~JpegWriter() override;
+    JpegWriter(int quality, bool progressive, Format format = RGB);
+    JpegWriter(Format format = RGB);
+    ~JpegWriter() override;
 
-  JpegWriter(const JpegWriter &other) = delete;
-  JpegWriter& operator=(const JpegWriter &other) = delete;
+    JpegWriter(const JpegWriter &other) = delete;
+    JpegWriter &operator=(const JpegWriter &other) = delete;
 
-  void setQuality(int quality);
-  void setProgressive(bool progressive);
-  void setOptimize(bool optimize);
-  bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
+    void setQuality(int quality);
+    void setProgressive(bool progressive);
+    void setOptimize(bool optimize);
+    bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
 
-  bool writePointers(unsigned char **rowPointers, int rowCount) override;
-  bool writeRow(unsigned char **row) override;
+    bool writePointers(unsigned char **rowPointers, int rowCount) override;
+    bool writeRow(unsigned char **row) override;
 
-  bool close() override;
-  bool supportCMYK() override;
+    bool close() override;
+    bool supportCMYK() override;
 
 private:
-  JpegWriterPrivate *priv;
+    JpegWriterPrivate *priv;
 };
 
 #endif

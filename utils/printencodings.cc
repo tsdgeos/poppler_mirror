@@ -28,16 +28,14 @@
 
 void printEncodings()
 {
-  std::vector<GooString*> *encNames = globalParams->getEncodingNames();
+    std::vector<GooString *> *encNames = globalParams->getEncodingNames();
 
-  std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) {
-    return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0;
-  });
+    std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) { return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0; });
 
-  printf("Available encodings are:\n");
-  for (const GooString *enc : *encNames) {
-    printf("%s\n", enc->c_str());
-  }
+    printf("Available encodings are:\n");
+    for (const GooString *enc : *encNames) {
+        printf("%s\n", enc->c_str());
+    }
 
-  delete encNames;
+    delete encNames;
 }

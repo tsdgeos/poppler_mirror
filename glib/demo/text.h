@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _TEXT_H_
-#define _TEXT_H_
+#    define _TEXT_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_text_create_widget (PopplerDocument *document);
+GtkWidget *pgd_text_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

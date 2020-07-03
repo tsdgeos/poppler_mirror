@@ -33,59 +33,50 @@
 typedef struct _PopplerFormFieldClass PopplerFormFieldClass;
 struct _PopplerFormFieldClass
 {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (PopplerFormField, poppler_form_field, G_TYPE_OBJECT)
+G_DEFINE_TYPE(PopplerFormField, poppler_form_field, G_TYPE_OBJECT)
 
-static void
-poppler_form_field_finalize (GObject *object)
+static void poppler_form_field_finalize(GObject *object)
 {
-  PopplerFormField *field = POPPLER_FORM_FIELD (object);
+    PopplerFormField *field = POPPLER_FORM_FIELD(object);
 
-  if (field->document)
-    {
-      g_object_unref (field->document);
-      field->document = nullptr;
+    if (field->document) {
+        g_object_unref(field->document);
+        field->document = nullptr;
     }
-  if (field->action)
-    {
-      poppler_action_free (field->action);
-      field->action = nullptr;
+    if (field->action) {
+        poppler_action_free(field->action);
+        field->action = nullptr;
     }
-  field->widget = nullptr;
+    field->widget = nullptr;
 
-  G_OBJECT_CLASS (poppler_form_field_parent_class)->finalize (object);
+    G_OBJECT_CLASS(poppler_form_field_parent_class)->finalize(object);
 }
 
-static void
-poppler_form_field_init (PopplerFormField *field)
+static void poppler_form_field_init(PopplerFormField *field) { }
+
+static void poppler_form_field_class_init(PopplerFormFieldClass *klass)
 {
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->finalize = poppler_form_field_finalize;
 }
 
-static void
-poppler_form_field_class_init (PopplerFormFieldClass *klass)
+PopplerFormField *_poppler_form_field_new(PopplerDocument *document, FormWidget *field)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    PopplerFormField *poppler_field;
 
-  gobject_class->finalize = poppler_form_field_finalize;
-}
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(field != nullptr, NULL);
 
-PopplerFormField *
-_poppler_form_field_new (PopplerDocument *document,
-			 FormWidget      *field)
-{
-  PopplerFormField *poppler_field;
+    poppler_field = POPPLER_FORM_FIELD(g_object_new(POPPLER_TYPE_FORM_FIELD, nullptr));
 
-  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
-  g_return_val_if_fail (field != nullptr, NULL);
+    poppler_field->document = (PopplerDocument *)g_object_ref(document);
+    poppler_field->widget = field;
 
-  poppler_field = POPPLER_FORM_FIELD (g_object_new (POPPLER_TYPE_FORM_FIELD, nullptr));
-
-  poppler_field->document = (PopplerDocument *)g_object_ref (document);
-  poppler_field->widget = field;
-  
-  return poppler_field;
+    return poppler_field;
 }
 
 /* Public methods */
@@ -96,27 +87,25 @@ _poppler_form_field_new (PopplerDocument *document,
  * Gets the type of @field
  *
  * Return value: #PopplerFormFieldType of @field
- **/ 
-PopplerFormFieldType
-poppler_form_field_get_field_type (PopplerFormField *field)
+ **/
+PopplerFormFieldType poppler_form_field_get_field_type(PopplerFormField *field)
 {
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), POPPLER_FORM_FIELD_UNKNOWN);
-  
-  switch (field->widget->getType ())
-  {
-    case formButton:
-      return POPPLER_FORM_FIELD_BUTTON;
-    case formText:
-      return POPPLER_FORM_FIELD_TEXT;
-    case formChoice:
-      return POPPLER_FORM_FIELD_CHOICE;
-    case formSignature:
-      return POPPLER_FORM_FIELD_SIGNATURE;
-    default:
-      g_warning ("Unsupported Form Field Type");
-  }
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), POPPLER_FORM_FIELD_UNKNOWN);
 
-  return POPPLER_FORM_FIELD_UNKNOWN;
+    switch (field->widget->getType()) {
+    case formButton:
+        return POPPLER_FORM_FIELD_BUTTON;
+    case formText:
+        return POPPLER_FORM_FIELD_TEXT;
+    case formChoice:
+        return POPPLER_FORM_FIELD_CHOICE;
+    case formSignature:
+        return POPPLER_FORM_FIELD_SIGNATURE;
+    default:
+        g_warning("Unsupported Form Field Type");
+    }
+
+    return POPPLER_FORM_FIELD_UNKNOWN;
 }
 
 /**
@@ -127,12 +116,11 @@ poppler_form_field_get_field_type (PopplerFormField *field)
  *
  * Return value: the id of @field
  **/
-gint
-poppler_form_field_get_id (PopplerFormField *field)
+gint poppler_form_field_get_id(PopplerFormField *field)
 {
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), -1);
-  
-  return field->widget->getID ();
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), -1);
+
+    return field->widget->getID();
 }
 
 /**
@@ -146,12 +134,11 @@ poppler_form_field_get_id (PopplerFormField *field)
  *
  * Return value: the font size of @field
  **/
-gdouble
-poppler_form_field_get_font_size (PopplerFormField *field)
+gdouble poppler_form_field_get_font_size(PopplerFormField *field)
 {
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), 0);
-  
-  return 0;
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), 0);
+
+    return 0;
 }
 
 /**
@@ -162,12 +149,11 @@ poppler_form_field_get_font_size (PopplerFormField *field)
  *
  * Return value: %TRUE if @field is read only
  **/
-gboolean
-poppler_form_field_is_read_only (PopplerFormField *field)
+gboolean poppler_form_field_is_read_only(PopplerFormField *field)
 {
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), FALSE);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), FALSE);
 
-  return field->widget->isReadOnly ();
+    return field->widget->isReadOnly();
 }
 
 /**
@@ -182,21 +168,20 @@ poppler_form_field_is_read_only (PopplerFormField *field)
  *
  * Since: 0.18
  */
-PopplerAction *
-poppler_form_field_get_action (PopplerFormField *field)
+PopplerAction *poppler_form_field_get_action(PopplerFormField *field)
 {
-  LinkAction *action;
+    LinkAction *action;
 
-  if (field->action)
+    if (field->action)
+        return field->action;
+
+    action = field->widget->getActivationAction();
+    if (!action)
+        return nullptr;
+
+    field->action = _poppler_action_new(field->document, action, nullptr);
+
     return field->action;
-
-  action = field->widget->getActivationAction();
-  if (!action)
-    return nullptr;
-
-  field->action = _poppler_action_new (field->document, action, nullptr);
-
-  return field->action;
 }
 
 /**
@@ -213,46 +198,43 @@ poppler_form_field_get_action (PopplerFormField *field)
  *
  * Since: 0.72
  */
-PopplerAction *
-poppler_form_field_get_additional_action (PopplerFormField           *field,
-					  PopplerAdditionalActionType type)
+PopplerAction *poppler_form_field_get_additional_action(PopplerFormField *field, PopplerAdditionalActionType type)
 {
-  Annot::FormAdditionalActionsType form_action;
-  PopplerAction **action;
+    Annot::FormAdditionalActionsType form_action;
+    PopplerAction **action;
 
-  switch (type)
-  {
+    switch (type) {
     case POPPLER_ADDITIONAL_ACTION_FIELD_MODIFIED:
-      form_action = Annot::actionFieldModified;
-      action = &field->field_modified_action;
-      break;
+        form_action = Annot::actionFieldModified;
+        action = &field->field_modified_action;
+        break;
     case POPPLER_ADDITIONAL_ACTION_FORMAT_FIELD:
-      form_action = Annot::actionFormatField;
-      action = &field->format_field_action;
-      break;
+        form_action = Annot::actionFormatField;
+        action = &field->format_field_action;
+        break;
     case POPPLER_ADDITIONAL_ACTION_VALIDATE_FIELD:
-      form_action = Annot::actionValidateField;
-      action = &field->validate_field_action;
-      break;
+        form_action = Annot::actionValidateField;
+        action = &field->validate_field_action;
+        break;
     case POPPLER_ADDITIONAL_ACTION_CALCULATE_FIELD:
-      form_action = Annot::actionCalculateField;
-      action = &field->calculate_field_action;
-      break;
+        form_action = Annot::actionCalculateField;
+        action = &field->calculate_field_action;
+        break;
     default:
-      g_return_val_if_reached (nullptr);
-      return nullptr;
-  }
+        g_return_val_if_reached(nullptr);
+        return nullptr;
+    }
 
-  if (*action)
+    if (*action)
+        return *action;
+
+    std::unique_ptr<LinkAction> link_action = field->widget->getAdditionalAction(form_action);
+    if (!link_action)
+        return nullptr;
+
+    *action = _poppler_action_new(nullptr, link_action.get(), nullptr);
+
     return *action;
-
-  std::unique_ptr<LinkAction> link_action = field->widget->getAdditionalAction (form_action);
-  if (!link_action)
-    return nullptr;
-
-  *action = _poppler_action_new (nullptr, link_action.get(), nullptr);
-
-  return *action;
 }
 
 /* Button Field */
@@ -264,21 +246,19 @@ poppler_form_field_get_additional_action (PopplerFormField           *field,
  *
  * Return value: #PopplerFormButtonType of @field
  **/
-PopplerFormButtonType
-poppler_form_field_button_get_button_type (PopplerFormField *field)
+PopplerFormButtonType poppler_form_field_button_get_button_type(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formButton, POPPLER_FORM_BUTTON_PUSH);
+    g_return_val_if_fail(field->widget->getType() == formButton, POPPLER_FORM_BUTTON_PUSH);
 
-  switch (static_cast<FormWidgetButton*>(field->widget)->getButtonType ())
-    {
-      case formButtonPush:
+    switch (static_cast<FormWidgetButton *>(field->widget)->getButtonType()) {
+    case formButtonPush:
         return POPPLER_FORM_BUTTON_PUSH;
-      case formButtonCheck:
+    case formButtonCheck:
         return POPPLER_FORM_BUTTON_CHECK;
-      case formButtonRadio:
+    case formButtonRadio:
         return POPPLER_FORM_BUTTON_RADIO;
-      default:
-        g_assert_not_reached ();
+    default:
+        g_assert_not_reached();
     }
 }
 
@@ -291,12 +271,11 @@ poppler_form_field_button_get_button_type (PopplerFormField *field)
  *
  * Return value: current state of @field
  **/
-gboolean
-poppler_form_field_button_get_state (PopplerFormField *field)
+gboolean poppler_form_field_button_get_state(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formButton, FALSE);
-  
-  return static_cast<FormWidgetButton*>(field->widget)->getState ();
+    g_return_val_if_fail(field->widget->getType() == formButton, FALSE);
+
+    return static_cast<FormWidgetButton *>(field->widget)->getState();
 }
 
 /**
@@ -305,15 +284,13 @@ poppler_form_field_button_get_state (PopplerFormField *field)
  * @state: %TRUE or %FALSE
  *
  * Sets the status of @field. Set to %TRUE if you want the #PopplerFormField
- * to be 'pressed in', and %FALSE to raise it. 
+ * to be 'pressed in', and %FALSE to raise it.
  **/
-void
-poppler_form_field_button_set_state (PopplerFormField *field,
-				     gboolean          state)
+void poppler_form_field_button_set_state(PopplerFormField *field, gboolean state)
 {
-  g_return_if_fail (field->widget->getType () == formButton);
+    g_return_if_fail(field->widget->getType() == formButton);
 
-  static_cast<FormWidgetButton*>(field->widget)->setState ((bool)state);
+    static_cast<FormWidgetButton *>(field->widget)->setState((bool)state);
 }
 
 /**
@@ -326,16 +303,15 @@ poppler_form_field_button_set_state (PopplerFormField *field,
  *
  * Since: 0.16
  **/
-gchar*
-poppler_form_field_get_partial_name (PopplerFormField *field)
+gchar *poppler_form_field_get_partial_name(PopplerFormField *field)
 {
-  const GooString *tmp;
+    const GooString *tmp;
 
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
 
-  tmp = field->widget->getPartialName();
+    tmp = field->widget->getPartialName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /**
@@ -349,16 +325,15 @@ poppler_form_field_get_partial_name (PopplerFormField *field)
  *
  * Since: 0.16
  **/
-gchar*
-poppler_form_field_get_mapping_name (PopplerFormField *field)
+gchar *poppler_form_field_get_mapping_name(PopplerFormField *field)
 {
-  const GooString *tmp;
+    const GooString *tmp;
 
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
 
-  tmp = field->widget->getMappingName();
+    tmp = field->widget->getMappingName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /**
@@ -372,16 +347,15 @@ poppler_form_field_get_mapping_name (PopplerFormField *field)
  *
  * Since: 0.16
  **/
-gchar*
-poppler_form_field_get_name (PopplerFormField *field)
+gchar *poppler_form_field_get_name(PopplerFormField *field)
 {
-  GooString *tmp;
+    GooString *tmp;
 
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
 
-  tmp = field->widget->getFullyQualifiedName();
+    tmp = field->widget->getFullyQualifiedName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /**
@@ -396,16 +370,15 @@ poppler_form_field_get_name (PopplerFormField *field)
  *
  * Since: 0.88
  **/
-gchar*
-poppler_form_field_get_alternate_ui_name (PopplerFormField *field)
+gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
 {
-  const GooString *tmp;
+    const GooString *tmp;
 
-  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
 
-  tmp = field->widget->getAlternateUiName();
+    tmp = field->widget->getAlternateUiName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /* Text Field */
@@ -417,21 +390,20 @@ poppler_form_field_get_alternate_ui_name (PopplerFormField *field)
  *
  * Return value: #PopplerFormTextType of @field
  **/
-PopplerFormTextType
-poppler_form_field_text_get_text_type (PopplerFormField *field)
+PopplerFormTextType poppler_form_field_text_get_text_type(PopplerFormField *field)
 {
-  FormWidgetText *text_field;
-  
-  g_return_val_if_fail (field->widget->getType () == formText, POPPLER_FORM_TEXT_NORMAL);
+    FormWidgetText *text_field;
 
-  text_field = static_cast<FormWidgetText*>(field->widget);
-  
-  if (text_field->isMultiline ())
-    return POPPLER_FORM_TEXT_MULTILINE;
-  else if (text_field->isFileSelect ())
-    return POPPLER_FORM_TEXT_FILE_SELECT;
+    g_return_val_if_fail(field->widget->getType() == formText, POPPLER_FORM_TEXT_NORMAL);
 
-  return POPPLER_FORM_TEXT_NORMAL;
+    text_field = static_cast<FormWidgetText *>(field->widget);
+
+    if (text_field->isMultiline())
+        return POPPLER_FORM_TEXT_MULTILINE;
+    else if (text_field->isFileSelect())
+        return POPPLER_FORM_TEXT_FILE_SELECT;
+
+    return POPPLER_FORM_TEXT_NORMAL;
 }
 
 /**
@@ -442,18 +414,17 @@ poppler_form_field_text_get_text_type (PopplerFormField *field)
  *
  * Return value: a new allocated string. It must be freed with g_free() when done.
  **/
-gchar *
-poppler_form_field_text_get_text (PopplerFormField *field)
+gchar *poppler_form_field_text_get_text(PopplerFormField *field)
 {
-  FormWidgetText *text_field;
-  const GooString *tmp;
+    FormWidgetText *text_field;
+    const GooString *tmp;
 
-  g_return_val_if_fail (field->widget->getType () == formText, NULL);
+    g_return_val_if_fail(field->widget->getType() == formText, NULL);
 
-  text_field = static_cast<FormWidgetText*>(field->widget);
-  tmp = text_field->getContent ();
+    text_field = static_cast<FormWidgetText *>(field->widget);
+    tmp = text_field->getContent();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /**
@@ -463,21 +434,19 @@ poppler_form_field_text_get_text (PopplerFormField *field)
  *
  * Sets the text in @field to the given value, replacing the current contents.
  **/
-void
-poppler_form_field_text_set_text (PopplerFormField *field,
-				  const gchar      *text)
+void poppler_form_field_text_set_text(PopplerFormField *field, const gchar *text)
 {
-  GooString *goo_tmp;
-  gchar *tmp;
-  gsize length = 0;
-	
-  g_return_if_fail (field->widget->getType () == formText);
+    GooString *goo_tmp;
+    gchar *tmp;
+    gsize length = 0;
 
-  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-  goo_tmp = new GooString (tmp, length);
-  g_free (tmp);
-  static_cast<FormWidgetText*>(field->widget)->setContent (goo_tmp);
-  delete goo_tmp;
+    g_return_if_fail(field->widget->getType() == formText);
+
+    tmp = text ? g_convert(text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
+    goo_tmp = new GooString(tmp, length);
+    g_free(tmp);
+    static_cast<FormWidgetText *>(field->widget)->setContent(goo_tmp);
+    delete goo_tmp;
 }
 
 /**
@@ -488,12 +457,11 @@ poppler_form_field_text_set_text (PopplerFormField *field,
  *
  * Return value: the maximum allowed number of characters in @field, or -1 if there is no maximum.
  **/
-gint
-poppler_form_field_text_get_max_len (PopplerFormField *field)
+gint poppler_form_field_text_get_max_len(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formText, 0);
+    g_return_val_if_fail(field->widget->getType() == formText, 0);
 
-  return static_cast<FormWidgetText*>(field->widget)->getMaxLen ();
+    return static_cast<FormWidgetText *>(field->widget)->getMaxLen();
 }
 
 /**
@@ -504,20 +472,18 @@ poppler_form_field_text_get_max_len (PopplerFormField *field)
  *
  * Return value: %TRUE if spell checking should be done for @field
  **/
-gboolean
-poppler_form_field_text_do_spell_check (PopplerFormField *field)
+gboolean poppler_form_field_text_do_spell_check(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formText, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formText, FALSE);
 
-  return !static_cast<FormWidgetText*>(field->widget)->noSpellCheck ();
+    return !static_cast<FormWidgetText *>(field->widget)->noSpellCheck();
 }
 
-gboolean
-poppler_form_field_text_do_scroll (PopplerFormField *field)
+gboolean poppler_form_field_text_do_scroll(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formText, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formText, FALSE);
 
-  return !static_cast<FormWidgetText*>(field->widget)->noScroll ();
+    return !static_cast<FormWidgetText *>(field->widget)->noScroll();
 }
 
 /**
@@ -528,12 +494,11 @@ poppler_form_field_text_do_scroll (PopplerFormField *field)
  *
  * Return value: %TRUE if the contents of @field are rich text
  **/
-gboolean
-poppler_form_field_text_is_rich_text (PopplerFormField *field)
+gboolean poppler_form_field_text_is_rich_text(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formText, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formText, FALSE);
 
-  return static_cast<FormWidgetText*>(field->widget)->isRichText ();
+    return static_cast<FormWidgetText *>(field->widget)->isRichText();
 }
 
 /**
@@ -544,12 +509,11 @@ poppler_form_field_text_is_rich_text (PopplerFormField *field)
  *
  * Return value: %TRUE if the content of @field is a password
  **/
-gboolean
-poppler_form_field_text_is_password (PopplerFormField *field)
+gboolean poppler_form_field_text_is_password(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formText, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formText, FALSE);
 
-  return static_cast<FormWidgetText*>(field->widget)->isPassword ();
+    return static_cast<FormWidgetText *>(field->widget)->isPassword();
 }
 
 /* Choice Field */
@@ -561,15 +525,14 @@ poppler_form_field_text_is_password (PopplerFormField *field)
  *
  * Return value: #PopplerFormChoiceType of @field
  **/
-PopplerFormChoiceType
-poppler_form_field_choice_get_choice_type (PopplerFormField *field)
+PopplerFormChoiceType poppler_form_field_choice_get_choice_type(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, POPPLER_FORM_CHOICE_COMBO);
+    g_return_val_if_fail(field->widget->getType() == formChoice, POPPLER_FORM_CHOICE_COMBO);
 
-  if (static_cast<FormWidgetChoice*>(field->widget)->isCombo ())
-    return POPPLER_FORM_CHOICE_COMBO;
-  else
-    return POPPLER_FORM_CHOICE_LIST;
+    if (static_cast<FormWidgetChoice *>(field->widget)->isCombo())
+        return POPPLER_FORM_CHOICE_COMBO;
+    else
+        return POPPLER_FORM_CHOICE_LIST;
 }
 
 /**
@@ -579,13 +542,12 @@ poppler_form_field_choice_get_choice_type (PopplerFormField *field)
  * Checks whether @field is editable
  *
  * Return value: %TRUE if @field is editable
- **/ 
-gboolean
-poppler_form_field_choice_is_editable (PopplerFormField *field)
+ **/
+gboolean poppler_form_field_choice_is_editable(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formChoice, FALSE);
 
-  return static_cast<FormWidgetChoice*>(field->widget)->hasEdit ();
+    return static_cast<FormWidgetChoice *>(field->widget)->hasEdit();
 }
 
 /**
@@ -596,12 +558,11 @@ poppler_form_field_choice_is_editable (PopplerFormField *field)
  *
  * Return value: %TRUE if @field allows multiple choices to be selected
  **/
-gboolean
-poppler_form_field_choice_can_select_multiple (PopplerFormField *field)
+gboolean poppler_form_field_choice_can_select_multiple(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formChoice, FALSE);
 
-  return static_cast<FormWidgetChoice*>(field->widget)->isMultiSelect ();
+    return static_cast<FormWidgetChoice *>(field->widget)->isMultiSelect();
 }
 
 /**
@@ -612,20 +573,18 @@ poppler_form_field_choice_can_select_multiple (PopplerFormField *field)
  *
  * Return value: %TRUE if spell checking should be done for @field
  **/
-gboolean
-poppler_form_field_choice_do_spell_check (PopplerFormField *field)
+gboolean poppler_form_field_choice_do_spell_check(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formChoice, FALSE);
 
-  return !static_cast<FormWidgetChoice*>(field->widget)->noSpellCheck ();
+    return !static_cast<FormWidgetChoice *>(field->widget)->noSpellCheck();
 }
 
-gboolean
-poppler_form_field_choice_commit_on_change (PopplerFormField *field)
+gboolean poppler_form_field_choice_commit_on_change(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
+    g_return_val_if_fail(field->widget->getType() == formChoice, FALSE);
 
-  return static_cast<FormWidgetChoice*>(field->widget)->commitOnSelChange ();
+    return static_cast<FormWidgetChoice *>(field->widget)->commitOnSelChange();
 }
 
 /**
@@ -636,12 +595,11 @@ poppler_form_field_choice_commit_on_change (PopplerFormField *field)
  *
  * Return value: the number of items on @field
  **/
-gint
-poppler_form_field_choice_get_n_items (PopplerFormField *field)
+gint poppler_form_field_choice_get_n_items(PopplerFormField *field)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, -1);
+    g_return_val_if_fail(field->widget->getType() == formChoice, -1);
 
-  return static_cast<FormWidgetChoice*>(field->widget)->getNumChoices ();
+    return static_cast<FormWidgetChoice *>(field->widget)->getNumChoices();
 }
 
 /**
@@ -653,17 +611,15 @@ poppler_form_field_choice_get_n_items (PopplerFormField *field)
  *
  * Return value: a new allocated string. It must be freed with g_free() when done.
  **/
-gchar *
-poppler_form_field_choice_get_item (PopplerFormField *field,
-				    gint              index)
+gchar *poppler_form_field_choice_get_item(PopplerFormField *field, gint index)
 {
-  const GooString *tmp;
-  
-  g_return_val_if_fail (field->widget->getType () == formChoice, NULL);
-  g_return_val_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field), NULL);
+    const GooString *tmp;
 
-  tmp = static_cast<FormWidgetChoice*>(field->widget)->getChoice (index);
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    g_return_val_if_fail(field->widget->getType() == formChoice, NULL);
+    g_return_val_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field), NULL);
+
+    tmp = static_cast<FormWidgetChoice *>(field->widget)->getChoice(index);
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
 /**
@@ -671,18 +627,16 @@ poppler_form_field_choice_get_item (PopplerFormField *field,
  * @field: a #PopplerFormField
  * @index: the index of the item
  *
- * Checks whether the item at the given index on @field is currently selected 
+ * Checks whether the item at the given index on @field is currently selected
  *
  * Return value: %TRUE if item at @index is currently selected
  **/
-gboolean
-poppler_form_field_choice_is_item_selected (PopplerFormField *field,
-					    gint              index)
+gboolean poppler_form_field_choice_is_item_selected(PopplerFormField *field, gint index)
 {
-  g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
-  g_return_val_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field), FALSE);
+    g_return_val_if_fail(field->widget->getType() == formChoice, FALSE);
+    g_return_val_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field), FALSE);
 
-  return static_cast<FormWidgetChoice*>(field->widget)->isSelected (index);
+    return static_cast<FormWidgetChoice *>(field->widget)->isSelected(index);
 }
 
 /**
@@ -692,14 +646,12 @@ poppler_form_field_choice_is_item_selected (PopplerFormField *field,
  *
  * Selects the item at the given index on @field
  **/
-void
-poppler_form_field_choice_select_item (PopplerFormField *field,
-				       gint              index)
+void poppler_form_field_choice_select_item(PopplerFormField *field, gint index)
 {
-  g_return_if_fail (field->widget->getType () == formChoice);
-  g_return_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field));
+    g_return_if_fail(field->widget->getType() == formChoice);
+    g_return_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field));
 
-  static_cast<FormWidgetChoice*>(field->widget)->select (index);
+    static_cast<FormWidgetChoice *>(field->widget)->select(index);
 }
 
 /**
@@ -708,12 +660,11 @@ poppler_form_field_choice_select_item (PopplerFormField *field,
  *
  * Unselects all the items on @field
  **/
-void
-poppler_form_field_choice_unselect_all (PopplerFormField *field)
+void poppler_form_field_choice_unselect_all(PopplerFormField *field)
 {
-  g_return_if_fail (field->widget->getType () == formChoice);
+    g_return_if_fail(field->widget->getType() == formChoice);
 
-  static_cast<FormWidgetChoice*>(field->widget)->deselectAll ();
+    static_cast<FormWidgetChoice *>(field->widget)->deselectAll();
 }
 
 /**
@@ -723,14 +674,12 @@ poppler_form_field_choice_unselect_all (PopplerFormField *field)
  *
  * Changes the state of the item at the given index
  **/
-void
-poppler_form_field_choice_toggle_item (PopplerFormField *field,
-				       gint              index)
+void poppler_form_field_choice_toggle_item(PopplerFormField *field, gint index)
 {
-  g_return_if_fail (field->widget->getType () == formChoice);
-  g_return_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field));
+    g_return_if_fail(field->widget->getType() == formChoice);
+    g_return_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field));
 
-  static_cast<FormWidgetChoice*>(field->widget)->toggle (index);
+    static_cast<FormWidgetChoice *>(field->widget)->toggle(index);
 }
 
 /**
@@ -740,21 +689,19 @@ poppler_form_field_choice_toggle_item (PopplerFormField *field,
  *
  * Sets the text in @field to the given value, replacing the current contents
  **/
-void
-poppler_form_field_choice_set_text (PopplerFormField *field,
-				    const gchar      *text)
+void poppler_form_field_choice_set_text(PopplerFormField *field, const gchar *text)
 {
-  GooString *goo_tmp;
-  gchar *tmp;
-  gsize length = 0;
+    GooString *goo_tmp;
+    gchar *tmp;
+    gsize length = 0;
 
-  g_return_if_fail (field->widget->getType () == formChoice);
+    g_return_if_fail(field->widget->getType() == formChoice);
 
-  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-  goo_tmp = new GooString (tmp, length);
-  g_free (tmp);
-  static_cast<FormWidgetChoice*>(field->widget)->setEditChoice (goo_tmp);
-  delete goo_tmp;
+    tmp = text ? g_convert(text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
+    goo_tmp = new GooString(tmp, length);
+    g_free(tmp);
+    static_cast<FormWidgetChoice *>(field->widget)->setEditChoice(goo_tmp);
+    delete goo_tmp;
 }
 
 /**
@@ -765,13 +712,12 @@ poppler_form_field_choice_set_text (PopplerFormField *field,
  *
  * Return value: a new allocated string. It must be freed with g_free() when done.
  **/
-gchar *
-poppler_form_field_choice_get_text (PopplerFormField *field)
+gchar *poppler_form_field_choice_get_text(PopplerFormField *field)
 {
-  const GooString *tmp;
-  
-  g_return_val_if_fail (field->widget->getType () == formChoice, NULL);
+    const GooString *tmp;
 
-  tmp = static_cast<FormWidgetChoice*>(field->widget)->getEditChoice ();
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+    g_return_val_if_fail(field->widget->getType() == formChoice, NULL);
+
+    tmp = static_cast<FormWidgetChoice *>(field->widget)->getEditChoice();
+    return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }

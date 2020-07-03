@@ -19,22 +19,17 @@
 // StdinPDFDocBuilder
 //------------------------------------------------------------------------
 
-PDFDoc *
-StdinPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword,
-                                    GooString *userPassword, void *guiDataA)
+PDFDoc *StdinPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
 {
-  CachedFile *cachedFile = new CachedFile(new StdinCacheLoader(), nullptr);
-  return new PDFDoc(new CachedFileStream(cachedFile, 0, false,
-                                         cachedFile->getLength(), Object(objNull)),
-                    ownerPassword, userPassword);
+    CachedFile *cachedFile = new CachedFile(new StdinCacheLoader(), nullptr);
+    return new PDFDoc(new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull)), ownerPassword, userPassword);
 }
 
 bool StdinPDFDocBuilder::supports(const GooString &uri)
 {
-  if (uri.cmpN("fd://0", 6) == 0) {
-    return true;
-  } else {
-    return false;
-  }
+    if (uri.cmpN("fd://0", 6) == 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
-

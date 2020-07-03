@@ -25,8 +25,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QComboBox>
 
-NavigationToolBar::NavigationToolBar(QWidget *parent)
-    : QToolBar(parent)
+NavigationToolBar::NavigationToolBar(QWidget *parent) : QToolBar(parent)
 {
     m_firstAct = addAction(tr("First"), this, SLOT(slotGoFirst()));
     m_prevAct = addAction(tr("Previous"), this, SLOT(slotGoPrev()));
@@ -71,9 +70,7 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     documentClosed();
 }
 
-NavigationToolBar::~NavigationToolBar()
-{
-}
+NavigationToolBar::~NavigationToolBar() { }
 
 void NavigationToolBar::documentLoaded()
 {
@@ -144,4 +141,3 @@ void NavigationToolBar::slotRotationComboChanged(int idx)
 {
     emit rotationChanged(idx * 90);
 }
-

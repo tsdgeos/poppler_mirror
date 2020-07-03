@@ -42,34 +42,34 @@
 #include <ctime>
 extern "C" {
 #if defined(_WIN32)
-#  include <sys/stat.h>
-#  ifdef FPTEX
-#    include <win32lib.h>
-#  else
-#    ifndef NOMINMAX
-#      define NOMINMAX
+#    include <sys/stat.h>
+#    ifdef FPTEX
+#        include <win32lib.h>
+#    else
+#        ifndef NOMINMAX
+#            define NOMINMAX
+#        endif
+#        include <windows.h>
 #    endif
-#    include <windows.h>
-#  endif
 #else
-#  include <unistd.h>
-#  include <sys/types.h>
-#  if defined(HAVE_DIRENT_H)
-#    include <dirent.h>
-#    define NAMLEN(d) strlen((d)->d_name)
-#  else
-#    define dirent direct
-#    define NAMLEN(d) (d)->d_namlen
-#    ifdef HAVE_SYS_NDIR_H
-#      include <sys/ndir.h>
+#    include <unistd.h>
+#    include <sys/types.h>
+#    if defined(HAVE_DIRENT_H)
+#        include <dirent.h>
+#        define NAMLEN(d) strlen((d)->d_name)
+#    else
+#        define dirent direct
+#        define NAMLEN(d) (d)->d_namlen
+#        ifdef HAVE_SYS_NDIR_H
+#            include <sys/ndir.h>
+#        endif
+#        ifdef HAVE_SYS_DIR_H
+#            include <sys/dir.h>
+#        endif
+#        ifdef HAVE_NDIR_H
+#            include <ndir.h>
+#        endif
 #    endif
-#    ifdef HAVE_SYS_DIR_H
-#      include <sys/dir.h>
-#    endif
-#    ifdef HAVE_NDIR_H
-#      include <ndir.h>
-#    endif
-#  endif
 #endif
 }
 
@@ -114,35 +114,35 @@ extern Goffset GoffsetMax();
 class GooFile
 {
 public:
-  GooFile(const GooFile &) = delete;
-  GooFile& operator=(const GooFile &other) = delete;
+    GooFile(const GooFile &) = delete;
+    GooFile &operator=(const GooFile &other) = delete;
 
-  int read(char *buf, int n, Goffset offset) const;
-  Goffset size() const;
-  
-  static GooFile *open(const GooString *fileName);
-  
+    int read(char *buf, int n, Goffset offset) const;
+    Goffset size() const;
+
+    static GooFile *open(const GooString *fileName);
+
 #ifdef _WIN32
-  static GooFile *open(const wchar_t *fileName);
-  
-  ~GooFile() { CloseHandle(handle); }
+    static GooFile *open(const wchar_t *fileName);
 
-  // Asuming than on windows you can't change files that are already open
-  bool modificationTimeChangedSinceOpen() const;
-  
+    ~GooFile() { CloseHandle(handle); }
+
+    // Asuming than on windows you can't change files that are already open
+    bool modificationTimeChangedSinceOpen() const;
+
 private:
-  GooFile(HANDLE handleA);
-  HANDLE handle;
-  struct _FILETIME modifiedTimeOnOpen;
+    GooFile(HANDLE handleA);
+    HANDLE handle;
+    struct _FILETIME modifiedTimeOnOpen;
 #else
-  ~GooFile() { close(fd); }
+    ~GooFile() { close(fd); }
 
-  bool modificationTimeChangedSinceOpen() const;
-    
+    bool modificationTimeChangedSinceOpen() const;
+
 private:
-  GooFile(int fdA);
-  int fd;
-  struct timespec modifiedTimeOnOpen;
+    GooFile(int fdA);
+    int fd;
+    struct timespec modifiedTimeOnOpen;
 #endif // _WIN32
 };
 

@@ -36,59 +36,57 @@ class OutlineItem;
 
 //------------------------------------------------------------------------
 
-class Outline {
+class Outline
+{
 public:
+    Outline(const Object *outlineObj, XRef *xref);
+    ~Outline();
 
-  Outline(const Object *outlineObj, XRef *xref);
-  ~Outline();
+    Outline(const Outline &) = delete;
+    Outline &operator=(const Outline &) = delete;
 
-  Outline(const Outline &) = delete;
-  Outline& operator=(const Outline &) = delete;
-
-  const std::vector<OutlineItem*> *getItems() const { return items; }
+    const std::vector<OutlineItem *> *getItems() const { return items; }
 
 private:
-
-  std::vector<OutlineItem*> *items; // nullptr if document has no outline,
+    std::vector<OutlineItem *> *items; // nullptr if document has no outline,
 };
 
 //------------------------------------------------------------------------
 
-class OutlineItem {
+class OutlineItem
+{
 public:
+    OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);
+    ~OutlineItem();
 
-  OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);
-  ~OutlineItem();
+    OutlineItem(const OutlineItem &) = delete;
+    OutlineItem &operator=(const OutlineItem &) = delete;
 
-  OutlineItem(const OutlineItem &) = delete;
-  OutlineItem& operator=(const OutlineItem &) = delete;
+    static std::vector<OutlineItem *> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
 
-  static std::vector<OutlineItem*> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
+    void open();
+    void close();
 
-  void open();
-  void close();
-
-  const Unicode *getTitle() const { return title; }
-  int getTitleLength() const { return titleLen; }
-  // OutlineItem keeps the ownership of the action
-  const LinkAction *getAction() const { return action.get(); }
-  bool isOpen() const { return startsOpen; }
-  bool hasKids() const { return firstRef.isRef(); }
-  const std::vector<OutlineItem*> *getKids() const { return kids; }
+    const Unicode *getTitle() const { return title; }
+    int getTitleLength() const { return titleLen; }
+    // OutlineItem keeps the ownership of the action
+    const LinkAction *getAction() const { return action.get(); }
+    bool isOpen() const { return startsOpen; }
+    bool hasKids() const { return firstRef.isRef(); }
+    const std::vector<OutlineItem *> *getKids() const { return kids; }
 
 private:
-
-  int refNum;
-  OutlineItem *parent;
-  XRef *xref;
-  Unicode *title;
-  int titleLen;
-  std::unique_ptr<LinkAction> action;
-  Object firstRef;
-  Object lastRef;
-  Object nextRef;
-  bool startsOpen;
-  std::vector<OutlineItem*> *kids;   // nullptr if this item is closed or has no kids
+    int refNum;
+    OutlineItem *parent;
+    XRef *xref;
+    Unicode *title;
+    int titleLen;
+    std::unique_ptr<LinkAction> action;
+    Object firstRef;
+    Object lastRef;
+    Object nextRef;
+    bool startsOpen;
+    std::vector<OutlineItem *> *kids; // nullptr if this item is closed or has no kids
 };
 
 #endif

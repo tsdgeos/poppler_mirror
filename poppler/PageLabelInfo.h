@@ -25,36 +25,39 @@
 
 #include "Object.h"
 
-class PageLabelInfo {
+class PageLabelInfo
+{
 public:
-  PageLabelInfo(Object *tree, int numPages);
+    PageLabelInfo(Object *tree, int numPages);
 
-  PageLabelInfo(const PageLabelInfo &) = delete;
-  PageLabelInfo& operator=(const PageLabelInfo &) = delete;
+    PageLabelInfo(const PageLabelInfo &) = delete;
+    PageLabelInfo &operator=(const PageLabelInfo &) = delete;
 
-  bool labelToIndex(GooString *label, int *index) const;
-  bool indexToLabel(int index, GooString *label) const;
-
-private:
-  void parse(Object *tree);
+    bool labelToIndex(GooString *label, int *index) const;
+    bool indexToLabel(int index, GooString *label) const;
 
 private:
-  struct Interval {
-    Interval(Object *dict, int baseA);
+    void parse(Object *tree);
 
-    std::string prefix;
-    enum NumberStyle {
-      None,
-      Arabic,
-      LowercaseRoman,
-      UppercaseRoman,
-      UppercaseLatin,
-      LowercaseLatin
-    } style;
-    int first, base, length;
-  };
+private:
+    struct Interval
+    {
+        Interval(Object *dict, int baseA);
 
-  std::vector<Interval> intervals;
+        std::string prefix;
+        enum NumberStyle
+        {
+            None,
+            Arabic,
+            LowercaseRoman,
+            UppercaseRoman,
+            UppercaseLatin,
+            LowercaseLatin
+        } style;
+        int first, base, length;
+    };
+
+    std::vector<Interval> intervals;
 };
 
 #endif

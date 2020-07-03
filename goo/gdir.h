@@ -43,45 +43,45 @@ class GooString;
 // GDir and GDirEntry
 //------------------------------------------------------------------------
 
-class GDirEntry {
+class GDirEntry
+{
 public:
+    GDirEntry(const char *dirPath, const char *nameA, bool doStat);
+    ~GDirEntry();
 
-  GDirEntry(const char *dirPath, const char *nameA, bool doStat);
-  ~GDirEntry();
+    GDirEntry(const GDirEntry &other) = delete;
+    GDirEntry &operator=(const GDirEntry &other) = delete;
 
-  GDirEntry(const GDirEntry &other) = delete;
-  GDirEntry& operator=(const GDirEntry &other) = delete;
-
-  const GooString *getName() const { return name; }
-  const GooString *getFullPath() const { return fullPath; }
-  bool isDir() const { return dir; }
+    const GooString *getName() const { return name; }
+    const GooString *getFullPath() const { return fullPath; }
+    bool isDir() const { return dir; }
 
 private:
-  GooString *name;		// dir/file name
-  GooString *fullPath;
-  bool dir;			// is it a directory?
+    GooString *name; // dir/file name
+    GooString *fullPath;
+    bool dir; // is it a directory?
 };
 
-class GDir {
+class GDir
+{
 public:
+    GDir(const char *name, bool doStatA = true);
+    ~GDir();
 
-  GDir(const char *name, bool doStatA = true);
-  ~GDir();
+    GDir(const GDir &other) = delete;
+    GDir &operator=(const GDir &other) = delete;
 
-  GDir(const GDir &other) = delete;
-  GDir& operator=(const GDir &other) = delete;
-
-  GDirEntry *getNextEntry();
-  void rewind();
+    GDirEntry *getNextEntry();
+    void rewind();
 
 private:
-  GooString *path;		// directory path
-  bool doStat;			// call stat() for each entry?
+    GooString *path; // directory path
+    bool doStat; // call stat() for each entry?
 #if defined(_WIN32)
-  WIN32_FIND_DATAA ffd;
-  HANDLE hnd;
+    WIN32_FIND_DATAA ffd;
+    HANDLE hnd;
 #else
-  DIR *dir;			// the DIR structure from opendir()
+    DIR *dir; // the DIR structure from opendir()
 #endif
 };
 

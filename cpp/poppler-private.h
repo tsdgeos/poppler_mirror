@@ -40,11 +40,9 @@ class PDFRectangle;
 
 #define PSTR(str) const_cast<char *>(str)
 
-namespace poppler
-{
+namespace poppler {
 
-namespace detail
-{
+namespace detail {
 
 extern debug_func user_debug_function;
 extern void *debug_closure;
@@ -54,11 +52,11 @@ rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 
 ustring unicode_GooString_to_ustring(const GooString *str);
 ustring unicode_to_ustring(const Unicode *u, int length);
-GooString* ustring_to_unicode_GooString(const ustring &str);
+GooString *ustring_to_unicode_GooString(const ustring &str);
 
 }
 
-template <typename ConstIterator>
+template<typename ConstIterator>
 void delete_all(ConstIterator it, ConstIterator end)
 {
     while (it != end) {
@@ -66,7 +64,7 @@ void delete_all(ConstIterator it, ConstIterator end)
     }
 }
 
-template <typename Collection>
+template<typename Collection>
 void delete_all(const Collection &c)
 {
     delete_all(c.begin(), c.end());
@@ -78,7 +76,7 @@ struct text_box_font_info_data
     ~text_box_font_info_data();
 
     double font_size;
-    std::vector<text_box::writing_mode_enum> wmodes; 
+    std::vector<text_box::writing_mode_enum> wmodes;
 
     /*
      * a duplication of the font_info_cache created by the
@@ -92,7 +90,7 @@ struct text_box_font_info_data
 
     /*
      * a std::vector from the glyph index in the owner
-     * text_box to the font_info index in font_info_cache. 
+     * text_box to the font_info index in font_info_cache.
      * The "-1" means no corresponding fonts found in the
      * cache.
      */

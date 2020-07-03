@@ -47,27 +47,17 @@ using namespace poppler;
  The various types of fonts available in a PDF %document.
 */
 
-
 /**
  Constructs an invalid font information.
  */
-font_info::font_info()
-    : d(new font_info_private())
-{
-}
+font_info::font_info() : d(new font_info_private()) { }
 
-font_info::font_info(font_info_private &dd)
-    : d(&dd)
-{
-}
+font_info::font_info(font_info_private &dd) : d(&dd) { }
 
 /**
  Copy constructor.
  */
-font_info::font_info(const font_info &fi)
-    : d(new font_info_private(*fi.d))
-{
-}
+font_info::font_info(const font_info &fi) : d(new font_info_private(*fi.d)) { }
 
 /**
  Destructor.
@@ -120,7 +110,7 @@ font_info::type_enum font_info::type() const
 /**
  Assignment operator.
  */
-font_info& font_info::operator=(const font_info &fi)
+font_info &font_info::operator=(const font_info &fi)
 {
     if (this != &fi) {
         *d = *fi.d;
@@ -148,11 +138,7 @@ delete it;
 \endcode
  */
 
-
-font_iterator::font_iterator(int start_page, document_private *dd)
-    : d(new font_iterator_private(start_page, dd))
-{
-}
+font_iterator::font_iterator(int start_page, document_private *dd) : d(new font_iterator_private(start_page, dd)) { }
 
 /**
  Destructor.
@@ -177,10 +163,10 @@ std::vector<font_info> font_iterator::next()
      * be scanned from the *current page*, not from the beginning.
      * We restrict the font scanning to the current page only.
      */
-    const std::vector<FontInfo*> items = d->font_info_scanner.scan(1);
+    const std::vector<FontInfo *> items = d->font_info_scanner.scan(1);
     std::vector<font_info> fonts;
     fonts.reserve(items.size());
-    for (FontInfo* entry : items) {
+    for (FontInfo *entry : items) {
         fonts.push_back(font_info(*new font_info_private(entry)));
         delete entry;
     }

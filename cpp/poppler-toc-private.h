@@ -29,8 +29,7 @@
 class Outline;
 class OutlineItem;
 
-namespace poppler
-{
+namespace poppler {
 
 class toc_private
 {
@@ -38,11 +37,10 @@ public:
     toc_private();
     ~toc_private();
 
-    static toc* load_from_outline(Outline *outline);
+    static toc *load_from_outline(Outline *outline);
 
     toc_item root;
 };
-
 
 class toc_item_private
 {
@@ -51,12 +49,12 @@ public:
     ~toc_item_private();
 
     toc_item_private(const toc_item_private &) = delete;
-    toc_item_private& operator=(const toc_item_private &) = delete;
+    toc_item_private &operator=(const toc_item_private &) = delete;
 
     void load(const OutlineItem *item);
-    void load_children(const std::vector<OutlineItem*> *items);
+    void load_children(const std::vector<OutlineItem *> *items);
 
-    std::vector<toc_item*> children;
+    std::vector<toc_item *> children;
     ustring title;
     bool is_open;
 };

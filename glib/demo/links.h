@@ -20,11 +20,11 @@
 #include <poppler.h>
 
 #ifndef _LINKS_H_
-#define _LINKS_H_
+#    define _LINKS_H_
 
 G_BEGIN_DECLS
 
-GtkWidget *pgd_links_create_widget (PopplerDocument *document);
+GtkWidget *pgd_links_create_widget(PopplerDocument *document);
 
 G_END_DECLS
 

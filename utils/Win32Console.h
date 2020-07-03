@@ -26,33 +26,34 @@
 // Ensure stdio.h is included before redefining stdio functions. We need to provide
 // our own declarations for the redefined functions because win32 stdio.h functions
 // have DLL export decorations.
-#include <cstdio>
+#    include <cstdio>
 
-#ifndef WIN32_CONSOLE_IMPL // don't redefine in Win32Console.cc so we can call original functions
-#define printf(...)  win32_fprintf(stdout, __VA_ARGS__)
-#define fprintf(stream, ...) win32_fprintf(stream, __VA_ARGS__)
-#define puts(s) win32_fprintf(stdout, "%s\n", s)
-#define fputs(s, stream) win32_fprintf(stream, "%s", s)
-#define putc(c) win32_fprintf(stdout, "%c", c)
-#define putchar(c) win32_fprintf(stdout, "%c", c)
-#define fputc(c, stream) win32_fprintf(stream, "%c", c)
-#define fwrite(ptr, size, nmemb, stream) win32_fwrite(ptr, size, nmemb, stream)
-#endif
+#    ifndef WIN32_CONSOLE_IMPL // don't redefine in Win32Console.cc so we can call original functions
+#        define printf(...) win32_fprintf(stdout, __VA_ARGS__)
+#        define fprintf(stream, ...) win32_fprintf(stream, __VA_ARGS__)
+#        define puts(s) win32_fprintf(stdout, "%s\n", s)
+#        define fputs(s, stream) win32_fprintf(stream, "%s", s)
+#        define putc(c) win32_fprintf(stdout, "%c", c)
+#        define putchar(c) win32_fprintf(stdout, "%c", c)
+#        define fputc(c, stream) win32_fprintf(stream, "%c", c)
+#        define fwrite(ptr, size, nmemb, stream) win32_fwrite(ptr, size, nmemb, stream)
+#    endif
 
 extern "C" {
-  int win32_fprintf(FILE *stream, ...);
-  size_t win32_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+int win32_fprintf(FILE *stream, ...);
+size_t win32_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 }
 
 class Win32Console
 {
 public:
-  Win32Console(int *argc, char **argv[]);
-  ~Win32Console();
+    Win32Console(int *argc, char **argv[]);
+    ~Win32Console();
+
 private:
-  int numArgs;
-  char **argList;
-  char **privateArgList;
+    int numArgs;
+    char **argList;
+    char **privateArgList;
 };
 
 #else
@@ -62,7 +63,7 @@ private:
 class Win32Console
 {
 public:
-  Win32Console(int *argc, char ***argv) {}
+    Win32Console(int *argc, char ***argv) { }
 };
 
 #endif // _WIN32
