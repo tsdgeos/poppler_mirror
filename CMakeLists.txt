@@ -503,6 +503,7 @@ if (GPERF AND RUN_GPERF_IF_PRESENT)
         add_custom_command(OUTPUT poppler/${input}.c
                        COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
                        COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND clang-format -i ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c || true
                        DEPENDS poppler/${input}.gperf
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
