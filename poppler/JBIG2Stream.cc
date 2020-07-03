@@ -1375,7 +1375,8 @@ void JBIG2Stream::readSegments() {
       }
       refFlags = (refFlags << 24) | (c1 << 16) | (c2 << 8) | c3;
       nRefSegs = refFlags & 0x1fffffff;
-      for (unsigned int i = 0; i < (nRefSegs + 9) >> 3; ++i) {
+      const unsigned int nCharsToRead = (nRefSegs + 9) >> 3;
+      for (unsigned int i = 0; i < nCharsToRead; ++i) {
 	if ((c1 = curStr->getChar()) == EOF) {
 	  goto eofError1;
 	}
