@@ -82,7 +82,7 @@ build_mingw64_fedora:
 
 build_clazy:
   stage: build
-  image: fedora
+  image: fedora:31
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
@@ -118,7 +118,6 @@ qt5_docs:
   only:
     - master
   stage: document
-  image: debian:testing
   variables:
     QT_SELECT: qt5
   script:
