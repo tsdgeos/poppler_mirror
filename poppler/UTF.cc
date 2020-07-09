@@ -90,6 +90,7 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
     int i, len;
     const char *s;
     Unicode *u;
+    bool isUnicode, isUnicodeLE;
 
     len = textStr->getLength();
     s = textStr->c_str();
@@ -99,12 +100,26 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
     }
 
     if (textStr->hasUnicodeMarker()) {
+        isUnicode = true;
+        isUnicodeLE = false;
+    } else if (textStr->hasUnicodeMarkerLE()) {
+        isUnicode = false;
+        isUnicodeLE = true;
+    } else {
+        isUnicode = false;
+        isUnicodeLE = false;
+    }
+
+    if (isUnicode || isUnicodeLE) {
         Unicode *utf16;
         len = len / 2 - 1;
         if (len > 0) {
             utf16 = new Unicode[len];
             for (i = 0; i < len; i++) {
-                utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+                if (isUnicode)
+                    utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+                else // UnicodeLE
+                    utf16[i] = (s[2 + i * 2] & 0xff) | (s[3 + i * 2] & 0xff) >> 8;
             }
             len = UTF16toUCS4(utf16, len, &u);
             delete[] utf16;
