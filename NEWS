@@ -1,3 +1,15 @@
+Release 0.90.1:
+        core:
+         * Fix regression on PS conversion.
+           Regression only happened on applications that are locale enabled
+           i.e. Okular but not pdftops, when using a quite new lcms and
+           the user locale uses , as decimal separator instead of .
+         * Add UTF16LE support to TextStringToUCS4.
+           Even if the standard clearly says it should be UTF16BE
+
+        qt6:
+         * Add work in progress qt6 port. Ignore for now :)
+
 Release 0.90.0:
         core:
          * Color profile tweaks
