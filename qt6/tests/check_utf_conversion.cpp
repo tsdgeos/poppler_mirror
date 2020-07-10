@@ -18,6 +18,7 @@ private slots:
     void testUTF_data();
     void testUTF();
     void testUnicodeToAscii7();
+    void testUnicodeLittleEndian();
 };
 
 static bool compare(const char *a, const char *b)
@@ -41,9 +42,18 @@ static bool compare(const Unicode *a, const char *b, int len)
             return false;
     }
 
-    return *a == (Unicode)*b;
+    return true;
 }
 
+static bool compare(const Unicode *a, const uint16_t *b, int len)
+{
+    for (int i = 0; i < len; i++) {
+        if (a[i] != b[i])
+            return false;
+    }
+
+    return true;
+}
 void TestUTFConversion::testUTF_data()
 {
     QTest::addColumn<QString>("s");
@@ -141,6 +151,38 @@ void TestUTFConversion::testUnicodeToAscii7()
 
     free(out);
     free(out_ascii_idx);
+}
+
+void TestUTFConversion::testUnicodeLittleEndian()
+{
+    uint16_t UTF16LE_hi[5] { 0xFFFE, 0x4800, 0x4900, 0x2100, 0x1126 }; // UTF16-LE "HI!☑"
+    GooString GooUTF16LE(reinterpret_cast<const char *>(UTF16LE_hi), sizeof(UTF16LE_hi));
+
+    uint16_t UTF16BE_hi[5] { 0xFEFF, 0x0048, 0x0049, 0x0021, 0x2611 }; // UTF16-BE "HI!☑"
+    GooString GooUTF16BE(reinterpret_cast<const char *>(UTF16BE_hi), sizeof(UTF16BE_hi));
+
+    // Let's assert both GooString's are different
+    QVERIFY(GooUTF16LE.cmp(&GooUTF16BE));
+
+    Unicode *UCS4fromLE, *UCS4fromBE;
+    const int len1 = TextStringToUCS4(&GooUTF16LE, &UCS4fromLE);
+    const int len2 = TextStringToUCS4(&GooUTF16BE, &UCS4fromBE);
+
+    // len is 4 because TextStringToUCS4() removes the two leading Byte Order Mark (BOM) code points
+    QCOMPARE(len1, len2);
+    QCOMPARE(len1, 4);
+
+    // Check that now after conversion, UCS4fromLE and UCS4fromBE are now the same
+    for (int i = 0; i < len1; i++) {
+        QCOMPARE(UCS4fromLE[i], UCS4fromBE[i]);
+    }
+
+    const QString expected = QStringLiteral("HI!☑");
+
+    // Do some final verifications, checking the strings to be "HI!"
+    QVERIFY(*UCS4fromLE == *UCS4fromBE);
+    QVERIFY(compare(UCS4fromLE, expected.utf16(), len1));
+    QVERIFY(compare(UCS4fromBE, expected.utf16(), len1));
 }
 
 QTEST_GUILESS_MAIN(TestUTFConversion)
