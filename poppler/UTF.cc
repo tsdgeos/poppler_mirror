@@ -19,7 +19,7 @@
 // Copyright (C) 2016, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -90,6 +90,7 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
     int i, len;
     const char *s;
     Unicode *u;
+    bool isUnicode, isUnicodeLE;
 
     len = textStr->getLength();
     s = textStr->c_str();
@@ -99,12 +100,26 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
     }
 
     if (textStr->hasUnicodeMarker()) {
+        isUnicode = true;
+        isUnicodeLE = false;
+    } else if (textStr->hasUnicodeMarkerLE()) {
+        isUnicode = false;
+        isUnicodeLE = true;
+    } else {
+        isUnicode = false;
+        isUnicodeLE = false;
+    }
+
+    if (isUnicode || isUnicodeLE) {
         Unicode *utf16;
         len = len / 2 - 1;
         if (len > 0) {
             utf16 = new Unicode[len];
             for (i = 0; i < len; i++) {
-                utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+                if (isUnicode)
+                    utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+                else // UnicodeLE
+                    utf16[i] = (s[2 + i * 2] & 0xff) | (s[3 + i * 2] & 0xff) >> 8;
             }
             len = UTF16toUCS4(utf16, len, &u);
             delete[] utf16;
