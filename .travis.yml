@@ -5,7 +5,6 @@ osx_image:
   - xcode11.2
 env:
   global:
-  - MAKEFLAGS="-j2"
   - Qt5Core_DIR=/usr/local/opt/qt/lib/cmake/Qt5Core
   - Qt5Gui_DIR=/usr/local/opt/qt/lib/cmake/Qt5Gui
   - Qt5Test_DIR=/usr/local/opt/qt/lib/cmake/Qt5Test
