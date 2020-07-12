@@ -16,5 +16,6 @@ before_install:
   - brew update
   - brew uninstall -f poppler gdal postgis python@2 mercurial
   - brew install poppler --only-dependencies
-  - brew upgrade cmake pkg-config
-script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
+  - brew upgrade cmake pkg-config ninja
+  - mkdir build && cd build
+script: cmake .. -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && ninja
