@@ -140,7 +140,6 @@ class Page;
  */
 class POPPLER_QT6_EXPORT Annotation
 {
-    friend class AnnotationUtils;
     friend class LinkMovie;
     friend class LinkRendition;
 
@@ -422,7 +421,6 @@ private:
  */
 class POPPLER_QT6_EXPORT TextAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -498,7 +496,6 @@ private:
  */
 class POPPLER_QT6_EXPORT LineAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -577,7 +574,6 @@ private:
  */
 class POPPLER_QT6_EXPORT GeomAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -611,7 +607,6 @@ private:
  */
 class POPPLER_QT6_EXPORT HighlightAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -678,7 +673,6 @@ private:
  */
 class POPPLER_QT6_EXPORT StampAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -727,7 +721,6 @@ private:
  */
 class POPPLER_QT6_EXPORT InkAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -746,7 +739,6 @@ private:
 
 class POPPLER_QT6_EXPORT LinkAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -785,7 +777,6 @@ private:
  */
 class POPPLER_QT6_EXPORT CaretAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
