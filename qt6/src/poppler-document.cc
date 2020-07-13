@@ -571,23 +571,6 @@ bool Document::hasEmbeddedFiles() const
     return (!(0 == m_doc->doc->getCatalog()->numEmbeddedFiles()));
 }
 
-QDomDocument *Document::toc() const
-{
-    Outline *outline = m_doc->doc->getOutline();
-    if (!outline)
-        return nullptr;
-
-    const std::vector<::OutlineItem *> *items = outline->getItems();
-    if (!items || items->size() < 1)
-        return nullptr;
-
-    QDomDocument *toc = new QDomDocument();
-    if (items->size() > 0)
-        m_doc->addTocChildren(toc, toc, items);
-
-    return toc;
-}
-
 QVector<OutlineItem> Document::outline() const
 {
     QVector<OutlineItem> result;

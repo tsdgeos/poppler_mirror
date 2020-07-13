@@ -1706,7 +1706,7 @@ QString subject = m_doc->info("Subject");
 
       \returns the TOC, or NULL if the Document does not have one
     */
-    QDomDocument *toc() const;
+    Q_DECL_DEPRECATED QDomDocument *toc() const;
 
     /**
        Gets the outline of the document
