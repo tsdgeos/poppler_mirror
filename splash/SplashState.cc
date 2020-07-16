@@ -58,7 +58,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     multiplyPatternAlpha = false;
     patternStrokeAlpha = 1;
     patternFillAlpha = 1;
-    lineWidth = 0;
+    lineWidth = 1;
     lineCap = splashLineCapButt;
     lineJoin = splashLineJoinMiter;
     miterLimit = 10;
@@ -113,7 +113,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     multiplyPatternAlpha = false;
     patternStrokeAlpha = 1;
     patternFillAlpha = 1;
-    lineWidth = 0;
+    lineWidth = 1;
     lineCap = splashLineCapButt;
     lineJoin = splashLineJoinMiter;
     miterLimit = 10;
