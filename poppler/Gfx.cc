@@ -529,7 +529,13 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
 
     // initialize
     out = outA;
-    state = new GfxState(72, 72, box, 0, false);
+    double hDPI = 72;
+    double vDPI = 72;
+    if (gfxA) {
+        hDPI = gfxA->getState()->getHDPI();
+        vDPI = gfxA->getState()->getVDPI();
+    }
+    state = new GfxState(hDPI, vDPI, box, 0, false);
     stackHeight = 1;
     pushStateGuard();
     fontChanged = false;
