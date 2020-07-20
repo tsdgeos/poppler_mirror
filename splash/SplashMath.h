@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2020 Jean Ghali <jghali@libertysurf.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,9 +67,16 @@ static inline int splashFloor(SplashCoord x)
     unsigned short oldCW, newCW;
     int result;
 
-    __asm fld QWORD PTR x __asm fnstcw WORD PTR oldCW __asm mov ax, WORD PTR oldCW __asm and ax, 0xf3ff __asm or ax, 0x0400 __asm mov WORD PTR newCW,
-            ax // round down
-            __asm fldcw WORD PTR newCW __asm fistp DWORD PTR result __asm fldcw WORD PTR oldCW return result;
+    __asm fld QWORD PTR x;
+    __asm fnstcw WORD PTR oldCW;
+    __asm mov ax, WORD PTR oldCW;
+    __asm and ax, 0xf3ff;
+    __asm or ax, 0x0400;
+    __asm mov WORD PTR newCW, ax; // round down
+    __asm fldcw WORD PTR newCW;
+    __asm fistp DWORD PTR result;
+    __asm fldcw WORD PTR oldCW;
+    return result;
 #else
     if (x > 0)
         return (int)x;
@@ -107,9 +115,16 @@ static inline int splashCeil(SplashCoord x)
     unsigned short oldCW, newCW;
     int result;
 
-    __asm fld QWORD PTR x __asm fnstcw WORD PTR oldCW __asm mov ax, WORD PTR oldCW __asm and ax, 0xf3ff __asm or ax, 0x0800 __asm mov WORD PTR newCW,
-            ax // round up
-            __asm fldcw WORD PTR newCW __asm fistp DWORD PTR result __asm fldcw WORD PTR oldCW return result;
+    __asm fld QWORD PTR x;
+    __asm fnstcw WORD PTR oldCW;
+    __asm mov ax, WORD PTR oldCW;
+    __asm and ax, 0xf3ff;
+    __asm or ax, 0x0800;
+    __asm mov WORD PTR newCW, ax; // round up
+    __asm fldcw WORD PTR newCW;
+    __asm fistp DWORD PTR result;
+    __asm fldcw WORD PTR oldCW;
+    return result;
 #else
     return (int)ceil(x);
 #endif
@@ -145,9 +160,16 @@ static inline int splashRound(SplashCoord x)
     int result;
 
     x += 0.5;
-    __asm fld QWORD PTR x __asm fnstcw WORD PTR oldCW __asm mov ax, WORD PTR oldCW __asm and ax, 0xf3ff __asm or ax, 0x0400 __asm mov WORD PTR newCW,
-            ax // round down
-            __asm fldcw WORD PTR newCW __asm fistp DWORD PTR result __asm fldcw WORD PTR oldCW return result;
+    __asm fld QWORD PTR x;
+    __asm fnstcw WORD PTR oldCW;
+    __asm mov ax, WORD PTR oldCW;
+    __asm and ax, 0xf3ff;
+    __asm or ax, 0x0400;
+    __asm mov WORD PTR newCW, ax; // round down
+    __asm fldcw WORD PTR newCW;
+    __asm fistp DWORD PTR result;
+    __asm fldcw WORD PTR oldCW;
+    return result;
 #else
     return (int)splashFloor(x + 0.5);
 #endif
