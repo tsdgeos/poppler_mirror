@@ -1,3 +1,15 @@
+Release 20.08.0:
+        core:
+         * Sub-page objects: initialize clip max values considering the render resolution. Issue #937
+         * Splash: Set initial line width to 1. Issue #674
+         * Fix stack overflow with specially crafted files
+         * GfxShading: Simplify holding the Function
+         * Splash: Fix x86 + windows asm build
+
+        qt5:
+         * Deprecate Document::toc
+         * Deprecate AnnotationUtils
+
 Release 0.90.1:
         core:
          * Fix regression on PS conversion.
