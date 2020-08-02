@@ -272,10 +272,6 @@ include_directories(
   ${FREETYPE_INCLUDE_DIRS}
 )
 
-if(ENABLE_ZLIB)
-  include_directories(SYSTEM ${ZLIB_INCLUDE_DIR})
-endif()
-
 if (NSS3_FOUND)
   set(ENABLE_NSS3 ON)
 endif()
@@ -455,7 +451,7 @@ if(ENABLE_ZLIB)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/FlateEncoder.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${ZLIB_LIBRARIES})
+  set(poppler_LIBS ${poppler_LIBS} ZLIB::ZLIB)
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS)
   set(poppler_SRCS ${poppler_SRCS}
