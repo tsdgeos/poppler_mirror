@@ -56,6 +56,7 @@
 #include "PDFDocFactory.h"
 #include "splash/SplashBitmap.h"
 #include "splash/Splash.h"
+#include "splash/SplashErrorCodes.h"
 #include "SplashOutputDev.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
@@ -278,16 +279,22 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
     params.tiffCompression.Set(TiffCompressionStr);
 
     if (ppmFile != nullptr) {
+        SplashError e;
+
         if (png) {
-            bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
+            e = bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
         } else if (jpeg) {
-            bitmap->writeImgFile(splashFormatJpeg, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatJpeg, ppmFile, x_resolution, y_resolution, &params);
         } else if (jpegcmyk) {
-            bitmap->writeImgFile(splashFormatJpegCMYK, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatJpegCMYK, ppmFile, x_resolution, y_resolution, &params);
         } else if (tiff) {
-            bitmap->writeImgFile(splashFormatTiff, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatTiff, ppmFile, x_resolution, y_resolution, &params);
         } else {
-            bitmap->writePNMFile(ppmFile);
+            e = bitmap->writePNMFile(ppmFile);
+        }
+        if (e != splashOk) {
+            fprintf(stderr, "Could not write image to %s; exiting\n", ppmFile);
+            exit(EXIT_FAILURE);
         }
     } else {
 #ifdef _WIN32
