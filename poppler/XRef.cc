@@ -1167,7 +1167,7 @@ Object XRef::fetch(int num, int gen, int recursion)
       goto err;
     }
 #endif
-        if (e->offset >= (unsigned int)size || entries[e->offset].type != xrefEntryUncompressed) {
+        if (e->offset >= (unsigned int)size || (entries[e->offset].type != xrefEntryUncompressed && entries[e->offset].type != xrefEntryNone)) {
             error(errSyntaxError, -1, "Invalid object stream");
             goto err;
         }
