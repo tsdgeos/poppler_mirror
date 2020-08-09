@@ -1621,7 +1621,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
         } else {
             resetGenericStats(sdTemplate, nullptr);
         }
-        resetIntStats(symCodeLen);
+        if (!resetIntStats(symCodeLen)) {
+            goto syntaxError;
+        }
         arithDecoder->start();
     }
 
@@ -1716,6 +1718,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                     huffDecoder->reset();
                     arithDecoder->start();
                 } else {
+                    if (iaidStats == nullptr) {
+                        goto syntaxError;
+                    }
                     symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
                     arithDecoder->decodeInt(&refDX, iardxStats);
                     arithDecoder->decodeInt(&refDY, iardyStats);
@@ -2127,7 +2132,9 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     if (!huff) {
-        resetIntStats(symCodeLen);
+        if (!resetIntStats(symCodeLen)) {
+            return;
+        }
         arithDecoder->start();
     }
     if (refine) {
@@ -2252,6 +2259,10 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                     symID = huffDecoder->readBits(symCodeLen);
                 }
             } else {
+                if (iaidStats == nullptr) {
+                    delete bitmap;
+                    return nullptr;
+                }
                 symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
             }
 
@@ -4030,7 +4041,7 @@ void JBIG2Stream::resetRefinementStats(unsigned int templ, JArithmeticDecoderSta
     }
 }
 
-void JBIG2Stream::resetIntStats(int symCodeLen)
+bool JBIG2Stream::resetIntStats(int symCodeLen)
 {
     iadhStats->reset();
     iadwStats->reset();
@@ -4045,12 +4056,18 @@ void JBIG2Stream::resetIntStats(int symCodeLen)
     iardwStats->reset();
     iardhStats->reset();
     iariStats->reset();
-    if (iaidStats->getContextSize() == 1 << (symCodeLen + 1)) {
+    if (iaidStats != nullptr && iaidStats->getContextSize() == 1 << (symCodeLen + 1)) {
         iaidStats->reset();
     } else {
         delete iaidStats;
         iaidStats = new JArithmeticDecoderStats(1 << (symCodeLen + 1));
+        if (!iaidStats->isValid()) {
+            delete iaidStats;
+            iaidStats = nullptr;
+            return false;
+        }
     }
+    return true;
 }
 
 bool JBIG2Stream::readUByte(unsigned int *x)

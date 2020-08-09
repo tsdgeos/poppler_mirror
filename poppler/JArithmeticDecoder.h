@@ -44,6 +44,7 @@ public:
     int getContextSize() { return contextSize; }
     void copyFrom(JArithmeticDecoderStats *stats);
     void setEntry(unsigned int cx, int i, int mps);
+    bool isValid() const { return cxTab != nullptr; }
 
 private:
     unsigned char *cxTab; // cxTab[cx] = (i[cx] << 1) + mps[cx]

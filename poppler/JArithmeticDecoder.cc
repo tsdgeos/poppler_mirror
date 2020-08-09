@@ -33,8 +33,10 @@
 JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA)
 {
     contextSize = contextSizeA;
-    cxTab = (unsigned char *)gmallocn(contextSize, sizeof(unsigned char));
-    reset();
+    cxTab = (unsigned char *)gmallocn_checkoverflow(contextSize, sizeof(unsigned char));
+    if (cxTab) {
+        reset();
+    }
 }
 
 JArithmeticDecoderStats::~JArithmeticDecoderStats()

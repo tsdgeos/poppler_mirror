@@ -88,7 +88,7 @@ private:
     void discardSegment(unsigned int segNum);
     void resetGenericStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
     void resetRefinementStats(unsigned int templ, JArithmeticDecoderStats *prevStats);
-    void resetIntStats(int symCodeLen);
+    bool resetIntStats(int symCodeLen);
     bool readUByte(unsigned int *x);
     bool readByte(int *x);
     bool readUWord(unsigned int *x);
