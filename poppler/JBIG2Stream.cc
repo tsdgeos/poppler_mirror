@@ -4056,6 +4056,9 @@ bool JBIG2Stream::resetIntStats(int symCodeLen)
     iardwStats->reset();
     iardhStats->reset();
     iariStats->reset();
+    if (symCodeLen + 1 >= 31) {
+        return false;
+    }
     if (iaidStats != nullptr && iaidStats->getContextSize() == 1 << (symCodeLen + 1)) {
         iaidStats->reset();
     } else {
