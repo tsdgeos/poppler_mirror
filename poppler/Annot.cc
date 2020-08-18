@@ -1421,12 +1421,13 @@ void Annot::setModified(GooString *new_modified)
 {
     annotLocker();
 
-    if (new_modified)
+    if (new_modified) {
         modified = std::make_unique<GooString>(new_modified);
-    else
-        modified = std::make_unique<GooString>();
-
-    update("M", Object(modified->copy()));
+        update("M", Object(modified->copy()));
+    } else {
+        modified.reset(nullptr);
+        update("M", Object(objNull));
+    }
 }
 
 void Annot::setFlags(unsigned int new_flags)
@@ -2094,12 +2095,13 @@ void AnnotMarkup::setOpacity(double opacityA)
 
 void AnnotMarkup::setDate(GooString *new_date)
 {
-    if (new_date)
+    if (new_date) {
         date = std::make_unique<GooString>(new_date);
-    else
-        date = std::make_unique<GooString>();
-
-    update("CreationDate", Object(date->copy()));
+        update("CreationDate", Object(date->copy()));
+    } else {
+        date.reset(nullptr);
+        update("CreationDate", Object(objNull));
+    }
 }
 
 void AnnotMarkup::removeReferencedObjects()
