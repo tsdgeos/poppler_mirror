@@ -1015,10 +1015,20 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
         setContents(e.attribute(QStringLiteral("contents")));
     if (e.hasAttribute(QStringLiteral("uniqueName")))
         setUniqueName(e.attribute(QStringLiteral("uniqueName")));
-    if (e.hasAttribute(QStringLiteral("modifyDate")))
-        setModificationDate(QDateTime::fromString(e.attribute(QStringLiteral("modifyDate"))));
-    if (e.hasAttribute(QStringLiteral("creationDate")))
-        setCreationDate(QDateTime::fromString(e.attribute(QStringLiteral("creationDate"))));
+    if (e.hasAttribute(QStringLiteral("modifyDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")), Qt::ISODate);
+        }
+        setModificationDate(dt);
+    }
+    if (e.hasAttribute(QStringLiteral("creationDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")), Qt::ISODate);
+        }
+        setCreationDate(dt);
+    }
 
     // parse -other- attributes
     if (e.hasAttribute(QStringLiteral("flags")))
