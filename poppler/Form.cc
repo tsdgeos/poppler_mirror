@@ -1360,7 +1360,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     if (obj1.isInt())
         topIdx = obj1.getInt();
 
-    obj1 = dict->lookup("Opt");
+    obj1 = Form::fieldLookup(dict, "Opt");
     if (obj1.isArray()) {
         numChoices = obj1.arrayGetLength();
         choices = new ChoiceOpt[numChoices];
