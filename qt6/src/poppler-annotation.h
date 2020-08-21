@@ -436,6 +436,12 @@ public:
         Callout,
         TypeWriter
     };
+    enum InplaceAlignPosition
+    {
+        InplaceAlignLeft,
+        InplaceAlignCenter,
+        InplaceAlignRight
+    };
 
     TextAnnotation(TextType type);
     ~TextAnnotation() override;
@@ -472,9 +478,8 @@ public:
     QColor textColor() const;
     void setTextColor(const QColor &color);
 
-    // 0:left, 1:center, 2:right
-    int inplaceAlign() const;
-    void setInplaceAlign(int align);
+    InplaceAlignPosition inplaceAlign() const;
+    void setInplaceAlign(InplaceAlignPosition align);
 
     QPointF calloutPoint(int id) const;
     QVector<QPointF> calloutPoints() const;

@@ -1408,12 +1408,12 @@ public:
     QString textIcon;
     QFont textFont;
     QColor textColor;
-    int inplaceAlign; // 0:left, 1:center, 2:right
+    TextAnnotation::InplaceAlignPosition inplaceAlign;
     QVector<QPointF> inplaceCallout;
     TextAnnotation::InplaceIntent inplaceIntent;
 };
 
-TextAnnotationPrivate::TextAnnotationPrivate() : AnnotationPrivate(), textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(0), inplaceIntent(TextAnnotation::Unknown) { }
+TextAnnotationPrivate::TextAnnotationPrivate() : AnnotationPrivate(), textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(TextAnnotation::InplaceAlignLeft), inplaceIntent(TextAnnotation::Unknown) { }
 
 Annotation *TextAnnotationPrivate::makeAlias()
 {
@@ -1590,7 +1590,7 @@ void TextAnnotation::setTextColor(const QColor &color)
     d->setDefaultAppearanceToNative();
 }
 
-int TextAnnotation::inplaceAlign() const
+TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
 {
     Q_D(const TextAnnotation);
 
@@ -1599,13 +1599,33 @@ int TextAnnotation::inplaceAlign() const
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
-        return ftextann->getQuadding();
+        switch (ftextann->getQuadding()) {
+        case quaddingLeftJustified:
+            return InplaceAlignLeft;
+        case quaddingCentered:
+            return InplaceAlignCenter;
+        case quaddingRightJustified:
+            return InplaceAlignRight;
+        }
     }
 
-    return 0;
+    return InplaceAlignLeft;
 }
 
-void TextAnnotation::setInplaceAlign(int align)
+static AnnotFreeText::AnnotFreeTextQuadding alignToQuadding(TextAnnotation::InplaceAlignPosition align)
+{
+    switch (align) {
+    case TextAnnotation::InplaceAlignLeft:
+        return AnnotFreeText::quaddingLeftJustified;
+    case TextAnnotation::InplaceAlignCenter:
+        return AnnotFreeText::quaddingCentered;
+    case TextAnnotation::InplaceAlignRight:
+        return AnnotFreeText::quaddingRightJustified;
+    }
+    return AnnotFreeText::quaddingLeftJustified;
+}
+
+void TextAnnotation::setInplaceAlign(InplaceAlignPosition align)
 {
     Q_D(TextAnnotation);
 
@@ -1616,7 +1636,7 @@ void TextAnnotation::setInplaceAlign(int align)
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot);
-        ftextann->setQuadding((AnnotFreeText::AnnotFreeTextQuadding)align);
+        ftextann->setQuadding(alignToQuadding(align));
     }
 }
 
