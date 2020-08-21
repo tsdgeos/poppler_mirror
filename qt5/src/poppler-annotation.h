@@ -522,6 +522,7 @@ public:
     /// \since 0.69
     void setTextColor(const QColor &color);
 
+    // 0:left, 1:center, 2:right
     int inplaceAlign() const;
     void setInplaceAlign(int align);
 
