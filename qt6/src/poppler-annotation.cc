@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -61,7 +61,7 @@
 namespace Poppler {
 
 // BEGIN Annotation implementation
-AnnotationPrivate::AnnotationPrivate() : flags(0), revisionScope(Annotation::Root), revisionType(Annotation::None), pdfAnnot(nullptr), pdfPage(nullptr), parentDoc(nullptr) { }
+AnnotationPrivate::AnnotationPrivate() : revisionScope(Annotation::Root), revisionType(Annotation::None), pdfAnnot(nullptr), pdfPage(nullptr), parentDoc(nullptr) { }
 
 void AnnotationPrivate::addRevision(Annotation *ann, Annotation::RevScope scope, Annotation::RevType type)
 {
@@ -1077,9 +1077,9 @@ void Annotation::setCreationDate(const QDateTime &date)
 #endif
 }
 
-static int fromPdfFlags(int flags)
+static Annotation::Flags fromPdfFlags(int flags)
 {
-    int qtflags = 0;
+    Annotation::Flags qtflags;
 
     if (flags & Annot::flagHidden)
         qtflags |= Annotation::Hidden;
@@ -1089,8 +1089,10 @@ static int fromPdfFlags(int flags)
         qtflags |= Annotation::FixedRotation;
     if (!(flags & Annot::flagPrint))
         qtflags |= Annotation::DenyPrint;
-    if (flags & Annot::flagReadOnly)
-        qtflags |= (Annotation::DenyWrite | Annotation::DenyDelete);
+    if (flags & Annot::flagReadOnly) {
+        qtflags |= Annotation::DenyWrite;
+        qtflags |= Annotation::DenyDelete;
+    }
     if (flags & Annot::flagLocked)
         qtflags |= Annotation::DenyDelete;
     if (flags & Annot::flagToggleNoView)
@@ -1099,7 +1101,7 @@ static int fromPdfFlags(int flags)
     return qtflags;
 }
 
-static int toPdfFlags(int qtflags)
+static int toPdfFlags(Annotation::Flags qtflags)
 {
     int flags = 0;
 
@@ -1121,7 +1123,7 @@ static int toPdfFlags(int qtflags)
     return flags;
 }
 
-int Annotation::flags() const
+Annotation::Flags Annotation::flags() const
 {
     Q_D(const Annotation);
 
@@ -1131,7 +1133,7 @@ int Annotation::flags() const
     return fromPdfFlags(d->pdfAnnot->getFlags());
 }
 
-void Annotation::setFlags(int flags)
+void Annotation::setFlags(Annotation::Flags flags)
 {
     Q_D(Annotation);
 

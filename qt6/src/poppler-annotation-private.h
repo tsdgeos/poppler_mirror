@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2012, 2014, 2018, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2012, 2014, 2018-2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public:
     QDateTime creationDate; // before or equal to modifyDate
 
     /* properties: look/interaction related */
-    int flags;
+    Annotation::Flags flags;
     QRectF boundary;
 
     /* style and popup */

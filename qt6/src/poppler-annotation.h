@@ -175,7 +175,7 @@ public:
      *
      * They can be OR'd together (e.g. Annotation::FixedRotation | Annotation::DenyPrint).
      *
-     * \sa flags(), setFlags(int)
+     * \sa flags(), setFlags()
      */
     // NOTE: Only flags that are known to work are documented
     enum Flag
@@ -189,6 +189,7 @@ public:
         ToggleHidingOnMouse = 64,
         External = 128
     };
+    Q_DECLARE_FLAGS(Flags, Flag)
 
     enum LineStyle
     {
@@ -253,15 +254,15 @@ public:
     /**
      * Returns this annotation's flags
      *
-     * \sa Flag, setFlags(int)
+     * \sa Flag, setFlags()
      */
-    int flags() const;
+    Flags flags() const;
     /**
      * Sets this annotation's flags
      *
      * \sa Flag, flags(), \ref annotFixedRotation
      */
-    void setFlags(int flags);
+    void setFlags(Flags flags);
 
     /**
      * Returns this annotation's boundary rectangle in normalized coordinates
