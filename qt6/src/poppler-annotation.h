@@ -166,8 +166,7 @@ public:
         AMovie = 11, ///< MovieAnnotation
         AScreen = 12, ///< ScreenAnnotation
         AWidget = 13, ///< WidgetAnnotation
-        ARichMedia = 14, ///< RichMediaAnnotation
-        A_BASE = 0
+        ARichMedia = 14 ///< RichMediaAnnotation
     };
 
     /**
