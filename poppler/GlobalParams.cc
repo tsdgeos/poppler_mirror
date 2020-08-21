@@ -1023,7 +1023,7 @@ fin:
     return path;
 }
 
-#elif WITH_FONTCONFIGURATION_WIN32
+#elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
 
 GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
