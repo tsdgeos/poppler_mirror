@@ -179,7 +179,7 @@ void TestUTFConversion::testUnicodeLittleEndian()
         QCOMPARE(UCS4fromLE[i], UCS4fromBE[i]);
     }
 
-    const QString expected = QStringLiteral("HI!☑");
+    const QString expected = QString::fromUtf8("HI!☑"); // clazy:exclude=qstring-allocations
 
     // Do some final verifications, checking the strings to be "HI!"
     QVERIFY(*UCS4fromLE == *UCS4fromBE);
