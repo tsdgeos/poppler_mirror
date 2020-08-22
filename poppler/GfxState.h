@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -902,7 +902,7 @@ protected:
 class GfxUnivariateShading : public GfxShading
 {
 public:
-    GfxUnivariateShading(int typeA, double t0A, double t1A, Function **funcsA, int nFuncsA, bool extend0A, bool extend1A);
+    GfxUnivariateShading(int typeA, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
     GfxUnivariateShading(const GfxUnivariateShading *shading);
     ~GfxUnivariateShading() override;
 
@@ -910,8 +910,8 @@ public:
     double getDomain1() const { return t1; }
     bool getExtend0() const { return extend0; }
     bool getExtend1() const { return extend1; }
-    int getNFuncs() const { return nFuncs; }
-    const Function *getFunc(int i) const { return funcs[i]; }
+    int getNFuncs() const { return funcs.size(); }
+    const Function *getFunc(int i) const { return funcs[i].get(); }
     // returns the nComps of the shading
     // i.e. how many positions of color have been set
     int getColor(double t, GfxColor *color);
@@ -924,8 +924,7 @@ public:
 
 private:
     double t0, t1;
-    Function *funcs[gfxColorMaxComps];
-    int nFuncs;
+    std::vector<std::unique_ptr<Function>> funcs;
     bool extend0, extend1;
 
     int cacheSize, lastMatch;
@@ -941,7 +940,7 @@ private:
 class GfxFunctionShading : public GfxShading
 {
 public:
-    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, Function **funcsA, int nFuncsA);
+    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
     GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
@@ -957,15 +956,14 @@ public:
         *y1A = y1;
     }
     const double *getMatrix() const { return matrix; }
-    int getNFuncs() const { return nFuncs; }
-    const Function *getFunc(int i) const { return funcs[i]; }
+    int getNFuncs() const { return funcs.size(); }
+    const Function *getFunc(int i) const { return funcs[i].get(); }
     void getColor(double x, double y, GfxColor *color) const;
 
 private:
     double x0, y0, x1, y1;
     double matrix[6];
-    Function *funcs[gfxColorMaxComps];
-    int nFuncs;
+    std::vector<std::unique_ptr<Function>> funcs;
 };
 
 //------------------------------------------------------------------------
@@ -975,7 +973,7 @@ private:
 class GfxAxialShading : public GfxUnivariateShading
 {
 public:
-    GfxAxialShading(double x0A, double y0A, double x1A, double y1A, double t0A, double t1A, Function **funcsA, int nFuncsA, bool extend0A, bool extend1A);
+    GfxAxialShading(double x0A, double y0A, double x1A, double y1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
     GfxAxialShading(const GfxAxialShading *shading);
     ~GfxAxialShading() override;
 
@@ -1006,7 +1004,7 @@ private:
 class GfxRadialShading : public GfxUnivariateShading
 {
 public:
-    GfxRadialShading(double x0A, double y0A, double r0A, double x1A, double y1A, double r1A, double t0A, double t1A, Function **funcsA, int nFuncsA, bool extend0A, bool extend1A);
+    GfxRadialShading(double x0A, double y0A, double r0A, double x1A, double y1A, double r1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
     GfxRadialShading(const GfxRadialShading *shading);
     ~GfxRadialShading() override;
 
@@ -1045,7 +1043,7 @@ struct GfxGouraudVertex
 class GfxGouraudTriangleShading : public GfxShading
 {
 public:
-    GfxGouraudTriangleShading(int typeA, GfxGouraudVertex *verticesA, int nVerticesA, int (*trianglesA)[3], int nTrianglesA, Function **funcsA, int nFuncsA);
+    GfxGouraudTriangleShading(int typeA, GfxGouraudVertex *verticesA, int nVerticesA, int (*trianglesA)[3], int nTrianglesA, std::vector<std::unique_ptr<Function>> &&funcsA);
     GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
     ~GfxGouraudTriangleShading() override;
 
@@ -1055,7 +1053,7 @@ public:
 
     int getNTriangles() const { return nTriangles; }
 
-    bool isParameterized() const { return nFuncs > 0; }
+    bool isParameterized() const { return !funcs.empty(); }
 
     /**
      * @precondition isParameterized() == true
@@ -1094,8 +1092,7 @@ private:
     int nVertices;
     int (*triangles)[3];
     int nTriangles;
-    Function *funcs[gfxColorMaxComps];
-    int nFuncs;
+    std::vector<std::unique_ptr<Function>> funcs;
 };
 
 //------------------------------------------------------------------------
@@ -1135,7 +1132,7 @@ struct GfxPatch
 class GfxPatchMeshShading : public GfxShading
 {
 public:
-    GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA, Function **funcsA, int nFuncsA);
+    GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA, std::vector<std::unique_ptr<Function>> &&funcsA);
     GfxPatchMeshShading(const GfxPatchMeshShading *shading);
     ~GfxPatchMeshShading() override;
 
@@ -1146,7 +1143,7 @@ public:
     int getNPatches() const { return nPatches; }
     const GfxPatch *getPatch(int i) const { return &patches[i]; }
 
-    bool isParameterized() const { return nFuncs > 0; }
+    bool isParameterized() const { return !funcs.empty(); }
 
     /**
      * @precondition isParameterized() == true
@@ -1171,8 +1168,7 @@ public:
 private:
     GfxPatch *patches;
     int nPatches;
-    Function *funcs[gfxColorMaxComps];
-    int nFuncs;
+    std::vector<std::unique_ptr<Function>> funcs;
 };
 
 //------------------------------------------------------------------------

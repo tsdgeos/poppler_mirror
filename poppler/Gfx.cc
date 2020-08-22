@@ -28,7 +28,7 @@
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 M Joonas Pihlaja <jpihlaja@cc.helsinki.fi>
-// Copyright (C) 2009-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
@@ -529,7 +529,13 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
 
     // initialize
     out = outA;
-    state = new GfxState(72, 72, box, 0, false);
+    double hDPI = 72;
+    double vDPI = 72;
+    if (gfxA) {
+        hDPI = gfxA->getState()->getHDPI();
+        vDPI = gfxA->getState()->getVDPI();
+    }
+    state = new GfxState(hDPI, vDPI, box, 0, false);
     stackHeight = 1;
     pushStateGuard();
     fontChanged = false;
@@ -926,12 +932,10 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
     Object obj1, obj2;
     GfxBlendMode mode;
     bool haveFillOP;
-    Function *funcs[4];
     GfxColor backdropColor;
     bool haveBackdropColor;
     bool alpha;
     double opac;
-    int i;
 
     obj1 = res->lookupGState(args[0].getName());
     if (obj1.isNull()) {
@@ -1049,22 +1053,28 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
         obj2 = obj1.dictLookup("TR");
     }
     if (obj2.isName("Default") || obj2.isName("Identity")) {
-        funcs[0] = funcs[1] = funcs[2] = funcs[3] = nullptr;
+        Function *funcs[4] = { nullptr, nullptr, nullptr, nullptr };
         state->setTransfer(funcs);
         out->updateTransfer(state);
     } else if (obj2.isArray() && obj2.arrayGetLength() == 4) {
-        for (i = 0; i < 4; ++i) {
+        Function *funcs[4] = { nullptr, nullptr, nullptr, nullptr };
+        for (int i = 0; i < 4; ++i) {
             Object obj3 = obj2.arrayGet(i);
             funcs[i] = Function::parse(&obj3);
             if (!funcs[i]) {
                 break;
             }
         }
-        if (i == 4) {
+        if (funcs[0] && funcs[1] && funcs[2] && funcs[3]) {
             state->setTransfer(funcs);
             out->updateTransfer(state);
+        } else {
+            for (Function *f : funcs) {
+                delete f;
+            }
         }
     } else if (obj2.isName() || obj2.isDict() || obj2.isStream()) {
+        Function *funcs[4];
         if ((funcs[0] = Function::parse(&obj2))) {
             funcs[1] = funcs[2] = funcs[3] = nullptr;
             state->setTransfer(funcs);
@@ -1100,26 +1110,26 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
             } else { // "Luminosity"
                 alpha = false;
             }
-            funcs[0] = nullptr;
+            Function *softMaskTransferFunc = nullptr;
             obj3 = obj2.dictLookup("TR");
             if (!obj3.isNull()) {
                 if (obj3.isName("Default") || obj3.isName("Identity")) {
-                    funcs[0] = nullptr;
+                    // nothing
                 } else {
-                    funcs[0] = Function::parse(&obj3);
-                    if (funcs[0] == nullptr || funcs[0]->getInputSize() != 1 || funcs[0]->getOutputSize() != 1) {
+                    softMaskTransferFunc = Function::parse(&obj3);
+                    if (softMaskTransferFunc == nullptr || softMaskTransferFunc->getInputSize() != 1 || softMaskTransferFunc->getOutputSize() != 1) {
                         error(errSyntaxError, getPos(), "Invalid transfer function in soft mask in ExtGState");
-                        delete funcs[0];
-                        funcs[0] = nullptr;
+                        delete softMaskTransferFunc;
+                        softMaskTransferFunc = nullptr;
                     }
                 }
             }
             obj3 = obj2.dictLookup("BC");
             if ((haveBackdropColor = obj3.isArray())) {
-                for (i = 0; i < gfxColorMaxComps; ++i) {
-                    backdropColor.c[i] = 0;
+                for (int &c : backdropColor.c) {
+                    c = 0;
                 }
-                for (i = 0; i < obj3.arrayGetLength() && i < gfxColorMaxComps; ++i) {
+                for (int i = 0; i < obj3.arrayGetLength() && i < gfxColorMaxComps; ++i) {
                     Object obj4 = obj3.arrayGet(i);
                     if (obj4.isNum()) {
                         backdropColor.c[i] = dblToCol(obj4.getNum());
@@ -1142,12 +1152,12 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
                             blendingColorSpace->getDefaultColor(&backdropColor);
                         } else {
                             //~ need to get the parent or default color space (?)
-                            for (i = 0; i < gfxColorMaxComps; ++i) {
-                                backdropColor.c[i] = 0;
+                            for (int &c : backdropColor.c) {
+                                c = 0;
                             }
                         }
                     }
-                    doSoftMask(&obj3, alpha, blendingColorSpace, isolated, knockout, funcs[0], &backdropColor);
+                    doSoftMask(&obj3, alpha, blendingColorSpace, isolated, knockout, softMaskTransferFunc, &backdropColor);
                     delete blendingColorSpace;
                 } else {
                     error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
@@ -1155,7 +1165,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
             } else {
                 error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
             }
-            delete funcs[0];
+            delete softMaskTransferFunc;
         } else if (!obj2.isNull()) {
             error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState");
         }

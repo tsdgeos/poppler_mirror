@@ -50,11 +50,27 @@ G_BEGIN_DECLS
 typedef gboolean (*PopplerAttachmentSaveFunc)(const gchar *buf, gsize count, gpointer data, GError **error);
 
 /* GTime is deprecated, but is part of our ABI here (see #715, #765). */
+/**
+ * PopplerAttachment:
+ * @name: The filename. Deprecated in poppler 20.09.0. Use
+ *   poppler_attachment_get_name() instead.
+ * @description: Descriptive text. Deprecated in poppler 20.09.0. Use
+ *   poppler_attachment_get_description() instead.
+ * @size: The size of the file. Deprecated in poppler 20.09.0. Use
+ *   poppler_attachment_get_size() instead.
+ * @mtime: The date and time when the file was last modified. Deprecated in
+ *   poppler 20.09.0. Use poppler_attachment_get_mtime() instead.
+ * @ctime: The date and time when the file was created. Deprecated in poppler
+ *   20.09.0. Use poppler_attachment_get_ctime() instead.
+ * @checksum: A 16-byte checksum of the file. Deprecated in poppler 20.09.0. Use
+ *   poppler_attachment_get_checksum() instead.
+ */
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 struct _PopplerAttachment
 {
     GObject parent;
 
+    /*< public >*/
     gchar *name;
     gchar *description;
     gsize size;
@@ -71,6 +87,18 @@ typedef struct _PopplerAttachmentClass
 
 POPPLER_PUBLIC
 GType poppler_attachment_get_type(void) G_GNUC_CONST;
+POPPLER_PUBLIC
+const GString *poppler_attachment_get_checksum(PopplerAttachment *attachment);
+POPPLER_PUBLIC
+GDateTime *poppler_attachment_get_ctime(PopplerAttachment *attachment);
+POPPLER_PUBLIC
+const gchar *poppler_attachment_get_description(PopplerAttachment *attachment);
+POPPLER_PUBLIC
+GDateTime *poppler_attachment_get_mtime(PopplerAttachment *attachment);
+POPPLER_PUBLIC
+const gchar *poppler_attachment_get_name(PopplerAttachment *attachment);
+POPPLER_PUBLIC
+gsize poppler_attachment_get_size(PopplerAttachment *attachment);
 POPPLER_PUBLIC
 gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *filename, GError **error);
 POPPLER_PUBLIC

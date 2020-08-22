@@ -14,6 +14,7 @@
 // Copyright (C) 2009, 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2020 Peter Wang <novalazy@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,7 +59,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     multiplyPatternAlpha = false;
     patternStrokeAlpha = 1;
     patternFillAlpha = 1;
-    lineWidth = 0;
+    lineWidth = 1;
     lineCap = splashLineCapButt;
     lineJoin = splashLineJoinMiter;
     miterLimit = 10;
@@ -113,7 +114,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     multiplyPatternAlpha = false;
     patternStrokeAlpha = 1;
     patternFillAlpha = 1;
-    lineWidth = 0;
+    lineWidth = 1;
     lineCap = splashLineCapButt;
     lineJoin = splashLineJoinMiter;
     miterLimit = 10;

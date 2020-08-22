@@ -143,8 +143,6 @@ public:
     DocumentData(const DocumentData &) = delete;
     DocumentData &operator=(const DocumentData &) = delete;
 
-    void addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items);
-
     void setPaperColor(const QColor &color) { paperColor = color; }
 
     void fillMembers()

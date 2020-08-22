@@ -176,63 +176,6 @@ Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::Additiona
     return Annot::actionCursorEntering;
 }
 
-static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomElement *e)
-{
-    if (!a || !e)
-        return;
-
-    switch (a->getKind()) {
-    case actionGoTo: {
-        // page number is contained/referenced in a LinkGoTo
-        const LinkGoTo *g = static_cast<const LinkGoTo *>(a);
-        const LinkDest *destination = g->getDest();
-        if (!destination && g->getNamedDest()) {
-            // no 'destination' but an internal 'named reference'. we could
-            // get the destination for the page now, but it's VERY time consuming,
-            // so better storing the reference and provide the viewport on demand
-            const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i)
-                charArray[i] = QChar(s->c_str()[i]);
-            QString aux(charArray, s->getLength());
-            e->setAttribute(QStringLiteral("DestinationName"), aux);
-            delete[] charArray;
-        } else if (destination && destination->isOk()) {
-            LinkDestinationData ldd(destination, nullptr, doc, false);
-            e->setAttribute(QStringLiteral("Destination"), LinkDestination(ldd).toString());
-        }
-        break;
-    }
-    case actionGoToR: {
-        // page number is contained/referenced in a LinkGoToR
-        const LinkGoToR *g = static_cast<const LinkGoToR *>(a);
-        const LinkDest *destination = g->getDest();
-        if (!destination && g->getNamedDest()) {
-            // no 'destination' but an internal 'named reference'. we could
-            // get the destination for the page now, but it's VERY time consuming,
-            // so better storing the reference and provide the viewport on demand
-            const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i)
-                charArray[i] = QChar(s->c_str()[i]);
-            QString aux(charArray, s->getLength());
-            e->setAttribute(QStringLiteral("DestinationName"), aux);
-            delete[] charArray;
-        } else if (destination && destination->isOk()) {
-            LinkDestinationData ldd(destination, nullptr, doc, g->getFileName() != nullptr);
-            e->setAttribute(QStringLiteral("Destination"), LinkDestination(ldd).toString());
-        }
-        e->setAttribute(QStringLiteral("ExternalFileName"), g->getFileName()->c_str());
-        break;
-    }
-    case actionURI: {
-        const LinkURI *u = static_cast<const LinkURI *>(a);
-        e->setAttribute(QStringLiteral("DestinationURI"), u->getURI().c_str());
-    }
-    default:;
-    }
-}
-
 DocumentData::~DocumentData()
 {
     qDeleteAll(m_embeddedFiles);
@@ -246,36 +189,6 @@ void DocumentData::init()
     paperColor = Qt::white;
     m_hints = 0;
     m_optContentModel = nullptr;
-}
-
-void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items)
-{
-    for (::OutlineItem *outlineItem : *items) {
-        // iterate over every object in 'items'
-
-        // 1. create element using outlineItem's title as tagName
-        QString name;
-        const Unicode *uniChar = outlineItem->getTitle();
-        int titleLength = outlineItem->getTitleLength();
-        name = unicodeToQString(uniChar, titleLength);
-        if (name.isEmpty())
-            continue;
-
-        QDomElement item = docSyn->createElement(name);
-        parent->appendChild(item);
-
-        // 2. find the page the link refers to
-        const ::LinkAction *a = outlineItem->getAction();
-        linkActionToTocItem(a, this, &item);
-
-        item.setAttribute(QStringLiteral("Open"), QVariant((bool)outlineItem->isOpen()).toString());
-
-        // 3. recursively descend over children
-        outlineItem->open();
-        const std::vector<::OutlineItem *> *children = outlineItem->getKids();
-        if (children)
-            addTocChildren(docSyn, &item, children);
-    }
 }
 
 FormWidget *FormFieldData::getFormWidget(const FormField *f)

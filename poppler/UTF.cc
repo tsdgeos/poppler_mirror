@@ -119,7 +119,7 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
                 if (isUnicode)
                     utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
                 else // UnicodeLE
-                    utf16[i] = (s[2 + i * 2] & 0xff) | (s[3 + i * 2] & 0xff) >> 8;
+                    utf16[i] = (s[3 + i * 2] & 0xff) << 8 | (s[2 + i * 2] & 0xff);
             }
             len = UTF16toUCS4(utf16, len, &u);
             delete[] utf16;

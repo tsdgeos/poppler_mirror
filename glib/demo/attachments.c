@@ -42,19 +42,26 @@ static void pgd_attachments_fill_model(GtkListStore *model, PopplerDocument *doc
         PopplerAttachment *attachment = POPPLER_ATTACHMENT(l->data);
         GtkTreeIter iter;
         gchar *size;
-        gchar *ctime, *mtime;
+        GDateTime *ctime, *mtime;
+        gchar *ctime_str, *mtime_str;
+        const gchar *name;
+        const gchar *description;
 
-        size = g_strdup_printf("%" G_GSIZE_FORMAT, attachment->size);
-        ctime = pgd_format_date(attachment->ctime);
-        mtime = pgd_format_date(attachment->mtime);
+        name = poppler_attachment_get_name(attachment);
+        description = poppler_attachment_get_description(attachment);
+        size = g_strdup_printf("%" G_GSIZE_FORMAT, poppler_attachment_get_size(attachment));
+        ctime = poppler_attachment_get_ctime(attachment);
+        ctime_str = ctime ? g_date_time_format(ctime, "%c") : NULL;
+        mtime = poppler_attachment_get_mtime(attachment);
+        mtime_str = mtime ? g_date_time_format(mtime, "%c") : NULL;
 
         gtk_list_store_append(model, &iter);
-        gtk_list_store_set(model, &iter, ATTACHMENTS_NAME_COLUMN, attachment->name ? attachment->name : "Unknown", ATTACHMENTS_DESCRIPTION_COLUMN, attachment->description ? attachment->description : "Unknown", ATTACHMENTS_SIZE_COLUMN,
-                           size ? size : "Unknown", ATTACHMENTS_CTIME_COLUMN, ctime ? ctime : "Unknown", ATTACHMENTS_MTIME_COLUMN, mtime ? mtime : "Unknown", ATTACHMENTS_ATTACHMENT_COLUMN, attachment, -1);
+        gtk_list_store_set(model, &iter, ATTACHMENTS_NAME_COLUMN, name ? name : "Unknown", ATTACHMENTS_DESCRIPTION_COLUMN, description ? description : "Unknown", ATTACHMENTS_SIZE_COLUMN, size ? size : "Unknown", ATTACHMENTS_CTIME_COLUMN,
+                           ctime_str ? ctime_str : "Unknown", ATTACHMENTS_MTIME_COLUMN, mtime_str ? mtime_str : "Unknown", ATTACHMENTS_ATTACHMENT_COLUMN, attachment, -1);
 
         g_free(size);
-        g_free(ctime);
-        g_free(mtime);
+        g_free(ctime_str);
+        g_free(mtime_str);
 
         g_object_unref(attachment);
     }
@@ -124,7 +131,7 @@ static void pgd_attachments_save_button_clicked(GtkButton *button, GtkTreeView *
         return;
 
     file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(treeview))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
-    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), attachment->name);
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), poppler_attachment_get_name(attachment));
     g_signal_connect(G_OBJECT(file_chooser), "response", G_CALLBACK(pgd_attachments_save_dialog_response), (gpointer)attachment);
     gtk_widget_show(file_chooser);
 }
@@ -152,6 +159,7 @@ static void pgd_attachments_validate_button_clicked(GtkButton *button, GtkTreeVi
     GtkTreeSelection *selection;
     GtkTreeModel *model;
     GtkTreeIter iter;
+    const GString *checksum;
     GChecksum *cs;
     guint8 *digest;
     gsize digest_len;
@@ -167,7 +175,9 @@ static void pgd_attachments_validate_button_clicked(GtkButton *button, GtkTreeVi
     if (!attachment)
         return;
 
-    if (attachment->checksum->len == 0) {
+    checksum = poppler_attachment_get_checksum(attachment);
+
+    if (checksum->len == 0) {
         message_dialog_run(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(treeview))), "Impossible to validate attachment: checksum is not available");
         g_object_unref(attachment);
 
@@ -181,11 +191,11 @@ static void pgd_attachments_validate_button_clicked(GtkButton *button, GtkTreeVi
     g_checksum_get_digest(cs, digest, &digest_len);
     g_checksum_free(cs);
 
-    if (attachment->checksum->len == digest_len) {
+    if (checksum->len == digest_len) {
         gint i;
 
         for (i = 0; i < digest_len; i++) {
-            if ((guint8)attachment->checksum->str[i] != digest[i]) {
+            if ((guint8)checksum->str[i] != digest[i]) {
                 valid = FALSE;
                 break;
             }

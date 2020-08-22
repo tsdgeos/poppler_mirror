@@ -633,6 +633,12 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
                 ok = false;
             }
         }
+        // Arbitrary limit because otherwise we exhaust the stack
+        // calling readXRef + readXRefTable
+        if (followedXRefStm->size() > 4096) {
+            error(errSyntaxError, -1, "File has more than 4096 XRefStm, aborting");
+            ok = false;
+        }
         if (ok) {
             followedXRefStm->push_back(pos2);
             readXRef(&pos2, followedXRefStm, xrefStreamObjsNum);
@@ -1161,7 +1167,7 @@ Object XRef::fetch(int num, int gen, int recursion)
       goto err;
     }
 #endif
-        if (e->offset >= (unsigned int)size || entries[e->offset].type != xrefEntryUncompressed) {
+        if (e->offset >= (unsigned int)size || (entries[e->offset].type != xrefEntryUncompressed && entries[e->offset].type != xrefEntryNone)) {
             error(errSyntaxError, -1, "Invalid object stream");
             goto err;
         }

@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, 2012, 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012, 2013, 2018-2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -80,19 +80,19 @@ public:
      * \returns a pointer to the complete Annotation or 0 if element is
      * invalid.
      */
-    static Annotation *createAnnotation(const QDomElement &annElement);
+    Q_DECL_DEPRECATED static Annotation *createAnnotation(const QDomElement &annElement);
 
     /**
      * Save the Annotation \p ann as a child of \p annElement taking
      * care of saving all revisions if \p ann has any.
      */
-    static void storeAnnotation(const Annotation *ann, QDomElement &annElement, QDomDocument &document);
+    Q_DECL_DEPRECATED static void storeAnnotation(const Annotation *ann, QDomElement &annElement, QDomDocument &document);
 
     /**
      * Returns an element called \p name from the direct children of
      * \p parentNode or a null element if not found.
      */
-    static QDomElement findChildElement(const QDomNode &parentNode, const QString &name);
+    Q_DECL_DEPRECATED static QDomElement findChildElement(const QDomNode &parentNode, const QString &name);
 };
 
 /**
@@ -522,6 +522,7 @@ public:
     /// \since 0.69
     void setTextColor(const QColor &color);
 
+    // 0:left, 1:center, 2:right
     int inplaceAlign() const;
     void setInplaceAlign(int align);
 

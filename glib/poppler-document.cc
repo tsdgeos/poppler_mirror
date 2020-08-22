@@ -87,7 +87,9 @@ enum
     PROP_METADATA,
     PROP_PRINT_SCALING,
     PROP_PRINT_DUPLEX,
-    PROP_PRINT_N_COPIES
+    PROP_PRINT_N_COPIES,
+    PROP_CREATION_DATETIME,
+    PROP_MOD_DATETIME
 };
 
 static void poppler_document_layers_free(PopplerDocument *document);
@@ -1430,6 +1432,50 @@ void poppler_document_set_creation_date(PopplerDocument *document, time_t creati
 }
 
 /**
+ * poppler_document_get_creation_date_time:
+ * @document: A #PopplerDocument
+ *
+ * Returns the date the document was created as a #GDateTime
+ *
+ * Returns: (nullable): the date the document was created, or %NULL
+ *
+ * Since: 20.09.0
+ **/
+GDateTime *poppler_document_get_creation_date_time(PopplerDocument *document)
+{
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+
+    GooString *str = document->doc->getDocInfoCreatDate();
+
+    if (!str)
+        return nullptr;
+
+    return _poppler_convert_pdf_date_to_date_time(str);
+}
+
+/**
+ * poppler_document_set_creation_date_time:
+ * @document: A #PopplerDocument
+ * @creation_datetime: (nullable): A new creation #GDateTime
+ *
+ * Sets the document's creation date. If @creation_datetime is %NULL,
+ * CreationDate entry is removed from the document's Info dictionary.
+ *
+ * Since: 20.09.0
+ **/
+void poppler_document_set_creation_date_time(PopplerDocument *document, GDateTime *creation_datetime)
+{
+    g_return_if_fail(POPPLER_IS_DOCUMENT(document));
+
+    GooString *str = nullptr;
+
+    if (creation_datetime)
+        str = _poppler_convert_date_time_to_pdf_date(creation_datetime);
+
+    document->doc->setDocInfoCreatDate(str);
+}
+
+/**
  * poppler_document_get_modification_date:
  * @document: A #PopplerDocument
  *
@@ -1470,6 +1516,50 @@ void poppler_document_set_modification_date(PopplerDocument *document, time_t mo
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
     GooString *str = modification_date == (time_t)-1 ? nullptr : timeToDateString(&modification_date);
+    document->doc->setDocInfoModDate(str);
+}
+
+/**
+ * poppler_document_get_modification_date_time:
+ * @document: A #PopplerDocument
+ *
+ * Returns the date the document was most recently modified as a #GDateTime
+ *
+ * Returns: (nullable): the date the document was modified, or %NULL
+ *
+ * Since: 20.09.0
+ **/
+GDateTime *poppler_document_get_modification_date_time(PopplerDocument *document)
+{
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+
+    GooString *str = document->doc->getDocInfoModDate();
+
+    if (!str)
+        return nullptr;
+
+    return _poppler_convert_pdf_date_to_date_time(str);
+}
+
+/**
+ * poppler_document_set_modification_date_time:
+ * @document: A #PopplerDocument
+ * @modification_datetime: (nullable): A new modification #GDateTime
+ *
+ * Sets the document's modification date. If @modification_datetime is %NULL,
+ * ModDate entry is removed from the document's Info dictionary.
+ *
+ * Since: 20.09.0
+ **/
+void poppler_document_set_modification_date_time(PopplerDocument *document, GDateTime *modification_datetime)
+{
+    g_return_if_fail(POPPLER_IS_DOCUMENT(document));
+
+    GooString *str = nullptr;
+
+    if (modification_datetime)
+        str = _poppler_convert_date_time_to_pdf_date(modification_datetime);
+
     document->doc->setDocInfoModDate(str);
 }
 
@@ -1949,8 +2039,14 @@ static void poppler_document_get_property(GObject *object, guint prop_id, GValue
     case PROP_CREATION_DATE:
         g_value_set_int(value, poppler_document_get_creation_date(document));
         break;
+    case PROP_CREATION_DATETIME:
+        g_value_take_boxed(value, poppler_document_get_creation_date_time(document));
+        break;
     case PROP_MOD_DATE:
         g_value_set_int(value, poppler_document_get_modification_date(document));
+        break;
+    case PROP_MOD_DATETIME:
+        g_value_take_boxed(value, poppler_document_get_modification_date_time(document));
         break;
     case PROP_LINEARIZED:
         g_value_set_boolean(value, poppler_document_is_linearized(document));
@@ -2023,8 +2119,14 @@ static void poppler_document_set_property(GObject *object, guint prop_id, const 
     case PROP_CREATION_DATE:
         poppler_document_set_creation_date(document, g_value_get_int(value));
         break;
+    case PROP_CREATION_DATETIME:
+        poppler_document_set_creation_date_time(document, (GDateTime *)g_value_get_boxed(value));
+        break;
     case PROP_MOD_DATE:
         poppler_document_set_modification_date(document, g_value_get_int(value));
+        break;
+    case PROP_MOD_DATETIME:
+        poppler_document_set_modification_date_time(document, (GDateTime *)g_value_get_boxed(value));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
@@ -2106,15 +2208,39 @@ static void poppler_document_class_init(PopplerDocumentClass *klass)
      * PopplerDocument:creation-date:
      *
      * The date the document was created as seconds since the Epoch, or -1
+     *
+     * Deprecated: 20.09.0: This will overflow in 2038. Use creation-datetime
+     * instead.
      */
-    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_CREATION_DATE, g_param_spec_int("creation-date", "Creation Date", "The date and time the document was created", -1, G_MAXINT, -1, G_PARAM_READWRITE));
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_CREATION_DATE,
+                                    g_param_spec_int("creation-date", "Creation Date", "The date and time the document was created", -1, G_MAXINT, -1, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_DEPRECATED)));
+
+    /**
+     * PopplerDocument:creation-datetime:
+     * The #GDateTime the document was created.
+     *
+     * Since: 20.09.0
+     */
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_CREATION_DATETIME, g_param_spec_boxed("creation-datetime", "Creation DateTime", "The date and time the document was created", G_TYPE_DATE_TIME, G_PARAM_READWRITE));
 
     /**
      * PopplerDocument:mod-date:
      *
      * The date the document was most recently modified as seconds since the Epoch, or -1
+     *
+     * Deprecated: 20.09.0: This will overflow in 2038. Use mod-datetime instead.
      */
-    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_MOD_DATE, g_param_spec_int("mod-date", "Modification Date", "The date and time the document was modified", -1, G_MAXINT, -1, G_PARAM_READWRITE));
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_MOD_DATE,
+                                    g_param_spec_int("mod-date", "Modification Date", "The date and time the document was modified", -1, G_MAXINT, -1, (GParamFlags)(G_PARAM_READWRITE | G_PARAM_DEPRECATED)));
+
+    /**
+     * PopplerDocument:mod-datetime:
+     *
+     * The #GDateTime the document was most recently modified.
+     *
+     * Since: 20.09.0
+     */
+    g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_MOD_DATETIME, g_param_spec_boxed("mod-datetime", "Modification DateTime", "The date and time the document was modified", G_TYPE_DATE_TIME, G_PARAM_READWRITE));
 
     /**
      * PopplerDocument:linearized:
@@ -3308,4 +3434,69 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
     g_free(date_string);
 
     return retval;
+}
+
+/**
+ * _poppler_convert_pdf_date_to_date_time:
+ * @date: a PDF date
+ *
+ * Converts the PDF date in @date to a #GDateTime.
+ *
+ * Returns: The converted date, or %NULL on error.
+ **/
+GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
+{
+    GDateTime *date_time = nullptr;
+    GTimeZone *time_zone = nullptr;
+    int year, mon, day, hour, min, sec, tzHours, tzMins;
+    char tz;
+
+    if (parseDateString(date->c_str(), &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
+        if (tz == '+' || tz == '-') {
+            gchar *identifier;
+
+            identifier = g_strdup_printf("%c%02u:%02u", tz, tzHours, tzMins);
+            time_zone = g_time_zone_new(identifier);
+            g_free(identifier);
+        } else if (tz == '\0' || tz == 'Z') {
+            time_zone = g_time_zone_new_utc();
+        } else {
+            g_warning("unexpected tz val '%c'", tz);
+            time_zone = g_time_zone_new_utc();
+        }
+
+        date_time = g_date_time_new(time_zone, year, mon, day, hour, min, sec);
+        g_time_zone_unref(time_zone);
+    }
+
+    return date_time;
+}
+
+/**
+ * _poppler_convert_date_time_to_pdf_date:
+ * @datetime: a #GDateTime
+ *
+ * Converts a #GDateTime to a PDF date.
+ *
+ * Returns: The converted date
+ **/
+GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
+{
+    int offset_min;
+    gchar *date_str;
+    GooString *out_str;
+
+    offset_min = g_date_time_get_utc_offset(datetime) / 1000000 / 60;
+    date_str = g_date_time_format(datetime, "D:%Y%m%d%H%M%S");
+
+    if (offset_min == 0) {
+        out_str = GooString::format("{0:s}Z", date_str);
+    } else {
+        char tz = offset_min > 0 ? '+' : '-';
+
+        out_str = GooString::format("{0:s}{1:c}{2:02d}'{3:02d}'", date_str, tz, offset_min / 60, offset_min % 60);
+    }
+
+    g_free(date_str);
+    return out_str;
 }

@@ -345,9 +345,17 @@ time_t poppler_document_get_creation_date(PopplerDocument *document);
 POPPLER_PUBLIC
 void poppler_document_set_creation_date(PopplerDocument *document, time_t creation_date);
 POPPLER_PUBLIC
+GDateTime *poppler_document_get_creation_date_time(PopplerDocument *document);
+POPPLER_PUBLIC
+void poppler_document_set_creation_date_time(PopplerDocument *document, GDateTime *creation_datetime);
+POPPLER_PUBLIC
 time_t poppler_document_get_modification_date(PopplerDocument *document);
 POPPLER_PUBLIC
 void poppler_document_set_modification_date(PopplerDocument *document, time_t modification_date);
+POPPLER_PUBLIC
+GDateTime *poppler_document_get_modification_date_time(PopplerDocument *document);
+POPPLER_PUBLIC
+void poppler_document_set_modification_date_time(PopplerDocument *document, GDateTime *modification_datetime);
 POPPLER_PUBLIC
 gboolean poppler_document_is_linearized(PopplerDocument *document);
 POPPLER_PUBLIC

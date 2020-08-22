@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2020 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,8 +34,10 @@
 JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA)
 {
     contextSize = contextSizeA;
-    cxTab = (unsigned char *)gmallocn(contextSize, sizeof(unsigned char));
-    reset();
+    cxTab = (unsigned char *)gmallocn_checkoverflow(contextSize, sizeof(unsigned char));
+    if (cxTab) {
+        reset();
+    }
 }
 
 JArithmeticDecoderStats::~JArithmeticDecoderStats()

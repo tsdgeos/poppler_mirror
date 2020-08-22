@@ -38,6 +38,8 @@
 struct PopplerAttachmentPrivate
 {
     Object obj_stream {};
+    GDateTime *mtime;
+    GDateTime *ctime;
 };
 
 static void poppler_attachment_finalize(GObject *obj);
@@ -79,6 +81,9 @@ static void poppler_attachment_finalize(GObject *obj)
         g_string_free(attachment->checksum, TRUE);
     attachment->checksum = nullptr;
 
+    g_clear_pointer(&priv->mtime, g_date_time_unref);
+    g_clear_pointer(&priv->ctime, g_date_time_unref);
+
     priv->~PopplerAttachmentPrivate();
 
     G_OBJECT_CLASS(poppler_attachment_parent_class)->finalize(obj);
@@ -107,14 +112,20 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
         attachment->size = embFile->size();
 
         if (embFile->createDate()) {
-            time_t aux;
-            _poppler_convert_pdf_date_to_gtime(embFile->createDate(), &aux);
-            attachment->ctime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+            priv->ctime = _poppler_convert_pdf_date_to_date_time(embFile->createDate());
+            G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+            /* This will overflow on dates from after 2038. This field is
+             * deprecated, only kept for backward compatibility. */
+            attachment->ctime = (GTime)g_date_time_to_unix(priv->ctime);
+            G_GNUC_END_IGNORE_DEPRECATIONS
         }
         if (embFile->modDate()) {
-            time_t aux;
-            _poppler_convert_pdf_date_to_gtime(embFile->modDate(), &aux);
-            attachment->mtime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+            priv->mtime = _poppler_convert_pdf_date_to_date_time(embFile->modDate());
+            G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+            /* This will overflow on dates from after 2038. This field is
+             * deprecated, only kept for backward compatibility. */
+            attachment->mtime = (GTime)g_date_time_to_unix(priv->mtime);
+            G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
         if (embFile->checksum() && embFile->checksum()->getLength() > 0)
@@ -126,6 +137,87 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
     }
 
     return attachment;
+}
+
+/**
+ * poppler_attachment_get_checksum:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's checksum.
+ *
+ * Since: 20.09.0
+ */
+const GString *poppler_attachment_get_checksum(PopplerAttachment *attachment)
+{
+    return attachment->checksum;
+}
+
+/**
+ * poppler_attachment_get_ctime:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: (transfer none) (nullable): The attachment's creation date and time
+ * as a #GDateTime, or %NULL if the creation date and time is not available.
+ *
+ * Since: 20.09.0
+ */
+GDateTime *poppler_attachment_get_ctime(PopplerAttachment *attachment)
+{
+    return GET_PRIVATE(attachment)->ctime;
+}
+
+/**
+ * poppler_attachment_get_description:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's descriptive text.
+ *
+ * Since: 20.09.0
+ */
+const gchar *poppler_attachment_get_description(PopplerAttachment *attachment)
+{
+    return attachment->description;
+}
+
+/**
+ * poppler_attachment_get_mtime:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: (transfer none) (nullable): The attachment's modification date and
+ * time as a #GDateTime, or %NULL if the modification date and time is not
+ * available.
+ *
+ * Since: 20.09.0
+ */
+GDateTime *poppler_attachment_get_mtime(PopplerAttachment *attachment)
+{
+    return GET_PRIVATE(attachment)->mtime;
+}
+
+/**
+ * poppler_attachment_get_name:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's name.
+ *
+ * Since: 20.09.0
+ */
+const gchar *poppler_attachment_get_name(PopplerAttachment *attachment)
+{
+    return attachment->name;
+}
+
+/**
+ * poppler_attachment_get_size:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's size.
+ *
+ * Since: 20.09.0
+ */
+gsize poppler_attachment_get_size(PopplerAttachment *attachment)
+{
+    return attachment->size;
 }
 
 static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
