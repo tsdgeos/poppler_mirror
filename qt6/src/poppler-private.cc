@@ -77,8 +77,8 @@ QString unicodeToQString(const Unicode *u, int len)
 {
     const UnicodeMap *utf8Map = globalParams->getUtf8Map();
 
-    // ignore the last character if it is 0x0
-    if ((len > 0) && (u[len - 1] == 0)) {
+    // ignore the last characters if they are 0x0
+    while ((len > 0) && (u[len - 1] == 0)) {
         --len;
     }
 
