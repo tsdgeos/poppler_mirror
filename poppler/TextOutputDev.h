@@ -232,6 +232,7 @@ private:
     bool spaceAfter; // set if there is a space between this
                      //   word and the next word on the line
     bool underlined;
+    bool invisible; // whether we are invisible (glyphless)
     TextWord *next; // next word in line
 
 #ifdef TEXTOUT_WORD_LIST
