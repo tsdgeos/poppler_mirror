@@ -4708,7 +4708,7 @@ void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData, Splash
             memcpy(lineBuf1, lineBuf2, scaledWidth * nComps);
             if (srcAlpha)
                 memcpy(alphaLineBuf1, alphaLineBuf2, scaledWidth);
-            if (currentSrcRow < srcHeight) {
+            if (currentSrcRow < srcHeight - 1) {
                 (*src)(srcData, srcBuf, alphaSrcBuf);
                 expandRow(srcBuf, lineBuf2, srcWidth, scaledWidth, nComps);
                 if (srcAlpha)
