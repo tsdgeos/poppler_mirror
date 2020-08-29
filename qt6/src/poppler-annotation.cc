@@ -30,7 +30,6 @@
  */
 
 // qt/kde includes
-#include <QtCore/QRegExp>
 #include <QtCore/QtAlgorithms>
 #include <QtGui/QColor>
 #include <QtGui/QTransform>
