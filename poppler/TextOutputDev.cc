@@ -39,7 +39,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018-2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
@@ -181,6 +181,11 @@
 // Text is considered diagonal if abs(tan(angle)) > diagonalThreshold.
 // (Or 1/tan(angle) for 90/270 degrees.)
 #define diagonalThreshold 0.1
+
+// How opaque a selection on a glyphless font should be. Since the font is
+// glyphless and overlaid over text in image form, this must enable users
+// to read the underlying image. Issue #157
+#define glyphlessSelectionOpacity 0.4
 
 namespace {
 
@@ -405,6 +410,7 @@ TextWord::TextWord(const GfxState *state, int rotA, double fontSizeA)
     len = size = 0;
     spaceAfter = false;
     next = nullptr;
+    invisible = state->getRender() == 3;
 
 #ifdef TEXTOUT_WORD_LIST
     GfxRGB rgb;
@@ -4486,6 +4492,7 @@ private:
     GfxState *state;
     std::vector<TextWordSelection *> *selectionList;
     Matrix ctm, ictm;
+    bool hasGlyphLessFont();
 };
 
 TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotation, OutputDev *outA, const GfxColor *box_color, const GfxColor *glyph_colorA) : TextSelectionVisitor(p), out(outA), glyph_color(glyph_colorA)
@@ -4548,6 +4555,16 @@ void TextSelectionPainter::visitWord(TextWord *word, int begin, int end, const P
     selectionList->push_back(new TextWordSelection(word, begin, end));
 }
 
+bool TextSelectionPainter::hasGlyphLessFont()
+{
+    if (selectionList && selectionList->size()) {
+        TextWordSelection *sel = (*selectionList)[0];
+        return sel->word->invisible;
+    }
+
+    return false;
+}
+
 void TextSelectionPainter::endPage()
 {
     out->fill(state);
@@ -4558,6 +4575,13 @@ void TextSelectionPainter::endPage()
     state->clearPath();
 
     state->setFillColor(glyph_color);
+
+    bool usingGlyphLessFont = hasGlyphLessFont();
+    /* Paint transparent selection when using tesseract glyphless font. Issue #157 */
+    if (usingGlyphLessFont) {
+        state->setFillOpacity(glyphlessSelectionOpacity);
+    }
+
     out->updateFillColor(state);
 
     for (const TextWordSelection *sel : *selectionList) {
@@ -4582,11 +4606,12 @@ void TextSelectionPainter::endPage()
             GooString *string = new GooString((char *)sel->word->charcode, fEnd - begin);
             out->beginString(state, string);
 
-            for (int j = begin; j < fEnd; j++) {
-                if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
-                    continue;
-
-                out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0, sel->word->charcode[j], 1, nullptr, 0);
+            if (!usingGlyphLessFont) {
+                for (int j = begin; j < fEnd; j++) {
+                    if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
+                        continue;
+                    out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0, sel->word->charcode[j], 1, nullptr, 0);
+                }
             }
             out->endString(state);
             delete string;

@@ -23,7 +23,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
-// Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -232,6 +232,7 @@ private:
     bool spaceAfter; // set if there is a space between this
                      //   word and the next word on the line
     bool underlined;
+    bool invisible; // whether we are invisible (glyphless)
     TextWord *next; // next word in line
 
 #ifdef TEXTOUT_WORD_LIST

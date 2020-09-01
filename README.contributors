@@ -35,4 +35,17 @@ clang-format disagrees, just apply the changes suggested by CI and then commit
 with the --no-verify flag. If you get stuck, don't hesitate to ask the reviewer
 to help and they will reformat your commits :)
 
+Merge requests
+--------------
+
+When creating a new merge request on gitlab make sure it has a clear title and
+the description includes any extra details that might be helpful for the
+reviewer, such as what the aim of the change is and decisions made during
+implementation.
+
+Also, check "Allow commits from members who can merge to the target branch" as
+that enables rebase on landing. See the gitlab docs for details:
+
+https://docs.gitlab.com/ee/user/project/merge_requests/allow_collaboration.html
+
 And keep hacking on poppler!

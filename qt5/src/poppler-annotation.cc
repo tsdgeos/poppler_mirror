@@ -52,6 +52,7 @@
 #include <Error.h>
 #include <FileSpec.h>
 #include <Link.h>
+#include <DateInfo.h>
 
 /* Almost all getters directly query the underlying poppler annotation, with
  * the exceptions of link, file attachment, sound, movie and screen annotations,
@@ -1014,10 +1015,20 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
         setContents(e.attribute(QStringLiteral("contents")));
     if (e.hasAttribute(QStringLiteral("uniqueName")))
         setUniqueName(e.attribute(QStringLiteral("uniqueName")));
-    if (e.hasAttribute(QStringLiteral("modifyDate")))
-        setModificationDate(QDateTime::fromString(e.attribute(QStringLiteral("modifyDate"))));
-    if (e.hasAttribute(QStringLiteral("creationDate")))
-        setCreationDate(QDateTime::fromString(e.attribute(QStringLiteral("creationDate"))));
+    if (e.hasAttribute(QStringLiteral("modifyDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")), Qt::ISODate);
+        }
+        setModificationDate(dt);
+    }
+    if (e.hasAttribute(QStringLiteral("creationDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")), Qt::ISODate);
+        }
+        setCreationDate(dt);
+    }
 
     // parse -other- attributes
     if (e.hasAttribute(QStringLiteral("flags")))
@@ -1342,15 +1353,16 @@ void Annotation::setModificationDate(const QDateTime &date)
         return;
     }
 
-#if 0 // TODO: Conversion routine is broken
-    if (d->pdfAnnot)
-    {
-        time_t t = date.toTime_t();
-        GooString *s = timeToDateString(&t);
-        d->pdfAnnot->setModified(s);
-        delete s;
+    if (d->pdfAnnot) {
+        if (date.isValid()) {
+            const time_t t = date.toTime_t();
+            GooString *s = timeToDateString(&t);
+            d->pdfAnnot->setModified(s);
+            delete s;
+        } else {
+            d->pdfAnnot->setModified(nullptr);
+        }
     }
-#endif
 }
 
 QDateTime Annotation::creationDate() const
@@ -1377,16 +1389,17 @@ void Annotation::setCreationDate(const QDateTime &date)
         return;
     }
 
-#if 0 // TODO: Conversion routine is broken
-    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
-    if (markupann)
-    {
-        time_t t = date.toTime_t();
-        GooString *s = timeToDateString(&t);
-        markupann->setDate(s);
-        delete s;
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
+    if (markupann) {
+        if (date.isValid()) {
+            const time_t t = date.toTime_t();
+            GooString *s = timeToDateString(&t);
+            markupann->setDate(s);
+            delete s;
+        } else {
+            markupann->setDate(nullptr);
+        }
     }
-#endif
 }
 
 static int fromPdfFlags(int flags)

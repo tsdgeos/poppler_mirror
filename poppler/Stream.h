@@ -694,7 +694,10 @@ private:
     {
         int n;
 
-        if (nChars <= 0) {
+        if (unlikely(nChars <= 0)) {
+            return 0;
+        }
+        if (unlikely(bufPtr >= bufEnd)) {
             return 0;
         }
         if (bufEnd - bufPtr < nChars) {

@@ -114,6 +114,15 @@ void TestStrings::check_unicodeToQString_data()
         u[2] = 0x0;
         QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + 0") << u << l << QStringLiteral("封面");
     }
+    {
+        const int l = 4;
+        Unicode *u = new Unicode[l];
+        u[0] = 0x5c01;
+        u[1] = 0x9762;
+        u[2] = 0x0;
+        u[3] = 0x0;
+        QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + two 0") << u << l << QStringLiteral("封面");
+    }
 }
 
 void TestStrings::check_unicodeToQString()
