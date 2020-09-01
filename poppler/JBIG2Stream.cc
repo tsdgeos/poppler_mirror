@@ -2133,6 +2133,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
 
     if (!huff) {
         if (!resetIntStats(symCodeLen)) {
+            gfree(syms);
             return;
         }
         arithDecoder->start();
