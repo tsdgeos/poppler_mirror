@@ -40,6 +40,7 @@
 
 #include "config.h"
 #include <cstring>
+#include <forward_list>
 #include "CairoFontEngine.h"
 #include "CairoOutputDev.h"
 #include "GlobalParams.h"
@@ -178,10 +179,8 @@ static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *fo
 }
 
 #ifdef CAN_CHECK_OPEN_FACES
-static struct _ft_face_data
+struct _ft_face_data
 {
-    struct _ft_face_data *prev, *next, **head;
-
     int fd;
     unsigned long hash;
     size_t size;
@@ -190,7 +189,20 @@ static struct _ft_face_data
     FT_Library lib;
     FT_Face face;
     cairo_font_face_t *font_face;
-} * _ft_open_faces;
+};
+
+class _FtFaceDataProxy
+{
+    _ft_face_data *_data;
+
+public:
+    _FtFaceDataProxy(_ft_face_data *data) : _data(data) { cairo_font_face_reference(_data->font_face); }
+    _FtFaceDataProxy(_FtFaceDataProxy &&) = delete;
+    ~_FtFaceDataProxy() { cairo_font_face_destroy(_data->font_face); }
+    operator _ft_face_data *() { return _data; }
+};
+
+static thread_local std::forward_list<_FtFaceDataProxy> _local_open_faces;
 
 static unsigned long _djb_hash(const unsigned char *bytes, size_t len)
 {
@@ -219,13 +231,6 @@ static void _ft_done_face(void *closure)
 {
     struct _ft_face_data *data = (struct _ft_face_data *)closure;
 
-    if (data->next)
-        data->next->prev = data->prev;
-    if (data->prev)
-        data->prev->next = data->next;
-    else
-        _ft_open_faces = data->next;
-
     if (data->fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
         munmap((char *)data->bytes, data->size);
@@ -243,7 +248,6 @@ static void _ft_done_face(void *closure)
 
 static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
-    struct _ft_face_data *l;
     struct stat st;
     struct _ft_face_data tmpl;
 
@@ -275,7 +279,7 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
     tmpl.lib = lib;
     tmpl.hash = _djb_hash(tmpl.bytes, tmpl.size);
 
-    for (l = _ft_open_faces; l; l = l->next) {
+    for (_ft_face_data *l : _local_open_faces) {
         if (_ft_face_data_equal(l, &tmpl)) {
             if (tmpl.fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
@@ -307,13 +311,8 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
         return false;
     }
 
-    l = (struct _ft_face_data *)gmallocn(1, sizeof(struct _ft_face_data));
+    struct _ft_face_data *l = (struct _ft_face_data *)gmallocn(1, sizeof(struct _ft_face_data));
     *l = tmpl;
-    l->prev = nullptr;
-    l->next = _ft_open_faces;
-    if (_ft_open_faces)
-        _ft_open_faces->prev = l;
-    _ft_open_faces = l;
 
     l->font_face = cairo_ft_font_face_create_for_ft_face(tmpl.face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
     if (cairo_font_face_set_user_data(l->font_face, &_ft_cairo_key, l, _ft_done_face)) {
@@ -321,6 +320,9 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
         _ft_done_face(l);
         return false;
     }
+
+    _local_open_faces.remove_if([](_ft_face_data *data) { return cairo_font_face_get_reference_count(data->font_face) == 1; });
+    _local_open_faces.emplace_front(l);
 
     *face_out = l->face;
     *font_face_out = l->font_face;
