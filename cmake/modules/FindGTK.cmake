@@ -10,6 +10,8 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
+# NOTE: As of cmake v3.18, built-in FindGTK is *only* valid for GTK1
+
 include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED)

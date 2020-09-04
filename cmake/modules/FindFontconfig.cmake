@@ -11,6 +11,8 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
+# NOTE: Once required cmake >=3.14, consider using built-in FindFontconfig
+#       See Poppler issue #955 for details
 
 if (FONTCONFIG_LIBRARIES AND FONTCONFIG_INCLUDE_DIR)
 
