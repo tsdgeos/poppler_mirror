@@ -5844,7 +5844,9 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
         wdy = (SplashCoord)0.5 * w * dy;
 
         // draw the start cap
-        pathOut->moveTo(pathIn->pts[i0].x - wdy, pathIn->pts[i0].y + wdx);
+        if (pathOut->moveTo(pathIn->pts[i0].x - wdy, pathIn->pts[i0].y + wdx) != splashOk) {
+            break;
+        }
         if (i0 == subpathStart0) {
             firstPt = pathOut->length - 1;
         }
