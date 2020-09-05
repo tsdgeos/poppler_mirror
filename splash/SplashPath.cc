@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
