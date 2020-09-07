@@ -200,6 +200,25 @@ else()
   set(CAIRO_FEATURE "#undef POPPLER_HAS_CAIRO")
   set(ENABLE_GLIB OFF)
 endif()
+
+# GTK API docs require both the gtk-doc package & python3 support
+if(ENABLE_GTK_DOC)
+  # Disable gtk-doc generation & warn if the package is missing
+  find_package(GtkDoc)
+  if(NOT GtkDoc_FOUND)
+    message("-- Warning: Install the gtk-doc package to generate GTK API documentation")
+    set(ENABLE_GTK_DOC OFF)
+  endif()
+  # NOTE: These Find<...> modules are deprecated, but the newer FindPython3 module requires CMake >=3.12
+  find_package(PythonInterp 3)
+  find_package(PythonLibs 3)
+  # Also disable gtk-doc generation & raise a warning if Python3 is missing
+  if(NOT (PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND))
+    message("-- Warning: ENABLE_GTK_DOC requires a python3 interpreter and libraries.")
+    set(ENABLE_GTK_DOC OFF)
+  endif()
+endif()
+
 if(ENABLE_CPP)
   macro_optional_find_package(Iconv)
   set(ENABLE_CPP ${ICONV_FOUND})
