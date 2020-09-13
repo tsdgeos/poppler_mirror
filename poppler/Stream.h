@@ -747,7 +747,7 @@ public:
     BaseStream *copy() override;
     Stream *makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return str->getKind(); }
-    void reset() override { }
+    void reset() override;
     int getChar() override;
     int lookChar() override;
     Goffset getPos() override;
@@ -774,6 +774,7 @@ private:
     long bufMax;
     long bufLen;
     long bufPos;
+    Goffset start;
 };
 
 //------------------------------------------------------------------------

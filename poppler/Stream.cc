@@ -1069,6 +1069,7 @@ EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset le
     reusable = reusableA;
     record = false;
     replay = false;
+    start = str->getPos();
     if (reusable) {
         bufData = (unsigned char *)gmalloc(16384);
         bufMax = 16384;
@@ -1083,13 +1084,27 @@ EmbedStream::~EmbedStream()
         gfree(bufData);
 }
 
+void EmbedStream::reset()
+{
+    if (str->getPos() != start) {
+        str->reset();
+        // Might be a FilterStream that does not support str->setPos(start)
+        while (str->getPos() < start) {
+            str->getChar();
+        }
+    }
+    record = false;
+    replay = false;
+    bufPos = 0;
+}
+
 BaseStream *EmbedStream::copy()
 {
     error(errInternal, -1, "Called copy() on EmbedStream");
     return nullptr;
 }
 
-Stream *EmbedStream::makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA)
+Stream *EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
