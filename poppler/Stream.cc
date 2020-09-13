@@ -1090,7 +1090,12 @@ void EmbedStream::reset()
         str->reset();
         // Might be a FilterStream that does not support str->setPos(start)
         while (str->getPos() < start) {
-            str->getChar();
+            if (str->getChar() == EOF) {
+                break;
+            }
+        }
+        if (str->getPos() != start) {
+            error(errInternal, -1, "Failed to reset EmbedStream");
         }
     }
     record = false;
