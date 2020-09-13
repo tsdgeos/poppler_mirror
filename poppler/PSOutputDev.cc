@@ -3141,6 +3141,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     unsigned char digit;
     bool isOptimizedGray;
     bool overprint;
+    SplashColorMode internalColorFormat;
 #endif
 
     if (!postInitDone) {
@@ -3176,13 +3177,25 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     startPage(page->getNum(), state, xref);
     delete state;
 
+    // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
+    // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
+    overprint = globalParams->getOverprintPreview() || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
+
     // set up the SplashOutputDev
+    internalColorFormat = processColorFormat;
     if (processColorFormat == splashModeMono8) {
         numComps = 1;
         paperColor[0] = 0xff;
     } else if (processColorFormat == splashModeCMYK8) {
         numComps = 4;
         paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
+
+        // If overprinting is emulated, it is not sufficient to just store the CMYK values in a bitmap.
+        // All separation channels need to be stored and collapsed at the end.
+        // Cf. PDF32000_2008 Section 11.7.4.5 and Tables 148, 149
+        if (overprint) {
+            internalColorFormat = splashModeDeviceN8;
+        }
     } else if (processColorFormat == splashModeRGB8) {
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
@@ -3192,10 +3205,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     }
-    // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
-    // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
-    overprint = globalParams->getOverprintPreview() || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
-    splashOut = new SplashOutputDev(processColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
+    splashOut = new SplashOutputDev(internalColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
 #    ifdef USE_CMS
@@ -3440,7 +3450,11 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         case psLevel3:
         case psLevel3Sep:
             p = bitmap->getDataPtr() + (h - 1) * bitmap->getRowSize();
-            str0 = new MemStream((char *)p, 0, w * h * numComps, Object(objNull));
+            if (processColorFormat == splashModeCMYK8 && internalColorFormat != splashModeCMYK8) {
+                str0 = new SplashBitmapCMYKEncoder(bitmap);
+            } else {
+                str0 = new MemStream((char *)p, 0, w * h * numComps, Object(objNull));
+            }
             // Check for a color image that uses only gray
             if (!getOptimizeColorSpace()) {
                 isOptimizedGray = false;

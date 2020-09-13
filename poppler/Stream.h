@@ -47,6 +47,9 @@
 class GooFile;
 class BaseStream;
 class CachedFile;
+#ifdef HAVE_SPLASH
+class SplashBitmap;
+#endif
 
 //------------------------------------------------------------------------
 
@@ -1427,5 +1430,54 @@ private:
 
     bool fillBuf();
 };
+
+//------------------------------------------------------------------------
+// SplashBitmapCMYKEncoder
+//
+// This stream helps to condense SplashBitmaps (mostly of DeviceN8 type) into
+// pure CMYK colors. In particular for a DeviceN8 bitmap it redacts the spot colorants.
+//------------------------------------------------------------------------
+
+#ifdef HAVE_SPLASH
+class SplashBitmapCMYKEncoder : public Stream
+{
+public:
+    SplashBitmapCMYKEncoder(SplashBitmap *bitmapA);
+    ~SplashBitmapCMYKEncoder() override;
+    StreamKind getKind() const override { return strWeird; }
+    void reset() override;
+    int getChar() override;
+    int lookChar() override;
+    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    bool isBinary(bool /*last = true*/) override { return true; }
+
+    // Although we are an encoder, we return false here, since we do not want do be auto-deleted by
+    // successive streams.
+    bool isEncoder() override { return false; }
+
+    int getUnfilteredChar() override { return getChar(); }
+    void unfilteredReset() override { reset(); }
+
+    BaseStream *getBaseStream() override { return nullptr; }
+    Stream *getUndecodedStream() override { return this; }
+
+    Dict *getDict() override { return nullptr; }
+    Object *getDictObject() override { return nullptr; }
+
+    Goffset getPos() override;
+    void setPos(Goffset pos, int dir = 0) override;
+
+private:
+    SplashBitmap *bitmap;
+    size_t width;
+    int height;
+
+    std::vector<unsigned char> buf;
+    size_t bufPtr;
+    int curLine;
+
+    bool fillBuf();
+};
+#endif
 
 #endif
