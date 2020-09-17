@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  *
@@ -51,14 +51,14 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, &PdfViewer::slotOpenFile);
-    m_fileOpenAct->setShortcut(Qt::CTRL + Qt::Key_O);
+    m_fileOpenAct->setShortcut(Qt::CTRL | Qt::Key_O);
     fileMenu->addSeparator();
     m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, &PdfViewer::slotSaveCopy);
-    m_fileSaveCopyAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    m_fileSaveCopyAct->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_S);
     m_fileSaveCopyAct->setEnabled(false);
     fileMenu->addSeparator();
     QAction *act = fileMenu->addAction(tr("&Quit"), qApp, &QApplication::closeAllWindows);
-    act->setShortcut(Qt::CTRL + Qt::Key_Q);
+    act->setShortcut(Qt::CTRL | Qt::Key_Q);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
