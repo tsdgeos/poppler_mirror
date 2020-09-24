@@ -1455,7 +1455,9 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
                           "parseCharName",
                           lig_part, charName);
             }
-            lig_part = lig_end + 1;
+            if (lig_end) {
+                lig_part = lig_end + 1;
+            }
         } while (lig_end && n < uLen);
         gfree(lig_copy);
         return n;
