@@ -300,6 +300,7 @@ public:
     {
 #ifdef HAVE_SPLASH
         processColorFormat = splashModeMono8;
+        processColorFormatSpecified = true;
 #endif
     }
 
@@ -338,7 +339,11 @@ public:
     void setEnableFlate(bool b) { enableFlate = b; }
 
 #ifdef HAVE_SPLASH
-    void setProcessColorFormat(SplashColorMode format) { processColorFormat = format; }
+    void setProcessColorFormat(SplashColorMode format)
+    {
+        processColorFormat = format;
+        processColorFormatSpecified = true;
+    }
 #endif
 
 private:
@@ -510,6 +515,7 @@ private:
 
 #ifdef HAVE_SPLASH
     SplashColorMode processColorFormat;
+    bool processColorFormatSpecified;
 #endif
 
     std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted

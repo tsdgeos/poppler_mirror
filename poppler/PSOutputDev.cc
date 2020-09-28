@@ -1260,7 +1260,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType
     clipURX0 = clipURY0 = -1;
 
 #ifdef HAVE_SPLASH
-    processColorFormat = splashModeUndefined;
+    processColorFormatSpecified = false;
 #endif
 
     // initialize sequential page number
@@ -1385,7 +1385,7 @@ void PSOutputDev::postInit()
 
 #ifdef HAVE_SPLASH
     // set some default process color format if none is set
-    if (processColorFormat == splashModeUndefined) {
+    if (!processColorFormatSpecified) {
         if (level == psLevel1) {
             processColorFormat = splashModeMono8;
         } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {

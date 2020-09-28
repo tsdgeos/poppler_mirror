@@ -123,7 +123,8 @@ static bool printHelp = false;
 static bool overprint = false;
 #ifdef HAVE_SPLASH
 static GooString processcolorformatname;
-static SplashColorMode processcolorformat = splashModeUndefined;
+static SplashColorMode processcolorformat;
+static bool processcolorformatspecified = false;
 #    ifdef USE_CMS
 static GooString processcolorprofilename;
 static GfxLCMSProfilePtr processcolorprofile;
@@ -279,10 +280,13 @@ int main(int argc, char *argv[])
     if (!processcolorformatname.toStr().empty()) {
         if (processcolorformatname.toStr() == "MONO8") {
             processcolorformat = splashModeMono8;
+            processcolorformatspecified = true;
         } else if (processcolorformatname.toStr() == "CMYK8") {
             processcolorformat = splashModeCMYK8;
+            processcolorformatspecified = true;
         } else if (processcolorformatname.toStr() == "RGB8") {
             processcolorformat = splashModeRGB8;
+            processcolorformatspecified = true;
         } else {
             fprintf(stderr, "Error: Unknown process color format \"%s\".\n", processcolorformatname.c_str());
             goto err05;
@@ -303,22 +307,25 @@ int main(int argc, char *argv[])
         }
         displayprofilecolorspace = cmsGetColorSpace(processcolorprofile.get());
         if (displayprofilecolorspace == cmsSigCmykData) {
-            if (processcolorformat == splashModeUndefined) {
+            if (!processcolorformatspecified) {
                 processcolorformat = splashModeCMYK8;
+                processcolorformatspecified = true;
             } else if (processcolorformat != splashModeCMYK8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is not a CMYK profile, but process color format is CMYK.\n", processcolorprofilename.c_str());
                 goto err05;
             }
         } else if (displayprofilecolorspace == cmsSigGrayData) {
-            if (processcolorformat == splashModeUndefined) {
+            if (!processcolorformatspecified) {
                 processcolorformat = splashModeMono8;
+                processcolorformatspecified = true;
             } else if (processcolorformat != splashModeMono8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is not a monochrome profile, but process color format is monochrome.\n", processcolorprofilename.c_str());
                 goto err05;
             }
         } else if (displayprofilecolorspace == cmsSigRgbData) {
-            if (processcolorformat == splashModeUndefined) {
+            if (!processcolorformatspecified) {
                 processcolorformat = splashModeRGB8;
+                processcolorformatspecified = true;
             } else if (processcolorformat != splashModeRGB8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is not a RGB profile, but process color format is RGB.\n", processcolorprofilename.c_str());
                 goto err05;
@@ -327,7 +334,7 @@ int main(int argc, char *argv[])
     }
 #    endif
 
-    if (processcolorformat != splashModeUndefined) {
+    if (processcolorformatspecified) {
         if (level1 && processcolorformat != splashModeMono8) {
             fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8");
             goto err05;
@@ -444,7 +451,8 @@ int main(int argc, char *argv[])
         psOut->setRasterResolution(splashResolution);
     }
 #ifdef HAVE_SPLASH
-    psOut->setProcessColorFormat(processcolorformat);
+    if (processcolorformatspecified)
+        psOut->setProcessColorFormat(processcolorformat);
 #    ifdef USE_CMS
     psOut->setDisplayProfile(processcolorprofile);
 #    endif
