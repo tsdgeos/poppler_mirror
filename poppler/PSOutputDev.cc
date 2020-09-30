@@ -3211,6 +3211,9 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     splashOut->setVectorAntialias(rasterAntialias);
 #    ifdef USE_CMS
     splashOut->setDisplayProfile(getDisplayProfile());
+    splashOut->setDefaultGrayProfile(getDefaultGrayProfile());
+    splashOut->setDefaultRGBProfile(getDefaultRGBProfile());
+    splashOut->setDefaultCMYKProfile(getDefaultCMYKProfile());
 #    endif
     splashOut->startDoc(doc);
 
