@@ -102,6 +102,12 @@ static bool gray = false;
 #ifdef USE_CMS
 static GooString displayprofilename;
 static GfxLCMSProfilePtr displayprofile;
+static GooString defaultgrayprofilename;
+static GfxLCMSProfilePtr defaultgrayprofile;
+static GooString defaultrgbprofilename;
+static GfxLCMSProfilePtr defaultrgbprofile;
+static GooString defaultcmykprofilename;
+static GfxLCMSProfilePtr defaultcmykprofile;
 #endif
 static char sep[2] = "-";
 static bool forceNum = false;
@@ -158,6 +164,9 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-gray", argFlag, &gray, 0, "generate a grayscale PGM file" },
 #ifdef USE_CMS
                                    { "-displayprofile", argGooString, &displayprofilename, 0, "ICC color profile to use as the display profile" },
+                                   { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
+                                   { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
+                                   { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
 #endif
                                    { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
                                    { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
@@ -353,6 +362,9 @@ static void processPageJobs()
         splashOut->setEnableFreeType(enableFreeType);
 #    ifdef USE_CMS
         splashOut->setDisplayProfile(displayprofile);
+        splashOut->setDefaultGrayProfile(defaultgrayprofile);
+        splashOut->setDefaultRGBProfile(defaultrgbprofile);
+        splashOut->setDefaultCMYKProfile(defaultcmykprofile);
 #    endif
         splashOut->startDoc(pageJob.doc);
 
@@ -383,7 +395,7 @@ int main(int argc, char *argv[])
     int pg, pg_num_len;
     double pg_w, pg_h;
 #ifdef USE_CMS
-    cmsColorSpaceSignature displayprofilecolorspace;
+    cmsColorSpaceSignature profilecolorspace;
 #endif
 
     Win32Console win32Console(&argc, &argv);
@@ -533,19 +545,70 @@ int main(int argc, char *argv[])
             fprintf(stderr, "ICC profile \"%s\" is not an output profile.\n", displayprofilename.c_str());
             goto err1;
         }
-        displayprofilecolorspace = cmsGetColorSpace(displayprofile.get());
+        profilecolorspace = cmsGetColorSpace(displayprofile.get());
         if (jpegcmyk || overprint) {
-            if (displayprofilecolorspace != cmsSigCmykData) {
+            if (profilecolorspace != cmsSigCmykData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a CMYK profile.\n", displayprofilename.c_str());
             }
         } else if (mono || gray) {
-            if (displayprofilecolorspace != cmsSigGrayData) {
+            if (profilecolorspace != cmsSigGrayData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a monochrome profile.\n", displayprofilename.c_str());
             }
         } else {
-            if (displayprofilecolorspace != cmsSigRgbData) {
+            if (profilecolorspace != cmsSigRgbData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a RGB profile.\n", displayprofilename.c_str());
             }
+        }
+    }
+    if (!defaultgrayprofilename.toStr().empty()) {
+        defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
+        if (!defaultgrayprofile) {
+            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultgrayprofilename.c_str());
+            goto err1;
+        }
+        if (!cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
+            && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
+            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultgrayprofilename.c_str());
+            goto err1;
+        }
+        profilecolorspace = cmsGetColorSpace(defaultgrayprofile.get());
+        if (profilecolorspace != cmsSigGrayData) {
+            fprintf(stderr, "Supplied ICC profile \"%s\" is not a monochrome profile.\n", defaultgrayprofilename.c_str());
+            goto err1;
+        }
+    }
+    if (!defaultrgbprofilename.toStr().empty()) {
+        defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
+        if (!defaultrgbprofile) {
+            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultrgbprofilename.c_str());
+            goto err1;
+        }
+        if (!cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
+            && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
+            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultrgbprofilename.c_str());
+            goto err1;
+        }
+        profilecolorspace = cmsGetColorSpace(defaultrgbprofile.get());
+        if (profilecolorspace != cmsSigRgbData) {
+            fprintf(stderr, "Supplied ICC profile \"%s\" is not a RGB profile.\n", defaultrgbprofilename.c_str());
+            goto err1;
+        }
+    }
+    if (!defaultcmykprofilename.toStr().empty()) {
+        defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
+        if (!defaultcmykprofile) {
+            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultcmykprofilename.c_str());
+            goto err1;
+        }
+        if (!cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
+            && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
+            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultcmykprofilename.c_str());
+            goto err1;
+        }
+        profilecolorspace = cmsGetColorSpace(defaultcmykprofile.get());
+        if (profilecolorspace != cmsSigCmykData) {
+            fprintf(stderr, "Supplied ICC profile \"%s\" is not a CMYK profile.\n", defaultcmykprofilename.c_str());
+            goto err1;
         }
     }
 #endif
@@ -559,6 +622,9 @@ int main(int argc, char *argv[])
     splashOut->setEnableFreeType(enableFreeType);
 #    ifdef USE_CMS
     splashOut->setDisplayProfile(displayprofile);
+    splashOut->setDefaultGrayProfile(defaultgrayprofile);
+    splashOut->setDefaultRGBProfile(defaultrgbprofile);
+    splashOut->setDefaultCMYKProfile(defaultcmykprofile);
 #    endif
     splashOut->startDoc(doc);
 
