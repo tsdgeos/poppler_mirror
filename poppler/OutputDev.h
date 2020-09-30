@@ -138,6 +138,31 @@ public:
     {
 #ifdef USE_CMS
         state->setDisplayProfile(displayprofile);
+
+        auto invalidref = Ref::INVALID();
+        if (defaultGrayProfile) {
+            auto cs = new GfxICCBasedColorSpace(1, new GfxDeviceGrayColorSpace(), &invalidref);
+
+            cs->setProfile(defaultGrayProfile);
+            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            state->setDefaultGrayColorSpace(cs);
+        }
+
+        if (defaultRGBProfile) {
+            auto cs = new GfxICCBasedColorSpace(3, new GfxDeviceRGBColorSpace(), &invalidref);
+
+            cs->setProfile(defaultRGBProfile);
+            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            state->setDefaultRGBColorSpace(cs);
+        }
+
+        if (defaultCMYKProfile) {
+            auto cs = new GfxICCBasedColorSpace(4, new GfxDeviceCMYKColorSpace(), &invalidref);
+
+            cs->setProfile(defaultCMYKProfile);
+            cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
+            state->setDefaultCMYKColorSpace(cs);
+        }
 #endif
     }
 
@@ -324,6 +349,12 @@ public:
 #ifdef USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &profile) { displayprofile = profile; }
     GfxLCMSProfilePtr getDisplayProfile() const { return displayprofile; }
+    void setDefaultGrayProfile(const GfxLCMSProfilePtr &profile) { defaultGrayProfile = profile; }
+    GfxLCMSProfilePtr getDefaultGrayProfile() const { return defaultGrayProfile; }
+    void setDefaultRGBProfile(const GfxLCMSProfilePtr &profile) { defaultRGBProfile = profile; }
+    GfxLCMSProfilePtr getDefaultRGBProfile() const { return defaultRGBProfile; }
+    void setDefaultCMYKProfile(const GfxLCMSProfilePtr &profile) { defaultCMYKProfile = profile; }
+    GfxLCMSProfilePtr getDefaultCMYKProfile() const { return defaultCMYKProfile; }
 
     PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache() { return &iccColorSpaceCache; }
 #endif
@@ -335,6 +366,9 @@ private:
 
 #ifdef USE_CMS
     GfxLCMSProfilePtr displayprofile;
+    GfxLCMSProfilePtr defaultGrayProfile;
+    GfxLCMSProfilePtr defaultRGBProfile;
+    GfxLCMSProfilePtr defaultCMYKProfile;
 
     PopplerCache<Ref, GfxICCBasedColorSpace> iccColorSpaceCache;
 #endif

@@ -234,34 +234,34 @@ GfxColorSpace *GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev 
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceGrayColorSpace();
+                    cs = state->copyDefaultGrayColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceGrayColorSpace();
+                cs = state->copyDefaultGrayColorSpace();
             }
         } else if (csObj->isName("DeviceRGB") || csObj->isName("RGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceRGBColorSpace();
+                    cs = state->copyDefaultRGBColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceRGBColorSpace();
+                cs = state->copyDefaultRGBColorSpace();
             }
         } else if (csObj->isName("DeviceCMYK") || csObj->isName("CMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceCMYKColorSpace();
+                    cs = state->copyDefaultCMYKColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceCMYKColorSpace();
+                cs = state->copyDefaultCMYKColorSpace();
             }
         } else if (csObj->isName("Pattern")) {
             cs = new GfxPatternColorSpace(nullptr);
@@ -274,34 +274,34 @@ GfxColorSpace *GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev 
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceGrayColorSpace();
+                    cs = state->copyDefaultGrayColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceGrayColorSpace();
+                cs = state->copyDefaultGrayColorSpace();
             }
         } else if (obj1.isName("DeviceRGB") || obj1.isName("RGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceRGBColorSpace();
+                    cs = state->copyDefaultRGBColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceRGBColorSpace();
+                cs = state->copyDefaultRGBColorSpace();
             }
         } else if (obj1.isName("DeviceCMYK") || obj1.isName("CMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceCMYKColorSpace();
+                    cs = state->copyDefaultCMYKColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceCMYKColorSpace();
+                cs = state->copyDefaultCMYKColorSpace();
             }
         } else if (obj1.isName("CalGray")) {
             cs = GfxCalGrayColorSpace::parse(csObj->getArray(), state);
@@ -328,34 +328,34 @@ GfxColorSpace *GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev 
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceGrayColorSpace();
+                    cs = state->copyDefaultGrayColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceGrayColorSpace();
+                cs = state->copyDefaultGrayColorSpace();
             }
         } else if (obj1.isName("DeviceRGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceRGBColorSpace();
+                    cs = state->copyDefaultRGBColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceRGBColorSpace();
+                cs = state->copyDefaultRGBColorSpace();
             }
         } else if (obj1.isName("DeviceCMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
-                    cs = new GfxDeviceCMYKColorSpace();
+                    cs = state->copyDefaultCMYKColorSpace();
                 } else {
                     cs = GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
             } else {
-                cs = new GfxDeviceCMYKColorSpace();
+                cs = state->copyDefaultCMYKColorSpace();
             }
         } else {
             error(errSyntaxWarning, -1, "Bad color space dict'");
@@ -1724,34 +1724,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     if (!hp) {
         error(errSyntaxWarning, -1, "read ICCBased color space profile error");
     } else {
-        auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : nullptr;
-        if (!dhp) {
-            dhp = GfxState::sRGBProfile;
-        }
-        unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(hp.get()));
-        unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp.get()));
-        unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp.get()));
-        cmsHTRANSFORM transform;
-
-        int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
-        if (state != nullptr) {
-            cmsIntent = state->getCmsRenderingIntent();
-        }
-        if ((transform = cmsCreateTransform(hp.get(), COLORSPACE_SH(cst) | CHANNELS_SH(nCompsA) | BYTES_SH(1), dhp.get(), COLORSPACE_SH(dcst) | CHANNELS_SH(dNChannels) | BYTES_SH(1), cmsIntent, LCMS_FLAGS)) == nullptr) {
-            error(errSyntaxWarning, -1, "Can't create transform");
-            cs->transform = nullptr;
-        } else {
-            cs->transform = std::make_shared<GfxColorTransform>(transform, cmsIntent, cst, dcst);
-        }
-        if (dcst == PT_RGB || dcst == PT_CMYK) {
-            // create line transform only when the display is RGB type color space
-            if ((transform = cmsCreateTransform(hp.get(), CHANNELS_SH(nCompsA) | BYTES_SH(1), dhp.get(), (dcst == PT_RGB) ? TYPE_RGB_8 : TYPE_CMYK_8, cmsIntent, LCMS_FLAGS)) == nullptr) {
-                error(errSyntaxWarning, -1, "Can't create transform");
-                cs->lineTransform = nullptr;
-            } else {
-                cs->lineTransform = std::make_shared<GfxColorTransform>(transform, cmsIntent, cst, dcst);
-            }
-        }
+        cs->buildTransforms(state);
     }
     // put this colorSpace into cache
     if (out && iccProfileStreamA != Ref::INVALID()) {
@@ -1760,6 +1733,40 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 #endif
     return cs;
 }
+
+#ifdef USE_CMS
+void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
+{
+    auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : nullptr;
+    if (!dhp) {
+        dhp = GfxState::sRGBProfile;
+    }
+    unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(profile.get()));
+    unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp.get()));
+    unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp.get()));
+    cmsHTRANSFORM transformA;
+
+    int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
+    if (state != nullptr) {
+        cmsIntent = state->getCmsRenderingIntent();
+    }
+    if ((transformA = cmsCreateTransform(profile.get(), COLORSPACE_SH(cst) | CHANNELS_SH(nComps) | BYTES_SH(1), dhp.get(), COLORSPACE_SH(dcst) | CHANNELS_SH(dNChannels) | BYTES_SH(1), cmsIntent, LCMS_FLAGS)) == nullptr) {
+        error(errSyntaxWarning, -1, "Can't create transform");
+        transform = nullptr;
+    } else {
+        transform = std::make_shared<GfxColorTransform>(transformA, cmsIntent, cst, dcst);
+    }
+    if (dcst == PT_RGB || dcst == PT_CMYK) {
+        // create line transform only when the display is RGB type color space
+        if ((transformA = cmsCreateTransform(profile.get(), CHANNELS_SH(nComps) | BYTES_SH(1), dhp.get(), (dcst == PT_RGB) ? TYPE_RGB_8 : TYPE_CMYK_8, cmsIntent, LCMS_FLAGS)) == nullptr) {
+            error(errSyntaxWarning, -1, "Can't create transform");
+            lineTransform = nullptr;
+        } else {
+            lineTransform = std::make_shared<GfxColorTransform>(transformA, cmsIntent, cst, dcst);
+        }
+    }
+}
+#endif
 
 void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
@@ -6280,6 +6287,10 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
     renderingIntent[0] = 0;
 
     saved = nullptr;
+
+    defaultGrayColorSpace = nullptr;
+    defaultRGBColorSpace = nullptr;
+    defaultCMYKColorSpace = nullptr;
 #ifdef USE_CMS
     XYZ2DisplayTransformRelCol = nullptr;
     XYZ2DisplayTransformAbsCol = nullptr;
@@ -6329,6 +6340,10 @@ GfxState::~GfxState()
     if (font) {
         font->decRefCnt();
     }
+
+    delete defaultGrayColorSpace;
+    delete defaultRGBColorSpace;
+    delete defaultCMYKColorSpace;
 }
 
 // Used for copy();
@@ -6429,6 +6444,22 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     XYZ2DisplayTransformSat = state->XYZ2DisplayTransformSat;
     XYZ2DisplayTransformPerc = state->XYZ2DisplayTransformPerc;
 #endif
+
+    if (state->defaultGrayColorSpace) {
+        defaultGrayColorSpace = state->defaultGrayColorSpace->copy();
+    } else {
+        defaultGrayColorSpace = nullptr;
+    }
+    if (state->defaultRGBColorSpace) {
+        defaultRGBColorSpace = state->defaultRGBColorSpace->copy();
+    } else {
+        defaultRGBColorSpace = nullptr;
+    }
+    if (state->defaultCMYKColorSpace) {
+        defaultCMYKColorSpace = state->defaultCMYKColorSpace->copy();
+    } else {
+        defaultCMYKColorSpace = nullptr;
+    }
 }
 
 #ifdef USE_CMS

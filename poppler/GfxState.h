@@ -585,6 +585,8 @@ public:
     Ref getRef() { return iccProfileStream; }
 #ifdef USE_CMS
     char *getPostScriptCSA();
+    void buildTransforms(GfxState *state);
+    void setProfile(GfxLCMSProfilePtr &profileA) { profile = profileA; }
     GfxLCMSProfilePtr getProfile() { return profile; }
 #endif
 
@@ -1599,6 +1601,36 @@ public:
     static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
+    void setDefaultGrayColorSpace(GfxColorSpace *cs) { defaultGrayColorSpace = cs; }
+
+    void setDefaultRGBColorSpace(GfxColorSpace *cs) { defaultRGBColorSpace = cs; }
+
+    void setDefaultCMYKColorSpace(GfxColorSpace *cs) { defaultCMYKColorSpace = cs; }
+
+    GfxColorSpace *copyDefaultGrayColorSpace()
+    {
+        if (defaultGrayColorSpace) {
+            return defaultGrayColorSpace->copy();
+        }
+        return new GfxDeviceGrayColorSpace();
+    }
+
+    GfxColorSpace *copyDefaultRGBColorSpace()
+    {
+        if (defaultRGBColorSpace) {
+            return defaultRGBColorSpace->copy();
+        }
+        return new GfxDeviceRGBColorSpace();
+    }
+
+    GfxColorSpace *copyDefaultCMYKColorSpace()
+    {
+        if (defaultCMYKColorSpace) {
+            return defaultCMYKColorSpace->copy();
+        }
+        return new GfxDeviceCMYKColorSpace();
+    }
+
     // Add to path.
     void moveTo(double x, double y) { path->moveTo(curX = x, curY = y); }
     void lineTo(double x, double y) { path->lineTo(curX = x, curY = y); }
@@ -1708,6 +1740,10 @@ private:
     std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
     static GfxLCMSProfilePtr XYZProfile;
 #endif
+
+    GfxColorSpace *defaultGrayColorSpace;
+    GfxColorSpace *defaultRGBColorSpace;
+    GfxColorSpace *defaultCMYKColorSpace;
 };
 
 #endif
