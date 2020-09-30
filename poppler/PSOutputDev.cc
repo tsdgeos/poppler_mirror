@@ -6592,8 +6592,14 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         GfxICCBasedColorSpace *iccBasedCS;
         iccBasedCS = (GfxICCBasedColorSpace *)colorSpace;
         Ref ref = iccBasedCS->getRef();
+        const bool validref = ref != Ref::INVALID();
         int intent = state->getCmsRenderingIntent();
-        GooString *name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
+        GooString *name;
+        if (validref) {
+            name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
+        } else {
+            name = GooString::format("ICCBased-hashed-{0:ullX}-{1:d}", std::hash<GfxLCMSProfilePtr> {}(iccBasedCS->getProfile()), intent);
+        }
         const auto &it = iccEmitted.find(name->toStr());
         if (it != iccEmitted.end()) {
             writePSFmt("{0:t}", name);
