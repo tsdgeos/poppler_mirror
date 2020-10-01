@@ -38,10 +38,10 @@ clang_format:
 build:
   stage: build
   script:
-    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202008280953qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
-    - 7z x 6.0.0-0-202008280953qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
-    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202008280953icu-linux-Rhel7.2-x64.7z
-    - 7z x 6.0.0-0-202008280953icu-linux-Rhel7.2-x64.7z
+    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202009301637qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
+    - 7z x 6.0.0-0-202009301637qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
+    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202009301637icu-linux-Rhel7.2-x64.7z
+    - 7z x 6.0.0-0-202009301637icu-linux-Rhel7.2-x64.7z
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
     - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data .. -DCMAKE_PREFIX_PATH=$PWD/../6.0.0/gcc_64/lib/cmake
