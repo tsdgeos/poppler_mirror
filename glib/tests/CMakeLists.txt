@@ -52,3 +52,21 @@ poppler_add_testcase(poppler-check-bb type3.pdf -p 10 125.80 130 509.30 695 125.
 
 add_executable(pdfdrawbb pdfdrawbb.c)
 target_link_libraries(pdfdrawbb poppler-glib)
+
+macro(GLIB_ADD_FUZZER exe)
+  string(REPLACE "-" "" test_name ${exe})
+  set(${test_name}_SOURCES
+    ${ARGN}
+  )
+  poppler_add_test(${exe} BUILD_GTK_TESTS ${${test_name}_SOURCES})
+  target_link_libraries(${exe} poppler-glib ${GTK3_LIBRARIES})
+endmacro(GLIB_ADD_FUZZER)
+
+if(ENABLE_FUZZER)
+    glib_add_fuzzer(annot_fuzzer ./fuzzing/annot_fuzzer.c)
+    glib_add_fuzzer(doc_attr_fuzzer ./fuzzing/doc_attr_fuzzer.c)
+    glib_add_fuzzer(find_text_fuzzer ./fuzzing/find_text_fuzzer.c)
+    glib_add_fuzzer(util_fuzzer ./fuzzing/util_fuzzer.c)
+    glib_add_fuzzer(label_fuzzer ./fuzzing/label_fuzzer.c)
+    glib_add_fuzzer(pdf_draw_fuzzer ./fuzzing/pdf_draw_fuzzer.c)
+endif()
