@@ -105,7 +105,7 @@ public:
     int getPermissionFlags() const override { return permFlags; }
     bool getOwnerPasswordOk() const override { return ownerPasswordOk; }
     const unsigned char *getFileKey() const override { return fileKey; }
-    int getFileKeyLength() const override { return fileKeyLength; }
+    int getFileKeyLength() const override { return ok ? fileKeyLength : 0; }
     int getEncVersion() const override { return encVersion; }
     int getEncRevision() const override { return encRevision; }
     CryptAlgorithm getEncAlgorithm() const override { return encAlgorithm; }
