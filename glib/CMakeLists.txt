@@ -115,14 +115,6 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
   "${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c"
 )
 
-
-macro(_list_prefix _outvar _listvar _prefix)
-  set(${_outvar})
-  foreach(_item IN LISTS ${_listvar})
-    list(APPEND ${_outvar} ${_prefix}${_item})
-  endforeach()
-endmacro(_list_prefix)
-
 # GObject Introspection
 if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   include(GObjectIntrospectionMacros)
@@ -141,7 +133,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
 
   # Format list of include directories as compiler flags
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
-  _list_prefix(_includes _tmp_includes "-I")
+  _gir_list_prefix(_includes _tmp_includes "-I")
   # And set flags for gir compiler and scanner
   set(Poppler_0_18_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR} -L${CMAKE_CURRENT_BINARY_DIR})
   set(Poppler_0_18_gir_SCANNERFLAGS "--c-include=poppler.h")
@@ -150,8 +142,8 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   set(orig_introspect_srcs ${poppler_glib_SRCS} ${poppler_glib_public_headers})
   set(gen_introspect_srcs "poppler-enums.c" "poppler-enums.h" "poppler-features.h")
   # Prefix the files with their correct directories for full paths
-  _list_prefix(_orig_introspect_paths orig_introspect_srcs "${CMAKE_CURRENT_SOURCE_DIR}/")
-  _list_prefix(_gen_introspect_paths gen_introspect_srcs "${CMAKE_CURRENT_BINARY_DIR}/")
+  _gir_list_prefix(_orig_introspect_paths orig_introspect_srcs "${CMAKE_CURRENT_SOURCE_DIR}/")
+  _gir_list_prefix(_gen_introspect_paths gen_introspect_srcs "${CMAKE_CURRENT_BINARY_DIR}/")
   # Now load them to the final file list
   set(Poppler_0_18_gir_FILES ${_orig_introspect_paths} ${_gen_introspect_paths})
 
