@@ -33,7 +33,7 @@ set(poppler_qt6_SRCS
   poppler-page-transition.cc
   poppler-media.cc
   poppler-outline.cc
-  ArthurOutputDev.cc
+  QPainterOutputDev.cc
   poppler-version.cpp
 )
 add_library(poppler-qt6 ${poppler_qt6_SRCS})

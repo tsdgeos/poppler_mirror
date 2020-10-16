@@ -657,7 +657,7 @@ QColor Document::paperColor() const
 void Document::setRenderBackend(Document::RenderBackend backend)
 {
     // no need to delete the outputdev as for the moment we always create a splash one
-    // as the arthur one does not allow "precaching" due to it's signature
+    // as the QPainter one does not allow "precaching" due to its signature
     // delete m_doc->m_outputDev;
     // m_doc->m_outputDev = NULL;
     m_doc->m_backend = backend;
@@ -674,7 +674,7 @@ QSet<Document::RenderBackend> Document::availableRenderBackends()
 #if defined(HAVE_SPLASH)
     ret << Document::SplashBackend;
 #endif
-    ret << Document::ArthurBackend;
+    ret << Document::QPainterBackend;
     return ret;
 }
 

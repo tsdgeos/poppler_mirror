@@ -9,9 +9,9 @@ int main(int argc, char **argv)
 {
     QGuiApplication a(argc, argv); // QApplication required!
 
-    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-arthur") != 0) || argc > 3) {
+    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-qpainter") != 0) || argc > 3) {
         // use argument as file name
-        qWarning() << "usage: test-render-to-file-qt6 filename [-arthur]";
+        qWarning() << "usage: test-render-to-file-qt6 filename [-qpainter]";
         exit(1);
     }
 
@@ -33,9 +33,9 @@ int main(int argc, char **argv)
     }
 
     QString backendString;
-    if (argc == 3 && strcmp(argv[2], "-arthur") == 0) {
-        backendString = QStringLiteral("Arthur");
-        doc->setRenderBackend(Poppler::Document::ArthurBackend);
+    if (argc == 3 && strcmp(argv[2], "-qpainter") == 0) {
+        backendString = QStringLiteral("QPainter");
+        doc->setRenderBackend(Poppler::Document::QPainterBackend);
     } else {
         backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);

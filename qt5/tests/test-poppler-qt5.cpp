@@ -15,7 +15,7 @@ class PDFDisplay : public QWidget // picture display widget
 {
     Q_OBJECT
 public:
-    PDFDisplay(Poppler::Document *d, bool arthur, QWidget *parent = nullptr);
+    PDFDisplay(Poppler::Document *d, bool qpainter, QWidget *parent = nullptr);
     ~PDFDisplay() override;
     void setShowTextRects(bool show);
     void display();
@@ -34,14 +34,14 @@ private:
     QList<Poppler::TextBox *> textRects;
 };
 
-PDFDisplay::PDFDisplay(Poppler::Document *d, bool arthur, QWidget *parent) : QWidget(parent)
+PDFDisplay::PDFDisplay(Poppler::Document *d, bool qpainter, QWidget *parent) : QWidget(parent)
 {
     showTextRects = false;
     doc = d;
     m_currentPage = 0;
-    if (arthur) {
-        backendString = QStringLiteral("Arthur");
-        doc->setRenderBackend(Poppler::Document::ArthurBackend);
+    if (qpainter) {
+        backendString = QStringLiteral("QPainter");
+        doc->setRenderBackend(Poppler::Document::QPainterBackend);
     } else {
         backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
@@ -132,9 +132,9 @@ int main(int argc, char **argv)
 {
     QApplication a(argc, argv); // QApplication required!
 
-    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-extract") != 0 && strcmp(argv[2], "-arthur") != 0 && strcmp(argv[2], "-textRects") != 0) || argc > 3) {
+    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-extract") != 0 && strcmp(argv[2], "-qpainter") != 0 && strcmp(argv[2], "-textRects") != 0) || argc > 3) {
         // use argument as file name
-        qWarning() << "usage: test-poppler-qt5 filename [-extract|-arthur|-textRects]";
+        qWarning() << "usage: test-poppler-qt5 filename [-extract|-qpainter|-textRects]";
         exit(1);
     }
 
@@ -195,9 +195,9 @@ int main(int argc, char **argv)
         }
     }
 
-    if (argc == 2 || (argc == 3 && strcmp(argv[2], "-arthur") == 0) || (argc == 3 && strcmp(argv[2], "-textRects") == 0)) {
-        bool useArthur = (argc == 3 && strcmp(argv[2], "-arthur") == 0);
-        PDFDisplay test(doc, useArthur); // create picture display
+    if (argc == 2 || (argc == 3 && strcmp(argv[2], "-qpainter") == 0) || (argc == 3 && strcmp(argv[2], "-textRects") == 0)) {
+        bool useQPainter = (argc == 3 && strcmp(argv[2], "-qpainter") == 0);
+        PDFDisplay test(doc, useQPainter); // create picture display
         test.setWindowTitle(QStringLiteral("Poppler-Qt5 Test"));
         test.setShowTextRects(argc == 3 && strcmp(argv[2], "-textRects") == 0);
         test.display();

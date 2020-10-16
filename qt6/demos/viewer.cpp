@@ -77,7 +77,7 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     act->setChecked(true);
     act->setData(QVariant::fromValue(0));
     m_settingsRenderBackendGrp->addAction(act);
-    act = settingsRenderMenu->addAction(tr("Arthur"));
+    act = settingsRenderMenu->addAction(tr("QPainter"));
     act->setCheckable(true);
     act->setData(QVariant::fromValue(1));
     m_settingsRenderBackendGrp->addAction(act);
