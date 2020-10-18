@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
 // Copyright (C) 2011 Jim Meyering <jim@meyering.net>
-// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
@@ -116,7 +116,7 @@ int FoFiBase::getS16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos + 1 >= len || pos > INT_MAX - 1) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= len) {
         *ok = false;
         return 0;
     }
@@ -132,7 +132,7 @@ int FoFiBase::getU16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos + 1 >= len || pos > INT_MAX - 1) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= len) {
         *ok = false;
         return 0;
     }
@@ -145,7 +145,7 @@ int FoFiBase::getS32BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos + 3 >= len || pos > INT_MAX - 3) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
         *ok = false;
         return 0;
     }
@@ -163,7 +163,7 @@ unsigned int FoFiBase::getU32BE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos + 3 >= len || pos > INT_MAX - 3) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
         *ok = false;
         return 0;
     }
@@ -178,7 +178,7 @@ unsigned int FoFiBase::getU32LE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos + 3 >= len || pos > INT_MAX - 3) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
         *ok = false;
         return 0;
     }
@@ -194,7 +194,7 @@ unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const
     unsigned int x;
     int i;
 
-    if (pos < 0 || pos + size > len || pos > INT_MAX - size) {
+    if (pos < 0 || pos > INT_MAX - size || pos + size > len) {
         *ok = false;
         return 0;
     }
