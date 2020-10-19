@@ -21,7 +21,7 @@ cpp_add_simpletest(poppler-dump poppler-dump.cpp ${CMAKE_SOURCE_DIR}/utils/parse
 cpp_add_simpletest(poppler-render poppler-render.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
 
 if(ENABLE_FUZZER)
-  cpp_add_simpletest(pdf_fuzzer pdf_fuzzer.cc)
+  cpp_add_simpletest(doc_fuzzer ./fuzzing/doc_fuzzer.cc)
   cpp_add_simpletest(pdf_file_fuzzer ./fuzzing/pdf_file_fuzzer.cc)
   cpp_add_simpletest(page_label_fuzzer ./fuzzing/page_label_fuzzer.cc)
   cpp_add_simpletest(page_search_fuzzer ./fuzzing/page_search_fuzzer.cc)
