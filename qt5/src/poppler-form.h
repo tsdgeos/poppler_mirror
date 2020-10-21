@@ -11,6 +11,7 @@
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -834,7 +835,7 @@ private:
 /**
   Return vector of suitable signing certificates
 */
-QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
+QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
 
 /**
   Set non-standard NSS CertDB directory (as a file URL)

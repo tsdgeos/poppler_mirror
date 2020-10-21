@@ -1097,16 +1097,16 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     return SignatureValidationInfo(priv);
 }
 
-QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
+QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
 {
-    QVector<CertificateInfo *> vReturnCerts;
+    QVector<CertificateInfo> vReturnCerts;
 
 #ifdef ENABLE_NSS3
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
 
     for (auto &cert : vCerts) {
         CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
-        vReturnCerts.append(new CertificateInfo(certPriv));
+        vReturnCerts.append(CertificateInfo(certPriv));
     }
 #endif
 
