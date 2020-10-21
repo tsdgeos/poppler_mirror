@@ -13,6 +13,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 //========================================================================
 
@@ -1117,6 +1118,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
 {
     // set callback, in case one of the slots has a password set
     // PK11_SetPasswordFunc( GetPasswordFunction );
+    setNSSDir({});
 
     std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
     PK11SlotList *slotList = PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_FALSE, nullptr);

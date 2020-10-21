@@ -11,6 +11,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 //========================================================================
 
@@ -53,7 +54,7 @@ public:
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
-    std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
+    static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     GooString *signDetached(const char *password);
 
     static SECOidTag getHashOidTag(const char *digestName);

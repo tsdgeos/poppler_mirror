@@ -12,6 +12,7 @@
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1101,8 +1102,7 @@ QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
     QVector<CertificateInfo *> vReturnCerts;
 
 #ifdef ENABLE_NSS3
-    SignatureHandler sigHandler;
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = sigHandler.getAvailableSigningCertificates();
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
 
     for (auto &cert : vCerts) {
         CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
