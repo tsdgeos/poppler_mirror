@@ -24,7 +24,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             continue;
         }
         poppler::rectf rect = p->page_rect();
-        poppler::ustring text = poppler::ustring::from_utf8((const char*)data, size);
+        poppler::ustring text = poppler::ustring::from_utf8((const char *)data, size);
         p->search(text, rect, poppler::page::search_from_top, poppler::case_insensitive, poppler::rotate_0);
         r.render_page(p);
         delete p;

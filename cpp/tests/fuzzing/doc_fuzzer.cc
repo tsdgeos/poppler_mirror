@@ -34,12 +34,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     doc->set_subject(poppler::ustring::from_latin1(in_sub));
     doc->set_title(poppler::ustring::from_latin1(in_title));
 
-    doc->set_author(poppler::ustring::from_utf8((const char*)data,size));
-    doc->set_creator(poppler::ustring::from_utf8((const char*)data,size));
-    doc->set_keywords(poppler::ustring::from_utf8((const char*)data,size));
-    doc->set_producer(poppler::ustring::from_utf8((const char*)data,size));
-    doc->set_subject(poppler::ustring::from_utf8((const char*)data,size));
-    doc->set_title(poppler::ustring::from_utf8((const char*)data,size));
+    doc->set_author(poppler::ustring::from_utf8((const char *)data, size));
+    doc->set_creator(poppler::ustring::from_utf8((const char *)data, size));
+    doc->set_keywords(poppler::ustring::from_utf8((const char *)data, size));
+    doc->set_producer(poppler::ustring::from_utf8((const char *)data, size));
+    doc->set_subject(poppler::ustring::from_utf8((const char *)data, size));
+    doc->set_title(poppler::ustring::from_utf8((const char *)data, size));
 
     delete doc;
     return 0;

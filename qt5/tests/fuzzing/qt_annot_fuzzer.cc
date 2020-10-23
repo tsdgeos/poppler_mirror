@@ -11,17 +11,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     const QColor color = QColor::fromRgb(0xAB, 0xCD, 0xEF);
     char *tmpfile = fuzzer_get_tmpfile(data, size);
 
-    QByteArray in_data = QByteArray::fromRawData((const char*)data, size);
+    QByteArray in_data = QByteArray::fromRawData((const char *)data, size);
     Poppler::Document *doc = Poppler::Document::loadFromData(in_data);
 
-    if (!doc || doc->isLocked()){
+    if (!doc || doc->isLocked()) {
         delete doc;
         fuzzer_release_tmpfile(tmpfile);
         return 0;
     }
 
     for (int i = 0; i < doc->numPages(); i++) {
-        Poppler::Page* p = doc->page(i);
+        Poppler::Page *p = doc->page(i);
         if (!p) {
             continue;
         }

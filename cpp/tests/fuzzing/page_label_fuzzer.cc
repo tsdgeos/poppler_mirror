@@ -19,7 +19,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     poppler::page_renderer r;
     for (int i = 0; i < doc->pages(); i++) {
-        poppler::ustring label = poppler::ustring::from_utf8((const char*)data, size);
+        poppler::ustring label = poppler::ustring::from_utf8((const char *)data, size);
         poppler::page *p = doc->create_page(label);
         if (!p) {
             continue;

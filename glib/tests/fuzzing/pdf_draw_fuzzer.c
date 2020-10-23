@@ -5,7 +5,8 @@
 
 #include "fuzzer_temp_file.h"
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+{
     GError *err = NULL;
     PopplerDocument *doc;
     PopplerPage *page;
@@ -54,7 +55,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         if (status != CAIRO_STATUS_SUCCESS) {
             g_object_unref(page);
             continue;
-
         }
         if (hg) {
             cairo_set_source_rgb(cr, 0.6, 0.6, 1.0);
