@@ -189,7 +189,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
         yMax = y - descent * fontSize;
         GfxRGB rgb;
         state->getFillRGB(&rgb);
-        HtmlFont hfont = HtmlFont(font, static_cast<int>(fontSize), rgb);
+        HtmlFont hfont = HtmlFont(font, static_cast<int>(fontSize), rgb, state->getFillOpacity());
         if (isMatRotOrSkew(state->getTextMat())) {
             double normalizedMatrix[4];
             memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));

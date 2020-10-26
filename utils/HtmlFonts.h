@@ -42,28 +42,32 @@ private:
     unsigned int r;
     unsigned int g;
     unsigned int b;
+    unsigned int opacity;
     bool Ok(unsigned int xcol) { return xcol <= 255; }
     GooString *convtoX(unsigned int xcol) const;
 
 public:
-    HtmlFontColor() : r(0), g(0), b(0) { }
-    HtmlFontColor(GfxRGB rgb);
+    HtmlFontColor() : r(0), g(0), b(0), opacity(255) { }
+    HtmlFontColor(GfxRGB rgb, double opacity);
     HtmlFontColor(const HtmlFontColor &x)
     {
         r = x.r;
         g = x.g;
         b = x.b;
+        opacity = x.opacity;
     }
     HtmlFontColor &operator=(const HtmlFontColor &x)
     {
         r = x.r;
         g = x.g;
         b = x.b;
+        opacity = x.opacity;
         return *this;
     }
     ~HtmlFontColor() {};
     GooString *toString() const;
-    bool isEqual(const HtmlFontColor &col) const { return ((r == col.r) && (g == col.g) && (b == col.b)); }
+    double getOpacity() const { return opacity / 255.0; }
+    bool isEqual(const HtmlFontColor &col) const { return ((r == col.r) && (g == col.g) && (b == col.b) && (opacity == col.opacity)); }
 };
 
 class HtmlFont
@@ -79,7 +83,7 @@ private:
     HtmlFontColor color;
     double rotSkewMat[4]; // only four values needed for rotation and skew
 public:
-    HtmlFont(GfxFont *font, int _size, GfxRGB rgb);
+    HtmlFont(GfxFont *font, int _size, GfxRGB rgb, double opacity);
     HtmlFont(const HtmlFont &x);
     HtmlFont &operator=(const HtmlFont &x);
     HtmlFontColor getColor() const { return color; }
