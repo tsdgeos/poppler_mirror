@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <poppler-qt5.h>
-#include "fuzzer_temp_file.h"
+#include <QtCore/QBuffer>
 
 static void dummy_error_function(const QString &, const QVariant &) { }
 
@@ -9,14 +9,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     Poppler::setDebugErrorFunction(dummy_error_function, QVariant());
     const QFont font(QStringLiteral("Helvetica"), 20);
     const QColor color = QColor::fromRgb(0xAB, 0xCD, 0xEF);
-    char *tmpfile = fuzzer_get_tmpfile(data, size);
 
     QByteArray in_data = QByteArray::fromRawData((const char *)data, size);
     Poppler::Document *doc = Poppler::Document::loadFromData(in_data);
 
     if (!doc || doc->isLocked()) {
         delete doc;
-        fuzzer_release_tmpfile(tmpfile);
         return 0;
     }
 
@@ -32,15 +30,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         ann->setContents(QString(in_data));
         p->addAnnotation(ann);
 
+        QBuffer buffer;
+        buffer.open(QIODevice::WriteOnly);
         std::unique_ptr<Poppler::PDFConverter> conv(doc->pdfConverter());
-        conv->setOutputFileName(tmpfile);
+        conv->setOutputDevice(&buffer);
         conv->setPDFOptions(Poppler::PDFConverter::WithChanges);
         conv->convert();
+        buffer.close();
         delete ann;
         delete p;
     }
 
-    fuzzer_release_tmpfile(tmpfile);
     delete doc;
     return 0;
 }

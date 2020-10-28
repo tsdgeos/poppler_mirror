@@ -6,6 +6,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     GError *err = NULL;
     PopplerDocument *doc;
     PopplerPage *page;
+    char *buf;
     int npages, n;
 
     doc = poppler_document_new_from_data(data, size, NULL, &err);
@@ -13,11 +14,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         g_error_free(err);
         return 0;
     }
-    poppler_document_set_author(doc, data);
-    poppler_document_set_creator(doc, data);
-    poppler_document_set_keywords(doc, data);
-    poppler_document_set_producer(doc, data);
-    poppler_document_set_subject(doc, data);
-    poppler_document_set_title(doc, data);
+
+    buf = (char *)malloc(size + 1);
+    memcpy(buf, data, size);
+    buf[size] = '\0';
+
+    poppler_document_set_author(doc, buf);
+    poppler_document_set_creator(doc, buf);
+    poppler_document_set_keywords(doc, buf);
+    poppler_document_set_producer(doc, buf);
+    poppler_document_set_subject(doc, buf);
+    poppler_document_set_title(doc, buf);
+
+    free(buf);
     return 0;
 }

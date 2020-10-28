@@ -6,6 +6,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     GError *err = NULL;
     PopplerDocument *doc;
     PopplerPage *page;
+    char *buf;
     int npages;
 
     doc = poppler_document_new_from_data(data, size, NULL, &err);
@@ -19,12 +20,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
+    buf = (char *)malloc(size + 1);
+    memcpy(buf, data, size);
+    buf[size] = '\0';
     for (int n = 0; n < npages; n++) {
-        page = poppler_document_get_page_by_label(doc, data);
+        /*page = poppler_document_get_page_by_label(doc, data);*/
+        page = poppler_document_get_page_by_label(doc, buf);
         if (!page) {
             continue;
         }
         g_object_unref(page);
     }
+    free(buf);
     return 0;
 }

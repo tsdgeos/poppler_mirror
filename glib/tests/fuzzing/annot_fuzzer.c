@@ -56,8 +56,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
                 continue;
             }
             poppler_page_add_annot(page, annot);
-            /*poppler_annot_set_contents(annot, data);*/
-            /*poppler_annot_markup_set_label(annot, data);*/
         }
 
         cr = cairo_create(surface);

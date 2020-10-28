@@ -1,11 +1,11 @@
 #include <cstdint>
-
 #include <poppler-global.h>
 #include <poppler-document.h>
 #include <poppler-page.h>
+
 #include "FuzzedDataProvider.h"
 
-#define INPUT_SIZE 32
+const size_t input_size = 32;
 
 static void dummy_error_function(const std::string &, void *) { }
 
@@ -19,12 +19,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     FuzzedDataProvider data_provider(data, size);
-    std::string in_auth = data_provider.ConsumeBytesAsString(INPUT_SIZE);
-    std::string in_creat = data_provider.ConsumeBytesAsString(INPUT_SIZE);
-    std::string in_key = data_provider.ConsumeBytesAsString(INPUT_SIZE);
-    std::string in_prod = data_provider.ConsumeBytesAsString(INPUT_SIZE);
-    std::string in_sub = data_provider.ConsumeBytesAsString(INPUT_SIZE);
-    std::string in_title = data_provider.ConsumeBytesAsString(INPUT_SIZE);
+    std::string in_auth = data_provider.ConsumeBytesAsString(input_size);
+    std::string in_creat = data_provider.ConsumeBytesAsString(input_size);
+    std::string in_key = data_provider.ConsumeBytesAsString(input_size);
+    std::string in_prod = data_provider.ConsumeBytesAsString(input_size);
+    std::string in_sub = data_provider.ConsumeBytesAsString(input_size);
+    std::string in_title = data_provider.ConsumeBytesAsString(input_size);
 
     // Testing both methods for conversion to ustring
     doc->set_author(poppler::ustring::from_latin1(in_auth));
