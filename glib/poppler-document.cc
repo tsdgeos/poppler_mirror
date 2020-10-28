@@ -216,17 +216,21 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
  * poppler_document_new_from_data:
  * @data: (array length=length) (element-type guint8): the pdf data
  * @length: the length of #data
- * @password: (allow-none): password to unlock the file with, or %NULL
- * @error: (allow-none): Return location for an error, or %NULL
+ * @password: (nullable): password to unlock the file with, or %NULL
+ * @error: (nullable): Return location for an error, or %NULL
  *
  * Creates a new #PopplerDocument.  If %NULL is returned, then @error will be
  * set. Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
  * domains.
  *
- * Note that @data must remain valid for as long as the returned document exists.
- * Prefer using poppler_document_new_from_bytes().
+ * Note that @data is not copied nor is a new reference to it created.
+ * It must remain valid and cannot be destroyed as long as the returned
+ * document exists.
  *
  * Return value: A newly created #PopplerDocument, or %NULL
+ *
+ * Deprecated: 0.82: This requires directly managing @length and @data.
+ * Use poppler_document_new_from_bytes() instead.
  **/
 PopplerDocument *poppler_document_new_from_data(char *data, int length, const char *password, GError **error)
 {
@@ -840,7 +844,7 @@ static void _poppler_dest_destroy_value(gpointer value)
  * poppler_document_create_dests_tree:
  * @document: A #PopplerDocument
  *
- * Creates named destinations balanced binary tree in @document
+ * Creates a balanced binary tree of all named destinations in @document
  *
  * The tree key is strings in the form returned by
  * poppler_named_dest_to_bytestring() which constains a destination name.
@@ -1088,10 +1092,11 @@ gchar *poppler_document_get_pdf_version_string(PopplerDocument *document)
 /**
  * poppler_document_get_pdf_version:
  * @document: A #PopplerDocument
- * @major_version: (out) (allow-none): return location for the PDF major version number
- * @minor_version: (out) (allow-none): return location for the PDF minor version number
+ * @major_version: (out) (nullable): return location for the PDF major version number
+ * @minor_version: (out) (nullable): return location for the PDF minor version number
  *
- * Returns: the major and minor PDF version numbers
+ * Updates values referenced by @major_version & @minor_version with the
+ * major and minor PDF versions of @document.
  *
  * Since: 0.16
  **/
@@ -1752,12 +1757,12 @@ gint poppler_document_get_print_n_copies(PopplerDocument *document)
  * @n_ranges: (out): return location for number of ranges
  *
  * Returns the suggested page ranges to print in the form of array
- * of #PopplerPageRanges and number of ranges.
- * NULL pointer means that the document does not specify page ranges
+ * of #PopplerPageRange<!-- -->s and number of ranges.
+ * %NULL pointer means that the document does not specify page ranges
  * for printing.
  *
  * Returns: (array length=n_ranges) (transfer full): an array
- *          of #PopplerPageRanges or NULL. Free the array when
+ *          of #PopplerPageRange<!-- -->s or %NULL. Free the array when
  *          it is no longer needed.
  *
  * Since: 0.80
@@ -1958,7 +1963,7 @@ gchar *poppler_document_get_metadata(PopplerDocument *document)
 /**
  * poppler_document_reset_form:
  * @document: A #PopplerDocument
- * @fields: list of fields to reset
+ * @fields (element-type utf8) (nullable): list of fields to reset
  * @exclude_fields: whether to reset all fields except those in @fields
  *
  * Resets the form fields specified by fields if exclude_fields is FALSE.
