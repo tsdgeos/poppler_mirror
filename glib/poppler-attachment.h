@@ -80,6 +80,16 @@ struct _PopplerAttachment
 };
 G_GNUC_END_IGNORE_DEPRECATIONS
 
+/* This struct was never documented nor intended for external use, but
+ * has technically been part of the API (see #33). */
+/**
+ * PopplerAttachmentClass:
+ *
+ * Provides a named wrapper for a single GObjectClass.
+ *
+ * Deprecated: 20.11: Use PopplerAttachment objects with the public
+ *   poppler_attachment functions instead.
+ */
 typedef struct _PopplerAttachmentClass
 {
     GObjectClass parent_class;
