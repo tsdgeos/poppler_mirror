@@ -4974,9 +4974,10 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
     // - NeedAppearances is true
-    if (field) {
-        if (appearance.isNull() || (form && form->getNeedAppearances()))
+    if (field && form) {
+        if (appearance.isNull() || form->getNeedAppearances()) {
             generateFieldAppearance(&addDingbatsResource);
+        }
     }
 
     // draw the appearance stream

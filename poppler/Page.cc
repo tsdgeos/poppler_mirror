@@ -386,7 +386,9 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
         std::set<int> parents;
         FormField *field = Form::createFieldFromDict(annot->getAnnotObj().copy(), annot->getDoc(), r, nullptr, &parents);
 
-        if (field && field->getType() == formButton && field->getNumWidgets() == 1) {
+        if (field && field->getNumWidgets() == 1) {
+
+            static_cast<AnnotWidget *>(annot)->setField(field);
 
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);

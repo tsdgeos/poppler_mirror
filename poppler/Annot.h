@@ -1420,6 +1420,8 @@ public:
 
     bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
 
+    void setField(FormField *f) { field = f; };
+
 private:
     void initialize(PDFDoc *docA, Dict *dict);
 
