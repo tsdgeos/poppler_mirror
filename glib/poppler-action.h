@@ -346,7 +346,7 @@ struct _PopplerActionRendition
  * PopplerActionOCGState:
  * @type: action type (%POPPLER_ACTION_OCG_STATE)
  * @title: action title
- * @state_list: (element-type PopplerActionLayer): list of #PopplerActionLayer<-- -->s
+ * @state_list: (element-type PopplerActionLayer): list of #PopplerActionLayer<!-- -->s
  *
  * State of layer.
  *
@@ -378,6 +378,22 @@ struct _PopplerActionJavascript
     gchar *script;
 };
 
+/**
+ * PopplerActionResetForm:
+ * @type: action type (%POPPLER_ACTION_RESET_FORM)
+ * @title: action title
+ * @fields: (element-type utf8) (nullable): list of field names to
+ *   reset / retain
+ * @exclude: whether to reset all but the listed fields
+ *
+ * Resets some or all fields within a PDF form.
+ *
+ * The default behavior resets only the list of @fields, but setting
+ * @exclude to %TRUE will cause the action to reset all fields but those
+ * listed. Providing an empty list of fields resets the entire form.
+ *
+ * Since: 0.90
+ */
 struct _PopplerActionResetForm
 {
     PopplerActionType type;
@@ -390,7 +406,7 @@ struct _PopplerActionResetForm
 /**
  * PopplerAction:
  *
- * A data structure for holding actions
+ * A generic wrapper for actions that exposes only #PopplerActionType.
  */
 union _PopplerAction {
     PopplerActionType type;
