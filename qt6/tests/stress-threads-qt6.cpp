@@ -34,12 +34,11 @@ class CrazyThread : public QThread
 {
     Q_OBJECT
 public:
-    CrazyThread(uint seed, Poppler::Document *document, QMutex *annotationMutex, QObject *parent = nullptr);
+    CrazyThread(Poppler::Document *document, QMutex *annotationMutex, QObject *parent = nullptr);
 
     void run() override;
 
 private:
-    uint m_seed;
     Poppler::Document *m_document;
     QMutex *m_annotationMutex;
 };
@@ -86,7 +85,7 @@ void SillyThread::run()
     }
 }
 
-CrazyThread::CrazyThread(uint seed, Poppler::Document *document, QMutex *annotationMutex, QObject *parent) : QThread(parent), m_seed(seed), m_document(document), m_annotationMutex(annotationMutex) { }
+CrazyThread::CrazyThread(Poppler::Document *document, QMutex *annotationMutex, QObject *parent) : QThread(parent), m_document(document), m_annotationMutex(annotationMutex) { }
 
 void CrazyThread::run()
 {
@@ -264,7 +263,7 @@ int main(int argc, char **argv)
         QMutex *annotationMutex = new QMutex();
 
         for (int i = 0; i < crazyCount; ++i) {
-            (new CrazyThread(QRandomGenerator::global()->generate(), document, annotationMutex))->start();
+            (new CrazyThread(document, annotationMutex))->start();
         }
     }
 
