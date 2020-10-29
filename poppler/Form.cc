@@ -29,6 +29,7 @@
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 //========================================================================
 
@@ -533,18 +534,14 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
+    const std::string signerName = certInfo->getSubjectInfo().commonName;
     signatureField->setCertificateInfo(certInfo);
     updateWidgetAppearance(); // add visible signing info to appearance
 
     GooString gReason(reason ? reason : "");
-    // TODO getSignerName() is only set when CMSSignerInfo available -
-    // i.e. in the check-signature-case
-    char *signerName = sigHandler.getSignerName();
-    GooString gName(signerName);
-    free(signerName);
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(&vObj);
-    if (!createSignature(vObj, vref, gName, gReason, tmpSignature)) {
+    if (!createSignature(vObj, vref, GooString(signerName), gReason, tmpSignature)) {
         delete tmpSignature;
         return false;
     }
@@ -714,25 +711,9 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
 bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
-    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKMS"));
-    switch (signatureType()) {
-    case unknown_signature_type:
-        // we don't support signing with an unknown subFilter
-        error(errUnimplemented, -1, "unknown_signature_type not supported\n");
-        return false;
-    case adbe_pkcs7_sha1:
-        // we don't support signing with SubFilter "adbe.pkcs7.sha1"
-        error(errUnimplemented, -1, "adbe.pkcs7.sha1 not supported\n");
-        return false;
-    case adbe_pkcs7_detached:
-        vObj.dictAdd("SubFilter", Object(objName, "adbe.pkcs7.detached"));
-        break;
-    case ETSI_CAdES_detached:
-        vObj.dictAdd("SubFilter", Object(objName, "ETSI.CAdES.detached"));
-        break;
-    }
+    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
+    vObj.dictAdd("SubFilter", Object(objName, "adbe.pkcs7.detached"));
     vObj.dictAdd("Name", Object(name.copy()));
-    vObj.dictAdd("Location", Object(new GooString("unknown")));
     GooString *date = timeToDateString(nullptr);
     vObj.dictAdd("M", Object(date));
     if (reason.getLength() > 0)
@@ -746,7 +727,6 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
     vObj.dictAdd("ByteRange", bObj.copy());
     obj.dictSet("V", Object(vRef));
-    obj.dictSet("DV", Object(vRef));
     xref->setModifiedObject(&obj, ref);
     return true;
 }
@@ -1939,7 +1919,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unknown_signature_type), signature(nullptr), content(nullptr)
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unknown_signature_type), signature(nullptr)
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -1949,7 +1929,6 @@ FormFieldSignature::~FormFieldSignature()
 {
     delete signature_info;
     delete signature;
-    delete content;
 }
 
 void FormFieldSignature::setSignature(const GooString &sig)
@@ -1958,20 +1937,14 @@ void FormFieldSignature::setSignature(const GooString &sig)
     signature = sig.copy();
 }
 
-const GooString *FormFieldSignature::getAppearanceContent() const
+const GooString &FormFieldSignature::getCustomAppearanceContent() const
 {
-    if (!certificate_info)
-        return nullptr;
-    if (!content)
-        content = new GooString();
+    return customAppearanceContent;
+}
 
-    // TODO perhaps add a few more things?
-    content->Set("Signed by: ");
-    content->append(certificate_info->getSubjectInfo().commonName.c_str());
-    content->append("\n\n");
-    content->append(timeToDateString(nullptr));
-
-    return content;
+void FormFieldSignature::setCustomAppearanceContent(const GooString &s)
+{
+    customAppearanceContent = GooString(s.toStr());
 }
 
 void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo)

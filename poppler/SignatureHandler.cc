@@ -686,6 +686,8 @@ static GooString *getDefaultFirefoxCertDB_Linux()
     return nullptr;
 }
 
+std::string SignatureHandler::sNssDir;
+
 /**
  * Initialise NSS
  */
@@ -708,17 +710,21 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
     bool initSuccess = false;
     if (nssDir.getLength() > 0) {
         initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
+        sNssDir = nssDir.toStr();
     } else {
         GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
         if (certDBPath == nullptr) {
             initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
+            sNssDir = "sql:/etc/pki/nssdb";
         } else {
             initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
+            sNssDir = certDBPath->toStr();
         }
         if (!initSuccess) {
             GooString homeNssDb(getenv("HOME"));
             homeNssDb.append("/.pki/nssdb");
             initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
+            sNssDir = homeNssDb.toStr();
             if (!initSuccess) {
                 NSS_NoDB_Init(nullptr);
             }
@@ -730,6 +736,18 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         // Make sure NSS root certificates module is loaded
         SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
     }
+}
+
+std::string SignatureHandler::getNSSDir()
+{
+    return sNssDir;
+}
+
+static std::function<char *(const char *)> PasswordFunction;
+
+void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+{
+    PasswordFunction = f;
 }
 
 SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
@@ -790,8 +808,6 @@ SignatureHandler::~SignatureHandler()
     if (CMSMessage)
         NSS_CMSMessage_Destroy(CMSMessage);
 
-    if (signing_cert)
-        CERT_DestroyCertificate(signing_cert);
     if (hash_context)
         HASH_Destroy(hash_context);
 
@@ -985,29 +1001,28 @@ GooString *SignatureHandler::signDetached(const char *password)
     /////////////////////////////////////
     /// Code from LibreOffice under MPLv2
     /////////////////////////////////////
-    NSSCMSSignedData *cms_sd;
-    NSSCMSSignerInfo *cms_signer;
 
-    NSSCMSMessage *result = NSS_CMSMessage_Create(nullptr);
-    if (!result)
+    NSSCMSMessage *cms_msg = NSS_CMSMessage_Create(nullptr);
+    if (!cms_msg)
         return nullptr;
 
-    cms_sd = NSS_CMSSignedData_Create(result);
+    NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg);
     if (!cms_sd)
         return nullptr;
 
-    NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(result);
-    if (NSS_CMSContentInfo_SetContent_SignedData(result, cms_cinfo, cms_sd) != SECSuccess)
+    NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg);
+
+    if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg, cms_cinfo, cms_sd) != SECSuccess)
         return nullptr;
 
     cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
 
     // Attach NULL data as detached data
-    if (NSS_CMSContentInfo_SetContent_Data(result, cms_cinfo, nullptr, PR_TRUE) != SECSuccess)
+    if (NSS_CMSContentInfo_SetContent_Data(cms_msg, cms_cinfo, nullptr, PR_TRUE) != SECSuccess)
         return nullptr;
 
     // hardcode SHA256 these days...
-    cms_signer = NSS_CMSSignerInfo_Create(result, signing_cert, SEC_OID_SHA256);
+    NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg, signing_cert, SEC_OID_SHA256);
     if (!cms_signer)
         return nullptr;
 
@@ -1022,8 +1037,6 @@ GooString *SignatureHandler::signDetached(const char *password)
 
     if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess)
         return nullptr;
-
-    // TODO add the TSA time stamping code, too?
 
     // Add the signing certificate as a signed attribute.
     ESSCertIDv2 *aCertIDs[2];
@@ -1057,6 +1070,7 @@ GooString *SignatureHandler::signDetached(const char *password)
     aCertIDs[1] = nullptr;
     SigningCertificateV2 aCertificate;
     aCertificate.certs = &aCertIDs[0];
+
     SECItem *pEncodedCertificate = SEC_ASN1EncodeItem(nullptr, nullptr, &aCertificate, SigningCertificateV2Template);
     if (!pEncodedCertificate)
         return nullptr;
@@ -1097,9 +1111,8 @@ GooString *SignatureHandler::signDetached(const char *password)
     cms_output.data = nullptr;
     cms_output.len = 0;
     PLArenaPool *arena = PORT_NewArena(10000);
-    NSSCMSEncoderContext *cms_ecx;
 
-    cms_ecx = NSS_CMSEncoder_Start(result, nullptr, nullptr, &cms_output, arena, passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
+    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg, nullptr, nullptr, &cms_output, arena, passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx)
         return nullptr;
 
@@ -1109,15 +1122,24 @@ GooString *SignatureHandler::signDetached(const char *password)
     GooString *signature = new GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
-    NSS_CMSMessage_Destroy(result);
+    NSS_CMSMessage_Destroy(cms_msg);
 
     return signature;
+}
+
+static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
+{
+    const char *name = PK11_GetTokenName(slot);
+    if (PasswordFunction) {
+        return PasswordFunction(name);
+    }
+    return nullptr;
 }
 
 std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates()
 {
     // set callback, in case one of the slots has a password set
-    // PK11_SetPasswordFunc( GetPasswordFunction );
+    PK11_SetPasswordFunc(GetPasswordFunction);
     setNSSDir({});
 
     std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
@@ -1150,7 +1172,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
         }
     }
 
-    // PK11_SetPasswordFunc( nullptr );
+    PK11_SetPasswordFunc(nullptr);
 
     return certsList;
 }

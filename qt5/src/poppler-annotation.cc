@@ -13,6 +13,7 @@
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -40,7 +41,6 @@
 
 // local includes
 #include "poppler-annotation.h"
-#include "poppler-form.h"
 #include "poppler-link.h"
 #include "poppler-qt5.h"
 #include "poppler-annotation-helper.h"
@@ -96,9 +96,6 @@ Annotation *AnnotationUtils::createAnnotation(const QDomElement &annElement)
         break;
     case Annotation::ACaret:
         annotation = new CaretAnnotation(annElement);
-        break;
-    case Annotation::AWidget:
-        annotation = new WidgetAnnotation(annElement);
         break;
     }
 
@@ -203,7 +200,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
 
 // Returns matrix to convert from user space coords (oriented according to the
 // specified rotation) to normalized coords
-void AnnotationPrivate::fillNormalizationMTX(double MTX[6], int pageRotation) const
+void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotation)
 {
     Q_ASSERT(pdfPage);
 
@@ -241,7 +238,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
 
     if (pageRotate == 0 || (pdfAnnot->getFlags() & Annot::flagNoRotate) == 0) {
         // Use the normalization matrix for this page's rotation
-        fillNormalizationMTX(MTX, pageRotate);
+        fillNormalizationMTX(pdfPage, MTX, pageRotate);
     } else {
         // Clients expect coordinates relative to this page's rotation, but
         // FixedRotation annotations internally use unrotated coordinates:
@@ -249,7 +246,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
         // top-left corner as rotation pivot
 
         double MTXnorm[6];
-        fillNormalizationMTX(MTXnorm, pageRotate);
+        fillNormalizationMTX(pdfPage, MTXnorm, pageRotate);
 
         QTransform transform(MTXnorm[0], MTXnorm[1], MTXnorm[2], MTXnorm[3], MTXnorm[4], MTXnorm[5]);
         transform.translate(+pdfAnnot->getXMin(), +pdfAnnot->getYMax());
@@ -300,7 +297,7 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
 // the transformation produced by fillTransformationMTX, but we can't use
 // fillTransformationMTX here because it relies on the native annotation
 // object's boundary rect to be already set up.
-PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags)
 {
     Q_ASSERT(pdfPage);
 
@@ -315,7 +312,7 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
     const int pageRotate = pdfPage->getRotate();
 
     double MTX[6];
-    fillNormalizationMTX(MTX, pageRotate);
+    fillNormalizationMTX(pdfPage, MTX, pageRotate);
 
     double tl_x, tl_y, br_x, br_y, swp;
     XPDFReader::invTransform(MTX, r.topLeft(), tl_x, tl_y);
@@ -345,6 +342,11 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
         return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
     else // rotationFixUp == 270
         return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
+}
+
+PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+{
+    return Poppler::boundaryToPdfRectangle(pdfPage, r, rFlags);
 }
 
 AnnotPath *AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) const
@@ -4202,7 +4204,6 @@ class WidgetAnnotationPrivate : public AnnotationPrivate
 public:
     Annotation *makeAlias() override;
     Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
-    FormWidget *formWidget();
 };
 
 Annotation *WidgetAnnotationPrivate::makeAlias()
@@ -4212,41 +4213,12 @@ Annotation *WidgetAnnotationPrivate::makeAlias()
 
 Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    WidgetAnnotation *w = static_cast<WidgetAnnotation *>(makeAlias());
-
-    // Set page and document
-    pdfPage = destPage;
-    parentDoc = doc;
-
-    // Set pdfAnnot
-    DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(10.0), std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::red)) } };
-    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da, std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::red)) }, std::unique_ptr<AnnotColor> { convertQColor(QColor(240, 240, 240)) });
-
-    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(1.5);
-    pdfAnnot->setBorder(std::move(border));
-
-    delete w;
-    return pdfAnnot;
+    return nullptr; // Not implemented
 }
-
-::FormWidget *WidgetAnnotationPrivate::formWidget()
-{
-    ::FormWidget *fw = nullptr;
-    AnnotWidget *widgetann = dynamic_cast<AnnotWidget *>(pdfAnnot);
-
-    if (widgetann)
-        fw = widgetann->getFormWidget();
-
-    return fw;
-}
-
-WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
 
 WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd) : Annotation(dd) { }
 
-WidgetAnnotation::WidgetAnnotation(const QDomNode &node) : Annotation(*new WidgetAnnotationPrivate(), node) { }
+WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
 
 WidgetAnnotation::~WidgetAnnotation() { }
 
@@ -4269,12 +4241,6 @@ Link *WidgetAnnotation::additionalAction(AdditionalActionType type) const
 {
     Q_D(const WidgetAnnotation);
     return d->additionalAction(type);
-}
-
-::FormWidget *WidgetAnnotation::getFormWidget()
-{
-    Q_D(WidgetAnnotation);
-    return d->formWidget();
 }
 
 /** RichMediaAnnotation [Annotation] */

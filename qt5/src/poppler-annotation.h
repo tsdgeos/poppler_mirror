@@ -9,6 +9,7 @@
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2020, Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -42,8 +43,6 @@
 #include <QtGui/QFont>
 #include <QtXml/QDomDocument>
 #include "poppler-export.h"
-
-class FormWidget;
 
 namespace Poppler {
 
@@ -1084,15 +1083,12 @@ private:
  */
 class POPPLER_QT5_EXPORT WidgetAnnotation : public Annotation
 {
-    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
-    WidgetAnnotation();
     ~WidgetAnnotation() override;
 
     SubType subType() const override;
-    ::FormWidget *getFormWidget();
 
     /**
      * Returns the additional action of the given @p type fo the annotation or
@@ -1103,7 +1099,7 @@ public:
     Link *additionalAction(AdditionalActionType type) const;
 
 private:
-    WidgetAnnotation(const QDomNode &node);
+    WidgetAnnotation();
     WidgetAnnotation(WidgetAnnotationPrivate &dd);
     void store(QDomNode &parentNode, QDomDocument &document) const override; // stub
     Q_DECLARE_PRIVATE(WidgetAnnotation)

@@ -1090,8 +1090,6 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
     }
 }
 
-AnnotAppearanceCharacs::AnnotAppearanceCharacs(std::unique_ptr<AnnotColor> &&_borderColor, std::unique_ptr<AnnotColor> &&_backColor) : borderColor(std::move(_borderColor)), backColor(std::move(_backColor)) { }
-
 AnnotAppearanceCharacs::~AnnotAppearanceCharacs() = default;
 
 //------------------------------------------------------------------------
@@ -2850,8 +2848,7 @@ static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontResDict, const char *r
 
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
-    fontDict->add("Subtype", Object(objName, "Type0"));
-    fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
+    fontDict->add("Subtype", Object(objName, "Type1"));
 
     Dict *fontsDict = new Dict(xref);
     fontsDict->add(resourceName, Object(fontDict));
@@ -3755,7 +3752,6 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj) :
 {
     type = typeWidget;
     field = nullptr;
-    formWidget = nullptr;
     initialize(docA, annotObj.getDict());
 }
 
@@ -3763,37 +3759,7 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
 {
     type = typeWidget;
     field = fieldA;
-    formWidget = nullptr;
     initialize(docA, dictObject->getDict());
-}
-
-AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppearance &da, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backColor) : Annot(docA, rectA)
-{
-    type = typeWidget;
-    flags |= flagPrint | flagLocked;
-
-    annotObj.dictSet("Subtype", Object(objName, "Widget"));
-    annotObj.dictSet("FT", Object(objName, "Sig"));
-    annotObj.dictSet("F", Object(int(flags)));
-
-    GooString *daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(daStr));
-
-    Catalog *catalog = doc->getCatalog();
-    catalog->setAcroForm(ref);
-
-    appearCharacs = std::make_unique<AnnotAppearanceCharacs>(std::move(borderColor), std::move(backColor));
-
-    initialize(docA, annotObj.getDict());
-
-    field = new FormFieldSignature(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
-    formWidget = field->getWidget(field->getNumWidgets() - 1);
-    formWidget->setWidgetAnnotation(this);
-
-    bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
-                                           // the dingbats resource we should not need it now
-    generateFieldAppearance(&dummyAddDingbatsResource);
-    updateAppearanceStream();
 }
 
 AnnotWidget::~AnnotWidget() = default;
@@ -4926,8 +4892,8 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
                                                     const PDFRectangle *rect, XRef *xref, Dict *appearDict)
 {
     DefaultAppearance da(const_cast<GooString *>(_da));
-    const GooString *contents_ = field->getAppearanceContent();
-    if (!contents_)
+    const GooString &contents = field->getCustomAppearanceContent();
+    if (contents.toStr().empty())
         return false;
 
     double borderWidth = 0;
@@ -4962,10 +4928,10 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     int i = 0;
     double xposPrev = 0;
-    while (i < contents_->getLength()) {
+    while (i < contents.getLength()) {
         GooString out;
         double linewidth, xpos;
-        Annot::layoutText(contents_, &out, &i, font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
+        Annot::layoutText(&contents, &out, &i, font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
         linewidth *= da.getFontPtSize();
         xpos = 0;
         appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());

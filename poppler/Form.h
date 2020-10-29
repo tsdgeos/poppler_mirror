@@ -23,6 +23,7 @@
 // Copyright 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 //========================================================================
 
@@ -610,7 +611,9 @@ public:
     FormSignatureType getSignatureType() const { return signature_type; }
     void setSignatureType(FormSignatureType t) { signature_type = t; }
 
-    const GooString *getAppearanceContent() const;
+    const GooString &getCustomAppearanceContent() const;
+    void setCustomAppearanceContent(const GooString &s);
+
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
 private:
@@ -621,8 +624,8 @@ private:
     Object byte_range;
     GooString *signature;
     SignatureInfo *signature_info;
+    GooString customAppearanceContent;
     std::unique_ptr<X509CertificateInfo> certificate_info;
-    mutable GooString *content;
 
     void print(int indent) override;
 };

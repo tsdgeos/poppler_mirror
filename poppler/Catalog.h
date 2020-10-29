@@ -30,6 +30,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -204,7 +205,7 @@ public:
     Object *getOutline();
 
     Object *getAcroForm() { return &acroForm; }
-    void setAcroForm(const Ref formRef);
+    void addFormToAcroForm(const Ref formRef);
 
     OCGs *getOptContentConfig() { return optContent; }
 

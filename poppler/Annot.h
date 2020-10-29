@@ -488,7 +488,6 @@ public:
     };
 
     AnnotAppearanceCharacs(Dict *dict);
-    AnnotAppearanceCharacs(std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backColor);
     ~AnnotAppearanceCharacs();
 
     AnnotAppearanceCharacs(const AnnotAppearanceCharacs &) = delete;
@@ -496,7 +495,9 @@ public:
 
     int getRotation() const { return rotation; }
     const AnnotColor *getBorderColor() const { return borderColor.get(); }
+    void setBorderColor(std::unique_ptr<AnnotColor> &&color) { borderColor = std::move(color); }
     const AnnotColor *getBackColor() const { return backColor.get(); }
+    void setBackColor(std::unique_ptr<AnnotColor> &&color) { backColor = std::move(color); }
     const GooString *getNormalCaption() const { return normalCaption.get(); }
     const GooString *getRolloverCaption() { return rolloverCaption.get(); }
     const GooString *getAlternateCaption() { return alternateCaption.get(); }
@@ -1413,7 +1414,6 @@ public:
         highlightModePush // P,T
     };
 
-    AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backColor);
     AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj);
     AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
     ~AnnotWidget() override;
@@ -1426,11 +1426,11 @@ public:
 
     AnnotWidgetHighlightMode getMode() { return mode; }
     AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
+    void setAppearCharacs(std::unique_ptr<AnnotAppearanceCharacs> &&appearCharacsA) { appearCharacs = std::move(appearCharacsA); }
     LinkAction *getAction() { return action.get(); } // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
     std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);
     Dict *getParent() { return parent; }
-    FormWidget *getFormWidget() { return formWidget; }
     void setNewAppearance(Object &&newAppearance);
 
     bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
@@ -1442,7 +1442,6 @@ private:
 
     Form *form;
     FormField *field; // FormField object for this annotation
-    FormWidget *formWidget;
     AnnotWidgetHighlightMode mode; // H  (Default I)
     std::unique_ptr<AnnotAppearanceCharacs> appearCharacs; // MK
     std::unique_ptr<LinkAction> action; // A

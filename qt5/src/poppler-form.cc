@@ -593,6 +593,11 @@ public:
     bool is_null;
 };
 
+CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
+{
+    d_ptr->is_null = true;
+}
+
 CertificateInfo::CertificateInfo(CertificateInfoPrivate *priv) : d_ptr(priv) { }
 
 CertificateInfo::CertificateInfo(const CertificateInfo &other) : d_ptr(other.d_ptr) { }
@@ -907,67 +912,6 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     return sigType;
 }
 
-void FormFieldSignature::setSignatureType(SignatureType type)
-{
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    switch (type) {
-    case UnknownSignatureType:
-        fws->setSignatureType(unknown_signature_type);
-        break;
-    case AdbePkcs7sha1:
-        fws->setSignatureType(adbe_pkcs7_sha1);
-        break;
-    case AdbePkcs7detached:
-        fws->setSignatureType(adbe_pkcs7_detached);
-        break;
-    case EtsiCAdESdetached:
-        fws->setSignatureType(ETSI_CAdES_detached);
-        break;
-    }
-}
-
-bool FormFieldSignature::sign(const QString &saveFilename, const QString &certNickname, const QString &password, DigestAlgorithm digestAlg, const QString &reason)
-{
-#ifdef ENABLE_NSS3
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    const char *digest = nullptr;
-    const char *rs = nullptr;
-    char *pw = password.isEmpty() ? nullptr : strdup(password.toUtf8().constData());
-    char *name = strdup(certNickname.toUtf8().constData());
-    char *filename = strdup(saveFilename.toUtf8().constData());
-    switch (digestAlg) {
-    case SHA1:
-        digest = "SHA1";
-        break;
-    case SHA256:
-        digest = "SHA256";
-        break;
-    case SHA384:
-        digest = "SHA384";
-        break;
-    case SHA512:
-        digest = "SHA512";
-        break;
-    default:
-        digest = "SHA256";
-        break;
-    }
-    if (!reason.isEmpty())
-        rs = reason.toUtf8().constData();
-    bool ok = fws->signDocument(filename, name, digest, pw, rs);
-    free(name);
-    free(pw);
-    return ok;
-#else
-    (void)saveFilename;
-    (void)certNickname;
-    (void)password;
-    (void)digestAlg;
-    (void)reason;
-    return false;
-#endif
-}
-
 SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
 {
     return validate(opt, QDateTime());
@@ -1097,7 +1041,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     return SignatureValidationInfo(priv);
 }
 
-QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
+QVector<CertificateInfo> getAvailableSigningCertificates()
 {
     QVector<CertificateInfo> vReturnCerts;
 
@@ -1113,16 +1057,40 @@ QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
     return vReturnCerts;
 }
 
-void POPPLER_QT5_EXPORT setNSSDir(const QString &path)
+QString POPPLER_QT5_EXPORT getNSSDir()
+{
+#ifdef ENABLE_NSS3
+    return QString::fromLocal8Bit(SignatureHandler::getNSSDir().c_str());
+#else
+    return QString();
+#endif
+}
+
+void setNSSDir(const QString &path)
 {
 #ifdef ENABLE_NSS3
     if (path.isEmpty())
         return;
 
-    GooString *goo = QStringToGooString(QUrl(path).toLocalFile());
+    GooString *goo = QStringToGooString(path);
     SignatureHandler::setNSSDir(*goo);
+    delete goo;
 #else
     (void)path;
+#endif
+}
+
+namespace {
+std::function<QString(const QString &)> nssPasswordCall;
+}
+
+void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+{
+#ifdef ENABLE_NSS3
+    SignatureHandler::setNSSPasswordCallback(f);
+#else
+    qWarning() << "setNSSPasswordCallback called but this poppler is built without NSS support";
+    (void)f;
 #endif
 }
 

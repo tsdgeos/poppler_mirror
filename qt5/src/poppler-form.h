@@ -31,6 +31,7 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
+#include <functional>
 #include <memory>
 #include <ctime>
 #include <QtCore/QDateTime>
@@ -530,6 +531,7 @@ public:
         Organization,
     };
 
+    CertificateInfo();
     CertificateInfo(CertificateInfoPrivate *priv);
     ~CertificateInfo();
 
@@ -560,6 +562,8 @@ public:
 
     /**
       The certificate internal database nickname
+
+      \since 20.12
      */
     QString nickName() const;
 
@@ -778,14 +782,6 @@ public:
         ValidateForceRevalidation = 2, ///< Force revalidation of the certificate.
     };
 
-    enum DigestAlgorithm
-    {
-        SHA1 = 1,
-        SHA256 = 2,
-        SHA384 = 3,
-        SHA512 = 4,
-    };
-
     /// \cond PRIVATE
     FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w);
     /// \endcond
@@ -798,19 +794,6 @@ public:
         \since 0.58
     */
     SignatureType signatureType() const;
-
-    void setSignatureType(SignatureType type);
-
-    /**
-        Sign the whole document in this signature field.
-
-        @param certNickname nickname of the signing certificate in the mozilla database
-        @param password     password to unlock the private key
-                            (may be empty if no password is set)
-        @param digestAlg    digest algorithm to be used in the signature
-        @param reason       a reason for the signature written to the signature field
-      */
-    bool sign(const QString &saveFilename, const QString &certNickname, const QString &password, DigestAlgorithm digestAlg = SHA256, const QString &reason = QString());
 
     /**
       Validate the signature with now as validation time.
@@ -834,13 +817,31 @@ private:
 
 /**
   Return vector of suitable signing certificates
+
+  \since 20.12
 */
 QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
 
 /**
-  Set non-standard NSS CertDB directory (as a file URL)
+  Gets the current NSS CertDB directory
+
+  \since 20.12
+*/
+QString POPPLER_QT5_EXPORT getNSSDir();
+
+/**
+  Set a custom NSS CertDB directory. Needs to be called before doing any other signature operation
+
+  \since 20.12
 */
 void POPPLER_QT5_EXPORT setNSSDir(const QString &pathURL);
+
+/**
+  Sets the callback for NSS password requests
+
+  \since 20.12
+*/
+void POPPLER_QT5_EXPORT setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 }
 
 #endif

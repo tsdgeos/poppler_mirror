@@ -24,6 +24,7 @@
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +64,6 @@ class AnnotMovie;
 */
 namespace Poppler {
 
-class Annotation;
 class Document;
 class DocumentData;
 
@@ -2130,19 +2130,84 @@ public:
     PDFOptions pdfOptions() const;
 
     /**
-               Sign PDF at given Annotation / signature form
+     * Holds data for a new signature
+     *  - Common Name of cert to sign (aka nickname)
+     *  - password for the cert
+     *  - page where to add the signature
+     *  - rect for the signature annotation
+     *  - text that will be shown inside the rect
+     *  - font size and color
+     *  - border and background color
+     * \since 20.12
+     */
+    class NewSignatureData
+    {
+    public:
+        NewSignatureData();
+        ~NewSignatureData();
+        NewSignatureData(const NewSignatureData &) = delete;
+        NewSignatureData &operator=(const NewSignatureData &) = delete;
 
-               \param pWhichAnnotation ptr to signature form
-               \param certCN Common Name of cert to sign (aka nickname)
-               \param digestName if empty, defaults to SHA256. otherwise specifies digest algo
-               \param password password for cert
-               \param reason optional reason for the signature
+        QString certNickname() const;
+        void setCertNickname(const QString &certNickname);
 
-               \return whether the signing succeeded
+        QString password() const;
+        void setPassword(const QString &password);
 
-               \since 0.81
-            */
-    bool sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &digestName, const QString &password, const QString &reason);
+        int page() const;
+        void setPage(int page);
+
+        QRectF boundingRectangle() const;
+        void setBoundingRectangle(const QRectF &rect);
+
+        QString signatureText() const;
+        void setSignatureText(const QString &text);
+
+        /**
+         * Default: 10
+         */
+        double fontSize() const;
+        void setFontSize(double fontSize);
+
+        /**
+         * Default: red
+         */
+        QColor fontColor() const;
+        void setFontColor(const QColor &color);
+
+        /**
+         * Default: red
+         */
+        QColor borderColor() const;
+        void setBorderColor(const QColor &color);
+
+        /**
+         * Default: QColor(240, 240, 240)
+         */
+        QColor backgroundColor() const;
+        void setBackgroundColor(const QColor &color);
+
+        /**
+         * Default: QUuid::createUuid().toString()
+         */
+        QString fieldPartialName() const;
+        void setFieldPartialName(const QString &name);
+
+    private:
+        struct NewSignatureDataPrivate;
+        NewSignatureDataPrivate *const d;
+    };
+
+    /**
+        Sign PDF at given Annotation / signature form
+
+        \param data new signature data
+
+        \return whether the signing succeeded
+
+        \since 20.12
+    */
+    bool sign(const NewSignatureData &data);
 
     bool convert() override;
 

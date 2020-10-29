@@ -21,7 +21,9 @@
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
-#include "vector"
+
+#include <vector>
+#include <functional>
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -65,6 +67,11 @@ public:
     // If wanted, this has to be called before doing signature validation calls
     static void setNSSDir(const GooString &nssDir);
 
+    // Gets the currently in use NSS dir
+    static std::string getNSSDir();
+
+    static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
+
 private:
     typedef struct
     {
@@ -97,6 +104,8 @@ private:
     NSSCMSSignerInfo *CMSSignerInfo;
     CERTCertificate *signing_cert;
     CERTCertificate **temp_certs;
+
+    static std::string sNssDir;
 };
 
 #endif

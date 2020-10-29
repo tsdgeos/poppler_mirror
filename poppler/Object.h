@@ -24,6 +24,7 @@
 // Copyright (C) 2016, 2020 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -191,14 +192,14 @@ public:
     }
     Object(ObjType typeA, GooString *stringA)
     {
-        assert(typeA == objName || typeA == objCmd || typeA == objHexString);
+        assert(typeA == objHexString);
         assert(stringA);
         type = typeA;
         string = stringA;
     }
     Object(ObjType typeA, const char *stringA)
     {
-        assert(typeA == objName || typeA == objCmd || typeA == objHexString);
+        assert(typeA == objName || typeA == objCmd);
         assert(stringA);
         type = typeA;
         cString = copyString(stringA);
@@ -299,7 +300,7 @@ public:
         CHECK_NOT_DEAD;
         return type == objString;
     }
-    bool isHexString()
+    bool isHexString() const
     {
         CHECK_NOT_DEAD;
         return type == objHexString;
