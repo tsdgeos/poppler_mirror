@@ -1,5 +1,5 @@
 /* poppler-link.cc: qt interface to poppler
- * Copyright (C) 2006-2007, 2013, 2016-2019, Albert Astals Cid
+ * Copyright (C) 2006-2007, 2013, 2016-2020, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -69,47 +69,64 @@ LinkDestinationPrivate::LinkDestinationPrivate()
     changeZoom = false;
 }
 
+LinkPrivate::~LinkPrivate()
+{
+    qDeleteAll(nextLinks);
+}
+
+LinkOCGStatePrivate::~LinkOCGStatePrivate() = default;
+
+LinkHidePrivate::~LinkHidePrivate() = default;
+
 class LinkGotoPrivate : public LinkPrivate
 {
 public:
     LinkGotoPrivate(const QRectF &area, const LinkDestination &dest);
+    ~LinkGotoPrivate() override;
 
     QString extFileName;
     LinkDestination destination;
 };
 
 LinkGotoPrivate::LinkGotoPrivate(const QRectF &area, const LinkDestination &dest) : LinkPrivate(area), destination(dest) { }
+LinkGotoPrivate::~LinkGotoPrivate() = default;
 
 class LinkExecutePrivate : public LinkPrivate
 {
 public:
     LinkExecutePrivate(const QRectF &area);
+    ~LinkExecutePrivate() override;
 
     QString fileName;
     QString parameters;
 };
 
 LinkExecutePrivate::LinkExecutePrivate(const QRectF &area) : LinkPrivate(area) { }
+LinkExecutePrivate::~LinkExecutePrivate() = default;
 
 class LinkBrowsePrivate : public LinkPrivate
 {
 public:
     LinkBrowsePrivate(const QRectF &area);
+    ~LinkBrowsePrivate() override;
 
     QString url;
 };
 
 LinkBrowsePrivate::LinkBrowsePrivate(const QRectF &area) : LinkPrivate(area) { }
+LinkBrowsePrivate::~LinkBrowsePrivate() = default;
 
 class LinkActionPrivate : public LinkPrivate
 {
 public:
     LinkActionPrivate(const QRectF &area);
+    ~LinkActionPrivate() override;
 
     LinkAction::ActionType type;
 };
 
 LinkActionPrivate::LinkActionPrivate(const QRectF &area) : LinkPrivate(area) { }
+LinkActionPrivate::~LinkActionPrivate() = default;
 
 class LinkSoundPrivate : public LinkPrivate
 {
@@ -174,16 +191,19 @@ class LinkJavaScriptPrivate : public LinkPrivate
 {
 public:
     LinkJavaScriptPrivate(const QRectF &area);
+    ~LinkJavaScriptPrivate() override;
 
     QString js;
 };
 
 LinkJavaScriptPrivate::LinkJavaScriptPrivate(const QRectF &area) : LinkPrivate(area) { }
+LinkJavaScriptPrivate::~LinkJavaScriptPrivate() = default;
 
 class LinkMoviePrivate : public LinkPrivate
 {
 public:
     LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref reference);
+    ~LinkMoviePrivate() override;
 
     LinkMovie::Operation operation;
     QString annotationTitle;
@@ -191,6 +211,8 @@ public:
 };
 
 LinkMoviePrivate::LinkMoviePrivate(const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref reference) : LinkPrivate(area), operation(_operation), annotationTitle(title), annotationReference(reference) { }
+
+LinkMoviePrivate::~LinkMoviePrivate() = default;
 
 static void cvtUserToDev(::Page *page, double xu, double yu, int *xd, int *yd)
 {

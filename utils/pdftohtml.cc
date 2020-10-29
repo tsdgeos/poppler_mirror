@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -144,7 +144,7 @@ class SplashOutputDevNoText : public SplashOutputDev
 public:
     SplashOutputDevNoText(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true)
         : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
-    ~SplashOutputDevNoText() override { }
+    ~SplashOutputDevNoText() override;
 
     void drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen) override { }
     bool beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen) override { return false; }
@@ -153,6 +153,9 @@ public:
     void endTextObject(GfxState *state) override { }
     bool interpretType3Chars() override { return false; }
 };
+
+SplashOutputDevNoText::~SplashOutputDevNoText() = default;
+
 #endif
 
 int main(int argc, char *argv[])

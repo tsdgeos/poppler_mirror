@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -4517,11 +4517,7 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
 public:
     RichMediaAnnotationPrivate() : settings(nullptr), content(nullptr) { }
 
-    ~RichMediaAnnotationPrivate() override
-    {
-        delete settings;
-        delete content;
-    }
+    ~RichMediaAnnotationPrivate() override;
 
     Annotation *makeAlias() override { return new RichMediaAnnotation(*this); }
 
@@ -4536,6 +4532,12 @@ public:
     RichMediaAnnotation::Settings *settings;
     RichMediaAnnotation::Content *content;
 };
+
+RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()
+{
+    delete settings;
+    delete content;
+}
 
 RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotationPrivate()) { }
 

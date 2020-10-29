@@ -344,11 +344,15 @@ void AnnotPath::parsePathArray(Array *array)
 
 AnnotCalloutLine::AnnotCalloutLine(double x1, double y1, double x2, double y2) : coord1(x1, y1), coord2(x2, y2) { }
 
+AnnotCalloutLine::~AnnotCalloutLine() = default;
+
 //------------------------------------------------------------------------
 // AnnotCalloutMultiLine
 //------------------------------------------------------------------------
 
 AnnotCalloutMultiLine::AnnotCalloutMultiLine(double x1, double y1, double x2, double y2, double x3, double y3) : AnnotCalloutLine(x1, y1, x2, y2), coord3(x3, y3) { }
+
+AnnotCalloutMultiLine::~AnnotCalloutMultiLine() = default;
 
 //------------------------------------------------------------------------
 // AnnotQuadrilateral

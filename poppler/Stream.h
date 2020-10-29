@@ -719,14 +719,14 @@ class MemStream : public BaseMemStream<const char>
 {
 public:
     MemStream(const char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
+    ~MemStream() override;
 };
 
 class AutoFreeMemStream : public BaseMemStream<char>
 {
 public:
     AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
-
-    ~AutoFreeMemStream() override { gfree(buf); }
+    ~AutoFreeMemStream() override;
 };
 
 //------------------------------------------------------------------------

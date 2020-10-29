@@ -1070,13 +1070,15 @@ class SplashOutFontFileID : public SplashFontFileID
 public:
     SplashOutFontFileID(const Ref *rA) { r = *rA; }
 
-    ~SplashOutFontFileID() override { }
+    ~SplashOutFontFileID() override;
 
     bool matches(SplashFontFileID *id) override { return ((SplashOutFontFileID *)id)->r == r; }
 
 private:
     Ref r;
 };
+
+SplashOutFontFileID::~SplashOutFontFileID() = default;
 
 //------------------------------------------------------------------------
 // T3FontCache

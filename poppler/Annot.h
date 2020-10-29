@@ -140,7 +140,7 @@ class AnnotCalloutLine
 {
 public:
     AnnotCalloutLine(double x1, double y1, double x2, double y2);
-    virtual ~AnnotCalloutLine() { }
+    virtual ~AnnotCalloutLine();
 
     AnnotCalloutLine(const AnnotCalloutLine &) = delete;
     AnnotCalloutLine &operator=(const AnnotCalloutLine &other) = delete;
@@ -162,6 +162,7 @@ class AnnotCalloutMultiLine : public AnnotCalloutLine
 {
 public:
     AnnotCalloutMultiLine(double x1, double y1, double x2, double y2, double x3, double y3);
+    ~AnnotCalloutMultiLine() override;
 
     double getX3() const { return coord3.getX(); }
     double getY3() const { return coord3.getY(); }

@@ -1,6 +1,6 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2009, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2009, 2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +33,14 @@ class PDFConverterPrivate : public BaseConverterPrivate
 {
 public:
     PDFConverterPrivate();
+    ~PDFConverterPrivate() override;
 
     PDFConverter::PDFOptions opts;
 };
 
 PDFConverterPrivate::PDFConverterPrivate() : BaseConverterPrivate() { }
+
+PDFConverterPrivate::~PDFConverterPrivate() = default;
 
 PDFConverter::PDFConverter(DocumentData *document) : BaseConverter(*new PDFConverterPrivate())
 {

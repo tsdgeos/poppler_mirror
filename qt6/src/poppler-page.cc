@@ -113,6 +113,8 @@ public:
     {
     }
 
+    ~Qt6SplashOutputDev() override;
+
     void dump() override
     {
         if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
@@ -164,10 +166,13 @@ private:
     bool ignorePaperColor;
 };
 
+Qt6SplashOutputDev::~Qt6SplashOutputDev() = default;
+
 class QImageDumpingQPainterOutputDev : public QPainterOutputDev, public OutputDevCallbackHelper
 {
 public:
     QImageDumpingQPainterOutputDev(QPainter *painter, QImage *i) : QPainterOutputDev(painter), image(i) { }
+    ~QImageDumpingQPainterOutputDev() override;
 
     void dump() override
     {
@@ -179,6 +184,8 @@ public:
 private:
     QImage *image;
 };
+
+QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
 Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
 {

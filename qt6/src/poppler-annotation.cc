@@ -3450,11 +3450,7 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
 public:
     RichMediaAnnotationPrivate() : settings(nullptr), content(nullptr) { }
 
-    ~RichMediaAnnotationPrivate() override
-    {
-        delete settings;
-        delete content;
-    }
+    ~RichMediaAnnotationPrivate() override;
 
     Annotation *makeAlias() override { return new RichMediaAnnotation(*this); }
 
@@ -3469,6 +3465,12 @@ public:
     RichMediaAnnotation::Settings *settings;
     RichMediaAnnotation::Content *content;
 };
+
+RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()
+{
+    delete settings;
+    delete content;
+}
 
 RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotationPrivate()) { }
 

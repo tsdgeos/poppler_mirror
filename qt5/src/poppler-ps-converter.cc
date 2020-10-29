@@ -1,5 +1,5 @@
 /* poppler-ps-converter.cc: qt interface to poppler
- * Copyright (C) 2007, 2009, 2010, 2015, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2007, 2009, 2010, 2015, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
@@ -41,6 +41,7 @@ class PSConverterPrivate : public BaseConverterPrivate
 {
 public:
     PSConverterPrivate();
+    ~PSConverterPrivate() override;
 
     QList<int> pageList;
     QString title;
@@ -74,6 +75,8 @@ PSConverterPrivate::PSConverterPrivate()
       pageConvertedPayload(nullptr)
 {
 }
+
+PSConverterPrivate::~PSConverterPrivate() = default;
 
 PSConverter::PSConverter(DocumentData *document) : BaseConverter(*new PSConverterPrivate())
 {

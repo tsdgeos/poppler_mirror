@@ -405,6 +405,7 @@ set(poppler_SRCS
   poppler/PageTransition.cc
   poppler/Parser.cc
   poppler/PDFDoc.cc
+  poppler/PDFDocBuilder.cc
   poppler/PDFDocEncoding.cc
   poppler/PDFDocFactory.cc
   poppler/ProfileData.cc

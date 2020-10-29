@@ -223,6 +223,7 @@ class LinkLaunch : public LinkAction
 public:
     // Build a LinkLaunch from an action dictionary.
     LinkLaunch(const Object *actionObj);
+    ~LinkLaunch() override;
 
     // Was the LinkLaunch created successfully?
     bool isOk() const override { return fileName != nullptr; }

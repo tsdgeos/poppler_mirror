@@ -159,6 +159,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(_warn "${_warn} -Wundef")
   set(_warn "${_warn} -Wzero-as-null-pointer-constant")
   set(_warn "${_warn} -Wshadow")
+  set(_warn "${_warn} -Wweak-vtables")
 
   # set extra warnings
   set(_warnx "${_warnx} -Wconversion")
