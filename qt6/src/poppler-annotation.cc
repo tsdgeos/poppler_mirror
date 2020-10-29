@@ -1602,11 +1602,11 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
         switch (ftextann->getQuadding()) {
-        case quaddingLeftJustified:
+        case AnnotFreeText::quaddingLeftJustified:
             return InplaceAlignLeft;
-        case quaddingCentered:
+        case AnnotFreeText::quaddingCentered:
             return InplaceAlignCenter;
-        case quaddingRightJustified:
+        case AnnotFreeText::quaddingRightJustified:
             return InplaceAlignRight;
         }
     }
