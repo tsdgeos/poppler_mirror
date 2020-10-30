@@ -23,8 +23,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     buf = (char *)malloc(size + 1);
     memcpy(buf, data, size);
     buf[size] = '\0';
+
     for (int n = 0; n < npages; n++) {
-        /*page = poppler_document_get_page_by_label(doc, data);*/
         page = poppler_document_get_page_by_label(doc, buf);
         if (!page) {
             continue;

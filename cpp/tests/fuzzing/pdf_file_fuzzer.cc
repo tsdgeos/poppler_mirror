@@ -1,8 +1,6 @@
 #include <cstdint>
-#include <string>
-
-#include <poppler-global.h>
 #include <poppler-document.h>
+#include <poppler-global.h>
 #include <poppler-page.h>
 #include <poppler-page-renderer.h>
 
