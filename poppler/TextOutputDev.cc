@@ -4270,7 +4270,7 @@ class TextSelectionVisitor
 {
 public:
     TextSelectionVisitor(TextPage *page);
-    virtual ~TextSelectionVisitor() { }
+    virtual ~TextSelectionVisitor();
     TextSelectionVisitor(const TextSelectionVisitor &) = delete;
     TextSelectionVisitor &operator=(const TextSelectionVisitor &) = delete;
     virtual void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) = 0;
@@ -4282,6 +4282,8 @@ protected:
 };
 
 TextSelectionVisitor::TextSelectionVisitor(TextPage *p) : page(p) { }
+
+TextSelectionVisitor::~TextSelectionVisitor() = default;
 
 class TextSelectionDumper : public TextSelectionVisitor
 {

@@ -1743,3 +1743,5 @@ void XRef::markUnencrypted()
         e->setFlag(XRefEntry::Unencrypted, true);
     }
 }
+
+XRef::XRefWriter::~XRefWriter() = default;

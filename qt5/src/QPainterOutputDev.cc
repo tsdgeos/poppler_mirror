@@ -1,6 +1,6 @@
 //========================================================================
 //
-// ArthurOutputDev.cc
+// QPainterOutputDev.cc
 //
 // Copyright 2003 Glyph & Cog, LLC
 //
@@ -50,7 +50,7 @@
 #include "FontEncodingTables.h"
 #include <fofi/FoFiTrueType.h>
 #include <fofi/FoFiType1C.h>
-#include "ArthurOutputDev.h"
+#include "QPainterOutputDev.h"
 #include "Page.h"
 #include "Gfx.h"
 #include "PDFDoc.h"
@@ -61,10 +61,10 @@
 #include <QtGui/QPainterPath>
 #include <QPicture>
 
-class ArthurType3Font
+class QPainterOutputDevType3Font
 {
 public:
-    ArthurType3Font(PDFDoc *doc, Gfx8BitFont *font);
+    QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font);
 
     const QPicture &getGlyph(int gid) const;
 
@@ -78,7 +78,7 @@ public:
     std::vector<int> codeToGID;
 };
 
-ArthurType3Font::ArthurType3Font(PDFDoc *doc, Gfx8BitFont *font) : m_doc(doc), m_font(font)
+QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font) : m_doc(doc), m_font(font)
 {
     char *name;
     const Dict *charProcs = font->getCharProcs();
@@ -103,7 +103,7 @@ ArthurType3Font::ArthurType3Font(PDFDoc *doc, Gfx8BitFont *font) : m_doc(doc), m
     }
 }
 
-const QPicture &ArthurType3Font::getGlyph(int gid) const
+const QPicture &QPainterOutputDevType3Font::getGlyph(int gid) const
 {
     if (!glyphs[gid]) {
 
@@ -118,7 +118,7 @@ const QPicture &ArthurType3Font::getGlyph(int gid) const
         QPainter glyphPainter;
         glyphs[gid] = std::make_unique<QPicture>();
         glyphPainter.begin(glyphs[gid].get());
-        auto output_dev = std::make_unique<ArthurOutputDev>(&glyphPainter);
+        auto output_dev = std::make_unique<QPainterOutputDev>(&glyphPainter);
 
         auto gfx = std::make_unique<Gfx>(m_doc, output_dev.get(), resDict,
                                          &box, // pagebox
@@ -140,10 +140,10 @@ const QPicture &ArthurType3Font::getGlyph(int gid) const
 }
 
 //------------------------------------------------------------------------
-// ArthurOutputDev
+// QPainterOutputDev
 //------------------------------------------------------------------------
 
-ArthurOutputDev::ArthurOutputDev(QPainter *painter) : m_lastTransparencyGroupPicture(nullptr), m_hintingPreference(QFont::PreferDefaultHinting)
+QPainterOutputDev::QPainterOutputDev(QPainter *painter) : m_lastTransparencyGroupPicture(nullptr), m_hintingPreference(QFont::PreferDefaultHinting)
 {
     m_painter.push(painter);
     m_currentBrush = QBrush(Qt::SolidPattern);
@@ -159,7 +159,7 @@ ArthurOutputDev::ArthurOutputDev(QPainter *painter) : m_lastTransparencyGroupPic
     m_useCIDs = major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
-ArthurOutputDev::~ArthurOutputDev()
+QPainterOutputDev::~QPainterOutputDev()
 {
     for (auto &codeToGID : m_codeToGIDCache) {
         gfree(const_cast<int *>(codeToGID.second));
@@ -168,7 +168,7 @@ ArthurOutputDev::~ArthurOutputDev()
     FT_Done_FreeType(m_ftLibrary);
 }
 
-void ArthurOutputDev::startDoc(PDFDoc *doc)
+void QPainterOutputDev::startDoc(PDFDoc *doc)
 {
     xref = doc->getXRef();
     m_doc = doc;
@@ -179,11 +179,11 @@ void ArthurOutputDev::startDoc(PDFDoc *doc)
     m_codeToGIDCache.clear();
 }
 
-void ArthurOutputDev::startPage(int pageNum, GfxState *state, XRef *) { }
+void QPainterOutputDev::startPage(int pageNum, GfxState *state, XRef *) { }
 
-void ArthurOutputDev::endPage() { }
+void QPainterOutputDev::endPage() { }
 
-void ArthurOutputDev::saveState(GfxState *state)
+void QPainterOutputDev::saveState(GfxState *state)
 {
     m_currentPenStack.push(m_currentPen);
     m_currentBrushStack.push(m_currentBrush);
@@ -194,7 +194,7 @@ void ArthurOutputDev::saveState(GfxState *state)
     m_painter.top()->save();
 }
 
-void ArthurOutputDev::restoreState(GfxState *state)
+void QPainterOutputDev::restoreState(GfxState *state)
 {
     m_painter.top()->restore();
 
@@ -210,21 +210,21 @@ void ArthurOutputDev::restoreState(GfxState *state)
     m_currentPenStack.pop();
 }
 
-void ArthurOutputDev::updateAll(GfxState *state)
+void QPainterOutputDev::updateAll(GfxState *state)
 {
     OutputDev::updateAll(state);
     m_needFontUpdate = true;
 }
 
 // Set CTM (Current Transformation Matrix) to a fixed matrix
-void ArthurOutputDev::setDefaultCTM(const double *ctm)
+void QPainterOutputDev::setDefaultCTM(const double *ctm)
 {
     m_painter.top()->setTransform(QTransform(ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
 }
 
 // Update the CTM (Current Transformation Matrix), i.e., compose the old
 // CTM with a new matrix.
-void ArthurOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
+void QPainterOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
 {
     updateLineDash(state);
     updateLineJoin(state);
@@ -237,7 +237,7 @@ void ArthurOutputDev::updateCTM(GfxState *state, double m11, double m12, double 
     m_painter.top()->setTransform(update, true);
 }
 
-void ArthurOutputDev::updateLineDash(GfxState *state)
+void QPainterOutputDev::updateLineDash(GfxState *state)
 {
     double *dashPattern;
     int dashLength;
@@ -272,12 +272,12 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateFlatness(GfxState *state)
+void QPainterOutputDev::updateFlatness(GfxState *state)
 {
     // qDebug() << "updateFlatness";
 }
 
-void ArthurOutputDev::updateLineJoin(GfxState *state)
+void QPainterOutputDev::updateLineJoin(GfxState *state)
 {
     switch (state->getLineJoin()) {
     case 0:
@@ -296,7 +296,7 @@ void ArthurOutputDev::updateLineJoin(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateLineCap(GfxState *state)
+void QPainterOutputDev::updateLineCap(GfxState *state)
 {
     switch (state->getLineCap()) {
     case 0:
@@ -312,13 +312,13 @@ void ArthurOutputDev::updateLineCap(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateMiterLimit(GfxState *state)
+void QPainterOutputDev::updateMiterLimit(GfxState *state)
 {
     m_currentPen.setMiterLimit(state->getMiterLimit());
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateLineWidth(GfxState *state)
+void QPainterOutputDev::updateLineWidth(GfxState *state)
 {
     m_currentPen.setWidthF(state->getLineWidth());
     m_painter.top()->setPen(m_currentPen);
@@ -329,7 +329,7 @@ void ArthurOutputDev::updateLineWidth(GfxState *state)
     updateLineDash(state);
 }
 
-void ArthurOutputDev::updateFillColor(GfxState *state)
+void QPainterOutputDev::updateFillColor(GfxState *state)
 {
     GfxRGB rgb;
     QColor brushColour = m_currentBrush.color();
@@ -338,7 +338,7 @@ void ArthurOutputDev::updateFillColor(GfxState *state)
     m_currentBrush.setColor(brushColour);
 }
 
-void ArthurOutputDev::updateStrokeColor(GfxState *state)
+void QPainterOutputDev::updateStrokeColor(GfxState *state)
 {
     GfxRGB rgb;
     QColor penColour = m_currentPen.color();
@@ -348,7 +348,7 @@ void ArthurOutputDev::updateStrokeColor(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateBlendMode(GfxState *state)
+void QPainterOutputDev::updateBlendMode(GfxState *state)
 {
     GfxBlendMode blendMode = state->getBlendMode();
 
@@ -400,14 +400,14 @@ void ArthurOutputDev::updateBlendMode(GfxState *state)
     }
 }
 
-void ArthurOutputDev::updateFillOpacity(GfxState *state)
+void QPainterOutputDev::updateFillOpacity(GfxState *state)
 {
     QColor brushColour = m_currentBrush.color();
     brushColour.setAlphaF(state->getFillOpacity());
     m_currentBrush.setColor(brushColour);
 }
 
-void ArthurOutputDev::updateStrokeOpacity(GfxState *state)
+void QPainterOutputDev::updateStrokeOpacity(GfxState *state)
 {
     QColor penColour = m_currentPen.color();
     penColour.setAlphaF(state->getStrokeOpacity());
@@ -415,7 +415,7 @@ void ArthurOutputDev::updateStrokeOpacity(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void ArthurOutputDev::updateFont(GfxState *state)
+void QPainterOutputDev::updateFont(GfxState *state)
 {
     GfxFont *gfxFont = state->getFont();
     if (!gfxFont) {
@@ -423,7 +423,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
     }
 
     // The key to look in the font caches
-    ArthurFontID fontID = { *gfxFont->getID(), state->getFontSize() };
+    QPainterFontID fontID = { *gfxFont->getID(), state->getFontSize() };
 
     // Current font is a type3 font
     if (gfxFont->getType() == fontType3) {
@@ -436,8 +436,8 @@ void ArthurOutputDev::updateFont(GfxState *state)
 
         } else {
 
-            m_currentType3Font = new ArthurType3Font(m_doc, (Gfx8BitFont *)gfxFont);
-            m_type3FontCache.insert(std::make_pair(fontID, std::unique_ptr<ArthurType3Font>(m_currentType3Font)));
+            m_currentType3Font = new QPainterOutputDevType3Font(m_doc, (Gfx8BitFont *)gfxFont);
+            m_type3FontCache.insert(std::make_pair(fontID, std::unique_ptr<QPainterOutputDevType3Font>(m_currentType3Font)));
         }
 
         return;
@@ -694,22 +694,22 @@ static QPainterPath convertPath(GfxState *state, const GfxPath *path, Qt::FillRu
     return qPath;
 }
 
-void ArthurOutputDev::stroke(GfxState *state)
+void QPainterOutputDev::stroke(GfxState *state)
 {
     m_painter.top()->strokePath(convertPath(state, state->getPath(), Qt::OddEvenFill), m_currentPen);
 }
 
-void ArthurOutputDev::fill(GfxState *state)
+void QPainterOutputDev::fill(GfxState *state)
 {
     m_painter.top()->fillPath(convertPath(state, state->getPath(), Qt::WindingFill), m_currentBrush);
 }
 
-void ArthurOutputDev::eoFill(GfxState *state)
+void QPainterOutputDev::eoFill(GfxState *state)
 {
     m_painter.top()->fillPath(convertPath(state, state->getPath(), Qt::OddEvenFill), m_currentBrush);
 }
 
-bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
+bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
 {
     double x0, y0, x1, y1;
     shading->getCoords(&x0, &y0, &x1, &y1);
@@ -835,17 +835,17 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
     return true;
 }
 
-void ArthurOutputDev::clip(GfxState *state)
+void QPainterOutputDev::clip(GfxState *state)
 {
     m_painter.top()->setClipPath(convertPath(state, state->getPath(), Qt::WindingFill), Qt::IntersectClip);
 }
 
-void ArthurOutputDev::eoClip(GfxState *state)
+void QPainterOutputDev::eoClip(GfxState *state)
 {
     m_painter.top()->setClipPath(convertPath(state, state->getPath(), Qt::OddEvenFill), Qt::IntersectClip);
 }
 
-void ArthurOutputDev::clipToStrokePath(GfxState *state)
+void QPainterOutputDev::clipToStrokePath(GfxState *state)
 {
     QPainterPath clipPath = convertPath(state, state->getPath(), Qt::WindingFill);
 
@@ -863,7 +863,7 @@ void ArthurOutputDev::clipToStrokePath(GfxState *state)
     m_painter.top()->setClipPath(clipPathOutline, Qt::IntersectClip);
 }
 
-void ArthurOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
+void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
 {
 
     // First handle type3 fonts
@@ -969,13 +969,13 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
     }
 }
 
-void ArthurOutputDev::type3D0(GfxState *state, double wx, double wy) { }
+void QPainterOutputDev::type3D0(GfxState *state, double wx, double wy) { }
 
-void ArthurOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) { }
+void QPainterOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) { }
 
-void ArthurOutputDev::endTextObject(GfxState *state) { }
+void QPainterOutputDev::endTextObject(GfxState *state) { }
 
-void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void QPainterOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
 {
     auto imgStr = std::make_unique<ImageStream>(str, width,
                                                 1, // numPixelComps
@@ -1012,7 +1012,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
 }
 
 // TODO: lots more work here.
-void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void QPainterOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {
     unsigned int *data;
     unsigned int *line;
@@ -1060,8 +1060,8 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
     m_painter.top()->drawImage(QRect(0, 0, 1, 1), image);
 }
 
-void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
-                                          bool maskInterpolate)
+void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
+                                            bool maskInterpolate)
 {
     // Bail out if the image size doesn't match the mask size.  I don't know
     // what to do in this case.
@@ -1115,7 +1115,7 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
     m_painter.top()->drawImage(QRect(0, 0, 1, 1), image);
 }
 
-void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
+void QPainterOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
 {
     // The entire transparency group will be painted into a
     // freshly created QPicture object.  Since an existing painter
@@ -1125,7 +1125,7 @@ void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double 
     m_painter.push(new QPainter(m_qpictures.top()));
 }
 
-void ArthurOutputDev::endTransparencyGroup(GfxState * /*state*/)
+void QPainterOutputDev::endTransparencyGroup(GfxState * /*state*/)
 {
     // Stop painting into the group
     m_painter.top()->end();
@@ -1144,7 +1144,7 @@ void ArthurOutputDev::endTransparencyGroup(GfxState * /*state*/)
     m_qpictures.pop();
 }
 
-void ArthurOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
+void QPainterOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
 {
     // Actually draw the transparency group
     m_painter.top()->drawPicture(0, 0, *m_lastTransparencyGroupPicture);

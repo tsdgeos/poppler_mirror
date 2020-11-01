@@ -31,6 +31,7 @@
 // Copyright (C) 2018 Steven Boswell <ulatekh@yahoo.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -69,17 +70,19 @@ void removeStyleSuffix(std::string &familyName)
 extern bool xml;
 extern bool fontFullName;
 
-HtmlFontColor::HtmlFontColor(GfxRGB rgb)
+HtmlFontColor::HtmlFontColor(GfxRGB rgb, double opacity_)
 {
     r = static_cast<int>(rgb.r / 65535.0 * 255.0);
     g = static_cast<int>(rgb.g / 65535.0 * 255.0);
     b = static_cast<int>(rgb.b / 65535.0 * 255.0);
-    if (!(Ok(r) && Ok(b) && Ok(g))) {
+    opacity = static_cast<int>(opacity_ * 255.999);
+    if (!(Ok(r) && Ok(b) && Ok(g) && Ok(opacity))) {
         if (!globalParams->getErrQuiet())
-            fprintf(stderr, "Error : Bad color (%d,%d,%d) reset to (0,0,0)\n", r, g, b);
+            fprintf(stderr, "Error : Bad color (%d,%d,%d,%d) reset to (0,0,0,255)\n", r, g, b, opacity);
         r = 0;
         g = 0;
         b = 0;
+        opacity = 255;
     }
 }
 
@@ -118,9 +121,9 @@ GooString *HtmlFontColor::toString() const
     return tmp;
 }
 
-HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb)
+HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb, double opacity)
 {
-    color = HtmlFontColor(rgb);
+    color = HtmlFontColor(rgb, opacity);
 
     lineSize = -1;
 
@@ -310,6 +313,10 @@ GooString *HtmlFontAccu::CSStyle(int i, int j)
         tmp->append(fontName); // font.getFontName());
         tmp->append(";color:");
         tmp->append(colorStr);
+        if (font.getColor().getOpacity() != 1.0) {
+            tmp->append(";opacity:");
+            tmp->append(std::to_string(font.getColor().getOpacity()));
+        }
         // if there is rotation or skew, include the matrix
         if (font.isRotOrSkewed()) {
             const double *const text_mat = font.getRotMat();
@@ -343,6 +350,10 @@ GooString *HtmlFontAccu::CSStyle(int i, int j)
         tmp->append(fontName);
         tmp->append("\" color=\"");
         tmp->append(colorStr);
+        if (font.getColor().getOpacity() != 1.0) {
+            tmp->append("\" opacity=\"");
+            tmp->append(std::to_string(font.getColor().getOpacity()));
+        }
         tmp->append("\"/>");
     }
 

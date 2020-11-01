@@ -16,7 +16,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
@@ -695,7 +695,7 @@ rather unexpected results.
 
        \returns whether the painting succeeded
 
-       \note This method is only supported for Arthur
+       \note This method is only supported for the QPainterOutputDev
 
        \since 0.16
     */
@@ -1166,7 +1166,8 @@ public:
     enum RenderBackend
     {
         SplashBackend, ///< Splash backend
-        ArthurBackend ///< Arthur (Qt) backend
+        ArthurBackend, ///< \deprecated The old name of the QPainter backend
+        QPainterBackend = ArthurBackend ///< @since 20.11
     };
 
     /**

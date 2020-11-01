@@ -38,10 +38,10 @@ clang_format:
 build:
   stage: build
   script:
-    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202009301637qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
-    - 7z x 6.0.0-0-202009301637qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
-    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202009301637icu-linux-Rhel7.2-x64.7z
-    - 7z x 6.0.0-0-202009301637icu-linux-Rhel7.2-x64.7z
+    - wget -r -l1 -np "http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/" -A "6.0.0-0-*qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z"
+    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-*qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
+    - wget -r -l1 -np "http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/" -A "6.0.0-0-*icu-linux-Rhel7.2-x64.7z"
+    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-*icu-linux-Rhel7.2-x64.7z
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
     - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data .. -DCMAKE_PREFIX_PATH=$PWD/../6.0.0/gcc_64/lib/cmake
@@ -82,12 +82,8 @@ build_mingw64_fedora:
 
 build_clazy:
   stage: build
-  image: fedora:31
-  before_script:
-    - dnf install -y 'dnf-command(builddep)'
-    - dnf builddep -y poppler
-    - dnf -y install glibc-langpack-en make ninja-build clazy clang redhat-rpm-config libcurl-devel
   script:
+    - apt-get install --yes --no-install-recommends clazy
     - mkdir -p build && cd build
     - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja

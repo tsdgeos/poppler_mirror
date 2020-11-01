@@ -3,6 +3,7 @@
  * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +80,7 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     act->setChecked(true);
     act->setData(QVariant::fromValue(0));
     m_settingsRenderBackendGrp->addAction(act);
-    act = settingsRenderMenu->addAction(tr("Arthur"));
+    act = settingsRenderMenu->addAction(tr("QPainter"));
     act->setCheckable(true);
     act->setData(QVariant::fromValue(1));
     m_settingsRenderBackendGrp->addAction(act);

@@ -6,7 +6,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 //========================================================================
@@ -259,5 +259,7 @@ size_t CachedFileWriter::write(const char *ptr, size_t size)
 
     return written;
 }
+
+CachedFileLoader::~CachedFileLoader() = default;
 
 //------------------------------------------------------------------------

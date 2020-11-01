@@ -5,6 +5,7 @@
  * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -251,7 +252,10 @@ class BytesStream : public MemStream
 
 public:
     BytesStream(GBytes *bytes, Object &&dictA) : MemStream(static_cast<const char *>(g_bytes_get_data(bytes, nullptr)), 0, g_bytes_get_size(bytes), std::move(dictA)), m_bytes { g_bytes_ref(bytes), &g_bytes_unref } { }
+    ~BytesStream() override;
 };
+
+BytesStream::~BytesStream() = default;
 
 /**
  * poppler_document_new_from_bytes:

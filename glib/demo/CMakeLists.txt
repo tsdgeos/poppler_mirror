@@ -27,4 +27,9 @@ set(poppler_glib_demo_SRCS
   taggedstruct.c
 )
 poppler_add_test(poppler-glib-demo BUILD_GTK_TESTS ${poppler_glib_demo_SRCS})
-target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib ${GTK3_LIBRARIES})
+
+if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
+    target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib ${GTK3_LIBRARIES})
+else()
+    target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib PkgConfig::GTK3)
+endif()

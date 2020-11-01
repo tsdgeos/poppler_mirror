@@ -44,6 +44,7 @@
 // Copyright (C) 2018-2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -344,11 +345,15 @@ void AnnotPath::parsePathArray(Array *array)
 
 AnnotCalloutLine::AnnotCalloutLine(double x1, double y1, double x2, double y2) : coord1(x1, y1), coord2(x2, y2) { }
 
+AnnotCalloutLine::~AnnotCalloutLine() = default;
+
 //------------------------------------------------------------------------
 // AnnotCalloutMultiLine
 //------------------------------------------------------------------------
 
 AnnotCalloutMultiLine::AnnotCalloutMultiLine(double x1, double y1, double x2, double y2, double x3, double y3) : AnnotCalloutLine(x1, y1, x2, y2), coord3(x3, y3) { }
+
+AnnotCalloutMultiLine::~AnnotCalloutMultiLine() = default;
 
 //------------------------------------------------------------------------
 // AnnotQuadrilateral
@@ -1334,7 +1339,7 @@ void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const
     *y2 = rect->y2;
 }
 
-void Annot::setRect(PDFRectangle *rectA)
+void Annot::setRect(const PDFRectangle *rectA)
 {
     setRect(rectA->x1, rectA->y1, rectA->x2, rectA->y2);
 }
@@ -4974,9 +4979,10 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
     // - NeedAppearances is true
-    if (field) {
-        if (appearance.isNull() || (form && form->getNeedAppearances()))
+    if (field && form) {
+        if (appearance.isNull() || form->getNeedAppearances()) {
             generateFieldAppearance(&addDingbatsResource);
+        }
     }
 
     // draw the appearance stream

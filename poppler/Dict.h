@@ -110,10 +110,10 @@ private:
     using DictEntry = std::pair<std::string, Object>;
     struct CmpDictEntry;
 
-    std::atomic_bool sorted;
     XRef *xref; // the xref table for this PDF file
     std::vector<DictEntry> entries;
     std::atomic_int ref; // reference count
+    std::atomic_bool sorted;
     mutable std::recursive_mutex mutex;
 
     const DictEntry *find(const char *key) const;

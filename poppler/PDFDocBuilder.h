@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -27,7 +27,7 @@ class PDFDocBuilder
 
 public:
     PDFDocBuilder() = default;
-    virtual ~PDFDocBuilder() = default;
+    virtual ~PDFDocBuilder();
 
     PDFDocBuilder(const PDFDocBuilder &) = delete;
     PDFDocBuilder &operator=(const PDFDocBuilder &) = delete;

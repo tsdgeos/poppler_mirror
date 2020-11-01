@@ -34,6 +34,7 @@
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -140,7 +141,7 @@ class AnnotCalloutLine
 {
 public:
     AnnotCalloutLine(double x1, double y1, double x2, double y2);
-    virtual ~AnnotCalloutLine() { }
+    virtual ~AnnotCalloutLine();
 
     AnnotCalloutLine(const AnnotCalloutLine &) = delete;
     AnnotCalloutLine &operator=(const AnnotCalloutLine &other) = delete;
@@ -162,6 +163,7 @@ class AnnotCalloutMultiLine : public AnnotCalloutLine
 {
 public:
     AnnotCalloutMultiLine(double x1, double y1, double x2, double y2, double x3, double y3);
+    ~AnnotCalloutMultiLine() override;
 
     double getX3() const { return coord3.getX(); }
     double getY3() const { return coord3.getY(); }
@@ -688,7 +690,7 @@ public:
     double getXMax();
     double getYMax();
 
-    void setRect(PDFRectangle *rect);
+    void setRect(const PDFRectangle *rect);
     void setRect(double x1, double y1, double x2, double y2);
 
     // Sets the annot contents to new_content
@@ -1419,6 +1421,8 @@ public:
     void setNewAppearance(Object &&newAppearance);
 
     bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
+
+    void setField(FormField *f) { field = f; };
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);

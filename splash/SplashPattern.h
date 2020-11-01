@@ -90,6 +90,8 @@ private:
 class SplashGouraudColor : public SplashPattern
 {
 public:
+    ~SplashGouraudColor() override;
+
     virtual bool isParameterized() = 0;
 
     virtual int getNTriangles() = 0;

@@ -57,7 +57,7 @@
 #include <TextOutputDev.h>
 #include <Annot.h>
 #include <Link.h>
-#include <ArthurOutputDev.h>
+#include <QPainterOutputDev.h>
 #include <Rendition.h>
 #if defined(HAVE_SPLASH)
 #    include <SplashOutputDev.h>
@@ -113,6 +113,8 @@ public:
     {
     }
 
+    ~Qt6SplashOutputDev() override;
+
     void dump() override
     {
         if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
@@ -164,10 +166,13 @@ private:
     bool ignorePaperColor;
 };
 
-class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper
+Qt6SplashOutputDev::~Qt6SplashOutputDev() = default;
+
+class QImageDumpingQPainterOutputDev : public QPainterOutputDev, public OutputDevCallbackHelper
 {
 public:
-    QImageDumpingArthurOutputDev(QPainter *painter, QImage *i) : ArthurOutputDev(painter), image(i) { }
+    QImageDumpingQPainterOutputDev(QPainter *painter, QImage *i) : QPainterOutputDev(painter), image(i) { }
+    ~QImageDumpingQPainterOutputDev() override;
 
     void dump() override
     {
@@ -179,6 +184,8 @@ public:
 private:
     QImage *image;
 };
+
+QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
 Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
 {
@@ -417,7 +424,7 @@ static auto shouldAbortExtractionInternalCallback = [](void *user_data) {
 // Needed to make the ternary operator happy.
 static bool (*nullAbortCallBack)(void *user_data) = nullptr;
 
-static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
+static bool renderToQPainter(QImageDumpingQPainterOutputDev *qpainter_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
 {
     const bool savePainter = !(flags & Page::DontSaveAndRestore);
     if (savePainter)
@@ -428,12 +435,12 @@ static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter
         painter->setRenderHint(QPainter::TextAntialiasing);
     painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
 
-    arthur_output->startDoc(page->parentDoc->doc);
+    qpainter_output->startDoc(page->parentDoc->doc);
 
     const bool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
 
-    OutputDevCallbackHelper *abortHelper = arthur_output;
-    page->parentDoc->doc->displayPageSlice(arthur_output, page->index + 1, xres, yres, (int)rotate * 90, false, true, false, x, y, w, h, abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
+    OutputDevCallbackHelper *abortHelper = qpainter_output;
+    page->parentDoc->doc->displayPageSlice(qpainter_output, page->index + 1, xres, yres, (int)rotate * 90, false, true, false, x, y, w, h, abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
                                            abortHelper, (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
     if (savePainter)
         painter->restore();
@@ -533,7 +540,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 #endif
         break;
     }
-    case Poppler::Document::ArthurBackend: {
+    case Poppler::Document::QPainterBackend: {
         QSize size = pageSize();
         QImage tmpimg(w == -1 ? qRound(size.width() * xres / 72.0) : w, h == -1 ? qRound(size.height() * yres / 72.0) : h, QImage::Format_ARGB32);
 
@@ -542,16 +549,16 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         tmpimg.fill(bgColor);
 
         QPainter painter(&tmpimg);
-        QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
+        QImageDumpingQPainterOutputDev qpainter_output(&painter, &tmpimg);
 
-        arthur_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
+        qpainter_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
 
 #ifdef USE_CMS
-        arthur_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
+        qpainter_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
 #endif
 
-        arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-        renderToArthur(&arthur_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);
+        qpainter_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
+        renderToQPainter(&qpainter_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);
         painter.end();
         img = tmpimg;
         break;
@@ -572,12 +579,12 @@ bool Page::renderToPainter(QPainter *painter, double xres, double yres, int x, i
     switch (m_page->parentDoc->m_backend) {
     case Poppler::Document::SplashBackend:
         return false;
-    case Poppler::Document::ArthurBackend: {
-        QImageDumpingArthurOutputDev arthur_output(painter, nullptr);
+    case Poppler::Document::QPainterBackend: {
+        QImageDumpingQPainterOutputDev qpainter_output(painter, nullptr);
 
-        arthur_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
+        qpainter_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
 
-        return renderToArthur(&arthur_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
+        return renderToQPainter(&qpainter_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
     }
     }
     return false;

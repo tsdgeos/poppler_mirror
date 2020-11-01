@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <QtGui/QPixmap>
 #include <QDebug>
 
-PageView::PageView(QWidget *parent) : QScrollArea(parent), m_zoom(1.0), m_rotation(0), m_dpiX(QApplication::desktop()->physicalDpiX()), m_dpiY(QApplication::desktop()->physicalDpiY())
+PageView::PageView(QWidget *parent) : QScrollArea(parent), m_zoom(1.0), m_rotation(0), m_dpiX(physicalDpiX()), m_dpiY(physicalDpiY())
 {
     m_imageLabel = new QLabel(this);
     m_imageLabel->resize(0, 0);

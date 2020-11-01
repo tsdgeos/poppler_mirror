@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -2993,6 +2993,7 @@ private:
     bool imageError;
 
 public:
+    ~RescaleDrawImage() override;
     cairo_surface_t *getSourceImage(Stream *str, int widthA, int height, int scaledWidth, int scaledHeight, bool printing, GfxImageColorMap *colorMapA, const int *maskColorsA)
     {
         cairo_surface_t *image = nullptr;
@@ -3149,6 +3150,8 @@ public:
         }
     }
 };
+
+RescaleDrawImage::~RescaleDrawImage() = default;
 
 void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int widthA, int heightA, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {

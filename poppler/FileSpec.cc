@@ -7,7 +7,7 @@
 //
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -156,7 +156,7 @@ FileSpec::~FileSpec()
 
 EmbFile *FileSpec::getEmbeddedFile()
 {
-    if (!ok)
+    if (!ok || !fileSpec.isDict())
         return nullptr;
 
     if (embFile)

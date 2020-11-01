@@ -260,7 +260,7 @@ private:
         XRefWriter() = default;
         virtual void startSection(int first, int count) = 0;
         virtual void writeEntry(Goffset offset, int gen, XRefEntryType type) = 0;
-        virtual ~XRefWriter() {};
+        virtual ~XRefWriter();
 
         XRefWriter(const XRefWriter &) = delete;
         XRefWriter &operator=(const XRefWriter &other) = delete;

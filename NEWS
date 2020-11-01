@@ -1,3 +1,12 @@
+Release 20.10.0:
+        core:
+         * Filter out repeated forms
+         * Implement EmbedStream::reset()
+         * CairoOutputDev: evict just font faces owned solely by cache.
+         * Splash: Rename Yd to Ydown, Xu to Xup, etc.
+         * Splash: fix crash in out-of-memory situation.
+         * Fix some undefined behaviour situation with forged files
+
 Release 20.09.0:
         core:
          * Compability fix for Forms

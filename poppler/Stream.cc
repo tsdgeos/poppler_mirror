@@ -195,6 +195,7 @@ class BaseStreamStream : public Stream
 {
 public:
     BaseStreamStream(Stream *strA) : str(strA) { }
+    ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
     void reset() override { str->getBaseStream()->reset(); }
@@ -213,6 +214,8 @@ public:
 private:
     std::unique_ptr<Stream> str;
 };
+
+BaseStreamStream::~BaseStreamStream() = default;
 
 Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int recursion, Dict *dict)
 {
@@ -1055,6 +1058,13 @@ void CachedFileStream::moveStart(Goffset delta)
     start += delta;
     bufPtr = bufEnd = buf;
     bufPos = start;
+}
+
+MemStream::~MemStream() = default;
+
+AutoFreeMemStream::~AutoFreeMemStream()
+{
+    gfree(buf);
 }
 
 //------------------------------------------------------------------------

@@ -1602,11 +1602,11 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
         switch (ftextann->getQuadding()) {
-        case quaddingLeftJustified:
+        case AnnotFreeText::quaddingLeftJustified:
             return InplaceAlignLeft;
-        case quaddingCentered:
+        case AnnotFreeText::quaddingCentered:
             return InplaceAlignCenter;
-        case quaddingRightJustified:
+        case AnnotFreeText::quaddingRightJustified:
             return InplaceAlignRight;
         }
     }
@@ -3450,11 +3450,7 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
 public:
     RichMediaAnnotationPrivate() : settings(nullptr), content(nullptr) { }
 
-    ~RichMediaAnnotationPrivate() override
-    {
-        delete settings;
-        delete content;
-    }
+    ~RichMediaAnnotationPrivate() override;
 
     Annotation *makeAlias() override { return new RichMediaAnnotation(*this); }
 
@@ -3469,6 +3465,12 @@ public:
     RichMediaAnnotation::Settings *settings;
     RichMediaAnnotation::Content *content;
 };
+
+RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()
+{
+    delete settings;
+    delete content;
+}
 
 RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotationPrivate()) { }
 

@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,3 +49,9 @@ bool SplashSolidColor::getColor(int x, int y, SplashColorPtr c)
     splashColorCopy(c, color);
     return true;
 }
+
+//------------------------------------------------------------------------
+// SplashGouraudColor
+//------------------------------------------------------------------------
+
+SplashGouraudColor::~SplashGouraudColor() = default;
