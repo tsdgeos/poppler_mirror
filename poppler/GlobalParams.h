@@ -78,20 +78,6 @@ enum SysFontType
 
 //------------------------------------------------------------------------
 
-enum PSLevel
-{
-    psLevel1,
-    psLevel1Sep,
-    psLevel2,
-    psLevel2Sep,
-    psLevel3,
-    psLevel3Sep
-};
-
-//------------------------------------------------------------------------
-
-//------------------------------------------------------------------------
-
 class GlobalParams
 {
 public:
@@ -126,7 +112,6 @@ public:
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     bool getPSExpandSmaller();
     bool getPSShrinkLarger();
-    PSLevel getPSLevel();
     std::string getTextEncodingName() const;
     bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
@@ -146,7 +131,6 @@ public:
     void addFontFile(const GooString *fontName, const GooString *path);
     void setPSExpandSmaller(bool expand);
     void setPSShrinkLarger(bool shrink);
-    void setPSLevel(PSLevel level);
     void setTextEncoding(const char *encodingName);
     void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
@@ -196,7 +180,6 @@ private:
     SysFontList *sysFonts; // system fonts
     bool psExpandSmaller; // expand smaller pages to fill paper
     bool psShrinkLarger; // shrink larger pages to fit paper
-    PSLevel psLevel; // PostScript level to generate
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
     bool overprintPreview; // enable overprint preview

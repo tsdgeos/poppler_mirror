@@ -1086,7 +1086,7 @@ static void outputToFile(void *stream, const char *data, int len)
 }
 
 PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-                         PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA)
+                         PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA, PSLevel levelA)
 {
     FILE *f;
     PSFileType fileTypeA;
@@ -1141,11 +1141,11 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
         }
     }
 
-    init(outputToFile, f, fileTypeA, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA);
+    init(outputToFile, f, fileTypeA, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA, levelA);
 }
 
 PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA,
-                         int imgURXA, int imgURYA, PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA)
+                         int imgURXA, int imgURYA, PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA, PSLevel levelA)
 {
     underlayCbk = nullptr;
     underlayCbkData = nullptr;
@@ -1168,7 +1168,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA, char *ps
     forceRasterize = forceRasterizeA;
     psTitle = nullptr;
 
-    init(outputFuncA, outputStreamA, psGeneric, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA);
+    init(outputFuncA, outputStreamA, psGeneric, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA, levelA);
 }
 
 struct StandardMedia
@@ -1193,7 +1193,7 @@ static bool pageDimensionEqual(int a, int b)
 //   created the PSOutputDev can use the various setters to change defaults.
 
 void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
-                       int paperWidthA, int paperHeightA, bool noCropA, bool duplexA)
+                       int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA)
 {
 
     if (pagesA.empty()) {
@@ -1227,7 +1227,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType
     fileType = fileTypeA;
     psTitle = (psTitleA ? strdup(psTitleA) : nullptr);
     doc = docA;
-    level = globalParams->getPSLevel();
+    level = levelA;
     pages = pagesA;
     mode = modeA;
     paperWidth = paperWidthA;
@@ -2523,7 +2523,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileNam
             }
             if (ffTT->isOpenTypeCFF()) {
                 ffTT->convertToCIDType0(psName->c_str(), codeToGID, codeToGIDLen, outputFunc, outputStream);
-            } else if (globalParams->getPSLevel() >= psLevel3) {
+            } else if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffTT->convertToCIDType2(psName->c_str(), codeToGID, codeToGIDLen, needVerticalMetrics, outputFunc, outputStream);
             } else {
@@ -2575,7 +2575,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     // convert it to a Type 0 font
     if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
         if ((ffT1C = FoFiType1C::make(fontBuf, fontLen))) {
-            if (globalParams->getPSLevel() >= psLevel3) {
+            if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffT1C->convertToCIDType0(psName->c_str(), nullptr, 0, outputFunc, outputStream);
             } else {
@@ -2606,7 +2606,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
     // convert it to a Type 0 font
     if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
         if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
-            if (globalParams->getPSLevel() >= psLevel3) {
+            if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffTT->convertToCIDType2(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), needVerticalMetrics, outputFunc, outputStream);
             } else {
@@ -2657,7 +2657,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
     if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
         if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
             if (ffTT->isOpenTypeCFF()) {
-                if (globalParams->getPSLevel() >= psLevel3) {
+                if (level >= psLevel3) {
                     // Level 3: use a CID font
                     ffTT->convertToCIDType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), outputFunc, outputStream);
                 } else {
@@ -3152,7 +3152,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     } else if (forceRasterize == psNeverRasterize) {
         rasterize = false;
     } else {
-        scan = new PreScanOutputDev(doc);
+        scan = new PreScanOutputDev(level);
         page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData);
         rasterize = scan->usesTransparency() || scan->usesPatternImageMask();
         delete scan;

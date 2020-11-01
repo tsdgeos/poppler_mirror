@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -39,10 +39,8 @@
 // PreScanOutputDev
 //------------------------------------------------------------------------
 
-PreScanOutputDev::PreScanOutputDev(PDFDoc *docA)
+PreScanOutputDev::PreScanOutputDev(PSLevel levelA) : level(levelA)
 {
-    level = globalParams->getPSLevel();
-    doc = docA;
     clearStats();
 }
 
