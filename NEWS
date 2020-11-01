@@ -1,3 +1,25 @@
+Release 20.11.0:
+        core:
+         * More work on rendering of standalone Annot Widgets. Issue #806
+         * Fix crashes in embedded file handling on broken files. Issue #967
+         * Fix uninitialized memory read on broken files
+         * Save a bit of memory in Dict data
+
+        cpp:
+         * Fix crashes in embedded file handling on broken files. Issue #966
+
+        utils:
+         * pdftohtml: HTML and XML output includes font opacity.
+
+        qt5:
+         * Rename ArthurOutputDev to QPainterOutputDev
+
+        build system:
+         * Fix linker error when gtk is not in a default location
+         * Add some checks for gtk-doc support
+         * Reorganize GObject introspection config
+         * Enable CMAKE_LINK_DEPENDS_NO_SHARED
+
 Release 20.10.0:
         core:
          * Filter out repeated forms
