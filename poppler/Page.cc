@@ -372,7 +372,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
         return;
 
     /* Look for standalone annots, identified by being: 1) of type Widget
-     * 2) of subtype Button 3) not referenced from the Catalog's Form Field array */
+     * 2) not referenced from the Catalog's Form Field array */
     for (int i = 0; i < numAnnots; ++i) {
         Annot *annot = annotations->getAnnot(i);
 
