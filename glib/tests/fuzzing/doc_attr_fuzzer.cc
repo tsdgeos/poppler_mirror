@@ -1,7 +1,9 @@
+#include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <poppler.h>
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     GError *err = NULL;
     PopplerDocument *doc;
@@ -9,7 +11,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     char *buf;
     int npages, n;
 
-    doc = poppler_document_new_from_data(data, size, NULL, &err);
+    doc = poppler_document_new_from_data((char*)data, size, NULL, &err);
     if (doc == NULL) {
         g_error_free(err);
         return 0;
