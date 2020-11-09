@@ -205,16 +205,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
 
     // check for a font subset name: capital letters followed by a '+'
     // sign
-    subset = false;
-    if (name) {
-        int i;
-        for (i = 0; i < name->getLength(); ++i) {
-            if (name->getChar(i) < 'A' || name->getChar(i) > 'Z') {
-                break;
-            }
-        }
-        subset = i > 0 && i < name->getLength() && name->getChar(i) == '+';
-    }
+    subset = font->isSubset();
 }
 
 FontInfo::FontInfo(const FontInfo &f)

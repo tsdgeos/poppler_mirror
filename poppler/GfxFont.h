@@ -212,6 +212,11 @@ public:
     // been done to map to a canonical Base-14 font name).
     const GooString *getName() const { return name; }
 
+    bool isSubset() const;
+
+    // Returns the original font name without the subset tag (if it has one)
+    std::string getNameWithoutSubsetTag() const;
+
     // Get font type.
     GfxFontType getType() const { return type; }
     virtual bool isCIDFont() const { return false; }
