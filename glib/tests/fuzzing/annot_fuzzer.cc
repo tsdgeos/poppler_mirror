@@ -20,7 +20,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     cairo_surface_t *surface;
     cairo_status_t status;
 
-    doc = poppler_document_new_from_data((char*)data, size, NULL, &err);
+    doc = poppler_document_new_from_data((char *)data, size, NULL, &err);
     if (doc == NULL) {
         g_error_free(err);
         return 0;
