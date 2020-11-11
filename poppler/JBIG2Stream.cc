@@ -2251,7 +2251,10 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
             } else {
                 arithDecoder->decodeInt(&dt, iaitStats);
             }
-            tt = t + dt;
+            if (unlikely(checkedAdd(t, dt, &tt))) {
+                delete bitmap;
+                return nullptr;
+            }
 
             // symbol ID
             if (huff) {
