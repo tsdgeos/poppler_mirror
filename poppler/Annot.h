@@ -556,6 +556,7 @@ public:
     void setLineStyleForBorder(const AnnotBorder *border);
     void setTextFont(const Object &fontName, double fontSize);
     void drawCircle(double cx, double cy, double r, bool fill);
+    void drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke);
     void drawCircleTopLeft(double cx, double cy, double r);
     void drawCircleBottomRight(double cx, double cy, double r);
     void drawLineEnding(AnnotLineEndingStyle endingStyle, double x, double y, double size, bool fill, const Matrix &m);
