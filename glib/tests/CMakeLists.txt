@@ -12,7 +12,8 @@ add_definitions(-DTESTDATADIR=\"${TESTDATADIR}\")
 set(poppler_check_text_SRCS
   check_text.c
 )
-poppler_add_unittest(poppler-check-text BUILD_GTK_TESTS ${poppler_check_text_SRCS})
+poppler_add_test(poppler-check-text BUILD_GTK_TESTS ${poppler_check_text_SRCS})
+add_test(poppler-check-text ${EXECUTABLE_OUTPUT_PATH}/poppler-check-text)
 
 set(poppler_check_bb_SRCS
   check_bb.c
