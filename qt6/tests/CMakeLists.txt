@@ -23,7 +23,8 @@ macro(QT6_ADD_QTEST exe source)
     set(${test_name}_SOURCES
       ${source}
     )
-    poppler_add_unittest(${exe} BUILD_QT6_TESTS ${${test_name}_SOURCES})
+    poppler_add_test(${exe} BUILD_QT6_TESTS ${${test_name}_SOURCES})
+    add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
     target_link_libraries(${exe} poppler-qt6 Qt6::Widgets Qt6::Test Qt6::Gui)
     if(MSVC)
       target_link_libraries(${exe} poppler ${poppler_LIBS})

@@ -29,6 +29,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,6 +48,9 @@
 class GooFile;
 class BaseStream;
 class CachedFile;
+#ifdef HAVE_SPLASH
+class SplashBitmap;
+#endif
 
 //------------------------------------------------------------------------
 
@@ -1427,5 +1431,54 @@ private:
 
     bool fillBuf();
 };
+
+//------------------------------------------------------------------------
+// SplashBitmapCMYKEncoder
+//
+// This stream helps to condense SplashBitmaps (mostly of DeviceN8 type) into
+// pure CMYK colors. In particular for a DeviceN8 bitmap it redacts the spot colorants.
+//------------------------------------------------------------------------
+
+#ifdef HAVE_SPLASH
+class SplashBitmapCMYKEncoder : public Stream
+{
+public:
+    SplashBitmapCMYKEncoder(SplashBitmap *bitmapA);
+    ~SplashBitmapCMYKEncoder() override;
+    StreamKind getKind() const override { return strWeird; }
+    void reset() override;
+    int getChar() override;
+    int lookChar() override;
+    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    bool isBinary(bool /*last = true*/) override { return true; }
+
+    // Although we are an encoder, we return false here, since we do not want do be auto-deleted by
+    // successive streams.
+    bool isEncoder() override { return false; }
+
+    int getUnfilteredChar() override { return getChar(); }
+    void unfilteredReset() override { reset(); }
+
+    BaseStream *getBaseStream() override { return nullptr; }
+    Stream *getUndecodedStream() override { return this; }
+
+    Dict *getDict() override { return nullptr; }
+    Object *getDictObject() override { return nullptr; }
+
+    Goffset getPos() override;
+    void setPos(Goffset pos, int dir = 0) override;
+
+private:
+    SplashBitmap *bitmap;
+    size_t width;
+    int height;
+
+    std::vector<unsigned char> buf;
+    size_t bufPtr;
+    int curLine;
+
+    bool fillBuf();
+};
+#endif
 
 #endif

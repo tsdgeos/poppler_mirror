@@ -38,6 +38,7 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -67,6 +68,10 @@
 #include "JBIG2Stream.h"
 #include "Stream-CCITT.h"
 #include "CachedFile.h"
+
+#ifdef HAVE_SPLASH
+#    include "splash/SplashBitmap.h"
+#endif
 
 #ifdef ENABLE_LIBJPEG
 #    include "DCTStream.h"
@@ -5137,3 +5142,81 @@ bool RGBGrayEncoder::fillBuf()
     *bufEnd++ = (char)i;
     return true;
 }
+
+//------------------------------------------------------------------------
+// SplashBitmapCMYKEncoder
+//------------------------------------------------------------------------
+
+#ifdef HAVE_SPLASH
+SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap(bitmapA)
+{
+    width = (size_t)4 * bitmap->getWidth();
+    height = bitmap->getHeight();
+    buf.resize(width);
+    bufPtr = width;
+    curLine = height - 1;
+}
+
+SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() { }
+
+void SplashBitmapCMYKEncoder::reset()
+{
+    bufPtr = width;
+    curLine = height - 1;
+}
+
+int SplashBitmapCMYKEncoder::lookChar()
+{
+    if (bufPtr >= width && !fillBuf()) {
+        return EOF;
+    }
+    return buf[bufPtr];
+}
+
+int SplashBitmapCMYKEncoder::getChar()
+{
+    int ret = lookChar();
+    bufPtr++;
+    return ret;
+}
+
+bool SplashBitmapCMYKEncoder::fillBuf()
+{
+    if (curLine < 0) {
+        return false;
+    }
+
+    if (bufPtr < width) {
+        return true;
+    }
+
+    bitmap->getCMYKLine(curLine, &buf[0]);
+    bufPtr = 0;
+    curLine--;
+    return true;
+}
+
+Goffset SplashBitmapCMYKEncoder::getPos()
+{
+    return (height - 1 - curLine) * width + bufPtr;
+}
+
+void SplashBitmapCMYKEncoder::setPos(Goffset pos, int dir)
+{
+    // This code is mostly untested!
+    if (dir < 0) {
+        curLine = pos / width;
+    } else {
+        curLine = height - 1 - pos / width;
+    }
+
+    bufPtr = width;
+    fillBuf();
+
+    if (dir < 0) {
+        bufPtr = width - 1 - pos % width;
+    } else {
+        bufPtr = pos % width;
+    }
+}
+#endif

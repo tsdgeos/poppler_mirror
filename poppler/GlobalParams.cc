@@ -391,7 +391,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
     sysFonts = new SysFontList();
     psExpandSmaller = false;
     psShrinkLarger = true;
-    psLevel = psLevel2;
     textEncoding = new GooString("UTF-8");
     overprintPreview = false;
     printCommands = false;
@@ -1133,12 +1132,6 @@ bool GlobalParams::getPSShrinkLarger()
     return psShrinkLarger;
 }
 
-PSLevel GlobalParams::getPSLevel()
-{
-    globalParamsLocker();
-    return psLevel;
-}
-
 std::string GlobalParams::getTextEncodingName() const
 {
     globalParamsLocker();
@@ -1245,12 +1238,6 @@ void GlobalParams::setPSShrinkLarger(bool shrink)
 {
     globalParamsLocker();
     psShrinkLarger = shrink;
-}
-
-void GlobalParams::setPSLevel(PSLevel level)
-{
-    globalParamsLocker();
-    psLevel = level;
 }
 
 void GlobalParams::setTextEncoding(const char *encodingName)
