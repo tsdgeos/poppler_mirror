@@ -586,20 +586,14 @@ AnnotBorderBS::AnnotBorderBS() { }
 
 AnnotBorderBS::AnnotBorderBS(Dict *dict)
 {
-    Object obj1, obj2;
+    // Border width (in points)
+    Object obj1 = dict->lookup("W");
+    width = obj1.getNumWithDefaultValue(1.0);
 
-    // acroread 8 seems to need both W and S entries for
-    // any border to be drawn, even though the spec
-    // doesn't claim anything of that sort. We follow
-    // that behaviour by verifying both entries exist
-    // otherwise we set the borderWidth to 0
-    // --jrmuizel
-    obj1 = dict->lookup("W");
-    obj2 = dict->lookup("S");
-    if (obj1.isNum() && obj2.isName()) {
-        const char *styleName = obj2.getName();
-
-        width = obj1.getNum();
+    // Border style
+    obj1 = dict->lookup("S");
+    if (obj1.isName()) {
+        const char *styleName = obj1.getName();
 
         if (!strcmp(styleName, "S")) {
             style = borderSolid;
@@ -615,9 +609,10 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict)
             style = borderSolid;
         }
     } else {
-        width = 0;
+        style = borderSolid;
     }
 
+    // Border dash style
     if (style == borderDashed) {
         obj1 = dict->lookup("D");
         if (obj1.isArray())
