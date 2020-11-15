@@ -1971,11 +1971,11 @@ void Splash::strokeNarrow(SplashPath *path)
                 dxdy = seg->dxdy;
                 if (y0 < state->clip->getYMinI()) {
                     y0 = state->clip->getYMinI();
-                    x0 = splashFloor(seg->x0 + ((SplashCoord)y0 - seg->y0) * dxdy);
+                    x0 = splashFloor(seg->x0 + (state->clip->getYMin() - seg->y0) * dxdy);
                 }
                 if (y1 > state->clip->getYMaxI()) {
                     y1 = state->clip->getYMaxI();
-                    x1 = splashFloor(seg->x0 + ((SplashCoord)y1 - seg->y0) * dxdy);
+                    x1 = splashFloor(seg->x0 + (state->clip->getYMax() - seg->y0) * dxdy);
                 }
                 if (x0 <= x1) {
                     xa = x0;
