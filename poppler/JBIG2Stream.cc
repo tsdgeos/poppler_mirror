@@ -1741,6 +1741,10 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                 } else {
                     bitmaps[numInputSyms + i] = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO, huffTableO,
                                                                huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
+                    if (unlikely(!bitmaps[numInputSyms + i])) {
+                        error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
+                        goto syntaxError;
+                    }
                 }
 
                 // non-ref/agg coding
