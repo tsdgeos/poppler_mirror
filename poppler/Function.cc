@@ -208,7 +208,7 @@ void IdentityFunction::transform(const double *in, double *out) const
 // SampledFunction
 //------------------------------------------------------------------------
 
-SampledFunction::SampledFunction(Object *funcObj, Dict *dict)
+SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
 {
     Stream *str;
     int sampleBits;
