@@ -36,6 +36,8 @@
 
 #include <config.h>
 
+#include <memory>
+
 #include <cstdlib>
 #include <climits>
 #include "Error.h"
@@ -2189,7 +2191,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                          const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable,
                                          const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {
-    JBIG2Bitmap *bitmap;
     JBIG2Bitmap *symbolBitmap;
     unsigned int strips;
     int t = 0, dt = 0, tt, s, ds = 0, sFirst, j = 0;
@@ -2199,9 +2200,8 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
     strips = 1 << logStrips;
 
     // allocate the bitmap
-    bitmap = new JBIG2Bitmap(0, w, h);
+    std::unique_ptr<JBIG2Bitmap> bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
-        delete bitmap;
         return nullptr;
     }
     if (defPixel) {
@@ -2253,7 +2253,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 arithDecoder->decodeInt(&dt, iaitStats);
             }
             if (unlikely(checkedAdd(t, dt, &tt))) {
-                delete bitmap;
                 return nullptr;
             }
 
@@ -2267,7 +2266,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 }
             } else {
                 if (iaidStats == nullptr) {
-                    delete bitmap;
                     return nullptr;
                 }
                 symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
@@ -2277,7 +2275,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
                 if (unlikely(numInstances - inst > 0x800)) {
                     // don't loop too often with damaged JBIg2 streams
-                    delete bitmap;
                     return nullptr;
                 }
             } else {
@@ -2331,7 +2328,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                         if (ri) {
                             delete symbolBitmap;
                         }
-                        delete bitmap;
                         return nullptr;
                     }
                     bh = symbolBitmap->getHeight() - 1;
@@ -2341,7 +2337,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                             if (ri) {
                                 delete symbolBitmap;
                             }
-                            delete bitmap;
                             return nullptr;
                         }
                         switch (refCorner) {
@@ -2367,7 +2362,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt - bh, combOp);
@@ -2378,7 +2372,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt, combOp);
@@ -2389,7 +2382,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt - bh, combOp);
@@ -2400,7 +2392,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt, combOp);
@@ -2413,7 +2404,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                     }
                 } else {
                     // NULL symbolBitmap only happens on error
-                    delete bitmap;
                     return nullptr;
                 }
             }
@@ -2432,13 +2422,12 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 }
             }
             if (checkedAdd(s, sOffset + ds, &s)) {
-                delete bitmap;
                 return nullptr;
             }
         }
     }
 
-    return bitmap;
+    return bitmap.release();
 }
 
 void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
