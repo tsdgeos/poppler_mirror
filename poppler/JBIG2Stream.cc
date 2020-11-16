@@ -36,6 +36,8 @@
 
 #include <config.h>
 
+#include <memory>
+
 #include <cstdlib>
 #include <climits>
 #include "Error.h"
@@ -1705,167 +1707,172 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                         break;
                     }
                 }
-#if 0 //~ This special case was added about a year before the final draft
-      //~ of the JBIG2 spec was released.  I have encountered some old
-      //~ JBIG2 images that predate it.
-	if (0) {
-#else
+                //~ This special case was added about a year before the final draft
+                //~ of the JBIG2 spec was released.  I have encountered some old
+                //~ JBIG2 images that predate it.
+                //~ if (0) {
                 if (refAggNum == 1) {
-#endif
-                if (huff) {
-                    symID = huffDecoder->readBits(symCodeLen);
-                    huffDecoder->decodeInt(&refDX, huffTableO);
-                    huffDecoder->decodeInt(&refDY, huffTableO);
-                    huffDecoder->decodeInt(&bmSize, huffTableA);
-                    huffDecoder->reset();
-                    arithDecoder->start();
-                } else {
-                    if (iaidStats == nullptr) {
+                    if (huff) {
+                        symID = huffDecoder->readBits(symCodeLen);
+                        huffDecoder->decodeInt(&refDX, huffTableO);
+                        huffDecoder->decodeInt(&refDY, huffTableO);
+                        huffDecoder->decodeInt(&bmSize, huffTableA);
+                        huffDecoder->reset();
+                        arithDecoder->start();
+                    } else {
+                        if (iaidStats == nullptr) {
+                            goto syntaxError;
+                        }
+                        symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
+                        arithDecoder->decodeInt(&refDX, iardxStats);
+                        arithDecoder->decodeInt(&refDY, iardyStats);
+                    }
+                    if (symID >= numInputSyms + i) {
+                        error(errSyntaxError, curStr->getPos(), "Invalid symbol ID in JBIG2 symbol dictionary");
                         goto syntaxError;
                     }
-                    symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
-                    arithDecoder->decodeInt(&refDX, iardxStats);
-                    arithDecoder->decodeInt(&refDY, iardyStats);
+                    refBitmap = bitmaps[symID];
+                    if (unlikely(refBitmap == nullptr)) {
+                        error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
+                        goto syntaxError;
+                    }
+                    bitmaps[numInputSyms + i] = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY);
+                    //~ do we need to use the bmSize value here (in Huffman mode)?
+                } else {
+                    bitmaps[numInputSyms + i] = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO, huffTableO,
+                                                               huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
+                    if (unlikely(!bitmaps[numInputSyms + i])) {
+                        error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
+                        goto syntaxError;
+                    }
                 }
-                if (symID >= numInputSyms + i) {
-                    error(errSyntaxError, curStr->getPos(), "Invalid symbol ID in JBIG2 symbol dictionary");
-                    goto syntaxError;
-                }
-                refBitmap = bitmaps[symID];
-                if (unlikely(refBitmap == nullptr)) {
-                    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
-                    goto syntaxError;
-                }
-                bitmaps[numInputSyms + i] = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY);
-                //~ do we need to use the bmSize value here (in Huffman mode)?
+
+                // non-ref/agg coding
             } else {
-                bitmaps[numInputSyms + i] = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO, huffTableO, huffTableO,
-                                                           huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
+                bitmaps[numInputSyms + i] = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0);
             }
 
-            // non-ref/agg coding
+            ++i;
         }
-        else { bitmaps[numInputSyms + i] = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0); }
 
-        ++i;
-    }
-
-    // read the collective bitmap
-    if (huff && !refAgg) {
-        huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
-        huffDecoder->reset();
-        if (bmSize == 0) {
-            collBitmap = new JBIG2Bitmap(0, totalWidth, symHeight);
-            bmSize = symHeight * ((totalWidth + 7) >> 3);
-            p = collBitmap->getDataPtr();
-            if (unlikely(p == nullptr)) {
+        // read the collective bitmap
+        if (huff && !refAgg) {
+            huffDecoder->decodeInt(&bmSize, huffBMSizeTable);
+            huffDecoder->reset();
+            if (bmSize == 0) {
+                collBitmap = new JBIG2Bitmap(0, totalWidth, symHeight);
+                bmSize = symHeight * ((totalWidth + 7) >> 3);
+                p = collBitmap->getDataPtr();
+                if (unlikely(p == nullptr)) {
+                    delete collBitmap;
+                    goto syntaxError;
+                }
+                for (k = 0; k < (unsigned int)bmSize; ++k) {
+                    if ((c = curStr->getChar()) == EOF) {
+                        memset(p, 0, bmSize - k);
+                        break;
+                    }
+                    *p++ = (unsigned char)c;
+                }
+            } else {
+                collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize);
+            }
+            if (likely(collBitmap != nullptr)) {
+                x = 0;
+                for (; j < i; ++j) {
+                    bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight);
+                    x += symWidths[j];
+                }
                 delete collBitmap;
+            } else {
+                error(errSyntaxError, curStr->getPos(), "collBitmap was null");
                 goto syntaxError;
             }
-            for (k = 0; k < (unsigned int)bmSize; ++k) {
-                if ((c = curStr->getChar()) == EOF) {
-                    memset(p, 0, bmSize - k);
-                    break;
-                }
-                *p++ = (unsigned char)c;
-            }
-        } else {
-            collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize);
         }
-        if (likely(collBitmap != nullptr)) {
-            x = 0;
-            for (; j < i; ++j) {
-                bitmaps[numInputSyms + j] = collBitmap->getSlice(x, 0, symWidths[j], symHeight);
-                x += symWidths[j];
-            }
-            delete collBitmap;
+    }
+
+    // create the symbol dict object
+    symbolDict = new JBIG2SymbolDict(segNum, numExSyms);
+    if (!symbolDict->isOk()) {
+        delete symbolDict;
+        goto syntaxError;
+    }
+
+    // exported symbol list
+    i = j = 0;
+    ex = false;
+    run = 0; // initialize it once in case the first decodeInt fails
+             // we do not want to use uninitialized memory
+    while (i < numInputSyms + numNewSyms) {
+        if (huff) {
+            huffDecoder->decodeInt(&run, huffTableA);
         } else {
-            error(errSyntaxError, curStr->getPos(), "collBitmap was null");
+            arithDecoder->decodeInt(&run, iaexStats);
+        }
+        if (i + run > numInputSyms + numNewSyms || (ex && j + run > numExSyms)) {
+            error(errSyntaxError, curStr->getPos(), "Too many exported symbols in JBIG2 symbol dictionary");
+            for (; j < numExSyms; ++j)
+                symbolDict->setBitmap(j, nullptr);
+            delete symbolDict;
             goto syntaxError;
         }
+        if (ex) {
+            for (cnt = 0; cnt < run; ++cnt) {
+                symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
+            }
+        } else {
+            i += run;
+        }
+        ex = !ex;
     }
-}
-
-// create the symbol dict object
-symbolDict = new JBIG2SymbolDict(segNum, numExSyms);
-if (!symbolDict->isOk()) {
-    delete symbolDict;
-    goto syntaxError;
-}
-
-// exported symbol list
-i = j = 0;
-ex = false;
-run = 0; // initialize it once in case the first decodeInt fails
-         // we do not want to use uninitialized memory
-while (i < numInputSyms + numNewSyms) {
-    if (huff) {
-        huffDecoder->decodeInt(&run, huffTableA);
-    } else {
-        arithDecoder->decodeInt(&run, iaexStats);
-    }
-    if (i + run > numInputSyms + numNewSyms || (ex && j + run > numExSyms)) {
-        error(errSyntaxError, curStr->getPos(), "Too many exported symbols in JBIG2 symbol dictionary");
+    if (j != numExSyms) {
+        error(errSyntaxError, curStr->getPos(), "Too few symbols in JBIG2 symbol dictionary");
         for (; j < numExSyms; ++j)
             symbolDict->setBitmap(j, nullptr);
         delete symbolDict;
         goto syntaxError;
     }
-    if (ex) {
-        for (cnt = 0; cnt < run; ++cnt) {
-            symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
-        }
-    } else {
-        i += run;
-    }
-    ex = !ex;
-}
-if (j != numExSyms) {
-    error(errSyntaxError, curStr->getPos(), "Too few symbols in JBIG2 symbol dictionary");
-    for (; j < numExSyms; ++j)
-        symbolDict->setBitmap(j, nullptr);
-    delete symbolDict;
-    goto syntaxError;
-}
 
-for (i = 0; i < numNewSyms; ++i) {
-    delete bitmaps[numInputSyms + i];
-}
-gfree(bitmaps);
-if (symWidths) {
-    gfree(symWidths);
-}
-
-// save the arithmetic decoder stats
-if (!huff && contextRetained) {
-    symbolDict->setGenericRegionStats(genericRegionStats->copy());
-    if (refAgg) {
-        symbolDict->setRefinementRegionStats(refinementRegionStats->copy());
-    }
-}
-
-// store the new symbol dict
-segments->push_back(symbolDict);
-
-return true;
-
-codeTableError : error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
-delete codeTables;
-
-syntaxError : for (i = 0; i < numNewSyms; ++i)
-{
-    if (bitmaps[numInputSyms + i]) {
+    for (i = 0; i < numNewSyms; ++i) {
         delete bitmaps[numInputSyms + i];
     }
-}
-gfree(bitmaps);
-if (symWidths) {
-    gfree(symWidths);
-}
-return false;
+    gfree(bitmaps);
+    if (symWidths) {
+        gfree(symWidths);
+    }
 
-eofError : error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-return false;
+    // save the arithmetic decoder stats
+    if (!huff && contextRetained) {
+        symbolDict->setGenericRegionStats(genericRegionStats->copy());
+        if (refAgg) {
+            symbolDict->setRefinementRegionStats(refinementRegionStats->copy());
+        }
+    }
+
+    // store the new symbol dict
+    segments->push_back(symbolDict);
+
+    return true;
+
+codeTableError:
+    error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
+    delete codeTables;
+
+syntaxError:
+    for (i = 0; i < numNewSyms; ++i) {
+        if (bitmaps[numInputSyms + i]) {
+            delete bitmaps[numInputSyms + i];
+        }
+    }
+    gfree(bitmaps);
+    if (symWidths) {
+        gfree(symWidths);
+    }
+    return false;
+
+eofError:
+    error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
+    return false;
 }
 
 void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs)
@@ -2188,7 +2195,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                          const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable,
                                          const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {
-    JBIG2Bitmap *bitmap;
     JBIG2Bitmap *symbolBitmap;
     unsigned int strips;
     int t = 0, dt = 0, tt, s, ds = 0, sFirst, j = 0;
@@ -2198,9 +2204,8 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
     strips = 1 << logStrips;
 
     // allocate the bitmap
-    bitmap = new JBIG2Bitmap(0, w, h);
+    std::unique_ptr<JBIG2Bitmap> bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
-        delete bitmap;
         return nullptr;
     }
     if (defPixel) {
@@ -2252,7 +2257,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 arithDecoder->decodeInt(&dt, iaitStats);
             }
             if (unlikely(checkedAdd(t, dt, &tt))) {
-                delete bitmap;
                 return nullptr;
             }
 
@@ -2266,7 +2270,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 }
             } else {
                 if (iaidStats == nullptr) {
-                    delete bitmap;
                     return nullptr;
                 }
                 symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
@@ -2276,7 +2279,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
                 if (unlikely(numInstances - inst > 0x800)) {
                     // don't loop too often with damaged JBIg2 streams
-                    delete bitmap;
                     return nullptr;
                 }
             } else {
@@ -2330,7 +2332,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                         if (ri) {
                             delete symbolBitmap;
                         }
-                        delete bitmap;
                         return nullptr;
                     }
                     bh = symbolBitmap->getHeight() - 1;
@@ -2340,7 +2341,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                             if (ri) {
                                 delete symbolBitmap;
                             }
-                            delete bitmap;
                             return nullptr;
                         }
                         switch (refCorner) {
@@ -2366,7 +2366,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt - bh, combOp);
@@ -2377,7 +2376,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt, combOp);
@@ -2388,7 +2386,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt - bh, combOp);
@@ -2399,7 +2396,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                                 if (ri) {
                                     delete symbolBitmap;
                                 }
-                                delete bitmap;
                                 return nullptr;
                             }
                             bitmap->combine(symbolBitmap, s, tt, combOp);
@@ -2412,7 +2408,6 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                     }
                 } else {
                     // NULL symbolBitmap only happens on error
-                    delete bitmap;
                     return nullptr;
                 }
             }
@@ -2431,13 +2426,12 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
                 }
             }
             if (checkedAdd(s, sOffset + ds, &s)) {
-                delete bitmap;
                 return nullptr;
             }
         }
     }
 
-    return bitmap;
+    return bitmap.release();
 }
 
 void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
@@ -3916,7 +3910,10 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length)
         huffTab[i].val = val;
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits);
         huffTab[i].rangeLen = huffDecoder->readBits(rangeBits);
-        val += 1 << huffTab[i].rangeLen;
+        if (unlikely(checkedAdd(val, 1 << huffTab[i].rangeLen, &val))) {
+            free(huffTab);
+            return;
+        }
         ++i;
     }
     if (i + oob + 3 > huffTabSize) {

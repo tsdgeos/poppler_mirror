@@ -3,7 +3,7 @@
 // FontInfo.cc
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
@@ -205,16 +205,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
 
     // check for a font subset name: capital letters followed by a '+'
     // sign
-    subset = false;
-    if (name) {
-        int i;
-        for (i = 0; i < name->getLength(); ++i) {
-            if (name->getChar(i) < 'A' || name->getChar(i) > 'Z') {
-                break;
-            }
-        }
-        subset = i > 0 && i < name->getLength() && name->getChar(i) == '+';
-    }
+    subset = font->isSubset();
 }
 
 FontInfo::FontInfo(const FontInfo &f)

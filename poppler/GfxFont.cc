@@ -262,6 +262,33 @@ void GfxFont::decRefCnt()
         delete this;
 }
 
+bool GfxFont::isSubset() const
+{
+    if (name) {
+        int i;
+        for (i = 0; i < name->getLength(); ++i) {
+            if (name->getChar(i) < 'A' || name->getChar(i) > 'Z') {
+                break;
+            }
+        }
+        return i == 6 && name->getLength() > 7 && name->getChar(6) == '+';
+    }
+    return false;
+}
+
+std::string GfxFont::getNameWithoutSubsetTag() const
+{
+    if (!name) {
+        return {};
+    }
+
+    if (!isSubset()) {
+        return name->toStr();
+    }
+
+    return name->toStr().substr(7);
+}
+
 // This function extracts three pieces of information:
 // 1. the "expected" font type, i.e., the font type implied by
 //    Font.Subtype, DescendantFont.Subtype, and

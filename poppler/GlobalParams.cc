@@ -701,7 +701,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     FcPattern *p;
 
     // this is all heuristics will be overwritten if font had proper info
-    char *fontName = strdup(((base14Name == nullptr) ? font->getName() : base14Name)->c_str());
+    char *fontName = strdup(((base14Name == nullptr) ? font->getNameWithoutSubsetTag() : base14Name->toStr()).c_str());
 
     const char *modifiers = strchr(fontName, ',');
     if (modifiers == nullptr)
