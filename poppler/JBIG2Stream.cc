@@ -3910,7 +3910,10 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length)
         huffTab[i].val = val;
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits);
         huffTab[i].rangeLen = huffDecoder->readBits(rangeBits);
-        val += 1 << huffTab[i].rangeLen;
+        if (unlikely(checkedAdd(val, 1 << huffTab[i].rangeLen, &val))) {
+            free(huffTab);
+            return;
+        }
         ++i;
     }
     if (i + oob + 3 > huffTabSize) {
