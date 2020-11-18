@@ -2240,7 +2240,9 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
         } else {
             arithDecoder->decodeInt(&ds, iafsStats);
         }
-        sFirst += ds;
+        if (unlikely(checkedAdd(sFirst, ds, &sFirst))) {
+            return nullptr;
+        }
         s = sFirst;
 
         // read the instances
