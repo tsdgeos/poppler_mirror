@@ -749,7 +749,7 @@ bool StreamPredictor::getNextLine()
     unsigned char upLeftBuf[gfxColorMaxComps * 2 + 1];
     int left, up, upLeft, p, pa, pb, pc;
     int c;
-    unsigned long inBuf, outBuf, bitMask;
+    unsigned long inBuf, outBuf;
     int inBits, outBits;
     int i, j, k, kk;
 
@@ -822,10 +822,13 @@ bool StreamPredictor::getNextLine()
     if (predictor == 2) {
         if (nBits == 1 && nComps == 1) {
             inBuf = predLine[pixBytes - 1];
-            for (i = pixBytes; i < rowBytes; i += 8) {
-                // 1-bit add is just xor
-                inBuf = (inBuf << 8) | predLine[i];
-                predLine[i] ^= inBuf >> nComps;
+            for (i = pixBytes; i < rowBytes; ++i) {
+                c = predLine[i] ^ inBuf;
+                c ^= c >> 1;
+                c ^= c >> 2;
+                c ^= c >> 4;
+                inBuf = (c & 1) << 7;
+                predLine[i] = c;
             }
         } else if (nBits == 8) {
             for (i = pixBytes; i < rowBytes; ++i) {
@@ -833,7 +836,7 @@ bool StreamPredictor::getNextLine()
             }
         } else {
             memset(upLeftBuf, 0, nComps + 1);
-            bitMask = (1 << nBits) - 1;
+            const unsigned long bitMask = (1 << nBits) - 1;
             inBuf = outBuf = 0;
             inBits = outBits = 0;
             j = k = pixBytes;
