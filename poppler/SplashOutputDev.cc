@@ -4307,7 +4307,33 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     m1.m[4] = -kx;
     m1.m[5] = -ky;
 
-    bitmap = new SplashBitmap(surface_width, surface_height, 1, (paintType == 1) ? colorMode : splashModeMono8, true);
+    box.x1 = bbox[0];
+    box.y1 = bbox[1];
+    box.x2 = bbox[2];
+    box.y2 = bbox[3];
+    gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    // set pattern transformation matrix
+    gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+    if (splashAbs(matc[1]) > splashAbs(matc[0])) {
+        kx = -matc[1];
+        ky = matc[2] - (matc[0] * matc[3]) / matc[1];
+    } else {
+        kx = matc[0];
+        ky = matc[3] - (matc[1] * matc[2]) / matc[0];
+    }
+    result_width = surface_width * repeatX;
+    result_height = surface_height * repeatY;
+    kx = result_width / (fabs(kx) + 1);
+    ky = result_height / (fabs(ky) + 1);
+    state->concatCTM(kx, 0, 0, ky, 0, 0);
+    ctm = state->getCTM();
+    matc[0] = ctm[0];
+    matc[1] = ctm[1];
+    matc[2] = ctm[2];
+    matc[3] = ctm[3];
+
+    const bool doFastBlit = matc[0] > 0 && matc[1] == 0 && matc[2] == 0 && matc[3] > 0;
+    bitmap = new SplashBitmap(surface_width, surface_height, 1, (paintType == 1 || doFastBlit) ? colorMode : splashModeMono8, true);
     if (bitmap->getDataPtr() == nullptr) {
         SplashBitmap *tBitmap = bitmap;
         bitmap = formerBitmap;
@@ -4316,6 +4342,8 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         return false;
     }
     splash = new Splash(bitmap, true);
+    updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+
     if (paintType == 2) {
         SplashColor clearColor;
         clearColor[0] = (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF;
@@ -4325,18 +4353,16 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     }
     splash->setThinLineMode(formerSplash->getThinLineMode());
     splash->setMinLineWidth(s_minLineWidth);
-
-    box.x1 = bbox[0];
-    box.y1 = bbox[1];
-    box.x2 = bbox[2];
-    box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
-    // set pattern transformation matrix
-    gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
-    updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+    if (doFastBlit) {
+        // drawImage would colorize the greyscale pattern in tilingBitmapSrc buffer accessor while tiling.
+        // blitImage can't, it has no buffer accessor. We instead colorize the pattern prototype in advance.
+        splash->setFillPattern(formerSplash->getFillPattern()->copy());
+        splash->setStrokePattern(formerSplash->getStrokePattern()->copy());
+    }
     gfx->display(str);
     delete splash;
     splash = formerSplash;
+
     TilingSplashOutBitmap imgData;
     imgData.bitmap = bitmap;
     imgData.paintType = paintType;
@@ -4347,26 +4373,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     imgData.repeatY = repeatY;
     SplashBitmap *tBitmap = bitmap;
     bitmap = formerBitmap;
-    result_width = tBitmap->getWidth() * imgData.repeatX;
-    result_height = tBitmap->getHeight() * imgData.repeatY;
-
-    if (splashAbs(matc[1]) > splashAbs(matc[0])) {
-        kx = -matc[1];
-        ky = matc[2] - (matc[0] * matc[3]) / matc[1];
-    } else {
-        kx = matc[0];
-        ky = matc[3] - (matc[1] * matc[2]) / matc[0];
-    }
-    kx = result_width / (fabs(kx) + 1);
-    ky = result_height / (fabs(ky) + 1);
-    state->concatCTM(kx, 0, 0, ky, 0, 0);
-    ctm = state->getCTM();
-    matc[0] = ctm[0];
-    matc[1] = ctm[1];
-    matc[2] = ctm[2];
-    matc[3] = ctm[3];
-    bool minorAxisZero = matc[1] == 0 && matc[2] == 0;
-    if (matc[0] > 0 && minorAxisZero && matc[3] > 0) {
+    if (doFastBlit) {
         // draw the tiles
         for (int y = 0; y < imgData.repeatY; ++y) {
             for (int x = 0; x < imgData.repeatX; ++x) {
