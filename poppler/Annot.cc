@@ -3557,6 +3557,32 @@ void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints)
     invalidateAppearance();
 }
 
+bool AnnotTextMarkup::shouldCreateApperance(Gfx *gfx) const
+{
+    if (appearance.isNull())
+        return true;
+
+    // Adobe Reader seems to have a complex condition for when to use the
+    // appearance stream of typeHighlight, which is "use it if it has a Resources dictionary with ExtGState"
+    // this is reverse engineering of me editing a file by hand and checking what it does so the real
+    // condition may be more or less complex
+    if (type == typeHighlight) {
+        XRef *xref = gfx->getXRef();
+        const Object fetchedApperance = appearance.fetch(xref);
+        if (fetchedApperance.isStream()) {
+            const Object resources = fetchedApperance.streamGetDict()->lookup("Resources");
+            if (resources.isDict()) {
+                if (resources.dictLookup("ExtGState").isDict()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    return false;
+}
+
 void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
@@ -3566,7 +3592,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         return;
 
     annotLocker();
-    if (appearance.isNull() || type == typeHighlight) {
+    if (shouldCreateApperance(gfx)) {
         bool blendMultiply = true;
         ca = opacity;
 

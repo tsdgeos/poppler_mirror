@@ -47,7 +47,7 @@ poppler_add_testcase(poppler-check-bb checkbox_issue_159.pdf 2.84 14.17 553.18 8
 poppler_add_testcase(poppler-check-bb NestedLayers.pdf 0 191 612 792)
 poppler_add_testcase(poppler-check-bb A6EmbeddedFiles.pdf 18 18 558.36 751.92)
 poppler_add_testcase(poppler-check-bb latex-hyperref-checkbox-issue-655.pdf 148.71 123.81 308.11 704.57)
-poppler_add_testcase(poppler-check-bb utf16le-annot.pdf 52.98 55.61 101.23 95.29)
+poppler_add_testcase(poppler-check-bb utf16le-annot.pdf 55.47 54.78 98.74 96.12)
 poppler_add_testcase(poppler-check-bb type3.pdf -p 10 125.80 130 509.30 695 125.80 132 538.03 693)
 
 add_executable(pdfdrawbb pdfdrawbb.c)
