@@ -5385,15 +5385,20 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 
         if (type == typeSquare) {
             appearBuilder.appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n", borderWidth / 2.0, borderWidth / 2.0, (rect->x2 - rect->x1) - borderWidth, (rect->y2 - rect->y1) - borderWidth);
-            if (fill)
-                appearBuilder.append("b\n");
-            else
+            if (fill) {
+                if (borderWidth > 0) {
+                    appearBuilder.append("b\n");
+                } else {
+                    appearBuilder.append("f\n");
+                }
+            } else if (borderWidth > 0) {
                 appearBuilder.append("S\n");
+            }
         } else {
             const double rx { (rect->x2 - rect->x1) / 2. };
             const double ry { (rect->y2 - rect->y1) / 2. };
             const double bwHalf { borderWidth / 2.0 };
-            appearBuilder.drawEllipse(rx, ry, rx - bwHalf, ry - bwHalf, fill, true);
+            appearBuilder.drawEllipse(rx, ry, rx - bwHalf, ry - bwHalf, fill, borderWidth > 0);
         }
         appearBuilder.append("Q\n");
 
@@ -5711,9 +5716,14 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
                     appearBBox->extendTo(vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
                 }
 
+                const double borderWidth = border->getWidth();
                 if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent) {
-                    appearBuilder.append("b\n");
-                } else {
+                    if (borderWidth > 0) {
+                        appearBuilder.append("b\n");
+                    } else {
+                        appearBuilder.append("f\n");
+                    }
+                } else if (borderWidth > 0) {
                     appearBuilder.append("s\n");
                 }
             }
