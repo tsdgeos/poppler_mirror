@@ -206,6 +206,7 @@ public:
 
     Object *getAcroForm() { return &acroForm; }
     void addFormToAcroForm(const Ref formRef);
+    void removeFormFromAcroForm(const Ref formRef);
 
     OCGs *getOptContentConfig() { return optContent; }
 

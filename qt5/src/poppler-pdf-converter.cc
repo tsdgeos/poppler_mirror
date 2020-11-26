@@ -179,8 +179,21 @@ bool PDFConverter::sign(const NewSignatureData &data)
     signatureAnnot->setBorder(std::move(border));
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
-    if (fws)
-        return fws->signDocument(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData());
+    if (fws) {
+        const bool res = fws->signDocument(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData());
+
+        // Now remove the signature stuff in case the user wants to continue editing stuff
+        // So the document object is clean
+        const Object &vRefObj = annotObj.dictLookupNF("V");
+        if (vRefObj.isRef()) {
+            doc->getXRef()->removeIndirectObject(vRefObj.getRef());
+        }
+        destPage->removeAnnot(signatureAnnot);
+        catalog->removeFormFromAcroForm(ref);
+        doc->getXRef()->removeIndirectObject(ref);
+
+        return res;
+    }
 
     return false;
 }

@@ -1038,6 +1038,31 @@ void Catalog::addFormToAcroForm(const Ref formRef)
     }
 }
 
+void Catalog::removeFormFromAcroForm(const Ref formRef)
+{
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (acroForm.isDict()) {
+        // remove from field array
+        Ref fieldRef;
+        Object fieldArrayO = acroForm.getDict()->lookup("Fields", &fieldRef);
+        Array *fieldArray = fieldArrayO.getArray();
+        for (int i = 0; i < fieldArray->getLength(); ++i) {
+            const Object &o = fieldArray->getNF(i);
+            if (o.isRef() && o.getRef() == formRef) {
+                fieldArray->remove(i);
+                break;
+            }
+        }
+
+        xref->setModifiedObject(&acroForm, acroFormRef);
+    }
+}
+
 ViewerPreferences *Catalog::getViewerPreferences()
 {
     catalogLocker();
