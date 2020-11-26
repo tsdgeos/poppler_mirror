@@ -746,6 +746,21 @@ QByteArray CertificateInfo::certificateData() const
     return d->certificate_der;
 }
 
+bool CertificateInfo::checkPassword(const QString &password) const
+{
+#ifdef ENABLE_NSS3
+    Q_D(const CertificateInfo);
+    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), SEC_OID_SHA256);
+    unsigned char buffer[5];
+    memcpy(buffer, "test", 5);
+    sigHandler.updateHash(buffer, 5);
+    std::unique_ptr<GooString> tmpSignature = std::make_unique<GooString>(sigHandler.signDetached(password.toUtf8().constData()));
+    return tmpSignature.get() != nullptr;
+#else
+    return false;
+#endif
+}
+
 class SignatureValidationInfoPrivate
 {
 public:

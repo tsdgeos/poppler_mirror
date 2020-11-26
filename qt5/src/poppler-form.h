@@ -607,6 +607,13 @@ public:
      */
     QByteArray certificateData() const;
 
+    /**
+      Checks if the given password is the correct one for this certificate
+
+      \since 20.12
+     */
+    bool checkPassword(const QString &password) const;
+
     CertificateInfo(const CertificateInfo &other);
     CertificateInfo &operator=(const CertificateInfo &other);
 
