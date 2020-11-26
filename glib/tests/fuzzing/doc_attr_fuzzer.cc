@@ -17,7 +17,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-    buf = (char *)malloc(size + 1);
+    buf = (char *)calloc(size + 1, sizeof(char));
     memcpy(buf, data, size);
     buf[size] = '\0';
 
