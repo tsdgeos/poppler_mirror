@@ -150,13 +150,13 @@ bool PDFConverter::sign(const NewSignatureData &data)
     Catalog *catalog = doc->getCatalog();
     catalog->addFormToAcroForm(ref);
 
-    ::FormFieldSignature *field = new ::FormFieldSignature(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
+    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
 
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     field->setCustomAppearanceContent(*gSignatureText);
 
     Object refObj(ref);
-    AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field);
+    AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field.get());
     signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked);
     Dict dummy(doc->getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
