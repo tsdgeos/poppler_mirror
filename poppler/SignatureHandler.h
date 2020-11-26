@@ -57,7 +57,7 @@ public:
     CertificateValidationStatus validateCertificate(time_t validation_time);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
-    GooString *signDetached(const char *password);
+    std::unique_ptr<GooString> signDetached(const char *password) const;
 
     static SECOidTag getHashOidTag(const char *digestName);
 

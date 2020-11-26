@@ -987,7 +987,7 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     return CERTIFICATE_GENERIC_ERROR;
 }
 
-GooString *SignatureHandler::signDetached(const char *password)
+std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) const
 {
     if (!hash_context)
         return nullptr;
@@ -1113,18 +1113,23 @@ GooString *SignatureHandler::signDetached(const char *password)
     PLArenaPool *arena = PORT_NewArena(10000);
 
     NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg, nullptr, nullptr, &cms_output, arena, passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
-    if (!cms_ecx)
+    if (!cms_ecx) {
+        PORT_FreeArena(arena, PR_FALSE);
         return nullptr;
+    }
 
-    if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess)
+    if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess) {
+        PORT_FreeArena(arena, PR_FALSE);
         return nullptr;
+    }
 
     GooString *signature = new GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
     NSS_CMSMessage_Destroy(cms_msg);
+    PORT_FreeArena(arena, PR_FALSE);
 
-    return signature;
+    return std::unique_ptr<GooString>(signature);
 }
 
 static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
@@ -1170,6 +1175,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
                 SECKEY_DestroyPrivateKeyList(privKeyList);
             }
         }
+        PK11_FreeSlotList(slotList);
     }
 
     PK11_SetPasswordFunc(nullptr);

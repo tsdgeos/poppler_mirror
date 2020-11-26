@@ -528,7 +528,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     memcpy(tmp_buffer, "PDF", 4);
     SignatureHandler sigHandler(certNickname, SEC_OID_SHA256);
     sigHandler.updateHash(tmp_buffer, 4);
-    GooString *tmpSignature = sigHandler.signDetached(password);
+    const std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password);
     if (!tmpSignature)
         return false;
 
@@ -541,8 +541,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     GooString gReason(reason ? reason : "");
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(&vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), gReason, tmpSignature)) {
-        delete tmpSignature;
+    if (!createSignature(vObj, vref, GooString(signerName), gReason, tmpSignature.get())) {
         return false;
     }
 
@@ -573,17 +572,16 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     hashFileRange(file, &sigHandler, sigEnd, fileSize);
 
     // and sign it
-    GooString *signature = sigHandler.signDetached(password);
+    const std::unique_ptr<GooString> signature = sigHandler.signDetached(password);
     if (!signature)
         return false;
 
     // write signature to saved file
-    if (!updateSignature(file, sigStart, sigEnd, signature)) {
+    if (!updateSignature(file, sigStart, sigEnd, signature.get())) {
         fprintf(stderr, "signDocument: unable update signature\n");
         return false;
     }
     signatureField->setSignature(*signature);
-    delete signature;
 
     fclose(file);
 

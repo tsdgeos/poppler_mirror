@@ -30,6 +30,7 @@
 #include <QFile>
 #include <QUuid>
 
+#include "Array.h"
 #include "Form.h"
 #include <ErrorCodes.h>
 
@@ -135,6 +136,12 @@ bool PDFConverter::sign(const NewSignatureData &data)
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
     annotObj.dictSet("FT", Object(objName, "Sig"));
     annotObj.dictSet("T", Object(QStringToGooString(data.fieldPartialName())));
+    Array *rectArray = new Array(doc->getXRef());
+    rectArray->add(Object(rect.x1));
+    rectArray->add(Object(rect.y1));
+    rectArray->add(Object(rect.x2));
+    rectArray->add(Object(rect.y2));
+    annotObj.dictSet("Rect", Object(rectArray));
 
     GooString *daStr = da.toAppearanceString();
     annotObj.dictSet("DA", Object(daStr));
@@ -145,12 +152,11 @@ bool PDFConverter::sign(const NewSignatureData &data)
 
     ::FormFieldSignature *field = new ::FormFieldSignature(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
 
-    std::unique_ptr<GooString> gSignatureText = std::make_unique<GooString>(QStringToUnicodeGooString(data.signatureText()));
+    std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     field->setCustomAppearanceContent(*gSignatureText);
 
     Object refObj(ref);
     AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field);
-    signatureAnnot->setRect(&rect);
     signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked);
     Dict dummy(doc->getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
