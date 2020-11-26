@@ -28,6 +28,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -328,6 +329,10 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *
 XRef::~XRef()
 {
     for (int i = 0; i < size; i++) {
+        if (entries[i].type == xrefEntryFree) {
+            continue;
+        }
+
         entries[i].obj.~Object();
     }
     gfree(entries);
