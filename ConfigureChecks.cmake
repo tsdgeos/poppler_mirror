@@ -38,8 +38,6 @@ check_function_exists(gettimeofday HAVE_GETTIMEOFDAY)
 check_function_exists(localtime_r HAVE_LOCALTIME_R)
 check_function_exists(popen HAVE_POPEN)
 check_function_exists(mkstemp HAVE_MKSTEMP)
-check_function_exists(strcpy_s HAVE_STRCPY_S)
-check_function_exists(strcat_s HAVE_STRCAT_S)
 check_function_exists(strtok_r HAVE_STRTOK_R)
 
 macro(CHECK_FOR_DIR include var)

@@ -1,6 +1,6 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
    Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
-   Copyright 2018 Albert Astals Cid <aacid@kde.org> 2018
+   Copyright 2018, 2020 Albert Astals Cid <aacid@kde.org> 2018
    Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    Copyright 2020 Adam Reichold <adam.reichold@t-online.de>
    License: GPLv2 */
@@ -197,14 +197,6 @@ static bool gfLoadOnly = false;
 #define UNIX_NEWLINE "\x0a"
 #define UNIX_NEWLINE_C 0xa
 
-#ifdef _WIN32
-#    define DIR_SEP_CHAR '\\'
-#    define DIR_SEP_STR "\\"
-#else
-#    define DIR_SEP_CHAR '/'
-#    define DIR_SEP_STR "/"
-#endif
-
 static void memzero(void *data, size_t len)
 {
     memset(data, 0, len);
@@ -334,34 +326,6 @@ static void sleep_milliseconds(int milliseconds)
 #endif
 }
 
-#ifndef HAVE_STRCPY_S
-static void strcpy_s(char *dst, size_t dst_size, const char *src)
-{
-    size_t src_size = strlen(src) + 1;
-    if (src_size <= dst_size)
-        memcpy(dst, src, src_size);
-    else {
-        if (dst_size > 0) {
-            memcpy(dst, src, dst_size);
-            dst[dst_size - 1] = 0;
-        }
-    }
-}
-#endif
-
-#ifndef HAVE_STRCAT_S
-static void strcat_s(char *dst, size_t dst_size, const char *src)
-{
-    size_t dst_len = strlen(dst);
-    if (dst_len >= dst_size) {
-        if (dst_size > 0)
-            dst[dst_size - 1] = 0;
-        return;
-    }
-    strcpy_s(dst + dst_len, dst_size - dst_len, src);
-}
-#endif
-
 static SplashColorMode gSplashColorMode = splashModeBGR8;
 
 static SplashColor splashColRed;
@@ -459,196 +423,6 @@ SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int ro
     return bmp;
 }
 
-struct FindFileState
-{
-    char path[MAX_FILENAME_SIZE];
-    char dirpath[MAX_FILENAME_SIZE]; /* current dir path */
-    char pattern[MAX_FILENAME_SIZE]; /* search pattern */
-    const char *bufptr;
-#ifdef _WIN32
-    WIN32_FIND_DATA fileinfo;
-    HANDLE dir;
-#else
-    DIR *dir;
-#endif
-};
-
-#ifdef _WIN32
-#    include <sys/timeb.h>
-#    include <direct.h>
-
-__inline char *getcwd(char *buffer, int maxlen)
-{
-    return _getcwd(buffer, maxlen);
-}
-
-static int fnmatch(const char *pattern, const char *string, int flags)
-{
-    int prefix_len;
-    const char *star_pos = strchr(pattern, '*');
-    if (!star_pos)
-        return strcmp(pattern, string) != 0;
-
-    prefix_len = (int)(star_pos - pattern);
-    if (0 == prefix_len)
-        return 0;
-
-    if (0 == _strnicmp(pattern, string, prefix_len))
-        return 0;
-
-    return 1;
-}
-
-#else
-#    include <fnmatch.h>
-#endif
-
-#ifdef _WIN32
-/* on windows to query dirs we need foo\* to get files in this directory.
-    foo\ always fails and foo will return just info about foo directory,
-    not files in this directory */
-static void win_correct_path_for_FindFirstFile(char *path, int path_max_len)
-{
-    int path_len = strlen(path);
-    if (path_len >= path_max_len - 4)
-        return;
-    if (DIR_SEP_CHAR != path[path_len])
-        path[path_len++] = DIR_SEP_CHAR;
-    path[path_len++] = '*';
-    path[path_len] = 0;
-}
-#endif
-
-static FindFileState *find_file_open(const char *path, const char *pattern)
-{
-    FindFileState *s;
-
-    s = (FindFileState *)malloc(sizeof(FindFileState));
-    if (!s)
-        return nullptr;
-    strcpy_s(s->path, sizeof(s->path), path);
-    strcpy_s(s->dirpath, sizeof(s->path), path);
-#ifdef _WIN32
-    win_correct_path_for_FindFirstFile(s->path, sizeof(s->path));
-#endif
-    strcpy_s(s->pattern, sizeof(s->pattern), pattern);
-    s->bufptr = s->path;
-#ifdef _WIN32
-    s->dir = INVALID_HANDLE_VALUE;
-#else
-    s->dir = nullptr;
-#endif
-    return s;
-}
-
-#if 0 /* re-enable if we #define USE_OWN_GET_AUTH_DATA */
-void *StandardSecurityHandler::getAuthData()
-{
-    return NULL;
-}
-#endif
-
-static char *makepath(char *buf, int buf_size, const char *path, const char *filename)
-{
-    strcpy_s(buf, buf_size, path);
-    int len = strlen(path);
-    if (len > 0 && path[len - 1] != DIR_SEP_CHAR && len + 1 < buf_size) {
-        buf[len++] = DIR_SEP_CHAR;
-        buf[len] = '\0';
-    }
-    strcat_s(buf, buf_size, filename);
-    return buf;
-}
-
-#ifdef _WIN32
-static int skip_matching_file(const char *filename)
-{
-    if (0 == strcmp(".", filename))
-        return 1;
-    if (0 == strcmp("..", filename))
-        return 1;
-    return 0;
-}
-#endif
-
-static int find_file_next(FindFileState *s, char *filename, int filename_size_max)
-{
-#ifdef _WIN32
-    int fFound;
-    if (INVALID_HANDLE_VALUE == s->dir) {
-        s->dir = FindFirstFile(s->path, &(s->fileinfo));
-        if (INVALID_HANDLE_VALUE == s->dir)
-            return -1;
-        goto CheckFile;
-    }
-
-    while (1) {
-        fFound = FindNextFile(s->dir, &(s->fileinfo));
-        if (!fFound)
-            return -1;
-    CheckFile:
-        if (skip_matching_file(s->fileinfo.cFileName))
-            continue;
-        if (0 == fnmatch(s->pattern, s->fileinfo.cFileName, 0)) {
-            makepath(filename, filename_size_max, s->dirpath, s->fileinfo.cFileName);
-            return 0;
-        }
-    }
-#else
-    struct dirent *dirent;
-    const char *p;
-    char *q;
-
-    if (s->dir == nullptr)
-        goto redo;
-
-    for (;;) {
-        dirent = readdir(s->dir);
-        if (dirent == nullptr) {
-        redo:
-            if (s->dir) {
-                closedir(s->dir);
-                s->dir = nullptr;
-            }
-            p = s->bufptr;
-            if (*p == '\0')
-                return -1;
-            /* CG: get_str(&p, s->dirpath, sizeof(s->dirpath), ":") */
-            q = s->dirpath;
-            while (*p != ':' && *p != '\0') {
-                if ((q - s->dirpath) < (int)sizeof(s->dirpath) - 1)
-                    *q++ = *p;
-                p++;
-            }
-            *q = '\0';
-            if (*p == ':')
-                p++;
-            s->bufptr = p;
-            s->dir = opendir(s->dirpath);
-            if (!s->dir)
-                goto redo;
-        } else {
-            if (fnmatch(s->pattern, dirent->d_name, 0) == 0) {
-                makepath(filename, filename_size_max, s->dirpath, dirent->d_name);
-                return 0;
-            }
-        }
-    }
-#endif
-}
-
-static void find_file_close(FindFileState *s)
-{
-#ifdef _WIN32
-    if (INVALID_HANDLE_VALUE != s->dir)
-        FindClose(s->dir);
-#else
-    if (s->dir)
-        closedir(s->dir);
-#endif
-    free(s);
-}
-
 static int StrList_Len(StrList **root)
 {
     int len = 0;
@@ -696,21 +470,6 @@ static int StrList_Insert(StrList **root, char *txt)
         return false;
     }
     return true;
-}
-
-static StrList *StrList_RemoveHead(StrList **root)
-{
-    StrList *tmp;
-    assert(root);
-    if (!root)
-        return nullptr;
-
-    if (!*root)
-        return nullptr;
-    tmp = *root;
-    *root = tmp->next;
-    tmp->next = nullptr;
-    return tmp;
 }
 
 static void StrList_FreeElement(StrList *el)
@@ -1081,92 +840,6 @@ static void ParseCommandLine(int argc, char **argv)
     }
 }
 
-#if 0
-void RenderFileList(char *pdfFileList)
-{
-    char *data = NULL;
-    char *dataNormalized = NULL;
-    char *pdfFileName;
-    uint64_t fileSize;
-
-    assert(pdfFileList);
-    if (!pdfFileList)
-        return;
-    data = file_read_all(pdfFileList, &fileSize);
-    if (!data) {
-        error(-1, "couldn't load file '%s'", pdfFileList);
-        return;
-    }
-    dataNormalized = str_normalize_newline(data, UNIX_NEWLINE);
-    if (!dataNormalized) {
-        error(-1, "couldn't normalize data of file '%s'", pdfFileList);
-        goto Exit;
-    }
-    for (;;) {
-        pdfFileName = str_split_iter(&dataNormalized, UNIX_NEWLINE_C);
-        if (!pdfFileName)
-            break;
-        str_strip_ws_both(pdfFileName);
-        if (str_empty(pdfFileName)) {
-            free((void*)pdfFileName);
-            continue;
-        }
-        RenderFile(pdfFileName);
-        free((void*)pdfFileName);
-    }
-Exit:
-    free((void*)dataNormalized);
-    free((void*)data);
-}
-#endif
-
-#ifdef _WIN32
-#    include <sys/types.h>
-#    include <sys/stat.h>
-
-static bool IsDirectoryName(char *path)
-{
-    struct _stat buf;
-    int result;
-
-    result = _stat(path, &buf);
-    if (0 != result)
-        return false;
-
-    if (buf.st_mode & _S_IFDIR)
-        return true;
-
-    return false;
-}
-
-static bool IsFileName(char *path)
-{
-    struct _stat buf;
-    int result;
-
-    result = _stat(path, &buf);
-    if (0 != result)
-        return false;
-
-    if (buf.st_mode & _S_IFREG)
-        return true;
-
-    return false;
-}
-#else
-static bool IsDirectoryName(char *path)
-{
-    /* TODO: implement me */
-    return false;
-}
-
-static bool IsFileName(char *path)
-{
-    /* TODO: implement me */
-    return true;
-}
-#endif
-
 static bool IsPdfFileName(char *path)
 {
     if (str_endswith(path, ".pdf"))
@@ -1174,54 +847,16 @@ static bool IsPdfFileName(char *path)
     return false;
 }
 
-static void RenderDirectory(char *path)
-{
-    FindFileState *ffs;
-    char filename[MAX_FILENAME_SIZE];
-    StrList *dirList = nullptr;
-    StrList *el;
-
-    StrList_Insert(&dirList, path);
-
-    while (0 != StrList_Len(&dirList)) {
-        el = StrList_RemoveHead(&dirList);
-        ffs = find_file_open(el->str, "*");
-        while (!find_file_next(ffs, filename, sizeof(filename))) {
-            if (IsDirectoryName(filename)) {
-                if (gfRecursive) {
-                    StrList_Insert(&dirList, filename);
-                }
-            } else if (IsFileName(filename)) {
-                if (IsPdfFileName(filename)) {
-                    RenderFile(filename);
-                }
-            }
-        }
-        find_file_close(ffs);
-        StrList_FreeElement(el);
-    }
-    StrList_Destroy(&dirList);
-}
-
 /* Render 'cmdLineArg', which can be:
-   - directory name
    - name of PDF file
-   - name of text file with names of PDF files
 */
 static void RenderCmdLineArg(char *cmdLineArg)
 {
     assert(cmdLineArg);
     if (!cmdLineArg)
         return;
-    if (IsDirectoryName(cmdLineArg)) {
-        RenderDirectory(cmdLineArg);
-    } else if (IsFileName(cmdLineArg)) {
-        if (IsPdfFileName(cmdLineArg))
-            RenderFile(cmdLineArg);
-#if 0
-        else
-            RenderFileList(cmdLineArg);
-#endif
+    if (IsPdfFileName(cmdLineArg)) {
+        RenderFile(cmdLineArg);
     } else {
         error(errCommandLine, -1, "unexpected argument '{0:s}'", cmdLineArg);
     }
