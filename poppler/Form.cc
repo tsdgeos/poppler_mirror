@@ -604,8 +604,11 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = Form::fieldLookup(dict, "Q");
     if (obj1.isInt()) {
-        quadding = static_cast<VariableTextQuadding>(obj1.getInt());
-        hasQuadding = true;
+        const int aux = obj1.getInt();
+        hasQuadding = aux == quaddingLeftJustified || aux == quaddingCentered || aux == quaddingRightJustified;
+        if (likely(hasQuadding)) {
+            quadding = static_cast<VariableTextQuadding>(aux);
+        }
     }
 
     obj1 = dict->lookup("T");
