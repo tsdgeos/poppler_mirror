@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2014, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2019, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -33,7 +33,7 @@ static std::pair<int, bool> fromDecimal(const char *const begin, const char *con
 {
 #ifdef HAVE_CODECVT
     if (unicode) {
-        std::wstring_convert<std::codecvt_utf16<wchar_t>> converter;
+        std::wstring_convert<std::codecvt_utf16<wchar_t>> converter("", L"");
         const auto str = converter.from_bytes(begin, end);
 
         // Skip BOM since wcstol seems unable to handle it.
