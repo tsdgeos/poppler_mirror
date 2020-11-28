@@ -197,6 +197,7 @@ void TestSearch::testIgnoreDiacritics()
     // La cigogne a survolé nos têtes.
     // Der Storch flog über unsere Köpfe hinweg.
 
+    QCOMPARE(page->search(QString(), left, top, right, bottom, direction, mode0), false);
     QCOMPARE(page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode0), false);
     QCOMPARE(page->search(QStringLiteral("Ciguena"), left, top, right, bottom, direction, mode1), false);
     QCOMPARE(page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode1), true);

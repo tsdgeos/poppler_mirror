@@ -3816,6 +3816,10 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     double xMin1, yMin1, xMax1, yMax1;
     bool found;
 
+    if (len == 0) {
+        return false;
+    }
+
     if (rawOrder) {
         return false;
     }
