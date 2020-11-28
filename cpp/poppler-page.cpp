@@ -211,6 +211,11 @@ page_transition *page::transition() const
 bool page::search(const ustring &text, rectf &r, search_direction_enum direction, case_sensitivity_enum case_sensitivity, rotation_enum rotation) const
 {
     const size_t len = text.length();
+
+    if (len == 0) {
+        return false;
+    }
+
     std::vector<Unicode> u(len);
     for (size_t i = 0; i < len; ++i) {
         u[i] = text[i];
