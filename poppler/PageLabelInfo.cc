@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2013, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2013, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -59,7 +59,8 @@ PageLabelInfo::Interval::Interval(Object *dict, int baseA)
 
 PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
 {
-    parse(tree);
+    std::set<int> alreadyParsedRefs;
+    parse(tree, alreadyParsedRefs);
 
     if (intervals.empty())
         return;
@@ -71,7 +72,7 @@ PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
     curr->length = std::max(0, numPages - curr->base);
 }
 
-void PageLabelInfo::parse(Object *tree)
+void PageLabelInfo::parse(const Object *tree, std::set<int> &alreadyParsedRefs)
 {
     // leaf node
     Object nums = tree->dictLookup("Nums");
@@ -93,10 +94,21 @@ void PageLabelInfo::parse(Object *tree)
 
     Object kids = tree->dictLookup("Kids");
     if (kids.isArray()) {
-        for (int i = 0; i < kids.arrayGetLength(); ++i) {
-            Object kid = kids.arrayGet(i);
-            if (kid.isDict())
-                parse(&kid);
+        const Array *kidsArray = kids.getArray();
+        for (int i = 0; i < kidsArray->getLength(); ++i) {
+            Ref ref;
+            const Object kid = kidsArray->get(i, &ref);
+            if (ref != Ref::INVALID()) {
+                const int numObj = ref.num;
+                if (alreadyParsedRefs.find(numObj) != alreadyParsedRefs.end()) {
+                    error(errSyntaxError, -1, "loop in PageLabelInfo (numObj: {0:d})", numObj);
+                    continue;
+                }
+                alreadyParsedRefs.insert(numObj);
+            }
+            if (kid.isDict()) {
+                parse(&kid, alreadyParsedRefs);
+            }
         }
     }
 }
