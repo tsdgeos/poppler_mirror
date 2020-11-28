@@ -1167,6 +1167,9 @@ protected:
     void initialize(PDFDoc *docA, Dict *dict);
 
     std::unique_ptr<AnnotQuadrilaterals> quadrilaterals; // QuadPoints
+
+private:
+    bool shouldCreateApperance(Gfx *gfx) const;
 };
 
 //------------------------------------------------------------------------

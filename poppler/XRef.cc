@@ -1250,7 +1250,9 @@ void XRef::removeDocInfo()
 
     trailerDict.dictRemove("Info");
 
-    removeIndirectObject(infoObjRef.getRef());
+    if (likely(infoObjRef.isRef())) {
+        removeIndirectObject(infoObjRef.getRef());
+    }
 }
 
 bool XRef::getStreamEnd(Goffset streamStart, Goffset *streamEnd)

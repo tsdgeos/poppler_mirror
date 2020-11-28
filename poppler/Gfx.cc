@@ -5062,7 +5062,6 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     double formXMin, formYMin, formXMax, formYMax;
     double x, y, sx, sy, tx, ty;
     double m[6], bbox[4];
-    double r, g, b;
     GfxColor color;
     double *dash, *dash2;
     int dashLength;
@@ -5215,18 +5214,22 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     }
 
     // draw the border
-    if (border && border->getWidth() > 0) {
+    if (border && border->getWidth() > 0 && (!aColor || aColor->getSpace() != AnnotColor::colorTransparent)) {
         if (state->getStrokeColorSpace()->getMode() != csDeviceRGB) {
             state->setStrokePattern(nullptr);
             state->setStrokeColorSpace(new GfxDeviceRGBColorSpace());
             out->updateStrokeColorSpace(state);
         }
-        if (aColor && (aColor->getSpace() == AnnotColor::colorRGB)) {
+        double r, g, b;
+        if (!aColor) {
+            r = g = b = 0;
+        } else if ((aColor->getSpace() == AnnotColor::colorRGB)) {
             const double *values = aColor->getValues();
             r = values[0];
             g = values[1];
             b = values[2];
         } else {
+            error(errUnimplemented, -1, "AnnotColor different than RGB and Transparent not supported");
             r = g = b = 0;
         };
         color.c[0] = dblToCol(r);

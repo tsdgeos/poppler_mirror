@@ -298,6 +298,14 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
 {
     Q_ASSERT(pdfPage);
 
+    const double w = pdfPage->getCropWidth();
+    const double h = pdfPage->getCropHeight();
+
+    if (w == 0 || h == 0) {
+        // page is broken, there's nothing to transform
+        return {};
+    }
+
     const int pageRotate = pdfPage->getRotate();
 
     double MTX[6];

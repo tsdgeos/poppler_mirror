@@ -82,12 +82,6 @@
 /* Define to 1 if you have the `mkstemp' function. */
 #cmakedefine HAVE_MKSTEMP 1
 
-/* Define to 1 if you have the `strcpy_s' function. */
-#cmakedefine HAVE_STRCPY_S 1
-
-/* Define to 1 if you have the `strcat_s' function. */
-#cmakedefine HAVE_STRCAT_S 1
-
 /* Defines if strtok_r is available on your system */
 #cmakedefine HAVE_STRTOK_R 1
 

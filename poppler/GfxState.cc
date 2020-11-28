@@ -1387,9 +1387,16 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state)
         return nullptr;
     }
 
-    cs->kr = 1 / (xyzrgb[0][0] * cs->whiteX + xyzrgb[0][1] * cs->whiteY + xyzrgb[0][2] * cs->whiteZ);
-    cs->kg = 1 / (xyzrgb[1][0] * cs->whiteX + xyzrgb[1][1] * cs->whiteY + xyzrgb[1][2] * cs->whiteZ);
-    cs->kb = 1 / (xyzrgb[2][0] * cs->whiteX + xyzrgb[2][1] * cs->whiteY + xyzrgb[2][2] * cs->whiteZ);
+    const auto krDenominator = (xyzrgb[0][0] * cs->whiteX + xyzrgb[0][1] * cs->whiteY + xyzrgb[0][2] * cs->whiteZ);
+    const auto kgDenominator = (xyzrgb[1][0] * cs->whiteX + xyzrgb[1][1] * cs->whiteY + xyzrgb[1][2] * cs->whiteZ);
+    const auto kbDenominator = (xyzrgb[2][0] * cs->whiteX + xyzrgb[2][1] * cs->whiteY + xyzrgb[2][2] * cs->whiteZ);
+    if (unlikely(krDenominator == 0 || kgDenominator == 0 || kbDenominator == 0)) {
+        delete cs;
+        return nullptr;
+    }
+    cs->kr = 1 / krDenominator;
+    cs->kg = 1 / kgDenominator;
+    cs->kb = 1 / kbDenominator;
 
 #ifdef USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;

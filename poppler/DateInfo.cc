@@ -7,6 +7,7 @@
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
 // Copyright (C) 2016, 2018 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -87,9 +88,9 @@ GooString *timeToDateString(const time_t *timeA)
     const time_t timeg = timegm(&localtime_tm);
     const time_t offset = difftime(timeg, timet); // find time zone offset in seconds
     if (offset > 0) {
-        dateString->appendf("+{0:02d}'{1:02d}", offset / 3600, (offset % 3600) / 60);
+        dateString->appendf("+{0:02d}'{1:02d}'", offset / 3600, (offset % 3600) / 60);
     } else if (offset < 0) {
-        dateString->appendf("-{0:02d}'{1:02d}", -offset / 3600, (-offset % 3600) / 60);
+        dateString->appendf("-{0:02d}'{1:02d}'", -offset / 3600, (-offset % 3600) / 60);
     } else {
         dateString->append("Z");
     }

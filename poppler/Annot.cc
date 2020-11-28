@@ -586,20 +586,14 @@ AnnotBorderBS::AnnotBorderBS() { }
 
 AnnotBorderBS::AnnotBorderBS(Dict *dict)
 {
-    Object obj1, obj2;
+    // Border width (in points)
+    Object obj1 = dict->lookup("W");
+    width = obj1.getNumWithDefaultValue(1.0);
 
-    // acroread 8 seems to need both W and S entries for
-    // any border to be drawn, even though the spec
-    // doesn't claim anything of that sort. We follow
-    // that behaviour by verifying both entries exist
-    // otherwise we set the borderWidth to 0
-    // --jrmuizel
-    obj1 = dict->lookup("W");
-    obj2 = dict->lookup("S");
-    if (obj1.isNum() && obj2.isName()) {
-        const char *styleName = obj2.getName();
-
-        width = obj1.getNum();
+    // Border style
+    obj1 = dict->lookup("S");
+    if (obj1.isName()) {
+        const char *styleName = obj1.getName();
 
         if (!strcmp(styleName, "S")) {
             style = borderSolid;
@@ -615,9 +609,10 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict)
             style = borderSolid;
         }
     } else {
-        width = 0;
+        style = borderSolid;
     }
 
+    // Border dash style
     if (style == borderDashed) {
         obj1 = dict->lookup("D");
         if (obj1.isArray())
@@ -3562,6 +3557,32 @@ void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints)
     invalidateAppearance();
 }
 
+bool AnnotTextMarkup::shouldCreateApperance(Gfx *gfx) const
+{
+    if (appearance.isNull())
+        return true;
+
+    // Adobe Reader seems to have a complex condition for when to use the
+    // appearance stream of typeHighlight, which is "use it if it has a Resources dictionary with ExtGState"
+    // this is reverse engineering of me editing a file by hand and checking what it does so the real
+    // condition may be more or less complex
+    if (type == typeHighlight) {
+        XRef *xref = gfx->getXRef();
+        const Object fetchedApperance = appearance.fetch(xref);
+        if (fetchedApperance.isStream()) {
+            const Object resources = fetchedApperance.streamGetDict()->lookup("Resources");
+            if (resources.isDict()) {
+                if (resources.dictLookup("ExtGState").isDict()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    return false;
+}
+
 void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
@@ -3571,7 +3592,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         return;
 
     annotLocker();
-    if (appearance.isNull() || type == typeHighlight) {
+    if (shouldCreateApperance(gfx)) {
         bool blendMultiply = true;
         ca = opacity;
 
@@ -5364,15 +5385,20 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 
         if (type == typeSquare) {
             appearBuilder.appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n", borderWidth / 2.0, borderWidth / 2.0, (rect->x2 - rect->x1) - borderWidth, (rect->y2 - rect->y1) - borderWidth);
-            if (fill)
-                appearBuilder.append("b\n");
-            else
+            if (fill) {
+                if (borderWidth > 0) {
+                    appearBuilder.append("b\n");
+                } else {
+                    appearBuilder.append("f\n");
+                }
+            } else if (borderWidth > 0) {
                 appearBuilder.append("S\n");
+            }
         } else {
             const double rx { (rect->x2 - rect->x1) / 2. };
             const double ry { (rect->y2 - rect->y1) / 2. };
             const double bwHalf { borderWidth / 2.0 };
-            appearBuilder.drawEllipse(rx, ry, rx - bwHalf, ry - bwHalf, fill, true);
+            appearBuilder.drawEllipse(rx, ry, rx - bwHalf, ry - bwHalf, fill, borderWidth > 0);
         }
         appearBuilder.append("Q\n");
 
@@ -5690,9 +5716,14 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
                     appearBBox->extendTo(vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
                 }
 
+                const double borderWidth = border->getWidth();
                 if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent) {
-                    appearBuilder.append("b\n");
-                } else {
+                    if (borderWidth > 0) {
+                        appearBuilder.append("b\n");
+                    } else {
+                        appearBuilder.append("f\n");
+                    }
+                } else if (borderWidth > 0) {
                     appearBuilder.append("s\n");
                 }
             }
