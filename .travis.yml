@@ -1,8 +1,8 @@
 language: cpp
 os: osx
 osx_image:
-  - xcode10.1
   - xcode11.2
+  - xcode12.2
 env:
   global:
   - Qt5Core_DIR=/usr/local/opt/qt/lib/cmake/Qt5Core
