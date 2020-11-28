@@ -1349,7 +1349,7 @@ Ref XRef::addIndirectObject(const Object *o)
     int entryIndexToUse = -1;
     for (int i = 1; entryIndexToUse == -1 && i < size; ++i) {
         XRefEntry *e = getEntry(i, false /* complainIfMissing */);
-        if (e->type == xrefEntryFree && e->gen != 65535) {
+        if (e->type == xrefEntryFree && e->gen < 65535) {
             entryIndexToUse = i;
         }
     }
@@ -1389,7 +1389,9 @@ void XRef::removeIndirectObject(Ref r)
     }
     e->obj.~Object();
     e->type = xrefEntryFree;
-    e->gen++;
+    if (likely(e->gen < 65535)) {
+        e->gen++;
+    }
     e->setFlag(XRefEntry::Updated, true);
     setModified();
 }
