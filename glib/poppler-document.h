@@ -293,7 +293,7 @@ GType poppler_document_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
 POPPLER_PUBLIC
-PopplerDocument *poppler_document_new_from_data(char *data, int length, const char *password, GError **error);
+PopplerDocument *poppler_document_new_from_data(char *data, int length, const char *password, GError **error) G_GNUC_DEPRECATED_FOR(poppler_document_new_from_bytes);
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *password, GError **error);
 POPPLER_PUBLIC

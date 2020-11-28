@@ -49,7 +49,6 @@ G_BEGIN_DECLS
  */
 typedef gboolean (*PopplerAttachmentSaveFunc)(const gchar *buf, gsize count, gpointer data, GError **error);
 
-/* GTime is deprecated, but is part of our ABI here (see #715, #765). */
 /**
  * PopplerAttachment:
  * @name: The filename. Deprecated in poppler 20.09.0. Use
@@ -65,7 +64,6 @@ typedef gboolean (*PopplerAttachmentSaveFunc)(const gchar *buf, gsize count, gpo
  * @checksum: A 16-byte checksum of the file. Deprecated in poppler 20.09.0. Use
  *   poppler_attachment_get_checksum() instead.
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 struct _PopplerAttachment
 {
     GObject parent;
@@ -74,11 +72,15 @@ struct _PopplerAttachment
     gchar *name;
     gchar *description;
     gsize size;
+
+    /* GTime is deprecated, but is part of our ABI here (see #715, #765). */
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     GTime mtime;
     GTime ctime;
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
     GString *checksum;
 };
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /* This struct was never documented nor intended for external use, but
  * has technically been part of the API (see #33). */
@@ -93,7 +95,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 typedef struct _PopplerAttachmentClass
 {
     GObjectClass parent_class;
-} PopplerAttachmentClass;
+} PopplerAttachmentClass G_GNUC_DEPRECATED_FOR(PopplerAttachment);
 
 POPPLER_PUBLIC
 GType poppler_attachment_get_type(void) G_GNUC_CONST;
