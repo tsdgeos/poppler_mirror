@@ -238,10 +238,6 @@ public:
     Object getDocInfo() { return xref->getDocInfo(); }
     Object getDocInfoNF() { return xref->getDocInfoNF(); }
 
-    // Create and return the document's Info dictionary if none exists.
-    // Otherwise return the existing one.
-    Object createDocInfoIfNoneExists() { return xref->createDocInfoIfNoneExists(); }
-
     // Remove the document's Info dictionary and update the trailer dictionary.
     void removeDocInfo() { xref->removeDocInfo(); }
 
@@ -359,9 +355,6 @@ private:
     // linearized document (0 for non linearized documents).
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
     long long strToLongLong(const char *s);
-
-    // Mark the document's Info dictionary as modified.
-    void setDocInfoModified(Object *infoObj);
 
     const GooString *fileName;
 #ifdef _WIN32
