@@ -823,6 +823,13 @@ private:
 };
 
 /**
+  Returns is poppler was compiled with NSS support
+
+  \since 20.12
+*/
+bool POPPLER_QT5_EXPORT hasNSSSupport();
+
+/**
   Return vector of suitable signing certificates
 
   \since 20.12

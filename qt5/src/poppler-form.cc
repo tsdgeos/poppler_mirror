@@ -1056,6 +1056,15 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     return SignatureValidationInfo(priv);
 }
 
+bool hasNSSSupport()
+{
+#ifdef ENABLE_NSS3
+    return true;
+#else
+    return false;
+#endif
+}
+
 QVector<CertificateInfo> getAvailableSigningCertificates()
 {
     QVector<CertificateInfo> vReturnCerts;
