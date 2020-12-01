@@ -4188,7 +4188,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
                                         double xStep, double yStep)
 {
     PDFRectangle box;
-    Gfx *gfx;
     Splash *formerSplash = splash;
     SplashBitmap *formerBitmap = bitmap;
     double width, height;
@@ -4311,7 +4310,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
     // set pattern transformation matrix
     gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
     if (splashAbs(matc[1]) > splashAbs(matc[0])) {
@@ -4387,7 +4386,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
     }
     delete tBitmap;
-    delete gfx;
     return retValue;
 }
 
