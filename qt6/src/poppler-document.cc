@@ -35,6 +35,7 @@
 #include "poppler-qt6.h"
 
 #include <config.h>
+#include <poppler-config.h>
 #include <ErrorCodes.h>
 #include <GlobalParams.h>
 #include <Outline.h>

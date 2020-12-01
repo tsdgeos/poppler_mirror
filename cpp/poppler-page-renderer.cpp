@@ -3,6 +3,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2019, Julián Unrrein <junrrein@gmail.com>
+ * Copyright (C) 2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@
 #include "poppler-image.h"
 
 #include <config.h>
+#include <poppler-config.h>
 
 #include "PDFDoc.h"
 #if defined(HAVE_SPLASH)

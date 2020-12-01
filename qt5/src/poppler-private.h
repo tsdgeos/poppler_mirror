@@ -46,6 +46,7 @@
 #include <QtCore/QVector>
 
 #include <config.h>
+#include <poppler-config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
 #include <Form.h>

@@ -19,6 +19,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -114,6 +115,11 @@
 /* Use header-only classes from Boost in the Splash backend */
 #ifndef USE_BOOST_HEADERS
 #cmakedefine USE_BOOST_HEADERS 1
+#endif
+
+/* Is splash backend available */
+#ifndef HAVE_SPLASH
+#cmakedefine HAVE_SPLASH 1
 #endif
 
 //------------------------------------------------------------------------
