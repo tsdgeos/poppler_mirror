@@ -732,12 +732,6 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
     }
 }
 
-void PDFDoc::setDocInfoModified(Object *infoObj)
-{
-    Object infoObjRef = getDocInfoNF();
-    xref->setModifiedObject(infoObj, infoObjRef.getRef());
-}
-
 void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
 {
     bool removeEntry = !value || value->getLength() == 0 || value->hasJustUnicodeMarker();
@@ -751,7 +745,8 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
         return;
     }
 
-    infoObj = createDocInfoIfNoneExists();
+    Ref infoObjRef;
+    infoObj = xref->createDocInfoIfNeeded(&infoObjRef);
     if (removeEntry) {
         infoObj.dictSet(key, Object(objNull));
     } else {
@@ -762,7 +757,7 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
         // Info dictionary is empty. Remove it altogether.
         removeDocInfo();
     } else {
-        setDocInfoModified(&infoObj);
+        xref->setModifiedObject(&infoObj, infoObjRef);
     }
 }
 

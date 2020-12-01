@@ -155,9 +155,10 @@ public:
     Object getDocInfo();
     Object getDocInfoNF();
 
-    // Create and return the document's Info dictionary if none exists.
+    // Create and return the document's Info dictionary if needed.
     // Otherwise return the existing one.
-    Object createDocInfoIfNoneExists();
+    // Returns in the given parameter the Ref the Info is in
+    Object createDocInfoIfNeeded(Ref *ref);
 
     // Remove the document's Info dictionary and update the trailer dictionary.
     void removeDocInfo();

@@ -1223,20 +1223,21 @@ Object XRef::getDocInfoNF()
     return trailerDict.dictLookupNF("Info").copy();
 }
 
-Object XRef::createDocInfoIfNoneExists()
+Object XRef::createDocInfoIfNeeded(Ref *ref)
 {
-    Object obj = getDocInfo();
+    Object obj = trailerDict.getDict()->lookup("Info", ref);
+    getDocInfo();
 
-    if (obj.isDict()) {
+    if (obj.isDict() && *ref != Ref::INVALID()) {
+        // Info is valid if it's a dict and to pointed by an indirect reference
         return obj;
-    } else if (!obj.isNull()) {
-        // DocInfo exists, but isn't a dictionary (doesn't comply with the PDF reference)
-        removeDocInfo();
     }
 
+    removeDocInfo();
+
     obj = Object(new Dict(this));
-    const Ref ref = addIndirectObject(&obj);
-    trailerDict.dictSet("Info", Object(ref));
+    *ref = addIndirectObject(&obj);
+    trailerDict.dictSet("Info", Object(*ref));
 
     return obj;
 }
@@ -1349,7 +1350,7 @@ Ref XRef::addIndirectObject(const Object *o)
     int entryIndexToUse = -1;
     for (int i = 1; entryIndexToUse == -1 && i < size; ++i) {
         XRefEntry *e = getEntry(i, false /* complainIfMissing */);
-        if (e->type == xrefEntryFree && e->gen != 65535) {
+        if (e->type == xrefEntryFree && e->gen < 65535) {
             entryIndexToUse = i;
         }
     }
@@ -1389,7 +1390,9 @@ void XRef::removeIndirectObject(Ref r)
     }
     e->obj.~Object();
     e->type = xrefEntryFree;
-    e->gen++;
+    if (likely(e->gen < 65535)) {
+        e->gen++;
+    }
     e->setFlag(XRefEntry::Updated, true);
     setModified();
 }
