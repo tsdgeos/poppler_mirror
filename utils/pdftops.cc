@@ -55,6 +55,7 @@
 #include "PSOutputDev.h"
 #include "Error.h"
 #include "Win32Console.h"
+#include "sanitychecks.h"
 
 #ifdef USE_CMS
 #    include <lcms2.h>
@@ -359,52 +360,19 @@ int main(int argc, char *argv[])
 #ifdef USE_CMS
     if (!defaultgrayprofilename.toStr().empty()) {
         defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
-        if (!defaultgrayprofile) {
-            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultgrayprofilename.c_str());
-            goto err05;
-        }
-        if (!cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
-            && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultgrayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
-            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultgrayprofilename.c_str());
-            goto err05;
-        }
-        profilecolorspace = cmsGetColorSpace(defaultgrayprofile.get());
-        if (profilecolorspace != cmsSigGrayData) {
-            fprintf(stderr, "Supplied ICC profile \"%s\" is not a monochrome profile.\n", defaultgrayprofilename.c_str());
+        if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
             goto err05;
         }
     }
     if (!defaultrgbprofilename.toStr().empty()) {
         defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
-        if (!defaultrgbprofile) {
-            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultrgbprofilename.c_str());
-            goto err05;
-        }
-        if (!cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
-            && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultrgbprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
-            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultrgbprofilename.c_str());
-            goto err05;
-        }
-        profilecolorspace = cmsGetColorSpace(defaultrgbprofile.get());
-        if (profilecolorspace != cmsSigRgbData) {
-            fprintf(stderr, "Supplied ICC profile \"%s\" is not a RGB profile.\n", defaultrgbprofilename.c_str());
+        if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
             goto err05;
         }
     }
     if (!defaultcmykprofilename.toStr().empty()) {
         defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
-        if (!defaultcmykprofile) {
-            fprintf(stderr, "Could not open the ICC profile \"%s\".\n", defaultcmykprofilename.c_str());
-            goto err05;
-        }
-        if (!cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_INPUT)
-            && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_SATURATION, LCMS_USED_AS_INPUT) && !cmsIsIntentSupported(defaultcmykprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_INPUT)) {
-            fprintf(stderr, "ICC profile \"%s\" is not an input profile.\n", defaultcmykprofilename.c_str());
-            goto err05;
-        }
-        profilecolorspace = cmsGetColorSpace(defaultcmykprofile.get());
-        if (profilecolorspace != cmsSigCmykData) {
-            fprintf(stderr, "Supplied ICC profile \"%s\" is not a CMYK profile.\n", defaultcmykprofilename.c_str());
+        if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
             goto err05;
         }
     }
