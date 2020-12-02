@@ -2829,6 +2829,14 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
     vx[3] = mat[0] + mat[4];
     vy[3] = mat[1] + mat[5];
 
+    // make sure vx/vy fit in integers since we're transforming them to in the next lines
+    for (i = 0; i < 4; ++i) {
+        if (unlikely(vx[i] < INT_MIN || vx[i] > INT_MAX || vy[i] < INT_MIN || vy[i] > INT_MAX)) {
+            error(errInternal, -1, "arbitraryTransformMask vertices values don't fit in an integer");
+            return;
+        }
+    }
+
     // clipping
     xMin = imgCoordMungeLowerC(vx[0], glyphMode);
     xMax = imgCoordMungeUpperC(vx[0], glyphMode);

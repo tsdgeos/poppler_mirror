@@ -1,3 +1,40 @@
+Release 20.12.0:
+        core:
+         * Draw better circles for circle annotations
+         * Fix annotation line width if no appearance stream or style are given
+         * Tweak rendering of highlight annotations
+         * Fix border rendering of some annotations
+         * Fix rendering of some files. Issue #976 Issue #567
+         * PSOutputDev: provide options to set the rasterization color space and ICC profile
+         * PSOutputDev: for splashModeCMYK8 and language level >=2 activate overprint emulation
+         * PSOutputDev: use the DeviceN8 bitmap for rasterization with CMYK-output + overprint
+         * Use the font name without subset tag when querying for a system font
+         * Splash: Fix wrong x adjustment during clipping
+         * Splash: Fix blitImage in uncolored tiling patterns
+         * timeToDateString: We forgot the ' after the minutes
+         * Move psLevel to PSOutputDev creation
+         * Fix several issues in broken files
+
+        utils:
+         * pdftops: provide options to set the rasterization color space and ICC profile
+         * pdftops: for splashModeCMYK8 and language level >=2 activate overprint emulation
+
+        cpp:
+         * New fuzzers
+
+        glib:
+         * New fuzzers
+
+        qt5:
+         * New fuzzers
+
+        build system:
+         * gcc: Enable -fno-operator-names
+         * Remove obsolete bool-to-binary macro
+         * Remove obsolete version-check macro for pkgconfig
+         * Remove .pc files for private back-ends
+         * Remove redundant unit-test macro
+
 Release 20.11.0:
         core:
          * More work on rendering of standalone Annot Widgets. Issue #806

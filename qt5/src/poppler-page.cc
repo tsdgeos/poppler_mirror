@@ -50,6 +50,7 @@
 #include <QtGui/QPainter>
 
 #include <config.h>
+#include <poppler-config.h>
 #include <PDFDoc.h>
 #include <Catalog.h>
 #include <Form.h>

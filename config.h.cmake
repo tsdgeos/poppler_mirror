@@ -91,9 +91,6 @@
 /* Define to 1 if you have the `popen' function. */
 #cmakedefine HAVE_POPEN 1
 
-/* Use splash for rendering. */
-#cmakedefine HAVE_SPLASH 1
-
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
 #cmakedefine HAVE_SYS_DIR_H 1
