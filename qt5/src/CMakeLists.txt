@@ -1,10 +1,7 @@
-add_definitions(${QT5_DEFINITIONS})
-add_definitions(${Qt5Core_DEFINITIONS})
 add_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Qt5Core_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -45,7 +42,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
     set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
-target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES} ${FREETYPE_LIBRARIES})
+target_link_libraries(poppler-qt5 poppler Qt5::Core Qt5::Gui Qt5::Xml ${FREETYPE_LIBRARIES})
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif()
