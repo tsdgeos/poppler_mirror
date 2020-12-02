@@ -94,9 +94,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(_warn "${_warn} -Wundef")
   set(_warn "${_warn} -Wzero-as-null-pointer-constant")
   set(_warn "${_warn} -Wshadow")
-  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
-    set(_warn "${_warn} -Wsuggest-override")
-  endif()
+  set(_warn "${_warn} -Wsuggest-override")
 
   # set extra warnings
   set(_warnx "${_warnx} -Wconversion")
