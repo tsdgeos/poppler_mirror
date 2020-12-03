@@ -2842,7 +2842,7 @@ std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const
     return std::make_unique<DefaultAppearance>(appearanceString.get());
 }
 
-static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontResDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
+static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
 {
     const Ref dummyRef = { -1, -1 };
 
@@ -2850,10 +2850,13 @@ static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontResDict, const char *r
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
 
-    Dict *fontsDict = new Dict(xref);
-    fontsDict->add(resourceName, Object(fontDict));
+    Object fontsDictObj = fontParentDict->lookup("Font");
+    if (!fontsDictObj.isDict()) {
+        fontsDictObj = Object(new Dict(xref));
+        fontParentDict->add("Font", fontsDictObj.copy()); // This is not a copy it's a ref
+    }
 
-    fontResDict->add("Font", Object(fontsDict));
+    fontsDictObj.dictSet(resourceName, Object(fontDict));
 
     return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
 }
@@ -4801,7 +4804,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
 }
 
 bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                           const GooString *appearState, XRef *xref, bool *addedDingbatsResource, Dict *appearDict)
+                                           const GooString *appearState, XRef *xref, bool *addedDingbatsResource, Dict *resourcesDict)
 {
     // draw the field contents
     switch (field->getType()) {
@@ -4814,7 +4817,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
         return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect);
         break;
     case formSignature:
-        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, resources, da, border, appearCharacs, rect, xref, appearDict);
+        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
         break;
     case formUndef:
     default:
@@ -4889,7 +4892,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
 }
 
 bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                    const PDFRectangle *rect, XRef *xref, Dict *appearDict)
+                                                    const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
     DefaultAppearance da(const_cast<GooString *>(_da));
     const GooString &contents = field->getCustomAppearanceContent();
@@ -4917,9 +4920,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     GfxFont *font = nullptr;
 
     // create a Helvetica fake font
-    Dict *fontResDict = new Dict(xref);
-    Object resourceObj = Object(fontResDict);
-    font = createAnnotDrawFont(xref, fontResDict, da.getFontName().getName());
+    font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
 
     // Set font state
     setDrawColor(da.getFontColor(), true);
@@ -4942,8 +4943,6 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     font->decRefCnt();
     append("ET Q\n");
-
-    appearDict->set("Resources", std::move(resourceObj));
 
     return true;
 }
@@ -4972,7 +4971,6 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
 
 void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 {
-    GfxResources *resources;
     const GooString *da;
 
     AnnotAppearanceBuilder appearBuilder;
@@ -4994,13 +4992,21 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     if (!da)
         da = form->getDefaultAppearance();
 
-    resources = form->getDefaultResources();
+    const GfxResources *resources = form->getDefaultResources();
     Dict *appearDict = new Dict(doc->getXRef());
 
-    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, appearDict);
+    Object resourcesDictObj;
+    const Object *defaultResDict = form->getDefaultResourcesObj();
+    if (defaultResDict->isDict()) {
+        resourcesDictObj = defaultResDict->copy();
+    } else {
+        resourcesDictObj = Object(new Dict(doc->getXRef()));
+    }
+
+    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
     if (!success && da != form->getDefaultAppearance()) {
         da = form->getDefaultAppearance();
-        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, appearDict);
+        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
     }
 
     const GooString *appearBuf = appearBuilder.buffer();
@@ -5015,9 +5021,8 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     appearDict->add("BBox", Object(bbox));
 
     // set the resource dictionary
-    Object *resDict = form->getDefaultResourcesObj();
-    if (resDict->isDict()) {
-        appearDict->add("Resources", resDict->copy());
+    if (resourcesDictObj.getDict()->getLength() > 0) {
+        appearDict->set("Resources", std::move(resourcesDictObj));
     }
 
     // build the appearance stream
