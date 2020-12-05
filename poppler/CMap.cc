@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -128,100 +128,6 @@ CMap *CMap::parse(CMapCache *cache, const GooString *collectionA, Stream *str)
     return cMap;
 }
 
-CMap *CMap::parse(CMapCache *cache, const GooString *collectionA, const GooString *cMapNameA, Stream *stream)
-{
-    FILE *f = nullptr;
-    CMap *cmap;
-    PSTokenizer *pst;
-    char tok1[256], tok2[256], tok3[256];
-    int n1, n2, n3;
-    unsigned int start, end, code;
-
-    if (stream) {
-        stream->reset();
-        pst = new PSTokenizer(&getCharFromStream, stream);
-    } else {
-        if (!(f = globalParams->findCMapFile(collectionA, cMapNameA))) {
-
-            // Check for an identity CMap.
-            if (!cMapNameA->cmp("Identity") || !cMapNameA->cmp("Identity-H")) {
-                return new CMap(collectionA->copy(), cMapNameA->copy(), 0);
-            }
-            if (!cMapNameA->cmp("Identity-V")) {
-                return new CMap(collectionA->copy(), cMapNameA->copy(), 1);
-            }
-
-            error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection", cMapNameA, collectionA);
-            return nullptr;
-        }
-        pst = new PSTokenizer(&getCharFromFile, f);
-    }
-
-    cmap = new CMap(collectionA->copy(), cMapNameA->copy());
-
-    pst->getToken(tok1, sizeof(tok1), &n1);
-    while (pst->getToken(tok2, sizeof(tok2), &n2)) {
-        if (!strcmp(tok2, "usecmap")) {
-            if (tok1[0] == '/') {
-                cmap->useCMap(cache, tok1 + 1);
-            }
-            pst->getToken(tok1, sizeof(tok1), &n1);
-        } else if (!strcmp(tok1, "/WMode")) {
-            cmap->wMode = atoi(tok2);
-            pst->getToken(tok1, sizeof(tok1), &n1);
-        } else if (!strcmp(tok2, "begincidchar")) {
-            while (pst->getToken(tok1, sizeof(tok1), &n1)) {
-                if (!strcmp(tok1, "endcidchar")) {
-                    break;
-                }
-                if (!pst->getToken(tok2, sizeof(tok2), &n2) || !strcmp(tok2, "endcidchar")) {
-                    error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
-                    break;
-                }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && n1 >= 4 && (n1 & 1) == 0)) {
-                    error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
-                    continue;
-                }
-                tok1[n1 - 1] = '\0';
-                if (sscanf(tok1 + 1, "%x", &code) != 1) {
-                    error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
-                    continue;
-                }
-                n1 = (n1 - 2) / 2;
-                cmap->addCIDs(code, code, n1, (CID)atoi(tok2));
-            }
-            pst->getToken(tok1, sizeof(tok1), &n1);
-        } else if (!strcmp(tok2, "begincidrange")) {
-            while (pst->getToken(tok1, sizeof(tok1), &n1)) {
-                if (!strcmp(tok1, "endcidrange")) {
-                    break;
-                }
-                if (!pst->getToken(tok2, sizeof(tok2), &n2) || !strcmp(tok2, "endcidrange") || !pst->getToken(tok3, sizeof(tok3), &n3) || !strcmp(tok3, "endcidrange")) {
-                    error(errSyntaxError, -1, "Illegal entry in cidrange block in CMap");
-                    break;
-                }
-                if (tok1[0] == '<' && tok2[0] == '<' && n1 == n2 && n1 >= 4 && (n1 & 1) == 0) {
-                    tok1[n1 - 1] = tok2[n1 - 1] = '\0';
-                    sscanf(tok1 + 1, "%x", &start);
-                    sscanf(tok2 + 1, "%x", &end);
-                    n1 = (n1 - 2) / 2;
-                    cmap->addCIDs(start, end, n1, (CID)atoi(tok3));
-                }
-            }
-            pst->getToken(tok1, sizeof(tok1), &n1);
-        } else {
-            strcpy(tok1, tok2);
-        }
-    }
-    delete pst;
-
-    if (f) {
-        fclose(f);
-    }
-
-    return cmap;
-}
-
 void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
 {
     PSTokenizer *pst;
@@ -324,7 +230,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     // GlobalParams::getCMap() in order to acqure the lock need to use
     // GlobalParams::getCMap
     if (cache) {
-        subCMap = cache->getCMap(collection, useNameStr, nullptr);
+        subCMap = cache->getCMap(collection, useNameStr);
     } else {
         subCMap = globalParams->getCMap(collection, useNameStr);
     }
@@ -539,7 +445,7 @@ CMapCache::~CMapCache()
     }
 }
 
-CMap *CMapCache::getCMap(const GooString *collection, const GooString *cMapName, Stream *stream)
+CMap *CMapCache::getCMap(const GooString *collection, const GooString *cMapName)
 {
     CMap *cmap;
     int i, j;
@@ -559,7 +465,7 @@ CMap *CMapCache::getCMap(const GooString *collection, const GooString *cMapName,
             return cmap;
         }
     }
-    if ((cmap = CMap::parse(this, collection, cMapName, stream))) {
+    if ((cmap = CMap::parse(this, collection, cMapName))) {
         if (cache[cMapCacheSize - 1]) {
             cache[cMapCacheSize - 1]->decRefCnt();
         }

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -53,13 +53,6 @@ public:
     // Parse a CMap from <str>.  Sets the initial reference count to 1.
     // Returns NULL on failure.
     static CMap *parse(CMapCache *cache, const GooString *collectionA, Stream *str);
-
-    // Create the CMap specified by <collection> and <cMapName>.  Sets
-    // the initial reference count to 1.
-    // Stream is a stream containing the CMap, can be NULL and
-    // this means the CMap will be searched in the CMap files
-    // Returns NULL on failure.
-    static CMap *parse(CMapCache *cache, const GooString *collectionA, const GooString *cMapNameA, Stream *stream);
 
     ~CMap();
 
@@ -128,7 +121,7 @@ public:
     // Stream is a stream containing the CMap, can be NULL and
     // this means the CMap will be searched in the CMap files
     // Returns NULL on failure.
-    CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream);
+    CMap *getCMap(const GooString *collection, const GooString *cMapName);
 
 private:
     CMap *cache[cMapCacheSize];
