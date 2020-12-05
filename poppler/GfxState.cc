@@ -1621,6 +1621,7 @@ GfxColorSpace *GfxICCBasedColorSpace::copy() const
         cs->rangeMax[i] = rangeMax[i];
     }
 #ifdef USE_CMS
+    cs->profile = profile;
     cs->transform = transform;
     cs->lineTransform = lineTransform;
 #endif

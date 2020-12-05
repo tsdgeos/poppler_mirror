@@ -3188,7 +3188,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         paperColor[0] = 0xff;
     } else if (processColorFormat == splashModeCMYK8) {
         numComps = 4;
-        paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
+        splashClearColor(paperColor);
 
         // If overprinting is emulated, it is not sufficient to just store the CMYK values in a bitmap.
         // All separation channels need to be stored and collapsed at the end.
@@ -3202,6 +3202,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     } else {
         error(errUnimplemented, -1, "Unsupported processColorMode. Falling back to RGB8.");
         processColorFormat = splashModeRGB8;
+        internalColorFormat = processColorFormat;
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     }
