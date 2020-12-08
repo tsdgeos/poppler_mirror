@@ -4392,11 +4392,12 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     obj1 = std::move(obj2);
                 }
             }
-            maskColorSpace = GfxColorSpace::parse(nullptr, &obj1, out, state);
-            if (!maskColorSpace || maskColorSpace->getMode() != csDeviceGray) {
-                delete maskColorSpace;
+            // Here, we parse manually instead of using GfxColorSpace::parse,
+            // since we explicitly need DeviceGray and not some DefaultGray color space
+            if (!obj1.isName("DeviceGray") && !obj1.isName("G")) {
                 goto err1;
             }
+            maskColorSpace = new GfxDeviceGrayColorSpace();
             obj1 = maskDict->lookup("Decode");
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("D");
