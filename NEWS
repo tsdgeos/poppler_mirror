@@ -1,3 +1,12 @@
+Release 20.12.1:
+        core:
+         * PSOutputDev: fixing regression in the rasterization code. Issue #1002
+         * Add missing profile copy operation in GfxICCBasedColorSpace::copy()
+         * Fix issue in broken files
+
+        build system:
+         * Use modern CMake linking for Qt and boost
+
 Release 20.12.0:
         core:
          * Draw better circles for circle annotations

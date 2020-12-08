@@ -62,13 +62,13 @@ struct CharCodeToUnicodeString
 
 static int getCharFromString(void *data)
 {
-    char *p;
+    unsigned char *p;
     int c;
 
-    p = *(char **)data;
+    p = *(unsigned char **)data;
     if (*p) {
         c = *p++;
-        *(char **)data = p;
+        *(unsigned char **)data = p;
     } else {
         c = EOF;
     }
