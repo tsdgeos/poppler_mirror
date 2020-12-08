@@ -4,7 +4,7 @@
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  *
@@ -309,7 +309,8 @@ ustring ustring::from_latin1(const std::string &str)
     const char *c = str.data();
     ustring ret(l, 0);
     for (size_type i = 0; i < l; ++i) {
-        ret[i] = *c++;
+        ret[i] = static_cast<unsigned char>(*c);
+        c++;
     }
     return ret;
 }
