@@ -12,6 +12,7 @@
 // Copyright 2011 Tomas Hoger <thoger@redhat.com>
 // Copyright 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 //
 //========================================================================
 
