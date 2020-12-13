@@ -3,6 +3,7 @@
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, 2014, 2018, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +38,8 @@ class PDFRectangle;
 
 namespace Poppler {
 class DocumentData;
+
+PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int flags);
 
 class AnnotationPrivate : public QSharedData
 {
@@ -88,7 +91,6 @@ public:
 
     /* The following helpers only work if pdfPage is set */
     void flushBaseAnnotationProperties();
-    void fillNormalizationMTX(double MTX[6], int pageRotation) const;
     void fillTransformationMTX(double MTX[6]) const;
     QRectF fromPdfRectangle(const PDFRectangle &r) const;
     PDFRectangle boundaryToPdfRectangle(const QRectF &r, int flags) const;

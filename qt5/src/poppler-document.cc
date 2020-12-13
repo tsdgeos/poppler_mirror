@@ -16,6 +16,8 @@
  * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

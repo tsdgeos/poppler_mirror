@@ -45,6 +45,8 @@
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2840,19 +2842,21 @@ std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const
     return std::make_unique<DefaultAppearance>(appearanceString.get());
 }
 
-static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontResDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
+static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
 {
     const Ref dummyRef = { -1, -1 };
 
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
-    fontDict->add("Subtype", Object(objName, "Type0"));
-    fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
+    fontDict->add("Subtype", Object(objName, "Type1"));
 
-    Dict *fontsDict = new Dict(xref);
-    fontsDict->add(resourceName, Object(fontDict));
+    Object fontsDictObj = fontParentDict->lookup("Font");
+    if (!fontsDictObj.isDict()) {
+        fontsDictObj = Object(new Dict(xref));
+        fontParentDict->add("Font", fontsDictObj.copy()); // This is not a copy it's a ref
+    }
 
-    fontResDict->add("Font", Object(fontsDict));
+    fontsDictObj.dictSet(resourceName, Object(fontDict));
 
     return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
 }
@@ -4800,7 +4804,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
 }
 
 bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                           const GooString *appearState, XRef *xref, bool *addedDingbatsResource)
+                                           const GooString *appearState, XRef *xref, bool *addedDingbatsResource, Dict *resourcesDict)
 {
     // draw the field contents
     switch (field->getType()) {
@@ -4813,7 +4817,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
         return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect);
         break;
     case formSignature:
-        //~unimp
+        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
         break;
     case formUndef:
     default:
@@ -4887,6 +4891,62 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
     return true;
 }
 
+bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
+                                                    const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
+{
+    DefaultAppearance da(const_cast<GooString *>(_da));
+    const GooString &contents = field->getCustomAppearanceContent();
+    if (contents.toStr().empty())
+        return false;
+
+    double borderWidth = 0;
+    append("q\n");
+
+    if (border) {
+        borderWidth = border->getWidth();
+        if (borderWidth > 0)
+            setLineStyleForBorder(border);
+    }
+
+    // Box size
+    const double width = rect->x2 - rect->x1;
+    const double height = rect->y2 - rect->y1;
+
+    // Setup text clipping
+    const double textmargin = borderWidth * 2;
+    const double textwidth = width - 2 * textmargin;
+    appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2 * textmargin);
+
+    GfxFont *font = nullptr;
+
+    // create a Helvetica fake font
+    font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
+
+    // Set font state
+    setDrawColor(da.getFontColor(), true);
+    appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
+    setTextFont(da.getFontName(), da.getFontPtSize());
+
+    int i = 0;
+    double xposPrev = 0;
+    while (i < contents.getLength()) {
+        GooString out;
+        double linewidth, xpos;
+        Annot::layoutText(&contents, &out, &i, font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
+        linewidth *= da.getFontPtSize();
+        xpos = 0;
+        appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
+        writeString(out);
+        append("Tj\n");
+        xposPrev = xpos;
+    }
+
+    font->decRefCnt();
+    append("ET Q\n");
+
+    return true;
+}
+
 bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
                                                  const PDFRectangle *rect)
 {
@@ -4911,7 +4971,6 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
 
 void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 {
-    GfxResources *resources;
     const GooString *da;
 
     AnnotAppearanceBuilder appearBuilder;
@@ -4933,17 +4992,25 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     if (!da)
         da = form->getDefaultAppearance();
 
-    resources = form->getDefaultResources();
+    const GfxResources *resources = form->getDefaultResources();
+    Dict *appearDict = new Dict(doc->getXRef());
 
-    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource);
+    Object resourcesDictObj;
+    const Object *defaultResDict = form->getDefaultResourcesObj();
+    if (defaultResDict->isDict()) {
+        resourcesDictObj = defaultResDict->copy();
+    } else {
+        resourcesDictObj = Object(new Dict(doc->getXRef()));
+    }
+
+    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
     if (!success && da != form->getDefaultAppearance()) {
         da = form->getDefaultAppearance();
-        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource);
+        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
     }
 
     const GooString *appearBuf = appearBuilder.buffer();
-    // build the appearance stream dictionary
-    Dict *appearDict = new Dict(doc->getXRef());
+    // fill the appearance stream dictionary
     appearDict->add("Length", Object(appearBuf->getLength()));
     appearDict->add("Subtype", Object(objName, "Form"));
     Array *bbox = new Array(doc->getXRef());
@@ -4954,9 +5021,8 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     appearDict->add("BBox", Object(bbox));
 
     // set the resource dictionary
-    Object *resDict = form->getDefaultResourcesObj();
-    if (resDict->isDict()) {
-        appearDict->add("Resources", resDict->copy());
+    if (resourcesDictObj.getDict()->getLength() > 0) {
+        appearDict->set("Resources", std::move(resourcesDictObj));
     }
 
     // build the appearance stream
@@ -5044,6 +5110,12 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     if (addDingbatsResource) {
         gfx->popResources();
     }
+}
+
+void AnnotWidget::invalidateAppearance()
+{
+    updatedAppearanceStream = Ref::INVALID();
+    Annot::invalidateAppearance();
 }
 
 //------------------------------------------------------------------------

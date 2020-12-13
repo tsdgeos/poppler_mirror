@@ -126,11 +126,22 @@ static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
 static bool dumpSignatures = false;
+static bool etsiCAdESdetached = false;
+static int signatureNumber = 0;
+static char certNickname[256] = "";
+static char password[256] = "";
+static char digestName[256] = "SHA256";
+static char reason[256] = "";
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
-
+                                   { "-sign", argInt, &signatureNumber, 0, "sign the document in the signature field with the given number" },
+                                   { "-etsi", argFlag, &etsiCAdESdetached, 0, "create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached" },
+                                   { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
+                                   { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
+                                   { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
+                                   { "-reason", argString, &reason, 256, "reason for signing (default: no reason given)" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
@@ -146,19 +157,24 @@ int main(int argc, char *argv[])
 
     const bool ok = parseArgs(argDesc, &argc, argv);
 
-    if (!ok || argc != 2 || printVersion || printHelp) {
+    if (!ok || (signatureNumber > 0 && argc != 3) || (signatureNumber == 0 && argc != 2) || printVersion || printHelp) {
         fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
         fprintf(stderr, "%s\n", popplerCopyright);
         fprintf(stderr, "%s\n", xpdfCopyright);
+        if (signatureNumber > 0 && argc == 2) {
+            fprintf(stderr, "An output filename for the signed document must be given\n");
+            return 2;
+        }
+
         if (!printVersion) {
-            printUsage("pdfsig", "<PDF-file>", argDesc);
+            printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
         }
         if (printVersion || printHelp)
             return 0;
         return 99;
     }
 
-    std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[argc - 1]);
+    std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[1]);
 
     SignatureHandler::setNSSDir(nssDir);
 
@@ -171,6 +187,38 @@ int main(int argc, char *argv[])
 
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
+
+    if (signatureNumber > static_cast<int>(sigCount)) {
+        printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
+        return 2;
+    } else if (signatureNumber > 0) {
+        if (strlen(certNickname) == 0) {
+            printf("A nickname of the signing certificate must be given\n");
+            return 2;
+        }
+        FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
+        Goffset file_size = 0;
+        GooString *sig = ffs->getCheckedSignature(&file_size);
+        if (sig) {
+            delete sig;
+            printf("Signature number %d is already signed\n", signatureNumber);
+            return 2;
+        }
+        if (etsiCAdESdetached)
+            ffs->setSignatureType(ETSI_CAdES_detached);
+        const char *pw = (strlen(password) == 0) ? nullptr : password;
+        const char *rs = (strlen(reason) == 0) ? nullptr : reason;
+        if (ffs->getNumWidgets() != 1) {
+            printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
+            return 2;
+        }
+        FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
+        if (fws->signDocument(argv[2], certNickname, digestName, pw, rs)) {
+            return 0;
+        } else {
+            return 3;
+        }
+    }
 
     if (sigCount >= 1) {
         if (dumpSignatures) {

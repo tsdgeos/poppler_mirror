@@ -2717,6 +2717,10 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMa
 {
     double bbox[4] = { 0, 0, 1, 1 }; // dummy
 
+    if (!transpGroupStack) {
+        return;
+    }
+
     /* transfer mask to alpha channel! */
     // memcpy(maskBitmap->getAlphaPtr(), maskBitmap->getDataPtr(), bitmap->getRowSize() * bitmap->getHeight());
     // memset(maskBitmap->getDataPtr(), 0, bitmap->getRowSize() * bitmap->getHeight());

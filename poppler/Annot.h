@@ -35,6 +35,8 @@
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -64,6 +66,7 @@ class FormField;
 class FormFieldButton;
 class FormFieldText;
 class FormFieldChoice;
+class FormFieldSignature;
 class PDFRectangle;
 class Movie;
 class LinkAction;
@@ -492,7 +495,9 @@ public:
 
     int getRotation() const { return rotation; }
     const AnnotColor *getBorderColor() const { return borderColor.get(); }
+    void setBorderColor(std::unique_ptr<AnnotColor> &&color) { borderColor = std::move(color); }
     const AnnotColor *getBackColor() const { return backColor.get(); }
+    void setBackColor(std::unique_ptr<AnnotColor> &&color) { backColor = std::move(color); }
     const GooString *getNormalCaption() const { return normalCaption.get(); }
     const GooString *getRolloverCaption() { return rolloverCaption.get(); }
     const GooString *getAlternateCaption() { return alternateCaption.get(); }
@@ -567,7 +572,7 @@ public:
     void drawLineEndSlash(double x, double y, double size, const Matrix &m);
     void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
     bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                       const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
+                       const GooString *appearState, XRef *xref, bool *addedDingbatsResource, Dict *resourcesDict);
     static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
     static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
     void writeString(const GooString &str);
@@ -583,6 +588,8 @@ private:
                              XRef *xref, bool *addedDingbatsResource);
     bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
     bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
+    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                                XRef *xref, Dict *resourcesDict);
     bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, bool multiline, int comb, int quadding,
                   bool txField, bool forceZapfDingbats, XRef *xref, bool *addedDingbatsResource, // xref and addedDingbatsResource both must not be null if forceZapfDingbats is passed
                   bool password);
@@ -753,7 +760,7 @@ protected:
     void update(const char *key, Object &&value);
 
     // Delete appearance streams and reset appearance state
-    void invalidateAppearance();
+    virtual void invalidateAppearance();
 
     Object annotObj;
 
@@ -1412,12 +1419,14 @@ public:
     ~AnnotWidget() override;
 
     void draw(Gfx *gfx, bool printing) override;
+    void invalidateAppearance() override;
 
     void generateFieldAppearance(bool *addedDingbatsResource);
     void updateAppearanceStream();
 
     AnnotWidgetHighlightMode getMode() { return mode; }
     AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
+    void setAppearCharacs(std::unique_ptr<AnnotAppearanceCharacs> &&appearCharacsA) { appearCharacs = std::move(appearCharacsA); }
     LinkAction *getAction() { return action.get(); } // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
     std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);

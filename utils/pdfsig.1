@@ -6,6 +6,7 @@ pdfsig \- Portable Document Format (PDF) digital signatures tool
 .B pdfsig
 [options]
 .RI [ PDF-file ]
+.RI [ Output-file ]
 .SH DESCRIPTION
 .B pdfsig
 verifies the digital signatures in a PDF document.
@@ -14,6 +15,7 @@ It also displays the identity of each signer
 the time and date of the signature, the hash algorithm used for signing,
 the type of the signature as stated in the PDF and
 the signed ranges with a statement wether the total document is signed.
+Moreover, with option -sign it can sign a PDF document.
 .PP
 The signer certificate validation uses the trusted certificates stored in the
 Network Security Services (NSS) Database. The NSS Database is searched for in the following locations:
@@ -37,6 +39,24 @@ Do not validate the certificate.
 .TP
 .B \-dump
 Dump all signatures into current directory.
+.B \-sign " number"
+Sign the document in the signature field with the given number.
+.TP
+.B \-nick " nickname"
+Use the certificate with the given nickname for signing.
+.TP
+.B \-kpw " password"
+Use the given password for the signing key
+(this might be missing if the key isn't password protected).
+.TP
+.B \-digest " algorithm"
+Use the given digest algorithm for signing (default: SHA256).
+.TP
+.B \-reason " reason"
+Set the given reason string for the signature (default: no reason set).
+.TP
+.B \-etsi
+Create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached.
 .TP
 .B \-v
 Print copyright and version information.

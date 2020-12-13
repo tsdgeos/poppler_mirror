@@ -27,6 +27,8 @@
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

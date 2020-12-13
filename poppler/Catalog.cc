@@ -36,6 +36,9 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -999,6 +1002,65 @@ Form *Catalog::getForm()
     }
 
     return form;
+}
+
+void Catalog::addFormToAcroForm(const Ref formRef)
+{
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (!acroForm.isDict()) {
+        // none there yet, need to create a new fields dict
+        Object newForm = Object(new Dict(xref));
+        newForm.dictSet("SigFlags", Object(3));
+
+        Array *fieldArray = new Array(xref);
+        fieldArray->add(Object(formRef));
+        newForm.dictSet("Fields", Object(fieldArray));
+
+        Ref newRef = xref->addIndirectObject(&newForm);
+        catDict.dictSet("AcroForm", Object(newRef));
+        acroForm = catDict.getDict()->lookup("AcroForm");
+    } else {
+        // append to field array
+        Ref fieldRef;
+        Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+        fieldArray.getArray()->add(Object(formRef));
+    }
+
+    if (acroFormRef != Ref::INVALID()) {
+        xref->setModifiedObject(&acroForm, acroFormRef);
+    } else {
+        xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+    }
+}
+
+void Catalog::removeFormFromAcroForm(const Ref formRef)
+{
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (acroForm.isDict()) {
+        // remove from field array
+        Ref fieldRef;
+        Object fieldArrayO = acroForm.getDict()->lookup("Fields", &fieldRef);
+        Array *fieldArray = fieldArrayO.getArray();
+        for (int i = 0; i < fieldArray->getLength(); ++i) {
+            const Object &o = fieldArray->getNF(i);
+            if (o.isRef() && o.getRef() == formRef) {
+                fieldArray->remove(i);
+                break;
+            }
+        }
+
+        xref->setModifiedObject(&acroForm, acroFormRef);
+    }
 }
 
 ViewerPreferences *Catalog::getViewerPreferences()

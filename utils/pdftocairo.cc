@@ -36,6 +36,7 @@
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2020 Salvo Miosi <salvo.ilmiosi@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,6 +49,7 @@
 #include <cstdio>
 #include <cmath>
 #include <cstring>
+#include <fcntl.h>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -385,9 +387,12 @@ static void writePageImage(GooString *filename)
     if (!writer)
         return;
 
-    if (filename->cmp("fd://0") == 0)
+    if (filename->cmp("fd://0") == 0) {
+#ifdef _WIN32
+        setmode(fileno(stdout), O_BINARY);
+#endif
         file = stdout;
-    else
+    } else
         file = fopen(filename->c_str(), "wb");
 
     if (!file) {

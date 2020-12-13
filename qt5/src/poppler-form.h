@@ -9,6 +9,9 @@
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+ * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +31,11 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
+#include <functional>
 #include <memory>
 #include <ctime>
 #include <QtCore/QDateTime>
+#include <QtCore/QVector>
 #include <QtCore/QList>
 #include <QtCore/QRectF>
 #include <QtCore/QStringList>
@@ -38,6 +43,7 @@
 #include "poppler-export.h"
 #include "poppler-annotation.h"
 
+class Object;
 class Page;
 class FormWidget;
 class FormWidgetButton;
@@ -525,6 +531,7 @@ public:
         Organization,
     };
 
+    CertificateInfo();
     CertificateInfo(CertificateInfoPrivate *priv);
     ~CertificateInfo();
 
@@ -552,6 +559,13 @@ public:
       Information about the subject
      */
     QString subjectInfo(EntityInfoKey key) const;
+
+    /**
+      The certificate internal database nickname
+
+      \since 20.12
+     */
+    QString nickName() const;
 
     /**
       The date-time when certificate becomes valid.
@@ -592,6 +606,13 @@ public:
       The DER encoded certificate.
      */
     QByteArray certificateData() const;
+
+    /**
+      Checks if the given password is the correct one for this certificate
+
+      \since 20.12
+     */
+    bool checkPassword(const QString &password) const;
 
     CertificateInfo(const CertificateInfo &other);
     CertificateInfo &operator=(const CertificateInfo &other);
@@ -801,6 +822,40 @@ private:
     Q_DISABLE_COPY(FormFieldSignature)
 };
 
+/**
+  Returns is poppler was compiled with NSS support
+
+  \since 20.12
+*/
+bool POPPLER_QT5_EXPORT hasNSSSupport();
+
+/**
+  Return vector of suitable signing certificates
+
+  \since 20.12
+*/
+QVector<CertificateInfo> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
+
+/**
+  Gets the current NSS CertDB directory
+
+  \since 20.12
+*/
+QString POPPLER_QT5_EXPORT getNSSDir();
+
+/**
+  Set a custom NSS CertDB directory. Needs to be called before doing any other signature operation
+
+  \since 20.12
+*/
+void POPPLER_QT5_EXPORT setNSSDir(const QString &pathURL);
+
+/**
+  Sets the callback for NSS password requests
+
+  \since 20.12
+*/
+void POPPLER_QT5_EXPORT setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 }
 
 #endif

@@ -22,12 +22,13 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2013, 2016 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2013, 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2014, 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -328,6 +329,10 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *
 XRef::~XRef()
 {
     for (int i = 0; i < size; i++) {
+        if (entries[i].type == xrefEntryFree) {
+            continue;
+        }
+
         entries[i].obj.~Object();
     }
     gfree(entries);
@@ -1114,7 +1119,7 @@ Object XRef::fetch(const Ref ref, int recursion)
     return fetch(ref.num, ref.gen, recursion);
 }
 
-Object XRef::fetch(int num, int gen, int recursion)
+Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
 {
     XRefEntry *e;
     Object obj1, obj2, obj3;
@@ -1151,6 +1156,9 @@ Object XRef::fetch(int num, int gen, int recursion)
                     if (longNumber <= INT_MAX && longNumber >= INT_MIN && *end_ptr == '\0') {
                         int number = longNumber;
                         error(errSyntaxWarning, -1, "Cmd was not obj but {0:s}, assuming the creator meant obj {1:d}", cmd, number);
+                        if (endPos) {
+                            *endPos = parser.getPos();
+                        }
                         return Object(number);
                     }
                 }
@@ -1158,6 +1166,9 @@ Object XRef::fetch(int num, int gen, int recursion)
             goto err;
         }
         Object obj = parser.getObj(false, (encrypted && !e->getFlag(XRefEntry::Unencrypted)) ? fileKey : nullptr, encAlgorithm, keyLength, num, gen, recursion);
+        if (endPos) {
+            *endPos = parser.getPos();
+        }
         return obj;
     }
 
@@ -1185,6 +1196,9 @@ Object XRef::fetch(int num, int gen, int recursion)
                 objStrs.put(e->offset, objStr);
             }
         }
+        if (endPos) {
+            *endPos = -1;
+        }
         return objStr->getObject(e->gen, num);
     }
 
@@ -1197,7 +1211,10 @@ err:
         error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct\n", num);
         rootNum = -1;
         constructXRef(&xrefReconstructed);
-        return fetch(num, gen, ++recursion);
+        return fetch(num, gen, ++recursion, endPos);
+    }
+    if (endPos) {
+        *endPos = -1;
     }
     return Object(objNull);
 }

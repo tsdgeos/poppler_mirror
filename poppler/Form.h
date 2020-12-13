@@ -22,6 +22,8 @@
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 //========================================================================
 
@@ -46,6 +48,7 @@ class LinkAction;
 class GfxResources;
 class PDFDoc;
 class SignatureInfo;
+class X509CertificateInfo;
 class SignatureHandler;
 
 enum FormFieldType
@@ -143,6 +146,7 @@ public:
 
     void createWidgetAnnotation();
     AnnotWidget *getWidgetAnnotation() const { return widget; }
+    void setWidgetAnnotation(AnnotWidget *_widget) { widget = _widget; }
 
     virtual void updateWidgetAppearance() = 0;
 
@@ -287,6 +291,8 @@ public:
     void updateWidgetAppearance() override;
 
     FormSignatureType signatureType() const;
+    void setSignatureType(FormSignatureType fst);
+
     // Use -1 for now as validationTime
     SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
@@ -294,12 +300,27 @@ public:
     // the elements of the list are of type Goffset
     std::vector<Goffset> getSignedRangeBounds() const;
 
+    // creates or replaces the dictionary name "V" in the signature dictionary and
+    // fills it with the fields of the signature; the field "Contents" is the signature
+    // in PKCS#7 format, which is calculated over the byte range encompassing the whole
+    // document except for the signature itself; this byte range is specified in the
+    // field "ByteRange" in the dictionary "V"
+    // return success
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const char *reason = nullptr);
+
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
     // otherwise a nullptr is returned
     GooString *getCheckedSignature(Goffset *checkedFileSize);
 
     const GooString *getSignature() const;
+
+private:
+    bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature);
+    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
+    bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
+
+    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);
 };
 
 //------------------------------------------------------------------------
@@ -586,7 +607,14 @@ public:
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }
     const GooString *getSignature() const { return signature; }
+    void setSignature(const GooString &sig);
     FormSignatureType getSignatureType() const { return signature_type; }
+    void setSignatureType(FormSignatureType t) { signature_type = t; }
+
+    const GooString &getCustomAppearanceContent() const;
+    void setCustomAppearanceContent(const GooString &s);
+
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
 private:
     void parseInfo();
@@ -596,6 +624,8 @@ private:
     Object byte_range;
     GooString *signature;
     SignatureInfo *signature_info;
+    GooString customAppearanceContent;
+    std::unique_ptr<X509CertificateInfo> certificate_info;
 
     void print(int indent) override;
 };

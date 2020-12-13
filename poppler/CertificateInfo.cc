@@ -7,6 +7,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
 // Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -63,6 +64,11 @@ const GooString &X509CertificateInfo::getSerialNumber() const
     return cert_serial;
 }
 
+const GooString &X509CertificateInfo::getNickName() const
+{
+    return cert_nick;
+}
+
 const X509CertificateInfo::EntityInfo &X509CertificateInfo::getIssuerInfo() const
 {
     return issuer_info;
@@ -106,6 +112,11 @@ void X509CertificateInfo::setVersion(int version)
 void X509CertificateInfo::setSerialNumber(const GooString &serialNumber)
 {
     cert_serial.Set(&serialNumber);
+}
+
+void X509CertificateInfo::setNickName(const GooString &nickName)
+{
+    cert_nick.Set(&nickName);
 }
 
 void X509CertificateInfo::setIssuerInfo(EntityInfo &&issuerInfo)

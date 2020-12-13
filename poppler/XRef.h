@@ -21,7 +21,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2013, 2016 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
@@ -149,7 +149,10 @@ public:
 
     // Fetch an indirect reference.
     Object fetch(const Ref ref, int recursion = 0);
-    Object fetch(int num, int gen, int recursion = 0);
+    // If endPos is not null, returns file position after parsing the object. This will
+    // be a few bytes after the end of the object due to the parser reading ahead.
+    // Returns -1 if object is in compressed stream.
+    Object fetch(int num, int gen, int recursion = 0, Goffset *endPos = nullptr);
 
     // Return the document's Info dictionary (if any).
     Object getDocInfo();
