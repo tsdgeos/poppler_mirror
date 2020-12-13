@@ -70,6 +70,7 @@ private:
     void init();
 
     bool hasGetChars() override { return true; }
+    bool readLine();
     int getChars(int nChars, unsigned char *buffer) override;
 
     int colorXform;

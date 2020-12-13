@@ -5460,7 +5460,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, GfxColorSpace *col
         }
         break;
     default:
-        if (colorSpace->useGetGrayLine() || colorSpace->useGetRGBLine() || colorSpace->useGetCMYKLine() || colorSpace->useGetDeviceNLine()) {
+        if ((!decode->isNull() || maxPixel != 255) && (colorSpace->useGetGrayLine() || (colorSpace->useGetRGBLine() && !decode->isNull()) || colorSpace->useGetCMYKLine() || colorSpace->useGetDeviceNLine())) {
             byte_lookup = (unsigned char *)gmallocn((maxPixel + 1), nComps);
             useByteLookup = true;
         }
@@ -5612,7 +5612,10 @@ void GfxImageColorMap::getGrayLine(unsigned char *in, unsigned char *out, int le
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getGrayLine(tmp_line, out, length);
@@ -5620,12 +5623,14 @@ void GfxImageColorMap::getGrayLine(unsigned char *in, unsigned char *out, int le
         break;
 
     default:
-        inp = in;
-        for (j = 0; j < length; j++)
-            for (i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (j = 0; j < length; j++)
+                for (i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getGrayLine(in, out, length);
         break;
     }
@@ -5654,7 +5659,10 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned int *out, int leng
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getRGBLine(tmp_line, out, length);
@@ -5662,12 +5670,14 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned int *out, int leng
         break;
 
     default:
-        inp = in;
-        for (j = 0; j < length; j++)
-            for (i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (j = 0; j < length; j++)
+                for (i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getRGBLine(in, out, length);
         break;
     }
@@ -5698,7 +5708,10 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned char *out, int len
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getRGBLine(tmp_line, out, length);
@@ -5706,12 +5719,14 @@ void GfxImageColorMap::getRGBLine(unsigned char *in, unsigned char *out, int len
         break;
 
     default:
-        inp = in;
-        for (j = 0; j < length; j++)
-            for (i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (j = 0; j < length; j++)
+                for (i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getRGBLine(in, out, length);
         break;
     }
@@ -5743,7 +5758,10 @@ void GfxImageColorMap::getRGBXLine(unsigned char *in, unsigned char *out, int le
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getRGBXLine(tmp_line, out, length);
@@ -5751,12 +5769,14 @@ void GfxImageColorMap::getRGBXLine(unsigned char *in, unsigned char *out, int le
         break;
 
     default:
-        inp = in;
-        for (j = 0; j < length; j++)
-            for (i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (j = 0; j < length; j++)
+                for (i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getRGBXLine(in, out, length);
         break;
     }
@@ -5788,7 +5808,10 @@ void GfxImageColorMap::getCMYKLine(unsigned char *in, unsigned char *out, int le
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (i = 0; i < length; i++) {
             for (j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getCMYKLine(tmp_line, out, length);
@@ -5796,12 +5819,14 @@ void GfxImageColorMap::getCMYKLine(unsigned char *in, unsigned char *out, int le
         break;
 
     default:
-        inp = in;
-        for (j = 0; j < length; j++)
-            for (i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (j = 0; j < length; j++)
+                for (i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getCMYKLine(in, out, length);
         break;
     }
@@ -5830,7 +5855,10 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
         tmp_line = (unsigned char *)gmallocn(length, nComps2);
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < nComps2; j++) {
-                tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
+                unsigned char c = in[i];
+                if (byte_lookup)
+                    c = byte_lookup[c * nComps2 + j];
+                tmp_line[i * nComps2 + j] = c;
             }
         }
         colorSpace2->getDeviceNLine(tmp_line, out, length);
@@ -5838,12 +5866,14 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
         break;
 
     default:
-        inp = in;
-        for (int j = 0; j < length; j++)
-            for (int i = 0; i < nComps; i++) {
-                *inp = byte_lookup[*inp * nComps + i];
-                inp++;
-            }
+        if (byte_lookup) {
+            inp = in;
+            for (int j = 0; j < length; j++)
+                for (int i = 0; i < nComps; i++) {
+                    *inp = byte_lookup[*inp * nComps + i];
+                    inp++;
+                }
+        }
         colorSpace->getDeviceNLine(in, out, length);
         break;
     }
