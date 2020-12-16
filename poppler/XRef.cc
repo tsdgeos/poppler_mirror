@@ -1208,6 +1208,20 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
 
 err:
     if (!xRefStream && !xrefReconstructed) {
+        // Check if there has been any updated object, if there has been we can't reconstruct because that would mean losing the changes
+        bool xrefHasChanges = false;
+        for (int i = 0; !xrefHasChanges && i < size; i++) {
+            if (entries[i].getFlag(XRefEntry::Updated)) {
+                xrefHasChanges = true;
+            }
+        }
+        if (xrefHasChanges) {
+            error(errInternal, -1, "xref num {0:d} not found but needed, document has changes, reconstruct aborted\n", num);
+            // pretend we constructed the xref, otherwise we will do this check again and again
+            xrefReconstructed = true;
+            return Object(objNull);
+        }
+
         error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct\n", num);
         rootNum = -1;
         constructXRef(&xrefReconstructed);
