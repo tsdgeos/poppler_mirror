@@ -591,7 +591,13 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA) : JBIG2Segment(se
 {
     w = wA;
     h = hA;
-    line = (wA + 7) >> 3;
+    int auxW;
+    if (unlikely(checkedAdd(wA, 7, &auxW))) {
+        error(errSyntaxError, -1, "invalid width");
+        data = nullptr;
+        return;
+    }
+    line = auxW >> 3;
 
     if (w <= 0 || h <= 0 || line <= 0 || h >= (INT_MAX - 1) / line) {
         error(errSyntaxError, -1, "invalid width/height");
