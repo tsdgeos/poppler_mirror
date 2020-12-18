@@ -11,6 +11,9 @@
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -133,7 +136,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
 
 // Returns matrix to convert from user space coords (oriented according to the
 // specified rotation) to normalized coords
-void AnnotationPrivate::fillNormalizationMTX(double MTX[6], int pageRotation) const
+void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotation)
 {
     Q_ASSERT(pdfPage);
 
@@ -171,7 +174,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
 
     if (pageRotate == 0 || (pdfAnnot->getFlags() & Annot::flagNoRotate) == 0) {
         // Use the normalization matrix for this page's rotation
-        fillNormalizationMTX(MTX, pageRotate);
+        fillNormalizationMTX(pdfPage, MTX, pageRotate);
     } else {
         // Clients expect coordinates relative to this page's rotation, but
         // FixedRotation annotations internally use unrotated coordinates:
@@ -179,7 +182,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
         // top-left corner as rotation pivot
 
         double MTXnorm[6];
-        fillNormalizationMTX(MTXnorm, pageRotate);
+        fillNormalizationMTX(pdfPage, MTXnorm, pageRotate);
 
         QTransform transform(MTXnorm[0], MTXnorm[1], MTXnorm[2], MTXnorm[3], MTXnorm[4], MTXnorm[5]);
         transform.translate(+pdfAnnot->getXMin(), +pdfAnnot->getYMax());
@@ -230,14 +233,14 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
 // the transformation produced by fillTransformationMTX, but we can't use
 // fillTransformationMTX here because it relies on the native annotation
 // object's boundary rect to be already set up.
-PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags)
 {
     Q_ASSERT(pdfPage);
 
     const int pageRotate = pdfPage->getRotate();
 
     double MTX[6];
-    fillNormalizationMTX(MTX, pageRotate);
+    fillNormalizationMTX(pdfPage, MTX, pageRotate);
 
     double tl_x, tl_y, br_x, br_y, swp;
     XPDFReader::invTransform(MTX, r.topLeft(), tl_x, tl_y);
@@ -267,6 +270,11 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
         return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
     else // rotationFixUp == 270
         return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
+}
+
+PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+{
+    return Poppler::boundaryToPdfRectangle(pdfPage, r, rFlags);
 }
 
 AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
