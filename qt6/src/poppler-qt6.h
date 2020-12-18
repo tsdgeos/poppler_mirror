@@ -1956,7 +1956,7 @@ public:
      *  - text that will be shown inside the rect
      *  - font size and color
      *  - border and background color
-     * \since 20.12
+     * \since 21.01
      */
     class NewSignatureData
     {
@@ -2023,7 +2023,7 @@ public:
 
         \return whether the signing succeeded
 
-        \since 20.12
+        \since 21.01
     */
     bool sign(const NewSignatureData &data);
 

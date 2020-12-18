@@ -529,7 +529,7 @@ public:
     /**
       The certificate internal database nickname
 
-      \since 20.12
+      \since 21.01
      */
     QString nickName() const;
 
@@ -576,7 +576,7 @@ public:
     /**
       Checks if the given password is the correct one for this certificate
 
-      \since 20.12
+      \since 21.01
      */
     bool checkPassword(const QString &password) const;
 
@@ -774,35 +774,35 @@ private:
 /**
   Returns is poppler was compiled with NSS support
 
-  \since 20.12
+  \since 21.01
 */
 bool POPPLER_QT6_EXPORT hasNSSSupport();
 
 /**
   Return vector of suitable signing certificates
 
-  \since 20.12
+  \since 21.01
 */
 QVector<CertificateInfo> POPPLER_QT6_EXPORT getAvailableSigningCertificates();
 
 /**
   Gets the current NSS CertDB directory
 
-  \since 20.12
+  \since 21.01
 */
 QString POPPLER_QT6_EXPORT getNSSDir();
 
 /**
   Set a custom NSS CertDB directory. Needs to be called before doing any other signature operation
 
-  \since 20.12
+  \since 21.01
 */
 void POPPLER_QT6_EXPORT setNSSDir(const QString &pathURL);
 
 /**
   Sets the callback for NSS password requests
 
-  \since 20.12
+  \since 21.01
 */
 void POPPLER_QT6_EXPORT setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 }
