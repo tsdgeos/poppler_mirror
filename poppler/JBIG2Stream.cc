@@ -1248,7 +1248,8 @@ void JBIG2Stream::readSegments()
     Goffset segDataPos;
     int c1, c2, c3;
 
-    while (readULong(&segNum)) {
+    bool done = false;
+    while (!done && readULong(&segNum)) {
 
         // segment header flags
         if (!readUByte(&segFlags)) {
@@ -1373,6 +1374,10 @@ void JBIG2Stream::readSegments()
             break;
         case 50:
             readEndOfStripeSeg(segLength);
+            break;
+        case 51:
+            // end of file segment
+            done = true;
             break;
         case 52:
             readProfilesSeg(segLength);
