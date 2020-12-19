@@ -3037,7 +3037,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, b
                 ltpCX = 0x0e3; // 001 1100 01 1
                 break;
             case 3:
-                ltpCX = 0x18a; // 01100 0101 1
+                ltpCX = 0x18b; // 01100 0101 1
                 break;
             }
         }
