@@ -82,6 +82,7 @@ build_mingw64_fedora:
 
 build_clazy:
   stage: build
+  image: debian:testing
   script:
     - apt-get install --yes --no-install-recommends clazy
     - mkdir -p build && cd build
