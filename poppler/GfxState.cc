@@ -1459,6 +1459,9 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     double X, Y, Z;
 
     getXYZ(color, &X, &Y, &Z);
+    X *= whiteX;
+    Y *= whiteY;
+    Z *= whiteZ;
 #ifdef USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
         unsigned char out[gfxColorMaxComps];
@@ -1496,9 +1499,6 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         return;
     }
 #endif
-    X *= whiteX;
-    Y *= whiteY;
-    Z *= whiteZ;
     // convert XYZ to RGB, including gamut mapping and gamma correction
     const double r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
     const double g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
@@ -1519,6 +1519,9 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
         unsigned char out[gfxColorMaxComps];
 
         getXYZ(color, &in[0], &in[1], &in[2]);
+        in[0] *= whiteX;
+        in[1] *= whiteY;
+        in[2] *= whiteZ;
         transform->doTransform(in, out, 1);
         cmyk->c = byteToCol(out[0]);
         cmyk->m = byteToCol(out[1]);
