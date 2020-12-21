@@ -101,8 +101,8 @@ private:
     unsigned int pageDefPixel;
     JBIG2Bitmap *pageBitmap;
     unsigned int defCombOp;
-    std::vector<JBIG2Segment *> *segments;
-    std::vector<JBIG2Segment *> *globalSegments;
+    std::vector<JBIG2Segment *> segments;
+    std::vector<JBIG2Segment *> globalSegments;
     Stream *curStr;
     unsigned char *dataPtr;
     unsigned char *dataEnd;

@@ -1097,7 +1097,6 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsS
             globalsStreamRef = globalsStreamRefA->getRef();
     }
 
-    segments = globalSegments = nullptr;
     curStr = nullptr;
     dataPtr = dataEnd = nullptr;
 }
@@ -1132,7 +1131,7 @@ void JBIG2Stream::reset()
     freeSegments();
 
     // read the globals stream
-    globalSegments = new std::vector<JBIG2Segment *>();
+    globalSegments.resize(0);
     if (globalsStream.isStream()) {
         segments = globalSegments;
         curStr = globalsStream.getStream();
@@ -1145,7 +1144,7 @@ void JBIG2Stream::reset()
     }
 
     // read the main stream
-    segments = new std::vector<JBIG2Segment *>();
+    segments.resize(0);
     curStr = str;
     curStr->reset();
     arithDecoder->setStream(curStr);
@@ -1163,20 +1162,15 @@ void JBIG2Stream::reset()
 
 void JBIG2Stream::freeSegments()
 {
-    if (segments) {
-        for (auto entry : *segments) {
-            delete entry;
-        }
-        delete segments;
-        segments = nullptr;
+    for (auto entry : segments) {
+        delete entry;
     }
-    if (globalSegments) {
-        for (auto entry : *globalSegments) {
-            delete entry;
-        }
-        delete globalSegments;
-        globalSegments = nullptr;
+    segments.resize(0);
+
+    for (auto entry : globalSegments) {
+        delete entry;
     }
+    globalSegments.resize(0);
 }
 
 void JBIG2Stream::close()
@@ -1863,7 +1857,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
 
     // store the new symbol dict
-    segments->push_back(symbolDict);
+    segments.push_back(symbolDict);
 
     return true;
 
@@ -2181,7 +2175,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
             // store the region bitmap
         } else {
             bitmap->setSegNum(segNum);
-            segments->push_back(bitmap);
+            segments.push_back(bitmap);
         }
     }
 
@@ -2498,7 +2492,7 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     delete bitmap;
 
     // store the new pattern dict
-    segments->push_back(patternDict);
+    segments.push_back(patternDict);
 
     return;
 
@@ -2672,7 +2666,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
 
         // store the region bitmap
     } else {
-        segments->push_back(bitmap);
+        segments.push_back(bitmap);
     }
 
     return;
@@ -2737,7 +2731,7 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossl
         // store the region bitmap
     } else {
         bitmap->setSegNum(segNum);
-        segments->push_back(bitmap);
+        segments.push_back(bitmap);
     }
 
     // immediate generic segments can have an unspecified length, in
@@ -3624,7 +3618,7 @@ void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
     } else {
         if (bitmap) {
             bitmap->setSegNum(segNum);
-            segments->push_back(bitmap);
+            segments.push_back(bitmap);
         } else {
             error(errSyntaxError, curStr->getPos(), "readGenericRefinementRegionSeg with null bitmap");
         }
@@ -3957,7 +3951,7 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length)
     huffTab[i].rangeLen = jbig2HuffmanEOT;
     if (JBIG2HuffmanDecoder::buildTable(huffTab, i)) {
         // create and store the new table segment
-        segments->push_back(new JBIG2CodeTable(segNum, huffTab));
+        segments.push_back(new JBIG2CodeTable(segNum, huffTab));
     } else {
         free(huffTab);
     }
@@ -3984,12 +3978,12 @@ void JBIG2Stream::readExtensionSeg(unsigned int length)
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)
 {
-    for (JBIG2Segment *seg : *globalSegments) {
+    for (JBIG2Segment *seg : globalSegments) {
         if (seg->getSegNum() == segNum) {
             return seg;
         }
     }
-    for (JBIG2Segment *seg : *segments) {
+    for (JBIG2Segment *seg : segments) {
         if (seg->getSegNum() == segNum) {
             return seg;
         }
@@ -3999,17 +3993,17 @@ JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)
 
 void JBIG2Stream::discardSegment(unsigned int segNum)
 {
-    for (auto it = globalSegments->begin(); it != globalSegments->end(); ++it) {
+    for (auto it = globalSegments.begin(); it != globalSegments.end(); ++it) {
         auto seg = static_cast<JBIG2Segment *>(*it);
         if (seg->getSegNum() == segNum) {
-            globalSegments->erase(it);
+            globalSegments.erase(it);
             return;
         }
     }
-    for (auto it = segments->begin(); it != segments->end(); ++it) {
+    for (auto it = segments.begin(); it != segments.end(); ++it) {
         auto seg = static_cast<JBIG2Segment *>(*it);
         if (seg->getSegNum() == segNum) {
-            segments->erase(it);
+            segments.erase(it);
             return;
         }
     }
