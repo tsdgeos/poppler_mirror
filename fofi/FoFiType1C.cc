@@ -194,7 +194,6 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     Type1CIndexVal val;
     GooString *buf;
     char buf2[256];
-    const char **enc;
     bool ok;
     int i;
 
@@ -299,9 +298,9 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     } else {
         (*outputFunc)(outputStream, "256 array\n", 10);
         (*outputFunc)(outputStream, "0 1 255 {1 index exch /.notdef put} for\n", 40);
-        enc = newEncoding ? newEncoding : (const char **)encoding;
+        const char **enc = newEncoding ? newEncoding : (const char **)encoding;
         for (i = 0; i < 256; ++i) {
-            if (enc[i]) {
+            if (enc && enc[i]) {
                 buf = GooString::format("dup {0:d} /{1:s} put\n", i, enc[i]);
                 (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
                 delete buf;
@@ -1945,7 +1944,7 @@ bool FoFiType1C::parse()
             readPrivateDict(0, 0, &privateDicts[0]);
         } else {
             getIndex(topDict.fdArrayOffset, &fdIdx, &parsedOk);
-            if (!parsedOk) {
+            if (!parsedOk || fdIdx.len <= 0) {
                 return false;
             }
             nFDs = fdIdx.len;
