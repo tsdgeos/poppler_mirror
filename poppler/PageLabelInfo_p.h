@@ -21,36 +21,37 @@
 
 #include "config.h"
 
-#ifdef HAVE_CODECVT
-#    include <locale>
-#    include <codecvt>
-#endif
-
 #include "goo/GooString.h"
 #include "Error.h"
 
-static std::pair<int, bool> fromDecimal(const char *const begin, const char *const end, const bool unicode)
+static std::pair<int, bool> fromDecimal(const std::string &str, const bool unicode)
 {
-#ifdef HAVE_CODECVT
-    if (unicode) {
-        std::wstring_convert<std::codecvt_utf16<wchar_t>> converter("", L"");
-        const auto str = converter.from_bytes(begin, end);
-
-        // Skip BOM since wcstol seems unable to handle it.
-        const wchar_t *c_str = str.c_str();
-        if (*c_str == wchar_t { 0xfeff }) {
-            ++c_str;
+    if (unicode && (str.size() % 2 == 0)) {
+        if (GooString::hasUnicodeMarker(str)) {
+            // strip the marker if it is there
+            return fromDecimal(str.substr(2), true /*unicode*/);
         }
 
-        wchar_t *parsed;
-        const int number = std::wcstol(c_str, &parsed, 10);
-        if (parsed >= str.data() + str.size()) {
-            return std::make_pair(number, true);
+        // Since we only care about numbers here, the first byte needs to be
+        // 0 and second will be the actual ascii number, so we're going to reconstruct a
+        // non unicode string that then we will use strtol to "translate"
+        std::string newString;
+        bool allGood = true;
+        for (size_t i = 0; allGood && i < str.size(); i += 2) {
+            if (str[i] == 0) {
+                newString += str[i + 1];
+            } else {
+                allGood = false;
+            }
+        }
+
+        if (allGood) {
+            return fromDecimal(newString, false /*unicode*/);
         }
     }
-#else
-    (void)unicode;
-#endif
+
+    const char *const begin = str.data();
+    const char *const end = begin + str.size();
 
     char *parsed;
     const int number = std::strtol(begin, &parsed, 10);

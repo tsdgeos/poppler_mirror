@@ -128,7 +128,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 
         switch (interval.style) {
         case Interval::Arabic:
-            std::tie(number, ok) = fromDecimal(str + prefixLen, str + strLen, strUnicode);
+            std::tie(number, ok) = fromDecimal(label->toStr().substr(prefixLen), strUnicode);
             if (ok && number - interval.first < interval.length) {
                 *index = interval.base + number - interval.first;
                 return true;
