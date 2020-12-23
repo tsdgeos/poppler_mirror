@@ -45,6 +45,7 @@
 #include <cctype>
 #include <climits>
 #include <cfloat>
+#include <limits>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Object.h"
@@ -793,8 +794,13 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             gen = (gen << 8) + c;
         }
         if (gen > INT_MAX) {
-            error(errSyntaxError, -1, "Gen inside xref table too large (bigger than INT_MAX)");
-            return false;
+            if (i == 0 && gen == std::numeric_limits<uint32_t>::max()) {
+                // workaround broken generators
+                gen = 65535;
+            } else {
+                error(errSyntaxError, -1, "Gen inside xref table too large (bigger than INT_MAX)");
+                return false;
+            }
         }
         if (entries[i].offset == -1) {
             switch (type) {
