@@ -270,6 +270,7 @@ public:
 
     // create mapping for spot colorants
     virtual void createMapping(std::vector<GfxSeparationColorSpace *> *separationList, int maxSepComps);
+    int *getMapping() const { return mapping; }
 
     // Does this ColorSpace support getRGBLine?
     virtual bool useGetRGBLine() const { return false; }

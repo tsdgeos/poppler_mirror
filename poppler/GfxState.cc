@@ -5906,7 +5906,7 @@ void GfxImageColorMap::getDeviceN(const unsigned char *x, GfxColor *deviceN)
     GfxColor color;
     int i;
 
-    if (colorSpace2) {
+    if ((colorSpace->getMapping() == nullptr || colorSpace->getMapping()[0] == -1) && colorSpace2) {
         for (i = 0; i < nComps2; ++i) {
             color.c[i] = lookup2[i][x[0]];
         }
