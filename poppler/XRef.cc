@@ -1216,9 +1216,10 @@ err:
     if (!xRefStream && !xrefReconstructed) {
         // Check if there has been any updated object, if there has been we can't reconstruct because that would mean losing the changes
         bool xrefHasChanges = false;
-        for (int i = 0; !xrefHasChanges && i < size; i++) {
+        for (int i = 0; i < size; i++) {
             if (entries[i].getFlag(XRefEntry::Updated)) {
                 xrefHasChanges = true;
+                break;
             }
         }
         if (xrefHasChanges) {
