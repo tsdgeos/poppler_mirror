@@ -4879,7 +4879,13 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
 
     contents = fieldText->getAppearanceContent();
     if (contents) {
-        quadding = fieldText->hasTextQuadding() ? fieldText->getTextQuadding() : form->getTextQuadding();
+        if (fieldText->hasTextQuadding()) {
+            quadding = fieldText->getTextQuadding();
+        } else if (form) {
+            quadding = form->getTextQuadding();
+        } else {
+            quadding = quaddingLeftJustified;
+        }
 
         int comb = 0;
         if (fieldText->isComb())
@@ -4953,7 +4959,13 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     const GooString *selected;
     VariableTextQuadding quadding;
 
-    quadding = fieldChoice->hasTextQuadding() ? fieldChoice->getTextQuadding() : form->getTextQuadding();
+    if (fieldChoice->hasTextQuadding()) {
+        quadding = fieldChoice->getTextQuadding();
+    } else if (form) {
+        quadding = form->getTextQuadding();
+    } else {
+        quadding = quaddingLeftJustified;
+    }
 
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
@@ -4989,22 +5001,21 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
         appearBuilder.drawFieldBorder(field, border.get(), appearCharacs.get(), rect.get());
 
     da = field->getDefaultAppearance();
-    if (!da)
+    if (!da && form)
         da = form->getDefaultAppearance();
 
-    const GfxResources *resources = form->getDefaultResources();
+    const GfxResources *resources = form ? form->getDefaultResources() : nullptr;
     Dict *appearDict = new Dict(doc->getXRef());
 
     Object resourcesDictObj;
-    const Object *defaultResDict = form->getDefaultResourcesObj();
-    if (defaultResDict->isDict()) {
-        resourcesDictObj = defaultResDict->copy();
+    if (form && form->getDefaultResourcesObj()->isDict()) {
+        resourcesDictObj = form->getDefaultResourcesObj()->copy();
     } else {
         resourcesDictObj = Object(new Dict(doc->getXRef()));
     }
 
     const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
-    if (!success && da != form->getDefaultAppearance()) {
+    if (!success && form && da != form->getDefaultAppearance()) {
         da = form->getDefaultAppearance();
         appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
     }
@@ -5083,8 +5094,8 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
     // - NeedAppearances is true
-    if (field && form) {
-        if (appearance.isNull() || form->getNeedAppearances()) {
+    if (field) {
+        if (appearance.isNull() || (form && form->getNeedAppearances())) {
             generateFieldAppearance(&addDingbatsResource);
         }
     }
