@@ -253,12 +253,14 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
 
     if (str->getLength() <= 0) {
         error(errSyntaxError, -1, "Document stream is empty");
+        errCode = errDamaged;
         return false;
     }
 
     str->setPos(0, -1);
     if (str->getPos() < 0) {
         error(errSyntaxError, -1, "Document base stream is not seekable");
+        errCode = errFileIO;
         return false;
     }
 
