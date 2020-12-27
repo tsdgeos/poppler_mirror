@@ -771,7 +771,9 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
     } else {
         x0 = 0;
     }
-    x1 = x + bitmap->w;
+    if (unlikely(checkedAdd(x, bitmap->w, &x1))) {
+        return;
+    }
     if (x1 > w) {
         x1 = w;
     }
