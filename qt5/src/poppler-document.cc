@@ -801,9 +801,12 @@ Document::FormType Document::formType() const
 
 QVector<int> Document::formCalculateOrder() const
 {
-    QVector<int> result;
-
     Form *form = m_doc->doc->getCatalog()->getForm();
+    if (!form) {
+        return {};
+    }
+
+    QVector<int> result;
     const std::vector<Ref> &calculateOrder = form->getCalculateOrder();
     for (Ref r : calculateOrder) {
         FormWidget *w = form->findWidgetByRef(r);
