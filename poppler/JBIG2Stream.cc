@@ -1131,9 +1131,7 @@ void JBIG2Stream::reset()
     freeSegments();
 
     // read the globals stream
-    globalSegments.resize(0);
     if (globalsStream.isStream()) {
-        segments = globalSegments;
         curStr = globalsStream.getStream();
         curStr->reset();
         arithDecoder->setStream(curStr);
@@ -1141,10 +1139,11 @@ void JBIG2Stream::reset()
         mmrDecoder->setStream(curStr);
         readSegments();
         curStr->close();
+        // swap the newly read segments list into globalSegments
+        std::swap(segments, globalSegments);
     }
 
     // read the main stream
-    segments.resize(0);
     curStr = str;
     curStr->reset();
     arithDecoder->setStream(curStr);
