@@ -120,7 +120,7 @@ public:
 
     CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
+    CMap *getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();

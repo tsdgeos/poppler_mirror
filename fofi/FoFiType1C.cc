@@ -194,7 +194,6 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     Type1CIndexVal val;
     GooString *buf;
     char buf2[256];
-    const char **enc;
     bool ok;
     int i;
 
@@ -299,9 +298,9 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     } else {
         (*outputFunc)(outputStream, "256 array\n", 10);
         (*outputFunc)(outputStream, "0 1 255 {1 index exch /.notdef put} for\n", 40);
-        enc = newEncoding ? newEncoding : (const char **)encoding;
+        const char **enc = newEncoding ? newEncoding : (const char **)encoding;
         for (i = 0; i < 256; ++i) {
-            if (enc[i]) {
+            if (enc && enc[i]) {
                 buf = GooString::format("dup {0:d} /{1:s} put\n", i, enc[i]);
                 (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
                 delete buf;
@@ -526,7 +525,8 @@ void FoFiType1C::convertToCIDType0(const char *psName, const int *codeMap, int n
                 if (!ok) {
                     subrIdx.pos = -1;
                 }
-                cvtGlyph(val.pos, val.len, charStrings, &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], true);
+                std::set<int> offsetBeingParsed;
+                cvtGlyph(val.pos, val.len, charStrings, &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], true, offsetBeingParsed);
             }
         }
     }
@@ -1103,7 +1103,8 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int of
 
     // generate the charstring
     charBuf = new GooString();
-    cvtGlyph(offset, nBytes, charBuf, subrIdx, pDict, true);
+    std::set<int> offsetBeingParsed;
+    cvtGlyph(offset, nBytes, charBuf, subrIdx, pDict, true, offsetBeingParsed);
 
     buf = GooString::format("/{0:s} {1:d} RD ", glyphName, charBuf->getLength());
     eexecWrite(eb, buf->c_str());
@@ -1114,7 +1115,7 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int of
     delete charBuf;
 }
 
-void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top)
+void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed)
 {
     Type1CIndexVal val;
     bool ok, dFP;
@@ -1122,6 +1123,12 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
     unsigned short r2;
     unsigned char byte;
     int pos, subrBias, start, i, k;
+
+    if (offsetBeingParsed.find(offset) != offsetBeingParsed.end()) {
+        return;
+    }
+
+    auto offsetEmplaceResult = offsetBeingParsed.emplace(offset);
 
     start = charBuf->getLength();
     if (top) {
@@ -1279,7 +1286,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     ok = true;
                     getIndexVal(subrIdx, k, &val, &ok);
                     if (likely(ok && val.pos != offset)) {
-                        cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false);
+                        cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
                 } else {
                     //~ error(-1, "Too few args to Type 2 callsubr");
@@ -1514,7 +1521,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     ok = true;
                     getIndexVal(&gsubrIdx, k, &val, &ok);
                     if (likely(ok && val.pos != offset)) {
-                        cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false);
+                        cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
                 } else {
                     //~ error(-1, "Too few args to Type 2 callgsubr");
@@ -1739,6 +1746,8 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
             r2 = (byte + r2) * 52845 + 22719;
         }
     }
+
+    offsetBeingParsed.erase(offsetEmplaceResult.first);
 }
 
 void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict)
@@ -1935,7 +1944,7 @@ bool FoFiType1C::parse()
             readPrivateDict(0, 0, &privateDicts[0]);
         } else {
             getIndex(topDict.fdArrayOffset, &fdIdx, &parsedOk);
-            if (!parsedOk) {
+            if (!parsedOk || fdIdx.len <= 0) {
                 return false;
             }
             nFDs = fdIdx.len;

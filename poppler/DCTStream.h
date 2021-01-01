@@ -10,6 +10,7 @@
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 //
 //========================================================================
 
@@ -70,6 +71,7 @@ private:
     void init();
 
     bool hasGetChars() override { return true; }
+    bool readLine();
     int getChars(int nChars, unsigned char *buffer) override;
 
     int colorXform;

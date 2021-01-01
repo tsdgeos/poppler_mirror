@@ -23,7 +23,7 @@ private slots:
 void TestPageLabelInfo::testFromDecimal()
 {
     std::string str { "2342" };
-    const auto res = fromDecimal(str.data(), str.data() + str.size(), false);
+    const auto res = fromDecimal(str, false);
     QCOMPARE(res.first, 2342);
     QCOMPARE(res.second, true);
 }
@@ -31,14 +31,8 @@ void TestPageLabelInfo::testFromDecimal()
 void TestPageLabelInfo::testFromDecimalUnicode()
 {
     std::unique_ptr<GooString> str(Poppler::QStringToUnicodeGooString(QString::fromLocal8Bit("2342")));
-    const auto res = fromDecimal(str->c_str(), str->c_str() + str->getLength(), str->hasUnicodeMarker());
-#ifndef HAVE_CODECVT
-    QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
-#endif
+    const auto res = fromDecimal(str->toStr(), str->hasUnicodeMarker());
     QCOMPARE(res.first, 2342);
-#ifndef HAVE_CODECVT
-    QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
-#endif
     QCOMPARE(res.second, true);
 }
 

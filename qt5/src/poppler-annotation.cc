@@ -200,7 +200,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
 
 // Returns matrix to convert from user space coords (oriented according to the
 // specified rotation) to normalized coords
-void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotation)
+static void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotation)
 {
     Q_ASSERT(pdfPage);
 

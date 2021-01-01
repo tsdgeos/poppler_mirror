@@ -1195,10 +1195,10 @@ const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName)
     return map;
 }
 
-CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapName, Stream *stream)
+CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapName)
 {
     cMapCacheLocker();
-    return cMapCache->getCMap(collection, cMapName, stream);
+    return cMapCache->getCMap(collection, cMapName);
 }
 
 const UnicodeMap *GlobalParams::getTextEncoding()

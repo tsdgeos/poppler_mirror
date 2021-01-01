@@ -1736,7 +1736,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
     Object desFontDictObj;
     Object obj1, obj2, obj3, obj4, obj5, obj6;
     int c1, c2;
-    int excepsSize, j, k;
+    int excepsSize;
 
     refCnt = 1;
     ascent = 0.95;
@@ -1889,17 +1889,19 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
                     excepsSize = (widths.nExceps + obj3.arrayGetLength() + 15) & ~15;
                     widths.exceps = (GfxFontCIDWidthExcep *)greallocn(widths.exceps, excepsSize, sizeof(GfxFontCIDWidthExcep));
                 }
-                j = obj2.getInt();
-                for (k = 0; k < obj3.arrayGetLength(); ++k) {
-                    obj4 = obj3.arrayGet(k);
-                    if (obj4.isNum()) {
-                        widths.exceps[widths.nExceps].first = j;
-                        widths.exceps[widths.nExceps].last = j;
-                        widths.exceps[widths.nExceps].width = obj4.getNum() * 0.001;
-                        ++j;
-                        ++widths.nExceps;
-                    } else {
-                        error(errSyntaxError, -1, "Bad widths array in Type 0 font");
+                int j = obj2.getInt();
+                if (likely(j < INT_MAX - obj3.arrayGetLength())) {
+                    for (int k = 0; k < obj3.arrayGetLength(); ++k) {
+                        obj4 = obj3.arrayGet(k);
+                        if (obj4.isNum()) {
+                            widths.exceps[widths.nExceps].first = j;
+                            widths.exceps[widths.nExceps].last = j;
+                            widths.exceps[widths.nExceps].width = obj4.getNum() * 0.001;
+                            ++j;
+                            ++widths.nExceps;
+                        } else {
+                            error(errSyntaxError, -1, "Bad widths array in Type 0 font");
+                        }
                     }
                 }
                 i += 2;
@@ -1953,8 +1955,8 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
                     excepsSize = (widths.nExcepsV + obj3.arrayGetLength() / 3 + 15) & ~15;
                     widths.excepsV = (GfxFontCIDWidthExcepV *)greallocn(widths.excepsV, excepsSize, sizeof(GfxFontCIDWidthExcepV));
                 }
-                j = obj2.getInt();
-                for (k = 0; k < obj3.arrayGetLength(); k += 3) {
+                int j = obj2.getInt();
+                for (int k = 0; k < obj3.arrayGetLength(); k += 3) {
                     if ((obj4 = obj3.arrayGet(k), obj4.isNum()) && (obj5 = obj3.arrayGet(k + 1), obj5.isNum()) && (obj6 = obj3.arrayGet(k + 2), obj6.isNum())) {
                         widths.excepsV[widths.nExcepsV].first = j;
                         widths.excepsV[widths.nExcepsV].last = j;

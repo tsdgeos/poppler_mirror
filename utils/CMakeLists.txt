@@ -11,6 +11,7 @@ if (ENABLE_SPLASH)
   # pdftoppm
   set(pdftoppm_SOURCES ${common_srcs}
     pdftoppm.cc
+    sanitychecks.cc
   )
   add_executable(pdftoppm ${pdftoppm_SOURCES})
   target_link_libraries(pdftoppm ${common_libs})
@@ -111,6 +112,7 @@ endif ()
 # pdftops
 set(pdftops_SOURCES ${common_srcs}
   pdftops.cc
+  sanitychecks.cc
 )
 add_executable(pdftops ${pdftops_SOURCES})
 target_link_libraries(pdftops ${common_libs})

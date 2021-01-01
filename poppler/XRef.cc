@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2010 William Bader <william@newspapersystems.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,6 +46,7 @@
 #include <cctype>
 #include <climits>
 #include <cfloat>
+#include <limits>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Object.h"
@@ -793,8 +795,13 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             gen = (gen << 8) + c;
         }
         if (gen > INT_MAX) {
-            error(errSyntaxError, -1, "Gen inside xref table too large (bigger than INT_MAX)");
-            return false;
+            if (i == 0 && gen == std::numeric_limits<uint32_t>::max()) {
+                // workaround broken generators
+                gen = 65535;
+            } else {
+                error(errSyntaxError, -1, "Gen inside xref table too large (bigger than INT_MAX)");
+                return false;
+            }
         }
         if (entries[i].offset == -1) {
             switch (type) {
@@ -1208,6 +1215,21 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
 
 err:
     if (!xRefStream && !xrefReconstructed) {
+        // Check if there has been any updated object, if there has been we can't reconstruct because that would mean losing the changes
+        bool xrefHasChanges = false;
+        for (int i = 0; i < size; i++) {
+            if (entries[i].getFlag(XRefEntry::Updated)) {
+                xrefHasChanges = true;
+                break;
+            }
+        }
+        if (xrefHasChanges) {
+            error(errInternal, -1, "xref num {0:d} not found but needed, document has changes, reconstruct aborted\n", num);
+            // pretend we constructed the xref, otherwise we will do this check again and again
+            xrefReconstructed = true;
+            return Object(objNull);
+        }
+
         error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct\n", num);
         rootNum = -1;
         constructXRef(&xrefReconstructed);

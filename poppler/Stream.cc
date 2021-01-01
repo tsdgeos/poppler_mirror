@@ -24,7 +24,7 @@
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011, 2012, 2016, 2020 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012, 2013, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
+// Copyright (C) 2012, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2013, 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
@@ -141,6 +141,25 @@ char *Stream::getLine(char *buf, int size)
     }
     buf[i] = '\0';
     return buf;
+}
+
+unsigned int Stream::discardChars(unsigned int n)
+{
+    unsigned char buf[4096];
+    unsigned int count, i, j;
+
+    count = 0;
+    while (count < n) {
+        if ((i = n - count) > sizeof(buf)) {
+            i = (unsigned int)sizeof(buf);
+        }
+        j = (unsigned int)doGetChars((int)i, buf);
+        count += j;
+        if (j != i) {
+            break;
+        }
+    }
+    return count;
 }
 
 GooString *Stream::getPSFilter(int psLevel, const char *indent)

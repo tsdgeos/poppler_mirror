@@ -150,6 +150,18 @@ is given then \-processcolorformat is inferred from the specified ICC profile.
 .BI \-processcolorprofile " filename"
 Sets the ICC profile that is assumed during rasterization and transparency reduction.
 .TP
+.BI \-defaultgrayprofile " defaultgrayprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultGray color space
+to the ICC profile stored in defaultgrayprofilefile.
+.TP
+.BI \-defaultrgbprofile " defaultrgbprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultRGB color space
+to the ICC profile stored in defaultrgbprofilefile.
+.TP
+.BI \-defaultcmykprofile " defaultcmykprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultCMYK color space
+to the ICC profile stored in defaultcmykprofilefile.
+.TP
 .B \-optimizecolorspace
 By default, bitmap images in the PDF pass through to the output PostScript
 in their original color space, which produces predictable results.

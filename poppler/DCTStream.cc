@@ -5,13 +5,14 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright 2005-2010, 2012, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2010, 2012, 2017, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2009 Ryszard Trojnacki <rysiek@menel.com>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2011 Tomas Hoger <thoger@redhat.com>
 // Copyright 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 //
 //========================================================================
 
@@ -183,49 +184,45 @@ void DCTStream::reset()
     }
 }
 
-// we can not go with inline since gcc
-// refuses to inline because of setjmp
-#define DO_GET_CHAR                                                                                                                                                                                                                            \
-    if (current == limit) {                                                                                                                                                                                                                    \
-        if (cinfo.output_scanline < cinfo.output_height) {                                                                                                                                                                                     \
-            if (!setjmp(err.setjmp_buffer)) {                                                                                                                                                                                                  \
-                if (!jpeg_read_scanlines(&cinfo, row_buffer, 1))                                                                                                                                                                               \
-                    c = EOF;                                                                                                                                                                                                                   \
-                else {                                                                                                                                                                                                                         \
-                    current = &row_buffer[0][0];                                                                                                                                                                                               \
-                    limit = &row_buffer[0][(cinfo.output_width - 1) * cinfo.output_components] + cinfo.output_components;                                                                                                                      \
-                    c = *current;                                                                                                                                                                                                              \
-                    ++current;                                                                                                                                                                                                                 \
-                }                                                                                                                                                                                                                              \
-            } else                                                                                                                                                                                                                             \
-                c = EOF;                                                                                                                                                                                                                       \
-        } else                                                                                                                                                                                                                                 \
-            c = EOF;                                                                                                                                                                                                                           \
-    } else {                                                                                                                                                                                                                                   \
-        c = *current;                                                                                                                                                                                                                          \
-        ++current;                                                                                                                                                                                                                             \
-    }
+bool DCTStream::readLine()
+{
+    if (cinfo.output_scanline < cinfo.output_height) {
+        if (!setjmp(err.setjmp_buffer)) {
+            if (!jpeg_read_scanlines(&cinfo, row_buffer, 1))
+                return false;
+            else {
+                current = &row_buffer[0][0];
+                limit = &row_buffer[0][(cinfo.output_width - 1) * cinfo.output_components] + cinfo.output_components;
+                return true;
+            }
+        } else
+            return false;
+    } else
+        return false;
+}
 
 int DCTStream::getChar()
 {
-    int c;
+    if (current == limit)
+        if (!readLine())
+            return EOF;
 
-    DO_GET_CHAR
-
-    return c;
+    return *current++;
 }
 
 int DCTStream::getChars(int nChars, unsigned char *buffer)
 {
-    // Use volatile to prevent the compiler optimizing
-    // variables into registers. See setjmp man page.
-    volatile int i, c;
-    for (i = 0; i < nChars; ++i) {
-        DO_GET_CHAR
-        if (likely(c != EOF))
-            buffer[i] = c;
-        else
-            return i;
+    for (int i = 0; i < nChars;) {
+        if (current == limit) {
+            if (!readLine())
+                return i;
+        }
+        int left = limit - current;
+        if (left + i > nChars)
+            left = nChars - i;
+        memcpy(buffer + i, current, left);
+        current += left;
+        i += left;
     }
     return nChars;
 }

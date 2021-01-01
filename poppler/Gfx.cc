@@ -1315,7 +1315,7 @@ void Gfx::opSetFillGray(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceGrayColorSpace();
+        colorSpace = state->copyDefaultGrayColorSpace();
     }
     state->setFillColorSpace(colorSpace);
     out->updateFillColorSpace(state);
@@ -1335,7 +1335,7 @@ void Gfx::opSetStrokeGray(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceGrayColorSpace();
+        colorSpace = state->copyDefaultGrayColorSpace();
     }
     state->setStrokeColorSpace(colorSpace);
     out->updateStrokeColorSpace(state);
@@ -1355,7 +1355,7 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceCMYKColorSpace();
+        colorSpace = state->copyDefaultCMYKColorSpace();
     }
     state->setFillPattern(nullptr);
     state->setFillColorSpace(colorSpace);
@@ -1379,7 +1379,7 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceCMYKColorSpace();
+        colorSpace = state->copyDefaultCMYKColorSpace();
     }
     state->setStrokeColorSpace(colorSpace);
     out->updateStrokeColorSpace(state);
@@ -1402,7 +1402,7 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceRGBColorSpace();
+        colorSpace = state->copyDefaultRGBColorSpace();
     }
     state->setFillColorSpace(colorSpace);
     out->updateFillColorSpace(state);
@@ -1425,7 +1425,7 @@ void Gfx::opSetStrokeRGBColor(Object args[], int numArgs)
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
     if (colorSpace == nullptr) {
-        colorSpace = new GfxDeviceRGBColorSpace();
+        colorSpace = state->copyDefaultRGBColorSpace();
     }
     state->setStrokeColorSpace(colorSpace);
     out->updateStrokeColorSpace(state);

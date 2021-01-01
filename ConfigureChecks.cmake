@@ -25,7 +25,6 @@ check_include_files(stdlib.h HAVE_STDLIB_H)
 check_include_files(sys/mman.h HAVE_SYS_MMAN_H)
 check_include_files(sys/stat.h HAVE_SYS_STAT_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
-check_include_file_cxx(codecvt HAVE_CODECVT)
 
 check_function_exists(fseek64 HAVE_FSEEK64)
 check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)

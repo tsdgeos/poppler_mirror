@@ -28,7 +28,7 @@
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -199,6 +199,11 @@ public:
 
     // Get next line from stream.
     virtual char *getLine(char *buf, int size);
+
+    // Discard the next <n> bytes from stream.  Returns the number of
+    // bytes discarded, which will be less than <n> only if EOF is
+    // reached.
+    virtual unsigned int discardChars(unsigned int n);
 
     // Get current position in file.
     virtual Goffset getPos() = 0;

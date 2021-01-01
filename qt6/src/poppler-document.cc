@@ -16,6 +16,8 @@
  * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -781,9 +783,12 @@ Document::FormType Document::formType() const
 
 QVector<int> Document::formCalculateOrder() const
 {
-    QVector<int> result;
-
     Form *form = m_doc->doc->getCatalog()->getForm();
+    if (!form) {
+        return {};
+    }
+
+    QVector<int> result;
     const std::vector<Ref> &calculateOrder = form->getCalculateOrder();
     for (Ref r : calculateOrder) {
         FormWidget *w = form->findWidgetByRef(r);
