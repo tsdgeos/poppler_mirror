@@ -106,6 +106,7 @@ private:
     Stream *curStr;
     unsigned char *dataPtr;
     unsigned char *dataEnd;
+    unsigned int byteCounter;
 
     JArithmeticDecoder *arithDecoder;
     JArithmeticDecoderStats *genericRegionStats;

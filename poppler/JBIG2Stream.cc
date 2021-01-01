@@ -198,15 +198,20 @@ public:
     // Sort the table by prefix length and assign prefix values.
     static bool buildTable(JBIG2HuffmanTable *table, unsigned int len);
 
+    void resetByteCounter() { byteCounter = 0; }
+    unsigned int getByteCounter() const { return byteCounter; }
+
 private:
     Stream *str;
     unsigned int buf;
     unsigned int bufLen;
+    unsigned int byteCounter;
 };
 
 JBIG2HuffmanDecoder::JBIG2HuffmanDecoder()
 {
     str = nullptr;
+    byteCounter = 0;
     reset();
 }
 
@@ -263,10 +268,12 @@ unsigned int JBIG2HuffmanDecoder::readBits(unsigned int n)
         bufLen = 0;
         while (nLeft >= 8) {
             x = (x << 8) | (str->getChar() & 0xff);
+            ++byteCounter;
             nLeft -= 8;
         }
         if (nLeft > 0) {
             buf = str->getChar();
+            ++byteCounter;
             bufLen = 8 - nLeft;
             x = (x << nLeft) | ((buf >> bufLen) & ((1 << nLeft) - 1));
         }
@@ -278,6 +285,7 @@ unsigned int JBIG2HuffmanDecoder::readBit()
 {
     if (bufLen == 0) {
         buf = str->getChar();
+        ++byteCounter;
         bufLen = 8;
     }
     --bufLen;
@@ -349,6 +357,8 @@ public:
     int getBlackCode();
     int getWhiteCode();
     unsigned int get24Bits();
+    void resetByteCounter() { byteCounter = 0; }
+    unsigned int getByteCounter() const { return byteCounter; }
     void skipTo(unsigned int length);
 
 private:
@@ -356,11 +366,13 @@ private:
     unsigned int buf;
     unsigned int bufLen;
     unsigned int nBytesRead;
+    unsigned int byteCounter;
 };
 
 JBIG2MMRDecoder::JBIG2MMRDecoder()
 {
     str = nullptr;
+    byteCounter = 0;
     reset();
 }
 
@@ -381,6 +393,7 @@ int JBIG2MMRDecoder::get2DCode()
         buf = str->getChar() & 0xff;
         bufLen = 8;
         ++nBytesRead;
+        ++byteCounter;
         p = &twoDimTab1[(buf >> 1) & 0x7f];
     } else if (bufLen == 8) {
         p = &twoDimTab1[(buf >> 1) & 0x7f];
@@ -390,6 +403,7 @@ int JBIG2MMRDecoder::get2DCode()
             buf = (buf << 8) | (str->getChar() & 0xff);
             bufLen += 8;
             ++nBytesRead;
+            ++byteCounter;
             p = &twoDimTab1[(buf >> (bufLen - 7)) & 0x7f];
         }
     }
@@ -410,6 +424,7 @@ int JBIG2MMRDecoder::getWhiteCode()
         buf = str->getChar() & 0xff;
         bufLen = 8;
         ++nBytesRead;
+        ++byteCounter;
     }
     while (true) {
         if (bufLen >= 11 && ((buf >> (bufLen - 7)) & 0x7f) == 0) {
@@ -437,6 +452,7 @@ int JBIG2MMRDecoder::getWhiteCode()
         buf = (buf << 8) | (str->getChar() & 0xff);
         bufLen += 8;
         ++nBytesRead;
+        ++byteCounter;
     }
     error(errSyntaxError, str->getPos(), "Bad white code in JBIG2 MMR stream");
     // eat a bit and return a positive number so that the caller doesn't
@@ -454,6 +470,7 @@ int JBIG2MMRDecoder::getBlackCode()
         buf = str->getChar() & 0xff;
         bufLen = 8;
         ++nBytesRead;
+        ++byteCounter;
     }
     while (true) {
         if (bufLen >= 10 && ((buf >> (bufLen - 6)) & 0x3f) == 0) {
@@ -491,6 +508,7 @@ int JBIG2MMRDecoder::getBlackCode()
         buf = (buf << 8) | (str->getChar() & 0xff);
         bufLen += 8;
         ++nBytesRead;
+        ++byteCounter;
     }
     error(errSyntaxError, str->getPos(), "Bad black code in JBIG2 MMR stream");
     // eat a bit and return a positive number so that the caller doesn't
@@ -505,16 +523,16 @@ unsigned int JBIG2MMRDecoder::get24Bits()
         buf = (buf << 8) | (str->getChar() & 0xff);
         bufLen += 8;
         ++nBytesRead;
+        ++byteCounter;
     }
     return (buf >> (bufLen - 24)) & 0xffffff;
 }
 
 void JBIG2MMRDecoder::skipTo(unsigned int length)
 {
-    while (nBytesRead < length) {
-        str->getChar();
-        ++nBytesRead;
-    }
+    int n = str->discardChars(length - nBytesRead);
+    nBytesRead += n;
+    byteCounter += n;
 }
 
 //------------------------------------------------------------------------
@@ -1240,7 +1258,6 @@ void JBIG2Stream::readSegments()
     unsigned int segNum, segFlags, segType, page, segLength;
     unsigned int refFlags, nRefSegs;
     unsigned int *refSegs;
-    Goffset segDataPos;
     int c1, c2, c3;
 
     bool done = false;
@@ -1309,9 +1326,6 @@ void JBIG2Stream::readSegments()
             goto eofError2;
         }
 
-        // keep track of the start of the segment data
-        segDataPos = curStr->getPos();
-
         // check for missing page information segment
         if (!pageBitmap && ((segType >= 4 && segType <= 7) || (segType >= 20 && segType <= 43))) {
             error(errSyntaxError, curStr->getPos(), "First JBIG2 segment associated with a page must be a page information segment");
@@ -1319,6 +1333,10 @@ void JBIG2Stream::readSegments()
         }
 
         // read the segment data
+        arithDecoder->resetByteCounter();
+        huffDecoder->resetByteCounter();
+        mmrDecoder->resetByteCounter();
+        byteCounter = 0;
         switch (segType) {
         case 0:
             if (!readSymbolDictSeg(segNum, segLength, refSegs, nRefSegs)) {
@@ -1397,9 +1415,13 @@ void JBIG2Stream::readSegments()
         // segment data, unless this segment is marked as having an
         // unknown length (section 7.2.7 of the JBIG2 Final Committee Draft)
 
-        if (segLength != 0xffffffff) {
+        if (!(segType == 38 && segLength == 0xffffffff)) {
 
-            Goffset segExtraBytes = segDataPos + segLength - curStr->getPos();
+            byteCounter += arithDecoder->getByteCounter();
+            byteCounter += huffDecoder->getByteCounter();
+            byteCounter += mmrDecoder->getByteCounter();
+
+            Goffset segExtraBytes = segLength - byteCounter;
             if (segExtraBytes > 0) {
 
                 // If we didn't read all of the bytes in the segment data,
@@ -1412,21 +1434,15 @@ void JBIG2Stream::readSegments()
 
                 error(errSyntaxError, curStr->getPos(), "{0:lld} extraneous byte{1:s} after segment", segExtraBytes, (segExtraBytes > 1) ? "s" : "");
 
-                // Burn through the remaining bytes -- inefficient, but
-                // hopefully we're not doing this much
-
-                int trash;
-                for (Goffset i = segExtraBytes; i > 0; i--) {
-                    readByte(&trash);
-                }
-
-            } else if (segExtraBytes < 0) {
+            } else if (segExtraBytes < 0 || segLength - byteCounter > 65536) {
 
                 // If we read more bytes than we should have, according to the
                 // segment length field, note an error.
 
                 error(errSyntaxError, curStr->getPos(), "Previous segment handler read too many bytes");
+                goto syntaxError;
             }
+            byteCounter += curStr->discardChars(segExtraBytes);
         }
 
         gfree(refSegs);
@@ -3862,26 +3878,14 @@ eofError:
 
 void JBIG2Stream::readEndOfStripeSeg(unsigned int length)
 {
-    unsigned int i;
-
     // skip the segment
-    for (i = 0; i < length; ++i) {
-        if (curStr->getChar() == EOF) {
-            break;
-        }
-    }
+    byteCounter += curStr->discardChars(length);
 }
 
 void JBIG2Stream::readProfilesSeg(unsigned int length)
 {
-    unsigned int i;
-
     // skip the segment
-    for (i = 0; i < length; ++i) {
-        if (curStr->getChar() == EOF) {
-            break;
-        }
-    }
+    byteCounter += curStr->discardChars(length);
 }
 
 void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length)
@@ -3965,14 +3969,8 @@ oomError:
 
 void JBIG2Stream::readExtensionSeg(unsigned int length)
 {
-    unsigned int i;
-
     // skip the segment
-    for (i = 0; i < length; ++i) {
-        if (curStr->getChar() == EOF) {
-            break;
-        }
-    }
+    byteCounter += curStr->discardChars(length);
 }
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)
@@ -4091,6 +4089,7 @@ bool JBIG2Stream::readUByte(unsigned int *x)
     if ((c0 = curStr->getChar()) == EOF) {
         return false;
     }
+    ++byteCounter;
     *x = (unsigned int)c0;
     return true;
 }
@@ -4102,6 +4101,7 @@ bool JBIG2Stream::readByte(int *x)
     if ((c0 = curStr->getChar()) == EOF) {
         return false;
     }
+    ++byteCounter;
     *x = c0;
     if (c0 & 0x80) {
         *x |= -1 - 0xff;
@@ -4116,6 +4116,7 @@ bool JBIG2Stream::readUWord(unsigned int *x)
     if ((c0 = curStr->getChar()) == EOF || (c1 = curStr->getChar()) == EOF) {
         return false;
     }
+    byteCounter += 2;
     *x = (unsigned int)((c0 << 8) | c1);
     return true;
 }
@@ -4127,6 +4128,7 @@ bool JBIG2Stream::readULong(unsigned int *x)
     if ((c0 = curStr->getChar()) == EOF || (c1 = curStr->getChar()) == EOF || (c2 = curStr->getChar()) == EOF || (c3 = curStr->getChar()) == EOF) {
         return false;
     }
+    byteCounter += 4;
     *x = (unsigned int)((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
     return true;
 }
@@ -4138,6 +4140,7 @@ bool JBIG2Stream::readLong(int *x)
     if ((c0 = curStr->getChar()) == EOF || (c1 = curStr->getChar()) == EOF || (c2 = curStr->getChar()) == EOF || (c3 = curStr->getChar()) == EOF) {
         return false;
     }
+    byteCounter += 4;
     *x = ((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
     if (c0 & 0x80) {
         *x |= -1 - (int)0xffffffff;

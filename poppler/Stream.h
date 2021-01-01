@@ -200,6 +200,11 @@ public:
     // Get next line from stream.
     virtual char *getLine(char *buf, int size);
 
+    // Discard the next <n> bytes from stream.  Returns the number of
+    // bytes discarded, which will be less than <n> only if EOF is
+    // reached.
+    virtual unsigned int discardChars(unsigned int n);
+
     // Get current position in file.
     virtual Goffset getPos() = 0;
 

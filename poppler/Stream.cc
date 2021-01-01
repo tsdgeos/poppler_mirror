@@ -143,6 +143,25 @@ char *Stream::getLine(char *buf, int size)
     return buf;
 }
 
+unsigned int Stream::discardChars(unsigned int n)
+{
+    unsigned char buf[4096];
+    unsigned int count, i, j;
+
+    count = 0;
+    while (count < n) {
+        if ((i = n - count) > sizeof(buf)) {
+            i = (unsigned int)sizeof(buf);
+        }
+        j = (unsigned int)doGetChars((int)i, buf);
+        count += j;
+        if (j != i) {
+            break;
+        }
+    }
+    return count;
+}
+
 GooString *Stream::getPSFilter(int psLevel, const char *indent)
 {
     return new GooString();
