@@ -496,14 +496,17 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 #ifdef ENABLE_NSS3
 // update hash with the specified range of data from the file
-static void hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Goffset end)
+static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Goffset end)
 {
     const int BUF_SIZE = 65536;
 
     unsigned char *buf = new unsigned char[BUF_SIZE];
 
     while (start < end) {
-        Gfseek(f, start, SEEK_SET);
+        if (Gfseek(f, start, SEEK_SET) != 0) {
+            delete[] buf;
+            return false;
+        }
         int len = BUF_SIZE;
         if (end - start < len)
             len = end - start;
@@ -512,6 +515,7 @@ static void hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
         start += len;
     }
     delete[] buf;
+    return true;
 }
 #endif
 
@@ -570,8 +574,14 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // compute hash of byte ranges
     sigHandler.restartHash();
-    hashFileRange(file, &sigHandler, 0LL, sigStart);
-    hashFileRange(file, &sigHandler, sigEnd, fileSize);
+    if (!hashFileRange(file, &sigHandler, 0LL, sigStart)) {
+        fclose(file);
+        return false;
+    }
+    if (!hashFileRange(file, &sigHandler, sigEnd, fileSize)) {
+        fclose(file);
+        return false;
+    }
 
     // and sign it
     const std::unique_ptr<GooString> signature = sigHandler.signDetached(password);
@@ -634,7 +644,9 @@ static char *setNextOffset(char *start, Goffset offset)
 // Returns start/end of signature string and file size.
 bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize)
 {
-    Gfseek(f, 0, SEEK_END);
+    if (Gfseek(f, 0, SEEK_END) != 0) {
+        return false;
+    }
     *fileSize = Gftell(f);
 
     if (objEnd > *fileSize)
@@ -646,7 +658,9 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
     }
 
     int bufSize = static_cast<int>(objEnd - objStart);
-    Gfseek(f, objStart, SEEK_SET);
+    if (Gfseek(f, objStart, SEEK_SET) != 0) {
+        return false;
+    }
     std::vector<char> buf(bufSize + 1);
     fread(buf.data(), bufSize, 1, f);
     buf[bufSize] = 0; // prevent string functions from searching past the end
@@ -686,7 +700,9 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
     }
 
     // write buffer back to disk
-    Gfseek(f, objStart, SEEK_SET);
+    if (Gfseek(f, objStart, SEEK_SET) != 0) {
+        return false;
+    }
     fwrite(buf.data(), bufSize, 1, f);
     return true;
 }
@@ -697,7 +713,9 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     if (signature->getLength() * 2 + 2 != sigEnd - sigStart)
         return false;
 
-    Gfseek(f, sigStart, SEEK_SET);
+    if (Gfseek(f, sigStart, SEEK_SET) != 0) {
+        return false;
+    }
     const char *c = signature->c_str();
     fprintf(f, "<");
     for (int i = 0; i < signature->getLength(); i++) {
