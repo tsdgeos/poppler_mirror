@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -483,7 +483,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
     for (i = 0; i < 6; ++i) {
         baseMatrix[i] = state->getCTM()[i];
     }
-    formDepth = 0;
+    displayDepth = 0;
     ocState = true;
     parser = nullptr;
     abortCheckCbk = abortCheckCbkA;
@@ -544,7 +544,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
     for (i = 0; i < 6; ++i) {
         baseMatrix[i] = state->getCTM()[i];
     }
-    formDepth = 0;
+    displayDepth = 0;
     ocState = true;
     parser = nullptr;
     abortCheckCbk = abortCheckCbkA;
@@ -622,10 +622,13 @@ Gfx::~Gfx()
 
 void Gfx::display(Object *obj, bool topLevel)
 {
-    int i;
+    // check for excessive recursion
+    if (displayDepth > 100) {
+        return;
+    }
 
     if (obj->isArray()) {
-        for (i = 0; i < obj->arrayGetLength(); ++i) {
+        for (int i = 0; i < obj->arrayGetLength(); ++i) {
             Object obj2 = obj->arrayGet(i);
             if (!obj2.isStream()) {
                 error(errSyntaxError, -1, "Weird page contents");
@@ -1236,11 +1239,6 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     Object obj1;
     int i;
 
-    // check for excessive recursion
-    if (formDepth > 20) {
-        return;
-    }
-
     // get stream dict
     dict = str->streamGetDict();
 
@@ -1290,9 +1288,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     resDict = obj1.isDict() ? obj1.getDict() : nullptr;
 
     // draw it
-    ++formDepth;
     drawForm(str, resDict, m, bbox, true, true, blendingColorSpace, isolated, knockout, alpha, transferFunc, backdropColor);
-    --formDepth;
 }
 
 void Gfx::opSetRenderingIntent(Object args[], int numArgs)
@@ -3920,7 +3916,9 @@ void Gfx::doShowText(const GooString *s)
                         }
                     }
                     if (displayCharProc) {
+                        ++displayDepth;
                         display(&charProc, false);
+                        --displayDepth;
 
                         if (refNum != -1) {
                             charProcDrawing.erase(charProcDrawingIt);
@@ -4604,11 +4602,6 @@ void Gfx::doForm(Object *str)
     Object obj1;
     int i;
 
-    // check for excessive recursion
-    if (formDepth > 100) {
-        return;
-    }
-
     // get stream dict
     dict = str->streamGetDict();
 
@@ -4693,9 +4686,7 @@ void Gfx::doForm(Object *str)
     }
 
     // draw it
-    ++formDepth;
     drawForm(str, resDict, m, bbox, transpGroup, false, blendingColorSpace, isolated, knockout);
-    --formDepth;
 
     if (blendingColorSpace) {
         delete blendingColorSpace;
@@ -4764,7 +4755,9 @@ void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const doubl
     GfxState *stateBefore = state;
 
     // draw the form
+    ++displayDepth;
     display(str, false);
+    --displayDepth;
 
     if (stateBefore != state) {
         if (state->isParentState(stateBefore)) {
