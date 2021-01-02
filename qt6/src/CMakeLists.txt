@@ -37,7 +37,7 @@ set(poppler_qt6_SRCS
   poppler-version.cpp
 )
 add_library(poppler-qt6 ${poppler_qt6_SRCS})
-set_target_properties(poppler-qt6 PROPERTIES VERSION 1.0.0 SOVERSION 1)
+set_target_properties(poppler-qt6 PROPERTIES VERSION 1.1.0 SOVERSION 1)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_QT6_SOVERSION poppler-qt6 SOVERSION)
     set_target_properties(poppler-qt6 PROPERTIES SUFFIX "-${POPPLER_QT6_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
