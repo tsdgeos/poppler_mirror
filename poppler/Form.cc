@@ -564,6 +564,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     FILE *file = openFile(saveFilename, "r+b");
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
         fprintf(stderr, "signDocument: unable update byte range\n");
+        fclose(file);
         return false;
     }
 
@@ -574,12 +575,15 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // and sign it
     const std::unique_ptr<GooString> signature = sigHandler.signDetached(password);
-    if (!signature)
+    if (!signature) {
+        fclose(file);
         return false;
+    }
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, signature.get())) {
         fprintf(stderr, "signDocument: unable update signature\n");
+        fclose(file);
         return false;
     }
     signatureField->setSignature(*signature);
