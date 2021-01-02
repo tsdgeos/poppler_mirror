@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -549,6 +549,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     GooString *fname = new GooString(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
+        delete fname;
         return false;
     }
 
