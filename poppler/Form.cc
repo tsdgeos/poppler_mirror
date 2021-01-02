@@ -643,10 +643,8 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
 
     int bufSize = static_cast<int>(objEnd - objStart);
     Gfseek(f, objStart, SEEK_SET);
-    char *buf = (char *)gmalloc_checkoverflow(bufSize + 1);
-    if (!buf)
-        return false;
-    fread(buf, bufSize, 1, f);
+    std::vector<char> buf(bufSize + 1);
+    fread(buf.data(), bufSize, 1, f);
     buf[bufSize] = 0; // prevent string functions from searching past the end
 
     // search for the Contents field which contains the signature
@@ -658,7 +656,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
             *sigStart = objStart + i + 10;
             char *p = strchr(&buf[i], '>');
             if (p)
-                *sigEnd = objStart + (p - buf) + 1;
+                *sigEnd = objStart + (p - buf.data()) + 1;
             break;
         }
     }
@@ -685,8 +683,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
 
     // write buffer back to disk
     Gfseek(f, objStart, SEEK_SET);
-    fwrite(buf, bufSize, 1, f);
-    free(buf);
+    fwrite(buf.data(), bufSize, 1, f);
     return true;
 }
 
