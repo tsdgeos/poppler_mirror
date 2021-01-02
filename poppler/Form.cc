@@ -510,7 +510,9 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
         int len = BUF_SIZE;
         if (end - start < len)
             len = end - start;
-        fread(buf, len, 1, f);
+        if (fread(buf, 1, len, f) != static_cast<size_t>(len)) {
+            return false;
+        }
         handler->updateHash(buf, len);
         start += len;
     }
@@ -657,19 +659,21 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
     }
 
-    int bufSize = static_cast<int>(objEnd - objStart);
+    const size_t bufSize = static_cast<int>(objEnd - objStart);
     if (Gfseek(f, objStart, SEEK_SET) != 0) {
         return false;
     }
     std::vector<char> buf(bufSize + 1);
-    fread(buf.data(), bufSize, 1, f);
+    if (fread(buf.data(), 1, bufSize, f) != bufSize) {
+        return false;
+    }
     buf[bufSize] = 0; // prevent string functions from searching past the end
 
     // search for the Contents field which contains the signature
     // which always must start with hex digits 308
     *sigStart = -1;
     *sigEnd = -1;
-    for (int i = 0; i < bufSize - 14; i++) {
+    for (size_t i = 0; i < bufSize - 14; i++) {
         if (buf[i] == '/' && strncmp(&buf[i], "/Contents <308", 14) == 0) {
             *sigStart = objStart + i + 10;
             char *p = strchr(&buf[i], '>');
@@ -683,7 +687,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
 
     // Search for ByteRange array and update offsets
-    for (int i = 0; i < bufSize - 10; i++) {
+    for (size_t i = 0; i < bufSize - 10; i++) {
         if (buf[i] == '/' && strncmp(&buf[i], "/ByteRange", 10) == 0) {
             // update range
             char *p = setNextOffset(&buf[i], *sigStart);
