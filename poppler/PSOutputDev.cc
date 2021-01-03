@@ -1185,7 +1185,11 @@ static const StandardMedia standardMedia[] = { { "A0", 2384, 3371 },      { "A1"
 /* PLRM specifies a tolerance of 5 points when matching page sizes */
 static bool pageDimensionEqual(int a, int b)
 {
-    return (abs(a - b) < 5);
+    int aux;
+    if (unlikely(checkedSubtraction(a, b, &aux))) {
+        return false;
+    }
+    return (abs(aux) < 5);
 }
 
 // Shared initialization of PSOutputDev members.
@@ -3676,7 +3680,10 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         y1 = (int)floor(state->getY1());
         x2 = (int)ceil(state->getX2());
         y2 = (int)ceil(state->getY2());
-        width = x2 - x1;
+        if (unlikely(checkedSubtraction(x2, x1, &width))) {
+            error(errSyntaxError, -1, "width too big");
+            return;
+        }
         height = y2 - y1;
         tx = ty = 0;
         // rotation and portrait/landscape mode
