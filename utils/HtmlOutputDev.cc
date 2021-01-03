@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -819,7 +819,7 @@ int HtmlPage::dumpComplexHeaders(FILE *const file, FILE *&pageFile, int page)
         }
 
         if (!pageFile) {
-            error(errIO, -1, "Couldn't open html file '{0:t}'", pageFileName.c_str());
+            error(errIO, -1, "Couldn't open html file '{0:s}'", pageFileName.c_str());
             return 1;
         }
 
