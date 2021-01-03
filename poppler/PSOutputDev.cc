@@ -1541,6 +1541,7 @@ PSOutputDev::~PSOutputDev()
         delete cc;
     }
     gfree(psTitle);
+    delete t3String;
 }
 
 void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
