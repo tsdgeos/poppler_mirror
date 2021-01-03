@@ -196,7 +196,11 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
                 str = makeFilter(obj2.getName(), str, &params2, recursion);
             } else {
                 error(errSyntaxError, getPos(), "Bad filter name");
-                str = new EOFStream(str);
+                if (dynamic_cast<EOFStream *>(str)) {
+                    // str is already a EOFStream, no need to wrap it in another EOFStream
+                } else {
+                    str = new EOFStream(str);
+                }
             }
         }
     } else if (!obj.isNull()) {
