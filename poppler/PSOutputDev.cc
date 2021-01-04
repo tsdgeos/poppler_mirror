@@ -3734,6 +3734,10 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
             xScale = xScale0;
             yScale = yScale0;
         } else if ((globalParams->getPSShrinkLarger() && (width > imgWidth2 || height > imgHeight2)) || (globalParams->getPSExpandSmaller() && (width < imgWidth2 && height < imgHeight2))) {
+            if (unlikely(width == 0)) {
+                error(errSyntaxError, -1, "width 0, xScale would be infinite");
+                return;
+            }
             xScale = (double)imgWidth2 / (double)width;
             yScale = (double)imgHeight2 / (double)height;
             if (yScale < xScale) {
