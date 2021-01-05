@@ -1433,9 +1433,11 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
                     charBuf->append((char)8);
                 }
-                cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                charBuf->append((char)5);
+                if (likely(k + 1 < nOps)) {
+                    cvtNum(ops[k].num, ops[k].isFP, charBuf);
+                    cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
+                    charBuf->append((char)5);
+                }
                 nOps = 0;
                 openPath = true;
                 break;
