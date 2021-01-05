@@ -167,6 +167,16 @@ GooString *Stream::getPSFilter(int psLevel, const char *indent)
     return new GooString();
 }
 
+static Stream *wrapEOFStream(Stream *str)
+{
+    if (dynamic_cast<EOFStream *>(str)) {
+        // str is already a EOFStream, no need to wrap it in another EOFStream
+        return str;
+    } else {
+        return new EOFStream(str);
+    }
+}
+
 Stream *Stream::addFilters(Dict *dict, int recursion)
 {
     Object obj, obj2;
@@ -196,11 +206,7 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
                 str = makeFilter(obj2.getName(), str, &params2, recursion);
             } else {
                 error(errSyntaxError, getPos(), "Bad filter name");
-                if (dynamic_cast<EOFStream *>(str)) {
-                    // str is already a EOFStream, no need to wrap it in another EOFStream
-                } else {
-                    str = new EOFStream(str);
-                }
+                str = wrapEOFStream(str);
             }
         }
     } else if (!obj.isNull()) {
@@ -342,7 +348,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new DCTStream(str, colorXform, dict, recursion);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
         pred = 1;
@@ -377,7 +383,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new JPXStream(str);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "Crypt")) {
         if (str->getKind() == strCrypt) {
@@ -387,7 +393,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
     } else {
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
     }
     return str;
 }
