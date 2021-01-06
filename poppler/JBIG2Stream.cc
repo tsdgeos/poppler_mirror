@@ -2221,7 +2221,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
     } else {
         arithDecoder->decodeInt(&t, iadtStats);
     }
-    t *= -(int)strips;
+
+    if (checkedMultiply(t, -(int)strips, &t)) {
+        return {};
+    }
 
     inst = 0;
     sFirst = 0;
