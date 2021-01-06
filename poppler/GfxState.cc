@@ -1715,6 +1715,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     obj1 = arr->get(1);
     if (!obj1.isStream()) {
         error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
+        delete cs;
         return nullptr;
     }
     unsigned char *profBuf;
