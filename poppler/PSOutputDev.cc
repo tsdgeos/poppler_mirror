@@ -7098,6 +7098,7 @@ void PSOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, dou
     t3LLY = lly;
     t3URX = urx;
     t3URY = ury;
+    delete t3String;
     t3String = new GooString();
     writePS("q\n");
     t3FillColorOnly = true;
