@@ -2932,6 +2932,11 @@ void GfxDeviceNColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 
 void GfxDeviceNColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
 {
+    if (unlikely(nComps < func->getInputSize() || alt->getNComps() > func->getOutputSize())) {
+        rgb->r = rgb->g = rgb->b = 0;
+        return;
+    }
+
     double x[gfxColorMaxComps], c[gfxColorMaxComps];
     GfxColor color2;
     int i;
