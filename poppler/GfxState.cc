@@ -4900,6 +4900,15 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
         }
     }
 
+    for (unsigned int k = 0; k < funcsA.size(); ++k) {
+        if (funcsA[k]->getInputSize() > 1) {
+            return nullptr;
+        }
+        if (funcsA[k]->getOutputSize() > static_cast<int>(gfxColorMaxComps - k)) {
+            return nullptr;
+        }
+    }
+
     nPatchesA = 0;
     patchesA = nullptr;
     patchesSize = 0;
