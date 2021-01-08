@@ -2903,7 +2903,10 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
             }
         }
     }
-    return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
+
+    if (likely(nCompsA >= funcA->getInputSize() && altA->getNComps() <= funcA->getOutputSize())) {
+        return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
+    }
 
 err5:
     delete funcA;
@@ -2932,11 +2935,6 @@ void GfxDeviceNColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 
 void GfxDeviceNColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
 {
-    if (unlikely(nComps < func->getInputSize() || alt->getNComps() > func->getOutputSize())) {
-        rgb->r = rgb->g = rgb->b = 0;
-        return;
-    }
-
     double x[gfxColorMaxComps], c[gfxColorMaxComps];
     GfxColor color2;
     int i;
