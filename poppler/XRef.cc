@@ -463,13 +463,14 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
     Object obj;
     bool more;
 
-    if (unlikely(start > (LLONG_MAX - *pos))) {
+    Goffset parsePos;
+    if (unlikely(checkedAdd(start, *pos, &parsePos))) {
         ok = false;
         return false;
     }
 
     // start up a parser, parse one token
-    parser = new Parser(nullptr, str->makeSubStream(start + *pos, false, 0, Object(objNull)), true);
+    parser = new Parser(nullptr, str->makeSubStream(parsePos, false, 0, Object(objNull)), true);
     obj = parser->getObj(true);
 
     // parse an old-style xref table
