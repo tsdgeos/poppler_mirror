@@ -1301,6 +1301,10 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             ++k;
         }
     }
+    if (unlikely(k < nNewTables)) {
+        error(errSyntaxWarning, -1, "unexpected number of tables");
+        nNewTables = k;
+    }
 
     // construct the table directory
     tableDir[0] = 0x00; // sfnt version
