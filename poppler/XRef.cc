@@ -468,6 +468,10 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
         ok = false;
         return false;
     }
+    if (parsePos < 0) {
+        ok = false;
+        return false;
+    }
 
     // start up a parser, parse one token
     parser = new Parser(nullptr, str->makeSubStream(parsePos, false, 0, Object(objNull)), true);
