@@ -1310,7 +1310,7 @@ void Gfx::opSetFillGray(Object args[], int numArgs)
     if (!obj.isNull()) {
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
-    if (colorSpace == nullptr || colorSpace->getNComps() != 1) {
+    if (colorSpace == nullptr || colorSpace->getNComps() > 1) {
         delete colorSpace;
         colorSpace = state->copyDefaultGrayColorSpace();
     }
