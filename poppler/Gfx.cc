@@ -1398,7 +1398,8 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs)
     if (!obj.isNull()) {
         colorSpace = GfxColorSpace::parse(res, &obj, out, state);
     }
-    if (colorSpace == nullptr) {
+    if (colorSpace == nullptr || colorSpace->getNComps() > 3) {
+        delete colorSpace;
         colorSpace = state->copyDefaultRGBColorSpace();
     }
     state->setFillColorSpace(colorSpace);
