@@ -1893,7 +1893,7 @@ inline void CCITTFaxStream::addPixelsNeg(int a1, int blackPixels)
         if (a1 < 0) {
             error(errSyntaxError, getPos(), "Invalid CCITTFax code");
             err = true;
-            a1 = 0;
+            a1 = columns;
         }
         while (a0i > 0 && a1 <= codingLine[a0i - 1]) {
             --a0i;
