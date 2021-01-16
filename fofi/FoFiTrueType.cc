@@ -1132,6 +1132,8 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     bool needVhea, needVmtx;
     int advance;
 
+    *maxUsedGlyph = -1;
+
     // construct the 'head' table, zero out the font checksum
     i = seekTable("head");
     if (i < 0 || i >= nTables) {
@@ -1182,7 +1184,6 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     locaTable[nGlyphs].len = 0;
     std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
     pos = 0;
-    *maxUsedGlyph = -1;
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].newOffset = pos;
         pos += locaTable[i].len;
