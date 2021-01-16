@@ -1,3 +1,29 @@
+Release 21.01.0:
+        core:
+         * Faster routines for jpeg decoding
+         * Fix reading signatures in encrypted files
+         * Add white point correction when lcms is used
+         * JBIG2Stream: Fix byte counting
+         * Fix potential data loss if we try to fetch a non existing Ref after modifying the document
+         * Specifically use DeviceGray instead of DefaultGray for softmasks
+         * Fix various issues handling broken files
+
+        utils:
+         * pdftocairo: Setmode binary for windows
+         * pdfsig: Add hability to digitally sign files
+         * pdftoppm: add options to set DeviceGray/DeviceRGB/DeviceCMYK
+         * pdftops: add options to set DeviceGray/DeviceRGB/DeviceCMYK
+         * pdfimages: Account for rotation in PPI calculation
+
+        qt5:
+         * Add hability to digitally sign files
+
+        qt6:
+         * Add hability to digitally sign files
+
+        build system:
+         * Enable clang-tidy bugprone-signed-char-misuse
+
 Release 20.12.1:
         core:
          * PSOutputDev: fixing regression in the rasterization code. Issue #1002

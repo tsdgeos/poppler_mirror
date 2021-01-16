@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -463,13 +463,18 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
     Object obj;
     bool more;
 
-    if (unlikely(start > (LLONG_MAX - *pos))) {
+    Goffset parsePos;
+    if (unlikely(checkedAdd(start, *pos, &parsePos))) {
+        ok = false;
+        return false;
+    }
+    if (parsePos < 0) {
         ok = false;
         return false;
     }
 
     // start up a parser, parse one token
-    parser = new Parser(nullptr, str->makeSubStream(start + *pos, false, 0, Object(objNull)), true);
+    parser = new Parser(nullptr, str->makeSubStream(parsePos, false, 0, Object(objNull)), true);
     obj = parser->getObj(true);
 
     // parse an old-style xref table

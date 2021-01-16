@@ -7,7 +7,7 @@
 	-Xclang -load -Xclang goostring-format-checker.so -Xclang -plugin -Xclang goostring-format-check
 
 Example:
-$ clang++ -shared -o goostring-format-checker.so goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS
+$ clang++ -fPIC -shared -o goostring-format-checker.so goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS
 $ export CXX=clang++
 $ export CXXFLAGS="-Xclang -load -Xclang $PWD/goostring-format-checker.so -Xclang -add-plugin -Xclang goostring-format-checker"
 $ mkdir build

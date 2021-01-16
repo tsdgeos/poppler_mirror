@@ -6,7 +6,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -72,12 +72,12 @@ static size_t load_cb(const char *ptr, size_t size, size_t nmemb, void *data)
 int CurlCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
 {
     CURLcode r = CURLE_OK;
-    size_t fromByte, toByte;
+    unsigned long long fromByte, toByte;
     for (const ByteRange &bRange : ranges) {
 
         fromByte = bRange.offset;
         toByte = fromByte + bRange.length - 1;
-        GooString *range = GooString::format("{0:ud}-{1:ud}", fromByte, toByte);
+        GooString *range = GooString::format("{0:ulld}-{1:ulld}", fromByte, toByte);
 
         curl_easy_setopt(curl, CURLOPT_URL, url->c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, load_cb);

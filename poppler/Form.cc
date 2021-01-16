@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -496,22 +496,28 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 #ifdef ENABLE_NSS3
 // update hash with the specified range of data from the file
-static void hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Goffset end)
+static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Goffset end)
 {
     const int BUF_SIZE = 65536;
 
     unsigned char *buf = new unsigned char[BUF_SIZE];
 
     while (start < end) {
-        Gfseek(f, start, SEEK_SET);
+        if (Gfseek(f, start, SEEK_SET) != 0) {
+            delete[] buf;
+            return false;
+        }
         int len = BUF_SIZE;
         if (end - start < len)
             len = end - start;
-        fread(buf, len, 1, f);
+        if (fread(buf, 1, len, f) != static_cast<size_t>(len)) {
+            return false;
+        }
         handler->updateHash(buf, len);
         start += len;
     }
     delete[] buf;
+    return true;
 }
 #endif
 
@@ -549,6 +555,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     GooString *fname = new GooString(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
+        delete fname;
         return false;
     }
 
@@ -563,22 +570,32 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     FILE *file = openFile(saveFilename, "r+b");
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
         fprintf(stderr, "signDocument: unable update byte range\n");
+        fclose(file);
         return false;
     }
 
     // compute hash of byte ranges
     sigHandler.restartHash();
-    hashFileRange(file, &sigHandler, 0LL, sigStart);
-    hashFileRange(file, &sigHandler, sigEnd, fileSize);
+    if (!hashFileRange(file, &sigHandler, 0LL, sigStart)) {
+        fclose(file);
+        return false;
+    }
+    if (!hashFileRange(file, &sigHandler, sigEnd, fileSize)) {
+        fclose(file);
+        return false;
+    }
 
     // and sign it
     const std::unique_ptr<GooString> signature = sigHandler.signDetached(password);
-    if (!signature)
+    if (!signature) {
+        fclose(file);
         return false;
+    }
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, signature.get())) {
         fprintf(stderr, "signDocument: unable update signature\n");
+        fclose(file);
         return false;
     }
     signatureField->setSignature(*signature);
@@ -629,7 +646,9 @@ static char *setNextOffset(char *start, Goffset offset)
 // Returns start/end of signature string and file size.
 bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize)
 {
-    Gfseek(f, 0, SEEK_END);
+    if (Gfseek(f, 0, SEEK_END) != 0) {
+        return false;
+    }
     *fileSize = Gftell(f);
 
     if (objEnd > *fileSize)
@@ -640,24 +659,26 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
     }
 
-    int bufSize = static_cast<int>(objEnd - objStart);
-    Gfseek(f, objStart, SEEK_SET);
-    char *buf = (char *)gmalloc_checkoverflow(bufSize + 1);
-    if (!buf)
+    const size_t bufSize = static_cast<int>(objEnd - objStart);
+    if (Gfseek(f, objStart, SEEK_SET) != 0) {
         return false;
-    fread(buf, bufSize, 1, f);
+    }
+    std::vector<char> buf(bufSize + 1);
+    if (fread(buf.data(), 1, bufSize, f) != bufSize) {
+        return false;
+    }
     buf[bufSize] = 0; // prevent string functions from searching past the end
 
     // search for the Contents field which contains the signature
     // which always must start with hex digits 308
     *sigStart = -1;
     *sigEnd = -1;
-    for (int i = 0; i < bufSize - 14; i++) {
+    for (size_t i = 0; i < bufSize - 14; i++) {
         if (buf[i] == '/' && strncmp(&buf[i], "/Contents <308", 14) == 0) {
             *sigStart = objStart + i + 10;
             char *p = strchr(&buf[i], '>');
             if (p)
-                *sigEnd = objStart + (p - buf) + 1;
+                *sigEnd = objStart + (p - buf.data()) + 1;
             break;
         }
     }
@@ -666,7 +687,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
 
     // Search for ByteRange array and update offsets
-    for (int i = 0; i < bufSize - 10; i++) {
+    for (size_t i = 0; i < bufSize - 10; i++) {
         if (buf[i] == '/' && strncmp(&buf[i], "/ByteRange", 10) == 0) {
             // update range
             char *p = setNextOffset(&buf[i], *sigStart);
@@ -683,9 +704,10 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
     }
 
     // write buffer back to disk
-    Gfseek(f, objStart, SEEK_SET);
-    fwrite(buf, bufSize, 1, f);
-    free(buf);
+    if (Gfseek(f, objStart, SEEK_SET) != 0) {
+        return false;
+    }
+    fwrite(buf.data(), bufSize, 1, f);
     return true;
 }
 
@@ -695,7 +717,9 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     if (signature->getLength() * 2 + 2 != sigEnd - sigStart)
         return false;
 
-    Gfseek(f, sigStart, SEEK_SET);
+    if (Gfseek(f, sigStart, SEEK_SET) != 0) {
+        return false;
+    }
     const char *c = signature->c_str();
     fprintf(f, "<");
     for (int i = 0; i < signature->getLength(); i++) {

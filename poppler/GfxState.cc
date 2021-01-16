@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -1713,6 +1713,11 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 
 #ifdef USE_CMS
     obj1 = arr->get(1);
+    if (!obj1.isStream()) {
+        error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
+        delete cs;
+        return nullptr;
+    }
     unsigned char *profBuf;
     Stream *iccStream = obj1.getStream();
     int length = 0;
@@ -2898,7 +2903,10 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
             }
         }
     }
-    return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
+
+    if (likely(nCompsA >= funcA->getInputSize() && altA->getNComps() <= funcA->getOutputSize())) {
+        return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
+    }
 
 err5:
     delete funcA;
@@ -4889,6 +4897,15 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
                 return nullptr;
             }
             funcsA.emplace_back(f);
+        }
+    }
+
+    for (unsigned int k = 0; k < funcsA.size(); ++k) {
+        if (funcsA[k]->getInputSize() > 1) {
+            return nullptr;
+        }
+        if (funcsA[k]->getOutputSize() > static_cast<int>(gfxColorMaxComps - k)) {
+            return nullptr;
         }
     }
 

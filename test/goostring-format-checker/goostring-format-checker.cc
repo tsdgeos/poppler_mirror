@@ -6,6 +6,7 @@
  * Clang++ compiler plugin that checks usage of GooString::format-like functions
  *
  * Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
  */
 
 #include <cctype>
@@ -341,7 +342,7 @@ private:
 class GooStringFormatCheckerAction : public PluginASTAction
 {
 protected:
-    ASTConsumer *CreateASTConsumer(CompilerInstance &compInst, llvm::StringRef inFile) { return new GooStringFormatCheckerConsumer(&compInst); }
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &compInst, llvm::StringRef inFile) { return std::make_unique<GooStringFormatCheckerConsumer>(&compInst); }
 
     bool ParseArgs(const CompilerInstance &compInst, const std::vector<std::string> &args)
     {

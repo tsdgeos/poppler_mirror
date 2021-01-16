@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -167,6 +167,16 @@ GooString *Stream::getPSFilter(int psLevel, const char *indent)
     return new GooString();
 }
 
+static Stream *wrapEOFStream(Stream *str)
+{
+    if (dynamic_cast<EOFStream *>(str)) {
+        // str is already a EOFStream, no need to wrap it in another EOFStream
+        return str;
+    } else {
+        return new EOFStream(str);
+    }
+}
+
 Stream *Stream::addFilters(Dict *dict, int recursion)
 {
     Object obj, obj2;
@@ -196,7 +206,7 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
                 str = makeFilter(obj2.getName(), str, &params2, recursion);
             } else {
                 error(errSyntaxError, getPos(), "Bad filter name");
-                str = new EOFStream(str);
+                str = wrapEOFStream(str);
             }
         }
     } else if (!obj.isNull()) {
@@ -338,7 +348,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new DCTStream(str, colorXform, dict, recursion);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
         pred = 1;
@@ -373,7 +383,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new JPXStream(str);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "Crypt")) {
         if (str->getKind() == strCrypt) {
@@ -383,7 +393,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
     } else {
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
     }
     return str;
 }
@@ -1883,7 +1893,7 @@ inline void CCITTFaxStream::addPixelsNeg(int a1, int blackPixels)
         if (a1 < 0) {
             error(errSyntaxError, getPos(), "Invalid CCITTFax code");
             err = true;
-            a1 = 0;
+            a1 = columns;
         }
         while (a0i > 0 && a1 <= codingLine[a0i - 1]) {
             --a0i;

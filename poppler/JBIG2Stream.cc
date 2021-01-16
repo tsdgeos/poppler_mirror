@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -1146,7 +1146,8 @@ JBIG2Stream::~JBIG2Stream()
 
 void JBIG2Stream::reset()
 {
-    freeSegments();
+    segments.resize(0);
+    globalSegments.resize(0);
 
     // read the globals stream
     if (globalsStream.isStream()) {
@@ -1177,26 +1178,14 @@ void JBIG2Stream::reset()
     }
 }
 
-void JBIG2Stream::freeSegments()
-{
-    for (auto entry : segments) {
-        delete entry;
-    }
-    segments.resize(0);
-
-    for (auto entry : globalSegments) {
-        delete entry;
-    }
-    globalSegments.resize(0);
-}
-
 void JBIG2Stream::close()
 {
     if (pageBitmap) {
         delete pageBitmap;
         pageBitmap = nullptr;
     }
-    freeSegments();
+    segments.resize(0);
+    globalSegments.resize(0);
     dataPtr = dataEnd = nullptr;
     FilterStream::close();
 }
@@ -1462,11 +1451,11 @@ eofError1:
 
 bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs)
 {
-    JBIG2SymbolDict *symbolDict;
+    std::unique_ptr<JBIG2SymbolDict> symbolDict;
     const JBIG2HuffmanTable *huffDHTable, *huffDWTable;
     const JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
     JBIG2Segment *seg;
-    std::vector<JBIG2Segment *> *codeTables;
+    std::vector<JBIG2Segment *> codeTables;
     JBIG2SymbolDict *inputSymbolDict;
     unsigned int flags, sdTemplate, sdrTemplate, huff, refAgg;
     unsigned int huffDH, huffDW, huffBMSize, huffAggInst;
@@ -1526,7 +1515,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
 
     // get referenced segments: input symbol dictionaries and code tables
-    codeTables = new std::vector<JBIG2Segment *>();
     numInputSyms = 0;
     for (i = 0; i < nRefSegs; ++i) {
         // This is need by bug 12014, returning false makes it not crash
@@ -1537,21 +1525,18 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                 j = ((JBIG2SymbolDict *)seg)->getSize();
                 if (numInputSyms > UINT_MAX - j) {
                     error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-                    delete codeTables;
                     goto eofError;
                 }
                 numInputSyms += j;
             } else if (seg->getType() == jbig2SegCodeTable) {
-                codeTables->push_back(seg);
+                codeTables.push_back(seg);
             }
         } else {
-            delete codeTables;
             return false;
         }
     }
     if (numInputSyms > UINT_MAX - numNewSyms) {
         error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-        delete codeTables;
         goto eofError;
     }
 
@@ -1574,7 +1559,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms, sizeof(JBIG2Bitmap *));
     if (!bitmaps && (numInputSyms + numNewSyms > 0)) {
         error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
-        delete codeTables;
         goto eofError;
     }
     for (i = 0; i < numInputSyms + numNewSyms; ++i) {
@@ -1602,39 +1586,38 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
         } else if (huffDH == 1) {
             huffDHTable = huffTableE;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDHTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffDHTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffDW == 0) {
             huffDWTable = huffTableB;
         } else if (huffDW == 1) {
             huffDWTable = huffTableC;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDWTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffDWTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffBMSize == 0) {
             huffBMSizeTable = huffTableA;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffBMSizeTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffBMSizeTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffAggInst == 0) {
             huffAggInstTable = huffTableA;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffAggInstTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffAggInstTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
     }
-    delete codeTables;
 
     // set up the Huffman decoder
     if (huff) {
@@ -1758,11 +1741,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                         error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
                         goto syntaxError;
                     }
-                    bitmaps[numInputSyms + i] = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY);
+                    bitmaps[numInputSyms + i] = readGenericRefinementRegion(symWidth, symHeight, sdrTemplate, false, refBitmap, refDX, refDY, sdrATX, sdrATY).release();
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {
                     bitmaps[numInputSyms + i] = readTextRegion(huff, true, symWidth, symHeight, refAggNum, 0, numInputSyms + i, nullptr, symCodeLen, bitmaps, 0, 0, 0, 1, 0, huffTableF, huffTableH, huffTableK, huffTableO, huffTableO,
-                                                               huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY);
+                                                               huffTableO, huffTableO, huffTableA, sdrTemplate, sdrATX, sdrATY)
+                                                        .release();
                     if (unlikely(!bitmaps[numInputSyms + i])) {
                         error(errSyntaxError, curStr->getPos(), "NULL bitmap in readTextRegion");
                         goto syntaxError;
@@ -1771,7 +1755,11 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
 
                 // non-ref/agg coding
             } else {
-                bitmaps[numInputSyms + i] = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0);
+                bitmaps[numInputSyms + i] = readGenericBitmap(false, symWidth, symHeight, sdTemplate, false, false, nullptr, sdATX, sdATY, 0).release();
+                if (unlikely(!bitmaps[numInputSyms + i])) {
+                    error(errSyntaxError, curStr->getPos(), "NULL bitmap in readGenericBitmap");
+                    goto syntaxError;
+                }
             }
 
             ++i;
@@ -1797,7 +1785,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                     *p++ = (unsigned char)c;
                 }
             } else {
-                collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize);
+                collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize).release();
             }
             if (likely(collBitmap != nullptr)) {
                 x = 0;
@@ -1814,9 +1802,8 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
 
     // create the symbol dict object
-    symbolDict = new JBIG2SymbolDict(segNum, numExSyms);
+    symbolDict = std::make_unique<JBIG2SymbolDict>(segNum, numExSyms);
     if (!symbolDict->isOk()) {
-        delete symbolDict;
         goto syntaxError;
     }
 
@@ -1835,7 +1822,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
             error(errSyntaxError, curStr->getPos(), "Too many exported symbols in JBIG2 symbol dictionary");
             for (; j < numExSyms; ++j)
                 symbolDict->setBitmap(j, nullptr);
-            delete symbolDict;
             goto syntaxError;
         }
         if (ex) {
@@ -1851,7 +1837,6 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
         error(errSyntaxError, curStr->getPos(), "Too few symbols in JBIG2 symbol dictionary");
         for (; j < numExSyms; ++j)
             symbolDict->setBitmap(j, nullptr);
-        delete symbolDict;
         goto syntaxError;
     }
 
@@ -1872,13 +1857,12 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
 
     // store the new symbol dict
-    segments.push_back(symbolDict);
+    segments.push_back(std::move(symbolDict));
 
     return true;
 
 codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 symbol dictionary");
-    delete codeTables;
 
 syntaxError:
     for (i = 0; i < numNewSyms; ++i) {
@@ -1899,14 +1883,14 @@ eofError:
 
 void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs)
 {
-    JBIG2Bitmap *bitmap;
+    std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2HuffmanTable runLengthTab[36];
     JBIG2HuffmanTable *symCodeTab = nullptr;
     const JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
     const JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
     const JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
     JBIG2Segment *seg;
-    std::vector<JBIG2Segment *> *codeTables;
+    std::vector<JBIG2Segment *> codeTables;
     JBIG2SymbolDict *symbolDict;
     JBIG2Bitmap **syms;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
@@ -1967,18 +1951,16 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     // get symbol dictionaries and tables
-    codeTables = new std::vector<JBIG2Segment *>();
     numSyms = 0;
     for (i = 0; i < nRefSegs; ++i) {
         if ((seg = findSegment(refSegs[i]))) {
             if (seg->getType() == jbig2SegSymbolDict) {
                 numSyms += ((JBIG2SymbolDict *)seg)->getSize();
             } else if (seg->getType() == jbig2SegCodeTable) {
-                codeTables->push_back(seg);
+                codeTables.push_back(seg);
             }
         } else {
             error(errSyntaxError, curStr->getPos(), "Invalid segment reference in JBIG2 text region");
-            delete codeTables;
             return;
         }
     }
@@ -2020,10 +2002,10 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
         } else if (huffFS == 1) {
             huffFSTable = huffTableG;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffFSTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffFSTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffDS == 0) {
             huffDSTable = huffTableH;
@@ -2032,10 +2014,10 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
         } else if (huffDS == 2) {
             huffDSTable = huffTableJ;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDSTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffDSTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffDT == 0) {
             huffDTTable = huffTableK;
@@ -2044,61 +2026,60 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
         } else if (huffDT == 2) {
             huffDTTable = huffTableM;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffDTTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffDTTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffRDW == 0) {
             huffRDWTable = huffTableN;
         } else if (huffRDW == 1) {
             huffRDWTable = huffTableO;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDWTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffRDWTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffRDH == 0) {
             huffRDHTable = huffTableN;
         } else if (huffRDH == 1) {
             huffRDHTable = huffTableO;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDHTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffRDHTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffRDX == 0) {
             huffRDXTable = huffTableN;
         } else if (huffRDX == 1) {
             huffRDXTable = huffTableO;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDXTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffRDXTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffRDY == 0) {
             huffRDYTable = huffTableN;
         } else if (huffRDY == 1) {
             huffRDYTable = huffTableO;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRDYTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffRDYTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
         if (huffRSize == 0) {
             huffRSizeTable = huffTableA;
         } else {
-            if (i >= codeTables->size()) {
+            if (i >= codeTables.size()) {
                 goto codeTableError;
             }
-            huffRSizeTable = ((JBIG2CodeTable *)(*codeTables)[i++])->getHuffTable();
+            huffRSizeTable = ((JBIG2CodeTable *)codeTables[i++])->getHuffTable();
         }
     }
-    delete codeTables;
 
     // symbol ID Huffman decoding table
     if (huff) {
@@ -2184,13 +2165,12 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
             if (pageH == 0xffffffff && y + h > curPageH) {
                 pageBitmap->expand(y + h, pageDefPixel);
             }
-            pageBitmap->combine(bitmap, x, y, extCombOp);
-            delete bitmap;
+            pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
             // store the region bitmap
         } else {
             bitmap->setSegNum(segNum);
-            segments.push_back(bitmap);
+            segments.push_back(std::move(bitmap));
         }
     }
 
@@ -2203,7 +2183,6 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
 
 codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-    delete codeTables;
     gfree(syms);
     return;
 
@@ -2212,10 +2191,10 @@ eofError:
     return;
 }
 
-JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
-                                         unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
-                                         const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable,
-                                         const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
+std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
+                                                         unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
+                                                         const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
+                                                         const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {
     JBIG2Bitmap *symbolBitmap;
     unsigned int strips;
@@ -2242,7 +2221,10 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
     } else {
         arithDecoder->decodeInt(&t, iadtStats);
     }
-    t *= -(int)strips;
+
+    if (checkedMultiply(t, -(int)strips, &t)) {
+        return {};
+    }
 
     inst = 0;
     sFirst = 0;
@@ -2337,9 +2319,11 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
 
                     if (decodeSuccess && syms[symID]) {
                         refDX = ((rdw >= 0) ? rdw : rdw - 1) / 2 + rdx;
-                        refDY = ((rdh >= 0) ? rdh : rdh - 1) / 2 + rdy;
+                        if (checkedAdd(((rdh >= 0) ? rdh : rdh - 1) / 2, rdy, &refDY)) {
+                            return nullptr;
+                        }
 
-                        symbolBitmap = readGenericRefinementRegion(rdw + syms[symID]->getWidth(), rdh + syms[symID]->getHeight(), templ, false, syms[symID], refDX, refDY, atx, aty);
+                        symbolBitmap = readGenericRefinementRegion(rdw + syms[symID]->getWidth(), rdh + syms[symID]->getHeight(), templ, false, syms[symID], refDX, refDY, atx, aty).release();
                     }
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {
@@ -2455,13 +2439,13 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, u
         }
     }
 
-    return bitmap.release();
+    return bitmap;
 }
 
 void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
 {
-    JBIG2PatternDict *patternDict;
-    JBIG2Bitmap *bitmap;
+    std::unique_ptr<JBIG2PatternDict> patternDict;
+    std::unique_ptr<JBIG2Bitmap> bitmap;
     unsigned int flags, patternW, patternH, grayMax, templ, mmr;
     int atx[4], aty[4];
     unsigned int i, x;
@@ -2494,7 +2478,7 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
         return;
 
     // create the pattern dict object
-    patternDict = new JBIG2PatternDict(segNum, grayMax + 1);
+    patternDict = std::make_unique<JBIG2PatternDict>(segNum, grayMax + 1);
 
     // split up the bitmap
     x = 0;
@@ -2503,11 +2487,8 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
         x += patternW;
     }
 
-    // free memory
-    delete bitmap;
-
     // store the new pattern dict
-    segments.push_back(patternDict);
+    segments.push_back(std::move(patternDict));
 
     return;
 
@@ -2517,12 +2498,11 @@ eofError:
 
 void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs)
 {
-    JBIG2Bitmap *bitmap;
+    std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2Segment *seg;
     JBIG2PatternDict *patternDict;
     JBIG2Bitmap *skipBitmap;
     unsigned int *grayImg;
-    JBIG2Bitmap *grayBitmap;
     JBIG2Bitmap *patternBitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
     unsigned int flags, mmr, templ, enableSkip, combOp;
@@ -2596,7 +2576,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     // allocate the bitmap
-    bitmap = new JBIG2Bitmap(segNum, w, h);
+    bitmap = std::make_unique<JBIG2Bitmap>(segNum, w, h);
     if (flags & 0x80) { // HDEFPIXEL
         bitmap->clearToOne();
     } else {
@@ -2631,7 +2611,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     atx[3] = -2;
     aty[3] = -2;
     for (j = bpp - 1; j >= 0; --j) {
-        grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap, atx, aty, -1);
+        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap, atx, aty, -1);
         i = 0;
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
@@ -2640,7 +2620,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
                 ++i;
             }
         }
-        delete grayBitmap;
     }
 
     // decode the image
@@ -2653,7 +2632,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
                 patternBitmap = patternDict->getBitmap(grayImg[i]);
                 if (unlikely(patternBitmap == nullptr)) {
                     delete skipBitmap;
-                    delete bitmap;
                     gfree(grayImg);
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
                     return;
@@ -2676,12 +2654,11 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
         }
-        pageBitmap->combine(bitmap, x, y, extCombOp);
-        delete bitmap;
+        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
         // store the region bitmap
     } else {
-        segments.push_back(bitmap);
+        segments.push_back(std::move(bitmap));
     }
 
     return;
@@ -2692,7 +2669,7 @@ eofError:
 
 void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length)
 {
-    JBIG2Bitmap *bitmap;
+    std::unique_ptr<JBIG2Bitmap> bitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp, rowCount;
     unsigned int flags, mmr, templ, tpgdOn;
     int atx[4], aty[4];
@@ -2740,13 +2717,12 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossl
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
         }
-        pageBitmap->combine(bitmap, x, y, extCombOp);
-        delete bitmap;
+        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
         // store the region bitmap
     } else {
         bitmap->setSegNum(segNum);
-        segments.push_back(bitmap);
+        segments.push_back(std::move(bitmap));
     }
 
     // immediate generic segments can have an unspecified length, in
@@ -2798,9 +2774,8 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
     }
 }
 
-JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
+std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    JBIG2Bitmap *bitmap;
     bool ltp;
     unsigned int ltpCX, cx, cx0, cx1, cx2;
     int *refLine, *codingLine;
@@ -2813,9 +2788,8 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, b
     unsigned char mask;
     int x, y, x0, x1, a0i, b1i, blackPixels, pix, i;
 
-    bitmap = new JBIG2Bitmap(0, w, h);
+    auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
-        delete bitmap;
         return nullptr;
     }
     bitmap->clearToZero();
@@ -2834,7 +2808,6 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, b
 
         if (unlikely(!codingLine || !refLine)) {
             error(errSyntaxError, curStr->getPos(), "Bad width in JBIG2 generic bitmap");
-            delete bitmap;
             return nullptr;
         }
 
@@ -3568,7 +3541,8 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, b
 
 void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs)
 {
-    JBIG2Bitmap *bitmap, *refBitmap;
+    std::unique_ptr<JBIG2Bitmap> bitmap;
+    JBIG2Bitmap *refBitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
     unsigned int flags, templ, tpgrOn;
     int atx[2], aty[2];
@@ -3626,14 +3600,13 @@ void JBIG2Stream::readGenericRefinementRegionSeg(unsigned int segNum, bool imm, 
 
     // combine the region bitmap into the page bitmap
     if (imm && bitmap) {
-        pageBitmap->combine(bitmap, x, y, extCombOp);
-        delete bitmap;
+        pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
         // store the region bitmap
     } else {
         if (bitmap) {
             bitmap->setSegNum(segNum);
-            segments.push_back(bitmap);
+            segments.push_back(std::move(bitmap));
         } else {
             error(errSyntaxError, curStr->getPos(), "readGenericRefinementRegionSeg with null bitmap");
         }
@@ -3652,9 +3625,8 @@ eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
 }
 
-JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty)
+std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty)
 {
-    JBIG2Bitmap *bitmap;
     bool ltp;
     unsigned int ltpCX, cx, cx0, cx2, cx3, cx4, tpgrCX0, tpgrCX1, tpgrCX2;
     JBIG2BitmapPtr cxPtr0 = { nullptr, 0, 0 };
@@ -3673,9 +3645,8 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h, int templ, b
         return nullptr;
     }
 
-    bitmap = new JBIG2Bitmap(0, w, h);
+    auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
-        delete bitmap;
         return nullptr;
     }
     bitmap->clearToZero();
@@ -3954,7 +3925,7 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length)
     huffTab[i].rangeLen = jbig2HuffmanEOT;
     if (JBIG2HuffmanDecoder::buildTable(huffTab, i)) {
         // create and store the new table segment
-        segments.push_back(new JBIG2CodeTable(segNum, huffTab));
+        segments.push_back(std::make_unique<JBIG2CodeTable>(segNum, huffTab));
     } else {
         free(huffTab);
     }
@@ -3975,14 +3946,14 @@ void JBIG2Stream::readExtensionSeg(unsigned int length)
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)
 {
-    for (JBIG2Segment *seg : globalSegments) {
+    for (std::unique_ptr<JBIG2Segment> &seg : globalSegments) {
         if (seg->getSegNum() == segNum) {
-            return seg;
+            return seg.get();
         }
     }
-    for (JBIG2Segment *seg : segments) {
+    for (std::unique_ptr<JBIG2Segment> &seg : segments) {
         if (seg->getSegNum() == segNum) {
-            return seg;
+            return seg.get();
         }
     }
     return nullptr;
@@ -3991,15 +3962,13 @@ JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum)
 void JBIG2Stream::discardSegment(unsigned int segNum)
 {
     for (auto it = globalSegments.begin(); it != globalSegments.end(); ++it) {
-        auto seg = static_cast<JBIG2Segment *>(*it);
-        if (seg->getSegNum() == segNum) {
+        if ((*it)->getSegNum() == segNum) {
             globalSegments.erase(it);
             return;
         }
     }
     for (auto it = segments.begin(); it != segments.end(); ++it) {
-        auto seg = static_cast<JBIG2Segment *>(*it);
-        if (seg->getSegNum() == segNum) {
+        if ((*it)->getSegNum() == segNum) {
             segments.erase(it);
             return;
         }

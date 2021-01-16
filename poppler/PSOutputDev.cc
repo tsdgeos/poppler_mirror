@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -1185,7 +1185,11 @@ static const StandardMedia standardMedia[] = { { "A0", 2384, 3371 },      { "A1"
 /* PLRM specifies a tolerance of 5 points when matching page sizes */
 static bool pageDimensionEqual(int a, int b)
 {
-    return (abs(a - b) < 5);
+    int aux;
+    if (unlikely(checkedSubtraction(a, b, &aux))) {
+        return false;
+    }
+    return (abs(aux) < 5);
 }
 
 // Shared initialization of PSOutputDev members.
@@ -1537,6 +1541,7 @@ PSOutputDev::~PSOutputDev()
         delete cc;
     }
     gfree(psTitle);
+    delete t3String;
 }
 
 void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PDFRectangle *cropBox, int pageRotate, const char *title)
@@ -3676,7 +3681,10 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         y1 = (int)floor(state->getY1());
         x2 = (int)ceil(state->getX2());
         y2 = (int)ceil(state->getY2());
-        width = x2 - x1;
+        if (unlikely(checkedSubtraction(x2, x1, &width))) {
+            error(errSyntaxError, -1, "width too big");
+            return;
+        }
         height = y2 - y1;
         tx = ty = 0;
         // rotation and portrait/landscape mode
@@ -3726,6 +3734,10 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
             xScale = xScale0;
             yScale = yScale0;
         } else if ((globalParams->getPSShrinkLarger() && (width > imgWidth2 || height > imgHeight2)) || (globalParams->getPSExpandSmaller() && (width < imgWidth2 && height < imgHeight2))) {
+            if (unlikely(width == 0)) {
+                error(errSyntaxError, -1, "width 0, xScale would be infinite");
+                return;
+            }
             xScale = (double)imgWidth2 / (double)width;
             yScale = (double)imgHeight2 / (double)height;
             if (yScale < xScale) {
@@ -6601,7 +6613,8 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         if (validref) {
             name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
         } else {
-            name = GooString::format("ICCBased-hashed-{0:ullX}-{1:d}", std::hash<GfxLCMSProfilePtr> {}(iccBasedCS->getProfile()), intent);
+            const unsigned long long hash = std::hash<GfxLCMSProfilePtr> {}(iccBasedCS->getProfile());
+            name = GooString::format("ICCBased-hashed-{0:ullX}-{1:d}", hash, intent);
         }
         const auto &it = iccEmitted.find(name->toStr());
         if (it != iccEmitted.end()) {
@@ -7085,6 +7098,7 @@ void PSOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, dou
     t3LLY = lly;
     t3URX = urx;
     t3URY = ury;
+    delete t3String;
     t3String = new GooString();
     writePS("q\n");
     t3FillColorOnly = true;

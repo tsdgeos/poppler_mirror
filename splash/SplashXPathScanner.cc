@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2014, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2014, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -49,11 +49,13 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYM
     partialClip = false;
 
     // compute the bbox
-    if (xPath->length == 0) {
-        xMin = yMin = 1;
-        xMax = yMax = 0;
-    } else {
+    xMin = yMin = 1;
+    xMax = yMax = 0;
+    if (xPath->length > 0) {
         seg = &xPath->segs[0];
+        if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
+            return;
+        }
         if (seg->x0 <= seg->x1) {
             xMinFP = seg->x0;
             xMaxFP = seg->x1;
@@ -70,6 +72,9 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYM
         }
         for (i = 1; i < xPath->length; ++i) {
             seg = &xPath->segs[i];
+            if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
+                return;
+            }
             if (seg->x0 < xMinFP) {
                 xMinFP = seg->x0;
             } else if (seg->x0 > xMaxFP) {

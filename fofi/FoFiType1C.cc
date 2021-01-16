@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
@@ -1433,9 +1433,11 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
                     charBuf->append((char)8);
                 }
-                cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                cvtNum(ops[k + 1].num, ops[k].isFP, charBuf);
-                charBuf->append((char)5);
+                if (likely(k + 1 < nOps)) {
+                    cvtNum(ops[k].num, ops[k].isFP, charBuf);
+                    cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
+                    charBuf->append((char)5);
+                }
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1445,7 +1447,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 for (k = 0; k < nOps - 6; k += 2) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                    cvtNum(ops[k + 1].num, ops[k].isFP, charBuf);
+                    cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                     charBuf->append((char)5);
                 }
                 cvtNum(ops[k].num, ops[k].isFP, charBuf);
