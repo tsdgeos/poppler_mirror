@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019-2021 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -42,6 +42,26 @@ inline bool checkedAdd(T x, T y, T *z)
 #else
     const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
     return checkedAssign(lz, z);
+#endif
+}
+
+template<>
+inline bool checkedAdd<long long>(long long x, long long y, long long *z)
+{
+#if __GNUC__ >= 5 || __has_builtin(__builtin_add_overflow)
+    return __builtin_add_overflow(x, y, z);
+#else
+    if (x > 0 && y > 0) {
+        if (x > (std::numeric_limits<long long>::max)() - y) {
+            return true;
+        }
+    } else if (x < 0 && y < 0) {
+        if (x < (std::numeric_limits<long long>::min)() - y) {
+            return true;
+        }
+    }
+    *z = x + y;
+    return false;
 #endif
 }
 
