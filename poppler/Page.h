@@ -40,6 +40,7 @@
 
 #include "poppler-config.h"
 #include "Object.h"
+#include "poppler_private_export.h"
 
 class Dict;
 class PDFDoc;
@@ -135,7 +136,7 @@ private:
 // Page
 //------------------------------------------------------------------------
 
-class Page
+class POPPLER_PRIVATE_EXPORT Page
 {
 public:
     // Constructor.

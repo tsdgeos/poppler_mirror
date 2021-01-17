@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "Object.h"
 
 class XRef;
@@ -41,7 +42,7 @@ class XRef;
 // Array
 //------------------------------------------------------------------------
 
-class Array
+class POPPLER_PRIVATE_EXPORT Array
 {
 public:
     // Constructor.

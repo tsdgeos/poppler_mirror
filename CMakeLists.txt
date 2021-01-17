@@ -20,6 +20,7 @@ test_big_endian(WORDS_BIGENDIAN)
 include(CheckFileOffsetBits)
 CHECK_FILE_OFFSET_BITS()
 
+include(GenerateExportHeader)
 include(GNUInstallDirs)
 
 set(ENABLE_FUZZER FALSE)
@@ -44,6 +45,10 @@ set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_LINK_DEPENDS_NO_SHARED TRUE)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 
 # command line switches
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
@@ -565,6 +570,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
+generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
 set_target_properties(poppler PROPERTIES VERSION 108.0.0 SOVERSION 108)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
@@ -650,6 +656,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
+    ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
     DESTINATION include/poppler)
   install(FILES

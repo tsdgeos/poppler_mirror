@@ -33,6 +33,7 @@
 #define LINK_H
 
 #include "Object.h"
+#include "poppler_private_export.h"
 #include <memory>
 #include <set>
 
@@ -65,7 +66,7 @@ enum LinkActionKind
     actionUnknown // anything else
 };
 
-class LinkAction
+class POPPLER_PRIVATE_EXPORT LinkAction
 {
 public:
     LinkAction();
@@ -112,7 +113,7 @@ enum LinkDestKind
     destFitBV
 };
 
-class LinkDest
+class POPPLER_PRIVATE_EXPORT LinkDest
 {
 public:
     // Build a LinkDest from the array.
@@ -161,7 +162,7 @@ private:
 // LinkGoTo
 //------------------------------------------------------------------------
 
-class LinkGoTo : public LinkAction
+class POPPLER_PRIVATE_EXPORT LinkGoTo : public LinkAction
 {
 public:
     // Build a LinkGoTo from a destination (dictionary, name, or string).
@@ -242,7 +243,7 @@ private:
 // LinkURI
 //------------------------------------------------------------------------
 
-class LinkURI : public LinkAction
+class POPPLER_PRIVATE_EXPORT LinkURI : public LinkAction
 {
 public:
     // Build a LinkURI given the URI (string) and base URI.
@@ -498,7 +499,7 @@ private:
 // LinkResetForm
 //------------------------------------------------------------------------
 
-class LinkResetForm : public LinkAction
+class POPPLER_PRIVATE_EXPORT LinkResetForm : public LinkAction
 {
 public:
     // Build a LinkResetForm.
@@ -546,7 +547,7 @@ private:
 // Links
 //------------------------------------------------------------------------
 
-class Links
+class POPPLER_PRIVATE_EXPORT Links
 {
 public:
     // Extract links from array of annotations.

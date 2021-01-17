@@ -22,19 +22,7 @@
 #ifndef POPPLER_GLOBAL_H
 #define POPPLER_GLOBAL_H
 
-#if defined(_WIN32)
-#    define LIB_EXPORT __declspec(dllexport)
-#    define LIB_IMPORT __declspec(dllimport)
-#else
-#    define LIB_EXPORT
-#    define LIB_IMPORT
-#endif
-
-#if defined(poppler_cpp_EXPORTS)
-#    define POPPLER_CPP_EXPORT LIB_EXPORT
-#else
-#    define POPPLER_CPP_EXPORT LIB_IMPORT
-#endif
+#include "poppler_cpp_export.h"
 
 #include <iosfwd>
 #include <string>

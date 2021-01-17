@@ -23,6 +23,7 @@
 #define SPLASHPATTERN_H
 
 #include "SplashTypes.h"
+#include "poppler_private_export.h"
 
 class SplashScreen;
 
@@ -62,7 +63,7 @@ private:
 // SplashSolidColor
 //------------------------------------------------------------------------
 
-class SplashSolidColor : public SplashPattern
+class POPPLER_PRIVATE_EXPORT SplashSolidColor : public SplashPattern
 {
 public:
     SplashSolidColor(SplashColorPtr colorA);

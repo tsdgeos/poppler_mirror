@@ -28,11 +28,12 @@
 #include <string>
 
 #include "CharTypes.h"
+#include "poppler_private_export.h"
 
 class GooString;
 
-extern const Unicode pdfDocEncoding[256];
+extern const Unicode POPPLER_PRIVATE_EXPORT pdfDocEncoding[256];
 
-char *pdfDocEncodingToUTF16(const std::string &orig, int *length);
+char POPPLER_PRIVATE_EXPORT *pdfDocEncodingToUTF16(const std::string &orig, int *length);
 
 #endif

@@ -37,6 +37,7 @@
 #define TEXTOUTPUTDEV_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
@@ -83,7 +84,7 @@ enum EndOfLineKind
 // TextFontInfo
 //------------------------------------------------------------------------
 
-class TextFontInfo
+class POPPLER_PRIVATE_EXPORT TextFontInfo
 {
 public:
     TextFontInfo(const GfxState *state);
@@ -133,7 +134,7 @@ private:
 // TextWord
 //------------------------------------------------------------------------
 
-class TextWord
+class POPPLER_PRIVATE_EXPORT TextWord
 {
 public:
     // Constructor.
@@ -503,7 +504,7 @@ private:
 // TextWordList
 //------------------------------------------------------------------------
 
-class TextWordList
+class POPPLER_PRIVATE_EXPORT TextWordList
 {
 public:
     // Build a flat word list, in content stream order (if
@@ -551,7 +552,7 @@ private:
 // TextPage
 //------------------------------------------------------------------------
 
-class TextPage
+class POPPLER_PRIVATE_EXPORT TextPage
 {
 public:
     // Constructor.
@@ -708,7 +709,7 @@ private:
 // ActualText
 //------------------------------------------------------------------------
 
-class ActualText
+class POPPLER_PRIVATE_EXPORT ActualText
 {
 public:
     // Create an ActualText
@@ -737,7 +738,7 @@ private:
 // TextOutputDev
 //------------------------------------------------------------------------
 
-class TextOutputDev : public OutputDev
+class POPPLER_PRIVATE_EXPORT TextOutputDev : public OutputDev
 {
 public:
     // Open a text output file.  If <fileName> is NULL, no file is

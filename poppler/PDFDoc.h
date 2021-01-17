@@ -46,6 +46,7 @@
 #include <mutex>
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include <cstdio>
 #include "XRef.h"
 #include "Catalog.h"
@@ -117,7 +118,7 @@ enum PDFSubtypeConformance
 // PDFDoc
 //------------------------------------------------------------------------
 
-class PDFDoc
+class POPPLER_PRIVATE_EXPORT PDFDoc
 {
 public:
     PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);

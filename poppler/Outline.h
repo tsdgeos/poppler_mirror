@@ -28,6 +28,7 @@
 #include <memory>
 #include "Object.h"
 #include "CharTypes.h"
+#include "poppler_private_export.h"
 
 class GooString;
 class XRef;
@@ -53,7 +54,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class OutlineItem
+class POPPLER_PRIVATE_EXPORT OutlineItem
 {
 public:
     OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);

@@ -35,6 +35,7 @@
 
 #include "SplashTypes.h"
 #include "poppler/GfxState.h"
+#include "poppler_private_export.h"
 #include <cstdio>
 
 class ImgWriter;
@@ -43,7 +44,7 @@ class ImgWriter;
 // SplashBitmap
 //------------------------------------------------------------------------
 
-class SplashBitmap
+class POPPLER_PRIVATE_EXPORT SplashBitmap
 {
 public:
     // Create a new bitmap.  It will have <widthA> x <heightA> pixels in

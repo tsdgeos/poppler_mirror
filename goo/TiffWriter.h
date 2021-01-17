@@ -15,6 +15,7 @@
 #define TIFFWRITER_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 
 #ifdef ENABLE_LIBTIFF
 
@@ -23,7 +24,7 @@
 
 struct TiffWriterPrivate;
 
-class TiffWriter : public ImgWriter
+class POPPLER_PRIVATE_EXPORT TiffWriter : public ImgWriter
 {
 public:
     /* RGB                 - 3 bytes/pixel

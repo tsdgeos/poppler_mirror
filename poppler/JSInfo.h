@@ -21,13 +21,13 @@
 #include <cstdio>
 #include "Object.h"
 #include "PDFDoc.h"
-
+#include "poppler_private_export.h"
 #include "Link.h"
 #include "UnicodeMap.h"
 
 class PDFDoc;
 
-class JSInfo
+class POPPLER_PRIVATE_EXPORT JSInfo
 {
 public:
     // Constructor.

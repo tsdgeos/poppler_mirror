@@ -37,6 +37,7 @@ set(poppler_qt5_SRCS
   poppler-version.cpp
 )
 add_library(poppler-qt5 ${poppler_qt5_SRCS})
+generate_export_header(poppler-qt5 BASE_NAME poppler-qt5 EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h")
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.27.0 SOVERSION 1)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
@@ -60,9 +61,9 @@ install(FILES
   poppler-annotation.h
   poppler-form.h
   poppler-optcontent.h
-  poppler-export.h
   poppler-page-transition.h
   poppler-media.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/qt5)
 

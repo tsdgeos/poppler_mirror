@@ -28,13 +28,14 @@
 #define FONT_INFO_H
 
 #include "Object.h"
+#include "poppler_private_export.h"
 
 #include <unordered_set>
 
 class GfxFont;
 class PDFDoc;
 
-class FontInfo
+class POPPLER_PRIVATE_EXPORT FontInfo
 {
 public:
     enum Type
@@ -86,7 +87,7 @@ private:
     Ref embRef;
 };
 
-class FontInfoScanner
+class POPPLER_PRIVATE_EXPORT FontInfoScanner
 {
 public:
     // Constructor.

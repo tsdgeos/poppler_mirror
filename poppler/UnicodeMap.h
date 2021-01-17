@@ -29,6 +29,7 @@
 #define UNICODEMAP_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "CharTypes.h"
 
 #include <atomic>
@@ -56,7 +57,7 @@ struct UnicodeMapExt;
 
 //------------------------------------------------------------------------
 
-class UnicodeMap
+class POPPLER_PRIVATE_EXPORT UnicodeMap
 {
 public:
     // Create the UnicodeMap specified by <encodingName>.  Sets the

@@ -15,9 +15,11 @@
 #ifndef IMGWRITER_H
 #define IMGWRITER_H
 
+#include "poppler_private_export.h"
+
 #include <cstdio>
 
-class ImgWriter
+class POPPLER_PRIVATE_EXPORT ImgWriter
 {
 public:
     ImgWriter() = default;

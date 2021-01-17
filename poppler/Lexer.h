@@ -38,7 +38,7 @@ class XRef;
 // Lexer
 //------------------------------------------------------------------------
 
-class Lexer
+class POPPLER_PRIVATE_EXPORT Lexer
 {
 public:
     // Construct a lexer for a single stream.  Deletes the stream when

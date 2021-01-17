@@ -37,13 +37,14 @@
 #include <utility>
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "Object.h"
 
 //------------------------------------------------------------------------
 // Dict
 //------------------------------------------------------------------------
 
-class Dict
+class POPPLER_PRIVATE_EXPORT Dict
 {
 public:
     // Constructor.
