@@ -136,7 +136,7 @@ PDFDoc::PDFDoc()
     init();
 }
 
-PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
 #ifdef _WIN32
     int n, i;
@@ -176,11 +176,11 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
     // create stream
     str = new FileStream(file, 0, false, file->size(), Object(objNull));
 
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
 #ifdef _WIN32
-PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
     OSVERSIONINFO version;
     int i;
@@ -217,11 +217,11 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
     // create stream
     str = new FileStream(file, 0, false, file->size(), Object(objNull));
 
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
 #ifdef _WIN32
     int n, i;
@@ -246,10 +246,10 @@ PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString
 #endif
     }
     str = strA;
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
-bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword)
+bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback)
 {
     pdfdocLocker();
 
@@ -278,12 +278,12 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
     bool wasReconstructed = false;
 
     // read xref table
-    xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed);
+    xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed, false, xrefReconstructedCallback);
     if (!xref->isOk()) {
         if (wasReconstructed) {
             delete xref;
             startXRefPos = -1;
-            xref = new XRef(str, getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed);
+            xref = new XRef(str, getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed, false, xrefReconstructedCallback);
         }
         if (!xref->isOk()) {
             error(errSyntaxError, -1, "Couldn't read xref table");
@@ -305,7 +305,7 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
             // try one more time to construct the Catalog, maybe the problem is damaged XRef
             delete catalog;
             delete xref;
-            xref = new XRef(str, 0, 0, nullptr, true);
+            xref = new XRef(str, 0, 0, nullptr, true, xrefReconstructedCallback);
             catalog = new Catalog(this);
         }
 

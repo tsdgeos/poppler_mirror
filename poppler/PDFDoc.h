@@ -121,13 +121,13 @@ enum PDFSubtypeConformance
 class POPPLER_PRIVATE_EXPORT PDFDoc
 {
 public:
-    PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 
 #ifdef _WIN32
-    PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 #endif
 
-    PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
     ~PDFDoc();
 
     PDFDoc(const PDFDoc &) = delete;
@@ -344,7 +344,7 @@ private:
 
     PDFDoc();
     void init();
-    bool setup(const GooString *ownerPassword, const GooString *userPassword);
+    bool setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback);
     bool checkFooter();
     void checkHeader();
     bool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);

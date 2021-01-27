@@ -258,11 +258,13 @@ XRef::XRef(const Object *trailerDictA) : XRef {}
         trailerDict = trailerDictA->copy();
 }
 
-XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *wasReconstructed, bool reconstruct) : XRef {}
+XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *wasReconstructed, bool reconstruct, const std::function<void()> &xrefReconstructedCallback) : XRef {}
 {
     Object obj;
 
     mainXRefEntriesOffset = mainXRefEntriesOffsetA;
+
+    xrefReconstructedCb = xrefReconstructedCallback;
 
     // read the trailer
     str = strA;
@@ -862,6 +864,10 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
 
     if (wasReconstructed) {
         *wasReconstructed = true;
+    }
+
+    if (xrefReconstructedCb) {
+        xrefReconstructedCb();
     }
 
     str->reset();

@@ -45,6 +45,7 @@
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
 
+#include <functional>
 #include <config.h>
 #include <poppler-config.h>
 #include <GfxState.h>
@@ -106,10 +107,10 @@ public:
         m_filePath = filePath;
 
 #ifdef _WIN32
-        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword);
+        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #else
         GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
-        doc = new PDFDoc(fileName, ownerPassword, userPassword);
+        doc = new PDFDoc(fileName, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #endif
 
         delete ownerPassword;
@@ -121,7 +122,7 @@ public:
         m_device = device;
         QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object(objNull));
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword);
+        doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
         delete ownerPassword;
         delete userPassword;
     }
@@ -132,7 +133,7 @@ public:
         fileContents = data;
         MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object(objNull));
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword);
+        doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
         delete ownerPassword;
         delete userPassword;
     }
@@ -158,6 +159,13 @@ public:
         }
     }
 
+    /**
+     * a method that is being called whenever PDFDoc's XRef is reconstructed
+     * where we'll set xrefReconstructed flag and notify users of the
+     * reconstruction event
+     */
+    void noitfyXRefReconstructed();
+
     static Document *checkDocument(DocumentData *doc);
 
     PDFDoc *doc;
@@ -174,6 +182,9 @@ public:
     GfxLCMSProfilePtr m_sRGBProfile;
     GfxLCMSProfilePtr m_displayProfile;
 #endif
+    bool xrefReconstructed;
+    // notifies the user whenever the backend's PDFDoc XRef is reconstructed
+    std::function<void()> xrefReconstructedCallback;
 };
 
 class FontInfoData

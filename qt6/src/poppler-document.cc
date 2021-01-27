@@ -815,6 +815,16 @@ QVector<FormFieldSignature *> Document::signatures() const
     return result;
 }
 
+bool Document::xrefWasReconstructed() const
+{
+    return m_doc->xrefReconstructed;
+}
+
+void Document::setXRefReconstructedCallback(const std::function<void()> &callback)
+{
+    m_doc->xrefReconstructedCallback = callback;
+}
+
 QDateTime convertDate(const char *dateString)
 {
     int year, mon, day, hour, min, sec, tzHours, tzMins;

@@ -45,6 +45,8 @@
 #ifndef __POPPLER_QT_H__
 #define __POPPLER_QT_H__
 
+#include <functional>
+
 #include "poppler-annotation.h"
 #include "poppler-link.h"
 #include "poppler-optcontent.h"
@@ -1722,6 +1724,21 @@ QString subject = m_doc->info("Subject");
      since there are documents with signatures that don't belong to a given page
     */
     QVector<FormFieldSignature *> signatures() const;
+
+    /**
+     Returns whether the document's XRef table has been reconstructed or not
+
+     \since 21.06
+    */
+    bool xrefWasReconstructed() const;
+
+    /**
+     Sets the document's XRef reconstruction callback, so whenever a XRef table
+     reconstruction happens the callback will get triggered.
+
+     \since 21.06
+    */
+    void setXRefReconstructedCallback(const std::function<void()> &callback);
 
     /**
        Destructor.

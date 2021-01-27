@@ -193,6 +193,19 @@ void DocumentData::init()
     paperColor = Qt::white;
     m_hints = 0;
     m_optContentModel = nullptr;
+    xrefReconstructed = false;
+    xrefReconstructedCallback = {};
+}
+
+void DocumentData::noitfyXRefReconstructed()
+{
+    if (!xrefReconstructed) {
+        xrefReconstructed = true;
+    }
+
+    if (xrefReconstructedCallback) {
+        xrefReconstructedCallback();
+    }
 }
 
 FormWidget *FormFieldData::getFormWidget(const FormField *f)

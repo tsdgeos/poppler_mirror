@@ -250,6 +250,8 @@ void DocumentData::init()
     paperColor = Qt::white;
     m_hints = 0;
     m_optContentModel = nullptr;
+    xrefReconstructed = false;
+    xrefReconstructedCallback = {};
 }
 
 void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items)
@@ -279,6 +281,17 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         const std::vector<::OutlineItem *> *children = outlineItem->getKids();
         if (children)
             addTocChildren(docSyn, &item, children);
+    }
+}
+
+void DocumentData::noitfyXRefReconstructed()
+{
+    if (!xrefReconstructed) {
+        xrefReconstructed = true;
+    }
+
+    if (xrefReconstructedCallback) {
+        xrefReconstructedCallback();
     }
 }
 

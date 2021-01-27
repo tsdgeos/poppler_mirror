@@ -56,8 +56,10 @@ private Q_SLOTS:
 private:
     void setPage(int page);
     int page() const;
+    void xrefReconstructedHandler(Poppler::Document *doc);
 
     int m_currentPage;
+    bool xrefReconstructed;
 
     QAction *m_fileOpenAct;
     QAction *m_fileSaveCopyAct;
