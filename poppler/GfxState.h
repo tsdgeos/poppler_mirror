@@ -25,7 +25,7 @@
 // Copyright (C) 2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -379,7 +379,6 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double gamma; // gamma value
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
@@ -460,7 +459,6 @@ private:
     double blackX, blackY, blackZ; // black point
     double gammaR, gammaG, gammaB; // gamma values
     double mat[9]; // ABC -> XYZ transform matrix
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
@@ -539,7 +537,6 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double aMin, aMax, bMin, bMax; // range for the a and b components
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
