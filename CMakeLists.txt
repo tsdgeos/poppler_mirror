@@ -1,6 +1,6 @@
 project(poppler)
 
-cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
@@ -492,12 +492,7 @@ if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/SignatureHandler.cc
   )
-  if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
-    set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
-    include_directories(SYSTEM ${NSS3_INCLUDE_DIRS})
-  else()
-    set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
-  endif()
+  set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}

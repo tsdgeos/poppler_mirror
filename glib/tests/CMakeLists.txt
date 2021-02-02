@@ -20,13 +20,8 @@ set(poppler_check_bb_SRCS
 )
 poppler_add_test(poppler-check-bb BUILD_GTK_TESTS ${poppler_check_bb_SRCS})
 
-if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
-    target_link_libraries(poppler-check-text poppler-glib ${GTK3_LIBRARIES})
-    target_link_libraries(poppler-check-bb poppler-glib ${GTK3_LIBRARIES})
-else()
-    target_link_libraries(poppler-check-text poppler-glib PkgConfig::GTK3)
-    target_link_libraries(poppler-check-bb poppler-glib PkgConfig::GTK3)
-endif()
+target_link_libraries(poppler-check-text poppler-glib PkgConfig::GTK3)
+target_link_libraries(poppler-check-bb poppler-glib PkgConfig::GTK3)
 
 poppler_add_testcase(poppler-check-bb shapes+attachments.pdf 42.5 42.5 557.5 557.5)
 poppler_add_testcase(poppler-check-bb orientation.pdf 34 34 83.74 49 793 34 808 97.19 488.02 793 561 808 34 503.61 49 56)

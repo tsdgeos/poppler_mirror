@@ -16,10 +16,6 @@ include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED)
 
-if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
-    pkg_check_modules(GTK3 "gtk+-3.0>=${GTK_REQUIRED}" "gdk-pixbuf-2.0>=${GDK_PIXBUF_REQUIRED}")
-else()
-    pkg_check_modules(GTK3 IMPORTED_TARGET "gtk+-3.0>=${GTK_REQUIRED}" "gdk-pixbuf-2.0>=${GDK_PIXBUF_REQUIRED}")
-endif()
+pkg_check_modules(GTK3 IMPORTED_TARGET "gtk+-3.0>=${GTK_REQUIRED}" "gdk-pixbuf-2.0>=${GDK_PIXBUF_REQUIRED}")
 
 find_package_handle_standard_args(GTK DEFAULT_MSG GTK3_LIBRARIES GTK3_CFLAGS)
