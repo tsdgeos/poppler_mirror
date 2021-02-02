@@ -154,7 +154,7 @@ else()
 endif()
 
 if (ENABLE_QT5)
-  find_package(Qt5Core 5.5)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+  find_package(Qt5Core 5.9)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
   find_package(Qt5Gui)
   find_package(Qt5Xml)
   find_package(Qt5Widgets)

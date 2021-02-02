@@ -259,11 +259,7 @@ int main(int argc, char **argv)
                     else
                         std::cout << "\t\t\tSignerName: "
                                   << "(null)" << std::endl;
-                    // http://doc.qt.io/qt-5/qdatetime.html#fromTime_t-1
-                    // Requires Qt 5.2 -> configure.ac update
-                    // QDateTime::fromTime_t(svi->signingTime(), Qt::UTC).toString();
-                    QDateTime sviTime;
-                    sviTime.setTime_t(svi.signingTime());
+                    const QDateTime sviTime = QDateTime::fromSecsSinceEpoch(svi.signingTime(), Qt::UTC);
                     std::cout << "\t\t\tSigningTime: " << sviTime.toString() << std::endl;
                 } break;
                 }
