@@ -1139,8 +1139,12 @@ std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActio
 {
     Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
     if (additionalActionsObject.isDict()) {
-        const char *key =
-                (type == actionCloseDocument ? "WC" : type == actionSaveDocumentStart ? "WS" : type == actionSaveDocumentFinish ? "DS" : type == actionPrintDocumentStart ? "WP" : type == actionPrintDocumentFinish ? "DP" : nullptr);
+        const char *key = (type == actionCloseDocument                 ? "WC"
+                                   : type == actionSaveDocumentStart   ? "WS"
+                                   : type == actionSaveDocumentFinish  ? "DS"
+                                   : type == actionPrintDocumentStart  ? "WP"
+                                   : type == actionPrintDocumentFinish ? "DP"
+                                                                       : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
         if (actionObject.isDict())
