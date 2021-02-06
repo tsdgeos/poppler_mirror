@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2012, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2012, 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
@@ -265,7 +265,10 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMap(const GooString *buf, int nBits)
 
     ctu = new CharCodeToUnicode(nullptr);
     const char *p = buf->c_str();
-    ctu->parseCMap1(&getCharFromString, &p, nBits);
+    if (!ctu->parseCMap1(&getCharFromString, &p, nBits)) {
+        delete ctu;
+        return nullptr;
+    }
     return ctu;
 }
 
@@ -276,8 +279,11 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(const GooString *fileNam
 
     ctu = new CharCodeToUnicode(nullptr);
     if ((f = globalParams->findToUnicodeFile(fileName))) {
-        ctu->parseCMap1(&getCharFromFile, f, nBits);
-        fclose(f);
+        if (!ctu->parseCMap1(&getCharFromFile, f, nBits)) {
+            delete ctu;
+            fclose(f);
+            return nullptr;
+        }
     } else {
         error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:t}'", fileName);
     }
@@ -290,7 +296,7 @@ void CharCodeToUnicode::mergeCMap(const GooString *buf, int nBits)
     parseCMap1(&getCharFromString, &p, nBits);
 }
 
-void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int nBits)
+bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int nBits)
 {
     PSTokenizer *pst;
     char tok1[256], tok2[256], tok3[256];
@@ -300,6 +306,7 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     GooString *name;
     FILE *f;
 
+    bool ok = false;
     maxCode = (nBits == 8) ? 0xff : (nBits == 16) ? 0xffff : 0xffffffff;
     pst = new PSTokenizer(getCharFunc, data);
     pst->getToken(tok1, sizeof(tok1), &n1);
@@ -308,7 +315,9 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
             if (tok1[0] == '/') {
                 name = new GooString(tok1 + 1);
                 if ((f = globalParams->findToUnicodeFile(name))) {
-                    parseCMap1(&getCharFromFile, f, nBits);
+                    if (parseCMap1(&getCharFromFile, f, nBits)) {
+                        ok = true;
+                    }
                     fclose(f);
                 } else {
                     error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:t}'", name);
@@ -338,6 +347,7 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Invalid entry in bfchar block in ToUnicode CMap");
                 }
                 addMapping(code1, tok2 + 1, n2 - 2, 0);
+                ok = true;
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok2, "beginbfrange")) {
@@ -376,6 +386,7 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                         if (tok1[0] == '<' && tok1[n1 - 1] == '>') {
                             tok1[n1 - 1] = '\0';
                             addMapping(code1 + i, tok1 + 1, n1 - 2, 0);
+                            ok = true;
                         } else {
                             error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
                         }
@@ -385,6 +396,7 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     tok3[n3 - 1] = '\0';
                     for (i = 0; code1 <= code2; ++code1, ++i) {
                         addMapping(code1, tok3 + 1, n3 - 2, i);
+                        ok = true;
                     }
 
                 } else {
@@ -392,11 +404,74 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                 }
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
+        } else if (!strcmp(tok2, "begincidchar")) {
+            // the begincidchar operator is not allowed in ToUnicode CMaps,
+            // but some buggy PDF generators incorrectly use
+            // code-to-CID-type CMaps here
+            error(errSyntaxWarning, -1, "Invalid 'begincidchar' operator in ToUnicode CMap");
+            while (pst->getToken(tok1, sizeof(tok1), &n1)) {
+                if (!strcmp(tok1, "endcidchar")) {
+                    break;
+                }
+                if (!pst->getToken(tok2, sizeof(tok2), &n2) || !strcmp(tok2, "endcidchar")) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
+                    break;
+                }
+                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>')) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
+                    continue;
+                }
+                tok1[n1 - 1] = '\0';
+                if (!parseHex(tok1 + 1, n1 - 2, &code1)) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
+                    continue;
+                }
+                if (code1 > maxCode) {
+                    error(errSyntaxWarning, -1, "Invalid entry in cidchar block in ToUnicode CMap");
+                }
+                addMappingInt(code1, atoi(tok2));
+                ok = true;
+            }
+            pst->getToken(tok1, sizeof(tok1), &n1);
+        } else if (!strcmp(tok2, "begincidrange")) {
+            // the begincidrange operator is not allowed in ToUnicode CMaps,
+            // but some buggy PDF generators incorrectly use
+            // code-to-CID-type CMaps here
+            error(errSyntaxWarning, -1, "Invalid 'begincidrange' operator in ToUnicode CMap");
+            while (pst->getToken(tok1, sizeof(tok1), &n1)) {
+                if (!strcmp(tok1, "endcidrange")) {
+                    break;
+                }
+                if (!pst->getToken(tok2, sizeof(tok2), &n2) || !strcmp(tok2, "endcidrange") || !pst->getToken(tok3, sizeof(tok3), &n3) || !strcmp(tok3, "endcidrange")) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
+                    break;
+                }
+                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
+                    continue;
+                }
+                tok1[n1 - 1] = tok2[n2 - 1] = '\0';
+                if (!parseHex(tok1 + 1, n1 - 2, &code1) || !parseHex(tok2 + 1, n2 - 2, &code2)) {
+                    error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
+                    continue;
+                }
+                if (code1 > maxCode || code2 > maxCode) {
+                    error(errSyntaxWarning, -1, "Invalid entry in cidrange block in ToUnicode CMap");
+                    if (code2 > maxCode) {
+                        code2 = maxCode;
+                    }
+                }
+                for (i = atoi(tok3); code1 <= code2; ++code1, ++i) {
+                    addMappingInt(code1, i);
+                    ok = true;
+                }
+            }
+            pst->getToken(tok1, sizeof(tok1), &n1);
         } else {
             strcpy(tok1, tok2);
         }
     }
-    delete pst;
+    return ok;
 }
 
 void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
@@ -456,6 +531,29 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
         gfree(utf16);
         ++sMapLen;
     }
+}
+
+void CharCodeToUnicode::addMappingInt(CharCode code, Unicode u)
+{
+    CharCode oldLen, i;
+
+    if (code > 0xffffff) {
+        // This is an arbitrary limit to avoid integer overflow issues.
+        // (I've seen CMaps with mappings for <ffffffff>.)
+        return;
+    }
+    if (code >= mapLen) {
+        oldLen = mapLen;
+        mapLen = mapLen ? 2 * mapLen : 256;
+        if (code >= mapLen) {
+            mapLen = (code + 256) & ~255;
+        }
+        map = (Unicode *)greallocn(map, mapLen, sizeof(Unicode));
+        for (i = oldLen; i < mapLen; ++i) {
+            map[i] = 0;
+        }
+    }
+    map[code] = u;
 }
 
 CharCodeToUnicode::CharCodeToUnicode()
