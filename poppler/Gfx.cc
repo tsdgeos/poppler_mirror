@@ -2174,8 +2174,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
             }
         }
         if (shouldDrawPattern) {
-            if (out->useTilingPatternFill()
-                && out->tilingPatternFill(state, this, catalog, tPat->getContentStream(), tPat->getMatrix(), tPat->getPaintType(), tPat->getTilingType(), tPat->getResDict(), m1, tPat->getBBox(), xi0, yi0, xi1, yi1, xstep, ystep)) {
+            if (out->useTilingPatternFill() && out->tilingPatternFill(state, this, catalog, tPat, m1, xi0, yi0, xi1, yi1, xstep, ystep)) {
                 // do nothing
             } else {
                 out->updatePatternOpacity(state);

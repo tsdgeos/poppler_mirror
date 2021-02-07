@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010, 2011, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -73,15 +73,14 @@ void PreScanOutputDev::eoFill(GfxState *state)
     check(state->getFillColorSpace(), state->getFillColor(), state->getFillOpacity(), state->getBlendMode());
 }
 
-bool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str, const double *pmat, int paintType, int /*tilingType*/, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                         double xStep, double yStep)
+bool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
-    if (paintType == 1) {
+    if (tPat->getPaintType() == 1) {
         bool tilingNeeded = (x1 - x0 != 1 || y1 - y0 != 1);
         if (tilingNeeded) {
             inTilingPatternFill++;
         }
-        gfx->drawForm(str, resDict, mat, bbox);
+        gfx->drawForm(tPat->getContentStream(), tPat->getResDict(), mat, tPat->getBBox());
         if (tilingNeeded) {
             inTilingPatternFill--;
         }

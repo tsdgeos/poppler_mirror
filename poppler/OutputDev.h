@@ -19,7 +19,7 @@
 // Copyright (C) 2007, 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -229,8 +229,7 @@ public:
     virtual void stroke(GfxState * /*state*/) { }
     virtual void fill(GfxState * /*state*/) { }
     virtual void eoFill(GfxState * /*state*/) { }
-    virtual bool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, Object * /*str*/, const double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/, const double * /*mat*/,
-                                   const double * /*bbox*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/, double /*yStep*/)
+    virtual bool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, GfxTilingPattern * /*tPat*/, const double * /*mat*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/, double /*yStep*/)
     {
         return false;
     }

@@ -4445,9 +4445,15 @@ bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                    double xStep, double yStep)
+bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
+    const double *bbox = tPat->getBBox();
+    const double *pmat = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    const int tilingType = tPat->getTilingType();
+    Dict *resDict = tPat->getResDict();
+    Object *str = tPat->getContentStream();
+
     if (x1 - x0 == 1 && y1 - y0 == 1) {
         // Don't need to use patterns if only one instance of the pattern is used
         PDFRectangle box;

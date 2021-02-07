@@ -23,7 +23,7 @@
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 //
@@ -170,8 +170,7 @@ public:
     void fill(GfxState *state) override;
     void eoFill(GfxState *state) override;
     void clipToStrokePath(GfxState *state) override;
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                           double yStep) override;
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
     bool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
 #endif
@@ -421,11 +420,7 @@ public:
     void fill(GfxState *state) override { }
     void eoFill(GfxState *state) override { }
     void clipToStrokePath(GfxState *state) override { }
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                           double yStep) override
-    {
-        return true;
-    }
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override { return true; }
     bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override { return true; }
     bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double sMin, double sMax) override { return true; }
 
