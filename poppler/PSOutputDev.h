@@ -536,6 +536,7 @@ private:
 #endif
 
     bool ok; // set up ok?
+    std::set<int> patternsBeingTiled; // the patterns that are being tiled
 
     friend class WinPDFPrinter;
 };
