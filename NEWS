@@ -1,3 +1,22 @@
+Release 21.02.0:
+        core:
+         * GfxCal*ColorSpace: introduce Bradford transform for chromatic adaptation
+         * Fix memory leak if saving the file fails
+         * Internal code improvements
+         * Fix various issues handling broken files
+         * Make checkedAdd work for long long in MSVC
+
+        qt5:
+         * Properly export NewSignatureData class
+         * Fix regression in QIODeviceOutStream + MSVC
+
+        qt6:
+         * Properly export NewSignatureData class
+         * Fix regression in QIODeviceOutStream + MSVC
+
+        utils:
+         * pdftohtml: Fix error() parameter type
+
 Release 21.01.0:
         core:
          * Faster routines for jpeg decoding

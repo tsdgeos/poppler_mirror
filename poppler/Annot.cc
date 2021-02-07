@@ -219,16 +219,17 @@ static std::unique_ptr<LinkAction> getAdditionalAction(Annot::AdditionalActionsT
     Object additionalActionsObject = additionalActions->fetch(doc->getXRef());
 
     if (additionalActionsObject.isDict()) {
-        const char *key =
-                (type == Annot::actionCursorEntering ? "E"
-                                                     : type == Annot::actionCursorLeaving ? "X"
-                                                                                          : type == Annot::actionMousePressed ? "D"
-                                                                                                                              : type == Annot::actionMouseReleased ? "U"
-                                                                                                                                                                   : type == Annot::actionFocusIn ? "Fo"
-                                                                                                                                                                                                  : type == Annot::actionFocusOut
-                                                                 ? "Bl"
-                                                                 : type == Annot::actionPageOpening ? "PO"
-                                                                                                    : type == Annot::actionPageClosing ? "PC" : type == Annot::actionPageVisible ? "PV" : type == Annot::actionPageInvisible ? "PI" : nullptr);
+        const char *key = (type == Annot::actionCursorEntering          ? "E"
+                                   : type == Annot::actionCursorLeaving ? "X"
+                                   : type == Annot::actionMousePressed  ? "D"
+                                   : type == Annot::actionMouseReleased ? "U"
+                                   : type == Annot::actionFocusIn       ? "Fo"
+                                   : type == Annot::actionFocusOut      ? "Bl"
+                                   : type == Annot::actionPageOpening   ? "PO"
+                                   : type == Annot::actionPageClosing   ? "PC"
+                                   : type == Annot::actionPageVisible   ? "PV"
+                                   : type == Annot::actionPageInvisible ? "PI"
+                                                                        : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
         if (actionObject.isDict())
