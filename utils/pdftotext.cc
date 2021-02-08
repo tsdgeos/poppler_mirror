@@ -82,6 +82,7 @@ static int h = 0;
 static bool bbox = false;
 static bool bboxLayout = false;
 static bool physLayout = false;
+static bool useCropBox = false;
 static double fixedPitch = 0;
 static bool rawOrder = false;
 static bool discardDiag = false;
@@ -114,6 +115,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-nopgbrk", argFlag, &noPageBreaks, 0, "don't insert page breaks between pages" },
                                    { "-bbox", argFlag, &bbox, 0, "output bounding box for each word and page size to html.  Sets -htmlmeta" },
                                    { "-bbox-layout", argFlag, &bboxLayout, 0, "like -bbox but with extra layout bounding box data.  Sets -htmlmeta" },
+                                   { "-cropbox", argFlag, &useCropBox, 0, "use the crop box rather than media box" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
@@ -496,8 +498,10 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
 
     fprintf(f, "<doc>\n");
     for (int page = first; page <= last; ++page) {
-        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
-        doc->displayPage(textOut, page, resolution, resolution, 0, true, false, false);
+        const double wid = useCropBox ? doc->getPageCropWidth(page) : doc->getPageMediaWidth(page);
+        const double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
+        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", wid, hgt);
+        doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
         for (flow = textOut->getFlows(); flow; flow = flow->getNext()) {
             fprintf(f, "    <flow>\n");
             for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
@@ -519,8 +523,10 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
 {
     fprintf(f, "<doc>\n");
     for (int page = first; page <= last; ++page) {
-        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
-        doc->displayPage(textOut, page, resolution, resolution, 0, true, false, false);
+        double wid = useCropBox ? doc->getPageCropWidth(page) : doc->getPageMediaWidth(page);
+        double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
+        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", wid, hgt);
+        doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
         TextWordList *wordlist = textOut->makeWordList();
         const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
         TextWord *word;
