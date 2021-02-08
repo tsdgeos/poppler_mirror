@@ -4420,7 +4420,7 @@ GooString *TextSelectionDumper::getText()
             TextWordSelection *sel = (*lineWords)[j];
 
             page->dumpFragment(sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
-            if (j < lineWords->size() - 1)
+            if (j < lineWords->size() - 1 && sel->word->spaceAfter)
                 text->append(space, spaceLen);
         }
         if (i < nLines - 1)
