@@ -32,7 +32,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -132,7 +132,7 @@ public:
     PDFDoc(const PDFDoc &) = delete;
     PDFDoc &operator=(const PDFDoc &) = delete;
 
-    static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
+    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
 
     // Was PDF document successfully opened?
     bool isOk() const { return ok; }

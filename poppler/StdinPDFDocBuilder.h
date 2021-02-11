@@ -6,6 +6,7 @@
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -24,7 +25,7 @@ class StdinPDFDocBuilder : public PDFDocBuilder
 {
 
 public:
-    PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
+    std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
     bool supports(const GooString &uri) override;
 };
 

@@ -30,7 +30,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -155,7 +155,7 @@ static std::string myXmlTokenReplace(const char *inString)
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     GooString *textFileName;
     GooString *ownerPW, *userPW;
@@ -346,9 +346,9 @@ int main(int argc, char *argv[])
                 textOut->setTextPageBreaks(false);
             }
             if (bboxLayout) {
-                printDocBBox(f, doc, textOut, firstPage, lastPage);
+                printDocBBox(f, doc.get(), textOut, firstPage, lastPage);
             } else {
-                printWordBBox(f, doc, textOut, firstPage, lastPage);
+                printWordBBox(f, doc.get(), textOut, firstPage, lastPage);
             }
         }
         if (f != stdout) {
@@ -404,7 +404,6 @@ int main(int argc, char *argv[])
 err3:
     delete textFileName;
 err2:
-    delete doc;
     delete fileName;
 err1:
 err0:

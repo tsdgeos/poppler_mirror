@@ -29,7 +29,7 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 <corentinf@free.fr>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 // Copyright (C) 2019 Sébastien Berthier <s.berthier@bee-buzziness.com>
@@ -381,7 +381,6 @@ static void processPageJobs()
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
     GooString *fileName = nullptr;
     char *ppmRoot = nullptr;
     char *ppmFile;
@@ -421,7 +420,7 @@ int main(int argc, char *argv[])
         }
         if (printVersion || printHelp)
             exitCode = 0;
-        goto err0;
+        return exitCode;
     }
     if (argc > 1)
         fileName = new GooString(argv[1]);
@@ -484,7 +483,7 @@ int main(int argc, char *argv[])
         delete fileName;
         fileName = new GooString("fd://0");
     }
-    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW));
     delete fileName;
 
     if (userPW) {
@@ -494,8 +493,7 @@ int main(int argc, char *argv[])
         delete ownerPW;
     }
     if (!doc->isOk()) {
-        exitCode = 1;
-        goto err1;
+        return 1;
     }
 
     // get page range
@@ -507,7 +505,7 @@ int main(int argc, char *argv[])
         lastPage = doc->getNumPages();
     if (lastPage < firstPage) {
         fprintf(stderr, "Wrong page range given: the first page (%d) can not be after the last page (%d).\n", firstPage, lastPage);
-        goto err1;
+        return exitCode;
     }
 
     // If our page range selection and document size indicate we're only
@@ -515,7 +513,7 @@ int main(int argc, char *argv[])
     // filter out that single page.
     if (firstPage == lastPage && ((printOnlyEven && firstPage % 2 == 1) || (printOnlyOdd && firstPage % 2 == 0))) {
         fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
-        goto err1;
+        return exitCode;
     }
 
     if (singleFile && firstPage < lastPage) {
@@ -540,12 +538,12 @@ int main(int argc, char *argv[])
         displayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(displayprofilename.c_str(), "r"));
         if (!displayprofile) {
             fprintf(stderr, "Could not open the ICC profile \"%s\".\n", displayprofilename.c_str());
-            goto err1;
+            return exitCode;
         }
         if (!cmsIsIntentSupported(displayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT)
             && !cmsIsIntentSupported(displayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
             fprintf(stderr, "ICC profile \"%s\" is not an output profile.\n", displayprofilename.c_str());
-            goto err1;
+            return exitCode;
         }
         profilecolorspace = cmsGetColorSpace(displayprofile.get());
         // Note: In contrast to pdftops we do not fail if a non-matching ICC profile is supplied.
@@ -568,19 +566,19 @@ int main(int argc, char *argv[])
     if (!defaultgrayprofilename.toStr().empty()) {
         defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
-            goto err1;
+            return exitCode;
         }
     }
     if (!defaultrgbprofilename.toStr().empty()) {
         defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
-            goto err1;
+            return exitCode;
         }
     }
     if (!defaultcmykprofilename.toStr().empty()) {
         defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
-            goto err1;
+            return exitCode;
         }
     }
 #endif
@@ -598,7 +596,7 @@ int main(int argc, char *argv[])
     splashOut->setDefaultRGBProfile(defaultrgbprofile);
     splashOut->setDefaultCMYKProfile(defaultcmykprofile);
 #    endif
-    splashOut->startDoc(doc);
+    splashOut->startDoc(doc.get());
 
 #endif // UTILS_USE_PTHREADS
 
@@ -656,13 +654,13 @@ int main(int argc, char *argv[])
         }
 #ifndef UTILS_USE_PTHREADS
         // process job in main thread
-        savePageSlice(doc, splashOut, pg, param_x, param_y, param_w, param_h, pg_w, pg_h, ppmFile);
+        savePageSlice(doc.get(), splashOut, pg, param_x, param_y, param_w, param_h, pg_w, pg_h, ppmFile);
 
         delete[] ppmFile;
 #else
 
         // queue job for worker threads
-        PageJob pageJob = { .doc = doc,
+        PageJob pageJob = { .doc = doc.get(),
                             .pg = pg,
 
                             .pg_w = pg_w,
@@ -701,12 +699,5 @@ int main(int argc, char *argv[])
 
 #endif // UTILS_USE_PTHREADS
 
-    exitCode = 0;
-
-    // clean up
-err1:
-    delete doc;
-err0:
-
-    return exitCode;
+    return 0;
 }

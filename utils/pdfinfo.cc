@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -807,7 +807,7 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     GooString *ownerPW, *userPW;
     const UnicodeMap *uMap;
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
         }
     } else if (printJS) {
         // print javascript
-        JSInfo jsInfo(doc, firstPage - 1);
+        JSInfo jsInfo(doc.get(), firstPage - 1);
         jsInfo.scanJS(lastPage - firstPage + 1, stdout, uMap);
     } else if (printStructure || printStructureText) {
         // print structure
@@ -926,7 +926,7 @@ int main(int argc, char *argv[])
             }
         }
     } else if (printDests) {
-        printDestinations(doc, uMap);
+        printDestinations(doc.get(), uMap);
     } else {
         // print info
         long long filesize = 0;
@@ -941,13 +941,12 @@ int main(int argc, char *argv[])
         if (multiPage == false)
             lastPage = 1;
 
-        printInfo(doc, uMap, filesize, multiPage);
+        printInfo(doc.get(), uMap, filesize, multiPage);
     }
     exitCode = 0;
 
     // clean up
 err2:
-    delete doc;
     delete fileName;
 err1:
 err0:

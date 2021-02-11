@@ -34,7 +34,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2020 Salvo Miosi <salvo.ilmiosi@gmail.com>
 //
@@ -855,7 +855,6 @@ static void checkInvalidImageOption(bool option, const char *option_name)
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
     GooString *fileName = nullptr;
     GooString *outputName = nullptr;
     GooString *outputFileName = nullptr;
@@ -1061,7 +1060,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
     if (!doc->isOk()) {
         fprintf(stderr, "Error opening PDF file.\n");
         exit(1);
@@ -1126,7 +1125,7 @@ int main(int argc, char *argv[])
 #ifdef USE_CMS
     cairoOut->setDisplayProfile(profile);
 #endif
-    cairoOut->startDoc(doc);
+    cairoOut->startDoc(doc.get());
     if (sz != 0)
         crop_w = crop_h = sz;
     pg_num_len = numberOfCharacters(doc->getNumPages());
@@ -1181,14 +1180,13 @@ int main(int argc, char *argv[])
         if (pg == firstPage)
             beginDocument(fileName, outputFileName, output_w, output_h);
         beginPage(&output_w, &output_h);
-        renderPage(doc, cairoOut, pg, pg_w, pg_h, output_w, output_h);
+        renderPage(doc.get(), cairoOut, pg, pg_w, pg_h, output_w, output_h);
         endPage(imageFileName);
     }
     endDocument();
 
     // clean up
     delete cairoOut;
-    delete doc;
     if (fileName)
         delete fileName;
     if (outputName)
