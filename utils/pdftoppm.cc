@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -208,6 +208,8 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "--help", argFlag, &printHelp, 0, "print usage information" },
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
+
+static constexpr int kOtherError = 99;
 
 static bool needToRotate(int angle)
 {
@@ -399,7 +401,6 @@ int main(int argc, char *argv[])
     pthread_t *jobs;
 #endif // UTILS_USE_PTHREADS
     bool ok;
-    int exitCode;
     int pg, pg_num_len;
     double pg_w, pg_h;
 #ifdef USE_CMS
@@ -407,7 +408,6 @@ int main(int argc, char *argv[])
 #endif
 
     Win32Console win32Console(&argc, &argv);
-    exitCode = 99;
 
     // parse args
     ok = parseArgs(argDesc, &argc, argv);
@@ -425,9 +425,11 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftoppm", "[PDF-file [PPM-file-prefix]]", argDesc);
         }
-        if (printVersion || printHelp)
-            exitCode = 0;
-        return exitCode;
+        if (printVersion || printHelp) {
+            return 0;
+        } else {
+            return kOtherError;
+        }
     }
     if (argc > 1)
         fileName = new GooString(argv[1]);
@@ -512,7 +514,7 @@ int main(int argc, char *argv[])
         lastPage = doc->getNumPages();
     if (lastPage < firstPage) {
         fprintf(stderr, "Wrong page range given: the first page (%d) can not be after the last page (%d).\n", firstPage, lastPage);
-        return exitCode;
+        return kOtherError;
     }
 
     // If our page range selection and document size indicate we're only
@@ -520,7 +522,7 @@ int main(int argc, char *argv[])
     // filter out that single page.
     if (firstPage == lastPage && ((printOnlyEven && firstPage % 2 == 1) || (printOnlyOdd && firstPage % 2 == 0))) {
         fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
-        return exitCode;
+        return kOtherError;
     }
 
     if (singleFile && firstPage < lastPage) {
@@ -545,12 +547,12 @@ int main(int argc, char *argv[])
         displayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(displayprofilename.c_str(), "r"));
         if (!displayprofile) {
             fprintf(stderr, "Could not open the ICC profile \"%s\".\n", displayprofilename.c_str());
-            return exitCode;
+            return kOtherError;
         }
         if (!cmsIsIntentSupported(displayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT)
             && !cmsIsIntentSupported(displayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
             fprintf(stderr, "ICC profile \"%s\" is not an output profile.\n", displayprofilename.c_str());
-            return exitCode;
+            return kOtherError;
         }
         profilecolorspace = cmsGetColorSpace(displayprofile.get());
         // Note: In contrast to pdftops we do not fail if a non-matching ICC profile is supplied.
@@ -573,19 +575,19 @@ int main(int argc, char *argv[])
     if (!defaultgrayprofilename.toStr().empty()) {
         defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
-            return exitCode;
+            return kOtherError;
         }
     }
     if (!defaultrgbprofilename.toStr().empty()) {
         defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
-            return exitCode;
+            return kOtherError;
         }
     }
     if (!defaultcmykprofilename.toStr().empty()) {
         defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
-            return exitCode;
+            return kOtherError;
         }
     }
 #endif
