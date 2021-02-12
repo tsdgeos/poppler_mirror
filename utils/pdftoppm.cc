@@ -137,6 +137,7 @@ static SplashThinLineMode thinLineMode = splashThinLineDefault;
 static int numberOfJobs = 1;
 #endif // UTILS_USE_PTHREADS
 static bool quiet = false;
+static bool progress = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
@@ -199,6 +200,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 #endif // UTILS_USE_PTHREADS
 
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
+                                   { "-progress", argFlag, &progress, 0, "print progress info" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
@@ -322,6 +324,10 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
         } else {
             bitmap->writePNMFile(stdout);
         }
+    }
+
+    if (progress) {
+        fprintf(stderr, "%d %d %s\n", pg, lastPage, ppmFile != nullptr ? ppmFile : "");
     }
 }
 
