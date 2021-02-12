@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012-2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012-2014, 2017, 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2016 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -134,34 +134,27 @@ static bool extractPages(const char *srcFileName, const char *destFileName)
     return true;
 }
 
+static constexpr int kOtherError = 99;
+
 int main(int argc, char *argv[])
 {
-    bool ok;
-    int exitCode;
-
-    exitCode = 99;
-
     // parse args
     Win32Console win32console(&argc, &argv);
-    ok = parseArgs(argDesc, &argc, argv);
-    if (!ok || argc != 3 || printVersion || printHelp) {
+    const bool parseOK = parseArgs(argDesc, &argc, argv);
+    if (!parseOK || argc != 3 || printVersion || printHelp) {
         fprintf(stderr, "pdfseparate version %s\n", PACKAGE_VERSION);
         fprintf(stderr, "%s\n", popplerCopyright);
         fprintf(stderr, "%s\n", xpdfCopyright);
         if (!printVersion) {
             printUsage("pdfseparate", "<PDF-sourcefile> <PDF-pattern-destfile>", argDesc);
         }
-        if (printVersion || printHelp)
-            exitCode = 0;
-        goto err0;
+        if (printVersion || printHelp) {
+            return 0;
+        } else {
+            return kOtherError;
+        }
     }
     globalParams = std::make_unique<GlobalParams>();
-    ok = extractPages(argv[1], argv[2]);
-    if (ok) {
-        exitCode = 0;
-    }
-
-err0:
-
-    return exitCode;
+    const bool extractOK = extractPages(argv[1], argv[2]);
+    return extractOK ? 0 : kOtherError;
 }
