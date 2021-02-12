@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -137,9 +137,7 @@ int main(int argc, char *argv[])
     int majorVersion = 0;
     int minorVersion = 0;
     char *fileName = argv[argc - 1];
-    int exitCode;
 
-    exitCode = 99;
     const bool ok = parseArgs(argDesc, &argc, argv);
     if (!ok || argc < 3 || printVersion || printHelp) {
         fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
@@ -148,11 +146,11 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdfunite", "<PDF-sourcefile-1>..<PDF-sourcefile-n> <PDF-destfile>", argDesc);
         }
-        if (printVersion || printHelp)
-            exitCode = 0;
-        return exitCode;
+        if (printVersion || printHelp) {
+            return 0;
+        }
+        return 99;
     }
-    exitCode = 0;
     globalParams = std::make_unique<GlobalParams>();
 
     for (i = 1; i < argc - 1; i++) {
@@ -394,5 +392,5 @@ int main(int argc, char *argv[])
     delete countRef;
     for (i = 0; i < (int)docs.size(); i++)
         delete docs[i];
-    return exitCode;
+    return 0;
 }
