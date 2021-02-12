@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -878,7 +878,7 @@ public:
     bool getHasBBox() const { return hasBBox; }
 
 protected:
-    bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    virtual bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
     // 1: Function-based shading
     // 2: Axial shading
@@ -922,6 +922,9 @@ public:
 
     virtual double getDistance(double sMin, double sMax) const = 0;
 
+protected:
+    bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state) override;
+
 private:
     double t0, t1;
     std::vector<std::unique_ptr<Function>> funcs;
@@ -959,6 +962,9 @@ public:
     int getNFuncs() const { return funcs.size(); }
     const Function *getFunc(int i) const { return funcs[i].get(); }
     void getColor(double x, double y, GfxColor *color) const;
+
+protected:
+    bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state) override;
 
 private:
     double x0, y0, x1, y1;
@@ -1087,6 +1093,9 @@ public:
 
     void getParameterizedColor(double t, GfxColor *color) const;
 
+protected:
+    bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state) override;
+
 private:
     GfxGouraudVertex *vertices;
     int nVertices;
@@ -1164,6 +1173,9 @@ public:
     }
 
     void getParameterizedColor(double t, GfxColor *color) const;
+
+protected:
+    bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state) override;
 
 private:
     GfxPatch *patches;
