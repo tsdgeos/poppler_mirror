@@ -133,7 +133,10 @@ static void pgd_selections_update_selected_text(PgdSelectionsDemo *demo)
 
     text = poppler_page_get_selected_text(demo->page, demo->style, &demo->doc_area);
     if (text) {
-        demo->selected_text = g_utf8_normalize(text, -1, G_NORMALIZE_NFKC);
+        /* For copying text from the document to the clipboard, we want a normalization
+         * that preserves 'canonical equivalence' i.e. that text after normalization
+         * is not visually different than the original text. Issue #724 */
+        demo->selected_text = g_utf8_normalize(text, -1, G_NORMALIZE_NFC);
         g_free(text);
         gtk_widget_set_sensitive(demo->copy_button, TRUE);
     }
