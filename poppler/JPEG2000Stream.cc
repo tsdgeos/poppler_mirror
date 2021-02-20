@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -267,24 +267,22 @@ void JPXStream::init()
     gfree(buf);
 
     if (priv->image) {
-        int numComps = (priv->image) ? priv->image->numcomps : 1;
+        int numComps = priv->image->numcomps;
         int alpha = 0;
-        if (priv->image) {
-            if (priv->image->color_space == OPJ_CLRSPC_SRGB && numComps == 4) {
-                numComps = 3;
-                alpha = 1;
-            } else if (priv->image->color_space == OPJ_CLRSPC_SYCC && numComps == 4) {
-                numComps = 3;
-                alpha = 1;
-            } else if (numComps == 2) {
-                numComps = 1;
-                alpha = 1;
-            } else if (numComps > 4) {
-                numComps = 4;
-                alpha = 1;
-            } else {
-                alpha = 0;
-            }
+        if (priv->image->color_space == OPJ_CLRSPC_SRGB && numComps == 4) {
+            numComps = 3;
+            alpha = 1;
+        } else if (priv->image->color_space == OPJ_CLRSPC_SYCC && numComps == 4) {
+            numComps = 3;
+            alpha = 1;
+        } else if (numComps == 2) {
+            numComps = 1;
+            alpha = 1;
+        } else if (numComps > 4) {
+            numComps = 4;
+            alpha = 1;
+        } else {
+            alpha = 0;
         }
         priv->npixels = priv->image->comps[0].w * priv->image->comps[0].h;
         priv->ncomps = priv->image->numcomps;
