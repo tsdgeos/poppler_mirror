@@ -1627,7 +1627,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
         callout->x2 = line->getX2();
         callout->y2 = line->getY2();
 
-        if ((multiline = static_cast<AnnotCalloutMultiLine *>(line))) {
+        if ((multiline = dynamic_cast<AnnotCalloutMultiLine *>(line))) {
             callout->multiline = TRUE;
             callout->x3 = multiline->getX3();
             callout->y3 = multiline->getY3();
