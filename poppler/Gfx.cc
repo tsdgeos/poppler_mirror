@@ -453,6 +453,7 @@ Object GfxResources::lookupGStateNF(const char *name)
 //------------------------------------------------------------------------
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
+    : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     int i;
 
@@ -460,8 +461,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
     xref = (xrefA == nullptr) ? doc->getXRef() : xrefA;
     catalog = doc->getCatalog();
     subPage = false;
-    printCommands = globalParams->getPrintCommands();
-    profileCommands = globalParams->getProfileCommands();
     mcStack = nullptr;
     parser = nullptr;
 
@@ -506,6 +505,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
 }
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
+    : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     int i;
 
@@ -519,8 +519,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
     }
     catalog = doc->getCatalog();
     subPage = true;
-    printCommands = globalParams->getPrintCommands();
-    profileCommands = globalParams->getProfileCommands();
     mcStack = nullptr;
     parser = nullptr;
 
