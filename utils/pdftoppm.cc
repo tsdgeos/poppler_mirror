@@ -379,7 +379,7 @@ static void processPageJobs()
 #    endif
         splashOut->startDoc(pageJob.doc);
 
-        savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
+        savePageSlice(pageJob.doc, splashOut, pageJob.pg, param_x, param_y, param_w, param_h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
 
         delete splashOut;
         delete[] pageJob.ppmFile;
