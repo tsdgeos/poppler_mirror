@@ -32,7 +32,6 @@ set(poppler_glib_public_headers
   poppler-form-field.h
   poppler-annot.h
   poppler-layer.h
-  poppler-macros.h
   poppler-movie.h
   poppler-media.h
   poppler.h
@@ -87,19 +86,13 @@ set(poppler_glib_generated_SRCS
   ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
+generate_export_header(poppler-glib EXPORT_MACRO_NAME POPPLER_PUBLIC EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h")
 set_target_properties(poppler-glib PROPERTIES VERSION 8.19.0 SOVERSION 8)
-set_target_properties(poppler-glib PROPERTIES C_VISIBILITY_PRESET hidden)
-set_target_properties(poppler-glib PROPERTIES CXX_VISIBILITY_PRESET hidden)
-set_target_properties(poppler-glib PROPERTIES VISIBILITY_INLINES_HIDDEN 1)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_GLIB_SOVERSION poppler-glib SOVERSION)
     set_target_properties(poppler-glib PROPERTIES SUFFIX "-${POPPLER_GLIB_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
-if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
-    target_link_libraries(poppler-glib poppler ${GLIB2_LIBRARIES} ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
-else()
-    target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
-endif()
+target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler-glib Threads::Threads)
 endif()
@@ -109,6 +102,7 @@ install(FILES
   ${poppler_glib_public_headers}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h
   DESTINATION include/poppler/glib)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
@@ -140,7 +134,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
 
   # Load temporary source-file lists, including a few generated at build
   set(orig_introspect_srcs ${poppler_glib_SRCS} ${poppler_glib_public_headers})
-  set(gen_introspect_srcs "poppler-enums.c" "poppler-enums.h" "poppler-features.h")
+  set(gen_introspect_srcs "poppler-enums.c" "poppler-enums.h" "poppler-features.h" "poppler-macros.h")
   # Prefix the files with their correct directories for full paths
   _gir_list_prefix(_orig_introspect_paths orig_introspect_srcs "${CMAKE_CURRENT_SOURCE_DIR}/")
   _gir_list_prefix(_gen_introspect_paths gen_introspect_srcs "${CMAKE_CURRENT_BINARY_DIR}/")

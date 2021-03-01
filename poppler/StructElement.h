@@ -17,6 +17,7 @@
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"
+#include "poppler_private_export.h"
 #include <vector>
 #include <set>
 
@@ -25,7 +26,7 @@ class Dict;
 class StructElement;
 class StructTreeRoot;
 
-class Attribute
+class POPPLER_PRIVATE_EXPORT Attribute
 {
 public:
     enum Type
@@ -160,7 +161,7 @@ private:
     friend class StructElement;
 };
 
-class StructElement
+class POPPLER_PRIVATE_EXPORT StructElement
 {
 public:
     enum Type

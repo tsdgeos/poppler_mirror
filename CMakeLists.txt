@@ -1,6 +1,6 @@
 project(poppler)
 
-cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
@@ -20,6 +20,7 @@ test_big_endian(WORDS_BIGENDIAN)
 include(CheckFileOffsetBits)
 CHECK_FILE_OFFSET_BITS()
 
+include(GenerateExportHeader)
 include(GNUInstallDirs)
 
 set(ENABLE_FUZZER FALSE)
@@ -34,7 +35,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "21")
-set(POPPLER_MINOR_VERSION_STRING "02")
+set(POPPLER_MINOR_VERSION_STRING "03")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -44,6 +45,10 @@ set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_LINK_DEPENDS_NO_SHARED TRUE)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 
 # command line switches
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
@@ -124,9 +129,9 @@ set(TEXTOUT_WORD_LIST ON)
 
 # setting the minimum required versions for some components
 set(CAIRO_VERSION "1.10.0")
-set(GLIB_REQUIRED "2.41")
-set(GTK_REQUIRED "3.8")
-set(GDK_PIXBUF_REQUIRED "2.8")
+set(GLIB_REQUIRED "2.56")
+set(GTK_REQUIRED "3.22")
+set(GDK_PIXBUF_REQUIRED "2.36")
 
 find_package(Freetype REQUIRED)
 if(WITH_FONTCONFIGURATION_FONTCONFIG)
@@ -154,7 +159,7 @@ else()
 endif()
 
 if (ENABLE_QT5)
-  find_package(Qt5Core 5.5)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+  find_package(Qt5Core 5.9)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
   find_package(Qt5Gui)
   find_package(Qt5Xml)
   find_package(Qt5Widgets)
@@ -492,12 +497,7 @@ if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/SignatureHandler.cc
   )
-  if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
-    set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
-    include_directories(SYSTEM ${NSS3_INCLUDE_DIRS})
-  else()
-    set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
-  endif()
+  set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
@@ -570,7 +570,8 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 107.0.0 SOVERSION 107)
+generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
+set_target_properties(poppler PROPERTIES VERSION 108.0.0 SOVERSION 108)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -655,6 +656,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
+    ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
     DESTINATION include/poppler)
   install(FILES

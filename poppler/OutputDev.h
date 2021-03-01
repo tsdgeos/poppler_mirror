@@ -37,6 +37,7 @@
 #define OUTPUTDEV_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "CharTypes.h"
 #include "Object.h"
 #include "PopplerCache.h"
@@ -61,7 +62,7 @@ class Function;
 // OutputDev
 //------------------------------------------------------------------------
 
-class OutputDev
+class POPPLER_PRIVATE_EXPORT OutputDev
 {
 public:
     // Constructor.

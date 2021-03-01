@@ -21,6 +21,7 @@
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
+#include "poppler_private_export.h"
 
 #include <vector>
 #include <functional>
@@ -38,7 +39,7 @@
 #include <secmodt.h>
 #include <sechash.h>
 
-class SignatureHandler
+class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
     explicit SignatureHandler();

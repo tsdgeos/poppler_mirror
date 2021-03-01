@@ -58,7 +58,7 @@ enum PageTransitionDirection
     transitionOutward
 };
 
-class PageTransition
+class POPPLER_PRIVATE_EXPORT PageTransition
 {
 public:
     // Construct a Page Transition.

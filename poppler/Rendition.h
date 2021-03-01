@@ -118,7 +118,7 @@ struct MediaParameters
     MediaWindowParameters windowParams;
 };
 
-class MediaRendition
+class POPPLER_PRIVATE_EXPORT MediaRendition
 {
 public:
     MediaRendition(Object *obj);

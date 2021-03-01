@@ -38,6 +38,8 @@
 #ifndef GooString_H
 #define GooString_H
 
+#include "poppler_private_export.h"
+
 #include <cstdarg>
 #include <string>
 
@@ -47,7 +49,7 @@
 #    define GOOSTRING_FORMAT
 #endif
 
-class GooString : private std::string
+class POPPLER_PRIVATE_EXPORT GooString : private std::string
 {
 public:
     // Create an empty string.

@@ -33,7 +33,7 @@
 // Parser
 //------------------------------------------------------------------------
 
-class Parser
+class POPPLER_PRIVATE_EXPORT Parser
 {
 public:
     // Constructor.

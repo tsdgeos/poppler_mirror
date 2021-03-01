@@ -42,7 +42,7 @@ enum SoundEncoding
     soundALaw // A-law-encoded samples
 };
 
-class Sound
+class POPPLER_PRIVATE_EXPORT Sound
 {
 public:
     // Try to parse the Object obj

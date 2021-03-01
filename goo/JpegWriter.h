@@ -19,6 +19,7 @@
 #define JPEGWRITER_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 
 #ifdef ENABLE_LIBJPEG
 
@@ -27,7 +28,7 @@
 
 struct JpegWriterPrivate;
 
-class JpegWriter : public ImgWriter
+class POPPLER_PRIVATE_EXPORT JpegWriter : public ImgWriter
 {
 public:
     /* RGB                 - 3 bytes/pixel

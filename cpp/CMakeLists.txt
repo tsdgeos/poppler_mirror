@@ -25,6 +25,7 @@ set(poppler_cpp_SRCS
 )
 
 add_library(poppler-cpp ${poppler_cpp_SRCS})
+generate_export_header(poppler-cpp BASE_NAME poppler-cpp EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h")
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.9.0 SOVERSION 0)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
@@ -46,6 +47,7 @@ install(FILES
   poppler-page-transition.h
   poppler-rectangle.h
   poppler-toc.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/cpp)
 

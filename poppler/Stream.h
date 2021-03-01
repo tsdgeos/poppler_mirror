@@ -43,6 +43,7 @@
 #include <cstdio>
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "Object.h"
 
 class GooFile;
@@ -103,7 +104,7 @@ typedef struct _ByteRange
 // Stream (base class)
 //------------------------------------------------------------------------
 
-class Stream
+class POPPLER_PRIVATE_EXPORT Stream
 {
 public:
     // Constructor.
@@ -266,7 +267,7 @@ private:
 //
 // This is the base class for all streams that output to a file
 //------------------------------------------------------------------------
-class OutStream
+class POPPLER_PRIVATE_EXPORT OutStream
 {
 public:
     // Constructor.
@@ -293,7 +294,7 @@ public:
 //------------------------------------------------------------------------
 // FileOutStream
 //------------------------------------------------------------------------
-class FileOutStream : public OutStream
+class POPPLER_PRIVATE_EXPORT FileOutStream : public OutStream
 {
 public:
     FileOutStream(FILE *fa, Goffset startA);
@@ -319,7 +320,7 @@ private:
 // This is the base class for all streams that read directly from a file.
 //------------------------------------------------------------------------
 
-class BaseStream : public Stream
+class POPPLER_PRIVATE_EXPORT BaseStream : public Stream
 {
 public:
     // TODO Mirar si puedo hacer que dictA sea un puntero
@@ -349,7 +350,7 @@ protected:
 // BaseInputStream
 //------------------------------------------------------------------------
 
-class BaseSeekInputStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT BaseSeekInputStream : public BaseStream
 {
 public:
     // This enum is used to tell the seek() method how it must reposition
@@ -430,7 +431,7 @@ protected:
 // ImageStream
 //------------------------------------------------------------------------
 
-class ImageStream
+class POPPLER_PRIVATE_EXPORT ImageStream
 {
 public:
     // Create an image stream object for an image with the specified
@@ -586,7 +587,7 @@ private:
 
 #define cachedStreamBufSize 1024
 
-class CachedFileStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT CachedFileStream : public BaseStream
 {
 public:
     CachedFileStream(CachedFile *ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
@@ -724,7 +725,7 @@ private:
     T *bufPtr;
 };
 
-class MemStream : public BaseMemStream<const char>
+class POPPLER_PRIVATE_EXPORT MemStream : public BaseMemStream<const char>
 {
 public:
     MemStream(const char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
@@ -748,7 +749,7 @@ public:
 // that creating a new FileStream (using makeSubStream).
 //------------------------------------------------------------------------
 
-class EmbedStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT EmbedStream : public BaseStream
 {
 public:
     EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA = false);

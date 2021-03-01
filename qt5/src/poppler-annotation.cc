@@ -1371,7 +1371,7 @@ void Annotation::setModificationDate(const QDateTime &date)
 
     if (d->pdfAnnot) {
         if (date.isValid()) {
-            const time_t t = date.toTime_t();
+            const time_t t = date.toSecsSinceEpoch();
             GooString *s = timeToDateString(&t);
             d->pdfAnnot->setModified(s);
             delete s;
@@ -1408,7 +1408,7 @@ void Annotation::setCreationDate(const QDateTime &date)
     AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
     if (markupann) {
         if (date.isValid()) {
-            const time_t t = date.toTime_t();
+            const time_t t = date.toSecsSinceEpoch();
             GooString *s = timeToDateString(&t);
             markupann->setDate(s);
             delete s;

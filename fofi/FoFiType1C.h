@@ -27,6 +27,8 @@
 
 #include "FoFiBase.h"
 
+#include "poppler_private_export.h"
+
 #include <set>
 
 class GooString;
@@ -148,7 +150,7 @@ struct Type1CEexecBuf
 // FoFiType1C
 //------------------------------------------------------------------------
 
-class FoFiType1C : public FoFiBase
+class POPPLER_PRIVATE_EXPORT FoFiType1C : public FoFiBase
 {
 public:
     // Create a FoFiType1C object from a memory buffer.

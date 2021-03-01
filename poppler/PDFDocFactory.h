@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "PDFDoc.h"
+#include "poppler_private_export.h"
 
 class GooString;
 class PDFDocBuilder;
@@ -32,7 +33,7 @@ class PDFDocBuilder;
 // the constructor, or by registering a new PDFDocBuilder afterwards.
 //------------------------------------------------------------------------
 
-class PDFDocFactory
+class POPPLER_PRIVATE_EXPORT PDFDocFactory
 {
 
 public:

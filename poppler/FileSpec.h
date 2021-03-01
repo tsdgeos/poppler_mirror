@@ -17,8 +17,9 @@
 #define FILE_SPEC_H
 
 #include "Object.h"
+#include "poppler_private_export.h"
 
-class EmbFile
+class POPPLER_PRIVATE_EXPORT EmbFile
 {
 public:
     EmbFile(Object &&efStream);
@@ -48,7 +49,7 @@ private:
     Object m_objStr;
 };
 
-class FileSpec
+class POPPLER_PRIVATE_EXPORT FileSpec
 {
 public:
     FileSpec(const Object *fileSpec);
@@ -79,6 +80,6 @@ private:
 };
 
 Object getFileSpecName(const Object *fileSpec);
-Object getFileSpecNameForPlatform(const Object *fileSpec);
+Object POPPLER_PRIVATE_EXPORT getFileSpecNameForPlatform(const Object *fileSpec);
 
 #endif /* FILE_SPEC_H */

@@ -1,3 +1,29 @@
+Release 21.03.0:
+        core:
+         * Fix parsing text in some broken pdf files. Issue #1040
+         * Fix memory issue when using threads. Issue #1050
+         * TextSelectionDumper: Fix getText() for space after word
+         * Change signature of OutputDev:tilingPatternFill
+         * Make PDFDocBuilder return a std::unique_ptr
+         * Improve well formed check for shading functions
+         * Fix leak in case of fread failing
+         * Fix memory leak in broken file in JBIG2Stream::readGenericBitmap
+         * PSOutputDev: Fix stack overflow in broken files
+
+        glib:
+         * poppler_annot_free_text_get_callout_line: Fix wrong static cast
+         * poppler-structure-element: fix memleak
+         * Improve documentation
+         * demo: keep same visual appearance between displayed and copied text
+
+        utils:
+         * pdftotext: Add -cropbox option
+         * pdftoppm: Add -progress option
+         * pdftoppm: Fix rounding bug in computation of output bitmap size. Issue #927
+
+        qt6:
+         * Add missing poppler-qt6.pc.cmake
+
 Release 21.02.0:
         core:
          * GfxCal*ColorSpace: introduce Bradford transform for chromatic adaptation

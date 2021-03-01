@@ -958,8 +958,8 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->nick_name = ci->getNickName().c_str();
 
         X509CertificateInfo::Validity certValidity = ci->getValidity();
-        certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
-        certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
+        certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, Qt::UTC);
+        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, Qt::UTC);
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
         certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
@@ -978,7 +978,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
 SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
 {
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
+    const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
     SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
 
     // get certificate info

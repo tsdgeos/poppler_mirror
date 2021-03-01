@@ -43,7 +43,7 @@ class PSStack;
 #define funcMaxOutputs 32
 #define sampledFuncMaxInputs 16
 
-class Function
+class POPPLER_PRIVATE_EXPORT Function
 {
 public:
     Function();

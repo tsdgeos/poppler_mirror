@@ -32,6 +32,7 @@
 
 #include "Object.h"
 #include "Annot.h"
+#include "poppler_private_export.h"
 
 #include <ctime>
 
@@ -101,7 +102,7 @@ class FormFieldChoice;
 // to a page.
 //------------------------------------------------------------------------
 
-class FormWidget
+class POPPLER_PRIVATE_EXPORT FormWidget
 {
 public:
     virtual ~FormWidget();
@@ -181,7 +182,7 @@ protected:
 // FormWidgetButton
 //------------------------------------------------------------------------
 
-class FormWidgetButton : public FormWidget
+class POPPLER_PRIVATE_EXPORT FormWidgetButton : public FormWidget
 {
 public:
     FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -205,7 +206,7 @@ protected:
 // FormWidgetText
 //------------------------------------------------------------------------
 
-class FormWidgetText : public FormWidget
+class POPPLER_PRIVATE_EXPORT FormWidgetText : public FormWidget
 {
 public:
     FormWidgetText(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -240,7 +241,7 @@ protected:
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
-class FormWidgetChoice : public FormWidget
+class POPPLER_PRIVATE_EXPORT FormWidgetChoice : public FormWidget
 {
 public:
     FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -284,7 +285,7 @@ protected:
 // FormWidgetSignature
 //------------------------------------------------------------------------
 
-class FormWidgetSignature : public FormWidget
+class POPPLER_PRIVATE_EXPORT FormWidgetSignature : public FormWidget
 {
 public:
     FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
@@ -587,7 +588,7 @@ protected:
 // FormFieldSignature
 //------------------------------------------------------------------------
 
-class FormFieldSignature : public FormField
+class POPPLER_PRIVATE_EXPORT FormFieldSignature : public FormField
 {
 public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
@@ -636,7 +637,7 @@ private:
 // Catalog entry).
 //------------------------------------------------------------------------
 
-class Form
+class POPPLER_PRIVATE_EXPORT Form
 {
 public:
     Form(PDFDoc *docA, Object *acroForm);
@@ -694,7 +695,7 @@ private:
 // FormPageWidgets
 //------------------------------------------------------------------------
 
-class FormPageWidgets
+class POPPLER_PRIVATE_EXPORT FormPageWidgets
 {
 public:
     FormPageWidgets(Annots *annots, unsigned int page, Form *form);

@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <string>
 #include "FoFiBase.h"
+#include "poppler_private_export.h"
 
 class GooString;
 struct TrueTypeTable;
@@ -41,7 +42,7 @@ struct TrueTypeCmap;
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-class FoFiTrueType : public FoFiBase
+class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
 public:
     // Create a FoFiTrueType object from a memory buffer.

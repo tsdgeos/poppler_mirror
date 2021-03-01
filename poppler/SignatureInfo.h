@@ -19,6 +19,8 @@
 #include <memory>
 #include <ctime>
 
+#include "poppler_private_export.h"
+
 enum SignatureValidationStatus
 {
     SIGNATURE_VALID,
@@ -43,7 +45,7 @@ enum CertificateValidationStatus
 
 class X509CertificateInfo;
 
-class SignatureInfo
+class POPPLER_PRIVATE_EXPORT SignatureInfo
 {
 public:
     SignatureInfo();

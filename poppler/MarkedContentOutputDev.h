@@ -13,6 +13,7 @@
 #define MARKEDCONTENTOUTPUTDEV_H
 
 #include "goo/gmem.h"
+#include "poppler_private_export.h"
 #include "OutputDev.h"
 #include "GfxState.h"
 #include "GfxFont.h"
@@ -84,7 +85,7 @@ private:
 
 typedef std::vector<TextSpan> TextSpanArray;
 
-class MarkedContentOutputDev : public OutputDev
+class POPPLER_PRIVATE_EXPORT MarkedContentOutputDev : public OutputDev
 {
 public:
     MarkedContentOutputDev(int mcidA);

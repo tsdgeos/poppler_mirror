@@ -35,6 +35,7 @@
 #include "splash/SplashTypes.h"
 #include "splash/SplashPattern.h"
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "OutputDev.h"
 #include "GfxState.h"
 #include "GlobalParams.h"
@@ -189,7 +190,7 @@ private:
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-class SplashOutputDev : public OutputDev
+class POPPLER_PRIVATE_EXPORT SplashOutputDev : public OutputDev
 {
 public:
     // Constructor.
