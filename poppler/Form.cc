@@ -511,6 +511,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
         if (end - start < len)
             len = end - start;
         if (fread(buf, 1, len, f) != static_cast<size_t>(len)) {
+            delete[] buf;
             return false;
         }
         handler->updateHash(buf, len);

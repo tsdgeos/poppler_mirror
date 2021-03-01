@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -500,8 +500,8 @@ public:
     // Stream accessors.
     void streamReset();
     void streamClose();
-    int streamGetChar() const;
-    int streamGetChars(int nChars, unsigned char *buffer) const;
+    int streamGetChar();
+    int streamGetChars(int nChars, unsigned char *buffer);
     void streamSetPos(Goffset pos, int dir = 0);
     Dict *streamGetDict() const;
 
@@ -663,13 +663,13 @@ inline void Object::streamClose()
     stream->close();
 }
 
-inline int Object::streamGetChar() const
+inline int Object::streamGetChar()
 {
     OBJECT_TYPE_CHECK(objStream);
     return stream->getChar();
 }
 
-inline int Object::streamGetChars(int nChars, unsigned char *buffer) const
+inline int Object::streamGetChars(int nChars, unsigned char *buffer)
 {
     OBJECT_TYPE_CHECK(objStream);
     return stream->doGetChars(nChars, buffer);

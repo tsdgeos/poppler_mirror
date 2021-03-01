@@ -30,7 +30,7 @@ G_BEGIN_DECLS
  * @POPPLER_ACTION_NONE: no action specified
  * @POPPLER_ACTION_GOTO_DEST: go to destination
  * @POPPLER_ACTION_GOTO_REMOTE: go to destination in another document
- * @POPPLER_ACTION_LAUNCH: launch app (or open document
+ * @POPPLER_ACTION_LAUNCH: launch app (or open document)
  * @POPPLER_ACTION_URI: URI
  * @POPPLER_ACTION_NAMED: predefined action
  * @POPPLER_ACTION_MOVIE: play movies. Since 0.14
@@ -195,7 +195,7 @@ struct _PopplerDest
 /**
  * PopplerActionLayer:
  * @action: a #PopplerActionLayerAction
- * @layers: list of #PopplerLayer<!-- -->s
+ * @layers: (element-type PopplerLayer): list of #PopplerLayer<!-- -->s
  *
  * Action to perform over a list of layers
  */
@@ -205,12 +205,27 @@ struct _PopplerActionLayer
     GList *layers;
 };
 
+/**
+ * PopplerActionAny:
+ * @type: action type
+ * @title: action title
+ *
+ * Fields common to all #PopplerAction<!-- -->s
+ */
 struct _PopplerActionAny
 {
     PopplerActionType type;
     gchar *title;
 };
 
+/**
+ * PopplerActionGotoDest:
+ * @type: action type (%POPPLER_ACTION_GOTO_DEST)
+ * @title: action title
+ * @dest: destination
+ *
+ * Go to destination
+ */
 struct _PopplerActionGotoDest
 {
     PopplerActionType type;
@@ -219,6 +234,15 @@ struct _PopplerActionGotoDest
     PopplerDest *dest;
 };
 
+/**
+ * PopplerActionGotoRemote:
+ * @type: action type (%POPPLER_ACTION_GOTO_REMOTE)
+ * @title: action title
+ * @file_name: file name
+ * @dest: destination
+ *
+ * Go to destination in another document
+ */
 struct _PopplerActionGotoRemote
 {
     PopplerActionType type;
@@ -228,6 +252,15 @@ struct _PopplerActionGotoRemote
     PopplerDest *dest;
 };
 
+/**
+ * PopplerActionLaunch:
+ * @type: action type (%POPPLER_ACTION_LAUNCH)
+ * @title: action title
+ * @file_name: file name
+ * @params: parameters
+ *
+ * Launch app (or open document)
+ */
 struct _PopplerActionLaunch
 {
     PopplerActionType type;
@@ -237,6 +270,14 @@ struct _PopplerActionLaunch
     gchar *params;
 };
 
+/**
+ * PopplerActionUri:
+ * @type: action type (%POPPLER_ACTION_URI)
+ * @title: action title
+ * @uri: URI
+ *
+ * URI
+ */
 struct _PopplerActionUri
 {
     PopplerActionType type;
@@ -245,6 +286,14 @@ struct _PopplerActionUri
     char *uri;
 };
 
+/**
+ * PopplerActionNamed:
+ * @type: action type (%POPPLER_ACTION_NAMED)
+ * @title: action title
+ * @named_dest: named destination
+ *
+ * Predefined action
+ */
 struct _PopplerActionNamed
 {
     PopplerActionType type;
@@ -253,6 +302,17 @@ struct _PopplerActionNamed
     gchar *named_dest;
 };
 
+/**
+ * PopplerActionMovie:
+ * @type: action type (%POPPLER_ACTION_MOVIE)
+ * @title: action title
+ * @operation: operation
+ * @movie: movie
+ *
+ * Play movies.
+ *
+ * Since: 0.14
+ */
 struct _PopplerActionMovie
 {
     PopplerActionType type;
@@ -262,6 +322,17 @@ struct _PopplerActionMovie
     PopplerMovie *movie;
 };
 
+/**
+ * PopplerActionRendition:
+ * @type: action type (%POPPLER_ACTION_RENDITION)
+ * @title: action title
+ * @op: operation
+ * @media: media
+ *
+ * Play multimedia content.
+ *
+ * Since: 0.14
+ */
 struct _PopplerActionRendition
 {
     PopplerActionType type;
@@ -271,6 +342,16 @@ struct _PopplerActionRendition
     PopplerMedia *media;
 };
 
+/**
+ * PopplerActionOCGState:
+ * @type: action type (%POPPLER_ACTION_OCG_STATE)
+ * @title: action title
+ * @state_list: (element-type PopplerActionLayer): list of #PopplerActionLayer<!-- -->s
+ *
+ * State of layer.
+ *
+ * Since: 0.14
+ */
 struct _PopplerActionOCGState
 {
     PopplerActionType type;
@@ -279,6 +360,16 @@ struct _PopplerActionOCGState
     GList *state_list;
 };
 
+/**
+ * PopplerActionJavascript:
+ * @type: action type (%POPPLER_ACTION_JAVASCRIPT)
+ * @title: action title
+ * @script: javascript
+ *
+ * Javascript.
+ *
+ * Since: 0.18
+ */
 struct _PopplerActionJavascript
 {
     PopplerActionType type;
@@ -287,6 +378,22 @@ struct _PopplerActionJavascript
     gchar *script;
 };
 
+/**
+ * PopplerActionResetForm:
+ * @type: action type (%POPPLER_ACTION_RESET_FORM)
+ * @title: action title
+ * @fields: (element-type utf8) (nullable): list of field names to
+ *   reset / retain
+ * @exclude: whether to reset all but the listed fields
+ *
+ * Resets some or all fields within a PDF form.
+ *
+ * The default behavior resets only the list of @fields, but setting
+ * @exclude to %TRUE will cause the action to reset all fields but those
+ * listed. Providing an empty list of fields resets the entire form.
+ *
+ * Since: 0.90
+ */
 struct _PopplerActionResetForm
 {
     PopplerActionType type;
@@ -299,7 +406,7 @@ struct _PopplerActionResetForm
 /**
  * PopplerAction:
  *
- * A data structure for holding actions
+ * A generic wrapper for actions that exposes only #PopplerActionType.
  */
 union _PopplerAction {
     PopplerActionType type;

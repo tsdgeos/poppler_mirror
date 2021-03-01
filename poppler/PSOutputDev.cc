@@ -4445,9 +4445,28 @@ bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                    double xStep, double yStep)
+bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
+    std::set<int>::iterator patternRefIt;
+    const int patternRefNum = tPat->getPatternRefNum();
+    if (patternRefNum != -1) {
+        if (patternsBeingTiled.find(patternRefNum) == patternsBeingTiled.end()) {
+            patternRefIt = patternsBeingTiled.insert(patternRefNum).first;
+        } else {
+            // pretend we drew it anyway
+            error(errSyntaxError, -1, "Loop in pattern fills");
+            return true;
+        }
+    }
+
+    const double *bbox = tPat->getBBox();
+    const double *pmat = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    const int tilingType = tPat->getTilingType();
+    Dict *resDict = tPat->getResDict();
+    Object *str = tPat->getContentStream();
+
+    bool res;
     if (x1 - x0 == 1 && y1 - y0 == 1) {
         // Don't need to use patterns if only one instance of the pattern is used
         PDFRectangle box;
@@ -4467,14 +4486,18 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Ob
         gfx->display(str);
         inType3Char = false;
         delete gfx;
-        return true;
+        res = true;
+    } else if (level == psLevel1 || level == psLevel1Sep) {
+        res = tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+    } else {
+        res = tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     }
 
-    if (level == psLevel1 || level == psLevel1Sep) {
-        return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
-    } else {
-        return tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+    if (patternRefNum != -1) {
+        patternsBeingTiled.erase(patternRefIt);
     }
+
+    return res;
 }
 
 bool PSOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading)

@@ -639,7 +639,10 @@ GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, Poppl
  *
  * Frees @region
  *
- * Deprecated: 0.16
+ * Deprecated: 0.16: Use only to free deprecated regions created by
+ * poppler_page_get_selection_region(). Regions created by
+ * poppler_page_get_selected_region() should be freed with
+ * cairo_region_destroy() instead.
  */
 void poppler_page_selection_region_free(GList *region)
 {

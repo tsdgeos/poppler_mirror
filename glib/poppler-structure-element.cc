@@ -1090,6 +1090,8 @@ static inline void convert_doubles_array(Object *object, gdouble **values, guint
     for (guint i = 0; i < *n_values; i++) {
         doubles[i] = object->arrayGet(i).getNum();
     }
+
+    values = &doubles;
 }
 
 static inline void convert_color(Object *object, PopplerColor *color)

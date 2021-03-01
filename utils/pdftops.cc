@@ -25,7 +25,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -199,7 +199,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     GooString *psFileName;
     PSLevel level;
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
             processcolorformatspecified = true;
         } else {
             fprintf(stderr, "Error: Unknown process color format \"%s\".\n", processcolorformatname.c_str());
-            goto err05;
+            goto err1;
         }
     }
 
@@ -310,12 +310,12 @@ int main(int argc, char *argv[])
         processcolorprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(processcolorprofilename.c_str(), "r"));
         if (!processcolorprofile) {
             fprintf(stderr, "Error: Could not open the ICC profile \"%s\".\n", processcolorprofilename.c_str());
-            goto err05;
+            goto err1;
         }
         if (!cmsIsIntentSupported(processcolorprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT)
             && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
             fprintf(stderr, "Error: ICC profile \"%s\" is not an output profile.\n", processcolorprofilename.c_str());
-            goto err05;
+            goto err1;
         }
         profilecolorspace = cmsGetColorSpace(processcolorprofile.get());
         if (profilecolorspace == cmsSigCmykData) {
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
                 processcolorformatspecified = true;
             } else if (processcolorformat != splashModeCMYK8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a CMYK profile, but process color format is not CMYK8.\n", processcolorprofilename.c_str());
-                goto err05;
+                goto err1;
             }
         } else if (profilecolorspace == cmsSigGrayData) {
             if (!processcolorformatspecified) {
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
                 processcolorformatspecified = true;
             } else if (processcolorformat != splashModeMono8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a monochrome profile, but process color format is not monochrome.\n", processcolorprofilename.c_str());
-                goto err05;
+                goto err1;
             }
         } else if (profilecolorspace == cmsSigRgbData) {
             if (!processcolorformatspecified) {
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
                 processcolorformatspecified = true;
             } else if (processcolorformat != splashModeRGB8) {
                 fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a RGB profile, but process color format is not RGB.\n", processcolorprofilename.c_str());
-                goto err05;
+                goto err1;
             }
         }
     }
@@ -349,10 +349,10 @@ int main(int argc, char *argv[])
     if (processcolorformatspecified) {
         if (level1 && processcolorformat != splashModeMono8) {
             fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8");
-            goto err05;
+            goto err1;
         } else if ((level1Sep || level2Sep || level3Sep || overprint) && processcolorformat != splashModeCMYK8) {
             fprintf(stderr, "Error: Setting -level1sep/-level2sep/-level3sep/-overprint requires -processcolorformat CMYK8");
-            goto err05;
+            goto err1;
         }
     }
 #endif
@@ -361,19 +361,19 @@ int main(int argc, char *argv[])
     if (!defaultgrayprofilename.toStr().empty()) {
         defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
-            goto err05;
+            goto err1;
         }
     }
     if (!defaultrgbprofilename.toStr().empty()) {
         defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
-            goto err05;
+            goto err1;
         }
     }
     if (!defaultcmykprofilename.toStr().empty()) {
         defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
-            goto err05;
+            goto err1;
         }
     }
 #endif
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
     }
 
     // write PostScript file
-    psOut = new PSOutputDev(psFileName->c_str(), doc, nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
+    psOut = new PSOutputDev(psFileName->c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
                             /*imgURXA*/ 0, /*imgURYA*/ 0, psRasterizeWhenNeeded, /*manualCtrlA*/ false, /*customCodeCbkA*/ nullptr, /*customCodeCbkDataA*/ nullptr, level);
     if (noCenter) {
         psOut->setPSCenter(false);
@@ -527,8 +527,6 @@ int main(int argc, char *argv[])
 err2:
     delete psFileName;
 err1:
-    delete doc;
-err05:
     delete fileName;
 err0:
 

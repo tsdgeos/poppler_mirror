@@ -28,7 +28,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -160,7 +160,7 @@ SplashOutputDevNoText::~SplashOutputDevNoText() = default;
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc = nullptr;
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName = nullptr;
     GooString *docTitle = nullptr;
     GooString *author = nullptr, *keywords = nullptr, *subject = nullptr, *date = nullptr;
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
         SplashImageFileFormat format = strcmp(extension, "jpg") ? splashFormatPng : splashFormatJpeg;
 
         splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, false, color);
-        splashOut->startDoc(doc);
+        splashOut->startDoc(doc.get());
 
         for (int pg = firstPage; pg <= lastPage; ++pg) {
             InMemoryFile imf;
@@ -392,14 +392,13 @@ int main(int argc, char *argv[])
         delete htmlOut;
         delete htmlFileName;
         delete fileName;
-        delete doc;
         return -1;
 #endif
     }
 
     if (htmlOut->isOk()) {
         doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0, true, false, false);
-        htmlOut->dumpDocOutline(doc);
+        htmlOut->dumpDocOutline(doc.get());
     }
 
     delete htmlOut;
@@ -408,8 +407,6 @@ int main(int argc, char *argv[])
 
     // clean up
 error:
-    if (doc)
-        delete doc;
     delete fileName;
 
     if (htmlFileName)

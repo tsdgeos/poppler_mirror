@@ -3663,6 +3663,45 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
     return shading;
 }
 
+bool GfxFunctionShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+{
+    const bool parentInit = GfxShading::init(res, dict, out, state);
+    if (!parentInit) {
+        return false;
+    }
+
+    // funcs needs to be one of the two:
+    //  * One function 2-in -> nComps-out
+    //  * nComps functions 2-in -> 1-out
+    const int nComps = colorSpace->getNComps();
+    const int nFuncs = funcs.size();
+    if (nFuncs == 1) {
+        if (funcs[0]->getInputSize() != 2) {
+            error(errSyntaxWarning, -1, "GfxFunctionShading: function with input size != 2");
+            return false;
+        }
+        if (funcs[0]->getOutputSize() != nComps) {
+            error(errSyntaxWarning, -1, "GfxFunctionShading: function with wrong output size");
+            return false;
+        }
+    } else if (nFuncs == nComps) {
+        for (const std::unique_ptr<Function> &f : funcs) {
+            if (f->getInputSize() != 2) {
+                error(errSyntaxWarning, -1, "GfxFunctionShading: function with input size != 2");
+                return false;
+            }
+            if (f->getOutputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxFunctionShading: function with wrong output size");
+                return false;
+            }
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
 GfxShading *GfxFunctionShading::copy() const
 {
     return new GfxFunctionShading(this);
@@ -3680,11 +3719,7 @@ void GfxFunctionShading::getColor(double x, double y, GfxColor *color) const
     in[0] = x;
     in[1] = y;
     for (int i = 0; i < getNFuncs(); ++i) {
-        if (likely(funcs[i]->getInputSize() <= 2)) {
-            funcs[i]->transform(in, &out[i]);
-        } else {
-            error(errSyntaxWarning, -1, "GfxFunctionShading::getColor: function with input size > 2");
-        }
+        funcs[i]->transform(in, &out[i]);
     }
     for (int i = 0; i < gfxColorMaxComps; ++i) {
         color->c[i] = dblToCol(out[i]);
@@ -3734,18 +3769,10 @@ GfxUnivariateShading::~GfxUnivariateShading()
 int GfxUnivariateShading::getColor(double t, GfxColor *color)
 {
     double out[gfxColorMaxComps];
-    int nComps;
 
-    if (likely(getNFuncs() >= 1)) {
-        // NB: there can be one function with n outputs or n functions with
-        // one output each (where n = number of color components)
-        nComps = getNFuncs() * funcs[0]->getOutputSize();
-    }
-
-    if (unlikely(getNFuncs() < 1 || nComps > gfxColorMaxComps)) {
-        clearGfxColor(color);
-        return gfxColorMaxComps;
-    }
+    // NB: there can be one function with n outputs or n functions with
+    // one output each (where n = number of color components)
+    const int nComps = getNFuncs() * funcs[0]->getOutputSize();
 
     if (cacheSize > 0) {
         double x, ix, *l, *u, *upper;
@@ -3773,10 +3800,6 @@ int GfxUnivariateShading::getColor(double t, GfxColor *color)
             out[i] = 0;
         }
         for (int i = 0; i < getNFuncs(); ++i) {
-            if (funcs[i]->getInputSize() != 1) {
-                error(errSyntaxWarning, -1, "Invalid shading function (input != 1)");
-                break;
-            }
             funcs[i]->transform(&t, &out[i]);
         }
     }
@@ -3868,6 +3891,45 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm, double xMin, double yMi
     }
 
     lastMatch = 1;
+}
+
+bool GfxUnivariateShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+{
+    const bool parentInit = GfxShading::init(res, dict, out, state);
+    if (!parentInit) {
+        return false;
+    }
+
+    // funcs needs to be one of the two:
+    //  * One function 1-in -> nComps-out
+    //  * nComps functions 1-in -> 1-out
+    const int nComps = colorSpace->getNComps();
+    const int nFuncs = funcs.size();
+    if (nFuncs == 1) {
+        if (funcs[0]->getInputSize() != 1) {
+            error(errSyntaxWarning, -1, "GfxUnivariateShading: function with input size != 2");
+            return false;
+        }
+        if (funcs[0]->getOutputSize() != nComps) {
+            error(errSyntaxWarning, -1, "GfxUnivariateShading: function with wrong output size");
+            return false;
+        }
+    } else if (nFuncs == nComps) {
+        for (const std::unique_ptr<Function> &f : funcs) {
+            if (f->getInputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxUnivariateShading: function with input size != 2");
+                return false;
+            }
+            if (f->getOutputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxUnivariateShading: function with wrong output size");
+                return false;
+            }
+        }
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 //------------------------------------------------------------------------
@@ -4762,6 +4824,46 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
     return shading;
 }
 
+bool GfxGouraudTriangleShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+{
+    const bool parentInit = GfxShading::init(res, dict, out, state);
+    if (!parentInit) {
+        return false;
+    }
+
+    // funcs needs to be one of the three:
+    //  * One function 1-in -> nComps-out
+    //  * nComps functions 1-in -> 1-out
+    //  * empty
+    const int nComps = colorSpace->getNComps();
+    const int nFuncs = funcs.size();
+    if (nFuncs == 1) {
+        if (funcs[0]->getInputSize() != 1) {
+            error(errSyntaxWarning, -1, "GfxGouraudTriangleShading: function with input size != 2");
+            return false;
+        }
+        if (funcs[0]->getOutputSize() != nComps) {
+            error(errSyntaxWarning, -1, "GfxGouraudTriangleShading: function with wrong output size");
+            return false;
+        }
+    } else if (nFuncs == nComps) {
+        for (const std::unique_ptr<Function> &f : funcs) {
+            if (f->getInputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxGouraudTriangleShading: function with input size != 2");
+                return false;
+            }
+            if (f->getOutputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxGouraudTriangleShading: function with wrong output size");
+                return false;
+            }
+        }
+    } else if (nFuncs != 0) {
+        return false;
+    }
+
+    return true;
+}
+
 GfxShading *GfxGouraudTriangleShading::copy() const
 {
     return new GfxGouraudTriangleShading(this);
@@ -4945,15 +5047,6 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
                 return nullptr;
             }
             funcsA.emplace_back(f);
-        }
-    }
-
-    for (unsigned int k = 0; k < funcsA.size(); ++k) {
-        if (funcsA[k]->getInputSize() > 1) {
-            return nullptr;
-        }
-        if (funcsA[k]->getOutputSize() > static_cast<int>(gfxColorMaxComps - k)) {
-            return nullptr;
         }
     }
 
@@ -5376,6 +5469,46 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
         return nullptr;
     }
     return shading;
+}
+
+bool GfxPatchMeshShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+{
+    const bool parentInit = GfxShading::init(res, dict, out, state);
+    if (!parentInit) {
+        return false;
+    }
+
+    // funcs needs to be one of the three:
+    //  * One function 1-in -> nComps-out
+    //  * nComps functions 1-in -> 1-out
+    //  * empty
+    const int nComps = colorSpace->getNComps();
+    const int nFuncs = funcs.size();
+    if (nFuncs == 1) {
+        if (funcs[0]->getInputSize() != 1) {
+            error(errSyntaxWarning, -1, "GfxPatchMeshShading: function with input size != 2");
+            return false;
+        }
+        if (funcs[0]->getOutputSize() != nComps) {
+            error(errSyntaxWarning, -1, "GfxPatchMeshShading: function with wrong output size");
+            return false;
+        }
+    } else if (nFuncs == nComps) {
+        for (const std::unique_ptr<Function> &f : funcs) {
+            if (f->getInputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxPatchMeshShading: function with input size != 2");
+                return false;
+            }
+            if (f->getOutputSize() != 1) {
+                error(errSyntaxWarning, -1, "GfxPatchMeshShading: function with wrong output size");
+                return false;
+            }
+        }
+    } else if (nFuncs != 0) {
+        return false;
+    }
+
+    return true;
 }
 
 void GfxPatchMeshShading::getParameterizedColor(double t, GfxColor *color) const

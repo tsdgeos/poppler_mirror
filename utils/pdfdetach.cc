@@ -18,7 +18,7 @@
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 <r.coeffier@bee-buzziness.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -72,10 +72,10 @@ static const ArgDesc argDesc[] = { { "-list", argFlag, &doList, 0, "list all emb
 
 int main(int argc, char *argv[])
 {
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     const UnicodeMap *uMap;
     GooString *ownerPW, *userPW;
-    PDFDoc *doc;
     char uBuf[8];
     char path[1024];
     char *p;
@@ -329,7 +329,6 @@ int main(int argc, char *argv[])
 err2:
     for (auto &file : embeddedFiles)
         delete file;
-    delete doc;
 err0:
 
     return exitCode;

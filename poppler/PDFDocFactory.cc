@@ -8,7 +8,7 @@
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -53,7 +53,7 @@ PDFDocFactory::~PDFDocFactory()
     }
 }
 
-PDFDoc *PDFDocFactory::createPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> PDFDocFactory::createPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
 {
     for (int i = builders->size() - 1; i >= 0; i--) {
         PDFDocBuilder *builder = (*builders)[i];

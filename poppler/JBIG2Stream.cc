@@ -2807,6 +2807,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
 
         if (unlikely(!codingLine || !refLine)) {
+            gfree(codingLine);
             error(errSyntaxError, curStr->getPos(), "Bad width in JBIG2 generic bitmap");
             return nullptr;
         }

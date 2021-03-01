@@ -159,6 +159,12 @@ Specify the user password for the PDF file.
 .B \-q
 Don't print any messages or errors.
 .TP
+.B \-progress
+Print progress info as each page is generated.  Three space-separated
+fields are printed to STDERR: the number of the current page, the number
+of the last page that will be generated, and the path to the file
+written to.
+.TP
 .BI \-sep " char"
 Specify single character separator between name and page number, default - .
 .TP

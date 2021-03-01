@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -4188,8 +4188,7 @@ void SplashOutputDev::setFreeTypeHinting(bool enable, bool enableSlightHintingA)
     enableSlightHinting = enableSlightHintingA;
 }
 
-bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, Object *str, const double *ptm, int paintType, int /*tilingType*/, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                        double xStep, double yStep)
+bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Splash *formerSplash = splash;
@@ -4203,6 +4202,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
+    const double *bbox = tPat->getBBox();
+    const double *ptm = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    Dict *resDict = tPat->getResDict();
 
     width = bbox[2] - bbox[0];
     height = bbox[3] - bbox[1];
@@ -4362,7 +4365,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         splash->setFillPattern(formerSplash->getFillPattern()->copy());
         splash->setStrokePattern(formerSplash->getStrokePattern()->copy());
     }
-    gfx->display(str);
+    gfx->display(tPat->getContentStream());
     delete splash;
     splash = formerSplash;
 

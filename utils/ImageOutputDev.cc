@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -658,8 +658,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
         embedStr->restore();
 }
 
-bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                       double xStep, double yStep)
+bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     return true;
     // do nothing -- this avoids the potentially slow loop in Gfx.cc

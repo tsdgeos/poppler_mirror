@@ -21,7 +21,7 @@
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Hartmut Goebel <h.goebel@crazy-compilers.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -96,16 +96,13 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
     GooString *fileName;
     char *imgRoot = nullptr;
     GooString *ownerPW, *userPW;
     ImageOutputDev *imgOut;
     bool ok;
-    int exitCode;
 
     Win32Console win32Console(&argc, &argv);
-    exitCode = 99;
 
     // parse args
     ok = parseArgs(argDesc, &argc, argv);
@@ -117,8 +114,8 @@ int main(int argc, char *argv[])
             printUsage("pdfimages", "<PDF-file> <image-root>", argDesc);
         }
         if (printVersion || printHelp)
-            exitCode = 0;
-        goto err0;
+            return 0;
+        return 99;
     }
     fileName = new GooString(argv[1]);
     if (!listImages)
@@ -146,7 +143,7 @@ int main(int argc, char *argv[])
         fileName = new GooString("fd://0");
     }
 
-    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
     delete fileName;
 
     if (userPW) {
@@ -156,16 +153,14 @@ int main(int argc, char *argv[])
         delete ownerPW;
     }
     if (!doc->isOk()) {
-        exitCode = 1;
-        goto err1;
+        return 1;
     }
 
     // check for copy permission
 #ifdef ENFORCE_PERMISSIONS
     if (!doc->okToCopy()) {
         error(errNotAllowed, -1, "Copying of images from this document is not allowed.");
-        exitCode = 3;
-        goto err1;
+        return 3;
     }
 #endif
 
@@ -174,13 +169,13 @@ int main(int argc, char *argv[])
         firstPage = 1;
     if (firstPage > doc->getNumPages()) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be larger then the number of pages in the document ({1:d}).", firstPage, doc->getNumPages());
-        goto err1;
+        return 99;
     }
     if (lastPage < 1 || lastPage > doc->getNumPages())
         lastPage = doc->getNumPages();
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
-        goto err1;
+        return 99;
     }
 
     // write image files
@@ -205,12 +200,5 @@ int main(int argc, char *argv[])
     }
     delete imgOut;
 
-    exitCode = 0;
-
-    // clean up
-err1:
-    delete doc;
-err0:
-
-    return exitCode;
+    return 0;
 }

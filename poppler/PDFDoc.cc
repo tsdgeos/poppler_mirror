@@ -46,6 +46,7 @@
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Adam Sampson <ats@offog.org>
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1937,13 +1938,14 @@ Outline *PDFDoc::getOutline()
     return outline;
 }
 
-PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
+std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
 {
+    // We cannot call std::make_unique here because the PDFDoc constructor is private
     PDFDoc *doc = new PDFDoc();
     doc->errCode = errorCode;
     doc->fileName = fileNameA;
 
-    return doc;
+    return std::unique_ptr<PDFDoc>(doc);
 }
 
 long long PDFDoc::strToLongLong(const char *s)

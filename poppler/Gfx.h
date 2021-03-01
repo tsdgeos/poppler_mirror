@@ -203,8 +203,8 @@ private:
     Catalog *catalog; // the Catalog for this PDF file
     OutputDev *out; // output device
     bool subPage; // is this a sub-page object?
-    bool printCommands; // print the drawing commands (for debugging)
-    bool profileCommands; // profile the drawing commands (for debugging)
+    const bool printCommands; // print the drawing commands (for debugging)
+    const bool profileCommands; // profile the drawing commands (for debugging)
     bool commandAborted; // did the previous command abort the drawing?
     GfxResources *res; // resource stack
     int updateLevel;

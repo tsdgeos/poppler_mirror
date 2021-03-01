@@ -471,6 +471,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
             strcpy(tok1, tok2);
         }
     }
+    delete pst;
     return ok;
 }
 

@@ -453,6 +453,7 @@ Object GfxResources::lookupGStateNF(const char *name)
 //------------------------------------------------------------------------
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
+    : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     int i;
 
@@ -460,8 +461,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
     xref = (xrefA == nullptr) ? doc->getXRef() : xrefA;
     catalog = doc->getCatalog();
     subPage = false;
-    printCommands = globalParams->getPrintCommands();
-    profileCommands = globalParams->getProfileCommands();
     mcStack = nullptr;
     parser = nullptr;
 
@@ -506,6 +505,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
 }
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
+    : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
     int i;
 
@@ -519,8 +519,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
     }
     catalog = doc->getCatalog();
     subPage = true;
-    printCommands = globalParams->getPrintCommands();
-    profileCommands = globalParams->getProfileCommands();
     mcStack = nullptr;
     parser = nullptr;
 
@@ -2174,8 +2172,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
             }
         }
         if (shouldDrawPattern) {
-            if (out->useTilingPatternFill()
-                && out->tilingPatternFill(state, this, catalog, tPat->getContentStream(), tPat->getMatrix(), tPat->getPaintType(), tPat->getTilingType(), tPat->getResDict(), m1, tPat->getBBox(), xi0, yi0, xi1, yi1, xstep, ystep)) {
+            if (out->useTilingPatternFill() && out->tilingPatternFill(state, this, catalog, tPat, m1, xi0, yi0, xi1, yi1, xstep, ystep)) {
                 // do nothing
             } else {
                 out->updatePatternOpacity(state);

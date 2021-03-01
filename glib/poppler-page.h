@@ -72,9 +72,9 @@ char *poppler_page_get_selected_text(PopplerPage *page, PopplerSelectionStyle st
 POPPLER_PUBLIC
 cairo_region_t *poppler_page_get_selected_region(PopplerPage *page, gdouble scale, PopplerSelectionStyle style, PopplerRectangle *selection);
 POPPLER_PUBLIC
-GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, PopplerSelectionStyle style, PopplerRectangle *selection);
+GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, PopplerSelectionStyle style, PopplerRectangle *selection) G_GNUC_DEPRECATED_FOR(poppler_page_get_selected_region);
 POPPLER_PUBLIC
-void poppler_page_selection_region_free(GList *region);
+void poppler_page_selection_region_free(GList *region) G_GNUC_DEPRECATED_FOR(cairo_region_destroy);
 POPPLER_PUBLIC
 GList *poppler_page_get_link_mapping(PopplerPage *page);
 POPPLER_PUBLIC

@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010-2012, 2014-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -39,7 +39,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2018-2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018-2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
@@ -4420,7 +4420,7 @@ GooString *TextSelectionDumper::getText()
             TextWordSelection *sel = (*lineWords)[j];
 
             page->dumpFragment(sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
-            if (j < lineWords->size() - 1)
+            if (j < lineWords->size() - 1 && sel->word->spaceAfter)
                 text->append(space, spaceLen);
         }
         if (i < nLines - 1)
@@ -4448,13 +4448,18 @@ class TextSelectionSizer : public TextSelectionVisitor
 {
 public:
     TextSelectionSizer(TextPage *page, double scale);
-    ~TextSelectionSizer() override { }
+    ~TextSelectionSizer() override { delete list; }
 
     void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};
     void visitLine(TextLine *line, TextWord *begin, TextWord *end, int edge_begin, int edge_end, const PDFRectangle *selection) override;
     void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override {};
 
-    std::vector<PDFRectangle *> *getRegion() { return list; }
+    std::vector<PDFRectangle *> *takeRegion()
+    {
+        auto aux = list;
+        list = nullptr;
+        return aux;
+    }
 
 private:
     std::vector<PDFRectangle *> *list;
@@ -4950,7 +4955,7 @@ std::vector<PDFRectangle *> *TextPage::getSelectionRegion(const PDFRectangle *se
 
     visitSelection(&sizer, selection, style);
 
-    return sizer.getRegion();
+    return sizer.takeRegion();
 }
 
 GooString *TextPage::getSelectionText(const PDFRectangle *selection, SelectionStyle style)

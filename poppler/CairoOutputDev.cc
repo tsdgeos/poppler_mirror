@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -885,8 +885,7 @@ void CairoOutputDev::eoFill(GfxState *state)
     }
 }
 
-bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str, const double *pmat, int paintType, int /*tilingType*/, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                       double xStep, double yStep)
+bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -902,6 +901,11 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     StrokePathClip *strokePathTmp;
     bool adjusted_stroke_width_tmp;
     cairo_pattern_t *maskTmp;
+    const double *bbox = tPat->getBBox();
+    const double *pmat = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    Dict *resDict = tPat->getResDict();
+    Object *str = tPat->getContentStream();
 
     width = bbox[2] - bbox[0];
     height = bbox[3] - bbox[1];
