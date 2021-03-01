@@ -4349,9 +4349,13 @@ void TextSelectionDumper::finishLine()
         lines = (std::vector<TextWordSelection *> **)grealloc(lines, linesSize * sizeof(std::vector<TextWordSelection *> *));
     }
 
-    if (words && words->size() > 0)
+    if (words && words->size() > 0) {
+        // Reverse word order for RTL text. Fixes #53 for glib backend (Evince)
+        if (!page->primaryLR)
+            std::reverse(words->begin(), words->end());
+
         lines[nLines++] = words;
-    else if (words)
+    } else if (words)
         delete words;
     words = nullptr;
 }
