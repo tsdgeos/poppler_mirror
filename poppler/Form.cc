@@ -1975,6 +1975,18 @@ void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo>
     certificate_info.swap(certInfo);
 }
 
+FormWidget *FormFieldSignature::getCreateWidget()
+{
+    ::FormWidget *fw = getWidget(0);
+    if (!fw) {
+        error(errSyntaxError, 0, "FormFieldSignature: was asked for widget and didn't had one, creating it");
+        _createWidget(&obj, ref);
+        fw = getWidget(0);
+        fw->createWidgetAnnotation();
+    }
+    return fw;
+}
+
 void FormFieldSignature::parseInfo()
 {
     if (!obj.isDict())

@@ -807,7 +807,7 @@ QVector<FormFieldSignature *> Document::signatures() const
     const std::vector<::FormFieldSignature *> pSignatures = m_doc->doc->getSignatureFields();
 
     for (::FormFieldSignature *pSignature : pSignatures) {
-        ::FormWidget *fw = pSignature->getWidget(0);
+        ::FormWidget *fw = pSignature->getCreateWidget();
         ::Page *p = m_doc->doc->getPage(fw->getWidgetAnnotation()->getPageNum());
         result.append(new FormFieldSignature(m_doc, p, static_cast<FormWidgetSignature *>(fw)));
     }

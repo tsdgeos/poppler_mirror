@@ -617,6 +617,8 @@ public:
 
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
+    FormWidget *getCreateWidget();
+
 private:
     void parseInfo();
     void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
