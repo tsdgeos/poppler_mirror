@@ -425,7 +425,7 @@ public:
     bool noToggleToOff() const { return noAllOff; }
 
     // returns true if the state modification is accepted
-    bool setState(const char *state);
+    bool setState(const char *state, bool ignoreToggleOff = false);
     bool getState(const char *state) const;
 
     const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }

@@ -269,6 +269,54 @@ void FormWidgetButton::setState(bool astate)
 
     parent()->setState(astate ? getOnStr() : (char *)"Off");
     // Parent will call setAppearanceState()
+
+    // Now handle standAlone fields which are related to this one by having the same
+    // fully qualified name. This is *partially* by spec, as seen in "Field names"
+    // section inside "8.6.2 Field Dictionaries" in 1.7 PDF spec. Issue #1034
+
+    if (!astate) // We're only interested when this field is being set to ON,
+        return; // to check if it has related fields and then set them OFF
+
+    unsigned this_page_num, this_field_num;
+    decodeID(getID(), &this_page_num, &this_field_num);
+    Page *this_page = doc->getCatalog()->getPage(this_page_num);
+    const FormField *this_field = getField();
+    if (!this_page->hasStandaloneFields() || this_field == nullptr)
+        return;
+
+    auto this_page_widgets = this_page->getFormWidgets();
+    const FormButtonType this_button_type = getButtonType();
+
+    const int tot = this_page_widgets->getNumWidgets();
+    for (int i = 0; i < tot; i++) {
+        bool found_related = false;
+        FormWidget *wid = this_page_widgets->getWidget(i);
+        const bool same_fqn = wid->getFullyQualifiedName()->cmp(getFullyQualifiedName()) == 0;
+        const bool same_button_type = wid->getType() == formButton && static_cast<const FormWidgetButton *>(wid)->getButtonType() == this_button_type;
+
+        if (same_fqn && same_button_type) {
+            if (this_field->isStandAlone()) {
+                //'this_field' is standAlone, so we need to search in both standAlone fields and normal fields
+                if (this_field != wid->getField()) { // so take care to not choose our same field
+                    found_related = true;
+                }
+            } else {
+                //'this_field' is not standAlone, so we just need to search in standAlone fields
+                if (wid->getField()->isStandAlone()) {
+                    found_related = true;
+                }
+            }
+        }
+
+        if (found_related) {
+            FormFieldButton *ffb = static_cast<FormFieldButton *>(wid->getField());
+            if (ffb == nullptr) {
+                error(errInternal, -1, "FormWidgetButton::setState : FormFieldButton expected\n");
+                continue;
+            }
+            ffb->setState((char *)"Off", true);
+        }
+    }
 }
 
 bool FormWidgetButton::getState() const
@@ -1285,7 +1333,7 @@ void FormFieldButton::fillChildrenSiblingsID()
     }
 }
 
-bool FormFieldButton::setState(const char *state)
+bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
 {
     // A check button could behave as a radio button
     // when it's in a set of more than 1 buttons
@@ -1302,7 +1350,7 @@ bool FormFieldButton::setState(const char *state)
 
     bool isOn = strcmp(state, "Off") != 0;
 
-    if (!isOn && noAllOff)
+    if (!isOn && noAllOff && !ignoreToggleOff)
         return false; // Don't allow to set all radio to off
 
     const char *current = getAppearanceState();
