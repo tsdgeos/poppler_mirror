@@ -1167,12 +1167,11 @@ void poppler_page_free_link_mapping(GList *list)
 GList *poppler_page_get_form_field_mapping(PopplerPage *page)
 {
     GList *map_list = nullptr;
-    FormPageWidgets *forms;
     gint i;
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
-    forms = page->page->getFormWidgets();
+    const std::unique_ptr<FormPageWidgets> forms = page->page->getFormWidgets();
 
     if (forms == nullptr)
         return nullptr;
@@ -1195,8 +1194,6 @@ GList *poppler_page_get_form_field_mapping(PopplerPage *page)
 
         map_list = g_list_prepend(map_list, mapping);
     }
-
-    delete forms;
 
     return map_list;
 }

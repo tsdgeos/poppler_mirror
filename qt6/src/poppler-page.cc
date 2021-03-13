@@ -22,7 +22,7 @@
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
- * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  *
@@ -834,7 +834,7 @@ QList<FormField *> Page::formFields() const
 {
     QList<FormField *> fields;
     ::Page *p = m_page->page;
-    ::FormPageWidgets *form = p->getFormWidgets();
+    const std::unique_ptr<FormPageWidgets> form = p->getFormWidgets();
     int formcount = form->getNumWidgets();
     for (int i = 0; i < formcount; ++i) {
         ::FormWidget *fm = form->getWidget(i);
@@ -862,8 +862,6 @@ QList<FormField *> Page::formFields() const
         if (ff)
             fields.append(ff);
     }
-
-    delete form;
 
     return fields;
 }

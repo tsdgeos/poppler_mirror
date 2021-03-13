@@ -31,7 +31,7 @@
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -507,9 +507,9 @@ Links *Page::getLinks()
     return new Links(getAnnots());
 }
 
-FormPageWidgets *Page::getFormWidgets()
+std::unique_ptr<FormPageWidgets> Page::getFormWidgets()
 {
-    FormPageWidgets *frmPageWidgets = new FormPageWidgets(getAnnots(), num, doc->getCatalog()->getForm());
+    auto frmPageWidgets = std::make_unique<FormPageWidgets>(getAnnots(), num, doc->getCatalog()->getForm());
     frmPageWidgets->addWidgets(standaloneFields, num);
 
     return frmPageWidgets;
