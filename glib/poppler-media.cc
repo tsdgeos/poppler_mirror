@@ -39,6 +39,9 @@ struct _PopplerMedia
     GObject parent_instance;
 
     gchar *filename;
+    gboolean auto_play;
+    gboolean show_controls;
+    gfloat repeat_count;
 
     gchar *mime_type;
     Object stream;
@@ -98,6 +101,13 @@ PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
         media->filename = g_strdup(poppler_media->getFileName()->c_str());
     }
 
+    const MediaParameters *mp = poppler_media->getBEParameters();
+    mp = mp ? mp : poppler_media->getMHParameters();
+
+    media->auto_play = mp ? mp->autoPlay : false;
+    media->show_controls = mp ? mp->showControls : false;
+    media->repeat_count = mp ? mp->repeatCount : 1.f;
+
     return media;
 }
 
@@ -138,6 +148,57 @@ gboolean poppler_media_is_embedded(PopplerMedia *poppler_media)
     g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
 
     return poppler_media->stream.isStream();
+}
+
+/**
+ * poppler_media_get_auto_play:
+ * @poppler_media: a #PopplerMedia
+ *
+ * Returns the auto-play parameter.
+ *
+ * Return value: %TRUE if media should auto-play, %FALSE otherwise
+ *
+ * Since: 20.04.0
+ */
+gboolean poppler_media_get_auto_play(PopplerMedia *poppler_media)
+{
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
+
+    return poppler_media->auto_play;
+}
+
+/**
+ * poppler_media_get_show_controls:
+ * @poppler_media: a #PopplerMedia
+ *
+ * Returns the show controls parameter.
+ *
+ * Return value: %TRUE if media should show controls, %FALSE otherwise
+ *
+ * Since: 20.04.0
+ */
+gboolean poppler_media_get_show_controls(PopplerMedia *poppler_media)
+{
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
+
+    return poppler_media->show_controls;
+}
+
+/**
+ * poppler_media_get_repeat_count:
+ * @poppler_media: a #PopplerMedia
+ *
+ * Returns the repeat count parameter.
+ *
+ * Return value: Repeat count parameter (float)
+ *
+ * Since: 20.04.0
+ */
+gfloat poppler_media_get_repeat_count(PopplerMedia *poppler_media)
+{
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), FALSE);
+
+    return poppler_media->repeat_count;
 }
 
 /**
