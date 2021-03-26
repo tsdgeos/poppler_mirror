@@ -581,7 +581,7 @@ struct _PopplerStructureElementIter
     unsigned index;
 };
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerStructureElementIter, poppler_structure_element_iter, poppler_structure_element_iter_copy, poppler_structure_element_iter_free)
+G_DEFINE_BOXED_TYPE(PopplerStructureElementIter, poppler_structure_element_iter, poppler_structure_element_iter_copy, poppler_structure_element_iter_free)
 
 /**
  * poppler_structure_element_iter_copy:
@@ -763,7 +763,7 @@ struct _PopplerTextSpan
     PopplerColor color;
 };
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerTextSpan, poppler_text_span, poppler_text_span_copy, poppler_text_span_free)
+G_DEFINE_BOXED_TYPE(PopplerTextSpan, poppler_text_span, poppler_text_span_copy, poppler_text_span_free)
 
 enum
 {
