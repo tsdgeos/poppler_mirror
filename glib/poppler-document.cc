@@ -2360,7 +2360,7 @@ struct _PopplerIndexIter
     int index;
 };
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerIndexIter, poppler_index_iter, poppler_index_iter_copy, poppler_index_iter_free)
+G_DEFINE_BOXED_TYPE(PopplerIndexIter, poppler_index_iter, poppler_index_iter_copy, poppler_index_iter_free)
 
 /**
  * poppler_index_iter_copy:
@@ -2579,7 +2579,7 @@ struct _PopplerFontsIter
     int index;
 };
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerFontsIter, poppler_fonts_iter, poppler_fonts_iter_copy, poppler_fonts_iter_free)
+G_DEFINE_BOXED_TYPE(PopplerFontsIter, poppler_fonts_iter, poppler_fonts_iter_copy, poppler_fonts_iter_free)
 
 /**
  * poppler_fonts_iter_get_full_name:
@@ -3111,7 +3111,7 @@ struct _PopplerLayersIter
     int index;
 };
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerLayersIter, poppler_layers_iter, poppler_layers_iter_copy, poppler_layers_iter_free)
+G_DEFINE_BOXED_TYPE(PopplerLayersIter, poppler_layers_iter, poppler_layers_iter_copy, poppler_layers_iter_free)
 
 /**
  * poppler_layers_iter_copy:

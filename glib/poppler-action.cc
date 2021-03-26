@@ -25,7 +25,7 @@
  * @title: PopplerAction
  */
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerDest, poppler_dest, poppler_dest_copy, poppler_dest_free)
+G_DEFINE_BOXED_TYPE(PopplerDest, poppler_dest, poppler_dest_copy, poppler_dest_free)
 
 /**
  * poppler_dest_copy:
@@ -88,7 +88,7 @@ static PopplerActionLayer *poppler_action_layer_copy(PopplerActionLayer *action_
     return retval;
 }
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerAction, poppler_action, poppler_action_copy, poppler_action_free)
+G_DEFINE_BOXED_TYPE(PopplerAction, poppler_action, poppler_action_copy, poppler_action_free)
 
 /**
  * poppler_action_free:

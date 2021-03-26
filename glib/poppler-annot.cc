@@ -1693,7 +1693,7 @@ gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *popple
 }
 
 /* PopplerAnnotCalloutLine */
-POPPLER_DEFINE_BOXED_TYPE(PopplerAnnotCalloutLine, poppler_annot_callout_line, poppler_annot_callout_line_copy, poppler_annot_callout_line_free)
+G_DEFINE_BOXED_TYPE(PopplerAnnotCalloutLine, poppler_annot_callout_line, poppler_annot_callout_line_copy, poppler_annot_callout_line_free)
 
 /**
  * poppler_annot_callout_line_new:

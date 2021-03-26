@@ -143,21 +143,6 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
 GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date);
 GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime);
 
-/*
- * A convenience macro for boxed type implementations, which defines a
- * type_name_get_type() function registering the boxed type.
- */
-#define POPPLER_DEFINE_BOXED_TYPE(TypeName, type_name, copy_func, free_func)                                                                                                                                                                   \
-    GType type_name##_get_type(void)                                                                                                                                                                                                           \
-    {                                                                                                                                                                                                                                          \
-        static volatile gsize g_define_type_id__volatile = 0;                                                                                                                                                                                  \
-        if (g_once_init_enter(&g_define_type_id__volatile)) {                                                                                                                                                                                  \
-            GType g_define_type_id = g_boxed_type_register_static(g_intern_static_string(#TypeName), (GBoxedCopyFunc)copy_func, (GBoxedFreeFunc)free_func);                                                                                    \
-            g_once_init_leave(&g_define_type_id__volatile, g_define_type_id);                                                                                                                                                                  \
-        }                                                                                                                                                                                                                                      \
-        return g_define_type_id__volatile;                                                                                                                                                                                                     \
-    }
-
 void _poppler_error_cb(ErrorCategory category, Goffset pos, const char *message);
 
 #endif

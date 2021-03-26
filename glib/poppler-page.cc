@@ -1563,7 +1563,7 @@ void poppler_page_remove_annot(PopplerPage *page, PopplerAnnot *annot)
 
 /* PopplerRectangle type */
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerRectangle, poppler_rectangle, poppler_rectangle_copy, poppler_rectangle_free)
+G_DEFINE_BOXED_TYPE(PopplerRectangle, poppler_rectangle, poppler_rectangle_copy, poppler_rectangle_free)
 
 /**
  * poppler_rectangle_new:
@@ -1605,7 +1605,7 @@ void poppler_rectangle_free(PopplerRectangle *rectangle)
 
 /* PopplerPoint type */
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerPoint, poppler_point, poppler_point_copy, poppler_point_free)
+G_DEFINE_BOXED_TYPE(PopplerPoint, poppler_point, poppler_point_copy, poppler_point_free)
 
 /**
  * poppler_point_new:
@@ -1654,7 +1654,7 @@ void poppler_point_free(PopplerPoint *point)
 
 /* PopplerQuadrilateral type */
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerQuadrilateral, poppler_quadrilateral, poppler_quadrilateral_copy, poppler_quadrilateral_free)
+G_DEFINE_BOXED_TYPE(PopplerQuadrilateral, poppler_quadrilateral, poppler_quadrilateral_copy, poppler_quadrilateral_free)
 
 /**
  * poppler_quadrilateral_new:
@@ -1702,7 +1702,7 @@ void poppler_quadrilateral_free(PopplerQuadrilateral *quad)
 
 /* PopplerTextAttributes type */
 
-POPPLER_DEFINE_BOXED_TYPE(PopplerTextAttributes, poppler_text_attributes, poppler_text_attributes_copy, poppler_text_attributes_free)
+G_DEFINE_BOXED_TYPE(PopplerTextAttributes, poppler_text_attributes, poppler_text_attributes_copy, poppler_text_attributes_free)
 
 /**
  * poppler_text_attributes_new:
@@ -1801,7 +1801,7 @@ void poppler_text_attributes_free(PopplerTextAttributes *text_attrs)
  */
 
 /* PopplerColor type */
-POPPLER_DEFINE_BOXED_TYPE(PopplerColor, poppler_color, poppler_color_copy, poppler_color_free)
+G_DEFINE_BOXED_TYPE(PopplerColor, poppler_color, poppler_color_copy, poppler_color_free)
 
 /**
  * poppler_color_new:
@@ -1845,7 +1845,7 @@ void poppler_color_free(PopplerColor *color)
 }
 
 /* PopplerLinkMapping type */
-POPPLER_DEFINE_BOXED_TYPE(PopplerLinkMapping, poppler_link_mapping, poppler_link_mapping_copy, poppler_link_mapping_free)
+G_DEFINE_BOXED_TYPE(PopplerLinkMapping, poppler_link_mapping, poppler_link_mapping_copy, poppler_link_mapping_free)
 
 /**
  * poppler_link_mapping_new:
@@ -1897,7 +1897,7 @@ void poppler_link_mapping_free(PopplerLinkMapping *mapping)
 }
 
 /* Poppler Image mapping type */
-POPPLER_DEFINE_BOXED_TYPE(PopplerImageMapping, poppler_image_mapping, poppler_image_mapping_copy, poppler_image_mapping_free)
+G_DEFINE_BOXED_TYPE(PopplerImageMapping, poppler_image_mapping, poppler_image_mapping_copy, poppler_image_mapping_free)
 
 /**
  * poppler_image_mapping_new:
@@ -1936,7 +1936,7 @@ void poppler_image_mapping_free(PopplerImageMapping *mapping)
 }
 
 /* Page Transition */
-POPPLER_DEFINE_BOXED_TYPE(PopplerPageTransition, poppler_page_transition, poppler_page_transition_copy, poppler_page_transition_free)
+G_DEFINE_BOXED_TYPE(PopplerPageTransition, poppler_page_transition, poppler_page_transition_copy, poppler_page_transition_free)
 
 /**
  * poppler_page_transition_new:
@@ -1980,7 +1980,7 @@ void poppler_page_transition_free(PopplerPageTransition *transition)
 }
 
 /* Form Field Mapping Type */
-POPPLER_DEFINE_BOXED_TYPE(PopplerFormFieldMapping, poppler_form_field_mapping, poppler_form_field_mapping_copy, poppler_form_field_mapping_free)
+G_DEFINE_BOXED_TYPE(PopplerFormFieldMapping, poppler_form_field_mapping, poppler_form_field_mapping_copy, poppler_form_field_mapping_free)
 
 /**
  * poppler_form_field_mapping_new:
@@ -2032,7 +2032,7 @@ void poppler_form_field_mapping_free(PopplerFormFieldMapping *mapping)
 }
 
 /* PopplerAnnot Mapping Type */
-POPPLER_DEFINE_BOXED_TYPE(PopplerAnnotMapping, poppler_annot_mapping, poppler_annot_mapping_copy, poppler_annot_mapping_free)
+G_DEFINE_BOXED_TYPE(PopplerAnnotMapping, poppler_annot_mapping, poppler_annot_mapping_copy, poppler_annot_mapping_free)
 
 /**
  * poppler_annot_mapping_new:
