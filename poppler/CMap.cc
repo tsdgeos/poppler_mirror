@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -287,36 +287,36 @@ void CMap::copyVector(CMapVectorEntry *dest, CMapVectorEntry *src)
 
 void CMap::addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID)
 {
-    CMapVectorEntry *vec;
-    CID cid;
-    int byte;
-    unsigned int i, j;
-
     if (nBytes > 4) {
         error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
         return;
     }
-    vec = vector;
-    for (i = nBytes - 1; i >= 1; --i) {
-        byte = (start >> (8 * i)) & 0xff;
-        if (!vec[byte].isVector) {
-            vec[byte].isVector = true;
-            vec[byte].vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
-            for (j = 0; j < 256; ++j) {
-                vec[byte].vector[j].isVector = false;
-                vec[byte].vector[j].cid = 0;
+
+    const unsigned int start1 = start & 0xffffff00;
+    const unsigned int end1 = end & 0xffffff00;
+    for (unsigned int i = start1; i <= end1; i += 0x100) {
+        CMapVectorEntry *vec = vector;
+        for (unsigned int j = nBytes - 1; j >= 1; --j) {
+            const int byte = (i >> (8 * j)) & 0xff;
+            if (!vec[byte].isVector) {
+                vec[byte].isVector = true;
+                vec[byte].vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
+                for (unsigned int k = 0; k < 256; ++k) {
+                    vec[byte].vector[k].isVector = false;
+                    vec[byte].vector[k].cid = 0;
+                }
+            }
+            vec = vec[byte].vector;
+        }
+        const int byte0 = (i < start) ? (start & 0xff) : 0;
+        const int byte1 = (i + 0xff > end) ? (end & 0xff) : 0xff;
+        for (int byte = byte0; byte <= byte1; ++byte) {
+            if (vec[byte].isVector) {
+                error(errSyntaxError, -1, "Invalid CID ({0:ux} [{1:ud} bytes]) in CMap", i, nBytes);
+            } else {
+                vec[byte].cid = firstCID + ((i + byte) - start);
             }
         }
-        vec = vec[byte].vector;
-    }
-    cid = firstCID;
-    for (byte = (int)(start & 0xff); byte <= (int)(end & 0xff); ++byte) {
-        if (vec[byte].isVector) {
-            error(errSyntaxError, -1, "Invalid CID ({0:ux} - {1:ux} [{2:ud} bytes]) in CMap", start, end, nBytes);
-        } else {
-            vec[byte].cid = cid;
-        }
-        ++cid;
     }
 }
 

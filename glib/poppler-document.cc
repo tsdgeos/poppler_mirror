@@ -3408,7 +3408,6 @@ PopplerFormField *poppler_document_get_form_field(PopplerDocument *document, gin
     Page *page;
     unsigned pageNum;
     unsigned fieldNum;
-    FormPageWidgets *widgets;
     FormWidget *field;
 
     FormWidget::decodeID(id, &pageNum, &fieldNum);
@@ -3417,7 +3416,7 @@ PopplerFormField *poppler_document_get_form_field(PopplerDocument *document, gin
     if (!page)
         return nullptr;
 
-    widgets = page->getFormWidgets();
+    const std::unique_ptr<FormPageWidgets> widgets = page->getFormWidgets();
     if (!widgets)
         return nullptr;
 

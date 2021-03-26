@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -616,6 +616,8 @@ public:
     void setCustomAppearanceContent(const GooString &s);
 
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
+
+    FormWidget *getCreateWidget();
 
 private:
     void parseInfo();

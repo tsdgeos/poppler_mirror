@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -22,7 +22,7 @@
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
- * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  *
@@ -154,7 +154,11 @@ public:
 
             if (takeImageData) {
                 // Construct a Qt image holding (and also owning) the raw bitmap data.
-                return QImage(data, bw, bh, brs, format, gfree, data);
+                QImage i(data, bw, bh, brs, format, gfree, data);
+                if (i.isNull()) {
+                    gfree(data);
+                }
+                return i;
             } else {
                 return QImage(data, bw, bh, brs, format).copy();
             }
@@ -862,7 +866,7 @@ QList<FormField *> Page::formFields() const
 {
     QList<FormField *> fields;
     ::Page *p = m_page->page;
-    ::FormPageWidgets *form = p->getFormWidgets();
+    const std::unique_ptr<FormPageWidgets> form = p->getFormWidgets();
     int formcount = form->getNumWidgets();
     for (int i = 0; i < formcount; ++i) {
         ::FormWidget *fm = form->getWidget(i);
@@ -890,8 +894,6 @@ QList<FormField *> Page::formFields() const
         if (ff)
             fields.append(ff);
     }
-
-    delete form;
 
     return fields;
 }

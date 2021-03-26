@@ -584,8 +584,11 @@ poppler_layer_get_type
 <TITLE>Poppler Media</TITLE>
 PopplerMedia
 PopplerMediaSaveFunc
+poppler_media_get_auto_play
 poppler_media_get_filename
 poppler_media_get_mime_type
+poppler_media_get_repeat_count
+poppler_media_get_show_controls
 poppler_media_is_embedded
 poppler_media_save
 poppler_media_save_to_callback

@@ -61,6 +61,12 @@ const gchar *poppler_media_get_filename(PopplerMedia *poppler_media);
 POPPLER_PUBLIC
 const gchar *poppler_media_get_mime_type(PopplerMedia *poppler_media);
 POPPLER_PUBLIC
+gboolean poppler_media_get_auto_play(PopplerMedia *poppler_media);
+POPPLER_PUBLIC
+gboolean poppler_media_get_show_controls(PopplerMedia *poppler_media);
+POPPLER_PUBLIC
+gfloat poppler_media_get_repeat_count(PopplerMedia *poppler_media);
+POPPLER_PUBLIC
 gboolean poppler_media_save(PopplerMedia *poppler_media, const char *filename, GError **error);
 POPPLER_PUBLIC
 gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMediaSaveFunc save_func, gpointer user_data, GError **error);
