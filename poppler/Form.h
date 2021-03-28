@@ -20,7 +20,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
-// Copyright 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
