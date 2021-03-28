@@ -4333,6 +4333,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
 
         // get the mask
+        bool haveMaskImage = false;
         haveColorKeyMask = haveExplicitMask = haveSoftMask = false;
         maskStr = nullptr; // make gcc happy
         maskWidth = maskHeight = 0; // make gcc happy
@@ -4340,13 +4341,41 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         std::unique_ptr<GfxImageColorMap> maskColorMap;
         Object maskObj = dict->lookup("Mask");
         Object smaskObj = dict->lookup("SMask");
-        if (smaskObj.isStream()) {
+
+        if (maskObj.isStream()) {
+            maskStr = maskObj.getStream();
+            maskDict = maskObj.streamGetDict();
+            // if Type is XObject and Subtype is Image
+            // then the way the softmask is drawn will draw
+            // correctly, if it falls through to the explicit
+            // mask code then you get an error and no image
+            // drawn because it expects maskDict to have an entry
+            // of Mask or IM that is boolean...
+            Object tobj = maskDict->lookup("Type");
+            if (!tobj.isNull() && tobj.isName() && tobj.isName("XObject")) {
+                Object sobj = maskDict->lookup("Subtype");
+                if (!sobj.isNull() && sobj.isName() && sobj.isName("Image")) {
+                    // ensure that this mask does not include an ImageMask entry
+                    // which signifies the explicit mask
+                    obj1 = maskDict->lookup("ImageMask");
+                    if (obj1.isNull()) {
+                        obj1 = maskDict->lookup("IM");
+                    }
+                    if (obj1.isNull() || !obj1.isBool())
+                        haveMaskImage = true;
+                }
+            }
+        }
+
+        if (smaskObj.isStream() || haveMaskImage) {
             // soft mask
             if (inlineImg) {
                 goto err1;
             }
-            maskStr = smaskObj.getStream();
-            maskDict = smaskObj.streamGetDict();
+            if (!haveMaskImage) {
+                maskStr = smaskObj.getStream();
+                maskDict = smaskObj.streamGetDict();
+            }
             obj1 = maskDict->lookup("Width");
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("W");
@@ -4447,8 +4476,11 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             if (inlineImg) {
                 goto err1;
             }
-            maskStr = maskObj.getStream();
-            maskDict = maskObj.streamGetDict();
+
+            if (maskStr == nullptr) {
+                maskStr = maskObj.getStream();
+                maskDict = maskObj.streamGetDict();
+            }
             obj1 = maskDict->lookup("Width");
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("W");
@@ -4473,13 +4505,15 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 maskInterpolate = obj1.getBool();
             else
                 maskInterpolate = false;
+
             obj1 = maskDict->lookup("ImageMask");
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("IM");
             }
-            if (!obj1.isBool() || !obj1.getBool()) {
+            if (!haveMaskImage && (!obj1.isBool() || !obj1.getBool())) {
                 goto err1;
             }
+
             maskInvert = false;
             obj1 = maskDict->lookup("Decode");
             if (obj1.isNull()) {
@@ -4495,6 +4529,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             } else if (!obj1.isNull()) {
                 goto err1;
             }
+
             haveExplicitMask = true;
         }
 
