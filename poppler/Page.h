@@ -240,6 +240,8 @@ public:
     // Get the page's default CTM.
     void getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown);
 
+    bool hasStandaloneFields() const { return !standaloneFields.empty(); }
+
 private:
     // replace xref
     void replaceXRef(XRef *xrefA);

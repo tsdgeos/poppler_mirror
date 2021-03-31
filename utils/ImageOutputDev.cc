@@ -373,6 +373,16 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         }
     }
 
+    int pixelSize = sizeof(unsigned int);
+    if (format == imgRGB48)
+        pixelSize = 2 * sizeof(unsigned int);
+
+    row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
+    if (!row) {
+        error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
+        return;
+    }
+
     if (format != imgMonochrome) {
         // initialize stream
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
@@ -381,12 +391,6 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         // initialize stream
         str->reset();
     }
-
-    int pixelSize = sizeof(unsigned int);
-    if (format == imgRGB48)
-        pixelSize = 2 * sizeof(unsigned int);
-
-    row = (unsigned char *)gmallocn(width, pixelSize);
 
     // PDF masks use 0 = draw current color, 1 = leave unchanged.
     // We invert this to provide the standard interpretation of alpha
