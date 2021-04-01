@@ -630,9 +630,16 @@ int main(int argc, char *argv[])
 
         // Handle requests for specific image size
         if (scaleTo != 0) {
-            resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
+            if (pg_w > pg_h) {
+                resolution = (72.0 * scaleTo) / pg_w;
+                pg_w = scaleTo;
+                pg_h = pg_h * (resolution / 72.0);
+            } else {
+                resolution = (72.0 * scaleTo) / pg_h;
+                pg_h = scaleTo;
+                pg_w = pg_w * (resolution / 72.0);
+            }
             x_resolution = y_resolution = resolution;
-            pg_w = pg_h = scaleTo;
         } else {
             if (x_scaleTo > 0) {
                 x_resolution = (72.0 * x_scaleTo) / pg_w;
