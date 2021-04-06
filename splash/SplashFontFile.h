@@ -23,6 +23,7 @@
 #define SPLASHFONTFILE_H
 
 #include "SplashTypes.h"
+#include "poppler_private_export.h"
 
 class GooString;
 class SplashFontEngine;
@@ -33,7 +34,7 @@ class SplashFontFileID;
 // SplashFontFile
 //------------------------------------------------------------------------
 
-class SplashFontSrc
+class POPPLER_PRIVATE_EXPORT SplashFontSrc
 {
 public:
     SplashFontSrc();
