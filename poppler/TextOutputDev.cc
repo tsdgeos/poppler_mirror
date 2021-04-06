@@ -931,7 +931,7 @@ TextPool::~TextPool()
 int TextPool::getBaseIdx(double base) const
 {
     const double baseIdxDouble = base / textPoolStep;
-    if (baseIdxDouble < minBaseIdx) {
+    if (std::isnan(baseIdxDouble) || baseIdxDouble < minBaseIdx) {
         return minBaseIdx;
     }
     if (baseIdxDouble > maxBaseIdx) {
