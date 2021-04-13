@@ -48,6 +48,7 @@
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -761,7 +762,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
 
 DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
-DefaultAppearance::DefaultAppearance(GooString *da)
+DefaultAppearance::DefaultAppearance(const GooString *da)
 {
     fontPtSize = -1;
 
@@ -4902,7 +4903,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
 bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
                                                     const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
-    DefaultAppearance da(const_cast<GooString *>(_da));
+    DefaultAppearance da(_da);
     const GooString &contents = field->getCustomAppearanceContent();
     if (contents.toStr().empty())
         return false;
