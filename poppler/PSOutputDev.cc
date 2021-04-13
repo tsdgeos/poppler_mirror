@@ -1828,8 +1828,17 @@ void PSOutputDev::setupResources(Dict *resDict)
                 // process the XObject's resource dictionary
                 Object xObj = xObjDict.dictGetVal(i);
                 if (xObj.isStream()) {
-                    Object resObj = xObj.streamGetDict()->lookup("Resources");
+                    Ref resObjRef;
+                    Object resObj = xObj.streamGetDict()->lookup("Resources", &resObjRef);
                     if (resObj.isDict()) {
+                        if (resObjRef != Ref::INVALID()) {
+                            const int numObj = resObjRef.num;
+                            if (resourceIDs.find(numObj) != resourceIDs.end()) {
+                                error(errSyntaxError, -1, "loop in Resources (numObj: {0:d})", numObj);
+                                continue;
+                            }
+                            resourceIDs.insert(numObj);
+                        }
                         setupResources(resObj.getDict());
                     }
                 }
