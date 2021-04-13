@@ -2172,10 +2172,28 @@ public:
         void setSignatureText(const QString &text);
 
         /**
+         * If this text is not empty, the signature representation
+         * will split in two, with this text on the left and signatureText
+         * on the right
+         *
+         * \since 21.06
+         */
+        QString signatureLeftText() const;
+        void setSignatureLeftText(const QString &text);
+
+        /**
          * Default: 10
          */
         double fontSize() const;
         void setFontSize(double fontSize);
+
+        /**
+         * Default: 20
+         *
+         * \since 21.06
+         */
+        double leftFontSize() const;
+        void setLeftFontSize(double fontSize);
 
         /**
          * Default: red

@@ -615,6 +615,12 @@ public:
     const GooString &getCustomAppearanceContent() const;
     void setCustomAppearanceContent(const GooString &s);
 
+    const GooString &getCustomAppearanceLeftContent() const;
+    void setCustomAppearanceLeftContent(const GooString &s);
+
+    double getCustomAppearanceLeftFontSize() const;
+    void setCustomAppearanceLeftFontSize(double size);
+
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
     FormWidget *getCreateWidget();
@@ -628,6 +634,8 @@ private:
     GooString *signature;
     SignatureInfo *signature_info;
     GooString customAppearanceContent;
+    GooString customAppearanceLeftContent;
+    double customAppearanceLeftFontSize = 20;
     std::unique_ptr<X509CertificateInfo> certificate_info;
 
     void print(int indent) override;
