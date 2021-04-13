@@ -9,6 +9,7 @@
  * Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -115,6 +116,9 @@ QString UnicodeParsedString(const std::string &s1)
 
 GooString *QStringToUnicodeGooString(const QString &s)
 {
+    if (s.isEmpty()) {
+        return new GooString();
+    }
     int len = s.length() * 2 + 2;
     char *cstring = (char *)gmallocn(len, sizeof(char));
     cstring[0] = (char)0xfe;
