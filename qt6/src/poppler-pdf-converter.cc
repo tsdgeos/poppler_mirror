@@ -176,7 +176,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     destPage->addAnnot(signatureAnnot);
 
     std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(1.5);
+    border->setWidth(data.borderWidth());
     signatureAnnot->setBorder(std::move(border));
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
@@ -211,6 +211,7 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     double fontSize = 10.0;
     QColor fontColor = Qt::red;
     QColor borderColor = Qt::red;
+    double borderWidth = 1.5;
     QColor backgroundColor = QColor(240, 240, 240);
 
     QString partialName = QUuid::createUuid().toString();
@@ -306,6 +307,16 @@ void PDFConverter::NewSignatureData::setBorderColor(const QColor &color)
 QColor PDFConverter::NewSignatureData::backgroundColor() const
 {
     return d->backgroundColor;
+}
+
+double PDFConverter::NewSignatureData::borderWidth() const
+{
+    return d->borderWidth;
+}
+
+void PDFConverter::NewSignatureData::setBorderWidth(double width)
+{
+    d->borderWidth = width;
 }
 
 void PDFConverter::NewSignatureData::setBackgroundColor(const QColor &color)

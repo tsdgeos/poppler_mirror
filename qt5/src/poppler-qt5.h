@@ -25,6 +25,7 @@
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2137,7 +2138,8 @@ public:
      *  - rect for the signature annotation
      *  - text that will be shown inside the rect
      *  - font size and color
-     *  - border and background color
+     *  - border width and color
+     *  - background color
      * \since 21.01
      */
     class POPPLER_QT5_EXPORT NewSignatureData
@@ -2180,6 +2182,16 @@ public:
          */
         QColor borderColor() const;
         void setBorderColor(const QColor &color);
+
+        /**
+         * border width in points
+         *
+         * Default: 1.5
+         *
+         * \since 21.05
+         */
+        double borderWidth() const;
+        void setBorderWidth(double width);
 
         /**
          * Default: QColor(240, 240, 240)
