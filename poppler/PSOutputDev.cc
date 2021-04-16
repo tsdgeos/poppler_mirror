@@ -3244,7 +3244,12 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         sliceW = (int)((box.x2 - box.x1) * hDPI2 / 72.0);
         sliceH = (int)((box.y2 - box.y1) * vDPI2 / 72.0);
     }
-    nStripes = (int)ceil((double)(sliceW * sliceH) / (double)rasterizationSliceSize);
+    int sliceArea;
+    if (checkedMultiply(sliceW, sliceH, &sliceArea)) {
+        delete splashOut;
+        return false;
+    }
+    nStripes = (int)ceil((double)(sliceArea) / (double)rasterizationSliceSize);
     if (unlikely(nStripes == 0)) {
         delete splashOut;
         return false;
