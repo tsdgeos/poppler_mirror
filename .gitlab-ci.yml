@@ -82,7 +82,7 @@ build_mingw64_fedora:
     - mingw64-cmake -G Ninja ..
     - ninja
 
-build_clazy:
+build_clazy_clang12:
   stage: build
   script:
     - apt-get install --yes --no-install-recommends clazy clang-12
