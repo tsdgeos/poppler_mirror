@@ -47,6 +47,8 @@ enum
     PROP_LABEL
 };
 
+static PopplerRectangleExtended *poppler_rectangle_extended_new();
+
 typedef struct _PopplerPageClass PopplerPageClass;
 struct _PopplerPageClass
 {
@@ -615,12 +617,7 @@ GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, Poppl
     for (const PDFRectangle *selection_rect : *list) {
         PopplerRectangle *rect;
 
-        rect = poppler_rectangle_new();
-
-        rect->x1 = selection_rect->x1;
-        rect->y1 = selection_rect->y1;
-        rect->x2 = selection_rect->x2;
-        rect->y2 = selection_rect->y2;
+        rect = poppler_rectangle_new_from_pdf_rectangle(selection_rect);
 
         region = g_list_prepend(region, rect);
 
@@ -811,15 +808,33 @@ char *poppler_page_get_text_for_area(PopplerPage *page, PopplerRectangle *area)
  * returns a #GList of rectangles for each occurrence of the text on the page.
  * The coordinates are in PDF points.
  *
- * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
+ * When %POPPLER_FIND_MULTILINE is passed in @options, matches may span more than
+ * one line. In this case, the returned list will contain one #PopplerRectangle
+ * for each part of a match. The function poppler_rectangle_find_get_match_continued()
+ * will return %TRUE for all rectangles belonging to the same match, except for
+ * the last one. If a hyphen was ignored at the end of the part of the match,
+ * poppler_rectangle_find_get_ignored_hyphen() will return %TRUE for that
+ * rectangle.
+ *
+ * Note that currently matches spanning more than two lines are not found.
+ * (This limitation may be lifted in a future version.)
+ *
+ * Note also that currently finding multi-line matches backwards is not
+ * implemented; if you pass %POPPLER_FIND_BACKWARDS and %POPPLER_FIND_MULTILINE
+ * together, %POPPLER_FIND_MULTILINE will be ignored.
+ *
+ * Return value: (element-type PopplerRectangle) (transfer full): a newly allocated list
+ * of newly allocated #PopplerRectangle. Free with g_list_free_full() using poppler_rectangle_free().
  *
  * Since: 0.22
  **/
 GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, PopplerFindFlags options)
 {
-    PopplerRectangle *match;
+    PopplerRectangleExtended *match;
     GList *matches;
     double xMin, yMin, xMax, yMax;
+    PDFRectangle continueMatch;
+    bool ignoredHyphen;
     gunichar *ucs4;
     glong ucs4_len;
     double height;
@@ -835,22 +850,46 @@ GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, 
     ucs4 = g_utf8_to_ucs4_fast(text, -1, &ucs4_len);
     poppler_page_get_size(page, nullptr, &height);
 
+    const bool multiline = (options & POPPLER_FIND_MULTILINE);
     backwards = options & POPPLER_FIND_BACKWARDS;
     matches = nullptr;
     xMin = 0;
     yMin = backwards ? height : 0;
 
+    continueMatch.x1 = G_MAXDOUBLE; // we use this to detect valid returned values
+
     while (text_dev->findText(ucs4, ucs4_len, false, true, // startAtTop, stopAtBottom
                               start_at_last,
                               false, // stopAtLast
-                              options & POPPLER_FIND_CASE_SENSITIVE, options & POPPLER_FIND_IGNORE_DIACRITICS, backwards, options & POPPLER_FIND_WHOLE_WORDS_ONLY, &xMin, &yMin, &xMax, &yMax)) {
-        match = poppler_rectangle_new();
+                              options & POPPLER_FIND_CASE_SENSITIVE, options & POPPLER_FIND_IGNORE_DIACRITICS, options & POPPLER_FIND_MULTILINE, backwards, options & POPPLER_FIND_WHOLE_WORDS_ONLY, &xMin, &yMin, &xMax, &yMax, &continueMatch,
+                              &ignoredHyphen)) {
+        match = poppler_rectangle_extended_new();
         match->x1 = xMin;
         match->y1 = height - yMax;
         match->x2 = xMax;
         match->y2 = height - yMin;
+        match->match_continued = false;
+        match->ignored_hyphen = false;
         matches = g_list_prepend(matches, match);
         start_at_last = TRUE;
+
+        if (continueMatch.x1 != G_MAXDOUBLE) {
+            // received rect for next-line part of a multi-line match, add it.
+            if (multiline) {
+                match->match_continued = true;
+                match->ignored_hyphen = ignoredHyphen;
+                match = poppler_rectangle_extended_new();
+                match->x1 = continueMatch.x1;
+                match->y1 = height - continueMatch.y1;
+                match->x2 = continueMatch.x2;
+                match->y2 = height - continueMatch.y2;
+                match->match_continued = false;
+                match->ignored_hyphen = false;
+                matches = g_list_prepend(matches, match);
+            }
+
+            continueMatch.x1 = G_MAXDOUBLE;
+        }
     }
 
     g_free(ucs4);
@@ -1565,6 +1604,22 @@ void poppler_page_remove_annot(PopplerPage *page, PopplerAnnot *annot)
 
 G_DEFINE_BOXED_TYPE(PopplerRectangle, poppler_rectangle, poppler_rectangle_copy, poppler_rectangle_free)
 
+static PopplerRectangleExtended *poppler_rectangle_extended_new()
+{
+    return g_slice_new0(PopplerRectangleExtended);
+}
+
+PopplerRectangle *poppler_rectangle_new_from_pdf_rectangle(const PDFRectangle *rect)
+{
+    auto r = poppler_rectangle_extended_new();
+    r->x1 = rect->x1;
+    r->y1 = rect->y1;
+    r->x2 = rect->x2;
+    r->y2 = rect->y2;
+
+    return reinterpret_cast<PopplerRectangle *>(r);
+}
+
 /**
  * poppler_rectangle_new:
  *
@@ -1574,36 +1629,95 @@ G_DEFINE_BOXED_TYPE(PopplerRectangle, poppler_rectangle, poppler_rectangle_copy,
  */
 PopplerRectangle *poppler_rectangle_new(void)
 {
-    return g_slice_new0(PopplerRectangle);
+    return reinterpret_cast<PopplerRectangle *>(poppler_rectangle_extended_new());
 }
 
 /**
  * poppler_rectangle_copy:
  * @rectangle: a #PopplerRectangle to copy
  *
- * Creates a copy of @rectangle
+ * Creates a copy of @rectangle.
  *
+ * Note that you must only use this function on an allocated PopplerRectangle, as
+ * returned by poppler_rectangle_new(), poppler_rectangle_copy(), or the list elements
+ * returned from poppler_page_find_text() or poppler_page_find_text_with_options().
  * Returns: a new allocated copy of @rectangle
  */
 PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle)
 {
     g_return_val_if_fail(rectangle != nullptr, NULL);
 
-    return g_slice_dup(PopplerRectangle, rectangle);
+    auto ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
+    return reinterpret_cast<PopplerRectangle *>(g_slice_dup(PopplerRectangleExtended, ext_rectangle));
 }
 
 /**
  * poppler_rectangle_free:
  * @rectangle: a #PopplerRectangle
  *
- * Frees the given #PopplerRectangle
+ * Frees the given #PopplerRectangle.
+ *
+ * Note that you must only use this function on an allocated PopplerRectangle, as
+ * returned by poppler_rectangle_new(), poppler_rectangle_copy(), or the list elements
+ * returned from poppler_page_find_text() or poppler_page_find_text_with_options().
  */
 void poppler_rectangle_free(PopplerRectangle *rectangle)
 {
     g_slice_free(PopplerRectangle, rectangle);
 }
 
-/* PopplerPoint type */
+/**
+ * poppler_rectangle_find_get_match_continued:
+ * @rectangle: a #PopplerRectangle
+ *
+ * When using poppler_page_find_text_with_options() with the
+ * %POPPLER_FIND_MULTILINE flag, a match may span more than one line
+ * and thus consist of more than one rectangle. Every rectangle belonging
+ * to the same match will return %TRUE from this function, except for
+ * the last rectangle, where this function will return %FALSE.
+ *
+ * Note that you must only call this function on a #PopplerRectangle
+ * returned in the list from poppler_page_find_text() or
+ * poppler_page_find_text_with_options().
+ *
+ * Returns: whether there are more rectangles belonging to the same match
+ *
+ * Since: 21.05.0
+ */
+gboolean poppler_rectangle_find_get_match_continued(const PopplerRectangle *rectangle)
+{
+    g_return_val_if_fail(rectangle != nullptr, false);
+
+    auto ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
+    return ext_rectangle->match_continued;
+}
+
+/**
+ * poppler_rectangle_find_get_ignored_hyphen:
+ * @rectangle: a #PopplerRectangle
+ *
+ * When using poppler_page_find_text_with_options() with the
+ * %POPPLER_FIND_MULTILINE flag, a match may span more than one line,
+ * and may have been formed by ignoring a hyphen at the end of the line.
+ * When this happens at the end of the line corresponding to @rectangle,
+ * this function returns %TRUE (and then poppler_rectangle_find_get_match_continued()
+ * will also return %TRUE); otherwise it returns %FALSE.
+ *
+ * Note that you must only call this function on a #PopplerRectangle
+ * returned in the list from poppler_page_find_text() or
+ * poppler_page_find_text_with_options().
+ *
+ * Returns: whether a hyphen was ignored at the end of the line corresponding to @rectangle.
+ *
+ * Since: 21.05.0
+ */
+gboolean poppler_rectangle_find_get_ignored_hyphen(const PopplerRectangle *rectangle)
+{
+    g_return_val_if_fail(rectangle != nullptr, false);
+
+    auto ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
+    return ext_rectangle->ignored_hyphen;
+}
 
 G_DEFINE_BOXED_TYPE(PopplerPoint, poppler_point, poppler_point_copy, poppler_point_free)
 

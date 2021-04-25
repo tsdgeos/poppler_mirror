@@ -112,6 +112,25 @@ struct _PopplerStructureElement
     const StructElement *elem;
 };
 
+/*
+ * PopplerRectangleExtended:
+ *
+ * The real type behind the public PopplerRectangle.
+ * Must be ABI compatible to it!
+ */
+typedef struct
+{
+    /*< private >*/
+    double x1;
+    double y1;
+    double x2;
+    double y2;
+    bool match_continued; /* Described in poppler_rectangle_find_get_match_continued() */
+    bool ignored_hyphen; /* Described in poppler_rectangle_find_get_ignored_hyphen() */
+} PopplerRectangleExtended;
+
+PopplerRectangle *poppler_rectangle_new_from_pdf_rectangle(const PDFRectangle *rect);
+
 GList *_poppler_document_get_layers(PopplerDocument *document);
 GList *_poppler_document_get_layer_rbgroup(PopplerDocument *document, Layer *layer);
 PopplerPage *_poppler_page_new(PopplerDocument *document, Page *page, int index);

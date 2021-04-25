@@ -92,6 +92,8 @@ poppler_quadrilateral_copy
 poppler_quadrilateral_free
 poppler_quadrilateral_new
 poppler_rectangle_copy
+poppler_rectangle_find_get_match_continued
+poppler_rectangle_find_get_ignored_hyphen
 poppler_rectangle_free
 poppler_rectangle_new
 poppler_text_attributes_copy

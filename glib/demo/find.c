@@ -85,6 +85,23 @@ static void pgd_find_update_progress(PgdFindDemo *demo, gint scanned)
     g_free(str);
 }
 
+static void pgd_find_append_match(PgdFindDemo *demo, GtkTreeModel *model, GtkTreeIter *iter_child, PopplerRectangle *rect, int match_id)
+{
+    char *x1, *y1, *x2, *y2, *str;
+    str = g_strdup_printf("Match %d", match_id + 1);
+    x1 = g_strdup_printf("%.2f", rect->x1);
+    y1 = g_strdup_printf("%.2f", rect->y1);
+    x2 = g_strdup_printf("%.2f", rect->x2);
+    y2 = g_strdup_printf("%.2f", rect->y2);
+    gtk_tree_store_set(GTK_TREE_STORE(model), iter_child, TITLE_COLUMN, str, X1_COLUMN, x1, Y1_COLUMN, y1, X2_COLUMN, x2, Y2_COLUMN, y2, VISIBLE_COLUMN, TRUE, PAGE_COLUMN, demo->page_index, PAGE_RECT, rect, -1);
+    g_free(str);
+    g_free(x1);
+    g_free(y1);
+    g_free(x2);
+    g_free(y2);
+    g_object_weak_ref(G_OBJECT(model), (GWeakNotify)poppler_rectangle_free, rect);
+}
+
 static gboolean pgd_find_find_text(PgdFindDemo *demo)
 {
     PopplerPage *page;
@@ -103,46 +120,31 @@ static gboolean pgd_find_find_text(PgdFindDemo *demo)
     matches = poppler_page_find_text_with_options(page, gtk_entry_get_text(GTK_ENTRY(demo->entry)), demo->options);
     g_timer_stop(timer);
     if (matches) {
-        GtkTreeIter iter;
+        GtkTreeIter iter, iter_child;
         gchar *str;
         GList *l;
         gdouble height;
         gint n_match = 0;
 
-        str = g_strdup_printf("%d matches found on page %d in %.4f seconds", g_list_length(matches), demo->page_index + 1, g_timer_elapsed(timer, NULL));
-
         gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
-        gtk_tree_store_set(GTK_TREE_STORE(model), &iter, TITLE_COLUMN, str, VISIBLE_COLUMN, FALSE, PAGE_COLUMN, demo->page_index, -1);
-        g_free(str);
-
         poppler_page_get_size(page, NULL, &height);
-
         for (l = matches; l && l->data; l = g_list_next(l)) {
             PopplerRectangle *rect = (PopplerRectangle *)l->data;
-            GtkTreeIter iter_child;
-            gchar *x1, *y1, *x2, *y2;
             gdouble tmp;
-
-            str = g_strdup_printf("Match %d", ++n_match);
-            x1 = g_strdup_printf("%.2f", rect->x1);
-            y1 = g_strdup_printf("%.2f", rect->y1);
-            x2 = g_strdup_printf("%.2f", rect->x2);
-            y2 = g_strdup_printf("%.2f", rect->y2);
-
             tmp = rect->y1;
             rect->y1 = height - rect->y2;
             rect->y2 = height - tmp;
-
             gtk_tree_store_append(GTK_TREE_STORE(model), &iter_child, &iter);
-            gtk_tree_store_set(GTK_TREE_STORE(model), &iter_child, TITLE_COLUMN, str, X1_COLUMN, x1, Y1_COLUMN, y1, X2_COLUMN, x2, Y2_COLUMN, y2, VISIBLE_COLUMN, TRUE, PAGE_COLUMN, demo->page_index, PAGE_RECT, rect, -1);
-            g_free(str);
-            g_free(x1);
-            g_free(y1);
-            g_free(x2);
-            g_free(y2);
-            g_object_weak_ref(G_OBJECT(model), (GWeakNotify)poppler_rectangle_free, rect);
+            pgd_find_append_match(demo, model, &iter_child, rect, n_match);
+            if (!poppler_rectangle_find_get_match_continued(rect))
+                ++n_match;
         }
         g_list_free(matches);
+
+        str = g_strdup_printf("%d matches found on page %d in %.4f seconds", n_match, demo->page_index + 1, g_timer_elapsed(timer, NULL));
+
+        gtk_tree_store_set(GTK_TREE_STORE(model), &iter, TITLE_COLUMN, str, VISIBLE_COLUMN, FALSE, PAGE_COLUMN, demo->page_index, -1);
+        g_free(str);
     }
 
     g_timer_destroy(timer);
@@ -152,6 +154,11 @@ static gboolean pgd_find_find_text(PgdFindDemo *demo)
     pgd_find_update_progress(demo, demo->page_index);
 
     return demo->page_index < demo->n_pages;
+}
+
+static void find_text_idle_finish(PgdFindDemo *demo)
+{
+    demo->idle_id = 0;
 }
 
 static cairo_surface_t *pgd_find_render_page(PgdFindDemo *demo)
@@ -252,7 +259,7 @@ static void pgd_find_button_clicked(GtkButton *button, PgdFindDemo *demo)
     pgd_find_update_progress(demo, demo->page_index);
     if (demo->idle_id > 0)
         g_source_remove(demo->idle_id);
-    demo->idle_id = g_idle_add((GSourceFunc)pgd_find_find_text, demo);
+    demo->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, (GSourceFunc)pgd_find_find_text, demo, (GDestroyNotify)find_text_idle_finish);
 }
 
 static void pgd_find_button_sensitivity_cb(GtkWidget *button, GtkEntry *entry)
@@ -309,6 +316,22 @@ static void pgd_find_backwards_toggled(GtkToggleButton *togglebutton, PgdFindDem
         demo->options &= ~POPPLER_FIND_BACKWARDS;
 }
 
+static void pgd_find_multiline_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
+{
+    if (gtk_toggle_button_get_active(togglebutton))
+        demo->options |= POPPLER_FIND_MULTILINE;
+    else
+        demo->options &= ~POPPLER_FIND_MULTILINE;
+}
+
+static void pgd_find_ignore_diacritics_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
+{
+    if (gtk_toggle_button_get_active(togglebutton))
+        demo->options |= POPPLER_FIND_IGNORE_DIACRITICS;
+    else
+        demo->options &= ~POPPLER_FIND_IGNORE_DIACRITICS;
+}
+
 static void pgd_find_whole_words_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
     if (gtk_toggle_button_get_active(togglebutton))
@@ -344,6 +367,16 @@ GtkWidget *pgd_find_create_widget(PopplerDocument *document)
     vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+
+    checkbutton = gtk_check_button_new_with_label("Multi-line");
+    g_signal_connect(checkbutton, "toggled", G_CALLBACK(pgd_find_multiline_toggled), demo);
+    gtk_box_pack_start(GTK_BOX(hbox), checkbutton, FALSE, FALSE, 0);
+    gtk_widget_show(checkbutton);
+
+    checkbutton = gtk_check_button_new_with_label("Ignore diacritics");
+    g_signal_connect(checkbutton, "toggled", G_CALLBACK(pgd_find_ignore_diacritics_toggled), demo);
+    gtk_box_pack_start(GTK_BOX(hbox), checkbutton, FALSE, FALSE, 0);
+    gtk_widget_show(checkbutton);
 
     demo->entry = gtk_entry_new();
     gtk_box_pack_start(GTK_BOX(hbox), demo->entry, FALSE, TRUE, 0);

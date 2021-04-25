@@ -50,6 +50,7 @@
 #include <QtGui/QPainter>
 
 #include <config.h>
+#include <cfloat>
 #include <poppler-config.h>
 #include <PDFDoc.h>
 #include <Catalog.h>
@@ -359,24 +360,28 @@ inline TextPage *PageData::prepareTextSearch(const QString &text, Page::Rotation
     return textPage;
 }
 
-inline bool PageData::performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics = false)
+inline bool PageData::performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics,
+                                              bool sAcrossLines)
 {
     if (direction == Page::FromTop)
-        return textPage->findText(u.data(), u.size(), true, true, false, false, sCase, sDiacritics, false, sWords, &sLeft, &sTop, &sRight, &sBottom);
+        return textPage->findText(u.data(), u.size(), true, true, false, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
     else if (direction == Page::NextResult)
-        return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, false, sWords, &sLeft, &sTop, &sRight, &sBottom);
+        return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
     else if (direction == Page::PreviousResult)
-        return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, true, sWords, &sLeft, &sTop, &sRight, &sBottom);
+        return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, true, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
 
     return false;
 }
 
-inline QList<QRectF> PageData::performMultipleTextSearch(TextPage *textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics = false)
+inline QList<QRectF> PageData::performMultipleTextSearch(TextPage *textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines)
 {
     QList<QRectF> results;
     double sLeft = 0.0, sTop = 0.0, sRight = 0.0, sBottom = 0.0;
+    bool sIgnoredHyphen = false;
+    PDFRectangle continueMatch;
+    continueMatch.x1 = DBL_MAX; // we use this to detect valid return values
 
-    while (textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, false, sWords, &sLeft, &sTop, &sRight, &sBottom)) {
+    while (textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, &continueMatch, &sIgnoredHyphen)) {
         QRectF result;
 
         result.setLeft(sLeft);
@@ -385,6 +390,18 @@ inline QList<QRectF> PageData::performMultipleTextSearch(TextPage *textPage, QVe
         result.setBottom(sBottom);
 
         results.append(result);
+
+        if (sAcrossLines && continueMatch.x1 != DBL_MAX) {
+            QRectF resultN;
+
+            resultN.setLeft(continueMatch.x1);
+            resultN.setTop(continueMatch.y1);
+            resultN.setRight(continueMatch.x2);
+            resultN.setBottom(continueMatch.y1);
+
+            results.append(resultN);
+            continueMatch.x1 = DBL_MAX;
+        }
     }
 
     return results;
@@ -647,7 +664,7 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
     QVector<Unicode> u;
     TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage, u, sLeft, sTop, sRight, sBottom, direction, sCase, false);
+    const bool found = m_page->performSingleTextSearch(textPage, u, sLeft, sTop, sRight, sBottom, direction, sCase, false, false, false);
 
     textPage->decRefCnt();
 
@@ -659,11 +676,12 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
     const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
     const bool sWords = flags.testFlag(WholeWords) ? true : false;
     const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
+    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
 
     QVector<Unicode> u;
     TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage, u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics);
+    const bool found = m_page->performSingleTextSearch(textPage, u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
 
     textPage->decRefCnt();
 
@@ -677,7 +695,7 @@ QList<QRectF> Page::search(const QString &text, SearchMode caseSensitive, Rotati
     QVector<Unicode> u;
     TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, false);
+    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, false, false, false);
 
     textPage->decRefCnt();
 
@@ -689,11 +707,12 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
     const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
     const bool sWords = flags.testFlag(WholeWords) ? true : false;
     const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
+    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
 
     QVector<Unicode> u;
     TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, sWords, sDiacritics);
+    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, sWords, sDiacritics, sAcrossLines);
 
     textPage->decRefCnt();
 

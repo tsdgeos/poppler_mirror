@@ -613,6 +613,20 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool ignoreDiacritics, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax,
                   double *yMax);
 
+    // Adds new parameter <matchAcrossLines>, which allows <s> to match on text
+    // spanning from end of a line to the next line. In that case, the rect for
+    // the part of match that falls on the next line will be stored in
+    // <continueMatch>, and if hyphenation (i.e. ignoring hyphen at end of line)
+    // was used while matching at the end of the line prior to <continueMatch>,
+    // then <ignoredHyphen> will be true, otherwise will be false.
+    // Only finding across two lines is supported, i.e. it won't match where <s>
+    // spans more than two lines.
+    //
+    // <matchAcrossLines> will be ignored if <backward> is true (as that
+    // combination has not been implemented yet).
+    bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool ignoreDiacritics, bool matchAcrossLines, bool backward, bool wholeWord, double *xMin, double *yMin,
+                  double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
+
     // Get the text which is inside the specified rectangle.
     GooString *getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
 
@@ -656,6 +670,7 @@ private:
     void clear();
     void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
+    void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
 
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // discard diagonal text

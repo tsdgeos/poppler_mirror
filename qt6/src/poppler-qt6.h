@@ -730,9 +730,12 @@ rather unexpected results.
         NoSearchFlags = 0x00000000,
         IgnoreCase = 0x00000001, ///< Case differences are ignored
         WholeWords = 0x00000002, ///< Only whole words are matched
-        IgnoreDiacritics = 0x00000004 ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored.
-                                      ///< This option will have no effect if the search term contains characters which
-                                      ///< are not pure ascii.
+        IgnoreDiacritics = 0x00000004, ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored.
+                                       ///< This option will have no effect if the search term contains characters which
+                                       ///< are not pure ascii.
+        AcrossLines = 0x00000008 ///< Allows to match on text spanning from end of a line to the next line.
+                                 ///< It won't match on text spanning more than two lines. Automatically ignores hyphen
+                                 ///< at end of line, and allows whitespace in search term to match on newline. \since 21.05.0
     };
     Q_DECLARE_FLAGS(SearchFlags, SearchFlag)
 
@@ -750,6 +753,9 @@ rather unexpected results.
 
     /**
        Returns a list of all occurrences of the specified text on the page.
+
+       if SearchFlags::AcrossLines is given in \param flags, then rects may just
+       be parts of the text itself if it's split between multiple lines.
 
        \param text the text to search
        \param flags the flags to consider during matching
