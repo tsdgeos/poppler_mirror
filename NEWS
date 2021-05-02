@@ -1,3 +1,22 @@
+Release 21.05.0:
+        core:
+         * Fix crashes in malformed files
+         * Export SplashFont* symbols used by Scribus
+         * Minor code improvements
+
+        glib:
+         * Enhance find to support multi-line matching
+
+        qt5/qt6:
+         * Make sure new signatures are always properly oriented
+         * Allow to pass the border width when signing
+
+        utils:
+         * pdftoppm: Fix regression when using single scaleTo. Issue #1062
+
+        build system:
+         * Allow to disable building manual tests
+
 Release 21.04.0:
         core:
          * Hide symbols by default
