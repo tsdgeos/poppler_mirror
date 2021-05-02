@@ -140,6 +140,10 @@ POPPLER_PUBLIC
 PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle);
 POPPLER_PUBLIC
 void poppler_rectangle_free(PopplerRectangle *rectangle);
+POPPLER_PUBLIC
+gboolean poppler_rectangle_find_get_match_continued(const PopplerRectangle *rectangle);
+POPPLER_PUBLIC
+gboolean poppler_rectangle_find_get_ignored_hyphen(const PopplerRectangle *rectangle);
 
 /* A point on a page, with coordinates in PDF points. */
 #define POPPLER_TYPE_POINT (poppler_point_get_type())

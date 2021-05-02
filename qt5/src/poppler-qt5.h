@@ -18,13 +18,14 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
- * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -762,9 +763,12 @@ rather unexpected results.
         NoSearchFlags = 0x00000000, ///< since 0.63
         IgnoreCase = 0x00000001, ///< Case differences are ignored
         WholeWords = 0x00000002, ///< Only whole words are matched
-        IgnoreDiacritics = 0x00000004 ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored. \since 0.73
-                                      ///< This option will have no effect if the search term contains characters which
-                                      ///< are not pure ascii.
+        IgnoreDiacritics = 0x00000004, ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored. \since 0.73
+                                       ///< This option will have no effect if the search term contains characters which
+                                       ///< are not pure ascii.
+        AcrossLines = 0x00000008 ///< Allows to match on text spanning from end of a line to the next line.
+                                 ///< It won't match on text spanning more than two lines. Automatically ignores hyphen
+                                 ///< at end of line, and allows whitespace in search term to match on newline. \since 21.05.0
     };
     Q_DECLARE_FLAGS(SearchFlags, SearchFlag)
 
@@ -810,6 +814,9 @@ rather unexpected results.
 
     /**
        Returns a list of all occurrences of the specified text on the page.
+
+       if SearchFlags::AcrossLines is given in \param flags, then rects may just
+       be parts of the text itself if it's split between multiple lines.
 
        \param text the text to search
        \param flags the flags to consider during matching
@@ -2137,7 +2144,8 @@ public:
      *  - rect for the signature annotation
      *  - text that will be shown inside the rect
      *  - font size and color
-     *  - border and background color
+     *  - border width and color
+     *  - background color
      * \since 21.01
      */
     class POPPLER_QT5_EXPORT NewSignatureData
@@ -2180,6 +2188,16 @@ public:
          */
         QColor borderColor() const;
         void setBorderColor(const QColor &color);
+
+        /**
+         * border width in points
+         *
+         * Default: 1.5
+         *
+         * \since 21.05
+         */
+        double borderWidth() const;
+        void setBorderWidth(double width);
 
         /**
          * Default: QColor(240, 240, 240)

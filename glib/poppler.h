@@ -157,6 +157,10 @@ typedef enum /*< flags >*/
  * @POPPLER_FIND_IGNORE_DIACRITICS: do diacritics insensitive search,
  * i.e. ignore accents, umlauts, diaeresis,etc. while matching. This
  * option will be ignored if the search term is not pure ascii. Since 0.73.
+ * @POPPLER_FIND_MULTILINE: allows to match on text spanning from
+ * end of a line to the next line. (Currently it won't match on text spanning
+ * more than two lines.) Automatically ignores hyphen at end of line, and
+ * allows whitespace in search term to match on newline char. Since: 21.05.0.
  *
  * Flags using while searching text in a page
  *
@@ -168,7 +172,8 @@ typedef enum /*< flags >*/
     POPPLER_FIND_CASE_SENSITIVE = 1 << 0,
     POPPLER_FIND_BACKWARDS = 1 << 1,
     POPPLER_FIND_WHOLE_WORDS_ONLY = 1 << 2,
-    POPPLER_FIND_IGNORE_DIACRITICS = 1 << 3
+    POPPLER_FIND_IGNORE_DIACRITICS = 1 << 3,
+    POPPLER_FIND_MULTILINE = 1 << 4
 } PopplerFindFlags;
 
 typedef struct _PopplerDocument PopplerDocument;

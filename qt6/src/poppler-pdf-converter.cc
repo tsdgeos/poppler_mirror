@@ -3,6 +3,7 @@
  * Copyright (C) 2008, 2009, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +130,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     ::Page *destPage = doc->getPage(data.page() + 1);
 
     const DefaultAppearance da { { objName, "SigFont" }, data.fontSize(), std::unique_ptr<AnnotColor> { convertQColor(data.fontColor()) } };
-    const PDFRectangle rect = boundaryToPdfRectangle(destPage, data.boundingRectangle(), 0 /* no flags */);
+    const PDFRectangle rect = boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation);
 
     Object annotObj = Object(new Dict(doc->getXRef()));
     annotObj.dictSet("Type", Object(objName, "Annot"));
@@ -157,7 +158,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
 
     Object refObj(ref);
     AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field.get());
-    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked);
+    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
     Dict dummy(doc->getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
     appearCharacs->setBorderColor(std::unique_ptr<AnnotColor> { convertQColor(data.borderColor()) });
@@ -175,7 +176,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     destPage->addAnnot(signatureAnnot);
 
     std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(1.5);
+    border->setWidth(data.borderWidth());
     signatureAnnot->setBorder(std::move(border));
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
@@ -210,6 +211,7 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     double fontSize = 10.0;
     QColor fontColor = Qt::red;
     QColor borderColor = Qt::red;
+    double borderWidth = 1.5;
     QColor backgroundColor = QColor(240, 240, 240);
 
     QString partialName = QUuid::createUuid().toString();
@@ -305,6 +307,16 @@ void PDFConverter::NewSignatureData::setBorderColor(const QColor &color)
 QColor PDFConverter::NewSignatureData::backgroundColor() const
 {
     return d->backgroundColor;
+}
+
+double PDFConverter::NewSignatureData::borderWidth() const
+{
+    return d->borderWidth;
+}
+
+void PDFConverter::NewSignatureData::setBorderWidth(double width)
+{
+    d->borderWidth = width;
 }
 
 void PDFConverter::NewSignatureData::setBackgroundColor(const QColor &color)

@@ -1828,8 +1828,17 @@ void PSOutputDev::setupResources(Dict *resDict)
                 // process the XObject's resource dictionary
                 Object xObj = xObjDict.dictGetVal(i);
                 if (xObj.isStream()) {
-                    Object resObj = xObj.streamGetDict()->lookup("Resources");
+                    Ref resObjRef;
+                    Object resObj = xObj.streamGetDict()->lookup("Resources", &resObjRef);
                     if (resObj.isDict()) {
+                        if (resObjRef != Ref::INVALID()) {
+                            const int numObj = resObjRef.num;
+                            if (resourceIDs.find(numObj) != resourceIDs.end()) {
+                                error(errSyntaxError, -1, "loop in Resources (numObj: {0:d})", numObj);
+                                continue;
+                            }
+                            resourceIDs.insert(numObj);
+                        }
                         setupResources(resObj.getDict());
                     }
                 }
@@ -3235,7 +3244,12 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         sliceW = (int)((box.x2 - box.x1) * hDPI2 / 72.0);
         sliceH = (int)((box.y2 - box.y1) * vDPI2 / 72.0);
     }
-    nStripes = (int)ceil((double)(sliceW * sliceH) / (double)rasterizationSliceSize);
+    int sliceArea;
+    if (checkedMultiply(sliceW, sliceH, &sliceArea)) {
+        delete splashOut;
+        return false;
+    }
+    nStripes = (int)ceil((double)(sliceArea) / (double)rasterizationSliceSize);
     if (unlikely(nStripes == 0)) {
         delete splashOut;
         return false;

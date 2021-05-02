@@ -3526,7 +3526,10 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
             hasBackground = true;
             for (i = 0; i < colorSpace->getNComps(); ++i) {
                 Object obj2 = obj1.arrayGet(i);
-                background.c[i] = dblToCol(obj2.getNum());
+                background.c[i] = dblToCol(obj2.getNum(&hasBackground));
+            }
+            if (!hasBackground) {
+                error(errSyntaxWarning, -1, "Bad Background in shading dictionary");
             }
         } else {
             error(errSyntaxWarning, -1, "Bad Background in shading dictionary");

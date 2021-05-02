@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, 2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -189,9 +190,14 @@ void TestStrings::check_QStringToUnicodeGooString()
     QFETCH(QByteArray, result);
 
     GooString *goo = Poppler::QStringToUnicodeGooString(string);
-    QVERIFY(goo->hasUnicodeMarker());
-    QCOMPARE(goo->getLength(), string.length() * 2 + 2);
-    QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
+    if (string.isEmpty()) {
+        QVERIFY(goo->toStr().empty());
+        QCOMPARE(goo->getLength(), 0);
+    } else {
+        QVERIFY(goo->hasUnicodeMarker());
+        QCOMPARE(goo->getLength(), string.length() * 2 + 2);
+        QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
+    }
 
     delete goo;
 }
