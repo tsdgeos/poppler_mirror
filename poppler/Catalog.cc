@@ -941,6 +941,43 @@ unsigned int Catalog::getMarkInfo()
     return markInfo;
 }
 
+Object *Catalog::getCreateOutline()
+{
+
+    catalogLocker();
+    Object catDict = xref->getCatalog();
+
+    // If there is no Object in the outline variable,
+    // check if there is an Outline dict in the catalog
+    if (outline.isNone()) {
+        if (catDict.isDict()) {
+            Object outline_obj = catDict.dictLookup("Outlines");
+            if (outline_obj.isDict()) {
+                return &outline;
+            }
+        } else {
+            // catalog is not a dict, give up?
+            return &outline;
+        }
+    }
+
+    // If there is an Object in variable, make sure it's a dict
+    if (outline.isDict()) {
+        return &outline;
+    }
+
+    // setup an empty outline dict
+    outline = Object(new Dict(doc->getXRef()));
+    outline.dictSet("Type", Object(objName, "Outlines"));
+    outline.dictSet("Count", Object(0));
+
+    const Ref outlineRef = doc->getXRef()->addIndirectObject(&outline);
+    catDict.dictAdd("Outlines", Object(outlineRef));
+    xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+
+    return &outline;
+}
+
 Object *Catalog::getOutline()
 {
     catalogLocker();

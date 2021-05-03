@@ -1933,7 +1933,7 @@ Outline *PDFDoc::getOutline()
     if (!outline) {
         pdfdocLocker();
         // read outline
-        outline = new Outline(catalog->getOutline(), xref);
+        outline = new Outline(catalog->getOutline(), xref, this);
     }
 
     return outline;
