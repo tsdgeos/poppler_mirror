@@ -2852,6 +2852,7 @@ static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
+    fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
 
     Object fontsDictObj = fontParentDict->lookup("Font");
     if (!fontsDictObj.isDict()) {
