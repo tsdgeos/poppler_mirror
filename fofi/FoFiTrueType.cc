@@ -1295,9 +1295,14 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             newTables[k].checksum = checksum;
             newTables[k].offset = pos;
             newTables[k].len = length;
-            pos += length;
-            if (pos & 3) {
-                pos += 4 - (length & 3);
+            int newPos;
+            if (unlikely(checkedAdd(pos, length, &newPos))) {
+                ok = false;
+            } else {
+                pos = newPos;
+                if (pos & 3) {
+                    pos += 4 - (length & 3);
+                }
             }
             ++k;
         }
