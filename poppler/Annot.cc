@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -2852,6 +2852,7 @@ static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
+    fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
 
     Object fontsDictObj = fontParentDict->lookup("Font");
     if (!fontsDictObj.isDict()) {

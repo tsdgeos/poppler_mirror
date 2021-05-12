@@ -1186,9 +1186,15 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     pos = 0;
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].newOffset = pos;
-        pos += locaTable[i].len;
-        if (pos & 3) {
-            pos += 4 - (pos & 3);
+
+        int newPos;
+        if (unlikely(checkedAdd(pos, locaTable[i].len, &newPos))) {
+            ok = false;
+        } else {
+            pos = newPos;
+            if (pos & 3) {
+                pos += 4 - (pos & 3);
+            }
         }
         if (locaTable[i].len > 0) {
             *maxUsedGlyph = i;
@@ -1295,9 +1301,14 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             newTables[k].checksum = checksum;
             newTables[k].offset = pos;
             newTables[k].len = length;
-            pos += length;
-            if (pos & 3) {
-                pos += 4 - (length & 3);
+            int newPos;
+            if (unlikely(checkedAdd(pos, length, &newPos))) {
+                ok = false;
+            } else {
+                pos = newPos;
+                if (pos & 3) {
+                    pos += 4 - (length & 3);
+                }
             }
             ++k;
         }
