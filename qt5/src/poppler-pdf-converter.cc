@@ -1,6 +1,6 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2009, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2009, 2020, 2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
