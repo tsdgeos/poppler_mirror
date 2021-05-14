@@ -6,7 +6,7 @@
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright 2005-2007, 2009-2011, 2017, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2007, 2009-2011, 2017, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -65,7 +65,7 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
 private:
     void init();

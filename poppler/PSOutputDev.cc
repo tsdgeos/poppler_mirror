@@ -1004,8 +1004,8 @@ public:
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
-    bool isBinary(bool last = true) override { return true; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool last = true) const override { return true; }
+    bool isEncoder() const override { return true; }
 
 private:
     bool fillBuf();

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -218,7 +218,7 @@ public:
     virtual GooString *getPSFilter(int psLevel, const char *indent);
 
     // Does this stream type potentially contain non-printable chars?
-    virtual bool isBinary(bool last = true) = 0;
+    virtual bool isBinary(bool last = true) const = 0;
 
     // Get the BaseStream of this stream.
     virtual BaseStream *getBaseStream() = 0;
@@ -232,7 +232,7 @@ public:
     virtual Object *getDictObject() = 0;
 
     // Is this an encoding filter?
-    virtual bool isEncoder() { return false; }
+    virtual bool isEncoder() const { return false; }
 
     // Get image parameters which are defined by the stream contents.
     virtual void getImageParams(int * /*bitsPerComponent*/, StreamColorSpaceMode * /*csMode*/) { }
@@ -329,7 +329,7 @@ public:
     virtual BaseStream *copy() = 0;
     virtual Stream *makeSubStream(Goffset start, bool limited, Goffset length, Object &&dict) = 0;
     void setPos(Goffset pos, int dir = 0) override = 0;
-    bool isBinary(bool last = true) override { return last; }
+    bool isBinary(bool last = true) const override { return last; }
     BaseStream *getBaseStream() override { return this; }
     Stream *getUndecodedStream() override { return this; }
     Dict *getDict() override { return dict.getDict(); }
@@ -806,7 +806,7 @@ public:
     }
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
 private:
     int buf;
@@ -832,7 +832,7 @@ public:
     }
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
 private:
     int c[5];
@@ -857,7 +857,7 @@ public:
     int getRawChar() override;
     void getRawChars(int nChars, int *buffer) override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
 private:
     bool hasGetChars() override { return true; }
@@ -915,7 +915,7 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
 private:
     bool hasGetChars() override { return true; }
@@ -950,7 +950,7 @@ public:
     }
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
     void unfilteredReset() override;
 
@@ -1042,7 +1042,7 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
     void unfilteredReset() override;
 
@@ -1147,7 +1147,7 @@ public:
     int getRawChar() override;
     void getRawChars(int nChars, int *buffer) override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
     void unfilteredReset() override;
 
 private:
@@ -1220,7 +1220,7 @@ public:
     int getChar() override { return EOF; }
     int lookChar() override { return EOF; }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return false; }
+    bool isBinary(bool /*last = true*/) const override { return false; }
 };
 
 //------------------------------------------------------------------------
@@ -1237,7 +1237,7 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
 
     int lookChar(int idx);
 
@@ -1260,8 +1260,8 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override;
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override;
+    bool isEncoder() const override { return true; }
 
 private:
     int length;
@@ -1282,8 +1282,8 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return false; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return false; }
+    bool isEncoder() const override { return true; }
 
 private:
     char buf[4];
@@ -1309,8 +1309,8 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return false; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return false; }
+    bool isEncoder() const override { return true; }
 
 private:
     char buf[8];
@@ -1336,8 +1336,8 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return true; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return true; }
+    bool isEncoder() const override { return true; }
 
 private:
     char buf[131];
@@ -1370,8 +1370,8 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
-    bool isBinary(bool last = true) override { return true; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool last = true) const override { return true; }
+    bool isEncoder() const override { return true; }
 
 private:
     LZWEncoderNode table[4096];
@@ -1400,8 +1400,8 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return false; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return false; }
+    bool isEncoder() const override { return true; }
 
 private:
     char buf[2];
@@ -1426,8 +1426,8 @@ public:
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return false; }
-    bool isEncoder() override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return false; }
+    bool isEncoder() const override { return true; }
 
 private:
     char buf[2];
@@ -1456,11 +1456,11 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
-    bool isBinary(bool /*last = true*/) override { return true; }
+    bool isBinary(bool /*last = true*/) const override { return true; }
 
     // Although we are an encoder, we return false here, since we do not want do be auto-deleted by
     // successive streams.
-    bool isEncoder() override { return false; }
+    bool isEncoder() const override { return false; }
 
     int getUnfilteredChar() override { return getChar(); }
     void unfilteredReset() override { reset(); }

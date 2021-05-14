@@ -235,7 +235,7 @@ public:
     void reset() override { str->getBaseStream()->reset(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
-    bool isBinary(bool last = true) override { return str->getBaseStream()->isBinary(); }
+    bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
     void unfilteredReset() override { str->getBaseStream()->unfilteredReset(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
@@ -1361,7 +1361,7 @@ GooString *ASCIIHexStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool ASCIIHexStream::isBinary(bool last)
+bool ASCIIHexStream::isBinary(bool last) const
 {
     return str->isBinary(false);
 }
@@ -1447,7 +1447,7 @@ GooString *ASCII85Stream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool ASCII85Stream::isBinary(bool last)
+bool ASCII85Stream::isBinary(bool last) const
 {
     return str->isBinary(false);
 }
@@ -1671,7 +1671,7 @@ GooString *LZWStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool LZWStream::isBinary(bool last)
+bool LZWStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -1734,7 +1734,7 @@ GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool RunLengthStream::isBinary(bool last)
+bool RunLengthStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -2558,7 +2558,7 @@ GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool CCITTFaxStream::isBinary(bool last)
+bool CCITTFaxStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4026,7 +4026,7 @@ GooString *DCTStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool DCTStream::isBinary(bool last)
+bool DCTStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4239,7 +4239,7 @@ GooString *FlateStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool FlateStream::isBinary(bool last)
+bool FlateStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4633,7 +4633,7 @@ int BufStream::lookChar(int idx)
     return buf[idx];
 }
 
-bool BufStream::isBinary(bool last)
+bool BufStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4675,7 +4675,7 @@ int FixedLengthEncoder::lookChar()
     return str->getChar();
 }
 
-bool FixedLengthEncoder::isBinary(bool last)
+bool FixedLengthEncoder::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
