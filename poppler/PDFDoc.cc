@@ -47,6 +47,7 @@
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Adam Sampson <ats@offog.org>
 // Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

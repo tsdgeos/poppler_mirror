@@ -18,6 +18,7 @@
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
