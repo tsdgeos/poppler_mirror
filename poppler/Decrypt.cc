@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -370,7 +370,7 @@ int BaseCryptStream::getChar()
     return c;
 }
 
-bool BaseCryptStream::isBinary(bool last)
+bool BaseCryptStream::isBinary(bool last) const
 {
     return str->isBinary(last);
 }

@@ -4904,11 +4904,30 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
 bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
                                                     const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
-    DefaultAppearance da(_da);
     const GooString &contents = field->getCustomAppearanceContent();
     if (contents.toStr().empty())
         return false;
 
+    const GooString &leftText = field->getCustomAppearanceLeftContent();
+    if (leftText.toStr().empty()) {
+        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
+    } else {
+        DefaultAppearance daLeft(_da);
+        daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
+        const double halfWidth = (rect->x2 - rect->x1) / 2;
+        PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
+        drawSignatureFieldText(leftText, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
+
+        PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
+        drawSignatureFieldText(contents, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+    }
+
+    return true;
+}
+
+void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
+                                                    bool centerHorizontally)
+{
     double borderWidth = 0;
     append("q\n");
 
@@ -4921,40 +4940,58 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     // Box size
     const double width = rect->x2 - rect->x1;
     const double height = rect->y2 - rect->y1;
-
-    // Setup text clipping
     const double textmargin = borderWidth * 2;
     const double textwidth = width - 2 * textmargin;
-    appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2 * textmargin);
-
-    GfxFont *font = nullptr;
 
     // create a Helvetica fake font
-    font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
+    GfxFont *font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
+
+    // calculate the string tokenization
+    int i = 0;
+    std::vector<std::pair<std::string, double>> outTexts;
+    while (i < text.getLength()) {
+        GooString out;
+        double textWidth;
+        Annot::layoutText(&text, &out, &i, font, &textWidth, textwidth / da.getFontPtSize(), nullptr, false);
+        outTexts.emplace_back(out.toStr(), textWidth * da.getFontPtSize());
+    }
+
+    // Setup text clipping
+    appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re W n\n", leftMargin + textmargin, textmargin, textwidth, height - 2 * textmargin);
 
     // Set font state
     setDrawColor(da.getFontColor(), true);
     appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
     setTextFont(da.getFontName(), da.getFontPtSize());
 
-    int i = 0;
-    double xposPrev = 0;
-    while (i < contents.getLength()) {
-        GooString out;
-        double linewidth, xpos;
-        Annot::layoutText(&contents, &out, &i, font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
-        linewidth *= da.getFontPtSize();
-        xpos = 0;
-        appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
-        writeString(out);
+    double xDelta = centerHorizontally ? 0 : leftMargin;
+    double currentX = 0;
+    double yDelta = -da.getFontPtSize();
+    if (centerVertically) {
+        const double outTextHeight = outTexts.size() * da.getFontPtSize();
+        if (outTextHeight < height) {
+            yDelta -= (height - outTextHeight) / 2;
+        }
+    }
+    for (const std::pair<std::string, double> &outText : outTexts) {
+        if (centerHorizontally) {
+            const double lineX = (width - outText.second) / 2;
+            xDelta = (lineX - currentX);
+            currentX += xDelta;
+        }
+
+        appendf("{0:.2f} {1:.2f} Td\n", xDelta, yDelta);
+        writeString(GooString(outText.first));
         append("Tj\n");
-        xposPrev = xpos;
+
+        if (!centerHorizontally) {
+            xDelta = 0;
+        }
+        yDelta = -da.getFontPtSize();
     }
 
     font->decRefCnt();
     append("ET Q\n");
-
-    return true;
 }
 
 bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,

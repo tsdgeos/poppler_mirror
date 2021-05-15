@@ -150,7 +150,7 @@ GooString *JPXStream::getPSFilter(int psLevel, const char *indent)
     return nullptr;
 }
 
-bool JPXStream::isBinary(bool last)
+bool JPXStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }

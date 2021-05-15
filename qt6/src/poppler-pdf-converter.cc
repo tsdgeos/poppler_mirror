@@ -1,6 +1,6 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2009, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2009, 2020, 2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
@@ -156,6 +156,9 @@ bool PDFConverter::sign(const NewSignatureData &data)
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     field->setCustomAppearanceContent(*gSignatureText);
 
+    std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
+    field->setCustomAppearanceLeftContent(*gSignatureLeftText);
+
     Object refObj(ref);
     AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field.get());
     signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
@@ -208,7 +211,9 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     int page;
     QRectF boundingRectangle;
     QString signatureText;
+    QString signatureLeftText;
     double fontSize = 10.0;
+    double leftFontSize = 20.0;
     QColor fontColor = Qt::red;
     QColor borderColor = Qt::red;
     double borderWidth = 1.5;
@@ -274,6 +279,16 @@ void PDFConverter::NewSignatureData::setSignatureText(const QString &text)
     d->signatureText = text;
 }
 
+QString PDFConverter::NewSignatureData::signatureLeftText() const
+{
+    return d->signatureLeftText;
+}
+
+void PDFConverter::NewSignatureData::setSignatureLeftText(const QString &text)
+{
+    d->signatureLeftText = text;
+}
+
 double PDFConverter::NewSignatureData::fontSize() const
 {
     return d->fontSize;
@@ -282,6 +297,16 @@ double PDFConverter::NewSignatureData::fontSize() const
 void PDFConverter::NewSignatureData::setFontSize(double fontSize)
 {
     d->fontSize = fontSize;
+}
+
+double PDFConverter::NewSignatureData::leftFontSize() const
+{
+    return d->leftFontSize;
+}
+
+void PDFConverter::NewSignatureData::setLeftFontSize(double fontSize)
+{
+    d->leftFontSize = fontSize;
 }
 
 QColor PDFConverter::NewSignatureData::fontColor() const

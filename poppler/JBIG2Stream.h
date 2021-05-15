@@ -18,7 +18,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
-// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -54,7 +54,7 @@ public:
     int getChar() override;
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
-    bool isBinary(bool last = true) override;
+    bool isBinary(bool last = true) const override;
     virtual Object *getGlobalsStream() { return &globalsStream; }
     virtual Ref getGlobalsStreamRef() { return globalsStreamRef; }
 

@@ -1237,7 +1237,7 @@ GooString *JBIG2Stream::getPSFilter(int psLevel, const char *indent)
     return nullptr;
 }
 
-bool JBIG2Stream::isBinary(bool last)
+bool JBIG2Stream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }

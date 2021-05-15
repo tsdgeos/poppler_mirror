@@ -26,6 +26,7 @@
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
+ * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +45,8 @@
 
 #ifndef __POPPLER_QT_H__
 #define __POPPLER_QT_H__
+
+#include <functional>
 
 #include "poppler-annotation.h"
 #include "poppler-link.h"
@@ -1889,6 +1892,21 @@ QString subject = m_doc->info("Subject");
     QVector<FormFieldSignature *> signatures() const;
 
     /**
+     Returns whether the document's XRef table has been reconstructed or not
+
+     \since 21.06
+    */
+    bool xrefWasReconstructed() const;
+
+    /**
+     Sets the document's XRef reconstruction callback, so whenever a XRef table
+     reconstruction happens the callback will get triggered.
+
+     \since 21.06
+    */
+    void setXRefReconstructedCallback(const std::function<void()> &callback);
+
+    /**
        Destructor.
     */
     ~Document();
@@ -2172,10 +2190,28 @@ public:
         void setSignatureText(const QString &text);
 
         /**
+         * If this text is not empty, the signature representation
+         * will split in two, with this text on the left and signatureText
+         * on the right
+         *
+         * \since 21.06
+         */
+        QString signatureLeftText() const;
+        void setSignatureLeftText(const QString &text);
+
+        /**
          * Default: 10
          */
         double fontSize() const;
         void setFontSize(double fontSize);
+
+        /**
+         * Default: 20
+         *
+         * \since 21.06
+         */
+        double leftFontSize() const;
+        void setLeftFontSize(double fontSize);
 
         /**
          * Default: red

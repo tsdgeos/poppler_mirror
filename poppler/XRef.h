@@ -25,6 +25,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,8 @@
 
 #ifndef XREF_H
 #define XREF_H
+
+#include <functional>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -101,7 +104,7 @@ public:
     // Constructor, create an empty XRef but with info dict, used for PDF writing
     XRef(const Object *trailerDictA);
     // Constructor.  Read xref table from stream.
-    XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, bool *wasReconstructed = nullptr, bool reconstruct = false);
+    XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, bool *wasReconstructed = nullptr, bool reconstruct = false, const std::function<void()> &xrefReconstructedCallback = {});
 
     // Destructor.
     ~XRef();
@@ -247,6 +250,7 @@ private:
     bool scannedSpecialFlags; // true if scanSpecialFlags has been called
     bool strOwner; // true if str is owned by the instance
     mutable std::recursive_mutex mutex;
+    std::function<void()> xrefReconstructedCb;
 
     int reserve(int newSize);
     int resize(int newSize);

@@ -10,6 +10,7 @@
  * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
+ * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -193,6 +194,19 @@ void DocumentData::init()
     paperColor = Qt::white;
     m_hints = 0;
     m_optContentModel = nullptr;
+    xrefReconstructed = false;
+    xrefReconstructedCallback = {};
+}
+
+void DocumentData::noitfyXRefReconstructed()
+{
+    if (!xrefReconstructed) {
+        xrefReconstructed = true;
+    }
+
+    if (xrefReconstructedCallback) {
+        xrefReconstructedCallback();
+    }
 }
 
 FormWidget *FormFieldData::getFormWidget(const FormField *f)

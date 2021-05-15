@@ -2018,6 +2018,26 @@ void FormFieldSignature::setCustomAppearanceContent(const GooString &s)
     customAppearanceContent = GooString(s.toStr());
 }
 
+const GooString &FormFieldSignature::getCustomAppearanceLeftContent() const
+{
+    return customAppearanceLeftContent;
+}
+
+void FormFieldSignature::setCustomAppearanceLeftContent(const GooString &s)
+{
+    customAppearanceLeftContent = GooString(s.toStr());
+}
+
+double FormFieldSignature::getCustomAppearanceLeftFontSize() const
+{
+    return customAppearanceLeftFontSize;
+}
+
+void FormFieldSignature::setCustomAppearanceLeftFontSize(double size)
+{
+    customAppearanceLeftFontSize = size;
+}
+
 void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo)
 {
     certificate_info.swap(certInfo);

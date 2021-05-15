@@ -4,6 +4,7 @@
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2021, Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +45,8 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+
+#include <functional>
 
 PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
 {
@@ -168,6 +171,8 @@ QSize PdfViewer::sizeHint() const
 
 void PdfViewer::loadDocument(const QString &file)
 {
+    // resetting xrefReconstructed each time we load new document
+    xrefReconstructed = false;
     Poppler::Document *newdoc = Poppler::Document::load(file);
     if (!newdoc) {
         QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
@@ -192,6 +197,13 @@ void PdfViewer::loadDocument(const QString &file)
     m_doc->setRenderHint(Poppler::Document::TextAntialiasing, m_settingsTextAAAct->isChecked());
     m_doc->setRenderHint(Poppler::Document::Antialiasing, m_settingsGfxAAAct->isChecked());
     m_doc->setRenderBackend((Poppler::Document::RenderBackend)m_settingsRenderBackendGrp->checkedAction()->data().toInt());
+    if (m_doc->xrefWasReconstructed()) {
+        xrefReconstructedHandler(m_doc);
+    } else {
+        std::function<void()> cb = [this]() { xrefReconstructedHandler(m_doc); };
+
+        m_doc->setXRefReconstructedCallback(cb);
+    }
 
     Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
@@ -216,6 +228,16 @@ void PdfViewer::closeDocument()
     m_doc = nullptr;
 
     m_fileSaveCopyAct->setEnabled(false);
+}
+
+void PdfViewer::xrefReconstructedHandler(Poppler::Document *doc)
+{
+    if (!xrefReconstructed) {
+        QMessageBox msgbox(QMessageBox::Critical, tr("File may be corrupted"), tr("The PDF may be broken but we're still showing something, contents may not be correct"), QMessageBox::Ok, this);
+        msgbox.exec();
+
+        xrefReconstructed = true;
+    }
 }
 
 void PdfViewer::slotOpenFile()
