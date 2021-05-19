@@ -1,5 +1,6 @@
 /* poppler-link-extractor_p.h: qt interface to poppler
  * Copyright (C) 2007, 2008, 2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,9 @@
 
 #ifndef _POPPLER_LINK_EXTRACTOR_H_
 #define _POPPLER_LINK_EXTRACTOR_H_
+
+#include <memory>
+#include <vector>
 
 #include <Object.h>
 #include <OutputDev.h>
@@ -42,13 +46,13 @@ public:
     void processLink(::AnnotLink *link) override;
 
     // our stuff
-    QList<Link *> links();
+    std::vector<std::unique_ptr<Link>> links();
 
 private:
     PageData *m_data;
     double m_pageCropWidth;
     double m_pageCropHeight;
-    QList<Link *> m_links;
+    std::vector<std::unique_ptr<Link>> m_links;
 };
 
 }

@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[1]);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(argv[1]);
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -32,5 +32,4 @@ int main(int argc, char **argv)
     } else {
         std::cout << "There are no embedded document at the top level" << std::endl;
     }
-    delete doc;
 }

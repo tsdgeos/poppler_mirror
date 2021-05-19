@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[1]);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(argv[1]);
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -83,5 +83,4 @@ int main(int argc, char **argv)
         std::cout << qPrintable(font.file());
         std::cout << std::endl;
     }
-    delete doc;
 }

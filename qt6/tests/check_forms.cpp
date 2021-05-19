@@ -23,16 +23,16 @@ private slots:
 void TestForms::testCheckbox()
 {
     // Test for checkbox issue #655
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page(document->page(0));
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
     QCOMPARE(forms.size(), 1);
 
-    Poppler::FormField *form = forms.at(0);
+    Poppler::FormField *form = forms.at(0).get();
     QCOMPARE(form->type(), Poppler::FormField::FormButton);
 
     Poppler::FormFieldButton *chkFormFieldButton = static_cast<Poppler::FormFieldButton *>(form);
@@ -51,20 +51,20 @@ void TestForms::testCheckbox()
 void TestForms::testStandAloneWidgets()
 {
     // Check for 'de facto' tooltips. Issue #34
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/tooltip.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/tooltip.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
     QCOMPARE(forms.size(), 3);
 
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (const std::unique_ptr<Poppler::FormField> &field : forms) {
         QCOMPARE(field->type(), Poppler::FormField::FormButton);
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         QCOMPARE(fieldButton->buttonType(), Poppler::FormFieldButton::Push);
 
         FormField *ff = Poppler::FormFieldData::getFormWidget(fieldButton)->getField();
@@ -80,23 +80,23 @@ void TestForms::testStandAloneWidgets()
 void TestForms::testCheckboxIssue159()
 {
     // Test for checkbox issue #159
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     Poppler::FormFieldButton *beerFieldButton = nullptr;
     Poppler::FormFieldButton *wineFieldButton = nullptr;
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
     // Let's find and assign the "Wine" and "Beer" radio buttons
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (const std::unique_ptr<Poppler::FormField> &field : forms) {
         if (field->type() != Poppler::FormField::FormButton)
             continue;
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (fieldButton->buttonType() != Poppler::FormFieldButton::Radio)
             continue;
 
@@ -125,23 +125,23 @@ void TestForms::testCheckboxIssue159()
 
 void TestForms::testSetIcon()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
     Poppler::FormFieldButton *anmButton = nullptr;
 
     // First we are finding the field which will have its icon changed
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (const std::unique_ptr<Poppler::FormField> &field : forms) {
 
         if (field->type() != Poppler::FormField::FormButton)
             continue;
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (field->name() == QStringLiteral("anm0"))
             anmButton = fieldButton;
     }
@@ -150,12 +150,12 @@ void TestForms::testSetIcon()
 
     // Then we set the Icon on this field, for every other field
     // And verify if it has a valid icon
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (const std::unique_ptr<Poppler::FormField> &field : forms) {
 
         if (field->type() != Poppler::FormField::FormButton)
             continue;
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (field->name() == QStringLiteral("anm0"))
             continue;
 
@@ -181,15 +181,15 @@ void TestForms::testSetIcon()
 
 void TestForms::testSetPrintable()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (std::unique_ptr<Poppler::FormField> &field : forms) {
         field->setPrintable(true);
         QCOMPARE(field->isPrintable(), true);
 
@@ -200,24 +200,24 @@ void TestForms::testSetPrintable()
 
 void TestForms::testSetAppearanceText()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
     int nTextForms = 0;
 
-    Q_FOREACH (Poppler::FormField *field, forms) {
+    for (std::unique_ptr<Poppler::FormField> &field : forms) {
 
         if (field->type() != Poppler::FormField::FormText)
             continue;
 
         nTextForms++;
 
-        Poppler::FormFieldText *fft = static_cast<Poppler::FormFieldText *>(field);
+        Poppler::FormFieldText *fft = static_cast<Poppler::FormFieldText *>(field.get());
 
         const QString textToSet = "HOLA" + fft->name();
         fft->setAppearanceText(textToSet);
@@ -239,15 +239,15 @@ void TestForms::testSetAppearanceText()
 
 void TestForms::testUnicodeFieldAttributes()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
-    QList<Poppler::FormField *> forms = page->formFields();
+    std::vector<std::unique_ptr<Poppler::FormField>> forms = page->formFields();
 
-    Poppler::FormField *field = forms.first();
+    Poppler::FormField *field = forms.front().get();
 
     QCOMPARE(field->name(), QStringLiteral("Tex"));
     QCOMPARE(field->uiName(), QStringLiteral("Texto de ayuda"));

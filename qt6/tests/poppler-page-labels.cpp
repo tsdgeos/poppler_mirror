@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[1]);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(argv[1]);
     if (!doc || doc->isLocked()) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -41,5 +41,4 @@ int main(int argc, char **argv)
         if (indexFromPageLabel != i)
             std::cout << "WARNING: Page label didn't link back to the same page index " << indexFromPageLabel << " " << i << std::endl;
     }
-    delete doc;
 }

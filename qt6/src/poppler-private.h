@@ -167,7 +167,7 @@ public:
      */
     void noitfyXRefReconstructed();
 
-    static Document *checkDocument(DocumentData *doc);
+    static std::unique_ptr<Document> checkDocument(DocumentData *doc);
 
     PDFDoc *doc;
     QString m_filePath;

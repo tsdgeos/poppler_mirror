@@ -1,6 +1,7 @@
 /* poppler-link-extractor_p.h: qt interface to poppler
  * Copyright (C) 2007, 2008, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,10 +43,7 @@ LinkExtractorOutputDev::LinkExtractorOutputDev(PageData *data) : m_data(data)
     setDefaultCTM(gfxState.getCTM());
 }
 
-LinkExtractorOutputDev::~LinkExtractorOutputDev()
-{
-    qDeleteAll(m_links);
-}
+LinkExtractorOutputDev::~LinkExtractorOutputDev() { }
 
 void LinkExtractorOutputDev::processLink(::AnnotLink *link)
 {
@@ -64,18 +62,16 @@ void LinkExtractorOutputDev::processLink(::AnnotLink *link)
     linkArea.setRight((double)rightAux / m_pageCropWidth);
     linkArea.setBottom((double)bottomAux / m_pageCropHeight);
 
-    Link *popplerLink = m_data->convertLinkActionToLink(link->getAction(), linkArea);
+    std::unique_ptr<Link> popplerLink = m_data->convertLinkActionToLink(link->getAction(), linkArea);
     if (popplerLink) {
-        m_links.append(popplerLink);
+        m_links.push_back(std::move(popplerLink));
     }
     OutputDev::processLink(link);
 }
 
-QList<Link *> LinkExtractorOutputDev::links()
+std::vector<std::unique_ptr<Link>> LinkExtractorOutputDev::links()
 {
-    QList<Link *> ret = m_links;
-    m_links.clear();
-    return ret;
+    return std::move(m_links);
 }
 
 }

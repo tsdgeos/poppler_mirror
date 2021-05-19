@@ -6,7 +6,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -69,10 +69,7 @@ LinkDestinationPrivate::LinkDestinationPrivate()
     changeZoom = false;
 }
 
-LinkPrivate::~LinkPrivate()
-{
-    qDeleteAll(nextLinks);
-}
+LinkPrivate::~LinkPrivate() = default;
 
 LinkOCGStatePrivate::~LinkOCGStatePrivate() = default;
 
@@ -420,7 +417,12 @@ QRectF Link::linkArea() const
 
 QVector<Link *> Link::nextLinks() const
 {
-    return d_ptr->nextLinks;
+    QVector<Link *> links(d_ptr->nextLinks.size());
+    for (std::size_t i = 0; i < links.size(); i++) {
+        links[i] = d_ptr->nextLinks[i].get();
+    }
+
+    return links;
 }
 
 // LinkGoto

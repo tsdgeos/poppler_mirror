@@ -39,14 +39,14 @@ class PageTransition;
 class PageData
 {
 public:
-    Link *convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea);
+    std::unique_ptr<Link> convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea);
 
     DocumentData *parentDoc;
     ::Page *page;
     int index;
     PageTransition *transition;
 
-    static Link *convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
+    static std::unique_ptr<Link> convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
 
     TextPage *prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
     bool performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);

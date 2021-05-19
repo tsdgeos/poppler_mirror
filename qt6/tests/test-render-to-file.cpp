@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(QFile::decodeName(argv[1]));
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QFile::decodeName(argv[1]));
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -27,7 +27,6 @@ int main(int argc, char **argv)
     }
 
     if (doc->numPages() <= 0) {
-        delete doc;
         qDebug() << "Doc has no pages";
         return 0;
     }
@@ -44,14 +43,13 @@ int main(int argc, char **argv)
     doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
 
     for (int i = 0; i < doc->numPages(); ++i) {
-        Poppler::Page *page = doc->page(i);
+        std::unique_ptr<Poppler::Page> page = doc->page(i);
         if (page) {
             qDebug() << "Rendering page using" << backendString << "backend: " << i;
             QTime t = QTime::currentTime();
             QImage image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
             image.save(QStringLiteral("test-render-to-file%1.png").arg(i));
-            delete page;
         }
     }
 

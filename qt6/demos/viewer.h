@@ -57,7 +57,7 @@ private Q_SLOTS:
 private:
     void setPage(int page);
     int page() const;
-    void xrefReconstructedHandler(Poppler::Document *doc);
+    void xrefReconstructedHandler();
 
     int m_currentPage;
     bool xrefReconstructed;
@@ -70,7 +70,7 @@ private:
 
     QList<DocumentObserver *> m_observers;
 
-    Poppler::Document *m_doc;
+    std::unique_ptr<Poppler::Document> m_doc;
 };
 
 #endif

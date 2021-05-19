@@ -53,20 +53,16 @@ static bool operator==(const FontInfo &f1, const FontInfo &f2)
 
 void TestFontsData::checkNoFonts()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/image.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/image.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE(listOfFonts.size(), 0);
-
-    delete doc;
 }
 
 void TestFontsData::checkType1()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/text.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/text.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -77,14 +73,11 @@ void TestFontsData::checkType1()
 
     QCOMPARE(listOfFonts.at(0).isEmbedded(), false);
     QCOMPARE(listOfFonts.at(0).isSubset(), false);
-
-    delete doc;
 }
 
 void TestFontsData::checkType3()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -102,14 +95,11 @@ void TestFontsData::checkType3()
 
     QCOMPARE(listOfFonts.at(1).isEmbedded(), true);
     QCOMPARE(listOfFonts.at(1).isSubset(), false);
-
-    delete doc;
 }
 
 void TestFontsData::checkTrueType()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -127,47 +117,44 @@ void TestFontsData::checkTrueType()
 
     QCOMPARE(listOfFonts.at(1).isEmbedded(), false);
     QCOMPARE(listOfFonts.at(1).isSubset(), false);
-
-    delete doc;
 }
 
 void TestFontsData::checkFontIterator()
 {
     // loading a 1-page document
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
     QVERIFY(doc);
     // loading a 6-pages document
-    Poppler::Document *doc6 = Poppler::Document::load(TESTDATADIR "/tests/cropbox.pdf");
+    std::unique_ptr<Poppler::Document> doc6 = Poppler::Document::load(TESTDATADIR "/tests/cropbox.pdf");
     QVERIFY(doc6);
 
     std::unique_ptr<Poppler::FontIterator> it;
 
     // some tests with the 1-page document:
     // - check a default iterator
-    it.reset(doc->newFontIterator());
+    it = doc->newFontIterator();
     QVERIFY(it->hasNext());
     // - check an iterator for negative pages to behave as 0
-    it.reset(doc->newFontIterator(-1));
+    it = doc->newFontIterator(-1);
     QVERIFY(it->hasNext());
     // - check an iterator for pages out of the page limit
-    it.reset(doc->newFontIterator(1));
+    it = doc->newFontIterator(1);
     QVERIFY(!it->hasNext());
     // - check that it reaches the end after 1 iteration
-    it.reset(doc->newFontIterator());
+    it = doc->newFontIterator();
     QVERIFY(it->hasNext());
     it->next();
     QVERIFY(!it->hasNext());
 
     // some tests with the 6-page document:
     // - check a default iterator
-    it.reset(doc6->newFontIterator());
+    it = doc6->newFontIterator();
     QVERIFY(it->hasNext());
     // - check an iterator for pages out of the page limit
-    it.reset(doc6->newFontIterator(6));
+    it = doc6->newFontIterator(6);
     QVERIFY(!it->hasNext());
     // - check that it reaches the end after 6 iterations
-    it.reset(doc6->newFontIterator());
+    it = doc6->newFontIterator();
     QVERIFY(it->hasNext());
     it->next();
     QVERIFY(it->hasNext());
@@ -181,15 +168,11 @@ void TestFontsData::checkFontIterator()
     QVERIFY(it->hasNext());
     it->next();
     QVERIFY(!it->hasNext());
-
-    delete doc;
-    delete doc6;
 }
 
 void TestFontsData::checkSecondDocumentQuery()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -197,38 +180,30 @@ void TestFontsData::checkSecondDocumentQuery()
     // check we get the very same result when calling fonts() again (#19405)
     QList<Poppler::FontInfo> listOfFonts2 = doc->fonts();
     QCOMPARE(listOfFonts, listOfFonts2);
-
-    delete doc;
 }
 
 void TestFontsData::checkMultipleIterations()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
     QVERIFY(doc);
 
-    QList<Poppler::FontInfo> listOfFonts = loadFontsViaIterator(doc);
+    QList<Poppler::FontInfo> listOfFonts = loadFontsViaIterator(doc.get());
     QCOMPARE(listOfFonts.size(), 2);
-    QList<Poppler::FontInfo> listOfFonts2 = loadFontsViaIterator(doc);
+    QList<Poppler::FontInfo> listOfFonts2 = loadFontsViaIterator(doc.get());
     QCOMPARE(listOfFonts, listOfFonts2);
-
-    delete doc;
 }
 
 void TestFontsData::checkIteratorFonts()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/fonts.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/fonts.pdf");
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE(listOfFonts.size(), 3);
 
     // check we get the very same result when gatering fonts using the iterator
-    QList<Poppler::FontInfo> listOfFonts2 = loadFontsViaIterator(doc);
+    QList<Poppler::FontInfo> listOfFonts2 = loadFontsViaIterator(doc.get());
     QCOMPARE(listOfFonts, listOfFonts2);
-
-    delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestFontsData)

@@ -64,30 +64,29 @@
 
 namespace Poppler {
 
-Document *Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
+std::unique_ptr<Document> Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     DocumentData *doc = new DocumentData(filePath, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
-Document *Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
+std::unique_ptr<Document> Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     DocumentData *doc = new DocumentData(device, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
-Document *Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
+std::unique_ptr<Document> Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     // create stream
     DocumentData *doc = new DocumentData(fileContents, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
-Document *DocumentData::checkDocument(DocumentData *doc)
+std::unique_ptr<Document> DocumentData::checkDocument(DocumentData *doc)
 {
-    Document *pdoc;
     if (doc->doc->isOk() || doc->doc->getErrorCode() == errEncrypted) {
-        pdoc = new Document(doc);
+        auto pdoc = std::unique_ptr<Document>(new Document(doc));
         if (doc->doc->getErrorCode() == errEncrypted)
             pdoc->m_doc->locked = true;
         else {
@@ -111,12 +110,12 @@ Document::~Document()
     delete m_doc;
 }
 
-Page *Document::page(int index) const
+std::unique_ptr<Page> Document::page(int index) const
 {
-    Page *page = new Page(m_doc, index);
+    // Cannot call std::make_unique, because the constructor of Page is private
+    auto page = std::unique_ptr<Page>(new Page(m_doc, index));
     if (page->m_page->page == nullptr) {
-        delete page;
-        return nullptr;
+        page.reset();
     }
 
     return page;
@@ -228,9 +227,10 @@ QList<EmbeddedFile *> Document::embeddedFiles() const
     return m_doc->m_embeddedFiles;
 }
 
-FontIterator *Document::newFontIterator(int startPage) const
+std::unique_ptr<FontIterator> Document::newFontIterator(int startPage) const
 {
-    return new FontIterator(startPage, m_doc);
+    // Cannot use std::make_unique, because the FontIterator constructor is private
+    return std::unique_ptr<FontIterator>(new FontIterator(startPage, m_doc));
 }
 
 QByteArray Document::fontData(const FontInfo &fi) const
@@ -555,7 +555,7 @@ void Document::getPdfVersion(int *major, int *minor) const
         *minor = m_doc->doc->getPDFMinorVersion();
 }
 
-Page *Document::page(const QString &label) const
+std::unique_ptr<Page> Document::page(const QString &label) const
 {
     GooString label_g(label.toLatin1().data());
     int index;
@@ -590,11 +590,11 @@ QVector<OutlineItem> Document::outline() const
     return result;
 }
 
-LinkDestination *Document::linkDestination(const QString &name)
+std::unique_ptr<LinkDestination> Document::linkDestination(const QString &name)
 {
     GooString *namedDest = QStringToGooString(name);
     LinkDestinationData ldd(nullptr, namedDest, m_doc, false);
-    LinkDestination *ld = new LinkDestination(ldd);
+    auto ld = std::make_unique<LinkDestination>(ldd);
     delete namedDest;
     return ld;
 }
@@ -701,14 +701,16 @@ Document::RenderHints Document::renderHints() const
     return Document::RenderHints(m_doc->m_hints);
 }
 
-PSConverter *Document::psConverter() const
+std::unique_ptr<PSConverter> Document::psConverter() const
 {
-    return new PSConverter(m_doc);
+    // Cannot use std::make_unique, because the PSConverter constructor is private
+    return std::unique_ptr<PSConverter>(new PSConverter(m_doc));
 }
 
-PDFConverter *Document::pdfConverter() const
+std::unique_ptr<PDFConverter> Document::pdfConverter() const
 {
-    return new PDFConverter(m_doc);
+    // Cannot use std::make_unique, because the PDFConverter constructor is private
+    return std::unique_ptr<PDFConverter>(new PDFConverter(m_doc));
 }
 
 QString Document::metadata() const
@@ -801,16 +803,16 @@ QVector<int> Document::formCalculateOrder() const
     return result;
 }
 
-QVector<FormFieldSignature *> Document::signatures() const
+std::vector<std::unique_ptr<FormFieldSignature>> Document::signatures() const
 {
-    QVector<FormFieldSignature *> result;
+    std::vector<std::unique_ptr<FormFieldSignature>> result;
 
     const std::vector<::FormFieldSignature *> pSignatures = m_doc->doc->getSignatureFields();
 
     for (::FormFieldSignature *pSignature : pSignatures) {
         ::FormWidget *fw = pSignature->getCreateWidget();
         ::Page *p = m_doc->doc->getPage(fw->getWidgetAnnotation()->getPageNum());
-        result.append(new FormFieldSignature(m_doc, p, static_cast<FormWidgetSignature *>(fw)));
+        result.push_back(std::make_unique<FormFieldSignature>(m_doc, p, static_cast<FormWidgetSignature *>(fw)));
     }
 
     return result;

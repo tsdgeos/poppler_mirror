@@ -5,7 +5,7 @@
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -221,6 +221,8 @@ public:
 
     /**
      * Get the next links to be activated / executed after this link.
+     *
+     * \note The caller does not get ownership of the returned objects.
      */
     QVector<Link *> nextLinks() const;
 

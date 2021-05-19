@@ -47,7 +47,7 @@ void PageView::documentClosed()
 
 void PageView::pageChanged(int page)
 {
-    Poppler::Page *popplerPage = document()->page(page);
+    std::unique_ptr<Poppler::Page> popplerPage = document()->page(page);
 
     if (!popplerPage) {
         qDebug() << "Page" << page << "is malformed";
@@ -74,7 +74,6 @@ void PageView::pageChanged(int page)
         m_imageLabel->resize(0, 0);
         m_imageLabel->setPixmap(QPixmap());
     }
-    delete popplerPage;
 }
 
 void PageView::slotZoomChanged(qreal value)

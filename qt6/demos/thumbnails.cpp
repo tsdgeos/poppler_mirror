@@ -44,7 +44,7 @@ void ThumbnailsDock::fillInfo()
     const int num = document()->numPages();
     QSize maxSize;
     for (int i = 0; i < num; ++i) {
-        const Poppler::Page *page = document()->page(i);
+        const std::unique_ptr<Poppler::Page> page = document()->page(i);
         const QImage image = page ? page->thumbnail() : QImage();
         if (!image.isNull()) {
             QListWidgetItem *item = new QListWidgetItem();
@@ -55,7 +55,6 @@ void ThumbnailsDock::fillInfo()
             maxSize.setWidth(qMax(maxSize.width(), image.width()));
             maxSize.setHeight(qMax(maxSize.height(), image.height()));
         }
-        delete page;
     }
     if (num > 0) {
         m_list->setGridSize(maxSize);

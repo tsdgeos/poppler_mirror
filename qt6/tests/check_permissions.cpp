@@ -13,8 +13,7 @@ private slots:
 
 void TestPermissions::permissions1()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
     QVERIFY(doc);
 
     // we are allowed to print
@@ -37,8 +36,6 @@ void TestPermissions::permissions1()
 
     // we are allowed to assemble this document
     QVERIFY(doc->okToAssemble());
-
-    delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestPermissions)

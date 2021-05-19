@@ -44,7 +44,7 @@ public:
     LinkPrivate &operator=(const LinkPrivate &) = delete;
 
     QRectF linkArea;
-    QVector<Link *> nextLinks;
+    std::vector<std::unique_ptr<Link>> nextLinks;
 };
 
 class LinkOCGStatePrivate : public LinkPrivate

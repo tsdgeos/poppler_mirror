@@ -8,7 +8,7 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
- * Copyright (C) 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2018, 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
@@ -221,16 +221,16 @@ void FormField::setPrintable(bool value)
     m_formData->fm->getWidgetAnnotation()->setFlags(flags);
 }
 
-Link *FormField::activationAction() const
+std::unique_ptr<Link> FormField::activationAction() const
 {
-    Link *action = nullptr;
     if (::LinkAction *act = m_formData->fm->getActivationAction()) {
-        action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
-Link *FormField::additionalAction(AdditionalActionType type) const
+std::unique_ptr<Link> FormField::additionalAction(AdditionalActionType type) const
 {
     Annot::FormAdditionalActionsType actionType = Annot::actionFieldModified;
     switch (type) {
@@ -248,27 +248,27 @@ Link *FormField::additionalAction(AdditionalActionType type) const
         break;
     }
 
-    Link *action = nullptr;
     if (std::unique_ptr<::LinkAction> act = m_formData->fm->getAdditionalAction(actionType)) {
-        action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
-Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
+std::unique_ptr<Link> FormField::additionalAction(Annotation::AdditionalActionType type) const
 {
     ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
     if (!w) {
-        return nullptr;
+        return {};
     }
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
-    Link *action = nullptr;
     if (std::unique_ptr<::LinkAction> act = w->getAdditionalAction(actionType)) {
-        action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
