@@ -3,7 +3,7 @@
  * Copyright (C) 2008, 2019, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021, Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify

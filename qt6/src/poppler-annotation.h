@@ -10,6 +10,7 @@
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2020, Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
