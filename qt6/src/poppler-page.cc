@@ -17,13 +17,12 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
- * Copyright (C) 2017-2020, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017-2021, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -193,23 +192,23 @@ private:
 
 QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
+std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
 {
     return convertLinkActionToLink(a, parentDoc, linkArea);
 }
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
+std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea)
 {
     if (!a)
         return nullptr;
 
-    Link *popplerLink = nullptr;
+    std::unique_ptr<Link> popplerLink;
     switch (a->getKind()) {
     case actionGoTo: {
         LinkGoTo *g = (LinkGoTo *)a;
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, false);
         // create link: no ext file, namedDest, object pointer
-        popplerLink = new LinkGoto(linkArea, QString(), LinkDestination(ldd));
+        popplerLink = std::make_unique<LinkGoto>(linkArea, QString(), LinkDestination(ldd));
     } break;
 
     case actionGoToR: {
@@ -218,61 +217,61 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
         const QString fileName = UnicodeParsedString(g->getFileName());
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty());
         // create link: fileName, namedDest, object pointer
-        popplerLink = new LinkGoto(linkArea, fileName, LinkDestination(ldd));
+        popplerLink = std::make_unique<LinkGoto>(linkArea, fileName, LinkDestination(ldd));
     } break;
 
     case actionLaunch: {
         LinkLaunch *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
-        popplerLink = new LinkExecute(linkArea, e->getFileName()->c_str(), p ? p->c_str() : nullptr);
+        popplerLink = std::make_unique<LinkExecute>(linkArea, e->getFileName()->c_str(), p ? p->c_str() : nullptr);
     } break;
 
     case actionNamed: {
         const std::string &name = ((LinkNamed *)a)->getName();
         if (name == "NextPage")
-            popplerLink = new LinkAction(linkArea, LinkAction::PageNext);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::PageNext);
         else if (name == "PrevPage")
-            popplerLink = new LinkAction(linkArea, LinkAction::PagePrev);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::PagePrev);
         else if (name == "FirstPage")
-            popplerLink = new LinkAction(linkArea, LinkAction::PageFirst);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::PageFirst);
         else if (name == "LastPage")
-            popplerLink = new LinkAction(linkArea, LinkAction::PageLast);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::PageLast);
         else if (name == "GoBack")
-            popplerLink = new LinkAction(linkArea, LinkAction::HistoryBack);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::HistoryBack);
         else if (name == "GoForward")
-            popplerLink = new LinkAction(linkArea, LinkAction::HistoryForward);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::HistoryForward);
         else if (name == "Quit")
-            popplerLink = new LinkAction(linkArea, LinkAction::Quit);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::Quit);
         else if (name == "GoToPage")
-            popplerLink = new LinkAction(linkArea, LinkAction::GoToPage);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::GoToPage);
         else if (name == "Find")
-            popplerLink = new LinkAction(linkArea, LinkAction::Find);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::Find);
         else if (name == "FullScreen")
-            popplerLink = new LinkAction(linkArea, LinkAction::Presentation);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::Presentation);
         else if (name == "Print")
-            popplerLink = new LinkAction(linkArea, LinkAction::Print);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::Print);
         else if (name == "Close") {
-            // acroread closes the document always, doesnt care whether
+            // acroread closes the document always, doesn't care whether
             // its presentation mode or not
-            // popplerLink = new LinkAction( linkArea, LinkAction::EndPresentation );
-            popplerLink = new LinkAction(linkArea, LinkAction::Close);
+            // popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::EndPresentation);
+            popplerLink = std::make_unique<LinkAction>(linkArea, LinkAction::Close);
         } else {
             // TODO
         }
     } break;
 
     case actionURI: {
-        popplerLink = new LinkBrowse(linkArea, ((LinkURI *)a)->getURI().c_str());
+        popplerLink = std::make_unique<LinkBrowse>(linkArea, ((LinkURI *)a)->getURI().c_str());
     } break;
 
     case actionSound: {
         ::LinkSound *ls = (::LinkSound *)a;
-        popplerLink = new LinkSound(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
+        popplerLink = std::make_unique<LinkSound>(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
     } break;
 
     case actionJavaScript: {
         ::LinkJavaScript *ljs = (::LinkJavaScript *)a;
-        popplerLink = new LinkJavaScript(linkArea, UnicodeParsedString(ljs->getScript()));
+        popplerLink = std::make_unique<LinkJavaScript>(linkArea, UnicodeParsedString(ljs->getScript()));
     } break;
 
     case actionMovie: {
@@ -300,7 +299,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
             break;
         };
 
-        popplerLink = new LinkMovie(linkArea, operation, title, reference);
+        popplerLink = std::make_unique<LinkMovie>(linkArea, operation, title, reference);
     } break;
 
     case actionRendition: {
@@ -310,21 +309,21 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
         if (lrn->hasScreenAnnot())
             reference = lrn->getScreenAnnot();
 
-        popplerLink = new LinkRendition(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : nullptr, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
+        popplerLink = std::make_unique<LinkRendition>(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : nullptr, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
     } break;
 
     case actionOCGState: {
         ::LinkOCGState *plocg = (::LinkOCGState *)a;
 
         LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
-        popplerLink = new LinkOCGState(locgp);
+        popplerLink = std::make_unique<LinkOCGState>(locgp);
     } break;
 
     case actionHide: {
         ::LinkHide *lh = (::LinkHide *)a;
 
         LinkHidePrivate *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
-        popplerLink = new LinkHide(lhp);
+        popplerLink = std::make_unique<LinkHide>(lhp);
     } break;
 
     case actionResetForm:
@@ -336,11 +335,11 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     }
 
     if (popplerLink) {
-        QVector<Link *> links;
+        std::vector<std::unique_ptr<Link>> links;
         for (const std::unique_ptr<::LinkAction> &nextAction : a->nextActions()) {
-            links << convertLinkActionToLink(nextAction.get(), parentDoc, linkArea);
+            links.push_back(convertLinkActionToLink(nextAction.get(), parentDoc, linkArea));
         }
-        LinkPrivate::get(popplerLink)->nextLinks = links;
+        LinkPrivate::get(popplerLink.get())->nextLinks = std::move(links);
     }
 
     return popplerLink;
@@ -691,16 +690,16 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
     return results;
 }
 
-QList<TextBox *> Page::textList(Rotation rotate) const
+std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate) const
 {
     return textList(rotate, nullptr, QVariant());
 }
 
-QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const
+std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const
 {
     TextOutputDev *output_dev;
 
-    QList<TextBox *> output_list;
+    std::vector<std::unique_ptr<TextBox>> output_list;
 
     output_dev = new TextOutputDev(nullptr, false, 0, false, false);
 
@@ -729,7 +728,7 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
         double xMin, yMin, xMax, yMax;
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-        TextBox *text_box = new TextBox(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
+        auto text_box = std::make_unique<TextBox>(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
         text_box->m_data->hasSpaceAfter = word->hasSpaceAfter() == true;
         text_box->m_data->charBBoxes.reserve(word->getLength());
         for (int j = 0; j < word->getLength(); ++j) {
@@ -737,9 +736,9 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
             text_box->m_data->charBBoxes.append(QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
         }
 
-        wordBoxMap.insert(word, text_box);
+        wordBoxMap.insert(word, text_box.get());
 
-        output_list.append(text_box);
+        output_list.push_back(std::move(text_box));
     }
 
     for (int i = 0; i < word_list->getLength(); i++) {
@@ -766,7 +765,7 @@ PageTransition *Page::transition() const
     return m_page->transition;
 }
 
-Link *Page::action(PageAction act) const
+std::unique_ptr<Link> Page::action(PageAction act) const
 {
     if (act == Page::Opening || act == Page::Closing) {
         Object o = m_page->page->getActions();
@@ -777,11 +776,9 @@ Link *Page::action(PageAction act) const
         const char *key = act == Page::Opening ? "O" : "C";
         Object o2 = dict->lookup((char *)key);
         std::unique_ptr<::LinkAction> lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI());
-        Link *popplerLink = nullptr;
         if (lact != nullptr) {
-            popplerLink = m_page->convertLinkActionToLink(lact.get(), QRectF());
+            return m_page->convertLinkActionToLink(lact.get(), QRectF());
         }
-        return popplerLink;
     }
     return nullptr;
 }
@@ -824,21 +821,19 @@ void Page::defaultCTM(double *CTM, double dpiX, double dpiY, int rotate, bool up
     m_page->page->getDefaultCTM(CTM, dpiX, dpiY, rotate, false, upsideDown);
 }
 
-QList<Link *> Page::links() const
+std::vector<std::unique_ptr<Link>> Page::links() const
 {
     LinkExtractorOutputDev link_dev(m_page);
     m_page->parentDoc->doc->processLinks(&link_dev, m_page->index + 1);
-    QList<Link *> popplerLinks = link_dev.links();
-
-    return popplerLinks;
+    return link_dev.links();
 }
 
-QList<Annotation *> Page::annotations() const
+std::vector<std::unique_ptr<Annotation>> Page::annotations() const
 {
     return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc, QSet<Annotation::SubType>());
 }
 
-QList<Annotation *> Page::annotations(const QSet<Annotation::SubType> &subtypes) const
+std::vector<std::unique_ptr<Annotation>> Page::annotations(const QSet<Annotation::SubType> &subtypes) const
 {
     return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc, subtypes);
 }
@@ -853,37 +848,37 @@ void Page::removeAnnotation(const Annotation *ann)
     AnnotationPrivate::removeAnnotationFromPage(m_page->page, ann);
 }
 
-QList<FormField *> Page::formFields() const
+std::vector<std::unique_ptr<FormField>> Page::formFields() const
 {
-    QList<FormField *> fields;
+    std::vector<std::unique_ptr<FormField>> fields;
     ::Page *p = m_page->page;
     const std::unique_ptr<FormPageWidgets> form = p->getFormWidgets();
     int formcount = form->getNumWidgets();
     for (int i = 0; i < formcount; ++i) {
         ::FormWidget *fm = form->getWidget(i);
-        FormField *ff = nullptr;
+        std::unique_ptr<FormField> ff;
         switch (fm->getType()) {
         case formButton: {
-            ff = new FormFieldButton(m_page->parentDoc, p, static_cast<FormWidgetButton *>(fm));
+            ff = std::make_unique<FormFieldButton>(m_page->parentDoc, p, static_cast<FormWidgetButton *>(fm));
         } break;
 
         case formText: {
-            ff = new FormFieldText(m_page->parentDoc, p, static_cast<FormWidgetText *>(fm));
+            ff = std::make_unique<FormFieldText>(m_page->parentDoc, p, static_cast<FormWidgetText *>(fm));
         } break;
 
         case formChoice: {
-            ff = new FormFieldChoice(m_page->parentDoc, p, static_cast<FormWidgetChoice *>(fm));
+            ff = std::make_unique<FormFieldChoice>(m_page->parentDoc, p, static_cast<FormWidgetChoice *>(fm));
         } break;
 
         case formSignature: {
-            ff = new FormFieldSignature(m_page->parentDoc, p, static_cast<FormWidgetSignature *>(fm));
+            ff = std::make_unique<FormFieldSignature>(m_page->parentDoc, p, static_cast<FormWidgetSignature *>(fm));
         } break;
 
         default:;
         }
 
         if (ff)
-            fields.append(ff);
+            fields.push_back(std::move(ff));
     }
 
     return fields;

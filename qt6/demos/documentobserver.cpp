@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@ DocumentObserver::~DocumentObserver() { }
 
 Poppler::Document *DocumentObserver::document() const
 {
-    return m_viewer->m_doc;
+    return m_viewer->m_doc.get();
 }
 
 void DocumentObserver::setPage(int page)

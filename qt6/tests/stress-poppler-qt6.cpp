@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         } else {
             QString path = "./pdfdb/" + subdir + "/data.pdf";
             std::cout << "Doing " << path.toLatin1().data() << " :";
-            Poppler::Document *doc = Poppler::Document::load(path);
+            std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(path);
             if (!doc) {
                 qWarning() << "doc not loaded";
             } else {
@@ -56,16 +56,14 @@ int main(int argc, char **argv)
                 doc->pageMode();
 
                 for (int index = 0; index < doc->numPages(); ++index) {
-                    Poppler::Page *page = doc->page(index);
+                    std::unique_ptr<Poppler::Page> page = doc->page(index);
                     page->renderToImage();
                     page->pageSize();
                     page->orientation();
-                    delete page;
                     std::cout << ".";
                     std::cout.flush();
                 }
                 std::cout << std::endl;
-                delete doc;
             }
         }
     }

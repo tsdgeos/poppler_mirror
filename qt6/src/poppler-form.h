@@ -7,7 +7,7 @@
  * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
- * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2018, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
@@ -172,7 +172,7 @@ public:
 
       \note It may be null.
      */
-    Link *activationAction() const;
+    std::unique_ptr<Link> activationAction() const;
 
     /**
      * Describes the flags from the form 'AA' dictionary.
@@ -187,12 +187,12 @@ public:
     /**
      * Returns a given form additional action
      */
-    Link *additionalAction(AdditionalActionType type) const;
+    std::unique_ptr<Link> additionalAction(AdditionalActionType type) const;
 
     /**
      * Returns a given widget annotation additional action
      */
-    Link *additionalAction(Annotation::AdditionalActionType type) const;
+    std::unique_ptr<Link> additionalAction(Annotation::AdditionalActionType type) const;
 
 protected:
     /// \cond PRIVATE

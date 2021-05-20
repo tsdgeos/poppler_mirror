@@ -22,8 +22,7 @@ private slots:
 
 void TestOptionalContent::checkVisPolicy()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/vis_policy_test.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/vis_policy_test.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());
@@ -36,14 +35,11 @@ void TestOptionalContent::checkVisPolicy()
     index = optContent->index(1, 0, QModelIndex());
     QCOMPARE(optContent->data(index, Qt::DisplayRole).toString(), QLatin1String("B"));
     QCOMPARE(static_cast<Qt::CheckState>(optContent->data(index, Qt::CheckStateRole).toInt()), Qt::Checked);
-
-    delete doc;
 }
 
 void TestOptionalContent::checkNestedLayers()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/NestedLayers.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/NestedLayers.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());
@@ -71,19 +67,14 @@ void TestOptionalContent::checkNestedLayers()
     index = optContent->index(3, 0, QModelIndex());
     QCOMPARE(optContent->data(index, Qt::DisplayRole).toString(), QLatin1String("Watermark"));
     QCOMPARE(static_cast<Qt::CheckState>(optContent->data(index, Qt::CheckStateRole).toInt()), Qt::Unchecked);
-
-    delete doc;
 }
 
 void TestOptionalContent::checkNoOptionalContent()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
     QVERIFY(doc);
 
     QCOMPARE(doc->hasOptionalContent(), false);
-
-    delete doc;
 }
 
 void TestOptionalContent::checkIsVisible()
@@ -365,8 +356,7 @@ void TestOptionalContent::checkVisibilitySetting()
 
 void TestOptionalContent::checkRadioButtons()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/ClarityOCGs.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/ClarityOCGs.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());
@@ -444,8 +434,6 @@ void TestOptionalContent::checkRadioButtons()
     QCOMPARE(optContent->data(subindex, Qt::DisplayRole).toString(), QLatin1String("French"));
     QCOMPARE(static_cast<Qt::CheckState>(optContent->data(subindex, Qt::CheckStateRole).toInt()), Qt::Unchecked);
     QCOMPARE(static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off);
-
-    delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestOptionalContent)

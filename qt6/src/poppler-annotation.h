@@ -10,6 +10,7 @@
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2020, Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -368,11 +369,8 @@ public:
 
     /**
      * Returns the revisions of this annotation
-     *
-     * \note The caller owns the returned annotations and they should
-     *       be deleted when no longer required.
      */
-    QList<Annotation *> revisions() const;
+    std::vector<std::unique_ptr<Annotation>> revisions() const;
 
     /**
      * The type of the annotation.
@@ -763,7 +761,7 @@ public:
     };
 
     Link *linkDestination() const;
-    void setLinkDestination(Link *link);
+    void setLinkDestination(std::unique_ptr<Link> &&link);
 
     HighlightMode linkHighlightMode() const;
     void setLinkHighlightMode(HighlightMode mode);
@@ -967,10 +965,10 @@ public:
     void setScreenTitle(const QString &title);
 
     /**
-     * Returns the additional action of the given @p type fo the annotation or
+     * Returns the additional action of the given @p type for the annotation or
      * @c 0 if no action has been defined.
      */
-    Link *additionalAction(AdditionalActionType type) const;
+    std::unique_ptr<Link> additionalAction(AdditionalActionType type) const;
 
 private:
     ScreenAnnotation();
@@ -997,10 +995,10 @@ public:
     SubType subType() const override;
 
     /**
-     * Returns the additional action of the given @p type fo the annotation or
+     * Returns the additional action of the given @p type for the annotation or
      * @c 0 if no action has been defined.
      */
-    Link *additionalAction(AdditionalActionType type) const;
+    std::unique_ptr<Link> additionalAction(AdditionalActionType type) const;
 
 private:
     WidgetAnnotation();

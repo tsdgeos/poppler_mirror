@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -66,7 +66,6 @@ public:
     static std::vector<OutlineItem *> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
 
     void open();
-    void close();
 
     const Unicode *getTitle() const { return title; }
     int getTitleLength() const { return titleLen; }

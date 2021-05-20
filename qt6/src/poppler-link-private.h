@@ -1,7 +1,7 @@
 /* poppler-link-private.h: qt interface to poppler
  * Copyright (C) 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public:
     LinkPrivate &operator=(const LinkPrivate &) = delete;
 
     QRectF linkArea;
-    QVector<Link *> nextLinks;
+    std::vector<std::unique_ptr<Link>> nextLinks;
 };
 
 class LinkOCGStatePrivate : public LinkPrivate

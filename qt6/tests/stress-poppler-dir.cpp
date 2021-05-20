@@ -19,13 +19,12 @@ int main(int argc, char **argv)
     foreach (const QString &fileName, directory.entryList()) {
         if (fileName.endsWith(QStringLiteral("pdf"))) {
             qDebug() << "Doing" << fileName.toLatin1().data() << ":";
-            Poppler::Document *doc = Poppler::Document::load(directory.canonicalPath() + "/" + fileName);
+            std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(directory.canonicalPath() + "/" + fileName);
             if (!doc) {
                 qWarning() << "doc not loaded";
             } else if (doc->isLocked()) {
                 if (!doc->unlock("", "password")) {
                     qWarning() << "couldn't unlock document";
-                    delete doc;
                 }
             } else {
                 int major = 0, minor = 0;
@@ -48,16 +47,14 @@ int main(int argc, char **argv)
                 doc->pageMode();
 
                 for (int index = 0; index < doc->numPages(); ++index) {
-                    Poppler::Page *page = doc->page(index);
+                    std::unique_ptr<Poppler::Page> page = doc->page(index);
                     page->renderToImage();
                     page->pageSize();
                     page->orientation();
-                    delete page;
                     std::cout << ".";
                     std::cout.flush();
                 }
                 std::cout << std::endl;
-                delete doc;
             }
         }
     }

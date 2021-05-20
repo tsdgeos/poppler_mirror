@@ -19,10 +19,10 @@ private slots:
 
 void TestSearch::bug7063()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/bug7063.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/bug7063.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     double rectLeft = 0.0, rectTop = 0.0, rectRight = page->pageSizeF().width(), rectBottom = page->pageSizeF().height();
@@ -58,10 +58,10 @@ void TestSearch::bug7063()
 
 void TestSearch::testNextAndPrevious()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/xr01.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/xr01.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     double rectLeft = 0.0, rectTop = 0.0, rectRight = page->pageSizeF().width(), rectBottom = page->pageSizeF().height();
@@ -147,10 +147,10 @@ void TestSearch::testNextAndPrevious()
 
 void TestSearch::testWholeWordsOnly()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
@@ -177,10 +177,10 @@ void TestSearch::testWholeWordsOnly()
 
 void TestSearch::testIgnoreDiacritics()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/Issue637.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/Issue637.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
@@ -236,10 +236,10 @@ void TestSearch::testIgnoreDiacritics()
 void TestSearch::testRussianSearch()
 {
     // Test for issue #743
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/russian.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/russian.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
@@ -265,10 +265,10 @@ void TestSearch::testRussianSearch()
 
 void TestSearch::testDeseretSearch()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/deseret.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/deseret.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(0));
+    std::unique_ptr<Poppler::Page> page = document->page(0);
     QVERIFY(page);
 
     double l, t, r, b; // left, top, right, bottom
@@ -285,10 +285,10 @@ void TestSearch::testAcrossLinesSearch()
     // Test for searching across lines with new flag Poppler::Page::AcrossLines
     // and its automatic features like ignoring hyphen at end of line or allowing
     // whitespace in the search term to match on newline character.
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/searchAcrossLines.pdf"));
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/searchAcrossLines.pdf");
     QVERIFY(document);
 
-    QScopedPointer<Poppler::Page> page(document->page(1));
+    std::unique_ptr<Poppler::Page> page = document->page(1);
     QVERIFY(page);
 
     const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
@@ -334,7 +334,7 @@ void TestSearch::testAcrossLinesSearch()
     // then we don't automatically ignore it, but treat it as a normal char.
     // In the searched page, "CC BY-NC-SA 4.0" is split across two lines on the second hyphen
     const QString str5 = QString::fromUtf8("CC BY-NC-SA 4.0"); // clazy:exclude=qstring-allocations
-    QScopedPointer<Poppler::Page> page0(document->page(0));
+    std::unique_ptr<Poppler::Page> page0 = document->page(0);
     QVERIFY(page0);
     QCOMPARE(page0->search(str5, l, t, r, b, direction, mode0), true);
     QCOMPARE(page0->search(str5, l, t, r, b, direction, mode1), true);

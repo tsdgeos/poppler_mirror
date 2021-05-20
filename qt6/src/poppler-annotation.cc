@@ -10,7 +10,7 @@
  * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
@@ -295,12 +295,12 @@ AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
     return new AnnotPath(std::move(ac));
 }
 
-QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
+std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
 {
     Annots *annots = pdfPage->getAnnots();
     const uint numAnnotations = annots->getNumAnnots();
     if (numAnnotations == 0) {
-        return QList<Annotation *>();
+        return std::vector<std::unique_ptr<Annotation>>();
     }
 
     const bool wantTextAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AText);
@@ -318,7 +318,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
     const bool wantWidgetAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AWidget);
 
     // Create Annotation objects and tie to their native Annot
-    QList<Annotation *> res;
+    std::vector<std::unique_ptr<Annotation>> res;
     for (uint k = 0; k < numAnnotations; k++) {
         // get the j-th annotation
         Annot *ann = annots->getAnnot(k);
@@ -337,36 +337,36 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             continue;
 
         /* Create Annotation of the right subclass */
-        Annotation *annotation = nullptr;
+        std::unique_ptr<Annotation> annotation;
         Annot::AnnotSubtype subType = ann->getType();
 
         switch (subType) {
         case Annot::typeText:
             if (!wantTextAnnotations)
                 continue;
-            annotation = new TextAnnotation(TextAnnotation::Linked);
+            annotation = std::make_unique<TextAnnotation>(TextAnnotation::Linked);
             break;
         case Annot::typeFreeText:
             if (!wantTextAnnotations)
                 continue;
-            annotation = new TextAnnotation(TextAnnotation::InPlace);
+            annotation = std::make_unique<TextAnnotation>(TextAnnotation::InPlace);
             break;
         case Annot::typeLine:
             if (!wantLineAnnotations)
                 continue;
-            annotation = new LineAnnotation(LineAnnotation::StraightLine);
+            annotation = std::make_unique<LineAnnotation>(LineAnnotation::StraightLine);
             break;
         case Annot::typePolygon:
         case Annot::typePolyLine:
             if (!wantLineAnnotations)
                 continue;
-            annotation = new LineAnnotation(LineAnnotation::Polyline);
+            annotation = std::make_unique<LineAnnotation>(LineAnnotation::Polyline);
             break;
         case Annot::typeSquare:
         case Annot::typeCircle:
             if (!wantGeomAnnotations)
                 continue;
-            annotation = new GeomAnnotation();
+            annotation = std::make_unique<GeomAnnotation>();
             break;
         case Annot::typeHighlight:
         case Annot::typeUnderline:
@@ -374,17 +374,17 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
         case Annot::typeStrikeOut:
             if (!wantHighlightAnnotations)
                 continue;
-            annotation = new HighlightAnnotation();
+            annotation = std::make_unique<HighlightAnnotation>();
             break;
         case Annot::typeStamp:
             if (!wantStampAnnotations)
                 continue;
-            annotation = new StampAnnotation();
+            annotation = std::make_unique<StampAnnotation>();
             break;
         case Annot::typeInk:
             if (!wantInkAnnotations)
                 continue;
-            annotation = new InkAnnotation();
+            annotation = std::make_unique<InkAnnotation>();
             break;
         case Annot::typeLink: /* TODO: Move logic to getters */
         {
@@ -393,7 +393,6 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             // parse Link params
             AnnotLink *linkann = static_cast<AnnotLink *>(ann);
             LinkAnnotation *l = new LinkAnnotation();
-            annotation = l;
 
             // -> hlMode
             l->setLinkHighlightMode((LinkAnnotation::HighlightMode)linkann->getLinkEffect());
@@ -403,17 +402,18 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
 
             // reading link action
             if (linkann->getAction()) {
-                Link *popplerLink = PageData::convertLinkActionToLink(linkann->getAction(), doc, QRectF());
+                std::unique_ptr<Link> popplerLink = PageData::convertLinkActionToLink(linkann->getAction(), doc, QRectF());
                 if (popplerLink) {
-                    l->setLinkDestination(popplerLink);
+                    l->setLinkDestination(std::move(popplerLink));
                 }
             }
+            annotation.reset(l);
             break;
         }
         case Annot::typeCaret:
             if (!wantCaretAnnotations)
                 continue;
-            annotation = new CaretAnnotation();
+            annotation = std::make_unique<CaretAnnotation>();
             break;
         case Annot::typeFileAttachment: /* TODO: Move logic to getters */
         {
@@ -421,12 +421,12 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                 continue;
             AnnotFileAttachment *attachann = static_cast<AnnotFileAttachment *>(ann);
             FileAttachmentAnnotation *f = new FileAttachmentAnnotation();
-            annotation = f;
             // -> fileIcon
             f->setFileIconName(QString::fromLatin1(attachann->getName()->c_str()));
             // -> embeddedFile
             FileSpec *filespec = new FileSpec(attachann->getFile());
             f->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(filespec)));
+            annotation.reset(f);
             break;
         }
         case Annot::typeSound: /* TODO: Move logic to getters */
@@ -435,12 +435,12 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                 continue;
             AnnotSound *soundann = static_cast<AnnotSound *>(ann);
             SoundAnnotation *s = new SoundAnnotation();
-            annotation = s;
 
             // -> soundIcon
             s->setSoundIconName(QString::fromLatin1(soundann->getName()->c_str()));
             // -> sound
             s->setSound(new SoundObject(soundann->getSound()));
+            annotation.reset(s);
             break;
         }
         case Annot::typeMovie: /* TODO: Move logic to getters */
@@ -449,7 +449,6 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                 continue;
             AnnotMovie *movieann = static_cast<AnnotMovie *>(ann);
             MovieAnnotation *m = new MovieAnnotation();
-            annotation = m;
 
             // -> movie
             MovieObject *movie = new MovieObject(movieann);
@@ -458,6 +457,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             const GooString *movietitle = movieann->getTitle();
             if (movietitle)
                 m->setMovieTitle(QString::fromLatin1(movietitle->c_str()));
+            annotation.reset(m);
             break;
         }
         case Annot::typeScreen: {
@@ -468,16 +468,16 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             if (!screenann->getAction() || screenann->getAction()->getKind() != actionRendition)
                 continue;
             ScreenAnnotation *s = new ScreenAnnotation();
-            annotation = s;
 
             // -> screen
-            Link *popplerLink = PageData::convertLinkActionToLink(screenann->getAction(), doc, QRectF());
-            s->setAction(static_cast<Poppler::LinkRendition *>(popplerLink));
+            std::unique_ptr<Link> popplerLink = PageData::convertLinkActionToLink(screenann->getAction(), doc, QRectF());
+            s->setAction(static_cast<Poppler::LinkRendition *>(popplerLink.release()));
 
             // -> screenTitle
             const GooString *screentitle = screenann->getTitle();
             if (screentitle)
                 s->setScreenTitle(UnicodeParsedString(screentitle));
+            annotation.reset(s);
             break;
         }
         case Annot::typePopup:
@@ -487,7 +487,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
         case Annot::typeWidget:
             if (!wantWidgetAnnotations)
                 continue;
-            annotation = new WidgetAnnotation();
+            annotation.reset(new WidgetAnnotation());
             break;
         case Annot::typeRichMedia: {
             const AnnotRichMedia *annotRichMedia = static_cast<AnnotRichMedia *>(ann);
@@ -644,7 +644,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                 richMediaAnnotation->setContent(content);
             }
 
-            annotation = richMediaAnnotation;
+            annotation.reset(richMediaAnnotation);
 
             break;
         }
@@ -667,7 +667,7 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
         }
 
         annotation->d_ptr->tieToNativeAnnot(ann, pdfPage, doc);
-        res.append(annotation);
+        res.push_back(std::move(annotation));
     }
 
     return res;
@@ -682,25 +682,23 @@ Ref AnnotationPrivate::pdfObjectReference() const
     return pdfAnnot->getRef();
 }
 
-Link *AnnotationPrivate::additionalAction(Annotation::AdditionalActionType type) const
+std::unique_ptr<Link> AnnotationPrivate::additionalAction(Annotation::AdditionalActionType type) const
 {
     if (pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget)
-        return nullptr;
+        return {};
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
-    std::unique_ptr<::LinkAction> linkAction = nullptr;
+    std::unique_ptr<::LinkAction> linkAction;
     if (pdfAnnot->getType() == Annot::typeScreen)
         linkAction = static_cast<AnnotScreen *>(pdfAnnot)->getAdditionalAction(actionType);
     else
         linkAction = static_cast<AnnotWidget *>(pdfAnnot)->getAdditionalAction(actionType);
 
-    Link *link = nullptr;
-
     if (linkAction)
-        link = PageData::convertLinkActionToLink(linkAction.get(), parentDoc, QRectF());
+        return PageData::convertLinkActionToLink(linkAction.get(), parentDoc, QRectF());
 
-    return link;
+    return {};
 }
 
 void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation *ann)
@@ -1381,22 +1379,22 @@ Annotation::RevType Annotation::revisionType() const
     return Annotation::None;
 }
 
-QList<Annotation *> Annotation::revisions() const
+std::vector<std::unique_ptr<Annotation>> Annotation::revisions() const
 {
     Q_D(const Annotation);
 
     if (!d->pdfAnnot) {
         /* Return aliases, whose ownership goes to the caller */
-        QList<Annotation *> res;
+        std::vector<std::unique_ptr<Annotation>> res;
         foreach (Annotation *rev, d->revisions)
-            res.append(rev->d_ptr->makeAlias());
+            res.push_back(std::unique_ptr<Annotation>(rev->d_ptr->makeAlias()));
         return res;
     }
 
     /* If the annotation doesn't live in a object on its own (eg bug51361), it
      * has no ref, therefore it can't have revisions */
     if (!d->pdfAnnot->getHasRef())
-        return QList<Annotation *>();
+        return std::vector<std::unique_ptr<Annotation>>();
 
     return AnnotationPrivate::findAnnotations(d->pdfPage, d->parentDoc, QSet<Annotation::SubType>(), d->pdfAnnot->getId());
 }
@@ -2712,17 +2710,14 @@ public:
     Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    Link *linkDestination;
+    std::unique_ptr<Link> linkDestination;
     LinkAnnotation::HighlightMode linkHLMode;
     QPointF linkRegion[4];
 };
 
-LinkAnnotationPrivate::LinkAnnotationPrivate() : AnnotationPrivate(), linkDestination(nullptr), linkHLMode(LinkAnnotation::Invert) { }
+LinkAnnotationPrivate::LinkAnnotationPrivate() : AnnotationPrivate(), linkHLMode(LinkAnnotation::Invert) { }
 
-LinkAnnotationPrivate::~LinkAnnotationPrivate()
-{
-    delete linkDestination;
-}
+LinkAnnotationPrivate::~LinkAnnotationPrivate() { }
 
 Annotation *LinkAnnotationPrivate::makeAlias()
 {
@@ -2748,14 +2743,13 @@ Annotation::SubType LinkAnnotation::subType() const
 Link *LinkAnnotation::linkDestination() const
 {
     Q_D(const LinkAnnotation);
-    return d->linkDestination;
+    return d->linkDestination.get();
 }
 
-void LinkAnnotation::setLinkDestination(Link *link)
+void LinkAnnotation::setLinkDestination(std::unique_ptr<Link> &&link)
 {
     Q_D(LinkAnnotation);
-    delete d->linkDestination;
-    d->linkDestination = link;
+    d->linkDestination = std::move(link);
 }
 
 LinkAnnotation::HighlightMode LinkAnnotation::linkHighlightMode() const
@@ -3127,7 +3121,7 @@ void ScreenAnnotation::setScreenTitle(const QString &title)
     d->title = title;
 }
 
-Link *ScreenAnnotation::additionalAction(AdditionalActionType type) const
+std::unique_ptr<Link> ScreenAnnotation::additionalAction(AdditionalActionType type) const
 {
     Q_D(const ScreenAnnotation);
     return d->additionalAction(type);
@@ -3162,7 +3156,7 @@ Annotation::SubType WidgetAnnotation::subType() const
     return AWidget;
 }
 
-Link *WidgetAnnotation::additionalAction(AdditionalActionType type) const
+std::unique_ptr<Link> WidgetAnnotation::additionalAction(AdditionalActionType type) const
 {
     Q_D(const WidgetAnnotation);
     return d->additionalAction(type);

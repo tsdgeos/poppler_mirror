@@ -708,7 +708,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
     }
 
-    const size_t bufSize = static_cast<int>(objEnd - objStart);
+    const size_t bufSize = static_cast<size_t>(objEnd - objStart);
     if (Gfseek(f, objStart, SEEK_SET) != 0) {
         return false;
     }

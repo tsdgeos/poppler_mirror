@@ -19,20 +19,15 @@ private slots:
 
 void TestAttachments::checkNoAttachments()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
     QVERIFY(doc);
 
     QCOMPARE(doc->hasEmbeddedFiles(), false);
-
-    delete doc;
 }
 
 void TestAttachments::checkAttach1()
 {
-
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -65,15 +60,11 @@ void TestAttachments::checkAttach1()
     QByteArray g64Data = file2.readAll();
     QByteArray emb2data = embfile2->data();
     QCOMPARE(g64Data, emb2data);
-
-    delete doc;
 }
 
 void TestAttachments::checkAttach2()
 {
-
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -102,15 +93,11 @@ void TestAttachments::checkAttach2()
     QCOMPARE(embfile3->createDate(), QDateTime(QDate(2003, 1, 31), QTime(15, 54, 29), Qt::UTC));
     QCOMPARE(embfile3->modDate(), QDateTime(QDate(2003, 1, 31), QTime(15, 52, 58), Qt::UTC));
     QCOMPARE(embfile3->mimeType(), QString());
-
-    delete doc;
 }
 
 void TestAttachments::checkAttach3()
 {
-
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/shapes+attachments.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/shapes+attachments.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -125,14 +112,11 @@ void TestAttachments::checkAttach3()
     QCOMPARE(embfile->createDate(), QDateTime(QDate(2004, 3, 29), QTime(19, 37, 16), Qt::UTC));
     QCOMPARE(embfile->modDate(), QDateTime(QDate(2004, 3, 29), QTime(19, 37, 16), Qt::UTC));
     QCOMPARE(embfile->mimeType(), QString());
-    delete doc;
 }
 
 void TestAttachments::checkAttach4()
 {
-
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf");
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -147,7 +131,6 @@ void TestAttachments::checkAttach4()
     QCOMPARE(embfile->createDate(), QDateTime(QDate(2005, 8, 30), QTime(20, 49, 35), Qt::UTC));
     QCOMPARE(embfile->modDate(), QDateTime(QDate(2005, 8, 30), QTime(20, 49, 52), Qt::UTC));
     QCOMPARE(embfile->mimeType(), QLatin1String("application/vnd.ms-excel"));
-    delete doc;
 }
 
 QTEST_GUILESS_MAIN(TestAttachments)

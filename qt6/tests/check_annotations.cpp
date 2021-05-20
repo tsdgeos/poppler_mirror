@@ -90,18 +90,17 @@ void TestAnnotations::checkFontSizeAndColor()
         auto annots = page->annotations();
         QCOMPARE(annots.size(), static_cast<int>(testColors.size()));
 
-        auto &&annot = annots.constBegin();
+        auto &&annot = annots.cbegin();
         for (const auto &color : testColors) {
             QCOMPARE((*annot)->subType(), Poppler::Annotation::AText);
-            auto textAnnot = static_cast<Poppler::TextAnnotation *>(*annot);
+            auto textAnnot = static_cast<Poppler::TextAnnotation *>(annot->get());
             QCOMPARE(textAnnot->contents(), contents);
             QCOMPARE(textAnnot->textFont().pointSize(), testFont.pointSize());
             QCOMPARE(static_cast<int>(textAnnot->textColor().spec()), static_cast<int>(color.spec()));
             QCOMPARE(textAnnot->textColor(), color);
-            if (annot != annots.constEnd())
+            if (annot != annots.cend())
                 ++annot;
         }
-        qDeleteAll(annots);
     }
 }
 
@@ -139,10 +138,8 @@ void TestAnnotations::checkUTF16LEAnnot()
     auto annots = page->annotations();
     QCOMPARE(annots.size(), 2);
 
-    auto annot = annots[1];
+    const auto &annot = annots[1];
     QCOMPARE(annot->contents(), QString::fromUtf8("Únîcödé豰")); // clazy:exclude=qstring-allocations
-
-    qDeleteAll(annots);
 }
 
 void TestAnnotations::saveAndCheck(const std::unique_ptr<Poppler::Document> &doc, const std::function<void(Poppler::Annotation *a)> &checkFunction)
@@ -160,8 +157,7 @@ void TestAnnotations::saveAndCheck(const std::unique_ptr<Poppler::Document> &doc
     std::unique_ptr<Poppler::Document> savedDoc { Poppler::Document::load(tempFile.fileName()) };
     std::unique_ptr<Poppler::Page> page { doc->page(0) };
     auto annots = page->annotations();
-    checkFunction(annots.at(1));
-    qDeleteAll(annots);
+    checkFunction(annots.at(1).get());
 }
 
 void TestAnnotations::checkModificationCreationDate()
@@ -172,7 +168,7 @@ void TestAnnotations::checkModificationCreationDate()
     std::unique_ptr<Poppler::Page> page { doc->page(0) };
 
     auto annots = page->annotations();
-    auto annot = annots.at(1);
+    const auto &annot = annots.at(1);
     QCOMPARE(annot->creationDate(), QDateTime());
     QCOMPARE(annot->modificationDate(), QDateTime());
 
@@ -183,13 +179,13 @@ void TestAnnotations::checkModificationCreationDate()
         // setting the creation date updates the modification date
         QVERIFY(std::abs(a->modificationDate().secsTo(QDateTime::currentDateTime())) < 2);
     };
-    checkFunction1(annot);
+    checkFunction1(annot.get());
     saveAndCheck(doc, checkFunction1);
 
     const QDateTime dt2(QDate(2020, 8, 30), QTime(8, 14, 52));
     annot->setModificationDate(dt2);
     auto checkFunction2 = [dt2](Poppler::Annotation *a) { QCOMPARE(a->modificationDate(), dt2); };
-    checkFunction2(annot);
+    checkFunction2(annot.get());
     saveAndCheck(doc, checkFunction2);
 
     // setting the creation date to empty means "use the modification date" and also updates the modification date
@@ -199,7 +195,7 @@ void TestAnnotations::checkModificationCreationDate()
         QVERIFY(std::abs(a->creationDate().secsTo(QDateTime::currentDateTime())) < 2);
         QCOMPARE(a->creationDate(), a->modificationDate());
     };
-    checkFunction3(annot);
+    checkFunction3(annot.get());
     saveAndCheck(doc, checkFunction3);
 
     annot->setModificationDate(QDateTime());
@@ -207,10 +203,8 @@ void TestAnnotations::checkModificationCreationDate()
         QCOMPARE(a->creationDate(), QDateTime());
         QCOMPARE(a->modificationDate(), QDateTime());
     };
-    checkFunction4(annot);
+    checkFunction4(annot.get());
     saveAndCheck(doc, checkFunction4);
-
-    qDeleteAll(annots);
 }
 
 void TestAnnotations::checkNonMarkupAnnotations()
@@ -223,7 +217,6 @@ void TestAnnotations::checkNonMarkupAnnotations()
 
     auto annots = page->annotations();
     QCOMPARE(annots.size(), 17);
-    qDeleteAll(annots);
 }
 
 void TestAnnotations::checkDefaultAppearance()
