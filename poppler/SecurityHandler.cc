@@ -243,7 +243,10 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 error(errUnimplemented, -1, "Unsupported version/revision ({0:d}/{1:d}) of Standard security handler", encVersion, encRevision);
             }
         } else {
-            error(errSyntaxError, -1, "Invalid encryption key length");
+            error(errSyntaxError, -1,
+                  "Invalid encryption key length. version: {0:d} - revision: {1:d} - ownerKeyLength: {2:d} - userKeyLength: {3:d} - ownerEncIsString: {4:d} - ownerEncLength: {5:d} - userEncIsString: {6:d} - userEncLength: {7:d}",
+                  encVersion, encRevision, ownerKeyObj.getString()->getLength(), userKeyObj.getString()->getLength(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString()->getLength() : -1, userEncObj.isString(),
+                  userEncObj.isString() ? userEncObj.getString()->getLength() : -1);
         }
     } else {
         error(errSyntaxError, -1, "Weird encryption info");
