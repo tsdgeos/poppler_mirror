@@ -251,6 +251,17 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
     } else {
         error(errSyntaxError, -1, "Weird encryption info");
     }
+
+    if (encRevision <= 4) {
+        // Adobe apparently zero-pads the U value (and maybe the O value?)
+        // if it's short
+        while (ownerKey->getLength() < 32) {
+            ownerKey->append((char)0x00);
+        }
+        while (userKey->getLength() < 32) {
+            userKey->append((char)0x00);
+        }
+    }
 }
 
 StandardSecurityHandler::~StandardSecurityHandler()
