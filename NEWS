@@ -1,3 +1,23 @@
+Release 21.06.0:
+        core:
+         * Fix rendering of some extended latin1 characters in annotations. Issue #1070
+         * Support some not so well formed documents with password. Issue #1083
+         * Add API to get notified if the xref is reconstructed
+         * Add somewhat fancier left/right signature visual representation
+         * Fix crashes in malformed files
+         * Minor code improvements
+
+        qt6:
+         * Change some functions to return std::unique_ptr
+
+        qt5/qt6:
+         * Add API to get notified if the xref is reconstructed
+         * Add somewhat fancier left/right signature visual representation
+         * Don't assert when trying to invert singular matrices
+
+        build system:
+         * make boost opt-out if building splash
+
 Release 21.05.0:
         core:
          * Fix crashes in malformed files
