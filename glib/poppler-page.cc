@@ -1663,7 +1663,8 @@ PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle)
  */
 void poppler_rectangle_free(PopplerRectangle *rectangle)
 {
-    g_slice_free(PopplerRectangle, rectangle);
+    auto ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
+    g_slice_free(PopplerRectangleExtended, ext_rectangle);
 }
 
 /**
