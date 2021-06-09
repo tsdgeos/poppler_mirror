@@ -87,6 +87,21 @@
 #include <cstring>
 #include <algorithm>
 
+#include "annot_stamp_approved.h"
+#include "annot_stamp_as_is.h"
+#include "annot_stamp_confidential.h"
+#include "annot_stamp_departmental.h"
+#include "annot_stamp_final.h"
+#include "annot_stamp_for_comment.h"
+#include "annot_stamp_experimental.h"
+#include "annot_stamp_expired.h"
+#include "annot_stamp_not_approved.h"
+#include "annot_stamp_not_for_public_release.h"
+#include "annot_stamp_sold.h"
+#include "annot_stamp_top_secret.h"
+#include "annot_stamp_for_public_release.h"
+#include "annot_stamp_draft.h"
+
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846
 #endif
@@ -5401,7 +5416,7 @@ void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
     updatedAppearanceStream = Ref::INVALID();
 }
 
-void AnnotStamp::generateStampAppearance()
+void AnnotStamp::generateStampCustomAppearance()
 {
     Ref imgRef = stampImageHelper->getRef();
     const std::string imgStrName = "X" + std::to_string(imgRef.num);
@@ -5422,6 +5437,68 @@ void AnnotStamp::generateStampAppearance()
     appearance = createForm(appearBuf, bboxArray, false, resDict);
 }
 
+void AnnotStamp::generateStampDefaultAppearance()
+{
+    Dict *extGStateDict = nullptr;
+    AnnotAppearanceBuilder defaultAppearanceBuilder;
+
+    if (!icon->cmp("Approved")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_APPROVED);
+        extGStateDict = getApprovedStampExtGStateDict(doc);
+    } else if (!icon->cmp("AsIs")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_AS_IS);
+        extGStateDict = getAsIsStampExtGStateDict(doc);
+    } else if (!icon->cmp("Confidential")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_CONFIDENTIAL);
+        extGStateDict = getConfidentialStampExtGStateDict(doc);
+    } else if (!icon->cmp("Final")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_FINAL);
+        extGStateDict = getFinalStampExtGStateDict(doc);
+    } else if (!icon->cmp("Experimental")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_EXPERIMENTAL);
+        extGStateDict = getExperimentalStampExtGStateDict(doc);
+    } else if (!icon->cmp("Expired")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_EXPIRED);
+        extGStateDict = getExpiredStampExtGStateDict(doc);
+    } else if (!icon->cmp("NotApproved")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_NOT_APPROVED);
+        extGStateDict = getNotApprovedStampExtGStateDict(doc);
+    } else if (!icon->cmp("NotForPublicRelease")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE);
+        extGStateDict = getNotForPublicReleaseStampExtGStateDict(doc);
+    } else if (!icon->cmp("Sold")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_SOLD);
+        extGStateDict = getSoldStampExtGStateDict(doc);
+    } else if (!icon->cmp("Departmental")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_DEPARTMENTAL);
+        extGStateDict = getDepartmentalStampExtGStateDict(doc);
+    } else if (!icon->cmp("ForComment")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_FOR_COMMENT);
+        extGStateDict = getForCommentStampExtGStateDict(doc);
+    } else if (!icon->cmp("ForPublicRelease")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_FOR_PUBLIC_RELEASE);
+        extGStateDict = getForPublicReleaseStampExtGStateDict(doc);
+    } else if (!icon->cmp("TopSecret")) {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_TOP_SECRET);
+        extGStateDict = getTopSecretStampExtGStateDict(doc);
+    } else {
+        defaultAppearanceBuilder.append(ANNOT_STAMP_DRAFT);
+        extGStateDict = getDraftStampExtGStateDict(doc);
+    }
+
+    double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+
+    Dict *resDict = new Dict(doc->getXRef());
+    resDict->add("ExtGState", Object(extGStateDict));
+
+    Object aStream = createForm(defaultAppearanceBuilder.buffer(), bboxArray, true, resDict);
+
+    AnnotAppearanceBuilder appearanceBuilder;
+    appearanceBuilder.append("/GS0 gs\n/Fm0 Do");
+    resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, nullptr);
+    appearance = createForm(appearanceBuilder.buffer(), bboxArray, false, resDict);
+}
+
 void AnnotStamp::draw(Gfx *gfx, bool printing)
 {
     if (!isVisible(printing))
@@ -5429,10 +5506,10 @@ void AnnotStamp::draw(Gfx *gfx, bool printing)
 
     annotLocker();
     if (appearance.isNull()) {
-        if (stampImageHelper == nullptr)
-            return;
-
-        generateStampAppearance();
+        if (stampImageHelper != nullptr)
+            generateStampCustomAppearance();
+        else
+            generateStampDefaultAppearance();
     }
 
     // draw the appearance stream
@@ -5465,7 +5542,7 @@ void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
     clearCustomImage();
 
     stampImageHelper = stampImageHelperA;
-    generateStampAppearance();
+    generateStampCustomAppearance();
 
     if (updatedAppearanceStream == Ref::INVALID()) {
         updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);

@@ -1212,7 +1212,8 @@ public:
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
-    void generateStampAppearance();
+    void generateStampDefaultAppearance();
+    void generateStampCustomAppearance();
 
     std::unique_ptr<GooString> icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;
