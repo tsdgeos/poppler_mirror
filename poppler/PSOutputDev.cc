@@ -5620,8 +5620,8 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
                 }
                 rectsOut[rectsOutLen].x0 = rects0[i].x0;
                 rectsOut[rectsOutLen].x1 = rects0[i].x1;
-                rectsOut[rectsOutLen].y0 = maskHeight - y - 1;
-                rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0 - 1;
+                rectsOut[rectsOutLen].y0 = maskHeight - y;
+                rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0;
                 ++rectsOutLen;
                 ++i;
             }
@@ -5661,8 +5661,8 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
         }
         rectsOut[rectsOutLen].x0 = rects0[i].x0;
         rectsOut[rectsOutLen].x1 = rects0[i].x1;
-        rectsOut[rectsOutLen].y0 = maskHeight - y - 1;
-        rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0 - 1;
+        rectsOut[rectsOutLen].y0 = maskHeight - y;
+        rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0;
         ++rectsOutLen;
     }
     if (rectsOutLen < 65536 / 4) {
@@ -5769,8 +5769,8 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                     }
                     rectsOut[rectsOutLen].x0 = rects0[i].x0;
                     rectsOut[rectsOutLen].x1 = rects0[i].x1;
-                    rectsOut[rectsOutLen].y0 = height - y - 1;
-                    rectsOut[rectsOutLen].y1 = height - rects0[i].y0 - 1;
+                    rectsOut[rectsOutLen].y0 = height - y;
+                    rectsOut[rectsOutLen].y1 = height - rects0[i].y0;
                     ++rectsOutLen;
                     ++i;
                 }
@@ -5826,8 +5826,8 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
             rectsOut[rectsOutLen].x0 = rects0[i].x0;
             rectsOut[rectsOutLen].x1 = rects0[i].x1;
-            rectsOut[rectsOutLen].y0 = height - y - 1;
-            rectsOut[rectsOutLen].y1 = height - rects0[i].y0 - 1;
+            rectsOut[rectsOutLen].y0 = height - y;
+            rectsOut[rectsOutLen].y1 = height - rects0[i].y0;
             ++rectsOutLen;
         }
         if (rectsOutLen < 65536 / 4) {
