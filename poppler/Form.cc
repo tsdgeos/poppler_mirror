@@ -2362,8 +2362,12 @@ Form::Form(PDFDoc *docA, Object *acroFormA)
         defaultAppearance = obj1.getString()->copy();
 
     obj1 = acroForm->dictLookup("Q");
-    if (obj1.isInt())
-        quadding = static_cast<VariableTextQuadding>(obj1.getInt());
+    if (obj1.isInt()) {
+        const int aux = obj1.getInt();
+        if (aux == quaddingLeftJustified || aux == quaddingCentered || aux == quaddingRightJustified) {
+            quadding = static_cast<VariableTextQuadding>(aux);
+        }
+    }
 
     resDict = acroForm->dictLookup("DR");
     if (resDict.isDict()) {
