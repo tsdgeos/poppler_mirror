@@ -675,9 +675,7 @@ Document::RenderBackend Document::renderBackend() const
 QSet<Document::RenderBackend> Document::availableRenderBackends()
 {
     QSet<Document::RenderBackend> ret;
-#if defined(HAVE_SPLASH)
     ret << Document::SplashBackend;
-#endif
     ret << Document::QPainterBackend;
     return ret;
 }

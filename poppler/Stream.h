@@ -49,9 +49,7 @@
 class GooFile;
 class BaseStream;
 class CachedFile;
-#ifdef HAVE_SPLASH
 class SplashBitmap;
-#endif
 
 //------------------------------------------------------------------------
 
@@ -1445,7 +1443,6 @@ private:
 // pure CMYK colors. In particular for a DeviceN8 bitmap it redacts the spot colorants.
 //------------------------------------------------------------------------
 
-#ifdef HAVE_SPLASH
 class SplashBitmapCMYKEncoder : public Stream
 {
 public:
@@ -1485,6 +1482,5 @@ private:
 
     bool fillBuf();
 };
-#endif
 
 #endif

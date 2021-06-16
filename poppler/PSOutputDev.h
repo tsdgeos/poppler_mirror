@@ -51,9 +51,7 @@
 #include <unordered_map>
 #include <string>
 
-#ifdef HAVE_SPLASH
-#    include "splash/Splash.h"
-#endif
+#include "splash/Splash.h"
 
 class PDFDoc;
 class XRef;
@@ -309,10 +307,8 @@ public:
     void setRasterResolution(double r) { rasterResolution = r; }
     void setRasterMono(bool b)
     {
-#ifdef HAVE_SPLASH
         processColorFormat = splashModeMono8;
         processColorFormatSpecified = true;
-#endif
     }
 
     void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
@@ -349,13 +345,11 @@ public:
     void setEnableLZW(bool b) { enableLZW = b; }
     void setEnableFlate(bool b) { enableFlate = b; }
 
-#ifdef HAVE_SPLASH
     void setProcessColorFormat(SplashColorMode format)
     {
         processColorFormat = format;
         processColorFormatSpecified = true;
     }
-#endif
 
 private:
     void init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
@@ -524,10 +518,8 @@ private:
     bool enableLZW; // enable LZW compression
     bool enableFlate; // enable Flate compression
 
-#ifdef HAVE_SPLASH
     SplashColorMode processColorFormat;
     bool processColorFormatSpecified;
-#endif
 
     std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted
 

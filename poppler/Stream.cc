@@ -69,9 +69,7 @@
 #include "Stream-CCITT.h"
 #include "CachedFile.h"
 
-#ifdef HAVE_SPLASH
-#    include "splash/SplashBitmap.h"
-#endif
+#include "splash/SplashBitmap.h"
 
 #ifdef ENABLE_LIBJPEG
 #    include "DCTStream.h"
@@ -5179,7 +5177,6 @@ bool RGBGrayEncoder::fillBuf()
 // SplashBitmapCMYKEncoder
 //------------------------------------------------------------------------
 
-#ifdef HAVE_SPLASH
 SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap(bitmapA)
 {
     width = (size_t)4 * bitmap->getWidth();
@@ -5251,4 +5248,3 @@ void SplashBitmapCMYKEncoder::setPos(Goffset pos, int dir)
         bufPtr = pos % width;
     }
 }
-#endif

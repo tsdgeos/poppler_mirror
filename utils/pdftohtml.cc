@@ -61,10 +61,8 @@
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "HtmlOutputDev.h"
-#ifdef HAVE_SPLASH
-#    include "SplashOutputDev.h"
-#    include "splash/SplashBitmap.h"
-#endif
+#include "SplashOutputDev.h"
+#include "splash/SplashBitmap.h"
 #include "GlobalParams.h"
 #include "PDFDocEncoding.h"
 #include "Error.h"
@@ -138,7 +136,6 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-fontfullname", argFlag, &fontFullName, 0, "outputs font full name" },
                                    {} };
 
-#ifdef HAVE_SPLASH
 class SplashOutputDevNoText : public SplashOutputDev
 {
 public:
@@ -156,8 +153,6 @@ public:
 
 SplashOutputDevNoText::~SplashOutputDevNoText() = default;
 
-#endif
-
 int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
@@ -166,9 +161,7 @@ int main(int argc, char *argv[])
     GooString *author = nullptr, *keywords = nullptr, *subject = nullptr, *date = nullptr;
     GooString *htmlFileName = nullptr;
     HtmlOutputDev *htmlOut = nullptr;
-#ifdef HAVE_SPLASH
     SplashOutputDev *splashOut = nullptr;
-#endif
     bool doOutline;
     bool ok;
     GooString *ownerPW, *userPW;
@@ -353,7 +346,6 @@ int main(int argc, char *argv[])
     }
 
     if ((complexMode || singleHtml) && !xml && !ignore) {
-#ifdef HAVE_SPLASH
         GooString *imgFileName = nullptr;
         // White paper color
         SplashColor color;
@@ -387,13 +379,6 @@ int main(int argc, char *argv[])
         }
 
         delete splashOut;
-#else
-        fprintf(stderr, "Your pdftohtml was built without splash backend support. It is needed for the option you want to use.\n");
-        delete htmlOut;
-        delete htmlFileName;
-        delete fileName;
-        return -1;
-#endif
     }
 
     if (htmlOut->isOk()) {

@@ -56,9 +56,7 @@
 #include <FontInfo.h>
 #include <OutputDev.h>
 #include <Error.h>
-#if defined(HAVE_SPLASH)
-#    include <SplashOutputDev.h>
-#endif
+#include <SplashOutputDev.h>
 
 #include "poppler-qt6.h"
 #include "poppler-embeddedfile-private.h"
