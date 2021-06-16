@@ -24,6 +24,7 @@
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
