@@ -148,7 +148,11 @@ if(ENABLE_DCTDECODER STREQUAL "libjpeg")
   if(JPEG_FOUND)
     set(ENABLE_LIBJPEG ${JPEG_FOUND})
   else()
-    message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can also decide to use the internal unmaintained DCT decoder or none at all.")
+    message(STATUS "Could NOT find libjpeg.")
+    message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can \
+also decide to use the internal unmaintained DCT decoder or none at all.\n\
+Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
+-DENABLE_DCTDECODER=unmaintained")
   endif()
   set(HAVE_DCT_DECODER ON)
 elseif(ENABLE_DCTDECODER STREQUAL "unmaintained")
