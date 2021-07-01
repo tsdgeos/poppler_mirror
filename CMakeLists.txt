@@ -256,7 +256,11 @@ if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
   find_package(OpenJPEG)
   set(WITH_OPENJPEG ${OpenJPEG_FOUND})
   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
-    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You can also decide to use the internal unmaintained JPX decoder or none at all.")
+    message(STATUS "Could NOT find openjpeg2.")
+    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You \
+can also decide to use the internal unmaintained JPX decoder or none at all.\n\
+Possible options are: -DENABLE_LIBOPENJPEG=openjpeg2, -DENABLE_LIBOPENJPEG=none, \
+-DENABLE_LIBOPENJPEG=unmaintained,")
   endif()
   set(HAVE_JPX_DECODER ON)
 elseif(ENABLE_LIBOPENJPEG STREQUAL "unmaintained")
