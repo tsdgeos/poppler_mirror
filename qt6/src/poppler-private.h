@@ -19,6 +19,7 @@
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -56,9 +57,7 @@
 #include <FontInfo.h>
 #include <OutputDev.h>
 #include <Error.h>
-#if defined(HAVE_SPLASH)
-#    include <SplashOutputDev.h>
-#endif
+#include <SplashOutputDev.h>
 
 #include "poppler-qt6.h"
 #include "poppler-embeddedfile-private.h"

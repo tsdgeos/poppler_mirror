@@ -36,7 +36,8 @@
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -79,11 +80,9 @@
 #include "PreScanOutputDev.h"
 #include "FileSpec.h"
 #include "CharCodeToUnicode.h"
-#ifdef HAVE_SPLASH
-#    include "splash/Splash.h"
-#    include "splash/SplashBitmap.h"
-#    include "SplashOutputDev.h"
-#endif
+#include "splash/Splash.h"
+#include "splash/SplashBitmap.h"
+#include "SplashOutputDev.h"
 #include "PSOutputDev.h"
 #include "PDFDoc.h"
 
@@ -1263,9 +1262,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType
     clipLLX0 = clipLLY0 = 0;
     clipURX0 = clipURY0 = -1;
 
-#ifdef HAVE_SPLASH
     processColorFormatSpecified = false;
-#endif
 
     // initialize sequential page number
     seqPage = 1;
@@ -1387,7 +1384,6 @@ void PSOutputDev::postInit()
     numTilingPatterns = 0;
     nextFunc = 0;
 
-#ifdef HAVE_SPLASH
     // set some default process color format if none is set
     if (!processColorFormatSpecified) {
         if (level == psLevel1) {
@@ -1395,7 +1391,7 @@ void PSOutputDev::postInit()
         } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {
             processColorFormat = splashModeCMYK8;
         }
-#    ifdef USE_CMS
+#ifdef USE_CMS
         else if (getDisplayProfile()) {
             auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
             if (processcolorspace == cmsSigCmykData) {
@@ -1406,7 +1402,7 @@ void PSOutputDev::postInit()
                 processColorFormat = splashModeRGB8;
             }
         }
-#    endif
+#endif
         else {
             processColorFormat = splashModeRGB8;
         }
@@ -1424,7 +1420,7 @@ void PSOutputDev::postInit()
               " Resetting processColorFormat to CMYK8.");
         processColorFormat = splashModeCMYK8;
     }
-#    ifdef USE_CMS
+#ifdef USE_CMS
     if (getDisplayProfile()) {
         auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
         if (processColorFormat == splashModeCMYK8) {
@@ -1441,7 +1437,6 @@ void PSOutputDev::postInit()
             }
         }
     }
-#    endif
 #endif
 
     // initialize embedded font resource comment list
@@ -3136,7 +3131,6 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
 {
     PreScanOutputDev *scan;
     bool rasterize;
-#ifdef HAVE_SPLASH
     bool useFlate, useLZW;
     SplashOutputDev *splashOut;
     SplashColor paperColor;
@@ -3156,7 +3150,6 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     bool isOptimizedGray;
     bool overprint;
     SplashColorMode internalColorFormat;
-#endif
 
     if (!postInitDone) {
         postInit();
@@ -3175,7 +3168,6 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         return true;
     }
 
-#ifdef HAVE_SPLASH
     // get the rasterization parameters
     useFlate = getEnableFlate() && level >= psLevel3;
     useLZW = getEnableLZW();
@@ -3223,12 +3215,12 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     splashOut = new SplashOutputDev(internalColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
-#    ifdef USE_CMS
+#ifdef USE_CMS
     splashOut->setDisplayProfile(getDisplayProfile());
     splashOut->setDefaultGrayProfile(getDefaultGrayProfile());
     splashOut->setDefaultRGBProfile(getDefaultRGBProfile());
     splashOut->setDefaultCMYKProfile(getDefaultCMYKProfile());
-#    endif
+#endif
     splashOut->startDoc(doc);
 
     // break the page into stripes
@@ -3504,7 +3496,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                 isOptimizedGray = false;
             }
             str0->reset();
-#    ifdef ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
             if (useFlate) {
                 if (isOptimizedGray && numComps == 4) {
                     str = new FlateEncoder(new CMYKGrayEncoder(str0));
@@ -3516,7 +3508,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                     str = new FlateEncoder(str0);
                 }
             } else
-#    endif
+#endif
                     if (useLZW) {
                 if (isOptimizedGray && numComps == 4) {
                     str = new LZWEncoder(new CMYKGrayEncoder(str0));
@@ -3619,14 +3611,6 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     endPage();
 
     return false;
-
-#else // HAVE_SPLASH
-
-    error(errSyntaxWarning, -1,
-          "PDF page uses transparency and PSOutputDev was built without"
-          " the Splash rasterizer - output may not be correct");
-    return true;
-#endif // HAVE_SPLASH
 }
 
 void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
@@ -5620,8 +5604,8 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
                 }
                 rectsOut[rectsOutLen].x0 = rects0[i].x0;
                 rectsOut[rectsOutLen].x1 = rects0[i].x1;
-                rectsOut[rectsOutLen].y0 = maskHeight - y - 1;
-                rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0 - 1;
+                rectsOut[rectsOutLen].y0 = maskHeight - y;
+                rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0;
                 ++rectsOutLen;
                 ++i;
             }
@@ -5661,8 +5645,8 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
         }
         rectsOut[rectsOutLen].x0 = rects0[i].x0;
         rectsOut[rectsOutLen].x1 = rects0[i].x1;
-        rectsOut[rectsOutLen].y0 = maskHeight - y - 1;
-        rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0 - 1;
+        rectsOut[rectsOutLen].y0 = maskHeight - y;
+        rectsOut[rectsOutLen].y1 = maskHeight - rects0[i].y0;
         ++rectsOutLen;
     }
     if (rectsOutLen < 65536 / 4) {
@@ -5769,8 +5753,8 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                     }
                     rectsOut[rectsOutLen].x0 = rects0[i].x0;
                     rectsOut[rectsOutLen].x1 = rects0[i].x1;
-                    rectsOut[rectsOutLen].y0 = height - y - 1;
-                    rectsOut[rectsOutLen].y1 = height - rects0[i].y0 - 1;
+                    rectsOut[rectsOutLen].y0 = height - y;
+                    rectsOut[rectsOutLen].y1 = height - rects0[i].y0;
                     ++rectsOutLen;
                     ++i;
                 }
@@ -5826,8 +5810,8 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
             rectsOut[rectsOutLen].x0 = rects0[i].x0;
             rectsOut[rectsOutLen].x1 = rects0[i].x1;
-            rectsOut[rectsOutLen].y0 = height - y - 1;
-            rectsOut[rectsOutLen].y1 = height - rects0[i].y0 - 1;
+            rectsOut[rectsOutLen].y0 = height - y;
+            rectsOut[rectsOutLen].y1 = height - rects0[i].y0;
             ++rectsOutLen;
         }
         if (rectsOutLen < 65536 / 4) {

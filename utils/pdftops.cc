@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -123,16 +124,12 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool overprint = false;
-#ifdef HAVE_SPLASH
 static GooString processcolorformatname;
 static SplashColorMode processcolorformat;
 static bool processcolorformatspecified = false;
-#    ifdef USE_CMS
+#ifdef USE_CMS
 static GooString processcolorprofilename;
 static GfxLCMSProfilePtr processcolorprofile;
-#    endif
-#endif
-#ifdef USE_CMS
 static GooString defaultgrayprofilename;
 static GfxLCMSProfilePtr defaultgrayprofile;
 static GooString defaultrgbprofilename;
@@ -164,13 +161,9 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-passfonts", argFlag, &fontPassthrough, 0, "don't substitute missing fonts" },
                                    { "-aaRaster", argString, rasterAntialiasStr, sizeof(rasterAntialiasStr), "enable anti-aliasing on rasterization: yes, no" },
                                    { "-rasterize", argString, forceRasterizeStr, sizeof(forceRasterizeStr), "control rasterization: always, never, whenneeded" },
-#ifdef HAVE_SPLASH
                                    { "-processcolorformat", argGooString, &processcolorformatname, 0, "color format that is used during rasterization and transparency reduction: MONO8, RGB8, CMYK8" },
-#    ifdef USE_CMS
-                                   { "-processcolorprofile", argGooString, &processcolorprofilename, 0, "ICC color profile to use as the process color profile during rasterization and transparency reduction" },
-#    endif
-#endif
 #ifdef USE_CMS
+                                   { "-processcolorprofile", argGooString, &processcolorprofilename, 0, "ICC color profile to use as the process color profile during rasterization and transparency reduction" },
                                    { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
                                    { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
                                    { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
@@ -288,7 +281,6 @@ int main(int argc, char *argv[])
         globalParams->setErrQuiet(quiet);
     }
 
-#ifdef HAVE_SPLASH
     if (!processcolorformatname.toStr().empty()) {
         if (processcolorformatname.toStr() == "MONO8") {
             processcolorformat = splashModeMono8;
@@ -305,7 +297,7 @@ int main(int argc, char *argv[])
         }
     }
 
-#    ifdef USE_CMS
+#ifdef USE_CMS
     if (!processcolorprofilename.toStr().empty()) {
         processcolorprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(processcolorprofilename.c_str(), "r"));
         if (!processcolorprofile) {
@@ -344,7 +336,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-#    endif
+#endif
 
     if (processcolorformatspecified) {
         if (level1 && processcolorformat != splashModeMono8) {
@@ -355,7 +347,6 @@ int main(int argc, char *argv[])
             goto err1;
         }
     }
-#endif
 
 #ifdef USE_CMS
     if (!defaultgrayprofilename.toStr().empty()) {
@@ -484,14 +475,10 @@ int main(int argc, char *argv[])
     if (splashResolution > 0) {
         psOut->setRasterResolution(splashResolution);
     }
-#ifdef HAVE_SPLASH
     if (processcolorformatspecified)
         psOut->setProcessColorFormat(processcolorformat);
-#    ifdef USE_CMS
-    psOut->setDisplayProfile(processcolorprofile);
-#    endif
-#endif
 #ifdef USE_CMS
+    psOut->setDisplayProfile(processcolorprofile);
     psOut->setDefaultGrayProfile(defaultgrayprofile);
     psOut->setDefaultRGBProfile(defaultrgbprofile);
     psOut->setDefaultCMYKProfile(defaultcmykprofile);

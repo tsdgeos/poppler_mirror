@@ -4,6 +4,7 @@
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2019, Julián Unrrein <junrrein@gmail.com>
  * Copyright (C) 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +34,8 @@
 #include <poppler-config.h>
 
 #include "PDFDoc.h"
-#if defined(HAVE_SPLASH)
-#    include "SplashOutputDev.h"
-#    include "splash/SplashBitmap.h"
-#endif
+#include "SplashOutputDev.h"
+#include "splash/SplashBitmap.h"
 
 using namespace poppler;
 
@@ -45,10 +44,8 @@ class poppler::page_renderer_private
 public:
     page_renderer_private() : paper_color(0xffffffff), hints(0), image_format(image::format_enum::format_argb32), line_mode(page_renderer::line_mode_enum::line_default) { }
 
-#if defined(HAVE_SPLASH)
     static bool conv_color_mode(image::format_enum mode, SplashColorMode &splash_mode);
     static bool conv_line_mode(page_renderer::line_mode_enum mode, SplashThinLineMode &splash_mode);
-#endif
 
     argb paper_color;
     unsigned int hints;
@@ -56,7 +53,6 @@ public:
     page_renderer::line_mode_enum line_mode;
 };
 
-#if defined(HAVE_SPLASH)
 bool page_renderer_private::conv_color_mode(image::format_enum mode, SplashColorMode &splash_mode)
 {
     switch (mode) {
@@ -98,7 +94,6 @@ bool page_renderer_private::conv_line_mode(page_renderer::line_mode_enum mode, S
     }
     return true;
 }
-#endif
 
 /**
  \class poppler::page_renderer poppler-page-renderer.h "poppler/cpp/poppler-renderer.h"
@@ -263,7 +258,6 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
         return image();
     }
 
-#if defined(HAVE_SPLASH)
     page_private *pp = page_private::get(p);
     PDFDoc *pdfdoc = pp->doc->doc;
 
@@ -293,9 +287,6 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
 
     const image img(reinterpret_cast<char *>(data_ptr), bw, bh, d->image_format);
     return img.copy();
-#else
-    return image();
-#endif
 }
 
 /**
@@ -308,9 +299,5 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
  */
 bool page_renderer::can_render()
 {
-#if defined(HAVE_SPLASH)
     return true;
-#else
-    return false;
-#endif
 }

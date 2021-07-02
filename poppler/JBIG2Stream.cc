@@ -967,7 +967,7 @@ public:
     unsigned int getSize() { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
-    bool isOk() { return bitmaps != nullptr; }
+    bool isOk() { return bitmaps != nullptr || size == 0; }
     void setGenericRegionStats(JArithmeticDecoderStats *stats) { genericRegionStats = stats; }
     void setRefinementRegionStats(JArithmeticDecoderStats *stats) { refinementRegionStats = stats; }
     JArithmeticDecoderStats *getGenericRegionStats() { return genericRegionStats; }
@@ -1329,6 +1329,7 @@ void JBIG2Stream::readSegments()
         switch (segType) {
         case 0:
             if (!readSymbolDictSeg(segNum, segLength, refSegs, nRefSegs)) {
+                error(errSyntaxError, curStr->getPos(), "readSymbolDictSeg reports syntax error!");
                 goto syntaxError;
             }
             break;

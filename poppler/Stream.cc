@@ -39,6 +39,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -69,9 +70,7 @@
 #include "Stream-CCITT.h"
 #include "CachedFile.h"
 
-#ifdef HAVE_SPLASH
-#    include "splash/SplashBitmap.h"
-#endif
+#include "splash/SplashBitmap.h"
 
 #ifdef ENABLE_LIBJPEG
 #    include "DCTStream.h"
@@ -5179,7 +5178,6 @@ bool RGBGrayEncoder::fillBuf()
 // SplashBitmapCMYKEncoder
 //------------------------------------------------------------------------
 
-#ifdef HAVE_SPLASH
 SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap(bitmapA)
 {
     width = (size_t)4 * bitmap->getWidth();
@@ -5251,4 +5249,3 @@ void SplashBitmapCMYKEncoder::setPos(Goffset pos, int dir)
         bufPtr = pos % width;
     }
 }
-#endif

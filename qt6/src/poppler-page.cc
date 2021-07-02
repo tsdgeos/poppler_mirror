@@ -24,6 +24,7 @@
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,10 +61,8 @@
 #include <Link.h>
 #include <QPainterOutputDev.h>
 #include <Rendition.h>
-#if defined(HAVE_SPLASH)
-#    include <SplashOutputDev.h>
-#    include <splash/SplashBitmap.h>
-#endif
+#include <SplashOutputDev.h>
+#include <splash/SplashBitmap.h>
 
 #include "poppler-private.h"
 #include "poppler-page-transition-private.h"
@@ -498,7 +497,6 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
     QImage img;
     switch (m_page->parentDoc->m_backend) {
     case Poppler::Document::SplashBackend: {
-#if defined(HAVE_SPLASH)
         SplashColor bgColor;
         const bool overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
         if (overprintPreview) {
@@ -545,9 +543,9 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? true : false);
         splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false, m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
 
-#    ifdef USE_CMS
+#ifdef USE_CMS
         splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
-#    endif
+#endif
 
         splash_output.startDoc(m_page->parentDoc->doc);
 
@@ -558,7 +556,6 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
                                                  (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack, nullptr, true);
 
         img = splash_output.getXBGRImage(true /* takeImageData */);
-#endif
         break;
     }
     case Poppler::Document::QPainterBackend: {

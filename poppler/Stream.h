@@ -30,6 +30,7 @@
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 // Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,9 +50,7 @@
 class GooFile;
 class BaseStream;
 class CachedFile;
-#ifdef HAVE_SPLASH
 class SplashBitmap;
-#endif
 
 //------------------------------------------------------------------------
 
@@ -1445,7 +1444,6 @@ private:
 // pure CMYK colors. In particular for a DeviceN8 bitmap it redacts the spot colorants.
 //------------------------------------------------------------------------
 
-#ifdef HAVE_SPLASH
 class SplashBitmapCMYKEncoder : public Stream
 {
 public:
@@ -1485,6 +1483,5 @@ private:
 
     bool fillBuf();
 };
-#endif
 
 #endif

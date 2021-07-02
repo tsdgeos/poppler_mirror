@@ -117,11 +117,6 @@
 #cmakedefine USE_BOOST_HEADERS 1
 #endif
 
-/* Is splash backend available */
-#ifndef HAVE_SPLASH
-#cmakedefine HAVE_SPLASH 1
-#endif
-
 //------------------------------------------------------------------------
 // version
 //------------------------------------------------------------------------

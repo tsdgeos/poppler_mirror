@@ -39,11 +39,13 @@ set(POPPLER_MINOR_VERSION_STRING "06")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
-set(POPPLER_MICRO_VERSION "0")
+set(POPPLER_MICRO_VERSION "1")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${POPPLER_MICRO_VERSION}")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_LINK_DEPENDS_NO_SHARED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -57,8 +59,7 @@ option(BUILD_QT5_TESTS "Whether to compile the Qt5 test programs." ON)
 option(BUILD_QT6_TESTS "Whether to compile the Qt6 test programs." ON)
 option(BUILD_CPP_TESTS "Whether to compile the CPP test programs." ON)
 option(BUILD_MANUAL_TESTS "Whether to compile manual test programs." ON)
-option(ENABLE_SPLASH "Build the Splash graphics backend." ON)
-option(ENABLE_BOOST "Use boost (when Splash is built)." ON)
+option(ENABLE_BOOST "Use boost (for Splash backend performance)." ON)
 option(ENABLE_UTILS "Compile poppler command line utils." ON)
 option(ENABLE_CPP "Compile poppler cpp wrapper." ON)
 option(ENABLE_GLIB "Compile poppler glib wrapper." ON)
@@ -181,17 +182,14 @@ if (ENABLE_QT6)
   endif()
 endif()
 
-# Check for rendering backends (Splash included unless disabled)
-set(HAVE_SPLASH ${ENABLE_SPLASH})
+# Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-if(ENABLE_SPLASH)
-  find_package(Boost 1.58.0)
-  if(Boost_FOUND)
-    set(USE_BOOST_HEADERS ON)
-  elseif(ENABLE_BOOST)
-    message(FATAL_ERROR "-- Boost recommended for Splash. Use ENABLE_BOOST=OFF to skip.")
-  endif()
+find_package(Boost 1.58.0)
+if(Boost_FOUND)
+  set(USE_BOOST_HEADERS ON)
+elseif(ENABLE_BOOST)
+  message(FATAL_ERROR "-- Boost recommended for Splash. Use ENABLE_BOOST=OFF to skip.")
 endif()
 
 if(CAIRO_FOUND)
@@ -442,29 +440,25 @@ set(poppler_SRCS
   poppler/Rendition.cc
   poppler/CertificateInfo.cc
   poppler/BBoxOutputDev.cc
+  poppler/SplashOutputDev.cc
+  splash/Splash.cc
+  splash/SplashBitmap.cc
+  splash/SplashClip.cc
+  splash/SplashFTFont.cc
+  splash/SplashFTFontEngine.cc
+  splash/SplashFTFontFile.cc
+  splash/SplashFont.cc
+  splash/SplashFontEngine.cc
+  splash/SplashFontFile.cc
+  splash/SplashFontFileID.cc
+  splash/SplashPath.cc
+  splash/SplashPattern.cc
+  splash/SplashScreen.cc
+  splash/SplashState.cc
+  splash/SplashXPath.cc
+  splash/SplashXPathScanner.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
-if(ENABLE_SPLASH)
-  set(poppler_SRCS ${poppler_SRCS}
-    poppler/SplashOutputDev.cc
-    splash/Splash.cc
-    splash/SplashBitmap.cc
-    splash/SplashClip.cc
-    splash/SplashFTFont.cc
-    splash/SplashFTFontEngine.cc
-    splash/SplashFTFontFile.cc
-    splash/SplashFont.cc
-    splash/SplashFontEngine.cc
-    splash/SplashFontFile.cc
-    splash/SplashFontFileID.cc
-    splash/SplashPath.cc
-    splash/SplashPattern.cc
-    splash/SplashScreen.cc
-    splash/SplashState.cc
-    splash/SplashXPath.cc
-    splash/SplashXPathScanner.cc
-  )
-endif()
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif()
@@ -662,6 +656,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
+    poppler/SplashOutputDev.h
     DESTINATION include/poppler)
   install(FILES
     goo/GooTimer.h
@@ -713,33 +708,28 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
       poppler/JPXStream.h
       DESTINATION include/poppler)
   endif()
-  if(ENABLE_SPLASH)
-    install(FILES
-      poppler/SplashOutputDev.h
-      DESTINATION include/poppler)
-    install(FILES
-      splash/Splash.h
-      splash/SplashBitmap.h
-      splash/SplashClip.h
-      splash/SplashErrorCodes.h
-      splash/SplashFTFont.h
-      splash/SplashFTFontEngine.h
-      splash/SplashFTFontFile.h
-      splash/SplashFont.h
-      splash/SplashFontEngine.h
-      splash/SplashFontFile.h
-      splash/SplashFontFileID.h
-      splash/SplashGlyphBitmap.h
-      splash/SplashMath.h
-      splash/SplashPath.h
-      splash/SplashPattern.h
-      splash/SplashScreen.h
-      splash/SplashState.h
-      splash/SplashTypes.h
-      splash/SplashXPath.h
-      splash/SplashXPathScanner.h
-      DESTINATION include/poppler/splash)
-  endif()
+  install(FILES
+    splash/Splash.h
+    splash/SplashBitmap.h
+    splash/SplashClip.h
+    splash/SplashErrorCodes.h
+    splash/SplashFTFont.h
+    splash/SplashFTFontEngine.h
+    splash/SplashFTFontFile.h
+    splash/SplashFont.h
+    splash/SplashFontEngine.h
+    splash/SplashFontFile.h
+    splash/SplashFontFileID.h
+    splash/SplashGlyphBitmap.h
+    splash/SplashMath.h
+    splash/SplashPath.h
+    splash/SplashPattern.h
+    splash/SplashScreen.h
+    splash/SplashState.h
+    splash/SplashTypes.h
+    splash/SplashXPath.h
+    splash/SplashXPathScanner.h
+    DESTINATION include/poppler/splash)
   if(CAIRO_FOUND)
     install(FILES
       poppler/CairoFontEngine.h
@@ -794,10 +784,7 @@ endif()
 # Summarize build options & display warnings for user
 message("Building Poppler with support for:")
 show_end_message("font configuration" ${font_configuration})
-show_end_message_yesno("splash output" ENABLE_SPLASH)
-if(ENABLE_SPLASH)
-  show_end_message_yesno("  use boost" ENABLE_BOOST)
-endif()
+show_end_message_yesno("use boost (Splash)" ENABLE_BOOST)
 show_end_message_yesno("cairo output" CAIRO_FOUND)
 show_end_message_yesno("qt5 wrapper" ENABLE_QT5)
 show_end_message_yesno("qt6 wrapper" ENABLE_QT6)
@@ -817,10 +804,6 @@ show_end_message_yesno("use lcms2" USE_CMS)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
-
-if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
-  message("Warning: There is no rendering backend enabled")
-endif()
 
 if(NOT ENABLE_LIBJPEG AND HAVE_DCT_DECODER)
   message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained.")
@@ -842,7 +825,7 @@ if(NOT HAVE_JPX_DECODER)
   message("Warning: You're not compiling any JPX decoder. Some files will fail to display properly.")
 endif()
 
-if(ENABLE_SPLASH AND NOT ENABLE_BOOST)
+if(NOT ENABLE_BOOST)
   message("Warning: Use of boost is recommended for better performance.")
 endif()
 

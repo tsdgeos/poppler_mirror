@@ -179,6 +179,10 @@ CairoOutputDev::~CairoOutputDev()
     if (fontEngine_owner && fontEngine) {
         delete fontEngine;
     }
+    if (textClipPath) {
+        cairo_path_destroy(textClipPath);
+        textClipPath = nullptr;
+    }
 
     if (cairo)
         cairo_destroy(cairo);

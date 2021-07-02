@@ -19,6 +19,7 @@
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -675,9 +676,7 @@ Document::RenderBackend Document::renderBackend() const
 QSet<Document::RenderBackend> Document::availableRenderBackends()
 {
     QSet<Document::RenderBackend> ret;
-#if defined(HAVE_SPLASH)
     ret << Document::SplashBackend;
-#endif
     ret << Document::QPainterBackend;
     return ret;
 }

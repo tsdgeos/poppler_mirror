@@ -7,20 +7,18 @@ set(common_libs
   poppler
 )
 
-if (ENABLE_SPLASH)
-  # pdftoppm
-  set(pdftoppm_SOURCES ${common_srcs}
-    pdftoppm.cc
-    sanitychecks.cc
-  )
-  add_executable(pdftoppm ${pdftoppm_SOURCES})
-  target_link_libraries(pdftoppm ${common_libs})
-  if(LCMS2_FOUND)
-    target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
-  endif()
-  install(TARGETS pdftoppm DESTINATION bin)
-  install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-endif ()
+# pdftoppm
+set(pdftoppm_SOURCES ${common_srcs}
+  pdftoppm.cc
+  sanitychecks.cc
+)
+add_executable(pdftoppm ${pdftoppm_SOURCES})
+target_link_libraries(pdftoppm ${common_libs})
+if(LCMS2_FOUND)
+  target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
+endif()
+install(TARGETS pdftoppm DESTINATION bin)
+install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if (HAVE_CAIRO)
   # pdftocairo
