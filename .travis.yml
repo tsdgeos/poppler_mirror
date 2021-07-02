@@ -17,4 +17,4 @@ before_install:
   - brew install poppler --only-dependencies
   - brew upgrade cmake pkg-config && brew install ninja
   - mkdir build && cd build
-script: cmake .. -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && ninja
+script: cmake .. -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF &&  ninja
