@@ -3459,7 +3459,7 @@ GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
     int year, mon, day, hour, min, sec, tzHours, tzMins;
     char tz;
 
-    if (parseDateString(date->c_str(), &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
+    if (parseDateString(date, &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
         if (tz == '+' || tz == '-') {
             gchar *identifier;
 

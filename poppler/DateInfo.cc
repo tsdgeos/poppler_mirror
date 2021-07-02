@@ -26,16 +26,27 @@
 #include <config.h>
 
 #include "glibc.h"
+#include "gmem.h"
 #include "DateInfo.h"
+#include "UTF.h"
 
 #include <cstdio>
 #include <cstring>
 
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
-bool parseDateString(const char *dateString, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
+bool parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
 {
-    if (dateString == nullptr)
-        return false;
+    Unicode *u;
+    int len = TextStringToUCS4(date, &u);
+    GooString s;
+    for (int i = 0; i < len; i++) {
+        // Ignore any non ASCII characters
+        if (u[i] < 128)
+            s.append(u[i]);
+    }
+    gfree(u);
+    const char *dateString = s.c_str();
+
     if (strlen(dateString) < 2)
         return false;
 
@@ -107,7 +118,7 @@ time_t dateStringToTime(const GooString *dateString)
     struct tm tm;
     time_t time;
 
-    if (!parseDateString(dateString->c_str(), &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
+    if (!parseDateString(dateString, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
         return -1;
 
     tm.tm_year = year - 1900;

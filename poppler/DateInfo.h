@@ -28,7 +28,7 @@
 #include "poppler_private_export.h"
 #include <ctime>
 
-bool POPPLER_PRIVATE_EXPORT parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
+bool POPPLER_PRIVATE_EXPORT parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 
 /* Converts the time_t into a PDF Date format string.
  * If timeA is NULL, current time is used.
