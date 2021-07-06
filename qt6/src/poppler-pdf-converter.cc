@@ -168,9 +168,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     appearCharacs->setBackColor(std::unique_ptr<AnnotColor> { convertQColor(data.backgroundColor()) });
     signatureAnnot->setAppearCharacs(std::move(appearCharacs));
 
-    bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
-                                           // the dingbats resource we should not need it now
-    signatureAnnot->generateFieldAppearance(&dummyAddDingbatsResource);
+    signatureAnnot->generateFieldAppearance();
     signatureAnnot->updateAppearanceStream();
 
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
