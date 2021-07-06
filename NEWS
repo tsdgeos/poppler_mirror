@@ -1,3 +1,13 @@
+Release 21.07.0:
+        core:
+         * JBIG2Stream: Do not consider a size-0 to be an error. Issue #535
+         * PSOutputDev: fix off-by-one error for image masking in L1/L2 output. Issue #1088
+         * CairoOutputDev: Fix memory leak on broken files
+         * Minor code improvements
+
+        build system:
+         * set C standard to 11 without extensions
+
 Release 21.06.1:
         glib:
          * fix poppler_rectangle_free() regression. Issue #1087

@@ -35,11 +35,11 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "21")
-set(POPPLER_MINOR_VERSION_STRING "06")
+set(POPPLER_MINOR_VERSION_STRING "07")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
-set(POPPLER_MICRO_VERSION "1")
+set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION_STRING}.${POPPLER_MICRO_VERSION}")
 
 set(CMAKE_CXX_STANDARD 14)
@@ -148,7 +148,11 @@ if(ENABLE_DCTDECODER STREQUAL "libjpeg")
   if(JPEG_FOUND)
     set(ENABLE_LIBJPEG ${JPEG_FOUND})
   else()
-    message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can also decide to use the internal unmaintained DCT decoder or none at all.")
+    message(STATUS "Could NOT find libjpeg.")
+    message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can \
+also decide to use the internal unmaintained DCT decoder or none at all.\n\
+Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
+-DENABLE_DCTDECODER=unmaintained")
   endif()
   set(HAVE_DCT_DECODER ON)
 elseif(ENABLE_DCTDECODER STREQUAL "unmaintained")
@@ -252,7 +256,11 @@ if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
   find_package(OpenJPEG)
   set(WITH_OPENJPEG ${OpenJPEG_FOUND})
   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
-    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You can also decide to use the internal unmaintained JPX decoder or none at all.")
+    message(STATUS "Could NOT find openjpeg2.")
+    message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You \
+can also decide to use the internal unmaintained JPX decoder or none at all.\n\
+Possible options are: -DENABLE_LIBOPENJPEG=openjpeg2, -DENABLE_LIBOPENJPEG=none, \
+-DENABLE_LIBOPENJPEG=unmaintained,")
   endif()
   set(HAVE_JPX_DECODER ON)
 elseif(ENABLE_LIBOPENJPEG STREQUAL "unmaintained")

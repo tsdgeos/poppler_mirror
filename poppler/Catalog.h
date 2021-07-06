@@ -204,6 +204,8 @@ public:
     bool indexToLabel(int index, GooString *label);
 
     Object *getOutline();
+    // returns the existing outline or new one if it doesn't exist
+    Object *getCreateOutline();
 
     Object *getAcroForm() { return &acroForm; }
     void addFormToAcroForm(const Ref formRef);

@@ -245,6 +245,21 @@ static const char *getFormAdditionalActionKey(Annot::FormAdditionalActionsType t
     return (type == Annot::actionFieldModified ? "K" : type == Annot::actionFormatField ? "F" : type == Annot::actionValidateField ? "V" : type == Annot::actionCalculateField ? "C" : nullptr);
 }
 
+static const char *determineFallbackFont(GooString *tok, const char *defaultFallback)
+{
+    // TODO: adjust these based on other example PDFs.
+    if (!tok->cmp("/ZaDb")) {
+        return "ZapfDingbats";
+    } else if (!tok->cmp("/Cour")) {
+        return "Courier";
+    } else if (!tok->cmp("/TiRo")) {
+        return "TimesNewRoman";
+    } else if (!tok->cmp("/Helvetica-Bold")) {
+        return "Helvetica-Bold";
+    }
+    return defaultFallback;
+}
+
 //------------------------------------------------------------------------
 // AnnotBorderEffect
 //------------------------------------------------------------------------
@@ -2852,7 +2867,9 @@ static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
-    fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
+    if (strcmp(fontname, "ZapfDingbats") && strcmp(fontname, "Symbol")) {
+        fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
+    }
 
     Object fontsDictObj = fontParentDict->lookup("Font");
     if (!fontsDictObj.isDict()) {
@@ -4110,7 +4127,7 @@ void AnnotAppearanceBuilder::writeString(const GooString &str)
 
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, bool multiline, int comb,
-                                      int quadding, bool txField, bool forceZapfDingbats, XRef *xref, bool *addedDingbatsResource, bool password)
+                                      int quadding, bool txField, bool forceZapfDingbats, XRef *xref, bool password, Dict *resourcesDict, const char *defaultFallback)
 {
     std::vector<GooString *> *daToks;
     GooString *tok;
@@ -4154,36 +4171,24 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         daToks = nullptr;
     }
 
-    // force ZapfDingbats
-    if (forceZapfDingbats) {
-        assert(xref != nullptr);
-        assert(addedDingbatsResource != nullptr);
-        *addedDingbatsResource = false;
-
-        if (tfPos >= 0) {
-            tok = (*daToks)[tfPos];
-            if (tok->cmp("/ZaDb")) {
-                tok->clear();
-                tok->append("/ZaDb");
-            }
-        }
-    }
     // get the font and font size
     font = nullptr;
     fontSize = 0;
     if (tfPos >= 0) {
         tok = (*daToks)[tfPos];
+        if (forceZapfDingbats) {
+            assert(xref != nullptr);
+            if (tok->cmp("/ZaDb")) {
+                tok->clear();
+                tok->append("/ZaDb");
+            }
+        }
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
-                if (forceZapfDingbats) {
-                    // We are forcing ZaDb but the font does not exist
-                    // so create a fake one
-                    Ref r = Ref::INVALID(); // dummy Ref, it's not used at all in this codepath
-                    Dict *d = new Dict(xref);
-                    fontToFree = new Gfx8BitFont(xref, "ZaDb", r, new GooString("ZapfDingbats"), fontType1, r, d);
-                    delete d;
+                if (xref != nullptr && resourcesDict != nullptr) {
+                    const char *fallback = determineFallbackFont(tok, defaultFallback);
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
                     font = fontToFree;
-                    *addedDingbatsResource = true;
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
                 }
@@ -4522,7 +4527,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, int quadding)
+bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, int quadding, XRef *xref, Dict *resourcesDict)
 {
     std::vector<GooString *> *daToks;
     GooString *tok;
@@ -4530,6 +4535,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     const GfxFont *font;
     double fontSize, borderWidth, x, y, w, wMax;
     int tfPos, tmPos, i, j;
+    GfxFont *fontToFree = nullptr;
 
     //~ if there is no MK entry, this should use the existing content stream,
     //~ and only replace the marked content portion of it
@@ -4569,7 +4575,13 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         tok = (*daToks)[tfPos];
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
-                error(errSyntaxError, -1, "Unknown font in field's DA string");
+                if (xref != nullptr && resourcesDict != nullptr) {
+                    const char *fallback = determineFallbackFont(tok, "Helvetica");
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
+                    font = fontToFree;
+                } else {
+                    error(errSyntaxError, -1, "Unknown font in field's DA string");
+                }
             }
         } else {
             error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
@@ -4701,6 +4713,9 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
         delete daToks;
     }
+    if (fontToFree) {
+        fontToFree->decRefCnt();
+    }
 
     return true;
 }
@@ -4808,17 +4823,17 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
 }
 
 bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                           const GooString *appearState, XRef *xref, bool *addedDingbatsResource, Dict *resourcesDict)
+                                           const GooString *appearState, XRef *xref, Dict *resourcesDict)
 {
     // draw the field contents
     switch (field->getType()) {
     case formButton:
-        return drawFormFieldButton(static_cast<const FormFieldButton *>(field), resources, da, border, appearCharacs, rect, appearState, xref, addedDingbatsResource);
+        return drawFormFieldButton(static_cast<const FormFieldButton *>(field), resources, da, border, appearCharacs, rect, appearState, xref, resourcesDict);
         break;
     case formText:
-        return drawFormFieldText(static_cast<const FormFieldText *>(field), form, resources, da, border, appearCharacs, rect);
+        return drawFormFieldText(static_cast<const FormFieldText *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
     case formChoice:
-        return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect);
+        return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
         break;
     case formSignature:
         return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
@@ -4832,7 +4847,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
 }
 
 bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                                 const GooString *appearState, XRef *xref, bool *addedDingbatsResource)
+                                                 const GooString *appearState, XRef *xref, Dict *resourcesDict)
 {
     const GooString *caption = nullptr;
     if (appearCharacs)
@@ -4843,7 +4858,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, addedDingbatsResource, false);
+                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -4858,15 +4873,15 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     } break;
     case formButtonPush:
         if (caption)
-            return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, false, xref, addedDingbatsResource, false);
+            return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, false, xref, false, resourcesDict);
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, addedDingbatsResource, false);
+                return drawText(&checkMark, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, addedDingbatsResource, false);
+                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
             }
         }
         break;
@@ -4876,7 +4891,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
 }
 
 bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                               const PDFRectangle *rect)
+                                               const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
     VariableTextQuadding quadding;
     const GooString *contents;
@@ -4895,7 +4910,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         if (fieldText->isComb())
             comb = fieldText->getMaxLen();
 
-        return drawText(contents, da, resources, border, appearCharacs, rect, fieldText->isMultiline(), comb, quadding, true, false, nullptr, nullptr, fieldText->isPassword());
+        return drawText(contents, da, resources, border, appearCharacs, rect, fieldText->isMultiline(), comb, quadding, true, false, xref, fieldText->isPassword(), resourcesDict);
     }
 
     return true;
@@ -4995,7 +5010,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
 }
 
 bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                 const PDFRectangle *rect)
+                                                 const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
     const GooString *selected;
     VariableTextQuadding quadding;
@@ -5011,18 +5026,18 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
         if (selected) {
-            return drawText(selected, da, resources, border, appearCharacs, rect, false, 0, quadding, true, false, nullptr, nullptr, false);
+            return drawText(selected, da, resources, border, appearCharacs, rect, false, 0, quadding, true, false, xref, false, resourcesDict);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
     } else {
-        return drawListBox(fieldChoice, border, rect, da, resources, quadding);
+        return drawListBox(fieldChoice, border, rect, da, resources, quadding, xref, resourcesDict);
     }
 
     return true;
 }
 
-void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
+void AnnotWidget::generateFieldAppearance()
 {
     const GooString *da;
 
@@ -5055,10 +5070,10 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
         resourcesDictObj = Object(new Dict(doc->getXRef()));
     }
 
-    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
+    const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
     if (!success && form && da != form->getDefaultAppearance()) {
         da = form->getDefaultAppearance();
-        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource, resourcesDictObj.getDict());
+        appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
     }
 
     const GooString *appearBuf = appearBuilder.buffer();
@@ -5096,9 +5111,7 @@ void AnnotWidget::updateAppearanceStream()
         return;
 
     // Create the new appearance
-    bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
-                                           // the dingbats resource we should not need it now
-    generateFieldAppearance(&dummyAddDingbatsResource);
+    generateFieldAppearance();
 
     // Fetch the appearance stream we've just created
     Object obj1 = appearance.fetch(doc->getXRef());
@@ -5130,38 +5143,19 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
         return;
 
     annotLocker();
-    bool addDingbatsResource = false;
 
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
     // - NeedAppearances is true
     if (field) {
         if (appearance.isNull() || (form && form->getNeedAppearances())) {
-            generateFieldAppearance(&addDingbatsResource);
+            generateFieldAppearance();
         }
     }
 
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
-    if (addDingbatsResource) {
-        // We are forcing ZaDb but the font does not exist
-        // so create a fake one
-        Dict *fontDict = new Dict(gfx->getXRef());
-        fontDict->add("BaseFont", Object(objName, "ZapfDingbats"));
-        fontDict->add("Subtype", Object(objName, "Type1"));
-
-        Dict *fontsDict = new Dict(gfx->getXRef());
-        fontsDict->add("ZaDb", Object(fontDict));
-
-        Dict *dict = new Dict(gfx->getXRef());
-        dict->add("Font", Object(fontsDict));
-        gfx->pushResources(dict);
-        delete dict;
-    }
     gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
-    if (addDingbatsResource) {
-        gfx->popResources();
-    }
 }
 
 void AnnotWidget::invalidateAppearance()

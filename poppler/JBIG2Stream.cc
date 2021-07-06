@@ -967,13 +967,14 @@ public:
     unsigned int getSize() { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
-    bool isOk() { return bitmaps != nullptr || size == 0; }
+    bool isOk() const { return ok; }
     void setGenericRegionStats(JArithmeticDecoderStats *stats) { genericRegionStats = stats; }
     void setRefinementRegionStats(JArithmeticDecoderStats *stats) { refinementRegionStats = stats; }
     JArithmeticDecoderStats *getGenericRegionStats() { return genericRegionStats; }
     JArithmeticDecoderStats *getRefinementRegionStats() { return refinementRegionStats; }
 
 private:
+    bool ok;
     unsigned int size;
     JBIG2Bitmap **bitmaps;
     JArithmeticDecoderStats *genericRegionStats;
@@ -982,13 +983,18 @@ private:
 
 JBIG2SymbolDict::JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA) : JBIG2Segment(segNumA)
 {
-    unsigned int i;
-
+    ok = true;
     size = sizeA;
-    bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(size, sizeof(JBIG2Bitmap *));
-    if (!bitmaps)
-        size = 0;
-    for (i = 0; i < size; ++i) {
+    if (size != 0) {
+        bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(size, sizeof(JBIG2Bitmap *));
+        if (!bitmaps) {
+            ok = false;
+            size = 0;
+        }
+    } else {
+        bitmaps = nullptr;
+    }
+    for (unsigned int i = 0; i < size; ++i) {
         bitmaps[i] = nullptr;
     }
     genericRegionStats = nullptr;
