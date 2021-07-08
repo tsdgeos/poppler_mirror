@@ -1216,6 +1216,11 @@ public:
        This function can return empty unique pointer if for some reason the page can't be properly parsed.
 
        \param index the page number index
+
+       \warning The Page object returned by this method internally stores a pointer
+       to the document that it was created from.  This pointer will go stale if you
+       delete the Document object.  Therefore the Document object needs to be kept alive
+       as long as you want to use the Page object.
     */
     std::unique_ptr<Page> page(int index) const;
 
