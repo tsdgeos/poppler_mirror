@@ -548,12 +548,9 @@ bool Document::okToAssemble() const
     return m_doc->doc->okToAssemble();
 }
 
-void Document::getPdfVersion(int *major, int *minor) const
+Document::PdfVersion Document::getPdfVersion() const
 {
-    if (major)
-        *major = m_doc->doc->getPDFMajorVersion();
-    if (minor)
-        *minor = m_doc->doc->getPDFMinorVersion();
+    return PdfVersion { m_doc->doc->getPDFMajorVersion(), m_doc->doc->getPDFMinorVersion() };
 }
 
 std::unique_ptr<Page> Document::page(const QString &label) const

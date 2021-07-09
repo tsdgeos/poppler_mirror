@@ -556,6 +556,11 @@ void Document::getPdfVersion(int *major, int *minor) const
         *minor = m_doc->doc->getPDFMinorVersion();
 }
 
+Document::PdfVersion Document::getPdfVersion() const
+{
+    return PdfVersion { m_doc->doc->getPDFMajorVersion(), m_doc->doc->getPDFMinorVersion() };
+}
+
 Page *Document::page(const QString &label) const
 {
     GooString label_g(label.toLatin1().data());

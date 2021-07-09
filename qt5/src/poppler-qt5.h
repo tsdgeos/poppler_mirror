@@ -1648,9 +1648,27 @@ QString subject = m_doc->info("Subject");
        \param minor an optional pointer to a variable where store the
        "minor" number of the version
 
+       \deprecated Will be removed in the Qt6 interface.  Use the method
+       returning a PdfVersion object instead!
+
        \since 0.12
     */
-    void getPdfVersion(int *major, int *minor) const;
+    Q_DECL_DEPRECATED void getPdfVersion(int *major, int *minor) const;
+
+    /** \brief The version specification of a pdf file */
+    struct PdfVersion
+    {
+        int major;
+        int minor;
+    };
+
+    /**
+       The version of the PDF specification that the document
+       conforms to
+
+       \since 21.08
+    */
+    PdfVersion getPdfVersion() const;
 
     /**
        The fonts within the PDF document.

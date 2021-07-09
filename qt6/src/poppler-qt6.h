@@ -1514,16 +1514,20 @@ QString subject = m_doc->info("Subject");
     */
     bool okToAssemble() const;
 
+    /** \brief The version specification of a pdf file */
+    struct PdfVersion
+    {
+        int major;
+        int minor;
+    };
+
     /**
        The version of the PDF specification that the document
        conforms to
 
-       \param major an optional pointer to a variable where store the
-       "major" number of the version
-       \param minor an optional pointer to a variable where store the
-       "minor" number of the version
+       \since 21.08
     */
-    void getPdfVersion(int *major, int *minor) const;
+    PdfVersion getPdfVersion() const;
 
     /**
        The fonts within the PDF document.

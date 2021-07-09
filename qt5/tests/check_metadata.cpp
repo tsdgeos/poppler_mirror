@@ -226,10 +226,9 @@ void TestMetaData::checkVersion()
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
     QVERIFY(doc);
 
-    int major = 0, minor = 0;
-    doc->getPdfVersion(&major, &minor);
-    QCOMPARE(major, 1);
-    QCOMPARE(minor, 6);
+    auto pdfVersion = doc->getPdfVersion();
+    QCOMPARE(pdfVersion.major, 1);
+    QCOMPARE(pdfVersion.minor, 6);
 
     delete doc;
 }
