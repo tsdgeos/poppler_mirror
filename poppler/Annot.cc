@@ -4618,6 +4618,9 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                     }
                     delete daToks;
                 }
+                if (fontToFree) {
+                    fontToFree->decRefCnt();
+                }
                 return false;
             }
             Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, font, &w, 0.0, nullptr, false);
