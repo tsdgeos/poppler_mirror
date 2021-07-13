@@ -2,11 +2,21 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 project(poppler)
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 include(PopplerDefaults)
 include(PopplerMacros)
+# Ensure that the user-provided C_FLAGS are used for try_compile() calls.
+# This is needed since PopplerMacros.cmake clears CMAKE_C_FLAGS and if
+# CMAKE_TRY_COMPILE_CONFIGURATION is empty CMake only uses the flags
+# specified in CMAKE_C_FLAGS (https://gitlab.kitware.com/cmake/cmake/-/issues/22414
+# and https://gitlab.kitware.com/cmake/cmake/-/issues/19512).
+# We therefore have to explicitly set CMAKE_TRY_COMPILE_CONFIGURATION until we
+# depend on a CMake release that includes a fix for those issues.
+# This is set after including PopplerMacros since that sets the default
+# CMAKE_BUILD_TYPE and also sets _CMAKE_BUILD_TYPE_UPPER.
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${_CMAKE_BUILD_TYPE_UPPER}")
+
 include(MacroOptionalFindPackage)
 find_package(PkgConfig)
 if (WIN32)
