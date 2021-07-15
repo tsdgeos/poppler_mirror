@@ -13,7 +13,7 @@
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
- * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
