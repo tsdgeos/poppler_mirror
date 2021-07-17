@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
