@@ -16,7 +16,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017, 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
@@ -1339,6 +1339,11 @@ public:
        This function can return nullptr if for some reason the page can't be properly parsed.
 
        \param index the page number index
+
+       \warning The Page object returned by this method internally stores a pointer
+       to the document that it was created from.  This pointer will go stale if you
+       delete the Document object.  Therefore the Document object needs to be kept alive
+       as long as you want to use the Page object.
     */
     Page *page(int index) const;
 
@@ -1643,9 +1648,27 @@ QString subject = m_doc->info("Subject");
        \param minor an optional pointer to a variable where store the
        "minor" number of the version
 
+       \deprecated Will be removed in the Qt6 interface.  Use the method
+       returning a PdfVersion object instead!
+
        \since 0.12
     */
-    void getPdfVersion(int *major, int *minor) const;
+    Q_DECL_DEPRECATED void getPdfVersion(int *major, int *minor) const;
+
+    /** \brief The version specification of a pdf file */
+    struct PdfVersion
+    {
+        int major;
+        int minor;
+    };
+
+    /**
+       The version of the PDF specification that the document
+       conforms to
+
+       \since 21.08
+    */
+    PdfVersion getPdfVersion() const;
 
     /**
        The fonts within the PDF document.

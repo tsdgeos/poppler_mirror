@@ -36,8 +36,8 @@ int main(int argc, char **argv)
             if (!doc) {
                 qWarning() << "doc not loaded";
             } else {
-                int major = 0, minor = 0;
-                doc->getPdfVersion(&major, &minor);
+                auto pdfVersion = doc->getPdfVersion();
+                Q_UNUSED(pdfVersion);
                 doc->info(QStringLiteral("Title"));
                 doc->info(QStringLiteral("Subject"));
                 doc->info(QStringLiteral("Author"));

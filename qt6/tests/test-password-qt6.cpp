@@ -91,9 +91,8 @@ int main(int argc, char **argv)
     }
 
     // output some meta-data
-    int major = 0, minor = 0;
-    doc->getPdfVersion(&major, &minor);
-    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(major).arg(minor));
+    auto pdfVersion = doc->getPdfVersion();
+    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(pdfVersion.major).arg(pdfVersion.minor));
     qDebug() << "          Title: " << doc->info(QStringLiteral("Title"));
     qDebug() << "        Subject: " << doc->info(QStringLiteral("Subject"));
     qDebug() << "         Author: " << doc->info(QStringLiteral("Author"));

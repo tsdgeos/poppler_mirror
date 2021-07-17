@@ -1216,6 +1216,11 @@ public:
        This function can return empty unique pointer if for some reason the page can't be properly parsed.
 
        \param index the page number index
+
+       \warning The Page object returned by this method internally stores a pointer
+       to the document that it was created from.  This pointer will go stale if you
+       delete the Document object.  Therefore the Document object needs to be kept alive
+       as long as you want to use the Page object.
     */
     std::unique_ptr<Page> page(int index) const;
 
@@ -1509,16 +1514,20 @@ QString subject = m_doc->info("Subject");
     */
     bool okToAssemble() const;
 
+    /** \brief The version specification of a pdf file */
+    struct PdfVersion
+    {
+        int major;
+        int minor;
+    };
+
     /**
        The version of the PDF specification that the document
        conforms to
 
-       \param major an optional pointer to a variable where store the
-       "major" number of the version
-       \param minor an optional pointer to a variable where store the
-       "minor" number of the version
+       \since 21.08
     */
-    void getPdfVersion(int *major, int *minor) const;
+    PdfVersion getPdfVersion() const;
 
     /**
        The fonts within the PDF document.

@@ -181,10 +181,9 @@ void TestMetaData::checkVersion()
     std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
     QVERIFY(doc);
 
-    int major = 0, minor = 0;
-    doc->getPdfVersion(&major, &minor);
-    QCOMPARE(major, 1);
-    QCOMPARE(minor, 6);
+    auto pdfVersion = doc->getPdfVersion();
+    QCOMPARE(pdfVersion.major, 1);
+    QCOMPARE(pdfVersion.minor, 6);
 }
 
 void TestMetaData::checkPdfId()

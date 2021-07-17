@@ -28,8 +28,11 @@ int main(int argc, char **argv)
                     delete doc;
                 }
             } else {
-                int major = 0, minor = 0;
-                doc->getPdfVersion(&major, &minor);
+                auto pdfVersion = doc->getPdfVersion();
+                if (pdfVersion.major != 1) {
+                    qWarning() << "pdf major version is not '1'";
+                }
+
                 doc->info(QStringLiteral("Title"));
                 doc->info(QStringLiteral("Subject"));
                 doc->info(QStringLiteral("Author"));

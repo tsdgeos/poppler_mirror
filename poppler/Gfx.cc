@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
@@ -2525,21 +2525,6 @@ void Gfx::doFunctionShFill1(GfxFunctionShading *shading, double x0, double y0, d
     }
 }
 
-static void bubbleSort(double array[])
-{
-    for (int j = 0; j < 3; ++j) {
-        int kk = j;
-        for (int k = j + 1; k < 4; ++k) {
-            if (array[k] < array[kk]) {
-                kk = k;
-            }
-        }
-        double tmp = array[j];
-        array[j] = array[kk];
-        array[kk] = tmp;
-    }
-}
-
 void Gfx::doAxialShFill(GfxAxialShading *shading)
 {
     double xMin, yMin, xMax, yMax;
@@ -2576,7 +2561,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
         bboxIntersections[1] = ((xMin - x0) * dx + (yMax - y0) * dy) * mul;
         bboxIntersections[2] = ((xMax - x0) * dx + (yMin - y0) * dy) * mul;
         bboxIntersections[3] = ((xMax - x0) * dx + (yMax - y0) * dy) * mul;
-        bubbleSort(bboxIntersections);
+        std::sort(std::begin(bboxIntersections), std::end(bboxIntersections));
         tMin = bboxIntersections[0];
         tMax = bboxIntersections[3];
         if (tMin < 0 && !shading->getExtend0()) {
@@ -2677,7 +2662,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
         s[1] = (yMax - ty) / dx;
         s[2] = (xMin - tx) / -dy;
         s[3] = (xMax - tx) / -dy;
-        bubbleSort(s);
+        std::sort(std::begin(s), std::end(s));
         sMin = s[1];
         sMax = s[2];
     }
@@ -2791,7 +2776,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
             s[1] = (yMax - ty) / dx;
             s[2] = (xMin - tx) / -dy;
             s[3] = (xMax - tx) / -dy;
-            bubbleSort(s);
+            std::sort(std::begin(s), std::end(s));
             sMin = s[1];
             sMax = s[2];
         }

@@ -2332,8 +2332,11 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
     for (i = 0; i < n_lines; i++) {
         std::vector<TextWordSelection *> *line_words = word_list[i];
         n_rects += line_words->size() - 1;
-        for (const TextWordSelection *word_sel : *line_words) {
+        for (std::size_t j = 0; j < line_words->size(); j++) {
+            const TextWordSelection *word_sel = (*line_words)[j];
             n_rects += word_sel->getEnd() - word_sel->getBegin();
+            if (!word_sel->getWord()->hasSpaceAfter() && j < line_words->size() - 1)
+                n_rects--;
         }
     }
 
@@ -2356,7 +2359,7 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
             rect = *rectangles + offset;
             word->getBBox(&x1, &y1, &x2, &y2);
 
-            if (j < line_words->size() - 1) {
+            if (word->hasSpaceAfter() && j < line_words->size() - 1) {
                 TextWordSelection *next_word_sel = (*line_words)[j + 1];
 
                 next_word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
@@ -2514,7 +2517,7 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
                 prev_word_i = word_i;
             }
 
-            if (j < line_words->size() - 1) {
+            if (word->hasSpaceAfter() && j < line_words->size() - 1) {
                 attrs->end_index = offset;
                 offset++;
             }
