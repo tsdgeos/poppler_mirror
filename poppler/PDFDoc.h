@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -44,11 +44,14 @@
 #ifndef PDFDOC_H
 #define PDFDOC_H
 
+#include <algorithm>
+#include <cstdio>
 #include <mutex>
 
 #include "poppler-config.h"
+
 #include "poppler_private_export.h"
-#include <cstdio>
+
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -278,9 +281,19 @@ public:
     PDFSubtypePart getPDFSubtypePart() const { return pdfPart; }
     PDFSubtypeConformance getPDFSubtypeConformance() const { return pdfConformance; }
 
-    // Return the PDF version specified by the file.
-    int getPDFMajorVersion() const { return pdfMajorVersion; }
-    int getPDFMinorVersion() const { return pdfMinorVersion; }
+    // Return the PDF version specified by the file (either header or catalog).
+    int getPDFMajorVersion() const { return std::max(headerPdfMajorVersion, catalog->getPDFMajorVersion()); }
+    int getPDFMinorVersion() const
+    {
+        const int catalogMajorVersion = catalog->getPDFMajorVersion();
+        if (catalogMajorVersion > headerPdfMajorVersion) {
+            return catalog->getPDFMinorVersion();
+        } else if (headerPdfMajorVersion > catalogMajorVersion) {
+            return headerPdfMinorVersion;
+        } else {
+            return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
+        }
+    }
 
     // Return the PDF ID in the trailer dictionary (if any).
     bool getID(GooString *permanent_id, GooString *update_id) const;
@@ -365,8 +378,8 @@ private:
     GooFile *file;
     BaseStream *str;
     void *guiData;
-    int pdfMajorVersion;
-    int pdfMinorVersion;
+    int headerPdfMajorVersion;
+    int headerPdfMinorVersion;
     PDFSubtype pdfSubtype;
     PDFSubtypePart pdfPart;
     PDFSubtypeConformance pdfConformance;

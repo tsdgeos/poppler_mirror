@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -411,8 +411,8 @@ void PDFDoc::checkHeader()
     int i;
     int bytesRead;
 
-    pdfMajorVersion = 0;
-    pdfMinorVersion = 0;
+    headerPdfMajorVersion = 0;
+    headerPdfMinorVersion = 0;
 
     // read up to headerSearchSize bytes from the beginning of the document
     for (i = 0; i < headerSearchSize; ++i) {
@@ -441,7 +441,7 @@ void PDFDoc::checkHeader()
         error(errSyntaxWarning, -1, "May not be a PDF file (continuing anyway)");
         return;
     }
-    sscanf(p, "%d.%d", &pdfMajorVersion, &pdfMinorVersion);
+    sscanf(p, "%d.%d", &headerPdfMajorVersion, &headerPdfMinorVersion);
     // We don't do the version check. Don't add it back in.
 }
 
