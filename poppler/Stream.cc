@@ -1103,6 +1103,16 @@ AutoFreeMemStream::~AutoFreeMemStream()
     gfree(buf);
 }
 
+bool AutoFreeMemStream::isFilterRemovalForbidden() const
+{
+    return filterRemovalForbidden;
+}
+
+void AutoFreeMemStream::setFilterRemovalForbidden(bool forbidden)
+{
+    filterRemovalForbidden = forbidden;
+}
+
 //------------------------------------------------------------------------
 // EmbedStream
 //------------------------------------------------------------------------

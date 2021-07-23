@@ -734,9 +734,17 @@ public:
 
 class AutoFreeMemStream : public BaseMemStream<char>
 {
+    bool filterRemovalForbidden;
+
 public:
+    // AutoFreeMemStream takes ownership over the buffer.
+    // The buffer should be created using gmalloc().
     AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
     ~AutoFreeMemStream() override;
+
+    // A hack to deal with the strange behaviour of PDFDoc::writeObject().
+    bool isFilterRemovalForbidden() const;
+    void setFilterRemovalForbidden(bool forbidden);
 };
 
 //------------------------------------------------------------------------

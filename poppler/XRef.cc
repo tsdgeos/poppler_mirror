@@ -31,6 +31,7 @@
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2010 William Bader <william@newspapersystems.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1453,6 +1454,20 @@ void XRef::removeIndirectObject(Ref r)
     }
     e->setFlag(XRefEntry::Updated, true);
     setModified();
+}
+
+Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize)
+{
+    dict->add("Length", Object((int)bufferSize));
+    AutoFreeMemStream *stream = new AutoFreeMemStream(buffer, 0, bufferSize, Object(dict));
+    stream->setFilterRemovalForbidden(true);
+    Object streamObj((Stream *)stream);
+    return addIndirectObject(&streamObj);
+}
+
+Ref XRef::addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize)
+{
+    return addStreamObject(dict, (char *)buffer, bufferSize);
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)

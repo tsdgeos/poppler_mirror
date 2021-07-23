@@ -2032,6 +2032,16 @@ void FormFieldSignature::setCustomAppearanceLeftFontSize(double size)
     customAppearanceLeftFontSize = size;
 }
 
+Ref FormFieldSignature::getImageResource() const
+{
+    return imageResource;
+}
+
+void FormFieldSignature::setImageResource(const Ref imageResourceA)
+{
+    imageResource = imageResourceA;
+}
+
 void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo)
 {
     certificate_info.swap(certInfo);
