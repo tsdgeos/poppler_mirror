@@ -24,7 +24,7 @@
 // Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 // Copyright (C) 2014 Pino Toscano <pino@kde.org>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>

@@ -6,7 +6,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
-// Copyright (C) 2016, 2018 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2016, 2018, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
 //
