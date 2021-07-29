@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -214,6 +214,9 @@ public:
 
     OCGs *getOptContentConfig() { return optContent; }
 
+    int getPDFMajorVersion() const { return catalogPdfMajorVersion; }
+    int getPDFMinorVersion() const { return catalogPdfMinorVersion; }
+
     enum FormType
     {
         NoForm,
@@ -304,6 +307,9 @@ private:
     NameTree *getEmbeddedFileNameTree();
     NameTree *getJSNameTree();
     std::unique_ptr<LinkDest> createLinkDest(Object *obj);
+
+    int catalogPdfMajorVersion = -1;
+    int catalogPdfMinorVersion = -1;
 
     mutable std::recursive_mutex mutex;
 };

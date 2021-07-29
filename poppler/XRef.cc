@@ -385,9 +385,16 @@ XRef *XRef::copy() const
     for (int i = 0; i < size; ++i) {
         xref->entries[i].offset = entries[i].offset;
         xref->entries[i].type = entries[i].type;
+        // set the object to null, it will be fetched from the stream when needed
         new (&xref->entries[i].obj) Object(objNull);
         xref->entries[i].flags = entries[i].flags;
         xref->entries[i].gen = entries[i].gen;
+
+        // If entry has been changed from the stream value we need to copy it
+        // otherwise it's lost
+        if (entries[i].getFlag(XRefEntry::Updated)) {
+            xref->entries[i].obj = entries[i].obj.copy();
+        }
     }
     xref->streamEndsLen = streamEndsLen;
     if (streamEndsLen != 0) {

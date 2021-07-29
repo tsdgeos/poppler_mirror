@@ -2688,6 +2688,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
 
         // bisect until color difference is small enough or we hit the
         // bisection limit
+        const double previousStop = tt;
         j = next[i];
         while (j > i + 1) {
             if (ta[j] < 0) {
@@ -2697,8 +2698,32 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
             } else {
                 tt = t0 + (t1 - t0) * ta[j];
             }
+
+            // Try to determine whether the color map is constant between ta[i] and ta[j].
+            // In the strict sense this question cannot be answered by sampling alone.
+            // We try an educated guess in form of 2 samples.
+            // See https://gitlab.freedesktop.org/poppler/poppler/issues/938 for a file where one sample was not enough.
+
+            // The first test sample at 1.0 (i.e., ta[j]) is coded separately, because we may
+            // want to reuse the color later
             shading->getColor(tt, &color1);
-            if (isSameGfxColor(color1, color0, nComps, axialColorDelta)) {
+            bool isPatchOfConstantColor = isSameGfxColor(color1, color0, nComps, axialColorDelta);
+
+            if (isPatchOfConstantColor) {
+
+                // Add more sample locations here if required
+                for (double l : { 0.5 }) {
+                    GfxColor tmpColor;
+                    double x = previousStop + l * (tt - previousStop);
+                    shading->getColor(x, &tmpColor);
+                    if (!isSameGfxColor(tmpColor, color0, nComps, axialColorDelta)) {
+                        isPatchOfConstantColor = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isPatchOfConstantColor) {
                 // in these two if what we guarantee is that if we are skipping lots of
                 // positions because the colors are the same, we still create a region
                 // with vertexs passing by bboxIntersections[1] and bboxIntersections[2]

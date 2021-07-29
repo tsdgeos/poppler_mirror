@@ -107,30 +107,33 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
 
+static void printTextString(const GooString *s, const UnicodeMap *uMap)
+{
+    Unicode *u;
+    char buf[8];
+    int len = TextStringToUCS4(s, &u);
+    for (int i = 0; i < len; i++) {
+        int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+        fwrite(buf, 1, n, stdout);
+    }
+    gfree(u);
+}
+
 static void printInfoString(Dict *infoDict, const char *key, const char *text, const UnicodeMap *uMap)
 {
     const GooString *s1;
-    Unicode *u;
-    char buf[8];
-    int i, n, len;
 
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
         s1 = obj.getString();
-        len = TextStringToUCS4(s1, &u);
-        for (i = 0; i < len; i++) {
-            n = uMap->mapUnicode(u[i], buf, sizeof(buf));
-            fwrite(buf, 1, n, stdout);
-        }
-        gfree(u);
+        printTextString(s1, uMap);
         fputc('\n', stdout);
     }
 }
 
-static void printInfoDate(Dict *infoDict, const char *key, const char *text)
+static void printInfoDate(Dict *infoDict, const char *key, const char *text, const UnicodeMap *uMap)
 {
-    const char *s;
     int year, mon, day, hour, min, sec, tz_hour, tz_minute;
     char tz;
     struct tm tmStruct;
@@ -140,7 +143,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text)
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
-        s = obj.getString()->c_str();
+        const GooString *s = obj.getString();
         // TODO do something with the timezone info
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             tmStruct.tm_year = year - 1900;
@@ -163,25 +166,24 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text)
                 strftime(buf, sizeof(buf), "%c %Z", &tmStruct);
                 fputs(buf, stdout);
             } else {
-                fputs(s, stdout);
+                printTextString(s, uMap);
             }
         } else {
-            fputs(s, stdout);
+            printTextString(s, uMap);
         }
         fputc('\n', stdout);
     }
 }
 
-static void printISODate(Dict *infoDict, const char *key, const char *text)
+static void printISODate(Dict *infoDict, const char *key, const char *text, const UnicodeMap *uMap)
 {
-    const char *s;
     int year, mon, day, hour, min, sec, tz_hour, tz_minute;
     char tz;
 
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
         fputs(text, stdout);
-        s = obj.getString()->c_str();
+        const GooString *s = obj.getString();
         if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
             fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
             if (tz_hour == 0 && tz_minute == 0) {
@@ -192,7 +194,7 @@ static void printISODate(Dict *infoDict, const char *key, const char *text)
                     fprintf(stdout, ":%02d", tz_minute);
             }
         } else {
-            fputs(s, stdout);
+            printTextString(obj.getString(), uMap);
         }
         fputc('\n', stdout);
     }
@@ -389,14 +391,7 @@ static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap)
                     printf("%4d ", i);
                     printLinkDest(it.second);
                     printf(" \"");
-                    Unicode *u;
-                    char buf[8];
-                    const int len = TextStringToUCS4(it.first, &u);
-                    for (int j = 0; j < len; j++) {
-                        const int n = uMap->mapUnicode(u[j], buf, sizeof(buf));
-                        fwrite(buf, 1, n, stdout);
-                    }
-                    gfree(u);
+                    printTextString(it.first, uMap);
                     printf("\"\n");
                     delete it.first;
                 }
@@ -657,14 +652,14 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
         printInfoString(info.getDict(), "Creator", "Creator:        ", uMap);
         printInfoString(info.getDict(), "Producer", "Producer:       ", uMap);
         if (isoDates) {
-            printISODate(info.getDict(), "CreationDate", "CreationDate:   ");
-            printISODate(info.getDict(), "ModDate", "ModDate:        ");
+            printISODate(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
+            printISODate(info.getDict(), "ModDate", "ModDate:        ", uMap);
         } else if (rawDates) {
             printInfoString(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
             printInfoString(info.getDict(), "ModDate", "ModDate:        ", uMap);
         } else {
-            printInfoDate(info.getDict(), "CreationDate", "CreationDate:   ");
-            printInfoDate(info.getDict(), "ModDate", "ModDate:        ");
+            printInfoDate(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
+            printInfoDate(info.getDict(), "ModDate", "ModDate:        ", uMap);
         }
     }
 

@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
+// Copyright 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2011, 2013, 2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010, 2013 Pino Toscano <pino@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -282,6 +282,11 @@ bool Hints::readPageOffsetTable(Stream *str)
     nBitsNumerator = sbr.readBits(16);
 
     denominator = sbr.readBits(16);
+
+    if ((nBitsDiffPageLength > 32) || (nBitsOffsetStream > 32) || (nBitsLengthStream > 32) || (nBitsNumShared > 32) || (nBitsShared > 32) || (nBitsNumerator > 32)) {
+        error(errSyntaxWarning, -1, "Invalid number of bits reading page offset hints table");
+        return false;
+    }
 
     for (int i = 0; i < nPages && !sbr.atEOF(); i++) {
         nObjects[i] = nObjectLeast + sbr.readBits(nBitsDiffObjects);

@@ -829,7 +829,8 @@ QDateTime convertDate(const char *dateString)
     int year, mon, day, hour, min, sec, tzHours, tzMins;
     char tz;
 
-    if (parseDateString(dateString, &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
+    GooString date(dateString);
+    if (parseDateString(&date, &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
         QDate d(year, mon, day);
         QTime t(hour, min, sec);
         if (d.isValid() && t.isValid()) {
