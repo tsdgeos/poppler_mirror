@@ -5442,7 +5442,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                         if (!clip->test(X, Y))
                             continue;
 
-                        assert(fabs(colorinterp - (scanColorMap0 * X + scanColorMap1)) < 1e-10);
+                        assert(fabs(colorinterp - (scanColorMap0 * X + scanColorMap1)) < 1e-9);
                         assert(bitmapOff == Y * rowSize + colorComps * X && scanLineOff == Y * rowSize);
 
                         shading->getParameterizedColor(colorinterp, bitmapMode, &bitmapData[bitmapOff]);
