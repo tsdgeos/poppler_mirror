@@ -1536,6 +1536,12 @@ void CairoOutputDev::endString(GfxState *state)
         goto finish;
     }
 
+    if (state->getFont()->getType() == fontType3 && render != 7) {
+        // If the current font is a type 3 font, we should ignore the text rendering mode
+        // (and use the default of 0) as long as we are going to either fill or stroke.
+        render = 0;
+    }
+
     if (!(render & 1)) {
         LOG(printf("fill string\n"));
         cairo_set_source(cairo, fill_pattern);
