@@ -58,9 +58,9 @@
 #include <cfloat>
 #include <cctype>
 #include <algorithm>
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
-#    include <io.h> // for setmode
+#    include <io.h> // for _setmode
 #endif
 #include "goo/gfile.h"
 #include "goo/gmem.h"
@@ -5544,9 +5544,9 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     if (fileName) {
         if (!strcmp(fileName, "-")) {
             outputStream = stdout;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
             // keep DOS from munging the end-of-line characters
-            setmode(fileno(stdout), O_BINARY);
+            _setmode(fileno(stdout), O_BINARY);
 #endif
         } else if ((outputStream = openFile(fileName, append ? "ab" : "wb"))) {
             needClose = true;

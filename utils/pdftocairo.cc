@@ -50,6 +50,9 @@
 #include <cmath>
 #include <cstring>
 #include <fcntl.h>
+#if defined(_WIN32) || defined(__CYGWIN__)
+#    include <io.h> // for _setmode
+#endif
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -388,8 +391,8 @@ static void writePageImage(GooString *filename)
         return;
 
     if (filename->cmp("fd://0") == 0) {
-#ifdef _WIN32
-        setmode(fileno(stdout), O_BINARY);
+#if defined(_WIN32) || defined(__CYGWIN__)
+        _setmode(fileno(stdout), O_BINARY);
 #endif
         file = stdout;
     } else
@@ -558,9 +561,12 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
         if (printToWin32) {
             output_file = nullptr;
         } else {
-            if (outputFileName->cmp("fd://0") == 0)
+            if (outputFileName->cmp("fd://0") == 0) {
+#if defined(_WIN32) || defined(__CYGWIN__)
+                _setmode(fileno(stdout), O_BINARY);
+#endif
                 output_file = stdout;
-            else {
+            } else {
                 output_file = fopen(outputFileName->c_str(), "wb");
                 if (!output_file) {
                     fprintf(stderr, "Error opening output file %s\n", outputFileName->c_str());
