@@ -19,11 +19,11 @@
 
 #ifdef ENABLE_LIBJPEG
 
+#    include "poppler/Error.h"
+
 extern "C" {
 #    include <jpeglib.h>
 }
-
-#    include "poppler/Error.h"
 
 struct JpegWriterPrivate
 {
