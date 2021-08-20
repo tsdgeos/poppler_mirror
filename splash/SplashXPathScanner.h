@@ -53,6 +53,9 @@ public:
     // Create a new SplashXPathScanner object.  <xPathA> must be sorted.
     SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYMin, int clipYMax);
 
+    // Copy a scanner.
+    SplashXPathScanner *copy() { return new SplashXPathScanner(this); }
+
     ~SplashXPathScanner();
 
     SplashXPathScanner(const SplashXPathScanner &) = delete;
@@ -92,6 +95,9 @@ public:
     // all non-zero pixels are between <x0> and <x1>.  This function
     // will update <x0> and <x1>.
     void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y);
+
+protected:
+    SplashXPathScanner(SplashXPathScanner *scanner);
 
 private:
     void computeIntersections();

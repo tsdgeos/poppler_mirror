@@ -72,7 +72,6 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
 
 SplashClip::SplashClip(SplashClip *clip)
 {
-    int yMinAA, yMaxAA;
     int i;
 
     antialias = clip->antialias;
@@ -92,14 +91,7 @@ SplashClip::SplashClip(SplashClip *clip)
     for (i = 0; i < length; ++i) {
         paths[i] = clip->paths[i]->copy();
         flags[i] = clip->flags[i];
-        if (antialias) {
-            yMinAA = yMinI * splashAASize;
-            yMaxAA = (yMaxI + 1) * splashAASize - 1;
-        } else {
-            yMinAA = yMinI;
-            yMaxAA = yMaxI;
-        }
-        scanners[i] = new SplashXPathScanner(paths[i], flags[i] & splashClipEO, yMinAA, yMaxAA);
+        scanners[i] = clip->scanners[i]->copy();
     }
 }
 
