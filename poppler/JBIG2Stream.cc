@@ -1284,10 +1284,7 @@ void JBIG2Stream::readSegments()
         }
 
         // referred-to segment numbers
-        refSegs = (unsigned int *)gmallocn_checkoverflow(nRefSegs, sizeof(unsigned int));
-        if (!refSegs) {
-            return;
-        }
+        refSegs = (unsigned int *)gmallocn(nRefSegs, sizeof(unsigned int));
         if (segNum <= 256) {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
                 if (!readUByte(&refSegs[i])) {
@@ -1657,10 +1654,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
 
     // allocate symbol widths storage
     if (huff && !refAgg) {
-        symWidths = (unsigned int *)gmallocn_checkoverflow(numNewSyms, sizeof(unsigned int));
-        if (!symWidths) {
-            goto syntaxError;
-        }
+        symWidths = (unsigned int *)gmallocn(numNewSyms, sizeof(unsigned int));
     }
 
     symHeight = 0;
@@ -1991,10 +1985,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     // get the symbol bitmaps
-    syms = (JBIG2Bitmap **)gmallocn_checkoverflow(numSyms, sizeof(JBIG2Bitmap *));
-    if (!syms) {
-        return;
-    }
+    syms = (JBIG2Bitmap **)gmallocn(numSyms, sizeof(JBIG2Bitmap *));
     kk = 0;
     for (i = 0; i < nRefSegs; ++i) {
         if ((seg = findSegment(refSegs[i]))) {
@@ -2122,11 +2113,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     if (huff) {
-        symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
-        if (!symCodeTab) {
-            gfree(syms);
-            return;
-        }
+        symCodeTab = (JBIG2HuffmanTable *)gmallocn(numSyms + 1, sizeof(JBIG2HuffmanTable));
         for (i = 0; i < numSyms; ++i) {
             symCodeTab[i].val = i;
             symCodeTab[i].rangeLen = 0;
@@ -2620,10 +2607,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     // read the gray-scale image
-    grayImg = (unsigned int *)gmallocn_checkoverflow(gridW * gridH, sizeof(unsigned int));
-    if (!grayImg) {
-        return;
-    }
+    grayImg = (unsigned int *)gmallocn(gridW * gridH, sizeof(unsigned int));
     memset(grayImg, 0, gridW * gridH * sizeof(unsigned int));
     atx[0] = templ <= 1 ? 3 : 2;
     aty[0] = -1;
