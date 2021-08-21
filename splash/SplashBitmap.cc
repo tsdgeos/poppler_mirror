@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 2010, 2012, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 2010, 2012, 2015, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
@@ -52,7 +52,7 @@
 // SplashBitmap
 //------------------------------------------------------------------------
 
-SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode modeA, bool alphaA, bool topDown, std::vector<GfxSeparationColorSpace *> *separationListA)
+SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode modeA, bool alphaA, bool topDown, const std::vector<GfxSeparationColorSpace *> *separationListA)
 {
     width = widthA;
     height = heightA;
@@ -127,10 +127,10 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
             separationList->push_back((GfxSeparationColorSpace *)separation->copy());
 }
 
-SplashBitmap *SplashBitmap::copy(SplashBitmap *src)
+SplashBitmap *SplashBitmap::copy(const SplashBitmap *src)
 {
     SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), src->getMode(), src->getAlphaPtr() != nullptr, src->getRowSize() >= 0, src->getSeparationList());
-    unsigned char *dataSource = src->getDataPtr();
+    SplashColorConstPtr dataSource = src->getDataPtr();
     unsigned char *dataDest = result->getDataPtr();
     int amount = src->getRowSize();
     if (amount < 0) {

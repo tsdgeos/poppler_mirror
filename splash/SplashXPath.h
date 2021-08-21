@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,7 +66,7 @@ public:
     SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
 
     // Copy an expanded path.
-    SplashXPath *copy() { return new SplashXPath(this); }
+    SplashXPath *copy() const { return new SplashXPath(this); }
 
     ~SplashXPath();
 
@@ -81,7 +81,7 @@ public:
     void sort();
 
 protected:
-    SplashXPath(SplashXPath *xPath);
+    SplashXPath(const SplashXPath *xPath);
     void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
     void grow(int nSegs);

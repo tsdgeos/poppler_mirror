@@ -112,7 +112,7 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYM
     computeIntersections();
 }
 
-SplashXPathScanner::SplashXPathScanner(SplashXPathScanner *scanner)
+SplashXPathScanner::SplashXPathScanner(const SplashXPathScanner *scanner)
 {
     xPath = scanner->xPath;
     eo = scanner->eo;

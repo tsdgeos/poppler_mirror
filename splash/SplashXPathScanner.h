@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2013, 2014, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -54,7 +54,7 @@ public:
     SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYMin, int clipYMax);
 
     // Copy a scanner.
-    SplashXPathScanner *copy() { return new SplashXPathScanner(this); }
+    SplashXPathScanner *copy() const { return new SplashXPathScanner(this); }
 
     ~SplashXPathScanner();
 
@@ -97,7 +97,7 @@ public:
     void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y);
 
 protected:
-    SplashXPathScanner(SplashXPathScanner *scanner);
+    SplashXPathScanner(const SplashXPathScanner *scanner);
 
 private:
     void computeIntersections();

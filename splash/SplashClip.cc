@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -70,7 +70,7 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
     length = size = 0;
 }
 
-SplashClip::SplashClip(SplashClip *clip)
+SplashClip::SplashClip(const SplashClip *clip)
 {
     int i;
 

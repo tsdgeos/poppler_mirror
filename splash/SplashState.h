@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,7 +58,7 @@ public:
     SplashState(int width, int height, bool vectorAntialias, SplashScreen *screenA);
 
     // Copy a state object.
-    SplashState *copy() { return new SplashState(this); }
+    SplashState *copy() const { return new SplashState(this); }
 
     ~SplashState();
 
@@ -89,7 +89,7 @@ public:
     void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
 
 private:
-    SplashState(SplashState *state);
+    SplashState(const SplashState *state);
 
     SplashCoord matrix[6];
     SplashPattern *strokePattern;

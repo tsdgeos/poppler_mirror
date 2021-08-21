@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
-// Copyright (C) 2010, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -242,7 +242,7 @@ void SplashXPath::strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, Splas
     }
 }
 
-SplashXPath::SplashXPath(SplashXPath *xPath)
+SplashXPath::SplashXPath(const SplashXPath *xPath)
 {
     length = xPath->length;
     size = xPath->size;
