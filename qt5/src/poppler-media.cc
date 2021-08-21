@@ -1,6 +1,6 @@
 /* poppler-media.cc: qt interface to poppler
  * Copyright (C) 2012 Guillermo A. Amaral B. <gamaral@kde.org>
- * Copyright (C) 2013, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2013, 2018, 2021 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace Poppler {
 class MediaRenditionPrivate
 {
 public:
-    MediaRenditionPrivate(::MediaRendition *renditionA) : rendition(renditionA) { }
+    explicit MediaRenditionPrivate(::MediaRendition *renditionA) : rendition(renditionA) { }
 
     ~MediaRenditionPrivate() { delete rendition; }
 

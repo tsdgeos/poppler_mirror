@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -765,7 +765,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 class SignatureValidationInfoPrivate
 {
 public:
-    SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
+    explicit SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
 
     SignatureValidationInfo::SignatureStatus signature_status;
     SignatureValidationInfo::CertificateStatus certificate_status;

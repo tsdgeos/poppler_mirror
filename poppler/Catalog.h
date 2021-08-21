@@ -111,7 +111,7 @@ class POPPLER_PRIVATE_EXPORT Catalog
 {
 public:
     // Constructor.
-    Catalog(PDFDoc *docA);
+    explicit Catalog(PDFDoc *docA);
 
     // Destructor.
     ~Catalog();

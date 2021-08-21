@@ -89,7 +89,7 @@ public:
     void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
 
 private:
-    SplashState(const SplashState *state);
+    explicit SplashState(const SplashState *state);
 
     SplashCoord matrix[6];
     SplashPattern *strokePattern;

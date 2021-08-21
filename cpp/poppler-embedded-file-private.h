@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace poppler {
 class embedded_file_private
 {
 public:
-    embedded_file_private(FileSpec *fs);
+    explicit embedded_file_private(FileSpec *fs);
     ~embedded_file_private();
 
     embedded_file_private(const embedded_file_private &) = delete;

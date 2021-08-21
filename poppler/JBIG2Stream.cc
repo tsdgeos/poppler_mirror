@@ -550,7 +550,7 @@ enum JBIG2SegmentType
 class JBIG2Segment
 {
 public:
-    JBIG2Segment(unsigned int segNumA) { segNum = segNumA; }
+    explicit JBIG2Segment(unsigned int segNumA) { segNum = segNumA; }
     virtual ~JBIG2Segment();
     JBIG2Segment(const JBIG2Segment &) = delete;
     JBIG2Segment &operator=(const JBIG2Segment &) = delete;
@@ -579,7 +579,7 @@ class JBIG2Bitmap : public JBIG2Segment
 {
 public:
     JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
-    JBIG2Bitmap(JBIG2Bitmap *bitmap);
+    explicit JBIG2Bitmap(JBIG2Bitmap *bitmap);
     ~JBIG2Bitmap() override;
     JBIG2SegmentType getType() override { return jbig2SegBitmap; }
     JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);

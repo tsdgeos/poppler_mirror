@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
- * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public:
     destination &operator=(destination &&other) noexcept;
 
 private:
-    destination(destination_private *dd);
+    explicit destination(destination_private *dd);
 
     destination_private *d;
     friend class document;

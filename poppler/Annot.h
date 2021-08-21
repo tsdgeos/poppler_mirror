@@ -121,8 +121,8 @@ class POPPLER_PRIVATE_EXPORT AnnotPath
 {
 public:
     AnnotPath();
-    AnnotPath(Array *array);
-    AnnotPath(std::vector<AnnotCoord> &&coords);
+    explicit AnnotPath(Array *array);
+    explicit AnnotPath(std::vector<AnnotCoord> &&coords);
     ~AnnotPath();
 
     AnnotPath(const AnnotPath &) = delete;
@@ -191,7 +191,7 @@ public:
         borderEffectCloudy // C
     };
 
-    AnnotBorderEffect(Dict *dict);
+    explicit AnnotBorderEffect(Dict *dict);
 
     AnnotBorderEffectType getEffectType() const { return effectType; }
     double getIntensity() const { return intensity; }
@@ -297,7 +297,7 @@ class POPPLER_PRIVATE_EXPORT AnnotBorderArray : public AnnotBorder
 {
 public:
     AnnotBorderArray();
-    AnnotBorderArray(Array *array);
+    explicit AnnotBorderArray(Array *array);
 
     void setHorizontalCorner(double hc) { horizontalCorner = hc; }
     void setVerticalCorner(double vc) { verticalCorner = vc; }
@@ -322,7 +322,7 @@ class AnnotBorderBS : public AnnotBorder
 {
 public:
     AnnotBorderBS();
-    AnnotBorderBS(Dict *dict);
+    explicit AnnotBorderBS(Dict *dict);
 
 private:
     AnnotBorderType getType() const override { return typeBS; }
@@ -351,10 +351,10 @@ public:
     };
 
     AnnotColor();
-    AnnotColor(double gray);
+    explicit AnnotColor(double gray);
     AnnotColor(double r, double g, double b);
     AnnotColor(double c, double m, double y, double k);
-    AnnotColor(Array *array, int adjust = 0);
+    explicit AnnotColor(Array *array, int adjust = 0);
 
     void adjustColor(int adjust);
 
@@ -376,7 +376,7 @@ class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
     DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA);
-    DefaultAppearance(const GooString *da);
+    explicit DefaultAppearance(const GooString *da);
     void setFontName(Object &&fontNameA);
     const Object &getFontName() const { return fontName; }
     void setFontPtSize(double fontPtSizeA);
@@ -415,7 +415,7 @@ public:
         scaleProportional // P
     };
 
-    AnnotIconFit(Dict *dict);
+    explicit AnnotIconFit(Dict *dict);
 
     AnnotIconFitScaleWhen getScaleWhen() { return scaleWhen; }
     AnnotIconFitScale getScale() { return scale; }
@@ -490,7 +490,7 @@ public:
         captionOverlaid // 6
     };
 
-    AnnotAppearanceCharacs(Dict *dict);
+    explicit AnnotAppearanceCharacs(Dict *dict);
     ~AnnotAppearanceCharacs();
 
     AnnotAppearanceCharacs(const AnnotAppearanceCharacs &) = delete;
@@ -528,7 +528,7 @@ protected:
 class AnnotAppearanceBBox
 {
 public:
-    AnnotAppearanceBBox(PDFRectangle *rect);
+    explicit AnnotAppearanceBBox(PDFRectangle *rect);
 
     void setBorderWidth(double w) { borderWidth = w; }
 
@@ -1497,7 +1497,7 @@ class Annot3D : public Annot
             dStateLive // L
         };
 
-        Activation(Dict *dict);
+        explicit Activation(Dict *dict);
 
     private:
         ActivationATrigger aTrigger; // A   (Default XA)
@@ -1531,7 +1531,7 @@ public:
     class POPPLER_PRIVATE_EXPORT Params
     {
     public:
-        Params(Dict *dict);
+        explicit Params(Dict *dict);
         ~Params();
 
         Params(const Params &) = delete;
@@ -1555,7 +1555,7 @@ public:
             typeVideo // Video
         };
 
-        Instance(Dict *dict);
+        explicit Instance(Dict *dict);
         ~Instance();
 
         Instance(const Instance &) = delete;
@@ -1581,7 +1581,7 @@ public:
             typeVideo // Video
         };
 
-        Configuration(Dict *dict);
+        explicit Configuration(Dict *dict);
         ~Configuration();
 
         Configuration(const Configuration &) = delete;
@@ -1624,7 +1624,7 @@ public:
     class POPPLER_PRIVATE_EXPORT Content
     {
     public:
-        Content(Dict *dict);
+        explicit Content(Dict *dict);
         ~Content();
 
         Content(const Content &) = delete;
@@ -1655,7 +1655,7 @@ public:
             conditionUserAction // XA
         };
 
-        Activation(Dict *dict);
+        explicit Activation(Dict *dict);
 
         Condition getCondition() const;
 
@@ -1674,7 +1674,7 @@ public:
             conditionUserAction // XD
         };
 
-        Deactivation(Dict *dict);
+        explicit Deactivation(Dict *dict);
 
         Condition getCondition() const;
 
@@ -1686,7 +1686,7 @@ public:
     class POPPLER_PRIVATE_EXPORT Settings
     {
     public:
-        Settings(Dict *dict);
+        explicit Settings(Dict *dict);
         ~Settings();
 
         Settings(const Settings &) = delete;

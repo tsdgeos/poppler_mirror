@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, 2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
@@ -51,7 +51,7 @@ namespace {
 
 struct FileCloser
 {
-    inline FileCloser(FILE *ff) : f(ff) { }
+    inline explicit FileCloser(FILE *ff) : f(ff) { }
     inline ~FileCloser() { (void)close(); }
     FileCloser(const FileCloser &) = delete;
     FileCloser &operator=(const FileCloser &) = delete;

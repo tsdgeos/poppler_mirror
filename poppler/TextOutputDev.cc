@@ -4389,7 +4389,7 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
 class TextSelectionVisitor
 {
 public:
-    TextSelectionVisitor(TextPage *page);
+    explicit TextSelectionVisitor(TextPage *page);
     virtual ~TextSelectionVisitor();
     TextSelectionVisitor(const TextSelectionVisitor &) = delete;
     TextSelectionVisitor &operator=(const TextSelectionVisitor &) = delete;
@@ -4408,7 +4408,7 @@ TextSelectionVisitor::~TextSelectionVisitor() = default;
 class TextSelectionDumper : public TextSelectionVisitor
 {
 public:
-    TextSelectionDumper(TextPage *page);
+    explicit TextSelectionDumper(TextPage *page);
     ~TextSelectionDumper() override;
 
     void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};

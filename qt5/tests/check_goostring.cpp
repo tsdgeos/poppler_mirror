@@ -7,7 +7,7 @@ class TestGooString : public QObject
 {
     Q_OBJECT
 public:
-    TestGooString(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestGooString(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testInsertData_data();
     void testInsertData();

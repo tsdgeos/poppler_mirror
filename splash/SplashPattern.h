@@ -66,7 +66,7 @@ private:
 class POPPLER_PRIVATE_EXPORT SplashSolidColor : public SplashPattern
 {
 public:
-    SplashSolidColor(SplashColorConstPtr colorA);
+    explicit SplashSolidColor(SplashColorConstPtr colorA);
 
     SplashPattern *copy() const override { return new SplashSolidColor(color); }
 

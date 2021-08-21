@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +29,7 @@ class FontsDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    FontsDock(QWidget *parent = nullptr);
+    explicit FontsDock(QWidget *parent = nullptr);
     ~FontsDock() override;
 
     void documentClosed() override;

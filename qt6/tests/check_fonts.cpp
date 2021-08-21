@@ -8,7 +8,7 @@ class TestFontsData : public QObject
 {
     Q_OBJECT
 public:
-    TestFontsData(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestFontsData(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkNoFonts();
     void checkType1();

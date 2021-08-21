@@ -8,7 +8,7 @@ class TestSearch : public QObject
 {
     Q_OBJECT
 public:
-    TestSearch(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestSearch(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testAcrossLinesSearch(); // leave it first
     void bug7063();

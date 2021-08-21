@@ -32,8 +32,8 @@
 class SplashScreen
 {
 public:
-    SplashScreen(const SplashScreenParams *params);
-    SplashScreen(const SplashScreen *screen);
+    explicit SplashScreen(const SplashScreenParams *params);
+    explicit SplashScreen(const SplashScreen *screen);
     ~SplashScreen();
 
     SplashScreen(const SplashScreen &) = delete;

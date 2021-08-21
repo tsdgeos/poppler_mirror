@@ -17,7 +17,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
-// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -117,7 +117,7 @@ class POPPLER_PRIVATE_EXPORT LinkDest
 {
 public:
     // Build a LinkDest from the array.
-    LinkDest(const Array *a);
+    explicit LinkDest(const Array *a);
 
     // Copy a LinkDest.
     LinkDest *copy() const { return new LinkDest(this); }
@@ -155,7 +155,7 @@ private:
                      //   destFitV/BV use changeLeft
     bool ok; // set if created successfully
 
-    LinkDest(const LinkDest *dest);
+    explicit LinkDest(const LinkDest *dest);
 };
 
 //------------------------------------------------------------------------
@@ -166,7 +166,7 @@ class POPPLER_PRIVATE_EXPORT LinkGoTo : public LinkAction
 {
 public:
     // Build a LinkGoTo from a destination (dictionary, name, or string).
-    LinkGoTo(const Object *destObj);
+    explicit LinkGoTo(const Object *destObj);
 
     ~LinkGoTo() override;
 
@@ -223,7 +223,7 @@ class LinkLaunch : public LinkAction
 {
 public:
     // Build a LinkLaunch from an action dictionary.
-    LinkLaunch(const Object *actionObj);
+    explicit LinkLaunch(const Object *actionObj);
     ~LinkLaunch() override;
 
     // Was the LinkLaunch created successfully?
@@ -271,7 +271,7 @@ class LinkNamed : public LinkAction
 {
 public:
     // Build a LinkNamed given the action name.
-    LinkNamed(const Object *nameObj);
+    explicit LinkNamed(const Object *nameObj);
 
     ~LinkNamed() override;
 
@@ -300,7 +300,7 @@ public:
         operationTypeStop
     };
 
-    LinkMovie(const Object *obj);
+    explicit LinkMovie(const Object *obj);
 
     ~LinkMovie() override;
 
@@ -344,7 +344,7 @@ public:
         ResumeRendition
     };
 
-    LinkRendition(const Object *Obj);
+    explicit LinkRendition(const Object *Obj);
 
     ~LinkRendition() override;
 
@@ -377,7 +377,7 @@ private:
 class LinkSound : public LinkAction
 {
 public:
-    LinkSound(const Object *soundObj);
+    explicit LinkSound(const Object *soundObj);
 
     ~LinkSound() override;
 
@@ -407,7 +407,7 @@ class LinkJavaScript : public LinkAction
 {
 public:
     // Build a LinkJavaScript given the action name.
-    LinkJavaScript(Object *jsObj);
+    explicit LinkJavaScript(Object *jsObj);
 
     ~LinkJavaScript() override;
 
@@ -429,7 +429,7 @@ private:
 class LinkOCGState : public LinkAction
 {
 public:
-    LinkOCGState(const Object *obj);
+    explicit LinkOCGState(const Object *obj);
 
     ~LinkOCGState() override;
 
@@ -467,7 +467,7 @@ private:
 class LinkHide : public LinkAction
 {
 public:
-    LinkHide(const Object *hideObj);
+    explicit LinkHide(const Object *hideObj);
 
     ~LinkHide() override;
 
@@ -503,7 +503,7 @@ class POPPLER_PRIVATE_EXPORT LinkResetForm : public LinkAction
 {
 public:
     // Build a LinkResetForm.
-    LinkResetForm(const Object *nameObj);
+    explicit LinkResetForm(const Object *nameObj);
 
     ~LinkResetForm() override;
 
@@ -527,7 +527,7 @@ class LinkUnknown : public LinkAction
 {
 public:
     // Build a LinkUnknown with the specified action type.
-    LinkUnknown(const char *actionA);
+    explicit LinkUnknown(const char *actionA);
 
     ~LinkUnknown() override;
 
@@ -551,7 +551,7 @@ class POPPLER_PRIVATE_EXPORT Links
 {
 public:
     // Extract links from array of annotations.
-    Links(Annots *annots);
+    explicit Links(Annots *annots);
 
     // Destructor.
     ~Links();

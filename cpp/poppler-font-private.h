@@ -2,6 +2,7 @@
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +33,7 @@ class poppler::font_info_private
 {
 public:
     font_info_private() : type(font_info::unknown), is_embedded(false), is_subset(false) { }
-    font_info_private(FontInfo *fi) : type((font_info::type_enum)fi->getType()), is_embedded(fi->getEmbedded()), is_subset(fi->getSubset())
+    explicit font_info_private(FontInfo *fi) : type((font_info::type_enum)fi->getType()), is_embedded(fi->getEmbedded()), is_subset(fi->getSubset())
     {
         if (fi->getName()) {
             font_name = fi->getName()->c_str();

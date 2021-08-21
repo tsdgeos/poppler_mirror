@@ -8,7 +8,7 @@ class TestAttachments : public QObject
 {
     Q_OBJECT
 public:
-    TestAttachments(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestAttachments(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkNoAttachments();
     void checkAttach1();

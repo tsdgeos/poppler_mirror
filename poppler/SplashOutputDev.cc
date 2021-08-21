@@ -1068,7 +1068,7 @@ static const SplashBlendFunc splashOutBlendFuncs[] = { nullptr,
 class SplashOutFontFileID : public SplashFontFileID
 {
 public:
-    SplashOutFontFileID(const Ref *rA) { r = *rA; }
+    explicit SplashOutFontFileID(const Ref *rA) { r = *rA; }
 
     ~SplashOutFontFileID() override;
 

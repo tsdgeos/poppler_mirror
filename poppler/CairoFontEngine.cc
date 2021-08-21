@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
@@ -197,10 +197,10 @@ class _FtFaceDataProxy
     _ft_face_data *_data;
 
 public:
-    _FtFaceDataProxy(_ft_face_data *data) : _data(data) { cairo_font_face_reference(_data->font_face); }
+    explicit _FtFaceDataProxy(_ft_face_data *data) : _data(data) { cairo_font_face_reference(_data->font_face); }
     _FtFaceDataProxy(_FtFaceDataProxy &&) = delete;
     ~_FtFaceDataProxy() { cairo_font_face_destroy(_data->font_face); }
-    operator _ft_face_data *() { return _data; }
+    explicit operator _ft_face_data *() { return _data; }
 };
 
 static thread_local std::forward_list<_FtFaceDataProxy> _local_open_faces;
@@ -280,7 +280,8 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
     tmpl.lib = lib;
     tmpl.hash = _djb_hash(tmpl.bytes, tmpl.size);
 
-    for (_ft_face_data *l : _local_open_faces) {
+    for (_FtFaceDataProxy &face_proxy : _local_open_faces) {
+        _ft_face_data *l = static_cast<_ft_face_data *>(face_proxy);
         if (_ft_face_data_equal(l, &tmpl)) {
             if (tmpl.fd != -1) {
 #    if defined(__SUNPRO_CC) && defined(__sun) && defined(__SVR4)
@@ -322,7 +323,10 @@ static bool _ft_new_face(FT_Library lib, const char *filename, char *font_data, 
         return false;
     }
 
-    _local_open_faces.remove_if([](_ft_face_data *data) { return cairo_font_face_get_reference_count(data->font_face) == 1; });
+    _local_open_faces.remove_if([](_FtFaceDataProxy &face_proxy) {
+        _ft_face_data *data = static_cast<_ft_face_data *>(face_proxy);
+        return cairo_font_face_get_reference_count(data->font_face) == 1;
+    });
     _local_open_faces.emplace_front(l);
 
     *face_out = l->face;

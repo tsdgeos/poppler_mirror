@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018-2021 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -88,7 +88,7 @@ typedef std::vector<TextSpan> TextSpanArray;
 class POPPLER_PRIVATE_EXPORT MarkedContentOutputDev : public OutputDev
 {
 public:
-    MarkedContentOutputDev(int mcidA);
+    explicit MarkedContentOutputDev(int mcidA);
     ~MarkedContentOutputDev() override;
 
     virtual bool isOk() { return true; }

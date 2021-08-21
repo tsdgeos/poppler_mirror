@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2011-2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011-2013, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2011, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
@@ -43,7 +43,7 @@ public:
         RGB48
     };
 
-    PNGWriter(Format format = RGB);
+    explicit PNGWriter(Format format = RGB);
     ~PNGWriter() override;
 
     PNGWriter(const PNGWriter &other) = delete;

@@ -408,7 +408,7 @@ private:
 class FilterStream : public Stream
 {
 public:
-    FilterStream(Stream *strA);
+    explicit FilterStream(Stream *strA);
     ~FilterStream() override;
     void close() override;
     Goffset getPos() override { return str->getPos(); }
@@ -793,7 +793,7 @@ private:
 class ASCIIHexStream : public FilterStream
 {
 public:
-    ASCIIHexStream(Stream *strA);
+    explicit ASCIIHexStream(Stream *strA);
     ~ASCIIHexStream() override;
     StreamKind getKind() const override { return strASCIIHex; }
     void reset() override;
@@ -819,7 +819,7 @@ private:
 class ASCII85Stream : public FilterStream
 {
 public:
-    ASCII85Stream(Stream *strA);
+    explicit ASCII85Stream(Stream *strA);
     ~ASCII85Stream() override;
     StreamKind getKind() const override { return strASCII85; }
     void reset() override;
@@ -907,7 +907,7 @@ private:
 class RunLengthStream : public FilterStream
 {
 public:
-    RunLengthStream(Stream *strA);
+    explicit RunLengthStream(Stream *strA);
     ~RunLengthStream() override;
     StreamKind getKind() const override { return strRunLength; }
     void reset() override;
@@ -1212,7 +1212,7 @@ private:
 class EOFStream : public FilterStream
 {
 public:
-    EOFStream(Stream *strA);
+    explicit EOFStream(Stream *strA);
     ~EOFStream() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override { }
@@ -1274,7 +1274,7 @@ private:
 class ASCIIHexEncoder : public FilterStream
 {
 public:
-    ASCIIHexEncoder(Stream *strA);
+    explicit ASCIIHexEncoder(Stream *strA);
     ~ASCIIHexEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1301,7 +1301,7 @@ private:
 class ASCII85Encoder : public FilterStream
 {
 public:
-    ASCII85Encoder(Stream *strA);
+    explicit ASCII85Encoder(Stream *strA);
     ~ASCII85Encoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1328,7 +1328,7 @@ private:
 class RunLengthEncoder : public FilterStream
 {
 public:
-    RunLengthEncoder(Stream *strA);
+    explicit RunLengthEncoder(Stream *strA);
     ~RunLengthEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1362,7 +1362,7 @@ struct LZWEncoderNode
 class LZWEncoder : public FilterStream
 {
 public:
-    LZWEncoder(Stream *strA);
+    explicit LZWEncoder(Stream *strA);
     ~LZWEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1392,7 +1392,7 @@ private:
 class CMYKGrayEncoder : public FilterStream
 {
 public:
-    CMYKGrayEncoder(Stream *strA);
+    explicit CMYKGrayEncoder(Stream *strA);
     ~CMYKGrayEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1418,7 +1418,7 @@ private:
 class RGBGrayEncoder : public FilterStream
 {
 public:
-    RGBGrayEncoder(Stream *strA);
+    explicit RGBGrayEncoder(Stream *strA);
     ~RGBGrayEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;
@@ -1447,7 +1447,7 @@ private:
 class SplashBitmapCMYKEncoder : public Stream
 {
 public:
-    SplashBitmapCMYKEncoder(SplashBitmap *bitmapA);
+    explicit SplashBitmapCMYKEncoder(SplashBitmap *bitmapA);
     ~SplashBitmapCMYKEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;

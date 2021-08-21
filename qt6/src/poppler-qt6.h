@@ -202,7 +202,7 @@ public:
     /**
        Create a new font information container.
     */
-    FontInfo(const FontInfoData &fid);
+    explicit FontInfo(const FontInfoData &fid);
     /// \endcond
 
     /**
@@ -337,7 +337,7 @@ class POPPLER_QT6_EXPORT EmbeddedFile
 
 public:
     /// \cond PRIVATE
-    EmbeddedFile(EmbFile *embfile);
+    explicit EmbeddedFile(EmbFile *embfile);
     /// \endcond
 
     /**
@@ -403,7 +403,7 @@ public:
 
 private:
     Q_DISABLE_COPY(EmbeddedFile)
-    EmbeddedFile(EmbeddedFileData &dd);
+    explicit EmbeddedFile(EmbeddedFileData &dd);
 
     EmbeddedFileData *m_embeddedFile;
 };
@@ -993,7 +993,7 @@ public:
     QVector<OutlineItem> children() const;
 
 private:
-    OutlineItem(OutlineItemData *data);
+    explicit OutlineItem(OutlineItemData *data);
     OutlineItemData *m_data;
 };
 
@@ -1732,7 +1732,7 @@ private:
 
     DocumentData *m_doc;
 
-    Document(DocumentData *dataA);
+    explicit Document(DocumentData *dataA);
 };
 
 class BaseConverterPrivate;
@@ -1783,7 +1783,7 @@ public:
 
 protected:
     /// \cond PRIVATE
-    BaseConverter(BaseConverterPrivate &dd);
+    explicit BaseConverter(BaseConverterPrivate &dd);
     Q_DECLARE_PRIVATE(BaseConverter)
     BaseConverterPrivate *d_ptr;
     /// \endcond
@@ -1919,7 +1919,7 @@ private:
     Q_DECLARE_PRIVATE(PSConverter)
     Q_DISABLE_COPY(PSConverter)
 
-    PSConverter(DocumentData *document);
+    explicit PSConverter(DocumentData *document);
 };
 
 /**
@@ -2068,7 +2068,7 @@ private:
     Q_DECLARE_PRIVATE(PDFConverter)
     Q_DISABLE_COPY(PDFConverter)
 
-    PDFConverter(DocumentData *document);
+    explicit PDFConverter(DocumentData *document);
 };
 
 /**
@@ -2120,7 +2120,7 @@ public:
     /** \cond PRIVATE
       The caller keeps the ownership of the popplersound argument
     */
-    SoundObject(Sound *popplersound);
+    explicit SoundObject(Sound *popplersound);
     /// \endcond
 
     ~SoundObject();
@@ -2227,7 +2227,7 @@ public:
 
 private:
     /// \cond PRIVATE
-    MovieObject(AnnotMovie *ann);
+    explicit MovieObject(AnnotMovie *ann);
     /// \endcond
 
     Q_DISABLE_COPY(MovieObject)

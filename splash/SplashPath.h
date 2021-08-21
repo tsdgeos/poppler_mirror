@@ -122,7 +122,7 @@ public:
     void reserve(int n);
 
 protected:
-    SplashPath(const SplashPath *path);
+    explicit SplashPath(const SplashPath *path);
     void grow(int nPts);
     bool noCurrentPoint() { return curSubpath == length; }
     bool onePointSubpath() { return curSubpath == length - 1; }

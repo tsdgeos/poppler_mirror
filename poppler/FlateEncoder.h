@@ -40,7 +40,7 @@ extern "C" {
 class FlateEncoder : public FilterStream
 {
 public:
-    FlateEncoder(Stream *strA);
+    explicit FlateEncoder(Stream *strA);
     ~FlateEncoder() override;
     StreamKind getKind() const override { return strWeird; }
     void reset() override;

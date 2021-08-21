@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, 2017, 2019, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, 2019-2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -69,7 +69,7 @@ class POPPLER_QT6_EXPORT FormFieldIcon
     friend class FormFieldIconData;
 
 public:
-    FormFieldIcon(FormFieldIconData *data);
+    explicit FormFieldIcon(FormFieldIconData *data);
     FormFieldIcon(const FormFieldIcon &ffIcon);
     ~FormFieldIcon();
 
@@ -196,7 +196,7 @@ public:
 
 protected:
     /// \cond PRIVATE
-    FormField(std::unique_ptr<FormFieldData> dd);
+    explicit FormField(std::unique_ptr<FormFieldData> dd);
 
     std::unique_ptr<FormFieldData> m_formData;
     /// \endcond
@@ -498,7 +498,7 @@ public:
     };
 
     CertificateInfo();
-    CertificateInfo(CertificateInfoPrivate *priv);
+    explicit CertificateInfo(CertificateInfoPrivate *priv);
     ~CertificateInfo();
 
     /**
@@ -641,7 +641,7 @@ public:
     };
 
     /// \cond PRIVATE
-    SignatureValidationInfo(SignatureValidationInfoPrivate *priv);
+    explicit SignatureValidationInfo(SignatureValidationInfoPrivate *priv);
     /// \endcond
     ~SignatureValidationInfo();
 

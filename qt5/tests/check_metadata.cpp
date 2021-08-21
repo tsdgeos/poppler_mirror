@@ -6,7 +6,7 @@ class TestMetaData : public QObject
 {
     Q_OBJECT
 public:
-    TestMetaData(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestMetaData(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkStrings_data();
     void checkStrings();

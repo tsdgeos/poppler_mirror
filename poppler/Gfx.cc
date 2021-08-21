@@ -5085,7 +5085,7 @@ void Gfx::opMarkPoint(Object args[], int numArgs)
 
 struct GfxStackStateSaver
 {
-    GfxStackStateSaver(Gfx *gfxA) : gfx(gfxA) { gfx->saveState(); }
+    explicit GfxStackStateSaver(Gfx *gfxA) : gfx(gfxA) { gfx->saveState(); }
 
     ~GfxStackStateSaver() { gfx->restoreState(); }
 

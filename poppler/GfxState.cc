@@ -4519,7 +4519,7 @@ void GfxRadialShading::getParameterRange(double *lower, double *upper, double xM
 class GfxShadingBitBuf
 {
 public:
-    GfxShadingBitBuf(Stream *strA);
+    explicit GfxShadingBitBuf(Stream *strA);
     ~GfxShadingBitBuf();
     GfxShadingBitBuf(const GfxShadingBitBuf &) = delete;
     GfxShadingBitBuf &operator=(const GfxShadingBitBuf &) = delete;

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +29,7 @@ class InfoDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    InfoDock(QWidget *parent = nullptr);
+    explicit InfoDock(QWidget *parent = nullptr);
     ~InfoDock() override;
 
     void documentClosed() override;

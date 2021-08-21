@@ -116,7 +116,7 @@ public:
     int getNumPaths() { return length; }
 
 protected:
-    SplashClip(const SplashClip *clip);
+    explicit SplashClip(const SplashClip *clip);
     void grow(int nPaths);
     bool testClipPaths(int x, int y);
 

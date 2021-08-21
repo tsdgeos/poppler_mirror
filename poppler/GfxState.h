@@ -742,7 +742,7 @@ private:
 class GfxPatternColorSpace : public GfxColorSpace
 {
 public:
-    GfxPatternColorSpace(GfxColorSpace *underA);
+    explicit GfxPatternColorSpace(GfxColorSpace *underA);
     ~GfxPatternColorSpace() override;
     GfxColorSpace *copy() const override;
     GfxColorSpaceMode getMode() const override { return csPattern; }
@@ -854,8 +854,8 @@ private:
 class GfxShading
 {
 public:
-    GfxShading(int typeA);
-    GfxShading(const GfxShading *shading);
+    explicit GfxShading(int typeA);
+    explicit GfxShading(const GfxShading *shading);
     virtual ~GfxShading();
 
     GfxShading(const GfxShading &) = delete;
@@ -904,7 +904,7 @@ class POPPLER_PRIVATE_EXPORT GfxUnivariateShading : public GfxShading
 {
 public:
     GfxUnivariateShading(int typeA, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
-    GfxUnivariateShading(const GfxUnivariateShading *shading);
+    explicit GfxUnivariateShading(const GfxUnivariateShading *shading);
     ~GfxUnivariateShading() override;
 
     double getDomain0() const { return t0; }
@@ -945,7 +945,7 @@ class POPPLER_PRIVATE_EXPORT GfxFunctionShading : public GfxShading
 {
 public:
     GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
-    GfxFunctionShading(const GfxFunctionShading *shading);
+    explicit GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
     static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
@@ -981,7 +981,7 @@ class GfxAxialShading : public GfxUnivariateShading
 {
 public:
     GfxAxialShading(double x0A, double y0A, double x1A, double y1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
-    GfxAxialShading(const GfxAxialShading *shading);
+    explicit GfxAxialShading(const GfxAxialShading *shading);
     ~GfxAxialShading() override;
 
     static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
@@ -1012,7 +1012,7 @@ class GfxRadialShading : public GfxUnivariateShading
 {
 public:
     GfxRadialShading(double x0A, double y0A, double r0A, double x1A, double y1A, double r1A, double t0A, double t1A, std::vector<std::unique_ptr<Function>> &&funcsA, bool extend0A, bool extend1A);
-    GfxRadialShading(const GfxRadialShading *shading);
+    explicit GfxRadialShading(const GfxRadialShading *shading);
     ~GfxRadialShading() override;
 
     static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
@@ -1051,7 +1051,7 @@ class POPPLER_PRIVATE_EXPORT GfxGouraudTriangleShading : public GfxShading
 {
 public:
     GfxGouraudTriangleShading(int typeA, GfxGouraudVertex *verticesA, int nVerticesA, int (*trianglesA)[3], int nTrianglesA, std::vector<std::unique_ptr<Function>> &&funcsA);
-    GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
+    explicit GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
     ~GfxGouraudTriangleShading() override;
 
     static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
@@ -1143,7 +1143,7 @@ class POPPLER_PRIVATE_EXPORT GfxPatchMeshShading : public GfxShading
 {
 public:
     GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA, std::vector<std::unique_ptr<Function>> &&funcsA);
-    GfxPatchMeshShading(const GfxPatchMeshShading *shading);
+    explicit GfxPatchMeshShading(const GfxPatchMeshShading *shading);
     ~GfxPatchMeshShading() override;
 
     static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
@@ -1243,7 +1243,7 @@ public:
     const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : nullptr; }
 
 private:
-    GfxImageColorMap(const GfxImageColorMap *colorMap);
+    explicit GfxImageColorMap(const GfxImageColorMap *colorMap);
 
     GfxColorSpace *colorSpace; // the image color space
     int bits; // bits per component
@@ -1317,7 +1317,7 @@ private:
     int size; // size of x/y arrays
     bool closed; // set if path is closed
 
-    GfxSubpath(const GfxSubpath *subpath);
+    explicit GfxSubpath(const GfxSubpath *subpath);
 };
 
 class POPPLER_PRIVATE_EXPORT GfxPath
@@ -1407,7 +1407,7 @@ public:
          * sure the path's memory structure is not changed during the
          * lifetime of the ReusablePathIterator.
          */
-        ReusablePathIterator(GfxPath *path);
+        explicit ReusablePathIterator(GfxPath *path);
 
         /**
          * Returns true if and only if the current iterator position is

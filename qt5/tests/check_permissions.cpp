@@ -6,7 +6,7 @@ class TestPermissions : public QObject
 {
     Q_OBJECT
 public:
-    TestPermissions(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestPermissions(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void permissions1();
 };
