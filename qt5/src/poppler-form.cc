@@ -13,6 +13,7 @@
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1037,8 +1038,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     priv->signer_name = si->getSignerName();
     priv->signer_subject_dn = si->getSubjectDN();
     priv->hash_algorithm = si->getHashAlgorithm();
-    priv->location = si->getLocation();
-    priv->reason = si->getReason();
+    priv->location = UnicodeParsedString(si->getLocation().toStr());
+    priv->reason = UnicodeParsedString(si->getReason().toStr());
 
     priv->signing_time = si->getSigningTime();
     const std::vector<Goffset> ranges = fws->getSignedRangeBounds();

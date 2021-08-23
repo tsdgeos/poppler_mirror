@@ -10,6 +10,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -20,6 +21,7 @@
 #include <ctime>
 
 #include "poppler_private_export.h"
+#include "goo/GooString.h"
 
 enum SignatureValidationStatus
 {
@@ -60,8 +62,8 @@ public:
     CertificateValidationStatus getCertificateValStatus() const;
     const char *getSignerName() const;
     const char *getSubjectDN() const;
-    const char *getLocation() const;
-    const char *getReason() const;
+    const GooString &getLocation() const;
+    const GooString &getReason() const;
     int getHashAlgorithm() const; // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
     time_t getSigningTime() const;
     bool isSubfilterSupported() const { return sig_subfilter_supported; }
@@ -72,8 +74,8 @@ public:
     void setCertificateValStatus(enum CertificateValidationStatus);
     void setSignerName(char *);
     void setSubjectDN(const char *);
-    void setLocation(const char *);
-    void setReason(const char *);
+    void setLocation(const GooString *);
+    void setReason(const GooString *);
     void setHashAlgorithm(int);
     void setSigningTime(time_t);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
@@ -85,8 +87,8 @@ private:
     std::unique_ptr<X509CertificateInfo> cert_info;
     char *signer_name;
     char *subject_dn;
-    char *location;
-    char *reason;
+    GooString location;
+    GooString reason;
     int hash_type;
     time_t signing_time;
     bool sig_subfilter_supported;
