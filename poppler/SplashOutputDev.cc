@@ -3274,22 +3274,26 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
         switch (colorMode) {
         case splashModeMono1:
         case splashModeMono8:
-            imgData.lookup = (SplashColorPtr)gmalloc(n);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getGray(&pix, &gray);
-                imgData.lookup[i] = colToByte(gray);
+            imgData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getGray(&pix, &gray);
+                    imgData.lookup[i] = colToByte(gray);
+                }
             }
             break;
         case splashModeRGB8:
         case splashModeBGR8:
-            imgData.lookup = (SplashColorPtr)gmallocn(n, 3);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getRGB(&pix, &rgb);
-                imgData.lookup[3 * i] = colToByte(rgb.r);
-                imgData.lookup[3 * i + 1] = colToByte(rgb.g);
-                imgData.lookup[3 * i + 2] = colToByte(rgb.b);
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 3);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getRGB(&pix, &rgb);
+                    imgData.lookup[3 * i] = colToByte(rgb.r);
+                    imgData.lookup[3 * i + 1] = colToByte(rgb.g);
+                    imgData.lookup[3 * i + 2] = colToByte(rgb.b);
+                }
             }
             break;
         case splashModeXBGR8:
@@ -3307,32 +3311,36 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
             break;
         case splashModeCMYK8:
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
-            imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getCMYK(&pix, &cmyk);
-                if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
-                    grayIndexed = false;
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getCMYK(&pix, &cmyk);
+                    if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
+                        grayIndexed = false;
+                    }
+                    imgData.lookup[4 * i] = colToByte(cmyk.c);
+                    imgData.lookup[4 * i + 1] = colToByte(cmyk.m);
+                    imgData.lookup[4 * i + 2] = colToByte(cmyk.y);
+                    imgData.lookup[4 * i + 3] = colToByte(cmyk.k);
                 }
-                imgData.lookup[4 * i] = colToByte(cmyk.c);
-                imgData.lookup[4 * i + 1] = colToByte(cmyk.m);
-                imgData.lookup[4 * i + 2] = colToByte(cmyk.y);
-                imgData.lookup[4 * i + 3] = colToByte(cmyk.k);
             }
             break;
         case splashModeDeviceN8:
             colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
-            imgData.lookup = (SplashColorPtr)gmallocn(n, SPOT_NCOMPS + 4);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getCMYK(&pix, &cmyk);
-                if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
-                    grayIndexed = false;
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, SPOT_NCOMPS + 4);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getCMYK(&pix, &cmyk);
+                    if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
+                        grayIndexed = false;
+                    }
+                    colorMap->getDeviceN(&pix, &deviceN);
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                        imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
                 }
-                colorMap->getDeviceN(&pix, &deviceN);
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
-                    imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
             }
             break;
         }
