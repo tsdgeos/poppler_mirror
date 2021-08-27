@@ -66,7 +66,6 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
     yMaxI = splashCeil(yMax) - 1;
     paths = nullptr;
     flags = nullptr;
-    scanners = nullptr;
     length = size = 0;
 }
 
@@ -87,11 +86,10 @@ SplashClip::SplashClip(const SplashClip *clip)
     size = clip->size;
     paths = (SplashXPath **)gmallocn(size, sizeof(SplashXPath *));
     flags = (unsigned char *)gmallocn(size, sizeof(unsigned char));
-    scanners = (SplashXPathScanner **)gmallocn(size, sizeof(SplashXPathScanner *));
+    scanners = clip->scanners;
     for (i = 0; i < length; ++i) {
         paths[i] = clip->paths[i]->copy();
         flags[i] = clip->flags[i];
-        scanners[i] = clip->scanners[i]->copy();
     }
 }
 
@@ -101,11 +99,9 @@ SplashClip::~SplashClip()
 
     for (i = 0; i < length; ++i) {
         delete paths[i];
-        delete scanners[i];
     }
     gfree(paths);
     gfree(flags);
-    gfree(scanners);
 }
 
 void SplashClip::grow(int nPaths)
@@ -119,7 +115,6 @@ void SplashClip::grow(int nPaths)
         }
         paths = (SplashXPath **)greallocn(paths, size, sizeof(SplashXPath *));
         flags = (unsigned char *)greallocn(flags, size, sizeof(unsigned char));
-        scanners = (SplashXPathScanner **)greallocn(scanners, size, sizeof(SplashXPathScanner *));
     }
 }
 
@@ -129,14 +124,12 @@ void SplashClip::resetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, Spl
 
     for (i = 0; i < length; ++i) {
         delete paths[i];
-        delete scanners[i];
     }
     gfree(paths);
     gfree(flags);
-    gfree(scanners);
     paths = nullptr;
     flags = nullptr;
-    scanners = nullptr;
+    scanners = {};
     length = size = 0;
 
     if (x0 < x1) {
@@ -243,7 +236,7 @@ SplashError SplashClip::clipToPath(SplashPath *path, SplashCoord *matrix, Splash
             yMinAA = yMinI;
             yMaxAA = yMaxI;
         }
-        scanners[length] = new SplashXPathScanner(xPath, eo, yMinAA, yMaxAA);
+        scanners.emplace_back(std::make_shared<SplashXPathScanner>(xPath, eo, yMinAA, yMaxAA));
         ++length;
     }
 

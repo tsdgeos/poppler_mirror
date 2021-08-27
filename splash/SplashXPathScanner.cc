@@ -111,17 +111,6 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath *xPath, bool eoA, int c
     computeIntersections(xPath);
 }
 
-SplashXPathScanner::SplashXPathScanner(const SplashXPathScanner *scanner)
-{
-    eo = scanner->eo;
-    xMin = scanner->xMin;
-    yMin = scanner->yMin;
-    xMax = scanner->xMax;
-    yMax = scanner->yMax;
-    partialClip = scanner->partialClip;
-    allIntersections = scanner->allIntersections;
-}
-
 SplashXPathScanner::~SplashXPathScanner() { }
 
 void SplashXPathScanner::getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA) const

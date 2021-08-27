@@ -25,6 +25,9 @@
 
 #include "SplashTypes.h"
 
+#include <memory>
+#include <vector>
+
 class SplashPath;
 class SplashXPath;
 class SplashXPathScanner;
@@ -122,7 +125,7 @@ protected:
     int xMinI, yMinI, xMaxI, yMaxI;
     SplashXPath **paths;
     unsigned char *flags;
-    SplashXPathScanner **scanners;
+    std::vector<std::shared_ptr<SplashXPathScanner>> scanners;
     int length, size;
 };
 
