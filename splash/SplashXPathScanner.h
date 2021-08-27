@@ -51,7 +51,7 @@ class SplashXPathScanner
 {
 public:
     // Create a new SplashXPathScanner object.  <xPathA> must be sorted.
-    SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYMin, int clipYMax);
+    SplashXPathScanner(const SplashXPath *xPath, bool eoA, int clipYMin, int clipYMax);
 
     // Copy a scanner.
     SplashXPathScanner *copy() const { return new SplashXPathScanner(this); }
@@ -100,10 +100,9 @@ protected:
     SplashXPathScanner(const SplashXPathScanner *scanner);
 
 private:
-    void computeIntersections();
+    void computeIntersections(const SplashXPath *xPath);
     bool addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
 
-    SplashXPath *xPath;
     bool eo;
     int xMin, yMin, xMax, yMax;
     bool partialClip;

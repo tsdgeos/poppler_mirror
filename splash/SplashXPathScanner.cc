@@ -38,13 +38,12 @@
 // SplashXPathScanner
 //------------------------------------------------------------------------
 
-SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYMin, int clipYMax)
+SplashXPathScanner::SplashXPathScanner(const SplashXPath *xPath, bool eoA, int clipYMin, int clipYMax)
 {
     SplashXPathSeg *seg;
     SplashCoord xMinFP, yMinFP, xMaxFP, yMaxFP;
     int i;
 
-    xPath = xPathA;
     eo = eoA;
     partialClip = false;
 
@@ -109,12 +108,11 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, bool eoA, int clipYM
         }
     }
 
-    computeIntersections();
+    computeIntersections(xPath);
 }
 
 SplashXPathScanner::SplashXPathScanner(const SplashXPathScanner *scanner)
 {
-    xPath = scanner->xPath;
     eo = scanner->eo;
     xMin = scanner->xMin;
     yMin = scanner->yMin;
@@ -237,7 +235,7 @@ SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scann
     }
 }
 
-void SplashXPathScanner::computeIntersections()
+void SplashXPathScanner::computeIntersections(const SplashXPath *xPath)
 {
     SplashXPathSeg *seg;
     SplashCoord segXMin, segXMax, segYMin, segYMax, xx0, xx1;
