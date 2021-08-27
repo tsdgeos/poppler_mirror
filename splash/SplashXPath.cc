@@ -242,14 +242,6 @@ void SplashXPath::strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, Splas
     }
 }
 
-SplashXPath::SplashXPath(const SplashXPath *xPath)
-{
-    length = xPath->length;
-    size = xPath->size;
-    segs = (SplashXPathSeg *)gmallocn(size, sizeof(SplashXPathSeg));
-    memcpy(segs, xPath->segs, length * sizeof(SplashXPathSeg));
-}
-
 SplashXPath::~SplashXPath()
 {
     gfree(segs);

@@ -51,7 +51,7 @@ class SplashXPathScanner
 {
 public:
     // Create a new SplashXPathScanner object.  <xPathA> must be sorted.
-    SplashXPathScanner(const SplashXPath *xPath, bool eoA, int clipYMin, int clipYMax);
+    SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax);
 
     ~SplashXPathScanner();
 
@@ -94,7 +94,7 @@ public:
     void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y) const;
 
 private:
-    void computeIntersections(const SplashXPath *xPath);
+    void computeIntersections(const SplashXPath &xPath);
     bool addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
 
     bool eo;

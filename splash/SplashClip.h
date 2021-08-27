@@ -123,7 +123,6 @@ protected:
     bool antialias;
     SplashCoord xMin, yMin, xMax, yMax;
     int xMinI, yMinI, xMaxI, yMaxI;
-    SplashXPath **paths;
     unsigned char *flags;
     std::vector<std::shared_ptr<SplashXPathScanner>> scanners;
     int length, size;

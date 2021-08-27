@@ -2367,7 +2367,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
         yMinI = yMinI * splashAASize;
         yMaxI = (yMaxI + 1) * splashAASize - 1;
     }
-    SplashXPathScanner scanner(&xPath, eo, yMinI, yMaxI);
+    SplashXPathScanner scanner(xPath, eo, yMinI, yMaxI);
 
     // get the min and max x and y values
     if (vectorAntialias && !inShading) {
@@ -2518,7 +2518,7 @@ SplashError Splash::xorFill(SplashPath *path, bool eo)
     }
     SplashXPath xPath(path, state->matrix, state->flatness, true);
     xPath.sort();
-    SplashXPathScanner scanner(&xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
+    SplashXPathScanner scanner(xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
 
     // get the min and max x and y values
     scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
@@ -6118,7 +6118,7 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pa
         yMinI = yMinI * splashAASize;
         yMaxI = (yMaxI + 1) * splashAASize - 1;
     }
-    SplashXPathScanner scanner(&xPath, false, yMinI, yMaxI);
+    SplashXPathScanner scanner(xPath, false, yMinI, yMaxI);
 
     // get the min and max x and y values
     if (vectorAntialias) {

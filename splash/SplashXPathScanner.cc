@@ -38,9 +38,9 @@
 // SplashXPathScanner
 //------------------------------------------------------------------------
 
-SplashXPathScanner::SplashXPathScanner(const SplashXPath *xPath, bool eoA, int clipYMin, int clipYMax)
+SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax)
 {
-    SplashXPathSeg *seg;
+    const SplashXPathSeg *seg;
     SplashCoord xMinFP, yMinFP, xMaxFP, yMaxFP;
     int i;
 
@@ -50,8 +50,8 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath *xPath, bool eoA, int c
     // compute the bbox
     xMin = yMin = 1;
     xMax = yMax = 0;
-    if (xPath->length > 0) {
-        seg = &xPath->segs[0];
+    if (xPath.length > 0) {
+        seg = &xPath.segs[0];
         if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
             return;
         }
@@ -69,8 +69,8 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath *xPath, bool eoA, int c
             yMinFP = seg->y0;
             yMaxFP = seg->y1;
         }
-        for (i = 1; i < xPath->length; ++i) {
-            seg = &xPath->segs[i];
+        for (i = 1; i < xPath.length; ++i) {
+            seg = &xPath.segs[i];
             if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
                 return;
             }
@@ -224,9 +224,9 @@ SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scann
     }
 }
 
-void SplashXPathScanner::computeIntersections(const SplashXPath *xPath)
+void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
 {
-    SplashXPathSeg *seg;
+    const SplashXPathSeg *seg;
     SplashCoord segXMin, segXMax, segYMin, segYMax, xx0, xx1;
     int x, y, y0, y1, i;
 
@@ -237,8 +237,8 @@ void SplashXPathScanner::computeIntersections(const SplashXPath *xPath)
     // build the list of all intersections
     allIntersections.resize(yMax - yMin + 1);
 
-    for (i = 0; i < xPath->length; ++i) {
-        seg = &xPath->segs[i];
+    for (i = 0; i < xPath.length; ++i) {
+        seg = &xPath.segs[i];
         if (seg->flags & splashXPathFlip) {
             segYMin = seg->y1;
             segYMax = seg->y0;

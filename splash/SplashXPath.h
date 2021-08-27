@@ -65,9 +65,6 @@ public:
     // subpaths.
     SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
 
-    // Copy an expanded path.
-    SplashXPath *copy() const { return new SplashXPath(this); }
-
     ~SplashXPath();
 
     SplashXPath(const SplashXPath &) = delete;
@@ -81,7 +78,6 @@ public:
     void sort();
 
 protected:
-    SplashXPath(const SplashXPath *xPath);
     void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
     void grow(int nSegs);
