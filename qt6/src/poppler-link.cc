@@ -418,7 +418,7 @@ QRectF Link::linkArea() const
 QVector<Link *> Link::nextLinks() const
 {
     QVector<Link *> links(d_ptr->nextLinks.size());
-    for (std::size_t i = 0; i < links.size(); i++) {
+    for (qsizetype i = 0; i < links.size(); i++) {
         links[i] = d_ptr->nextLinks[i].get();
     }
 

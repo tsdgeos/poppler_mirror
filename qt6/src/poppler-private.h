@@ -65,7 +65,6 @@
 
 class LinkDest;
 class FormWidget;
-class OutlineItem;
 
 namespace Poppler {
 
