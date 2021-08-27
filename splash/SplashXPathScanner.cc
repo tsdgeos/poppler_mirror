@@ -124,7 +124,7 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPathScanner *scanner)
 
 SplashXPathScanner::~SplashXPathScanner() { }
 
-void SplashXPathScanner::getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA)
+void SplashXPathScanner::getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA) const
 {
     *xMinA = xMin / splashAASize;
     *yMinA = yMin / splashAASize;
@@ -132,7 +132,7 @@ void SplashXPathScanner::getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMax
     *yMaxA = yMax / splashAASize;
 }
 
-void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax)
+void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax) const
 {
     if (y < yMin || y > yMax) {
         *spanXMin = xMax + 1;
@@ -155,7 +155,7 @@ void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax)
     }
 }
 
-bool SplashXPathScanner::test(int x, int y)
+bool SplashXPathScanner::test(int x, int y) const
 {
     if (y < yMin || y > yMax) {
         return false;
@@ -171,7 +171,7 @@ bool SplashXPathScanner::test(int x, int y)
     return eo ? (count & 1) : (count != 0);
 }
 
-bool SplashXPathScanner::testSpan(int x0, int x1, int y)
+bool SplashXPathScanner::testSpan(int x0, int x1, int y) const
 {
     unsigned int i;
 
@@ -357,7 +357,7 @@ inline bool SplashXPathScanner::addIntersection(double segYMin, double segYMax, 
     return true;
 }
 
-void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine)
+void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine) const
 {
     int xx0, xx1, xx, xxMin, xxMax, yy, yyMax, interCount;
     size_t interIdx;
@@ -436,7 +436,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int
     *x1 = (xxMax - 1) / splashAASize;
 }
 
-void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y)
+void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y) const
 {
     int xx0, xx1, xx, yy, yyMin, yyMax, interCount;
     size_t interIdx;
