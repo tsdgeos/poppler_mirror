@@ -26,6 +26,7 @@
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -723,23 +724,20 @@ QList<TextBox *> Page::textList(Rotation rotate) const
 
 QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const
 {
-    TextOutputDev *output_dev;
-
     QList<TextBox *> output_list;
 
-    output_dev = new TextOutputDev(nullptr, false, 0, false, false);
+    TextOutputDev output_dev(nullptr, false, 0, false, false);
 
     int rotation = (int)rotate * 90;
 
     TextExtractionAbortHelper abortHelper(shouldAbortExtractionCallback, closure);
-    m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
+    m_page->parentDoc->doc->displayPageSlice(&output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
                                              nullptr, nullptr, true);
 
-    TextWordList *word_list = output_dev->makeWordList();
+    TextWordList *word_list = output_dev.makeWordList();
 
     if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
         delete word_list;
-        delete output_dev;
         return output_list;
     }
 
@@ -774,7 +772,6 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
     }
 
     delete word_list;
-    delete output_dev;
 
     return output_list;
 }

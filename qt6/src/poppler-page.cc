@@ -25,6 +25,7 @@
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -694,23 +695,20 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate) const
 
 std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const
 {
-    TextOutputDev *output_dev;
-
     std::vector<std::unique_ptr<TextBox>> output_list;
 
-    output_dev = new TextOutputDev(nullptr, false, 0, false, false);
+    TextOutputDev output_dev(nullptr, false, 0, false, false);
 
     int rotation = (int)rotate * 90;
 
     TextExtractionAbortHelper abortHelper(shouldAbortExtractionCallback, closure);
-    m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
+    m_page->parentDoc->doc->displayPageSlice(&output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
                                              nullptr, nullptr, true);
 
-    TextWordList *word_list = output_dev->makeWordList();
+    TextWordList *word_list = output_dev.makeWordList();
 
     if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
         delete word_list;
-        delete output_dev;
         return output_list;
     }
 
@@ -745,7 +743,6 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbor
     }
 
     delete word_list;
-    delete output_dev;
 
     return output_list;
 }
