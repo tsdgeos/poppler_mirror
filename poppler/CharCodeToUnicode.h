@@ -103,7 +103,7 @@ private:
     void addMapping(CharCode code, char *uStr, int n, int offset);
     void addMappingInt(CharCode code, Unicode u);
     CharCodeToUnicode();
-    CharCodeToUnicode(GooString *tagA);
+    explicit CharCodeToUnicode(GooString *tagA);
     CharCodeToUnicode(GooString *tagA, Unicode *mapA, CharCode mapLenA, bool copyMap, CharCodeToUnicodeString *sMapA, int sMapLenA, int sMapSizeA);
 
     GooString *tag;
@@ -120,7 +120,7 @@ private:
 class CharCodeToUnicodeCache
 {
 public:
-    CharCodeToUnicodeCache(int sizeA);
+    explicit CharCodeToUnicodeCache(int sizeA);
     ~CharCodeToUnicodeCache();
 
     CharCodeToUnicodeCache(const CharCodeToUnicodeCache &) = delete;

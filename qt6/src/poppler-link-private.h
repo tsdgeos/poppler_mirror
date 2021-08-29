@@ -1,5 +1,5 @@
 /* poppler-link-private.h: qt interface to poppler
- * Copyright (C) 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2016, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  *
@@ -34,7 +34,7 @@ class Link;
 class LinkPrivate
 {
 public:
-    LinkPrivate(const QRectF &area) : linkArea(area) { }
+    explicit LinkPrivate(const QRectF &area) : linkArea(area) { }
 
     virtual ~LinkPrivate();
 

@@ -7,7 +7,7 @@ class TestObject : public QObject
 {
     Q_OBJECT
 public:
-    TestObject(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestObject(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void benchDefaultConstructor();
     void benchMoveConstructor();

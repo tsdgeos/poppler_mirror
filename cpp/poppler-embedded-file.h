@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ public:
     byte_array data() const;
 
 private:
-    embedded_file(embedded_file_private &dd);
+    explicit embedded_file(embedded_file_private &dd);
 
     embedded_file_private *d;
     friend class embedded_file_private;

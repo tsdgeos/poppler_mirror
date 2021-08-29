@@ -12,6 +12,7 @@
 // Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2018 Ed Porras <ed@motologic.com>
+// Copyright (C) 2021 Peter Williams <peter@newton.cx>
 //
 //========================================================================
 
@@ -19,11 +20,11 @@
 
 #ifdef ENABLE_LIBJPEG
 
+#    include "poppler/Error.h"
+
 extern "C" {
 #    include <jpeglib.h>
 }
-
-#    include "poppler/Error.h"
 
 struct JpegWriterPrivate
 {

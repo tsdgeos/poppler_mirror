@@ -15,7 +15,7 @@ class TestAnnotations : public QObject
 {
     Q_OBJECT
 public:
-    TestAnnotations(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestAnnotations(QObject *parent = nullptr) : QObject(parent) { }
 
     void saveAndCheck(const std::unique_ptr<Poppler::Document> &doc, const std::function<void(Poppler::Annotation *a)> &checkFunction);
 

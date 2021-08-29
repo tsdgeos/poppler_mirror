@@ -36,6 +36,7 @@
 // Copyright (C) 2020 Stéfan van der Walt <sjvdwalt@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
+// Copyright (C) 2021 Peter Williams <peter@newton.cx>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -44,9 +45,9 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
-#    include <io.h> // for setmode
+#    include <io.h> // for _setmode
 #endif
 #include <cstdio>
 #include <cmath>
@@ -314,8 +315,8 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
             exit(EXIT_FAILURE);
         }
     } else {
-#ifdef _WIN32
-        setmode(fileno(stdout), O_BINARY);
+#if defined(_WIN32) || defined(__CYGWIN__)
+        _setmode(fileno(stdout), O_BINARY);
 #endif
 
         if (png) {

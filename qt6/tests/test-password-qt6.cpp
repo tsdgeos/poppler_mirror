@@ -11,7 +11,7 @@ class PDFDisplay : public QWidget // picture display widget
 {
     Q_OBJECT
 public:
-    PDFDisplay(std::unique_ptr<Poppler::Document> &&d, QWidget *parent = nullptr);
+    explicit PDFDisplay(std::unique_ptr<Poppler::Document> &&d, QWidget *parent = nullptr);
     ~PDFDisplay() override;
 
 protected:

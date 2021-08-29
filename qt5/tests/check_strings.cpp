@@ -32,7 +32,7 @@ class TestStrings : public QObject
     Q_OBJECT
 
 public:
-    TestStrings(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestStrings(QObject *parent = nullptr) : QObject(parent) { }
 
 private slots:
     void initTestCase();

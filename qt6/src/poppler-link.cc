@@ -1,5 +1,5 @@
 /* poppler-link.cc: qt interface to poppler
- * Copyright (C) 2006-2007, 2013, 2016-2020, Albert Astals Cid
+ * Copyright (C) 2006-2007, 2013, 2016-2021, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -92,7 +92,7 @@ LinkGotoPrivate::~LinkGotoPrivate() = default;
 class LinkExecutePrivate : public LinkPrivate
 {
 public:
-    LinkExecutePrivate(const QRectF &area);
+    explicit LinkExecutePrivate(const QRectF &area);
     ~LinkExecutePrivate() override;
 
     QString fileName;
@@ -106,7 +106,7 @@ LinkExecutePrivate::~LinkExecutePrivate() = default;
 class LinkBrowsePrivate : public LinkPrivate
 {
 public:
-    LinkBrowsePrivate(const QRectF &area);
+    explicit LinkBrowsePrivate(const QRectF &area);
     ~LinkBrowsePrivate() override;
 
     QString url;
@@ -119,7 +119,7 @@ LinkBrowsePrivate::~LinkBrowsePrivate() = default;
 class LinkActionPrivate : public LinkPrivate
 {
 public:
-    LinkActionPrivate(const QRectF &area);
+    explicit LinkActionPrivate(const QRectF &area);
     ~LinkActionPrivate() override;
 
     LinkAction::ActionType type;
@@ -132,7 +132,7 @@ LinkActionPrivate::~LinkActionPrivate() = default;
 class LinkSoundPrivate : public LinkPrivate
 {
 public:
-    LinkSoundPrivate(const QRectF &area);
+    explicit LinkSoundPrivate(const QRectF &area);
     ~LinkSoundPrivate() override;
 
     double volume;
@@ -191,7 +191,7 @@ LinkRenditionPrivate::~LinkRenditionPrivate()
 class LinkJavaScriptPrivate : public LinkPrivate
 {
 public:
-    LinkJavaScriptPrivate(const QRectF &area);
+    explicit LinkJavaScriptPrivate(const QRectF &area);
     ~LinkJavaScriptPrivate() override;
 
     QString js;
@@ -418,7 +418,7 @@ QRectF Link::linkArea() const
 QVector<Link *> Link::nextLinks() const
 {
     QVector<Link *> links(d_ptr->nextLinks.size());
-    for (std::size_t i = 0; i < links.size(); i++) {
+    for (qsizetype i = 0; i < links.size(); i++) {
         links[i] = d_ptr->nextLinks[i].get();
     }
 

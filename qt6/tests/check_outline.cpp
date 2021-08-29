@@ -8,7 +8,7 @@ class TestOutline : public QObject
 {
     Q_OBJECT
 public:
-    TestOutline(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestOutline(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkOutline_xr02();
 };

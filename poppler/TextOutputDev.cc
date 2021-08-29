@@ -43,6 +43,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
+// Copyright (C) 2021 Peter Williams <peter@newton.cx>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,9 +59,9 @@
 #include <cfloat>
 #include <cctype>
 #include <algorithm>
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
-#    include <io.h> // for setmode
+#    include <io.h> // for _setmode
 #endif
 #include "goo/gfile.h"
 #include "goo/gmem.h"
@@ -4389,7 +4390,7 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
 class TextSelectionVisitor
 {
 public:
-    TextSelectionVisitor(TextPage *page);
+    explicit TextSelectionVisitor(TextPage *page);
     virtual ~TextSelectionVisitor();
     TextSelectionVisitor(const TextSelectionVisitor &) = delete;
     TextSelectionVisitor &operator=(const TextSelectionVisitor &) = delete;
@@ -4408,7 +4409,7 @@ TextSelectionVisitor::~TextSelectionVisitor() = default;
 class TextSelectionDumper : public TextSelectionVisitor
 {
 public:
-    TextSelectionDumper(TextPage *page);
+    explicit TextSelectionDumper(TextPage *page);
     ~TextSelectionDumper() override;
 
     void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};
@@ -5544,9 +5545,9 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     if (fileName) {
         if (!strcmp(fileName, "-")) {
             outputStream = stdout;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
             // keep DOS from munging the end-of-line characters
-            setmode(fileno(stdout), O_BINARY);
+            _setmode(fileno(stdout), O_BINARY);
 #endif
         } else if ((outputStream = openFile(fileName, append ? "ab" : "wb"))) {
             needClose = true;

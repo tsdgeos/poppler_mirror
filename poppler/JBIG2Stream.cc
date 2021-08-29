@@ -27,7 +27,7 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
-// Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2019-2021 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -550,7 +550,7 @@ enum JBIG2SegmentType
 class JBIG2Segment
 {
 public:
-    JBIG2Segment(unsigned int segNumA) { segNum = segNumA; }
+    explicit JBIG2Segment(unsigned int segNumA) { segNum = segNumA; }
     virtual ~JBIG2Segment();
     JBIG2Segment(const JBIG2Segment &) = delete;
     JBIG2Segment &operator=(const JBIG2Segment &) = delete;
@@ -579,7 +579,7 @@ class JBIG2Bitmap : public JBIG2Segment
 {
 public:
     JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
-    JBIG2Bitmap(JBIG2Bitmap *bitmap);
+    explicit JBIG2Bitmap(JBIG2Bitmap *bitmap);
     ~JBIG2Bitmap() override;
     JBIG2SegmentType getType() override { return jbig2SegBitmap; }
     JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
@@ -1284,7 +1284,10 @@ void JBIG2Stream::readSegments()
         }
 
         // referred-to segment numbers
-        refSegs = (unsigned int *)gmallocn(nRefSegs, sizeof(unsigned int));
+        refSegs = (unsigned int *)gmallocn_checkoverflow(nRefSegs, sizeof(unsigned int));
+        if (nRefSegs > 0 && !refSegs) {
+            return;
+        }
         if (segNum <= 256) {
             for (unsigned int i = 0; i < nRefSegs; ++i) {
                 if (!readUByte(&refSegs[i])) {
@@ -1654,7 +1657,10 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
 
     // allocate symbol widths storage
     if (huff && !refAgg) {
-        symWidths = (unsigned int *)gmallocn(numNewSyms, sizeof(unsigned int));
+        symWidths = (unsigned int *)gmallocn_checkoverflow(numNewSyms, sizeof(unsigned int));
+        if (numNewSyms > 0 && !symWidths) {
+            goto syntaxError;
+        }
     }
 
     symHeight = 0;
@@ -1985,7 +1991,10 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     // get the symbol bitmaps
-    syms = (JBIG2Bitmap **)gmallocn(numSyms, sizeof(JBIG2Bitmap *));
+    syms = (JBIG2Bitmap **)gmallocn_checkoverflow(numSyms, sizeof(JBIG2Bitmap *));
+    if (numSyms > 0 && !syms) {
+        return;
+    }
     kk = 0;
     for (i = 0; i < nRefSegs; ++i) {
         if ((seg = findSegment(refSegs[i]))) {
@@ -2113,7 +2122,11 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     }
 
     if (huff) {
-        symCodeTab = (JBIG2HuffmanTable *)gmallocn(numSyms + 1, sizeof(JBIG2HuffmanTable));
+        symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
+        if (!symCodeTab) {
+            gfree(syms);
+            return;
+        }
         for (i = 0; i < numSyms; ++i) {
             symCodeTab[i].val = i;
             symCodeTab[i].rangeLen = 0;
@@ -2607,7 +2620,10 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     // read the gray-scale image
-    grayImg = (unsigned int *)gmallocn(gridW * gridH, sizeof(unsigned int));
+    grayImg = (unsigned int *)gmallocn_checkoverflow(gridW * gridH, sizeof(unsigned int));
+    if (!grayImg) {
+        return;
+    }
     memset(grayImg, 0, gridW * gridH * sizeof(unsigned int));
     atx[0] = templ <= 1 ? 3 : 2;
     aty[0] = -1;

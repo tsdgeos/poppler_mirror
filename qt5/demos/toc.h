@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ class TocDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    TocDock(QWidget *parent = nullptr);
+    explicit TocDock(QWidget *parent = nullptr);
     ~TocDock() override;
 
     void documentClosed() override;

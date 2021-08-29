@@ -1,5 +1,5 @@
 /* poppler-link.cc: qt interface to poppler
- * Copyright (C) 2006-2007, 2013, 2016-2020, Albert Astals Cid
+ * Copyright (C) 2006-2007, 2013, 2016-2021, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -94,7 +94,7 @@ LinkGotoPrivate::~LinkGotoPrivate() = default;
 class LinkExecutePrivate : public LinkPrivate
 {
 public:
-    LinkExecutePrivate(const QRectF &area);
+    explicit LinkExecutePrivate(const QRectF &area);
     ~LinkExecutePrivate() override;
 
     QString fileName;
@@ -107,7 +107,7 @@ LinkExecutePrivate::~LinkExecutePrivate() = default;
 class LinkBrowsePrivate : public LinkPrivate
 {
 public:
-    LinkBrowsePrivate(const QRectF &area);
+    explicit LinkBrowsePrivate(const QRectF &area);
     ~LinkBrowsePrivate() override;
 
     QString url;
@@ -119,7 +119,7 @@ LinkBrowsePrivate::~LinkBrowsePrivate() = default;
 class LinkActionPrivate : public LinkPrivate
 {
 public:
-    LinkActionPrivate(const QRectF &area);
+    explicit LinkActionPrivate(const QRectF &area);
     ~LinkActionPrivate() override;
 
     LinkAction::ActionType type;
@@ -131,7 +131,7 @@ LinkActionPrivate::~LinkActionPrivate() = default;
 class LinkSoundPrivate : public LinkPrivate
 {
 public:
-    LinkSoundPrivate(const QRectF &area);
+    explicit LinkSoundPrivate(const QRectF &area);
     ~LinkSoundPrivate() override;
 
     double volume;
@@ -151,7 +151,7 @@ LinkSoundPrivate::~LinkSoundPrivate()
 class LinkRenditionPrivate : public LinkPrivate
 {
 public:
-    LinkRenditionPrivate(const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref);
+    explicit LinkRenditionPrivate(const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref);
     ~LinkRenditionPrivate() override;
 
     MediaRendition *rendition;
@@ -190,7 +190,7 @@ LinkRenditionPrivate::~LinkRenditionPrivate()
 class LinkJavaScriptPrivate : public LinkPrivate
 {
 public:
-    LinkJavaScriptPrivate(const QRectF &area);
+    explicit LinkJavaScriptPrivate(const QRectF &area);
     ~LinkJavaScriptPrivate() override;
 
     QString js;

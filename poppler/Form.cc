@@ -30,6 +30,7 @@
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -2075,12 +2076,12 @@ void FormFieldSignature::parseInfo()
 
     const Object location_obj = sig_dict.dictLookup("Location");
     if (location_obj.isString()) {
-        signature_info->setLocation(location_obj.getString()->c_str());
+        signature_info->setLocation(location_obj.getString());
     }
 
     const Object reason_obj = sig_dict.dictLookup("Reason");
     if (reason_obj.isString()) {
-        signature_info->setReason(reason_obj.getString()->c_str());
+        signature_info->setReason(reason_obj.getString());
     }
 
     // retrieve SigningTime

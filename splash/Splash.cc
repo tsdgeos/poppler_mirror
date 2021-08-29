@@ -24,6 +24,7 @@
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2366,7 +2367,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
         yMinI = yMinI * splashAASize;
         yMaxI = (yMaxI + 1) * splashAASize - 1;
     }
-    SplashXPathScanner scanner(&xPath, eo, yMinI, yMaxI);
+    SplashXPathScanner scanner(xPath, eo, yMinI, yMaxI);
 
     // get the min and max x and y values
     if (vectorAntialias && !inShading) {
@@ -2517,7 +2518,7 @@ SplashError Splash::xorFill(SplashPath *path, bool eo)
     }
     SplashXPath xPath(path, state->matrix, state->flatness, true);
     xPath.sort();
-    SplashXPathScanner scanner(&xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
+    SplashXPathScanner scanner(xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
 
     // get the min and max x and y values
     scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
@@ -5442,7 +5443,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                         if (!clip->test(X, Y))
                             continue;
 
-                        assert(fabs(colorinterp - (scanColorMap0 * X + scanColorMap1)) < 1e-10);
+                        assert(fabs(colorinterp - (scanColorMap0 * X + scanColorMap1)) < 1e-9);
                         assert(bitmapOff == Y * rowSize + colorComps * X && scanLineOff == Y * rowSize);
 
                         shading->getParameterizedColor(colorinterp, bitmapMode, &bitmapData[bitmapOff]);
@@ -6117,7 +6118,7 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pa
         yMinI = yMinI * splashAASize;
         yMaxI = (yMaxI + 1) * splashAASize - 1;
     }
-    SplashXPathScanner scanner(&xPath, false, yMinI, yMaxI);
+    SplashXPathScanner scanner(xPath, false, yMinI, yMaxI);
 
     // get the min and max x and y values
     if (vectorAntialias) {

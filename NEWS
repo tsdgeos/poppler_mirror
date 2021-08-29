@@ -1,3 +1,26 @@
+Release 21.08.0:
+        core:
+         * Add API to allow addition and modification of outlines into a PDF
+         * Use additional samples to test for constant parts of an axial gradient
+         * forms: Create fallback fonts for some well known font names
+         * Support reading the PDF Version from the Catalog
+         * Fix XRef::copy when there are modified objects
+         * Take into account that Date string may be in unicode
+         * JBIG2Stream: Fix regression in "Do not consider a size-0 to be an error"
+         * Replace a local bubble sort implementation by std::sort
+         * Fix issues with malformed files
+
+        build system:
+         * Better error message when libjpeg is not found
+         * Better error messages when libopenjpeg2 is not found
+
+        qt5/qt6:
+         * Document that a document has to outlive its pages
+         * Make getPdfVersion return a dedicated version object
+
+        glib:
+         * mimick TextSelectionDumper logic change for spaceAfter
+
 Release 21.07.0:
         core:
          * JBIG2Stream: Do not consider a size-0 to be an error. Issue #535

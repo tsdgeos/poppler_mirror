@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -83,7 +83,7 @@ class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
     // Initialize the global parameters
-    GlobalParams(const char *customPopplerDataDir = nullptr);
+    explicit GlobalParams(const char *customPopplerDataDir = nullptr);
 
     ~GlobalParams();
 
@@ -205,7 +205,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GlobalParamsIniter
 {
 public:
-    GlobalParamsIniter(ErrorCallback errorCallback);
+    explicit GlobalParamsIniter(ErrorCallback errorCallback);
     ~GlobalParamsIniter();
 
     GlobalParamsIniter(const GlobalParamsIniter &) = delete;

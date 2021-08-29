@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ class PageView : public QScrollArea, public DocumentObserver
     Q_OBJECT
 
 public:
-    PageView(QWidget *parent = nullptr);
+    explicit PageView(QWidget *parent = nullptr);
     ~PageView() override;
 
     void documentLoaded() override;

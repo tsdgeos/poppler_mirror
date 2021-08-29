@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -13,6 +13,7 @@
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -764,7 +765,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 class SignatureValidationInfoPrivate
 {
 public:
-    SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
+    explicit SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
 
     SignatureValidationInfo::SignatureStatus signature_status;
     SignatureValidationInfo::CertificateStatus certificate_status;
@@ -1037,8 +1038,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     priv->signer_name = si->getSignerName();
     priv->signer_subject_dn = si->getSubjectDN();
     priv->hash_algorithm = si->getHashAlgorithm();
-    priv->location = si->getLocation();
-    priv->reason = si->getReason();
+    priv->location = UnicodeParsedString(si->getLocation().toStr());
+    priv->reason = UnicodeParsedString(si->getReason().toStr());
 
     priv->signing_time = si->getSigningTime();
     const std::vector<Goffset> ranges = fws->getSignedRangeBounds();

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
@@ -37,7 +37,7 @@ class POPPLER_PRIVATE_EXPORT PDFDocFactory
 {
 
 public:
-    PDFDocFactory(std::vector<PDFDocBuilder *> *pdfDocBuilders = nullptr);
+    explicit PDFDocFactory(std::vector<PDFDocBuilder *> *pdfDocBuilders = nullptr);
     ~PDFDocFactory();
 
     PDFDocFactory(const PDFDocFactory &) = delete;

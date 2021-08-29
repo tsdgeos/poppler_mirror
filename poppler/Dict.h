@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -48,8 +48,8 @@ class POPPLER_PRIVATE_EXPORT Dict
 {
 public:
     // Constructor.
-    Dict(XRef *xrefA);
-    Dict(const Dict *dictA);
+    explicit Dict(XRef *xrefA);
+    explicit Dict(const Dict *dictA);
     Dict *copy(XRef *xrefA) const;
 
     Dict(const Dict &) = delete;

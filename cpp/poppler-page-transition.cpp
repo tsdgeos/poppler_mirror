@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2011, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2011, 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ using namespace poppler;
 class poppler::page_transition_private
 {
 public:
-    page_transition_private(Object *trans) : pt(trans) { }
+    explicit page_transition_private(Object *trans) : pt(trans) { }
 
     PageTransition pt;
 };

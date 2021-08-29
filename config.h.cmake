@@ -176,6 +176,8 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #define popen _popen
 #define pclose _pclose
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */

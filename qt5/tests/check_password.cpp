@@ -6,7 +6,7 @@ class TestPassword : public QObject
 {
     Q_OBJECT
 public:
-    TestPassword(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestPassword(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void password1();
     void password1a();

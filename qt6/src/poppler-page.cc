@@ -680,7 +680,7 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
     QVector<Unicode> u;
     TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, sWords, sDiacritics, sAcrossLines);
+    QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, sWords, sDiacritics, sAcrossLines);
 
     textPage->decRefCnt();
 

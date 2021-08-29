@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, 2012, 2013, 2018-2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012, 2013, 2018-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -404,7 +404,7 @@ public:
 
 protected:
     /// \cond PRIVATE
-    Annotation(AnnotationPrivate &dd);
+    explicit Annotation(AnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(Annotation)
     QExplicitlySharedDataPointer<AnnotationPrivate> d_ptr;
     /// \endcond
@@ -443,7 +443,7 @@ public:
         InplaceAlignRight
     };
 
-    TextAnnotation(TextType type);
+    explicit TextAnnotation(TextType type);
     ~TextAnnotation() override;
     SubType subType() const override;
 
@@ -489,7 +489,7 @@ public:
     void setInplaceIntent(InplaceIntent intent);
 
 private:
-    TextAnnotation(TextAnnotationPrivate &dd);
+    explicit TextAnnotation(TextAnnotationPrivate &dd);
     void setTextType(TextType type);
     Q_DECLARE_PRIVATE(TextAnnotation)
     Q_DISABLE_COPY(TextAnnotation)
@@ -532,7 +532,7 @@ public:
         PolygonCloud
     };
 
-    LineAnnotation(LineType type);
+    explicit LineAnnotation(LineType type);
     ~LineAnnotation() override;
     SubType subType() const override;
 
@@ -566,7 +566,7 @@ public:
     void setLineIntent(LineIntent intent);
 
 private:
-    LineAnnotation(LineAnnotationPrivate &dd);
+    explicit LineAnnotation(LineAnnotationPrivate &dd);
     void setLineType(LineType type);
     Q_DECLARE_PRIVATE(LineAnnotation)
     Q_DISABLE_COPY(LineAnnotation)
@@ -601,7 +601,7 @@ public:
     void setGeomInnerColor(const QColor &color);
 
 private:
-    GeomAnnotation(GeomAnnotationPrivate &dd);
+    explicit GeomAnnotation(GeomAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(GeomAnnotation)
     Q_DISABLE_COPY(GeomAnnotation)
 };
@@ -667,7 +667,7 @@ public:
     void setHighlightQuads(const QList<Quad> &quads);
 
 private:
-    HighlightAnnotation(HighlightAnnotationPrivate &dd);
+    explicit HighlightAnnotation(HighlightAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(HighlightAnnotation)
     Q_DISABLE_COPY(HighlightAnnotation)
 };
@@ -715,7 +715,7 @@ public:
     void setStampIconName(const QString &name);
 
 private:
-    StampAnnotation(StampAnnotationPrivate &dd);
+    explicit StampAnnotation(StampAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(StampAnnotation)
     Q_DISABLE_COPY(StampAnnotation)
 };
@@ -738,7 +738,7 @@ public:
     void setInkPaths(const QList<QVector<QPointF>> &paths);
 
 private:
-    InkAnnotation(InkAnnotationPrivate &dd);
+    explicit InkAnnotation(InkAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(InkAnnotation)
     Q_DISABLE_COPY(InkAnnotation)
 };
@@ -771,7 +771,7 @@ public:
 
 private:
     LinkAnnotation();
-    LinkAnnotation(LinkAnnotationPrivate &dd);
+    explicit LinkAnnotation(LinkAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(LinkAnnotation)
     Q_DISABLE_COPY(LinkAnnotation)
 };
@@ -803,7 +803,7 @@ public:
     void setCaretSymbol(CaretSymbol symbol);
 
 private:
-    CaretAnnotation(CaretAnnotationPrivate &dd);
+    explicit CaretAnnotation(CaretAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(CaretAnnotation)
     Q_DISABLE_COPY(CaretAnnotation)
 };
@@ -843,7 +843,7 @@ public:
 
 private:
     FileAttachmentAnnotation();
-    FileAttachmentAnnotation(FileAttachmentAnnotationPrivate &dd);
+    explicit FileAttachmentAnnotation(FileAttachmentAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(FileAttachmentAnnotation)
     Q_DISABLE_COPY(FileAttachmentAnnotation)
 };
@@ -883,7 +883,7 @@ public:
 
 private:
     SoundAnnotation();
-    SoundAnnotation(SoundAnnotationPrivate &dd);
+    explicit SoundAnnotation(SoundAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(SoundAnnotation)
     Q_DISABLE_COPY(SoundAnnotation)
 };
@@ -923,7 +923,7 @@ public:
 
 private:
     MovieAnnotation();
-    MovieAnnotation(MovieAnnotationPrivate &dd);
+    explicit MovieAnnotation(MovieAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(MovieAnnotation)
     Q_DISABLE_COPY(MovieAnnotation)
 };
@@ -972,7 +972,7 @@ public:
 
 private:
     ScreenAnnotation();
-    ScreenAnnotation(ScreenAnnotationPrivate &dd);
+    explicit ScreenAnnotation(ScreenAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(ScreenAnnotation)
     Q_DISABLE_COPY(ScreenAnnotation)
 };
@@ -1002,7 +1002,7 @@ public:
 
 private:
     WidgetAnnotation();
-    WidgetAnnotation(WidgetAnnotationPrivate &dd);
+    explicit WidgetAnnotation(WidgetAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(WidgetAnnotation)
     Q_DISABLE_COPY(WidgetAnnotation)
 };
@@ -1326,7 +1326,7 @@ private:
     void setContent(RichMediaAnnotation::Content *content);
 
     RichMediaAnnotation();
-    RichMediaAnnotation(RichMediaAnnotationPrivate &dd);
+    explicit RichMediaAnnotation(RichMediaAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(RichMediaAnnotation)
     Q_DISABLE_COPY(RichMediaAnnotation)
 };

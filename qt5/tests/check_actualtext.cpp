@@ -8,7 +8,7 @@ class TestActualText : public QObject
 {
     Q_OBJECT
 public:
-    TestActualText(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestActualText(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkActualText1();
     void checkActualText2();

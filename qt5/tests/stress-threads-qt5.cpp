@@ -20,7 +20,7 @@ class SillyThread : public QThread
 {
     Q_OBJECT
 public:
-    SillyThread(Poppler::Document *document, QObject *parent = nullptr);
+    explicit SillyThread(Poppler::Document *document, QObject *parent = nullptr);
 
     void run() override;
 

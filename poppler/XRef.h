@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010-2013, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -102,7 +102,7 @@ public:
     // Constructor, create an empty XRef, used for PDF writing
     XRef();
     // Constructor, create an empty XRef but with info dict, used for PDF writing
-    XRef(const Object *trailerDictA);
+    explicit XRef(const Object *trailerDictA);
     // Constructor.  Read xref table from stream.
     XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, bool *wasReconstructed = nullptr, bool reconstruct = false, const std::function<void()> &xrefReconstructedCallback = {});
 
@@ -279,7 +279,7 @@ private:
     class XRefTableWriter : public XRefWriter
     {
     public:
-        XRefTableWriter(OutStream *outStrA);
+        explicit XRefTableWriter(OutStream *outStrA);
         void startSection(int first, int count) override;
         void writeEntry(Goffset offset, int gen, XRefEntryType type) override;
 

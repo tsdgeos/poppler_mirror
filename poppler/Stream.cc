@@ -227,7 +227,7 @@ bool Stream::isEncrypted() const
 class BaseStreamStream : public Stream
 {
 public:
-    BaseStreamStream(Stream *strA) : str(strA) { }
+    explicit BaseStreamStream(Stream *strA) : str(strA) { }
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }

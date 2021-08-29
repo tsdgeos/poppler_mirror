@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2017-2019
+// Albert Astals Cid <aacid@kde.org> (c) 2017-2019, 2021
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ class POPPLER_PRIVATE_EXPORT Movie
 {
 public:
     Movie(const Object *movieDict, const Object *aDict);
-    Movie(const Object *movieDict);
+    explicit Movie(const Object *movieDict);
     Movie(const Movie &other);
     ~Movie();
     Movie &operator=(const Movie &) = delete;

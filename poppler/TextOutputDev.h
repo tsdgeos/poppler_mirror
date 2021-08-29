@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -87,7 +87,7 @@ enum EndOfLineKind
 class POPPLER_PRIVATE_EXPORT TextFontInfo
 {
 public:
-    TextFontInfo(const GfxState *state);
+    explicit TextFontInfo(const GfxState *state);
     ~TextFontInfo();
 
     TextFontInfo(const TextFontInfo &) = delete;
@@ -556,7 +556,7 @@ class POPPLER_PRIVATE_EXPORT TextPage
 {
 public:
     // Constructor.
-    TextPage(bool rawOrderA, bool discardDiagA = false);
+    explicit TextPage(bool rawOrderA, bool discardDiagA = false);
 
     TextPage(const TextPage &) = delete;
     TextPage &operator=(const TextPage &) = delete;
@@ -728,7 +728,7 @@ class POPPLER_PRIVATE_EXPORT ActualText
 {
 public:
     // Create an ActualText
-    ActualText(TextPage *out);
+    explicit ActualText(TextPage *out);
     ~ActualText();
 
     ActualText(const ActualText &) = delete;

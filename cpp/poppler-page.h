@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
- * Copyright (C) 2018-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018-2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
@@ -129,7 +129,7 @@ public:
     std::string get_font_name(int i = 0) const;
 
 private:
-    text_box(text_box_data *data);
+    explicit text_box(text_box_data *data);
 
     std::unique_ptr<text_box_data> m_data;
 };

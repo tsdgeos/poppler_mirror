@@ -13,7 +13,7 @@ class TestUTFConversion : public QObject
 {
     Q_OBJECT
 public:
-    TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testUTF_data();
     void testUTF();

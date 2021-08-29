@@ -25,7 +25,7 @@ struct JPXStreamPrivate;
 class JPXStream : public FilterStream
 {
 public:
-    JPXStream(Stream *strA);
+    explicit JPXStream(Stream *strA);
     ~JPXStream() override;
 
     JPXStream(const JPXStream &other) = delete;

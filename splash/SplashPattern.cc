@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2020, 2021 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,7 +37,7 @@ SplashPattern::~SplashPattern() { }
 // SplashSolidColor
 //------------------------------------------------------------------------
 
-SplashSolidColor::SplashSolidColor(SplashColorPtr colorA)
+SplashSolidColor::SplashSolidColor(SplashColorConstPtr colorA)
 {
     splashColorCopy(color, colorA);
 }

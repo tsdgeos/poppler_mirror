@@ -9,7 +9,7 @@ class TestForms : public QObject
 {
     Q_OBJECT
 public:
-    TestForms(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestForms(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testCheckbox(); // Test for issue #655
     void testCheckboxIssue159(); // Test for issue #159
@@ -172,7 +172,7 @@ void TestForms::testSetIcon()
     }
 
     // Just making sure that setting a invalid icon will still produce a valid icon.
-    anmButton->setIcon(nullptr);
+    anmButton->setIcon(Poppler::FormFieldIcon(nullptr));
     Poppler::FormFieldIcon anmIcon = anmButton->icon();
 
     QVERIFY(Poppler::FormFieldIconData::getData(anmIcon));
