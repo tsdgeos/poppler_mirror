@@ -70,10 +70,6 @@ class POPPLER_PRIVATE_EXPORT SplashPath
 public:
     // Create an empty path.
     SplashPath();
-
-    // Copy a path.
-    SplashPath *copy() const { return new SplashPath(this); }
-
     ~SplashPath();
 
     SplashPath(const SplashPath &) = delete;
@@ -122,7 +118,6 @@ public:
     void reserve(int n);
 
 protected:
-    explicit SplashPath(const SplashPath *path);
     void grow(int nPts);
     bool noCurrentPoint() { return curSubpath == length; }
     bool onePointSubpath() { return curSubpath == length - 1; }
