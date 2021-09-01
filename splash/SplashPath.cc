@@ -53,24 +53,6 @@ SplashPath::SplashPath()
     hintsLength = hintsSize = 0;
 }
 
-SplashPath::SplashPath(const SplashPath *path)
-{
-    length = path->length;
-    size = path->size;
-    pts = (SplashPathPoint *)gmallocn(size, sizeof(SplashPathPoint));
-    flags = (unsigned char *)gmallocn(size, sizeof(unsigned char));
-    memcpy(pts, path->pts, length * sizeof(SplashPathPoint));
-    memcpy(flags, path->flags, length * sizeof(unsigned char));
-    curSubpath = path->curSubpath;
-    if (path->hints) {
-        hintsLength = hintsSize = path->hintsLength;
-        hints = (SplashPathHint *)gmallocn(hintsSize, sizeof(SplashPathHint));
-        memcpy(hints, path->hints, hintsLength * sizeof(SplashPathHint));
-    } else {
-        hints = nullptr;
-    }
-}
-
 SplashPath::SplashPath(SplashPath &&path) noexcept
 {
     length = path.length;
