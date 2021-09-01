@@ -1,3 +1,15 @@
+Release 21.09.0:
+        core:
+         * Splash: Massive spped improvement on files that use lots of save/restore (q/Q) operators
+         * Correct decoding of signature properties Reason & Location when they are Unicode
+         * Fix issues with malformed files
+         * MSVC build fixes
+
+        build system:
+         * Call cmake_minium_required() before project()
+         * Always append to CMAKE_{C,CXX}_FLAGS_${CMAKE_BUILD_TYPE}
+         * correctly forward user-provided flags to try_compile()
+
 Release 21.08.0:
         core:
          * Add API to allow addition and modification of outlines into a PDF
