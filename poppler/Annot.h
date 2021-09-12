@@ -39,6 +39,7 @@
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
+// Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,6 +54,7 @@
 #include <mutex>
 #include <vector>
 
+#include "AnnotStampImageHelper.h"
 #include "Object.h"
 #include "poppler_private_export.h"
 
@@ -731,6 +733,8 @@ public:
     const GooString *getName() const { return name.get(); }
     const GooString *getModified() const { return modified.get(); }
     unsigned int getFlags() const { return flags; }
+    Object getAppearance() const;
+    void setNewAppearance(Object &&newAppearance);
     AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
     const GooString *getAppearState() const { return appearState.get(); }
     AnnotBorder *getBorder() const { return border.get(); }
@@ -1195,15 +1199,24 @@ public:
     AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj);
     ~AnnotStamp() override;
 
+    void draw(Gfx *gfx, bool printing) override;
+
     void setIcon(GooString *new_icon);
+
+    void setCustomImage(AnnotStampImageHelper *stampImageHelperA);
+
+    void clearCustomImage();
 
     // getters
     const GooString *getIcon() const { return icon.get(); }
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
+    void generateStampAppearance();
 
     std::unique_ptr<GooString> icon; // Name       (Default Draft)
+    AnnotStampImageHelper *stampImageHelper;
+    Ref updatedAppearanceStream;
 };
 
 //------------------------------------------------------------------------
@@ -1436,7 +1449,6 @@ public:
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
     std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);
     Dict *getParent() { return parent; }
-    void setNewAppearance(Object &&newAppearance);
 
     bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
 

@@ -50,6 +50,7 @@
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
+// Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1958,6 +1959,38 @@ void Annot::draw(Gfx *gfx, bool printing)
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
     gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
+}
+
+void Annot::setNewAppearance(Object &&newAppearance)
+{
+    if (newAppearance.isNull())
+        return;
+
+    annotLocker();
+    if (newAppearance.getType() == ObjType::objStream) {
+        invalidateAppearance();
+        appearance = std::move(newAppearance);
+
+        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+
+        Object obj1 = Object(new Dict(doc->getXRef()));
+        obj1.dictAdd("N", Object(updatedAppearanceStream));
+        update("AP", std::move(obj1));
+
+        Object updatedAP = annotObj.dictLookup("AP");
+        appearStreams = std::make_unique<AnnotAppearance>(doc, &updatedAP);
+    } else {
+        appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
+        update("AP", std::move(newAppearance));
+
+        if (appearStreams)
+            appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+    }
+}
+
+Object Annot::getAppearance() const
+{
+    return appearance.fetch(doc->getXRef());
 }
 
 //------------------------------------------------------------------------
@@ -3881,17 +3914,6 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
     return true;
 }
 
-void AnnotWidget::setNewAppearance(Object &&newAppearance)
-{
-    if (!newAppearance.isNull()) {
-        appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
-        update("AP", std::move(newAppearance));
-    }
-
-    if (appearStreams)
-        appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
-}
-
 // Grand unified handler for preparing text strings to be drawn into form
 // fields.  Takes as input a text string (in PDFDocEncoding or UTF-16).
 // Converts some or all of this string to the appropriate encoding for the
@@ -5361,7 +5383,10 @@ AnnotStamp::AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj) : A
     initialize(docA, annotObj.getDict());
 }
 
-AnnotStamp::~AnnotStamp() = default;
+AnnotStamp::~AnnotStamp()
+{
+    delete stampImageHelper;
+}
 
 void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
 {
@@ -5370,6 +5395,53 @@ void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
         icon = std::make_unique<GooString>(obj1.getName());
     } else {
         icon = std::make_unique<GooString>("Draft");
+    }
+
+    stampImageHelper = nullptr;
+    updatedAppearanceStream = Ref::INVALID();
+}
+
+void AnnotStamp::generateStampAppearance()
+{
+    Ref imgRef = stampImageHelper->getRef();
+    std::string imgStrName = "X" + std::to_string(imgRef.num);
+    GooString imgRefName(imgStrName);
+
+    AnnotAppearanceBuilder appearBuilder;
+    appearBuilder.append("q\n");
+    appearBuilder.append("/GS0 gs\n");
+    appearBuilder.appendf("{0:.3f} 0 0 {1:.3f} 0 0 cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
+    appearBuilder.append("/");
+    appearBuilder.append(imgRefName.c_str());
+    appearBuilder.append(" Do\n");
+    appearBuilder.append("Q\n");
+
+    Dict *resDict = createResourcesDict(imgRefName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
+
+    double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const GooString *appearBuf = appearBuilder.buffer();
+    appearance = createForm(appearBuf, bboxArray, false, resDict);
+}
+
+void AnnotStamp::draw(Gfx *gfx, bool printing)
+{
+    if (!isVisible(printing))
+        return;
+
+    annotLocker();
+    if (appearance.isNull()) {
+        if (stampImageHelper == nullptr)
+            return;
+
+        generateStampAppearance();
+    }
+
+    // draw the appearance stream
+    Object obj = appearance.fetch(gfx->getXRef());
+    if (appearBBox) {
+        gfx->drawAnnot(&obj, nullptr, color.get(), appearBBox->getPageXMin(), appearBBox->getPageYMin(), appearBBox->getPageXMax(), appearBBox->getPageYMax(), getRotation());
+    } else {
+        gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
     }
 }
 
@@ -5382,6 +5454,38 @@ void AnnotStamp::setIcon(GooString *new_icon)
     }
 
     update("Name", Object(objName, icon->c_str()));
+    invalidateAppearance();
+}
+
+void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
+{
+    if (!stampImageHelperA)
+        return;
+
+    annotLocker();
+    clearCustomImage();
+
+    stampImageHelper = stampImageHelperA;
+    generateStampAppearance();
+
+    if (updatedAppearanceStream == Ref::INVALID()) {
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+    } else {
+        Object obj1 = appearance.fetch(doc->getXRef());
+        doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);
+    }
+
+    Object obj1 = Object(new Dict(doc->getXRef()));
+    obj1.dictAdd("N", Object(updatedAppearanceStream));
+    update("AP", std::move(obj1));
+}
+
+void AnnotStamp::clearCustomImage()
+{
+    if (stampImageHelper != nullptr) {
+        stampImageHelper->removeAnnotStampImageObject();
+        delete stampImageHelper;
+    }
     invalidateAppearance();
 }
 

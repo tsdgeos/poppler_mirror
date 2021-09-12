@@ -46,7 +46,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "21")
-set(POPPLER_MINOR_VERSION_STRING "08")
+set(POPPLER_MINOR_VERSION_STRING "09")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -396,6 +396,7 @@ set(poppler_SRCS
   fofi/FoFiType1C.cc
   fofi/FoFiIdentifier.cc
   poppler/Annot.cc
+  poppler/AnnotStampImageHelper.cc
   poppler/Array.cc
   poppler/CachedFile.cc
   poppler/Catalog.cc
@@ -588,7 +589,7 @@ else()
 add_library(poppler ${poppler_SRCS})
 endif()
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
-set_target_properties(poppler PROPERTIES VERSION 112.0.0 SOVERSION 112)
+set_target_properties(poppler PROPERTIES VERSION 113.0.0 SOVERSION 113)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -602,6 +603,7 @@ install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INST
 if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
     poppler/Annot.h
+    poppler/AnnotStampImageHelper.h
     poppler/Array.h
     poppler/CachedFile.h
     poppler/Catalog.h

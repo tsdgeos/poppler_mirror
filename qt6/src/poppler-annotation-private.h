@@ -5,6 +5,7 @@
  * Copyright (C) 2012, 2014, 2018-2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2021, Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@
 #include "poppler-annotation.h"
 
 #include <Object.h>
+#include <AnnotStampImageHelper.h>
 
 class Annot;
 class AnnotPath;
@@ -42,6 +44,7 @@ namespace Poppler {
 class DocumentData;
 
 PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int flags);
+void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData);
 
 class AnnotationPrivate : public QSharedData
 {
@@ -110,6 +113,16 @@ public:
     Ref pdfObjectReference() const;
 
     std::unique_ptr<Link> additionalAction(Annotation::AdditionalActionType type) const;
+
+    Object annotationAppearance;
+};
+
+class AnnotationAppearancePrivate
+{
+public:
+    explicit AnnotationAppearancePrivate(Annot *annot);
+
+    Object appearance;
 };
 
 }
