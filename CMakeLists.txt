@@ -396,6 +396,7 @@ set(poppler_SRCS
   fofi/FoFiType1C.cc
   fofi/FoFiIdentifier.cc
   poppler/Annot.cc
+  poppler/AnnotStampImageHelper.cc
   poppler/Array.cc
   poppler/CachedFile.cc
   poppler/Catalog.cc
@@ -602,6 +603,7 @@ install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INST
 if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
     poppler/Annot.h
+    poppler/AnnotStampImageHelper.h
     poppler/Array.h
     poppler/CachedFile.h
     poppler/Catalog.h

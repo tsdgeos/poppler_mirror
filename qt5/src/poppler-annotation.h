@@ -44,10 +44,13 @@
 #include <QtXml/QDomDocument>
 #include "poppler-export.h"
 
+#include <memory>
+
 namespace Poppler {
 
 class Annotation;
 class AnnotationPrivate;
+class AnnotationAppearancePrivate;
 class TextAnnotationPrivate;
 class LineAnnotationPrivate;
 class GeomAnnotationPrivate;
@@ -95,6 +98,29 @@ public:
      * \p parentNode or a null element if not found.
      */
     Q_DECL_DEPRECATED static QDomElement findChildElement(const QDomNode &parentNode, const QString &name);
+};
+
+/**
+ * \short AnnotationAppearance class wrapping Poppler's AP stream object
+ *
+ * The Annotation's Appearance Stream is a Form XObject containing
+ * information required to properly render the Annotation on the document.
+ *
+ * This class wraps Poppler's Object implementing the appearance stream
+ * for the calling annotation. It can be used to preserve the current
+ * Appearance Stream for the calling annotation.
+ */
+class POPPLER_QT5_EXPORT AnnotationAppearance
+{
+    friend class Annotation;
+
+public:
+    explicit AnnotationAppearance(AnnotationAppearancePrivate *annotationAppearancePrivate);
+    ~AnnotationAppearance();
+
+private:
+    AnnotationAppearancePrivate *d;
+    Q_DISABLE_COPY(AnnotationAppearance)
 };
 
 /**
@@ -420,6 +446,16 @@ public:
      * The type of the annotation.
      */
     virtual SubType subType() const = 0;
+
+    /**
+     * Returns the current appearance stream of this annotation.
+     */
+    std::unique_ptr<AnnotationAppearance> annotationAppearance() const;
+
+    /**
+     * Sets the annotation's appearance stream with the @p annotationAppearance.
+     */
+    void setAnnotationAppearance(const AnnotationAppearance &annotationAppearance);
 
     /**
      * Destructor.
@@ -777,6 +813,11 @@ public:
        \sa stampIconName for the list of standard icon names
     */
     void setStampIconName(const QString &name);
+
+    /**
+       Set a custom icon for this stamp annotation.
+    */
+    void setStampCustomImage(const QImage &image);
 
 private:
     explicit StampAnnotation(const QDomNode &node);

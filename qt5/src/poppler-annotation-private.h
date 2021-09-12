@@ -30,6 +30,7 @@
 #include "poppler-annotation.h"
 
 #include <Object.h>
+#include <AnnotStampImageHelper.h>
 
 class Annot;
 class AnnotPath;
@@ -40,6 +41,7 @@ namespace Poppler {
 class DocumentData;
 
 PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int flags);
+void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData);
 
 class AnnotationPrivate : public QSharedData
 {
@@ -108,6 +110,16 @@ public:
     Ref pdfObjectReference() const;
 
     Link *additionalAction(Annotation::AdditionalActionType type) const;
+
+    Object annotationAppearance;
+};
+
+class AnnotationAppearancePrivate
+{
+public:
+    explicit AnnotationAppearancePrivate(Annot *annot);
+
+    Object appearance;
 };
 
 }
