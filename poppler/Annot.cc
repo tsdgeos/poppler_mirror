@@ -1855,12 +1855,12 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     return 0;
 }
 
-Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict)
+Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict)
 {
     return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
 }
 
-Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject)
+Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject)
 {
     Dict *appearDict = new Dict(doc->getXRef());
     appearDict->set("Length", Object(appearBuf->getLength()));
@@ -5404,21 +5404,20 @@ void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
 void AnnotStamp::generateStampAppearance()
 {
     Ref imgRef = stampImageHelper->getRef();
-    std::string imgStrName = "X" + std::to_string(imgRef.num);
-    GooString imgRefName(imgStrName);
+    const std::string imgStrName = "X" + std::to_string(imgRef.num);
 
     AnnotAppearanceBuilder appearBuilder;
     appearBuilder.append("q\n");
     appearBuilder.append("/GS0 gs\n");
     appearBuilder.appendf("{0:.3f} 0 0 {1:.3f} 0 0 cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
     appearBuilder.append("/");
-    appearBuilder.append(imgRefName.c_str());
+    appearBuilder.append(imgStrName.c_str());
     appearBuilder.append(" Do\n");
     appearBuilder.append("Q\n");
 
-    Dict *resDict = createResourcesDict(imgRefName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
+    Dict *resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
 
-    double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const GooString *appearBuf = appearBuilder.buffer();
     appearance = createForm(appearBuf, bboxArray, false, resDict);
 }
@@ -5485,8 +5484,9 @@ void AnnotStamp::clearCustomImage()
     if (stampImageHelper != nullptr) {
         stampImageHelper->removeAnnotStampImageObject();
         delete stampImageHelper;
+        stampImageHelper = nullptr;
+        invalidateAppearance();
     }
-    invalidateAppearance();
 }
 
 //------------------------------------------------------------------------

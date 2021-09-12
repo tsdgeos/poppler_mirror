@@ -3,6 +3,7 @@
 // AnnotStampImageHelper.h
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
 //
 // Licensed under GPLv2 or later
 //
@@ -41,14 +42,12 @@ public:
     ~AnnotStampImageHelper() { }
 
     // Returns the ref to the created Image XObject
-    Ref getRef() { return ref; }
+    Ref getRef() const { return ref; }
 
     // Returns the width of the image
     int getWidth() const { return width; }
     // Returns the height of the image
     int getHeight() const { return height; }
-
-    Object &getAnnotStampImageHelperObject() { return imgObj; }
 
     // Removes the created Image XObject as well as its soft mask from the XRef Table
     void removeAnnotStampImageObject();

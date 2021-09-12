@@ -758,8 +758,8 @@ private:
 protected:
     virtual ~Annot();
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict);
-    Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict);
+    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;
