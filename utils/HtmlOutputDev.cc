@@ -516,11 +516,11 @@ void HtmlPage::coalesce()
         bool found;
         while (str1) {
             double size = str1->yMax - str1->yMin;
-            double xLimit = str1->xMin + size * 0.175;
+            double xLimit = str1->xMin + size;
             found = false;
             for (str2 = str1, str3 = str1->yxNext; str3 && str3->xMin < xLimit; str2 = str3, str3 = str2->yxNext) {
                 if (str3->len == str1->len && !memcmp(str3->text, str1->text, str1->len * sizeof(Unicode)) && fabs(str3->yMin - str1->yMin) < size * 0.2 && fabs(str3->yMax - str1->yMax) < size * 0.2
-                    && fabs(str3->xMax - str1->xMax) < size * 0.175) {
+                    && fabs(str3->xMax - str1->xMax) < size * 0.1) {
                     found = true;
                     // printf("found duplicate!\n");
                     break;
