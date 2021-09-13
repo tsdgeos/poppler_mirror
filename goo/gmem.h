@@ -17,6 +17,7 @@
 // Copyright (C) 2007-2010, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
