@@ -168,7 +168,13 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
         std::abort();
     }
 
-    return grealloc(p, bytes, checkoverflow);
+    if (void *q = grealloc(p, bytes, checkoverflow)) {
+        return q;
+    }
+    if (free_p) {
+        gfree(p);
+    }
+    return nullptr;
 }
 
 inline void *greallocn_checkoverflow(void *p, int count, int size)
