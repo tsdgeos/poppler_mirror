@@ -5442,51 +5442,87 @@ void AnnotStamp::generateStampDefaultAppearance()
     Dict *extGStateDict = nullptr;
     AnnotAppearanceBuilder defaultAppearanceBuilder;
 
+    double stampUnscaledWidth;
+    double stampUnscaledHeight;
+    const char *stampCode;
     if (!icon->cmp("Approved")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_APPROVED);
+        stampUnscaledWidth = ANNOT_STAMP_APPROVED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_APPROVED_HEIGHT;
+        stampCode = ANNOT_STAMP_APPROVED;
         extGStateDict = getApprovedStampExtGStateDict(doc);
     } else if (!icon->cmp("AsIs")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_AS_IS);
+        stampUnscaledWidth = ANNOT_STAMP_AS_IS_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_AS_IS_HEIGHT;
+        stampCode = ANNOT_STAMP_AS_IS;
         extGStateDict = getAsIsStampExtGStateDict(doc);
     } else if (!icon->cmp("Confidential")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_CONFIDENTIAL);
+        stampUnscaledWidth = ANNOT_STAMP_CONFIDENTIAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_CONFIDENTIAL_HEIGHT;
+        stampCode = ANNOT_STAMP_CONFIDENTIAL;
         extGStateDict = getConfidentialStampExtGStateDict(doc);
     } else if (!icon->cmp("Final")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_FINAL);
+        stampUnscaledWidth = ANNOT_STAMP_FINAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FINAL_HEIGHT;
+        stampCode = ANNOT_STAMP_FINAL;
         extGStateDict = getFinalStampExtGStateDict(doc);
     } else if (!icon->cmp("Experimental")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_EXPERIMENTAL);
+        stampUnscaledWidth = ANNOT_STAMP_EXPERIMENTAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_EXPERIMENTAL_HEIGHT;
+        stampCode = ANNOT_STAMP_EXPERIMENTAL;
         extGStateDict = getExperimentalStampExtGStateDict(doc);
     } else if (!icon->cmp("Expired")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_EXPIRED);
+        stampUnscaledWidth = ANNOT_STAMP_EXPIRED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_EXPIRED_HEIGHT;
+        stampCode = ANNOT_STAMP_EXPIRED;
         extGStateDict = getExpiredStampExtGStateDict(doc);
     } else if (!icon->cmp("NotApproved")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_NOT_APPROVED);
+        stampUnscaledWidth = ANNOT_STAMP_NOT_APPROVED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_NOT_APPROVED_HEIGHT;
+        stampCode = ANNOT_STAMP_NOT_APPROVED;
         extGStateDict = getNotApprovedStampExtGStateDict(doc);
     } else if (!icon->cmp("NotForPublicRelease")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE);
+        stampUnscaledWidth = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_HEIGHT;
+        stampCode = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE;
         extGStateDict = getNotForPublicReleaseStampExtGStateDict(doc);
     } else if (!icon->cmp("Sold")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_SOLD);
+        stampUnscaledWidth = ANNOT_STAMP_SOLD_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_SOLD_HEIGHT;
+        stampCode = ANNOT_STAMP_SOLD;
         extGStateDict = getSoldStampExtGStateDict(doc);
     } else if (!icon->cmp("Departmental")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_DEPARTMENTAL);
+        stampUnscaledWidth = ANNOT_STAMP_DEPARTMENTAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_DEPARTMENTAL_HEIGHT;
+        stampCode = ANNOT_STAMP_DEPARTMENTAL;
         extGStateDict = getDepartmentalStampExtGStateDict(doc);
     } else if (!icon->cmp("ForComment")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_FOR_COMMENT);
+        stampUnscaledWidth = ANNOT_STAMP_FOR_COMMENT_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FOR_COMMENT_HEIGHT;
+        stampCode = ANNOT_STAMP_FOR_COMMENT;
         extGStateDict = getForCommentStampExtGStateDict(doc);
     } else if (!icon->cmp("ForPublicRelease")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_FOR_PUBLIC_RELEASE);
+        stampUnscaledWidth = ANNOT_STAMP_FOR_PUBLIC_RELEASE_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FOR_PUBLIC_RELEASE_HEIGHT;
+        stampCode = ANNOT_STAMP_FOR_PUBLIC_RELEASE;
         extGStateDict = getForPublicReleaseStampExtGStateDict(doc);
     } else if (!icon->cmp("TopSecret")) {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_TOP_SECRET);
+        stampUnscaledWidth = ANNOT_STAMP_TOP_SECRET_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_TOP_SECRET_HEIGHT;
+        stampCode = ANNOT_STAMP_TOP_SECRET;
         extGStateDict = getTopSecretStampExtGStateDict(doc);
     } else {
-        defaultAppearanceBuilder.append(ANNOT_STAMP_DRAFT);
+        stampUnscaledWidth = ANNOT_STAMP_DRAFT_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_DRAFT_HEIGHT;
+        stampCode = ANNOT_STAMP_DRAFT;
         extGStateDict = getDraftStampExtGStateDict(doc);
     }
 
-    double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const GooString *scale = GooString::format("{0:.6g} 0 0 {1:.6g} 0 0 cm\nq\n", bboxArray[2] / stampUnscaledWidth, bboxArray[3] / stampUnscaledHeight);
+    defaultAppearanceBuilder.append(scale->c_str());
+    defaultAppearanceBuilder.append(stampCode);
+    defaultAppearanceBuilder.append("Q\n");
+    delete scale;
 
     Dict *resDict = new Dict(doc->getXRef());
     resDict->add("ExtGState", Object(extGStateDict));

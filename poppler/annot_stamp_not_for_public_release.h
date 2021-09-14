@@ -3,6 +3,7 @@
 // annot_stamp_not_for_public_release.h
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
 //
 // Mechanically extracted from an SVG created for Okular by Eugene Trounev eugene.trounev@gmail.com
 //
@@ -16,6 +17,9 @@
 #include "PDFDoc.h"
 #include "Dict.h"
 #include "Object.h"
+
+static const double ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_WIDTH = 268.008179;
+static const double ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_HEIGHT = 26.484743;
 
 static const char *ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE = "1 0 0 -1 0 26.484741 cm\n"
                                                         "q\n"

@@ -3,6 +3,7 @@
 // annot_stamp_for_comment.h
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
 //
 // Mechanically extracted from an SVG created for Okular by Eugene Trounev eugene.trounev@gmail.com
 //
@@ -16,6 +17,9 @@
 #include "Dict.h"
 #include "Object.h"
 #include "PDFDoc.h"
+
+static const double ANNOT_STAMP_FOR_COMMENT_WIDTH = 170.508179;
+static const double ANNOT_STAMP_FOR_COMMENT_HEIGHT = 26.484743;
 
 static const char *ANNOT_STAMP_FOR_COMMENT = "1 0 0 -1 0 26.484741 cm\n"
                                              "q\n"
