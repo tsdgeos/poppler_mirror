@@ -129,76 +129,12 @@ bool PDFConverter::sign(const NewSignatureData &data)
 
     ::PDFDoc *doc = d->document->doc;
     ::Page *destPage = doc->getPage(data.page() + 1);
-
-    const DefaultAppearance da { { objName, "SigFont" }, data.fontSize(), std::unique_ptr<AnnotColor> { convertQColor(data.fontColor()) } };
-    const PDFRectangle rect = boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation);
-
-    Object annotObj = Object(new Dict(doc->getXRef()));
-    annotObj.dictSet("Type", Object(objName, "Annot"));
-    annotObj.dictSet("Subtype", Object(objName, "Widget"));
-    annotObj.dictSet("FT", Object(objName, "Sig"));
-    annotObj.dictSet("T", Object(QStringToGooString(data.fieldPartialName())));
-    Array *rectArray = new Array(doc->getXRef());
-    rectArray->add(Object(rect.x1));
-    rectArray->add(Object(rect.y1));
-    rectArray->add(Object(rect.x2));
-    rectArray->add(Object(rect.y2));
-    annotObj.dictSet("Rect", Object(rectArray));
-
-    GooString *daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(daStr));
-
-    const Ref ref = doc->getXRef()->addIndirectObject(&annotObj);
-    Catalog *catalog = doc->getCatalog();
-    catalog->addFormToAcroForm(ref);
-
-    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
-
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
-    field->setCustomAppearanceContent(*gSignatureText);
-
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
-    field->setCustomAppearanceLeftContent(*gSignatureLeftText);
 
-    Object refObj(ref);
-    AnnotWidget *signatureAnnot = new AnnotWidget(doc, &annotObj, &refObj, field.get());
-    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
-    Dict dummy(doc->getXRef());
-    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
-    appearCharacs->setBorderColor(std::unique_ptr<AnnotColor> { convertQColor(data.borderColor()) });
-    appearCharacs->setBackColor(std::unique_ptr<AnnotColor> { convertQColor(data.backgroundColor()) });
-    signatureAnnot->setAppearCharacs(std::move(appearCharacs));
-
-    signatureAnnot->generateFieldAppearance();
-    signatureAnnot->updateAppearanceStream();
-
-    FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
-    formWidget->setWidgetAnnotation(signatureAnnot);
-
-    destPage->addAnnot(signatureAnnot);
-
-    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(data.borderWidth());
-    signatureAnnot->setBorder(std::move(border));
-
-    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
-    if (fws) {
-        const bool res = fws->signDocument(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData());
-
-        // Now remove the signature stuff in case the user wants to continue editing stuff
-        // So the document object is clean
-        const Object &vRefObj = annotObj.dictLookupNF("V");
-        if (vRefObj.isRef()) {
-            doc->getXRef()->removeIndirectObject(vRefObj.getRef());
-        }
-        destPage->removeAnnot(signatureAnnot);
-        catalog->removeFormFromAcroForm(ref);
-        doc->getXRef()->removeIndirectObject(ref);
-
-        return res;
-    }
-
-    return false;
+    return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page(),
+                     boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
+                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate

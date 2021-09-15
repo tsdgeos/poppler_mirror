@@ -329,6 +329,9 @@ public:
     // scans the PDF and returns whether it contains any javascript
     bool hasJavascript();
 
+    bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+              std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor);
+
 private:
     // insert referenced objects in XRef
     void markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts);

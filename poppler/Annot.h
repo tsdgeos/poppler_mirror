@@ -377,7 +377,7 @@ private:
 class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
-    DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA);
+    DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
     explicit DefaultAppearance(const GooString *da);
     void setFontName(Object &&fontNameA);
     const Object &getFontName() const { return fontName; }

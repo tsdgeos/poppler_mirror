@@ -792,7 +792,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
+DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
 DefaultAppearance::DefaultAppearance(const GooString *da)
 {
