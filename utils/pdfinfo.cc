@@ -43,6 +43,7 @@
 #include <ctime>
 #include <cmath>
 #include <map>
+#include <set>
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
@@ -73,6 +74,7 @@ static int firstPage = 1;
 static int lastPage = 0;
 static bool printBoxes = false;
 static bool printMetadata = false;
+static bool printCustom = false;
 static bool printJS = false;
 static bool isoDates = false;
 static bool rawDates = false;
@@ -90,6 +92,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-l", argInt, &lastPage, 0, "last page to convert" },
                                    { "-box", argFlag, &printBoxes, 0, "print the page bounding boxes" },
                                    { "-meta", argFlag, &printMetadata, 0, "print the document metadata (XML)" },
+                                   { "-custom", argFlag, &printCustom, 0, "print both custom and standard metadata" },
                                    { "-js", argFlag, &printJS, 0, "print all JavaScript in the PDF" },
                                    { "-struct", argFlag, &printStructure, 0, "print the logical document structure (for tagged files)" },
                                    { "-struct-text", argFlag, &printStructureText, 0, "print text contents along with document structure (for tagged files)" },
@@ -117,6 +120,15 @@ static void printTextString(const GooString *s, const UnicodeMap *uMap)
         fwrite(buf, 1, n, stdout);
     }
     gfree(u);
+}
+
+static void printUCS4String(const Unicode *u, int len, const UnicodeMap *uMap)
+{
+    char buf[8];
+    for (int i = 0; i < len; i++) {
+        int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+        fwrite(buf, 1, n, stdout);
+    }
 }
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text, const UnicodeMap *uMap)
@@ -634,6 +646,60 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
     }
 }
 
+static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
+{
+    Object info = doc->getDocInfo();
+    if (info.isDict()) {
+        Dict *dict = info.getDict();
+
+        // Sort keys
+        std::set<std::string> keys;
+        for (int i = 0; i < dict->getLength(); i++) {
+            std::string key(dict->getKey(i));
+            if (key != "Trapped") {
+                keys.insert(key);
+            }
+        }
+
+        for (const std::string &key : keys) {
+            if (key == "CreationDate") {
+                if (isoDates) {
+                    printISODate(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
+                } else if (rawDates) {
+                    printInfoString(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
+                } else {
+                    printInfoDate(info.getDict(), "CreationDate", "CreationDate:   ", uMap);
+                }
+            } else if (key == "ModDate") {
+                if (isoDates) {
+                    printISODate(info.getDict(), "ModDate", "ModDate:        ", uMap);
+                } else if (rawDates) {
+                    printInfoString(info.getDict(), "ModDate", "ModDate:        ", uMap);
+                } else {
+                    printInfoDate(info.getDict(), "ModDate", "ModDate:        ", uMap);
+                }
+            } else {
+                // print key
+                Unicode *u;
+                int len = utf8ToUCS4(key.c_str(), &u);
+                printUCS4String(u, len, uMap);
+                fputs(":", stdout);
+                while (len < 15) {
+                    fputs(" ", stdout);
+                    len++;
+                }
+                gfree(u);
+
+                // print value
+                Object obj = dict->lookup(key.c_str());
+                GooString val_str(obj.getString());
+                printTextString(&val_str, uMap);
+                fputc('\n', stdout);
+            }
+        }
+    }
+}
+
 static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, bool multiPage)
 {
     Page *page;
@@ -908,6 +974,8 @@ int main(int argc, char *argv[])
             fputc('\n', stdout);
             delete metadata;
         }
+    } else if (printCustom) {
+        printCustomInfo(doc.get(), uMap);
     } else if (printJS) {
         // print javascript
         JSInfo jsInfo(doc.get(), firstPage - 1);
