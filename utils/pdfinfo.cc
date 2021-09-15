@@ -679,22 +679,24 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                     printInfoDate(info.getDict(), "ModDate", "ModDate:        ", uMap);
                 }
             } else {
-                // print key
-                Unicode *u;
-                int len = utf8ToUCS4(key.c_str(), &u);
-                printUCS4String(u, len, uMap);
-                fputs(":", stdout);
-                while (len < 15) {
-                    fputs(" ", stdout);
-                    len++;
-                }
-                gfree(u);
-
-                // print value
                 Object obj = dict->lookup(key.c_str());
-                GooString val_str(obj.getString());
-                printTextString(&val_str, uMap);
-                fputc('\n', stdout);
+                if (obj.isString()) {
+                    // print key
+                    Unicode *u;
+                    int len = utf8ToUCS4(key.c_str(), &u);
+                    printUCS4String(u, len, uMap);
+                    fputs(":", stdout);
+                    while (len < 15) {
+                        fputs(" ", stdout);
+                        len++;
+                    }
+                    gfree(u);
+
+                    // print value
+                    GooString val_str(obj.getString());
+                    printTextString(&val_str, uMap);
+                    fputc('\n', stdout);
+                }
             }
         }
     }
