@@ -4,7 +4,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
- * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2712,14 +2712,13 @@ PopplerFontType poppler_fonts_iter_get_font_type(PopplerFontsIter *iter)
  */
 const char *poppler_fonts_iter_get_encoding(PopplerFontsIter *iter)
 {
-    const GooString *encoding;
     FontInfo *info;
 
     info = iter->items[iter->index];
 
-    encoding = info->getEncoding();
-    if (encoding != nullptr) {
-        return encoding->c_str();
+    const std::string &encoding = info->getEncoding();
+    if (!encoding.empty()) {
+        return encoding.c_str();
     } else {
         return nullptr;
     }
