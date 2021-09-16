@@ -161,6 +161,8 @@ int main(int argc, char *argv[])
 
     const bool ok = parseArgs(argDesc, &argc, argv);
 
+    SignatureHandler::setNSSDir(nssDir);
+
     if (listNicknames) {
         bool passwordNeeded = false;
         auto passwordCallback = [&passwordNeeded](const char *) -> char * {
@@ -209,8 +211,6 @@ int main(int argc, char *argv[])
     }
 
     std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[1]);
-
-    SignatureHandler::setNSSDir(nssDir);
 
     // open PDF file
     std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
