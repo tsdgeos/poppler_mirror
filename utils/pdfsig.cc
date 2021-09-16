@@ -39,6 +39,7 @@
 #include "SignatureInfo.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
+#include "UTF.h"
 #include <libgen.h>
 
 static const char *getReadableSigState(SignatureValidationStatus sig_vs)
@@ -132,7 +133,7 @@ static int signatureNumber = 0;
 static char certNickname[256] = "";
 static char password[256] = "";
 static char digestName[256] = "SHA256";
-static char reason[256] = "";
+static GooString reason;
 static bool listNicknames = false;
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
@@ -144,7 +145,7 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
                                    { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
-                                   { "-reason", argString, &reason, 256, "reason for signing (default: no reason given)" },
+                                   { "-reason", argGooString, &reason, 0, "reason for signing (default: no reason given)" },
                                    { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
@@ -263,13 +264,13 @@ int main(int argc, char *argv[])
         if (etsiCAdESdetached)
             ffs->setSignatureType(ETSI_CAdES_detached);
         const char *pw = (strlen(password) == 0) ? nullptr : password;
-        const char *rs = (strlen(reason) == 0) ? nullptr : reason;
+        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason));
         if (ffs->getNumWidgets() != 1) {
             printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs);
+        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs.get());
         return success ? 0 : 3;
     }
 

@@ -27,6 +27,7 @@
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1997,6 +1998,26 @@ public:
          */
         QString signatureLeftText() const;
         void setSignatureLeftText(const QString &text);
+
+        /**
+         * Signature's property Reason.
+         *
+         * Default: an empty string.
+         *
+         * \since 21.10
+         */
+        QString reason() const;
+        void setReason(const QString &reason);
+
+        /**
+         * Signature's property Location.
+         *
+         * Default: an empty string.
+         *
+         * \since 21.10
+         */
+        QString location() const;
+        void setLocation(const QString &location);
 
         /**
          * Default: 10

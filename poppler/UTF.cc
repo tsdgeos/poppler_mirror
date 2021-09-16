@@ -20,6 +20,7 @@
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,8 @@
 #include "UTF.h"
 #include "UnicodeMapFuncs.h"
 #include <algorithm>
+
+#include <config.h>
 
 bool UnicodeIsValid(Unicode ucs4)
 {
@@ -352,6 +355,26 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
     utf8ToUtf16(utf8, utf16);
     return utf16;
+}
+
+GooString *utf8ToUtf16WithBom(const GooString &utf8)
+{
+    GooString *result = new GooString();
+    if (utf8.toStr().empty()) {
+        return result;
+    }
+    int tmp_length; // Number of UTF-16 symbols.
+    char *tmp_str = (char *)utf8ToUtf16(utf8.c_str(), &tmp_length);
+#ifndef WORDS_BIGENDIAN
+    for (int i = 0; i < tmp_length; i++) {
+        std::swap(tmp_str[i * 2], tmp_str[i * 2 + 1]);
+    }
+#endif
+
+    result->prependUnicodeMarker();
+    result->append(tmp_str, tmp_length * 2);
+    gfree(tmp_str);
+    return result;
 }
 
 static const uint32_t UTF16_ACCEPT = 0;

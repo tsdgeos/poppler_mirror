@@ -4,7 +4,8 @@
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
- * * Copyright (C) 2021, Zachary Travis <ztravis@everlaw.com>
+ * Copyright (C) 2021, Zachary Travis <ztravis@everlaw.com>
+ * Copyright (C) 2021, Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,10 +132,11 @@ bool PDFConverter::sign(const NewSignatureData &data)
     ::Page *destPage = doc->getPage(data.page() + 1);
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
-
+    const auto reason = std::unique_ptr<GooString>(data.reason().isEmpty() ? nullptr : QStringToUnicodeGooString(data.reason()));
+    const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page(),
                      boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
-                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get());
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
@@ -147,6 +149,8 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     QRectF boundingRectangle;
     QString signatureText;
     QString signatureLeftText;
+    QString reason;
+    QString location;
     double fontSize = 10.0;
     double leftFontSize = 20.0;
     QColor fontColor = Qt::red;
@@ -222,6 +226,26 @@ QString PDFConverter::NewSignatureData::signatureLeftText() const
 void PDFConverter::NewSignatureData::setSignatureLeftText(const QString &text)
 {
     d->signatureLeftText = text;
+}
+
+QString PDFConverter::NewSignatureData::reason() const
+{
+    return d->reason;
+}
+
+void PDFConverter::NewSignatureData::setReason(const QString &reason)
+{
+    d->reason = reason;
+}
+
+QString PDFConverter::NewSignatureData::location() const
+{
+    return d->location;
+}
+
+void PDFConverter::NewSignatureData::setLocation(const QString &location)
+{
+    d->location = location;
 }
 
 double PDFConverter::NewSignatureData::fontSize() const

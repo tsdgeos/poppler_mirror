@@ -571,7 +571,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const char *reason)
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location)
 {
 #ifdef ENABLE_NSS3
     if (!certNickname) {
@@ -594,10 +594,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     signatureField->setCertificateInfo(certInfo);
     updateWidgetAppearance(); // add visible signing info to appearance
 
-    GooString gReason(reason ? reason : "");
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(&vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), gReason, tmpSignature.get())) {
+    if (!createSignature(vObj, vref, GooString(signerName), tmpSignature.get(), reason, location)) {
         return false;
     }
 
@@ -780,7 +779,7 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     return true;
 }
 
-bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature)
+bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason, const GooString *location)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
     vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
@@ -788,8 +787,13 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("Name", Object(name.copy()));
     GooString *date = timeToDateString(nullptr);
     vObj.dictAdd("M", Object(date));
-    if (reason.getLength() > 0)
-        vObj.dictAdd("Reason", Object(reason.copy()));
+    if (reason && (reason->getLength() > 0)) {
+        vObj.dictAdd("Reason", Object(reason->copy()));
+    }
+    if (location && (location->getLength() > 0)) {
+        vObj.dictAdd("Location", Object(location->copy()));
+    }
+
     vObj.dictAdd("Contents", Object(objHexString, signature->copy()));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes

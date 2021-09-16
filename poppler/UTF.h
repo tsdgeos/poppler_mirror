@@ -9,6 +9,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -70,6 +71,12 @@ int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int ma
 
 // Allocate utf16 string and convert utf8 into it.
 uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
+
+// Converts a UTF-8 string to a big endian UTF-16 string with BOM.
+// The caller owns the returned pointer.
+//  utf8 - UTF-8 string to convert. An empty string is acceptable.
+// Returns a big endian UTF-16 string with BOM or an empty string without BOM.
+GooString POPPLER_PRIVATE_EXPORT *utf8ToUtf16WithBom(const GooString &utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).

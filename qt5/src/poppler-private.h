@@ -76,6 +76,8 @@ POPPLER_QT5_EXPORT QString UnicodeParsedString(const GooString *s1);
 
 POPPLER_QT5_EXPORT QString UnicodeParsedString(const std::string &s1);
 
+// Returns a big endian UTF-16 string with BOM or an empty string without BOM.
+// The caller owns the returned pointer.
 POPPLER_QT5_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
 POPPLER_QT5_EXPORT GooString *QStringToGooString(const QString &s);
