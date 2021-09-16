@@ -152,6 +152,16 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
 
+static void print_version_usage(bool usage)
+{
+    fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
+    fprintf(stderr, "%s\n", popplerCopyright);
+    fprintf(stderr, "%s\n", xpdfCopyright);
+    if (usage) {
+        printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     char *time_str = nullptr;
@@ -160,6 +170,21 @@ int main(int argc, char *argv[])
     Win32Console win32Console(&argc, &argv);
 
     const bool ok = parseArgs(argDesc, &argc, argv);
+
+    if (!ok) {
+        print_version_usage(true);
+        return 99;
+    }
+
+    if (printVersion) {
+        print_version_usage(false);
+        return 0;
+    }
+
+    if (printHelp) {
+        print_version_usage(true);
+        return 0;
+    }
 
     SignatureHandler::setNSSDir(nssDir);
 
@@ -193,20 +218,9 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if (!ok || (signatureNumber > 0 && argc != 3) || (signatureNumber == 0 && argc != 2) || printVersion || printHelp) {
-        fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
-        fprintf(stderr, "%s\n", popplerCopyright);
-        fprintf(stderr, "%s\n", xpdfCopyright);
-        if (signatureNumber > 0 && argc == 2) {
-            fprintf(stderr, "An output filename for the signed document must be given\n");
-            return 2;
-        }
-
-        if (!printVersion) {
-            printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
-        }
-        if (printVersion || printHelp)
-            return 0;
+    if (argc < 2) {
+        // no filename was given
+        print_version_usage(true);
         return 99;
     }
 
@@ -222,10 +236,18 @@ int main(int argc, char *argv[])
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
 
-    if (signatureNumber > static_cast<int>(sigCount)) {
-        printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
-        return 2;
-    } else if (signatureNumber > 0) {
+    if (signatureNumber > 0) {
+        // We are signing an existing signature field
+        if (argc == 2) {
+            fprintf(stderr, "An output filename for the signed document must be given\n");
+            return 2;
+        }
+
+        if (signatureNumber > static_cast<int>(sigCount)) {
+            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
+            return 2;
+        }
+
         if (strlen(certNickname) == 0) {
             printf("A nickname of the signing certificate must be given\n");
             return 2;
@@ -247,11 +269,14 @@ int main(int argc, char *argv[])
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        if (fws->signDocument(argv[2], certNickname, digestName, pw, rs)) {
-            return 0;
-        } else {
-            return 3;
-        }
+        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs);
+        return success ? 0 : 3;
+    }
+
+    if (argc > 2) {
+        // We are not signing and more than 1 filename was given
+        print_version_usage(true);
+        return 99;
     }
 
     if (sigCount >= 1) {
