@@ -34,6 +34,9 @@ prefix. If not specified the other search locations described in
 .B DESCRIPTION
 are used.
 .TP
+.B \-nss-pwd "password"
+Specify the password needed to acces the NSS database (if any).
+.TP
 .B \-nocert
 Do not validate the certificate.
 .TP
@@ -58,6 +61,9 @@ Set the given reason string for the signature (default: no reason set).
 .TP
 .B \-etsi
 Create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached.
+.TP
+.B \-list-nicks
+List available nicknames in the NSS database.
 .TP
 .B \-v
 Print copyright and version information.

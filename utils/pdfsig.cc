@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -122,6 +122,7 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
 }
 
 static GooString nssDir;
+static GooString nssPassword;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
@@ -132,8 +133,10 @@ static char certNickname[256] = "";
 static char password[256] = "";
 static char digestName[256] = "SHA256";
 static char reason[256] = "";
+static bool listNicknames = false;
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
+                                   { "-nss-pwd", argGooString, &nssPassword, 0, "password to access the NSS database (if any)" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
                                    { "-sign", argInt, &signatureNumber, 0, "sign the document in the signature field with the given number" },
@@ -142,6 +145,7 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
                                    { "-reason", argString, &reason, 256, "reason for signing (default: no reason given)" },
+                                   { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
@@ -156,6 +160,36 @@ int main(int argc, char *argv[])
     Win32Console win32Console(&argc, &argv);
 
     const bool ok = parseArgs(argDesc, &argc, argv);
+
+    if (listNicknames) {
+        bool passwordNeeded = false;
+        auto passwordCallback = [&passwordNeeded](const char *) -> char * {
+            if (nssPassword.getLength() > 0) {
+                return strdup(nssPassword.c_str());
+            } else {
+                passwordNeeded = true;
+                return nullptr;
+            }
+        };
+        SignatureHandler::setNSSPasswordCallback(passwordCallback);
+
+        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+        if (passwordNeeded) {
+            printf("Password is needed to access the NSS database.\n");
+            printf("\tPlease provide one with -nss-pwd.\n");
+        } else {
+            if (vCerts.empty()) {
+                printf("There are no certificates available.\n");
+            } else {
+                printf("Certificate nicknames available:\n");
+                for (auto &cert : vCerts) {
+                    const GooString &nick = cert->getNickName();
+                    printf("%s\n", nick.c_str());
+                }
+            }
+        }
+        return 0;
+    }
 
     if (!ok || (signatureNumber > 0 && argc != 3) || (signatureNumber == 0 && argc != 2) || printVersion || printHelp) {
         fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
