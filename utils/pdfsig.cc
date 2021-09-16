@@ -14,6 +14,7 @@
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
