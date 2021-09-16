@@ -27,6 +27,7 @@
 #include <ctime>
 #include <hasht.h>
 #include <fstream>
+#include <random>
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
@@ -136,11 +137,15 @@ static char password[256] = "";
 static char digestName[256] = "SHA256";
 static GooString reason;
 static bool listNicknames = false;
+static bool addNewSignature = false;
+static GooString newSignatureFieldName;
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
                                    { "-nss-pwd", argGooString, &nssPassword, 0, "password to access the NSS database (if any)" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
+                                   { "-add-signature", argFlag, &addNewSignature, 0, "adds a new signature to the document" },
+                                   { "-new-signature-field-name", argGooString, &newSignatureFieldName, 0, "field name used for the newly added signature. A random ID will be used if empty" },
                                    { "-sign", argInt, &signatureNumber, 0, "sign the document in the signature field with the given number" },
                                    { "-etsi", argFlag, &etsiCAdESdetached, 0, "create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached" },
                                    { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
@@ -162,6 +167,29 @@ static void print_version_usage(bool usage)
     if (usage) {
         printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
     }
+}
+
+static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *passwordNeeded)
+{
+    *passwordNeeded = false;
+    auto passwordCallback = [&passwordNeeded](const char *) -> char * {
+        if (nssPassword.getLength() > 0) {
+            return strdup(nssPassword.c_str());
+        } else {
+            *passwordNeeded = true;
+            return nullptr;
+        }
+    };
+    SignatureHandler::setNSSPasswordCallback(passwordCallback);
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+    SignatureHandler::setNSSPasswordCallback({});
+    if (*passwordNeeded) {
+        printf("Password is needed to access the NSS database.\n");
+        printf("\tPlease provide one with -nss-pwd.\n");
+        return {};
+    }
+
+    return vCerts;
 }
 
 int main(int argc, char *argv[])
@@ -191,21 +219,10 @@ int main(int argc, char *argv[])
     SignatureHandler::setNSSDir(nssDir);
 
     if (listNicknames) {
-        bool passwordNeeded = false;
-        auto passwordCallback = [&passwordNeeded](const char *) -> char * {
-            if (nssPassword.getLength() > 0) {
-                return strdup(nssPassword.c_str());
-            } else {
-                passwordNeeded = true;
-                return nullptr;
-            }
-        };
-        SignatureHandler::setNSSPasswordCallback(passwordCallback);
-
-        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+        bool passwordNeeded;
+        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = getAvailableSigningCertificates(&passwordNeeded);
         if (passwordNeeded) {
-            printf("Password is needed to access the NSS database.\n");
-            printf("\tPlease provide one with -nss-pwd.\n");
+            return 2;
         } else {
             if (vCerts.empty()) {
                 printf("There are no certificates available.\n");
@@ -233,6 +250,69 @@ int main(int argc, char *argv[])
 
     if (!doc->isOk()) {
         return 1;
+    }
+
+    if (addNewSignature && signatureNumber > 0) {
+        // incompatible options
+        print_version_usage(true);
+        return 99;
+    }
+
+    if (addNewSignature) {
+        if (argc == 2) {
+            fprintf(stderr, "An output filename for the signed document must be given\n");
+            return 2;
+        }
+
+        if (strlen(certNickname) == 0) {
+            printf("A nickname of the signing certificate must be given\n");
+            return 2;
+        }
+
+        if (etsiCAdESdetached) {
+            printf("-etsi is not supported yet with -add-signature\n");
+            printf("Please file a bug report if this is important for you\n");
+            return 2;
+        }
+
+        if (digestName != std::string("SHA256")) {
+            printf("Only digest SHA256 is supported at the moment with -add-signature\n");
+            printf("Please file a bug report if this is important for you\n");
+            return 2;
+        }
+
+        if (doc->getPage(1) == nullptr) {
+            printf("Error getting first page of the document.\n");
+            return 2;
+        }
+
+        bool passwordNeeded;
+        // We need to call this otherwise NSS spins forever
+        getAvailableSigningCertificates(&passwordNeeded);
+        if (passwordNeeded) {
+            return 2;
+        }
+
+        const char *pw = (strlen(password) == 0) ? nullptr : password;
+        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason));
+
+        if (newSignatureFieldName.getLength() == 0) {
+            // Create a random field name, it could be anything but 32 hex numbers should
+            // hopefully give us something that is not already in the document
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distrib(1, 15);
+            for (int i = 0; i < 32; ++i) {
+                const int value = distrib(gen);
+                newSignatureFieldName.append(value < 10 ? 48 + value : 65 + (value - 10));
+            }
+        }
+
+        // We don't provide a way to customize the UI from pdfsig for now
+        const bool success = doc->sign(argv[2], certNickname, pw, newSignatureFieldName.copy(), /*page*/ 1,
+                                       /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0,
+                                       /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get());
+        return success ? 0 : 3;
     }
 
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();

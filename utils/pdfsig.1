@@ -15,7 +15,7 @@ It also displays the identity of each signer
 the time and date of the signature, the hash algorithm used for signing,
 the type of the signature as stated in the PDF and
 the signed ranges with a statement wether the total document is signed.
-Moreover, with option -sign it can sign a PDF document.
+It can also sign PDF documents (options -add-signature or -sign).
 .PP
 The signer certificate validation uses the trusted certificates stored in the
 Network Security Services (NSS) Database. The NSS Database is searched for in the following locations:
@@ -43,8 +43,14 @@ Do not validate the certificate.
 .B \-dump
 Dump all signatures into current directory.
 .TP
-.B \-sign " number"
-Sign the document in the signature field with the given number.
+.B \-add-signature
+Add a new signature to the document.
+.TP
+.B \-new-signature-field-name " name"
+Specifies the field name to be used when adding a new signature. A random ID will be used by default.
+.TP
+.B \-sign " n"
+Sign the document in the n-th signature field present in the document (must be unsigned).
 .TP
 .B \-nick " nickname"
 Use the certificate with the given nickname for signing.
@@ -74,6 +80,16 @@ Print usage information.
 and
 .B \-\-help
 are equivalent.)
+.SH EXAMPLES
+.TP
+pdfsig signed_file.pdf
+Displays signature info for signed_file.pdf.
+.TP
+pdfsig input.pdf output.pdf -add-signature -nss-pwd password -nick my-cert -reason 'for fun!'
+Creates a new pdf named output.pdf with the contents of input.pdf signed by the 'my-cert' certificate.
+.TP
+pdfsig input.pdf output.pdf -sign 0 -nss-pwd password -nick my-cert -reason 'for fun!'
+Creates a new pdf named output.pdf with the contents of input.pdf signed by the 'my-cert' certificate. input.pdf must have an already existing un-signed signature field.
 .SH AUTHOR
 The pdfsig software and documentation are copyright 1996-2004 Glyph & Cog, LLC
 and copyright 2005-2015 The Poppler Developers - http://poppler.freedesktop.org
