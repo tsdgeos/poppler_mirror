@@ -2124,7 +2124,7 @@ bool PDFDoc::hasJavascript()
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
                   double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location)
 {
-    ::Page *destPage = getPage(page + 1);
+    ::Page *destPage = getPage(page);
 
     const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
 
