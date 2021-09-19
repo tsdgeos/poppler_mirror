@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -154,8 +154,8 @@ AnnotationPrivate::AnnotationPrivate() : flags(0), revisionScope(Annotation::Roo
 
 void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData)
 {
-    int height = qimg.height();
-    int width = qimg.width();
+    const int height = qimg.height();
+    const int width = qimg.width();
 
     switch (bitsPerPixel) {
     case 1:
@@ -3256,8 +3256,8 @@ AnnotStampImageHelper *StampAnnotationPrivate::convertQImageToAnnotStampImageHel
 
     QByteArray data;
     QByteArray sMaskData;
-    int width = convertedQImage.width();
-    int height = convertedQImage.height();
+    const int width = convertedQImage.width();
+    const int height = convertedQImage.height();
     int bitsPerComponent = 1;
     ColorSpace colorSpace = ColorSpace::DeviceGray;
 

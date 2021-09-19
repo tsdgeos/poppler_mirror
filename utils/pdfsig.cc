@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -14,6 +14,7 @@
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -39,6 +40,7 @@
 #include "SignatureInfo.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
+#include "UTF.h"
 #include <libgen.h>
 
 static const char *getReadableSigState(SignatureValidationStatus sig_vs)
@@ -122,6 +124,7 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
 }
 
 static GooString nssDir;
+static GooString nssPassword;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
@@ -131,9 +134,11 @@ static int signatureNumber = 0;
 static char certNickname[256] = "";
 static char password[256] = "";
 static char digestName[256] = "SHA256";
-static char reason[256] = "";
+static GooString reason;
+static bool listNicknames = false;
 
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
+                                   { "-nss-pwd", argGooString, &nssPassword, 0, "password to access the NSS database (if any)" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
                                    { "-sign", argInt, &signatureNumber, 0, "sign the document in the signature field with the given number" },
@@ -141,12 +146,23 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
                                    { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
-                                   { "-reason", argString, &reason, 256, "reason for signing (default: no reason given)" },
+                                   { "-reason", argGooString, &reason, 0, "reason for signing (default: no reason given)" },
+                                   { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
+
+static void print_version_usage(bool usage)
+{
+    fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
+    fprintf(stderr, "%s\n", popplerCopyright);
+    fprintf(stderr, "%s\n", xpdfCopyright);
+    if (usage) {
+        printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -157,26 +173,60 @@ int main(int argc, char *argv[])
 
     const bool ok = parseArgs(argDesc, &argc, argv);
 
-    if (!ok || (signatureNumber > 0 && argc != 3) || (signatureNumber == 0 && argc != 2) || printVersion || printHelp) {
-        fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
-        fprintf(stderr, "%s\n", popplerCopyright);
-        fprintf(stderr, "%s\n", xpdfCopyright);
-        if (signatureNumber > 0 && argc == 2) {
-            fprintf(stderr, "An output filename for the signed document must be given\n");
-            return 2;
-        }
+    if (!ok) {
+        print_version_usage(true);
+        return 99;
+    }
 
-        if (!printVersion) {
-            printUsage("pdfsig", "<PDF-file> [<output-file>]", argDesc);
+    if (printVersion) {
+        print_version_usage(false);
+        return 0;
+    }
+
+    if (printHelp) {
+        print_version_usage(true);
+        return 0;
+    }
+
+    SignatureHandler::setNSSDir(nssDir);
+
+    if (listNicknames) {
+        bool passwordNeeded = false;
+        auto passwordCallback = [&passwordNeeded](const char *) -> char * {
+            if (nssPassword.getLength() > 0) {
+                return strdup(nssPassword.c_str());
+            } else {
+                passwordNeeded = true;
+                return nullptr;
+            }
+        };
+        SignatureHandler::setNSSPasswordCallback(passwordCallback);
+
+        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+        if (passwordNeeded) {
+            printf("Password is needed to access the NSS database.\n");
+            printf("\tPlease provide one with -nss-pwd.\n");
+        } else {
+            if (vCerts.empty()) {
+                printf("There are no certificates available.\n");
+            } else {
+                printf("Certificate nicknames available:\n");
+                for (auto &cert : vCerts) {
+                    const GooString &nick = cert->getNickName();
+                    printf("%s\n", nick.c_str());
+                }
+            }
         }
-        if (printVersion || printHelp)
-            return 0;
+        return 0;
+    }
+
+    if (argc < 2) {
+        // no filename was given
+        print_version_usage(true);
         return 99;
     }
 
     std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[1]);
-
-    SignatureHandler::setNSSDir(nssDir);
 
     // open PDF file
     std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
@@ -188,10 +238,18 @@ int main(int argc, char *argv[])
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
 
-    if (signatureNumber > static_cast<int>(sigCount)) {
-        printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
-        return 2;
-    } else if (signatureNumber > 0) {
+    if (signatureNumber > 0) {
+        // We are signing an existing signature field
+        if (argc == 2) {
+            fprintf(stderr, "An output filename for the signed document must be given\n");
+            return 2;
+        }
+
+        if (signatureNumber > static_cast<int>(sigCount)) {
+            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
+            return 2;
+        }
+
         if (strlen(certNickname) == 0) {
             printf("A nickname of the signing certificate must be given\n");
             return 2;
@@ -207,17 +265,20 @@ int main(int argc, char *argv[])
         if (etsiCAdESdetached)
             ffs->setSignatureType(ETSI_CAdES_detached);
         const char *pw = (strlen(password) == 0) ? nullptr : password;
-        const char *rs = (strlen(reason) == 0) ? nullptr : reason;
+        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason));
         if (ffs->getNumWidgets() != 1) {
             printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        if (fws->signDocument(argv[2], certNickname, digestName, pw, rs)) {
-            return 0;
-        } else {
-            return 3;
-        }
+        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs.get());
+        return success ? 0 : 3;
+    }
+
+    if (argc > 2) {
+        // We are not signing and more than 1 filename was given
+        print_version_usage(true);
+        return 99;
     }
 
     if (sigCount >= 1) {

@@ -49,6 +49,7 @@
 // Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2118,4 +2119,75 @@ bool PDFDoc::hasJavascript()
     JSInfo jsInfo(this);
     jsInfo.scanJS(getNumPages(), true);
     return jsInfo.containsJS();
+}
+
+bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
+                  double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location)
+{
+    ::Page *destPage = getPage(page);
+
+    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+
+    Object annotObj = Object(new Dict(getXRef()));
+    annotObj.dictSet("Type", Object(objName, "Annot"));
+    annotObj.dictSet("Subtype", Object(objName, "Widget"));
+    annotObj.dictSet("FT", Object(objName, "Sig"));
+    annotObj.dictSet("T", Object(partialFieldName));
+    Array *rectArray = new Array(getXRef());
+    rectArray->add(Object(rect.x1));
+    rectArray->add(Object(rect.y1));
+    rectArray->add(Object(rect.x2));
+    rectArray->add(Object(rect.y2));
+    annotObj.dictSet("Rect", Object(rectArray));
+
+    GooString *daStr = da.toAppearanceString();
+    annotObj.dictSet("DA", Object(daStr));
+
+    const Ref ref = getXRef()->addIndirectObject(&annotObj);
+    catalog->addFormToAcroForm(ref);
+
+    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
+
+    field->setCustomAppearanceContent(signatureText);
+    field->setCustomAppearanceLeftContent(signatureTextLeft);
+
+    Object refObj(ref);
+    AnnotWidget *signatureAnnot = new AnnotWidget(this, &annotObj, &refObj, field.get());
+    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
+    Dict dummy(getXRef());
+    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
+    appearCharacs->setBorderColor(std::move(borderColor));
+    appearCharacs->setBackColor(std::move(backgroundColor));
+    signatureAnnot->setAppearCharacs(std::move(appearCharacs));
+
+    signatureAnnot->generateFieldAppearance();
+    signatureAnnot->updateAppearanceStream();
+
+    FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
+    formWidget->setWidgetAnnotation(signatureAnnot);
+
+    destPage->addAnnot(signatureAnnot);
+
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
+    border->setWidth(borderWidth);
+    signatureAnnot->setBorder(std::move(border));
+
+    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
+    if (fws) {
+        const bool res = fws->signDocument(saveFilename, certNickname, "SHA256", password, reason, location);
+
+        // Now remove the signature stuff in case the user wants to continue editing stuff
+        // So the document object is clean
+        const Object &vRefObj = annotObj.dictLookupNF("V");
+        if (vRefObj.isRef()) {
+            getXRef()->removeIndirectObject(vRefObj.getRef());
+        }
+        destPage->removeAnnot(signatureAnnot);
+        catalog->removeFormFromAcroForm(ref);
+        getXRef()->removeIndirectObject(ref);
+
+        return res;
+    }
+
+    return false;
 }

@@ -20,6 +20,7 @@
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -76,6 +77,8 @@ POPPLER_QT5_EXPORT QString UnicodeParsedString(const GooString *s1);
 
 POPPLER_QT5_EXPORT QString UnicodeParsedString(const std::string &s1);
 
+// Returns a big endian UTF-16 string with BOM or an empty string without BOM.
+// The caller owns the returned pointer.
 POPPLER_QT5_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
 POPPLER_QT5_EXPORT GooString *QStringToGooString(const QString &s);

@@ -19,7 +19,7 @@
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             printf("name                                 type              encoding         emb sub uni object ID\n");
             printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
             for (const FontInfo *font : fonts) {
-                printf("%-36s %-17s %-16s %-3s %-3s %-3s", font->getName() ? font->getName()->c_str() : "[none]", fontTypeNames[font->getType()], font->getEncoding()->c_str(), font->getEmbedded() ? "yes" : "no",
+                printf("%-36s %-17s %-16s %-3s %-3s %-3s", font->getName() ? font->getName()->c_str() : "[none]", fontTypeNames[font->getType()], font->getEncoding().c_str(), font->getEmbedded() ? "yes" : "no",
                        font->getSubset() ? "yes" : "no", font->getToUnicode() ? "yes" : "no");
                 const Ref fontRef = font->getRef();
                 if (fontRef.gen >= 100000) {

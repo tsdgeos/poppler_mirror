@@ -35,6 +35,7 @@
 // Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -328,6 +329,11 @@ public:
     static void writeXRefStreamTrailer(Object &&trailerDict, XRef *uxref, Ref *uxrefStreamRef, Goffset uxrefOffset, OutStream *outStr, XRef *xRef);
     // scans the PDF and returns whether it contains any javascript
     bool hasJavascript();
+
+    // Arguments signatureText and signatureTextLeft are UTF-16 big endian strings with BOM.
+    // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
+    bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+              std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr);
 
 private:
     // insert referenced objects in XRef

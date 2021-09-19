@@ -377,7 +377,7 @@ private:
 class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
-    DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA);
+    DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
     explicit DefaultAppearance(const GooString *da);
     void setFontName(Object &&fontNameA);
     const Object &getFontName() const { return fontName; }
@@ -758,8 +758,8 @@ private:
 protected:
     virtual ~Annot();
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict);
-    Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict);
+    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;
@@ -1212,7 +1212,8 @@ public:
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
-    void generateStampAppearance();
+    void generateStampDefaultAppearance();
+    void generateStampCustomAppearance();
 
     std::unique_ptr<GooString> icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;

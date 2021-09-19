@@ -14,12 +14,13 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2016, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,8 @@
 #include "UTF.h"
 #include "UnicodeMapFuncs.h"
 #include <algorithm>
+
+#include <config.h>
 
 bool UnicodeIsValid(Unicode ucs4)
 {
@@ -176,377 +179,28 @@ static const uint32_t UTF8_REJECT = 12;
 static const uint32_t UCS4_MAX = 0x10FFFF;
 static const Unicode REPLACEMENT_CHAR = 0xFFFD;
 
+// clang-format off
 static const uint8_t decodeUtf8Table[] = {
-    // The first part of the table maps bytes to character classes
-    // to reduce the size of the transition table and create bitmasks.
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // 00..1f
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // 20..3f
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // 40..5f
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // 60..7f
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    1,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9,
-    9, // 80..9f
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7,
-    7, // a0..bf
-    8,
-    8,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2,
-    2, // c0..df
-    10,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    3,
-    4,
-    3,
-    3,
-    11,
-    6,
-    6,
-    6,
-    5,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8,
-    8, // e0..ff
+  // The first part of the table maps bytes to character classes
+  // to reduce the size of the transition table and create bitmasks.
+   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 00..1f
+   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 20..3f
+   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 40..5f
+   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // 60..7f
+   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,  9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, // 80..9f
+   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, // a0..bf
+   8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, // c0..df
+  10,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3, 11,6,6,6,5,8,8,8,8,8,8,8,8,8,8,8, // e0..ff
 
-    // The second part is a transition table that maps a combination
-    // of a state of the automaton and a character class to a state.
-    0,
-    12,
-    24,
-    36,
-    60,
-    96,
-    84,
-    12,
-    12,
-    12,
-    48,
-    72,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    0,
-    12,
-    12,
-    12,
-    12,
-    12,
-    0,
-    12,
-    0,
-    12,
-    12,
-    12,
-    24,
-    12,
-    12,
-    12,
-    12,
-    12,
-    24,
-    12,
-    24,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    24,
-    12,
-    12,
-    12,
-    12,
-    12,
-    24,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    24,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    36,
-    12,
-    36,
-    12,
-    12,
-    12,
-    36,
-    12,
-    12,
-    12,
-    12,
-    12,
-    36,
-    12,
-    36,
-    12,
-    12,
-    12,
-    36,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
-    12,
+  // The second part is a transition table that maps a combination
+  // of a state of the automaton and a character class to a state.
+   0,12,24,36,60,96,84,12,12,12,48,72, 12,12,12,12,12,12,12,12,12,12,12,12,
+  12, 0,12,12,12,12,12, 0,12, 0,12,12, 12,24,12,12,12,12,12,24,12,24,12,12,
+  12,12,12,12,12,12,12,24,12,12,12,12, 12,24,12,12,12,12,12,12,12,24,12,12,
+  12,12,12,12,12,12,12,36,12,36,12,12, 12,36,12,12,12,12,12,36,12,36,12,12,
+  12,36,12,12,12,12,12,12,12,12,12,12,
 };
+// clang-format on
 
 // Decode utf8 state machine for fast UTF-8 decoding. Initialise state
 // to 0 and call decodeUtf8() for each byte of UTF-8. Return value
@@ -564,6 +218,53 @@ inline uint32_t decodeUtf8(uint32_t *state, uint32_t *codep, char byte)
 
     *state = decodeUtf8Table[256 + *state + type];
     return *state;
+}
+
+int utf8CountUCS4(const char *utf8)
+{
+    uint32_t codepoint;
+    uint32_t state = 0;
+    int count = 0;
+
+    while (*utf8) {
+        decodeUtf8(&state, &codepoint, *utf8);
+        if (state == UTF8_ACCEPT) {
+            count++;
+        } else if (state == UTF8_REJECT) {
+            count++; // replace with REPLACEMENT_CHAR
+            state = 0;
+        }
+        utf8++;
+    }
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+        count++; // replace with REPLACEMENT_CHAR
+
+    return count;
+}
+
+int utf8ToUCS4(const char *utf8, Unicode **ucs4_out)
+{
+    int len = utf8CountUCS4(utf8);
+    Unicode *u = (Unicode *)gmallocn(len, sizeof(Unicode));
+    int n = 0;
+    uint32_t codepoint;
+    uint32_t state = 0;
+
+    while (*utf8 && n < len) {
+        decodeUtf8(&state, &codepoint, *utf8);
+        if (state == UTF8_ACCEPT) {
+            u[n++] = codepoint;
+        } else if (state == UTF8_REJECT) {
+            u[n++] = REPLACEMENT_CHAR; // invalid byte for this position
+            state = 0;
+        }
+        utf8++;
+    }
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+        u[n] = REPLACEMENT_CHAR; // invalid byte for this position
+
+    *ucs4_out = u;
+    return len;
 }
 
 // Count number of UTF-16 code units required to convert a UTF-8 string
@@ -654,6 +355,26 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
     utf8ToUtf16(utf8, utf16);
     return utf16;
+}
+
+GooString *utf8ToUtf16WithBom(const GooString &utf8)
+{
+    GooString *result = new GooString();
+    if (utf8.toStr().empty()) {
+        return result;
+    }
+    int tmp_length; // Number of UTF-16 symbols.
+    char *tmp_str = (char *)utf8ToUtf16(utf8.c_str(), &tmp_length);
+#ifndef WORDS_BIGENDIAN
+    for (int i = 0; i < tmp_length; i++) {
+        std::swap(tmp_str[i * 2], tmp_str[i * 2 + 1]);
+    }
+#endif
+
+    result->prependUnicodeMarker();
+    result->append(tmp_str, tmp_length * 2);
+    gfree(tmp_str);
+    return result;
 }
 
 static const uint32_t UTF16_ACCEPT = 0;

@@ -99,6 +99,11 @@ void TestUTFConversion::testUTF()
     QVERIFY(compare(utf16String, s.utf16()));
     free(utf16String);
 
+    GooString gsUtf8(str);
+    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(gsUtf8));
+    std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
+    QCOMPARE(gsUtf16_a->cmp(gsUtf16_b.get()), 0);
+
     // UTF-16 to UTF-8
 
     len = utf16CountUtf8Bytes(s.utf16());

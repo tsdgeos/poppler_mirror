@@ -24,6 +24,7 @@
 // Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -291,7 +292,7 @@ public:
     bool hasToUnicodeCMap() const { return hasToUnicode; }
 
     // Return the name of the encoding
-    GooString *getEncodingName() const { return encodingName; }
+    const std::string &getEncodingName() const { return encodingName; }
 
     // Return AGLFN names of ligatures in the Standard and Expert encodings
     // for use with fonts that are not compatible with the Standard 14 fonts.
@@ -326,7 +327,7 @@ protected:
     int refCnt;
     bool ok;
     bool hasToUnicode;
-    GooString *encodingName;
+    std::string encodingName;
 };
 
 //------------------------------------------------------------------------

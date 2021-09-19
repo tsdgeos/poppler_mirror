@@ -110,6 +110,8 @@ public:
  * This class wraps Poppler's Object implementing the appearance stream
  * for the calling annotation. It can be used to preserve the current
  * Appearance Stream for the calling annotation.
+ *
+ * \since 21.10.0
  */
 class POPPLER_QT5_EXPORT AnnotationAppearance
 {
@@ -450,11 +452,15 @@ public:
 
     /**
      * Returns the current appearance stream of this annotation.
+     *
+     * \since 21.10.0
      */
     std::unique_ptr<AnnotationAppearance> annotationAppearance() const;
 
     /**
      * Sets the annotation's appearance stream with the @p annotationAppearance.
+     *
+     * \since 21.10.0
      */
     void setAnnotationAppearance(const AnnotationAppearance &annotationAppearance);
 
@@ -817,6 +823,8 @@ public:
 
     /**
        Set a custom icon for this stamp annotation.
+
+       \since 21.10.0
     */
     void setStampCustomImage(const QImage &image);
 

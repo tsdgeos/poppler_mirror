@@ -4,11 +4,12 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -42,6 +43,16 @@ bool UnicodeIsValid(Unicode ucs4);
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);
 
+// Count number of UCS-4 characters required to convert a UTF-8 string to
+// UCS-4 (excluding terminating NULL).
+int POPPLER_PRIVATE_EXPORT utf8CountUCS4(const char *utf8);
+
+// Convert a UTF-8 string to a UCS-4
+//   utf8      - utf8 bytes
+//   ucs4_out   - if not NULL, allocates and returns UCS-4 string. Free with gfree.
+//   returns number of UCS-4 characters
+int POPPLER_PRIVATE_EXPORT utf8ToUCS4(const char *utf8, Unicode **ucs4_out);
+
 // Count number of UTF-16 code units required to convert a UTF-8 string
 // (excluding terminating NULL). Each invalid byte is counted as a
 // code point since the UTF-8 conversion functions will replace it with
@@ -60,6 +71,12 @@ int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int ma
 
 // Allocate utf16 string and convert utf8 into it.
 uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
+
+// Converts a UTF-8 string to a big endian UTF-16 string with BOM.
+// The caller owns the returned pointer.
+//  utf8 - UTF-8 string to convert. An empty string is acceptable.
+// Returns a big endian UTF-16 string with BOM or an empty string without BOM.
+GooString POPPLER_PRIVATE_EXPORT *utf8ToUtf16WithBom(const GooString &utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).

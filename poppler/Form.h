@@ -24,6 +24,7 @@
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
 
@@ -301,13 +302,14 @@ public:
     // the elements of the list are of type Goffset
     std::vector<Goffset> getSignedRangeBounds() const;
 
-    // creates or replaces the dictionary name "V" in the signature dictionary and
+    // Creates or replaces the dictionary name "V" in the signature dictionary and
     // fills it with the fields of the signature; the field "Contents" is the signature
     // in PKCS#7 format, which is calculated over the byte range encompassing the whole
     // document except for the signature itself; this byte range is specified in the
-    // field "ByteRange" in the dictionary "V"
-    // return success
-    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const char *reason = nullptr);
+    // field "ByteRange" in the dictionary "V".
+    // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
+    // Returns success.
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr);
 
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
@@ -317,7 +319,7 @@ public:
     const GooString *getSignature() const;
 
 private:
-    bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature);
+    bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason = nullptr, const GooString *location = nullptr);
     bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 

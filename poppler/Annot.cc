@@ -87,6 +87,21 @@
 #include <cstring>
 #include <algorithm>
 
+#include "annot_stamp_approved.h"
+#include "annot_stamp_as_is.h"
+#include "annot_stamp_confidential.h"
+#include "annot_stamp_departmental.h"
+#include "annot_stamp_final.h"
+#include "annot_stamp_for_comment.h"
+#include "annot_stamp_experimental.h"
+#include "annot_stamp_expired.h"
+#include "annot_stamp_not_approved.h"
+#include "annot_stamp_not_for_public_release.h"
+#include "annot_stamp_sold.h"
+#include "annot_stamp_top_secret.h"
+#include "annot_stamp_for_public_release.h"
+#include "annot_stamp_draft.h"
+
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846
 #endif
@@ -777,7 +792,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
+DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
 DefaultAppearance::DefaultAppearance(const GooString *da)
 {
@@ -1855,12 +1870,12 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     return 0;
 }
 
-Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict)
+Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict)
 {
     return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
 }
 
-Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject)
+Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject)
 {
     Dict *appearDict = new Dict(doc->getXRef());
     appearDict->set("Length", Object(appearBuf->getLength()));
@@ -5401,26 +5416,123 @@ void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
     updatedAppearanceStream = Ref::INVALID();
 }
 
-void AnnotStamp::generateStampAppearance()
+void AnnotStamp::generateStampCustomAppearance()
 {
     Ref imgRef = stampImageHelper->getRef();
-    std::string imgStrName = "X" + std::to_string(imgRef.num);
-    GooString imgRefName(imgStrName);
+    const std::string imgStrName = "X" + std::to_string(imgRef.num);
 
     AnnotAppearanceBuilder appearBuilder;
     appearBuilder.append("q\n");
     appearBuilder.append("/GS0 gs\n");
     appearBuilder.appendf("{0:.3f} 0 0 {1:.3f} 0 0 cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
     appearBuilder.append("/");
-    appearBuilder.append(imgRefName.c_str());
+    appearBuilder.append(imgStrName.c_str());
     appearBuilder.append(" Do\n");
     appearBuilder.append("Q\n");
 
-    Dict *resDict = createResourcesDict(imgRefName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
+    Dict *resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
 
-    double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const GooString *appearBuf = appearBuilder.buffer();
     appearance = createForm(appearBuf, bboxArray, false, resDict);
+}
+
+void AnnotStamp::generateStampDefaultAppearance()
+{
+    Dict *extGStateDict = nullptr;
+    AnnotAppearanceBuilder defaultAppearanceBuilder;
+
+    double stampUnscaledWidth;
+    double stampUnscaledHeight;
+    const char *stampCode;
+    if (!icon->cmp("Approved")) {
+        stampUnscaledWidth = ANNOT_STAMP_APPROVED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_APPROVED_HEIGHT;
+        stampCode = ANNOT_STAMP_APPROVED;
+        extGStateDict = getApprovedStampExtGStateDict(doc);
+    } else if (!icon->cmp("AsIs")) {
+        stampUnscaledWidth = ANNOT_STAMP_AS_IS_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_AS_IS_HEIGHT;
+        stampCode = ANNOT_STAMP_AS_IS;
+        extGStateDict = getAsIsStampExtGStateDict(doc);
+    } else if (!icon->cmp("Confidential")) {
+        stampUnscaledWidth = ANNOT_STAMP_CONFIDENTIAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_CONFIDENTIAL_HEIGHT;
+        stampCode = ANNOT_STAMP_CONFIDENTIAL;
+        extGStateDict = getConfidentialStampExtGStateDict(doc);
+    } else if (!icon->cmp("Final")) {
+        stampUnscaledWidth = ANNOT_STAMP_FINAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FINAL_HEIGHT;
+        stampCode = ANNOT_STAMP_FINAL;
+        extGStateDict = getFinalStampExtGStateDict(doc);
+    } else if (!icon->cmp("Experimental")) {
+        stampUnscaledWidth = ANNOT_STAMP_EXPERIMENTAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_EXPERIMENTAL_HEIGHT;
+        stampCode = ANNOT_STAMP_EXPERIMENTAL;
+        extGStateDict = getExperimentalStampExtGStateDict(doc);
+    } else if (!icon->cmp("Expired")) {
+        stampUnscaledWidth = ANNOT_STAMP_EXPIRED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_EXPIRED_HEIGHT;
+        stampCode = ANNOT_STAMP_EXPIRED;
+        extGStateDict = getExpiredStampExtGStateDict(doc);
+    } else if (!icon->cmp("NotApproved")) {
+        stampUnscaledWidth = ANNOT_STAMP_NOT_APPROVED_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_NOT_APPROVED_HEIGHT;
+        stampCode = ANNOT_STAMP_NOT_APPROVED;
+        extGStateDict = getNotApprovedStampExtGStateDict(doc);
+    } else if (!icon->cmp("NotForPublicRelease")) {
+        stampUnscaledWidth = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE_HEIGHT;
+        stampCode = ANNOT_STAMP_NOT_FOR_PUBLIC_RELEASE;
+        extGStateDict = getNotForPublicReleaseStampExtGStateDict(doc);
+    } else if (!icon->cmp("Sold")) {
+        stampUnscaledWidth = ANNOT_STAMP_SOLD_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_SOLD_HEIGHT;
+        stampCode = ANNOT_STAMP_SOLD;
+        extGStateDict = getSoldStampExtGStateDict(doc);
+    } else if (!icon->cmp("Departmental")) {
+        stampUnscaledWidth = ANNOT_STAMP_DEPARTMENTAL_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_DEPARTMENTAL_HEIGHT;
+        stampCode = ANNOT_STAMP_DEPARTMENTAL;
+        extGStateDict = getDepartmentalStampExtGStateDict(doc);
+    } else if (!icon->cmp("ForComment")) {
+        stampUnscaledWidth = ANNOT_STAMP_FOR_COMMENT_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FOR_COMMENT_HEIGHT;
+        stampCode = ANNOT_STAMP_FOR_COMMENT;
+        extGStateDict = getForCommentStampExtGStateDict(doc);
+    } else if (!icon->cmp("ForPublicRelease")) {
+        stampUnscaledWidth = ANNOT_STAMP_FOR_PUBLIC_RELEASE_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_FOR_PUBLIC_RELEASE_HEIGHT;
+        stampCode = ANNOT_STAMP_FOR_PUBLIC_RELEASE;
+        extGStateDict = getForPublicReleaseStampExtGStateDict(doc);
+    } else if (!icon->cmp("TopSecret")) {
+        stampUnscaledWidth = ANNOT_STAMP_TOP_SECRET_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_TOP_SECRET_HEIGHT;
+        stampCode = ANNOT_STAMP_TOP_SECRET;
+        extGStateDict = getTopSecretStampExtGStateDict(doc);
+    } else {
+        stampUnscaledWidth = ANNOT_STAMP_DRAFT_WIDTH;
+        stampUnscaledHeight = ANNOT_STAMP_DRAFT_HEIGHT;
+        stampCode = ANNOT_STAMP_DRAFT;
+        extGStateDict = getDraftStampExtGStateDict(doc);
+    }
+
+    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const GooString *scale = GooString::format("{0:.6g} 0 0 {1:.6g} 0 0 cm\nq\n", bboxArray[2] / stampUnscaledWidth, bboxArray[3] / stampUnscaledHeight);
+    defaultAppearanceBuilder.append(scale->c_str());
+    defaultAppearanceBuilder.append(stampCode);
+    defaultAppearanceBuilder.append("Q\n");
+    delete scale;
+
+    Dict *resDict = new Dict(doc->getXRef());
+    resDict->add("ExtGState", Object(extGStateDict));
+
+    Object aStream = createForm(defaultAppearanceBuilder.buffer(), bboxArray, true, resDict);
+
+    AnnotAppearanceBuilder appearanceBuilder;
+    appearanceBuilder.append("/GS0 gs\n/Fm0 Do");
+    resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, nullptr);
+    appearance = createForm(appearanceBuilder.buffer(), bboxArray, false, resDict);
 }
 
 void AnnotStamp::draw(Gfx *gfx, bool printing)
@@ -5430,10 +5542,10 @@ void AnnotStamp::draw(Gfx *gfx, bool printing)
 
     annotLocker();
     if (appearance.isNull()) {
-        if (stampImageHelper == nullptr)
-            return;
-
-        generateStampAppearance();
+        if (stampImageHelper != nullptr)
+            generateStampCustomAppearance();
+        else
+            generateStampDefaultAppearance();
     }
 
     // draw the appearance stream
@@ -5466,7 +5578,7 @@ void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
     clearCustomImage();
 
     stampImageHelper = stampImageHelperA;
-    generateStampAppearance();
+    generateStampCustomAppearance();
 
     if (updatedAppearanceStream == Ref::INVALID()) {
         updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
@@ -5485,8 +5597,9 @@ void AnnotStamp::clearCustomImage()
     if (stampImageHelper != nullptr) {
         stampImageHelper->removeAnnotStampImageObject();
         delete stampImageHelper;
+        stampImageHelper = nullptr;
+        invalidateAppearance();
     }
-    invalidateAppearance();
 }
 
 //------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -194,7 +194,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
         if (substituteNameAux.getLength() > 0)
             substituteName = substituteNameAux.copy();
     }
-    encoding = font->getEncodingName()->copy();
+    encoding = font->getEncodingName();
 
     // look for a ToUnicode map
     hasToUnicode = false;
@@ -212,7 +212,7 @@ FontInfo::FontInfo(const FontInfo &f)
 {
     name = f.name ? f.name->copy() : nullptr;
     file = f.file ? f.file->copy() : nullptr;
-    encoding = f.encoding ? f.encoding->copy() : nullptr;
+    encoding = f.encoding;
     substituteName = f.substituteName ? f.substituteName->copy() : nullptr;
     type = f.type;
     emb = f.emb;
@@ -226,7 +226,6 @@ FontInfo::~FontInfo()
 {
     delete name;
     delete file;
-    delete encoding;
     if (substituteName)
         delete substituteName;
 }

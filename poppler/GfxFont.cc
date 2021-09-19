@@ -35,6 +35,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -232,7 +233,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType 
     stretch = StretchNotDefined;
     weight = WeightNotDefined;
     refCnt = 1;
-    encodingName = new GooString("");
     hasToUnicode = false;
 }
 
@@ -245,9 +245,6 @@ GfxFont::~GfxFont()
     }
     if (embFontName) {
         delete embFontName;
-    }
-    if (encodingName) {
-        delete encodingName;
     }
 }
 
@@ -1198,19 +1195,19 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     }
 
     if (baseEncFromFontFile) {
-        encodingName->Set("Builtin");
+        encodingName = "Builtin";
     } else if (baseEnc == winAnsiEncoding) {
-        encodingName->Set("WinAnsi");
+        encodingName = "WinAnsi";
     } else if (baseEnc == macRomanEncoding) {
-        encodingName->Set("MacRoman");
+        encodingName = "MacRoman";
     } else if (baseEnc == macExpertEncoding) {
-        encodingName->Set("MacExpert");
+        encodingName = "MacExpert";
     } else if (baseEnc == symbolEncoding) {
-        encodingName->Set("Symbol");
+        encodingName = "Symbol";
     } else if (baseEnc == zapfDingbatsEncoding) {
-        encodingName->Set("ZapfDingbats");
+        encodingName = "ZapfDingbats";
     } else {
-        encodingName->Set("Standard");
+        encodingName = "Standard";
     }
 
     // copy the base encoding
@@ -1238,7 +1235,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (obj1.isDict()) {
         Object obj2 = obj1.dictLookup("Differences");
         if (obj2.isArray()) {
-            encodingName->Set("Custom");
+            encodingName = "Custom";
             hasEncoding = true;
             int code = 0;
             for (i = 0; i < obj2.arrayGetLength(); ++i) {
@@ -1830,9 +1827,9 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
         return;
     }
     if (cMap->getCMapName()) {
-        encodingName->Set(cMap->getCMapName()->c_str());
+        encodingName = cMap->getCMapName()->toStr();
     } else {
-        encodingName->Set("Custom");
+        encodingName = "Custom";
     }
 
     // CIDToGIDMap (for embedded TrueType fonts)
