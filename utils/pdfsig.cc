@@ -129,6 +129,7 @@ static GooString nssPassword;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
+static bool noOCSPRevocationCheck = false;
 static bool dumpSignatures = false;
 static bool etsiCAdESdetached = false;
 static int signatureNumber = 0;
@@ -143,6 +144,7 @@ static GooString newSignatureFieldName;
 static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path to directory of libnss3 database" },
                                    { "-nss-pwd", argGooString, &nssPassword, 0, "password to access the NSS database (if any)" },
                                    { "-nocert", argFlag, &dontVerifyCert, 0, "don't perform certificate validation" },
+                                   { "-no-ocsp", argFlag, &noOCSPRevocationCheck, 0, "don't perform online OCSP certificate revocation check" },
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
                                    { "-add-signature", argFlag, &addNewSignature, 0, "adds a new signature to the document" },
                                    { "-new-signature-field-name", argGooString, &newSignatureFieldName, 0, "field name used for the newly added signature. A random ID will be used if empty" },
@@ -395,7 +397,7 @@ int main(int argc, char *argv[])
     }
 
     for (unsigned int i = 0; i < sigCount; i++) {
-        const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */);
+        const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck);
         printf("Signature #%u:\n", i + 1);
         printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
         printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());

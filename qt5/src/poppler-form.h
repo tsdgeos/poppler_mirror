@@ -787,6 +787,7 @@ public:
     {
         ValidateVerifyCertificate = 1, ///< Validate the certificate.
         ValidateForceRevalidation = 2, ///< Force revalidation of the certificate.
+        ValidateWithoutOCSPRevocationCheck = 4 ///< Do not contact OCSP servers to check for certificate revocation status \since 21.10
     };
 
     /// \cond PRIVATE

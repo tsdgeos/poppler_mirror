@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -944,7 +944,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time)
+CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck)
 {
     CERTCertificate *cert;
 
@@ -959,7 +959,11 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
         vTime = 1000000 * (PRTime)validation_time;
     CERTValInParam inParams[3];
     inParams[0].type = cert_pi_revocationFlags;
-    inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
+    if (ocspRevocationCheck) {
+        inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
+    } else {
+        inParams[0].value.pointer.revocation = CERT_GetClassicOCSPDisabledPolicy();
+    }
     inParams[1].type = cert_pi_date;
     inParams[1].value.scalar.time = vTime;
     inParams[2].type = cert_pi_end;

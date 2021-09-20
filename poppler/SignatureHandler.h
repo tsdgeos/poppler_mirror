@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -55,7 +55,7 @@ public:
     void restartHash();
     SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
-    CertificateValidationStatus validateCertificate(time_t validation_time);
+    CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     std::unique_ptr<GooString> signDetached(const char *password) const;

@@ -296,7 +296,7 @@ public:
     void setSignatureType(FormSignatureType fst);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck);
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset
@@ -596,7 +596,7 @@ public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck);
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset

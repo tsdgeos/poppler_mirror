@@ -980,7 +980,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
 {
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
-    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
+    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck));
 
     // get certificate info
     const X509CertificateInfo *ci = si->getCertificateInfo();

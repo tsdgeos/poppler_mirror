@@ -538,9 +538,9 @@ const GooString *FormWidgetSignature::getSignature() const
     return static_cast<FormFieldSignature *>(field)->getSignature();
 }
 
-SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
+SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck)
 {
-    return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime);
+    return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime, ocspRevocationCheck);
 }
 
 #ifdef ENABLE_NSS3
@@ -2141,7 +2141,7 @@ void FormWidgetSignature::setSignatureType(FormSignatureType fst)
     static_cast<FormFieldSignature *>(field)->setSignatureType(fst);
 }
 
-SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
+SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck)
 {
 #ifdef ENABLE_NSS3
     if (signature_info->getSignatureValStatus() != SIGNATURE_NOT_VERIFIED && !forceRevalidation) {
@@ -2212,7 +2212,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         return signature_info;
     }
 
-    const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime);
+    const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime, ocspRevocationCheck);
     signature_info->setCertificateValStatus(cert_val_state);
     signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
