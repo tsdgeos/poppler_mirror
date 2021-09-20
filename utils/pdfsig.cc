@@ -169,26 +169,41 @@ static void print_version_usage(bool usage)
     }
 }
 
-static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *passwordNeeded)
+static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
 {
-    *passwordNeeded = false;
-    auto passwordCallback = [&passwordNeeded](const char *) -> char * {
+    bool wrongPassword = false;
+    bool passwordNeeded = false;
+    auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
+        static bool firstTime = true;
+        if (!firstTime) {
+            wrongPassword = true;
+            return nullptr;
+        }
+        firstTime = false;
         if (nssPassword.getLength() > 0) {
             return strdup(nssPassword.c_str());
         } else {
-            *passwordNeeded = true;
+            passwordNeeded = true;
             return nullptr;
         }
     };
     SignatureHandler::setNSSPasswordCallback(passwordCallback);
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
     SignatureHandler::setNSSPasswordCallback({});
-    if (*passwordNeeded) {
+    if (passwordNeeded) {
+        *error = true;
         printf("Password is needed to access the NSS database.\n");
         printf("\tPlease provide one with -nss-pwd.\n");
         return {};
     }
+    if (wrongPassword) {
+        *error = true;
+        printf("Password was not accepted to open the NSS database.\n");
+        printf("\tPlease provide the correct one with -nss-pwd.\n");
+        return {};
+    }
 
+    *error = false;
     return vCerts;
 }
 
@@ -219,9 +234,9 @@ int main(int argc, char *argv[])
     SignatureHandler::setNSSDir(nssDir);
 
     if (listNicknames) {
-        bool passwordNeeded;
-        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = getAvailableSigningCertificates(&passwordNeeded);
-        if (passwordNeeded) {
+        bool getCertsError;
+        const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = getAvailableSigningCertificates(&getCertsError);
+        if (getCertsError) {
             return 2;
         } else {
             if (vCerts.empty()) {
@@ -286,10 +301,10 @@ int main(int argc, char *argv[])
             return 2;
         }
 
-        bool passwordNeeded;
+        bool getCertsError;
         // We need to call this otherwise NSS spins forever
-        getAvailableSigningCertificates(&passwordNeeded);
-        if (passwordNeeded) {
+        getAvailableSigningCertificates(&getCertsError);
+        if (getCertsError) {
             return 2;
         }
 
