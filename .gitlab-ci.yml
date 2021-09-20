@@ -80,7 +80,7 @@ build_mingw64_fedora33:
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
-    - dnf -y install glibc-langpack-en make ninja-build mingw64-boost
+    - dnf -y install glibc-langpack-en make ninja-build mingw64-boost mingw64-curl
   script:
     - mkdir -p build && cd build
     - mingw64-cmake -G Ninja ..
