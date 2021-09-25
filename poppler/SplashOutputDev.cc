@@ -4251,7 +4251,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     m1.m[0] = std::max(fabs(ptm[0]), fabs(ptm[2])) * kx;
     m1.m[1] = 0;
     m1.m[2] = 0;
-    m1.m[3] = std::max(fabs(ptm[1]), fabs(ptm[3])) * kx;
+    m1.m[3] = std::max(fabs(ptm[1]), fabs(ptm[3])) * ky;
     m1.m[4] = 0;
     m1.m[5] = 0;
     m1.transform(width, height, &kx, &ky);
