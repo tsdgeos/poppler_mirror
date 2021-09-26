@@ -166,7 +166,7 @@ Catalog::~Catalog()
     delete structTreeRoot;
 }
 
-GooString *Catalog::readMetadata()
+std::unique_ptr<GooString> Catalog::readMetadata()
 {
     catalogLocker();
     if (metadata.isNone()) {
@@ -180,14 +180,14 @@ GooString *Catalog::readMetadata()
     }
 
     if (!metadata.isStream()) {
-        return nullptr;
+        return {};
     }
     Object obj = metadata.streamGetDict()->lookup("Subtype");
     if (!obj.isName("XML")) {
         error(errSyntaxWarning, -1, "Unknown Metadata type: '{0:s}'", obj.isName() ? obj.getName() : "???");
     }
-    GooString *s = new GooString();
-    metadata.getStream()->fillGooString(s);
+    std::unique_ptr<GooString> s = std::make_unique<GooString>();
+    metadata.getStream()->fillGooString(s.get());
     metadata.streamClose();
     return s;
 }

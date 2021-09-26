@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018, 2021 Adrian Johnson <ajohnson@redneon.com>
@@ -732,10 +732,9 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
     }
 
     bool hasMetadata = false;
-    const GooString *metadata = doc->readMetadata();
+    std::unique_ptr<GooString> metadata = doc->readMetadata();
     if (metadata) {
         hasMetadata = true;
-        delete metadata;
     }
 
     const std::set<std::string> docInfoStandardKeys { "Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate", "Trapped" };
@@ -995,11 +994,10 @@ int main(int argc, char *argv[])
 
     if (printMetadata) {
         // print the metadata
-        const GooString *metadata = doc->readMetadata();
+        const std::unique_ptr<GooString> metadata = doc->readMetadata();
         if (metadata) {
             fputs(metadata->c_str(), stdout);
             fputc('\n', stdout);
-            delete metadata;
         }
     } else if (printCustom) {
         printCustomInfo(doc.get(), uMap);

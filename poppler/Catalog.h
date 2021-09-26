@@ -136,7 +136,7 @@ public:
 
     // Return the contents of the metadata stream, or NULL if there is
     // no metadata.
-    GooString *readMetadata();
+    std::unique_ptr<GooString> readMetadata();
 
     // Return the structure tree root object.
     StructTreeRoot *getStructTreeRoot();
