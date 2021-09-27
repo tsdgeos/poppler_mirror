@@ -55,7 +55,7 @@ public:
     void restartHash();
     SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
-    CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck);
+    CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     std::unique_ptr<GooString> signDetached(const char *password) const;

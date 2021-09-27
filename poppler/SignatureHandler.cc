@@ -944,7 +944,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck)
+CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
 {
     CERTCertificate *cert;
 
@@ -957,7 +957,7 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     PRTime vTime = 0; // time in microseconds since the epoch, special value 0 means now
     if (validation_time > 0)
         vTime = 1000000 * (PRTime)validation_time;
-    CERTValInParam inParams[3];
+    CERTValInParam inParams[4];
     inParams[0].type = cert_pi_revocationFlags;
     if (ocspRevocationCheck) {
         inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
@@ -966,7 +966,13 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     }
     inParams[1].type = cert_pi_date;
     inParams[1].value.scalar.time = vTime;
-    inParams[2].type = cert_pi_end;
+    if (useAIACertFetch) {
+        inParams[2].type = cert_pi_useAIACertFetch;
+        inParams[2].value.scalar.b = PR_TRUE;
+        inParams[3].type = cert_pi_end;
+    } else {
+        inParams[2].type = cert_pi_end;
+    }
 
     CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr, CMSSignerInfo->cmsg->pwfn_arg);
 
