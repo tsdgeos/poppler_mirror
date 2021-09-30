@@ -4248,10 +4248,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     result_height = (int)ceil(fabs(ky * height * (y1 - y0)));
     kx = state->getHDPI() / 72.0;
     ky = state->getVDPI() / 72.0;
-    m1.m[0] = (ptm[0] == 0) ? fabs(ptm[2]) * kx : fabs(ptm[0]) * kx;
+    m1.m[0] = std::max(fabs(ptm[0]), fabs(ptm[2])) * kx;
     m1.m[1] = 0;
     m1.m[2] = 0;
-    m1.m[3] = (ptm[3] == 0) ? fabs(ptm[1]) * ky : fabs(ptm[3]) * ky;
+    m1.m[3] = std::max(fabs(ptm[1]), fabs(ptm[3])) * ky;
     m1.m[4] = 0;
     m1.m[5] = 0;
     m1.transform(width, height, &kx, &ky);

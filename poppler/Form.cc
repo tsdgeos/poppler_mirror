@@ -31,6 +31,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 //
 //========================================================================
 
@@ -538,9 +539,9 @@ const GooString *FormWidgetSignature::getSignature() const
     return static_cast<FormFieldSignature *>(field)->getSignature();
 }
 
-SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
+SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA)
 {
-    return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime);
+    return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime, ocspRevocationCheck, enableAIA);
 }
 
 #ifdef ENABLE_NSS3
@@ -2141,7 +2142,7 @@ void FormWidgetSignature::setSignatureType(FormSignatureType fst)
     static_cast<FormFieldSignature *>(field)->setSignatureType(fst);
 }
 
-SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
+SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA)
 {
 #ifdef ENABLE_NSS3
     if (signature_info->getSignatureValStatus() != SIGNATURE_NOT_VERIFIED && !forceRevalidation) {
@@ -2212,7 +2213,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         return signature_info;
     }
 
-    const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime);
+    const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime, ocspRevocationCheck, enableAIA);
     signature_info->setCertificateValStatus(cert_val_state);
     signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 

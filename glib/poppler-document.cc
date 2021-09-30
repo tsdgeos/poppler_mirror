@@ -1949,11 +1949,10 @@ gchar *poppler_document_get_metadata(PopplerDocument *document)
 
     catalog = document->doc->getCatalog();
     if (catalog && catalog->isOk()) {
-        GooString *s = catalog->readMetadata();
+        std::unique_ptr<GooString> s = catalog->readMetadata();
 
-        if (s != nullptr) {
+        if (s) {
             retval = g_strdup(s->c_str());
-            delete s;
         }
     }
 

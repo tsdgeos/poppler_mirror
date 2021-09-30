@@ -25,6 +25,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 //
 //========================================================================
 
@@ -296,7 +297,7 @@ public:
     void setSignatureType(FormSignatureType fst);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset
@@ -596,7 +597,7 @@ public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset

@@ -12,6 +12,7 @@
  * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021, Theofilos Intzoglou <int.teo@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -787,6 +788,8 @@ public:
     {
         ValidateVerifyCertificate = 1, ///< Validate the certificate.
         ValidateForceRevalidation = 2, ///< Force revalidation of the certificate.
+        ValidateWithoutOCSPRevocationCheck = 4, ///< Do not contact OCSP servers to check for certificate revocation status \since 21.10
+        ValidateUseAIACertFetch = 8 ///< Use the AIA extension for certificate fetching \since 21.10
     };
 
     /// \cond PRIVATE

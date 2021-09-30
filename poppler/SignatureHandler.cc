@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -14,6 +14,7 @@
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 //
 //========================================================================
 
@@ -944,7 +945,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time)
+CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
 {
     CERTCertificate *cert;
 
@@ -957,12 +958,22 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     PRTime vTime = 0; // time in microseconds since the epoch, special value 0 means now
     if (validation_time > 0)
         vTime = 1000000 * (PRTime)validation_time;
-    CERTValInParam inParams[3];
+    CERTValInParam inParams[4];
     inParams[0].type = cert_pi_revocationFlags;
-    inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
+    if (ocspRevocationCheck) {
+        inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
+    } else {
+        inParams[0].value.pointer.revocation = CERT_GetClassicOCSPDisabledPolicy();
+    }
     inParams[1].type = cert_pi_date;
     inParams[1].value.scalar.time = vTime;
-    inParams[2].type = cert_pi_end;
+    if (useAIACertFetch) {
+        inParams[2].type = cert_pi_useAIACertFetch;
+        inParams[2].value.scalar.b = PR_TRUE;
+        inParams[3].type = cert_pi_end;
+    } else {
+        inParams[2].type = cert_pi_end;
+    }
 
     CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr, CMSSignerInfo->cmsg->pwfn_arg);
 
