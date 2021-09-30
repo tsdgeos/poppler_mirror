@@ -82,20 +82,18 @@ struct _PopplerAttachment
     GString *checksum;
 };
 
-/* This struct was never documented nor intended for external use, but
- * has technically been part of the API (see #33). */
+/* This struct was not intended to be public, but can't be moved to
+ * poppler-attachment.cc without breaking the API stability.
+ */
 /**
  * PopplerAttachmentClass:
  *
- * Provides a named wrapper for a single GObjectClass.
- *
- * Deprecated: 20.11: Use PopplerAttachment objects with the public
- *   poppler_attachment functions instead.
+ * The GObject class structure of #PopplerAttachment.
  */
 typedef struct _PopplerAttachmentClass
 {
     GObjectClass parent_class;
-} PopplerAttachmentClass G_GNUC_DEPRECATED_FOR(PopplerAttachment);
+} PopplerAttachmentClass;
 
 POPPLER_PUBLIC
 GType poppler_attachment_get_type(void) G_GNUC_CONST;
