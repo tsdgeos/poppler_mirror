@@ -126,6 +126,12 @@ file.  Note that extracting text this way might be slow for big PDF files.
 (Implies
 .BR \-struct .)
 .TP
+.B \-url
+Print all URLs in the PDF. Only the URL types supported by Poppler are listed.
+Currently, this is limited to Annotations. Note: only URLs referenced by the PDF objects
+such as Link Annotations are listed. pdfinfo does not attempt to extract strings
+matching http://... from the text content.
+.TP
 .B \-isodates
 Prints dates in ISO-8601 format (including the time zone).
 .TP
