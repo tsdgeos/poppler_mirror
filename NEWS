@@ -1,3 +1,31 @@
+Release 21.10.0:
+        core:
+         * Add support for setting custom stamp annotations
+         * Add default appearance for the well known stamp names
+         * Correct encoding of signature's properties Reason & Location
+         * Splash: Fix rendering of some odd patterns
+         * SignatureHandler::validateCertificate: Add option to not do OCSP revocation check
+         * SignatureHandler::validateCertificate: Add support for AIA fetching to verify certificates
+         * greallocn: if memory allocation fails, free the previous pointer to avoid memory leak
+         * Fix issues with malformed files
+         * Internal code improvements
+
+         utils:
+         * pdfsig: Add a way to list certificate nicknames
+         * pdfsig: You can now add signatures from pdfsig
+         * pdfsig: Add option to not do OCSP revocation check
+         * pdfsig: Add option for AIA fetching to verify certificates
+         * pdfinfo: Add -custom option to print custom metadata
+         * pdfinfo: add metadata flags
+
+        qt:
+         * Add support for setting custom stamp annotations
+         * Add getters for signature's properties Reason & Location
+         * Internal code improvements
+
+        glib:
+         * Remove incorrect PopplerAttachment deprecation
+
 Release 21.09.0:
         core:
          * Splash: Massive spped improvement on files that use lots of save/restore (q/Q) operators
