@@ -4120,7 +4120,9 @@ void Gfx::opXObject(Object args[], int numArgs)
             if (out->useDrawForm() && refObj.isRef()) {
                 out->drawForm(refObj.getRef());
             } else {
+                out->beginForm(refObj.getRef());
                 doForm(&obj1);
+                out->endForm(refObj.getRef());
             }
         }
         if (refObj.isRef() && shouldDoForm) {

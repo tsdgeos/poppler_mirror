@@ -17,8 +17,9 @@
 #include "Annot.h"
 #include <vector>
 
-MarkedContentOutputDev::MarkedContentOutputDev(int mcidA) : currentFont(nullptr), currentText(nullptr), mcid(mcidA), pageWidth(0.0), pageHeight(0.0), unicodeMap(nullptr)
+MarkedContentOutputDev::MarkedContentOutputDev(int mcidA, const Object &stmObj) : currentFont(nullptr), currentText(nullptr), mcid(mcidA), pageWidth(0.0), pageHeight(0.0), unicodeMap(nullptr)
 {
+    stmRef = stmObj.copy();
     currentColor.r = currentColor.g = currentColor.b = 0;
 }
 
@@ -54,6 +55,26 @@ void MarkedContentOutputDev::endPage()
     pageWidth = pageHeight = 0.0;
 }
 
+void MarkedContentOutputDev::beginForm(Ref id)
+{
+    formStack.push_back(id);
+}
+
+void MarkedContentOutputDev::endForm(Ref id)
+{
+    formStack.pop_back();
+}
+
+bool MarkedContentOutputDev::contentStreamMatch()
+{
+    if (stmRef.isRef()) {
+        if (formStack.empty())
+            return false;
+        return formStack.back() == stmRef.getRef();
+    }
+    return formStack.empty();
+}
+
 void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properties)
 {
     int id = -1;
@@ -64,7 +85,7 @@ void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properti
         return;
 
     // The stack keep track of MCIDs of nested marked content.
-    if (inMarkedContent() || id == mcid)
+    if (inMarkedContent() || (id == mcid && contentStreamMatch()))
         mcidStack.push_back(id);
 }
 

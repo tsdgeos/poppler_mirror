@@ -329,7 +329,7 @@ public:
     {
         if (!isContent())
             return TextSpanArray();
-        MarkedContentOutputDev mcdev(getMCID());
+        MarkedContentOutputDev mcdev(getMCID(), stmRef);
         return getTextSpansInternal(mcdev);
     }
 
@@ -379,6 +379,7 @@ private:
     StructTreeRoot *treeRoot;
     StructElement *parent;
     mutable Object pageRef;
+    Object stmRef;
 
     union {
         StructData *s;

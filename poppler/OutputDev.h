@@ -321,6 +321,8 @@ public:
 
     //----- form XObjects
     virtual void drawForm(Ref /*id*/) { }
+    virtual void beginForm(Ref /*id*/) { }
+    virtual void endForm(Ref /*id*/) { }
 
     //----- PostScript XObjects
     virtual void psXObject(Stream * /*psStream*/, Stream * /*level1Stream*/) { }
