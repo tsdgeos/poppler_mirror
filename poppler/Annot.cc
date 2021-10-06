@@ -51,6 +51,7 @@
 // Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5101,13 +5102,31 @@ void AnnotWidget::generateFieldAppearance()
     if (!da && form)
         da = form->getDefaultAppearance();
 
-    const GfxResources *resources = form ? form->getDefaultResources() : nullptr;
     Dict *appearDict = new Dict(doc->getXRef());
 
+    // Let's init resourcesDictObj and resources.
+    // In PDF 1.2, an additional entry in the field dictionary, DR, was defined.
+    // Beginning with PDF 1.5, this entry is obsolete.
+    // And yet Acrobat Reader seems to be taking a field's DR into account.
     Object resourcesDictObj;
-    if (form && form->getDefaultResourcesObj()->isDict()) {
-        resourcesDictObj = form->getDefaultResourcesObj()->copy();
-    } else {
+    const GfxResources *resources = nullptr;
+    GfxResources *resourcesToFree = nullptr;
+    if (field && field->getObj() && field->getObj()->isDict()) {
+        // Let's use a field's resource dictionary.
+        resourcesDictObj = field->getObj()->dictLookup("DR");
+        if (resourcesDictObj.isDict()) {
+            resourcesToFree = new GfxResources(doc->getXRef(), resourcesDictObj.getDict(), form ? form->getDefaultResources() : nullptr);
+            resources = resourcesToFree;
+        }
+    }
+    if (!resourcesDictObj.isDict()) {
+        // No luck with a field's resource dictionary. Let's use an AcroForm's resource dictionary.
+        if (form && form->getDefaultResourcesObj()->isDict()) {
+            resourcesDictObj = form->getDefaultResourcesObj()->copy();
+            resources = form->getDefaultResources();
+        }
+    }
+    if (!resourcesDictObj.isDict()) {
         resourcesDictObj = Object(new Dict(doc->getXRef()));
     }
 
@@ -5136,6 +5155,10 @@ void AnnotWidget::generateFieldAppearance()
     // build the appearance stream
     Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
     appearance = Object(appearStream);
+
+    if (resourcesToFree) {
+        delete resourcesToFree;
+    }
 }
 
 void AnnotWidget::updateAppearanceStream()
