@@ -320,8 +320,8 @@ public:
     virtual void type3D1(GfxState * /*state*/, double /*wx*/, double /*wy*/, double /*llx*/, double /*lly*/, double /*urx*/, double /*ury*/) { }
 
     //----- form XObjects
-    virtual void drawForm(Ref /*id*/) { }
     virtual void beginForm(Ref /*id*/) { }
+    virtual void drawForm(Ref /*id*/) { }
     virtual void endForm(Ref /*id*/) { }
 
     //----- PostScript XObjects
