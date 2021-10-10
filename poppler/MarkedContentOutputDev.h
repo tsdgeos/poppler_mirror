@@ -6,6 +6,7 @@
 //
 // Copyright 2013 Igalia S.L.
 // Copyright 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
