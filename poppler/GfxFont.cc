@@ -1362,11 +1362,17 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
         if (obj1.arrayGetLength() < lastChar - firstChar + 1) {
             lastChar = firstChar + obj1.arrayGetLength() - 1;
         }
+        double firstNonZeroWidth = 0;
         for (int code = firstChar; code <= lastChar; ++code) {
             Object obj2 = obj1.arrayGet(code - firstChar);
             if (obj2.isNum()) {
                 widths[code] = obj2.getNum() * mul;
-                if (fabs(widths[code] - widths[firstChar]) > 0.00001) {
+
+                // Check if the font is fixed width
+                if (firstNonZeroWidth == 0) {
+                    firstNonZeroWidth = widths[code];
+                }
+                if (firstNonZeroWidth != 0 && widths[code] != 0 && fabs(widths[code] - firstNonZeroWidth) > 0.00001) {
                     flags &= ~fontFixedWidth;
                 }
             }
