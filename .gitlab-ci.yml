@@ -102,24 +102,20 @@ build_android:
   stage: build
   image: kdeorg/android-sdk
   before_script:
-    - wget https://download.savannah.gnu.org/releases/freetype/freetype-2.10.1.tar.xz
-    - tar xvfh freetype-2.10.1.tar.xz
-    - pushd freetype-2.10.1
-    - CFLAGS=-std=gnu99 STANDALONE_EXTRA="--arch arm64" /opt/helpers/build-standalone "./autogen.sh && ./configure --enable-shared=no --prefix=/opt/popplerandroid-deps --host=aarch64-linux-android && make -j`nproc` && make install"
-    - popd
+    - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
+    - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
   script:
     - mkdir -p build && cd build
     - 'ANDROID_ARCH_ABI=arm64-v8a cmake -G Ninja ..
                          -DCMAKE_ANDROID_API=28
-                         -DCMAKE_INSTALL_PREFIX="/opt/popplerandroid-deps"
-                         -DCMAKE_PREFIX_PATH="$QT_ANDROID;/opt/popplerandroid-deps"
+                         -DCMAKE_PREFIX_PATH="/opt/Qt/;/opt/kdeandroid-arm64/"
                          -DCMAKE_BUILD_TYPE=debug
                          -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
                          -DENABLE_DCTDECODER=unmaintained
                          -DENABLE_LIBOPENJPEG=unmaintained
                          -DENABLE_BOOST=OFF
                          -DCMAKE_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake'
-    - ninja && ninja install
+    - ninja
 
 qt5_docs:
   only:
