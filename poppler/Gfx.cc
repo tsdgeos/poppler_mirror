@@ -3915,6 +3915,10 @@ void Gfx::doShowText(const GooString *s)
                     pushResources(resDict);
                 }
                 if (charProc.isStream()) {
+                    Object charProcResourcesObj = charProc.streamGetDict()->lookup("Resources");
+                    if (charProcResourcesObj.isDict()) {
+                        pushResources(charProcResourcesObj.getDict());
+                    }
                     std::set<int>::iterator charProcDrawingIt;
                     bool displayCharProc = true;
                     if (refNum != -1) {
@@ -3933,6 +3937,9 @@ void Gfx::doShowText(const GooString *s)
                         if (refNum != -1) {
                             charProcDrawing.erase(charProcDrawingIt);
                         }
+                    }
+                    if (charProcResourcesObj.isDict()) {
+                        popResources();
                     }
                 } else {
                     error(errSyntaxError, getPos(), "Missing or bad Type3 CharProc entry");
