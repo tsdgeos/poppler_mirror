@@ -1908,7 +1908,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     GooString *psName;
     char buf[16];
     bool subst;
-    const UnicodeMap *uMap;
     const char *charName;
     double xs, ys;
     int code;
@@ -2048,23 +2047,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
             if (xs < 0.1) {
                 xs = 1;
             }
-        }
-
-        // handle encodings for substituted CID fonts
-        if (fontLoc->locType == gfxFontLocResident && fontLoc->fontType >= fontCIDType0) {
-            subst = true;
-            if (font16EncLen >= font16EncSize) {
-                font16EncSize += 16;
-                font16Enc = (PSFont16Enc *)greallocn(font16Enc, font16EncSize, sizeof(PSFont16Enc));
-            }
-            font16Enc[font16EncLen].fontID = *font->getID();
-            if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding->toStr()))) {
-                font16Enc[font16EncLen].enc = fontLoc->encoding->copy();
-            } else {
-                error(errSyntaxError, -1, "Couldn't find Unicode map for 16-bit font encoding '{0:t}'", fontLoc->encoding);
-                font16Enc[font16EncLen].enc = nullptr;
-            }
-            ++font16EncLen;
         }
 
         delete fontLoc;

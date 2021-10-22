@@ -174,7 +174,6 @@ GfxFontLoc::GfxFontLoc()
 {
     path = nullptr;
     fontNum = 0;
-    encoding = nullptr;
     substIdx = -1;
 }
 
@@ -182,9 +181,6 @@ GfxFontLoc::~GfxFontLoc()
 {
     if (path) {
         delete path;
-    }
-    if (encoding) {
-        delete encoding;
     }
 }
 

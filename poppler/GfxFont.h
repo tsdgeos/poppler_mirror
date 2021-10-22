@@ -131,10 +131,6 @@ public:
                      //   (if locType == gfxFontLocResident)
     int fontNum; // for TrueType collections
                  //   (if locType == gfxFontLocExternal)
-    GooString *encoding; // PS font encoding, only for 16-bit fonts
-                         //   (if locType == gfxFontLocResident)
-    int wMode; // writing mode, only for 16-bit fonts
-               //   (if locType == gfxFontLocResident)
     int substIdx; // substitute font index
                   //   (if locType == gfxFontLocExternal,
                   //   and a Base-14 substitution was made)
