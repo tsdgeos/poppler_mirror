@@ -220,12 +220,10 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
     return font;
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA)
+GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), type(typeA)
 {
     ok = false;
-    id = idA;
     name = nameA;
-    type = typeA;
     embFontID = embFontIDA;
     embFontName = nullptr;
     family = nullptr;
@@ -2412,7 +2410,7 @@ GfxFontDict::~GfxFontDict()
     gfree(fonts);
 }
 
-GfxFont *GfxFontDict::lookup(const char *tag)
+GfxFont *GfxFontDict::lookup(const char *tag) const
 {
     int i;
 

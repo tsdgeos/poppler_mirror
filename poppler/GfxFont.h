@@ -310,12 +310,12 @@ protected:
     static GfxFontLoc *getExternalFont(GooString *path, bool cid);
 
     const std::string tag; // PDF font tag
-    Ref id; // reference (used as unique ID)
+    const Ref id; // reference (used as unique ID)
     const GooString *name; // font name
     GooString *family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
-    GfxFontType type; // type of font
+    const GfxFontType type; // type of font
     int flags; // font descriptor flags
     GooString *embFontName; // name of embedded font
     Ref embFontID; // ref to embedded font file stream
@@ -455,11 +455,11 @@ public:
     GfxFontDict &operator=(const GfxFontDict &) = delete;
 
     // Get the specified font.
-    GfxFont *lookup(const char *tag);
+    GfxFont *lookup(const char *tag) const;
 
     // Iterative access.
-    int getNumFonts() { return numFonts; }
-    GfxFont *getFont(int i) { return fonts[i]; }
+    int getNumFonts() const { return numFonts; }
+    GfxFont *getFont(int i) const { return fonts[i]; }
 
 private:
     int hashFontObject(Object *obj);
