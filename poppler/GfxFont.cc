@@ -2164,9 +2164,11 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
     *codeToGIDLen = 0;
     if (!ctu || !getCollection())
         return nullptr;
-    if (getCollection()->cmp("Adobe-Identity") == 0)
-        return nullptr;
+
     if (getEmbeddedFontID(&embID)) {
+        if (getCollection()->cmp("Adobe-Identity") == 0)
+            return nullptr;
+
         /* if this font is embedded font,
          * CIDToGIDMap should be embedded in PDF file
          * and already set. So return it.
@@ -2242,7 +2244,11 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
         ff->setupGSUB(lp->scriptTag, lp->languageTag);
     } else {
-        error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+        if (getCollection()->cmp("Adobe-Identity") == 0) {
+            error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:t}", getName());
+        } else {
+            error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+        }
         if (ctu) {
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
