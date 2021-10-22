@@ -3613,7 +3613,7 @@ void Gfx::opSetFont(Object args[], int numArgs)
         return;
     }
     if (printCommands) {
-        printf("  font: tag=%s name='%s' %g\n", font->getTag()->c_str(), font->getName() ? font->getName()->c_str() : "???", args[1].getNum());
+        printf("  font: tag=%s name='%s' %g\n", font->getTag().c_str(), font->getName() ? font->getName()->c_str() : "???", args[1].getNum());
         fflush(stdout);
     }
 

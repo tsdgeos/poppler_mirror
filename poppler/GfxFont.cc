@@ -220,10 +220,9 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
     return font;
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA)
+GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA)
 {
     ok = false;
-    tag = new GooString(tagA);
     id = idA;
     name = nameA;
     type = typeA;
@@ -238,7 +237,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType 
 
 GfxFont::~GfxFont()
 {
-    delete tag;
     delete family;
     if (name) {
         delete name;

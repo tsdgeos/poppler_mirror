@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -193,13 +193,13 @@ public:
     void decRefCnt();
 
     // Get font tag.
-    const GooString *getTag() const { return tag; }
+    const std::string &getTag() const { return tag; }
 
     // Get font dictionary ID.
     const Ref *getID() const { return &id; }
 
     // Does this font match the tag?
-    bool matches(const char *tagA) const { return !tag->cmp(tagA); }
+    bool matches(const char *tagA) const { return tag == tagA; }
 
     // Get font family name.
     GooString *getFamily() const { return family; }
@@ -309,7 +309,7 @@ protected:
     CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
     static GfxFontLoc *getExternalFont(GooString *path, bool cid);
 
-    GooString *tag; // PDF font tag
+    const std::string tag; // PDF font tag
     Ref id; // reference (used as unique ID)
     const GooString *name; // font name
     GooString *family; // font family
