@@ -151,7 +151,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
             }
             break;
         case Interval::None:
-            if (interval.length == 1) {
+            if (interval.length == 1 && label->toStr() == interval.prefix) {
                 *index = interval.base;
                 return true;
             } else {
