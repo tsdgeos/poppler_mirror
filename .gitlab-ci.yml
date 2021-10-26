@@ -30,9 +30,9 @@ clang_format:
   stage: build
   before_script:
   - apt-get update
-  - apt-get install --yes --no-install-recommends git clang-format-12
+  - apt-get install --yes --no-install-recommends git clang-format-13
   script:
-    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format-12 -i {} \;
+    - find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name "*.cc" \) -exec clang-format-13 -i {} \;
     - git diff --exit-code
 
 build:
@@ -48,7 +48,7 @@ build:
     - ninja
     - ctest --output-on-failure
 
-build_clang12_libcpp:
+build_clang13_libcpp:
   stage: build
   script:
     - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/" -A "6.1.0-0-*qtbase-Linux-CentOS_8_3-GCC-Linux-CentOS_8_3-X86_64.7z"
@@ -57,9 +57,9 @@ build_clang12_libcpp:
     - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/6.1.0-0-*icu-linux-Rhel7.2-x64.7z
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - apt-get install --yes --no-install-recommends libclang-12-dev llvm-12-dev libc++-12-dev libc++abi-12-dev clang-tidy-12 clang-12 libunwind-12-dev
-    - clang++-12 -fPIC -shared -o goostring-format-checker.so ../test/goostring-format-checker/goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -I /usr/lib/llvm-12/include/
-    - CC=clang-12 CXX=clang++-12 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Xclang -load -Xclang $PWD/goostring-format-checker.so -Xclang -add-plugin -Xclang goostring-format-checker" -DTESTDATADIR=$PWD/../test-data -DCMAKE_CXX_CLANG_TIDY="clang-tidy-12;-header-filter=.;-checks=-*,performance-*,bugprone-*,readability-inconsistent-declaration-parameter-name,readability-string-compare,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,google-explicit-constructor,-bugprone-narrowing-conversions,-bugprone-macro-parentheses,-bugprone-suspicious-string-compare,-bugprone-incorrect-roundings,-bugprone-undefined-memory-manipulation,-bugprone-sizeof-expression,-bugprone-branch-clone,-bugprone-reserved-identifier,-bugprone-suspicious-include,-performance-no-int-to-ptr;-warnings-as-errors=*" .. -DCMAKE_PREFIX_PATH=$PWD/../6.1.0/gcc_64/lib/cmake
+    - apt-get install --yes --no-install-recommends libclang-13-dev llvm-13-dev libc++-13-dev libc++abi-13-dev clang-tidy-13 clang-13 libunwind-13-dev
+    - clang++-13 -fPIC -shared -o goostring-format-checker.so ../test/goostring-format-checker/goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -I /usr/lib/llvm-13/include/
+    - CC=clang-13 CXX=clang++-13 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Xclang -load -Xclang $PWD/goostring-format-checker.so -Xclang -add-plugin -Xclang goostring-format-checker" -DTESTDATADIR=$PWD/../test-data -DCMAKE_CXX_CLANG_TIDY="clang-tidy-13;-header-filter=.;-checks=-*,performance-*,bugprone-*,readability-inconsistent-declaration-parameter-name,readability-string-compare,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,google-explicit-constructor,-bugprone-narrowing-conversions,-bugprone-macro-parentheses,-bugprone-suspicious-string-compare,-bugprone-incorrect-roundings,-bugprone-undefined-memory-manipulation,-bugprone-sizeof-expression,-bugprone-branch-clone,-bugprone-reserved-identifier,-bugprone-suspicious-include,-performance-no-int-to-ptr,-bugprone-easily-swappable-parameters,-bugprone-implicit-widening-of-multiplication-result;-warnings-as-errors=*" .. -DCMAKE_PREFIX_PATH=$PWD/../6.1.0/gcc_64/lib/cmake
     - ninja
     - ctest --output-on-failure
 
@@ -86,16 +86,16 @@ build_mingw64_fedora35:
     - mingw64-cmake -G Ninja ..
     - ninja
 
-build_clazy_clang12:
+build_clazy_clang13:
   stage: build
   script:
     - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/" -A "6.1.0-0-*qtbase-Linux-CentOS_8_3-GCC-Linux-CentOS_8_3-X86_64.7z"
     - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/6.1.0-0-*qtbase-Linux-CentOS_8_3-GCC-Linux-CentOS_8_3-X86_64.7z
     - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/" -A "6.1.0-0-*icu-linux-Rhel7.2-x64.7z"
     - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_610/qt.qt6.610.gcc_64/6.1.0-0-*icu-linux-Rhel7.2-x64.7z
-    - apt-get install --yes --no-install-recommends clazy clang-12
+    - apt-get install --yes --no-install-recommends clazy clang-13
     - mkdir -p build && cd build
-    - CC=clang-12 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja .. -DCMAKE_PREFIX_PATH=$PWD/../6.1.0/gcc_64/lib/cmake
+    - CC=clang-13 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja .. -DCMAKE_PREFIX_PATH=$PWD/../6.1.0/gcc_64/lib/cmake
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja
 
 build_android:
