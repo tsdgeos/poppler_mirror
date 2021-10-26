@@ -2333,11 +2333,9 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
         }
 
         lastYStep = yStep;
-        int k1 = y;
 
         int xt = 0;
         int xSrc = 0;
-        int x1 = k1;
         int n = yStep > 0 ? yStep : 1;
         int origN = n;
 
@@ -2386,7 +2384,6 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
             }
             buffer[y * row_stride + x] = splashFloor(pixAcc0 / (origN * m));
             xSrc += xStep;
-            x1 += 1;
         }
     }
     free(pixBuf);
