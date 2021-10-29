@@ -1562,17 +1562,14 @@ void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 
 double FormFieldText::getTextFontSize()
 {
-    std::vector<GooString *> daToks;
+    std::vector<std::string> daToks;
     int idx = parseDA(&daToks);
     double fontSize = -1;
     if (idx >= 0) {
         char *p = nullptr;
-        fontSize = strtod(daToks[idx]->c_str(), &p);
+        fontSize = strtod(daToks[idx].c_str(), &p);
         if (!p || *p)
             fontSize = -1;
-    }
-    for (auto entry : daToks) {
-        delete entry;
     }
     return fontSize;
 }
@@ -1580,39 +1577,31 @@ double FormFieldText::getTextFontSize()
 void FormFieldText::setTextFontSize(int fontSize)
 {
     if (fontSize > 0 && obj.isDict()) {
-        std::vector<GooString *> *daToks = new std::vector<GooString *>();
-        int idx = parseDA(daToks);
+        std::vector<std::string> daToks;
+        int idx = parseDA(&daToks);
         if (idx == -1) {
             error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
-            for (auto entry : *daToks) {
-                delete entry;
-            }
-            delete daToks;
             return;
         }
         if (defaultAppearance)
             delete defaultAppearance;
         defaultAppearance = new GooString;
-        for (std::size_t i = 0; i < daToks->size(); ++i) {
+        for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0)
                 defaultAppearance->append(' ');
             if (i == (std::size_t)idx) {
                 defaultAppearance->appendf("{0:d}", fontSize);
             } else {
-                defaultAppearance->append((*daToks)[i]);
+                defaultAppearance->append(daToks[i]);
             }
         }
-        for (auto entry : *daToks) {
-            delete entry;
-        }
-        delete daToks;
         obj.dictSet("DA", Object(defaultAppearance->copy()));
         xref->setModifiedObject(&obj, ref);
         updateChildrenAppearance();
     }
 }
 
-int FormFieldText::tokenizeDA(const std::string &da, std::vector<GooString *> *daToks, const char *searchTok)
+int FormFieldText::tokenizeDA(const std::string &da, std::vector<std::string> *daToks, const char *searchTok)
 {
     int idx = -1;
     if (daToks) {
@@ -1624,10 +1613,10 @@ int FormFieldText::tokenizeDA(const std::string &da, std::vector<GooString *> *d
             }
             if (i < da.size()) {
                 for (j = i + 1; j < da.size() && !Lexer::isSpace(da[j]); ++j) { }
-                GooString *tok = new GooString(da, i, j - i);
-                if (searchTok && !tok->cmp(searchTok))
+                std::string tok(da, i, j - i);
+                if (searchTok && tok == searchTok)
                     idx = daToks->size();
-                daToks->push_back(tok);
+                daToks->emplace_back(std::move(tok));
                 i = j;
             }
         }
@@ -1635,7 +1624,7 @@ int FormFieldText::tokenizeDA(const std::string &da, std::vector<GooString *> *d
     return idx;
 }
 
-int FormFieldText::parseDA(std::vector<GooString *> *daToks)
+int FormFieldText::parseDA(std::vector<std::string> *daToks)
 {
     int idx = -1;
     if (obj.isDict()) {

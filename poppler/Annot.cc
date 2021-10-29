@@ -800,34 +800,31 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
     fontPtSize = -1;
 
     if (da) {
-        std::vector<GooString *> daToks;
+        std::vector<std::string> daToks;
         int i = FormFieldText::tokenizeDA(da->toStr(), &daToks, "Tf");
 
         if (i >= 1) {
-            fontPtSize = gatof(daToks[i - 1]->c_str());
+            fontPtSize = gatof(daToks[i - 1].c_str());
         }
         if (i >= 2) {
             // We are expecting a name, therefore the first letter should be '/'.
-            const GooString *fontToken = daToks[i - 2];
-            if (fontToken && fontToken->getLength() > 1 && fontToken->getChar(0) == '/') {
+            const std::string &fontToken = daToks[i - 2];
+            if (fontToken.size() > 1 && fontToken[0] == '/') {
                 // The +1 is here to skip the leading '/'.
-                fontName = Object(objName, fontToken->c_str() + 1);
+                fontName = Object(objName, fontToken.c_str() + 1);
             }
         }
         // Scan backwards: we are looking for the last set value
         for (i = daToks.size() - 1; i >= 0; --i) {
             if (!fontColor) {
-                if (!(daToks[i])->cmp("g") && i >= 1) {
-                    fontColor = std::make_unique<AnnotColor>(gatof((daToks[i - 1])->c_str()));
-                } else if (!(daToks[i])->cmp("rg") && i >= 3) {
-                    fontColor = std::make_unique<AnnotColor>(gatof((daToks[i - 3])->c_str()), gatof((daToks[i - 2])->c_str()), gatof((daToks[i - 1])->c_str()));
-                } else if (!(daToks[i])->cmp("k") && i >= 4) {
-                    fontColor = std::make_unique<AnnotColor>(gatof((daToks[i - 4])->c_str()), gatof((daToks[i - 3])->c_str()), gatof((daToks[i - 2])->c_str()), gatof((daToks[i - 1])->c_str()));
+                if (daToks[i] == "g" && i >= 1) {
+                    fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 1].c_str()));
+                } else if (daToks[i] == "rg" && i >= 3) {
+                    fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 3].c_str()), gatof(daToks[i - 2].c_str()), gatof(daToks[i - 1].c_str()));
+                } else if (daToks[i] == "k" && i >= 4) {
+                    fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 4].c_str()), gatof(daToks[i - 3].c_str()), gatof(daToks[i - 2].c_str()), gatof(daToks[i - 1].c_str()));
                 }
             }
-        }
-        for (auto entry : daToks) {
-            delete entry;
         }
     }
 }
