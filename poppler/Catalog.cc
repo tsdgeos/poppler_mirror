@@ -490,7 +490,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     NameTree *ef = getEmbeddedFileNameTree();
     bool fileAlreadyAdded = false;
     for (int i = 0; i < ef->numEntries(); ++i) {
-        GooString *efNameI = ef->getName(i);
+        const GooString *efNameI = ef->getName(i);
 
         // we need to add the file if it has not been added yet and the name is smaller or equal lexicographically
         // than the current item
@@ -768,7 +768,7 @@ Object *NameTree::getValue(int index)
     }
 }
 
-GooString *NameTree::getName(int index)
+const GooString *NameTree::getName(int index) const
 {
     if (index < length) {
         return &entries[index]->name;
