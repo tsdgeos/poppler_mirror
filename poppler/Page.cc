@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -502,9 +502,9 @@ void Page::removeAnnot(Annot *annot)
     annot->setPage(0, false);
 }
 
-Links *Page::getLinks()
+std::unique_ptr<Links> Page::getLinks()
 {
-    return new Links(getAnnots());
+    return std::make_unique<Links>(getAnnots());
 }
 
 std::unique_ptr<FormPageWidgets> Page::getFormWidgets()
@@ -771,14 +771,10 @@ void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool 
 
 void Page::processLinks(OutputDev *out)
 {
-    Links *links;
-    int i;
-
-    links = getLinks();
-    for (i = 0; i < links->getNumLinks(); ++i) {
+    std::unique_ptr<Links> links = getLinks();
+    for (int i = 0; i < links->getNumLinks(); ++i) {
         out->processLink(links->getLink(i));
     }
-    delete links;
 }
 
 void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown)

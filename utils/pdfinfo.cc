@@ -419,7 +419,7 @@ static void printUrlList(PDFDoc *doc)
     for (int pg = firstPage; pg <= lastPage; pg++) {
         Page *page = doc->getPage(pg);
         if (page) {
-            Links *links = page->getLinks();
+            std::unique_ptr<Links> links = page->getLinks();
             for (int i = 0; i < links->getNumLinks(); i++) {
                 AnnotLink *annot = links->getLink(i);
                 LinkAction *action = annot->getAction();

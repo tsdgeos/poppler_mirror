@@ -663,11 +663,11 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page, double hDPI, double vDPI
         getPage(page)->displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
-Links *PDFDoc::getLinks(int page)
+std::unique_ptr<Links> PDFDoc::getLinks(int page)
 {
     Page *p = getPage(page);
     if (!p) {
-        return new Links(nullptr);
+        return std::make_unique<Links>(nullptr);
     }
     return p->getLinks();
 }
