@@ -154,7 +154,6 @@ CairoOutputDev::CairoOutputDev()
     inType3Char = false;
     t3_glyph_has_bbox = false;
     text_matrix_valid = true;
-    antialias = CAIRO_ANTIALIAS_DEFAULT;
 
     groupColorSpaceStack = nullptr;
     maskStack = nullptr;
@@ -216,7 +215,6 @@ void CairoOutputDev::setCairo(cairo_t *c)
         /* save the initial matrix so that we can use it for type3 fonts. */
         // XXX: is this sufficient? could we miss changes to the matrix somehow?
         cairo_get_matrix(cairo, &orig_matrix);
-        setContextAntialias(cairo, antialias);
     } else {
         cairo = nullptr;
         cairo_shape = nullptr;
@@ -239,22 +237,12 @@ void CairoOutputDev::setTextPage(TextPage *text)
     }
 }
 
-void CairoOutputDev::setAntialias(cairo_antialias_t a)
+void CairoOutputDev::copyAntialias(cairo_t *cr, cairo_t *source_cr)
 {
-    antialias = a;
-    if (cairo)
-        setContextAntialias(cairo, antialias);
-    if (cairo_shape)
-        setContextAntialias(cairo_shape, antialias);
-}
+    cairo_set_antialias(cr, cairo_get_antialias(source_cr));
 
-void CairoOutputDev::setContextAntialias(cairo_t *cr, cairo_antialias_t antialias)
-{
-    cairo_font_options_t *font_options;
-    cairo_set_antialias(cr, antialias);
-    font_options = cairo_font_options_create();
-    cairo_get_font_options(cr, font_options);
-    cairo_font_options_set_antialias(font_options, antialias);
+    cairo_font_options_t *font_options = cairo_font_options_create();
+    cairo_get_font_options(source_cr, font_options);
     cairo_set_font_options(cr, font_options);
     cairo_font_options_destroy(font_options);
 }
@@ -941,7 +929,7 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     old_cairo = cairo;
     cairo = cairo_create(surface);
     cairo_surface_destroy(surface);
-    setContextAntialias(cairo, antialias);
+    copyAntialias(cairo, old_cairo);
 
     box.x1 = bbox[0];
     box.y1 = bbox[1];
@@ -1623,7 +1611,7 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double *
             cairo_surface_t *cairo_shape_surface = cairo_surface_create_similar_clip(cairo, CAIRO_CONTENT_ALPHA);
             cairo_shape = cairo_create(cairo_shape_surface);
             cairo_surface_destroy(cairo_shape_surface);
-            setContextAntialias(cairo_shape, antialias);
+            copyAntialias(cairo_shape, cairo);
 
             /* the color doesn't matter as long as it is opaque */
             cairo_set_source_rgb(cairo_shape, 0, 0, 0);
@@ -1778,7 +1766,7 @@ void CairoOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha
 
         cairo_surface_t *source = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
         cairo_t *maskCtx = cairo_create(source);
-        setContextAntialias(maskCtx, antialias);
+        copyAntialias(maskCtx, cairo);
 
         // XXX: hopefully this uses the correct color space */
         if (!alpha && groupColorSpaceStack->cs) {
@@ -2345,11 +2333,9 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
         }
 
         lastYStep = yStep;
-        int k1 = y;
 
         int xt = 0;
         int xSrc = 0;
-        int x1 = k1;
         int n = yStep > 0 ? yStep : 1;
         int origN = n;
 
@@ -2398,7 +2384,6 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
             }
             buffer[y * row_stride + x] = splashFloor(pixAcc0 / (origN * m));
             xSrc += xStep;
-            x1 += 1;
         }
     }
     free(pixBuf);

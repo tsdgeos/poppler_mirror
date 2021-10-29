@@ -82,12 +82,11 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
 {
     char buf[CachedFileChunkSize];
     gssize bytesRead;
-    size_t rangeBytesRead, bytesToRead, size;
+    size_t rangeBytesRead, bytesToRead;
 
     if (length == (goffset)-1)
         return 0;
 
-    size = 0;
     for (const ByteRange &range : ranges) {
         bytesToRead = MIN(CachedFileChunkSize, range.length);
         rangeBytesRead = 0;
@@ -98,7 +97,6 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
                 return -1;
 
             writer->write(buf, bytesRead);
-            size += bytesRead;
             rangeBytesRead += bytesRead;
             bytesToRead = range.length - rangeBytesRead;
         } while (bytesRead > 0 && bytesToRead > 0);

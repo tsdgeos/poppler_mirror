@@ -194,8 +194,7 @@ class POPPLER_PRIVATE_EXPORT SplashOutputDev : public OutputDev
 {
 public:
     // Constructor.
-    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault,
-                    bool overprintPreviewA = globalParams->getOverprintPreview());
+    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
 
     // Destructor.
     ~SplashOutputDev() override;

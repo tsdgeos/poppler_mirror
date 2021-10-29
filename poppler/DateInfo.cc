@@ -2,7 +2,7 @@
 //
 // DateInfo.cc
 //
-// Copyright (C) 2008, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
@@ -37,7 +37,7 @@
 bool parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
 {
     Unicode *u;
-    int len = TextStringToUCS4(date, &u);
+    int len = TextStringToUCS4(date->toStr(), &u);
     GooString s;
     for (int i = 0; i < len; i++) {
         // Ignore any non ASCII characters

@@ -496,10 +496,10 @@ public:
     void print(int indent) override;
     void reset(const std::vector<std::string> &excludedFields) override;
 
-    static int tokenizeDA(const GooString *daString, std::vector<GooString *> *daToks, const char *searchTok);
+    static int tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
 
 protected:
-    int parseDA(std::vector<GooString *> *daToks);
+    int parseDA(std::vector<std::string> *daToks);
     void fillContent(FillValueType fillType);
 
     GooString *content;

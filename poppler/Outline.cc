@@ -413,7 +413,7 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
     obj1 = dict->lookup("Title");
     if (obj1.isString()) {
         const GooString *s = obj1.getString();
-        titleLen = TextStringToUCS4(s, &title);
+        titleLen = TextStringToUCS4(s->toStr(), &title);
     } else {
         titleLen = 0;
     }
@@ -494,7 +494,7 @@ void OutlineItem::setTitle(const std::string &titleA)
 
     Object dict = xref->fetch(ref);
     GooString *g = new GooString(titleA);
-    titleLen = TextStringToUCS4(g, &title);
+    titleLen = TextStringToUCS4(g->toStr(), &title);
     dict.dictSet("Title", Object(g));
     xref->setModifiedObject(&dict, ref);
 }

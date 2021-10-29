@@ -26,7 +26,7 @@
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
-// Copyright (C) 2010 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2010, 2021 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2010, 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2011 Sam Liao <phyomh@gmail.com>
 // Copyright (C) 2012 Horst Prote <prote@fmi.uni-stuttgart.de>
@@ -187,6 +187,10 @@
 // glyphless and overlaid over text in image form, this must enable users
 // to read the underlying image. Issue #157
 #define glyphlessSelectionOpacity 0.4
+
+// Returns whether x is between a and b or equal to a or b.
+// a and b don't need to be sorted.
+#define XBetweenAB(x, a, b) (!(((x) > (a) && (x) > (b)) || ((x) < (a) && (x) < (b))) ? true : false)
 
 namespace {
 
@@ -4597,11 +4601,37 @@ void TextSelectionSizer::visitLine(TextLine *line, TextWord *begin, TextWord *en
     PDFRectangle *rect;
     double x1, y1, x2, y2, margin;
 
-    margin = (line->yMax - line->yMin) / 8;
-    x1 = line->edge[edge_begin];
-    y1 = line->yMin - margin;
-    x2 = line->edge[edge_end];
-    y2 = line->yMax + margin;
+    switch (line->rot) {
+    default:
+    case 0:
+        margin = (line->yMax - line->yMin) / 8;
+        x1 = line->edge[edge_begin];
+        x2 = line->edge[edge_end];
+        y1 = line->yMin - margin;
+        y2 = line->yMax + margin;
+        break;
+    case 1:
+        margin = (line->xMax - line->xMin) / 8;
+        x1 = line->xMin - margin;
+        x2 = line->xMax + margin;
+        y1 = line->edge[edge_begin];
+        y2 = line->edge[edge_end];
+        break;
+    case 2:
+        margin = (line->yMax - line->yMin) / 8;
+        x1 = line->edge[edge_end];
+        x2 = line->edge[edge_begin];
+        y1 = line->yMin - margin;
+        y2 = line->yMax + margin;
+        break;
+    case 3:
+        margin = (line->xMax - line->xMin) / 8;
+        x1 = line->xMin - margin;
+        x2 = line->xMax + margin;
+        y1 = line->edge[edge_end];
+        y2 = line->edge[edge_begin];
+        break;
+    }
 
     rect = new PDFRectangle(floor(x1 * scale), floor(y1 * scale), ceil(x2 * scale), ceil(y2 * scale));
     list->push_back(rect);
@@ -4658,19 +4688,56 @@ void TextSelectionPainter::visitLine(TextLine *line, TextWord *begin, TextWord *
 {
     double x1, y1, x2, y2, margin;
 
-    margin = (line->yMax - line->yMin) / 8;
-    x1 = floor(line->edge[edge_begin]);
-    y1 = floor(line->yMin - margin);
-    x2 = ceil(line->edge[edge_end]);
-    y2 = ceil(line->yMax + margin);
+    switch (line->rot) {
+    default:
+    case 0:
+        margin = (line->yMax - line->yMin) / 8;
+        x1 = line->edge[edge_begin];
+        x2 = line->edge[edge_end];
+        y1 = line->yMin - margin;
+        y2 = line->yMax + margin;
+        break;
+    case 1:
+        margin = (line->xMax - line->xMin) / 8;
+        x1 = line->xMin - margin;
+        x2 = line->xMax + margin;
+        y1 = line->edge[edge_begin];
+        y2 = line->edge[edge_end];
+        break;
+    case 2:
+        margin = (line->yMax - line->yMin) / 8;
+        x1 = line->edge[edge_end];
+        x2 = line->edge[edge_begin];
+        y1 = line->yMin - margin;
+        y2 = line->yMax + margin;
+        break;
+    case 3:
+        margin = (line->xMax - line->xMin) / 8;
+        x1 = line->xMin - margin;
+        x2 = line->xMax + margin;
+        y1 = line->edge[edge_end];
+        y2 = line->edge[edge_begin];
+        break;
+    }
 
-    ctm.transform(line->edge[edge_begin], line->yMin - margin, &x1, &y1);
-    ctm.transform(line->edge[edge_end], line->yMax + margin, &x2, &y2);
+    ctm.transform(x1, y1, &x1, &y1);
+    ctm.transform(x2, y2, &x2, &y2);
 
-    x1 = floor(x1);
-    y1 = floor(y1);
-    x2 = ceil(x2);
-    y2 = ceil(y2);
+    if (x1 < x2) {
+        x1 = floor(x1);
+        x2 = ceil(x2);
+    } else {
+        x1 = ceil(x1);
+        x2 = floor(x2);
+    }
+
+    if (y1 < y2) {
+        y1 = floor(y1);
+        y2 = ceil(y2);
+    } else {
+        y1 = ceil(y1);
+        y2 = floor(y2);
+    }
 
     ictm.transform(x1, y1, &x1, &y1);
     ictm.transform(x2, y2, &x2, &y2);
@@ -4758,17 +4825,26 @@ void TextSelectionPainter::endPage()
 void TextWord::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style)
 {
     int i, begin, end;
-    double mid;
+    double mid, s1, s2;
+
+    if (rot == 0 || rot == 2) {
+        s1 = selection->x1;
+        s2 = selection->x2;
+    } else {
+        s1 = selection->y1;
+        s2 = selection->y2;
+    }
 
     begin = len;
     end = 0;
     for (i = 0; i < len; i++) {
         mid = (edge[i] + edge[i + 1]) / 2;
-        if (selection->x1 < mid || selection->x2 < mid)
+        if (XBetweenAB(mid, s1, s2)) {
             if (i < begin)
                 begin = i;
-        if (mid < selection->x1 || mid < selection->x2)
+
             end = i + 1;
+        }
     }
 
     /* Skip empty selection. */
@@ -4783,26 +4859,41 @@ void TextLine::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     TextWord *p, *begin, *end, *current;
     int i, edge_begin, edge_end;
     PDFRectangle child_selection;
+    double s1, s2, pMin, pMax;
+
+    if (rot == 0 || rot == 2) {
+        s1 = selection->x1;
+        s2 = selection->x2;
+    } else {
+        s1 = selection->y1;
+        s2 = selection->y2;
+    }
 
     begin = nullptr;
     end = nullptr;
     current = nullptr;
     for (p = words; p != nullptr; p = p->next) {
-        if (blk->page->primaryLR) {
-            if ((selection->x1 < p->xMax) || (selection->x2 < p->xMax))
-                if (begin == nullptr)
-                    begin = p;
+        if (rot == 0 || rot == 2) {
+            pMin = p->xMin;
+            pMax = p->xMax;
+        } else {
+            pMin = p->yMin;
+            pMax = p->yMax;
+        }
 
-            if (((selection->x1 > p->xMin) || (selection->x2 > p->xMin)) && (begin != nullptr)) {
+        if (blk->page->primaryLR) {
+            if (((s1 < pMax) || (s2 < pMax)) && begin == nullptr)
+                begin = p;
+
+            if (((s1 > pMin) || (s2 > pMin)) && begin != nullptr) {
                 end = p->next;
                 current = p;
             }
         } else {
-            if ((selection->x1 > p->xMin) || (selection->x2 > p->xMin))
-                if (begin == nullptr)
-                    begin = p;
+            if (((s1 > pMin) || (s2 > pMin)) && begin == nullptr)
+                begin = p;
 
-            if (((selection->x1 < p->xMax) || (selection->x2 < p->xMax)) && (begin != nullptr)) {
+            if (((s1 < pMax) || (s2 < pMax)) && begin != nullptr) {
                 end = p->next;
                 current = p;
             }
@@ -4814,23 +4905,41 @@ void TextLine::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
 
     child_selection = *selection;
     if (style == selectionStyleWord) {
-        child_selection.x1 = begin ? begin->xMin : xMin;
-        if (end && end->xMax != -1) {
-            child_selection.x2 = current->xMax;
+        if (rot == 0 || rot == 2) {
+            child_selection.x1 = begin ? begin->xMin : xMin;
+            if (end && end->xMax != -1) {
+                child_selection.x2 = current->xMax;
+            } else {
+                child_selection.x2 = xMax;
+            }
         } else {
-            child_selection.x2 = xMax;
+            child_selection.y1 = begin ? begin->yMin : yMin;
+            if (end && end->yMax != -1) {
+                child_selection.y2 = current->yMax;
+            } else {
+                child_selection.y2 = yMax;
+            }
         }
+    }
+
+    if (rot == 0 || rot == 2) {
+        s1 = child_selection.x1;
+        s2 = child_selection.x2;
+    } else {
+        s1 = child_selection.y1;
+        s2 = child_selection.y2;
     }
 
     edge_begin = len;
     edge_end = 0;
     for (i = 0; i < len; i++) {
         double mid = (edge[i] + edge[i + 1]) / 2;
-        if (child_selection.x1 < mid || child_selection.x2 < mid)
+        if (XBetweenAB(mid, s1, s2)) {
             if (i < edge_begin)
                 edge_begin = i;
-        if (mid < child_selection.x2 || mid < child_selection.x1)
+
             edge_end = i + 1;
+        }
     }
 
     /* Skip empty selection. */
@@ -5509,7 +5618,7 @@ void ActualText::end(const GfxState *state)
         // now that we have the position info for all of the text inside
         // the marked content span, we feed the "ActualText" back through
         // text->addChar()
-        length = TextStringToUCS4(actualText, &uni);
+        length = TextStringToUCS4(actualText->toStr(), &uni);
         text->addChar(state, actualTextX0, actualTextY0, actualTextX1 - actualTextX0, actualTextY1 - actualTextY0, 0, actualTextNBytes, uni, length);
         gfree(uni);
     }

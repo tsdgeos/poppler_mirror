@@ -8,7 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
-// Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -813,7 +813,7 @@ const Attribute *StructElement::findAttribute(Attribute::Type attributeType, boo
 GooString *StructElement::appendSubTreeText(GooString *string, bool recursive) const
 {
     if (isContent() && !isObjectRef()) {
-        MarkedContentOutputDev mcdev(getMCID());
+        MarkedContentOutputDev mcdev(getMCID(), stmRef);
         const TextSpanArray &spans(getTextSpansInternal(mcdev));
 
         if (!string)
@@ -1031,9 +1031,9 @@ StructElement *StructElement::parseChild(const Object *ref, Object *childObj, st
         child = new StructElement(childObj->getInt(), treeRoot, this);
     } else if (childObj->isDict("MCR")) {
         /*
-         * TODO: The optional Stm/StwOwn attributes are not handled, so all the
-         *      page will be always scanned when calling StructElement::getText().
+         * TODO: The optional StmOwn attribute is not handled.
          */
+
         Object mcidObj = childObj->dictLookup("MCID");
         if (!mcidObj.isInt()) {
             error(errSyntaxError, -1, "MCID object is wrong type ({0:s})", mcidObj.getTypeName());
@@ -1046,6 +1046,15 @@ StructElement *StructElement::parseChild(const Object *ref, Object *childObj, st
         if (pageRefObj.isRef()) {
             child->pageRef = std::move(pageRefObj);
         }
+
+        const Object &stmObj = childObj->dictLookupNF("Stm");
+        if (stmObj.isRef()) {
+            child->stmRef = stmObj.copy();
+        } else if (!stmObj.isNull()) {
+            error(errSyntaxError, -1, "Stm object is wrong type ({0:s})", stmObj.getTypeName());
+            return nullptr;
+        }
+
     } else if (childObj->isDict("OBJR")) {
         const Object &refObj = childObj->dictLookupNF("Obj");
         if (refObj.isRef()) {

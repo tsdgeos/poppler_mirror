@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -80,6 +80,7 @@ public:
 
     // Create a string from <lengthA> chars at <idx> in <str>.
     GooString(const GooString *str, int idx, int lengthA) : std::string(*str, idx, lengthA) { }
+    GooString(const std::string &str, int idx, int lengthA) : std::string(str, idx, lengthA) { }
 
     // Set content of a string to <newStr>.
     GooString *Set(const GooString *newStr)

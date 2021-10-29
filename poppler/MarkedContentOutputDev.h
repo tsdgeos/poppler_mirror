@@ -6,6 +6,7 @@
 //
 // Copyright 2013 Igalia S.L.
 // Copyright 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
@@ -88,7 +89,7 @@ typedef std::vector<TextSpan> TextSpanArray;
 class POPPLER_PRIVATE_EXPORT MarkedContentOutputDev : public OutputDev
 {
 public:
-    explicit MarkedContentOutputDev(int mcidA);
+    explicit MarkedContentOutputDev(int mcidA, const Object &stmObj);
     ~MarkedContentOutputDev() override;
 
     virtual bool isOk() { return true; }
@@ -101,6 +102,9 @@ public:
     void startPage(int pageNum, GfxState *state, XRef *xref) override;
     void endPage() override;
 
+    void beginForm(Ref id) override;
+    void endForm(Ref id) override;
+
     void drawChar(GfxState *state, double xx, double yy, double dx, double dy, double ox, double oy, CharCode c, int nBytes, const Unicode *u, int uLen) override;
 
     void beginMarkedContent(const char *name, Dict *properties) override;
@@ -111,6 +115,7 @@ public:
 private:
     void endSpan();
     bool inMarkedContent() const { return mcidStack.size() > 0; }
+    bool contentStreamMatch();
     bool needFontChange(const GfxFont *font) const;
 
     GfxFont *currentFont;
@@ -119,9 +124,11 @@ private:
     TextSpanArray textSpans;
     int mcid;
     std::vector<int> mcidStack;
+    std::vector<Ref> formStack;
     double pageWidth;
     double pageHeight;
     const UnicodeMap *unicodeMap;
+    Object stmRef;
 };
 
 #endif /* !MARKEDCONTENTOUTPUTDEV_H */

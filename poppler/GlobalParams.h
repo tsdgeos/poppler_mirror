@@ -111,10 +111,7 @@ public:
     GooString *findFontFile(const GooString *fontName);
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
-    bool getPSExpandSmaller();
-    bool getPSShrinkLarger();
     std::string getTextEncodingName() const;
-    bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
     bool getProfileCommands();
     bool getErrQuiet();
@@ -126,14 +123,11 @@ public:
 
     const UnicodeMap *getUtf8Map();
 
-    std::vector<GooString *> *getEncodingNames();
+    std::vector<std::string> getEncodingNames();
 
     //----- functions to set parameters
     void addFontFile(const GooString *fontName, const GooString *path);
-    void setPSExpandSmaller(bool expand);
-    void setPSShrinkLarger(bool shrink);
     void setTextEncoding(const char *encodingName);
-    void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
@@ -170,7 +164,7 @@ private:
     std::unordered_map<std::string, std::string> unicodeMaps;
     // list of CMap dirs, indexed by collection
     std::unordered_multimap<std::string, std::string> cMapDirs;
-    std::vector<GooString *> *toUnicodeDirs; // list of ToUnicode CMap dirs
+    std::vector<GooString *> toUnicodeDirs; // list of ToUnicode CMap dirs
     bool baseFontsInitialized;
 #ifdef _WIN32
     // windows font substitutes (for CID fonts)
@@ -179,11 +173,8 @@ private:
     // font files: font name mapped to path
     std::unordered_map<std::string, std::string> fontFiles;
     SysFontList *sysFonts; // system fonts
-    bool psExpandSmaller; // expand smaller pages to fill paper
-    bool psShrinkLarger; // shrink larger pages to fit paper
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
-    bool overprintPreview; // enable overprint preview
     bool printCommands; // print the drawing commands
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?

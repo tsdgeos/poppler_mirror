@@ -238,7 +238,7 @@ public:
         printing = printingA;
         needFontUpdate = true;
     }
-    void setAntialias(cairo_antialias_t antialias);
+    void copyAntialias(cairo_t *cr, cairo_t *source_cr);
 
     void setInType3Char(bool inType3CharA) { inType3Char = inType3CharA; }
     void getType3GlyphWidth(double *wx, double *wy)
@@ -264,7 +264,6 @@ protected:
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
     bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
 #endif
-    static void setContextAntialias(cairo_t *cr, cairo_antialias_t antialias);
 
     GfxRGB fill_color, stroke_color;
     cairo_pattern_t *fill_pattern, *stroke_pattern;
@@ -317,7 +316,6 @@ protected:
     double t3_glyph_wx, t3_glyph_wy;
     bool t3_glyph_has_bbox;
     double t3_glyph_bbox[4];
-    cairo_antialias_t antialias;
     bool prescaleImages;
 
     TextPage *textPage; // text for the current page

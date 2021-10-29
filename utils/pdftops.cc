@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012, 2014-2016, 2020 William Bader <williambader@hotmail.com>
@@ -268,15 +268,6 @@ int main(int argc, char *argv[])
             goto err0;
         }
     }
-    if (overprint) {
-        globalParams->setOverprintPreview(true);
-    }
-    if (expand) {
-        globalParams->setPSExpandSmaller(true);
-    }
-    if (noShrink) {
-        globalParams->setPSShrinkLarger(false);
-    }
     if (quiet) {
         globalParams->setErrQuiet(quiet);
     }
@@ -450,6 +441,15 @@ int main(int argc, char *argv[])
                             /*imgURXA*/ 0, /*imgURYA*/ 0, psRasterizeWhenNeeded, /*manualCtrlA*/ false, /*customCodeCbkA*/ nullptr, /*customCodeCbkDataA*/ nullptr, level);
     if (noCenter) {
         psOut->setPSCenter(false);
+    }
+    if (expand) {
+        psOut->setPSExpandSmaller(true);
+    }
+    if (noShrink) {
+        psOut->setPSShrinkLarger(false);
+    }
+    if (overprint) {
+        psOut->setOverprintPreview(true);
     }
 
     if (rasterAntialiasStr[0]) {

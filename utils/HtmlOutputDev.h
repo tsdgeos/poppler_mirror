@@ -80,13 +80,13 @@ public:
 
     // Add a character to the string.
     void addChar(GfxState *state, double x, double y, double dx, double dy, Unicode u);
-    HtmlLink *getLink() { return link; }
+    const HtmlLink *getLink() const { return link; }
     const HtmlFont &getFont() const { return *fonts->Get(fontpos); }
     void endString(); // postprocessing
 
 private:
     // aender die text variable
-    HtmlLink *link;
+    const HtmlLink *link;
     double xMin, xMax; // bounding box x coordinates
     double yMin, yMax; // bounding box y coordinates
     int col; // starting column
@@ -147,7 +147,7 @@ public:
     void addImage(GooString *fname, GfxState *state);
 
     // number of images on the current page
-    int getNumImages() { return imgList->size(); }
+    int getNumImages() { return imgList.size(); }
 
     void dump(FILE *f, int pageNum, const std::vector<std::string> &backgroundImages);
 
@@ -177,7 +177,7 @@ private:
     int fontsPageMarker;
     HtmlFontAccu *fonts;
     HtmlLinks *links;
-    std::vector<HtmlImage *> *imgList;
+    std::vector<HtmlImage *> imgList;
 
     GooString *DocName;
     int pageWidth;
@@ -311,7 +311,7 @@ private:
     int maxPageHeight;
     GooString *Docname;
     GooString *docTitle;
-    std::vector<HtmlMetaVar *> *glMetaVars;
+    std::vector<HtmlMetaVar *> glMetaVars;
     Catalog *catalog;
     Page *docPage;
     std::vector<std::string> backgroundImages;

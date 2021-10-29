@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -88,24 +88,24 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4_out)
     return len;
 }
 
-int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
+int TextStringToUCS4(const std::string &textStr, Unicode **ucs4)
 {
     int i, len;
     const char *s;
     Unicode *u;
     bool isUnicode, isUnicodeLE;
 
-    len = textStr->getLength();
-    s = textStr->c_str();
+    len = textStr.size();
+    s = textStr.c_str();
     if (len == 0) {
         *ucs4 = nullptr;
         return 0;
     }
 
-    if (textStr->hasUnicodeMarker()) {
+    if (GooString::hasUnicodeMarker(textStr)) {
         isUnicode = true;
         isUnicodeLE = false;
-    } else if (textStr->hasUnicodeMarkerLE()) {
+    } else if (GooString::hasUnicodeMarkerLE(textStr)) {
         isUnicode = false;
         isUnicodeLE = true;
     } else {
@@ -357,10 +357,10 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     return utf16;
 }
 
-GooString *utf8ToUtf16WithBom(const GooString &utf8)
+GooString *utf8ToUtf16WithBom(const std::string &utf8)
 {
     GooString *result = new GooString();
-    if (utf8.toStr().empty()) {
+    if (utf8.empty()) {
         return result;
     }
     int tmp_length; // Number of UTF-16 symbols.
@@ -515,7 +515,7 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
             idx = (int *)gmallocn(len * 8 + 1, sizeof(int));
     }
 
-    GooString gstr;
+    std::string str;
 
     char buf[8]; // 8 is enough for mapping an unicode char to a string
     int i, n, k;
@@ -528,14 +528,14 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
             buf[0] = 31;
             n = 1;
         }
-        gstr.append(buf, n);
+        str.append(buf, n);
         if (indices) {
             for (; n > 0; n--)
                 idx[k++] = in_idx[i];
         }
     }
 
-    *out_len = TextStringToUCS4(&gstr, ucs4_out);
+    *out_len = TextStringToUCS4(str, ucs4_out);
 
     if (indices) {
         idx[k] = in_idx[len];

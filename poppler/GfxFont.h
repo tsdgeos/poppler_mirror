@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -131,10 +131,6 @@ public:
                      //   (if locType == gfxFontLocResident)
     int fontNum; // for TrueType collections
                  //   (if locType == gfxFontLocExternal)
-    GooString *encoding; // PS font encoding, only for 16-bit fonts
-                         //   (if locType == gfxFontLocResident)
-    int wMode; // writing mode, only for 16-bit fonts
-               //   (if locType == gfxFontLocResident)
     int substIdx; // substitute font index
                   //   (if locType == gfxFontLocExternal,
                   //   and a Base-14 substitution was made)
@@ -193,13 +189,13 @@ public:
     void decRefCnt();
 
     // Get font tag.
-    const GooString *getTag() const { return tag; }
+    const std::string &getTag() const { return tag; }
 
     // Get font dictionary ID.
     const Ref *getID() const { return &id; }
 
     // Does this font match the tag?
-    bool matches(const char *tagA) const { return !tag->cmp(tagA); }
+    bool matches(const char *tagA) const { return tag == tagA; }
 
     // Get font family name.
     GooString *getFamily() const { return family; }
@@ -309,13 +305,13 @@ protected:
     CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
     static GfxFontLoc *getExternalFont(GooString *path, bool cid);
 
-    GooString *tag; // PDF font tag
-    Ref id; // reference (used as unique ID)
+    const std::string tag; // PDF font tag
+    const Ref id; // reference (used as unique ID)
     const GooString *name; // font name
     GooString *family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
-    GfxFontType type; // type of font
+    const GfxFontType type; // type of font
     int flags; // font descriptor flags
     GooString *embFontName; // name of embedded font
     Ref embFontID; // ref to embedded font file stream
@@ -455,11 +451,11 @@ public:
     GfxFontDict &operator=(const GfxFontDict &) = delete;
 
     // Get the specified font.
-    GfxFont *lookup(const char *tag);
+    GfxFont *lookup(const char *tag) const;
 
     // Iterative access.
-    int getNumFonts() { return numFonts; }
-    GfxFont *getFont(int i) { return fonts[i]; }
+    int getNumFonts() const { return numFonts; }
+    GfxFont *getFont(int i) const { return fonts[i]; }
 
 private:
     int hashFontObject(Object *obj);

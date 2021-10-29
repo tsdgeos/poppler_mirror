@@ -87,6 +87,7 @@ static bool printEnc = false;
 static bool printStructure = false;
 static bool printStructureText = false;
 static bool printDests = false;
+static bool printUrls = false;
 
 static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
                                    { "-l", argInt, &lastPage, 0, "last page to convert" },
@@ -99,6 +100,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-isodates", argFlag, &isoDates, 0, "print the dates in ISO-8601 format" },
                                    { "-rawdates", argFlag, &rawDates, 0, "print the undecoded date strings directly from the PDF file" },
                                    { "-dests", argFlag, &printDests, 0, "print all named destinations in the PDF" },
+                                   { "-url", argFlag, &printUrls, 0, "print all URLs inside PDF objects (does not scan text content)" },
                                    { "-enc", argString, textEncName, sizeof(textEncName), "output text encoding name" },
                                    { "-listenc", argFlag, &printEnc, 0, "list available encodings" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
@@ -114,7 +116,7 @@ static void printTextString(const GooString *s, const UnicodeMap *uMap)
 {
     Unicode *u;
     char buf[8];
-    int len = TextStringToUCS4(s, &u);
+    int len = TextStringToUCS4(s->toStr(), &u);
     for (int i = 0; i < len; i++) {
         int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
         fwrite(buf, 1, n, stdout);
@@ -406,6 +408,26 @@ static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap)
                     printTextString(it.first, uMap);
                     printf("\"\n");
                     delete it.first;
+                }
+            }
+        }
+    }
+}
+
+static void printUrlList(PDFDoc *doc)
+{
+    printf("Page  Type          URL\n");
+    for (int pg = firstPage; pg <= lastPage; pg++) {
+        Page *page = doc->getPage(pg);
+        if (page) {
+            Links *links = page->getLinks();
+            for (int i = 0; i < links->getNumLinks(); i++) {
+                AnnotLink *annot = links->getLink(i);
+                LinkAction *action = annot->getAction();
+                if (action->getKind() == actionURI) {
+                    LinkURI *linkUri = dynamic_cast<LinkURI *>(action);
+                    std::string uri = linkUri->getURI();
+                    printf("%4d  Annotation    %s\n", pg, uri.c_str());
                 }
             }
         }
@@ -1015,6 +1037,8 @@ int main(int argc, char *argv[])
         }
     } else if (printDests) {
         printDestinations(doc.get(), uMap);
+    } else if (printUrls) {
+        printUrlList(doc.get());
     } else {
         // print info
         long long filesize = 0;

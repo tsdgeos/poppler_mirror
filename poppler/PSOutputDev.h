@@ -303,6 +303,9 @@ public:
     void setDisplayText(bool display) { displayText = display; }
 
     void setPSCenter(bool center) { psCenter = center; }
+    void setPSExpandSmaller(bool expand) { psExpandSmaller = expand; }
+    void setPSShrinkLarger(bool shrink) { psShrinkLarger = shrink; }
+    void setOverprintPreview(bool overprintPreviewA) { overprintPreview = overprintPreviewA; }
     void setRasterAntialias(bool a) { rasterAntialias = a; }
     void setForceRasterize(PSForceRasterize f) { forceRasterize = f; }
     void setRasterResolution(double r) { rasterResolution = r; }
@@ -498,6 +501,9 @@ private:
     PSForceRasterize forceRasterize; // controls the rasterization of pages into images
     bool displayText; // displayText
     bool psCenter; // center pages on the paper
+    bool psExpandSmaller = false; // expand smaller pages to fill paper
+    bool psShrinkLarger = true; // shrink larger pages to fit paper
+    bool overprintPreview = false; // enable overprint preview
     bool rasterAntialias; // antialias on rasterize
     bool uncompressPreloadedImages;
     double rasterResolution; // PostScript rasterization resolution (dpi)

@@ -285,7 +285,6 @@ HtmlPage::HtmlPage(bool rawOrderA)
     yxCur1 = yxCur2 = nullptr;
     fonts = new HtmlFontAccu();
     links = new HtmlLinks();
-    imgList = new std::vector<HtmlImage *>();
     pageWidth = 0;
     pageHeight = 0;
     fontsPageMarker = 0;
@@ -299,10 +298,9 @@ HtmlPage::~HtmlPage()
     delete DocName;
     delete fonts;
     delete links;
-    for (auto entry : *imgList) {
+    for (auto entry : imgList) {
         delete entry;
     }
-    delete imgList;
 }
 
 void HtmlPage::updateFont(GfxState *state)
@@ -630,8 +628,8 @@ void HtmlPage::coalesce()
             }
 
             /* fix <i>, <b> if str1 and str2 differ and handle switch of links */
-            HtmlLink *hlink1 = str1->getLink();
-            HtmlLink *hlink2 = str2->getLink();
+            const HtmlLink *hlink1 = str1->getLink();
+            const HtmlLink *hlink2 = str2->getLink();
             bool switch_links = !hlink1 || !hlink2 || !hlink1->isEqualDest(*hlink2);
             bool finish_a = switch_links && hlink1 != nullptr;
             bool finish_italic = hfont1->isItalic() && (!hfont2->isItalic() || finish_a);
@@ -713,7 +711,7 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
         delete fontCSStyle;
     }
 
-    for (auto ptr : *imgList) {
+    for (auto ptr : imgList) {
         auto img = static_cast<HtmlImage *>(ptr);
         if (!noRoundedCoordinates) {
             fprintf(f, "<image top=\"%d\" left=\"%d\" ", xoutRound(img->yMin), xoutRound(img->xMin));
@@ -725,7 +723,7 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
         fprintf(f, "src=\"%s\"/>\n", img->fName->c_str());
         delete img;
     }
-    imgList->clear();
+    imgList.clear();
 
     for (HtmlString *tmp = yxStrings; tmp; tmp = tmp->yxNext) {
         if (tmp->htext) {
@@ -910,7 +908,7 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
     } else {
         fprintf(f, "<a name=%d></a>", pageNum);
         // Loop over the list of image names on this page
-        for (auto ptr : *imgList) {
+        for (auto ptr : imgList) {
             auto img = static_cast<HtmlImage *>(ptr);
 
             // see printCSS() for class names
@@ -924,7 +922,7 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
             fprintf(f, "<img%s src=\"%s\"/><br/>\n", styles[style_index], img->fName->c_str());
             delete img;
         }
-        imgList->clear();
+        imgList.clear();
 
         GooString *str;
         for (HtmlString *tmp = yxStrings; tmp; tmp = tmp->yxNext) {
@@ -975,7 +973,7 @@ void HtmlPage::setDocName(const char *fname)
 void HtmlPage::addImage(GooString *fname, GfxState *state)
 {
     HtmlImage *img = new HtmlImage(fname, state);
-    imgList->push_back(img);
+    imgList.push_back(img);
 }
 
 //------------------------------------------------------------------------
@@ -1073,16 +1071,15 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
     needClose = false;
     pages = new HtmlPage(rawOrder);
 
-    glMetaVars = new std::vector<HtmlMetaVar *>();
-    glMetaVars->push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
+    glMetaVars.push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
     if (author)
-        glMetaVars->push_back(new HtmlMetaVar("author", author));
+        glMetaVars.push_back(new HtmlMetaVar("author", author));
     if (keywords)
-        glMetaVars->push_back(new HtmlMetaVar("keywords", keywords));
+        glMetaVars.push_back(new HtmlMetaVar("keywords", keywords));
     if (date)
-        glMetaVars->push_back(new HtmlMetaVar("date", date));
+        glMetaVars.push_back(new HtmlMetaVar("date", date));
     if (subject)
-        glMetaVars->push_back(new HtmlMetaVar("subject", subject));
+        glMetaVars.push_back(new HtmlMetaVar("subject", subject));
 
     maxPageWidth = 0;
     maxPageHeight = 0;
@@ -1170,10 +1167,9 @@ HtmlOutputDev::~HtmlOutputDev()
     delete Docname;
     delete docTitle;
 
-    for (auto entry : *glMetaVars) {
+    for (auto entry : glMetaVars) {
         delete entry;
     }
-    delete glMetaVars;
 
     if (fContentsFrame) {
         fputs("</body>\n</html>\n", fContentsFrame);
@@ -1612,7 +1608,7 @@ void HtmlOutputDev::dumpMetaVars(FILE *file)
 {
     GooString *var;
 
-    for (const HtmlMetaVar *t : *glMetaVars) {
+    for (const HtmlMetaVar *t : glMetaVars) {
         var = t->toString();
         fprintf(file, "%s\n", var->c_str());
         delete var;

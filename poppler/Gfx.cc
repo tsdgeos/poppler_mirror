@@ -20,7 +20,7 @@
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
-// Copyright (C) 2007, 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2007, 2011, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
@@ -3613,7 +3613,7 @@ void Gfx::opSetFont(Object args[], int numArgs)
         return;
     }
     if (printCommands) {
-        printf("  font: tag=%s name='%s' %g\n", font->getTag()->c_str(), font->getName() ? font->getName()->c_str() : "???", args[1].getNum());
+        printf("  font: tag=%s name='%s' %g\n", font->getTag().c_str(), font->getName() ? font->getName()->c_str() : "???", args[1].getNum());
         fflush(stdout);
     }
 
@@ -3915,6 +3915,10 @@ void Gfx::doShowText(const GooString *s)
                     pushResources(resDict);
                 }
                 if (charProc.isStream()) {
+                    Object charProcResourcesObj = charProc.streamGetDict()->lookup("Resources");
+                    if (charProcResourcesObj.isDict()) {
+                        pushResources(charProcResourcesObj.getDict());
+                    }
                     std::set<int>::iterator charProcDrawingIt;
                     bool displayCharProc = true;
                     if (refNum != -1) {
@@ -3933,6 +3937,9 @@ void Gfx::doShowText(const GooString *s)
                         if (refNum != -1) {
                             charProcDrawing.erase(charProcDrawingIt);
                         }
+                    }
+                    if (charProcResourcesObj.isDict()) {
+                        popResources();
                     }
                 } else {
                     error(errSyntaxError, getPos(), "Missing or bad Type3 CharProc entry");
@@ -4120,7 +4127,10 @@ void Gfx::opXObject(Object args[], int numArgs)
             if (out->useDrawForm() && refObj.isRef()) {
                 out->drawForm(refObj.getRef());
             } else {
+                Ref ref = refObj.isRef() ? refObj.getRef() : Ref::INVALID();
+                out->beginForm(ref);
                 doForm(&obj1);
+                out->endForm(ref);
             }
         }
         if (refObj.isRef() && shouldDoForm) {

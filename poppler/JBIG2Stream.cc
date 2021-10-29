@@ -2185,7 +2185,9 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
             if (pageH == 0xffffffff && y + h > curPageH) {
                 pageBitmap->expand(y + h, pageDefPixel);
             }
-            pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+            if (pageBitmap->isOk()) {
+                pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+            }
 
             // store the region bitmap
         } else {

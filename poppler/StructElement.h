@@ -8,6 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
@@ -329,7 +330,7 @@ public:
     {
         if (!isContent())
             return TextSpanArray();
-        MarkedContentOutputDev mcdev(getMCID());
+        MarkedContentOutputDev mcdev(getMCID(), stmRef);
         return getTextSpansInternal(mcdev);
     }
 
@@ -379,6 +380,7 @@ private:
     StructTreeRoot *treeRoot;
     StructElement *parent;
     mutable Object pageRef;
+    Object stmRef;
 
     union {
         StructData *s;

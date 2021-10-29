@@ -174,7 +174,6 @@ GfxFontLoc::GfxFontLoc()
 {
     path = nullptr;
     fontNum = 0;
-    encoding = nullptr;
     substIdx = -1;
 }
 
@@ -182,9 +181,6 @@ GfxFontLoc::~GfxFontLoc()
 {
     if (path) {
         delete path;
-    }
-    if (encoding) {
-        delete encoding;
     }
 }
 
@@ -220,13 +216,10 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
     return font;
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA)
+GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), type(typeA)
 {
     ok = false;
-    tag = new GooString(tagA);
-    id = idA;
     name = nameA;
-    type = typeA;
     embFontID = embFontIDA;
     embFontName = nullptr;
     family = nullptr;
@@ -238,7 +231,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType 
 
 GfxFont::~GfxFont()
 {
-    delete tag;
     delete family;
     if (name) {
         delete name;
@@ -1362,11 +1354,17 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
         if (obj1.arrayGetLength() < lastChar - firstChar + 1) {
             lastChar = firstChar + obj1.arrayGetLength() - 1;
         }
+        double firstNonZeroWidth = 0;
         for (int code = firstChar; code <= lastChar; ++code) {
             Object obj2 = obj1.arrayGet(code - firstChar);
             if (obj2.isNum()) {
                 widths[code] = obj2.getNum() * mul;
-                if (fabs(widths[code] - widths[firstChar]) > 0.00001) {
+
+                // Check if the font is fixed width
+                if (firstNonZeroWidth == 0) {
+                    firstNonZeroWidth = widths[code];
+                }
+                if (firstNonZeroWidth != 0 && widths[code] != 0 && fabs(widths[code] - firstNonZeroWidth) > 0.00001) {
                     flags &= ~fontFixedWidth;
                 }
             }
@@ -2160,9 +2158,11 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
     *codeToGIDLen = 0;
     if (!ctu || !getCollection())
         return nullptr;
-    if (getCollection()->cmp("Adobe-Identity") == 0)
-        return nullptr;
+
     if (getEmbeddedFontID(&embID)) {
+        if (getCollection()->cmp("Adobe-Identity") == 0)
+            return nullptr;
+
         /* if this font is embedded font,
          * CIDToGIDMap should be embedded in PDF file
          * and already set. So return it.
@@ -2238,7 +2238,11 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
         ff->setupGSUB(lp->scriptTag, lp->languageTag);
     } else {
-        error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+        if (getCollection()->cmp("Adobe-Identity") == 0) {
+            error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:t}", getName());
+        } else {
+            error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+        }
         if (ctu) {
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
@@ -2402,7 +2406,7 @@ GfxFontDict::~GfxFontDict()
     gfree(fonts);
 }
 
-GfxFont *GfxFontDict::lookup(const char *tag)
+GfxFont *GfxFontDict::lookup(const char *tag) const
 {
     int i;
 

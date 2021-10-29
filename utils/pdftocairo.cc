@@ -648,12 +648,20 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg, double pag
     cairo_t *cr;
     cairo_status_t status;
     cairo_matrix_t m;
+    cairo_font_options_t *font_options;
 
     cr = cairo_create(surface);
 
+    cairo_set_antialias(cr, antialiasEnum);
+
+    font_options = cairo_font_options_create();
+    cairo_get_font_options(cr, font_options);
+    cairo_font_options_set_antialias(font_options, antialiasEnum);
+    cairo_set_font_options(cr, font_options);
+    cairo_font_options_destroy(font_options);
+
     cairoOut->setCairo(cr);
     cairoOut->setPrinting(printing);
-    cairoOut->setAntialias(antialiasEnum);
 
     cairo_save(cr);
     if (ps && output_w > output_h) {

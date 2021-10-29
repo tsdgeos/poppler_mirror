@@ -1388,7 +1388,7 @@ void PSOutputDev::postInit()
     if (!processColorFormatSpecified) {
         if (level == psLevel1) {
             processColorFormat = splashModeMono8;
-        } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {
+        } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || overprintPreview) {
             processColorFormat = splashModeCMYK8;
         }
 #ifdef USE_CMS
@@ -1414,7 +1414,7 @@ void PSOutputDev::postInit()
               "Conflicting settings between LanguageLevel=psLevel1 and processColorFormat."
               " Resetting processColorFormat to MONO8.");
         processColorFormat = splashModeMono8;
-    } else if ((level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) && processColorFormat != splashModeCMYK8) {
+    } else if ((level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || overprintPreview) && processColorFormat != splashModeCMYK8) {
         error(errConfig, -1,
               "Conflicting settings between LanguageLevel and/or overprint simulation, and processColorFormat."
               " Resetting processColorFormat to CMYK8.");
@@ -1908,7 +1908,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     GooString *psName;
     char buf[16];
     bool subst;
-    const UnicodeMap *uMap;
     const char *charName;
     double xs, ys;
     int code;
@@ -2048,23 +2047,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
             if (xs < 0.1) {
                 xs = 1;
             }
-        }
-
-        // handle encodings for substituted CID fonts
-        if (fontLoc->locType == gfxFontLocResident && fontLoc->fontType >= fontCIDType0) {
-            subst = true;
-            if (font16EncLen >= font16EncSize) {
-                font16EncSize += 16;
-                font16Enc = (PSFont16Enc *)greallocn(font16Enc, font16EncSize, sizeof(PSFont16Enc));
-            }
-            font16Enc[font16EncLen].fontID = *font->getID();
-            if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding->toStr()))) {
-                font16Enc[font16EncLen].enc = fontLoc->encoding->copy();
-            } else {
-                error(errSyntaxError, -1, "Couldn't find Unicode map for 16-bit font encoding '{0:t}'", fontLoc->encoding);
-                font16Enc[font16EncLen].enc = nullptr;
-            }
-            ++font16EncLen;
         }
 
         delete fontLoc;
@@ -3185,7 +3167,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
 
     // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
     // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
-    overprint = globalParams->getOverprintPreview() || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
+    overprint = overprintPreview || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
 
     // set up the SplashOutputDev
     internalColorFormat = processColorFormat;
@@ -3731,7 +3713,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         if (xScale0 > 0 && yScale0 > 0) {
             xScale = xScale0;
             yScale = yScale0;
-        } else if ((globalParams->getPSShrinkLarger() && (width > imgWidth2 || height > imgHeight2)) || (globalParams->getPSExpandSmaller() && (width < imgWidth2 && height < imgHeight2))) {
+        } else if ((psShrinkLarger && (width > imgWidth2 || height > imgHeight2)) || (psExpandSmaller && (width < imgWidth2 && height < imgHeight2))) {
             if (unlikely(width == 0)) {
                 error(errSyntaxError, -1, "width 0, xScale would be infinite");
                 return;
