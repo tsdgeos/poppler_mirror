@@ -1562,19 +1562,18 @@ void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 
 double FormFieldText::getTextFontSize()
 {
-    std::vector<GooString *> *daToks = new std::vector<GooString *>();
-    int idx = parseDA(daToks);
+    std::vector<GooString *> daToks;
+    int idx = parseDA(&daToks);
     double fontSize = -1;
     if (idx >= 0) {
         char *p = nullptr;
-        fontSize = strtod((*daToks)[idx]->c_str(), &p);
+        fontSize = strtod(daToks[idx]->c_str(), &p);
         if (!p || *p)
             fontSize = -1;
     }
-    for (auto entry : *daToks) {
+    for (auto entry : daToks) {
         delete entry;
     }
-    delete daToks;
     return fontSize;
 }
 
