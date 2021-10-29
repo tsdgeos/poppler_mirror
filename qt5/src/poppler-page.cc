@@ -734,10 +734,9 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
     m_page->parentDoc->doc->displayPageSlice(&output_dev, m_page->index + 1, 72, 72, rotation, false, false, false, -1, -1, -1, -1, shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
                                              nullptr, nullptr, true);
 
-    TextWordList *word_list = output_dev.makeWordList();
+    std::unique_ptr<TextWordList> word_list = output_dev.makeWordList();
 
-    if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
-        delete word_list;
+    if (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure)) {
         return output_list;
     }
 
@@ -770,8 +769,6 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
         TextBox *text_box = wordBoxMap.value(word);
         text_box->m_data->nextWord = wordBoxMap.value(word->nextWord());
     }
-
-    delete word_list;
 
     return output_list;
 }

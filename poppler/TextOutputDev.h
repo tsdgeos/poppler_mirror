@@ -660,7 +660,7 @@ public:
     // this->rawOrder is true), physical layout order (if <physLayout>
     // is true and this->rawOrder is false), or reading order (if both
     // flags are false).
-    TextWordList *makeWordList(bool physLayout);
+    std::unique_ptr<TextWordList> makeWordList(bool physLayout);
 #endif
 
 private:
@@ -861,7 +861,7 @@ public:
     // this->rawOrder is true), physical layout order (if
     // this->physLayout is true and this->rawOrder is false), or reading
     // order (if both flags are false).
-    TextWordList *makeWordList();
+    std::unique_ptr<TextWordList> makeWordList();
 #endif
 
     // Returns the TextPage object for the last rasterized page,
