@@ -1200,14 +1200,14 @@ const UnicodeMap *GlobalParams::getTextEncoding()
     return getUnicodeMap(textEncoding->toStr());
 }
 
-std::vector<GooString *> *GlobalParams::getEncodingNames()
+std::vector<std::string> GlobalParams::getEncodingNames()
 {
-    auto *const result = new std::vector<GooString *>;
+    std::vector<std::string> result;
     for (const auto &unicodeMap : residentUnicodeMaps) {
-        result->push_back(new GooString(unicodeMap.first));
+        result.push_back(unicodeMap.first);
     }
     for (const auto &unicodeMap : unicodeMaps) {
-        result->push_back(new GooString(unicodeMap.first));
+        result.push_back(unicodeMap.first);
     }
     return result;
 }

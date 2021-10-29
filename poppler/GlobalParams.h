@@ -126,7 +126,7 @@ public:
 
     const UnicodeMap *getUtf8Map();
 
-    std::vector<GooString *> *getEncodingNames();
+    std::vector<std::string> getEncodingNames();
 
     //----- functions to set parameters
     void addFontFile(const GooString *fontName, const GooString *path);
