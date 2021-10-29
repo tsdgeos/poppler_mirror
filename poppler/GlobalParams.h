@@ -112,7 +112,6 @@ public:
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     std::string getTextEncodingName() const;
-    bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
     bool getProfileCommands();
     bool getErrQuiet();
@@ -129,7 +128,6 @@ public:
     //----- functions to set parameters
     void addFontFile(const GooString *fontName, const GooString *path);
     void setTextEncoding(const char *encodingName);
-    void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
@@ -177,7 +175,6 @@ private:
     SysFontList *sysFonts; // system fonts
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
-    bool overprintPreview; // enable overprint preview
     bool printCommands; // print the drawing commands
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?

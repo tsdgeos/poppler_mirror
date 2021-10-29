@@ -268,9 +268,6 @@ int main(int argc, char *argv[])
             goto err0;
         }
     }
-    if (overprint) {
-        globalParams->setOverprintPreview(true);
-    }
     if (quiet) {
         globalParams->setErrQuiet(quiet);
     }
@@ -450,6 +447,9 @@ int main(int argc, char *argv[])
     }
     if (noShrink) {
         psOut->setPSShrinkLarger(false);
+    }
+    if (overprint) {
+        psOut->setOverprintPreview(true);
     }
 
     if (rasterAntialiasStr[0]) {

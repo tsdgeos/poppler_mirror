@@ -124,6 +124,7 @@ static int jpegQuality = -1;
 static bool jpegProgressive = false;
 static bool jpegOptimize = false;
 static bool overprint = false;
+static bool splashOverprintPreview = false;
 static char enableFreeTypeStr[16] = "";
 static bool enableFreeType = true;
 static char antialiasStr[16] = "";
@@ -368,7 +369,11 @@ static void processPageJobs()
         pthread_mutex_unlock(&pageJobMutex);
 
         // process the job
-        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
+        SplashOutputDev *splashOut = new SplashOutputDev(mono                              ? splashModeMono1
+                                                                 : gray                    ? splashModeMono8
+                                                                 : (jpegcmyk || overprint) ? splashModeDeviceN8
+                                                                                           : splashModeRGB8,
+                                                         4, false, *pageJob.paperColor, true, thinLineMode, splashOverprintPreview);
         splashOut->setFontAntialias(fontAntialias);
         splashOut->setVectorAntialias(vectorAntialias);
         splashOut->setEnableFreeType(enableFreeType);
@@ -535,7 +540,7 @@ int main(int argc, char *argv[])
 
     // write PPM files
     if (jpegcmyk || overprint) {
-        globalParams->setOverprintPreview(true);
+        splashOverprintPreview = true;
         splashClearColor(paperColor);
     } else {
         paperColor[0] = 255;
@@ -595,7 +600,7 @@ int main(int argc, char *argv[])
 
 #ifndef UTILS_USE_PTHREADS
 
-    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
+    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode, splashOverprintPreview);
 
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);

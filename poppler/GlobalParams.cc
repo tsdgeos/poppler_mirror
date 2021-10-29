@@ -385,7 +385,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
     nameToUnicodeText = new NameToCharCode();
     sysFonts = new SysFontList();
     textEncoding = new GooString("UTF-8");
-    overprintPreview = false;
     printCommands = false;
     profileCommands = false;
     errQuiet = false;
@@ -1213,12 +1212,6 @@ void GlobalParams::setTextEncoding(const char *encodingName)
     globalParamsLocker();
     delete textEncoding;
     textEncoding = new GooString(encodingName);
-}
-
-void GlobalParams::setOverprintPreview(bool overprintPreviewA)
-{
-    globalParamsLocker();
-    overprintPreview = overprintPreviewA;
 }
 
 void GlobalParams::setPrintCommands(bool printCommandsA)

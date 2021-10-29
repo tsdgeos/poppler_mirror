@@ -1388,7 +1388,7 @@ void PSOutputDev::postInit()
     if (!processColorFormatSpecified) {
         if (level == psLevel1) {
             processColorFormat = splashModeMono8;
-        } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {
+        } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || overprintPreview) {
             processColorFormat = splashModeCMYK8;
         }
 #ifdef USE_CMS
@@ -1414,7 +1414,7 @@ void PSOutputDev::postInit()
               "Conflicting settings between LanguageLevel=psLevel1 and processColorFormat."
               " Resetting processColorFormat to MONO8.");
         processColorFormat = splashModeMono8;
-    } else if ((level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) && processColorFormat != splashModeCMYK8) {
+    } else if ((level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || overprintPreview) && processColorFormat != splashModeCMYK8) {
         error(errConfig, -1,
               "Conflicting settings between LanguageLevel and/or overprint simulation, and processColorFormat."
               " Resetting processColorFormat to CMYK8.");
@@ -3167,7 +3167,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
 
     // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
     // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
-    overprint = globalParams->getOverprintPreview() || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
+    overprint = overprintPreview || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
 
     // set up the SplashOutputDev
     internalColorFormat = processColorFormat;
