@@ -263,16 +263,16 @@ static const char *getFormAdditionalActionKey(Annot::FormAdditionalActionsType t
     return (type == Annot::actionFieldModified ? "K" : type == Annot::actionFormatField ? "F" : type == Annot::actionValidateField ? "V" : type == Annot::actionCalculateField ? "C" : nullptr);
 }
 
-static const char *determineFallbackFont(GooString *tok, const char *defaultFallback)
+static const char *determineFallbackFont(const std::string &tok, const char *defaultFallback)
 {
     // TODO: adjust these based on other example PDFs.
-    if (!tok->cmp("/ZaDb")) {
+    if (tok == "/ZaDb") {
         return "ZapfDingbats";
-    } else if (!tok->cmp("/Cour")) {
+    } else if (tok == "/Cour") {
         return "Courier";
-    } else if (!tok->cmp("/TiRo")) {
+    } else if (tok == "/TiRo") {
         return "TimesNewRoman";
-    } else if (!tok->cmp("/Helvetica-Bold")) {
+    } else if (tok == "/Helvetica-Bold") {
         return "Helvetica-Bold";
     }
     return defaultFallback;
@@ -4218,7 +4218,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
                 if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok, defaultFallback);
+                    const char *fallback = determineFallbackFont(tok->toStr(), defaultFallback);
                     fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
                     font = fontToFree;
                 } else {
@@ -4593,7 +4593,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
                 if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok, "Helvetica");
+                    const char *fallback = determineFallbackFont(tok->toStr(), "Helvetica");
                     fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
                     font = fontToFree;
                 } else {
