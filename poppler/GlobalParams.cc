@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -230,27 +230,23 @@ public:
     void scanWindowsFonts(GooString *winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si) { fonts->push_back(si); }
+    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
 #endif
 private:
 #ifdef _WIN32
     SysFontInfo *makeWindowsFont(const char *name, int fontNum, const char *path);
 #endif
 
-    std::vector<SysFontInfo *> *fonts;
+    std::vector<SysFontInfo *> fonts;
 };
 
-SysFontList::SysFontList()
-{
-    fonts = new std::vector<SysFontInfo *>();
-}
+SysFontList::SysFontList() { }
 
 SysFontList::~SysFontList()
 {
-    for (auto entry : *fonts) {
+    for (auto entry : fonts) {
         delete entry;
     }
-    delete fonts;
 }
 
 const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact)
@@ -334,7 +330,7 @@ const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, boo
 
     // search for the font
     const SysFontInfo *fi = nullptr;
-    for (const SysFontInfo *f : *fonts) {
+    for (const SysFontInfo *f : fonts) {
         fi = f;
         if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
             break;
@@ -343,7 +339,7 @@ const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, boo
     }
     if (!fi && !exact && bold) {
         // try ignoring the bold flag
-        for (const SysFontInfo *f : *fonts) {
+        for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, italic)) {
                 break;
@@ -353,7 +349,7 @@ const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, boo
     }
     if (!fi && !exact && (bold || italic)) {
         // try ignoring the bold and italic flags
-        for (const SysFontInfo *f : *fonts) {
+        for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, false)) {
                 break;
@@ -387,7 +383,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
 
     nameToUnicodeZapfDingbats = new NameToCharCode();
     nameToUnicodeText = new NameToCharCode();
-    toUnicodeDirs = new std::vector<GooString *>();
     sysFonts = new SysFontList();
     psExpandSmaller = false;
     psShrinkLarger = true;
@@ -473,7 +468,7 @@ void GlobalParams::scanEncodingDirs()
     dir = new GDir(dataPathBuffer, false);
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addCMapDir(entry->getName(), entry->getFullPath());
-        toUnicodeDirs->push_back(entry->getFullPath()->copy());
+        toUnicodeDirs.push_back(entry->getFullPath()->copy());
         delete entry;
     }
     delete dir;
@@ -542,10 +537,9 @@ GlobalParams::~GlobalParams()
 
     delete nameToUnicodeZapfDingbats;
     delete nameToUnicodeText;
-    for (auto entry : *toUnicodeDirs) {
+    for (auto entry : toUnicodeDirs) {
         delete entry;
     }
-    delete toUnicodeDirs;
     delete sysFonts;
     delete textEncoding;
 
@@ -631,7 +625,7 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name)
     FILE *f;
 
     globalParamsLocker();
-    for (const GooString *dir : *toUnicodeDirs) {
+    for (const GooString *dir : toUnicodeDirs) {
         fileName = appendToPath(dir->copy(), name->c_str());
         f = openFile(fileName->c_str(), "r");
         delete fileName;
