@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
         }
 
         const char *pw = (strlen(password) == 0) ? nullptr : password;
-        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason));
+        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
 
         if (newSignatureFieldName.getLength() == 0) {
             // Create a random field name, it could be anything but 32 hex numbers should
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
         if (etsiCAdESdetached)
             ffs->setSignatureType(ETSI_CAdES_detached);
         const char *pw = (strlen(password) == 0) ? nullptr : password;
-        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason));
+        const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
         if (ffs->getNumWidgets() != 1) {
             printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
             return 2;

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2020, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -45,7 +45,7 @@ void JSInfo::printJS(const GooString *js)
     if (!js || !js->c_str())
         return;
 
-    len = TextStringToUCS4(js, &u);
+    len = TextStringToUCS4(js->toStr(), &u);
     for (i = 0; i < len; i++) {
         n = uniMap->mapUnicode(u[i], buf, sizeof(buf));
         fwrite(buf, 1, n, file);

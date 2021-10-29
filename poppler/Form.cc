@@ -1613,18 +1613,18 @@ void FormFieldText::setTextFontSize(int fontSize)
     }
 }
 
-int FormFieldText::tokenizeDA(const GooString *da, std::vector<GooString *> *daToks, const char *searchTok)
+int FormFieldText::tokenizeDA(const std::string &da, std::vector<GooString *> *daToks, const char *searchTok)
 {
     int idx = -1;
-    if (da && daToks) {
-        int i = 0;
-        int j = 0;
-        while (i < da->getLength()) {
-            while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
+    if (daToks) {
+        size_t i = 0;
+        size_t j = 0;
+        while (i < da.size()) {
+            while (i < da.size() && Lexer::isSpace(da[i])) {
                 ++i;
             }
-            if (i < da->getLength()) {
-                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) { }
+            if (i < da.size()) {
+                for (j = i + 1; j < da.size() && !Lexer::isSpace(da[j]); ++j) { }
                 GooString *tok = new GooString(da, i, j - i);
                 if (searchTok && !tok->cmp(searchTok))
                     idx = daToks->size();
@@ -1643,7 +1643,7 @@ int FormFieldText::parseDA(std::vector<GooString *> *daToks)
         Object objDA(obj.dictLookup("DA"));
         if (objDA.isString()) {
             const GooString *da = objDA.getString();
-            idx = tokenizeDA(da, daToks, "Tf") - 1;
+            idx = tokenizeDA(da->toStr(), daToks, "Tf") - 1;
         }
     }
     return idx;

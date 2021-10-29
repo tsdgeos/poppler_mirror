@@ -97,8 +97,8 @@ void TestUTFConversion::testUTF()
     QVERIFY(compare(utf16String, s.utf16()));
     free(utf16String);
 
-    GooString gsUtf8(str);
-    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(gsUtf8));
+    std::string sUtf8(str);
+    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(sUtf8));
     std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
     QCOMPARE(gsUtf16_a->cmp(gsUtf16_b.get()), 0);
 
@@ -129,7 +129,7 @@ void TestUTFConversion::testUnicodeToAscii7()
     GooString *goo = Poppler::QStringToUnicodeGooString(QString::fromUtf8("®©©©©©©©©©©©©©©©©©©©©")); // clazy:exclude=qstring-allocations
 
     Unicode *in;
-    const int in_len = TextStringToUCS4(goo, &in);
+    const int in_len = TextStringToUCS4(goo->toStr(), &in);
 
     delete goo;
 
@@ -161,17 +161,17 @@ void TestUTFConversion::testUnicodeToAscii7()
 void TestUTFConversion::testUnicodeLittleEndian()
 {
     uint16_t UTF16LE_hi[5] { 0xFFFE, 0x4800, 0x4900, 0x2100, 0x1126 }; // UTF16-LE "HI!☑"
-    GooString GooUTF16LE(reinterpret_cast<const char *>(UTF16LE_hi), sizeof(UTF16LE_hi));
+    std::string GooUTF16LE(reinterpret_cast<const char *>(UTF16LE_hi), sizeof(UTF16LE_hi));
 
     uint16_t UTF16BE_hi[5] { 0xFEFF, 0x0048, 0x0049, 0x0021, 0x2611 }; // UTF16-BE "HI!☑"
-    GooString GooUTF16BE(reinterpret_cast<const char *>(UTF16BE_hi), sizeof(UTF16BE_hi));
+    std::string GooUTF16BE(reinterpret_cast<const char *>(UTF16BE_hi), sizeof(UTF16BE_hi));
 
     // Let's assert both GooString's are different
-    QVERIFY(GooUTF16LE.cmp(&GooUTF16BE));
+    QVERIFY(GooUTF16LE != GooUTF16BE);
 
     Unicode *UCS4fromLE, *UCS4fromBE;
-    const int len1 = TextStringToUCS4(&GooUTF16LE, &UCS4fromLE);
-    const int len2 = TextStringToUCS4(&GooUTF16BE, &UCS4fromBE);
+    const int len1 = TextStringToUCS4(GooUTF16LE, &UCS4fromLE);
+    const int len2 = TextStringToUCS4(GooUTF16BE, &UCS4fromBE);
 
     // len is 4 because TextStringToUCS4() removes the two leading Byte Order Mark (BOM) code points
     QCOMPARE(len1, len2);

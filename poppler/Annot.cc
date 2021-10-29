@@ -801,7 +801,7 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
 
     if (da) {
         std::vector<GooString *> *daToks = new std::vector<GooString *>();
-        int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
+        int i = FormFieldText::tokenizeDA(da->toStr(), daToks, "Tf");
 
         if (i >= 1) {
             fontPtSize = gatof((*daToks)[i - 1]->c_str());

@@ -116,7 +116,7 @@ static void printTextString(const GooString *s, const UnicodeMap *uMap)
 {
     Unicode *u;
     char buf[8];
-    int len = TextStringToUCS4(s, &u);
+    int len = TextStringToUCS4(s->toStr(), &u);
     for (int i = 0; i < len; i++) {
         int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
         fwrite(buf, 1, n, stdout);
