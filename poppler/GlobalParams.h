@@ -111,8 +111,6 @@ public:
     GooString *findFontFile(const GooString *fontName);
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
-    bool getPSExpandSmaller();
-    bool getPSShrinkLarger();
     std::string getTextEncodingName() const;
     bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
@@ -130,8 +128,6 @@ public:
 
     //----- functions to set parameters
     void addFontFile(const GooString *fontName, const GooString *path);
-    void setPSExpandSmaller(bool expand);
-    void setPSShrinkLarger(bool shrink);
     void setTextEncoding(const char *encodingName);
     void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
@@ -179,8 +175,6 @@ private:
     // font files: font name mapped to path
     std::unordered_map<std::string, std::string> fontFiles;
     SysFontList *sysFonts; // system fonts
-    bool psExpandSmaller; // expand smaller pages to fill paper
-    bool psShrinkLarger; // shrink larger pages to fit paper
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
     bool overprintPreview; // enable overprint preview

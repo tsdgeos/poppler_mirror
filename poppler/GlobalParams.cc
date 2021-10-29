@@ -384,8 +384,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
     nameToUnicodeZapfDingbats = new NameToCharCode();
     nameToUnicodeText = new NameToCharCode();
     sysFonts = new SysFontList();
-    psExpandSmaller = false;
-    psShrinkLarger = true;
     textEncoding = new GooString("UTF-8");
     overprintPreview = false;
     printCommands = false;
@@ -1114,18 +1112,6 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 }
 #endif
 
-bool GlobalParams::getPSExpandSmaller()
-{
-    globalParamsLocker();
-    return psExpandSmaller;
-}
-
-bool GlobalParams::getPSShrinkLarger()
-{
-    globalParamsLocker();
-    return psShrinkLarger;
-}
-
 std::string GlobalParams::getTextEncodingName() const
 {
     globalParamsLocker();
@@ -1220,18 +1206,6 @@ void GlobalParams::addFontFile(const GooString *fontName, const GooString *path)
 {
     globalParamsLocker();
     fontFiles[fontName->toStr()] = path->toStr();
-}
-
-void GlobalParams::setPSExpandSmaller(bool expand)
-{
-    globalParamsLocker();
-    psExpandSmaller = expand;
-}
-
-void GlobalParams::setPSShrinkLarger(bool shrink)
-{
-    globalParamsLocker();
-    psShrinkLarger = shrink;
 }
 
 void GlobalParams::setTextEncoding(const char *encodingName)
