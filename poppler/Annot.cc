@@ -5078,7 +5078,7 @@ void AnnotWidget::generateFieldAppearance()
     Object resourcesDictObj;
     const GfxResources *resources = nullptr;
     GfxResources *resourcesToFree = nullptr;
-    if (field && field->getObj() && field->getObj()->isDict()) {
+    if (field->getObj() && field->getObj()->isDict()) {
         // Let's use a field's resource dictionary.
         resourcesDictObj = field->getObj()->dictLookup("DR");
         if (resourcesDictObj.isDict()) {
