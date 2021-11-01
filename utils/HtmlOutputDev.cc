@@ -1228,11 +1228,10 @@ void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
 
 void HtmlOutputDev::endPage()
 {
-    Links *linksList = docPage->getLinks();
+    std::unique_ptr<Links> linksList = docPage->getLinks();
     for (int i = 0; i < linksList->getNumLinks(); ++i) {
         doProcessLink(linksList->getLink(i));
     }
-    delete linksList;
 
     pages->conv();
     pages->coalesce();

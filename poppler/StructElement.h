@@ -125,11 +125,11 @@ public:
     Owner getOwner() const { return owner; }
     const char *getTypeName() const;
     const char *getOwnerName() const;
-    Object *getValue() const { return &value; }
+    const Object *getValue() const { return &value; }
     static Object *getDefaultValue(Type type);
 
     // The caller gets the ownership of the return GooString and is responsible of deleting it
-    GooString *getName() const { return type == UserProperty ? name.copy() : new GooString(getTypeName()); }
+    std::unique_ptr<GooString> getName() const { return std::make_unique<GooString>(type == UserProperty ? name.c_str() : getTypeName()); }
 
     // The revision is optional, and defaults to zero.
     unsigned int getRevision() const { return revision; }
@@ -150,8 +150,8 @@ private:
     Type type;
     Owner owner;
     unsigned int revision;
-    mutable GooString name;
-    mutable Object value;
+    GooString name;
+    Object value;
     bool hidden;
     GooString *formatted;
 

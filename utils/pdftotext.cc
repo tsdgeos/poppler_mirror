@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -527,7 +527,7 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
         double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
         fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", wid, hgt);
         doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
-        TextWordList *wordlist = textOut->makeWordList();
+        std::unique_ptr<TextWordList> wordlist = textOut->makeWordList();
         const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
         TextWord *word;
         double xMinA, yMinA, xMaxA, yMaxA;
@@ -541,7 +541,6 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
             fprintf(f, "    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
         }
         fprintf(f, "  </page>\n");
-        delete wordlist;
     }
     fprintf(f, "</doc>\n");
 }

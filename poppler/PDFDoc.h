@@ -210,7 +210,7 @@ public:
 
     // Returns the links for the current page, transferring ownership to
     // the caller.
-    Links *getLinks(int page);
+    std::unique_ptr<Links> getLinks(int page);
 
     // Find a named destination.  Returns the link destination, or
     // nullptr if <name> is not a destination.

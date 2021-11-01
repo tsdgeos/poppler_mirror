@@ -80,7 +80,7 @@ public:
     int numEntries() { return length; };
     // iterator accessor, note it returns a pointer to the internal object, do not free nor delete it
     Object *getValue(int i);
-    GooString *getName(int i);
+    const GooString *getName(int i) const;
 
 private:
     struct Entry
@@ -174,7 +174,7 @@ public:
     int numDestNameTree() { return getDestNameTree()->numEntries(); }
 
     // Get the i'th named destination name in name-tree
-    GooString *getDestNameTreeName(int i) { return getDestNameTree()->getName(i); }
+    const GooString *getDestNameTreeName(int i) { return getDestNameTree()->getName(i); }
 
     // Get the i'th named destination link destination in name-tree
     std::unique_ptr<LinkDest> getDestNameTreeDest(int i);
@@ -195,7 +195,7 @@ public:
 
     // Get the number of javascript scripts
     int numJS() { return getJSNameTree()->numEntries(); }
-    GooString *getJSName(int i) { return getJSNameTree()->getName(i); }
+    const GooString *getJSName(int i) { return getJSNameTree()->getName(i); }
 
     // Get the i'th JavaScript script (at the Document level) in the document
     GooString *getJS(int i);

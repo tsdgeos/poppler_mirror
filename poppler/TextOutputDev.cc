@@ -5557,9 +5557,9 @@ int TextPage::dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap,
 }
 
 #ifdef TEXTOUT_WORD_LIST
-TextWordList *TextPage::makeWordList(bool physLayout)
+std::unique_ptr<TextWordList> TextPage::makeWordList(bool physLayout)
 {
-    return new TextWordList(this, physLayout);
+    return std::make_unique<TextWordList>(this, physLayout);
 }
 #endif
 
@@ -5933,7 +5933,7 @@ void TextOutputDev::setMergeCombining(bool merge)
 }
 
 #ifdef TEXTOUT_WORD_LIST
-TextWordList *TextOutputDev::makeWordList()
+std::unique_ptr<TextWordList> TextOutputDev::makeWordList()
 {
     return text->makeWordList(physLayout);
 }

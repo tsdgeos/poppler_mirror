@@ -232,9 +232,8 @@ static void printAttribute(const Attribute *attribute, unsigned indent)
     printIndent(indent);
     printf(" /%s ", attribute->getTypeName());
     if (attribute->getType() == Attribute::UserProperty) {
-        GooString *name = attribute->getName();
+        std::unique_ptr<GooString> name = attribute->getName();
         printf("(%s) ", name->c_str());
-        delete name;
     }
     attribute->getValue()->print(stdout);
     if (attribute->getFormattedValue()) {
@@ -420,7 +419,7 @@ static void printUrlList(PDFDoc *doc)
     for (int pg = firstPage; pg <= lastPage; pg++) {
         Page *page = doc->getPage(pg);
         if (page) {
-            Links *links = page->getLinks();
+            std::unique_ptr<Links> links = page->getLinks();
             for (int i = 0; i < links->getNumLinks(); i++) {
                 AnnotLink *annot = links->getLink(i);
                 LinkAction *action = annot->getAction();
