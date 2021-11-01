@@ -1,3 +1,24 @@
+Release 21.11.0:
+        core:
+         * Fix rendering of some non-standard confirming annotations
+         * Support rendering of some non-standard Type3 charprocs. Issue #1150
+         * TextOutputDev: Respect orientation when selecting words. Issue #499
+         * CairoOutputDev: Don't override the antialias settings from the cairo_t
+         * StructElement: support MCID in XObjects
+         * Fix detection of monospace fonts
+         * Ignore Adobe-Identity for non embedded CID fonts
+         * PageLabelInfo::labelToIndex: work on some special no style intervals
+         * Fix crash in malformed files
+         * Minor code improvements
+
+        utils:
+         * pdfinfo: add -url option to print all URLs in a PDF
+         * pdftohtml: document what zoom means in regard to DPI
+
+        qt6:
+         * Require Qt 6.1
+         * Minor code improvements
+
 Release 21.10.0:
         core:
          * Add support for setting custom stamp annotations
