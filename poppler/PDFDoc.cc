@@ -164,7 +164,7 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
     file = GooFile::open(wFileName);
     gfree(wFileName);
 #else
-    file = GooFile::open(fileName);
+    file = GooFile::open(fileName->toStr());
 #endif
     if (file == nullptr) {
         // fopen() has failed.
@@ -209,7 +209,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
     if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
         file = GooFile::open(fileNameU);
     } else {
-        file = GooFile::open(fileName);
+        file = GooFile::open(fileName->toStr());
     }
     if (!file) {
         error(errIO, -1, "Couldn't open file '{0:t}'", fileName);

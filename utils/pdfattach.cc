@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         return 99;
     }
     const GooString pdfFileName(argv[1]);
-    const GooString attachFilePath(argv[2]);
+    const std::string attachFilePath(argv[2]);
 
     // init GlobalParams
     globalParams = std::make_unique<GlobalParams>();
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::unique_ptr<GooFile> attachFile(GooFile::open(&attachFilePath));
+    std::unique_ptr<GooFile> attachFile(GooFile::open(attachFilePath));
     if (!attachFile) {
         fprintf(stderr, "Couldn't open %s\n", attachFilePath.c_str());
         return 2;

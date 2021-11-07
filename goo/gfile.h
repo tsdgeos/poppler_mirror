@@ -41,6 +41,7 @@
 #include <cstdlib>
 #include <cstddef>
 #include <ctime>
+#include <string>
 extern "C" {
 #if defined(_WIN32)
 #    include <sys/stat.h>
@@ -121,7 +122,7 @@ public:
     int read(char *buf, int n, Goffset offset) const;
     Goffset size() const;
 
-    static GooFile *open(const GooString *fileName);
+    static GooFile *open(const std::string &fileName);
 
 #ifdef _WIN32
     static GooFile *open(const wchar_t *fileName);

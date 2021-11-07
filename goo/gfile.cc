@@ -19,7 +19,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -358,9 +358,9 @@ Goffset GooFile::size() const
     return size.QuadPart;
 }
 
-GooFile *GooFile::open(const GooString *fileName)
+GooFile *GooFile::open(const std::string &fileName)
 {
-    HANDLE handle = CreateFileA(fileName->c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE handle = CreateFileA(fileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
     return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
 }
@@ -400,9 +400,9 @@ Goffset GooFile::size() const
 #    endif
 }
 
-GooFile *GooFile::open(const GooString *fileName)
+GooFile *GooFile::open(const std::string &fileName)
 {
-    int fd = openFileDescriptor(fileName->c_str(), O_RDONLY);
+    int fd = openFileDescriptor(fileName.c_str(), O_RDONLY);
 
     return fd < 0 ? nullptr : new GooFile(fd);
 }
