@@ -1,4 +1,4 @@
-name: CMake
+name: macOS
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
         brew update
         brew uninstall -f poppler gdal postgis python@2 mercurial
         brew install poppler --only-dependencies
-        brew upgrade cmake pkg-config && brew install ninja boost
+        brew upgrade cmake pkg-config && brew install ninja boost qt@5
     
     - name: Clone test files
       working-directory: ${{github.workspace}}
