@@ -1,0 +1,40 @@
+name: CMake
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-10.15, macos-11]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew uninstall -f poppler gdal postgis python@2 mercurial
+        brew install poppler --only-dependencies
+        brew upgrade cmake pkg-config && brew install ninja
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: ninja
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest
+      
