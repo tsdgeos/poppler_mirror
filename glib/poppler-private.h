@@ -41,6 +41,7 @@ struct _PopplerPSFile
 
     PopplerDocument *document;
     PSOutputDev *out;
+    int fd;
     char *filename;
     int first_page;
     int last_page;
