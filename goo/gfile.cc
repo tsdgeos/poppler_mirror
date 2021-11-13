@@ -404,7 +404,12 @@ GooFile *GooFile::open(const std::string &fileName)
 {
     int fd = openFileDescriptor(fileName.c_str(), O_RDONLY);
 
-    return fd < 0 ? nullptr : new GooFile(fd);
+    return GooFile::open(fd);
+}
+
+GooFile *GooFile::open(int fdA)
+{
+    return fdA < 0 ? nullptr : new GooFile(fdA);
 }
 
 GooFile::GooFile(int fdA) : fd(fdA)

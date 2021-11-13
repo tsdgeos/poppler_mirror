@@ -123,6 +123,9 @@ public:
     Goffset size() const;
 
     static GooFile *open(const std::string &fileName);
+#ifndef _WIN32
+    static GooFile *open(int fdA);
+#endif
 
 #ifdef _WIN32
     static GooFile *open(const wchar_t *fileName);
