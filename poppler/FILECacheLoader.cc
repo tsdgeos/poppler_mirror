@@ -1,6 +1,6 @@
 //========================================================================
 //
-// StdinCachedFile.cc
+// FILECacheLoader.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -13,22 +13,20 @@
 
 #include <config.h>
 
-#include "StdinCachedFile.h"
+#include "FILECacheLoader.h"
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
 #    include <io.h> // for _setmode
 #endif
 
-StdinCacheLoader::~StdinCacheLoader()
+FILECacheLoader::~FILECacheLoader()
 {
-#ifndef _WIN32
     if (file != stdin)
         fclose(file);
-#endif
 }
 
-size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
+size_t FILECacheLoader::init(GooString *dummy, CachedFile *cachedFile)
 {
     size_t read, size = 0;
     char buf[CachedFileChunkSize];
@@ -47,7 +45,7 @@ size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
     return size;
 }
 
-int StdinCacheLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
+int FILECacheLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
 {
     return 0;
 }

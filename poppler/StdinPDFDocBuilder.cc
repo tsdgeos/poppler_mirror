@@ -15,8 +15,8 @@
 #include <cstdio>
 
 #include "StdinPDFDocBuilder.h"
+#include "FILECacheLoader.h"
 #include "CachedFile.h"
-#include "StdinCachedFile.h"
 
 //------------------------------------------------------------------------
 // StdinPDFDocBuilder
@@ -46,7 +46,7 @@ std::unique_ptr<PDFDoc> StdinPDFDocBuilder::buildPDFDoc(const GooString &uri, Go
     if (!file)
         return {};
 
-    CachedFile *cachedFile = new CachedFile(new StdinCacheLoader(file), nullptr);
+    CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
     return std::make_unique<PDFDoc>(new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull)), ownerPassword, userPassword);
 }
 

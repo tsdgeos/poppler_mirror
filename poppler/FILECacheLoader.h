@@ -1,6 +1,6 @@
 //========================================================================
 //
-// StdinCachedFile.h
+// FILECacheLoader.h
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -9,22 +9,22 @@
 //
 //========================================================================
 
-#ifndef STDINCACHELOADER_H
-#define STDINCACHELOADER_H
+#ifndef FILECACHELOADER_H
+#define FILECACHELOADER_H
 
 #include "CachedFile.h"
 
 #include <cstdio>
 
-class POPPLER_PRIVATE_EXPORT StdinCacheLoader : public CachedFileLoader
+class POPPLER_PRIVATE_EXPORT FILECacheLoader : public CachedFileLoader
 {
     FILE *file = stdin;
 
 public:
-    StdinCacheLoader() = default;
-    ~StdinCacheLoader() override;
+    FILECacheLoader() = default;
+    ~FILECacheLoader() override;
 
-    explicit StdinCacheLoader(FILE *fileA) : file(fileA) { }
+    explicit FILECacheLoader(FILE *fileA) : file(fileA) { }
 
     size_t init(GooString *dummy, CachedFile *cachedFile) override;
     int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
