@@ -516,7 +516,7 @@ private:
 
 #define fileStreamBufSize 256
 
-class FileStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT FileStream : public BaseStream
 {
 public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);

@@ -14,7 +14,7 @@
 
 #include "CachedFile.h"
 
-class StdinCacheLoader : public CachedFileLoader
+class POPPLER_PRIVATE_EXPORT StdinCacheLoader : public CachedFileLoader
 {
 
 public:
