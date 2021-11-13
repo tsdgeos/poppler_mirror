@@ -126,6 +126,10 @@
     <title>Index of new symbols in 21.05.0</title>
     <xi:include href="xml/api-index-21.05.0.xml"><xi:fallback /></xi:include>
   </index>
+  <index id="api-index-21-12-0">
+    <title>Index of new symbols in 21.12.0</title>
+    <xi:include href="xml/api-index-21.12.0.xml"><xi:fallback /></xi:include>
+  </index>
 
   <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
 </book>
