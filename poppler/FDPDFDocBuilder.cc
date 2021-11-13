@@ -1,6 +1,6 @@
 //========================================================================
 //
-// StdinPDFDocBuilder.cc
+// FileDescriptorPDFDocBuilder.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -14,15 +14,15 @@
 
 #include <cstdio>
 
-#include "StdinPDFDocBuilder.h"
+#include "FDPDFDocBuilder.h"
 #include "FILECacheLoader.h"
 #include "CachedFile.h"
 
 //------------------------------------------------------------------------
-// StdinPDFDocBuilder
+// FileDescriptorPDFDocBuilder
 //------------------------------------------------------------------------
 
-int StdinPDFDocBuilder::parseFdFromUri(const GooString &uri)
+int FileDescriptorPDFDocBuilder::parseFdFromUri(const GooString &uri)
 {
     int fd = -1;
     char c;
@@ -32,7 +32,7 @@ int StdinPDFDocBuilder::parseFdFromUri(const GooString &uri)
     return fd;
 }
 
-std::unique_ptr<PDFDoc> StdinPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
 {
     const auto fd = parseFdFromUri(uri);
     if (fd == -1)
@@ -50,7 +50,7 @@ std::unique_ptr<PDFDoc> StdinPDFDocBuilder::buildPDFDoc(const GooString &uri, Go
     return std::make_unique<PDFDoc>(new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull)), ownerPassword, userPassword);
 }
 
-bool StdinPDFDocBuilder::supports(const GooString &uri)
+bool FileDescriptorPDFDocBuilder::supports(const GooString &uri)
 {
     return parseFdFromUri(uri) != -1;
 }

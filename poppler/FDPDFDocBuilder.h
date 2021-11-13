@@ -1,6 +1,6 @@
 //========================================================================
 //
-// StdinPDFDocBuilder.h
+// FileDescriptorPDFDocBuilder.h
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -10,18 +10,18 @@
 //
 //========================================================================
 
-#ifndef STDINPDFDOCBUILDER_H
-#define STDINPDFDOCBUILDER_H
+#ifndef FDPDFDOCBUILDER_H
+#define FDPDFDOCBUILDER_H
 
 #include "PDFDocBuilder.h"
 
 //------------------------------------------------------------------------
-// StdinPDFDocBuilder
+// FileDescriptorPDFDocBuilder
 //
-// The StdinPDFDocBuilder implements a PDFDocBuilder that read from a file descriptor.
+// The FileDescriptorPDFDocBuilder implements a PDFDocBuilder that read from a file descriptor.
 //------------------------------------------------------------------------
 
-class StdinPDFDocBuilder : public PDFDocBuilder
+class FileDescriptorPDFDocBuilder : public PDFDocBuilder
 {
 
 public:
@@ -32,4 +32,4 @@ private:
     int parseFdFromUri(const GooString &uri);
 };
 
-#endif /* STDINPDFDOCBUILDER_H */
+#endif /* FDPDFDOCBUILDER_H */
