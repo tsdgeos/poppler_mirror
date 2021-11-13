@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------
 // StdinPDFDocBuilder
 //
-// The StdinPDFDocBuilder implements a PDFDocBuilder that read from stdin.
+// The StdinPDFDocBuilder implements a PDFDocBuilder that read from a file descriptor.
 //------------------------------------------------------------------------
 
 class StdinPDFDocBuilder : public PDFDocBuilder
@@ -27,6 +27,9 @@ class StdinPDFDocBuilder : public PDFDocBuilder
 public:
     std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
     bool supports(const GooString &uri) override;
+
+private:
+    int parseFdFromUri(const GooString &uri);
 };
 
 #endif /* STDINPDFDOCBUILDER_H */

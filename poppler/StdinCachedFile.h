@@ -14,10 +14,18 @@
 
 #include "CachedFile.h"
 
+#include <cstdio>
+
 class POPPLER_PRIVATE_EXPORT StdinCacheLoader : public CachedFileLoader
 {
+    FILE *file = stdin;
 
 public:
+    StdinCacheLoader() = default;
+    ~StdinCacheLoader() override;
+
+    explicit StdinCacheLoader(FILE *fileA) : file(fileA) { }
+
     size_t init(GooString *dummy, CachedFile *cachedFile) override;
     int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
 };

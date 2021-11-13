@@ -19,7 +19,14 @@
 #    include <fcntl.h> // for O_BINARY
 #    include <io.h> // for _setmode
 #endif
-#include <cstdio>
+
+StdinCacheLoader::~StdinCacheLoader()
+{
+#ifndef _WIN32
+    if (file != stdin)
+        fclose(file);
+#endif
+}
 
 size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
 {
@@ -27,12 +34,12 @@ size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
     char buf[CachedFileChunkSize];
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-    _setmode(fileno(stdin), O_BINARY);
+    _setmode(fileno(file), O_BINARY);
 #endif
 
     CachedFileWriter writer = CachedFileWriter(cachedFile, nullptr);
     do {
-        read = fread(buf, 1, CachedFileChunkSize, stdin);
+        read = fread(buf, 1, CachedFileChunkSize, file);
         (writer.write)(buf, CachedFileChunkSize);
         size += read;
     } while (read == CachedFileChunkSize);
