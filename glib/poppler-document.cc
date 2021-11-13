@@ -25,11 +25,21 @@
 #include "config.h"
 #include <cstring>
 
+#ifndef G_OS_WIN32
+#    include <fcntl.h>
+#    include <sys/stat.h>
+#    include <sys/types.h>
+#    include <unistd.h>
+#endif
+
 #ifndef __GI_SCANNER__
 #    include <memory>
 
+#    include <goo/gfile.h>
 #    include <splash/SplashBitmap.h>
+#    include <CachedFile.h>
 #    include <DateInfo.h>
+#    include <FILECacheLoader.h>
 #    include <GlobalParams.h>
 #    include <PDFDoc.h>
 #    include <Outline.h>
@@ -398,6 +408,87 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
     g_object_unref(stream);
 
     return document;
+}
+
+/**
+ * poppler_document_new_from_fd:
+ * @fd: a valid file descriptor
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from the file
+ * descriptor @fd. @fd must refer to a regular file, or STDIN, and be open
+ * for reading.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 21.12.0
+ */
+PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error)
+{
+#ifndef G_OS_WIN32
+    struct stat statbuf;
+    int flags;
+    BaseStream *stream;
+    PDFDoc *newDoc;
+    GooString *password_g;
+
+    g_return_val_if_fail(fd != -1, nullptr);
+
+    auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
+
+    if (fstat(fd, &statbuf) == -1 || (flags = fcntl(fd, F_GETFL, &flags)) == -1) {
+        int errsv = errno;
+        g_set_error_literal(error, G_FILE_ERROR, g_file_error_from_errno(errsv), g_strerror(errsv));
+        close(fd);
+        return nullptr;
+    }
+
+    switch (flags & O_ACCMODE) {
+    case O_RDONLY:
+    case O_RDWR:
+        break;
+    case O_WRONLY:
+    default:
+        g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_BADF, "File descriptor %d is not readable", fd);
+        close(fd);
+        return nullptr;
+    }
+
+    if (fd == STDIN_FILENO || !S_ISREG(statbuf.st_mode)) {
+        FILE *file;
+        if (fd == STDIN_FILENO) {
+            file = stdin;
+        } else {
+            file = fdopen(fd, "rb");
+            if (!file) {
+                int errsv = errno;
+                g_set_error_literal(error, G_FILE_ERROR, g_file_error_from_errno(errsv), g_strerror(errsv));
+                fclose(file);
+                return nullptr;
+            }
+        }
+
+        CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
+        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+    } else {
+        GooFile *file = GooFile::open(fd);
+        stream = new FileStream(file, 0, false, file->size(), Object(objNull));
+    }
+
+    password_g = poppler_password_to_latin1(password);
+    newDoc = new PDFDoc(stream, password_g, password_g);
+    delete password_g;
+
+    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+#else
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "Not supported on win32");
+    return nullptr;
+#endif /* G_OS_WIN32 */
 }
 
 static gboolean handle_save_error(int err_code, GError **error)

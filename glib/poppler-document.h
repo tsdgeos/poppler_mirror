@@ -290,6 +290,7 @@ typedef enum
 
 POPPLER_PUBLIC
 GType poppler_document_get_type(void) G_GNUC_CONST;
+
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
 POPPLER_PUBLIC
@@ -300,6 +301,8 @@ POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset length, const char *password, GCancellable *cancellable, GError **error);
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *password, GCancellable *cancellable, GError **error);
+POPPLER_PUBLIC
+PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error);
 POPPLER_PUBLIC
 gboolean poppler_document_save(PopplerDocument *document, const char *uri, GError **error);
 POPPLER_PUBLIC

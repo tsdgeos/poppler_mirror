@@ -15,15 +15,18 @@
 #include <poppler.h>
 #include <poppler-private.h>
 #include <gtk/gtk.h>
+#include <cerrno>
 #include <cmath>
 
 static int requested_page = 0;
 static gboolean cairo_output = FALSE;
 static gboolean splash_output = FALSE;
+static gboolean args_are_fds = FALSE;
 static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr },
                                         { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr },
                                         { "page", 'p', 0, G_OPTION_ARG_INT, &requested_page, "Page number", "PAGE" },
+                                        { "fd", 'f', 0, G_OPTION_ARG_NONE, &args_are_fds, "File descriptors", nullptr },
                                         { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
                                         {} };
 
@@ -336,30 +339,48 @@ int main(int argc, char *argv[])
     for (int i = 0; file_arguments[i]; i++) {
         View *view;
         GFile *file;
-        PopplerDocument *doc;
+        PopplerDocument *doc = nullptr;
         GError *error = nullptr;
+        const char *arg;
 
-        file = g_file_new_for_commandline_arg(file_arguments[i]);
-        doc = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
-        if (!doc) {
-            gchar *uri;
+        arg = file_arguments[i];
+        if (args_are_fds) {
+            char *end;
+            gint64 v;
 
-            uri = g_file_get_uri(file);
-            g_printerr("Error opening document %s: %s\n", uri, error->message);
-            g_error_free(error);
-            g_free(uri);
+            errno = 0;
+            end = nullptr;
+            v = g_ascii_strtoll(arg, &end, 10);
+            if (errno || end == arg || v == -1 || v < G_MININT || v > G_MAXINT) {
+                g_set_error(&error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE, "Failed to parse \"%s\" as file descriptor number", arg);
+            } else {
+                doc = poppler_document_new_from_fd(int(v), nullptr, &error);
+            }
+        } else {
+            file = g_file_new_for_commandline_arg(arg);
+            doc = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
+            if (!doc) {
+                gchar *uri;
+
+                uri = g_file_get_uri(file);
+                g_prefix_error(&error, "%s: ", uri);
+                g_free(uri);
+            }
             g_object_unref(file);
-
-            continue;
         }
-        g_object_unref(file);
 
-        view = view_new(doc);
-        view_list = g_list_prepend(view_list, view);
-        view_set_page(view, CLAMP(requested_page, 0, poppler_document_get_n_pages(doc) - 1));
+        if (doc) {
+            view = view_new(doc);
+            view_list = g_list_prepend(view_list, view);
+            view_set_page(view, CLAMP(requested_page, 0, poppler_document_get_n_pages(doc) - 1));
+        } else {
+            g_printerr("Error opening document: %s\n", error->message);
+            g_error_free(error);
+        }
     }
 
-    gtk_main();
+    if (view_list != nullptr)
+        gtk_main();
 
     return 0;
 }
