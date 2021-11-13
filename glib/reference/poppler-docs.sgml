@@ -114,7 +114,18 @@
     <title>Index of new symbols in 0.90</title>
     <xi:include href="xml/api-index-0.90.xml"><xi:fallback /></xi:include>
   </index>
-
+  <index id="api-index-20-04-0">
+    <title>Index of new symbols in 20.04.0</title>
+    <xi:include href="xml/api-index-20.04.0.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-20-09-0">
+    <title>Index of new symbols in 20.09.0</title>
+    <xi:include href="xml/api-index-20.09.0.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-21-05-0">
+    <title>Index of new symbols in 21.05.0</title>
+    <xi:include href="xml/api-index-21.05.0.xml"><xi:fallback /></xi:include>
+  </index>
 
   <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
 </book>
