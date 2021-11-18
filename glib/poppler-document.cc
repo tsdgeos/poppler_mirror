@@ -25,11 +25,21 @@
 #include "config.h"
 #include <cstring>
 
+#ifndef G_OS_WIN32
+#    include <fcntl.h>
+#    include <sys/stat.h>
+#    include <sys/types.h>
+#    include <unistd.h>
+#endif
+
 #ifndef __GI_SCANNER__
 #    include <memory>
 
+#    include <goo/gfile.h>
 #    include <splash/SplashBitmap.h>
+#    include <CachedFile.h>
 #    include <DateInfo.h>
+#    include <FILECacheLoader.h>
 #    include <GlobalParams.h>
 #    include <PDFDoc.h>
 #    include <Outline.h>
@@ -400,6 +410,87 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
     return document;
 }
 
+/**
+ * poppler_document_new_from_fd:
+ * @fd: a valid file descriptor
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from the file
+ * descriptor @fd. @fd must refer to a regular file, or STDIN, and be open
+ * for reading.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 21.12.0
+ */
+PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error)
+{
+#ifndef G_OS_WIN32
+    struct stat statbuf;
+    int flags;
+    BaseStream *stream;
+    PDFDoc *newDoc;
+    GooString *password_g;
+
+    g_return_val_if_fail(fd != -1, nullptr);
+
+    auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
+
+    if (fstat(fd, &statbuf) == -1 || (flags = fcntl(fd, F_GETFL, &flags)) == -1) {
+        int errsv = errno;
+        g_set_error_literal(error, G_FILE_ERROR, g_file_error_from_errno(errsv), g_strerror(errsv));
+        close(fd);
+        return nullptr;
+    }
+
+    switch (flags & O_ACCMODE) {
+    case O_RDONLY:
+    case O_RDWR:
+        break;
+    case O_WRONLY:
+    default:
+        g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_BADF, "File descriptor %d is not readable", fd);
+        close(fd);
+        return nullptr;
+    }
+
+    if (fd == STDIN_FILENO || !S_ISREG(statbuf.st_mode)) {
+        FILE *file;
+        if (fd == STDIN_FILENO) {
+            file = stdin;
+        } else {
+            file = fdopen(fd, "rb");
+            if (!file) {
+                int errsv = errno;
+                g_set_error_literal(error, G_FILE_ERROR, g_file_error_from_errno(errsv), g_strerror(errsv));
+                fclose(file);
+                return nullptr;
+            }
+        }
+
+        CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
+        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+    } else {
+        GooFile *file = GooFile::open(fd);
+        stream = new FileStream(file, 0, false, file->size(), Object(objNull));
+    }
+
+    password_g = poppler_password_to_latin1(password);
+    newDoc = new PDFDoc(stream, password_g, password_g);
+    delete password_g;
+
+    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+#else
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "Not supported on win32");
+    return nullptr;
+#endif /* G_OS_WIN32 */
+}
+
 static gboolean handle_save_error(int err_code, GError **error)
 {
     switch (err_code) {
@@ -486,6 +577,54 @@ gboolean poppler_document_save_a_copy(PopplerDocument *document, const char *uri
     }
 
     return retval;
+}
+
+/**
+ * poppler_document_save_to_fd:
+ * @document: a #PopplerDocument
+ * @fd: a valid file descriptor open for writing
+ * @include_changes: whether to include user changes (e.g. form fills)
+ * @error: (allow-none): return location for an error, or %NULL
+ *
+ * Saves @document. Any change made in the document such as
+ * form fields filled, annotations added or modified
+ * will be saved if @include_changes is %TRUE, or discarded i
+ * @include_changes is %FALSE.
+ *
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * If @error is set, %FALSE will be returned. Possible errors
+ * include those in the #G_FILE_ERROR domain.
+ *
+ * Return value: %TRUE, if the document was successfully saved
+ *
+ * Since: 21.12.0
+ **/
+gboolean poppler_document_save_to_fd(PopplerDocument *document, int fd, gboolean include_changes, GError **error)
+{
+    FILE *file;
+    OutStream *stream;
+    int rv;
+
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), FALSE);
+    g_return_val_if_fail(fd != -1, FALSE);
+
+    file = fdopen(fd, "wb");
+    if (file == nullptr) {
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), "Failed to open FD %d for writing: %s", fd, g_strerror(errsv));
+        return FALSE;
+    }
+
+    stream = new FileOutStream(file, 0);
+    if (include_changes)
+        rv = document->doc->saveAs(stream);
+    else
+        rv = document->doc->saveWithoutChangesAs(stream);
+    delete stream;
+
+    return handle_save_error(rv, error);
 }
 
 static void poppler_document_finalize(GObject *object)
@@ -3299,6 +3438,8 @@ static void poppler_ps_file_class_init(PopplerPSFileClass *klass)
 static void poppler_ps_file_init(PopplerPSFile *ps_file)
 {
     ps_file->out = nullptr;
+    ps_file->fd = -1;
+    ps_file->filename = nullptr;
     ps_file->paper_width = -1;
     ps_file->paper_height = -1;
     ps_file->duplex = FALSE;
@@ -3311,6 +3452,8 @@ static void poppler_ps_file_finalize(GObject *object)
     delete ps_file->out;
     g_object_unref(ps_file->document);
     g_free(ps_file->filename);
+    if (ps_file->fd != -1)
+        close(ps_file->fd);
 
     G_OBJECT_CLASS(poppler_ps_file_parent_class)->finalize(object);
 }
@@ -3324,7 +3467,7 @@ static void poppler_ps_file_finalize(GObject *object)
  *
  * Create a new postscript file to render to
  *
- * Return value: a PopplerPSFile
+ * Return value: (transfer full): a PopplerPSFile
  **/
 PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filename, int first_page, int n_pages)
 {
@@ -3337,6 +3480,38 @@ PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filena
     ps_file = (PopplerPSFile *)g_object_new(POPPLER_TYPE_PS_FILE, nullptr);
     ps_file->document = (PopplerDocument *)g_object_ref(document);
     ps_file->filename = g_strdup(filename);
+    ps_file->first_page = first_page + 1;
+    ps_file->last_page = first_page + 1 + n_pages - 1;
+
+    return ps_file;
+}
+
+/**
+ * poppler_ps_file_new_fd:
+ * @document: a #PopplerDocument
+ * @fd: a valid file descriptor open for writing
+ * @first_page: the first page to print
+ * @n_pages: the number of pages to print
+ *
+ * Create a new postscript file to render to.
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * Return value: (transfer full): a #PopplerPSFile
+ *
+ * Since: 21.12.0
+ **/
+PopplerPSFile *poppler_ps_file_new_fd(PopplerDocument *document, int fd, int first_page, int n_pages)
+{
+    PopplerPSFile *ps_file;
+
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+    g_return_val_if_fail(fd != -1, nullptr);
+    g_return_val_if_fail(n_pages > 0, nullptr);
+
+    ps_file = (PopplerPSFile *)g_object_new(POPPLER_TYPE_PS_FILE, nullptr);
+    ps_file->document = (PopplerDocument *)g_object_ref(document);
+    ps_file->fd = fd;
     ps_file->first_page = first_page + 1;
     ps_file->last_page = first_page + 1 + n_pages - 1;
 

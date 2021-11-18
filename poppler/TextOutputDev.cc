@@ -2331,11 +2331,9 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
     TextWord **wordArray;
     int nWords, i;
 
-    words = new std::vector<TextWord *>();
-
     if (text->rawOrder) {
         for (word = text->rawWords; word; word = word->next) {
-            words->push_back(word);
+            words.push_back(word);
         }
 
     } else if (physLayout) {
@@ -2364,7 +2362,7 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
         }
         qsort(wordArray, nWords, sizeof(TextWord *), &TextWord::cmpYX);
         for (i = 0; i < nWords; ++i) {
-            words->push_back(wordArray[i]);
+            words.push_back(wordArray[i]);
         }
         gfree(wordArray);
 
@@ -2373,7 +2371,7 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
             for (blk = flow->blocks; blk; blk = blk->next) {
                 for (line = blk->lines; line; line = line->next) {
                     for (word = line->words; word; word = word->next) {
-                        words->push_back(word);
+                        words.push_back(word);
                     }
                 }
             }
@@ -2381,22 +2379,19 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
     }
 }
 
-TextWordList::~TextWordList()
-{
-    delete words;
-}
+TextWordList::~TextWordList() { }
 
 int TextWordList::getLength() const
 {
-    return words->size();
+    return words.size();
 }
 
 TextWord *TextWordList::get(int idx)
 {
-    if (idx < 0 || idx >= (int)words->size()) {
+    if (idx < 0 || idx >= (int)words.size()) {
         return nullptr;
     }
-    return (*words)[idx];
+    return words[idx];
 }
 
 #endif // TEXTOUT_WORD_LIST
@@ -2421,41 +2416,22 @@ TextPage::TextPage(bool rawOrderA, bool discardDiagA)
     lastCharOverlap = false;
     if (!rawOrder) {
         for (rot = 0; rot < 4; ++rot) {
-            pools[rot] = new TextPool();
+            pools[rot] = std::make_unique<TextPool>();
         }
     }
     flows = nullptr;
     blocks = nullptr;
     rawWords = nullptr;
     rawLastWord = nullptr;
-    fonts = new std::vector<TextFontInfo *>();
     lastFindXMin = lastFindYMin = 0;
     haveLastFind = false;
-    underlines = new std::vector<TextUnderline *>();
-    links = new std::vector<TextLink *>();
     mergeCombining = true;
     diagonal = false;
 }
 
 TextPage::~TextPage()
 {
-    int rot;
-
     clear();
-    if (!rawOrder) {
-        for (rot = 0; rot < 4; ++rot) {
-            delete pools[rot];
-        }
-    }
-    delete fonts;
-    for (auto entry : *underlines) {
-        delete entry;
-    }
-    delete underlines;
-    for (auto entry : *links) {
-        delete entry;
-    }
-    delete links;
 }
 
 void TextPage::incRefCnt()
@@ -2505,7 +2481,7 @@ void TextPage::clear()
         }
     } else {
         for (rot = 0; rot < 4; ++rot) {
-            delete pools[rot];
+            pools[rot] = std::make_unique<TextPool>();
         }
         while (flows) {
             flow = flows;
@@ -2514,18 +2490,9 @@ void TextPage::clear()
         }
         gfree(blocks);
     }
-    for (auto entry : *fonts) {
-        delete entry;
-    }
-    delete fonts;
-    for (auto entry : *underlines) {
-        delete entry;
-    }
-    delete underlines;
-    for (auto entry : *links) {
-        delete entry;
-    }
-    delete links;
+    fonts.clear();
+    underlines.clear();
+    links.clear();
 
     diagonal = false;
     curWord = nullptr;
@@ -2534,18 +2501,10 @@ void TextPage::clear()
     curFontSize = 0;
     nest = 0;
     nTinyChars = 0;
-    if (!rawOrder) {
-        for (rot = 0; rot < 4; ++rot) {
-            pools[rot] = new TextPool();
-        }
-    }
     flows = nullptr;
     blocks = nullptr;
     rawWords = nullptr;
     rawLastWord = nullptr;
-    fonts = new std::vector<TextFontInfo *>();
-    underlines = new std::vector<TextUnderline *>();
-    links = new std::vector<TextLink *>();
 }
 
 void TextPage::updateFont(const GfxState *state)
@@ -2558,16 +2517,15 @@ void TextPage::updateFont(const GfxState *state)
 
     // get the font info object
     curFont = nullptr;
-    for (TextFontInfo *f : *fonts) {
-        curFont = f;
-        if (curFont->matches(state)) {
+    for (const std::unique_ptr<TextFontInfo> &f : fonts) {
+        if (f->matches(state)) {
+            curFont = f.get();
             break;
         }
-        curFont = nullptr;
     }
     if (!curFont) {
-        curFont = new TextFontInfo(state);
-        fonts->push_back(curFont);
+        fonts.emplace_back(std::make_unique<TextFontInfo>(state));
+        curFont = fonts.back().get();
     }
 
     // adjust the font size
@@ -2847,17 +2805,16 @@ void TextPage::addWord(TextWord *word)
 
 void TextPage::addUnderline(double x0, double y0, double x1, double y1)
 {
-    underlines->push_back(new TextUnderline(x0, y0, x1, y1));
+    underlines.emplace_back(std::make_unique<TextUnderline>(x0, y0, x1, y1));
 }
 
 void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link)
 {
-    links->push_back(new TextLink(xMin, yMin, xMax, yMax, link));
+    links.emplace_back(std::make_unique<TextLink>(xMin, yMin, xMax, yMax, link));
 }
 
 void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML)
 {
-    TextPool *pool;
     TextWord *word0, *word1, *word2;
     TextLine *line;
     TextBlock *blkList, *blk, *lastBlk, *blk0, *blk1, *blk2;
@@ -2914,7 +2871,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML)
     if (doHTML) {
 
         //----- handle underlining
-        for (const TextUnderline *underline : *underlines) {
+        for (const std::unique_ptr<TextUnderline> &underline : underlines) {
             if (underline->horiz) {
                 // rot = 0
                 if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
@@ -2972,7 +2929,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML)
         }
 
         //----- handle links
-        for (const TextLink *link : *links) {
+        for (const std::unique_ptr<TextLink> &link : links) {
             // rot = 0
             if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
                 startBaseIdx = pools[0]->getBaseIdx(link->yMin);
@@ -3033,7 +2990,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML)
 
     // build blocks for each rotation value
     for (rot = 0; rot < 4; ++rot) {
-        pool = pools[rot];
+        std::unique_ptr<TextPool> &pool = pools[rot];
         poolMinBaseIdx = pool->minBaseIdx;
         count[rot] = 0;
 

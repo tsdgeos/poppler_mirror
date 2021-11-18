@@ -31,6 +31,7 @@
 // Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+// Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -516,7 +517,7 @@ private:
 
 #define fileStreamBufSize 256
 
-class FileStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT FileStream : public BaseStream
 {
 public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);

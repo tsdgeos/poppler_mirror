@@ -45,6 +45,7 @@
 // Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
+// Copyright (C) 2021 Christopher Hasse <hasse.christopher@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -516,11 +517,11 @@ void HtmlPage::coalesce()
         bool found;
         while (str1) {
             double size = str1->yMax - str1->yMin;
-            double xLimit = str1->xMin + size * 0.2;
+            double xLimit = str1->xMin + size;
             found = false;
             for (str2 = str1, str3 = str1->yxNext; str3 && str3->xMin < xLimit; str2 = str3, str3 = str2->yxNext) {
                 if (str3->len == str1->len && !memcmp(str3->text, str1->text, str1->len * sizeof(Unicode)) && fabs(str3->yMin - str1->yMin) < size * 0.2 && fabs(str3->yMax - str1->yMax) < size * 0.2
-                    && fabs(str3->xMax - str1->xMax) < size * 0.2) {
+                    && fabs(str3->xMax - str1->xMax) < size * 0.1) {
                     found = true;
                     // printf("found duplicate!\n");
                     break;

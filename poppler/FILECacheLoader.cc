@@ -1,6 +1,6 @@
 //========================================================================
 //
-// StdinCachedFile.cc
+// FILECacheLoader.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -8,31 +8,37 @@
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Jonathan Liu <net147@gmail.com>
 // Copyright 2021 Peter Williams <peter@newton.cx>
+// Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
 
 #include <config.h>
 
-#include "StdinCachedFile.h"
+#include "FILECacheLoader.h"
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
 #    include <io.h> // for _setmode
 #endif
-#include <cstdio>
 
-size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
+FILECacheLoader::~FILECacheLoader()
+{
+    if (file != stdin)
+        fclose(file);
+}
+
+size_t FILECacheLoader::init(GooString *dummy, CachedFile *cachedFile)
 {
     size_t read, size = 0;
     char buf[CachedFileChunkSize];
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-    _setmode(fileno(stdin), O_BINARY);
+    _setmode(fileno(file), O_BINARY);
 #endif
 
     CachedFileWriter writer = CachedFileWriter(cachedFile, nullptr);
     do {
-        read = fread(buf, 1, CachedFileChunkSize, stdin);
+        read = fread(buf, 1, CachedFileChunkSize, file);
         (writer.write)(buf, CachedFileChunkSize);
         size += read;
     } while (read == CachedFileChunkSize);
@@ -40,7 +46,7 @@ size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
     return size;
 }
 
-int StdinCacheLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
+int FILECacheLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
 {
     return 0;
 }

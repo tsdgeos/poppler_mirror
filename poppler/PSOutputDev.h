@@ -29,6 +29,7 @@
 // Copyright (C) 2018, 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+// Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -123,6 +124,10 @@ public:
     PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, const std::vector<int> &pages, PSOutMode modeA, int paperWidthA = -1, int paperHeightA = -1, bool noCrop = false, bool duplexA = true, int imgLLXA = 0, int imgLLYA = 0,
                 int imgURXA = 0, int imgURYA = 0, PSForceRasterize forceRasterizeA = psRasterizeWhenNeeded, bool manualCtrlA = false, PSOutCustomCodeCbk customCodeCbkA = nullptr, void *customCodeCbkDataA = nullptr,
                 PSLevel levelA = psLevel2);
+
+    // Open a PSOutputDev that will write to a file descriptor
+    PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vector<int> &pages, PSOutMode modeA, int paperWidthA = -1, int paperHeightA = -1, bool noCrop = false, bool duplexA = true, int imgLLXA = 0, int imgLLYA = 0, int imgURXA = 0,
+                int imgURYA = 0, PSForceRasterize forceRasterizeA = psRasterizeWhenNeeded, bool manualCtrlA = false, PSOutCustomCodeCbk customCodeCbkA = nullptr, void *customCodeCbkDataA = nullptr, PSLevel levelA = psLevel2);
 
     // Open a PSOutputDev that will write to a generic stream.
     // pages has to be sorted in increasing order

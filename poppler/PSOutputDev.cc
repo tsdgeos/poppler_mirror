@@ -34,7 +34,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
-// Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
@@ -1135,6 +1135,49 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
         fileTypeA = psFile;
         if (!(f = openFile(fileName, "w"))) {
             error(errIO, -1, "Couldn't open PostScript file '{0:s}'", fileName);
+            ok = false;
+            return;
+        }
+    }
+
+    init(outputToFile, f, fileTypeA, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA, levelA);
+}
+
+PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
+                         PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA, PSLevel levelA)
+{
+    FILE *f;
+    PSFileType fileTypeA;
+
+    underlayCbk = nullptr;
+    underlayCbkData = nullptr;
+    overlayCbk = nullptr;
+    overlayCbkData = nullptr;
+    customCodeCbk = customCodeCbkA;
+    customCodeCbkData = customCodeCbkDataA;
+
+    fontIDs = nullptr;
+    t1FontNames = nullptr;
+    font8Info = nullptr;
+    font16Enc = nullptr;
+    imgIDs = nullptr;
+    formIDs = nullptr;
+    paperSizes = nullptr;
+    embFontList = nullptr;
+    customColors = nullptr;
+    haveTextClip = false;
+    t3String = nullptr;
+    forceRasterize = forceRasterizeA;
+    psTitle = nullptr;
+
+    // open file or pipe
+    if (fdA == STDOUT_FILENO) {
+        fileTypeA = psStdout;
+        f = stdout;
+    } else {
+        fileTypeA = psFile;
+        if (!(f = fdopen(fdA, "w"))) {
+            error(errIO, -1, "Couldn't open PostScript file descriptor '{0:d}'", fdA);
             ok = false;
             return;
         }

@@ -195,12 +195,14 @@ poppler_document_has_javascript
 poppler_document_is_linearized
 poppler_document_new_from_bytes
 poppler_document_new_from_data
+poppler_document_new_from_fd
 poppler_document_new_from_file
 poppler_document_new_from_gfile
 poppler_document_new_from_stream
 poppler_document_reset_form
 poppler_document_save
 poppler_document_save_a_copy
+poppler_document_save_to_fd
 poppler_document_set_author
 poppler_document_set_creation_date
 poppler_document_set_creation_date_time
@@ -241,6 +243,7 @@ poppler_layers_iter_new
 poppler_layers_iter_next
 poppler_ps_file_free
 poppler_ps_file_new
+poppler_ps_file_new_fd
 poppler_ps_file_set_duplex
 poppler_ps_file_set_paper_size
 
@@ -343,6 +346,7 @@ poppler_attachment_get_mtime
 poppler_attachment_get_name
 poppler_attachment_get_size
 poppler_attachment_save
+poppler_attachment_save_to_fd
 poppler_attachment_save_to_callback
 
 <SUBSECTION Standard>
@@ -593,6 +597,7 @@ poppler_media_get_repeat_count
 poppler_media_get_show_controls
 poppler_media_is_embedded
 poppler_media_save
+poppler_media_save_to_fd
 poppler_media_save_to_callback
 
 <SUBSECTION Standard>

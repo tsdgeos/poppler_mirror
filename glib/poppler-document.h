@@ -290,6 +290,7 @@ typedef enum
 
 POPPLER_PUBLIC
 GType poppler_document_get_type(void) G_GNUC_CONST;
+
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
 POPPLER_PUBLIC
@@ -301,9 +302,13 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *password, GCancellable *cancellable, GError **error);
 POPPLER_PUBLIC
+PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error);
+POPPLER_PUBLIC
 gboolean poppler_document_save(PopplerDocument *document, const char *uri, GError **error);
 POPPLER_PUBLIC
 gboolean poppler_document_save_a_copy(PopplerDocument *document, const char *uri, GError **error);
+POPPLER_PUBLIC
+gboolean poppler_document_save_to_fd(PopplerDocument *document, int fd, gboolean include_changes, GError **error);
 POPPLER_PUBLIC
 gboolean poppler_document_get_id(PopplerDocument *document, gchar **permanent_id, gchar **update_id);
 POPPLER_PUBLIC
@@ -494,6 +499,8 @@ POPPLER_PUBLIC
 GType poppler_ps_file_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filename, int first_page, int n_pages);
+POPPLER_PUBLIC
+PopplerPSFile *poppler_ps_file_new_fd(PopplerDocument *document, int fd, int first_page, int n_pages);
 POPPLER_PUBLIC
 void poppler_ps_file_set_paper_size(PopplerPSFile *ps_file, double width, double height);
 POPPLER_PUBLIC

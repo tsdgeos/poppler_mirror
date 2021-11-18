@@ -227,7 +227,8 @@ static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError
 
     n = fwrite(buf, 1, count, f);
     if (n != count) {
-        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), _("Error writing to image file: %s"), g_strerror(errno));
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Error writing to image file: %s"), g_strerror(errsv));
         return FALSE;
     }
 
@@ -268,6 +269,49 @@ gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *file
         gchar *display_name = g_filename_display_name(filename);
         g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), _("Failed to close '%s', all data may not have been saved: %s"), display_name, g_strerror(errno));
         g_free(display_name);
+        return FALSE;
+    }
+
+    return result;
+}
+
+/**
+ * poppler_attachment_save_to_fd:
+ * @attachment: A #PopplerAttachment.
+ * @fd: a valid file descriptor open for writing
+ * @error: (allow-none): return location for error, or %NULL.
+ *
+ * Saves @attachment to a file referred to by @fd.  If @error is set, %FALSE
+ * will be returned. Possible errors include those in the #G_FILE_ERROR domain
+ * and whatever the save function generates.
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * Return value: %TRUE, if the file successfully saved
+ *
+ * Since: 21.12.0
+ **/
+gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GError **error)
+{
+    gboolean result;
+    FILE *f;
+
+    g_return_val_if_fail(POPPLER_IS_ATTACHMENT(attachment), FALSE);
+    g_return_val_if_fail(fd != -1, FALSE);
+    g_return_val_if_fail(error == nullptr || *error == nullptr, FALSE);
+
+    f = fdopen(fd, "wb");
+    if (f == nullptr) {
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to open FD %d for writing: %s"), fd, g_strerror(errsv));
+        return FALSE;
+    }
+
+    result = poppler_attachment_save_to_callback(attachment, save_helper, f, error);
+
+    if (fclose(f) < 0) {
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to close FD %d, all data may not have been saved: %s"), fd, g_strerror(errsv));
         return FALSE;
     }
 

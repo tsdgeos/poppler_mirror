@@ -525,7 +525,7 @@ public:
     TextWord *get(int idx);
 
 private:
-    std::vector<TextWord *> *words;
+    std::vector<TextWord *> words;
 };
 
 #endif // TEXTOUT_WORD_LIST
@@ -689,7 +689,7 @@ private:
                           //   previous char
     bool diagonal; // whether the current text is diagonal
 
-    TextPool *pools[4]; // a "pool" of TextWords for each rotation
+    std::unique_ptr<TextPool> pools[4]; // a "pool" of TextWords for each rotation
     TextFlow *flows; // linked list of flows
     TextBlock **blocks; // array of blocks, in yx order
     int nBlocks; // number of blocks
@@ -700,14 +700,14 @@ private:
                         //   rawOrder is set)
     TextWord *rawLastWord; // last word on rawWords list
 
-    std::vector<TextFontInfo *> *fonts; // all font info objects used on this page
+    std::vector<std::unique_ptr<TextFontInfo>> fonts; // all font info objects used on this page
 
     double lastFindXMin, // coordinates of the last "find" result
             lastFindYMin;
     bool haveLastFind;
 
-    std::vector<TextUnderline *> *underlines;
-    std::vector<TextLink *> *links;
+    std::vector<std::unique_ptr<TextUnderline>> underlines;
+    std::vector<std::unique_ptr<TextLink>> links;
 
     int refCnt;
 

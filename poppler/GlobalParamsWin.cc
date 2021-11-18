@@ -414,7 +414,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
     fileName->append("/cidfmap");
 
     // try to open file
-    file = GooFile::open(fileName);
+    file = GooFile::open(fileName->toStr());
 
     if (file != nullptr) {
         Parser *parser;

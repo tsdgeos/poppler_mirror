@@ -407,6 +407,8 @@ set(poppler_SRCS
   poppler/Decrypt.cc
   poppler/Dict.cc
   poppler/Error.cc
+  poppler/FDPDFDocBuilder.cc
+  poppler/FILECacheLoader.cc
   poppler/FileSpec.cc
   poppler/FontEncodingTables.cc
   poppler/Form.cc
@@ -453,8 +455,6 @@ set(poppler_SRCS
   poppler/TextOutputDev.cc
   poppler/PageLabelInfo.cc
   poppler/SecurityHandler.cc
-  poppler/StdinCachedFile.cc
-  poppler/StdinPDFDocBuilder.cc
   poppler/Sound.cc
   poppler/ViewerPreferences.cc
   poppler/Movie.cc
@@ -614,6 +614,8 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Decrypt.h
     poppler/Dict.h
     poppler/Error.h
+    poppler/FDPDFDocBuilder.h
+    poppler/FILECacheLoader.h
     poppler/FileSpec.h
     poppler/FontEncodingTables.h
     poppler/FontInfo.h
@@ -671,8 +673,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PSOutputDev.h
     poppler/TextOutputDev.h
     poppler/SecurityHandler.h
-    poppler/StdinCachedFile.h
-    poppler/StdinPDFDocBuilder.h
     poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
