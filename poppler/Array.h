@@ -60,6 +60,8 @@ public:
     // Copy array with new xref
     Array *copy(XRef *xrefA) const;
 
+    Array *deepCopy() const;
+
     // Add an element
     // elem becomes a dead object after this call
     void add(Object &&elem);

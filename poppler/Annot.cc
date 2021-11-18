@@ -5089,7 +5089,7 @@ void AnnotWidget::generateFieldAppearance()
     if (!resourcesDictObj.isDict()) {
         // No luck with a field's resource dictionary. Let's use an AcroForm's resource dictionary.
         if (form && form->getDefaultResourcesObj()->isDict()) {
-            resourcesDictObj = form->getDefaultResourcesObj()->copy();
+            resourcesDictObj = form->getDefaultResourcesObj()->deepCopy();
             resources = form->getDefaultResources();
         }
     }

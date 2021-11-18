@@ -263,8 +263,13 @@ public:
         type = objNull;
     }
 
-    // Copy this to obj
+    // Copies all object types except
+    // objArray, objDict, objStream whose refcount is increased by 1
     Object copy() const;
+
+    // Deep copies all object types (recursively)
+    // except objStream whose refcount is increased by 1
+    Object deepCopy() const;
 
     // If object is a Ref, fetch and return the referenced object.
     // Otherwise, return a copy of the object.

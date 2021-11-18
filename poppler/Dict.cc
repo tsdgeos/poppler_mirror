@@ -85,6 +85,18 @@ Dict *Dict::copy(XRef *xrefA) const
     return dictA;
 }
 
+Dict *Dict::deepCopy() const
+{
+    dictLocker();
+    Dict *dictA = new Dict(xref);
+
+    dictA->entries.reserve(entries.size());
+    for (auto &entry : entries) {
+        dictA->entries.emplace_back(entry.first, entry.second.deepCopy());
+    }
+    return dictA;
+}
+
 void Dict::add(const char *key, Object &&val)
 {
     dictLocker();
