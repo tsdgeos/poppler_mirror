@@ -6,6 +6,7 @@
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
 

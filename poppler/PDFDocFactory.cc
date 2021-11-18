@@ -9,6 +9,7 @@
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
 

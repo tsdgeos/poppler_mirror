@@ -8,6 +8,7 @@
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Jonathan Liu <net147@gmail.com>
 // Copyright 2021 Peter Williams <peter@newton.cx>
+// Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
 

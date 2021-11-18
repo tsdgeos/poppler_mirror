@@ -7,6 +7,7 @@
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
 
