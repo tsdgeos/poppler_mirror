@@ -459,9 +459,9 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         return nullptr;
     }
 
-    if (fd == STDIN_FILENO || !S_ISREG(statbuf.st_mode)) {
+    if (fd == fileno(stdin) || !S_ISREG(statbuf.st_mode)) {
         FILE *file;
-        if (fd == STDIN_FILENO) {
+        if (fd == fileno(stdin)) {
             file = stdin;
         } else {
             file = fdopen(fd, "rb");
