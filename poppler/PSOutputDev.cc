@@ -1171,7 +1171,7 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     psTitle = nullptr;
 
     // open file or pipe
-    if (fdA == STDOUT_FILENO) {
+    if (fdA == fileno(stdout)) {
         fileTypeA = psStdout;
         f = stdout;
     } else {
