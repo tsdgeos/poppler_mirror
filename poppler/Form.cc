@@ -596,7 +596,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     updateWidgetAppearance(); // add visible signing info to appearance
 
     Object vObj(new Dict(xref));
-    Ref vref = xref->addIndirectObject(&vObj);
+    Ref vref = xref->addIndirectObject(vObj);
     if (!createSignature(vObj, vref, GooString(signerName), tmpSignature.get(), reason, location)) {
         return false;
     }

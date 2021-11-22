@@ -463,8 +463,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
 {
     catalogLocker();
 
-    Object fileSpecObj = FileSpec::newFileSpecObject(xref, file, fileName);
-    const Ref fileSpecRef = xref->addIndirectObject(&fileSpecObj);
+    const Ref fileSpecRef = xref->addIndirectObject(FileSpec::newFileSpecObject(xref, file, fileName));
 
     Object catDict = xref->getCatalog();
     Ref namesObjRef;
@@ -482,7 +481,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
 
     // We create a new EmbeddedFiles nametree, this replaces the existing one (if any), but it's not a problem
     Object embeddedFilesObj = Object(new Dict(xref));
-    const Ref embeddedFilesRef = xref->addIndirectObject(&embeddedFilesObj);
+    const Ref embeddedFilesRef = xref->addIndirectObject(embeddedFilesObj);
 
     Array *embeddedFilesNamesArray = new Array(xref);
 
@@ -981,7 +980,7 @@ Object *Catalog::getCreateOutline()
     outline.dictSet("Type", Object(objName, "Outlines"));
     outline.dictSet("Count", Object(0));
 
-    const Ref outlineRef = doc->getXRef()->addIndirectObject(&outline);
+    const Ref outlineRef = doc->getXRef()->addIndirectObject(outline);
     catDict.dictAdd("Outlines", Object(outlineRef));
     xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
 
@@ -1068,7 +1067,7 @@ void Catalog::addFormToAcroForm(const Ref formRef)
         fieldArray->add(Object(formRef));
         newForm.dictSet("Fields", Object(fieldArray));
 
-        Ref newRef = xref->addIndirectObject(&newForm);
+        Ref newRef = xref->addIndirectObject(newForm);
         catDict.dictSet("AcroForm", Object(newRef));
         acroForm = catDict.getDict()->lookup("AcroForm");
     } else {

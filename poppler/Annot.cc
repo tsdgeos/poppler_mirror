@@ -1206,7 +1206,7 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
     annotObj.dictSet("Type", Object(objName, "Annot"));
     annotObj.dictSet("Rect", Object(a));
 
-    ref = docA->getXRef()->addIndirectObject(&annotObj);
+    ref = docA->getXRef()->addIndirectObject(annotObj);
 
     initialize(docA, annotObj.getDict());
 }
@@ -1983,7 +1983,7 @@ void Annot::setNewAppearance(Object &&newAppearance)
         invalidateAppearance();
         appearance = std::move(newAppearance);
 
-        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
 
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
@@ -5177,7 +5177,7 @@ void AnnotWidget::updateAppearanceStream()
     // Otherwise, just update the stream we had created previously.
     if (updatedAppearanceStream == Ref::INVALID()) {
         // Write the appearance stream
-        updatedAppearanceStream = doc->getXRef()->addIndirectObject(&obj1);
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(obj1);
 
         // Write the AP dictionary
         obj1 = Object(new Dict(doc->getXRef()));
@@ -5596,7 +5596,7 @@ void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
     generateStampCustomAppearance();
 
     if (updatedAppearanceStream == Ref::INVALID()) {
-        updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
     } else {
         Object obj1 = appearance.fetch(doc->getXRef());
         doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);

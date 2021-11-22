@@ -431,10 +431,10 @@ void Page::addAnnot(Annot *annot)
         // page doesn't have annots array,
         // we have to create it
 
-        Object obj1 = Object(new Array(xref));
-        obj1.arrayAdd(Object(annotRef));
+        Array *annotsArray = new Array(xref);
+        annotsArray->add(Object(annotRef));
 
-        annotsRef = xref->addIndirectObject(&obj1);
+        annotsRef = xref->addIndirectObject(Object(annotsArray));
         annotsObj = Object(annotsRef);
         pageObj.dictSet("Annots", Object(annotsRef));
         xref->setModifiedObject(&pageObj, pageRef);

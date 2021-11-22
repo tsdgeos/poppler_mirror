@@ -205,7 +205,7 @@ public:
 
     // Write access
     void setModifiedObject(const Object *o, Ref r);
-    Ref addIndirectObject(const Object *o);
+    Ref addIndirectObject(const Object &o);
     void removeIndirectObject(Ref r);
     void add(int num, int gen, Goffset offs, bool used);
     void add(Ref ref, Goffset offs, bool used);

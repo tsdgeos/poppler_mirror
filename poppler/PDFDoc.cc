@@ -2159,7 +2159,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     GooString *daStr = da.toAppearanceString();
     annotObj.dictSet("DA", Object(daStr));
 
-    const Ref ref = getXRef()->addIndirectObject(&annotObj);
+    const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
 
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
