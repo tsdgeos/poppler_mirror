@@ -4956,7 +4956,7 @@ static void registerResourceForWidget(const char *resourceType, Dict *resourcesD
     Object childDictionaryObj = resourcesDict->lookup(resourceType);
     if (!childDictionaryObj.isDict()) {
         childDictionaryObj = Object(new Dict(xref));
-        resourcesDict->add(resourceType, childDictionaryObj.copy());
+        resourcesDict->set(resourceType, childDictionaryObj.copy());
     }
     childDictionaryObj.dictSet(resourceId, Object(resourceRef));
 }
