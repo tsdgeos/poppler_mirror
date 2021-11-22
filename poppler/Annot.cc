@@ -4949,16 +4949,14 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     return true;
 }
 
-// Helper function for AnnotAppearanceBuilder::drawSignatureFieldText(). Registers a resource.
-// Argument resourceType should be "XObject" or "Font".
-static void registerResourceForWidget(const char *resourceType, Dict *resourcesDict, const char *resourceId, const Ref resourceRef, XRef *xref)
+static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, const char *childDictEntryName, const Ref childDictEntryValue, XRef *xref)
 {
-    Object childDictionaryObj = resourcesDict->lookup(resourceType);
+    Object childDictionaryObj = parentDict->lookup(childDictName);
     if (!childDictionaryObj.isDict()) {
         childDictionaryObj = Object(new Dict(xref));
-        resourcesDict->set(resourceType, childDictionaryObj.copy());
+        parentDict->set(childDictName, childDictionaryObj.copy());
     }
-    childDictionaryObj.dictSet(resourceId, Object(resourceRef));
+    childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
 }
 
 void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
@@ -4982,7 +4980,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     // Print a background image.
     if (imageResourceRef != Ref::INVALID()) {
         static const char *imageResourceId = "SigImg";
-        registerResourceForWidget("XObject", resourcesDict, imageResourceId, imageResourceRef, xref);
+        setChildDictEntryValue(resourcesDict, "XObject", imageResourceId, imageResourceRef, xref);
 
         Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
         matrix.scale(width, height);
