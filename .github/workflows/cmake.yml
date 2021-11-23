@@ -22,11 +22,12 @@ jobs:
 
     - name: Install dependencies
       run: |
+        brew list
+        brew list --cask
         brew update
-        brew uninstall -f poppler gdal postgis python@2 mercurial
+        brew uninstall -f poppler gdal postgis python@2 mercurial mono
         brew install poppler --only-dependencies
         brew upgrade cmake pkg-config && brew install ninja boost
-        brew list libpng
     
     - name: Clone test files
       working-directory: ${{github.workspace}}
