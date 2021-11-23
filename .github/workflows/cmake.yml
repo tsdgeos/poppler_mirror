@@ -33,7 +33,7 @@ jobs:
       run: git clone git://git.freedesktop.org/git/poppler/test testfiles
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF -DTESTDATADIR=${{github.workspace}}/testfiles
+      run: cmake -B ${{github.workspace}}/build -G Ninja -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF -DTESTDATADIR=${{github.workspace}}/testfiles -DCMAKE_PREFIX_PATH=/usr/local/Cellar/libpng/1.6.37
 
     - name: Build
       working-directory: ${{github.workspace}}/build
