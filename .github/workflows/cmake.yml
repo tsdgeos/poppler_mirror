@@ -25,9 +25,11 @@ jobs:
         brew list
         brew list --cask
         brew update
-        brew uninstall -f poppler gdal postgis python@2 mercurial mono
+        brew uninstall -f poppler gdal postgis python@2 mercurial
         brew install poppler --only-dependencies
         brew upgrade cmake pkg-config && brew install ninja boost
+        rm -rf /Library/Frameworks/Mono.framework
+        rm -rf /Library/Receipts/MonoFramework-*
     
     - name: Clone test files
       working-directory: ${{github.workspace}}
