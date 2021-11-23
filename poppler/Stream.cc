@@ -40,6 +40,7 @@
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1101,6 +1102,16 @@ MemStream::~MemStream() = default;
 AutoFreeMemStream::~AutoFreeMemStream()
 {
     gfree(buf);
+}
+
+bool AutoFreeMemStream::isFilterRemovalForbidden() const
+{
+    return filterRemovalForbidden;
+}
+
+void AutoFreeMemStream::setFilterRemovalForbidden(bool forbidden)
+{
+    filterRemovalForbidden = forbidden;
 }
 
 //------------------------------------------------------------------------

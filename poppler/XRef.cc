@@ -31,6 +31,7 @@
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2010 William Bader <william@newspapersystems.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1294,7 +1295,7 @@ Object XRef::createDocInfoIfNeeded(Ref *ref)
     removeDocInfo();
 
     obj = Object(new Dict(this));
-    *ref = addIndirectObject(&obj);
+    *ref = addIndirectObject(obj);
     trailerDict.dictSet("Info", Object(*ref));
 
     return obj;
@@ -1403,7 +1404,7 @@ void XRef::setModifiedObject(const Object *o, Ref r)
     setModified();
 }
 
-Ref XRef::addIndirectObject(const Object *o)
+Ref XRef::addIndirectObject(const Object &o)
 {
     int entryIndexToUse = -1;
     for (int i = 1; entryIndexToUse == -1 && i < size; ++i) {
@@ -1425,7 +1426,7 @@ Ref XRef::addIndirectObject(const Object *o)
         // incremented when the object was deleted
     }
     e->type = xrefEntryUncompressed;
-    e->obj = o->copy();
+    e->obj = o.copy();
     e->setFlag(XRefEntry::Updated, true);
     setModified();
 
@@ -1453,6 +1454,19 @@ void XRef::removeIndirectObject(Ref r)
     }
     e->setFlag(XRefEntry::Updated, true);
     setModified();
+}
+
+Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize)
+{
+    dict->add("Length", Object((int)bufferSize));
+    AutoFreeMemStream *stream = new AutoFreeMemStream(buffer, 0, bufferSize, Object(dict));
+    stream->setFilterRemovalForbidden(true);
+    return addIndirectObject(Object((Stream *)stream));
+}
+
+Ref XRef::addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize)
+{
+    return addStreamObject(dict, (char *)buffer, bufferSize);
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)

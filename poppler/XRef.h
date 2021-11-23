@@ -26,6 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -204,10 +205,16 @@ public:
 
     // Write access
     void setModifiedObject(const Object *o, Ref r);
-    Ref addIndirectObject(const Object *o);
+    Ref addIndirectObject(const Object &o);
     void removeIndirectObject(Ref r);
     void add(int num, int gen, Goffset offs, bool used);
     void add(Ref ref, Goffset offs, bool used);
+    // Adds a stream object using AutoFreeMemStream.
+    // The function takes ownership over dict and buffer.
+    // The buffer should be created using gmalloc().
+    // Returns ref to a new object.
+    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize);
+    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize);
 
     // Output XRef table to stream
     void writeTableToFile(OutStream *outStr, bool writeAllEntries);

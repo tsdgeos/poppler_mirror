@@ -105,7 +105,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
     Object prevItemObject;
     Object nextItemObject;
 
-    Ref outlineItemRef = xref->addIndirectObject(&outlineItem);
+    Ref outlineItemRef = xref->addIndirectObject(outlineItem);
 
     // the next two statements fix up the parent object
     // for clarity we separate this out
@@ -294,7 +294,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
         a->add(Object(objName, "Fit"));
 
         Object outlineItem = Object(new Dict(doc->getXRef()));
-        Ref outlineItemRef = doc->getXRef()->addIndirectObject(&outlineItem);
+        Ref outlineItemRef = doc->getXRef()->addIndirectObject(outlineItem);
 
         if (firstRef == Ref::INVALID()) {
             firstRef = outlineItemRef;

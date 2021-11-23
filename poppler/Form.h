@@ -624,6 +624,10 @@ public:
     double getCustomAppearanceLeftFontSize() const;
     void setCustomAppearanceLeftFontSize(double size);
 
+    // Background image (ref to an object of type XObject). Invalid ref if not required.
+    Ref getImageResource() const;
+    void setImageResource(const Ref imageResourceA);
+
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
     FormWidget *getCreateWidget();
@@ -639,6 +643,7 @@ private:
     GooString customAppearanceContent;
     GooString customAppearanceLeftContent;
     double customAppearanceLeftFontSize = 20;
+    Ref imageResource = Ref::INVALID();
     std::unique_ptr<X509CertificateInfo> certificate_info;
 
     void print(int indent) override;

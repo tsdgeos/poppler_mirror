@@ -596,7 +596,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     updateWidgetAppearance(); // add visible signing info to appearance
 
     Object vObj(new Dict(xref));
-    Ref vref = xref->addIndirectObject(&vObj);
+    Ref vref = xref->addIndirectObject(vObj);
     if (!createSignature(vObj, vref, GooString(signerName), tmpSignature.get(), reason, location)) {
         return false;
     }
@@ -2030,6 +2030,16 @@ double FormFieldSignature::getCustomAppearanceLeftFontSize() const
 void FormFieldSignature::setCustomAppearanceLeftFontSize(double size)
 {
     customAppearanceLeftFontSize = size;
+}
+
+Ref FormFieldSignature::getImageResource() const
+{
+    return imageResource;
+}
+
+void FormFieldSignature::setImageResource(const Ref imageResourceA)
+{
+    imageResource = imageResourceA;
 }
 
 void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo)

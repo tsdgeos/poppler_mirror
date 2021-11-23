@@ -419,6 +419,7 @@ set(poppler_SRCS
   poppler/GfxState.cc
   poppler/GlobalParams.cc
   poppler/Hints.cc
+  poppler/ImageEmbeddingUtils.cc
   poppler/JArithmeticDecoder.cc
   poppler/JBIG2Stream.cc
   poppler/JSInfo.cc

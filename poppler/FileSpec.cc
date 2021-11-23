@@ -7,7 +7,7 @@
 //
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -181,8 +181,7 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
     FileStream *fStream = new FileStream(file, 0, false, file->size(), std::move(streamDict));
     fStream->setNeedsEncryptionOnSave(true);
     Stream *stream = fStream;
-    Object streamObj = Object(stream);
-    const Ref streamRef = xref->addIndirectObject(&streamObj);
+    const Ref streamRef = xref->addIndirectObject(Object(stream));
 
     Dict *efDict = new Dict(xref);
     efDict->set("F", Object(streamRef));

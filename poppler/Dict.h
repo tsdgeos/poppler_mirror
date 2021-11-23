@@ -52,6 +52,8 @@ public:
     explicit Dict(const Dict *dictA);
     Dict *copy(XRef *xrefA) const;
 
+    Dict *deepCopy() const;
+
     Dict(const Dict &) = delete;
     Dict &operator=(const Dict &) = delete;
 

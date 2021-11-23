@@ -94,6 +94,7 @@
 #include "Hints.h"
 #include "UTF.h"
 #include "JSInfo.h"
+#include "ImageEmbeddingUtils.h"
 
 //------------------------------------------------------------------------
 
@@ -1452,6 +1453,10 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             stream->getDict()->set("Length", Object(tmp));
 
             // Remove Stream encoding
+            AutoFreeMemStream *internalStream = dynamic_cast<AutoFreeMemStream *>(stream);
+            if (internalStream && internalStream->isFilterRemovalForbidden()) {
+                removeFilter = false;
+            }
             if (removeFilter) {
                 stream->getDict()->remove("Filter");
             }
@@ -2122,9 +2127,20 @@ bool PDFDoc::hasJavascript()
 }
 
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
-                  double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location)
+                  double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location,
+                  const std::string &imagePath)
 {
     ::Page *destPage = getPage(page);
+    if (destPage == nullptr) {
+        return false;
+    }
+    Ref imageResourceRef = Ref::INVALID();
+    if (!imagePath.empty()) {
+        imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
+        if (imageResourceRef == Ref::INVALID()) {
+            return false;
+        }
+    }
 
     const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
 
@@ -2143,13 +2159,13 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     GooString *daStr = da.toAppearanceString();
     annotObj.dictSet("DA", Object(daStr));
 
-    const Ref ref = getXRef()->addIndirectObject(&annotObj);
+    const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
 
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
-
     field->setCustomAppearanceContent(signatureText);
     field->setCustomAppearanceLeftContent(signatureTextLeft);
+    field->setImageResource(imageResourceRef);
 
     Object refObj(ref);
     AnnotWidget *signatureAnnot = new AnnotWidget(this, &annotObj, &refObj, field.get());

@@ -1206,7 +1206,7 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
     annotObj.dictSet("Type", Object(objName, "Annot"));
     annotObj.dictSet("Rect", Object(a));
 
-    ref = docA->getXRef()->addIndirectObject(&annotObj);
+    ref = docA->getXRef()->addIndirectObject(annotObj);
 
     initialize(docA, annotObj.getDict());
 }
@@ -1983,7 +1983,7 @@ void Annot::setNewAppearance(Object &&newAppearance)
         invalidateAppearance();
         appearance = std::move(newAppearance);
 
-        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
 
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
@@ -4934,7 +4934,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     const GooString &leftText = field->getCustomAppearanceLeftContent();
     if (leftText.toStr().empty()) {
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */, field->getImageResource());
     } else {
         DefaultAppearance daLeft(_da);
         daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
@@ -4949,8 +4949,18 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     return true;
 }
 
+static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, const char *childDictEntryName, const Ref childDictEntryValue, XRef *xref)
+{
+    Object childDictionaryObj = parentDict->lookup(childDictName);
+    if (!childDictionaryObj.isDict()) {
+        childDictionaryObj = Object(new Dict(xref));
+        parentDict->set(childDictName, childDictionaryObj.copy());
+    }
+    childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
+}
+
 void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
-                                                    bool centerHorizontally)
+                                                    bool centerHorizontally, const Ref imageResourceRef)
 {
     double borderWidth = 0;
     append("q\n");
@@ -4966,6 +4976,19 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double height = rect->y2 - rect->y1;
     const double textmargin = borderWidth * 2;
     const double textwidth = width - 2 * textmargin;
+
+    // Print a background image.
+    if (imageResourceRef != Ref::INVALID()) {
+        static const char *imageResourceId = "SigImg";
+        setChildDictEntryValue(resourcesDict, "XObject", imageResourceId, imageResourceRef, xref);
+
+        Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+        matrix.scale(width, height);
+        static const char *IMG_TMPL = "\nq {0:.1g} {1:.1g} {2:.1g} {3:.1g} {4:.1g} {5:.1g} cm /{6:s} Do Q\n";
+        const GooString *imgBuffer = GooString::format(IMG_TMPL, matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
+        append(imgBuffer->c_str());
+        delete imgBuffer;
+    }
 
     // create a Helvetica fake font
     GfxFont *font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
@@ -5089,7 +5112,7 @@ void AnnotWidget::generateFieldAppearance()
     if (!resourcesDictObj.isDict()) {
         // No luck with a field's resource dictionary. Let's use an AcroForm's resource dictionary.
         if (form && form->getDefaultResourcesObj()->isDict()) {
-            resourcesDictObj = form->getDefaultResourcesObj()->copy();
+            resourcesDictObj = form->getDefaultResourcesObj()->deepCopy();
             resources = form->getDefaultResources();
         }
     }
@@ -5152,7 +5175,7 @@ void AnnotWidget::updateAppearanceStream()
     // Otherwise, just update the stream we had created previously.
     if (updatedAppearanceStream == Ref::INVALID()) {
         // Write the appearance stream
-        updatedAppearanceStream = doc->getXRef()->addIndirectObject(&obj1);
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(obj1);
 
         // Write the AP dictionary
         obj1 = Object(new Dict(doc->getXRef()));
@@ -5571,7 +5594,7 @@ void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
     generateStampCustomAppearance();
 
     if (updatedAppearanceStream == Ref::INVALID()) {
-        updatedAppearanceStream = doc->getXRef()->addIndirectObject(&appearance);
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
     } else {
         Object obj1 = appearance.fetch(doc->getXRef());
         doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);

@@ -32,6 +32,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -734,9 +735,17 @@ public:
 
 class AutoFreeMemStream : public BaseMemStream<char>
 {
+    bool filterRemovalForbidden;
+
 public:
+    // AutoFreeMemStream takes ownership over the buffer.
+    // The buffer should be created using gmalloc().
     AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
     ~AutoFreeMemStream() override;
+
+    // A hack to deal with the strange behaviour of PDFDoc::writeObject().
+    bool isFilterRemovalForbidden() const;
+    void setFilterRemovalForbidden(bool forbidden);
 };
 
 //------------------------------------------------------------------------

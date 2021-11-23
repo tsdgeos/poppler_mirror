@@ -71,6 +71,38 @@ Object Object::copy() const
     return obj;
 }
 
+Object Object::deepCopy() const
+{
+    CHECK_NOT_DEAD;
+
+    Object obj;
+    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object));
+
+    switch (type) {
+    case objString:
+    case objHexString:
+        obj.string = string->copy();
+        break;
+    case objName:
+    case objCmd:
+        obj.cString = copyString(cString);
+        break;
+    case objArray:
+        obj.array = array->deepCopy();
+        break;
+    case objDict:
+        obj.dict = dict->deepCopy();
+        break;
+    case objStream:
+        stream->incRef();
+        break;
+    default:
+        break;
+    }
+
+    return obj;
+}
+
 Object Object::fetch(XRef *xref, int recursion) const
 {
     CHECK_NOT_DEAD;
