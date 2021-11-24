@@ -37,7 +37,7 @@ public:
     void close() override;
     Goffset getPos() override;
     void put(char c) override;
-    void printf(const char *format, ...) override;
+    void printf(const char *format, ...) override GCC_PRINTF_FORMAT(2, 3);
 
 private:
     QIODevice *m_device;

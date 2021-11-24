@@ -42,6 +42,8 @@ void QIODeviceOutStream::put(char c)
     m_device->putChar(c);
 }
 
+static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap) GCC_PRINTF_FORMAT(2, 0);
+
 static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap)
 {
     va_list ap_copy;
