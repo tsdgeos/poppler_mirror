@@ -684,7 +684,7 @@ static char *setNextOffset(char *start, Goffset offset)
 
     char *p = strstr(start, "9999999999");
     if (p) {
-        strncpy(p, buf, 10); // overwrite exact size.
+        memcpy(p, buf, 10); // overwrite exact size.
         p += 10;
     } else {
         return nullptr;
