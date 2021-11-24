@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 //
 // This file is under the GPLv2 or later license
 //

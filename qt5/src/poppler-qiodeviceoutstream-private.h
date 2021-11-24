@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, Even Rouault <even.rouault@spatialys.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
