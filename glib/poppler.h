@@ -1,5 +1,6 @@
 /* poppler.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -217,6 +218,7 @@ typedef struct _PopplerStructureElement PopplerStructureElement;
 typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
 typedef struct _PopplerTextSpan PopplerTextSpan;
 typedef struct _PopplerPageRange PopplerPageRange;
+typedef struct _PopplerSignatureInfo PopplerSignatureInfo;
 
 /**
  * PopplerBackend:

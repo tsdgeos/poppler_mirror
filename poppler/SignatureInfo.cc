@@ -11,6 +11,8 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
+// Copyright 2021 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -119,10 +121,10 @@ void SignatureInfo::setCertificateValStatus(enum CertificateValidationStatus cer
     cert_status = cert_val_status;
 }
 
-void SignatureInfo::setSignerName(char *signerName)
+void SignatureInfo::setSignerName(const char *signerName)
 {
     free(signer_name);
-    signer_name = signerName;
+    signer_name = signerName ? strdup(signerName) : nullptr;
 }
 
 void SignatureInfo::setSubjectDN(const char *subjectDN)

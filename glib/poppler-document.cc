@@ -6,6 +6,8 @@
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
+ * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +44,7 @@
 #    include <FILECacheLoader.h>
 #    include <GlobalParams.h>
 #    include <PDFDoc.h>
+#    include <SignatureInfo.h>
 #    include <Outline.h>
 #    include <ErrorCodes.h>
 #    include <UnicodeMap.h>
@@ -1727,6 +1730,25 @@ gboolean poppler_document_is_linearized(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), FALSE);
 
     return document->doc->isLinearized();
+}
+
+/**
+ * poppler_document_get_n_signatures:
+ * @document: A #PopplerDocument
+ *
+ * Returns how many digital signatures @document contains.
+ * PDF digital signatures ensure that the content hash not been altered since last edit and
+ * that it was produced by someone the user can trust
+ *
+ * Return value: The number of signatures found in the document
+ *
+ * Since: 21.12.0
+ **/
+gint poppler_document_get_n_signatures(const PopplerDocument *document)
+{
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), 0);
+
+    return document->doc->getNumSignatureFields();
 }
 
 /**

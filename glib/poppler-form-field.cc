@@ -3,6 +3,8 @@
  * Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2006 Julien Rebetez
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
+ * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -379,6 +381,307 @@ gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
     tmp = field->widget->getAlternateUiName();
 
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+}
+
+/**
+ * PopplerSignatureInfo:
+ *
+ * PopplerSignatureInfo contains detailed info about a signature
+ * contained in a form field.
+ *
+ * Since: 21.12.0
+ **/
+struct _PopplerSignatureInfo
+{
+    PopplerSignatureStatus sig_status;
+    PopplerCertificateStatus cert_status;
+    char *signer_name;
+    GDateTime *local_signing_time;
+};
+
+static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormField *field, PopplerSignatureValidationFlags flags, gboolean force_revalidation, GError **error)
+{
+    FormFieldSignature *sig_field;
+    SignatureInfo *sig_info;
+    PopplerSignatureInfo *poppler_sig_info;
+
+    if (poppler_form_field_get_field_type(field) != POPPLER_FORM_FIELD_SIGNATURE) {
+        g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Wrong FormField type");
+        return nullptr;
+    }
+
+    sig_field = static_cast<FormFieldSignature *>(field->widget->getField());
+
+    sig_info = sig_field->validateSignature(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE, force_revalidation, -1, flags & POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK,
+                                            flags & POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH);
+
+    poppler_sig_info = g_new0(PopplerSignatureInfo, 1);
+    switch (sig_info->getSignatureValStatus()) {
+    case SIGNATURE_VALID:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_VALID;
+        break;
+    case SIGNATURE_INVALID:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_INVALID;
+        break;
+    case SIGNATURE_DIGEST_MISMATCH:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_DIGEST_MISMATCH;
+        break;
+    case SIGNATURE_DECODING_ERROR:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_DECODING_ERROR;
+        break;
+    case SIGNATURE_GENERIC_ERROR:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_GENERIC_ERROR;
+        break;
+    case SIGNATURE_NOT_FOUND:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_NOT_FOUND;
+        break;
+    case SIGNATURE_NOT_VERIFIED:
+        poppler_sig_info->sig_status = POPPLER_SIGNATURE_NOT_VERIFIED;
+        break;
+    }
+
+    switch (sig_info->getCertificateValStatus()) {
+    case CERTIFICATE_TRUSTED:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_TRUSTED;
+        break;
+    case CERTIFICATE_UNTRUSTED_ISSUER:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_UNTRUSTED_ISSUER;
+        break;
+    case CERTIFICATE_UNKNOWN_ISSUER:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_UNKNOWN_ISSUER;
+        break;
+    case CERTIFICATE_REVOKED:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_REVOKED;
+        break;
+    case CERTIFICATE_EXPIRED:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_EXPIRED;
+        break;
+    case CERTIFICATE_GENERIC_ERROR:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_GENERIC_ERROR;
+        break;
+    case CERTIFICATE_NOT_VERIFIED:
+        poppler_sig_info->cert_status = POPPLER_CERTIFICATE_NOT_VERIFIED;
+        break;
+    }
+
+    poppler_sig_info->signer_name = g_strdup(sig_info->getSignerName());
+    poppler_sig_info->local_signing_time = g_date_time_new_from_unix_local(sig_info->getSigningTime());
+
+    return poppler_sig_info;
+}
+
+static void signature_validate_thread(GTask *task, gpointer source_object, gpointer task_data, GCancellable *cancellable)
+{
+    PopplerSignatureValidationFlags flags = (PopplerSignatureValidationFlags)GPOINTER_TO_INT(task_data);
+    PopplerSignatureInfo *signature_info;
+    PopplerFormField *field = (PopplerFormField *)source_object;
+    GError *error = nullptr;
+
+    signature_info = _poppler_form_field_signature_validate(field, flags, FALSE, &error);
+    if (signature_info == nullptr && error != nullptr) {
+        g_task_return_error(task, error);
+        return;
+    }
+
+    if (g_task_set_return_on_cancel(task, FALSE)) {
+        g_task_return_pointer(task, signature_info, (GDestroyNotify)poppler_signature_info_free);
+    }
+}
+
+/**
+ * poppler_form_field_signature_validate_sync:
+ * @field: a #PopplerFormField that represents a signature annotation
+ * @flags: #PopplerSignatureValidationFlags flags influencing process of validation of the field signature
+ * @cancellable: (nullable): optional #GCancellable object
+ * @error: a #GError
+ *
+ * Synchronously validates the cryptographic signature contained in @signature_field.
+ *
+ * Return value: (transfer full): a #PopplerSignatureInfo structure containing signature metadata and validation status
+ *                                Free the returned structure with poppler_signature_info_free().
+ *
+ * Since: 21.12.0
+ **/
+PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormField *field, PopplerSignatureValidationFlags flags, GCancellable *cancellable, GError **error)
+{
+    PopplerSignatureInfo *signature_info;
+    GTask *task;
+
+    g_return_val_if_fail(error == NULL || *error == NULL, NULL);
+
+    task = g_task_new(field, cancellable, nullptr, nullptr);
+    g_task_set_task_data(task, GINT_TO_POINTER(flags), nullptr);
+    g_task_set_return_on_cancel(task, TRUE);
+
+    g_task_run_in_thread_sync(task, signature_validate_thread);
+
+    signature_info = (PopplerSignatureInfo *)g_task_propagate_pointer(task, error);
+    g_object_unref(task);
+
+    return signature_info;
+}
+
+/**
+ * poppler_form_field_signature_validate_async:
+ * @field: a #PopplerFormField that represents a signature annotation
+ * @flags: #PopplerSignatureValidationFlags flags influencing process of validation of the field signature
+ * @cancellable: (nullable): optional #GCancellable object
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the signature is validated
+ * @user_data: (closure): the data to pass to callback function
+ *
+ * Asynchronously validates the cryptographic signature contained in @signature_field.
+ *
+ * Since: 21.12.0
+ **/
+void poppler_form_field_signature_validate_async(PopplerFormField *field, PopplerSignatureValidationFlags flags, GCancellable *cancellable, GAsyncReadyCallback callback, gpointer user_data)
+{
+    GTask *task;
+
+    task = g_task_new(field, cancellable, callback, user_data);
+    g_task_set_task_data(task, GINT_TO_POINTER(flags), nullptr);
+    g_task_set_return_on_cancel(task, TRUE);
+
+    g_task_run_in_thread(task, signature_validate_thread);
+
+    g_object_unref(task);
+}
+
+/**
+ * poppler_form_field_signature_validate_finish:
+ * @field: a #PopplerFormField that represents a signature annotation
+ * @result: a #GAsyncResult
+ * @error: a #GError
+ *
+ * Finishes validation of the cryptographic signature contained in @signature_field.
+ * See poppler_form_field_signature_validate_async().
+ *
+ * Return value: (transfer full): a #PopplerSignatureInfo structure containing signature metadata and validation status
+ *                                Free the returned structure with poppler_signature_info_free().
+ *
+ * Since: 21.12.0
+ **/
+PopplerSignatureInfo *poppler_form_field_signature_validate_finish(PopplerFormField *field, GAsyncResult *result, GError **error)
+{
+    g_return_val_if_fail(g_task_is_valid(result, field), NULL);
+
+    return (PopplerSignatureInfo *)g_task_propagate_pointer(G_TASK(result), error);
+}
+
+G_DEFINE_BOXED_TYPE(PopplerSignatureInfo, poppler_signature_info, poppler_signature_info_copy, poppler_signature_info_free)
+
+/**
+ * poppler_signature_info_copy:
+ * @siginfo: a #PopplerSignatureInfo structure containing signature metadata and validation status
+ *
+ * Copies @siginfo, creating an identical #PopplerSignatureInfo.
+ *
+ * Return value: (transfer full): a new #PopplerSignatureInfo structure identical to @siginfo
+ *
+ * Since: 21.12.0
+ **/
+PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *siginfo)
+{
+    PopplerSignatureInfo *new_info;
+
+    g_return_val_if_fail(siginfo != NULL, NULL);
+
+    new_info = g_new(PopplerSignatureInfo, 1);
+    new_info->sig_status = siginfo->sig_status;
+    new_info->cert_status = siginfo->cert_status;
+    new_info->signer_name = g_strdup(siginfo->signer_name);
+    new_info->local_signing_time = g_date_time_ref(siginfo->local_signing_time);
+
+    return new_info;
+}
+
+/**
+ * poppler_signature_info_free:
+ * @siginfo: a #PopplerSignatureInfo structure containing signature metadata and validation status
+ *
+ * Frees @siginfo
+ *
+ * Since: 21.12.0
+ **/
+void poppler_signature_info_free(PopplerSignatureInfo *siginfo)
+{
+    if (siginfo == nullptr)
+        return;
+
+    g_date_time_unref(siginfo->local_signing_time);
+    g_free(siginfo->signer_name);
+    g_free(siginfo);
+}
+
+/**
+ * poppler_signature_info_get_signature_status:
+ * @siginfo: a #PopplerSignatureInfo
+ *
+ * Returns status of the signature for given PopplerSignatureInfo.
+ *
+ * Return value: signature status of the signature
+ *
+ * Since: 21.12.0
+ **/
+PopplerSignatureStatus poppler_signature_info_get_signature_status(const PopplerSignatureInfo *siginfo)
+{
+    g_return_val_if_fail(siginfo != NULL, POPPLER_SIGNATURE_GENERIC_ERROR);
+
+    return siginfo->sig_status;
+}
+
+/**
+ * poppler_signature_info_get_certificate_status:
+ * @siginfo: a #PopplerSignatureInfo
+ *
+ * Returns status of the certificate for given PopplerSignatureInfo.
+ *
+ * Return value: certificate status of the signature
+ *
+ * Since: 21.12.0
+ **/
+PopplerCertificateStatus poppler_signature_info_get_certificate_status(const PopplerSignatureInfo *siginfo)
+{
+    g_return_val_if_fail(siginfo != NULL, POPPLER_CERTIFICATE_GENERIC_ERROR);
+
+    return siginfo->cert_status;
+}
+
+/**
+ * poppler_signature_info_get_signer_name:
+ * @siginfo: a #PopplerSignatureInfo
+ *
+ * Returns name of signer for given PopplerSignatureInfo.
+ *
+ * Return value: (transfer none): A string.
+ *
+ * Since: 21.12.0
+ **/
+const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *siginfo)
+{
+    g_return_val_if_fail(siginfo != NULL, NULL);
+
+    return siginfo->signer_name;
+}
+
+/**
+ * poppler_signature_info_get_local_signing_time:
+ * @siginfo: a #PopplerSignatureInfo
+ *
+ * Returns local time of signing as GDateTime. This does not
+ * contain information about time zone since it has not been
+ * preserved during conversion.
+ * Do not modify returned value since it is internal to
+ * PopplerSignatureInfo.
+ *
+ * Return value: (transfer none): GDateTime
+ *
+ * Since: 21.12.0
+ **/
+GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureInfo *siginfo)
+{
+    g_return_val_if_fail(siginfo != NULL, NULL);
+
+    return siginfo->local_signing_time;
 }
 
 /* Text Field */

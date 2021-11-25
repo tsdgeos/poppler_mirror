@@ -18,6 +18,7 @@
 #    include <CairoOutputDev.h>
 #    include <FileSpec.h>
 #    include <StructElement.h>
+#    include <SignatureInfo.h>
 #endif
 
 #define SUPPORTED_ROTATION(r) (r == 90 || r == 180 || r == 270)
