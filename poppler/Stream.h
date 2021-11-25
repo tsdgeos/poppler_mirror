@@ -735,7 +735,7 @@ public:
 
 class AutoFreeMemStream : public BaseMemStream<char>
 {
-    bool filterRemovalForbidden;
+    bool filterRemovalForbidden = false;
 
 public:
     // AutoFreeMemStream takes ownership over the buffer.
