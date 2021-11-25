@@ -15,6 +15,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
+// Copyright 2021 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -502,6 +503,8 @@ SECOidTag SignatureHandler::getHashOidTag(const char *digestName)
 
 char *SignatureHandler::getSignerName()
 {
+    char *commonName, *name;
+
     if (!CMSSignerInfo || !NSS_IsInitialized())
         return nullptr;
 
@@ -511,7 +514,11 @@ char *SignatureHandler::getSignerName()
     if (!signing_cert)
         return nullptr;
 
-    return CERT_GetCommonName(&signing_cert->subject);
+    commonName = CERT_GetCommonName(&signing_cert->subject);
+    name = strdup(commonName);
+    PORT_Free(commonName);
+
+    return name;
 }
 
 const char *SignatureHandler::getSignerSubjectDN()

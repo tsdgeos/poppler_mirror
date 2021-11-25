@@ -27,11 +27,12 @@
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
-// Copyright 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020, 2021 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
+// Copyright 2021 Even Rouault <even.rouault@spatialys.com>
 //
 //========================================================================
 
@@ -684,7 +685,7 @@ static char *setNextOffset(char *start, Goffset offset)
 
     char *p = strstr(start, "9999999999");
     if (p) {
-        strncpy(p, buf, 10); // overwrite exact size.
+        memcpy(p, buf, 10); // overwrite exact size.
         p += 10;
     } else {
         return nullptr;
@@ -2190,9 +2191,13 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         hashSignedDataBlock(&signature_handler, len);
     }
 
-    signature_info->setSignerName(signature_handler.getSignerName());
+    char *signerName = signature_handler.getSignerName();
+
+    signature_info->setSignerName(signerName);
     signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
     signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
+
+    free(signerName);
 
     if (!signature_info->isSubfilterSupported()) {
         error(errUnimplemented, 0, "Unable to validate this type of signature");

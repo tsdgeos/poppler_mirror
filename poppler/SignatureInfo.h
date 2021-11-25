@@ -11,6 +11,8 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
+// Copyright 2021 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -72,7 +74,7 @@ public:
     /* SETTERS */
     void setSignatureValStatus(enum SignatureValidationStatus);
     void setCertificateValStatus(enum CertificateValidationStatus);
-    void setSignerName(char *);
+    void setSignerName(const char *);
     void setSubjectDN(const char *);
     void setLocation(const GooString *);
     void setReason(const GooString *);

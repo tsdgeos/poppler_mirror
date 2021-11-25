@@ -636,6 +636,16 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
     return res;
 }
 
+int PDFDoc::getNumSignatureFields()
+{
+    const Form *f = catalog->getForm();
+
+    if (!f)
+        return 0;
+
+    return f->getNumFields();
+}
+
 void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
                          bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data), void *annotDisplayDecideCbkData, bool copyXRef)
 {

@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2020, 2021 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, Even Rouault <even.rouault@spatialys.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +42,8 @@ void QIODeviceOutStream::put(char c)
 {
     m_device->putChar(c);
 }
+
+static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap) GCC_PRINTF_FORMAT(2, 0);
 
 static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap)
 {

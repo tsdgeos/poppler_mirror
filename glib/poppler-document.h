@@ -2,8 +2,9 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018, 2019, 2021 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -411,6 +412,10 @@ void poppler_document_reset_form(PopplerDocument *document, GList *fields, gbool
 /* Javascript */
 POPPLER_PUBLIC
 gboolean poppler_document_has_javascript(PopplerDocument *document);
+
+/* Signatures */
+POPPLER_PUBLIC
+gint poppler_document_get_n_signatures(const PopplerDocument *document);
 
 /* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER (poppler_index_iter_get_type())

@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -24,9 +25,15 @@ FlateEncoder::FlateEncoder(Stream *strA) : FilterStream(strA)
     outBufPtr = outBufEnd = outBuf;
     inBufEof = outBufEof = false;
 
-    zlib_stream.zalloc = Z_NULL;
-    zlib_stream.zfree = Z_NULL;
-    zlib_stream.opaque = Z_NULL;
+    // We used to assign Z_NULL to the 3 following members of zlib_stream,
+    // but as Z_NULL is a #define to 0, using it triggers the
+    // -Wzero-as-null-pointer-constant warning.
+    // For safety, check that the Z_NULL definition is equivalent to
+    // 0 / null pointer.
+    static_assert(Z_NULL == 0);
+    zlib_stream.zalloc = nullptr;
+    zlib_stream.zfree = nullptr;
+    zlib_stream.opaque = nullptr;
 
     zlib_status = deflateInit(&zlib_stream, Z_DEFAULT_COMPRESSION);
 
