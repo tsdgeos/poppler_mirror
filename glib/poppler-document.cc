@@ -2101,7 +2101,7 @@ gchar *poppler_document_get_metadata(PopplerDocument *document)
 /**
  * poppler_document_reset_form:
  * @document: A #PopplerDocument
- * @fields (element-type utf8) (nullable): list of fields to reset
+ * @fields: (element-type utf8) (nullable): list of fields to reset
  * @exclude_fields: whether to reset all fields except those in @fields
  *
  * Resets the form fields specified by fields if exclude_fields is FALSE.
