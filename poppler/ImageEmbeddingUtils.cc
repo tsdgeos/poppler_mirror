@@ -358,6 +358,10 @@ Ref embed(XRef *xref, const GooFile &imageFile)
 {
     // Load the image file.
     const Goffset fileSize = imageFile.size();
+    if (fileSize < 0) {
+        error(errIO, -1, "Image file size could not be calculated");
+        return Ref::INVALID();
+    }
     uint8_t *fileContent = (uint8_t *)gmalloc(fileSize);
     const Goffset bytesRead = imageFile.read((char *)fileContent, fileSize, 0);
     if ((bytesRead != fileSize) || (fileSize < MAX_MAGIC_NUM_SIZE)) {
