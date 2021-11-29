@@ -471,7 +471,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
             if (!file) {
                 int errsv = errno;
                 g_set_error_literal(error, G_FILE_ERROR, g_file_error_from_errno(errsv), g_strerror(errsv));
-                fclose(file);
+                close(fd);
                 return nullptr;
             }
         }
