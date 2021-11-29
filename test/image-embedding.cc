@@ -25,12 +25,14 @@ static int depth = 0;
 static GooString colorSpace;
 static GooString filter;
 static bool smask = false;
+static bool fail = false;
 static bool printHelp = false;
 
 static const ArgDesc argDesc[] = { { "-depth", argInt, &depth, 0, "XObject's property 'BitsPerComponent'" },
                                    { "-colorspace", argGooString, &colorSpace, 0, "XObject's property 'ColorSpace'" },
                                    { "-filter", argGooString, &filter, 0, "XObject's property 'Filter'" },
                                    { "-smask", argFlag, &smask, 0, "SMask should exist" },
+                                   { "-fail", argFlag, &fail, 0, "the image embedding API is expected to fail" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
                                    { "--help", argFlag, &printHelp, 0, "print usage information" },
@@ -57,11 +59,15 @@ int main(int argc, char *argv[])
     // Embed an image.
     Ref baseImageRef = ImageEmbeddingUtils::embed(doc->getXRef(), imagePath.toStr());
     if (baseImageRef == Ref::INVALID()) {
-        fprintf(stderr, "embedImage() failed.\n");
-        return 1;
+        if (fail) {
+            return 0;
+        } else {
+            fprintf(stderr, "ImageEmbeddingUtils::embed() failed.\n");
+            return 1;
+        }
     }
 
-    // Save updated PDF document.
+    // Save the updated PDF document.
     // const GooString outputPathSuffix(".pdf");
     // const GooString outputPath = GooString(&imagePath, &outputPathSuffix);
     // doc->saveAs(&outputPath, writeForceRewrite);
