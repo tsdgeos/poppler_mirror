@@ -55,8 +55,8 @@ set (pdf_fullrewrite_SRCS
 add_executable(pdf-fullrewrite ${pdf_fullrewrite_SRCS})
 target_link_libraries(pdf-fullrewrite poppler)
 
-# Test image embedding API.
-if(ENABLE_LIBJPEG AND ENABLE_LIBPNG)
+# Tests for the image embedding API.
+if(ENABLE_LIBPNG OR ENABLE_LIBJPEG)
   set(image_embedding_SRCS
     image-embedding.cc
     ../utils/parseargs.cc
@@ -67,58 +67,73 @@ if(ENABLE_LIBJPEG AND ENABLE_LIBPNG)
   set(INPUT_PDF ${TESTDATADIR}/unittestcases/xr01.pdf)
   set(IMG_DIR ${TESTDATADIR}/unittestcases/images)
   set(IMAGE_EMBEDDING_PATH ${EXECUTABLE_OUTPUT_PATH}/image-embedding)
-  add_test(
-    NAME embed-png-g1
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g1.png -depth 8 -colorspace DeviceGray
-  )
-  add_test(
-    NAME embed-png-g2
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g2.png -depth 8 -colorspace DeviceGray
-  )
-  add_test(
-    NAME embed-png-g4
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g4.png -depth 8 -colorspace DeviceGray
-  )
-  add_test(
-    NAME embed-png-g8
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g8.png -depth 8 -colorspace DeviceGray
-  )
-  add_test(
-    NAME embed-png-g16
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g16.png -depth 16 -colorspace DeviceGray
-  )
-  add_test(
-    NAME embed-png-ga8
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-ga8.png -depth 8 -colorspace DeviceGray -smask
-  )
-  add_test(
-    NAME embed-png-ga16
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-ga16.png -depth 16 -colorspace DeviceGray -smask
-  )
-  add_test(
-    NAME embed-png-palette
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-palette.png -depth 8 -colorspace DeviceRGB
-  )
-  add_test(
-    NAME embed-png-rgb8
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgb8.png -depth 8 -colorspace DeviceRGB
-  )
-  add_test(
-    NAME embed-png-rgb16
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgb16.png -depth 16 -colorspace DeviceRGB
-  )
-  add_test(
-    NAME embed-png-rgba8
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgba8.png -depth 8 -colorspace DeviceRGB -smask
-  )
-  add_test(
-    NAME embed-png-rgba16
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgba16.png -depth 16 -colorspace DeviceRGB -smask
-  )
-  add_test(
-    NAME embed-jpeg
-    COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/jpeg.jpg -depth 8 -colorspace DeviceRGB -filter DCTDecode
-  )
+
+  if (ENABLE_LIBPNG)
+    add_test(
+      NAME embed-png-g1
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g1.png -depth 8 -colorspace DeviceGray
+    )
+    add_test(
+      NAME embed-png-g2
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g2.png -depth 8 -colorspace DeviceGray
+    )
+    add_test(
+      NAME embed-png-g4
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g4.png -depth 8 -colorspace DeviceGray
+    )
+    add_test(
+      NAME embed-png-g8
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g8.png -depth 8 -colorspace DeviceGray
+    )
+    add_test(
+      NAME embed-png-g16
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-g16.png -depth 16 -colorspace DeviceGray
+    )
+    add_test(
+      NAME embed-png-ga8
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-ga8.png -depth 8 -colorspace DeviceGray -smask
+    )
+    add_test(
+      NAME embed-png-ga16
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-ga16.png -depth 16 -colorspace DeviceGray -smask
+    )
+    add_test(
+      NAME embed-png-palette
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-palette.png -depth 8 -colorspace DeviceRGB
+    )
+    add_test(
+      NAME embed-png-rgb8
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgb8.png -depth 8 -colorspace DeviceRGB
+    )
+    add_test(
+      NAME embed-png-rgb16
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgb16.png -depth 16 -colorspace DeviceRGB
+    )
+    add_test(
+      NAME embed-png-rgba8
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgba8.png -depth 8 -colorspace DeviceRGB -smask
+    )
+    add_test(
+      NAME embed-png-rgba16
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/png-rgba16.png -depth 16 -colorspace DeviceRGB -smask
+    )
+    add_test(
+      NAME embed-malformed-png
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/malformed.png -fail
+    )
+  endif()
+
+  if(ENABLE_LIBJPEG)
+    add_test(
+      NAME embed-jpeg
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/jpeg.jpg -depth 8 -colorspace DeviceRGB -filter DCTDecode
+    )
+    add_test(
+      NAME embed-malformed-jpeg
+      COMMAND ${IMAGE_EMBEDDING_PATH} ${INPUT_PDF} ${IMG_DIR}/malformed.jpg -fail
+    )
+  endif()
+
   unset(IMAGE_EMBEDDING_PATH)
   unset(IMG_DIR)
   unset(INPUT_PDF)
