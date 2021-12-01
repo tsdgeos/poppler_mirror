@@ -1,3 +1,20 @@
+Release 21.12.0:
+        core:
+         * Add API to add images
+         * CairoOutputDev: Fix de-duping of Flate images
+         * Fix crash on broken files when using non-default ENABLE_ZLIB_UNCOMPRESS. Issue #393
+         * Minor code improvements
+
+        glib:
+         * Add API for validation of signatures
+         * Add API to read/save to file descriptor
+
+        utils:
+         * pdftohtml: Reduce sensitivity of duplicate detection. Issue #1117
+
+        build system:
+         * Increase C++ standard to 17
+
 Release 21.11.0:
         core:
          * Fix rendering of some non-standard confirming annotations
