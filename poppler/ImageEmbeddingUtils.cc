@@ -23,6 +23,7 @@ extern "C" {
 
 #include "ImageEmbeddingUtils.h"
 #include "goo/gmem.h"
+#include "goo/GooCheckedOps.h"
 #include "Object.h"
 #include "Array.h"
 #include "Error.h"
@@ -256,9 +257,24 @@ public:
 Ref PngEmbedder::embedImage(XRef *xref)
 {
     // Read pixels.
-    const Goffset mainBufferSize = m_width * m_height * m_nWithoutAlpha * m_byteDepth;
+    Goffset area;
+    if (checkedMultiply(static_cast<Goffset>(m_width), static_cast<Goffset>(m_height), &area)) {
+        error(errIO, -1, "PngEmbedder::embedImage: width * height overflows Goffset");
+        return Ref::INVALID();
+    }
+    Goffset maskBufferSize;
+    static_assert(sizeof(Goffset) >= sizeof(m_byteDepth));
+    if (checkedMultiply(area, static_cast<Goffset>(m_byteDepth), &maskBufferSize)) {
+        error(errIO, -1, "PngEmbedder::embedImage: width * height * m_byteDepth overflows Goffset");
+        return Ref::INVALID();
+    }
+    Goffset mainBufferSize;
+    static_assert(sizeof(Goffset) >= sizeof(m_nWithoutAlpha));
+    if (checkedMultiply(maskBufferSize, static_cast<Goffset>(m_nWithoutAlpha), &mainBufferSize)) {
+        error(errIO, -1, "PngEmbedder::embedImage: width * height * m_byteDepth * m_nWithoutAlpha overflows Goffset");
+        return Ref::INVALID();
+    }
     png_bytep mainBuffer = (png_bytep)gmalloc(mainBufferSize);
-    const Goffset maskBufferSize = m_width * m_height * m_byteDepth;
     png_bytep maskBuffer = (m_hasAlpha) ? (png_bytep)gmalloc(maskBufferSize) : nullptr;
     readPixels(mainBuffer, maskBuffer);
 
