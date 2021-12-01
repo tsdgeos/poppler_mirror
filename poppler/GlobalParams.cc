@@ -120,18 +120,14 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 }
 }
 
-static const char *get_poppler_datadir(void)
+static void get_poppler_localdir(char *retval, const char *suffix)
 {
-    static char retval[MAX_PATH];
-    static int beenhere = 0;
-
     unsigned char *p;
 
-    if (beenhere)
-        return retval;
-
-    if (!GetModuleFileNameA(hmodule, (CHAR *)retval, sizeof(retval) - 20))
-        return POPPLER_DATADIR;
+    if (!GetModuleFileNameA(hmodule, (CHAR *)retval, sizeof(retval) - 20)) {
+        strcpy(retval, POPPLER_DATADIR);
+        return;
+    }
 
     p = _mbsrchr((unsigned char *)retval, '\\');
     *p = '\0';
@@ -140,9 +136,20 @@ static const char *get_poppler_datadir(void)
         if (stricmp((const char *)(p + 1), "bin") == 0)
             *p = '\0';
     }
-    strcat(retval, "\\share\\poppler");
+    strcat(retval, suffix);
+}
 
-    beenhere = 1;
+static const char *get_poppler_datadir(void)
+{
+    static char retval[MAX_PATH];
+    static bool beenhere = false;
+
+    if (beenhere)
+        return retval;
+
+    get_poppler_localdir(retval, "\\share\\poppler");
+
+    beenhere = true;
 
     return retval;
 }
@@ -150,6 +157,25 @@ static const char *get_poppler_datadir(void)
 #    undef POPPLER_DATADIR
 #    define POPPLER_DATADIR get_poppler_datadir()
 
+static const char *get_poppler_fontsdir(void)
+{
+    static char retval[MAX_PATH];
+    static bool beenhere = false;
+
+    if (beenhere)
+        return retval;
+
+    get_poppler_localdir(retval, "\\share\\fonts");
+
+    beenhere = true;
+
+    return retval;
+}
+#    undef POPPLER_FONTSDIR
+#    define POPPLER_FONTSDIR get_poppler_fontsdir()
+
+#else
+#    define POPPLER_FONTSDIR nullptr
 #endif
 
 //------------------------------------------------------------------------
@@ -836,7 +862,7 @@ GooString *GlobalParams::findFontFile(const GooString *fontName)
 {
     GooString *path = nullptr;
 
-    setupBaseFonts(nullptr);
+    setupBaseFonts(POPPLER_FONTSDIR);
     globalParamsLocker();
     const auto fontFile = fontFiles.find(fontName->toStr());
     if (fontFile != fontFiles.end()) {
