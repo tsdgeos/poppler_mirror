@@ -382,7 +382,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
 
         GooString *fontName = new GooString(displayFontTab[i].name);
 
-        if (dir) {
+        if (dir && displayFontTab[i].t1FileName) {
             GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
             if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath, ".pfb", ".pfa")->c_str())) {
                 addFontFile(fontName, fontPath);
@@ -504,7 +504,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     if (!fontName)
         return nullptr;
     std::unique_lock<std::recursive_mutex> locker(mutex);
-    setupBaseFonts(nullptr);
+    setupBaseFonts(POPPLER_FONTSDIR);
 
     // TODO: base14Name should be changed?
     // In the system using FontConfig, findSystemFontFile() uses
