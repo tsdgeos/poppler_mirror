@@ -37,6 +37,8 @@ inline bool checkedAssign(long long lz, T *z)
 template<typename T>
 inline bool checkedAdd(T x, T y, T *z)
 {
+// The __GNUC__ checks can not be removed until we depend on GCC >= 10.1
+// which is the first version that returns true for __has_builtin(__builtin_add_overflow)
 #if __GNUC__ >= 5 || __has_builtin(__builtin_add_overflow)
     return __builtin_add_overflow(x, y, z);
 #else
