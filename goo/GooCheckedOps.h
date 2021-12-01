@@ -87,6 +87,21 @@ inline bool checkedMultiply(T x, T y, T *z)
 #endif
 }
 
+template<>
+inline bool checkedMultiply<long long>(long long x, long long y, long long *z)
+{
+#if __GNUC__ >= 5 || __has_builtin(__builtin_mul_overflow)
+    return __builtin_mul_overflow(x, y, z);
+#else
+    if (x != 0 && (std::numeric_limits<long long>::max)() / x < y) {
+        return true;
+    }
+
+    *z = x * y;
+    return false;
+#endif
+}
+
 template<typename T>
 inline T safeAverage(T a, T b)
 {
