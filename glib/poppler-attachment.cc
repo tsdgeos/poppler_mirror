@@ -304,6 +304,7 @@ gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GE
     if (f == nullptr) {
         int errsv = errno;
         g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to open FD %d for writing: %s"), fd, g_strerror(errsv));
+        close(fd);
         return FALSE;
     }
 
