@@ -677,10 +677,14 @@ gboolean poppler_document_get_id(PopplerDocument *document, gchar **permanent_id
         *update_id = nullptr;
 
     if (document->doc->getID(permanent_id ? &permanent : nullptr, update_id ? &update : nullptr)) {
-        if (permanent_id)
-            *permanent_id = (gchar *)g_memdup(permanent.c_str(), 32);
-        if (update_id)
-            *update_id = (gchar *)g_memdup(update.c_str(), 32);
+        if (permanent_id) {
+            *permanent_id = g_new(char, 32);
+            memcpy(*permanent_id, permanent.c_str(), 32);
+        }
+        if (update_id) {
+            *update_id = g_new(char, 32);
+            memcpy(*update_id, update.c_str(), 32);
+        }
 
         retval = TRUE;
     }
