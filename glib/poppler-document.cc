@@ -27,6 +27,8 @@
 #include "config.h"
 #include <cstring>
 
+#include <glib.h>
+
 #ifndef G_OS_WIN32
 #    include <fcntl.h>
 #    include <sys/stat.h>
