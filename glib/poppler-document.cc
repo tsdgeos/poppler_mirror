@@ -1602,12 +1602,12 @@ GDateTime *poppler_document_get_creation_date_time(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
-    GooString *str = document->doc->getDocInfoCreatDate();
+    std::unique_ptr<GooString> str { document->doc->getDocInfoCreatDate() };
 
     if (!str)
         return nullptr;
 
-    return _poppler_convert_pdf_date_to_date_time(str);
+    return _poppler_convert_pdf_date_to_date_time(str.get());
 }
 
 /**
@@ -1690,12 +1690,12 @@ GDateTime *poppler_document_get_modification_date_time(PopplerDocument *document
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
-    GooString *str = document->doc->getDocInfoModDate();
+    std::unique_ptr<GooString> str { document->doc->getDocInfoModDate() };
 
     if (!str)
         return nullptr;
 
-    return _poppler_convert_pdf_date_to_date_time(str);
+    return _poppler_convert_pdf_date_to_date_time(str.get());
 }
 
 /**
