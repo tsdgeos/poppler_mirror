@@ -793,7 +793,7 @@ GooString *PDFDoc::getDocInfoStringEntry(const char *key)
     GooString *result;
 
     if (entryObj.isString()) {
-        result = entryObj.takeString();
+        result = entryObj.getString()->copy();
     } else {
         result = nullptr;
     }

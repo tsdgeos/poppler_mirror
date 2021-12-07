@@ -921,7 +921,7 @@ void StructElement::parse(Dict *element)
     // Object ID (optional), to be looked at the IDTree in the tree root.
     obj = element->lookup("ID");
     if (obj.isString()) {
-        s->id = obj.takeString();
+        s->id = obj.getString()->copy();
     }
 
     // Page reference (optional) in which at least one of the child items
@@ -939,31 +939,31 @@ void StructElement::parse(Dict *element)
     // Element title (optional).
     obj = element->lookup("T");
     if (obj.isString()) {
-        s->title = obj.takeString();
+        s->title = obj.getString()->copy();
     }
 
     // Language (optional).
     obj = element->lookup("Lang");
     if (obj.isString()) {
-        s->language = obj.takeString();
+        s->language = obj.getString()->copy();
     }
 
     // Alternative text (optional).
     obj = element->lookup("Alt");
     if (obj.isString()) {
-        s->altText = obj.takeString();
+        s->altText = obj.getString()->copy();
     }
 
     // Expanded form of an abbreviation (optional).
     obj = element->lookup("E");
     if (obj.isString()) {
-        s->expandedAbbr = obj.takeString();
+        s->expandedAbbr = obj.getString()->copy();
     }
 
     // Actual text (optional).
     obj = element->lookup("ActualText");
     if (obj.isString()) {
-        s->actualText = obj.takeString();
+        s->actualText = obj.getString()->copy();
     }
 
     // Attributes directly attached to the element (optional).
