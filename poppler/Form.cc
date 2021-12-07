@@ -2191,13 +2191,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         hashSignedDataBlock(&signature_handler, len);
     }
 
-    char *signerName = signature_handler.getSignerName();
-
-    signature_info->setSignerName(signerName);
+    signature_info->setSignerName(signature_handler.getSignerName().c_str());
     signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
     signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
-
-    free(signerName);
 
     if (!signature_info->isSubfilterSupported()) {
         error(errUnimplemented, 0, "Unable to validate this type of signature");

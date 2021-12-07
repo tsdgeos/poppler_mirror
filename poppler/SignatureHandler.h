@@ -48,7 +48,7 @@ public:
     SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime();
-    char *getSignerName();
+    std::string getSignerName();
     const char *getSignerSubjectDN();
     HASH_HashType getHashAlgorithm();
     void setSignature(unsigned char *, int);
