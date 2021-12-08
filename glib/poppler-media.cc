@@ -277,6 +277,8 @@ gboolean poppler_media_save(PopplerMedia *poppler_media, const char *filename, G
     return result;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_media_save_to_fd:
  * @poppler_media: a #PopplerMedia
@@ -320,6 +322,8 @@ gboolean poppler_media_save_to_fd(PopplerMedia *poppler_media, int fd, GError **
 
     return result;
 }
+
+#endif /* !G_OS_WIN32 */
 
 #define BUF_SIZE 1024
 

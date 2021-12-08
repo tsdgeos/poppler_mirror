@@ -68,8 +68,10 @@ POPPLER_PUBLIC
 gfloat poppler_media_get_repeat_count(PopplerMedia *poppler_media);
 POPPLER_PUBLIC
 gboolean poppler_media_save(PopplerMedia *poppler_media, const char *filename, GError **error);
+#ifndef G_OS_WIN32
 POPPLER_PUBLIC
 gboolean poppler_media_save_to_fd(PopplerMedia *poppler_media, int fd, GError **error);
+#endif
 POPPLER_PUBLIC
 gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMediaSaveFunc save_func, gpointer user_data, GError **error);
 

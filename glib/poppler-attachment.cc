@@ -275,6 +275,8 @@ gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *file
     return result;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_attachment_save_to_fd:
  * @attachment: A #PopplerAttachment.
@@ -318,6 +320,8 @@ gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GE
 
     return result;
 }
+
+#endif /* !G_OS_WIN32 */
 
 #define BUF_SIZE 1024
 

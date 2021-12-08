@@ -415,6 +415,8 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
     return document;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_document_new_from_fd:
  * @fd: a valid file descriptor
@@ -435,7 +437,6 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
  */
 PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error)
 {
-#ifndef G_OS_WIN32
     struct stat statbuf;
     int flags;
     BaseStream *stream;
@@ -490,11 +491,9 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
     delete password_g;
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
-#else
-    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "Not supported on win32");
-    return nullptr;
-#endif /* G_OS_WIN32 */
 }
+
+#endif /* !G_OS_WIN32 */
 
 static gboolean handle_save_error(int err_code, GError **error)
 {
@@ -584,6 +583,8 @@ gboolean poppler_document_save_a_copy(PopplerDocument *document, const char *uri
     return retval;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_document_save_to_fd:
  * @document: a #PopplerDocument
@@ -631,6 +632,8 @@ gboolean poppler_document_save_to_fd(PopplerDocument *document, int fd, gboolean
 
     return handle_save_error(rv, error);
 }
+
+#endif /* !G_OS_WIN32 */
 
 static void poppler_document_finalize(GObject *object)
 {
@@ -3458,8 +3461,10 @@ static void poppler_ps_file_finalize(GObject *object)
     delete ps_file->out;
     g_object_unref(ps_file->document);
     g_free(ps_file->filename);
+#ifndef G_OS_WIN32
     if (ps_file->fd != -1)
         close(ps_file->fd);
+#endif /* !G_OS_WIN32 */
 
     G_OBJECT_CLASS(poppler_ps_file_parent_class)->finalize(object);
 }
@@ -3492,6 +3497,8 @@ PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filena
     return ps_file;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_ps_file_new_fd:
  * @document: a #PopplerDocument
@@ -3523,6 +3530,8 @@ PopplerPSFile *poppler_ps_file_new_fd(PopplerDocument *document, int fd, int fir
 
     return ps_file;
 }
+
+#endif /* !G_OS_WIN32 */
 
 /**
  * poppler_ps_file_set_paper_size:
