@@ -478,11 +478,10 @@ bool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *us
     return ret;
 }
 
-static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, GooString *pdfSubtypeVersion)
+static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, const std::string &pdfsubver)
 {
     const std::regex regex("PDF/(?:A|X|VT|E|UA)-([[:digit:]])(?:[[:alpha:]]{1,2})?:?([[:digit:]]{4})?");
     std::smatch match;
-    const std::string &pdfsubver = pdfSubtypeVersion->toStr();
     PDFSubtypePart subtypePart = subtypePartNone;
 
     if (std::regex_search(pdfsubver, match, regex)) {
@@ -538,11 +537,10 @@ static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, GooString *pdfSubtyp
     return subtypePart;
 }
 
-static PDFSubtypeConformance pdfConformanceFromString(GooString *pdfSubtypeVersion)
+static PDFSubtypeConformance pdfConformanceFromString(const std::string &pdfsubver)
 {
     const std::regex regex("PDF/(?:A|X|VT|E|UA)-[[:digit:]]([[:alpha:]]+)");
     std::smatch match;
-    const std::string &pdfsubver = pdfSubtypeVersion->toStr();
     PDFSubtypeConformance pdfConf = subtypeConfNone;
 
     // match contains the PDF conformance (A, B, G, N, P, PG or U)
@@ -579,7 +577,7 @@ void PDFDoc::extractPDFSubtype()
     pdfPart = subtypePartNull;
     pdfConformance = subtypeConfNull;
 
-    GooString *pdfSubtypeVersion = nullptr;
+    std::unique_ptr<GooString> pdfSubtypeVersion;
     // Find PDF InfoDict subtype key if any
     if ((pdfSubtypeVersion = getDocInfoStringEntry("GTS_PDFA1Version"))) {
         pdfSubtype = subtypePDFA;
@@ -599,12 +597,10 @@ void PDFDoc::extractPDFSubtype()
     }
 
     // Extract part from version string
-    pdfPart = pdfPartFromString(pdfSubtype, pdfSubtypeVersion);
+    pdfPart = pdfPartFromString(pdfSubtype, pdfSubtypeVersion->toStr());
 
     // Extract conformance from version string
-    pdfConformance = pdfConformanceFromString(pdfSubtypeVersion);
-
-    delete pdfSubtypeVersion;
+    pdfConformance = pdfConformanceFromString(pdfSubtypeVersion->toStr());
 }
 
 static void addSignatureFieldsToVector(FormField *ff, std::vector<FormFieldSignature *> &res)
@@ -781,24 +777,19 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
     }
 }
 
-GooString *PDFDoc::getDocInfoStringEntry(const char *key)
+std::unique_ptr<GooString> PDFDoc::getDocInfoStringEntry(const char *key)
 {
     Object infoObj = getDocInfo();
     if (!infoObj.isDict()) {
-        return nullptr;
+        return {};
     }
 
-    Object entryObj = infoObj.dictLookup(key);
-
-    GooString *result;
-
-    if (entryObj.isString()) {
-        result = entryObj.getString()->copy();
-    } else {
-        result = nullptr;
+    const Object entryObj = infoObj.dictLookup(key);
+    if (!entryObj.isString()) {
+        return {};
     }
 
-    return result;
+    return std::unique_ptr<GooString>(entryObj.getString()->copy());
 }
 
 static bool get_id(const GooString *encodedidstring, GooString *id)

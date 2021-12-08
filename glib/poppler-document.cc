@@ -1273,11 +1273,8 @@ gchar *poppler_document_get_title(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_title = document->doc->getDocInfoTitle();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_title);
-    delete goo_title;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_title = document->doc->getDocInfoTitle();
+    return _poppler_goo_string_to_utf8(goo_title.get());
 }
 
 /**
@@ -1320,11 +1317,8 @@ gchar *poppler_document_get_author(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_author = document->doc->getDocInfoAuthor();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_author);
-    delete goo_author;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_author = document->doc->getDocInfoAuthor();
+    return _poppler_goo_string_to_utf8(goo_author.get());
 }
 
 /**
@@ -1367,11 +1361,8 @@ gchar *poppler_document_get_subject(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_subject = document->doc->getDocInfoSubject();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_subject);
-    delete goo_subject;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_subject = document->doc->getDocInfoSubject();
+    return _poppler_goo_string_to_utf8(goo_subject.get());
 }
 
 /**
@@ -1414,11 +1405,8 @@ gchar *poppler_document_get_keywords(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_keywords = document->doc->getDocInfoKeywords();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_keywords);
-    delete goo_keywords;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_keywords = document->doc->getDocInfoKeywords();
+    return _poppler_goo_string_to_utf8(goo_keywords.get());
 }
 
 /**
@@ -1463,11 +1451,8 @@ gchar *poppler_document_get_creator(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_creator = document->doc->getDocInfoCreator();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_creator);
-    delete goo_creator;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_creator = document->doc->getDocInfoCreator();
+    return _poppler_goo_string_to_utf8(goo_creator.get());
 }
 
 /**
@@ -1512,11 +1497,8 @@ gchar *poppler_document_get_producer(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *goo_producer = document->doc->getDocInfoProducer();
-    gchar *utf8 = _poppler_goo_string_to_utf8(goo_producer);
-    delete goo_producer;
-
-    return utf8;
+    const std::unique_ptr<GooString> goo_producer = document->doc->getDocInfoProducer();
+    return _poppler_goo_string_to_utf8(goo_producer.get());
 }
 
 /**
@@ -1558,14 +1540,13 @@ time_t poppler_document_get_creation_date(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), (time_t)-1);
 
-    GooString *str = document->doc->getDocInfoCreatDate();
-    if (str == nullptr) {
+    const std::unique_ptr<GooString> str = document->doc->getDocInfoCreatDate();
+    if (!str) {
         return (time_t)-1;
     }
 
     time_t date;
-    gboolean success = _poppler_convert_pdf_date_to_gtime(str, &date);
-    delete str;
+    gboolean success = _poppler_convert_pdf_date_to_gtime(str.get(), &date);
 
     return (success) ? date : (time_t)-1;
 }
@@ -1646,14 +1627,13 @@ time_t poppler_document_get_modification_date(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), (time_t)-1);
 
-    GooString *str = document->doc->getDocInfoModDate();
-    if (str == nullptr) {
+    const std::unique_ptr<GooString> str = document->doc->getDocInfoModDate();
+    if (!str) {
         return (time_t)-1;
     }
 
     time_t date;
-    gboolean success = _poppler_convert_pdf_date_to_gtime(str, &date);
-    delete str;
+    gboolean success = _poppler_convert_pdf_date_to_gtime(str.get(), &date);
 
     return (success) ? date : (time_t)-1;
 }
@@ -2014,7 +1994,7 @@ gchar *poppler_document_get_pdf_subtype_string(PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
-    GooString *infostring;
+    std::unique_ptr<GooString> infostring;
 
     switch (document->doc->getPDFSubtype()) {
     case subtypePDFA:
@@ -2034,14 +2014,12 @@ gchar *poppler_document_get_pdf_subtype_string(PopplerDocument *document)
         break;
     case subtypeNone:
     case subtypeNull:
-    default:
-        infostring = nullptr;
+    default: {
+        /* nothing */
+    }
     }
 
-    gchar *utf8 = _poppler_goo_string_to_utf8(infostring);
-    delete infostring;
-
-    return utf8;
+    return _poppler_goo_string_to_utf8(infostring.get());
 }
 
 /**
