@@ -3708,7 +3708,10 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
             error(errSyntaxError, -1, "width too big");
             return;
         }
-        height = y2 - y1;
+        if (unlikely(checkedSubtraction(y2, y1, &height))) {
+            error(errSyntaxError, -1, "height too big");
+            return;
+        }
         tx = ty = 0;
         // rotation and portrait/landscape mode
         if (paperMatch) {
