@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 //
 // This file is licensed under the GPLv2 or later
 //
