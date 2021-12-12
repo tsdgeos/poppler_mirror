@@ -16,6 +16,7 @@
 extern "C" {
 #    include <jpeglib.h>
 }
+#    include <csetjmp>
 #endif
 #ifdef ENABLE_LIBPNG
 #    include <png.h>
