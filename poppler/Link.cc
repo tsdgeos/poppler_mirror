@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -859,13 +859,17 @@ LinkResetForm::LinkResetForm(const Object *obj)
         fields.resize(obj1.arrayGetLength());
         for (int i = 0; i < obj1.arrayGetLength(); ++i) {
             const Object &obj2 = obj1.arrayGetNF(i);
-            if (obj2.isName())
+            if (obj2.isName()) {
                 fields[i] = std::string(obj2.getName());
-            else if (obj2.isRef()) {
+            } else if (obj2.isString()) {
+                fields[i] = obj2.getString()->toStr();
+            } else if (obj2.isRef()) {
                 fields[i] = std::to_string(obj2.getRef().num);
                 fields[i].append(" ");
                 fields[i].append(std::to_string(obj2.getRef().gen));
                 fields[i].append(" R");
+            } else {
+                error(errSyntaxWarning, -1, "LinkResetForm: unexpected Field type");
             }
         }
     }
