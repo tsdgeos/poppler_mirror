@@ -2554,7 +2554,7 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
             for (const std::string &field : fields) {
                 Ref fieldRef;
 
-                if (field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
+                if (field.size() > 1 && field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
                     foundField = findFieldByRef(fieldRef);
                 } else {
                     foundField = findFieldByFullyQualifiedName(field);
