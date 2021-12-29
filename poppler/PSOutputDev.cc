@@ -35,7 +35,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
@@ -1947,7 +1947,6 @@ void PSOutputDev::setupFonts(Dict *resDict)
 
 void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
 {
-    GfxFontLoc *fontLoc;
     GooString *psName;
     char buf[16];
     bool subst;
@@ -1979,8 +1978,8 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
         psName = GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen);
         setupType3Font(font, psName, parentResDict);
     } else {
-        fontLoc = font->locateFont(xref, this);
-        if (fontLoc != nullptr) {
+        std::optional<GfxFontLoc> fontLoc = font->locateFont(xref, this);
+        if (fontLoc) {
             switch (fontLoc->locType) {
             case gfxFontLocEmbedded:
                 switch (fontLoc->fontType) {
@@ -2068,7 +2067,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
             } else {
                 error(errSyntaxError, -1, "Couldn't find a font to substitute for '{0:s}'", font->getName() ? font->getName()->c_str() : "(unnamed)");
             }
-            delete fontLoc;
             return;
         }
 
@@ -2091,8 +2089,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 xs = 1;
             }
         }
-
-        delete fontLoc;
     }
 
     // generate PostScript code to set up the font

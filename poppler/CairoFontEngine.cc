@@ -31,6 +31,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -347,7 +348,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     int font_data_len;
     int i, n;
     GfxFontType fontType;
-    GfxFontLoc *fontLoc;
+    std::optional<GfxFontLoc> fontLoc;
     char **enc;
     const char *name;
     FoFiTrueType *ff;
@@ -533,12 +534,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         break;
     }
 
-    delete fontLoc;
     return new CairoFreeTypeFont(ref, font_face, codeToGID, codeToGIDLen, substitute);
 
 err2:
-    /* hmm? */
-    delete fontLoc;
     gfree(codeToGID);
     gfree(font_data);
     fprintf(stderr, "some font thing failed\n");

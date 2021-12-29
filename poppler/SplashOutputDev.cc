@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1824,7 +1824,6 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
     GfxFont *gfxFont;
-    GfxFontLoc *fontLoc;
     GfxFontType fontType;
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
@@ -1842,7 +1841,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     needFontUpdate = false;
     font = nullptr;
     tmpBuf = nullptr;
-    fontLoc = nullptr;
 
     if (!(gfxFont = state->getFont())) {
         goto err1;
@@ -1861,8 +1859,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     // check the font file cache
 reload:
     delete id;
-    delete fontLoc;
-    fontLoc = nullptr;
     if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
         fontsrc = nullptr;
@@ -1874,7 +1870,8 @@ reload:
 
     } else {
 
-        if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr))) {
+        std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr);
+        if (!fontLoc) {
             error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
             goto err2;
         }
@@ -2076,14 +2073,12 @@ reload:
         font = fontEngine->getFont(fontFile, mat, splash->getMatrix());
     }
 
-    delete fontLoc;
     if (fontsrc && !fontsrc->isFile)
         fontsrc->unref();
     return;
 
 err2:
     delete id;
-    delete fontLoc;
 err1:
     if (fontsrc && !fontsrc->isFile)
         fontsrc->unref();
