@@ -310,7 +310,8 @@ public:
     // field "ByteRange" in the dictionary "V".
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Returns success.
-    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr);
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const GooString *ownerPassword = nullptr,
+                      const GooString *userPassword = nullptr);
 
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
@@ -321,7 +322,7 @@ public:
 
 private:
     bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason = nullptr, const GooString *location = nullptr);
-    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
+    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
     bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);

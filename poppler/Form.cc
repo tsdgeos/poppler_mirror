@@ -573,7 +573,8 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location)
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const GooString *ownerPassword,
+                                       const GooString *userPassword)
 {
 #ifdef ENABLE_NSS3
     if (!certNickname) {
@@ -612,7 +613,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
-    if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd)) {
+    if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
     }
 
@@ -660,9 +661,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 }
 
 // Get start and end file position of objNum in the PDF named filename.
-bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd)
+bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
 {
-    PDFDoc newDoc(filename);
+    PDFDoc newDoc(filename, ownerPassword, userPassword);
     if (!newDoc.isOk())
         return false;
 

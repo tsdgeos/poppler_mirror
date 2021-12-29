@@ -2130,7 +2130,7 @@ bool PDFDoc::hasJavascript()
 
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
                   double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location,
-                  const std::string &imagePath)
+                  const std::string &imagePath, const GooString *ownerPassword, const GooString *userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
@@ -2192,7 +2192,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
     if (fws) {
-        const bool res = fws->signDocument(saveFilename, certNickname, "SHA256", password, reason, location);
+        const bool res = fws->signDocument(saveFilename, certNickname, "SHA256", password, reason, location, ownerPassword, userPassword);
 
         // Now remove the signature stuff in case the user wants to continue editing stuff
         // So the document object is clean
