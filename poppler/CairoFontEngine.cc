@@ -39,7 +39,6 @@
 
 #include <config.h>
 
-#include "config.h"
 #include <cstring>
 #include <forward_list>
 #include "CairoFontEngine.h"
