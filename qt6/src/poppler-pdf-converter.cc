@@ -134,9 +134,11 @@ bool PDFConverter::sign(const NewSignatureData &data)
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
     const auto reason = std::unique_ptr<GooString>(data.reason().isEmpty() ? nullptr : QStringToUnicodeGooString(data.reason()));
     const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
+    const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
+    const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
                      boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
-                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get());
+                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), "" /*imagepath*/, ownerPwd.get(), userPwd.get());
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
@@ -159,6 +161,9 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     QColor backgroundColor = QColor(240, 240, 240);
 
     QString partialName = QUuid::createUuid().toString();
+
+    QByteArray documentOwnerPassword;
+    QByteArray documentUserPassword;
 };
 
 PDFConverter::NewSignatureData::NewSignatureData() : d(new NewSignatureDataPrivate()) { }
@@ -316,5 +321,25 @@ QString PDFConverter::NewSignatureData::fieldPartialName() const
 void PDFConverter::NewSignatureData::setFieldPartialName(const QString &name)
 {
     d->partialName = name;
+}
+
+QByteArray PDFConverter::NewSignatureData::documentOwnerPassword() const
+{
+    return d->documentOwnerPassword;
+}
+
+void PDFConverter::NewSignatureData::setDocumentOwnerPassword(const QByteArray &password)
+{
+    d->documentOwnerPassword = password;
+}
+
+QByteArray PDFConverter::NewSignatureData::documentUserPassword() const
+{
+    return d->documentUserPassword;
+}
+
+void PDFConverter::NewSignatureData::setDocumentUserPassword(const QByteArray &password)
+{
+    d->documentUserPassword = password;
 }
 }

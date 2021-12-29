@@ -2291,6 +2291,26 @@ public:
         QString fieldPartialName() const;
         void setFieldPartialName(const QString &name);
 
+        /**
+         * Document owner password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentOwnerPassword() const;
+        void setDocumentOwnerPassword(const QByteArray &password);
+
+        /**
+         * Document user password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentUserPassword() const;
+        void setDocumentUserPassword(const QByteArray &password);
+
     private:
         struct NewSignatureDataPrivate;
         NewSignatureDataPrivate *const d;
