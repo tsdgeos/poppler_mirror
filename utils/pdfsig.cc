@@ -127,6 +127,8 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
 
 static GooString nssDir;
 static GooString nssPassword;
+static char ownerPassword[33] = "\001";
+static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
@@ -158,6 +160,8 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
                                    { "-reason", argGooString, &reason, 0, "reason for signing (default: no reason given)" },
                                    { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
+                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
+                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
@@ -265,8 +269,15 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[1]);
 
+    std::unique_ptr<GooString> ownerPW, userPW;
+    if (ownerPassword[0] != '\001') {
+        ownerPW = std::make_unique<GooString>(ownerPassword);
+    }
+    if (userPassword[0] != '\001') {
+        userPW = std::make_unique<GooString>(userPassword);
+    }
     // open PDF file
-    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW.get(), userPW.get()));
 
     if (!doc->isOk()) {
         return 1;
