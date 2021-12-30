@@ -351,7 +351,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     std::optional<GfxFontLoc> fontLoc;
     char **enc;
     const char *name;
-    FoFiTrueType *ff;
     FoFiType1C *ff1c;
     Ref ref;
     FT_Face face;
@@ -436,6 +435,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
                 memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
             }
         } else {
+            std::unique_ptr<FoFiTrueType> ff;
             if (font_data != nullptr) {
                 ff = FoFiTrueType::make(font_data, font_data_len);
             } else {
@@ -443,13 +443,13 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
             }
             if (!ff)
                 goto err2;
-            codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
-            delete ff;
+            codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
         }
         codeToGIDLen = n;
         /* Fall through */
     case fontTrueType:
-    case fontTrueTypeOT:
+    case fontTrueTypeOT: {
+        std::unique_ptr<FoFiTrueType> ff;
         if (font_data != nullptr) {
             ff = FoFiTrueType::make(font_data, font_data_len);
         } else {
@@ -461,16 +461,15 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         }
         /* This might be set already for the CIDType2 case */
         if (fontType == fontTrueType || fontType == fontTrueTypeOT) {
-            codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
+            codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
             codeToGIDLen = 256;
         }
-        delete ff;
         if (!_ft_new_face(lib, fileNameC, font_data, font_data_len, &face, &font_face)) {
             error(errSyntaxError, -1, "could not create truetype face\n");
             goto err2;
         }
         break;
-
+    }
     case fontCIDType0:
     case fontCIDType0C:
 
@@ -509,6 +508,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
 
         if (!codeToGID) {
             if (!useCIDs) {
+                std::unique_ptr<FoFiTrueType> ff;
                 if (font_data != nullptr) {
                     ff = FoFiTrueType::make(font_data, font_data_len);
                 } else {
@@ -518,7 +518,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
                     if (ff->isOpenTypeCFF()) {
                         codeToGID = ff->getCIDToGIDMap((int *)&codeToGIDLen);
                     }
-                    delete ff;
                 }
             }
         }

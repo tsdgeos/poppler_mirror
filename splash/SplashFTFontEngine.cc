@@ -119,7 +119,6 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFon
 
 SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen)
 {
-    FoFiTrueType *ff;
     int *cidToGIDMap;
     int nCIDs;
     SplashFontFile *ret;
@@ -128,6 +127,7 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, S
     nCIDs = 0;
     if (!codeToGID) {
         if (!useCIDs) {
+            std::unique_ptr<FoFiTrueType> ff;
             if (src->isFile) {
                 ff = FoFiTrueType::load(src->fileName->c_str());
             } else {
@@ -137,7 +137,6 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, S
                 if (ff->isOpenTypeCFF()) {
                     cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
                 }
-                delete ff;
             }
         }
     }

@@ -450,33 +450,31 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-FoFiTrueType *FoFiTrueType::make(const char *fileA, int lenA, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const char *fileA, int lenA, int faceIndexA)
 {
-    FoFiTrueType *ff;
-
-    ff = new FoFiTrueType(fileA, lenA, false, faceIndexA);
+    // Cannot use std::make_unique, because the constructor is private
+    auto ff = new FoFiTrueType(fileA, lenA, false, faceIndexA);
     if (!ff->parsedOk) {
         delete ff;
         return nullptr;
     }
-    return ff;
+    return std::unique_ptr<FoFiTrueType>(ff);
 }
 
-FoFiTrueType *FoFiTrueType::load(const char *fileName, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceIndexA)
 {
-    FoFiTrueType *ff;
     char *fileA;
     int lenA;
 
     if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
         return nullptr;
     }
-    ff = new FoFiTrueType(fileA, lenA, true, faceIndexA);
+    // Cannot use std::make_unique, because the constructor is private
+    auto ff = new FoFiTrueType(fileA, lenA, true, faceIndexA);
     if (!ff->parsedOk) {
-        delete ff;
         return nullptr;
     }
-    return ff;
+    return std::unique_ptr<FoFiTrueType>(ff);
 }
 
 FoFiTrueType::FoFiTrueType(const char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)

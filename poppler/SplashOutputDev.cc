@@ -1828,7 +1828,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
-    FoFiTrueType *ff;
     char *tmpBuf;
     int tmpBufLen;
     const double *textMat;
@@ -1926,6 +1925,7 @@ reload:
             break;
         case fontTrueType:
         case fontTrueTypeOT: {
+            std::unique_ptr<FoFiTrueType> ff;
             if (fileName)
                 ff = FoFiTrueType::load(fileName->c_str());
             else
@@ -1933,8 +1933,7 @@ reload:
             int *codeToGID;
             const int n = ff ? 256 : 0;
             if (ff) {
-                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
-                delete ff;
+                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
                 // if we're substituting for a non-TrueType font, we need to mark
                 // all notdef codes as "do not draw" (rather than drawing TrueType
                 // notdef glyphs)
@@ -1996,6 +1995,7 @@ reload:
                     memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
                 }
             } else {
+                std::unique_ptr<FoFiTrueType> ff;
                 if (fileName)
                     ff = FoFiTrueType::load(fileName->c_str());
                 else
@@ -2004,8 +2004,7 @@ reload:
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     goto err2;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
-                delete ff;
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
             }
             if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, faceIndex))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
