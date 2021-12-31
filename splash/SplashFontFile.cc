@@ -110,7 +110,7 @@ void SplashFontSrc::unref()
         delete this;
 }
 
-void SplashFontSrc::setFile(GooString *file, bool del)
+void SplashFontSrc::setFile(const GooString *file, bool del)
 {
     isFile = true;
     fileName = file->copy();

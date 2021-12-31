@@ -369,14 +369,14 @@ private:
     void setupFont(GfxFont *font, Dict *parentResDict);
     void setupEmbeddedType1Font(Ref *id, GooString *psName);
     void updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph);
-    void setupExternalType1Font(GooString *fileName, GooString *psName);
+    void setupExternalType1Font(const GooString *fileName, GooString *psName);
     void setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName);
     void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName);
     void setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName);
-    void setupExternalTrueTypeFont(GfxFont *font, GooString *fileName, GooString *psName);
+    void setupExternalTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName);
     void setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName);
     void setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, bool needVerticalMetrics);
-    void setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileName, GooString *psName, bool needVerticalMetrics);
+    void setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName, bool needVerticalMetrics);
     void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
     void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
     GooString *makePSFontName(GfxFont *font, const Ref *id);

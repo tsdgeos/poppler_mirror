@@ -2295,7 +2295,7 @@ err1:
         strObj.streamClose();
 }
 
-void PSOutputDev::setupExternalType1Font(GooString *fileName, GooString *psName)
+void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *psName)
 {
     static const char hexChar[17] = "0123456789abcdef";
     FILE *fontFile;
@@ -2485,7 +2485,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName, GooString *psName)
+void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName)
 {
     FoFiTrueType *ffTT;
     int *codeToGID;
@@ -2526,7 +2526,7 @@ void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
     }
 }
 
-void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileName, GooString *psName, bool needVerticalMetrics)
+void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName, bool needVerticalMetrics)
 {
     FoFiTrueType *ffTT;
     int *codeToGID;
