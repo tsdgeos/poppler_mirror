@@ -342,7 +342,6 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
 {
-    GooString *fileName;
     const char *fileNameC;
     char *font_data;
     int font_data_len;
@@ -364,7 +363,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     codeToGIDLen = 0;
     font_data = nullptr;
     font_data_len = 0;
-    fileName = nullptr;
+    const GooString *fileName = nullptr;
     fileNameC = nullptr;
 
     bool substitute = false;
@@ -385,7 +384,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
 
         // external font
     } else { // gfxFontLocExternal
-        fileName = fontLoc->path;
+        fileName = fontLoc->pathAsGooString();
         fontType = fontLoc->fontType;
         substitute = true;
     }

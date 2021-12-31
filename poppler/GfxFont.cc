@@ -172,16 +172,21 @@ static int readFromStream(void *data)
 
 GfxFontLoc::GfxFontLoc()
 {
-    path = nullptr;
     fontNum = 0;
     substIdx = -1;
 }
 
-GfxFontLoc::~GfxFontLoc()
+GfxFontLoc::~GfxFontLoc() = default;
+
+void GfxFontLoc::setPath(GooString *pathA)
 {
-    if (path) {
-        delete path;
-    }
+    path = pathA->toStr();
+    delete pathA;
+}
+
+const GooString *GfxFontLoc::pathAsGooString() const
+{
+    return (const GooString *)(&path);
 }
 
 //------------------------------------------------------------------------
@@ -618,7 +623,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
 {
     GfxFontLoc *fontLoc;
     SysFontType sysFontType;
-    GooString *path, *base14Name, *substName;
+    GooString *path, *base14Name;
     int substIdx, fontNum;
     bool embed;
 
@@ -674,7 +679,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
         fontLoc = new GfxFontLoc();
         fontLoc->locType = gfxFontLocResident;
         fontLoc->fontType = fontType1;
-        fontLoc->path = name->copy();
+        fontLoc->setPath(name->copy());
         return fontLoc;
     }
 
@@ -683,7 +688,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
         fontLoc = new GfxFontLoc();
         fontLoc->locType = gfxFontLocResident;
         fontLoc->fontType = fontType1;
-        fontLoc->path = new GooString(((Gfx8BitFont *)this)->base14->base14Name);
+        fontLoc->path = ((Gfx8BitFont *)this)->base14->base14Name;
         return fontLoc;
     }
 
@@ -713,7 +718,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
                 fontLoc = new GfxFontLoc();
                 fontLoc->locType = gfxFontLocExternal;
                 fontLoc->fontType = fontCIDType2;
-                fontLoc->path = path;
+                fontLoc->setPath(path);
                 fontLoc->fontNum = fontNum;
                 return fontLoc;
             }
@@ -722,13 +727,13 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
                 fontLoc = new GfxFontLoc();
                 fontLoc->locType = gfxFontLocExternal;
                 fontLoc->fontType = fontTrueType;
-                fontLoc->path = path;
+                fontLoc->setPath(path);
                 return fontLoc;
             } else if (sysFontType == sysFontPFA || sysFontType == sysFontPFB) {
                 fontLoc = new GfxFontLoc();
                 fontLoc->locType = gfxFontLocExternal;
                 fontLoc->fontType = fontType1;
-                fontLoc->path = path;
+                fontLoc->setPath(path);
                 fontLoc->fontNum = fontNum;
                 return fontLoc;
             }
@@ -752,18 +757,17 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
         if (isItalic()) {
             substIdx += 1;
         }
-        substName = new GooString(base14SubstFonts[substIdx]);
+        GooString substName(base14SubstFonts[substIdx]);
         if (ps) {
             error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "null");
             fontLoc = new GfxFontLoc();
             fontLoc->locType = gfxFontLocResident;
             fontLoc->fontType = fontType1;
-            fontLoc->path = substName;
+            fontLoc->path = substName.toStr();
             fontLoc->substIdx = substIdx;
             return fontLoc;
         } else {
-            path = globalParams->findFontFile(substName);
-            delete substName;
+            path = globalParams->findFontFile(&substName);
             if (path) {
                 if ((fontLoc = getExternalFont(path, false))) {
                     error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
@@ -834,7 +838,7 @@ GfxFontLoc *GfxFont::getExternalFont(GooString *path, bool cid)
     fontLoc = new GfxFontLoc();
     fontLoc->locType = gfxFontLocExternal;
     fontLoc->fontType = fontType;
-    fontLoc->path = path;
+    fontLoc->setPath(path);
     return fontLoc;
 }
 

@@ -2031,25 +2031,25 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                         //~ this won't work -- the PS font name won't match
                         psName = makePSFontName(font, font->getID());
                     }
-                    setupExternalType1Font(fontLoc->path, psName);
+                    setupExternalType1Font(fontLoc->pathAsGooString(), psName);
                     break;
                 case fontTrueType:
                 case fontTrueTypeOT:
                     psName = makePSFontName(font, font->getID());
-                    setupExternalTrueTypeFont(font, fontLoc->path, psName);
+                    setupExternalTrueTypeFont(font, fontLoc->pathAsGooString(), psName);
                     break;
                 case fontCIDType2:
                 case fontCIDType2OT:
                     psName = makePSFontName(font, font->getID());
                     //~ should check to see if font actually uses vertical mode
-                    setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, true);
+                    setupExternalCIDTrueTypeFont(font, fontLoc->pathAsGooString(), psName, true);
                     break;
                 default:
                     break;
                 }
                 break;
             case gfxFontLocResident:
-                psName = fontLoc->path->copy();
+                psName = new GooString(fontLoc->path);
                 break;
             }
         }

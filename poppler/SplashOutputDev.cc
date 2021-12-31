@@ -1830,7 +1830,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
     FoFiTrueType *ff;
-    GooString *fileName;
     char *tmpBuf;
     int tmpBufLen;
     const double *textMat;
@@ -1842,7 +1841,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
 
     needFontUpdate = false;
     font = nullptr;
-    fileName = nullptr;
     tmpBuf = nullptr;
     fontLoc = nullptr;
 
@@ -1882,6 +1880,8 @@ reload:
         }
 
         // embedded font
+        const GooString *fileName = nullptr;
+
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
             tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef(), &tmpBufLen);
@@ -1890,7 +1890,7 @@ reload:
 
             // external font
         } else { // gfxFontLocExternal
-            fileName = fontLoc->path;
+            fileName = fontLoc->pathAsGooString();
             fontType = fontLoc->fontType;
             doAdjustFontMatrix = true;
         }

@@ -121,14 +121,19 @@ public:
     GfxFontLoc(const GfxFontLoc &) = delete;
     GfxFontLoc &operator=(const GfxFontLoc &) = delete;
 
+    // Set the 'path' string from a GooString on the heap.
+    // Ownership of the object is taken.
+    void setPath(GooString *pathA);
+    const GooString *pathAsGooString() const;
+
     GfxFontLocType locType;
     GfxFontType fontType;
     Ref embFontID; // embedded stream obj ID
                    //   (if locType == gfxFontLocEmbedded)
-    GooString *path; // font file path
-                     //   (if locType == gfxFontLocExternal)
-                     // PS font name
-                     //   (if locType == gfxFontLocResident)
+    std::string path; // font file path
+                      //   (if locType == gfxFontLocExternal)
+                      // PS font name
+                      //   (if locType == gfxFontLocResident)
     int fontNum; // for TrueType collections
                  //   (if locType == gfxFontLocExternal)
     int substIdx; // substitute font index
