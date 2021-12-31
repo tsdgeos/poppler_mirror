@@ -726,20 +726,16 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
                 return std::move(fontLoc); // std::move only required to please g++-7
             }
         } else {
+            GfxFontLoc fontLoc;
+            fontLoc.setPath(path);
+            fontLoc.locType = gfxFontLocExternal;
             if (sysFontType == sysFontTTF || sysFontType == sysFontTTC) {
-                GfxFontLoc fontLoc;
-                fontLoc.locType = gfxFontLocExternal;
                 fontLoc.fontType = fontTrueType;
-                fontLoc.setPath(path);
-                return std::move(fontLoc); // std::move only required to please g++-7
             } else if (sysFontType == sysFontPFA || sysFontType == sysFontPFB) {
-                GfxFontLoc fontLoc;
-                fontLoc.locType = gfxFontLocExternal;
                 fontLoc.fontType = fontType1;
-                fontLoc.setPath(path);
                 fontLoc.fontNum = fontNum;
-                return std::move(fontLoc); // std::move only required to please g++-7
             }
+            return std::move(fontLoc); // std::move only required to please g++-7
         }
         delete path;
     }
