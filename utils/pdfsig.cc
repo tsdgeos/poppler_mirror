@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -365,6 +365,14 @@ int main(int argc, char *argv[])
             printf("A nickname of the signing certificate must be given\n");
             return 2;
         }
+
+        bool getCertsError;
+        // We need to call this otherwise NSS spins forever
+        getAvailableSigningCertificates(&getCertsError);
+        if (getCertsError) {
+            return 2;
+        }
+
         FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
         Goffset file_size = 0;
         GooString *sig = ffs->getCheckedSignature(&file_size);
