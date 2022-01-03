@@ -375,9 +375,8 @@ int main(int argc, char *argv[])
 
         FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
         Goffset file_size = 0;
-        GooString *sig = ffs->getCheckedSignature(&file_size);
+        const std::optional<GooString> sig = ffs->getCheckedSignature(&file_size);
         if (sig) {
-            delete sig;
             printf("Signature number %d is already signed\n", signatureNumber);
             return 2;
         }
@@ -468,13 +467,12 @@ int main(int argc, char *argv[])
         if (ranges.size() == 4) {
             printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
             Goffset checked_file_size;
-            GooString *signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
+            const std::optional<GooString> signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
             if (signature && checked_file_size == ranges[3]) {
                 printf("  - Total document signed\n");
             } else {
                 printf("  - Not total document signed\n");
             }
-            delete signature;
         }
         printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
         gfree(time_str);

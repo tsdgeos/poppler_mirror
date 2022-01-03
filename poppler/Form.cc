@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -815,7 +815,7 @@ std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds() const
     return static_cast<FormFieldSignature *>(field)->getSignedRangeBounds();
 }
 
-GooString *FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::optional<GooString> FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
     return static_cast<FormFieldSignature *>(field)->getCheckedSignature(checkedFileSize);
 }
@@ -2241,7 +2241,7 @@ std::vector<Goffset> FormFieldSignature::getSignedRangeBounds() const
     return range_vec;
 }
 
-GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::optional<GooString> FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
     Goffset start = 0;
     Goffset end = 0;
@@ -2274,7 +2274,7 @@ GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
             do {
                 c1 = stream->getChar();
                 if (c1 == EOF)
-                    return nullptr;
+                    return {};
                 gstr.append(static_cast<char>(c1));
             } while (++pos < len);
             if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0') {
@@ -2329,12 +2329,12 @@ GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
                         len = 0;
                 }
                 if (len > 0) {
-                    return new GooString(&gstr, 0, len);
+                    return GooString(&gstr, 0, len);
                 }
             }
         }
     }
-    return nullptr;
+    return {};
 }
 
 void FormFieldSignature::print(int indent)
