@@ -730,7 +730,8 @@ public:
         UnknownSignatureType,
         AdbePkcs7sha1,
         AdbePkcs7detached,
-        EtsiCAdESdetached
+        EtsiCAdESdetached,
+        UnsignedSignature ///< \since 22.02
     };
 
     /**

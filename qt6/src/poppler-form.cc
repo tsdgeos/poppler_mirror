@@ -925,6 +925,9 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     case unknown_signature_type:
         sigType = UnknownSignatureType;
         break;
+    case unsigned_signature_field:
+        sigType = UnsignedSignature;
+        break;
     }
     return sigType;
 }

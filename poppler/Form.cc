@@ -1986,7 +1986,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unknown_signature_type), signature(nullptr)
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unsigned_signature_field), signature(nullptr)
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -2107,6 +2107,8 @@ void FormFieldSignature::parseInfo()
     } else if (subfilterName.isName("ETSI.CAdES.detached")) {
         signature_type = ETSI_CAdES_detached;
         signature_info->setSubFilterSupport(true);
+    } else {
+        signature_type = unknown_signature_type;
     }
 }
 

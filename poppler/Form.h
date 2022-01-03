@@ -83,7 +83,8 @@ enum FormSignatureType
     adbe_pkcs7_sha1,
     adbe_pkcs7_detached,
     ETSI_CAdES_detached,
-    unknown_signature_type
+    unknown_signature_type,
+    unsigned_signature_field
 };
 
 enum FillValueType

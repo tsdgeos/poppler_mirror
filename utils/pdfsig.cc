@@ -420,8 +420,15 @@ int main(int argc, char *argv[])
     }
 
     for (unsigned int i = 0; i < sigCount; i++) {
-        const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch);
+        FormFieldSignature *ffs = signatures.at(i);
         printf("Signature #%u:\n", i + 1);
+
+        if (ffs->getSignatureType() == unsigned_signature_field) {
+            printf("  The signature form field is not signed.\n");
+            continue;
+        }
+
+        const SignatureInfo *sig_info = ffs->validateSignature(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch);
         printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
         printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
         printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
@@ -452,7 +459,7 @@ int main(int argc, char *argv[])
             printf("unknown\n");
         }
         printf("  - Signature Type: ");
-        switch (signatures.at(i)->getSignatureType()) {
+        switch (ffs->getSignatureType()) {
         case adbe_pkcs7_sha1:
             printf("adbe.pkcs7.sha1\n");
             break;
@@ -465,7 +472,7 @@ int main(int argc, char *argv[])
         default:
             printf("unknown\n");
         }
-        std::vector<Goffset> ranges = signatures.at(i)->getSignedRangeBounds();
+        const std::vector<Goffset> ranges = ffs->getSignedRangeBounds();
         if (ranges.size() == 4) {
             printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
             Goffset checked_file_size;
