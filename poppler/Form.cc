@@ -660,6 +660,49 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 #endif
 }
 
+bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const GooString *ownerPassword,
+                                                     const GooString *userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                     std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+{
+    // Set the appearance
+    GooString *aux = getField()->getDefaultAppearance();
+    std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
+
+    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+    getField()->setDefaultAppearance(da.toAppearanceString());
+
+    std::unique_ptr<AnnotAppearanceCharacs> origAppearCharacs = getWidgetAnnotation()->getAppearCharacs() ? getWidgetAnnotation()->getAppearCharacs()->copy() : nullptr;
+    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
+    appearCharacs->setBorderColor(std::move(borderColor));
+    appearCharacs->setBackColor(std::move(backgroundColor));
+    getWidgetAnnotation()->setAppearCharacs(std::move(appearCharacs));
+
+    std::unique_ptr<AnnotBorder> origBorderCopy = getWidgetAnnotation()->getBorder() ? getWidgetAnnotation()->getBorder()->copy() : nullptr;
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
+    border->setWidth(borderWidth);
+    getWidgetAnnotation()->setBorder(std::move(border));
+
+    getWidgetAnnotation()->generateFieldAppearance();
+    getWidgetAnnotation()->updateAppearanceStream();
+
+    ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
+    ffs->setCustomAppearanceContent(signatureText);
+    ffs->setCustomAppearanceLeftContent(signatureTextLeft);
+
+    const bool success = signDocument(saveFilename, certNickname, digestName, password, reason, location, ownerPassword, userPassword);
+
+    // Now bring back the annotation appearance back to what it was
+    ffs->setDefaultAppearance(originalDefaultAppearance);
+    ffs->setCustomAppearanceContent({});
+    ffs->setCustomAppearanceLeftContent({});
+    getWidgetAnnotation()->setAppearCharacs(std::move(origAppearCharacs));
+    getWidgetAnnotation()->setBorder(std::move(origBorderCopy));
+    getWidgetAnnotation()->generateFieldAppearance();
+    getWidgetAnnotation()->updateAppearanceStream();
+
+    return success;
+}
+
 // Get start and end file position of objNum in the PDF named filename.
 bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
 {
@@ -954,6 +997,12 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     } else {
         mappingName = nullptr;
     }
+}
+
+void FormField::setDefaultAppearance(const std::string &appearance)
+{
+    delete defaultAppearance;
+    defaultAppearance = new GooString(appearance);
 }
 
 void FormField::setPartialName(const GooString &name)

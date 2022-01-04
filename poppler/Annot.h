@@ -279,6 +279,7 @@ public:
     virtual AnnotBorderStyle getStyle() const { return style; }
 
     virtual Object writeToObject(XRef *xref) const = 0;
+    virtual std::unique_ptr<AnnotBorder> copy() const = 0;
 
 protected:
     AnnotBorder();
@@ -309,6 +310,8 @@ public:
     double getHorizontalCorner() const { return horizontalCorner; }
     double getVerticalCorner() const { return verticalCorner; }
 
+    std::unique_ptr<AnnotBorder> copy() const override;
+
 private:
     AnnotBorderType getType() const override { return typeArray; }
     Object writeToObject(XRef *xref) const override;
@@ -333,6 +336,8 @@ private:
     Object writeToObject(XRef *xref) const override;
 
     const char *getStyleName() const;
+
+    std::unique_ptr<AnnotBorder> copy() const override;
 
     // double width;           // W  (Default 1)   (inherited from AnnotBorder)
     // AnnotBorderStyle style; // S  (Default S)   (inherited from AnnotBorder)
@@ -510,6 +515,8 @@ public:
     const GooString *getAlternateCaption() { return alternateCaption.get(); }
     const AnnotIconFit *getIconFit() { return iconFit.get(); }
     AnnotAppearanceCharacsTextPos getPosition() const { return position; }
+
+    std::unique_ptr<AnnotAppearanceCharacs> copy() const;
 
 protected:
     int rotation; // R  (Default 0)

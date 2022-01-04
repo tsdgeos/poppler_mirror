@@ -315,6 +315,11 @@ public:
     bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const GooString *ownerPassword = nullptr,
                       const GooString *userPassword = nullptr);
 
+    // Same as above but adds text, font color, etc.
+    bool signDocumentWithAppearance(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr,
+                                    const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, const GooString &signatureText = {}, const GooString &signatureTextLeft = {}, double fontSize = {},
+                                    std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {}, std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
+
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
     // otherwise a nullptr is returned
@@ -355,6 +360,8 @@ public:
     bool isStandAlone() const { return standAlone; }
 
     GooString *getDefaultAppearance() const { return defaultAppearance; }
+    void setDefaultAppearance(const std::string &appearance);
+
     bool hasTextQuadding() const { return hasQuadding; }
     VariableTextQuadding getTextQuadding() const { return quadding; }
 
