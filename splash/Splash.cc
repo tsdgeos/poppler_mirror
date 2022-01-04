@@ -5468,7 +5468,9 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
             // Sadly this current algorithm only supports shadings where the three triangle vertices have the same color
             shading->getNonParametrizedTriangle(i, bitmapMode, xdbl + 0, ydbl + 0, (SplashColorPtr)&color, xdbl + 1, ydbl + 1, (SplashColorPtr)&auxColor1, xdbl + 2, ydbl + 2, (SplashColorPtr)&auxColor2);
             if (!splashColorEqual(color, auxColor1) || !splashColorEqual(color, auxColor2)) {
-                delete blitTarget;
+                if (!bDirectBlit) {
+                    delete blitTarget;
+                }
                 return false;
             }
             for (int m = 0; m < 3; ++m) {

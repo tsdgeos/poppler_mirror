@@ -277,6 +277,8 @@ gboolean poppler_media_save(PopplerMedia *poppler_media, const char *filename, G
     return result;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_media_save_to_fd:
  * @poppler_media: a #PopplerMedia
@@ -303,10 +305,10 @@ gboolean poppler_media_save_to_fd(PopplerMedia *poppler_media, int fd, GError **
     g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
     f = fdopen(fd, "wb");
-
     if (f == nullptr) {
         int errsv = errno;
         g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), "Failed to open FD %d for writing: %s", fd, g_strerror(errsv));
+        close(fd);
         return FALSE;
     }
 
@@ -320,6 +322,8 @@ gboolean poppler_media_save_to_fd(PopplerMedia *poppler_media, int fd, GError **
 
     return result;
 }
+
+#endif /* !G_OS_WIN32 */
 
 #define BUF_SIZE 1024
 

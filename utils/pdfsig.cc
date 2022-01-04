@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -127,6 +127,8 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
 
 static GooString nssDir;
 static GooString nssPassword;
+static char ownerPassword[33] = "\001";
+static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
@@ -158,6 +160,8 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
                                    { "-reason", argGooString, &reason, 0, "reason for signing (default: no reason given)" },
                                    { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
+                                   { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
+                                   { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
@@ -265,8 +269,15 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[1]);
 
+    std::unique_ptr<GooString> ownerPW, userPW;
+    if (ownerPassword[0] != '\001') {
+        ownerPW = std::make_unique<GooString>(ownerPassword);
+    }
+    if (userPassword[0] != '\001') {
+        userPW = std::make_unique<GooString>(userPassword);
+    }
     // open PDF file
-    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW.get(), userPW.get()));
 
     if (!doc->isOk()) {
         return 1;
@@ -331,7 +342,7 @@ int main(int argc, char *argv[])
         // We don't provide a way to customize the UI from pdfsig for now
         const bool success = doc->sign(argv[2], certNickname, pw, newSignatureFieldName.copy(), /*page*/ 1,
                                        /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0,
-                                       /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get());
+                                       /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get(), /* location */ nullptr, /* image path */ "", ownerPW.get(), userPW.get());
         return success ? 0 : 3;
     }
 
@@ -354,11 +365,18 @@ int main(int argc, char *argv[])
             printf("A nickname of the signing certificate must be given\n");
             return 2;
         }
+
+        bool getCertsError;
+        // We need to call this otherwise NSS spins forever
+        getAvailableSigningCertificates(&getCertsError);
+        if (getCertsError) {
+            return 2;
+        }
+
         FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
         Goffset file_size = 0;
-        GooString *sig = ffs->getCheckedSignature(&file_size);
+        const std::optional<GooString> sig = ffs->getCheckedSignature(&file_size);
         if (sig) {
-            delete sig;
             printf("Signature number %d is already signed\n", signatureNumber);
             return 2;
         }
@@ -449,13 +467,12 @@ int main(int argc, char *argv[])
         if (ranges.size() == 4) {
             printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
             Goffset checked_file_size;
-            GooString *signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
+            const std::optional<GooString> signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
             if (signature && checked_file_size == ranges[3]) {
                 printf("  - Total document signed\n");
             } else {
                 printf("  - Not total document signed\n");
             }
-            delete signature;
         }
         printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
         gfree(time_str);

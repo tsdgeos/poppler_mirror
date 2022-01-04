@@ -267,17 +267,16 @@ public:
 
     // Get document's properties from document's Info dictionary.
     // Returns nullptr on fail.
-    // Returned GooStrings should be freed by the caller.
-    GooString *getDocInfoStringEntry(const char *key);
+    std::unique_ptr<GooString> getDocInfoStringEntry(const char *key);
 
-    GooString *getDocInfoTitle() { return getDocInfoStringEntry("Title"); }
-    GooString *getDocInfoAuthor() { return getDocInfoStringEntry("Author"); }
-    GooString *getDocInfoSubject() { return getDocInfoStringEntry("Subject"); }
-    GooString *getDocInfoKeywords() { return getDocInfoStringEntry("Keywords"); }
-    GooString *getDocInfoCreator() { return getDocInfoStringEntry("Creator"); }
-    GooString *getDocInfoProducer() { return getDocInfoStringEntry("Producer"); }
-    GooString *getDocInfoCreatDate() { return getDocInfoStringEntry("CreationDate"); }
-    GooString *getDocInfoModDate() { return getDocInfoStringEntry("ModDate"); }
+    std::unique_ptr<GooString> getDocInfoTitle() { return getDocInfoStringEntry("Title"); }
+    std::unique_ptr<GooString> getDocInfoAuthor() { return getDocInfoStringEntry("Author"); }
+    std::unique_ptr<GooString> getDocInfoSubject() { return getDocInfoStringEntry("Subject"); }
+    std::unique_ptr<GooString> getDocInfoKeywords() { return getDocInfoStringEntry("Keywords"); }
+    std::unique_ptr<GooString> getDocInfoCreator() { return getDocInfoStringEntry("Creator"); }
+    std::unique_ptr<GooString> getDocInfoProducer() { return getDocInfoStringEntry("Producer"); }
+    std::unique_ptr<GooString> getDocInfoCreatDate() { return getDocInfoStringEntry("CreationDate"); }
+    std::unique_ptr<GooString> getDocInfoModDate() { return getDocInfoStringEntry("ModDate"); }
 
     // Return the PDF subtype, part, and conformance
     PDFSubtype getPDFSubtype() const { return pdfSubtype; }
@@ -338,7 +337,7 @@ public:
     // sign() takes ownership of partialFieldName.
     bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
               std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr,
-              const std::string &imagePath = "");
+              const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
 
 private:
     // insert referenced objects in XRef

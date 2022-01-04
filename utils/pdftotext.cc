@@ -84,6 +84,7 @@ static bool bbox = false;
 static bool bboxLayout = false;
 static bool physLayout = false;
 static bool useCropBox = false;
+static double colspacing = TextOutputDev::minColSpacing1_default;
 static double fixedPitch = 0;
 static bool rawOrder = false;
 static bool discardDiag = false;
@@ -117,6 +118,8 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-bbox", argFlag, &bbox, 0, "output bounding box for each word and page size to html.  Sets -htmlmeta" },
                                    { "-bbox-layout", argFlag, &bboxLayout, 0, "like -bbox but with extra layout bounding box data.  Sets -htmlmeta" },
                                    { "-cropbox", argFlag, &useCropBox, 0, "use the crop box rather than media box" },
+                                   { "-colspacing", argFP, &colspacing, 0,
+                                     "how much spacing we allow after a word before considering adjacent text to be a new column, as a fraction of the font size (default is 0.7, old releases had a 0.3 default)" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
@@ -177,6 +180,10 @@ int main(int argc, char *argv[])
     }
     if (bbox) {
         htmlMeta = true;
+    }
+    if (colspacing <= 0 || colspacing > 10) {
+        error(errCommandLine, -1, "Bogus value provided for -colspacing");
+        goto err1;
     }
     if (!ok || (argc < 2 && !printEnc) || argc > 3 || printVersion || printHelp) {
         fprintf(stderr, "pdftotext version %s\n", PACKAGE_VERSION);
@@ -342,6 +349,7 @@ int main(int argc, char *argv[])
 
         if (textOut->isOk()) {
             textOut->setTextEOL(textEOL);
+            textOut->setMinColSpacing1(colspacing);
             if (noPageBreaks) {
                 textOut->setTextPageBreaks(false);
             }
@@ -358,6 +366,7 @@ int main(int argc, char *argv[])
         textOut = new TextOutputDev(textFileName->c_str(), physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
         if (textOut->isOk()) {
             textOut->setTextEOL(textEOL);
+            textOut->setMinColSpacing1(colspacing);
             if (noPageBreaks) {
                 textOut->setTextPageBreaks(false);
             }

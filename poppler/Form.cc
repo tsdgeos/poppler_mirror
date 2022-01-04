@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -573,7 +573,8 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location)
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const GooString *ownerPassword,
+                                       const GooString *userPassword)
 {
 #ifdef ENABLE_NSS3
     if (!certNickname) {
@@ -612,7 +613,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
-    if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd)) {
+    if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
     }
 
@@ -660,9 +661,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 }
 
 // Get start and end file position of objNum in the PDF named filename.
-bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd)
+bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
 {
-    PDFDoc newDoc(filename);
+    PDFDoc newDoc(filename, ownerPassword, userPassword);
     if (!newDoc.isOk())
         return false;
 
@@ -814,7 +815,7 @@ std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds() const
     return static_cast<FormFieldSignature *>(field)->getSignedRangeBounds();
 }
 
-GooString *FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::optional<GooString> FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
     return static_cast<FormFieldSignature *>(field)->getCheckedSignature(checkedFileSize);
 }
@@ -2191,13 +2192,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         hashSignedDataBlock(&signature_handler, len);
     }
 
-    char *signerName = signature_handler.getSignerName();
-
-    signature_info->setSignerName(signerName);
+    signature_info->setSignerName(signature_handler.getSignerName().c_str());
     signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
     signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
-
-    free(signerName);
 
     if (!signature_info->isSubfilterSupported()) {
         error(errUnimplemented, 0, "Unable to validate this type of signature");
@@ -2244,7 +2241,7 @@ std::vector<Goffset> FormFieldSignature::getSignedRangeBounds() const
     return range_vec;
 }
 
-GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::optional<GooString> FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
     Goffset start = 0;
     Goffset end = 0;
@@ -2277,7 +2274,7 @@ GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
             do {
                 c1 = stream->getChar();
                 if (c1 == EOF)
-                    return nullptr;
+                    return {};
                 gstr.append(static_cast<char>(c1));
             } while (++pos < len);
             if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0') {
@@ -2332,12 +2329,12 @@ GooString *FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
                         len = 0;
                 }
                 if (len > 0) {
-                    return new GooString(&gstr, 0, len);
+                    return GooString(&gstr, 0, len);
                 }
             }
         }
     }
-    return nullptr;
+    return {};
 }
 
 void FormFieldSignature::print(int indent)
@@ -2558,7 +2555,7 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
             for (const std::string &field : fields) {
                 Ref fieldRef;
 
-                if (field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
+                if (field.size() > 1 && field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
                     foundField = findFieldByRef(fieldRef);
                 } else {
                     foundField = findFieldByFullyQualifiedName(field);

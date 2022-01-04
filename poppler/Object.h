@@ -414,22 +414,9 @@ public:
         OBJECT_TYPE_CHECK(objString);
         return string;
     }
-    // After takeString() the only method that should be called for the object is free().
-    GooString *takeString()
-    {
-        OBJECT_TYPE_CHECK(objString);
-        type = objDead;
-        return string;
-    }
     const GooString *getHexString() const
     {
         OBJECT_TYPE_CHECK(objHexString);
-        return string;
-    }
-    GooString *takeHexString()
-    {
-        OBJECT_TYPE_CHECK(objHexString);
-        type = objDead;
         return string;
     }
     const char *getName() const

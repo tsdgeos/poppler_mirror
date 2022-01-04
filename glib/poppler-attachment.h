@@ -111,8 +111,10 @@ POPPLER_PUBLIC
 gsize poppler_attachment_get_size(PopplerAttachment *attachment);
 POPPLER_PUBLIC
 gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *filename, GError **error);
+#ifndef G_OS_WIN32
 POPPLER_PUBLIC
 gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GError **error);
+#endif
 POPPLER_PUBLIC
 gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, PopplerAttachmentSaveFunc save_func, gpointer user_data, GError **error);
 

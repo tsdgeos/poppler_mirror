@@ -122,8 +122,9 @@
 #define maxWordSpacing 1.5
 
 // Maximum horizontal spacing which will allow a word to be pulled
-// into a block.
-#define minColSpacing1 0.3
+// into a block, as a fraction of the font size.
+// This default value can be tweaked via API.
+double TextOutputDev::minColSpacing1_default = 0.7;
 
 // Minimum spacing between columns, as a fraction of the font size.
 #define minColSpacing2 1.0
@@ -2814,6 +2815,11 @@ void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link)
 }
 
 void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML)
+{
+    coalesce(physLayout, fixedPitch, doHTML, TextOutputDev::minColSpacing1_default);
+}
+
+void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double minColSpacing1)
 {
     TextWord *word0, *word1, *word2;
     TextLine *line;
@@ -5605,6 +5611,7 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     textEOL = defaultEndOfLine();
     textPageBreaks = true;
     ok = true;
+    minColSpacing1 = minColSpacing1_default;
 
     // open file
     needClose = false;
@@ -5648,6 +5655,7 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA
     textEOL = defaultEndOfLine();
     textPageBreaks = true;
     ok = true;
+    minColSpacing1 = minColSpacing1_default;
 }
 
 TextOutputDev::~TextOutputDev()
@@ -5669,7 +5677,7 @@ void TextOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
 void TextOutputDev::endPage()
 {
     text->endPage();
-    text->coalesce(physLayout, fixedPitch, doHTML);
+    text->coalesce(physLayout, fixedPitch, doHTML, minColSpacing1);
     if (outputStream) {
         text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks);
     }

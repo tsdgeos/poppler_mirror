@@ -13,6 +13,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
+// Copyright 2021 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -48,7 +49,7 @@ public:
     SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime();
-    char *getSignerName();
+    std::string getSignerName();
     const char *getSignerSubjectDN();
     HASH_HashType getHashAlgorithm();
     void setSignature(unsigned char *, int);

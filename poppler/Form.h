@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -38,6 +38,7 @@
 
 #include <ctime>
 
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -310,18 +311,19 @@ public:
     // field "ByteRange" in the dictionary "V".
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Returns success.
-    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr);
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const GooString *ownerPassword = nullptr,
+                      const GooString *userPassword = nullptr);
 
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
     // otherwise a nullptr is returned
-    GooString *getCheckedSignature(Goffset *checkedFileSize);
+    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
 
     const GooString *getSignature() const;
 
 private:
     bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason = nullptr, const GooString *location = nullptr);
-    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
+    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
     bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);
@@ -606,7 +608,7 @@ public:
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
     // otherwise a nullptr is returned
-    GooString *getCheckedSignature(Goffset *checkedFileSize);
+    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
 
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }

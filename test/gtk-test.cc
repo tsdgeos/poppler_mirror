@@ -26,7 +26,9 @@ static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr },
                                         { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr },
                                         { "page", 'p', 0, G_OPTION_ARG_INT, &requested_page, "Page number", "PAGE" },
+#ifndef G_OS_WIN32
                                         { "fd", 'f', 0, G_OPTION_ARG_NONE, &args_are_fds, "File descriptors", nullptr },
+#endif
                                         { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
                                         {} };
 
@@ -344,6 +346,7 @@ int main(int argc, char *argv[])
         const char *arg;
 
         arg = file_arguments[i];
+#ifndef G_OS_WIN32
         if (args_are_fds) {
             char *end;
             gint64 v;
@@ -356,7 +359,9 @@ int main(int argc, char *argv[])
             } else {
                 doc = poppler_document_new_from_fd(int(v), nullptr, &error);
             }
-        } else {
+        } else
+#endif /* !G_OS_WIN32 */
+        {
             file = g_file_new_for_commandline_arg(arg);
             doc = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
             if (!doc) {

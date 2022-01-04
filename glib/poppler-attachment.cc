@@ -275,6 +275,8 @@ gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *file
     return result;
 }
 
+#ifndef G_OS_WIN32
+
 /**
  * poppler_attachment_save_to_fd:
  * @attachment: A #PopplerAttachment.
@@ -304,6 +306,7 @@ gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GE
     if (f == nullptr) {
         int errsv = errno;
         g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to open FD %d for writing: %s"), fd, g_strerror(errsv));
+        close(fd);
         return FALSE;
     }
 
@@ -317,6 +320,8 @@ gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GE
 
     return result;
 }
+
+#endif /* !G_OS_WIN32 */
 
 #define BUF_SIZE 1024
 

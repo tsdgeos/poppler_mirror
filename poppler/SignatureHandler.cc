@@ -501,21 +501,21 @@ SECOidTag SignatureHandler::getHashOidTag(const char *digestName)
     return tag;
 }
 
-char *SignatureHandler::getSignerName()
+std::string SignatureHandler::getSignerName()
 {
-    char *commonName, *name;
+    char *commonName;
 
     if (!CMSSignerInfo || !NSS_IsInitialized())
-        return nullptr;
+        return {};
 
     if (!signing_cert)
         signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
 
     if (!signing_cert)
-        return nullptr;
+        return {};
 
     commonName = CERT_GetCommonName(&signing_cert->subject);
-    name = strdup(commonName);
+    std::string name(commonName);
     PORT_Free(commonName);
 
     return name;

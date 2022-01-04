@@ -2616,7 +2616,6 @@ GfxColorSpace *GfxSeparationColorSpace::copy() const
 //~ handle the 'All' and 'None' colorants
 GfxColorSpace *GfxSeparationColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
 {
-    GfxSeparationColorSpace *cs;
     GooString *nameA;
     GfxColorSpace *altA;
     Function *funcA;
@@ -2645,8 +2644,9 @@ GfxColorSpace *GfxSeparationColorSpace::parse(GfxResources *res, Array *arr, Out
         error(errSyntaxWarning, -1, "Bad SeparationColorSpace function");
         goto err5;
     }
-    cs = new GfxSeparationColorSpace(nameA, altA, funcA);
-    return cs;
+    if (altA->getNComps() <= funcA->getOutputSize()) {
+        return new GfxSeparationColorSpace(nameA, altA, funcA);
+    }
 
 err5:
     delete funcA;
@@ -2694,11 +2694,6 @@ void GfxSeparationColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         const int altNComps = alt->getNComps();
         for (i = 0; i < altNComps; ++i) {
             color2.c[i] = dblToCol(c[i]);
-        }
-        if (unlikely(altNComps > func->getOutputSize())) {
-            for (i = func->getOutputSize(); i < altNComps; ++i) {
-                color2.c[i] = 0;
-            }
         }
         alt->getRGB(&color2, rgb);
     }
