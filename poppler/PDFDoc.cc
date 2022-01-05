@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -2158,8 +2158,8 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     rectArray->add(Object(rect.y2));
     annotObj.dictSet("Rect", Object(rectArray));
 
-    GooString *daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(daStr));
+    const std::string daStr = da.toAppearanceString();
+    annotObj.dictSet("DA", Object(new GooString(daStr)));
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
