@@ -97,7 +97,6 @@ std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
 void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo *> *fontsList)
 {
     GfxFontDict *gfxFontDict;
-    GfxFont *font;
 
     // scan the fonts in this resource dictionary
     gfxFontDict = nullptr;
@@ -113,12 +112,12 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
     }
     if (gfxFontDict) {
         for (int i = 0; i < gfxFontDict->getNumFonts(); ++i) {
-            if ((font = gfxFontDict->getFont(i))) {
+            if (const std::shared_ptr<GfxFont> &font = gfxFontDict->getFont(i)) {
                 Ref fontRef = *font->getID();
 
                 // add this font to the list if not already found
                 if (fonts.insert(fontRef.num).second) {
-                    fontsList->push_back(new FontInfo(font, xrefA));
+                    fontsList->push_back(new FontInfo(font.get(), xrefA));
                 }
             }
         }

@@ -117,8 +117,8 @@ public:
     GfxResources(const GfxResources &) = delete;
     GfxResources &operator=(const GfxResources &other) = delete;
 
-    GfxFont *lookupFont(const char *name);
-    const GfxFont *lookupFont(const char *name) const;
+    std::shared_ptr<GfxFont> lookupFont(const char *name);
+    std::shared_ptr<const GfxFont> lookupFont(const char *name) const;
     Object lookupXObject(const char *name);
     Object lookupXObjectNF(const char *name);
     Object lookupMarkedContentNF(const char *name);
@@ -131,7 +131,7 @@ public:
     GfxResources *getNext() const { return next; }
 
 private:
-    GfxFont *doLookupFont(const char *name) const;
+    std::shared_ptr<GfxFont> doLookupFont(const char *name) const;
 
     GfxFontDict *fonts;
     Object xObjDict;

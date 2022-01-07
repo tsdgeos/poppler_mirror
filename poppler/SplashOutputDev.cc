@@ -1823,7 +1823,6 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
-    GfxFont *gfxFont;
     GfxFontType fontType;
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
@@ -1841,7 +1840,8 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     font = nullptr;
     tmpBuf = nullptr;
 
-    if (!(gfxFont = state->getFont())) {
+    GfxFont *const gfxFont = state->getFont().get();
+    if (!gfxFont) {
         goto err1;
     }
     fontType = gfxFont->getType();
@@ -2266,7 +2266,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
 
 bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen)
 {
-    GfxFont *gfxFont;
+    std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
     const double *ctm, *bbox;
     T3FontCache *t3Font;

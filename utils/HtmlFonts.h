@@ -84,7 +84,7 @@ private:
     HtmlFontColor color;
     double rotSkewMat[4]; // only four values needed for rotation and skew
 public:
-    HtmlFont(GfxFont *font, int _size, GfxRGB rgb, double opacity);
+    HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity);
     HtmlFont(const HtmlFont &x);
     HtmlFont &operator=(const HtmlFont &x);
     HtmlFontColor getColor() const { return color; }

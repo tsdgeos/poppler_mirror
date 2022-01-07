@@ -172,11 +172,10 @@ static const char *print_uni_str(const Unicode *u, const unsigned uLen)
 
 HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) : fonts(_fonts)
 {
-    GfxFont *font;
     double x, y;
 
     state->transform(state->getCurX(), state->getCurY(), &x, &y);
-    if ((font = state->getFont())) {
+    if (std::shared_ptr<const GfxFont> font = state->getFont()) {
         double ascent = font->getAscent();
         double descent = font->getDescent();
         if (ascent > 1.05) {
@@ -191,7 +190,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
         yMax = y - descent * fontSize;
         GfxRGB rgb;
         state->getFillRGB(&rgb);
-        HtmlFont hfont = HtmlFont(font, static_cast<int>(fontSize), rgb, state->getFillOpacity());
+        HtmlFont hfont = HtmlFont(*font, static_cast<int>(fontSize), rgb, state->getFillOpacity());
         if (isMatRotOrSkew(state->getTextMat())) {
             double normalizedMatrix[4];
             memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));
@@ -306,14 +305,14 @@ HtmlPage::~HtmlPage()
 
 void HtmlPage::updateFont(GfxState *state)
 {
-    GfxFont *font;
     const char *name;
     int code;
     double w;
 
     // adjust the font size
     fontSize = state->getTransformedFontSize();
-    if ((font = state->getFont()) && font->getType() == fontType3) {
+    const GfxFont *const font = state->getFont().get();
+    if (font && font->getType() == fontType3) {
         // This is a hack which makes it possible to deal with some Type 3
         // fonts.  The problem is that it's impossible to know what the
         // base coordinate system used in the font is without actually

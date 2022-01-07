@@ -43,24 +43,22 @@ public:
             delete data;
     }
 
-    GfxFont *getFont() const { return data->font; }
+    const std::shared_ptr<GfxFont> &getFont() const { return data->font; }
     GooString *getText() const { return data->text; }
     GfxRGB &getColor() const { return data->color; }
 
 private:
     // Note: Takes ownership of strings, increases refcount for font.
-    TextSpan(GooString *text, GfxFont *font, const GfxRGB color) : data(new Data)
+    TextSpan(GooString *text, std::shared_ptr<GfxFont> font, const GfxRGB color) : data(new Data)
     {
         data->text = text;
-        data->font = font;
+        data->font = std::move(font);
         data->color = color;
-        if (data->font)
-            data->font->incRefCnt();
     }
 
     struct Data
     {
-        GfxFont *font;
+        std::shared_ptr<GfxFont> font;
         GooString *text;
         GfxRGB color;
         unsigned refcount;
@@ -70,8 +68,6 @@ private:
         ~Data()
         {
             assert(refcount == 0);
-            if (font)
-                font->decRefCnt();
             delete text;
         }
 
@@ -116,9 +112,9 @@ private:
     void endSpan();
     bool inMarkedContent() const { return mcidStack.size() > 0; }
     bool contentStreamMatch();
-    bool needFontChange(const GfxFont *font) const;
+    bool needFontChange(const std::shared_ptr<const GfxFont> &font) const;
 
-    GfxFont *currentFont;
+    std::shared_ptr<GfxFont> currentFont;
     GooString *currentText;
     GfxRGB currentColor;
     TextSpanArray textSpans;

@@ -6533,9 +6533,6 @@ GfxState::~GfxState()
         // this gets set to NULL by restore()
         delete path;
     }
-    if (font) {
-        font->decRefCnt();
-    }
 
     delete defaultGrayColorSpace;
     delete defaultRGBColorSpace;
@@ -6606,8 +6603,6 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     textKnockout = state->textKnockout;
 
     font = state->font;
-    if (font)
-        font->incRefCnt();
     fontSize = state->fontSize;
     memcpy(textMat, state->textMat, sizeof(textMat));
     charSpace = state->charSpace;
@@ -6901,12 +6896,9 @@ void GfxState::setStrokePattern(GfxPattern *pattern)
     strokePattern = pattern;
 }
 
-void GfxState::setFont(GfxFont *fontA, double fontSizeA)
+void GfxState::setFont(std::shared_ptr<GfxFont> fontA, double fontSizeA)
 {
-    if (font)
-        font->decRefCnt();
-
-    font = fontA;
+    font = std::move(fontA);
     fontSize = fontSizeA;
 }
 

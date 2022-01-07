@@ -1921,7 +1921,6 @@ void PSOutputDev::setupFonts(Dict *resDict)
 {
     Ref r;
     GfxFontDict *gfxFontDict;
-    GfxFont *font;
     int i;
 
     gfxFontDict = nullptr;
@@ -1937,8 +1936,8 @@ void PSOutputDev::setupFonts(Dict *resDict)
     }
     if (gfxFontDict) {
         for (i = 0; i < gfxFontDict->getNumFonts(); ++i) {
-            if ((font = gfxFontDict->getFont(i))) {
-                setupFont(font, resDict);
+            if (const std::shared_ptr<GfxFont> &font = gfxFontDict->getFont(i)) {
+                setupFont(font.get(), resDict);
             }
         }
         delete gfxFontDict;
@@ -5009,7 +5008,7 @@ void PSOutputDev::doPath(const GfxPath *path)
 
 void PSOutputDev::drawString(GfxState *state, const GooString *s)
 {
-    GfxFont *font;
+    std::shared_ptr<GfxFont> font;
     int wMode;
     int *codeToGID;
     GooString *s2;

@@ -2970,7 +2970,7 @@ std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const
     return std::make_unique<DefaultAppearance>(appearanceString.get());
 }
 
-static GfxFont *createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
+static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
 {
     const Ref dummyRef = { -1, -1 };
 
@@ -3041,7 +3041,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     const double textwidth = width - 2 * textmargin;
     appearBuilder.appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2 * textmargin);
 
-    GfxFont *font = nullptr;
+    std::unique_ptr<const GfxFont> font = nullptr;
 
     // look for font name in the default resources
     Form *form = doc->getCatalog()->getForm(); // form is owned by catalog, no need to clean it up
@@ -3085,7 +3085,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     while (i < contents->getLength()) {
         GooString out;
         double linewidth, xpos;
-        layoutText(contents.get(), &out, &i, font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
+        layoutText(contents.get(), &out, &i, *font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
         linewidth *= da.getFontPtSize();
         switch (quadding) {
         case quaddingCentered:
@@ -3104,7 +3104,6 @@ void AnnotFreeText::generateFreeTextAppearance()
         xposPrev = xpos;
     }
 
-    font->decRefCnt();
     appearBuilder.append("ET Q\n");
 
     double bbox[4];
@@ -3407,7 +3406,7 @@ void AnnotLine::generateLineAppearance()
     const double lineendingSize = std::min(6. * borderWidth, main_len / 2);
 
     Dict *fontResDict;
-    GfxFont *font;
+    std::unique_ptr<const GfxFont> font;
 
     // Calculate caption width and height
     if (caption) {
@@ -3418,7 +3417,7 @@ void AnnotLine::generateLineAppearance()
         while (i < contents->getLength()) {
             GooString out;
             double linewidth;
-            layoutText(contents.get(), &out, &i, font, &linewidth, 0, nullptr, false);
+            layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
             linewidth *= fontsize;
             if (linewidth > captionwidth) {
                 captionwidth = linewidth;
@@ -3502,7 +3501,7 @@ void AnnotLine::generateLineAppearance()
         while (i < contents->getLength()) {
             GooString out;
             double linewidth, xpos;
-            layoutText(contents.get(), &out, &i, font, &linewidth, 0, nullptr, false);
+            layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
             linewidth *= fontsize;
             xpos = (captionwidth - linewidth) / 2;
             appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);
@@ -3511,7 +3510,6 @@ void AnnotLine::generateLineAppearance()
             xposPrev = xpos;
         }
         appearBuilder.append("ET\n");
-        font->decRefCnt();
     }
 
     // Draw leader lines
@@ -4016,7 +4014,7 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont *font, double *width, double widthLimit, int *charCount, bool noReencode)
+void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode)
 {
     CharCode c;
     Unicode uChar;
@@ -4097,13 +4095,13 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         if (noReencode) {
             outBuf->append(uChar);
         } else {
-            const CharCodeToUnicode *ccToUnicode = font->getToUnicode();
+            const CharCodeToUnicode *ccToUnicode = font.getToUnicode();
             if (!ccToUnicode) {
                 // This assumes an identity CMap.
                 outBuf->append((uChar >> 8) & 0xff);
                 outBuf->append(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
-                if (font->isCIDFont()) {
+                if (font.isCIDFont()) {
                     // TODO: This assumes an identity CMap.  It should be extended to
                     // handle the general case.
                     outBuf->append((c >> 8) & 0xff);
@@ -4130,7 +4128,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         // Compute width of character just output
         if (outBuf->getLength() > last_o2) {
             dx = 0.0;
-            font->getNextChar(outBuf->c_str() + last_o2, outBuf->getLength() - last_o2, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
+            font.getNextChar(outBuf->c_str() + last_o2, outBuf->getLength() - last_o2, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
             w += dx;
         }
 
@@ -4185,7 +4183,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
 
         while (len > 0) {
             dx = 0.0;
-            n = font->getNextChar(s, len, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
+            n = font.getNextChar(s, len, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
 
             if (n == 0) {
                 break;
@@ -4239,7 +4237,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     int tfPos, tmPos, j;
     int rot;
     bool freeText = false; // true if text should be freed before return
-    GfxFont *fontToFree = nullptr;
+    std::unique_ptr<const GfxFont> fontToFree = nullptr;
 
     //~ if there is no MK entry, this should use the existing content stream,
     //~ and only replace the marked content portion of it
@@ -4282,11 +4280,15 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
         }
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
+            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok->toStr(), defaultFallback);
+                    // The font variable sometimes points to an object that needs to be deleted
+                    // and sometimes not, depending on whether the call to lookupFont above fails.
+                    // When the code path right here is taken, the destructor of fontToFree
+                    // (which is a std::unique_ptr) will delete the font object at the end of this method.
                     fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
-                    font = fontToFree;
+                    font = fontToFree.get();
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
                 }
@@ -4364,7 +4366,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 y = dy - 3;
                 int i = 0;
                 while (i < text->getLength()) {
-                    Annot::layoutText(text, &convertedText, &i, font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
+                    Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
                     y -= fontSize;
                 }
                 // approximate the descender for the last line
@@ -4408,7 +4410,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         int i = 0;
         xPrev = 0;
         while (i < text->getLength()) {
-            Annot::layoutText(text, &convertedText, &i, font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
+            Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
             w *= fontSize;
 
             // compute text start position
@@ -4460,7 +4462,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             int i = 0;
-            Annot::layoutText(text, &convertedText, &i, font, nullptr, 0.0, &charCount, forceZapfDingbats);
+            Annot::layoutText(text, &convertedText, &i, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
             if (charCount > comb)
                 charCount = comb;
 
@@ -4533,7 +4535,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             // regular (non-comb) formatting
         } else {
             int ii = 0;
-            Annot::layoutText(text, &convertedText, &ii, font, &w, 0.0, nullptr, forceZapfDingbats);
+            Annot::layoutText(text, &convertedText, &ii, *font, &w, 0.0, nullptr, forceZapfDingbats);
 
             // compute font autosize
             if (fontSize == 0) {
@@ -4605,9 +4607,6 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     if (freeText) {
         delete text;
     }
-    if (fontToFree) {
-        fontToFree->decRefCnt();
-    }
 
     return true;
 }
@@ -4621,7 +4620,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     const GfxFont *font;
     double fontSize, borderWidth, x, y, w, wMax;
     int tfPos, tmPos, i, j;
-    GfxFont *fontToFree = nullptr;
+    std::unique_ptr<const GfxFont> fontToFree;
 
     //~ if there is no MK entry, this should use the existing content stream,
     //~ and only replace the marked content portion of it
@@ -4657,11 +4656,15 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     if (tfPos >= 0) {
         tok = daToks[tfPos];
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
+            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok->toStr(), "Helvetica");
+                    // The font variable sometimes points to an object that needs to be deleted
+                    // and sometimes not, depending on whether the call to lookupFont above fails.
+                    // When the code path right here is taken, the destructor of fontToFree
+                    // (which is a std::unique_ptr) will delete the font object at the end of this method.
                     fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
-                    font = fontToFree;
+                    font = fontToFree.get();
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
                 }
@@ -4694,12 +4697,9 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 for (auto entry : daToks) {
                     delete entry;
                 }
-                if (fontToFree) {
-                    fontToFree->decRefCnt();
-                }
                 return false;
             }
-            Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, font, &w, 0.0, nullptr, false);
+            Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
             if (w > wMax) {
                 wMax = w;
             }
@@ -4733,7 +4733,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // compute text width and start position
         j = 0;
-        Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, font, &w, 0.0, nullptr, false);
+        Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
         switch (quadding) {
         case quaddingLeftJustified:
@@ -4787,9 +4787,6 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     for (auto entry : daToks) {
         delete entry;
-    }
-    if (fontToFree) {
-        fontToFree->decRefCnt();
     }
 
     return true;
@@ -5057,7 +5054,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    GfxFont *font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
+    std::unique_ptr<const GfxFont> font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
 
     // calculate the string tokenization
     int i = 0;
@@ -5065,7 +5062,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     while (i < text.getLength()) {
         GooString out;
         double textWidth;
-        Annot::layoutText(&text, &out, &i, font, &textWidth, textwidth / da.getFontPtSize(), nullptr, false);
+        Annot::layoutText(&text, &out, &i, *font, &textWidth, textwidth / da.getFontPtSize(), nullptr, false);
         outTexts.emplace_back(out.toStr(), textWidth * da.getFontPtSize());
     }
 
@@ -5103,7 +5100,6 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
         yDelta = -da.getFontPtSize();
     }
 
-    font->decRefCnt();
     append("ET Q\n");
 }
 

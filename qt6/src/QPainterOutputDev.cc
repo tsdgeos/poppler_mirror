@@ -64,13 +64,13 @@
 class QPainterOutputDevType3Font
 {
 public:
-    QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font);
+    QPainterOutputDevType3Font(PDFDoc *doc, const std::shared_ptr<Gfx8BitFont> &font);
 
     const QPicture &getGlyph(int gid) const;
 
 private:
     PDFDoc *m_doc;
-    Gfx8BitFont *m_font;
+    std::shared_ptr<Gfx8BitFont> m_font;
 
     mutable std::vector<std::unique_ptr<QPicture>> glyphs;
 
@@ -78,7 +78,7 @@ public:
     std::vector<int> codeToGID;
 };
 
-QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font) : m_doc(doc), m_font(font)
+QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, const std::shared_ptr<Gfx8BitFont> &font) : m_doc(doc), m_font(font)
 {
     char *name;
     const Dict *charProcs = font->getCharProcs();
@@ -417,7 +417,7 @@ void QPainterOutputDev::updateStrokeOpacity(GfxState *state)
 
 void QPainterOutputDev::updateFont(GfxState *state)
 {
-    GfxFont *gfxFont = state->getFont();
+    const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
     if (!gfxFont) {
         return;
     }
@@ -436,7 +436,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
         } else {
 
-            m_currentType3Font = new QPainterOutputDevType3Font(m_doc, (Gfx8BitFont *)gfxFont);
+            m_currentType3Font = new QPainterOutputDevType3Font(m_doc, std::static_pointer_cast<Gfx8BitFont>(gfxFont));
             m_type3FontCache.insert(std::make_pair(fontID, std::unique_ptr<QPainterOutputDevType3Font>(m_currentType3Font)));
         }
 
@@ -570,7 +570,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             int *codeToGID = (int *)gmallocn(256, sizeof(int));
             for (int i = 0; i < 256; ++i) {
                 codeToGID[i] = 0;
-                if ((name = ((const char **)((Gfx8BitFont *)gfxFont)->getEncoding())[i])) {
+                if ((name = ((const char **)((Gfx8BitFont *)gfxFont.get())->getEncoding())[i])) {
                     codeToGID[i] = (int)FT_Get_Name_Index(freeTypeFace, (char *)name);
                     if (codeToGID[i] == 0) {
                         name = GfxFont::getAlternateName(name);
@@ -591,7 +591,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontTrueTypeOT: {
             auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(tmpBuf.get(), tmpBufLen);
 
-            m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get()) : nullptr;
+            m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : nullptr;
 
             break;
         }
@@ -614,10 +614,10 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontCIDType0COT: {
             int *codeToGID = nullptr;
 
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                int codeToGIDLen = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
+            if (((GfxCIDFont *)gfxFont.get())->getCIDToGID()) {
+                int codeToGIDLen = ((GfxCIDFont *)gfxFont.get())->getCIDToGIDLen();
                 codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-                memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), codeToGIDLen * sizeof(int));
+                memcpy(codeToGID, ((GfxCIDFont *)gfxFont.get())->getCIDToGID(), codeToGIDLen * sizeof(int));
             }
 
             int *cidToGIDMap = nullptr;
@@ -639,18 +639,18 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontCIDType2OT: {
             int *codeToGID = nullptr;
             int codeToGIDLen = 0;
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                codeToGIDLen = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
+            if (((GfxCIDFont *)gfxFont.get())->getCIDToGID()) {
+                codeToGIDLen = ((GfxCIDFont *)gfxFont.get())->getCIDToGIDLen();
                 if (codeToGIDLen) {
                     codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-                    memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), codeToGIDLen * sizeof(int));
+                    memcpy(codeToGID, ((GfxCIDFont *)gfxFont.get())->getCIDToGID(), codeToGIDLen * sizeof(int));
                 }
             } else {
                 auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(tmpBuf.get(), tmpBufLen);
                 if (!ff) {
                     return;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &codeToGIDLen);
+                codeToGID = ((GfxCIDFont *)gfxFont.get())->getCodeToGIDMap(ff.get(), &codeToGIDLen);
             }
 
             m_codeToGIDCache[id] = codeToGID;
@@ -867,7 +867,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx,
 {
 
     // First handle type3 fonts
-    GfxFont *gfxFont = state->getFont();
+    const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
 
     GfxFontType fontType = gfxFont->getType();
     if (fontType == fontType3) {

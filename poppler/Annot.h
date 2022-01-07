@@ -755,7 +755,7 @@ public:
     // Check if point is inside the annot rectangle.
     bool inRect(double x, double y) const;
 
-    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont *font, double *width, double widthLimit, int *charCount, bool noReencode);
+    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode);
 
 private:
     void readArrayNum(Object *pdfArray, int key, double *value);
