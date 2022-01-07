@@ -50,7 +50,7 @@
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2021-2022 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -633,6 +633,23 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
     return res;
 }
 
+static int sumSignatureFields(FormField *ff)
+{
+    int sum = 0;
+
+    if (ff->getNumChildren() == 0) {
+        if (ff->getType() == formSignature) {
+            sum = 1;
+        }
+    } else {
+        for (int i = 0; i < ff->getNumChildren(); ++i) {
+            FormField *children = ff->getChildren(i);
+            sum += sumSignatureFields(children);
+        }
+    }
+    return sum;
+}
+
 int PDFDoc::getNumSignatureFields()
 {
     const Form *f = catalog->getForm();
@@ -640,7 +657,13 @@ int PDFDoc::getNumSignatureFields()
     if (!f)
         return 0;
 
-    return f->getNumFields();
+    const int nRootFields = f->getNumFields();
+    int sum = 0;
+    for (int i = 0; i < nRootFields; ++i) {
+        FormField *ff = f->getRootField(i);
+        sum += sumSignatureFields(ff);
+    }
+    return sum;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
