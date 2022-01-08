@@ -214,11 +214,26 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
     length = MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, length);
 
     newDoc = new PDFDoc(filenameW, length, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(filenameW, length, password_g, password_g);
+    }
     delete[] filenameW;
 #else
     GooString *filename_g;
     filename_g = new GooString(filename);
     newDoc = new PDFDoc(filename_g, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        filename_g = filename_g->copy();
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(filename_g, password_g, password_g);
+    }
 #endif
     g_free(filename);
 
@@ -260,6 +275,14 @@ PopplerDocument *poppler_document_new_from_data(char *data, int length, const ch
 
     password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        str = dynamic_cast<MemStream *>(str->copy());
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(str, password_g, password_g);
+    }
     delete password_g;
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
@@ -308,6 +331,14 @@ PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *pass
 
     password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        str = dynamic_cast<BytesStream *>(str->copy());
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(str, password_g, password_g);
+    }
     delete password_g;
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
@@ -368,6 +399,14 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
 
     password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        str = str->copy();
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(str, password_g, password_g);
+    }
     delete password_g;
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
@@ -488,6 +527,14 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
 
     password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(stream, password_g, password_g);
+    if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
+        /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
+        stream = stream->copy();
+        delete newDoc;
+        delete password_g;
+        password_g = new GooString(password);
+        newDoc = new PDFDoc(stream, password_g, password_g);
+    }
     delete password_g;
 
     return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
