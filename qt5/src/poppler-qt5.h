@@ -2311,6 +2311,17 @@ public:
         QByteArray documentUserPassword() const;
         void setDocumentUserPassword(const QByteArray &password);
 
+        /**
+         * Filesystem path to an image file to be used as background
+         * image for the signature annotation widget.
+         *
+         * Default: empty
+         *
+         * \since 22.02
+         */
+        QString imagePath() const;
+        void setImagePath(const QString &path);
+
     private:
         struct NewSignatureDataPrivate;
         NewSignatureDataPrivate *const d;

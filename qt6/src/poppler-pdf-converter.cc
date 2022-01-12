@@ -138,7 +138,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
                      boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
-                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), "" /*imagepath*/, ownerPwd.get(), userPwd.get());
+                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd.get(), userPwd.get());
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
@@ -164,6 +164,8 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
 
     QByteArray documentOwnerPassword;
     QByteArray documentUserPassword;
+
+    QString imagePath;
 };
 
 PDFConverter::NewSignatureData::NewSignatureData() : d(new NewSignatureDataPrivate()) { }
@@ -341,5 +343,15 @@ QByteArray PDFConverter::NewSignatureData::documentUserPassword() const
 void PDFConverter::NewSignatureData::setDocumentUserPassword(const QByteArray &password)
 {
     d->documentUserPassword = password;
+}
+
+QString PDFConverter::NewSignatureData::imagePath() const
+{
+    return d->imagePath;
+}
+
+void PDFConverter::NewSignatureData::setImagePath(const QString &path)
+{
+    d->imagePath = path;
 }
 }
