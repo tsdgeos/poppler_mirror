@@ -22,9 +22,11 @@
 #include <config.h>
 
 #include "SignatureHandler.h"
+#include "goo/gdir.h"
 #include "goo/gmem.h"
 
-#include <dirent.h>
+#include <optional>
+
 #include <Error.h>
 
 /* NSS headers */
@@ -665,33 +667,18 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
     }
 }
 
-static GooString *getDefaultFirefoxCertDB_Linux()
+static std::optional<std::string> getDefaultFirefoxCertDB_Linux()
 {
-    GooString *finalPath = nullptr;
-    DIR *toSearchIn;
-    struct dirent *subFolder;
+    const std::string firefoxPath = std::string(getenv("HOME")) + "/.mozilla/firefox/";
 
-    GooString *homePath = new GooString(getenv("HOME"));
-    homePath = homePath->append("/.mozilla/firefox/");
-
-    if ((toSearchIn = opendir(homePath->c_str())) == nullptr) {
-        error(errInternal, 0, "couldn't find default Firefox Folder");
-        delete homePath;
-        return nullptr;
-    }
-    do {
-        if ((subFolder = readdir(toSearchIn)) != nullptr) {
-            if (strstr(subFolder->d_name, "default") != nullptr) {
-                finalPath = homePath->append(subFolder->d_name);
-                closedir(toSearchIn);
-                return finalPath;
-            }
+    GDir firefoxDir(firefoxPath.c_str());
+    std::unique_ptr<GDirEntry> entry;
+    while (entry = firefoxDir.getNextEntry(), entry != nullptr) {
+        if (entry->isDir() && entry->getName()->toStr().find("default") != std::string::npos) {
+            return entry->getFullPath()->toStr();
         }
-    } while (subFolder != nullptr);
-
-    closedir(toSearchIn);
-    delete homePath;
-    return nullptr;
+    }
+    return {};
 }
 
 std::string SignatureHandler::sNssDir;
@@ -720,13 +707,13 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
         sNssDir = nssDir.toStr();
     } else {
-        GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
-        if (certDBPath == nullptr) {
+        const std::optional<std::string> certDBPath = getDefaultFirefoxCertDB_Linux();
+        if (!certDBPath) {
             initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
             sNssDir = "sql:/etc/pki/nssdb";
         } else {
             initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
-            sNssDir = certDBPath->toStr();
+            sNssDir = *certDBPath;
         }
         if (!initSuccess) {
             GooString homeNssDb(getenv("HOME"));
@@ -737,7 +724,6 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
                 NSS_NoDB_Init(nullptr);
             }
         }
-        delete certDBPath;
     }
 
     if (initSuccess) {
