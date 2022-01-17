@@ -2,21 +2,22 @@
 # Once done this will define
 #
 #  NSS_FOUND - system has NSS3
-#  NSS3_CFLAGS - the NSS CFlags
-#  NSS3_LIBRARIES - Link these to use NSS
+#  PkgConfig::NSS3 - Use this in target_link_libraries to bring both includes and link libraries
+#
+#  Deprecated, use the above variables:
+#     NSS3_CFLAGS - the NSS CFlags
+#     NSS3_LIBRARIES - Link these to use NSS
 #
 # Copyright 2015 André Guerreiro, <aguerreiro1985@gmail.com>
+# Copyright 2022 Albert Astals Cid, <aacid@kde.org>
 #
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 include(FindPackageHandleStandardArgs)
 
-if (NOT MSVC)
-  find_package(PkgConfig REQUIRED)
+find_package(PkgConfig REQUIRED)
 
-  pkg_check_modules(NSS3 IMPORTED_TARGET "nss>=3.19")
+pkg_check_modules(NSS3 IMPORTED_TARGET "nss>=3.19")
 
-  find_package_handle_standard_args(NSS3 DEFAULT_MSG NSS3_LIBRARIES NSS3_CFLAGS)
-
-endif(NOT MSVC)
+find_package_handle_standard_args(NSS3 DEFAULT_MSG NSS3_LIBRARIES NSS3_CFLAGS)
