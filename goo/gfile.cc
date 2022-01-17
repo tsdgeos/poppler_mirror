@@ -19,7 +19,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -492,17 +492,16 @@ GDir::~GDir()
 #endif
 }
 
-GDirEntry *GDir::getNextEntry()
+std::unique_ptr<GDirEntry> GDir::getNextEntry()
 {
-    GDirEntry *e = nullptr;
-
 #ifdef _WIN32
     if (hnd != INVALID_HANDLE_VALUE) {
-        e = new GDirEntry(path->c_str(), ffd.cFileName, doStat);
+        auto e = std::make_unique<GDirEntry>(path->c_str(), ffd.cFileName, doStat);
         if (!FindNextFileA(hnd, &ffd)) {
             FindClose(hnd);
             hnd = INVALID_HANDLE_VALUE;
         }
+        return e;
     }
 #else
     struct dirent *ent;
@@ -511,12 +510,12 @@ GDirEntry *GDir::getNextEntry()
             ent = readdir(dir);
         } while (ent && (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")));
         if (ent) {
-            e = new GDirEntry(path->c_str(), ent->d_name, doStat);
+            return std::make_unique<GDirEntry>(path->c_str(), ent->d_name, doStat);
         }
     }
 #endif
 
-    return e;
+    return {};
 }
 
 void GDir::rewind()

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -456,7 +456,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
 void GlobalParams::scanEncodingDirs()
 {
     GDir *dir;
-    GDirEntry *entry;
+    std::unique_ptr<GDirEntry> entry;
     const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
 
     // allocate buffer large enough to append "/nameToUnicode"
@@ -469,7 +469,6 @@ void GlobalParams::scanEncodingDirs()
         if (!entry->isDir()) {
             parseNameToUnicode(entry->getFullPath());
         }
-        delete entry;
     }
     delete dir;
 
@@ -477,7 +476,6 @@ void GlobalParams::scanEncodingDirs()
     dir = new GDir(dataPathBuffer, false);
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addCIDToUnicode(entry->getName(), entry->getFullPath());
-        delete entry;
     }
     delete dir;
 
@@ -485,7 +483,6 @@ void GlobalParams::scanEncodingDirs()
     dir = new GDir(dataPathBuffer, false);
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addUnicodeMap(entry->getName(), entry->getFullPath());
-        delete entry;
     }
     delete dir;
 
@@ -494,7 +491,6 @@ void GlobalParams::scanEncodingDirs()
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addCMapDir(entry->getName(), entry->getFullPath());
         toUnicodeDirs.push_back(entry->getFullPath()->copy());
-        delete entry;
     }
     delete dir;
 
