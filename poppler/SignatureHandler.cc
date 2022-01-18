@@ -31,6 +31,7 @@
 
 /* NSS headers */
 #include <secmod.h>
+#include <secoid.h>
 #include <keyhi.h>
 #include <secder.h>
 #include <pk11pub.h>
@@ -193,12 +194,10 @@ const SEC_ASN1Template IssuerSerialTemplate[] = {
  * }
  */
 
-SEC_ASN1_MKSUB(SECOID_AlgorithmIDTemplate)
-
 const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
-                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_SUB(SECOID_AlgorithmIDTemplate), 0 },
+                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), 0 },
                                                  { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
-                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
+                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
                                                  { 0, 0, nullptr, 0 } };
 
 /**
