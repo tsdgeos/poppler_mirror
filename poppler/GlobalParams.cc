@@ -45,6 +45,7 @@
 // Copyright (C) 2021, 2022 Stefan Löffler <st.loeffler@gmail.com>
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,6 +54,7 @@
 
 #include <config.h>
 
+#include <algorithm>
 #include <cstring>
 #include <cstdio>
 #include <cctype>
@@ -664,22 +666,20 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name)
 }
 
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-static bool findModifier(const char *name, const char *modifier, const char **start)
+static bool findModifier(const std::string &name, const size_t modStart, const char *modifier, size_t &start)
 {
-    const char *match;
-
-    if (name == nullptr) {
+    if (modStart == std::string::npos) {
         return false;
     }
 
-    match = strstr(name, modifier);
-    if (match) {
-        if (*start == nullptr || match < *start) {
-            *start = match;
+    size_t match = name.find(modifier, modStart);
+    if (match == std::string::npos) {
+        return false;
+    } else {
+        if (start == std::string::npos || match < start) {
+            start = match;
         }
         return true;
-    } else {
-        return false;
     }
 }
 
@@ -721,57 +721,55 @@ static const char *getFontLang(const GfxFont *font)
 static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Name)
 {
     int weight = -1, slant = -1, width = -1, spacing = -1;
-    const char *family;
-    const char *start;
     FcPattern *p;
 
     // this is all heuristics will be overwritten if font had proper info
-    char *fontName = strdup(((base14Name == nullptr) ? font->getNameWithoutSubsetTag() : base14Name->toStr()).c_str());
+    std::string fontName;
+    if (base14Name == nullptr) {
+        fontName = font->getNameWithoutSubsetTag();
+    } else {
+        fontName = base14Name->toStr();
+    }
 
-    const char *modifiers = strchr(fontName, ',');
-    if (modifiers == nullptr) {
-        modifiers = strchr(fontName, '-');
+    size_t modStart = fontName.find(',');
+    if (modStart == std::string::npos) {
+        modStart = fontName.find('-');
     }
 
     // remove the - from the names, for some reason, Fontconfig does not
     // understand "MS-Mincho" but does with "MS Mincho"
-    const int len = strlen(fontName);
-    for (int i = 0; i < len; i++) {
-        fontName[i] = (fontName[i] == '-' ? ' ' : fontName[i]);
-    }
+    std::replace(fontName.begin(), fontName.end(), '-', ' ');
 
-    start = nullptr;
-    findModifier(modifiers, "Regular", &start);
-    findModifier(modifiers, "Roman", &start);
+    size_t start = std::string::npos;
+    findModifier(fontName, modStart, "Regular", start);
+    findModifier(fontName, modStart, "Roman", start);
 
-    if (findModifier(modifiers, "Oblique", &start)) {
+    if (findModifier(fontName, modStart, "Oblique", start)) {
         slant = FC_SLANT_OBLIQUE;
     }
-    if (findModifier(modifiers, "Italic", &start)) {
+    if (findModifier(fontName, modStart, "Italic", start)) {
         slant = FC_SLANT_ITALIC;
     }
-    if (findModifier(modifiers, "Bold", &start)) {
+    if (findModifier(fontName, modStart, "Bold", start)) {
         weight = FC_WEIGHT_BOLD;
     }
-    if (findModifier(modifiers, "Light", &start)) {
+    if (findModifier(fontName, modStart, "Light", start)) {
         weight = FC_WEIGHT_LIGHT;
     }
-    if (findModifier(modifiers, "Medium", &start)) {
+    if (findModifier(fontName, modStart, "Medium", start)) {
         weight = FC_WEIGHT_MEDIUM;
     }
-    if (findModifier(modifiers, "Condensed", &start)) {
+    if (findModifier(fontName, modStart, "Condensed", start)) {
         width = FC_WIDTH_CONDENSED;
     }
 
-    if (start) {
+    std::string family;
+    if (start == std::string::npos) {
+        family = fontName;
+    } else {
         // There have been "modifiers" in the name, crop them to obtain
         // the family name
-        family = strndup(fontName, modifiers - fontName);
-        free(fontName);
-        fontName = nullptr;
-    } else {
-        family = fontName;
-        fontName = nullptr;
+        family = fontName.substr(0, modStart);
     }
 
     // use font flags
@@ -785,12 +783,9 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
         slant = FC_SLANT_ITALIC;
     }
 
-    bool freeFamily = true;
     // if the FontDescriptor specified a family name use it
     if (font->getFamily()) {
-        free((char *)family);
-        family = font->getFamily()->c_str();
-        freeFamily = false;
+        family = font->getFamily()->toStr();
     }
 
     // if the FontDescriptor specified a weight use it
@@ -861,7 +856,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
 
     const char *lang = getFontLang(font);
 
-    p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family, FC_LANG, FcTypeString, lang, NULL);
+    p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family.c_str(), FC_LANG, FcTypeString, lang, NULL);
     if (slant != -1) {
         FcPatternAddInteger(p, FC_SLANT, slant);
     }
@@ -875,9 +870,6 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
         FcPatternAddInteger(p, FC_SPACING, spacing);
     }
 
-    if (freeFamily) {
-        free((char *)family);
-    }
     return p;
 }
 #endif
