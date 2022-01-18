@@ -31,6 +31,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,7 +40,6 @@
 
 #include <config.h>
 
-#include "config.h"
 #include <cstring>
 #include <forward_list>
 #include "CairoFontEngine.h"
@@ -343,16 +343,14 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
 {
-    GooString *fileName;
     const char *fileNameC;
     char *font_data;
     int font_data_len;
     int i, n;
     GfxFontType fontType;
-    GfxFontLoc *fontLoc;
+    std::optional<GfxFontLoc> fontLoc;
     char **enc;
     const char *name;
-    FoFiTrueType *ff;
     FoFiType1C *ff1c;
     Ref ref;
     FT_Face face;
@@ -365,7 +363,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     codeToGIDLen = 0;
     font_data = nullptr;
     font_data_len = 0;
-    fileName = nullptr;
+    const GooString *fileName = nullptr;
     fileNameC = nullptr;
 
     bool substitute = false;
@@ -386,7 +384,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
 
         // external font
     } else { // gfxFontLocExternal
-        fileName = fontLoc->path;
+        fileName = fontLoc->pathAsGooString();
         fontType = fontLoc->fontType;
         substitute = true;
     }
@@ -437,6 +435,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
                 memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
             }
         } else {
+            std::unique_ptr<FoFiTrueType> ff;
             if (font_data != nullptr) {
                 ff = FoFiTrueType::make(font_data, font_data_len);
             } else {
@@ -444,13 +443,13 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
             }
             if (!ff)
                 goto err2;
-            codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
-            delete ff;
+            codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
         }
         codeToGIDLen = n;
         /* Fall through */
     case fontTrueType:
-    case fontTrueTypeOT:
+    case fontTrueTypeOT: {
+        std::unique_ptr<FoFiTrueType> ff;
         if (font_data != nullptr) {
             ff = FoFiTrueType::make(font_data, font_data_len);
         } else {
@@ -462,16 +461,15 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         }
         /* This might be set already for the CIDType2 case */
         if (fontType == fontTrueType || fontType == fontTrueTypeOT) {
-            codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
+            codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
             codeToGIDLen = 256;
         }
-        delete ff;
         if (!_ft_new_face(lib, fileNameC, font_data, font_data_len, &face, &font_face)) {
             error(errSyntaxError, -1, "could not create truetype face\n");
             goto err2;
         }
         break;
-
+    }
     case fontCIDType0:
     case fontCIDType0C:
 
@@ -510,6 +508,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
 
         if (!codeToGID) {
             if (!useCIDs) {
+                std::unique_ptr<FoFiTrueType> ff;
                 if (font_data != nullptr) {
                     ff = FoFiTrueType::make(font_data, font_data_len);
                 } else {
@@ -519,7 +518,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
                     if (ff->isOpenTypeCFF()) {
                         codeToGID = ff->getCIDToGIDMap((int *)&codeToGIDLen);
                     }
-                    delete ff;
                 }
             }
         }
@@ -535,12 +533,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         break;
     }
 
-    delete fontLoc;
     return new CairoFreeTypeFont(ref, font_face, codeToGID, codeToGIDLen, substitute);
 
 err2:
-    /* hmm? */
-    delete fontLoc;
     gfree(codeToGID);
     gfree(font_data);
     fprintf(stderr, "some font thing failed\n");

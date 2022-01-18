@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1824,13 +1824,10 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
     GfxFont *gfxFont;
-    GfxFontLoc *fontLoc;
     GfxFontType fontType;
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
-    FoFiTrueType *ff;
-    GooString *fileName;
     char *tmpBuf;
     int tmpBufLen;
     const double *textMat;
@@ -1842,9 +1839,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
 
     needFontUpdate = false;
     font = nullptr;
-    fileName = nullptr;
     tmpBuf = nullptr;
-    fontLoc = nullptr;
 
     if (!(gfxFont = state->getFont())) {
         goto err1;
@@ -1863,8 +1858,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     // check the font file cache
 reload:
     delete id;
-    delete fontLoc;
-    fontLoc = nullptr;
     if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
         fontsrc = nullptr;
@@ -1876,12 +1869,15 @@ reload:
 
     } else {
 
-        if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr))) {
+        std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr);
+        if (!fontLoc) {
             error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
             goto err2;
         }
 
         // embedded font
+        const GooString *fileName = nullptr;
+
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
             tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef(), &tmpBufLen);
@@ -1890,7 +1886,7 @@ reload:
 
             // external font
         } else { // gfxFontLocExternal
-            fileName = fontLoc->path;
+            fileName = fontLoc->pathAsGooString();
             fontType = fontLoc->fontType;
             doAdjustFontMatrix = true;
         }
@@ -1929,6 +1925,7 @@ reload:
             break;
         case fontTrueType:
         case fontTrueTypeOT: {
+            std::unique_ptr<FoFiTrueType> ff;
             if (fileName)
                 ff = FoFiTrueType::load(fileName->c_str());
             else
@@ -1936,8 +1933,7 @@ reload:
             int *codeToGID;
             const int n = ff ? 256 : 0;
             if (ff) {
-                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
-                delete ff;
+                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
                 // if we're substituting for a non-TrueType font, we need to mark
                 // all notdef codes as "do not draw" (rather than drawing TrueType
                 // notdef glyphs)
@@ -1999,6 +1995,7 @@ reload:
                     memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
                 }
             } else {
+                std::unique_ptr<FoFiTrueType> ff;
                 if (fileName)
                     ff = FoFiTrueType::load(fileName->c_str());
                 else
@@ -2007,8 +2004,7 @@ reload:
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     goto err2;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
-                delete ff;
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
             }
             if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, faceIndex))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
@@ -2076,14 +2072,12 @@ reload:
         font = fontEngine->getFont(fontFile, mat, splash->getMatrix());
     }
 
-    delete fontLoc;
     if (fontsrc && !fontsrc->isFile)
         fontsrc->unref();
     return;
 
 err2:
     delete id;
-    delete fontLoc;
 err1:
     if (fontsrc && !fontsrc->isFile)
         fontsrc->unref();

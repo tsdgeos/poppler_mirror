@@ -1,11 +1,12 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2009, 2020, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2009, 2020-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  * Copyright (C) 2021, Zachary Travis <ztravis@everlaw.com>
  * Copyright (C) 2021, Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+ * Copyright (C) 2022, Martin <martinbts@gmx.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,9 +135,11 @@ bool PDFConverter::sign(const NewSignatureData &data)
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
     const auto reason = std::unique_ptr<GooString>(data.reason().isEmpty() ? nullptr : QStringToUnicodeGooString(data.reason()));
     const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
+    const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
+    const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
                      boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
-                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get());
+                     convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd.get(), userPwd.get());
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
@@ -159,6 +162,11 @@ struct PDFConverter::NewSignatureData::NewSignatureDataPrivate
     QColor backgroundColor = QColor(240, 240, 240);
 
     QString partialName = QUuid::createUuid().toString();
+
+    QByteArray documentOwnerPassword;
+    QByteArray documentUserPassword;
+
+    QString imagePath;
 };
 
 PDFConverter::NewSignatureData::NewSignatureData() : d(new NewSignatureDataPrivate()) { }
@@ -316,5 +324,35 @@ QString PDFConverter::NewSignatureData::fieldPartialName() const
 void PDFConverter::NewSignatureData::setFieldPartialName(const QString &name)
 {
     d->partialName = name;
+}
+
+QByteArray PDFConverter::NewSignatureData::documentOwnerPassword() const
+{
+    return d->documentOwnerPassword;
+}
+
+void PDFConverter::NewSignatureData::setDocumentOwnerPassword(const QByteArray &password)
+{
+    d->documentOwnerPassword = password;
+}
+
+QByteArray PDFConverter::NewSignatureData::documentUserPassword() const
+{
+    return d->documentUserPassword;
+}
+
+void PDFConverter::NewSignatureData::setDocumentUserPassword(const QByteArray &password)
+{
+    d->documentUserPassword = password;
+}
+
+QString PDFConverter::NewSignatureData::imagePath() const
+{
+    return d->imagePath;
+}
+
+void PDFConverter::NewSignatureData::setImagePath(const QString &path)
+{
+    d->imagePath = path;
 }
 }

@@ -29,6 +29,7 @@
 #define FOFITRUETYPE_H
 
 #include <cstddef>
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include "FoFiBase.h"
@@ -46,10 +47,10 @@ class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
 public:
     // Create a FoFiTrueType object from a memory buffer.
-    static FoFiTrueType *make(const char *fileA, int lenA, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> make(const char *fileA, int lenA, int faceIndexA = 0);
 
     // Create a FoFiTrueType object from a file on disk.
-    static FoFiTrueType *load(const char *fileName, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA = 0);
 
     ~FoFiTrueType() override;
 

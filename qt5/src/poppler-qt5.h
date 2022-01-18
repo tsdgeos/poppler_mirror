@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -28,6 +28,7 @@
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+ * Copyright (C) 2022 Martin <martinbts@gmx.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2290,6 +2291,37 @@ public:
          */
         QString fieldPartialName() const;
         void setFieldPartialName(const QString &name);
+
+        /**
+         * Document owner password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentOwnerPassword() const;
+        void setDocumentOwnerPassword(const QByteArray &password);
+
+        /**
+         * Document user password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentUserPassword() const;
+        void setDocumentUserPassword(const QByteArray &password);
+
+        /**
+         * Filesystem path to an image file to be used as background
+         * image for the signature annotation widget.
+         *
+         * Default: empty
+         *
+         * \since 22.02
+         */
+        QString imagePath() const;
+        void setImagePath(const QString &path);
 
     private:
         struct NewSignatureDataPrivate;

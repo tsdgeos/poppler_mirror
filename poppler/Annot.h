@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -41,6 +41,7 @@
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2022 Martin <martinbts@gmx.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -386,7 +387,7 @@ public:
     double getFontPtSize() const { return fontPtSize; }
     void setFontColor(std::unique_ptr<AnnotColor> fontColorA);
     const AnnotColor *getFontColor() const { return fontColor.get(); }
-    GooString *toAppearanceString() const;
+    std::string toAppearanceString() const;
 
     DefaultAppearance(const DefaultAppearance &) = delete;
     DefaultAppearance &operator=(const DefaultAppearance &) = delete;
@@ -598,8 +599,7 @@ private:
                              XRef *xref, Dict *resourcesDict);
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                                 XRef *xref, Dict *resourcesDict);
-    void drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically, bool centerHorizontally,
-                                const Ref imageResourceRef = Ref::INVALID());
+    void drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically, bool centerHorizontally);
     bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, bool multiline, int comb, int quadding,
                   bool txField, bool forceZapfDingbats, XRef *xref, bool password, Dict *resourcesDict, const char *defaultFallback = "Helvetica");
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);

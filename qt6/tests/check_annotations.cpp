@@ -234,7 +234,7 @@ void TestAnnotations::checkDefaultAppearance()
         QCOMPARE(color->getValues()[0], 0.1);
         QCOMPARE(color->getValues()[1], 0.2);
         QCOMPARE(color->getValues()[2], 0.3);
-        roundtripString.reset(da.toAppearanceString());
+        roundtripString = std::make_unique<GooString>(da.toAppearanceString());
     }
     {
         /* roundtrip through parse/generate/parse shall preserve values */

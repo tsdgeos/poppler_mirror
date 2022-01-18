@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -52,6 +52,7 @@
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2022 Martin <martinbts@gmx.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -844,14 +845,14 @@ void DefaultAppearance::setFontColor(std::unique_ptr<AnnotColor> fontColorA)
     fontColor = std::move(fontColorA);
 }
 
-GooString *DefaultAppearance::toAppearanceString() const
+std::string DefaultAppearance::toAppearanceString() const
 {
     AnnotAppearanceBuilder appearBuilder;
     if (fontColor) {
         appearBuilder.setDrawColor(fontColor.get(), true);
     }
     appearBuilder.setTextFont(fontName, fontPtSize);
-    return appearBuilder.buffer()->copy();
+    return appearBuilder.buffer()->toStr();
 }
 
 //------------------------------------------------------------------------
@@ -2723,9 +2724,9 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA, const DefaultApp
 {
     type = typeFreeText;
 
-    GooString *daStr = da.toAppearanceString();
+    const std::string daStr = da.toAppearanceString();
     annotObj.dictSet("Subtype", Object(objName, "FreeText"));
-    annotObj.dictSet("DA", Object(daStr));
+    annotObj.dictSet("DA", Object(new GooString(daStr)));
 
     initialize(docA, annotObj.getDict());
 }
@@ -2829,7 +2830,7 @@ void AnnotFreeText::setContents(GooString *new_content)
 
 void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da)
 {
-    appearanceString = std::unique_ptr<GooString>(da.toAppearanceString());
+    appearanceString = std::make_unique<GooString>(da.toAppearanceString());
 
     update("DA", Object(appearanceString->copy()));
     invalidateAppearance();
@@ -4925,6 +4926,16 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
     return true;
 }
 
+static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, const char *childDictEntryName, const Ref childDictEntryValue, XRef *xref)
+{
+    Object childDictionaryObj = parentDict->lookup(childDictName);
+    if (!childDictionaryObj.isDict()) {
+        childDictionaryObj = Object(new Dict(xref));
+        parentDict->set(childDictName, childDictionaryObj.copy());
+    }
+    childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
+}
+
 bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
                                                     const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
@@ -4932,9 +4943,22 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     if (contents.toStr().empty())
         return false;
 
+    if (field->getImageResource() != Ref::INVALID()) {
+        const double width = rect->x2 - rect->x1;
+        const double height = rect->y2 - rect->y1;
+        static const char *imageResourceId = "SigImg";
+        setChildDictEntryValue(resourcesDict, "XObject", imageResourceId, field->getImageResource(), xref);
+        Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+        matrix.scale(width, height);
+        static const char *IMG_TMPL = "\nq {0:.1g} {1:.1g} {2:.1g} {3:.1g} {4:.1g} {5:.1g} cm /{6:s} Do Q\n";
+        const GooString *imgBuffer = GooString::format(IMG_TMPL, matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
+        append(imgBuffer->c_str());
+        delete imgBuffer;
+    }
+
     const GooString &leftText = field->getCustomAppearanceLeftContent();
     if (leftText.toStr().empty()) {
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */, field->getImageResource());
+        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
         DefaultAppearance daLeft(_da);
         daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
@@ -4949,18 +4973,8 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     return true;
 }
 
-static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, const char *childDictEntryName, const Ref childDictEntryValue, XRef *xref)
-{
-    Object childDictionaryObj = parentDict->lookup(childDictName);
-    if (!childDictionaryObj.isDict()) {
-        childDictionaryObj = Object(new Dict(xref));
-        parentDict->set(childDictName, childDictionaryObj.copy());
-    }
-    childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
-}
-
 void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
-                                                    bool centerHorizontally, const Ref imageResourceRef)
+                                                    bool centerHorizontally)
 {
     double borderWidth = 0;
     append("q\n");
@@ -4976,19 +4990,6 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double height = rect->y2 - rect->y1;
     const double textmargin = borderWidth * 2;
     const double textwidth = width - 2 * textmargin;
-
-    // Print a background image.
-    if (imageResourceRef != Ref::INVALID()) {
-        static const char *imageResourceId = "SigImg";
-        setChildDictEntryValue(resourcesDict, "XObject", imageResourceId, imageResourceRef, xref);
-
-        Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
-        matrix.scale(width, height);
-        static const char *IMG_TMPL = "\nq {0:.1g} {1:.1g} {2:.1g} {3:.1g} {4:.1g} {5:.1g} cm /{6:s} Do Q\n";
-        const GooString *imgBuffer = GooString::format(IMG_TMPL, matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
-        append(imgBuffer->c_str());
-        delete imgBuffer;
-    }
 
     // create a Helvetica fake font
     GfxFont *font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());

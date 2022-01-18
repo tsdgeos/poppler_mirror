@@ -34,6 +34,8 @@
 #ifndef GFXFONT_H
 #define GFXFONT_H
 
+#include <optional>
+
 #include "goo/GooString.h"
 #include "Object.h"
 #include "CharTypes.h"
@@ -119,16 +121,23 @@ public:
     ~GfxFontLoc();
 
     GfxFontLoc(const GfxFontLoc &) = delete;
+    GfxFontLoc(GfxFontLoc &&) noexcept;
     GfxFontLoc &operator=(const GfxFontLoc &) = delete;
+    GfxFontLoc &operator=(GfxFontLoc &&other) noexcept;
+
+    // Set the 'path' string from a GooString on the heap.
+    // Ownership of the object is taken.
+    void setPath(GooString *pathA);
+    const GooString *pathAsGooString() const;
 
     GfxFontLocType locType;
     GfxFontType fontType;
     Ref embFontID; // embedded stream obj ID
                    //   (if locType == gfxFontLocEmbedded)
-    GooString *path; // font file path
-                     //   (if locType == gfxFontLocExternal)
-                     // PS font name
-                     //   (if locType == gfxFontLocResident)
+    std::string path; // font file path
+                      //   (if locType == gfxFontLocExternal)
+                      // PS font name
+                      //   (if locType == gfxFontLocResident)
     int fontNum; // for TrueType collections
                  //   (if locType == gfxFontLocExternal)
     int substIdx; // substitute font index
@@ -267,11 +276,11 @@ public:
     virtual int getWMode() { return 0; }
 
     // Locate the font file for this font.  If <ps> is not null, includes PS
-    // printer-resident fonts.  Returns NULL on failure.
-    GfxFontLoc *locateFont(XRef *xref, PSOutputDev *ps);
+    // printer-resident fonts.  Returns std::optional without a value on failure.
+    std::optional<GfxFontLoc> locateFont(XRef *xref, PSOutputDev *ps);
 
     // Locate a Base-14 font file for a specified font name.
-    static GfxFontLoc *locateBase14Font(const GooString *base14Name);
+    static std::optional<GfxFontLoc> locateBase14Font(const GooString *base14Name);
 
     // Read an external or embedded font file into a buffer.
     char *readEmbFontFile(XRef *xref, int *len);
@@ -303,7 +312,7 @@ protected:
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
     void readFontDescriptor(XRef *xref, Dict *fontDict);
     CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
-    static GfxFontLoc *getExternalFont(GooString *path, bool cid);
+    static std::optional<GfxFontLoc> getExternalFont(GooString *path, bool cid);
 
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)

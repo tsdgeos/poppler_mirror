@@ -1,3 +1,23 @@
+Release 22.01.0:
+        core:
+         * Allow local (relative to dll) fonts dir on Windows
+         * TextOutputDev: require more spacing between columns. Issue #1093
+         * Fix crash in Splash::gouraudTriangleShadedFill. Issue #1183
+         * Fix crash when calling Form::reset()
+         * GfxSeparationColorSpace: Check validity of colorspace and function. Issue #1184
+         * Minor code improvements
+
+        glib:
+         * Include glib.h before using defines from it
+         * Close file descriptors on error
+         * Plug some memory leaks
+         * Replace use of deprecated g_memdup/g_time_zone_new
+         * Remove FD-taking functions on windows
+
+        utils:
+         * pdfsig: Add support for documents with passwords
+         * pdfsig: Fix signing with -sign if nss password is needed
+
 Release 21.12.0:
         core:
          * Add API to add images

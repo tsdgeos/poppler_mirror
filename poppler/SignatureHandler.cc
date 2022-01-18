@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -22,13 +22,16 @@
 #include <config.h>
 
 #include "SignatureHandler.h"
+#include "goo/gdir.h"
 #include "goo/gmem.h"
 
-#include <dirent.h>
+#include <optional>
+
 #include <Error.h>
 
 /* NSS headers */
 #include <secmod.h>
+#include <secoid.h>
 #include <keyhi.h>
 #include <secder.h>
 #include <pk11pub.h>
@@ -164,7 +167,7 @@ struct SigningCertificateV2
  *      registeredID                    [8]     OBJECT IDENTIFIER
  * }
  */
-const SEC_ASN1Template GeneralNameTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralName) }, { SEC_ASN1_INLINE, offsetof(GeneralName, name), CERT_NameTemplate, 0 }, { 0, 0, nullptr, 0 } };
+const SEC_ASN1Template GeneralNameTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralName) }, { SEC_ASN1_INLINE, offsetof(GeneralName, name), SEC_ASN1_GET(CERT_NameTemplate), 0 }, { 0, 0, nullptr, 0 } };
 
 /**
  * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
@@ -191,12 +194,10 @@ const SEC_ASN1Template IssuerSerialTemplate[] = {
  * }
  */
 
-SEC_ASN1_MKSUB(SECOID_AlgorithmIDTemplate)
-
 const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
-                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_SUB(SECOID_AlgorithmIDTemplate), 0 },
+                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), 0 },
                                                  { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
-                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
+                                                 { SEC_ASN1_INLINE, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
                                                  { 0, 0, nullptr, 0 } };
 
 /**
@@ -665,33 +666,18 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
     }
 }
 
-static GooString *getDefaultFirefoxCertDB_Linux()
+static std::optional<std::string> getDefaultFirefoxCertDB_Linux()
 {
-    GooString *finalPath = nullptr;
-    DIR *toSearchIn;
-    struct dirent *subFolder;
+    const std::string firefoxPath = std::string(getenv("HOME")) + "/.mozilla/firefox/";
 
-    GooString *homePath = new GooString(getenv("HOME"));
-    homePath = homePath->append("/.mozilla/firefox/");
-
-    if ((toSearchIn = opendir(homePath->c_str())) == nullptr) {
-        error(errInternal, 0, "couldn't find default Firefox Folder");
-        delete homePath;
-        return nullptr;
-    }
-    do {
-        if ((subFolder = readdir(toSearchIn)) != nullptr) {
-            if (strstr(subFolder->d_name, "default") != nullptr) {
-                finalPath = homePath->append(subFolder->d_name);
-                closedir(toSearchIn);
-                return finalPath;
-            }
+    GDir firefoxDir(firefoxPath.c_str());
+    std::unique_ptr<GDirEntry> entry;
+    while (entry = firefoxDir.getNextEntry(), entry != nullptr) {
+        if (entry->isDir() && entry->getName()->toStr().find("default") != std::string::npos) {
+            return entry->getFullPath()->toStr();
         }
-    } while (subFolder != nullptr);
-
-    closedir(toSearchIn);
-    delete homePath;
-    return nullptr;
+    }
+    return {};
 }
 
 std::string SignatureHandler::sNssDir;
@@ -720,13 +706,13 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
         sNssDir = nssDir.toStr();
     } else {
-        GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
-        if (certDBPath == nullptr) {
+        const std::optional<std::string> certDBPath = getDefaultFirefoxCertDB_Linux();
+        if (!certDBPath) {
             initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
             sNssDir = "sql:/etc/pki/nssdb";
         } else {
             initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
-            sNssDir = certDBPath->toStr();
+            sNssDir = *certDBPath;
         }
         if (!initSuccess) {
             GooString homeNssDb(getenv("HOME"));
@@ -737,7 +723,6 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
                 NSS_NoDB_Init(nullptr);
             }
         }
-        delete certDBPath;
     }
 
     if (initSuccess) {

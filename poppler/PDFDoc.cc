@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -50,7 +50,7 @@
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2021-2022 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -633,6 +633,23 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
     return res;
 }
 
+static int sumSignatureFields(FormField *ff)
+{
+    int sum = 0;
+
+    if (ff->getNumChildren() == 0) {
+        if (ff->getType() == formSignature) {
+            sum = 1;
+        }
+    } else {
+        for (int i = 0; i < ff->getNumChildren(); ++i) {
+            FormField *children = ff->getChildren(i);
+            sum += sumSignatureFields(children);
+        }
+    }
+    return sum;
+}
+
 int PDFDoc::getNumSignatureFields()
 {
     const Form *f = catalog->getForm();
@@ -640,7 +657,13 @@ int PDFDoc::getNumSignatureFields()
     if (!f)
         return 0;
 
-    return f->getNumFields();
+    const int nRootFields = f->getNumFields();
+    int sum = 0;
+    for (int i = 0; i < nRootFields; ++i) {
+        FormField *ff = f->getRootField(i);
+        sum += sumSignatureFields(ff);
+    }
+    return sum;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
@@ -2158,8 +2181,8 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     rectArray->add(Object(rect.y2));
     annotObj.dictSet("Rect", Object(rectArray));
 
-    GooString *daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(daStr));
+    const std::string daStr = da.toAppearanceString();
+    annotObj.dictSet("DA", Object(new GooString(daStr)));
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
