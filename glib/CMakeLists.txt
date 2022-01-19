@@ -39,11 +39,13 @@ set(poppler_glib_public_headers
 )
 
 find_program(GLIB2_MKENUMS glib-mkenums)
+find_program(GLIB2_MKENUMS_PYTHON python3)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
-  COMMAND ${GLIB2_MKENUMS}
+  COMMAND ${GLIB2_MKENUMS_PYTHON}
   ARGS
+    ${GLIB2_MKENUMS}
     --template poppler-enums.h.template
     ${poppler_glib_public_headers} > ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -53,8 +55,9 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
-  COMMAND ${GLIB2_MKENUMS}
+  COMMAND ${GLIB2_MKENUMS_PYTHON}
   ARGS
+    ${GLIB2_MKENUMS}
     --template poppler-enums.c.template
     ${poppler_glib_public_headers} > ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
