@@ -16,6 +16,8 @@ install:
     & cmd /C "git clone -q --depth=1 https://invent.kde.org/packaging/craftmaster.git C:\CraftMaster\CraftMaster 2>&1"
     & cmd /C "git clone https://gitlab.freedesktop.org/poppler/test.git $env:APPVEYOR_BUILD_FOLDER/../test 2>&1"
     craft craft
+    craft --set buildGlibFrontend=1 poppler
+    craft --set buildUtils=1 poppler
     craft --install-deps poppler
 
 build_script:
