@@ -43,7 +43,9 @@
 #include "Win32Console.h"
 #include "numberofcharacters.h"
 #include "UTF.h"
-#include <libgen.h>
+#if __has_include(<libgen.h>)
+#    include <libgen.h>
+#endif
 
 static const char *getReadableSigState(SignatureValidationStatus sig_vs)
 {
