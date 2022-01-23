@@ -620,8 +620,11 @@ static void addSignatureFieldsToVector(FormField *ff, std::vector<FormFieldSigna
 
 std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
 {
+    // Unfortunately there's files with signatures in Forms but not in Annots
+    // and files with signatures in Annots but no in forms so we need to search both
     std::vector<FormFieldSignature *> res;
 
+    // First search
     const Form *f = catalog->getForm();
     if (!f)
         return res;
@@ -631,40 +634,26 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
         FormField *ff = f->getRootField(i);
         addSignatureFieldsToVector(ff, res);
     }
+
+    // Second search
+    for (int page = 1; page <= getNumPages(); ++page) {
+        Page *p = getPage(page);
+        if (p) {
+            const std::unique_ptr<FormPageWidgets> pw = p->getFormWidgets();
+            for (int i = 0; i < pw->getNumWidgets(); ++i) {
+                FormWidget *fw = pw->getWidget(i);
+                if (fw->getType() == formSignature) {
+                    assert(fw->getField()->getType() == formSignature);
+                    FormFieldSignature *ffs = static_cast<FormFieldSignature *>(fw->getField());
+                    if (std::find(res.begin(), res.end(), ffs) == res.end()) {
+                        res.push_back(ffs);
+                    }
+                }
+            }
+        }
+    }
+
     return res;
-}
-
-static int sumSignatureFields(FormField *ff)
-{
-    int sum = 0;
-
-    if (ff->getNumChildren() == 0) {
-        if (ff->getType() == formSignature) {
-            sum = 1;
-        }
-    } else {
-        for (int i = 0; i < ff->getNumChildren(); ++i) {
-            FormField *children = ff->getChildren(i);
-            sum += sumSignatureFields(children);
-        }
-    }
-    return sum;
-}
-
-int PDFDoc::getNumSignatureFields()
-{
-    const Form *f = catalog->getForm();
-
-    if (!f)
-        return 0;
-
-    const int nRootFields = f->getNumFields();
-    int sum = 0;
-    for (int i = 0; i < nRootFields; ++i) {
-        FormField *ff = f->getRootField(i);
-        sum += sumSignatureFields(ff);
-    }
-    return sum;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,

@@ -1783,7 +1783,7 @@ gint poppler_document_get_n_signatures(const PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), 0);
 
-    return document->doc->getNumSignatureFields();
+    return document->doc->getSignatureFields().size();
 }
 
 /**

@@ -228,7 +228,6 @@ public:
     bool isEncrypted() { return xref->isEncrypted(); }
 
     std::vector<FormFieldSignature *> getSignatureFields();
-    int getNumSignatureFields();
 
     // Check various permissions.
     bool okToPrint(bool ignoreOwnerPW = false) { return xref->okToPrint(ignoreOwnerPW); }
