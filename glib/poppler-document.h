@@ -2,7 +2,7 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2019, 2021 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
@@ -418,6 +418,8 @@ POPPLER_PUBLIC
 gboolean poppler_document_has_javascript(PopplerDocument *document);
 
 /* Signatures */
+POPPLER_PUBLIC
+GList *poppler_document_get_signature_fields(PopplerDocument *document);
 POPPLER_PUBLIC
 gint poppler_document_get_n_signatures(const PopplerDocument *document);
 
