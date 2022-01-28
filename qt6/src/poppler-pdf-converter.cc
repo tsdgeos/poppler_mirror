@@ -138,7 +138,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
     const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
-                     boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
+                     boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(),
                      convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd.get(), userPwd.get());
 }
 

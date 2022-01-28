@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 
         // We don't provide a way to customize the UI from pdfsig for now
         const bool success = doc->sign(argv[2], certNickname, pw, newSignatureFieldName.copy(), /*page*/ 1,
-                                       /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0,
+                                       /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
                                        /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get(), /* location */ nullptr, /* image path */ "", ownerPW.get(), userPW.get());
         return success ? 0 : 3;
     }

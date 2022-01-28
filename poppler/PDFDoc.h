@@ -336,8 +336,8 @@ public:
     // Argument imagePath is a background image (a path to a file).
     // sign() takes ownership of partialFieldName.
     bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-              std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr,
-              const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
+              double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr,
+              const GooString *location = nullptr, const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
 
 private:
     // insert referenced objects in XRef
