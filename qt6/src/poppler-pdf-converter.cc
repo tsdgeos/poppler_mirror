@@ -7,6 +7,7 @@
  * Copyright (C) 2021, Zachary Travis <ztravis@everlaw.com>
  * Copyright (C) 2021, Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Copyright (C) 2022, Martin <martinbts@gmx.net>
+ * Copyright (C) 2022, Felix Jung <fxjung@posteo.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

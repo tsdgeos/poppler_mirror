@@ -16,6 +16,7 @@
 // Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
+// Copyright 2022 Felix Jung <fxjung@posteo.de>
 //
 //========================================================================
 
