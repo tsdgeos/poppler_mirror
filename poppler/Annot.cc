@@ -1104,6 +1104,7 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
 
     if (!dict) {
         rotation = 0;
+        position = captionNoIcon;
         return;
     }
 
