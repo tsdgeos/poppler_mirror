@@ -2,12 +2,11 @@
  * Copyright (C) 2005, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
- * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1785,6 +1784,35 @@ gint poppler_document_get_n_signatures(const PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), 0);
 
     return document->doc->getNumSignatureFields();
+}
+
+/**
+ * poppler_document_get_signature_fields:
+ * @document: A #PopplerDocument
+ *
+ * Returns a #GList containing all signature #PopplerFormField<!-- -->s in the document.
+ *
+ * Return value: (element-type PopplerFormField) (transfer full): a list of all signature form fields.
+ *
+ * Since: 22.02.0
+ **/
+GList *poppler_document_get_signature_fields(PopplerDocument *document)
+{
+    std::vector<FormFieldSignature *> signature_fields;
+    FormWidget *widget;
+    GList *result = nullptr;
+    gsize i;
+
+    signature_fields = document->doc->getSignatureFields();
+
+    for (i = 0; i < signature_fields.size(); i++) {
+        widget = signature_fields[i]->getCreateWidget();
+
+        if (widget != nullptr)
+            result = g_list_prepend(result, _poppler_form_field_new(document, widget));
+    }
+
+    return g_list_reverse(result);
 }
 
 /**

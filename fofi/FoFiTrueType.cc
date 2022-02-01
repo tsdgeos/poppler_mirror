@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012, 2014-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -472,6 +472,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
     // Cannot use std::make_unique, because the constructor is private
     auto ff = new FoFiTrueType(fileA, lenA, true, faceIndexA);
     if (!ff->parsedOk) {
+        delete ff;
         return nullptr;
     }
     return std::unique_ptr<FoFiTrueType>(ff);

@@ -7,6 +7,7 @@
  * Copyright (C) 2021, Zachary Travis <ztravis@everlaw.com>
  * Copyright (C) 2021, Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Copyright (C) 2022, Martin <martinbts@gmx.net>
+ * Copyright (C) 2022, Felix Jung <fxjung@posteo.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,7 +139,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
     const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
     return doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
-                     boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(),
+                     boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(),
                      convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd.get(), userPwd.get());
 }
 

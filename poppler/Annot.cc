@@ -598,6 +598,22 @@ AnnotBorderArray::AnnotBorderArray(Array *array)
     }
 }
 
+std::unique_ptr<AnnotBorder> AnnotBorderArray::copy() const
+{
+    AnnotBorderArray *res = new AnnotBorderArray();
+    res->type = type;
+    res->width = width;
+    res->dashLength = dashLength;
+    if (dashLength > 0) {
+        res->dash = (double *)gmallocn(dashLength, sizeof(double));
+        memcpy(res->dash, dash, dashLength * sizeof(double));
+    }
+    res->style = style;
+    res->horizontalCorner = horizontalCorner;
+    res->verticalCorner = verticalCorner;
+    return std::unique_ptr<AnnotBorder>(res);
+}
+
 Object AnnotBorderArray::writeToObject(XRef *xref) const
 {
     Array *borderArray = new Array(xref);
@@ -681,6 +697,20 @@ const char *AnnotBorderBS::getStyleName() const
     }
 
     return "S";
+}
+
+std::unique_ptr<AnnotBorder> AnnotBorderBS::copy() const
+{
+    AnnotBorderBS *res = new AnnotBorderBS();
+    res->type = type;
+    res->width = width;
+    res->dashLength = dashLength;
+    if (dashLength > 0) {
+        res->dash = (double *)gmallocn(dashLength, sizeof(double));
+        memcpy(res->dash, dash, dashLength * sizeof(double));
+    }
+    res->style = style;
+    return std::unique_ptr<AnnotBorder>(res);
 }
 
 Object AnnotBorderBS::writeToObject(XRef *xref) const
@@ -1072,6 +1102,12 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
 {
     Object obj1;
 
+    if (!dict) {
+        rotation = 0;
+        position = captionNoIcon;
+        return;
+    }
+
     obj1 = dict->lookup("R");
     if (obj1.isInt()) {
         rotation = obj1.getInt();
@@ -1124,6 +1160,32 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
 }
 
 AnnotAppearanceCharacs::~AnnotAppearanceCharacs() = default;
+
+std::unique_ptr<AnnotAppearanceCharacs> AnnotAppearanceCharacs::copy() const
+{
+    AnnotAppearanceCharacs *res = new AnnotAppearanceCharacs(nullptr);
+    res->rotation = rotation;
+    if (borderColor) {
+        res->borderColor = std::make_unique<AnnotColor>(*borderColor);
+    }
+    if (backColor) {
+        res->backColor = std::make_unique<AnnotColor>(*backColor);
+    }
+    if (normalCaption) {
+        res->normalCaption = std::unique_ptr<GooString>(normalCaption->copy());
+    }
+    if (rolloverCaption) {
+        res->rolloverCaption = std::unique_ptr<GooString>(rolloverCaption->copy());
+    }
+    if (alternateCaption) {
+        res->alternateCaption = std::unique_ptr<GooString>(alternateCaption->copy());
+    }
+    if (iconFit) {
+        res->iconFit = std::make_unique<AnnotIconFit>(*iconFit);
+    }
+    res->position = position;
+    return std::unique_ptr<AnnotAppearanceCharacs>(res);
+}
 
 //------------------------------------------------------------------------
 // AnnotAppearanceBBox

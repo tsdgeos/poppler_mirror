@@ -119,7 +119,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   # General gir: Reset object-list for introspection & load tool args
   set(INTROSPECTION_GIRS)
   set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}" "--warn-all")
-  set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
+  set(INTROSPECTION_COMPILER_ARGS ${INTROSPECTION_COMPILER_ARGS} "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
   # Poppler: Assign package to gir & export keys
   set(Poppler_0_18_gir "poppler-glib")

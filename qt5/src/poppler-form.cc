@@ -31,7 +31,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "poppler-qt5.h"
+#include "poppler-form.h"
 
 #include <config.h>
 
@@ -47,7 +47,6 @@
 #    include <SignatureHandler.h>
 #endif
 
-#include "poppler-form.h"
 #include "poppler-page-private.h"
 #include "poppler-private.h"
 #include "poppler-annotation-helper.h"
@@ -925,6 +924,9 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     case unknown_signature_type:
         sigType = UnknownSignatureType;
         break;
+    case unsigned_signature_field:
+        sigType = UnsignedSignature;
+        break;
     }
     return sigType;
 }
@@ -1055,6 +1057,34 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     }
 
     return SignatureValidationInfo(priv);
+}
+
+FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const
+{
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    if (fws->signatureType() != unsigned_signature_field) {
+        return FieldAlreadySigned;
+    }
+
+    Goffset file_size = 0;
+    const std::optional<GooString> sig = fws->getCheckedSignature(&file_size);
+    if (sig) {
+        // the above unsigned_signature_field check
+        // should already catch this, but double check
+        return FieldAlreadySigned;
+    }
+    const auto reason = std::unique_ptr<GooString>(data.reason().isEmpty() ? nullptr : QStringToUnicodeGooString(data.reason()));
+    const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
+    const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
+    const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
+    const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
+    const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
+
+    const bool success =
+            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd.get(), userPwd.get(),
+                                            *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+
+    return success ? SigningSuccess : GenericSigningError;
 }
 
 bool hasNSSSupport()

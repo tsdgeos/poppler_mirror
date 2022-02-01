@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, 2017, 2019-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, 2019-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -43,6 +43,7 @@
 #include <QtCore/QSharedPointer>
 #include "poppler-export.h"
 #include "poppler-annotation.h"
+#include "poppler-qt5.h"
 
 class Object;
 class Page;
@@ -778,7 +779,8 @@ public:
         AdbePkcs7sha1,
         AdbePkcs7detached,
         EtsiCAdESdetached,
-        UnknownSignatureType ///< \since 0.90
+        UnknownSignatureType, ///< \since 0.90
+        UnsignedSignature ///< \since 22.02
     };
 
     /**
@@ -820,6 +822,25 @@ public:
       \since 0.58
      */
     SignatureValidationInfo validate(int opt, const QDateTime &validationTime) const;
+
+    /**
+     * \since 22.02
+     */
+    enum SigningResult
+    {
+        FieldAlreadySigned, ///< Trying to sign a field that is already signed
+        GenericSigningError,
+        SigningSuccess
+    };
+
+    /**
+      Signs a field of UnsignedSignature type.
+
+      Ignores data.page(), data.fieldPartialName() and data.boundingRectangle()
+
+      \since 22.02
+     */
+    SigningResult sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const;
 
 private:
     Q_DISABLE_COPY(FormFieldSignature)

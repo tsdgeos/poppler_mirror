@@ -37,6 +37,7 @@
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -336,8 +337,8 @@ public:
     // Argument imagePath is a background image (a path to a file).
     // sign() takes ownership of partialFieldName.
     bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-              std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr,
-              const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
+              double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr,
+              const GooString *location = nullptr, const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
 
 private:
     // insert referenced objects in XRef

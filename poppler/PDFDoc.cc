@@ -51,6 +51,7 @@
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2021-2022 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2152,8 +2153,8 @@ bool PDFDoc::hasJavascript()
 }
 
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
-                  double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location,
-                  const std::string &imagePath, const GooString *ownerPassword, const GooString *userPassword)
+                  double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason,
+                  const GooString *location, const std::string &imagePath, const GooString *ownerPassword, const GooString *userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
@@ -2190,6 +2191,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
     field->setCustomAppearanceContent(signatureText);
     field->setCustomAppearanceLeftContent(signatureTextLeft);
+    field->setCustomAppearanceLeftFontSize(leftFontSize);
     field->setImageResource(imageResourceRef);
 
     Object refObj(ref);
