@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -53,17 +53,14 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
 
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    // TODO Use modern syntax when depending on Qt 5.6
-    m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, SLOT(slotOpenFile())); // clazy:exclude=old-style-connect
+    m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, &PdfViewer::slotOpenFile);
     m_fileOpenAct->setShortcut(Qt::CTRL + Qt::Key_O);
     fileMenu->addSeparator();
-    // TODO Use modern syntax when depending on Qt 5.6
-    m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, SLOT(slotSaveCopy())); // clazy:exclude=old-style-connect
+    m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, &PdfViewer::slotSaveCopy);
     m_fileSaveCopyAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     m_fileSaveCopyAct->setEnabled(false);
     fileMenu->addSeparator();
-    // TODO Use modern syntax when depending on Qt 5.6
-    QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows())); // clazy:exclude=old-style-connect
+    QAction *act = fileMenu->addAction(tr("&Quit"), qApp, &QApplication::closeAllWindows);
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
@@ -90,10 +87,8 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     connect(m_settingsRenderBackendGrp, &QActionGroup::triggered, this, &PdfViewer::slotRenderBackend);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    // TODO Use modern syntax when depending on Qt 5.6
-    act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout())); // clazy:exclude=old-style-connect
-    // TODO Use modern syntax when depending on Qt 5.6
-    act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt())); // clazy:exclude=old-style-connect
+    act = helpMenu->addAction(tr("&About"), this, &PdfViewer::slotAbout);
+    act = helpMenu->addAction(tr("About &Qt"), this, &PdfViewer::slotAboutQt);
 
     NavigationToolBar *navbar = new NavigationToolBar(this);
     addToolBar(navbar);
