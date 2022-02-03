@@ -669,11 +669,11 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
 static std::optional<std::string> getDefaultFirefoxCertDB()
 {
 #ifdef _WIN32
-    const char *env = getenv("USERPROFILE");
+    const char *env = getenv("APPDATA");
     if (!env) {
         return {};
     }
-    const std::string firefoxPath = std::string(env) + "/AppData/Roaming/Mozilla/Firefox/Profiles/";
+    const std::string firefoxPath = std::string(env) + "/Mozilla/Firefox/Profiles/";
 #else
     const char *env = getenv("HOME");
     if (!env) {
