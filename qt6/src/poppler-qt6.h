@@ -94,7 +94,7 @@ struct OutlineItemData;
     the first parameter is the actual message, the second is the unaltered
     closure argument which was passed to the setDebugErrorFunction call.
 */
-typedef void (*PopplerDebugFunc)(const QString & /*message*/, const QVariant & /*closure*/);
+using PopplerDebugFunc = void (*)(const QString & /*message*/, const QVariant & /*closure*/);
 
 /**
     Set a new debug/error output function.
@@ -519,7 +519,7 @@ public:
         the first parameter is the image as rendered up to now, the second is the unaltered
         closure argument which was passed to the renderToImage call.
     */
-    typedef void (*RenderToImagePartialUpdateFunc)(const QImage & /*image*/, const QVariant & /*closure*/);
+    using RenderToImagePartialUpdateFunc = void (*)(const QImage & /*image*/, const QVariant & /*closure*/);
 
     /**
         Partial Update query renderToImage callback.
@@ -527,7 +527,7 @@ public:
         This function type is used for query if the partial rendering update should happen;
         the parameter is the unaltered closure argument which was passed to the renderToImage call.
     */
-    typedef bool (*ShouldRenderToImagePartialQueryFunc)(const QVariant & /*closure*/);
+    using ShouldRenderToImagePartialQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
        Render the page to a QImage using the current
@@ -584,7 +584,7 @@ public:
 
         This function type is used for query if the current rendering/text extraction should be cancelled.
     */
-    typedef bool (*ShouldAbortQueryFunc)(const QVariant & /*closure*/);
+    using ShouldAbortQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
 Render the page to a QImage using the current

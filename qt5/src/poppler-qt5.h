@@ -94,7 +94,7 @@ struct OutlineItemData;
 
     \since 0.16
 */
-typedef void (*PopplerDebugFunc)(const QString & /*message*/, const QVariant & /*closure*/);
+using PopplerDebugFunc = void (*)(const QString & /*message*/, const QVariant & /*closure*/);
 
 /**
     Set a new debug/error output function.
@@ -537,7 +537,7 @@ public:
 
         \since 0.62
     */
-    typedef void (*RenderToImagePartialUpdateFunc)(const QImage & /*image*/, const QVariant & /*closure*/);
+    using RenderToImagePartialUpdateFunc = void (*)(const QImage & /*image*/, const QVariant & /*closure*/);
 
     /**
         Partial Update query renderToImage callback.
@@ -547,7 +547,7 @@ public:
 
         \since 0.62
     */
-    typedef bool (*ShouldRenderToImagePartialQueryFunc)(const QVariant & /*closure*/);
+    using ShouldRenderToImagePartialQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
        Render the page to a QImage using the current
@@ -608,7 +608,7 @@ public:
 
         \since 0.63
     */
-    typedef bool (*ShouldAbortQueryFunc)(const QVariant & /*closure*/);
+    using ShouldAbortQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
 Render the page to a QImage using the current
