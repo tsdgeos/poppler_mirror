@@ -293,34 +293,16 @@ PDFDoc::~PDFDoc()
         gfree(pageCache);
     }
     delete secHdlr;
-    if (outline) {
-        delete outline;
-    }
-    if (catalog) {
-        delete catalog;
-    }
-    if (xref) {
-        delete xref;
-    }
-    if (hints) {
-        delete hints;
-    }
-    if (linearization) {
-        delete linearization;
-    }
-    if (str) {
-        delete str;
-    }
-    if (file) {
-        delete file;
-    }
-    if (fileName) {
-        delete fileName;
-    }
+    delete outline;
+    delete catalog;
+    delete xref;
+    delete hints;
+    delete linearization;
+    delete str;
+    delete file;
+    delete fileName;
 #ifdef _WIN32
-    if (fileNameU) {
-        gfree(fileNameU);
-    }
+    gfree(fileNameU);
 #endif
 }
 
