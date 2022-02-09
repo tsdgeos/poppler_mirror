@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -432,21 +432,19 @@ std::unique_ptr<LinkDest> Catalog::getDestNameTreeDest(int i)
     return createLinkDest(&obj);
 }
 
-FileSpec *Catalog::embeddedFile(int i)
+std::unique_ptr<FileSpec> Catalog::embeddedFile(int i)
 {
     catalogLocker();
     Object *obj = getEmbeddedFileNameTree()->getValue(i);
-    FileSpec *embeddedFile = nullptr;
     if (obj->isRef()) {
         Object fsDict = obj->fetch(xref);
-        embeddedFile = new FileSpec(&fsDict);
+        return std::make_unique<FileSpec>(&fsDict);
     } else if (obj->isDict()) {
-        embeddedFile = new FileSpec(obj);
+        return std::make_unique<FileSpec>(obj);
     } else {
         Object null;
-        embeddedFile = new FileSpec(&null);
+        return std::make_unique<FileSpec>(&null);
     }
-    return embeddedFile;
 }
 
 bool Catalog::hasEmbeddedFile(const std::string &fileName)

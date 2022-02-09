@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,22 +20,20 @@
 #ifndef POPPLER_EMBEDDED_FILE_PRIVATE_H
 #define POPPLER_EMBEDDED_FILE_PRIVATE_H
 
-class FileSpec;
+#include <FileSpec.h>
+
+#include <memory>
 
 namespace poppler {
 
 class embedded_file_private
 {
 public:
-    explicit embedded_file_private(FileSpec *fs);
-    ~embedded_file_private();
+    explicit embedded_file_private(std::unique_ptr<FileSpec> &&fs);
 
-    embedded_file_private(const embedded_file_private &) = delete;
-    embedded_file_private &operator=(const embedded_file_private &) = delete;
+    static embedded_file *create(std::unique_ptr<FileSpec> &&fs);
 
-    static embedded_file *create(FileSpec *fs);
-
-    FileSpec *file_spec;
+    std::unique_ptr<FileSpec> file_spec;
 };
 
 }

@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017-2021 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017-2022 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -53,6 +53,7 @@
 #include <poppler-config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
+#include <FileSpec.h>
 #include <Form.h>
 #include <PDFDoc.h>
 #include <FontInfo.h>
@@ -158,8 +159,8 @@ public:
         if (!(0 == numEmb)) {
             // we have some embedded documents, build the list
             for (int yalv = 0; yalv < numEmb; ++yalv) {
-                FileSpec *fs = doc->getCatalog()->embeddedFile(yalv);
-                m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(fs)));
+                std::unique_ptr<FileSpec> fs = doc->getCatalog()->embeddedFile(yalv);
+                m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(std::move(fs))));
             }
         }
     }

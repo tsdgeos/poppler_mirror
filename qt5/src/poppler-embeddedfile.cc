@@ -1,5 +1,5 @@
 /* poppler-document.cc: qt interface to poppler
- * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
@@ -27,19 +27,13 @@
 #include "Object.h"
 #include "Stream.h"
 #include "Catalog.h"
-#include "FileSpec.h"
 
 #include "poppler-private.h"
 #include "poppler-embeddedfile-private.h"
 
 namespace Poppler {
 
-EmbeddedFileData::EmbeddedFileData(FileSpec *fs) : filespec(fs) { }
-
-EmbeddedFileData::~EmbeddedFileData()
-{
-    delete filespec;
-}
+EmbeddedFileData::EmbeddedFileData(std::unique_ptr<FileSpec> &&fs) : filespec(std::move(fs)) { }
 
 EmbFile *EmbeddedFileData::embFile() const
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,16 +34,11 @@
 
 using namespace poppler;
 
-embedded_file_private::embedded_file_private(FileSpec *fs) : file_spec(fs) { }
+embedded_file_private::embedded_file_private(std::unique_ptr<FileSpec> &&fs) : file_spec(std::move(fs)) { }
 
-embedded_file_private::~embedded_file_private()
+embedded_file *embedded_file_private::create(std::unique_ptr<FileSpec> &&fs)
 {
-    delete file_spec;
-}
-
-embedded_file *embedded_file_private::create(FileSpec *fs)
-{
-    return new embedded_file(*new embedded_file_private(fs));
+    return new embedded_file(*new embedded_file_private(std::move(fs)));
 }
 
 /**
