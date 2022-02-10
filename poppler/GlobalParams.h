@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -118,7 +118,7 @@ public:
 
     CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    CMap *getCMap(const GooString *collection, const GooString *cMapName);
+    std::shared_ptr<CMap> getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();

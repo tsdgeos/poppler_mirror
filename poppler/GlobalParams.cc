@@ -1198,7 +1198,7 @@ const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName)
     return map;
 }
 
-CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapName)
+std::shared_ptr<CMap> GlobalParams::getCMap(const GooString *collection, const GooString *cMapName)
 {
     cMapCacheLocker();
     return cMapCache->getCMap(collection, cMapName);
