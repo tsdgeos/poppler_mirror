@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2012 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
