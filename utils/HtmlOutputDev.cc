@@ -925,12 +925,9 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
         }
         imgList.clear();
 
-        GooString *str;
         for (HtmlString *tmp = yxStrings; tmp; tmp = tmp->yxNext) {
             if (tmp->htext) {
-                str = new GooString(tmp->htext);
-                fputs(str->c_str(), f);
-                delete str;
+                fputs(tmp->htext->c_str(), f);
                 fputs("<br/>\n", f);
             }
         }
