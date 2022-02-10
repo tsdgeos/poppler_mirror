@@ -117,7 +117,7 @@
 // PDFDoc
 //------------------------------------------------------------------------
 
-#define pdfdocLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define pdfdocLocker() const std::scoped_lock locker(mutex)
 
 PDFDoc::PDFDoc() { }
 

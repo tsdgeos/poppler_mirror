@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -248,7 +248,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 // Page
 //------------------------------------------------------------------------
 
-#define pageLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define pageLocker() const std::scoped_lock locker(mutex)
 
 Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form)
 {
