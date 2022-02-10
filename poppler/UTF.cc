@@ -357,9 +357,9 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     return utf16;
 }
 
-GooString *utf8ToUtf16WithBom(const std::string &utf8)
+std::unique_ptr<GooString> utf8ToUtf16WithBom(const std::string &utf8)
 {
-    GooString *result = new GooString();
+    auto result = std::make_unique<GooString>();
     if (utf8.empty()) {
         return result;
     }
