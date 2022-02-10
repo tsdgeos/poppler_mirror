@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -183,7 +183,7 @@ public:
     int numEmbeddedFiles() { return getEmbeddedFileNameTree()->numEntries(); }
 
     // Get the i'th file embedded (at the Document level) in the document
-    FileSpec *embeddedFile(int i);
+    std::unique_ptr<FileSpec> embeddedFile(int i);
 
     // Is there an embedded file with the given name?
     bool hasEmbeddedFile(const std::string &fileName);

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -959,8 +959,8 @@ std::vector<embedded_file *> document::embedded_files() const
         const int num = d->doc->getCatalog()->numEmbeddedFiles();
         d->embedded_files.resize(num);
         for (int i = 0; i < num; ++i) {
-            FileSpec *fs = d->doc->getCatalog()->embeddedFile(i);
-            d->embedded_files[i] = embedded_file_private::create(fs);
+            std::unique_ptr<FileSpec> fs = d->doc->getCatalog()->embeddedFile(i);
+            d->embedded_files[i] = embedded_file_private::create(std::move(fs));
         }
     }
     return d->embedded_files;

@@ -8,7 +8,7 @@
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2019-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 //========================================================================
@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <climits>
+#include <memory>
 
 #include "goo/GooString.h"
 #include "CharTypes.h"
@@ -76,7 +77,7 @@ uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullpt
 // The caller owns the returned pointer.
 //  utf8 - UTF-8 string to convert. An empty string is acceptable.
 // Returns a big endian UTF-16 string with BOM or an empty string without BOM.
-GooString POPPLER_PRIVATE_EXPORT *utf8ToUtf16WithBom(const std::string &utf8);
+std::unique_ptr<GooString> POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).

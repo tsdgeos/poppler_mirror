@@ -666,9 +666,21 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
     }
 }
 
-static std::optional<std::string> getDefaultFirefoxCertDB_Linux()
+static std::optional<std::string> getDefaultFirefoxCertDB()
 {
-    const std::string firefoxPath = std::string(getenv("HOME")) + "/.mozilla/firefox/";
+#ifdef _WIN32
+    const char *env = getenv("APPDATA");
+    if (!env) {
+        return {};
+    }
+    const std::string firefoxPath = std::string(env) + "/Mozilla/Firefox/Profiles/";
+#else
+    const char *env = getenv("HOME");
+    if (!env) {
+        return {};
+    }
+    const std::string firefoxPath = std::string(env) + "/.mozilla/firefox/";
+#endif
 
     GDir firefoxDir(firefoxPath.c_str());
     std::unique_ptr<GDirEntry> entry;
@@ -706,7 +718,7 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
         sNssDir = nssDir.toStr();
     } else {
-        const std::optional<std::string> certDBPath = getDefaultFirefoxCertDB_Linux();
+        const std::optional<std::string> certDBPath = getDefaultFirefoxCertDB();
         if (!certDBPath) {
             initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
             sNssDir = "sql:/etc/pki/nssdb";

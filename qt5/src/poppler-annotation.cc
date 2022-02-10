@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -561,8 +561,8 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
             // -> fileIcon
             f->setFileIconName(QString::fromLatin1(attachann->getName()->c_str()));
             // -> embeddedFile
-            FileSpec *filespec = new FileSpec(attachann->getFile());
-            f->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(filespec)));
+            auto filespec = std::make_unique<FileSpec>(attachann->getFile());
+            f->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(filespec))));
             break;
         }
         case Annot::typeSound: /* TODO: Move logic to getters */
@@ -768,8 +768,8 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
                         if (annotAsset->getName())
                             asset->setName(UnicodeParsedString(annotAsset->getName()));
 
-                        FileSpec *fileSpec = new FileSpec(annotAsset->getFileSpec());
-                        asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(fileSpec)));
+                        auto fileSpec = std::make_unique<FileSpec>(annotAsset->getFileSpec());
+                        asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec))));
 
                         assets.append(asset);
                     }

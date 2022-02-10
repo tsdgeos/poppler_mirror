@@ -867,16 +867,13 @@ GList *poppler_document_get_attachments(PopplerDocument *document)
     n_files = catalog->numEmbeddedFiles();
     for (i = 0; i < n_files; i++) {
         PopplerAttachment *attachment;
-        FileSpec *emb_file;
 
-        emb_file = catalog->embeddedFile(i);
+        const std::unique_ptr<FileSpec> emb_file = catalog->embeddedFile(i);
         if (!emb_file->isOk() || !emb_file->getEmbeddedFile()->isOk()) {
-            delete emb_file;
             continue;
         }
 
-        attachment = _poppler_attachment_new(emb_file);
-        delete emb_file;
+        attachment = _poppler_attachment_new(emb_file.get());
 
         if (attachment != nullptr)
             retval = g_list_prepend(retval, attachment);
@@ -1783,7 +1780,7 @@ gint poppler_document_get_n_signatures(const PopplerDocument *document)
 {
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), 0);
 
-    return document->doc->getNumSignatureFields();
+    return document->doc->getSignatureFields().size();
 }
 
 /**

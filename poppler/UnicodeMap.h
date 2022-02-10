@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
@@ -33,6 +33,7 @@
 #include "CharTypes.h"
 
 #include <atomic>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -62,7 +63,7 @@ class POPPLER_PRIVATE_EXPORT UnicodeMap
 public:
     // Create the UnicodeMap specified by <encodingName>.  Sets the
     // initial reference count to 1.  Returns NULL on failure.
-    static UnicodeMap *parse(const std::string &encodingNameA);
+    static std::unique_ptr<UnicodeMap> parse(const std::string &encodingNameA);
 
     // Create a resident UnicodeMap.
     UnicodeMap(const char *encodingNameA, bool unicodeOutA, const UnicodeMapRange *rangesA, int lenA);
@@ -116,16 +117,12 @@ class UnicodeMapCache
 {
 public:
     UnicodeMapCache();
-    ~UnicodeMapCache();
-
-    UnicodeMapCache(const UnicodeMapCache &) = delete;
-    UnicodeMapCache &operator=(const UnicodeMapCache &) = delete;
 
     // Get the UnicodeMap for <encodingName>.  Returns NULL on failure.
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
 
 private:
-    std::vector<UnicodeMap *> cache;
+    std::vector<std::unique_ptr<UnicodeMap>> cache;
 };
 
 #endif

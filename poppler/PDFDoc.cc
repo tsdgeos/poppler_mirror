@@ -86,7 +86,6 @@
 #include "Link.h"
 #include "OutputDev.h"
 #include "Error.h"
-#include "ErrorCodes.h"
 #include "Lexer.h"
 #include "Parser.h"
 #include "SecurityHandler.h"
@@ -120,55 +119,25 @@
 
 #define pdfdocLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
 
-void PDFDoc::init()
-{
-    ok = false;
-    errCode = errNone;
-    fileName = nullptr;
-    file = nullptr;
-    str = nullptr;
-    xref = nullptr;
-    linearization = nullptr;
-    catalog = nullptr;
-    hints = nullptr;
-    outline = nullptr;
-    startXRefPos = -1;
-    secHdlr = nullptr;
-    pageCache = nullptr;
-}
+PDFDoc::PDFDoc() { }
 
-PDFDoc::PDFDoc()
-{
-    init();
-}
-
-PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : fileName(fileNameA), guiData(guiDataA)
 {
 #ifdef _WIN32
-    int n, i;
-#endif
-
-    init();
-
-    fileName = fileNameA;
-    guiData = guiDataA;
-#ifdef _WIN32
-    n = fileName->getLength();
+    const int n = fileName->getLength();
     fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
-    for (i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
     }
     fileNameU[n] = L'\0';
-#endif
 
-    // try to open file
-#ifdef _WIN32
     wchar_t *wFileName = (wchar_t *)utf8ToUtf16(fileName->c_str());
     file = GooFile::open(wFileName);
     gfree(wFileName);
 #else
     file = GooFile::open(fileName->toStr());
 #endif
+
     if (file == nullptr) {
         // fopen() has failed.
         // Keep a copy of the errno returned by fopen so that it can be
@@ -186,19 +155,14 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
 }
 
 #ifdef _WIN32
-PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     OSVERSIONINFO version;
-    int i;
-
-    init();
-
-    guiData = guiDataA;
 
     // save both Unicode and 8-bit copies of the file name
     GooString *fileNameG = new GooString();
     fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
-    for (i = 0; i < fileNameLen; ++i) {
+    for (int i = 0; i < fileNameLen; ++i) {
         fileNameG->append((char)fileNameA[i]);
         fileNameU[i] = fileNameA[i];
     }
@@ -227,28 +191,17 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
-#ifdef _WIN32
-    int n, i;
-#endif
-
-    init();
-    guiData = guiDataA;
     if (strA->getFileName()) {
         fileName = strA->getFileName()->copy();
 #ifdef _WIN32
-        n = fileName->getLength();
+        const int n = fileName->getLength();
         fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
-        for (i = 0; i < n; ++i) {
+        for (int i = 0; i < n; ++i) {
             fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
         }
         fileNameU[n] = L'\0';
-#endif
-    } else {
-        fileName = nullptr;
-#ifdef _WIN32
-        fileNameU = NULL;
 #endif
     }
     str = strA;
@@ -340,34 +293,16 @@ PDFDoc::~PDFDoc()
         gfree(pageCache);
     }
     delete secHdlr;
-    if (outline) {
-        delete outline;
-    }
-    if (catalog) {
-        delete catalog;
-    }
-    if (xref) {
-        delete xref;
-    }
-    if (hints) {
-        delete hints;
-    }
-    if (linearization) {
-        delete linearization;
-    }
-    if (str) {
-        delete str;
-    }
-    if (file) {
-        delete file;
-    }
-    if (fileName) {
-        delete fileName;
-    }
+    delete outline;
+    delete catalog;
+    delete xref;
+    delete hints;
+    delete linearization;
+    delete str;
+    delete file;
+    delete fileName;
 #ifdef _WIN32
-    if (fileNameU) {
-        gfree(fileNameU);
-    }
+    gfree(fileNameU);
 #endif
 }
 
@@ -620,8 +555,11 @@ static void addSignatureFieldsToVector(FormField *ff, std::vector<FormFieldSigna
 
 std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
 {
+    // Unfortunately there's files with signatures in Forms but not in Annots
+    // and files with signatures in Annots but no in forms so we need to search both
     std::vector<FormFieldSignature *> res;
 
+    // First search
     const Form *f = catalog->getForm();
     if (!f)
         return res;
@@ -631,40 +569,26 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
         FormField *ff = f->getRootField(i);
         addSignatureFieldsToVector(ff, res);
     }
+
+    // Second search
+    for (int page = 1; page <= getNumPages(); ++page) {
+        Page *p = getPage(page);
+        if (p) {
+            const std::unique_ptr<FormPageWidgets> pw = p->getFormWidgets();
+            for (int i = 0; i < pw->getNumWidgets(); ++i) {
+                FormWidget *fw = pw->getWidget(i);
+                if (fw->getType() == formSignature) {
+                    assert(fw->getField()->getType() == formSignature);
+                    FormFieldSignature *ffs = static_cast<FormFieldSignature *>(fw->getField());
+                    if (std::find(res.begin(), res.end(), ffs) == res.end()) {
+                        res.push_back(ffs);
+                    }
+                }
+            }
+        }
+    }
+
     return res;
-}
-
-static int sumSignatureFields(FormField *ff)
-{
-    int sum = 0;
-
-    if (ff->getNumChildren() == 0) {
-        if (ff->getType() == formSignature) {
-            sum = 1;
-        }
-    } else {
-        for (int i = 0; i < ff->getNumChildren(); ++i) {
-            FormField *children = ff->getChildren(i);
-            sum += sumSignatureFields(children);
-        }
-    }
-    return sum;
-}
-
-int PDFDoc::getNumSignatureFields()
-{
-    const Form *f = catalog->getForm();
-
-    if (!f)
-        return 0;
-
-    const int nRootFields = f->getNumFields();
-    int sum = 0;
-    for (int i = 0; i < nRootFields; ++i) {
-        FormField *ff = f->getRootField(i);
-        sum += sumSignatureFields(ff);
-    }
-    return sum;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,

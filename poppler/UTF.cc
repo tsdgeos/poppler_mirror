@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -357,9 +357,9 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     return utf16;
 }
 
-GooString *utf8ToUtf16WithBom(const std::string &utf8)
+std::unique_ptr<GooString> utf8ToUtf16WithBom(const std::string &utf8)
 {
-    GooString *result = new GooString();
+    auto result = std::make_unique<GooString>();
     if (utf8.empty()) {
         return result;
     }

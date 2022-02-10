@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -59,6 +59,7 @@
 #include "Catalog.h"
 #include "Page.h"
 #include "Annot.h"
+#include "ErrorCodes.h"
 #include "Form.h"
 #include "OptionalContent.h"
 #include "Stream.h"
@@ -228,7 +229,6 @@ public:
     bool isEncrypted() { return xref->isEncrypted(); }
 
     std::vector<FormFieldSignature *> getSignatureFields();
-    int getNumSignatureFields();
 
     // Check various permissions.
     bool okToPrint(bool ignoreOwnerPW = false) { return xref->okToPrint(ignoreOwnerPW); }
@@ -368,7 +368,6 @@ private:
     Hints *getHints();
 
     PDFDoc();
-    void init();
     bool setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback);
     bool checkFooter();
     void checkHeader();
@@ -382,37 +381,37 @@ private:
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
     long long strToLongLong(const char *s);
 
-    const GooString *fileName;
+    const GooString *fileName = nullptr;
 #ifdef _WIN32
-    wchar_t *fileNameU;
+    wchar_t *fileNameU = nullptr;
 #endif
-    GooFile *file;
-    BaseStream *str;
-    void *guiData;
+    GooFile *file = nullptr;
+    BaseStream *str = nullptr;
+    void *guiData = nullptr;
     int headerPdfMajorVersion;
     int headerPdfMinorVersion;
     PDFSubtype pdfSubtype;
     PDFSubtypePart pdfPart;
     PDFSubtypeConformance pdfConformance;
-    Linearization *linearization;
+    Linearization *linearization = nullptr;
     // linearizationState = 0: unchecked
     // linearizationState = 1: checked and valid
     // linearizationState = 2: checked and invalid
     int linearizationState;
-    XRef *xref;
-    SecurityHandler *secHdlr;
-    Catalog *catalog;
-    Hints *hints;
-    Outline *outline;
-    Page **pageCache;
+    XRef *xref = nullptr;
+    SecurityHandler *secHdlr = nullptr;
+    Catalog *catalog = nullptr;
+    Hints *hints = nullptr;
+    Outline *outline = nullptr;
+    Page **pageCache = nullptr;
 
-    bool ok;
-    int errCode;
+    bool ok = false;
+    int errCode = errNone;
     // If there is an error opening the PDF file with fopen() in the constructor,
     // then the POSIX errno will be here.
     int fopenErrno;
 
-    Goffset startXRefPos; // offset of last xref table
+    Goffset startXRefPos = -1; // offset of last xref table
     mutable std::recursive_mutex mutex;
 };
 

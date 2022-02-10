@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
-// Copyright 2017, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
@@ -19,8 +19,6 @@
 
 ViewerPreferences::ViewerPreferences(Dict *prefDict)
 {
-    init();
-
     hideToolbar = prefDict->lookup("HideToolbar").getBoolWithDefaultValue(false);
 
     hideMenubar = prefDict->lookup("HideMenubar").getBoolWithDefaultValue(false);
@@ -112,12 +110,3 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
 }
 
 ViewerPreferences::~ViewerPreferences() { }
-
-void ViewerPreferences::init()
-{
-    nonFullScreenPageMode = nfpmUseNone;
-    direction = directionL2R;
-    printScaling = printScalingAppDefault;
-    duplex = duplexNone;
-    numCopies = 1;
-}
