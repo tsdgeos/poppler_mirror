@@ -337,9 +337,6 @@ endif()
 if(TIFF_FOUND)
   set(ENABLE_LIBTIFF ON)
 endif()
-if(OpenJPEG_FOUND)
-  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
-endif()
 
 # Recent versions of poppler-data install a .pc file.
 # Use it to determine the encoding data path, if available.
@@ -521,6 +518,8 @@ if (OpenJPEG_FOUND)
     poppler/JPEG2000Stream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} openjp2)
+  # target openjp2 may lack interface include directories
+  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
 else ()
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPXStream.cc
