@@ -304,10 +304,6 @@ if(MINGW)
   # Use mingw's ansi stdio extensions
   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
 endif()
-if(FONTCONFIG_FOUND)
-  add_definitions(${FONTCONFIG_DEFINITIONS})
-  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
-endif()
 if(WITH_FONTCONFIGURATION_WIN32)
   if(MINGW)
     # Set the minimum required Internet Explorer version to 5.0
@@ -472,6 +468,8 @@ set(poppler_SRCS
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(FONTCONFIG_FOUND)
+  add_definitions(${FONTCONFIG_DEFINITIONS})
+  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif()
 
