@@ -340,9 +340,6 @@ endif()
 if(OpenJPEG_FOUND)
   include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
 endif()
-if(LCMS2_FOUND)
-  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
-endif()
 
 # Recent versions of poppler-data install a .pc file.
 # Use it to determine the encoding data path, if available.
@@ -530,6 +527,7 @@ else ()
   )
 endif()
 if(USE_CMS)
+  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
 endif()
 if(WIN32)
