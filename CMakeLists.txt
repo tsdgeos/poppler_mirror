@@ -317,8 +317,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/poppler
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
-  SYSTEM
-  ${FREETYPE_INCLUDE_DIRS}
 )
 
 if (NSS3_FOUND)
@@ -466,7 +464,7 @@ set(poppler_SRCS
   splash/SplashXPath.cc
   splash/SplashXPathScanner.cc
 )
-set(poppler_LIBS ${FREETYPE_LIBRARIES})
+set(poppler_LIBS Freetype::Freetype)
 if(FONTCONFIG_FOUND)
   add_definitions(${FONTCONFIG_DEFINITIONS})
   include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})

@@ -38,7 +38,7 @@ if (GTK_FOUND)
       ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
     )
     poppler_add_test(pdf-inspector BUILD_GTK_TESTS ${pdf_inspector_SRCS})
-    target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES} ${common_libs} ${GTK3_LIBRARIES} poppler)
+    target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} Freetype::Freetype ${common_libs} ${GTK3_LIBRARIES} poppler)
     target_compile_definitions(pdf-inspector PRIVATE -DSRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     if(CMAKE_USE_PTHREADS_INIT)
        target_link_libraries(pdf-inspector Threads::Threads)
