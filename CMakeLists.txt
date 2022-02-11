@@ -328,9 +328,6 @@ include_directories(
 if (NSS3_FOUND)
   set(ENABLE_NSS3 ON)
 endif()
-if(JPEG_FOUND)
-  include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
-endif()
 if(PNG_FOUND)
   set(ENABLE_LIBPNG ON)
 endif()
@@ -482,7 +479,12 @@ if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
+    set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
+  else()
+    set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
+  endif()
 endif()
 if(ENABLE_ZLIB)
   set(poppler_SRCS ${poppler_SRCS}
