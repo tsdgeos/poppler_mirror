@@ -605,7 +605,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // Incremental save to avoid breaking any existing signatures
     GooString *fname = new GooString(saveFilename);
-    if (doc->saveAs(fname, writeForceIncremental) != errNone) {
+    if (doc->saveAs(*fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
         delete fname;
         return false;

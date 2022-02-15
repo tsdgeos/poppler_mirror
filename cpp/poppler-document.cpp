@@ -1025,7 +1025,7 @@ bool document::save(const std::string &file_name) const
     }
 
     GooString fname(file_name.c_str());
-    return d->doc->saveAs(&fname) == errNone;
+    return d->doc->saveAs(fname) == errNone;
 }
 
 /**
@@ -1040,7 +1040,7 @@ bool document::save_a_copy(const std::string &file_name) const
     }
 
     GooString fname(file_name.c_str());
-    return d->doc->saveWithoutChangesAs(&fname) == errNone;
+    return d->doc->saveWithoutChangesAs(fname) == errNone;
 }
 
 /**

@@ -302,13 +302,13 @@ public:
     bool getID(GooString *permanent_id, GooString *update_id) const;
 
     // Save one page with another name.
-    int savePageAs(const GooString *name, int pageNo);
+    int savePageAs(const GooString &name, int pageNo);
     // Save this file with another name.
-    int saveAs(const GooString *name, PDFWriteMode mode = writeStandard);
+    int saveAs(const GooString &name, PDFWriteMode mode = writeStandard);
     // Save this file in the given output stream.
     int saveAs(OutStream *outStr, PDFWriteMode mode = writeStandard);
     // Save this file with another name without saving changes
-    int saveWithoutChangesAs(const GooString *name);
+    int saveWithoutChangesAs(const GooString &name);
     // Save this file in the given output stream without saving changes
     int saveWithoutChangesAs(OutStream *outStr);
 

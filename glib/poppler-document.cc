@@ -582,13 +582,12 @@ gboolean poppler_document_save(PopplerDocument *document, const char *uri, GErro
 
     filename = g_filename_from_uri(uri, nullptr, error);
     if (filename != nullptr) {
-        GooString *fname = new GooString(filename);
+        GooString fname(filename);
         int err_code;
         g_free(filename);
 
         err_code = document->doc->saveAs(fname);
         retval = handle_save_error(err_code, error);
-        delete fname;
     }
 
     return retval;
@@ -617,13 +616,12 @@ gboolean poppler_document_save_a_copy(PopplerDocument *document, const char *uri
 
     filename = g_filename_from_uri(uri, nullptr, error);
     if (filename != nullptr) {
-        GooString *fname = new GooString(filename);
+        GooString fname(filename);
         int err_code;
         g_free(filename);
 
         err_code = document->doc->saveWithoutChangesAs(fname);
         retval = handle_save_error(err_code, error);
-        delete fname;
     }
 
     return retval;

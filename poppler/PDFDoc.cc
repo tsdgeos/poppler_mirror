@@ -802,7 +802,7 @@ Hints *PDFDoc::getHints()
     return hints;
 }
 
-int PDFDoc::savePageAs(const GooString *name, int pageNo)
+int PDFDoc::savePageAs(const GooString &name, int pageNo)
 {
     FILE *f;
     OutStream *outStr;
@@ -834,8 +834,8 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
     outStr = new FileOutStream(f, 0);
@@ -946,7 +946,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     Ref ref;
     ref.num = rootNum;
     ref.gen = 0;
-    Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(), name->c_str(), uxrefOffset);
+    Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(), name.c_str(), uxrefOffset);
     writeXRefTableTrailer(std::move(trailerDict), yRef, false /* do not write unnecessary entries */, uxrefOffset, outStr, getXRef());
 
     outStr->close();
@@ -958,14 +958,14 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     return errNone;
 }
 
-int PDFDoc::saveAs(const GooString *name, PDFWriteMode mode)
+int PDFDoc::saveAs(const GooString &name, PDFWriteMode mode)
 {
     FILE *f;
     OutStream *outStr;
     int res;
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
     outStr = new FileOutStream(f, 0);
@@ -992,14 +992,14 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode)
     return errNone;
 }
 
-int PDFDoc::saveWithoutChangesAs(const GooString *name)
+int PDFDoc::saveWithoutChangesAs(const GooString &name)
 {
     FILE *f;
     OutStream *outStr;
     int res;
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
 
