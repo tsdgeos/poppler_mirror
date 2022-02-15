@@ -121,7 +121,8 @@
 
 PDFDoc::PDFDoc() { }
 
-PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : fileName(fileNameA), guiData(guiDataA)
+PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+    : fileName(std::move(fileNameA)), guiData(guiDataA)
 {
 #ifdef _WIN32
     const int n = fileName->getLength();
@@ -143,7 +144,7 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
         // Keep a copy of the errno returned by fopen so that it can be
         // referred to later.
         fopenErrno = errno;
-        error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName, strerror(errno));
+        error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName.get(), strerror(errno));
         errCode = errOpenFile;
         return;
     }
@@ -166,7 +167,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
         fileNameG->append((char)fileNameA[i]);
         fileNameU[i] = fileNameA[i];
     }
-    fileName = fileNameG;
+    fileName.reset(fileNameG);
     fileNameU[fileNameLen] = L'\0';
 
     // try to open file
@@ -179,7 +180,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
         file = GooFile::open(fileName->toStr());
     }
     if (!file) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
+        error(errIO, -1, "Couldn't open file '{0:t}'", fileName.get());
         errCode = errOpenFile;
         return;
     }
@@ -194,7 +195,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
 PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     if (strA->getFileName()) {
-        fileName = strA->getFileName()->copy();
+        fileName.reset(strA->getFileName()->copy());
 #ifdef _WIN32
         const int n = fileName->getLength();
         fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
@@ -300,7 +301,6 @@ PDFDoc::~PDFDoc()
     delete linearization;
     delete str;
     delete file;
-    delete fileName;
 #ifdef _WIN32
     gfree(fileNameU);
 #endif
@@ -1896,12 +1896,12 @@ Outline *PDFDoc::getOutline()
     return outline;
 }
 
-std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
+std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA)
 {
     // We cannot call std::make_unique here because the PDFDoc constructor is private
     PDFDoc *doc = new PDFDoc();
     doc->errCode = errorCode;
-    doc->fileName = fileNameA;
+    doc->fileName = std::move(fileNameA);
 
     return std::unique_ptr<PDFDoc>(doc);
 }

@@ -113,8 +113,7 @@ public:
 #ifdef _WIN32
         doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #else
-        GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
-        doc = new PDFDoc(fileName, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #endif
 
         delete ownerPassword;

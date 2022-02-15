@@ -222,16 +222,13 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
     }
     delete[] filenameW;
 #else
-    GooString *filename_g;
-    filename_g = new GooString(filename);
-    newDoc = new PDFDoc(filename_g, password_g, password_g);
+    newDoc = new PDFDoc(std::make_unique<GooString>(filename), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        filename_g = filename_g->copy();
         delete newDoc;
         delete password_g;
         password_g = new GooString(password);
-        newDoc = new PDFDoc(filename_g, password_g, password_g);
+        newDoc = new PDFDoc(std::make_unique<GooString>(filename), password_g, password_g);
     }
 #endif
     g_free(filename);

@@ -129,7 +129,7 @@ enum PDFSubtypeConformance
 class POPPLER_PRIVATE_EXPORT PDFDoc
 {
 public:
-    explicit PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
+    explicit PDFDoc(std::unique_ptr<GooString> &&fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 
 #ifdef _WIN32
     PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
@@ -141,7 +141,7 @@ public:
     PDFDoc(const PDFDoc &) = delete;
     PDFDoc &operator=(const PDFDoc &) = delete;
 
-    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
+    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA);
 
     // Was PDF document successfully opened?
     bool isOk() const { return ok; }
@@ -154,7 +154,7 @@ public:
     int getFopenErrno() const { return fopenErrno; }
 
     // Get file name.
-    const GooString *getFileName() const { return fileName; }
+    const GooString *getFileName() const { return fileName.get(); }
 #ifdef _WIN32
     wchar_t *getFileNameU() { return fileNameU; }
 #endif
@@ -381,7 +381,7 @@ private:
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
     long long strToLongLong(const char *s);
 
-    const GooString *fileName = nullptr;
+    std::unique_ptr<GooString> fileName;
 #ifdef _WIN32
     wchar_t *fileNameU = nullptr;
 #endif

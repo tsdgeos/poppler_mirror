@@ -604,10 +604,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     }
 
     // Incremental save to avoid breaking any existing signatures
-    GooString *fname = new GooString(saveFilename);
-    if (doc->saveAs(*fname, writeForceIncremental) != errNone) {
+    const GooString fname(saveFilename);
+    if (doc->saveAs(fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
-        delete fname;
         return false;
     }
 
@@ -704,9 +703,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
 }
 
 // Get start and end file position of objNum in the PDF named filename.
-bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
+bool FormWidgetSignature::getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
 {
-    PDFDoc newDoc(filename, ownerPassword, userPassword);
+    PDFDoc newDoc(std::unique_ptr<GooString>(filename.copy()), ownerPassword, userPassword);
     if (!newDoc.isOk())
         return false;
 

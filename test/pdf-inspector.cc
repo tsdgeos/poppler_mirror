@@ -4,7 +4,7 @@
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019, 2022 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -222,10 +222,7 @@ void PdfInspector::load(const char *file_name)
 
     // load the new file
     if (file_name) {
-        GooString *filename_g;
-
-        filename_g = new GooString(file_name);
-        doc = new PDFDoc(filename_g, nullptr, nullptr);
+        doc = new PDFDoc(std::make_unique<GooString>(file_name), nullptr, nullptr);
     }
 
     if (doc && !doc->isOk()) {

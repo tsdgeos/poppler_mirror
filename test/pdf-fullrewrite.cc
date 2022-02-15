@@ -39,8 +39,6 @@ int main(int argc, char *argv[])
 {
     PDFDoc *doc = nullptr;
     PDFDoc *docOut = nullptr;
-    GooString *inputName = nullptr;
-    GooString *outputName = nullptr;
     GooString *ownerPW = nullptr;
     GooString *userPW = nullptr;
     int res = 0;
@@ -55,9 +53,6 @@ int main(int argc, char *argv[])
         goto done;
     }
 
-    inputName = new GooString(argv[1]);
-    outputName = new GooString(argv[2]);
-
     if (ownerPassword[0] != '\001') {
         ownerPW = new GooString(ownerPassword);
     }
@@ -67,7 +62,7 @@ int main(int argc, char *argv[])
 
     // load input document
     globalParams = std::make_unique<GlobalParams>();
-    doc = new PDFDoc(inputName, ownerPW, userPW);
+    doc = new PDFDoc(std::make_unique<GooString>(argv[1]), ownerPW, userPW);
     if (!doc->isOk()) {
         fprintf(stderr, "Error loading input document\n");
         res = 1;
@@ -75,7 +70,7 @@ int main(int argc, char *argv[])
     }
 
     // save it back (in rewrite or incremental update mode)
-    if (doc->saveAs(*outputName, forceIncremental ? writeForceIncremental : writeForceRewrite) != 0) {
+    if (doc->saveAs(*doc->getFileName(), forceIncremental ? writeForceIncremental : writeForceRewrite) != 0) {
         fprintf(stderr, "Error saving document\n");
         res = 1;
         goto done;
@@ -83,7 +78,7 @@ int main(int argc, char *argv[])
 
     if (checkOutput) {
         // open the generated document to verify it
-        docOut = new PDFDoc(outputName, ownerPW, userPW);
+        docOut = new PDFDoc(std::make_unique<GooString>(argv[2]), ownerPW, userPW);
         if (!docOut->isOk()) {
             fprintf(stderr, "Error loading generated document\n");
             res = 1;
@@ -91,8 +86,6 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Verification failed\n");
             res = 1;
         }
-    } else {
-        delete outputName;
     }
 
 done:

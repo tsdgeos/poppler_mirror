@@ -1,6 +1,6 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
    Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
-   Copyright 2018, 2020 Albert Astals Cid <aacid@kde.org> 2018
+   Copyright 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org> 2018
    Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    Copyright 2020 Adam Reichold <adam.reichold@t-online.de>
    License: GPLv2 */
@@ -382,12 +382,8 @@ PdfEnginePoppler::~PdfEnginePoppler()
 bool PdfEnginePoppler::load(const char *fileName)
 {
     setFileName(fileName);
-    /* note: don't delete fileNameStr since PDFDoc takes ownership and deletes them itself */
-    GooString *fileNameStr = new GooString(fileName);
-    if (!fileNameStr)
-        return false;
 
-    _pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
+    _pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName), nullptr, nullptr, nullptr);
     if (!_pdfDoc->isOk()) {
         return false;
     }
@@ -585,7 +581,6 @@ static bool ShowPreview()
 
 static void RenderPdfAsText(const char *fileName)
 {
-    GooString *fileNameStr = nullptr;
     PDFDoc *pdfDoc = nullptr;
     GooString *txt = nullptr;
     int pageCount;
@@ -604,12 +599,7 @@ static void RenderPdfAsText(const char *fileName)
     }
 
     GooTimer msTimer;
-    /* note: don't delete fileNameStr since PDFDoc takes ownership and deletes them itself */
-    fileNameStr = new GooString(fileName);
-    if (!fileNameStr)
-        goto Exit;
-
-    pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
+    pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName), nullptr, nullptr, nullptr);
     if (!pdfDoc->isOk()) {
         error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
         goto Exit;

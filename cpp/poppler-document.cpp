@@ -50,11 +50,11 @@
 
 using namespace poppler;
 
-document_private::document_private(GooString *file_path, const std::string &owner_password, const std::string &user_password) : document_private()
+document_private::document_private(std::unique_ptr<GooString> &&file_path, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
-    doc = new PDFDoc(file_path, &goo_owner_password, &goo_user_password);
+    doc = new PDFDoc(std::move(file_path), &goo_owner_password, &goo_user_password);
 }
 
 document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
@@ -176,7 +176,7 @@ bool document::unlock(const std::string &owner_password, const std::string &user
         } else if (d->raw_doc_data) {
             newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);
         } else {
-            newdoc = new document_private(new GooString(d->doc->getFileName()), owner_password, user_password);
+            newdoc = new document_private(std::make_unique<GooString>(d->doc->getFileName()), owner_password, user_password);
         }
         if (!newdoc->doc->isOk()) {
             d->doc_data.swap(newdoc->doc_data);
@@ -1052,7 +1052,7 @@ bool document::save_a_copy(const std::string &file_name) const
  */
 document *document::load_from_file(const std::string &file_name, const std::string &owner_password, const std::string &user_password)
 {
-    document_private *doc = new document_private(new GooString(file_name.c_str()), owner_password, user_password);
+    document_private *doc = new document_private(std::make_unique<GooString>(file_name.c_str()), owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }
 
