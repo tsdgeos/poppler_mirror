@@ -22,7 +22,7 @@
 // CurlPDFDocBuilder
 //------------------------------------------------------------------------
 
-std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
 {
     CachedFile *cachedFile = new CachedFile(new CurlCachedFileLoader(), uri.copy());
 

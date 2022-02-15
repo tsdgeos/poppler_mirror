@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
     GooString *fileName = nullptr;
     char *ppmRoot = nullptr;
     char *ppmFile;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     SplashColor paperColor;
 #ifndef UTILS_USE_PTHREADS
     SplashOutputDev *splashOut;
@@ -481,14 +481,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0]) {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0]) {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     if (fileName == nullptr) {
@@ -500,13 +496,6 @@ int main(int argc, char *argv[])
     }
     std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW));
     delete fileName;
-
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         return 1;
     }

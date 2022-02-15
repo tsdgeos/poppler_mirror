@@ -121,7 +121,7 @@
 
 PDFDoc::PDFDoc() { }
 
-PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
     : fileName(std::move(fileNameA)), guiData(guiDataA)
 {
 #ifdef _WIN32
@@ -156,7 +156,7 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const GooString *ownerPas
 }
 
 #ifdef _WIN32
-PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
+PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     OSVERSIONINFO version;
 
@@ -192,7 +192,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
+PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     if (strA->getFileName()) {
         fileName.reset(strA->getFileName()->copy());
@@ -209,7 +209,7 @@ PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
-bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback)
+bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback)
 {
     pdfdocLocker();
 
@@ -384,7 +384,7 @@ void PDFDoc::checkHeader()
     // We don't do the version check. Don't add it back in.
 }
 
-bool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *userPassword)
+bool PDFDoc::checkEncryption(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     bool encrypted;
     bool ret;
@@ -2078,7 +2078,7 @@ bool PDFDoc::hasJavascript()
 
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
                   double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason,
-                  const GooString *location, const std::string &imagePath, const GooString *ownerPassword, const GooString *userPassword)
+                  const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {

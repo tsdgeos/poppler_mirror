@@ -6,6 +6,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2022 by Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
     const GooString docPath(argv[1]);
     const GooString imagePath(argv[2]);
 
-    auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(docPath, nullptr, nullptr));
+    auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(docPath));
     if (!doc->isOk()) {
         fprintf(stderr, "Error opening input PDF file.\n");
         return 1;

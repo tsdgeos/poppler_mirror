@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2018, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -68,7 +68,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
 int main(int argc, char *argv[])
 {
-    std::unique_ptr<GooString> ownerPW, userPW;
+    std::optional<GooString> ownerPW, userPW;
     bool ok;
 
     Win32Console win32Console(&argc, &argv);
@@ -97,13 +97,13 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = std::make_unique<GooString>(ownerPassword);
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = std::make_unique<GooString>(userPassword);
+        userPW = GooString(userPassword);
     }
 
-    auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW.get(), userPW.get()));
+    auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW, userPW));
 
     if (!doc->isOk()) {
         return 1;

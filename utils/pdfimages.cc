@@ -15,7 +15,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2018, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 {
     GooString *fileName;
     char *imgRoot = nullptr;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     ImageOutputDev *imgOut;
     bool ok;
 
@@ -129,14 +129,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
     if (fileName->cmp("-") == 0) {
         delete fileName;
@@ -146,12 +142,6 @@ int main(int argc, char *argv[])
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
     delete fileName;
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         return 1;
     }

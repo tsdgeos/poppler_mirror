@@ -222,7 +222,7 @@ void PdfInspector::load(const char *file_name)
 
     // load the new file
     if (file_name) {
-        doc = new PDFDoc(std::make_unique<GooString>(file_name), nullptr, nullptr);
+        doc = new PDFDoc(std::make_unique<GooString>(file_name));
     }
 
     if (doc && !doc->isOk()) {

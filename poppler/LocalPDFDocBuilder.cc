@@ -18,7 +18,7 @@
 // LocalPDFDocBuilder
 //------------------------------------------------------------------------
 
-std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
 {
     if (uri.cmpN("file://", 7) == 0) {
         std::unique_ptr<GooString> fileName(uri.copy());

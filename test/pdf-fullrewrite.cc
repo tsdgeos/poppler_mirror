@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
 {
     PDFDoc *doc = nullptr;
     PDFDoc *docOut = nullptr;
-    GooString *ownerPW = nullptr;
-    GooString *userPW = nullptr;
+    std::optional<GooString> ownerPW;
+    std::optional<GooString> userPW;
     int res = 0;
 
     // parse args
@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
     }
 
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
+        userPW = GooString(userPassword);
     }
 
     // load input document
@@ -91,8 +91,6 @@ int main(int argc, char *argv[])
 done:
     delete docOut;
     delete doc;
-    delete userPW;
-    delete ownerPW;
     return res;
 }
 

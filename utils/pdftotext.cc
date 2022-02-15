@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     GooString *textFileName;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     TextOutputDev *textOut;
     FILE *f;
     const UnicodeMap *uMap;
@@ -238,14 +238,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     if (fileName->cmp("-") == 0) {
@@ -255,12 +251,6 @@ int main(int argc, char *argv[])
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         exitCode = 1;
         goto err2;

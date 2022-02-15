@@ -1075,14 +1075,13 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     }
     const auto reason = std::unique_ptr<GooString>(data.reason().isEmpty() ? nullptr : QStringToUnicodeGooString(data.reason()));
     const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
-    const auto ownerPwd = std::make_unique<GooString>(data.documentOwnerPassword().constData());
-    const auto userPwd = std::make_unique<GooString>(data.documentUserPassword().constData());
+    const auto ownerPwd = std::optional<GooString>(data.documentOwnerPassword().constData());
+    const auto userPwd = std::optional<GooString>(data.documentUserPassword().constData());
     const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
-    const bool success =
-            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd.get(), userPwd.get(),
-                                            *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+    const bool success = fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd,
+                                                         *gSignatureText, *gSignatureLeftText, data.fontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
 
     return success ? SigningSuccess : GenericSigningError;
 }

@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     // open PDF file
-    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, nullptr, nullptr));
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, {}, {}));
 
     if (!doc->isOk()) {
         fprintf(stderr, "Couldn't open %s\n", pdfFileName.c_str());

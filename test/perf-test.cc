@@ -383,7 +383,7 @@ bool PdfEnginePoppler::load(const char *fileName)
 {
     setFileName(fileName);
 
-    _pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName), nullptr, nullptr, nullptr);
+    _pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!_pdfDoc->isOk()) {
         return false;
     }
@@ -599,7 +599,7 @@ static void RenderPdfAsText(const char *fileName)
     }
 
     GooTimer msTimer;
-    pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName), nullptr, nullptr, nullptr);
+    pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!pdfDoc->isOk()) {
         error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
         goto Exit;

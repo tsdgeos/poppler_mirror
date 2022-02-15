@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     SplashOutputDev *splashOut = nullptr;
     bool doOutline;
     bool ok;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     Object info;
     int exit_status = EXIT_FAILURE;
 
@@ -206,14 +206,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0]) {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0]) {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     fileName = new GooString(argv[1]);
@@ -225,12 +221,6 @@ int main(int argc, char *argv[])
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         goto error;
     }

@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     for (i = 1; i < argc - 1; i++) {
-        PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(argv[i]), nullptr, nullptr, nullptr);
+        PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(argv[i]));
         if (doc->isOk() && !doc->isEncrypted() && doc->getXRef()->getCatalog().isDict()) {
             docs.push_back(doc);
             if (doc->getPDFMajorVersion() > majorVersion) {
