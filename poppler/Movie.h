@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2017-2019, 2021
+// Albert Astals Cid <aacid@kde.org> (c) 2017-2019, 2021, 2022
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 
 #include "Object.h"
 #include "poppler_private_export.h"
+
+#include <memory>
 
 struct MovieActivationParameters
 {
@@ -99,7 +101,7 @@ public:
     bool getUseFloatingWindow() const { return MA.floatingWindow; }
     void getFloatingWindowSize(int *width, int *height);
 
-    Movie *copy() const;
+    std::unique_ptr<Movie> copy() const;
 
 private:
     void parseMovie(const Object *movieDict);
