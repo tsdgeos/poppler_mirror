@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -1740,7 +1740,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
     descent = -0.35;
     fontBBox[0] = fontBBox[1] = fontBBox[2] = fontBBox[3] = 0;
     collection = nullptr;
-    cMap = nullptr;
     ctu = nullptr;
     ctuUsesCharCode = true;
     widths.defWidth = 1.0;
@@ -1982,9 +1981,6 @@ GfxCIDFont::~GfxCIDFont()
 {
     if (collection) {
         delete collection;
-    }
-    if (cMap) {
-        cMap->decRefCnt();
     }
     if (ctu) {
         ctu->decRefCnt();
@@ -2228,14 +2224,13 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         for (cmapName = lp->CMaps; *cmapName != nullptr; cmapName++) {
             GooString cname(*cmapName);
 
-            CMap *cnameCMap;
+            std::shared_ptr<CMap> cnameCMap;
             if ((cnameCMap = globalParams->getCMap(getCollection(), &cname)) != nullptr) {
                 if (cnameCMap->getWMode()) {
                     cnameCMap->setReverseMap(vumap, n, 1);
                 } else {
                     cnameCMap->setReverseMap(humap, n, N_UCS_CANDIDATES);
                 }
-                cnameCMap->decRefCnt();
             }
         }
         ff->setupGSUB(lp->scriptTag, lp->languageTag);

@@ -40,10 +40,6 @@ if (GTK_FOUND)
     poppler_add_test(pdf-inspector BUILD_GTK_TESTS ${pdf_inspector_SRCS})
     target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} Freetype::Freetype ${common_libs} ${GTK3_LIBRARIES} poppler)
     target_compile_definitions(pdf-inspector PRIVATE -DSRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-    if(CMAKE_USE_PTHREADS_INIT)
-       target_link_libraries(pdf-inspector Threads::Threads)
-    endif()
-
   endif ()
 
 endif ()

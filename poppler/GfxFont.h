@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -34,6 +34,7 @@
 #ifndef GFXFONT_H
 #define GFXFONT_H
 
+#include <memory>
 #include <optional>
 
 #include "goo/GooString.h"
@@ -433,7 +434,7 @@ private:
     double getWidth(CID cid) const; // Get width of a character.
 
     GooString *collection; // collection name
-    CMap *cMap; // char code --> CID
+    std::shared_ptr<CMap> cMap; // char code --> CID
     CharCodeToUnicode *ctu; // CID --> Unicode
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;
                           //   false: ctu maps CID to Unicode
