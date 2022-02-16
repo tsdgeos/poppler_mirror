@@ -17,7 +17,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
-// Copyright (C) 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -119,9 +119,6 @@ public:
     // Build a LinkDest from the array.
     explicit LinkDest(const Array *a);
 
-    // Copy a LinkDest.
-    LinkDest *copy() const { return new LinkDest(this); }
-
     // Was the LinkDest created successfully?
     bool isOk() const { return ok; }
 
@@ -154,8 +151,6 @@ private:
                      //   destFitH/BH use changeTop;
                      //   destFitV/BV use changeLeft
     bool ok; // set if created successfully
-
-    explicit LinkDest(const LinkDest *dest);
 };
 
 //------------------------------------------------------------------------

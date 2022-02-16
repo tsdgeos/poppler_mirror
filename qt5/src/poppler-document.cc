@@ -1,7 +1,7 @@
 /* poppler-document.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2010, 2012, 2013, 2015, 2017-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2010, 2012, 2013, 2015, 2017-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
@@ -67,20 +67,20 @@ namespace Poppler {
 
 Document *Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(filePath, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(device, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     // create stream
-    DocumentData *doc = new DocumentData(fileContents, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
@@ -134,11 +134,11 @@ bool Document::unlock(const QByteArray &ownerPassword, const QByteArray &userPas
         /* racier then it needs to be */
         DocumentData *doc2;
         if (!m_doc->fileContents.isEmpty()) {
-            doc2 = new DocumentData(m_doc->fileContents, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
         } else if (m_doc->m_device) {
-            doc2 = new DocumentData(m_doc->m_device, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->m_device, GooString(ownerPassword.data()), GooString(userPassword.data()));
         } else {
-            doc2 = new DocumentData(m_doc->m_filePath, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->m_filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
         }
         if (!doc2->doc->isOk()) {
             delete doc2;

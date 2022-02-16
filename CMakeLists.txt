@@ -294,7 +294,6 @@ endif()
 if(ENABLE_LIBCURL)
   find_package(CURL)
   if(CURL_FOUND)
-    include_directories(SYSTEM ${CURL_INCLUDE_DIR})
     set(POPPLER_HAS_CURL_SUPPORT ON)
   else()
     set(ENABLE_LIBCURL OFF)
@@ -304,10 +303,6 @@ endif()
 if(MINGW)
   # Use mingw's ansi stdio extensions
   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
-endif()
-if(FONTCONFIG_FOUND)
-  add_definitions(${FONTCONFIG_DEFINITIONS})
-  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
 endif()
 if(WITH_FONTCONFIGURATION_WIN32)
   if(MINGW)
@@ -322,27 +317,16 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/poppler
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
-  SYSTEM
-  ${FREETYPE_INCLUDE_DIRS}
 )
 
 if (NSS3_FOUND)
   set(ENABLE_NSS3 ON)
-endif()
-if(JPEG_FOUND)
-  include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
 endif()
 if(PNG_FOUND)
   set(ENABLE_LIBPNG ON)
 endif()
 if(TIFF_FOUND)
   set(ENABLE_LIBTIFF ON)
-endif()
-if(OpenJPEG_FOUND)
-  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
-endif()
-if(LCMS2_FOUND)
-  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
 endif()
 
 # Recent versions of poppler-data install a .pc file.
@@ -480,8 +464,10 @@ set(poppler_SRCS
   splash/SplashXPath.cc
   splash/SplashXPathScanner.cc
 )
-set(poppler_LIBS ${FREETYPE_LIBRARIES})
+set(poppler_LIBS Freetype::Freetype)
 if(FONTCONFIG_FOUND)
+  add_definitions(${FONTCONFIG_DEFINITIONS})
+  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif()
 
@@ -489,7 +475,12 @@ if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
+    set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
+  else()
+    set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
+  endif()
 endif()
 if(ENABLE_ZLIB)
   set(poppler_SRCS ${poppler_SRCS}
@@ -508,6 +499,7 @@ if(ENABLE_LIBCURL)
     poppler/CurlPDFDocBuilder.cc
   )
   if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    include_directories(SYSTEM ${CURL_INCLUDE_DIRS})
     set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
   else()
     set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
@@ -524,12 +516,15 @@ if (OpenJPEG_FOUND)
     poppler/JPEG2000Stream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} openjp2)
+  # target openjp2 may lack interface include directories
+  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
 else ()
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPXStream.cc
   )
 endif()
 if(USE_CMS)
+  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
 endif()
 if(WIN32)

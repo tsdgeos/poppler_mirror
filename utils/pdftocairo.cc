@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2011-2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010, 2014 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -875,7 +875,7 @@ int main(int argc, char *argv[])
     GooString *outputName = nullptr;
     GooString *outputFileName = nullptr;
     GooString *imageFileName = nullptr;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     CairoOutputDev *cairoOut;
     int pg, pg_num_len;
     double pg_w, pg_h, tmp, output_w, output_h;
@@ -1027,14 +1027,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0]) {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0]) {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     fileName = new GooString(argv[1]);
@@ -1211,10 +1207,6 @@ int main(int argc, char *argv[])
         delete outputFileName;
     if (imageFileName)
         delete imageFileName;
-    if (ownerPW)
-        delete ownerPW;
-    if (userPW)
-        delete userPW;
 
 #ifdef USE_CMS
     if (icc_data)

@@ -50,20 +50,16 @@
 
 using namespace poppler;
 
-document_private::document_private(GooString *file_path, const std::string &owner_password, const std::string &user_password) : document_private()
+document_private::document_private(std::unique_ptr<GooString> &&file_path, const std::string &owner_password, const std::string &user_password) : document_private()
 {
-    GooString goo_owner_password(owner_password.c_str());
-    GooString goo_user_password(user_password.c_str());
-    doc = new PDFDoc(file_path, &goo_owner_password, &goo_user_password);
+    doc = new PDFDoc(std::move(file_path), GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     file_data->swap(doc_data);
     MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
-    GooString goo_owner_password(owner_password.c_str());
-    GooString goo_user_password(user_password.c_str());
-    doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
+    doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password) : document_private()
@@ -71,9 +67,7 @@ document_private::document_private(const char *file_data, int file_data_length, 
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
     MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, Object(objNull));
-    GooString goo_owner_password(owner_password.c_str());
-    GooString goo_user_password(user_password.c_str());
-    doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
+    doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private() : GlobalParamsIniter(detail::error_function), doc(nullptr), raw_doc_data(nullptr), raw_doc_data_length(0), is_locked(false) { }
@@ -176,7 +170,7 @@ bool document::unlock(const std::string &owner_password, const std::string &user
         } else if (d->raw_doc_data) {
             newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);
         } else {
-            newdoc = new document_private(new GooString(d->doc->getFileName()), owner_password, user_password);
+            newdoc = new document_private(std::make_unique<GooString>(d->doc->getFileName()), owner_password, user_password);
         }
         if (!newdoc->doc->isOk()) {
             d->doc_data.swap(newdoc->doc_data);
@@ -1025,7 +1019,7 @@ bool document::save(const std::string &file_name) const
     }
 
     GooString fname(file_name.c_str());
-    return d->doc->saveAs(&fname) == errNone;
+    return d->doc->saveAs(fname) == errNone;
 }
 
 /**
@@ -1040,7 +1034,7 @@ bool document::save_a_copy(const std::string &file_name) const
     }
 
     GooString fname(file_name.c_str());
-    return d->doc->saveWithoutChangesAs(&fname) == errNone;
+    return d->doc->saveWithoutChangesAs(fname) == errNone;
 }
 
 /**
@@ -1052,7 +1046,7 @@ bool document::save_a_copy(const std::string &file_name) const
  */
 document *document::load_from_file(const std::string &file_name, const std::string &owner_password, const std::string &user_password)
 {
-    document_private *doc = new document_private(new GooString(file_name.c_str()), owner_password, user_password);
+    document_private *doc = new document_private(std::make_unique<GooString>(file_name.c_str()), owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }
 

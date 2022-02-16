@@ -40,7 +40,7 @@ void TestInternalOutline::testCreateOutline()
     outlineItems = outline->getItems();
     // no items will result in a nullptr rather than a 0 length list
     QVERIFY(outlineItems == nullptr);
-    doc->saveAs(&gooTempFileName);
+    doc->saveAs(gooTempFileName);
 
     /******************************************************/
 
@@ -87,7 +87,7 @@ void TestInternalOutline::testSetOutline()
             { { "1", 1, { { "1.1", 1, {} }, { "1.2", 2, {} }, { "1.3", 3, { { "1.3.1", 1, {} }, { "1.3.2", 2, {} }, { "1.3.3", 3, {} }, { "1.3.4", 4, {} } } }, { "1.4", 4, {} } } }, { "2", 2, {} }, { "3", 3, {} }, { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(&gooTempFileName);
+    doc->saveAs(gooTempFileName);
     outline = nullptr;
 
     /******************************************************/
@@ -175,7 +175,7 @@ void TestInternalOutline::testInsertChild()
 
     // create an outline and save the file
     outline->setOutline({});
-    doc->saveAs(&gooTempFileName);
+    doc->saveAs(gooTempFileName);
     outline = nullptr;
 
     /******************************************************/
@@ -207,7 +207,7 @@ void TestInternalOutline::testInsertChild()
     outlineItems->at(1)->insertChild("2.3", 2, 2);
 
     // save the file
-    doc->saveAs(&gooTempFileName2);
+    doc->saveAs(gooTempFileName2);
     outline = nullptr;
 
     /******************************************************/
@@ -282,7 +282,7 @@ void TestInternalOutline::testRemoveChild()
                           { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(&gooTempFileName);
+    doc->saveAs(gooTempFileName);
     outline = nullptr;
 
     /******************************************************/
@@ -303,7 +303,7 @@ void TestInternalOutline::testRemoveChild()
     outline->getItems()->at(1)->removeChild(0);
 
     // save the file
-    doc->saveAs(&gooTempFileName2);
+    doc->saveAs(gooTempFileName2);
     outline = nullptr;
 
     /******************************************************/
@@ -376,7 +376,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
                           { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(&gooTempFileName);
+    doc->saveAs(gooTempFileName);
 
     outline = nullptr;
 
@@ -407,7 +407,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     }
 
     // save the file
-    doc->saveAs(&gooTempFileName2);
+    doc->saveAs(gooTempFileName2);
     outline = nullptr;
     item = nullptr;
 

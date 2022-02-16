@@ -1250,7 +1250,7 @@ double AnnotAppearanceBBox::getPageYMax() const
 // Annot
 //------------------------------------------------------------------------
 
-#define annotLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define annotLocker() const std::scoped_lock locker(mutex)
 
 Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
 {
@@ -5289,7 +5289,7 @@ AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rectA, Movie *movieA) : Annot
     type = typeMovie;
     annotObj.dictSet("Subtype", Object(objName, "Movie"));
 
-    movie.reset(movieA->copy());
+    movie = movieA->copy();
     // TODO: create movie dict from movieA
 
     initialize(docA, annotObj.getDict());

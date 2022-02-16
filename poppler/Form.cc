@@ -573,8 +573,8 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const GooString *ownerPassword,
-                                       const GooString *userPassword)
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+                                       const std::optional<GooString> &userPassword)
 {
 #ifdef ENABLE_NSS3
     if (!certNickname) {
@@ -604,10 +604,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     }
 
     // Incremental save to avoid breaking any existing signatures
-    GooString *fname = new GooString(saveFilename);
+    const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
-        delete fname;
         return false;
     }
 
@@ -660,9 +659,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 #endif
 }
 
-bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const GooString *ownerPassword,
-                                                     const GooString *userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
-                                                     std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location,
+                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+                                                     std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -704,9 +703,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
 }
 
 // Get start and end file position of objNum in the PDF named filename.
-bool FormWidgetSignature::getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword)
+bool FormWidgetSignature::getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
-    PDFDoc newDoc(filename, ownerPassword, userPassword);
+    PDFDoc newDoc(std::unique_ptr<GooString>(filename.copy()), ownerPassword, userPassword);
     if (!newDoc.isOk())
         return false;
 

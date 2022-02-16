@@ -117,11 +117,12 @@
 // PDFDoc
 //------------------------------------------------------------------------
 
-#define pdfdocLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define pdfdocLocker() const std::scoped_lock locker(mutex)
 
 PDFDoc::PDFDoc() { }
 
-PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : fileName(fileNameA), guiData(guiDataA)
+PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
+    : fileName(std::move(fileNameA)), guiData(guiDataA)
 {
 #ifdef _WIN32
     const int n = fileName->getLength();
@@ -143,7 +144,7 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
         // Keep a copy of the errno returned by fopen so that it can be
         // referred to later.
         fopenErrno = errno;
-        error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName, strerror(errno));
+        error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName.get(), strerror(errno));
         errCode = errOpenFile;
         return;
     }
@@ -155,7 +156,7 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
 }
 
 #ifdef _WIN32
-PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
+PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     OSVERSIONINFO version;
 
@@ -166,7 +167,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
         fileNameG->append((char)fileNameA[i]);
         fileNameU[i] = fileNameA[i];
     }
-    fileName = fileNameG;
+    fileName.reset(fileNameG);
     fileNameU[fileNameLen] = L'\0';
 
     // try to open file
@@ -179,7 +180,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
         file = GooFile::open(fileName->toStr());
     }
     if (!file) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
+        error(errIO, -1, "Couldn't open file '{0:t}'", fileName.get());
         errCode = errOpenFile;
         return;
     }
@@ -191,10 +192,10 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
+PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     if (strA->getFileName()) {
-        fileName = strA->getFileName()->copy();
+        fileName.reset(strA->getFileName()->copy());
 #ifdef _WIN32
         const int n = fileName->getLength();
         fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
@@ -208,7 +209,7 @@ PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
-bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback)
+bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback)
 {
     pdfdocLocker();
 
@@ -300,7 +301,6 @@ PDFDoc::~PDFDoc()
     delete linearization;
     delete str;
     delete file;
-    delete fileName;
 #ifdef _WIN32
     gfree(fileNameU);
 #endif
@@ -384,7 +384,7 @@ void PDFDoc::checkHeader()
     // We don't do the version check. Don't add it back in.
 }
 
-bool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *userPassword)
+bool PDFDoc::checkEncryption(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     bool encrypted;
     bool ret;
@@ -802,7 +802,7 @@ Hints *PDFDoc::getHints()
     return hints;
 }
 
-int PDFDoc::savePageAs(const GooString *name, int pageNo)
+int PDFDoc::savePageAs(const GooString &name, int pageNo)
 {
     FILE *f;
     OutStream *outStr;
@@ -834,8 +834,8 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
     outStr = new FileOutStream(f, 0);
@@ -946,7 +946,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     Ref ref;
     ref.num = rootNum;
     ref.gen = 0;
-    Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(), name->c_str(), uxrefOffset);
+    Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(), name.c_str(), uxrefOffset);
     writeXRefTableTrailer(std::move(trailerDict), yRef, false /* do not write unnecessary entries */, uxrefOffset, outStr, getXRef());
 
     outStr->close();
@@ -958,14 +958,14 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     return errNone;
 }
 
-int PDFDoc::saveAs(const GooString *name, PDFWriteMode mode)
+int PDFDoc::saveAs(const GooString &name, PDFWriteMode mode)
 {
     FILE *f;
     OutStream *outStr;
     int res;
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
     outStr = new FileOutStream(f, 0);
@@ -992,14 +992,14 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode)
     return errNone;
 }
 
-int PDFDoc::saveWithoutChangesAs(const GooString *name)
+int PDFDoc::saveWithoutChangesAs(const GooString &name)
 {
     FILE *f;
     OutStream *outStr;
     int res;
 
-    if (!(f = openFile(name->c_str(), "wb"))) {
-        error(errIO, -1, "Couldn't open file '{0:t}'", name);
+    if (!(f = openFile(name.c_str(), "wb"))) {
+        error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
 
@@ -1896,12 +1896,12 @@ Outline *PDFDoc::getOutline()
     return outline;
 }
 
-std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
+std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA)
 {
     // We cannot call std::make_unique here because the PDFDoc constructor is private
     PDFDoc *doc = new PDFDoc();
     doc->errCode = errorCode;
-    doc->fileName = fileNameA;
+    doc->fileName = std::move(fileNameA);
 
     return std::unique_ptr<PDFDoc>(doc);
 }
@@ -2078,7 +2078,7 @@ bool PDFDoc::hasJavascript()
 
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
                   double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason,
-                  const GooString *location, const std::string &imagePath, const GooString *ownerPassword, const GooString *userPassword)
+                  const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {

@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -405,25 +405,6 @@ LinkDest::LinkDest(const Array *a)
         return;
     }
 
-    ok = true;
-}
-
-LinkDest::LinkDest(const LinkDest *dest)
-{
-    kind = dest->kind;
-    pageIsRef = dest->pageIsRef;
-    if (pageIsRef)
-        pageRef = dest->pageRef;
-    else
-        pageNum = dest->pageNum;
-    left = dest->left;
-    bottom = dest->bottom;
-    right = dest->right;
-    top = dest->top;
-    zoom = dest->zoom;
-    changeLeft = dest->changeLeft;
-    changeTop = dest->changeTop;
-    changeZoom = dest->changeZoom;
     ok = true;
 }
 

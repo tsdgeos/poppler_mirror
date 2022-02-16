@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -230,7 +230,7 @@ Object ObjectStream::getObject(int objIdx, int objNum)
 // XRef
 //------------------------------------------------------------------------
 
-#define xrefLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define xrefLocker() const std::scoped_lock locker(mutex)
 
 XRef::XRef() : objStrs { 5 }
 {

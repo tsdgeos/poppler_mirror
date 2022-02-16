@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
@@ -62,7 +62,7 @@ SecurityHandler::SecurityHandler(PDFDoc *docA)
 
 SecurityHandler::~SecurityHandler() { }
 
-bool SecurityHandler::checkEncryption(const GooString *ownerPassword, const GooString *userPassword)
+bool SecurityHandler::checkEncryption(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     void *authData;
 
@@ -77,8 +77,7 @@ bool SecurityHandler::checkEncryption(const GooString *ownerPassword, const GooS
     }
     if (!ok) {
         if (!ownerPassword && !userPassword) {
-            GooString dummy;
-            return checkEncryption(&dummy, &dummy);
+            return checkEncryption(GooString(), GooString());
         } else {
             error(errCommandLine, -1, "Incorrect password");
         }
@@ -291,7 +290,7 @@ bool StandardSecurityHandler::isUnencrypted() const
     return encVersion == -1 && encRevision == -1;
 }
 
-void *StandardSecurityHandler::makeAuthData(const GooString *ownerPassword, const GooString *userPassword)
+void *StandardSecurityHandler::makeAuthData(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     return new StandardAuthData(ownerPassword ? ownerPassword->copy() : nullptr, userPassword ? userPassword->copy() : nullptr);
 }

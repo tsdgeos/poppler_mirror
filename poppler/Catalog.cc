@@ -71,7 +71,7 @@
 // Catalog
 //------------------------------------------------------------------------
 
-#define catalogLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define catalogLocker() const std::scoped_lock locker(mutex)
 
 Catalog::Catalog(PDFDoc *docA)
 {

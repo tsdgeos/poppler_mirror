@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2019-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     // open PDF file
-    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, nullptr, nullptr));
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, {}, {}));
 
     if (!doc->isOk()) {
         fprintf(stderr, "Couldn't open %s\n", pdfFileName.c_str());
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     doc->getCatalog()->addEmbeddedFile(attachFile.get(), attachFileName);
 
     const GooString outputPdfFilePath(argv[3]);
-    const int saveResult = doc->saveAs(&outputPdfFilePath);
+    const int saveResult = doc->saveAs(outputPdfFilePath);
     if (saveResult != errNone) {
         fprintf(stderr, "Couldn't save the file properly.\n");
         return 5;

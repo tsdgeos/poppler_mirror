@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     const UnicodeMap *uMap;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     char uBuf[8];
     char path[1024];
     char *p;
@@ -124,24 +124,14 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         return 1;
     }

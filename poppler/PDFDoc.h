@@ -129,19 +129,20 @@ enum PDFSubtypeConformance
 class POPPLER_PRIVATE_EXPORT PDFDoc
 {
 public:
-    explicit PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
+    explicit PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, void *guiDataA = nullptr,
+                    const std::function<void()> &xrefReconstructedCallback = {});
 
 #ifdef _WIN32
-    PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
+    PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 #endif
 
-    explicit PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
+    explicit PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
     ~PDFDoc();
 
     PDFDoc(const PDFDoc &) = delete;
     PDFDoc &operator=(const PDFDoc &) = delete;
 
-    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
+    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA);
 
     // Was PDF document successfully opened?
     bool isOk() const { return ok; }
@@ -154,7 +155,7 @@ public:
     int getFopenErrno() const { return fopenErrno; }
 
     // Get file name.
-    const GooString *getFileName() const { return fileName; }
+    const GooString *getFileName() const { return fileName.get(); }
 #ifdef _WIN32
     wchar_t *getFileNameU() { return fileNameU; }
 #endif
@@ -302,13 +303,13 @@ public:
     bool getID(GooString *permanent_id, GooString *update_id) const;
 
     // Save one page with another name.
-    int savePageAs(const GooString *name, int pageNo);
+    int savePageAs(const GooString &name, int pageNo);
     // Save this file with another name.
-    int saveAs(const GooString *name, PDFWriteMode mode = writeStandard);
+    int saveAs(const GooString &name, PDFWriteMode mode = writeStandard);
     // Save this file in the given output stream.
     int saveAs(OutStream *outStr, PDFWriteMode mode = writeStandard);
     // Save this file with another name without saving changes
-    int saveWithoutChangesAs(const GooString *name);
+    int saveWithoutChangesAs(const GooString &name);
     // Save this file in the given output stream without saving changes
     int saveWithoutChangesAs(OutStream *outStr);
 
@@ -338,7 +339,7 @@ public:
     // sign() takes ownership of partialFieldName.
     bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
               double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr,
-              const GooString *location = nullptr, const std::string &imagePath = "", const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr);
+              const GooString *location = nullptr, const std::string &imagePath = "", const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
 
 private:
     // insert referenced objects in XRef
@@ -368,10 +369,10 @@ private:
     Hints *getHints();
 
     PDFDoc();
-    bool setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback);
+    bool setup(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback);
     bool checkFooter();
     void checkHeader();
-    bool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);
+    bool checkEncryption(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
     void extractPDFSubtype();
 
     // Get the offset of the start xref table.
@@ -381,7 +382,7 @@ private:
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
     long long strToLongLong(const char *s);
 
-    const GooString *fileName = nullptr;
+    std::unique_ptr<GooString> fileName;
 #ifdef _WIN32
     wchar_t *fileNameU = nullptr;
 #endif

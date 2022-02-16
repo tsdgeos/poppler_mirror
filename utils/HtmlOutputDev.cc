@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -925,12 +925,9 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
         }
         imgList.clear();
 
-        GooString *str;
         for (HtmlString *tmp = yxStrings; tmp; tmp = tmp->yxNext) {
             if (tmp->htext) {
-                str = new GooString(tmp->htext);
-                fputs(str->c_str(), f);
-                delete str;
+                fputs(tmp->htext->c_str(), f);
                 fputs("<br/>\n", f);
             }
         }
@@ -1507,7 +1504,7 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
         LinkGoTo *ha = (LinkGoTo *)link->getAction();
         std::unique_ptr<LinkDest> dest;
         if (ha->getDest() != nullptr)
-            dest = std::unique_ptr<LinkDest>(ha->getDest()->copy());
+            dest = std::make_unique<LinkDest>(*ha->getDest());
         else if (ha->getNamedDest() != nullptr)
             dest = catalog->findDest(ha->getNamedDest());
 
@@ -1556,7 +1553,7 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
             file = new GooString(ha->getFileName()->c_str());
         }
         if (ha->getDest() != nullptr)
-            dest = ha->getDest()->copy();
+            dest = new LinkDest(*ha->getDest());
         if (dest && file) {
             if (!(dest->isPageRef()))
                 destPage = dest->getPageNum();
@@ -1774,7 +1771,7 @@ int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
         return pagenum;
 
     if (link->getDest())
-        linkdest = std::unique_ptr<LinkDest>(link->getDest()->copy());
+        linkdest = std::make_unique<LinkDest>(*link->getDest());
     else if (link->getNamedDest())
         linkdest = catalog->findDest(link->getNamedDest());
 

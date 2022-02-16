@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2017, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2017, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
@@ -33,7 +33,7 @@ int FileDescriptorPDFDocBuilder::parseFdFromUri(const GooString &uri)
     return fd;
 }
 
-std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
 {
     const auto fd = parseFdFromUri(uri);
     if (fd == -1)

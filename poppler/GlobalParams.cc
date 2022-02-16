@@ -390,9 +390,9 @@ const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, boo
     return fi;
 }
 
-#define globalParamsLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
-#define unicodeMapCacheLocker() std::unique_lock<std::recursive_mutex> locker(unicodeMapCacheMutex)
-#define cMapCacheLocker() std::unique_lock<std::recursive_mutex> locker(cMapCacheMutex)
+#define globalParamsLocker() const std::scoped_lock locker(mutex)
+#define unicodeMapCacheLocker() const std::scoped_lock locker(unicodeMapCacheMutex)
+#define cMapCacheLocker() const std::scoped_lock locker(cMapCacheMutex)
 
 //------------------------------------------------------------------------
 // parsing
@@ -1258,7 +1258,7 @@ void GlobalParams::setErrQuiet(bool errQuietA)
 
 GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback)
 {
-    std::lock_guard<std::mutex> lock { mutex };
+    const std::scoped_lock lock { mutex };
 
     if (count == 0) {
         globalParams = std::make_unique<GlobalParams>(!customDataDir.empty() ? customDataDir.c_str() : nullptr);
@@ -1271,7 +1271,7 @@ GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback)
 
 GlobalParamsIniter::~GlobalParamsIniter()
 {
-    std::lock_guard<std::mutex> lock { mutex };
+    const std::scoped_lock lock { mutex };
 
     --count;
 
@@ -1282,7 +1282,7 @@ GlobalParamsIniter::~GlobalParamsIniter()
 
 bool GlobalParamsIniter::setCustomDataDir(const std::string &dir)
 {
-    std::lock_guard<std::mutex> lock { mutex };
+    const std::scoped_lock lock { mutex };
 
     if (count == 0) {
         customDataDir = dir;
