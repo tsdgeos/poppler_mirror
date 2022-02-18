@@ -2781,14 +2781,13 @@ G_DEFINE_BOXED_TYPE(PopplerFontsIter, poppler_fonts_iter, poppler_fonts_iter_cop
  */
 const char *poppler_fonts_iter_get_full_name(PopplerFontsIter *iter)
 {
-    const GooString *name;
     FontInfo *info;
 
     info = iter->items[iter->index];
 
-    name = info->getName();
-    if (name != nullptr) {
-        return info->getName()->c_str();
+    std::optional<std::string> name = info->getName();
+    if (name) {
+        return name->c_str();
     } else {
         return nullptr;
     }
@@ -2834,13 +2833,12 @@ const char *poppler_fonts_iter_get_name(PopplerFontsIter *iter)
  */
 const char *poppler_fonts_iter_get_substitute_name(PopplerFontsIter *iter)
 {
-    const GooString *name;
     FontInfo *info;
 
     info = iter->items[iter->index];
 
-    name = info->getSubstituteName();
-    if (name != nullptr) {
+    std::optional<std::string> name = info->getSubstituteName();
+    if (name) {
         return name->c_str();
     } else {
         return nullptr;
@@ -2858,13 +2856,12 @@ const char *poppler_fonts_iter_get_substitute_name(PopplerFontsIter *iter)
  */
 const char *poppler_fonts_iter_get_file_name(PopplerFontsIter *iter)
 {
-    const GooString *file;
     FontInfo *info;
 
     info = iter->items[iter->index];
 
-    file = info->getFile();
-    if (file != nullptr) {
+    std::optional<std::string> file = info->getFile();
+    if (file) {
         return file->c_str();
     } else {
         return nullptr;

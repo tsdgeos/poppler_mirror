@@ -30,6 +30,8 @@
 #include "Object.h"
 #include "poppler_private_export.h"
 
+#include <optional>
+#include <string>
 #include <unordered_set>
 
 class GfxFont;
@@ -57,15 +59,13 @@ public:
     // Constructor.
     FontInfo(GfxFont *fontA, XRef *xrefA);
     // Copy constructor
-    FontInfo(const FontInfo &f);
-    // Destructor.
-    ~FontInfo();
+    FontInfo(const FontInfo &f) = default;
 
     FontInfo &operator=(const FontInfo &) = delete;
 
-    const GooString *getName() const { return name; };
-    const GooString *getSubstituteName() const { return substituteName; };
-    const GooString *getFile() const { return file; };
+    const std::optional<std::string> &getName() const { return name; };
+    const std::optional<std::string> &getSubstituteName() const { return substituteName; };
+    const std::optional<std::string> &getFile() const { return file; };
     const std::string &getEncoding() const { return encoding; };
     Type getType() const { return type; };
     bool getEmbedded() const { return emb; };
@@ -75,9 +75,9 @@ public:
     Ref getEmbRef() const { return embRef; };
 
 private:
-    GooString *name;
-    GooString *substituteName;
-    GooString *file;
+    std::optional<std::string> name;
+    std::optional<std::string> substituteName;
+    std::optional<std::string> file;
     std::string encoding;
     Type type;
     bool emb;
