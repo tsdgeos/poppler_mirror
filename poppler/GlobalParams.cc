@@ -42,7 +42,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Kai Pastor <dg0yt@darc.de>
-// Copyright (C) 2021 Stefan Löffler <st.loeffler@gmail.com>
+// Copyright (C) 2021, 2022 Stefan Löffler <st.loeffler@gmail.com>
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 //
 // To see a description of the changes please see the Changelog file that
