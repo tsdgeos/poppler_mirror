@@ -2142,6 +2142,8 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
+    // say that there a now signatures and that we should append only
+    catalog->getAcroForm()->dictSet("SigFlags", Object(3));
 
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
     field->setCustomAppearanceContent(signatureText);

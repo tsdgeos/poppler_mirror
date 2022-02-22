@@ -1513,6 +1513,8 @@ void Annot::update(const char *key, Object &&value)
     annotObj.dictSet(const_cast<char *>(key), std::move(value));
 
     doc->getXRef()->setModifiedObject(&annotObj, ref);
+
+    hasBeenUpdated = true;
 }
 
 void Annot::setContents(std::unique_ptr<GooString> &&new_content)
@@ -2094,6 +2096,7 @@ void Annot::setNewAppearance(Object &&newAppearance)
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
         update("AP", std::move(obj1));
+        update("AS", Object(objName, "N"));
 
         Object updatedAP = annotObj.dictLookup("AP");
         appearStreams = std::make_unique<AnnotAppearance>(doc, &updatedAP);
@@ -2831,13 +2834,12 @@ void AnnotLink::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 const double AnnotFreeText::undefinedFontPtSize = 10.;
 
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppearance &da) : AnnotMarkup(docA, rectA)
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeFreeText;
 
-    const std::string daStr = da.toAppearanceString();
     annotObj.dictSet("Subtype", Object(objName, "FreeText"));
-    annotObj.dictSet("DA", Object(new GooString(daStr)));
+    annotObj.dictSet("DA", Object(new GooString()));
 
     initialize(docA, annotObj.getDict());
 }
@@ -3041,6 +3043,64 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
     return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
 }
 
+class HorizontalTextLayouter
+{
+public:
+    void add(const std::string &text, const std::string &fontName, const double width) { data.emplace_back(text, fontName, width); }
+
+    std::string layout(const VariableTextQuadding quadding, const double availableWidth, const double fontSize, double &xposPrev) const
+    {
+        double totalWidth = 0;
+        for (const Data &d : data) {
+            totalWidth += d.width;
+        }
+
+        double newXpos;
+        switch (quadding) {
+        case VariableTextQuadding::centered:
+            newXpos = (availableWidth - totalWidth) / 2;
+            break;
+        case VariableTextQuadding::rightJustified:
+            newXpos = availableWidth - totalWidth;
+            break;
+        default: // VariableTextQuadding::lLeftJustified:
+            newXpos = 0;
+            break;
+        }
+
+        AnnotAppearanceBuilder builder;
+        bool first = true;
+        double prevBlockWidth = 0;
+        for (const Data &d : data) {
+            builder.appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+
+            const double yDiff = first ? -fontSize : 0;
+            const double xDiff = first ? newXpos - xposPrev : prevBlockWidth;
+
+            builder.appendf("{0:.2f} {1:.2f} Td\n", xDiff, yDiff);
+            builder.writeString(d.text);
+            builder.append("Tj\n");
+            first = false;
+            prevBlockWidth = d.width;
+        }
+        xposPrev = newXpos + totalWidth - prevBlockWidth;
+
+        return builder.buffer()->toStr();
+    }
+
+private:
+    struct Data
+    {
+        Data(const std::string &t, const std::string &fName, double w) : text(t), fontName(fName), width(w) { }
+
+        const std::string text;
+        const std::string fontName;
+        const double width;
+    };
+
+    std::vector<Data> data;
+};
+
 void AnnotFreeText::generateFreeTextAppearance()
 {
     double borderWidth, ca = opacity;
@@ -3132,30 +3192,78 @@ void AnnotFreeText::generateFreeTextAppearance()
     // Set font state
     appearBuilder.setDrawColor(da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-    appearBuilder.setTextFont(da.getFontName(), da.getFontPtSize());
 
     int i = 0;
     double xposPrev = 0;
+    const bool isUnicode = contents->hasUnicodeMarker();
     while (i < contents->getLength()) {
+        HorizontalTextLayouter textLayouter;
+
         GooString out;
-        double linewidth, xpos;
-        layoutText(contents.get(), &out, &i, *font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
-        linewidth *= da.getFontPtSize();
-        switch (quadding) {
-        case VariableTextQuadding::centered:
-            xpos = (textwidth - linewidth) / 2;
-            break;
-        case VariableTextQuadding::rightJustified:
-            xpos = textwidth - linewidth;
-            break;
-        default: // VariableTextQuadding::leftJustified:
-            xpos = 0;
-            break;
+        double availableTextWidthInFontPtSize = textwidth / da.getFontPtSize();
+        double blockWidth;
+        bool newFontNeeded;
+        layoutText(contents.get(), &out, &i, *font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+        availableTextWidthInFontPtSize -= blockWidth;
+        textLayouter.add(out.toStr(), da.getFontName().getName(), blockWidth * da.getFontPtSize());
+
+        while (availableTextWidthInFontPtSize >= 0 && newFontNeeded) {
+            if (!form) {
+                // There's no fonts to look for, so just skip the characters
+                i += isUnicode ? 2 : 1;
+                error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, found character that the font can't represent");
+                newFontNeeded = false;
+            } else {
+                Unicode uChar;
+                if (isUnicode) {
+                    uChar = (unsigned char)(contents->getChar(i)) << 8;
+                    uChar += (unsigned char)(contents->getChar(i + 1));
+                } else {
+                    uChar = pdfDocEncoding[contents->getChar(i) & 0xff];
+                }
+                const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
+                if (!auxFontName.empty()) {
+                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName.c_str());
+
+                    // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
+                    GooString auxContents = GooString(contents->toStr().substr(i, isUnicode ? 2 : 1));
+                    if (isUnicode) {
+                        auxContents.prependUnicodeMarker();
+                    }
+                    int auxI = 0;
+                    layoutText(&auxContents, &out, &auxI, *auxFont, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+                    assert(!newFontNeeded);
+                    // layoutText will always at least layout one character even if it doesn't fit in
+                    // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                    availableTextWidthInFontPtSize -= blockWidth;
+                    if (availableTextWidthInFontPtSize >= 0) {
+                        i += auxI - (isUnicode ? 2 : 0); // the second term is the unicode marker
+                        textLayouter.add(out.toStr(), auxFontName, blockWidth * da.getFontPtSize());
+                    }
+
+                } else {
+                    error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, couldn't find a font for character U+{0:04uX}", uChar);
+                    newFontNeeded = false;
+                    i += contents->hasUnicodeMarker() ? 2 : 1;
+                }
+            }
+
+            // Now layout the rest of the text with the original font if we still have space
+            if (availableTextWidthInFontPtSize >= 0) {
+                layoutText(contents.get(), &out, &i, *font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+                availableTextWidthInFontPtSize -= blockWidth;
+                // layoutText will always at least layout one character even if it doesn't fit in
+                // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                if (availableTextWidthInFontPtSize >= 0) {
+                    textLayouter.add(out.toStr(), da.getFontName().getName(), blockWidth * da.getFontPtSize());
+                } else {
+                    i -= isUnicode ? 2 : 1;
+                }
+            }
         }
-        appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
-        appearBuilder.writeString(out.toStr());
-        appearBuilder.append("Tj\n");
-        xposPrev = xpos;
+
+        const std::string layoutedLine = textLayouter.layout(quadding, textwidth, da.getFontPtSize(), xposPrev);
+        appearBuilder.append(layoutedLine.c_str());
     }
 
     appearBuilder.append("ET Q\n");
@@ -3165,14 +3273,23 @@ void AnnotFreeText::generateFreeTextAppearance()
     bbox[2] = rect->x2 - rect->x1;
     bbox[3] = rect->y2 - rect->y1;
 
+    Object newAppearance;
     if (ca == 1) {
-        appearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resourceObj));
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resourceObj));
     } else {
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(resourceObj));
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
         Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        appearance = createForm(&appearBuf, bbox, false, resDict);
+        newAppearance = createForm(&appearBuf, bbox, false, resDict);
+    }
+    if (hasBeenUpdated) {
+        // We should technically do this for all annots but AnnotFreeText
+        // is particularly special since we're potentially embeddeing a font so we really need
+        // to set the AP and not let other renderers guess it from the contents
+        setNewAppearance(std::move(newAppearance));
+    } else {
+        appearance = std::move(newAppearance);
     }
 }
 
@@ -4078,7 +4195,7 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode)
+void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded)
 {
     CharCode c;
     Unicode uChar;
@@ -4087,6 +4204,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     int uLen, n;
     double dx, dy, ox, oy;
 
+    if (newFontNeeded) {
+        *newFontNeeded = false;
+    }
     if (width != nullptr) {
         *width = 0.0;
     }
@@ -4171,10 +4291,28 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
                 outBuf->append(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
                 if (font.isCIDFont()) {
-                    // TODO: This assumes an identity CMap.  It should be extended to
-                    // handle the general case.
-                    outBuf->append((c >> 8) & 0xff);
-                    outBuf->append(c & 0xff);
+                    auto cidFont = static_cast<const GfxCIDFont *>(&font);
+                    if (c < cidFont->getCIDToGIDLen()) {
+                        const int glyph = cidFont->getCIDToGID()[c];
+                        if (glyph > 0 || c == 0) {
+                            outBuf->append((c >> 8) & 0xff);
+                            outBuf->append(c & 0xff);
+                        } else {
+                            if (newFontNeeded) {
+                                *newFontNeeded = true;
+                                *i -= unicode ? 2 : 1;
+                                break;
+                            }
+                            outBuf->append((c >> 8) & 0xff);
+                            outBuf->append(c & 0xff);
+                            error(errSyntaxError, -1, "AnnotWidget::layoutText, font doesn't have glyph for charcode U+{0:04uX}", c);
+                        }
+                    } else {
+                        // TODO: This assumes an identity CMap.  It should be extended to
+                        // handle the general case.
+                        outBuf->append((c >> 8) & 0xff);
+                        outBuf->append(c & 0xff);
+                    }
                 } else {
                     // 8-bit font
                     outBuf->append(c);

@@ -247,3 +247,13 @@ bool Dict::hasKey(const char *key) const
 {
     return find(key) != nullptr;
 }
+
+std::string Dict::findAvailableKey(const std::string &suggestedKey)
+{
+    int i = 0;
+    std::string res = suggestedKey;
+    while (find(res.c_str())) {
+        res = suggestedKey + std::to_string(i++);
+    }
+    return res;
+}

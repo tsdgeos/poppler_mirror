@@ -535,3 +535,50 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 
     return path;
 }
+
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+{
+    const std::scoped_lock locker(mutex);
+    setupBaseFonts(POPPLER_FONTSDIR);
+
+    const std::string familyAndStyle = fontFamily + " " + fontStyle;
+
+    const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false);
+    if (fi) {
+        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum);
+    }
+
+    return {};
+}
+
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+{
+    const std::scoped_lock locker(mutex);
+    setupBaseFonts(POPPLER_FONTSDIR);
+
+    const std::vector<SysFontInfo *> &fonts = sysFonts->getFonts();
+    for (SysFontInfo *f : fonts) {
+        // This is not super great given that it ignores fontToEmulate, but will do for now
+        if (supportedFontForEmbedding(uChar, f->path->c_str(), f->fontNum)) {
+            std::string style;
+            if (f->italic) {
+                style = "Italic";
+            }
+            if (f->oblique) {
+                if (!style.empty()) {
+                    style += " ";
+                }
+                style += "Oblique";
+            }
+            if (f->bold) {
+                if (!style.empty()) {
+                    style += " ";
+                }
+                style += "Bold";
+            }
+            return UCharFontSearchResult(f->path->toStr(), f->fontNum, f->name->toStr(), style);
+        }
+    }
+
+    return {};
+}

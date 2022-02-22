@@ -772,7 +772,8 @@ public:
     // Check if point is inside the annot rectangle.
     bool inRect(double x, double y) const;
 
-    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode);
+    // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
+    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
 private:
     void readArrayNum(Object *pdfArray, int key, double *value);
@@ -827,6 +828,8 @@ protected:
 
     bool hasRef;
     mutable std::recursive_mutex mutex;
+
+    bool hasBeenUpdated = false;
 };
 
 //------------------------------------------------------------------------
@@ -1055,7 +1058,7 @@ public:
 
     static const double undefinedFontPtSize;
 
-    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
+    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect);
     AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);
     ~AnnotFreeText() override;
 
