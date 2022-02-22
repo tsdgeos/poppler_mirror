@@ -239,6 +239,9 @@ public:
     // Return true if string ends with suffix
     POPPLER_PRIVATE_EXPORT bool endsWith(const char *suffix) const;
 
+    static bool startsWith(std::string_view str, std::string_view prefix) { return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix); }
+    static bool endsWith(std::string_view str, std::string_view suffix) { return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix); }
+
     bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
     static bool hasUnicodeMarker(const std::string &s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
     bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
