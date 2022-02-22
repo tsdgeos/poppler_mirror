@@ -1835,7 +1835,7 @@ public:
     // data fields
     TextAnnotation::TextType textType;
     QString textIcon;
-    QFont textFont;
+    std::optional<QFont> textFont;
     QColor textColor;
     int inplaceAlign; // 0:left, 1:center, 2:right
     QVector<QPointF> inplaceCallout;
@@ -1863,7 +1863,11 @@ Annot *TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     if (textType == TextAnnotation::Linked) {
         pdfAnnot = new AnnotText { destPage->getDoc(), &rect };
     } else {
-        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), convertQColor(textColor) };
+        const double pointSize = textFont ? textFont->pointSizeF() : AnnotFreeText::undefinedFontPtSize;
+        if (pointSize < 0) {
+            qWarning() << "TextAnnotationPrivate::createNativeAnnot: font pointSize < 0";
+        }
+        DefaultAppearance da { { objName, "Invalid_font" }, pointSize, convertQColor(textColor) };
         pdfAnnot = new AnnotFreeText { destPage->getDoc(), &rect, da };
     }
 
@@ -1885,7 +1889,11 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
 {
     if (pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(pdfAnnot);
-        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), convertQColor(textColor) };
+        const double pointSize = textFont ? textFont->pointSizeF() : AnnotFreeText::undefinedFontPtSize;
+        if (pointSize < 0) {
+            qWarning() << "TextAnnotationPrivate::createNativeAnnot: font pointSize < 0";
+        }
+        DefaultAppearance da { { objName, "Invalid_font" }, pointSize, convertQColor(textColor) };
         ftextann->setDefaultAppearance(da);
     }
 }
@@ -2066,8 +2074,8 @@ QFont TextAnnotation::textFont() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
-        return d->textFont;
+    if (d->textFont)
+        return *d->textFont;
 
     double fontSize { AnnotFreeText::undefinedFontPtSize };
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
