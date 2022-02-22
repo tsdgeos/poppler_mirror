@@ -1528,7 +1528,7 @@ Annot *TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     if (textType == TextAnnotation::Linked) {
         pdfAnnot = new AnnotText { destPage->getDoc(), &rect };
     } else {
-        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), std::unique_ptr<AnnotColor> { convertQColor(textColor) } };
+        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), convertQColor(textColor) };
         pdfAnnot = new AnnotFreeText { destPage->getDoc(), &rect, da };
     }
 
@@ -1550,7 +1550,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
 {
     if (pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(pdfAnnot);
-        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), std::unique_ptr<AnnotColor> { convertQColor(textColor) } };
+        DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(textFont.pointSize()), convertQColor(textColor) };
         ftextann->setDefaultAppearance(da);
     }
 }
