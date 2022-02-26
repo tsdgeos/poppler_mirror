@@ -2,7 +2,7 @@
 //
 // poppler-config.h
 //
-// Copyright 1996-2011 Glyph & Cog, LLC
+// Copyright 1996-2011, 2022 Glyph & Cog, LLC
 //
 //========================================================================
 
@@ -123,7 +123,7 @@
 
 // copyright notice
 #define popplerCopyright "Copyright 2005-2022 The Poppler Developers - http://poppler.freedesktop.org"
-#define xpdfCopyright "Copyright 1996-2011 Glyph & Cog, LLC"
+#define xpdfCopyright "Copyright 1996-2011, 2022 Glyph & Cog, LLC"
 
 //------------------------------------------------------------------------
 // Win32 stuff
