@@ -42,7 +42,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Kai Pastor <dg0yt@darc.de>
-// Copyright (C) 2021 Stefan Löffler <st.loeffler@gmail.com>
+// Copyright (C) 2021, 2022 Stefan Löffler <st.loeffler@gmail.com>
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -122,38 +122,38 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 }
 }
 
-static void get_poppler_localdir(char *retval, const char *suffix)
+static std::string get_poppler_localdir(const std::string &suffix)
 {
-    unsigned char *p;
+    const std::string binSuffix("\\bin");
+    std::string retval(MAX_PATH, '\0');
 
-    if (!GetModuleFileNameA(hmodule, (CHAR *)retval, sizeof(retval) - 20)) {
-        strcpy(retval, POPPLER_DATADIR);
-        return;
+    if (!GetModuleFileNameA(hmodule, retval.data(), retval.size())) {
+        return POPPLER_DATADIR;
     }
 
-    p = _mbsrchr((unsigned char *)retval, '\\');
-    *p = '\0';
-    p = _mbsrchr((unsigned char *)retval, '\\');
-    if (p) {
-        if (stricmp((const char *)(p + 1), "bin") == 0)
-            *p = '\0';
+    const std::string::size_type p = retval.rfind('\\');
+    if (p != std::string::npos) {
+        retval.erase(p);
+        if (retval.size() > binSuffix.size() && stricmp(retval.substr(p - binSuffix.size()).c_str(), binSuffix.c_str()) == 0) {
+            retval.erase(p - binSuffix.size());
+        }
     }
-    strcat(retval, suffix);
+    retval += suffix;
+    retval.shrink_to_fit();
+    return retval;
 }
 
 static const char *get_poppler_datadir(void)
 {
-    static char retval[MAX_PATH];
+    static std::string retval;
     static bool beenhere = false;
 
-    if (beenhere)
-        return retval;
+    if (!beenhere) {
+        retval = get_poppler_localdir("\\share\\poppler");
+        beenhere = true;
+    }
 
-    get_poppler_localdir(retval, "\\share\\poppler");
-
-    beenhere = true;
-
-    return retval;
+    return retval.c_str();
 }
 
 #    undef POPPLER_DATADIR
@@ -161,17 +161,15 @@ static const char *get_poppler_datadir(void)
 
 static const char *get_poppler_fontsdir(void)
 {
-    static char retval[MAX_PATH];
+    static std::string retval;
     static bool beenhere = false;
 
-    if (beenhere)
-        return retval;
+    if (!beenhere) {
+        retval = get_poppler_localdir("\\share\\fonts");
+        beenhere = true;
+    }
 
-    get_poppler_localdir(retval, "\\share\\fonts");
-
-    beenhere = true;
-
-    return retval;
+    return retval.c_str();
 }
 #    undef POPPLER_FONTSDIR
 #    define POPPLER_FONTSDIR get_poppler_fontsdir()

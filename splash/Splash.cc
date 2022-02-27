@@ -55,6 +55,11 @@
 #include "Splash.h"
 #include <algorithm>
 
+// the MSVC math.h doesn't define this
+#ifndef M_PI
+#    define M_PI 3.14159265358979323846
+#endif
+
 //------------------------------------------------------------------------
 
 #define splashAAGamma 1.5
@@ -5962,17 +5967,94 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
                 m = splashSqrt(miter - 1);
             }
 
+            // hasangle == false means that the current and and the next segment
+            // are parallel.  In that case no join needs to be drawn.
             // round join
             if (hasangle && state->lineJoin == splashLineJoinRound) {
-                pathOut->moveTo(pathIn->pts[j0].x + (SplashCoord)0.5 * w, pathIn->pts[j0].y);
-                pathOut->curveTo(pathIn->pts[j0].x + (SplashCoord)0.5 * w, pathIn->pts[j0].y + bezierCircle2 * w, pathIn->pts[j0].x + bezierCircle2 * w, pathIn->pts[j0].y + (SplashCoord)0.5 * w, pathIn->pts[j0].x,
-                                 pathIn->pts[j0].y + (SplashCoord)0.5 * w);
-                pathOut->curveTo(pathIn->pts[j0].x - bezierCircle2 * w, pathIn->pts[j0].y + (SplashCoord)0.5 * w, pathIn->pts[j0].x - (SplashCoord)0.5 * w, pathIn->pts[j0].y + bezierCircle2 * w, pathIn->pts[j0].x - (SplashCoord)0.5 * w,
-                                 pathIn->pts[j0].y);
-                pathOut->curveTo(pathIn->pts[j0].x - (SplashCoord)0.5 * w, pathIn->pts[j0].y - bezierCircle2 * w, pathIn->pts[j0].x - bezierCircle2 * w, pathIn->pts[j0].y - (SplashCoord)0.5 * w, pathIn->pts[j0].x,
-                                 pathIn->pts[j0].y - (SplashCoord)0.5 * w);
-                pathOut->curveTo(pathIn->pts[j0].x + bezierCircle2 * w, pathIn->pts[j0].y - (SplashCoord)0.5 * w, pathIn->pts[j0].x + (SplashCoord)0.5 * w, pathIn->pts[j0].y - bezierCircle2 * w, pathIn->pts[j0].x + (SplashCoord)0.5 * w,
-                                 pathIn->pts[j0].y);
+                // join angle < 180
+                if (crossprod < 0) {
+                    SplashCoord angle = atan2((double)dx, (double)-dy);
+                    SplashCoord angleNext = atan2((double)dxNext, (double)-dyNext);
+                    if (angle < angleNext) {
+                        angle += 2 * M_PI;
+                    }
+                    SplashCoord dAngle = (angle - angleNext) / M_PI;
+                    if (dAngle < 0.501) {
+                        // span angle is <= 90 degrees -> draw a single arc
+                        SplashCoord kappa = dAngle * bezierCircle * w;
+                        SplashCoord cx1 = pathIn->pts[j0].x - wdy + kappa * dx;
+                        SplashCoord cy1 = pathIn->pts[j0].y + wdx + kappa * dy;
+                        SplashCoord cx2 = pathIn->pts[j0].x - wdyNext - kappa * dxNext;
+                        SplashCoord cy2 = pathIn->pts[j0].y + wdxNext - kappa * dyNext;
+                        pathOut->moveTo(pathIn->pts[j0].x, pathIn->pts[j0].y);
+                        pathOut->lineTo(pathIn->pts[j0].x - wdyNext, pathIn->pts[j0].y + wdxNext);
+                        pathOut->curveTo(cx2, cy2, cx1, cy1, pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
+                    } else {
+                        // span angle is > 90 degrees -> split into two arcs
+                        SplashCoord dJoin = splashDist(-wdy, wdx, -wdyNext, wdxNext);
+                        if (dJoin > 0) {
+                            SplashCoord dxJoin = (-wdyNext + wdy) / dJoin;
+                            SplashCoord dyJoin = (wdxNext - wdx) / dJoin;
+                            SplashCoord xc = pathIn->pts[j0].x + (SplashCoord)0.5 * w * cos((double)((SplashCoord)0.5 * (angle + angleNext)));
+                            SplashCoord yc = pathIn->pts[j0].y + (SplashCoord)0.5 * w * sin((double)((SplashCoord)0.5 * (angle + angleNext)));
+                            SplashCoord kappa = dAngle * bezierCircle2 * w;
+                            SplashCoord cx1 = pathIn->pts[j0].x - wdy + kappa * dx;
+                            SplashCoord cy1 = pathIn->pts[j0].y + wdx + kappa * dy;
+                            SplashCoord cx2 = xc - kappa * dxJoin;
+                            SplashCoord cy2 = yc - kappa * dyJoin;
+                            SplashCoord cx3 = xc + kappa * dxJoin;
+                            SplashCoord cy3 = yc + kappa * dyJoin;
+                            SplashCoord cx4 = pathIn->pts[j0].x - wdyNext - kappa * dxNext;
+                            SplashCoord cy4 = pathIn->pts[j0].y + wdxNext - kappa * dyNext;
+                            pathOut->moveTo(pathIn->pts[j0].x, pathIn->pts[j0].y);
+                            pathOut->lineTo(pathIn->pts[j0].x - wdyNext, pathIn->pts[j0].y + wdxNext);
+                            pathOut->curveTo(cx4, cy4, cx3, cy3, xc, yc);
+                            pathOut->curveTo(cx2, cy2, cx1, cy1, pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
+                        }
+                    }
+
+                    // join angle >= 180
+                } else {
+                    SplashCoord angle = atan2((double)-dx, (double)dy);
+                    SplashCoord angleNext = atan2((double)-dxNext, (double)dyNext);
+                    if (angleNext < angle) {
+                        angleNext += 2 * M_PI;
+                    }
+                    SplashCoord dAngle = (angleNext - angle) / M_PI;
+                    if (dAngle < 0.501) {
+                        // span angle is <= 90 degrees -> draw a single arc
+                        SplashCoord kappa = dAngle * bezierCircle * w;
+                        SplashCoord cx1 = pathIn->pts[j0].x + wdy + kappa * dx;
+                        SplashCoord cy1 = pathIn->pts[j0].y - wdx + kappa * dy;
+                        SplashCoord cx2 = pathIn->pts[j0].x + wdyNext - kappa * dxNext;
+                        SplashCoord cy2 = pathIn->pts[j0].y - wdxNext - kappa * dyNext;
+                        pathOut->moveTo(pathIn->pts[j0].x, pathIn->pts[j0].y);
+                        pathOut->lineTo(pathIn->pts[j0].x + wdy, pathIn->pts[j0].y - wdx);
+                        pathOut->curveTo(cx1, cy1, cx2, cy2, pathIn->pts[j0].x + wdyNext, pathIn->pts[j0].y - wdxNext);
+                    } else {
+                        // span angle is > 90 degrees -> split into two arcs
+                        SplashCoord dJoin = splashDist(wdy, -wdx, wdyNext, -wdxNext);
+                        if (dJoin > 0) {
+                            SplashCoord dxJoin = (wdyNext - wdy) / dJoin;
+                            SplashCoord dyJoin = (-wdxNext + wdx) / dJoin;
+                            SplashCoord xc = pathIn->pts[j0].x + (SplashCoord)0.5 * w * cos((double)((SplashCoord)0.5 * (angle + angleNext)));
+                            SplashCoord yc = pathIn->pts[j0].y + (SplashCoord)0.5 * w * sin((double)((SplashCoord)0.5 * (angle + angleNext)));
+                            SplashCoord kappa = dAngle * bezierCircle2 * w;
+                            SplashCoord cx1 = pathIn->pts[j0].x + wdy + kappa * dx;
+                            SplashCoord cy1 = pathIn->pts[j0].y - wdx + kappa * dy;
+                            SplashCoord cx2 = xc - kappa * dxJoin;
+                            SplashCoord cy2 = yc - kappa * dyJoin;
+                            SplashCoord cx3 = xc + kappa * dxJoin;
+                            SplashCoord cy3 = yc + kappa * dyJoin;
+                            SplashCoord cx4 = pathIn->pts[j0].x + wdyNext - kappa * dxNext;
+                            SplashCoord cy4 = pathIn->pts[j0].y - wdxNext - kappa * dyNext;
+                            pathOut->moveTo(pathIn->pts[j0].x, pathIn->pts[j0].y);
+                            pathOut->lineTo(pathIn->pts[j0].x + wdy, pathIn->pts[j0].y - wdx);
+                            pathOut->curveTo(cx1, cy1, cx2, cy2, xc, yc);
+                            pathOut->curveTo(cx3, cy3, cx4, cy4, pathIn->pts[j0].x + wdyNext, pathIn->pts[j0].y - wdxNext);
+                        }
+                    }
+                }
 
             } else if (hasangle) {
                 pathOut->moveTo(pathIn->pts[j0].x, pathIn->pts[j0].y);

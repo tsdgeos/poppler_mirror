@@ -14,7 +14,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -169,9 +169,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     // font name
     origName = font->getName();
     if (origName != nullptr) {
-        name = font->getName()->copy();
-    } else {
-        name = nullptr;
+        name = font->getName()->toStr();
     }
 
     // font type
@@ -184,15 +182,15 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
         emb = font->getEmbeddedFontID(&embRef);
     }
 
-    file = nullptr;
-    substituteName = nullptr;
     if (!emb) {
         SysFontType dummy;
         int dummy2;
         GooString substituteNameAux;
-        file = globalParams->findSystemFontFile(font, &dummy, &dummy2, &substituteNameAux);
+        std::unique_ptr<GooString> tmpFile(globalParams->findSystemFontFile(font, &dummy, &dummy2, &substituteNameAux));
+        if (tmpFile)
+            file = tmpFile->toStr();
         if (substituteNameAux.getLength() > 0)
-            substituteName = substituteNameAux.copy();
+            substituteName = substituteNameAux.toStr();
     }
     encoding = font->getEncodingName();
 
@@ -206,26 +204,4 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     // check for a font subset name: capital letters followed by a '+'
     // sign
     subset = font->isSubset();
-}
-
-FontInfo::FontInfo(const FontInfo &f)
-{
-    name = f.name ? f.name->copy() : nullptr;
-    file = f.file ? f.file->copy() : nullptr;
-    encoding = f.encoding;
-    substituteName = f.substituteName ? f.substituteName->copy() : nullptr;
-    type = f.type;
-    emb = f.emb;
-    subset = f.subset;
-    hasToUnicode = f.hasToUnicode;
-    fontRef = f.fontRef;
-    embRef = f.embRef;
-}
-
-FontInfo::~FontInfo()
-{
-    delete name;
-    delete file;
-    if (substituteName)
-        delete substituteName;
 }
