@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -50,6 +50,7 @@
 #include <QtCore/QVarLengthArray>
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
+#include <QDebug>
 
 #include <config.h>
 #include <cfloat>
@@ -256,8 +257,10 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
             // its presentation mode or not
             // popplerLink = new LinkAction( linkArea, LinkAction::EndPresentation );
             popplerLink = new LinkAction(linkArea, LinkAction::Close);
+        } else if (name == "SaveAs") {
+            popplerLink = new LinkAction(linkArea, LinkAction::SaveAs);
         } else {
-            // TODO
+            qWarning() << "Unhandled action name" << name.c_str();
         }
     } break;
 

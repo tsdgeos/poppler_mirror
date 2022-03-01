@@ -3848,6 +3848,9 @@ void LinkAnnotation::store(QDomNode &node, QDomDocument &document) const
             case Poppler::LinkAction::Print:
                 hyperlinkElement.setAttribute(QStringLiteral("action"), QStringLiteral("Print"));
                 break;
+            case Poppler::LinkAction::SaveAs:
+                hyperlinkElement.setAttribute(QStringLiteral("action"), QStringLiteral("SaveAs"));
+                break;
             }
             break;
         }
