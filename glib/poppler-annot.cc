@@ -700,17 +700,14 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
  **/
 void poppler_annot_set_contents(PopplerAnnot *poppler_annot, const gchar *contents)
 {
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
     g_return_if_fail(POPPLER_IS_ANNOT(poppler_annot));
 
     tmp = contents ? g_convert(contents, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    poppler_annot->annot->setContents(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    poppler_annot->annot->setContents(goo_tmp);
-    delete (goo_tmp);
 }
 
 /**

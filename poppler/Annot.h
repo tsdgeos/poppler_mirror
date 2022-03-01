@@ -719,7 +719,7 @@ public:
 
     // Sets the annot contents to new_content
     // new_content should never be NULL
-    virtual void setContents(GooString *new_content);
+    virtual void setContents(std::unique_ptr<GooString> &&new_content);
     void setName(GooString *new_name);
     void setModified(GooString *new_modified);
     void setFlags(unsigned int new_flags);
@@ -1051,7 +1051,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
     Object getAppearanceResDict() override;
-    void setContents(GooString *new_content) override;
+    void setContents(std::unique_ptr<GooString> &&new_content) override;
 
     void setDefaultAppearance(const DefaultAppearance &da);
     void setQuadding(AnnotFreeTextQuadding new_quadding);
@@ -1115,7 +1115,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
     Object getAppearanceResDict() override;
-    void setContents(GooString *new_content) override;
+    void setContents(std::unique_ptr<GooString> &&new_content) override;
 
     void setVertices(double x1, double y1, double x2, double y2);
     void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);

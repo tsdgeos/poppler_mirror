@@ -1386,9 +1386,7 @@ void Annotation::setContents(const QString &contents)
         return;
     }
 
-    GooString *s = QStringToUnicodeGooString(contents);
-    d->pdfAnnot->setContents(s);
-    delete s;
+    d->pdfAnnot->setContents(std::unique_ptr<GooString>(QStringToUnicodeGooString(contents)));
 }
 
 QString Annotation::uniqueName() const

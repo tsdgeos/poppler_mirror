@@ -1484,12 +1484,12 @@ void Annot::update(const char *key, Object &&value)
     doc->getXRef()->setModifiedObject(&annotObj, ref);
 }
 
-void Annot::setContents(GooString *new_content)
+void Annot::setContents(std::unique_ptr<GooString> &&new_content)
 {
     annotLocker();
 
     if (new_content) {
-        contents = std::make_unique<GooString>(new_content);
+        contents = std::move(new_content);
         // append the unicode marker <FE FF> if needed
         if (!contents->hasUnicodeMarker()) {
             contents->prependUnicodeMarker();
@@ -2884,9 +2884,9 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotFreeText::setContents(GooString *new_content)
+void AnnotFreeText::setContents(std::unique_ptr<GooString> &&new_content)
 {
-    Annot::setContents(new_content);
+    Annot::setContents(std::move(new_content));
     invalidateAppearance();
 }
 
@@ -3279,9 +3279,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotLine::setContents(GooString *new_content)
+void AnnotLine::setContents(std::unique_ptr<GooString> &&new_content)
 {
-    Annot::setContents(new_content);
+    Annot::setContents(std::move(new_content));
     if (caption)
         invalidateAppearance();
 }
