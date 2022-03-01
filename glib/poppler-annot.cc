@@ -1020,7 +1020,6 @@ gchar *poppler_annot_markup_get_label(PopplerAnnotMarkup *poppler_annot)
 void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gchar *label)
 {
     AnnotMarkup *annot;
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
@@ -1029,10 +1028,8 @@ void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gch
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     tmp = label ? g_convert(label, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    annot->setLabel(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    annot->setLabel(goo_tmp);
-    delete goo_tmp;
 }
 
 /**

@@ -2184,10 +2184,10 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotMarkup::setLabel(GooString *new_label)
+void AnnotMarkup::setLabel(std::unique_ptr<GooString> &&new_label)
 {
     if (new_label) {
-        label = std::make_unique<GooString>(new_label);
+        label = std::move(new_label);
         // append the unicode marker <FE FF> if needed
         if (!label->hasUnicodeMarker()) {
             label->prependUnicodeMarker();

@@ -1024,9 +1024,7 @@ void Annotation::setAuthor(const QString &author)
 
     AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
     if (markupann) {
-        GooString *s = QStringToUnicodeGooString(author);
-        markupann->setLabel(s);
-        delete s;
+        markupann->setLabel(std::unique_ptr<GooString>(QStringToUnicodeGooString(author)));
     }
 }
 
