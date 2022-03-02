@@ -194,8 +194,9 @@ std::unique_ptr<GooString> Catalog::readMetadata()
 
 Page *Catalog::getPage(int i)
 {
-    if (i < 1)
+    if (i < 1) {
         return nullptr;
+    }
 
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
@@ -209,8 +210,9 @@ Page *Catalog::getPage(int i)
 
 Ref *Catalog::getPageRef(int i)
 {
-    if (i < 1)
+    if (i < 1) {
         return nullptr;
+    }
 
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
@@ -264,11 +266,13 @@ bool Catalog::cachePageTree(int page)
 
     while (true) {
 
-        if (std::size_t(page) <= pages.size())
+        if (std::size_t(page) <= pages.size()) {
             return true;
+        }
 
-        if (pagesList->empty())
+        if (pagesList->empty()) {
             return false;
+        }
 
         Object kids = pagesList->back().dictLookup("Kids");
         if (!kids.isArray()) {
@@ -283,8 +287,9 @@ bool Catalog::cachePageTree(int page)
             delete attrsList->back();
             attrsList->pop_back();
             kidsIdxList->pop_back();
-            if (!kidsIdxList->empty())
+            if (!kidsIdxList->empty()) {
                 kidsIdxList->back()++;
+            }
             continue;
         }
 
@@ -348,8 +353,9 @@ int Catalog::findPage(const Ref pageRef)
 
     for (i = 0; i < getNumPages(); ++i) {
         Ref *ref = getPageRef(i + 1);
-        if (ref != nullptr && *ref == pageRef)
+        if (ref != nullptr && *ref == pageRef) {
             return i + 1;
+        }
     }
     return 0;
 }
@@ -374,10 +380,11 @@ std::unique_ptr<LinkDest> Catalog::createLinkDest(Object *obj)
         dest = std::make_unique<LinkDest>(obj->getArray());
     } else if (obj->isDict()) {
         Object obj2 = obj->dictLookup("D");
-        if (obj2.isArray())
+        if (obj2.isArray()) {
             dest = std::make_unique<LinkDest>(obj2.getArray());
-        else
+        } else {
             error(errSyntaxWarning, -1, "Bad named destination value");
+        }
     } else {
         error(errSyntaxWarning, -1, "Bad named destination value");
     }
@@ -451,8 +458,9 @@ bool Catalog::hasEmbeddedFile(const std::string &fileName)
 {
     NameTree *ef = getEmbeddedFileNameTree();
     for (int i = 0; i < ef->numEntries(); ++i) {
-        if (fileName == ef->getName(i)->toStr())
+        if (fileName == ef->getName(i)->toStr()) {
             return true;
+        }
     }
     return false;
 }
@@ -576,18 +584,19 @@ Catalog::PageMode Catalog::getPageMode()
 
         Object obj = catDict.dictLookup("PageMode");
         if (obj.isName()) {
-            if (obj.isName("UseNone"))
+            if (obj.isName("UseNone")) {
                 pageMode = pageModeNone;
-            else if (obj.isName("UseOutlines"))
+            } else if (obj.isName("UseOutlines")) {
                 pageMode = pageModeOutlines;
-            else if (obj.isName("UseThumbs"))
+            } else if (obj.isName("UseThumbs")) {
                 pageMode = pageModeThumbs;
-            else if (obj.isName("FullScreen"))
+            } else if (obj.isName("FullScreen")) {
                 pageMode = pageModeFullScreen;
-            else if (obj.isName("UseOC"))
+            } else if (obj.isName("UseOC")) {
                 pageMode = pageModeOC;
-            else if (obj.isName("UseAttachments"))
+            } else if (obj.isName("UseAttachments")) {
                 pageMode = pageModeAttach;
+            }
         }
     }
     return pageMode;
@@ -610,18 +619,24 @@ Catalog::PageLayout Catalog::getPageLayout()
         pageLayout = pageLayoutNone;
         Object obj = catDict.dictLookup("PageLayout");
         if (obj.isName()) {
-            if (obj.isName("SinglePage"))
+            if (obj.isName("SinglePage")) {
                 pageLayout = pageLayoutSinglePage;
-            if (obj.isName("OneColumn"))
+            }
+            if (obj.isName("OneColumn")) {
                 pageLayout = pageLayoutOneColumn;
-            if (obj.isName("TwoColumnLeft"))
+            }
+            if (obj.isName("TwoColumnLeft")) {
                 pageLayout = pageLayoutTwoColumnLeft;
-            if (obj.isName("TwoColumnRight"))
+            }
+            if (obj.isName("TwoColumnRight")) {
                 pageLayout = pageLayoutTwoColumnRight;
-            if (obj.isName("TwoPageLeft"))
+            }
+            if (obj.isName("TwoPageLeft")) {
                 pageLayout = pageLayoutTwoPageLeft;
-            if (obj.isName("TwoPageRight"))
+            }
+            if (obj.isName("TwoPageRight")) {
                 pageLayout = pageLayoutTwoPageRight;
+            }
         }
     }
     return pageLayout;
@@ -638,8 +653,9 @@ NameTree::~NameTree()
 {
     int i;
 
-    for (i = 0; i < length; i++)
+    for (i = 0; i < length; i++) {
         delete entries[i];
+    }
 
     gfree(entries);
 }
@@ -650,8 +666,9 @@ NameTree::Entry::Entry(Array *array, int index)
         Object aux = array->get(index);
         if (aux.isString()) {
             name.append(aux.getString());
-        } else
+        } else {
             error(errSyntaxError, -1, "Invalid page tree");
+        }
     }
     value = array->getNF(index + 1).copy();
 }
@@ -693,8 +710,9 @@ void NameTree::init(XRef *xrefA, Object *tree)
 
 void NameTree::parse(const Object *tree, std::set<int> &seen)
 {
-    if (!tree->isDict())
+    if (!tree->isDict()) {
         return;
+    }
 
     // leaf node
     Object names = tree->dictLookup("Names");
@@ -729,8 +747,9 @@ void NameTree::parse(const Object *tree, std::set<int> &seen)
                 }
                 seen.insert(numObj);
             }
-            if (kid.isDict())
+            if (kid.isDict()) {
                 parse(&kid, seen);
+            }
         }
     }
 }
@@ -780,16 +799,19 @@ bool Catalog::labelToIndex(GooString *label, int *index)
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        if (!pli->labelToIndex(label, index))
+        if (!pli->labelToIndex(label, index)) {
             return false;
+        }
     } else {
         *index = strtol(label->c_str(), &end, 10) - 1;
-        if (*end != '\0')
+        if (*end != '\0') {
             return false;
+        }
     }
 
-    if (*index < 0 || *index >= getNumPages())
+    if (*index < 0 || *index >= getNumPages()) {
         return false;
+    }
 
     return true;
 }
@@ -798,8 +820,9 @@ bool Catalog::indexToLabel(int index, GooString *label)
 {
     char buffer[32];
 
-    if (index < 0 || index >= getNumPages())
+    if (index < 0 || index >= getNumPages()) {
         return false;
+    }
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
@@ -928,16 +951,18 @@ unsigned int Catalog::getMarkInfo()
                 }
 
                 value = markInfoDict.dictLookup("Suspects");
-                if (value.isBool() && value.getBool())
+                if (value.isBool() && value.getBool()) {
                     markInfo |= markInfoSuspects;
-                else if (!value.isNull())
+                } else if (!value.isNull()) {
                     error(errSyntaxError, -1, "Suspects object is wrong type ({0:s})", value.getTypeName());
+                }
 
                 value = markInfoDict.dictLookup("UserProperties");
-                if (value.isBool() && value.getBool())
+                if (value.isBool() && value.getBool()) {
                     markInfo |= markInfoUserProperties;
-                else if (!value.isNull())
+                } else if (!value.isNull()) {
                     error(errSyntaxError, -1, "UserProperties object is wrong type ({0:s})", value.getTypeName());
+                }
             } else if (!markInfoDict.isNull()) {
                 error(errSyntaxError, -1, "MarkInfo object is wrong type ({0:s})", markInfoDict.getTypeName());
             }
@@ -1191,8 +1216,9 @@ std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActio
                                                                        : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
-        if (actionObject.isDict())
+        if (actionObject.isDict()) {
             return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+        }
     }
     return nullptr;
 }

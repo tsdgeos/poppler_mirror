@@ -133,16 +133,18 @@ void poppler_layer_show(PopplerLayer *poppler_layer)
 
     layer = poppler_layer->layer;
 
-    if (layer->oc->getState() == OptionalContentGroup::On)
+    if (layer->oc->getState() == OptionalContentGroup::On) {
         return;
+    }
 
     layer->oc->setState(OptionalContentGroup::On);
 
     for (l = poppler_layer->rbgroup; l && l->data; l = g_list_next(l)) {
         OptionalContentGroup *oc = (OptionalContentGroup *)l->data;
 
-        if (oc != layer->oc)
+        if (oc != layer->oc) {
             oc->setState(OptionalContentGroup::Off);
+        }
     }
 }
 
@@ -164,8 +166,9 @@ void poppler_layer_hide(PopplerLayer *poppler_layer)
 
     layer = poppler_layer->layer;
 
-    if (layer->oc->getState() == OptionalContentGroup::Off)
+    if (layer->oc->getState() == OptionalContentGroup::Off) {
         return;
+    }
 
     layer->oc->setState(OptionalContentGroup::Off);
 }

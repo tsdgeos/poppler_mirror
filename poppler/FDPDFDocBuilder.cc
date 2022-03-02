@@ -27,8 +27,9 @@ int FileDescriptorPDFDocBuilder::parseFdFromUri(const GooString &uri)
 {
     int fd = -1;
     char c;
-    if (sscanf(uri.c_str(), "fd://%d%c", &fd, &c) != 1)
+    if (sscanf(uri.c_str(), "fd://%d%c", &fd, &c) != 1) {
         return -1;
+    }
 
     return fd;
 }
@@ -36,16 +37,19 @@ int FileDescriptorPDFDocBuilder::parseFdFromUri(const GooString &uri)
 std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
 {
     const auto fd = parseFdFromUri(uri);
-    if (fd == -1)
+    if (fd == -1) {
         return {};
+    }
 
     FILE *file;
-    if (fd == fileno(stdin))
+    if (fd == fileno(stdin)) {
         file = stdin;
-    else
+    } else {
         file = fdopen(fd, "rb");
-    if (!file)
+    }
+    if (!file) {
         return {};
+    }
 
     CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
     return std::make_unique<PDFDoc>(new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull)), ownerPassword, userPassword);

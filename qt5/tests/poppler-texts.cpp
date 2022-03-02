@@ -28,8 +28,9 @@ int main(int argc, char **argv)
         Poppler::Page *page = doc->page(i);
         const QByteArray utf8str = page->text(QRectF(), Poppler::Page::RawOrderLayout).toUtf8();
         std::cout << std::flush;
-        for (j = 0; j < utf8str.size(); j++)
+        for (j = 0; j < utf8str.size(); j++) {
             std::cout << utf8str[j];
+        }
         std::cout << std::endl;
         delete page;
     }

@@ -77,8 +77,9 @@ public:
     // Set position in file.
     void setPos(Goffset pos)
     {
-        if (curStr.isStream())
+        if (curStr.isStream()) {
             curStr.getStream()->setPos(pos);
+        }
     }
 
     // Returns true if <c> is a whitespace character.

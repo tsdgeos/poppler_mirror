@@ -178,8 +178,9 @@ std::ostream &operator<<(std::ostream &out, const QList<T> &elems)
 {
     bool isFirst = true;
     for (int i = 0; i < elems.count(); ++i) {
-        if (!isFirst)
+        if (!isFirst) {
             out << " ";
+        }
         out << elems[i];
         isFirst = false;
     }
@@ -254,11 +255,12 @@ int main(int argc, char **argv)
                     const Poppler::SignatureValidationInfo svi = signatureForm->validate(Poppler::FormFieldSignature::ValidateVerifyCertificate);
                     std::cout << "\t\t\tSignatureStatus: " << svi.signatureStatus() << std::endl;
                     std::cout << "\t\t\tCertificateStatus: " << svi.certificateStatus() << std::endl;
-                    if (svi.signerName().isEmpty() == false)
+                    if (svi.signerName().isEmpty() == false) {
                         std::cout << "\t\t\tSignerName: " << svi.signerName() << std::endl;
-                    else
+                    } else {
                         std::cout << "\t\t\tSignerName: "
                                   << "(null)" << std::endl;
+                    }
                     const QDateTime sviTime = QDateTime::fromSecsSinceEpoch(svi.signingTime(), Qt::UTC);
                     std::cout << "\t\t\tSigningTime: " << sviTime.toString() << std::endl;
                 } break;

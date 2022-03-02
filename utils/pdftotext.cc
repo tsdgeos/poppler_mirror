@@ -192,8 +192,9 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftotext", "<PDF-file> [<text-file>]", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exitCode = 0;
+        }
         goto err0;
     }
 
@@ -388,8 +389,9 @@ int main(int argc, char *argv[])
                 goto err3;
             }
         }
-        if (!bbox)
+        if (!bbox) {
             fputs("</pre>\n", f);
+        }
         fputs("</body>\n", f);
         fputs("</html>\n", f);
         if (f != stdout) {
@@ -469,14 +471,18 @@ static void printLine(FILE *f, const TextLine *line)
     for (word = line->getWords(); word; word = word->getNext()) {
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-        if (lineXMin == 0 || lineXMin > xMin)
+        if (lineXMin == 0 || lineXMin > xMin) {
             lineXMin = xMin;
-        if (lineYMin == 0 || lineYMin > yMin)
+        }
+        if (lineYMin == 0 || lineYMin > yMin) {
             lineYMin = yMin;
-        if (lineXMax < xMax)
+        }
+        if (lineXMax < xMax) {
             lineXMax = xMax;
-        if (lineYMax < yMax)
+        }
+        if (lineYMax < yMax) {
             lineYMax = yMax;
+        }
 
         GooString *wordText = word->getText();
         const std::string myString = myXmlTokenReplace(wordText->c_str());
@@ -530,8 +536,9 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
         const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
         TextWord *word;
         double xMinA, yMinA, xMaxA, yMaxA;
-        if (word_length == 0)
+        if (word_length == 0) {
             fprintf(stderr, "no word list\n");
+        }
 
         for (int i = 0; i < word_length; ++i) {
             word = wordlist->get(i);

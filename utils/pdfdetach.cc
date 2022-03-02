@@ -136,22 +136,26 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    for (i = 0; i < doc->getCatalog()->numEmbeddedFiles(); ++i)
+    for (i = 0; i < doc->getCatalog()->numEmbeddedFiles(); ++i) {
         embeddedFiles.push_back(doc->getCatalog()->embeddedFile(i));
+    }
 
     nPages = doc->getCatalog()->getNumPages();
     for (i = 0; i < nPages; ++i) {
         page = doc->getCatalog()->getPage(i + 1);
-        if (!page)
+        if (!page) {
             continue;
+        }
         annots = page->getAnnots();
-        if (!annots)
+        if (!annots) {
             break;
+        }
 
         for (j = 0; j < annots->getNumAnnots(); ++j) {
             annot = annots->getAnnot(j);
-            if (annot->getType() != Annot::typeFileAttachment)
+            if (annot->getType() != Annot::typeFileAttachment) {
                 continue;
+            }
             embeddedFiles.push_back(std::make_unique<FileSpec>(static_cast<AnnotFileAttachment *>(annot)->getFile()));
         }
     }
@@ -224,8 +228,9 @@ int main(int argc, char *argv[])
                     ++j;
                 }
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
-                if (p + n >= path + sizeof(path))
+                if (p + n >= path + sizeof(path)) {
                     break;
+                }
                 memcpy(p, uBuf, n);
                 p += n;
             }
@@ -283,8 +288,9 @@ int main(int argc, char *argv[])
                     ++j;
                 }
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
-                if (p + n >= path + sizeof(path))
+                if (p + n >= path + sizeof(path)) {
                     break;
+                }
                 memcpy(p, uBuf, n);
                 p += n;
             }

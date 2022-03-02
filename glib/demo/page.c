@@ -39,8 +39,9 @@ typedef struct
 
 static void pgd_page_free(PgdPageDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -79,10 +80,11 @@ static void image_set_from_surface(GtkImage *gtkimage, cairo_surface_t *surface)
     cr = cairo_create(image);
     cairo_set_source_surface(cr, surface, 0, 0);
 
-    if (has_alpha)
+    if (has_alpha) {
         cairo_mask_surface(cr, surface, 0, 0);
-    else
+    } else {
         cairo_paint(cr);
+    }
 
     cairo_destroy(cr);
     cairo_surface_destroy(image);

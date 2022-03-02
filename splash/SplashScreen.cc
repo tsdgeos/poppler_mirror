@@ -83,8 +83,9 @@ void SplashScreen::createMatrix()
     const SplashScreenParams *params = screenParams;
 
     // size must be a power of 2, and at least 2
-    for (size = 2, log2Size = 1; size < params->size; size <<= 1, ++log2Size)
+    for (size = 2, log2Size = 1; size < params->size; size <<= 1, ++log2Size) {
         ;
+    }
 
     switch (params->type) {
 

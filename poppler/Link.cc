@@ -766,8 +766,9 @@ LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
         for (int i = 0; i < obj1.arrayGetLength(); ++i) {
             const Object &obj2 = obj1.arrayGetNF(i);
             if (obj2.isName()) {
-                if (!stList.list.empty())
+                if (!stList.list.empty()) {
                     stateList.push_back(stList);
+                }
 
                 const char *name = obj2.getName();
                 stList.list.clear();
@@ -789,8 +790,9 @@ LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
             }
         }
         // Add the last group
-        if (!stList.list.empty())
+        if (!stList.list.empty()) {
             stateList.push_back(stList);
+        }
     } else {
         error(errSyntaxWarning, -1, "Invalid OCGState action");
         isValid = false;
@@ -859,8 +861,9 @@ LinkResetForm::LinkResetForm(const Object *obj)
     if (obj1.isInt()) {
         int flags = obj1.getInt();
 
-        if (flags & 0x1)
+        if (flags & 0x1) {
             exclude = true;
+        }
     }
 }
 
@@ -883,14 +886,16 @@ LinkUnknown::~LinkUnknown() = default;
 
 Links::Links(Annots *annots)
 {
-    if (!annots)
+    if (!annots) {
         return;
+    }
 
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
         Annot *annot = annots->getAnnot(i);
 
-        if (annot->getType() != Annot::typeLink)
+        if (annot->getType() != Annot::typeLink) {
             continue;
+        }
 
         annot->incRefCnt();
         links.push_back(static_cast<AnnotLink *>(annot));
@@ -899,6 +904,7 @@ Links::Links(Annots *annots)
 
 Links::~Links()
 {
-    for (AnnotLink *link : links)
+    for (AnnotLink *link : links) {
         link->decRefCnt();
+    }
 }

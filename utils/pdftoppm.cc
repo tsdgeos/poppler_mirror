@@ -281,10 +281,12 @@ static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) { return !
 
 static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x, int y, int w, int h, double pg_w, double pg_h, char *ppmFile)
 {
-    if (w == 0)
+    if (w == 0) {
         w = (int)ceil(pg_w);
-    if (h == 0)
+    }
+    if (h == 0) {
         h = (int)ceil(pg_h);
+    }
     w = (x + w > pg_w ? (int)ceil(pg_w - x) : w);
     h = (y + h > pg_h ? (int)ceil(pg_h - y) : h);
     doc->displayPageSlice(splashOut, pg, x_resolution, y_resolution, 0, !useCropBox, false, false, x, y, w, h, nullptr, nullptr, annotDisplayDecideCbk, nullptr);
@@ -437,10 +439,12 @@ int main(int argc, char *argv[])
             return kOtherError;
         }
     }
-    if (argc > 1)
+    if (argc > 1) {
         fileName = new GooString(argv[1]);
-    if (argc == 3)
+    }
+    if (argc == 3) {
         ppmRoot = argv[2];
+    }
 
     if (antialiasStr[0]) {
         if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
@@ -454,8 +458,9 @@ int main(int argc, char *argv[])
     }
 
     if (jpegOpt.getLength() > 0) {
-        if (!jpeg)
+        if (!jpeg) {
             fprintf(stderr, "Warning: -jpegopt only valid with jpeg output.\n");
+        }
         parseJpegOptions();
     }
 
@@ -501,12 +506,15 @@ int main(int argc, char *argv[])
     }
 
     // get page range
-    if (firstPage < 1)
+    if (firstPage < 1) {
         firstPage = 1;
-    if (singleFile && lastPage < 1)
+    }
+    if (singleFile && lastPage < 1) {
         lastPage = firstPage;
-    if (lastPage < 1 || lastPage > doc->getNumPages())
+    }
+    if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
+    }
     if (lastPage < firstPage) {
         fprintf(stderr, "Wrong page range given: the first page (%d) can not be after the last page (%d).\n", firstPage, lastPage);
         return kOtherError;
@@ -604,14 +612,17 @@ int main(int argc, char *argv[])
 
 #endif // UTILS_USE_PTHREADS
 
-    if (sz != 0)
+    if (sz != 0) {
         param_w = param_h = sz;
+    }
     pg_num_len = numberOfCharacters(doc->getNumPages());
     for (pg = firstPage; pg <= lastPage; ++pg) {
-        if (printOnlyEven && pg % 2 == 1)
+        if (printOnlyEven && pg % 2 == 1) {
             continue;
-        if (printOnlyOdd && pg % 2 == 0)
+        }
+        if (printOnlyOdd && pg % 2 == 0) {
             continue;
+        }
         if (useCropBox) {
             pg_w = doc->getPageCropWidth(pg);
             pg_h = doc->getPageCropHeight(pg);
@@ -620,8 +631,9 @@ int main(int argc, char *argv[])
             pg_h = doc->getPageMediaHeight(pg);
         }
 
-        if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+        if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg))) {
             std::swap(pg_w, pg_h);
+        }
 
         // Handle requests for specific image size
         if (scaleTo != 0) {
@@ -639,15 +651,17 @@ int main(int argc, char *argv[])
             if (x_scaleTo > 0) {
                 x_resolution = (72.0 * x_scaleTo) / pg_w;
                 pg_w = x_scaleTo;
-                if (y_scaleTo == -1)
+                if (y_scaleTo == -1) {
                     y_resolution = x_resolution;
+                }
             }
 
             if (y_scaleTo > 0) {
                 y_resolution = (72.0 * y_scaleTo) / pg_h;
                 pg_h = y_scaleTo;
-                if (x_scaleTo == -1)
+                if (x_scaleTo == -1) {
                     x_resolution = y_resolution;
+                }
             }
 
             // No specific image size requested---compute the size from the resolution
@@ -659,8 +673,9 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+        if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg))) {
             std::swap(pg_w, pg_h);
+        }
 
         if (ppmRoot != nullptr) {
             const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";

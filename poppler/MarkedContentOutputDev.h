@@ -40,8 +40,9 @@ public:
 
     ~TextSpan()
     {
-        if (data && --data->refcount == 0)
+        if (data && --data->refcount == 0) {
             delete data;
+        }
     }
 
     const std::shared_ptr<GfxFont> &getFont() const { return data->font; }

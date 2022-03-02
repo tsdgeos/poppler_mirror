@@ -220,35 +220,41 @@ static int reorderText(const Unicode *text, int len, const UnicodeMap *uMap, boo
         i = 0;
         while (i < len) {
             // output a left-to-right section
-            for (j = i; j < len && !unicodeTypeR(text[j]); ++j)
+            for (j = i; j < len && !unicodeTypeR(text[j]); ++j) {
                 ;
+            }
             for (k = i; k < j; ++k) {
                 if (s) {
                     n = uMap->mapUnicode(text[k], buf, sizeof(buf));
                     s->append(buf, n);
                 }
-                if (u)
+                if (u) {
                     u[nCols] = text[k];
+                }
                 ++nCols;
             }
             i = j;
             // output a right-to-left section
-            for (j = i; j < len && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j])); ++j)
+            for (j = i; j < len && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j])); ++j) {
                 ;
+            }
             if (j > i) {
-                if (s)
+                if (s) {
                     s->append(rle, rleLen);
+                }
                 for (k = j - 1; k >= i; --k) {
                     if (s) {
                         n = uMap->mapUnicode(text[k], buf, sizeof(buf));
                         s->append(buf, n);
                     }
-                    if (u)
+                    if (u) {
                         u[nCols] = text[k];
+                    }
                     ++nCols;
                 }
-                if (s)
+                if (s) {
                     s->append(popdf, popdfLen);
+                }
                 i = j;
             }
         }
@@ -257,45 +263,53 @@ static int reorderText(const Unicode *text, int len, const UnicodeMap *uMap, boo
         // Arabic/Indic) as left-to-right, which isn't strictly correct
         // (incurs extra LRE/POPDF pairs), but does produce correct
         // visual formatting.
-        if (s)
+        if (s) {
             s->append(rle, rleLen);
+        }
         i = len - 1;
         while (i >= 0) {
             // output a right-to-left section
-            for (j = i; j >= 0 && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j])); --j)
+            for (j = i; j >= 0 && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j])); --j) {
                 ;
+            }
             for (k = i; k > j; --k) {
                 if (s) {
                     n = uMap->mapUnicode(text[k], buf, sizeof(buf));
                     s->append(buf, n);
                 }
-                if (u)
+                if (u) {
                     u[nCols] = text[k];
+                }
                 ++nCols;
             }
             i = j;
             // output a left-to-right section
-            for (j = i; j >= 0 && !unicodeTypeR(text[j]); --j)
+            for (j = i; j >= 0 && !unicodeTypeR(text[j]); --j) {
                 ;
+            }
             if (j < i) {
-                if (s)
+                if (s) {
                     s->append(lre, lreLen);
+                }
                 for (k = j + 1; k <= i; ++k) {
                     if (s) {
                         n = uMap->mapUnicode(text[k], buf, sizeof(buf));
                         s->append(buf, n);
                     }
-                    if (u)
+                    if (u) {
                         u[nCols] = text[k];
+                    }
                     ++nCols;
                 }
-                if (s)
+                if (s) {
                     s->append(popdf, popdfLen);
+                }
                 i = j;
             }
         }
-        if (s)
+        if (s) {
             s->append(popdf, popdfLen);
+        }
     }
 
     return nCols;
@@ -451,8 +465,9 @@ void TextWord::addChar(const GfxState *state, TextFontInfo *fontA, double x, dou
     font[len] = fontA;
     textMat[len] = textMatA;
 
-    if (len == 0)
+    if (len == 0) {
         setInitialBounds(fontA, x, y);
+    }
 
     if (wMode) { // vertical writing mode
         // NB: the rotation value has been incremented by 1 (in
@@ -625,16 +640,18 @@ static const struct CombiningTable combiningTable[] = {
 static Unicode getCombiningChar(Unicode u)
 {
     for (const CombiningTable &combining : combiningTable) {
-        if (u == combining.base)
+        if (u == combining.base) {
             return combining.comb;
+        }
     }
     return 0;
 }
 
 bool TextWord::addCombining(const GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA)
 {
-    if (len == 0 || wMode != 0 || fontA->getWMode() != 0)
+    if (len == 0 || wMode != 0 || fontA->getWMode() != 0) {
         return false;
+    }
 
     Unicode cCurrent = getCombiningChar(u);
     Unicode cPrev = getCombiningChar(text[len - 1]);
@@ -657,8 +674,9 @@ bool TextWord::addCombining(const GfxState *state, TextFontInfo *fontA, double f
             maxScaledBaseDelta = (xMax - xMin) * combMaxBaseDelta;
         }
 
-        if (fabs(charMid - edgeMid) >= maxScaledMidDelta || fabs(charBase - base) >= maxScaledBaseDelta)
+        if (fabs(charMid - edgeMid) >= maxScaledMidDelta || fabs(charBase - base) >= maxScaledBaseDelta) {
             return false;
+        }
 
         // Add character, but don't adjust edge / bounding box because
         // combining character's positioning could be odd.
@@ -691,8 +709,9 @@ bool TextWord::addCombining(const GfxState *state, TextFontInfo *fontA, double f
             maxScaledMidDelta = fabs(dy * combMaxMidDelta);
         }
 
-        if (fabs(charMid - edgeMid) >= maxScaledMidDelta || fabs(charBase - base) >= maxScaledBaseDelta)
+        if (fabs(charMid - edgeMid) >= maxScaledMidDelta || fabs(charBase - base) >= maxScaledBaseDelta) {
             return false;
+        }
 
         // move combining character to after base character
         ensureCapacity(len + 1);
@@ -709,8 +728,9 @@ bool TextWord::addCombining(const GfxState *state, TextFontInfo *fontA, double f
         font[len - 1] = fontA;
         textMat[len - 1] = textMatA;
 
-        if (len == 1)
+        if (len == 1) {
             setInitialBounds(fontA, x, y);
+        }
 
         // Updated edges / bounding box because we changed the base
         // character.
@@ -999,8 +1019,9 @@ void TextPool::addWord(TextWord *word)
         w0 = nullptr;
         w1 = pool[wordBaseIdx - minBaseIdx];
     }
-    for (; w1 && word->primaryCmp(w1) > 0; w0 = w1, w1 = w1->next)
+    for (; w1 && word->primaryCmp(w1) > 0; w0 = w1, w1 = w1->next) {
         ;
+    }
     word->next = w1;
     if (w0) {
         w0->next = word;
@@ -1709,8 +1730,9 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
     while (true) {
 
         // find the first non-empty line in the pool
-        for (; poolMinBaseIdx <= pool->maxBaseIdx && !pool->getPool(poolMinBaseIdx); ++poolMinBaseIdx)
+        for (; poolMinBaseIdx <= pool->maxBaseIdx && !pool->getPool(poolMinBaseIdx); ++poolMinBaseIdx) {
             ;
+        }
         if (poolMinBaseIdx > pool->maxBaseIdx) {
             break;
         }
@@ -1792,8 +1814,9 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
             line0 = nullptr;
             line1 = lines;
         }
-        for (; line1 && line->cmpYX(line1) > 0; line0 = line1, line1 = line1->next)
+        for (; line1 && line->cmpYX(line1) > 0; line0 = line1, line1 = line1->next) {
             ;
+        }
         if (line0) {
             line0->next = line;
         } else {
@@ -1852,20 +1875,24 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                     k = 0; // make gcc happy
                     switch (rot) {
                     case 0:
-                        for (k = 0; k < line1->len && line0->xMin >= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k)
+                        for (k = 0; k < line1->len && line0->xMin >= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k) {
                             ;
+                        }
                         break;
                     case 1:
-                        for (k = 0; k < line1->len && line0->yMin >= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k)
+                        for (k = 0; k < line1->len && line0->yMin >= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k) {
                             ;
+                        }
                         break;
                     case 2:
-                        for (k = 0; k < line1->len && line0->xMax <= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k)
+                        for (k = 0; k < line1->len && line0->xMax <= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k) {
                             ;
+                        }
                         break;
                     case 3:
-                        for (k = 0; k < line1->len && line0->yMax <= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k)
+                        for (k = 0; k < line1->len && line0->yMax <= 0.5 * (line1->edge[k] + line1->edge[k + 1]); ++k) {
                             ;
+                        }
                         break;
                     }
                     col2 = line1->col[k];
@@ -2161,15 +2188,18 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1, TextBlock **sorted,
         // is blk2 before blk1? (for table entries)
         if (blk1->tableId >= 0 && blk1->tableId == blk2->tableId) {
             if (page->primaryLR) {
-                if (blk2->xMax <= blk1->xMin && blk2->yMin <= blk1->yMax && blk2->yMax >= blk1->yMin)
+                if (blk2->xMax <= blk1->xMin && blk2->yMin <= blk1->yMax && blk2->yMax >= blk1->yMin) {
                     before = true;
+                }
             } else {
-                if (blk2->xMin >= blk1->xMax && blk2->yMin <= blk1->yMax && blk2->yMax >= blk1->yMin)
+                if (blk2->xMin >= blk1->xMax && blk2->yMin <= blk1->yMax && blk2->yMax >= blk1->yMin) {
                     before = true;
+                }
             }
 
-            if (blk2->yMax <= blk1->yMin)
+            if (blk2->yMax <= blk1->yMin) {
                 before = true;
+            }
         } else {
             if (blk2->isBeforeByRule1(blk1)) {
                 // Rule (1) blk1 and blk2 overlap, and blk2 is above blk1.
@@ -2438,8 +2468,9 @@ void TextPage::incRefCnt()
 
 void TextPage::decRefCnt()
 {
-    if (--refCnt == 0)
+    if (--refCnt == 0) {
         delete this;
+    }
 }
 
 void TextPage::startPage(const GfxState *state)
@@ -2998,8 +3029,9 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         while (true) {
 
             // find the first non-empty line in the pool
-            for (; poolMinBaseIdx <= pool->maxBaseIdx && !pool->getPool(poolMinBaseIdx); ++poolMinBaseIdx)
+            for (; poolMinBaseIdx <= pool->maxBaseIdx && !pool->getPool(poolMinBaseIdx); ++poolMinBaseIdx) {
                 ;
+            }
             if (poolMinBaseIdx > pool->maxBaseIdx) {
                 break;
             }
@@ -3297,8 +3329,9 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     //----- column assignment
 
     // sort blocks into xy order for column assignment
-    if (blocks)
+    if (blocks) {
         gfree(blocks);
+    }
     if (physLayout && fixedPitch) {
 
         blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
@@ -3511,14 +3544,18 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
             deltaX = 0.0;
             deltaY = 0.0;
 
-            if (blk1->lines && blk1->lines->words)
+            if (blk1->lines && blk1->lines->words) {
                 deltaX = blk1->lines->words->getFontSize();
-            if (fblk2->lines && fblk2->lines->words)
+            }
+            if (fblk2->lines && fblk2->lines->words) {
                 deltaX = deltaX < fblk2->lines->words->getFontSize() ? deltaX : fblk2->lines->words->getFontSize();
-            if (fblk3->lines && fblk3->lines->words)
+            }
+            if (fblk3->lines && fblk3->lines->words) {
                 deltaX = deltaX < fblk3->lines->words->getFontSize() ? deltaX : fblk3->lines->words->getFontSize();
-            if (fblk4->lines && fblk4->lines->words)
+            }
+            if (fblk4->lines && fblk4->lines->words) {
                 deltaX = deltaX < fblk4->lines->words->getFontSize() ? deltaX : fblk4->lines->words->getFontSize();
+            }
 
             deltaY = deltaX;
 
@@ -3535,28 +3572,34 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
             yCentre4 = (fblk4->yMax + fblk4->yMin) / 2.0;
 
             // are blocks centrally aligned in x ?
-            if (fabs(xCentre1 - xCentre3) <= deltaX && fabs(xCentre2 - xCentre4) <= deltaX)
+            if (fabs(xCentre1 - xCentre3) <= deltaX && fabs(xCentre2 - xCentre4) <= deltaX) {
                 correspondenceX++;
+            }
 
             // are blocks centrally aligned in y ?
-            if (fabs(yCentre1 - yCentre2) <= deltaY && fabs(yCentre3 - yCentre4) <= deltaY)
+            if (fabs(yCentre1 - yCentre2) <= deltaY && fabs(yCentre3 - yCentre4) <= deltaY) {
                 correspondenceY++;
+            }
 
             // are blocks aligned to the left ?
-            if (fabs(blk1->xMin - fblk3->xMin) <= deltaX && fabs(fblk2->xMin - fblk4->xMin) <= deltaX)
+            if (fabs(blk1->xMin - fblk3->xMin) <= deltaX && fabs(fblk2->xMin - fblk4->xMin) <= deltaX) {
                 correspondenceX++;
+            }
 
             // are blocks aligned to the right ?
-            if (fabs(blk1->xMax - fblk3->xMax) <= deltaX && fabs(fblk2->xMax - fblk4->xMax) <= deltaX)
+            if (fabs(blk1->xMax - fblk3->xMax) <= deltaX && fabs(fblk2->xMax - fblk4->xMax) <= deltaX) {
                 correspondenceX++;
+            }
 
             // are blocks aligned to the top ?
-            if (fabs(blk1->yMin - fblk2->yMin) <= deltaY && fabs(fblk3->yMin - fblk4->yMin) <= deltaY)
+            if (fabs(blk1->yMin - fblk2->yMin) <= deltaY && fabs(fblk3->yMin - fblk4->yMin) <= deltaY) {
                 correspondenceY++;
+            }
 
             // are blocks aligned to the bottom ?
-            if (fabs(blk1->yMax - fblk2->yMax) <= deltaY && fabs(fblk3->yMax - fblk4->yMax) <= deltaY)
+            if (fabs(blk1->yMax - fblk2->yMax) <= deltaY && fabs(fblk3->yMax - fblk4->yMax) <= deltaY) {
                 correspondenceY++;
+            }
 
             // are blocks aligned in x and y ?
             if (correspondenceX > 0 && correspondenceY > 0) {
@@ -3600,14 +3643,16 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         if (blk1->tableId >= 0) {
             if (blk1->ExMin < envelopes[blk1->tableId].x1) {
                 envelopes[blk1->tableId].x1 = blk1->ExMin;
-                if (!blk1->page->primaryLR)
+                if (!blk1->page->primaryLR) {
                     ending_blocks[blk1->tableId] = blk1;
+                }
             }
 
             if (blk1->ExMax > envelopes[blk1->tableId].x2) {
                 envelopes[blk1->tableId].x2 = blk1->ExMax;
-                if (blk1->page->primaryLR)
+                if (blk1->page->primaryLR) {
                     ending_blocks[blk1->tableId] = blk1;
+                }
             }
 
             envelopes[blk1->tableId].y1 = blk1->EyMin < envelopes[blk1->tableId].y1 ? blk1->EyMin : envelopes[blk1->tableId].y1;
@@ -3641,28 +3686,33 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
             double xMin = DBL_MIN;
 
             for (blk2 = blkList; blk2; blk2 = blk2->next) {
-                if (blk2 == blk1)
+                if (blk2 == blk1) {
                     continue;
+                }
 
                 if (blk1->yMin <= blk2->yMax && blk1->yMax >= blk2->yMin) {
-                    if (blk2->xMin < xMax && blk2->xMin > blk1->xMax)
+                    if (blk2->xMin < xMax && blk2->xMin > blk1->xMax) {
                         xMax = blk2->xMin;
+                    }
 
-                    if (blk2->xMax > xMin && blk2->xMax < blk1->xMin)
+                    if (blk2->xMax > xMin && blk2->xMax < blk1->xMin) {
                         xMin = blk2->xMax;
+                    }
                 }
             }
 
             for (blk2 = blkList; blk2; blk2 = blk2->next) {
-                if (blk2 == blk1)
+                if (blk2 == blk1) {
                     continue;
+                }
 
                 if (blk2->xMax > blk1->ExMax && blk2->xMax <= xMax && blk2->yMin >= blk1->yMax) {
                     blk1->ExMax = blk2->xMax;
                 }
 
-                if (blk2->xMin < blk1->ExMin && blk2->xMin >= xMin && blk2->yMin >= blk1->yMax)
+                if (blk2->xMin < blk1->ExMin && blk2->xMin >= xMin && blk2->yMin >= blk1->yMax) {
                     blk1->ExMin = blk2->xMin;
+                }
             }
         }
     }
@@ -3844,8 +3894,9 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
         // convert the search string to uppercase
         for (i = 0; i < len; ++i) {
             s2[i] = unicodeToUpper(s2[i]);
-            if (ignoreDiacritics && !isAscii7(s2[i]))
+            if (ignoreDiacritics && !isAscii7(s2[i])) {
                 ignoreDiacritics = false;
+            }
         }
     } else if (ignoreDiacritics) {
         for (i = 0; i < len; ++i) {
@@ -3912,11 +3963,13 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 continue;
             }
 
-            if (!line->normalized)
+            if (!line->normalized) {
                 line->normalized = unicodeNormalizeNFKC(line->text, line->len, &line->normalized_len, &line->normalized_idx, true);
+            }
 
-            if (matchAcrossLines && line->next && !line->next->normalized)
+            if (matchAcrossLines && line->next && !line->next->normalized) {
                 line->next->normalized = unicodeNormalizeNFKC(line->next->text, line->next->len, &line->next->normalized_len, &line->next->normalized_idx, true);
+            }
             nextline = nullptr;
             nextline_len = 0;
 
@@ -3924,15 +3977,18 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
             m = line->normalized_len;
 
             if (ignoreDiacritics) {
-                if (!line->ascii_translation)
+                if (!line->ascii_translation) {
                     unicodeToAscii7(line->normalized, line->normalized_len, &line->ascii_translation, &line->ascii_len, line->normalized_idx, &line->ascii_idx);
-                if (line->ascii_len)
+                }
+                if (line->ascii_len) {
                     m = line->ascii_len;
-                else
+                } else {
                     ignoreDiacritics = false;
+                }
 
-                if (matchAcrossLines && line->next && !line->next->ascii_translation)
+                if (matchAcrossLines && line->next && !line->next->ascii_translation) {
                     unicodeToAscii7(line->next->normalized, line->next->normalized_len, &line->next->ascii_translation, &line->next->ascii_len, line->next->normalized_idx, &line->next->ascii_idx);
+                }
             }
             if (!caseSensitive) {
                 if (m > txtSize) {
@@ -3940,10 +3996,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     txtSize = m;
                 }
                 for (k = 0; k < m; ++k) {
-                    if (ignoreDiacritics)
+                    if (ignoreDiacritics) {
                         txt[k] = unicodeToUpper(line->ascii_translation[k]);
-                    else
+                    } else {
                         txt[k] = unicodeToUpper(line->normalized[k]);
+                    }
                 }
                 if (matchAcrossLines && line->next) {
                     nextline_len = ignoreDiacritics ? line->next->ascii_len : line->next->normalized_len;
@@ -3953,10 +4010,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     }
                 }
             } else {
-                if (ignoreDiacritics)
+                if (ignoreDiacritics) {
                     txt = line->ascii_translation;
-                else
+                } else {
                     txt = line->normalized;
+                }
 
                 if (matchAcrossLines && line->next) {
                     nextline_len = ignoreDiacritics ? line->next->ascii_len : line->next->normalized_len;
@@ -3971,10 +4029,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 bool wholeWordStartIsOk, wholeWordEndIsOk;
                 if (wholeWord) {
                     wholeWordStartIsOk = j == 0 || !unicodeTypeAlphaNum(txt[j - 1]);
-                    if (nextline)
+                    if (nextline) {
                         wholeWordEndIsOk = true; // word end may be in next line, so we'll check it later
-                    else
+                    } else {
                         wholeWordEndIsOk = j + len == m || !unicodeTypeAlphaNum(txt[j + len]);
+                    }
                 }
                 if (!wholeWord || (wholeWordStartIsOk && wholeWordEndIsOk)) {
                     int n = 0;
@@ -3996,10 +4055,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                     break;
                                 }
                                 k++;
-                            } else if (p[k] != (Unicode)'-' || UnicodeIsWhitespace(s2[k]))
+                            } else if (p[k] != (Unicode)'-' || UnicodeIsWhitespace(s2[k])) {
                                 break;
-                            else
+                            } else {
                                 nextlineAfterHyphen = true;
+                            }
 
                             for (; n < nextline_len && k < len; ++k, ++n) {
                                 if (nextline[n] != s2[k]) {
@@ -4017,35 +4077,40 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
 
                     found_it = k == len;
                     if (found_it && nextline && wholeWord) { // check word end for nextline case
-                        if (n) // Match ended at next line
+                        if (n) { // Match ended at next line
                             wholeWordEndIsOk = n == nextline_len || !unicodeTypeAlphaNum(nextline[n]);
-                        else // Match ended on same line
+                        } else { // Match ended on same line
                             wholeWordEndIsOk = j + len == m || !unicodeTypeAlphaNum(txt[j + len]);
+                        }
 
-                        if (!wholeWordEndIsOk)
+                        if (!wholeWordEndIsOk) {
                             found_it = false;
+                        }
                     }
                     // found it
                     if (found_it) {
                         bool nextLineMatch = (bool)n;
-                        if (spaceConsumedByNewline)
+                        if (spaceConsumedByNewline) {
                             k--;
+                        }
                         // where s2 matches a subsequence of a compatibility equivalence
                         // decomposition, highlight the entire glyph, since we don't know
                         // the internal layout of subglyph components
                         int normStart, normAfterEnd;
                         if (ignoreDiacritics) {
                             normStart = line->ascii_idx[j];
-                            if (nextline)
+                            if (nextline) {
                                 normAfterEnd = line->ascii_idx[j + k - n];
-                            else
+                            } else {
                                 normAfterEnd = line->ascii_idx[j + len - 1] + 1;
+                            }
                         } else {
                             normStart = line->normalized_idx[j];
-                            if (nextline)
+                            if (nextline) {
                                 normAfterEnd = line->normalized_idx[j + k - n];
-                            else
+                            } else {
                                 normAfterEnd = line->normalized_idx[j + len - 1] + 1;
+                            }
                         }
 
                         adjustRotation(line, normStart, normAfterEnd, &xMin1, &xMax1, &yMin1, &yMax1);
@@ -4069,8 +4134,9 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                     yMax0 = yMax1;
                                     found = true;
                                     if (nextLineMatch) { // set the out parameters
-                                        if (ignoredHyphen)
+                                        if (ignoredHyphen) {
                                             *ignoredHyphen = nextlineAfterHyphen;
+                                        }
 
                                         if (continueMatch) {
                                             adjustRotation(line->next, 0, n, &xMin2, &xMax2, &yMin2, &yMax2);
@@ -4311,8 +4377,9 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
         i = 0;
         while (i < nFrags) {
             delta = maxIntraLineDelta * frags[i].line->words->fontSize;
-            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j)
+            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
                 ;
+            }
             qsort(frags + i, j - i, sizeof(TextLineFrag), oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
             i = j;
         }
@@ -4429,12 +4496,14 @@ void TextSelectionDumper::finishLine()
 
     if (words && words->size() > 0) {
         // Reverse word order for RTL text. Fixes #53 for glib backend (Evince)
-        if (!page->primaryLR)
+        if (!page->primaryLR) {
             std::reverse(words->begin(), words->end());
+        }
 
         lines[nLines++] = words;
-    } else if (words)
+    } else if (words) {
         delete words;
+    }
     words = nullptr;
 }
 
@@ -4490,8 +4559,9 @@ GooString *TextSelectionDumper::getText()
 
     text = new GooString();
 
-    if (!(uMap = globalParams->getTextEncoding()))
+    if (!(uMap = globalParams->getTextEncoding())) {
         return text;
+    }
 
     spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
     eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
@@ -4502,11 +4572,13 @@ GooString *TextSelectionDumper::getText()
             TextWordSelection *sel = (*lineWords)[j];
 
             page->dumpFragment(sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
-            if (j < lineWords->size() - 1 && sel->word->spaceAfter)
+            if (j < lineWords->size() - 1 && sel->word->spaceAfter) {
                 text->append(space, spaceLen);
+            }
         }
-        if (i < nLines - 1)
+        if (i < nLines - 1) {
             text->append(eol, eolLen);
+        }
     }
 
     return text;
@@ -4517,8 +4589,9 @@ std::vector<TextWordSelection *> **TextSelectionDumper::takeWordList(int *nLines
     std::vector<TextWordSelection *> **returnValue = lines;
 
     *nLinesOut = nLines;
-    if (nLines == 0)
+    if (nLines == 0) {
         return nullptr;
+    }
 
     nLines = 0;
     lines = nullptr;
@@ -4753,8 +4826,9 @@ void TextSelectionPainter::endPage()
 
             int fEnd = begin + 1;
             while (fEnd < sel->end && font->matches(sel->word->font[fEnd]) && mat->m[0] == sel->word->textMat[fEnd].m[0] && mat->m[1] == sel->word->textMat[fEnd].m[1] && mat->m[2] == sel->word->textMat[fEnd].m[2]
-                   && mat->m[3] == sel->word->textMat[fEnd].m[3])
+                   && mat->m[3] == sel->word->textMat[fEnd].m[3]) {
                 fEnd++;
+            }
 
             /* The only purpose of this string is to let the output device query
              * it's length.  Might want to change this interface later. */
@@ -4763,8 +4837,9 @@ void TextSelectionPainter::endPage()
 
             if (!usingGlyphLessFont) {
                 for (int j = begin; j < fEnd; j++) {
-                    if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
+                    if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1]) {
                         continue;
+                    }
                     out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0, sel->word->charcode[j], 1, nullptr, 0);
                 }
             }
@@ -4796,16 +4871,18 @@ void TextWord::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     for (i = 0; i < len; i++) {
         mid = (edge[i] + edge[i + 1]) / 2;
         if (XBetweenAB(mid, s1, s2)) {
-            if (i < begin)
+            if (i < begin) {
                 begin = i;
+            }
 
             end = i + 1;
         }
     }
 
     /* Skip empty selection. */
-    if (end <= begin)
+    if (end <= begin) {
         return;
+    }
 
     visitor->visitWord(this, begin, end, selection);
 }
@@ -4838,16 +4915,18 @@ void TextLine::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
         }
 
         if (blk->page->primaryLR) {
-            if (((s1 < pMax) || (s2 < pMax)) && begin == nullptr)
+            if (((s1 < pMax) || (s2 < pMax)) && begin == nullptr) {
                 begin = p;
+            }
 
             if (((s1 > pMin) || (s2 > pMin)) && begin != nullptr) {
                 end = p->next;
                 current = p;
             }
         } else {
-            if (((s1 > pMin) || (s2 > pMin)) && begin == nullptr)
+            if (((s1 > pMin) || (s2 > pMin)) && begin == nullptr) {
                 begin = p;
+            }
 
             if (((s1 < pMax) || (s2 < pMax)) && begin != nullptr) {
                 end = p->next;
@@ -4856,8 +4935,9 @@ void TextLine::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
         }
     }
 
-    if (!current)
+    if (!current) {
         current = begin;
+    }
 
     child_selection = *selection;
     if (style == selectionStyleWord) {
@@ -4891,21 +4971,24 @@ void TextLine::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     for (i = 0; i < len; i++) {
         double mid = (edge[i] + edge[i + 1]) / 2;
         if (XBetweenAB(mid, s1, s2)) {
-            if (i < edge_begin)
+            if (i < edge_begin) {
                 edge_begin = i;
+            }
 
             edge_end = i + 1;
         }
     }
 
     /* Skip empty selection. */
-    if (edge_end <= edge_begin)
+    if (edge_end <= edge_begin) {
         return;
+    }
 
     visitor->visitLine(this, begin, end, edge_begin, edge_end, &child_selection);
 
-    for (p = begin; p != end; p = p->next)
+    for (p = begin; p != end; p = p->next) {
         p->visitSelection(visitor, &child_selection, style);
+    }
 }
 
 void TextBlock::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style)
@@ -5022,8 +5105,9 @@ void TextPage::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     TextBlock *blk, *best_block[2];
     int i, count = 0, best_count[2], start, stop;
 
-    if (!flows)
+    if (!flows) {
         return;
+    }
 
     x[0] = selection->x1;
     y[0] = selection->y1;
@@ -5189,10 +5273,12 @@ bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, do
         for (line = blk->lines; line; line = line->next) {
             for (word = line->words; word; word = word->next) {
                 if (pos < word->charPos[word->len] && pos + length > word->charPos[0]) {
-                    for (j0 = 0; j0 < word->len && pos >= word->charPos[j0 + 1]; ++j0)
+                    for (j0 = 0; j0 < word->len && pos >= word->charPos[j0 + 1]; ++j0) {
                         ;
-                    for (j1 = word->len - 1; j1 > j0 && pos + length <= word->charPos[j1]; --j1)
+                    }
+                    for (j1 = word->len - 1; j1 > j0 && pos + length <= word->charPos[j1]; --j1) {
                         ;
+                    }
                     switch (line->rot) {
                     case 0:
                         xMin1 = word->edge[j0];
@@ -5324,8 +5410,9 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         i = 0;
         while (i < nFrags) {
             delta = maxIntraLineDelta * frags[i].line->words->fontSize;
-            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j)
+            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
                 ;
+            }
             qsort(frags + i, j - i, sizeof(TextLineFrag), &TextLineFrag::cmpXYColumnPrimaryRot);
             i = j;
         }
@@ -5436,8 +5523,9 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
                     if (frag0->xMin >= frag1->xMax) {
                         col2 = frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start]) + 1;
                     } else {
-                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->xMin >= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k)
+                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->xMin >= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k) {
                             ;
+                        }
                         col2 = frag1->col + frag1->line->col[k] - frag1->line->col[frag1->start];
                     }
                     break;
@@ -5445,8 +5533,9 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
                     if (frag0->yMin >= frag1->yMax) {
                         col2 = frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start]) + 1;
                     } else {
-                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->yMin >= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k)
+                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->yMin >= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k) {
                             ;
+                        }
                         col2 = frag1->col + frag1->line->col[k] - frag1->line->col[frag1->start];
                     }
                     break;
@@ -5454,8 +5543,9 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
                     if (frag0->xMax <= frag1->xMin) {
                         col2 = frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start]) + 1;
                     } else {
-                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->xMax <= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k)
+                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->xMax <= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k) {
                             ;
+                        }
                         col2 = frag1->col + frag1->line->col[k] - frag1->line->col[frag1->start];
                     }
                     break;
@@ -5463,8 +5553,9 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
                     if (frag0->yMax <= frag1->yMin) {
                         col2 = frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start]) + 1;
                     } else {
-                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->yMax <= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k)
+                        for (k = frag1->start; k < frag1->start + frag1->len && frag0->yMax <= 0.5 * (frag1->line->edge[k] + frag1->line->edge[k + 1]); ++k) {
                             ;
+                        }
                         col2 = frag1->col + frag1->line->col[k] - frag1->line->col[frag1->start];
                     }
                     break;
@@ -5532,8 +5623,9 @@ ActualText::ActualText(TextPage *out)
 
 ActualText::~ActualText()
 {
-    if (actualText)
+    if (actualText) {
         delete actualText;
+    }
     text->decRefCnt();
 }
 
@@ -5556,8 +5648,9 @@ void ActualText::addChar(const GfxState *state, double x, double y, double dx, d
 
 void ActualText::begin(const GfxState *state, const GooString *t)
 {
-    if (actualText)
+    if (actualText) {
         delete actualText;
+    }
     actualText = new GooString(t);
     actualTextNBytes = 0;
 }

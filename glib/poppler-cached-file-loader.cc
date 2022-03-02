@@ -32,8 +32,9 @@ PopplerCachedFileLoader::PopplerCachedFileLoader(GInputStream *inputStreamA, GCa
 PopplerCachedFileLoader::~PopplerCachedFileLoader()
 {
     g_object_unref(inputStream);
-    if (cancellable)
+    if (cancellable) {
         g_object_unref(cancellable);
+    }
 }
 
 size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
@@ -45,8 +46,9 @@ size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
     url = urlA;
     cachedFile = cachedFileA;
 
-    if (length != (goffset)-1)
+    if (length != (goffset)-1) {
         return length;
+    }
 
     if (G_IS_FILE_INPUT_STREAM(inputStream)) {
         GFileInfo *info;
@@ -68,8 +70,9 @@ size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
     size = 0;
     do {
         bytesRead = g_input_stream_read(inputStream, buf, CachedFileChunkSize, cancellable, nullptr);
-        if (bytesRead == -1)
+        if (bytesRead == -1) {
             break;
+        }
 
         writer.write(buf, bytesRead);
         size += bytesRead;
@@ -84,8 +87,9 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
     gssize bytesRead;
     size_t rangeBytesRead, bytesToRead;
 
-    if (length == (goffset)-1)
+    if (length == (goffset)-1) {
         return 0;
+    }
 
     for (const ByteRange &range : ranges) {
         bytesToRead = MIN(CachedFileChunkSize, range.length);
@@ -93,8 +97,9 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
         g_seekable_seek(G_SEEKABLE(inputStream), range.offset, G_SEEK_SET, cancellable, nullptr);
         do {
             bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, nullptr);
-            if (bytesRead == -1)
+            if (bytesRead == -1) {
                 return -1;
+            }
 
             writer->write(buf, bytesRead);
             rangeBytesRead += bytesRead;

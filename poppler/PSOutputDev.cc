@@ -1339,8 +1339,9 @@ void PSOutputDev::postInit()
     paperSizes = new std::vector<PSOutPaperSize *>();
     for (const int pg : pages) {
         Page *page = catalog->getPage(pg);
-        if (page == nullptr)
+        if (page == nullptr) {
             paperMatch = false;
+        }
         if (!paperMatch) {
             w = paperWidth;
             h = paperHeight;
@@ -1360,17 +1361,21 @@ void PSOutputDev::postInit()
         }
         if (paperMatch) {
             const int pageRotate = page->getRotate();
-            if (pageRotate == 90 || pageRotate == 270)
+            if (pageRotate == 90 || pageRotate == 270) {
                 std::swap(w, h);
+            }
         }
-        if (w > paperWidth)
+        if (w > paperWidth) {
             paperWidth = w;
-        if (h > paperHeight)
+        }
+        if (h > paperHeight) {
             paperHeight = h;
+        }
         for (i = 0; i < (int)paperSizes->size(); ++i) {
             size = (*paperSizes)[i];
-            if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h))
+            if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h)) {
                 break;
+            }
         }
         if (i == (int)paperSizes->size()) {
             const StandardMedia *media = standardMedia;
@@ -1384,13 +1389,15 @@ void PSOutputDev::postInit()
                 }
                 media++;
             }
-            if (!name)
+            if (!name) {
                 name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72));
+            }
             paperSizes->push_back(new PSOutPaperSize(name, w, h));
         }
         pagePaperSize.insert(std::pair<int, int>(pg, i));
-        if (!paperMatch)
+        if (!paperMatch) {
             break; // we only need one entry when all pages are the same size
+        }
     }
     if (imgLLX == 0 && imgURX == 0 && imgLLY == 0 && imgURY == 0) {
         imgLLX = imgLLY = 0;
@@ -2189,8 +2196,9 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
             error(errSyntaxError, -1, "Unexpected end of file in embedded font stream");
             goto err1;
         }
-        if (!((start[i] >= '0' && start[i] <= '9') || (start[i] >= 'A' && start[i] <= 'F') || (start[i] >= 'a' && start[i] <= 'f')))
+        if (!((start[i] >= '0' && start[i] <= '9') || (start[i] >= 'A' && start[i] <= 'F') || (start[i] >= 'a' && start[i] <= 'f'))) {
             binMode = true;
+        }
     }
 
     if (length2 == 0) {
@@ -2286,8 +2294,9 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
     writePS("%%EndResource\n");
 
 err1:
-    if (strObj.isStream())
+    if (strObj.isStream()) {
         strObj.streamClose();
+    }
 }
 
 void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *psName)
@@ -2320,27 +2329,31 @@ void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *p
             fgetc(fontFile); // skip start of segment byte (0x80)
             int segType = fgetc(fontFile);
             long segLen = fgetc(fontFile) | (fgetc(fontFile) << 8) | (fgetc(fontFile) << 16) | (fgetc(fontFile) << 24);
-            if (feof(fontFile))
+            if (feof(fontFile)) {
                 break;
+            }
 
             if (segType == 1) {
                 // ASCII segment
                 for (long i = 0; i < segLen; i++) {
                     c = fgetc(fontFile);
-                    if (c == EOF)
+                    if (c == EOF) {
                         break;
+                    }
                     writePSChar(c);
                 }
             } else if (segType == 2) {
                 // binary segment
                 for (long i = 0; i < segLen; i++) {
                     c = fgetc(fontFile);
-                    if (c == EOF)
+                    if (c == EOF) {
                         break;
+                    }
                     writePSChar(hexChar[(c >> 4) & 0x0f]);
                     writePSChar(hexChar[c & 0x0f]);
-                    if (i % 36 == 35)
+                    if (i % 36 == 35) {
                         writePSChar('\n');
+                    }
                 }
             } else {
                 // end of file
@@ -2349,8 +2362,9 @@ void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *p
         }
     } else if (c != EOF) {
         writePSChar(c);
-        while ((c = fgetc(fontFile)) != EOF)
+        while ((c = fgetc(fontFile)) != EOF) {
             writePSChar(c);
+        }
     }
     fclose(fontFile);
 
@@ -3010,8 +3024,9 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
             if (col > 225) {
                 writePS((char *)(doUseASCIIHex ? "> put\n" : "~> put\n"));
                 ++line;
-                if (line >= innerSize)
+                if (line >= innerSize) {
                     break;
+                }
                 writePSFmt((char *)(doUseASCIIHex ? "dup {0:d} <" : "dup {0:d} <~"), line);
                 col = 0;
             }
@@ -3358,8 +3373,9 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                         for (x = 0; x < w; ++x) {
                             g = p[4 * x] + p[4 * x + 3];
                             g = 255 - g;
-                            if (g < 0)
+                            if (g < 0) {
                                 g = 0;
+                            }
                             hexBuf[i++] = (unsigned char)g;
                             if (i >= 64) {
                                 writePSBuf(hexBuf, i);
@@ -3371,8 +3387,9 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                         for (x = 0; x < w; ++x) {
                             g = p[4 * x] + p[4 * x + 3];
                             g = 255 - g;
-                            if (g < 0)
+                            if (g < 0) {
                                 g = 0;
+                            }
                             digit = g / 16;
                             hexBuf[i++] = digit + ((digit >= 10) ? 'a' - 10 : '0');
                             digit = g % 16;
@@ -3816,8 +3833,9 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
             writePSFmt("{0:d} {1:d} pdfSetupPaper\n", imgURX, imgURY);
         }
         writePS("pdfStartPage\n");
-        if (rotate)
+        if (rotate) {
             writePSFmt("{0:d} rotate\n", rotate);
+        }
         if (tx != 0 || ty != 0) {
             writePSFmt("{0:.6g} {1:.6g} translate\n", tx, ty);
         }
@@ -4053,8 +4071,9 @@ void PSOutputDev::updateFillColor(GfxState *state)
                 if ((fabs(m - c) < 0.01 && fabs(m - y) < 0.01) || (fabs(m - c) < 0.2 && fabs(m - y) < 0.2 && k + g > 1.5)) {
                     c = m = y = 0.0;
                     k += g;
-                    if (k > 1.0)
+                    if (k > 1.0) {
                         k = 1.0;
+                    }
                 }
             }
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} k\n", c, m, y, k);
@@ -4117,8 +4136,9 @@ void PSOutputDev::updateStrokeColor(GfxState *state)
                 if ((fabs(m - c) < 0.01 && fabs(m - y) < 0.01) || (fabs(m - c) < 0.2 && fabs(m - y) < 0.2 && k + g > 1.5)) {
                     c = m = y = 0.0;
                     k += g;
-                    if (k > 1.0)
+                    if (k > 1.0) {
                         k = 1.0;
+                    }
                 }
             }
             writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} K\n", c, m, y, k);
@@ -4167,10 +4187,12 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
         processColors |= psProcessMagenta;
         return;
     }
-    if (!sepCS->getName()->cmp("All"))
+    if (!sepCS->getName()->cmp("All")) {
         return;
-    if (!sepCS->getName()->cmp("None"))
+    }
+    if (!sepCS->getName()->cmp("None")) {
         return;
+    }
     for (cc = customColors; cc; cc = cc->next) {
         if (!cc->name->cmp(sepCS->getName())) {
             return;
@@ -5024,8 +5046,9 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     CharCode maxGlyph;
 
     // for pdftohtml, output PS without text
-    if (displayText == false)
+    if (displayText == false) {
         return;
+    }
 
     // check for invisible text -- this is used by Acrobat Capture
     if (state->getRender() == 3) {
@@ -5042,8 +5065,9 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
         return;
     }
     maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[font->getName()->toStr()] : 0);
-    if (maxGlyphInt < 0)
+    if (maxGlyphInt < 0) {
         maxGlyphInt = 0;
+    }
     maxGlyph = (CharCode)maxGlyphInt;
     wMode = font->getWMode();
 
@@ -5474,8 +5498,9 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
                     processColors |= psProcessBlack;
                 }
                 g = 255 - g;
-                if (g < 0)
+                if (g < 0) {
                     g = 0;
+                }
                 if (useBinary) {
                     hexBuf[i++] = g;
                 } else {
@@ -5589,10 +5614,12 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
         }
         i = 0;
         rects1Len = 0;
-        for (x0 = 0; x0 < maskWidth && (line[x0] ^ maskXor); ++x0)
+        for (x0 = 0; x0 < maskWidth && (line[x0] ^ maskXor); ++x0) {
             ;
-        for (x1 = x0; x1 < maskWidth && !(line[x1] ^ maskXor); ++x1)
+        }
+        for (x1 = x0; x1 < maskWidth && !(line[x1] ^ maskXor); ++x1) {
             ;
+        }
         while (x0 < maskWidth || i < rects0Len) {
             emitRect = addRect = extendRect = false;
             if (x0 >= maskWidth) {
@@ -5636,10 +5663,12 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
                     ++i;
                 }
                 ++rects1Len;
-                for (x0 = x1; x0 < maskWidth && (line[x0] ^ maskXor); ++x0)
+                for (x0 = x1; x0 < maskWidth && (line[x0] ^ maskXor); ++x0) {
                     ;
-                for (x1 = x0; x1 < maskWidth && !(line[x1] ^ maskXor); ++x1)
+                }
+                for (x1 = x0; x1 < maskWidth && !(line[x1] ^ maskXor); ++x1) {
                     ;
+                }
             }
         }
         rectsTmp = rects0;
@@ -6025,8 +6054,9 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         writePSFmt(">>\n{0:s}\n", colorMap ? "image" : "imagemask");
 
         // get rid of the array and index
-        if (!inlineImg)
+        if (!inlineImg) {
             writePS("pop ");
+        }
         writePS("pop pop\n");
 
     } else {
@@ -6462,8 +6492,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
 
     // get rid of the array and index
     if (mode == psModeForm || inType3Char || preloadImagesForms) {
-        if (!inlineImg)
+        if (!inlineImg) {
             writePS("pop ");
+        }
         writePS("pop pop\n");
 
         // image data

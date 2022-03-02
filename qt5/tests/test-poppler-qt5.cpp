@@ -72,8 +72,9 @@ void PDFDisplay::display()
                 foreach (Poppler::TextBox *tb, textRects) {
                     painter.drawRect(tb->boundingBox());
                 }
-            } else
+            } else {
                 textRects.clear();
+            }
             update();
             delete page;
         }

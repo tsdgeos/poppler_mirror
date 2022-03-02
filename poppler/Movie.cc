@@ -234,10 +234,11 @@ Movie::Movie(const Object *movieDict)
 {
     ok = true;
 
-    if (movieDict->isDict())
+    if (movieDict->isDict()) {
         parseMovie(movieDict);
-    else
+    } else {
         ok = false;
+    }
 }
 
 Movie::Movie(const Object *movieDict, const Object *aDict)
@@ -246,8 +247,9 @@ Movie::Movie(const Object *movieDict, const Object *aDict)
 
     if (movieDict->isDict()) {
         parseMovie(movieDict);
-        if (aDict->isDict())
+        if (aDict->isDict()) {
             MA.parseMovieActivation(aDict);
+        }
     } else {
         ok = false;
     }
@@ -264,10 +266,11 @@ Movie::Movie(const Movie &other)
 
     poster = other.poster.copy();
 
-    if (other.fileName)
+    if (other.fileName) {
         fileName = other.fileName->copy();
-    else
+    } else {
         fileName = nullptr;
+    }
 }
 
 void Movie::getFloatingWindowSize(int *widthA, int *heightA)

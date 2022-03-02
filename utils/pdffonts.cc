@@ -82,8 +82,9 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdffonts", "<PDF-file>", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             return 0;
+        }
         return 99;
     }
 

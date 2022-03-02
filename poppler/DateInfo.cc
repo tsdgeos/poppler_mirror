@@ -41,17 +41,20 @@ bool parseDateString(const GooString *date, int *year, int *month, int *day, int
     GooString s;
     for (int i = 0; i < len; i++) {
         // Ignore any non ASCII characters
-        if (u[i] < 128)
+        if (u[i] < 128) {
             s.append(u[i]);
+        }
     }
     gfree(u);
     const char *dateString = s.c_str();
 
-    if (strlen(dateString) < 2)
+    if (strlen(dateString) < 2) {
         return false;
+    }
 
-    if (dateString[0] == 'D' && dateString[1] == ':')
+    if (dateString[0] == 'D' && dateString[1] == ':') {
         dateString += 2;
+    }
 
     *month = 1;
     *day = 1;
@@ -74,8 +77,9 @@ bool parseDateString(const GooString *date, int *year, int *month, int *day, int
             }
         }
 
-        if (*year <= 0)
+        if (*year <= 0) {
             return false;
+        }
 
         return true;
     }
@@ -118,8 +122,9 @@ time_t dateStringToTime(const GooString *dateString)
     struct tm tm;
     time_t time;
 
-    if (!parseDateString(dateString, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
+    if (!parseDateString(dateString, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
         return -1;
+    }
 
     tm.tm_year = year - 1900;
     tm.tm_mon = mon - 1;
@@ -133,12 +138,14 @@ time_t dateStringToTime(const GooString *dateString)
 
     /* compute tm_wday and tm_yday and check date */
     time = timegm(&tm);
-    if (time == (time_t)-1)
+    if (time == (time_t)-1) {
         return time;
+    }
 
     time_t offset = (tz_hour * 60 + tz_minute) * 60;
-    if (tz == '-')
+    if (tz == '-') {
         offset *= -1;
+    }
     time -= offset;
 
     return time;

@@ -93,12 +93,14 @@ void TestForms::testCheckboxIssue159()
 
     // Let's find and assign the "Wine" and "Beer" radio buttons
     Q_FOREACH (Poppler::FormField *field, forms) {
-        if (field->type() != Poppler::FormField::FormButton)
+        if (field->type() != Poppler::FormField::FormButton) {
             continue;
+        }
 
         Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
-        if (fieldButton->buttonType() != Poppler::FormFieldButton::Radio)
+        if (fieldButton->buttonType() != Poppler::FormFieldButton::Radio) {
             continue;
+        }
 
         // printf("%s \n", fieldButton->caption().toLatin1().data());
         if (fieldButton->caption() == QStringLiteral("Wine")) {
@@ -138,12 +140,14 @@ void TestForms::testSetIcon()
     // First we are finding the field which will have its icon changed
     Q_FOREACH (Poppler::FormField *field, forms) {
 
-        if (field->type() != Poppler::FormField::FormButton)
+        if (field->type() != Poppler::FormField::FormButton) {
             continue;
+        }
 
         Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
-        if (field->name() == QStringLiteral("anm0"))
+        if (field->name() == QStringLiteral("anm0")) {
             anmButton = fieldButton;
+        }
     }
 
     QVERIFY(anmButton);
@@ -152,12 +156,14 @@ void TestForms::testSetIcon()
     // And verify if it has a valid icon
     Q_FOREACH (Poppler::FormField *field, forms) {
 
-        if (field->type() != Poppler::FormField::FormButton)
+        if (field->type() != Poppler::FormField::FormButton) {
             continue;
+        }
 
         Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
-        if (field->name() == QStringLiteral("anm0"))
+        if (field->name() == QStringLiteral("anm0")) {
             continue;
+        }
 
         Poppler::FormFieldIcon newIcon = fieldButton->icon();
 
@@ -212,8 +218,9 @@ void TestForms::testSetAppearanceText()
 
     Q_FOREACH (Poppler::FormField *field, forms) {
 
-        if (field->type() != Poppler::FormField::FormText)
+        if (field->type() != Poppler::FormField::FormText) {
             continue;
+        }
 
         nTextForms++;
 

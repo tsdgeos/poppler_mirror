@@ -51,8 +51,9 @@ struct MiniIconv
     MiniIconv(const char *to_code, const char *from_code) : i_(iconv_open(to_code, from_code)) { }
     ~MiniIconv()
     {
-        if (is_valid())
+        if (is_valid()) {
             iconv_close(i_);
+        }
     }
     MiniIconv(const MiniIconv &) = delete;
     MiniIconv &operator=(const MiniIconv &) = delete;

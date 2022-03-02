@@ -133,10 +133,11 @@ public:
         } else {
             for (int i = 0; i < nChars; ++i) {
                 const int c = getChar();
-                if (likely(c != EOF))
+                if (likely(c != EOF)) {
                     buffer[i] = c;
-                else
+                } else {
                     return i;
+                }
             }
             return nChars;
         }
@@ -1001,8 +1002,9 @@ private:
     short lookBits(int n);
     void eatBits(int n)
     {
-        if ((inputBits -= n) < 0)
+        if ((inputBits -= n) < 0) {
             inputBits = 0;
+        }
     }
 };
 
@@ -1166,8 +1168,9 @@ private:
         int c;
 
         while (remain == 0) {
-            if (endOfBlock && eof)
+            if (endOfBlock && eof) {
                 return EOF;
+            }
             readSome();
         }
         c = buf[index];

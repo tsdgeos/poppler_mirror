@@ -23,8 +23,9 @@
 
 FILECacheLoader::~FILECacheLoader()
 {
-    if (file != stdin)
+    if (file != stdin) {
         fclose(file);
+    }
 }
 
 size_t FILECacheLoader::init(GooString *dummy, CachedFile *cachedFile)

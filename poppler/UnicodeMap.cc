@@ -180,8 +180,9 @@ UnicodeMap::UnicodeMap(UnicodeMap &&other) noexcept : encodingName { std::move(o
 
 UnicodeMap &UnicodeMap::operator=(UnicodeMap &&other) noexcept
 {
-    if (this != &other)
+    if (this != &other) {
         swap(other);
+    }
     return *this;
 }
 

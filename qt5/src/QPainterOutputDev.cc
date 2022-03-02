@@ -794,12 +794,14 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
             shading->getColor(midPoint, &colorAtMidPoint);
 
             GfxColor linearlyInterpolatedColor;
-            for (int ii = 0; ii < nComps; ii++)
+            for (int ii = 0; ii < nComps; ii++) {
                 linearlyInterpolatedColor.c[ii] = 0.5 * (color0.c[ii] + color1.c[ii]);
+            }
 
             // If the two colors are equal, ta[j] is a good place for the next color stop; take it!
-            if (isSameGfxColor(colorAtMidPoint, linearlyInterpolatedColor))
+            if (isSameGfxColor(colorAtMidPoint, linearlyInterpolatedColor)) {
                 break;
+            }
 
             // Otherwise: bisect further
             int k = (i + j) / 2;

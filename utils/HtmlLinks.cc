@@ -71,8 +71,9 @@ bool HtmlLink::isEqualDest(const HtmlLink &x) const
 bool HtmlLink::inLink(double xmin, double ymin, double xmax, double ymax) const
 {
     double y = (ymin + ymax) / 2;
-    if (y > Ymax)
+    if (y > Ymax) {
         return false;
+    }
     return (y > Ymin) && (xmin < Xmax) && (xmax > Xmin);
 }
 
@@ -98,8 +99,9 @@ static GooString *EscapeSpecialChars(GooString *s)
             continue;
         }
         if (replace) {
-            if (!tmp)
+            if (!tmp) {
                 tmp = new GooString(s);
+            }
             if (tmp) {
                 tmp->del(j, 1);
                 int l = strlen(replace);
@@ -116,8 +118,9 @@ GooString *HtmlLink::getLinkStart() const
     GooString *res = new GooString("<a href=\"");
     GooString *d = xml ? EscapeSpecialChars(dest) : dest;
     res->append(d);
-    if (d != dest)
+    if (d != dest) {
         delete d;
+    }
     res->append("\">");
     return res;
 }

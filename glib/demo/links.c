@@ -45,8 +45,9 @@ typedef struct
 
 static void pgd_links_free(PgdLinksDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -72,8 +73,9 @@ static void pgd_links_get_links(GtkWidget *button, PgdLinksDemo *demo)
     pgd_action_view_set_action(demo->action_view, NULL);
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_link_mapping(page);

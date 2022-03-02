@@ -490,8 +490,9 @@ PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, Annot *annot)
     poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_SCREEN, annot);
     annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot);
     action = annot_screen->getAction();
-    if (action)
+    if (action) {
         POPPLER_ANNOT_SCREEN(poppler_annot)->action = _poppler_action_new(doc, action, nullptr);
+    }
 
     return poppler_annot;
 }
@@ -782,8 +783,9 @@ void poppler_annot_set_flags(PopplerAnnot *poppler_annot, PopplerAnnotFlag flags
 {
     g_return_if_fail(POPPLER_IS_ANNOT(poppler_annot));
 
-    if (poppler_annot_get_flags(poppler_annot) == flags)
+    if (poppler_annot_get_flags(poppler_annot) == flags) {
         return;
+    }
 
     poppler_annot->annot->setFlags((guint)flags);
 }
@@ -824,8 +826,9 @@ static PopplerColor *create_poppler_color_from_annot_color(AnnotColor *color)
 
 static std::unique_ptr<AnnotColor> create_annot_color_from_poppler_color(PopplerColor *poppler_color)
 {
-    if (!poppler_color)
+    if (!poppler_color) {
         return nullptr;
+    }
 
     return std::make_unique<AnnotColor>((double)poppler_color->red / 65535, (double)poppler_color->green / 65535, (double)poppler_color->blue / 65535);
 }
@@ -895,8 +898,9 @@ const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_an
 
         page = poppler_annot->annot->getDoc()->getPage(page_index);
         if (page) {
-            if (page_out)
+            if (page_out) {
                 *page_out = page;
+            }
 
             return page->getCropBox();
         }
@@ -1091,8 +1095,9 @@ gboolean poppler_annot_markup_get_popup_is_open(PopplerAnnotMarkup *poppler_anno
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    if ((annot_popup = annot->getPopup()))
+    if ((annot_popup = annot->getPopup())) {
         return annot_popup->getOpen();
+    }
 
     return FALSE;
 }
@@ -1116,11 +1121,13 @@ void poppler_annot_markup_set_popup_is_open(PopplerAnnotMarkup *poppler_annot, g
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return;
+    }
 
-    if (annot_popup->getOpen() != is_open)
+    if (annot_popup->getOpen() != is_open) {
         annot_popup->setOpen(is_open);
+    }
 }
 
 /**
@@ -1144,8 +1151,9 @@ gboolean poppler_annot_markup_get_popup_rectangle(PopplerAnnotMarkup *poppler_an
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return FALSE;
+    }
 
     const PDFRectangle &annot_rect = annot_popup->getRect();
     poppler_rect->x1 = annot_rect.x1;
@@ -1178,8 +1186,9 @@ void poppler_annot_markup_set_popup_rectangle(PopplerAnnotMarkup *poppler_annot,
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return;
+    }
 
     annot_popup->setRect(poppler_rect->x1, poppler_rect->y1, poppler_rect->x2, poppler_rect->y2);
 }
@@ -1244,8 +1253,9 @@ GDate *poppler_annot_markup_get_date(PopplerAnnotMarkup *poppler_annot)
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_date = annot->getDate();
-    if (!annot_date)
+    if (!annot_date) {
         return nullptr;
+    }
 
     if (_poppler_convert_pdf_date_to_gtime(annot_date, &timet)) {
         GDate *date;

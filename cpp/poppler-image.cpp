@@ -483,8 +483,9 @@ std::vector<std::string> image::supported_image_formats()
  */
 image &image::operator=(const image &img)
 {
-    if (this == &img)
+    if (this == &img) {
         return *this;
+    }
 
     if (img.d) {
         ++img.d->ref;

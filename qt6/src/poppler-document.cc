@@ -88,9 +88,9 @@ std::unique_ptr<Document> DocumentData::checkDocument(DocumentData *doc)
 {
     if (doc->doc->isOk() || doc->doc->getErrorCode() == errEncrypted) {
         auto pdoc = std::unique_ptr<Document>(new Document(doc));
-        if (doc->doc->getErrorCode() == errEncrypted)
+        if (doc->doc->getErrorCode() == errEncrypted) {
             pdoc->m_doc->locked = true;
-        else {
+        } else {
             pdoc->m_doc->locked = false;
             pdoc->m_doc->fillMembers();
         }
@@ -195,8 +195,9 @@ Document::PageLayout Document::pageLayout() const
 
 Qt::LayoutDirection Document::textDirection() const
 {
-    if (!m_doc->doc->getCatalog()->getViewerPreferences())
+    if (!m_doc->doc->getCatalog()->getViewerPreferences()) {
         return Qt::LayoutDirectionAuto;
+    }
 
     switch (m_doc->doc->getCatalog()->getViewerPreferences()->getDirection()) {
     case ViewerPreferences::directionL2R:
@@ -410,15 +411,18 @@ QStringList Document::infoKeys() const
 {
     QStringList keys;
 
-    if (m_doc->locked)
+    if (m_doc->locked) {
         return QStringList();
+    }
 
     QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
-    if (!xref)
+    if (!xref) {
         return QStringList();
+    }
     Object info = xref->getDocInfo();
-    if (!info.isDict())
+    if (!info.isDict()) {
         return QStringList();
+    }
 
     Dict *infoDict = info.getDict();
     // somehow iterate over keys in infoDict
@@ -683,13 +687,15 @@ void Document::setRenderHint(Document::RenderHint hint, bool on)
     const bool touchesOverprinting = hint & Document::OverprintPreview;
 
     int hintForOperation = hint;
-    if (touchesOverprinting && !isOverprintPreviewAvailable())
+    if (touchesOverprinting && !isOverprintPreviewAvailable()) {
         hintForOperation = hintForOperation & ~(int)Document::OverprintPreview;
+    }
 
-    if (on)
+    if (on) {
         m_doc->m_hints |= hintForOperation;
-    else
+    } else {
         m_doc->m_hints &= ~hintForOperation;
+    }
 }
 
 Document::RenderHints Document::renderHints() const
@@ -715,8 +721,9 @@ QString Document::metadata() const
     Catalog *catalog = m_doc->doc->getCatalog();
     if (catalog && catalog->isOk()) {
         std::unique_ptr<GooString> s = catalog->readMetadata();
-        if (s)
+        if (s) {
             result = UnicodeParsedString(s.get());
+        }
     }
     return result;
 }
@@ -754,13 +761,16 @@ bool Document::getPdfId(QByteArray *permanentId, QByteArray *updateId) const
     GooString gooPermanentId;
     GooString gooUpdateId;
 
-    if (!m_doc->doc->getID(permanentId ? &gooPermanentId : nullptr, updateId ? &gooUpdateId : nullptr))
+    if (!m_doc->doc->getID(permanentId ? &gooPermanentId : nullptr, updateId ? &gooUpdateId : nullptr)) {
         return false;
+    }
 
-    if (permanentId)
+    if (permanentId) {
         *permanentId = gooPermanentId.c_str();
-    if (updateId)
+    }
+    if (updateId) {
         *updateId = gooUpdateId.c_str();
+    }
 
     return true;
 }

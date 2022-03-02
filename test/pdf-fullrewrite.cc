@@ -97,8 +97,9 @@ done:
 static bool compareDictionaries(Dict *dictA, Dict *dictB)
 {
     const int length = dictA->getLength();
-    if (dictB->getLength() != length)
+    if (dictB->getLength() != length) {
         return false;
+    }
 
     /* Check that every key in dictA is contained in dictB.
      * Since keys are unique and we've already checked that dictA and dictB
@@ -108,8 +109,9 @@ static bool compareDictionaries(Dict *dictA, Dict *dictB)
         const char *key = dictA->getKey(i);
         const Object &valA = dictA->getValNF(i);
         const Object &valB = dictB->lookupNF(key);
-        if (!compareObjects(&valA, &valB))
+        if (!compareObjects(&valA, &valB)) {
             return false;
+        }
     }
 
     return true;

@@ -160,11 +160,13 @@ static gboolean drawing_area_draw(GtkWidget *drawing_area, cairo_t *cr, View *vi
         document.height = view->out->getBitmapHeight();
     }
 
-    if (!gdk_cairo_get_clip_rectangle(cr, &clip))
+    if (!gdk_cairo_get_clip_rectangle(cr, &clip)) {
         return FALSE;
+    }
 
-    if (!gdk_rectangle_intersect(&document, &clip, &draw))
+    if (!gdk_rectangle_intersect(&document, &clip, &draw)) {
         return FALSE;
+    }
 
     if (cairo_output) {
         cairo_set_source_surface(cr, view->surface, 0, 0);
@@ -190,8 +192,9 @@ static void view_set_page(View *view, int page)
         w = (int)ceil(width);
         h = (int)ceil(height);
 
-        if (view->surface)
+        if (view->surface) {
             cairo_surface_destroy(view->surface);
+        }
         view->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
 
         cr = cairo_create(view->surface);
@@ -223,8 +226,9 @@ static void redraw_callback(void *data)
 
 static void view_free(View *view)
 {
-    if (G_UNLIKELY(!view))
+    if (G_UNLIKELY(!view)) {
         return;
+    }
 
     g_object_unref(view->doc);
     delete view->out;
@@ -237,8 +241,9 @@ static void destroy_window_callback(GtkWindow *window, View *view)
     view_list = g_list_remove(view_list, view);
     view_free(view);
 
-    if (!view_list)
+    if (!view_list) {
         gtk_main_quit();
+    }
 }
 
 static void page_changed_callback(GtkSpinButton *button, View *view)
@@ -386,8 +391,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (view_list != nullptr)
+    if (view_list != nullptr) {
         gtk_main();
+    }
 
     return 0;
 }

@@ -47,8 +47,9 @@ typedef struct
 
 static void pgd_render_free(PgdRenderDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -65,8 +66,9 @@ static void pgd_render_free(PgdRenderDemo *demo)
 
 static gboolean pgd_render_drawing_area_draw(GtkWidget *area, cairo_t *cr, PgdRenderDemo *demo)
 {
-    if (!demo->surface)
+    if (!demo->surface) {
         return FALSE;
+    }
 
     cairo_set_source_surface(cr, demo->surface, 0, 0);
     cairo_paint(cr);
@@ -85,11 +87,13 @@ static void pgd_render_start(GtkButton *button, PgdRenderDemo *demo)
     cairo_t *cr;
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
-    if (demo->surface)
+    if (demo->surface) {
         cairo_surface_destroy(demo->surface);
+    }
     demo->surface = NULL;
 
     poppler_page_get_size(page, &page_width, &page_height);
@@ -125,16 +129,19 @@ static void pgd_render_start(GtkButton *button, PgdRenderDemo *demo)
         cairo_translate(cr, -x, -y);
     }
 
-    if (demo->scale != 1.0)
+    if (demo->scale != 1.0) {
         cairo_scale(cr, demo->scale, demo->scale);
+    }
 
-    if (demo->rotate != 0)
+    if (demo->rotate != 0) {
         cairo_rotate(cr, demo->rotate * G_PI / 180.0);
+    }
 
-    if (demo->printing)
+    if (demo->printing) {
         poppler_page_render_for_printing(page, cr);
-    else
+    } else {
         poppler_page_render(page, cr);
+    }
     cairo_restore(cr);
 
     cairo_set_operator(cr, CAIRO_OPERATOR_DEST_OVER);
@@ -162,8 +169,9 @@ static void pgd_render_slice_selector_setup(PgdRenderDemo *demo)
     gdouble width, height;
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     poppler_page_get_size(page, &width, &height);
 

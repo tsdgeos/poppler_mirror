@@ -198,8 +198,9 @@ Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
 Object Dict::lookupEnsureEncryptedIfNeeded(const char *key) const
 {
     const auto *entry = find(key);
-    if (!entry)
+    if (!entry) {
         return Object(objNull);
+    }
 
     if (entry->second.getType() == objRef && xref->isEncrypted() && !xref->isRefEncrypted(entry->second.getRef())) {
         error(errSyntaxError, -1, "{0:s} is not encrypted and the document is. This may be a hacking attempt", key);

@@ -39,8 +39,9 @@ typedef struct
 
 static void pgd_print_free(PgdPrintDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -66,8 +67,9 @@ static void pgd_print_draw_page(GtkPrintOperation *op, GtkPrintContext *context,
     PopplerPrintFlags flags = 0;
 
     page = poppler_document_get_page(demo->doc, page_nr);
-    if (!page)
+    if (!page) {
         return;
+    }
 
 #if 0
         settings = gtk_print_operation_get_print_settings (op);

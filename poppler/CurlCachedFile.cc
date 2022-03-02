@@ -88,8 +88,9 @@ int CurlCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFileW
 
         delete range;
 
-        if (r != CURLE_OK)
+        if (r != CURLE_OK) {
             break;
+        }
     }
     return r;
 }

@@ -569,8 +569,9 @@ const std::vector<OutlineItem *> *OutlineItem::getKids()
 {
     open();
 
-    if (!kids || kids->empty())
+    if (!kids || kids->empty()) {
         return nullptr;
-    else
+    } else {
         return kids;
+    }
 }

@@ -315,8 +315,9 @@ bool PDFDoc::checkFooter()
     int i, ch;
     for (i = 0; i < 1024; i++) {
         ch = str->getChar();
-        if (ch == EOF)
+        if (ch == EOF) {
             break;
+        }
         eof[i] = ch;
     }
     eof[i] = '\0';
@@ -355,8 +356,9 @@ void PDFDoc::checkHeader()
     // read up to headerSearchSize bytes from the beginning of the document
     for (i = 0; i < headerSearchSize; ++i) {
         const int c = str->getChar();
-        if (c == EOF)
+        if (c == EOF) {
             break;
+        }
         hdrBuf[i] = c;
     }
     bytesRead = i;
@@ -560,8 +562,9 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
 
     // First search
     const Form *f = catalog->getForm();
-    if (!f)
+    if (!f) {
         return res;
+    }
 
     const int nRootFields = f->getNumFields();
     for (int i = 0; i < nRootFields; ++i) {
@@ -597,8 +600,9 @@ void PDFDoc::displayPage(OutputDev *out, int page, double hDPI, double vDPI, int
         printf("***** page %d *****\n", page);
     }
 
-    if (getPage(page))
+    if (getPage(page)) {
         getPage(page)->display(out, hDPI, vDPI, rotate, useMediaBox, crop, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
+    }
 }
 
 void PDFDoc::displayPages(OutputDev *out, int firstPage, int lastPage, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
@@ -614,8 +618,9 @@ void PDFDoc::displayPages(OutputDev *out, int firstPage, int lastPage, double hD
 void PDFDoc::displayPageSlice(OutputDev *out, int page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data),
                               void *abortCheckCbkData, bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data), void *annotDisplayDecideCbkData, bool copyXRef)
 {
-    if (getPage(page))
+    if (getPage(page)) {
         getPage(page)->displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
+    }
 }
 
 std::unique_ptr<Links> PDFDoc::getLinks(int page)
@@ -629,8 +634,9 @@ std::unique_ptr<Links> PDFDoc::getLinks(int page)
 
 void PDFDoc::processLinks(OutputDev *out, int page)
 {
-    if (getPage(page))
+    if (getPage(page)) {
         getPage(page)->processLinks(out);
+    }
 }
 
 Linearization *PDFDoc::getLinearization()
@@ -644,12 +650,15 @@ Linearization *PDFDoc::getLinearization()
 
 bool PDFDoc::checkLinearization()
 {
-    if (linearization == nullptr)
+    if (linearization == nullptr) {
         return false;
-    if (linearizationState == 1)
+    }
+    if (linearizationState == 1) {
         return true;
-    if (linearizationState == 2)
+    }
+    if (linearizationState == 2) {
         return false;
+    }
     if (!hints) {
         hints = new Hints(str, linearization, getXRef(), secHdlr);
     }
@@ -685,13 +694,14 @@ bool PDFDoc::checkLinearization()
 
 bool PDFDoc::isLinearized(bool tryingToReconstruct)
 {
-    if ((str->getLength()) && (getLinearization()->getLength() == str->getLength()))
+    if ((str->getLength()) && (getLinearization()->getLength() == str->getLength())) {
         return true;
-    else {
-        if (tryingToReconstruct)
+    } else {
+        if (tryingToReconstruct) {
             return getLinearization()->getLength() > 0;
-        else
+        } else {
             return false;
+        }
     }
 }
 
@@ -745,13 +755,15 @@ static bool get_id(const GooString *encodedidstring, GooString *id)
     char pdfid[pdfIdLength + 1];
     int n;
 
-    if (encodedidstring->getLength() != pdfIdLength / 2)
+    if (encodedidstring->getLength() != pdfIdLength / 2) {
         return false;
+    }
 
     n = sprintf(pdfid, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", encodedid[0] & 0xff, encodedid[1] & 0xff, encodedid[2] & 0xff, encodedid[3] & 0xff, encodedid[4] & 0xff, encodedid[5] & 0xff, encodedid[6] & 0xff,
                 encodedid[7] & 0xff, encodedid[8] & 0xff, encodedid[9] & 0xff, encodedid[10] & 0xff, encodedid[11] & 0xff, encodedid[12] & 0xff, encodedid[13] & 0xff, encodedid[14] & 0xff, encodedid[15] & 0xff);
-    if (n != pdfIdLength)
+    if (n != pdfIdLength) {
         return false;
+    }
 
     id->Set(pdfid, pdfIdLength);
     return true;
@@ -807,8 +819,9 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     OutStream *outStr;
     XRef *yRef, *countRef;
 
-    if (file && file->modificationTimeChangedSinceOpen())
+    if (file && file->modificationTimeChangedSinceOpen()) {
         return errFileChangedSinceOpen;
+    }
 
     int rootNum = getXRef()->getNumObjects() + 1;
 
@@ -879,8 +892,9 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     }
     Dict *pagesDict = pagesObj.getDict();
     Object resourcesObj = pagesDict->lookup("Resources");
-    if (resourcesObj.isDict())
+    if (resourcesObj.isDict()) {
         markPageObjects(resourcesObj.getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
+    }
     markPageObjects(catDict, yRef, countRef, 0, refPage->num, rootNum + 2);
 
     Dict *pageDict = page.getDict();
@@ -905,8 +919,9 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     for (int j = 0; j < catDict->getLength(); j++) {
         const char *key = catDict->getKey(j);
         if (strcmp(key, "Type") != 0 && strcmp(key, "Catalog") != 0 && strcmp(key, "Pages") != 0) {
-            if (j > 0)
+            if (j > 0) {
                 outStr->printf(" ");
+            }
             Object value = catDict->getValNF(j).copy();
             outStr->printf("/%s ", key);
             writeObject(&value, outStr, getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
@@ -928,8 +943,9 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     outStr->printf("%d 0 obj\n", rootNum + 2);
     outStr->printf("<< ");
     for (int n = 0; n < pageDict->getLength(); n++) {
-        if (n > 0)
+        if (n > 0) {
             outStr->printf(" ");
+        }
         const char *key = pageDict->getKey(n);
         Object value = pageDict->getValNF(n).copy();
         if (strcmp(key, "Parent") == 0) {
@@ -976,8 +992,9 @@ int PDFDoc::saveAs(const GooString &name, PDFWriteMode mode)
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode)
 {
-    if (file && file->modificationTimeChangedSinceOpen())
+    if (file && file->modificationTimeChangedSinceOpen()) {
         return errFileChangedSinceOpen;
+    }
 
     if (!xref->isModified() && mode == writeStandard) {
         // simply copy the original file
@@ -1015,8 +1032,9 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
 {
     int c;
 
-    if (file && file->modificationTimeChangedSinceOpen())
+    if (file && file->modificationTimeChangedSinceOpen()) {
         return errFileChangedSinceOpen;
+    }
 
     BaseStream *copyStr = str->copy();
     copyStr->reset();
@@ -1051,8 +1069,9 @@ void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
     uxref->add(0, 65535, 0, false);
     xref->lock();
     for (int i = 0; i < xref->getNumObjects(); i++) {
-        if ((xref->getEntry(i)->type == xrefEntryFree) && (xref->getEntry(i)->gen == 0)) // we skip the irrelevant free objects
+        if ((xref->getEntry(i)->type == xrefEntryFree) && (xref->getEntry(i)->gen == 0)) { // we skip the irrelevant free objects
             continue;
+        }
 
         if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) { // we have an updated object
             Ref ref;
@@ -1127,8 +1146,9 @@ void PDFDoc::saveCompleteRewrite(OutStream *outStr)
             ref.gen = xref->getEntry(i)->gen;
             /* the XRef class adds a lot of irrelevant free entries, we only want the significant one
                 and we don't want the one with num=0 because it has already been added (gen = 65535)*/
-            if (ref.gen > 0 && ref.num > 0)
+            if (ref.gen > 0 && ref.num > 0) {
                 uxref->add(ref, 0, false);
+            }
         } else if (xref->getEntry(i)->getFlag(XRefEntry::DontRewrite)) {
             // This entry must not be written, put a free entry instead (with incremented gen)
             ref.num = i;
@@ -1173,8 +1193,9 @@ void PDFDoc::writeDictionnary(Dict *dict, OutStream *outStr, XRef *xRef, unsigne
 
     if (alreadyWrittenDicts->find(dict) != alreadyWrittenDicts->end()) {
         error(errSyntaxWarning, -1, "PDFDoc::writeDictionnary: Found recursive dicts");
-        if (deleteSet)
+        if (deleteSet) {
             delete alreadyWrittenDicts;
+        }
         return;
     } else {
         alreadyWrittenDicts->insert(dict);
@@ -1215,10 +1236,11 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
     }
 
     Goffset length;
-    if (obj1.isInt())
+    if (obj1.isInt()) {
         length = obj1.getInt();
-    else
+    } else {
         length = obj1.getInt64();
+    }
 
     outStr->printf("stream\r\n");
     str->unfilteredReset();
@@ -1259,8 +1281,9 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
         for (int i = 0; i < s->getLength(); i++) {
             char unescaped = *(c + i) & 0x000000ff;
             // escape if needed
-            if (unescaped == '(' || unescaped == ')' || unescaped == '\\')
+            if (unescaped == '(' || unescaped == ')' || unescaped == '\\') {
                 outStr->printf("%c", '\\');
+            }
             outStr->printf("%c", unescaped);
         }
         outStr->printf(") ");
@@ -1270,11 +1293,11 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
         for (int i = 0; i < s->getLength(); i++) {
             char unescaped = *(c + i) & 0x000000ff;
             // escape if needed
-            if (unescaped == '\r')
+            if (unescaped == '\r') {
                 outStr->printf("\\r");
-            else if (unescaped == '\n')
+            } else if (unescaped == '\n') {
                 outStr->printf("\\n");
-            else {
+            } else {
                 if (unescaped == '(' || unescaped == ')' || unescaped == '\\') {
                     outStr->printf("%c", '\\');
                 }
@@ -1479,8 +1502,9 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
     sprintf(buffer, "%i", (int)time(nullptr));
     message.append(buffer);
 
-    if (fileName)
+    if (fileName) {
         message.append(fileName);
+    }
 
     sprintf(buffer, "%lli", (long long)fileSize);
     message.append(buffer);
@@ -1612,8 +1636,9 @@ void PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned in
 
     if (alreadyMarkedDicts->find(dict) != alreadyMarkedDicts->end()) {
         error(errSyntaxWarning, -1, "PDFDoc::markDictionnary: Found recursive dicts");
-        if (deleteSet)
+        if (deleteSet) {
             delete alreadyMarkedDicts;
+        }
         return;
     } else {
         alreadyMarkedDicts->insert(dict);
@@ -1671,8 +1696,9 @@ void PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         } else {
             XRefEntry *entry = countRef->getEntry(obj->getRef().num + numOffset);
             entry->gen++;
-            if (entry->gen > 9)
+            if (entry->gen > 9) {
                 break;
+            }
         }
         Object obj1 = getXRef()->fetch(obj->getRef());
         markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
@@ -1945,8 +1971,9 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
                 if (!strncmp("endobj", &buf[i], 6)) {
                     i += 6;
                     // skip whitespace
-                    while (buf[i] && Lexer::isSpace(buf[i]))
+                    while (buf[i] && Lexer::isSpace(buf[i])) {
                         ++i;
+                    }
                     startXRefPos = i;
                     break;
                 }
@@ -1959,8 +1986,9 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
             // read last xrefSearchSize bytes
             int segnum = 0;
             int maxXRefSearch = 24576;
-            if (str->getLength() < maxXRefSearch)
+            if (str->getLength() < maxXRefSearch) {
                 maxXRefSearch = str->getLength();
+            }
             for (; (xrefSearchSize - 16) * segnum < maxXRefSearch; segnum++) {
                 str->setPos((xrefSearchSize - 16) * segnum + xrefSearchSize, -1);
                 for (n = 0; n < xrefSearchSize; ++n) {
@@ -1980,8 +2008,9 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
                 if (i < 0) {
                     startXRefPos = 0;
                 } else {
-                    for (p = &buf[i + 9]; isspace(*p); ++p)
+                    for (p = &buf[i + 9]; isspace(*p); ++p) {
                         ;
+                    }
                     startXRefPos = strToLongLong(p);
                     break;
                 }
@@ -2044,8 +2073,9 @@ Page *PDFDoc::parsePage(int page)
 
 Page *PDFDoc::getPage(int page)
 {
-    if ((page < 1) || page > getNumPages())
+    if ((page < 1) || page > getNumPages()) {
         return nullptr;
+    }
 
     if (isLinearized() && checkLinearization()) {
         pdfdocLocker();

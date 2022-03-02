@@ -261,17 +261,20 @@ int main(int argc, char *argv[])
         goto error;
     } else {
         const char *p = fileName->c_str() + fileName->getLength() - 4;
-        if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF"))
+        if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
             htmlFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
-        else
+        } else {
             htmlFileName = fileName->copy();
+        }
         //   htmlFileName->append(".html");
     }
 
-    if (scale > 3.0)
+    if (scale > 3.0) {
         scale = 3.0;
-    if (scale < 0.5)
+    }
+    if (scale < 0.5) {
         scale = 0.5;
+    }
 
     if (complexMode) {
         // noframes=false;
@@ -291,10 +294,12 @@ int main(int argc, char *argv[])
     }
 
     // get page range
-    if (firstPage < 1)
+    if (firstPage < 1) {
         firstPage = 1;
-    if (lastPage < 1 || lastPage > doc->getNumPages())
+    }
+    if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
+    }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
         goto error;
@@ -307,16 +312,19 @@ int main(int argc, char *argv[])
         keywords = getInfoString(info.getDict(), "Keywords");
         subject = getInfoString(info.getDict(), "Subject");
         date = getInfoDate(info.getDict(), "ModDate");
-        if (!date)
+        if (!date) {
             date = getInfoDate(info.getDict(), "CreationDate");
+        }
     }
-    if (!docTitle)
+    if (!docTitle) {
         docTitle = new GooString(htmlFileName);
+    }
 
-    if (!singleHtml)
+    if (!singleHtml) {
         rawOrder = complexMode; // todo: figure out what exactly rawOrder do :)
-    else
+    } else {
         rawOrder = singleHtml;
+    }
 
     doOutline = doc->getOutline()->getItems() != nullptr;
     // write text file
@@ -385,8 +393,9 @@ int main(int argc, char *argv[])
 error:
     delete fileName;
 
-    if (htmlFileName)
+    if (htmlFileName) {
         delete htmlFileName;
+    }
 
     return exit_status;
 }

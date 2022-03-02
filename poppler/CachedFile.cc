@@ -52,8 +52,9 @@ void CachedFile::incRefCnt()
 
 void CachedFile::decRefCnt()
 {
-    if (--refCnt == 0)
+    if (--refCnt == 0) {
         delete this;
+    }
 }
 
 long int CachedFile::tell()
@@ -96,19 +97,23 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
         ranges = &all;
     }
 
-    for (int i = 0; i < numChunks; ++i)
+    for (int i = 0; i < numChunks; ++i) {
         chunkNeeded[i] = false;
+    }
     for (const ByteRange &r : *ranges) {
 
-        if (r.length == 0)
+        if (r.length == 0) {
             continue;
-        if (r.offset >= length)
+        }
+        if (r.offset >= length) {
             continue;
+        }
 
         const size_t start = r.offset;
         size_t end = start + r.length - 1;
-        if (end >= length)
+        if (end >= length) {
             end = length - 1;
+        }
 
         startChunk = start / CachedFileChunkSize;
         endChunk = end / CachedFileChunkSize;
@@ -121,10 +126,12 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
 
     int chunk = 0;
     while (chunk < numChunks) {
-        while (!chunkNeeded[chunk] && (++chunk != numChunks))
+        while (!chunkNeeded[chunk] && (++chunk != numChunks)) {
             ;
-        if (chunk == numChunks)
+        }
+        if (chunk == numChunks) {
             break;
+        }
         startChunk = chunk;
         loadChunks.push_back(chunk);
 
@@ -154,12 +161,14 @@ size_t CachedFile::read(void *ptr, size_t unitsize, size_t count)
         bytes = length - streamPos;
     }
 
-    if (bytes == 0)
+    if (bytes == 0) {
         return 0;
+    }
 
     // Load data
-    if (cache(streamPos, bytes) != 0)
+    if (cache(streamPos, bytes) != 0) {
         return 0;
+    }
 
     // Copy data to buffer
     size_t toCopy = bytes;
@@ -168,8 +177,9 @@ size_t CachedFile::read(void *ptr, size_t unitsize, size_t count)
         int offset = streamPos % CachedFileChunkSize;
         size_t len = CachedFileChunkSize - offset;
 
-        if (len > toCopy)
+        if (len > toCopy) {
             len = toCopy;
+        }
 
         memcpy(ptr, (*chunks)[chunk].data + offset, len);
         streamPos += len;
@@ -215,15 +225,17 @@ size_t CachedFileWriter::write(const char *ptr, size_t size)
     size_t written = 0;
     size_t chunk;
 
-    if (!len)
+    if (!len) {
         return 0;
+    }
 
     while (len) {
         if (chunks) {
             if (offset == CachedFileChunkSize) {
                 ++it;
-                if (it == (*chunks).end())
+                if (it == (*chunks).end()) {
                     return written;
+                }
                 offset = 0;
             }
             chunk = *it;

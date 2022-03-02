@@ -82,8 +82,9 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     obj = prefDict->lookup("NumCopies");
     if (obj.isInt()) {
         numCopies = obj.getInt();
-        if (numCopies < 2)
+        if (numCopies < 2) {
             numCopies = 1;
+        }
     }
 
     obj = prefDict->lookup("PrintPageRange");
@@ -92,8 +93,9 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         int length = range->getLength();
         int pageNumber1, pageNumber2;
 
-        if (length % 2 == 1)
+        if (length % 2 == 1) {
             length--;
+        }
 
         for (int i = 0; i < length; i += 2) {
             Object obj2 = range->get(i);

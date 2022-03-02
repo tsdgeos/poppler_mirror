@@ -78,8 +78,9 @@ static void poppler_page_finalize(GObject *object)
     g_object_unref(page->document);
     page->document = nullptr;
 
-    if (page->text != nullptr)
+    if (page->text != nullptr) {
         page->text->decRefCnt();
+    }
     /* page->page is owned by the document */
 
     G_OBJECT_CLASS(poppler_page_parent_class)->finalize(object);
@@ -109,10 +110,12 @@ void poppler_page_get_size(PopplerPage *page, double *width, double *height)
         page_height = page->page->getCropHeight();
     }
 
-    if (width != nullptr)
+    if (width != nullptr) {
         *width = page_width;
-    if (height != nullptr)
+    }
+    if (height != nullptr) {
         *height = page_height;
+    }
 }
 
 /**
@@ -292,8 +295,9 @@ static bool poppler_print_annot_cb(Annot *annot, void *user_data)
 {
     PopplerPrintFlags user_print_flags = (PopplerPrintFlags)GPOINTER_TO_INT(user_data);
 
-    if (annot->getFlags() & Annot::flagHidden)
+    if (annot->getFlags() & Annot::flagHidden) {
         return false;
+    }
 
     if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
         return (annot->getType() == Annot::typeStamp) ? (annot->getFlags() & Annot::flagPrint) : (annot->getType() == Annot::typeWidget);
@@ -424,8 +428,9 @@ static cairo_surface_t *create_surface_from_thumbnail_data(guchar *data, gint wi
     int j;
 
     surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-    if (cairo_surface_status(surface))
+    if (cairo_surface_status(surface)) {
         return nullptr;
+    }
 
     cairo_pixels = cairo_image_surface_get_data(surface);
     cairo_stride = cairo_image_surface_get_stride(surface);
@@ -475,8 +480,9 @@ cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page)
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
-    if (!page->page->loadThumb(&data, &width, &height, &rowstride))
+    if (!page->page->loadThumb(&data, &width, &height, &rowstride)) {
         return nullptr;
+    }
 
     surface = create_surface_from_thumbnail_data(data, width, height, rowstride);
     gfree(data);
@@ -565,8 +571,9 @@ gboolean poppler_page_get_thumbnail_size(PopplerPage *page, int *width, int *hei
 
     /* Theoretically, this could succeed and you would still fail when
      * loading the thumb */
-    if (dict->lookupInt("Width", "W", width) && dict->lookupInt("Height", "H", height))
+    if (dict->lookupInt("Width", "W", width) && dict->lookupInt("Height", "H", height)) {
         retval = TRUE;
+    }
 
     return retval;
 }
@@ -643,8 +650,9 @@ GList *poppler_page_get_selection_region(PopplerPage *page, gdouble scale, Poppl
  */
 void poppler_page_selection_region_free(GList *region)
 {
-    if (G_UNLIKELY(!region))
+    if (G_UNLIKELY(!region)) {
         return;
+    }
 
     g_list_free_full(region, (GDestroyNotify)poppler_rectangle_free);
 }
@@ -1031,8 +1039,9 @@ cairo_surface_t *poppler_page_get_image(PopplerPage *page, gint image_id)
  **/
 void poppler_page_free_image_mapping(GList *list)
 {
-    if (G_UNLIKELY(list == nullptr))
+    if (G_UNLIKELY(list == nullptr)) {
         return;
+    }
 
     g_list_free_full(list, (GDestroyNotify)poppler_image_mapping_free);
 }
@@ -1118,8 +1127,9 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
 
     links = new Links(page->page->getAnnots());
 
-    if (links == nullptr)
+    if (links == nullptr) {
         return nullptr;
+    }
 
     poppler_page_get_size(page, &width, &height);
 
@@ -1192,8 +1202,9 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
  **/
 void poppler_page_free_link_mapping(GList *list)
 {
-    if (G_UNLIKELY(list == nullptr))
+    if (G_UNLIKELY(list == nullptr)) {
         return;
+    }
 
     g_list_free_full(list, (GDestroyNotify)poppler_link_mapping_free);
 }
@@ -1217,8 +1228,9 @@ GList *poppler_page_get_form_field_mapping(PopplerPage *page)
 
     const std::unique_ptr<FormPageWidgets> forms = page->page->getFormWidgets();
 
-    if (forms == nullptr)
+    if (forms == nullptr) {
         return nullptr;
+    }
 
     for (i = 0; i < forms->getNumWidgets(); i++) {
         PopplerFormFieldMapping *mapping;
@@ -1252,8 +1264,9 @@ GList *poppler_page_get_form_field_mapping(PopplerPage *page)
  **/
 void poppler_page_free_form_field_mapping(GList *list)
 {
-    if (G_UNLIKELY(list == nullptr))
+    if (G_UNLIKELY(list == nullptr)) {
         return;
+    }
 
     g_list_free_full(list, (GDestroyNotify)poppler_form_field_mapping_free);
 }
@@ -1279,8 +1292,9 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
     g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
 
     annots = page->page->getAnnots();
-    if (!annots)
+    if (!annots) {
         return nullptr;
+    }
 
     poppler_page_get_size(page, &width, &height);
     crop_box = page->page->getCropBox();
@@ -1406,8 +1420,9 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
  **/
 void poppler_page_free_annot_mapping(GList *list)
 {
-    if (G_UNLIKELY(!list))
+    if (G_UNLIKELY(!list)) {
         return;
+    }
 
     g_list_free_full(list, (GDestroyNotify)poppler_annot_mapping_free);
 }
@@ -1504,8 +1519,9 @@ void _unrotate_rect_for_annot_and_page(Page *page, Annot *annot, double *x1, dou
 {
     gboolean flag_no_rotate;
 
-    if (!SUPPORTED_ROTATION(page->getRotate()))
+    if (!SUPPORTED_ROTATION(page->getRotate())) {
         return;
+    }
     /* Normalize received rect diagonal to be from UpperLeft to BottomRight,
      * as our algorithm follows that */
     if (*y2 > *y1) {
@@ -1844,8 +1860,9 @@ static gchar *get_font_name_from_word(const TextWord *word, gint word_i)
     gboolean subset;
     gint i;
 
-    if (!font_name || font_name->getLength() == 0)
+    if (!font_name || font_name->getLength() == 0) {
         return g_strdup("Default");
+    }
 
     // check for a font subset name: capital letters followed by a '+' sign
     for (i = 0; i < font_name->getLength(); ++i) {
@@ -1855,8 +1872,9 @@ static gchar *get_font_name_from_word(const TextWord *word, gint word_i)
     }
     subset = i > 0 && i < font_name->getLength() && font_name->getChar(i) == '+';
     name = font_name->c_str();
-    if (subset)
+    if (subset) {
         name += i + 1;
+    }
 
     return g_strdup(name);
 }
@@ -1992,8 +2010,9 @@ PopplerLinkMapping *poppler_link_mapping_copy(PopplerLinkMapping *mapping)
 
     new_mapping = g_slice_dup(PopplerLinkMapping, mapping);
 
-    if (new_mapping->action)
+    if (new_mapping->action) {
         new_mapping->action = poppler_action_copy(new_mapping->action);
+    }
 
     return new_mapping;
 }
@@ -2006,11 +2025,13 @@ PopplerLinkMapping *poppler_link_mapping_copy(PopplerLinkMapping *mapping)
  */
 void poppler_link_mapping_free(PopplerLinkMapping *mapping)
 {
-    if (G_UNLIKELY(!mapping))
+    if (G_UNLIKELY(!mapping)) {
         return;
+    }
 
-    if (mapping->action)
+    if (mapping->action) {
         poppler_action_free(mapping->action);
+    }
 
     g_slice_free(PopplerLinkMapping, mapping);
 }
@@ -2127,8 +2148,9 @@ PopplerFormFieldMapping *poppler_form_field_mapping_copy(PopplerFormFieldMapping
 
     new_mapping = g_slice_dup(PopplerFormFieldMapping, mapping);
 
-    if (mapping->field)
+    if (mapping->field) {
         new_mapping->field = (PopplerFormField *)g_object_ref(mapping->field);
+    }
 
     return new_mapping;
 }
@@ -2141,11 +2163,13 @@ PopplerFormFieldMapping *poppler_form_field_mapping_copy(PopplerFormFieldMapping
  */
 void poppler_form_field_mapping_free(PopplerFormFieldMapping *mapping)
 {
-    if (G_UNLIKELY(!mapping))
+    if (G_UNLIKELY(!mapping)) {
         return;
+    }
 
-    if (mapping->field)
+    if (mapping->field) {
         g_object_unref(mapping->field);
+    }
 
     g_slice_free(PopplerFormFieldMapping, mapping);
 }
@@ -2179,8 +2203,9 @@ PopplerAnnotMapping *poppler_annot_mapping_copy(PopplerAnnotMapping *mapping)
 
     new_mapping = g_slice_dup(PopplerAnnotMapping, mapping);
 
-    if (mapping->annot)
+    if (mapping->annot) {
         new_mapping->annot = (PopplerAnnot *)g_object_ref(mapping->annot);
+    }
 
     return new_mapping;
 }
@@ -2193,11 +2218,13 @@ PopplerAnnotMapping *poppler_annot_mapping_copy(PopplerAnnotMapping *mapping)
  */
 void poppler_annot_mapping_free(PopplerAnnotMapping *mapping)
 {
-    if (G_UNLIKELY(!mapping))
+    if (G_UNLIKELY(!mapping)) {
         return;
+    }
 
-    if (mapping->annot)
+    if (mapping->annot) {
         g_object_unref(mapping->annot);
+    }
 
     g_slice_free(PopplerAnnotMapping, mapping);
 }
@@ -2329,8 +2356,9 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
 
     text = poppler_page_get_text_page(page);
     std::vector<TextWordSelection *> **word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
-    if (!word_list)
+    if (!word_list) {
         return FALSE;
+    }
 
     n_rects += n_lines - 1;
     for (i = 0; i < n_lines; i++) {
@@ -2339,8 +2367,9 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
         for (std::size_t j = 0; j < line_words->size(); j++) {
             const TextWordSelection *word_sel = (*line_words)[j];
             n_rects += word_sel->getEnd() - word_sel->getBegin();
-            if (!word_sel->getWord()->hasSpaceAfter() && j < line_words->size() - 1)
+            if (!word_sel->getWord()->hasSpaceAfter() && j < line_words->size() - 1) {
                 n_rects--;
+            }
         }
     }
 
@@ -2408,8 +2437,9 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
  **/
 void poppler_page_free_text_attributes(GList *list)
 {
-    if (G_UNLIKELY(list == nullptr))
+    if (G_UNLIKELY(list == nullptr)) {
         return;
+    }
 
     g_list_free_full(list, (GDestroyNotify)poppler_text_attributes_free);
 }
@@ -2418,14 +2448,17 @@ static gboolean word_text_attributes_equal(const TextWord *a, gint ai, const Tex
 {
     double ar, ag, ab, br, bg, bb;
 
-    if (!a->getFontInfo(ai)->matches(b->getFontInfo(bi)))
+    if (!a->getFontInfo(ai)->matches(b->getFontInfo(bi))) {
         return FALSE;
+    }
 
-    if (a->getFontSize() != b->getFontSize())
+    if (a->getFontSize() != b->getFontSize()) {
         return FALSE;
+    }
 
-    if (a->isUnderlined() != b->isUnderlined())
+    if (a->isUnderlined() != b->isUnderlined()) {
         return FALSE;
+    }
 
     a->getColor(&ar, &ag, &ab);
     b->getColor(&br, &bg, &bb);
@@ -2498,8 +2531,9 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
 
     text = poppler_page_get_text_page(page);
     std::vector<TextWordSelection *> **word_list = text->getSelectionWords(&selection, selectionStyleGlyph, &n_lines);
-    if (!word_list)
+    if (!word_list) {
         return nullptr;
+    }
 
     for (i = 0; i < n_lines; i++) {
         std::vector<TextWordSelection *> *line_words = word_list[i];

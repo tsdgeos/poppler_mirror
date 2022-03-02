@@ -173,8 +173,9 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text, con
             time = timegm(&tmStruct);
             if (time != (time_t)-1) {
                 int offset = (tz_hour * 60 + tz_minute) * 60;
-                if (tz == '-')
+                if (tz == '-') {
                     offset *= -1;
+                }
                 time -= offset;
                 localtime_r(&time, &tmStruct);
                 strftime(buf, sizeof(buf), "%c %Z", &tmStruct);
@@ -204,8 +205,9 @@ static void printISODate(Dict *infoDict, const char *key, const char *text, cons
                 fprintf(stdout, "Z");
             } else {
                 fprintf(stdout, "%c%02d", tz, tz_hour);
-                if (tz_minute)
+                if (tz_minute) {
                     fprintf(stdout, ":%02d", tz_minute);
+                }
             }
         } else {
             printTextString(obj.getString(), uMap);
@@ -657,13 +659,15 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
 
         printf("    Title:         %s\n", typeExp->c_str());
         printf("    Abbreviation:  %s\n", abbr->c_str());
-        if (part.get())
+        if (part.get()) {
             printf("    Subtitle:      Part %d: %s\n", subpart, part->c_str());
-        else
+        } else {
             printf("    Subtitle:      Part %d\n", subpart);
+        }
         printf("    Standard:      %s-%d\n", typeExp->toStr().substr(0, 9).c_str(), subpart);
-        if (confExp.get())
+        if (confExp.get()) {
             printf("    Conformance:   %s\n", confExp->c_str());
+        }
     }
 }
 
@@ -936,13 +940,15 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdfinfo", "<PDF-file>", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exitCode = 0;
+        }
         goto err0;
     }
 
-    if (printStructureText)
+    if (printStructureText) {
         printStructure = true;
+    }
 
     // read config file
     globalParams = std::make_unique<GlobalParams>();
@@ -1039,8 +1045,9 @@ int main(int argc, char *argv[])
             fclose(f);
         }
 
-        if (multiPage == false)
+        if (multiPage == false) {
             lastPage = 1;
+        }
 
         printInfo(doc.get(), uMap, filesize, multiPage);
     }

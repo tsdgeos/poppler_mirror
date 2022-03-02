@@ -82,8 +82,9 @@ QByteArray MediaRendition::data() const
     Q_D(const MediaRendition);
 
     Stream *s = d->rendition->getEmbbededStream();
-    if (!s)
+    if (!s) {
         return QByteArray();
+    }
 
     QBuffer buffer;
     unsigned char data[BUFFER_MAX];
@@ -91,8 +92,9 @@ QByteArray MediaRendition::data() const
 
     buffer.open(QIODevice::WriteOnly);
     s->reset();
-    while ((bread = s->doGetChars(BUFFER_MAX, data)) != 0)
+    while ((bread = s->doGetChars(BUFFER_MAX, data)) != 0) {
         buffer.write(reinterpret_cast<const char *>(data), bread);
+    }
     buffer.close();
 
     return buffer.data();
@@ -105,8 +107,9 @@ bool MediaRendition::autoPlay() const
         return d->rendition->getBEParameters()->autoPlay;
     } else if (d->rendition->getMHParameters()) {
         return d->rendition->getMHParameters()->autoPlay;
-    } else
+    } else {
         qDebug("No BE or MH parameters to reference!");
+    }
     return false;
 }
 
@@ -117,8 +120,9 @@ bool MediaRendition::showControls() const
         return d->rendition->getBEParameters()->showControls;
     } else if (d->rendition->getMHParameters()) {
         return d->rendition->getMHParameters()->showControls;
-    } else
+    } else {
         qDebug("No BE or MH parameters to reference!");
+    }
     return false;
 }
 
@@ -129,8 +133,9 @@ float MediaRendition::repeatCount() const
         return d->rendition->getBEParameters()->repeatCount;
     } else if (d->rendition->getMHParameters()) {
         return d->rendition->getMHParameters()->repeatCount;
-    } else
+    } else {
         qDebug("No BE or MH parameters to reference!");
+    }
     return 1.f;
 }
 
@@ -139,15 +144,17 @@ QSize MediaRendition::size() const
     Q_D(const MediaRendition);
     const MediaParameters *mp = nullptr;
 
-    if (d->rendition->getBEParameters())
+    if (d->rendition->getBEParameters()) {
         mp = d->rendition->getBEParameters();
-    else if (d->rendition->getMHParameters())
+    } else if (d->rendition->getMHParameters()) {
         mp = d->rendition->getMHParameters();
-    else
+    } else {
         qDebug("No BE or MH parameters to reference!");
+    }
 
-    if (mp)
+    if (mp) {
         return QSize(mp->windowParams.width, mp->windowParams.height);
+    }
     return QSize();
 }
 

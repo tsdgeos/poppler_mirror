@@ -1496,18 +1496,21 @@ void FoFiTrueType::parse()
         int dircount;
 
         dircount = getU32BE(8, &parsedOk);
-        if (!parsedOk)
+        if (!parsedOk) {
             return;
+        }
         if (!dircount) {
             parsedOk = false;
             return;
         }
 
-        if (faceIndex >= dircount)
+        if (faceIndex >= dircount) {
             faceIndex = 0;
+        }
         pos = getU32BE(12 + faceIndex * 4, &parsedOk);
-        if (!parsedOk)
+        if (!parsedOk) {
             return;
+        }
     } else {
         pos = 0;
     }
@@ -1641,8 +1644,9 @@ void FoFiTrueType::readPostTable()
             } else {
                 j -= 258;
                 if (j != stringIdx) {
-                    for (stringIdx = 0, stringPos = tablePos + 34 + 2 * n; stringIdx < j; ++stringIdx, stringPos += 1 + getU8(stringPos, &ok))
+                    for (stringIdx = 0, stringPos = tablePos + 34 + 2 * n; stringIdx < j; ++stringIdx, stringPos += 1 + getU8(stringPos, &ok)) {
                         ;
+                    }
                     if (!ok) {
                         continue;
                     }
@@ -1696,8 +1700,9 @@ unsigned int FoFiTrueType::charToTag(const char *tagName)
     unsigned int tag = 0;
     int i;
 
-    if (n > 4)
+    if (n > 4) {
         n = 4;
+    }
     for (i = 0; i < n; i++) {
         tag <<= 8;
         tag |= tagName[i] & 0xff;
@@ -1880,8 +1885,9 @@ unsigned int FoFiTrueType::mapToVertGID(unsigned int orgGID)
 {
     unsigned int mapped;
 
-    if (gsubFeatureTable == 0)
+    if (gsubFeatureTable == 0) {
         return orgGID;
+    }
     if ((mapped = doMapToVertGID(orgGID)) != 0) {
         return mapped;
     }
@@ -1897,8 +1903,9 @@ unsigned int FoFiTrueType::scanLookupList(unsigned int listIndex, unsigned int o
     unsigned int gid = 0;
     unsigned int pos;
 
-    if (gsubLookupList == 0)
+    if (gsubLookupList == 0) {
         return 0; /* no lookup list */
+    }
     pos = gsubLookupList + 2 + listIndex * 2;
     lookupTable = getU16BE(pos, &parsedOk);
     /* read lookup table */
@@ -1909,8 +1916,9 @@ unsigned int FoFiTrueType::scanLookupList(unsigned int listIndex, unsigned int o
     for (i = 0; i < subTableCount; i++) {
         subTable = getU16BE(pos, &parsedOk);
         pos += 2;
-        if ((gid = scanLookupSubTable(gsubLookupList + lookupTable + subTable, orgGID)) != 0)
+        if ((gid = scanLookupSubTable(gsubLookupList + lookupTable + subTable, orgGID)) != 0) {
             break;
+        }
     }
     return gid;
 }

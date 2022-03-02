@@ -108,8 +108,9 @@ static void pgd_info_add_metadata(GtkGrid *table, const gchar *metadata, gint *r
     textview = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    if (metadata)
+    if (metadata) {
         gtk_text_buffer_set_text(buffer, metadata, -1);
+    }
 
     gtk_container_add(GTK_CONTAINER(swindow), textview);
     gtk_widget_show(textview);

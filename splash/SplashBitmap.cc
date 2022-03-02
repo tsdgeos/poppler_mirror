@@ -122,9 +122,11 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
         alpha = nullptr;
     }
     separationList = new std::vector<GfxSeparationColorSpace *>();
-    if (separationListA != nullptr)
-        for (const GfxSeparationColorSpace *separation : *separationListA)
+    if (separationListA != nullptr) {
+        for (const GfxSeparationColorSpace *separation : *separationListA) {
             separationList->push_back((GfxSeparationColorSpace *)separation->copy());
+        }
+    }
 }
 
 SplashBitmap *SplashBitmap::copy(const SplashBitmap *src)
@@ -316,8 +318,9 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel)
         break;
     case splashModeDeviceN8:
         p = &data[y * rowSize + (SPOT_NCOMPS + 4) * x];
-        for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+        for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
             pixel[cp] = p[cp];
+        }
         break;
     }
 }
@@ -357,8 +360,9 @@ void SplashBitmap::setJpegParams(ImgWriter *writer, WriteImgParams *params)
     if (params) {
         static_cast<JpegWriter *>(writer)->setProgressive(params->jpegProgressive);
         static_cast<JpegWriter *>(writer)->setOptimize(params->jpegOptimize);
-        if (params->jpegQuality >= 0)
+        if (params->jpegQuality >= 0) {
             static_cast<JpegWriter *>(writer)->setQuality(params->jpegQuality);
+        }
     }
 #endif
 }
@@ -460,14 +464,18 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line)
                     k += byteToDbl(col[3]);
                 }
             }
-            if (c > 1)
+            if (c > 1) {
                 c = 1;
-            if (m > 1)
+            }
+            if (m > 1) {
                 m = 1;
-            if (y > 1)
+            }
+            if (y > 1) {
                 y = 1;
-            if (k > 1)
+            }
+            if (k > 1) {
                 k = 1;
+            }
         }
         c1 = 1 - c;
         m1 = 1 - m;
@@ -509,14 +517,18 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
                     k += byteToDbl(col[3]);
                 }
             }
-            if (c > 1)
+            if (c > 1) {
                 c = 1;
-            if (m > 1)
+            }
+            if (m > 1) {
                 m = 1;
-            if (y > 1)
+            }
+            if (y > 1) {
                 y = 1;
-            if (k > 1)
+            }
+            if (k > 1) {
                 k = 1;
+            }
         }
         c1 = 1 - c;
         m1 = 1 - m;

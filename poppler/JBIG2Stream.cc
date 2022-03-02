@@ -303,8 +303,9 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
     // - all other entries with prefixLen = 0
     // (on entry, table[len] has prefixLen = 0, rangeLen = EOT)
     for (i = 0; i < len; ++i) {
-        for (j = i; j < len && table[j].prefixLen == 0; ++j)
+        for (j = i; j < len && table[j].prefixLen == 0; ++j) {
             ;
+        }
         if (j == len) {
             break;
         }
@@ -808,8 +809,9 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
     oneByte = x0 == ((x1 - 1) & ~7);
 
     for (yy = y0; yy < y1; ++yy) {
-        if (unlikely((y + yy >= h) || (y + yy < 0)))
+        if (unlikely((y + yy >= h) || (y + yy < 0))) {
             continue;
+        }
 
         // one byte per line -- need to mask both left and right side
         if (oneByte) {
@@ -1030,8 +1032,9 @@ public:
     unsigned int getSize() { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap)
     {
-        if (likely(idx < size))
+        if (likely(idx < size)) {
             bitmaps[idx] = bitmap;
+        }
     }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return (idx < size) ? bitmaps[idx] : nullptr; }
 
@@ -1117,8 +1120,9 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsS
 
     if (globalsStreamA.isStream()) {
         globalsStream = std::move(globalsStreamA);
-        if (globalsStreamRefA->isRef())
+        if (globalsStreamRefA->isRef()) {
             globalsStreamRef = globalsStreamRefA->getRef();
+        }
     }
 
     curStr = nullptr;
@@ -1833,8 +1837,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
         }
         if (i + run > numInputSyms + numNewSyms || (ex && j + run > numExSyms)) {
             error(errSyntaxError, curStr->getPos(), "Too many exported symbols in JBIG2 symbol dictionary");
-            for (; j < numExSyms; ++j)
+            for (; j < numExSyms; ++j) {
                 symbolDict->setBitmap(j, nullptr);
+            }
             goto syntaxError;
         }
         if (ex) {
@@ -1848,8 +1853,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
     if (j != numExSyms) {
         error(errSyntaxError, curStr->getPos(), "Too few symbols in JBIG2 symbol dictionary");
-        for (; j < numExSyms; ++j)
+        for (; j < numExSyms; ++j) {
             symbolDict->setBitmap(j, nullptr);
+        }
         goto syntaxError;
     }
 
@@ -2496,8 +2502,9 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[3] = -2;
     bitmap = readGenericBitmap(mmr, (grayMax + 1) * patternW, patternH, templ, false, false, nullptr, atx, aty, length - 7);
 
-    if (!bitmap)
+    if (!bitmap) {
         return;
+    }
 
     // create the pattern dict object
     patternDict = std::make_unique<JBIG2PatternDict>(segNum, grayMax + 1);
@@ -2734,8 +2741,9 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossl
 
     // read the bitmap
     bitmap = readGenericBitmap(mmr, w, h, templ, tpgdOn, false, nullptr, atx, aty, mmr ? length - 18 : 0);
-    if (!bitmap)
+    if (!bitmap) {
         return;
+    }
 
     // combine the region bitmap into the page bitmap
     if (imm) {
@@ -2838,8 +2846,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         memset(refLine, 0, (w + 2) * sizeof(int));
-        for (i = 0; i < w + 1; ++i)
+        for (i = 0; i < w + 1; ++i) {
             codingLine[i] = w;
+        }
 
         for (y = 0; y < h; ++y) {
 

@@ -1,0 +1,8 @@
+---
+Checks:          '-*,performance-*,bugprone-*,readability-inconsistent-declaration-parameter-name,readability-string-compare,readability-braces-around-statements,modernize-deprecated-headers,modernize-make-unique,modernize-make-shared,modernize-use-override,modernize-use-equals-delete,modernize-use-emplace,modernize-use-bool-literals,modernize-redundant-void-arg,modernize-loop-convert,google-explicit-constructor,-bugprone-narrowing-conversions,-bugprone-macro-parentheses,-bugprone-suspicious-string-compare,-bugprone-incorrect-roundings,-bugprone-undefined-memory-manipulation,-bugprone-sizeof-expression,-bugprone-branch-clone,-bugprone-reserved-identifier,-bugprone-suspicious-include,-performance-no-int-to-ptr,-bugprone-easily-swappable-parameters,-bugprone-implicit-widening-of-multiplication-result'
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.'
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
+User:            user
+...

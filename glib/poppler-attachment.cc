@@ -69,16 +69,19 @@ static void poppler_attachment_finalize(GObject *obj)
     attachment = (PopplerAttachment *)obj;
     priv = GET_PRIVATE(attachment);
 
-    if (attachment->name)
+    if (attachment->name) {
         g_free(attachment->name);
+    }
     attachment->name = nullptr;
 
-    if (attachment->description)
+    if (attachment->description) {
         g_free(attachment->description);
+    }
     attachment->description = nullptr;
 
-    if (attachment->checksum)
+    if (attachment->checksum) {
         g_string_free(attachment->checksum, TRUE);
+    }
     attachment->checksum = nullptr;
 
     g_clear_pointer(&priv->mtime, g_date_time_unref);
@@ -102,10 +105,12 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
     attachment = (PopplerAttachment *)g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr);
     priv = GET_PRIVATE(attachment);
 
-    if (emb_file->getFileName())
+    if (emb_file->getFileName()) {
         attachment->name = _poppler_goo_string_to_utf8(emb_file->getFileName());
-    if (emb_file->getDescription())
+    }
+    if (emb_file->getDescription()) {
         attachment->description = _poppler_goo_string_to_utf8(emb_file->getDescription());
+    }
 
     embFile = emb_file->getEmbeddedFile();
     if (embFile != nullptr && embFile->streamObject()->isStream()) {
@@ -128,8 +133,9 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
-        if (embFile->checksum() && embFile->checksum()->getLength() > 0)
+        if (embFile->checksum() && embFile->checksum()->getLength() > 0) {
             attachment->checksum = g_string_new_len(embFile->checksum()->c_str(), embFile->checksum()->getLength());
+        }
         priv->obj_stream = embFile->streamObject()->copy();
     } else {
         g_warning("Missing stream object for embedded file");
@@ -367,8 +373,9 @@ gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, Popp
         }
 
         if (i > 0) {
-            if (!(save_func)(buf, i, user_data, error))
+            if (!(save_func)(buf, i, user_data, error)) {
                 return FALSE;
+            }
         }
     } while (!eof_reached);
 

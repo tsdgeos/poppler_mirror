@@ -124,8 +124,9 @@ GooString *FoFiType1C::getGlyphName(int gid) const
     bool ok;
 
     ok = true;
-    if (gid < 0 || gid >= charsetLength)
+    if (gid < 0 || gid >= charsetLength) {
         return nullptr;
+    }
     getString(charset[gid], buf, &ok);
     if (!ok) {
         return nullptr;
@@ -847,8 +848,9 @@ void FoFiType1C::convertToType0(const char *psName, const int *codeMap, int nCod
                 }
             }
 
-            if (fd >= nFDs)
+            if (fd >= nFDs) {
                 continue;
+            }
 
             // font dictionary (unencrypted section)
             (*outputFunc)(outputStream, "16 dict begin\n", 14);

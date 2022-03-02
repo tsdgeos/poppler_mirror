@@ -275,8 +275,9 @@ int main(int argc, char *argv[])
             }
 
             const PDFRectangle *cropBox = nullptr;
-            if (docs[i]->getCatalog()->getPage(j)->isCropped())
+            if (docs[i]->getCatalog()->getPage(j)->isCropped()) {
                 cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
+            }
             docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
             Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
             Object page = docs[i]->getXRef()->fetch(*refPage);
@@ -350,8 +351,9 @@ int main(int argc, char *argv[])
     yRef->add(rootNum + 1, 0, outStr->getPos(), true);
     outStr->printf("%d 0 obj\n", rootNum + 1);
     outStr->printf("<< /Type /Pages /Kids [");
-    for (j = 0; j < (int)pages.size(); j++)
+    for (j = 0; j < (int)pages.size(); j++) {
         outStr->printf(" %d 0 R", rootNum + j + 2);
+    }
     outStr->printf(" ] /Count %zd >>\nendobj\n", pages.size());
     objectsCount++;
 
@@ -361,8 +363,9 @@ int main(int argc, char *argv[])
         outStr->printf("<< ");
         Dict *pageDict = pages[i].getDict();
         for (j = 0; j < pageDict->getLength(); j++) {
-            if (j > 0)
+            if (j > 0) {
                 outStr->printf(" ");
+            }
             const char *key = pageDict->getKey(j);
             Object value = pageDict->getValNF(j).copy();
             if (strcmp(key, "Parent") == 0) {
@@ -389,7 +392,8 @@ int main(int argc, char *argv[])
     fclose(f);
     delete yRef;
     delete countRef;
-    for (i = 0; i < (int)docs.size(); i++)
+    for (i = 0; i < (int)docs.size(); i++) {
         delete docs[i];
+    }
     return 0;
 }

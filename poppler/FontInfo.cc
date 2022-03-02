@@ -73,8 +73,9 @@ std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
     std::unique_ptr<XRef> xrefA(doc->getXRef()->copy());
     for (int pg = currentPage; pg < lastPage; ++pg) {
         page = doc->getPage(pg);
-        if (!page)
+        if (!page) {
             continue;
+        }
 
         if ((resDict = page->getResourceDictCopy(xrefA.get()))) {
             scanFonts(xrefA.get(), resDict, &result);
@@ -186,10 +187,12 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
         int dummy2;
         GooString substituteNameAux;
         std::unique_ptr<GooString> tmpFile(globalParams->findSystemFontFile(font, &dummy, &dummy2, &substituteNameAux));
-        if (tmpFile)
+        if (tmpFile) {
             file = tmpFile->toStr();
-        if (substituteNameAux.getLength() > 0)
+        }
+        if (substituteNameAux.getLength() > 0) {
             substituteName = substituteNameAux.toStr();
+        }
     }
     encoding = font->getEncodingName();
 

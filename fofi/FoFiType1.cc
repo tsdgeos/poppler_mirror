@@ -121,8 +121,9 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
     int i;
 
     // copy everything up to the encoding
-    for (line = (char *)file; line && strncmp(line, "/Encoding", 9); line = getNextLine(line))
+    for (line = (char *)file; line && strncmp(line, "/Encoding", 9); line = getNextLine(line)) {
         ;
+    }
     if (!line) {
         // no encoding - just copy the whole font file
         (*outputFunc)(outputStream, (char *)file, len);
@@ -161,8 +162,9 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
     // some fonts have two /Encoding entries in their dictionary, so we
     // check for a second one here
     if (line) {
-        for (line2 = line, i = 0; i < 20 && line2 && strncmp(line2, "/Encoding", 9); line2 = getNextLine(line2), ++i)
+        for (line2 = line, i = 0; i < 20 && line2 && strncmp(line2, "/Encoding", 9); line2 = getNextLine(line2), ++i) {
             ;
+        }
         if (i < 20 && line2) {
             (*outputFunc)(outputStream, line, line2 - line);
             if (!strncmp(line2, "/Encoding StandardEncoding def", 30)) {
@@ -244,8 +246,9 @@ void FoFiType1::parse()
                 }
                 if (continueLine) {
                     continueLine = false;
-                    if ((line1 - firstLine) + 1 > (int)sizeof(buf))
+                    if ((line1 - firstLine) + 1 > (int)sizeof(buf)) {
                         break;
+                    }
                     p = firstLine;
                     p2 = buf;
                     while (p < line1) {
@@ -262,13 +265,15 @@ void FoFiType1::parse()
                     strncpy(buf, line, n);
                     buf[n] = '\0';
                 }
-                for (p = buf; *p == ' ' || *p == '\t'; ++p)
+                for (p = buf; *p == ' ' || *p == '\t'; ++p) {
                     ;
+                }
                 if (!strncmp(p, "dup", 3)) {
                     while (true) {
                         p += 3;
-                        for (; *p == ' ' || *p == '\t'; ++p)
+                        for (; *p == ' ' || *p == '\t'; ++p) {
                             ;
+                        }
                         code = 0;
                         if (*p == '8' && p[1] == '#') {
                             base = 8;
@@ -284,8 +289,9 @@ void FoFiType1::parse()
                         for (; *p >= '0' && *p < '0' + base && code < INT_MAX / (base + (*p - '0')); ++p) {
                             code = code * base + (*p - '0');
                         }
-                        for (; *p == ' ' || *p == '\t'; ++p)
+                        for (; *p == ' ' || *p == '\t'; ++p) {
                             ;
+                        }
                         if (*p == '\n' || *p == '\r') {
                             continueLine = true;
                             break;
@@ -293,8 +299,9 @@ void FoFiType1::parse()
                             break;
                         }
                         ++p;
-                        for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2)
+                        for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2) {
                             ;
+                        }
                         if (code >= 0 && code < 256) {
                             c = *p2;
                             *p2 = '\0';
@@ -302,8 +309,9 @@ void FoFiType1::parse()
                             encoding[code] = copyString(p);
                             *p2 = c;
                         }
-                        for (p = p2; *p == ' ' || *p == '\t'; ++p)
+                        for (p = p2; *p == ' ' || *p == '\t'; ++p) {
                             ;
+                        }
                         if (*p == '\n' || *p == '\r') {
                             continueLine = true;
                             break;
@@ -311,8 +319,9 @@ void FoFiType1::parse()
                         if (strncmp(p, "put", 3)) {
                             break;
                         }
-                        for (p += 3; *p == ' ' || *p == '\t'; ++p)
+                        for (p += 3; *p == ' ' || *p == '\t'; ++p) {
                             ;
+                        }
                         if (strncmp(p, "dup", 3)) {
                             break;
                         }

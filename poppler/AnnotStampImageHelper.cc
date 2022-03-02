@@ -71,8 +71,9 @@ void AnnotStampImageHelper::initialize(PDFDoc *docA, int widthA, int heightA, Co
 
 void AnnotStampImageHelper::removeAnnotStampImageObject()
 {
-    if (sMaskRef != Ref::INVALID())
+    if (sMaskRef != Ref::INVALID()) {
         doc->getXRef()->removeIndirectObject(sMaskRef);
+    }
 
     doc->getXRef()->removeIndirectObject(ref);
 }

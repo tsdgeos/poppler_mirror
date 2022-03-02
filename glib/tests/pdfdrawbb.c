@@ -29,8 +29,9 @@ char *pdfaddsuffix(char *infile, char *suffix)
     g_free(basename);
 
     pos = strrchr(outfile, '.');
-    if (pos != NULL && (!strcmp(pos, ".pdf") || !strcmp(pos, ".PDF")))
+    if (pos != NULL && (!strcmp(pos, ".pdf") || !strcmp(pos, ".PDF"))) {
         *pos = '\0';
+    }
 
     strcat(outfile, "-");
     strcat(outfile, suffix);
@@ -61,12 +62,13 @@ int main(int argc, char *argv[])
 
     /* arguments */
 
-    while ((opt = getopt(argc, argv, "h")) != -1)
+    while ((opt = getopt(argc, argv, "h")) != -1) {
         switch (opt) {
         case 'h':
             usage = TRUE;
             break;
         }
+    }
 
     if (!usage && argc - 1 < optind) {
         g_print("input file name missing\n");
@@ -80,15 +82,17 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     infilename = argv[optind];
-    if (!infilename)
+    if (!infilename) {
         exit(EXIT_FAILURE);
+    }
     outfilename = pdfaddsuffix(argv[optind], "bb");
 
     /* open file */
 
     infile = g_file_new_for_path(infilename);
-    if (infile == NULL)
+    if (infile == NULL) {
         exit(EXIT_FAILURE);
+    }
 
     doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
     if (doc == NULL) {
@@ -119,8 +123,9 @@ int main(int argc, char *argv[])
         cairo_pdf_surface_set_size(surface, width, height);
 
         hg = poppler_page_get_bounding_box(page, &bb);
-        if (hg)
+        if (hg) {
             g_print("bounding box %g,%g - %g,%g", bb.x1, bb.y1, bb.x2, bb.y2);
+        }
         g_print("\n");
 
         cr = cairo_create(surface);

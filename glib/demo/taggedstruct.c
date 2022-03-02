@@ -35,8 +35,9 @@ typedef struct
 
 static void pgd_taggedstruct_free(PgdTaggedStructDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->store) {
         g_object_unref(demo->store);
@@ -91,8 +92,9 @@ static void pgd_selection_changed(GtkTreeSelection *selection, PgdTaggedStructDe
     GtkTreeIter iter;
     gpointer elementptr;
 
-    if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+    if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
         return;
+    }
 
     gtk_tree_model_get(model, &iter, 1, &elementptr, -1);
     element = POPPLER_STRUCTURE_ELEMENT(elementptr);
@@ -106,16 +108,18 @@ static void pgd_selection_changed(GtkTreeSelection *selection, PgdTaggedStructDe
     if (poppler_structure_element_is_content(element)) {
         const gchar *text = poppler_structure_element_get_text(element, FALSE);
 
-        if (text)
+        if (text) {
             gtk_text_buffer_set_text(demo->text_buffer, text, -1);
+        }
         gtk_label_set_text(GTK_LABEL(demo->type_value), "Content");
     } else {
-        if (poppler_structure_element_is_inline(element))
+        if (poppler_structure_element_is_inline(element)) {
             gtk_label_set_text(GTK_LABEL(demo->type_value), "Inline");
-        else if (poppler_structure_element_is_block(element))
+        } else if (poppler_structure_element_is_block(element)) {
             gtk_label_set_text(GTK_LABEL(demo->type_value), "Block");
-        else
+        } else {
             gtk_label_set_text(GTK_LABEL(demo->type_value), "Structure");
+        }
     }
 }
 

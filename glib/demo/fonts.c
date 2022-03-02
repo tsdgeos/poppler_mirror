@@ -39,8 +39,9 @@ typedef struct
 
 static void pgd_fonts_free(PgdFontsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->idle_id > 0) {
         g_source_remove(demo->idle_id);
@@ -127,13 +128,15 @@ static gboolean pgd_fonts_fill_model(PgdFontsDemo *demo)
     while (poppler_font_info_scan(font_info, 20, &fonts_iter)) {
         pgd_fonts_update_progress(demo, n_pages, scanned);
 
-        while (gtk_events_pending())
+        while (gtk_events_pending()) {
             gtk_main_iteration();
+        }
 
         scanned += 20;
 
-        if (!fonts_iter)
+        if (!fonts_iter) {
             continue;
+        }
 
         do {
             GtkTreeIter iter;
@@ -146,20 +149,23 @@ static gboolean pgd_fonts_fill_model(PgdFontsDemo *demo)
             gchar *details;
 
             name = poppler_fonts_iter_get_name(fonts_iter);
-            if (!name)
+            if (!name) {
                 name = "No name";
+            }
 
             encoding = poppler_fonts_iter_get_encoding(fonts_iter);
-            if (!encoding)
+            if (!encoding) {
                 encoding = "None";
+            }
 
             type = font_type_to_string(poppler_fonts_iter_get_font_type(fonts_iter));
 
             if (poppler_fonts_iter_is_embedded(fonts_iter)) {
-                if (poppler_fonts_iter_is_subset(fonts_iter))
+                if (poppler_fonts_iter_is_subset(fonts_iter)) {
                     embedded = "Embedded subset";
-                else
+                } else {
                     embedded = "Embedded";
+                }
             } else {
                 embedded = "Not embedded";
             }
@@ -167,10 +173,11 @@ static gboolean pgd_fonts_fill_model(PgdFontsDemo *demo)
             substitute = poppler_fonts_iter_get_substitute_name(fonts_iter);
             filename = poppler_fonts_iter_get_file_name(fonts_iter);
 
-            if (substitute && filename)
+            if (substitute && filename) {
                 details = g_markup_printf_escaped("%s\nEncoding: %s\n%s, substituting with <b>%s</b>\n(%s)", type, encoding, embedded, substitute, filename);
-            else
+            } else {
                 details = g_markup_printf_escaped("%s\nEncoding: %s\n%s", type, encoding, embedded);
+            }
 
             gtk_list_store_append(GTK_LIST_STORE(model), &iter);
             gtk_list_store_set(GTK_LIST_STORE(model), &iter, FONTS_NAME_COLUMN, name, FONTS_DETAILS_COLUMN, details, -1);

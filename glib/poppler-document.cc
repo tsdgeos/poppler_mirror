@@ -163,8 +163,9 @@ static std::optional<GooString> poppler_password_to_latin1(const gchar *password
 {
     gchar *password_latin;
 
-    if (!password)
+    if (!password) {
         return {};
+    }
 
     password_latin = g_convert(password, -1, "ISO-8859-1", "UTF-8", nullptr, nullptr, nullptr);
     std::optional<GooString> password_g = GooString(password_latin);
@@ -193,8 +194,9 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     filename = g_filename_from_uri(uri, nullptr, error);
-    if (!filename)
+    if (!filename) {
         return nullptr;
+    }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
 
@@ -421,8 +423,9 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
     }
 
     stream = g_file_read(file, cancellable, error);
-    if (!stream)
+    if (!stream) {
         return nullptr;
+    }
 
     document = poppler_document_new_from_stream(G_INPUT_STREAM(stream), -1, password, cancellable, error);
     g_object_unref(stream);
@@ -642,10 +645,11 @@ gboolean poppler_document_save_to_fd(PopplerDocument *document, int fd, gboolean
     }
 
     stream = new FileOutStream(file, 0);
-    if (include_changes)
+    if (include_changes) {
         rv = document->doc->saveAs(stream);
-    else
+    } else {
         rv = document->doc->saveWithoutChangesAs(stream);
+    }
     delete stream;
 
     return handle_save_error(rv, error);
@@ -692,10 +696,12 @@ gboolean poppler_document_get_id(PopplerDocument *document, gchar **permanent_id
 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), FALSE);
 
-    if (permanent_id)
+    if (permanent_id) {
         *permanent_id = nullptr;
-    if (update_id)
+    }
+    if (update_id) {
         *update_id = nullptr;
+    }
 
     if (document->doc->getID(permanent_id ? &permanent : nullptr, update_id ? &update : nullptr)) {
         if (permanent_id) {
@@ -745,8 +751,9 @@ PopplerPage *poppler_document_get_page(PopplerDocument *document, int index)
     g_return_val_if_fail(0 <= index && index < poppler_document_get_n_pages(document), NULL);
 
     page = document->doc->getPage(index + 1);
-    if (!page)
+    if (!page) {
         return nullptr;
+    }
 
     return _poppler_page_new(document, page, index);
 }
@@ -771,8 +778,9 @@ PopplerPage *poppler_document_get_page_by_label(PopplerDocument *document, const
     int index;
 
     catalog = document->doc->getCatalog();
-    if (!catalog->labelToIndex(&label_g, &index))
+    if (!catalog->labelToIndex(&label_g, &index)) {
         return nullptr;
+    }
 
     return poppler_document_get_page(document, index);
 }
@@ -833,8 +841,9 @@ GList *poppler_document_get_attachments(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
 
     catalog = document->doc->getCatalog();
-    if (catalog == nullptr || !catalog->isOk())
+    if (catalog == nullptr || !catalog->isOk()) {
         return nullptr;
+    }
 
     n_files = catalog->numEmbeddedFiles();
     for (i = 0; i < n_files; i++) {
@@ -847,8 +856,9 @@ GList *poppler_document_get_attachments(PopplerDocument *document)
 
         attachment = _poppler_attachment_new(emb_file.get());
 
-        if (attachment != nullptr)
+        if (attachment != nullptr) {
             retval = g_list_prepend(retval, attachment);
+        }
     }
     return g_list_reverse(retval);
 }
@@ -936,12 +946,13 @@ guint8 *poppler_named_dest_to_bytestring(const char *name, gsize *length)
         if (*p == '\\') {
             p++;
             len--;
-            if (*p == '0')
+            if (*p == '0') {
                 *q++ = '\0';
-            else if (*p == '\\')
+            } else if (*p == '\\') {
                 *q++ = '\\';
-            else
+            } else {
                 goto invalid;
+            }
         } else {
             *q++ = *p;
         }
@@ -981,15 +992,17 @@ PopplerDest *poppler_document_find_dest(PopplerDocument *document, const gchar *
 
     gsize len;
     guint8 *data = poppler_named_dest_to_bytestring(link_name, &len);
-    if (data == nullptr)
+    if (data == nullptr) {
         return nullptr;
+    }
 
     GooString g_link_name((const char *)data, (int)len);
     g_free(data);
 
     std::unique_ptr<LinkDest> link_dest = document->doc->findDest(&g_link_name);
-    if (link_dest == nullptr)
+    if (link_dest == nullptr) {
         return nullptr;
+    }
 
     PopplerDest *dest = _poppler_dest_new_goto(document, link_dest.get());
 
@@ -1031,8 +1044,9 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     catalog = document->doc->getCatalog();
-    if (catalog == nullptr)
+    if (catalog == nullptr) {
         return nullptr;
+    }
 
     tree = g_tree_new_full(_poppler_dest_compare_keys, nullptr, g_free, _poppler_dest_destroy_value);
 
@@ -1270,10 +1284,12 @@ void poppler_document_get_pdf_version(PopplerDocument *document, guint *major_ve
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    if (major_version)
+    if (major_version) {
         *major_version = document->doc->getPDFMajorVersion();
-    if (minor_version)
+    }
+    if (minor_version) {
         *minor_version = document->doc->getPDFMinorVersion();
+    }
 }
 
 /**
@@ -1314,8 +1330,9 @@ void poppler_document_set_title(PopplerDocument *document, const gchar *title)
         goo_title = nullptr;
     } else {
         goo_title = _poppler_goo_string_from_utf8(title);
-        if (!goo_title)
+        if (!goo_title) {
             return;
+        }
     }
     document->doc->setDocInfoTitle(goo_title);
 }
@@ -1358,8 +1375,9 @@ void poppler_document_set_author(PopplerDocument *document, const gchar *author)
         goo_author = nullptr;
     } else {
         goo_author = _poppler_goo_string_from_utf8(author);
-        if (!goo_author)
+        if (!goo_author) {
             return;
+        }
     }
     document->doc->setDocInfoAuthor(goo_author);
 }
@@ -1402,8 +1420,9 @@ void poppler_document_set_subject(PopplerDocument *document, const gchar *subjec
         goo_subject = nullptr;
     } else {
         goo_subject = _poppler_goo_string_from_utf8(subject);
-        if (!goo_subject)
+        if (!goo_subject) {
             return;
+        }
     }
     document->doc->setDocInfoSubject(goo_subject);
 }
@@ -1446,8 +1465,9 @@ void poppler_document_set_keywords(PopplerDocument *document, const gchar *keywo
         goo_keywords = nullptr;
     } else {
         goo_keywords = _poppler_goo_string_from_utf8(keywords);
-        if (!goo_keywords)
+        if (!goo_keywords) {
             return;
+        }
     }
     document->doc->setDocInfoKeywords(goo_keywords);
 }
@@ -1492,8 +1512,9 @@ void poppler_document_set_creator(PopplerDocument *document, const gchar *creato
         goo_creator = nullptr;
     } else {
         goo_creator = _poppler_goo_string_from_utf8(creator);
-        if (!goo_creator)
+        if (!goo_creator) {
             return;
+        }
     }
     document->doc->setDocInfoCreator(goo_creator);
 }
@@ -1538,8 +1559,9 @@ void poppler_document_set_producer(PopplerDocument *document, const gchar *produ
         goo_producer = nullptr;
     } else {
         goo_producer = _poppler_goo_string_from_utf8(producer);
-        if (!goo_producer)
+        if (!goo_producer) {
             return;
+        }
     }
     document->doc->setDocInfoProducer(goo_producer);
 }
@@ -1603,8 +1625,9 @@ GDateTime *poppler_document_get_creation_date_time(PopplerDocument *document)
 
     std::unique_ptr<GooString> str { document->doc->getDocInfoCreatDate() };
 
-    if (!str)
+    if (!str) {
         return nullptr;
+    }
 
     return _poppler_convert_pdf_date_to_date_time(str.get());
 }
@@ -1625,8 +1648,9 @@ void poppler_document_set_creation_date_time(PopplerDocument *document, GDateTim
 
     GooString *str = nullptr;
 
-    if (creation_datetime)
+    if (creation_datetime) {
         str = _poppler_convert_date_time_to_pdf_date(creation_datetime);
+    }
 
     document->doc->setDocInfoCreatDate(str);
 }
@@ -1690,8 +1714,9 @@ GDateTime *poppler_document_get_modification_date_time(PopplerDocument *document
 
     std::unique_ptr<GooString> str { document->doc->getDocInfoModDate() };
 
-    if (!str)
+    if (!str) {
         return nullptr;
+    }
 
     return _poppler_convert_pdf_date_to_date_time(str.get());
 }
@@ -1712,8 +1737,9 @@ void poppler_document_set_modification_date_time(PopplerDocument *document, GDat
 
     GooString *str = nullptr;
 
-    if (modification_datetime)
+    if (modification_datetime) {
         str = _poppler_convert_date_time_to_pdf_date(modification_datetime);
+    }
 
     document->doc->setDocInfoModDate(str);
 }
@@ -1777,8 +1803,9 @@ GList *poppler_document_get_signature_fields(PopplerDocument *document)
     for (i = 0; i < signature_fields.size(); i++) {
         widget = signature_fields[i]->getCreateWidget();
 
-        if (widget != nullptr)
+        if (widget != nullptr) {
             result = g_list_prepend(result, _poppler_form_field_new(document, widget));
+        }
     }
 
     return g_list_reverse(result);
@@ -1801,8 +1828,9 @@ PopplerPageLayout poppler_document_get_page_layout(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), POPPLER_PAGE_LAYOUT_UNSET);
 
     catalog = document->doc->getCatalog();
-    if (catalog && catalog->isOk())
+    if (catalog && catalog->isOk()) {
         return convert_page_layout(catalog->getPageLayout());
+    }
 
     return POPPLER_PAGE_LAYOUT_UNSET;
 }
@@ -1825,8 +1853,9 @@ PopplerPageMode poppler_document_get_page_mode(PopplerDocument *document)
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), POPPLER_PAGE_MODE_UNSET);
 
     catalog = document->doc->getCatalog();
-    if (catalog && catalog->isOk())
+    if (catalog && catalog->isOk()) {
         return convert_page_mode(catalog->getPageMode());
+    }
 
     return POPPLER_PAGE_MODE_UNSET;
 }
@@ -2006,22 +2035,30 @@ PopplerPermissions poppler_document_get_permissions(PopplerDocument *document)
 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), POPPLER_PERMISSIONS_FULL);
 
-    if (document->doc->okToPrint())
+    if (document->doc->okToPrint()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_PRINT;
-    if (document->doc->okToChange())
+    }
+    if (document->doc->okToChange()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_MODIFY;
-    if (document->doc->okToCopy())
+    }
+    if (document->doc->okToCopy()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_COPY;
-    if (document->doc->okToAddNotes())
+    }
+    if (document->doc->okToAddNotes()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_ADD_NOTES;
-    if (document->doc->okToFillForm())
+    }
+    if (document->doc->okToFillForm()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_FILL_FORM;
-    if (document->doc->okToAccessibility())
+    }
+    if (document->doc->okToAccessibility()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS;
-    if (document->doc->okToAssemble())
+    }
+    if (document->doc->okToAssemble()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_ASSEMBLE;
-    if (document->doc->okToPrintHighRes())
+    }
+    if (document->doc->okToPrintHighRes()) {
         flag |= POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION;
+    }
 
     return (PopplerPermissions)flag;
 }
@@ -2178,8 +2215,9 @@ void poppler_document_reset_form(PopplerDocument *document, GList *fields, gbool
         form = catalog->getForm();
 
         if (form) {
-            for (iter = fields; iter != nullptr; iter = iter->next)
+            for (iter = fields; iter != nullptr; iter = iter->next) {
                 list.emplace_back(std::string((char *)iter->data));
+            }
 
             form->reset(list, exclude_fields);
         }
@@ -2620,12 +2658,14 @@ PopplerIndexIter *poppler_index_iter_new(PopplerDocument *document)
     const std::vector<OutlineItem *> *items;
 
     outline = document->doc->getOutline();
-    if (outline == nullptr)
+    if (outline == nullptr) {
         return nullptr;
+    }
 
     items = outline->getItems();
-    if (items == nullptr)
+    if (items == nullptr) {
         return nullptr;
+    }
 
     iter = g_slice_new(PopplerIndexIter);
     iter->document = (PopplerDocument *)g_object_ref(document);
@@ -2653,8 +2693,9 @@ PopplerIndexIter *poppler_index_iter_get_child(PopplerIndexIter *parent)
 
     item = (*parent->items)[parent->index];
     item->open();
-    if (!(item->hasKids() && item->getKids()))
+    if (!(item->hasKids() && item->getKids())) {
         return nullptr;
+    }
 
     child = g_slice_new0(PopplerIndexIter);
     child->document = (PopplerDocument *)g_object_ref(parent->document);
@@ -2743,8 +2784,9 @@ gboolean poppler_index_iter_next(PopplerIndexIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (int)iter->items->size())
+    if (iter->index >= (int)iter->items->size()) {
         return FALSE;
+    }
 
     return TRUE;
 }
@@ -2757,8 +2799,9 @@ gboolean poppler_index_iter_next(PopplerIndexIter *iter)
  **/
 void poppler_index_iter_free(PopplerIndexIter *iter)
 {
-    if (G_UNLIKELY(iter == nullptr))
+    if (G_UNLIKELY(iter == nullptr)) {
         return;
+    }
 
     g_object_unref(iter->document);
     g_slice_free(PopplerIndexIter, iter);
@@ -2811,11 +2854,13 @@ const char *poppler_fonts_iter_get_name(PopplerFontsIter *iter)
     info = iter->items[iter->index];
 
     if (info->getSubset() && name) {
-        while (*name && *name != '+')
+        while (*name && *name != '+') {
             name++;
+        }
 
-        if (*name)
+        if (*name) {
             name++;
+        }
     }
 
     return name;
@@ -2959,8 +3004,9 @@ gboolean poppler_fonts_iter_next(PopplerFontsIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (int)iter->items.size())
+    if (iter->index >= (int)iter->items.size()) {
         return FALSE;
+    }
 
     return TRUE;
 }
@@ -2998,8 +3044,9 @@ PopplerFontsIter *poppler_fonts_iter_copy(PopplerFontsIter *iter)
  */
 void poppler_fonts_iter_free(PopplerFontsIter *iter)
 {
-    if (G_UNLIKELY(iter == nullptr))
+    if (G_UNLIKELY(iter == nullptr)) {
         return;
+    }
 
     for (auto entry : iter->items) {
         delete entry;
@@ -3138,8 +3185,9 @@ static Layer *layer_new(OptionalContentGroup *oc)
 
 static void layer_free(Layer *layer)
 {
-    if (G_UNLIKELY(!layer))
+    if (G_UNLIKELY(!layer)) {
         return;
+    }
 
     if (layer->kids) {
         g_list_free_full(layer->kids, (GDestroyNotify)layer_free);
@@ -3198,8 +3246,9 @@ GList *_poppler_document_get_layer_rbgroup(PopplerDocument *document, Layer *lay
     for (l = document->layers_rbgroups; l && l->data; l = g_list_next(l)) {
         GList *group = (GList *)l->data;
 
-        if (g_list_find(group, layer->oc))
+        if (g_list_find(group, layer->oc)) {
             return group;
+        }
     }
 
     return nullptr;
@@ -3268,8 +3317,9 @@ GList *_poppler_document_get_layers(PopplerDocument *document)
         Catalog *catalog = document->doc->getCatalog();
         OCGs *ocg = catalog->getOptContentConfig();
 
-        if (!ocg)
+        if (!ocg) {
             return nullptr;
+        }
 
         document->layers = get_optional_content_items(ocg);
         document->layers_rbgroups = get_optional_content_rbgroups(ocg);
@@ -3280,8 +3330,9 @@ GList *_poppler_document_get_layers(PopplerDocument *document)
 
 static void poppler_document_layers_free(PopplerDocument *document)
 {
-    if (G_UNLIKELY(!document->layers))
+    if (G_UNLIKELY(!document->layers)) {
         return;
+    }
 
     g_list_free_full(document->layers, (GDestroyNotify)layer_free);
     g_list_free_full(document->layers_rbgroups, (GDestroyNotify)g_list_free);
@@ -3333,8 +3384,9 @@ PopplerLayersIter *poppler_layers_iter_copy(PopplerLayersIter *iter)
  **/
 void poppler_layers_iter_free(PopplerLayersIter *iter)
 {
-    if (G_UNLIKELY(iter == nullptr))
+    if (G_UNLIKELY(iter == nullptr)) {
         return;
+    }
 
     g_object_unref(iter->document);
     g_slice_free(PopplerLayersIter, iter);
@@ -3353,8 +3405,9 @@ PopplerLayersIter *poppler_layers_iter_new(PopplerDocument *document)
 
     items = _poppler_document_get_layers(document);
 
-    if (!items)
+    if (!items) {
         return nullptr;
+    }
 
     iter = g_slice_new0(PopplerLayersIter);
     iter->document = (PopplerDocument *)g_object_ref(document);
@@ -3382,8 +3435,9 @@ PopplerLayersIter *poppler_layers_iter_get_child(PopplerLayersIter *parent)
     g_return_val_if_fail(parent != nullptr, NULL);
 
     layer = (Layer *)g_list_nth_data(parent->items, parent->index);
-    if (!layer || !layer->kids)
+    if (!layer || !layer->kids) {
         return nullptr;
+    }
 
     child = g_slice_new0(PopplerLayersIter);
     child->document = (PopplerDocument *)g_object_ref(parent->document);
@@ -3462,8 +3516,9 @@ gboolean poppler_layers_iter_next(PopplerLayersIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (gint)g_list_length(iter->items))
+    if (iter->index >= (gint)g_list_length(iter->items)) {
         return FALSE;
+    }
 
     return TRUE;
 }
@@ -3503,8 +3558,9 @@ static void poppler_ps_file_finalize(GObject *object)
     g_object_unref(ps_file->document);
     g_free(ps_file->filename);
 #ifndef G_OS_WIN32
-    if (ps_file->fd != -1)
+    if (ps_file->fd != -1) {
         close(ps_file->fd);
+    }
 #endif /* !G_OS_WIN32 */
 
     G_OBJECT_CLASS(poppler_ps_file_parent_class)->finalize(object);
@@ -3642,16 +3698,19 @@ PopplerFormField *poppler_document_get_form_field(PopplerDocument *document, gin
     FormWidget::decodeID(id, &pageNum, &fieldNum);
 
     page = document->doc->getPage(pageNum);
-    if (!page)
+    if (!page) {
         return nullptr;
+    }
 
     const std::unique_ptr<FormPageWidgets> widgets = page->getFormWidgets();
-    if (!widgets)
+    if (!widgets) {
         return nullptr;
+    }
 
     field = widgets->getWidget(fieldNum);
-    if (field)
+    if (field) {
         return _poppler_form_field_new(document, field);
+    }
 
     return nullptr;
 }

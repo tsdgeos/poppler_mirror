@@ -101,8 +101,9 @@ QString UnicodeParsedString(const GooString *s1)
 
 QString UnicodeParsedString(const std::string &s1)
 {
-    if (s1.empty())
+    if (s1.empty()) {
         return QString();
+    }
 
     if (GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const ushort *>(s1.c_str()), s1.size() / 2);
@@ -137,8 +138,9 @@ GooString *QStringToGooString(const QString &s)
 {
     int len = s.length();
     char *cstring = (char *)gmallocn(s.length(), sizeof(char));
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
+    }
     GooString *ret = new GooString(cstring, len);
     gfree(cstring);
     return ret;
@@ -183,8 +185,9 @@ Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::Additiona
 
 static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomElement *e)
 {
-    if (!a || !e)
+    if (!a || !e) {
         return;
+    }
 
     switch (a->getKind()) {
     case actionGoTo: {
@@ -197,8 +200,9 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
             QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i)
+            for (int i = 0; i < s->getLength(); ++i) {
                 charArray[i] = QChar(s->c_str()[i]);
+            }
             QString aux(charArray, s->getLength());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
             delete[] charArray;
@@ -218,8 +222,9 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
             QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i)
+            for (int i = 0; i < s->getLength(); ++i) {
                 charArray[i] = QChar(s->c_str()[i]);
+            }
             QString aux(charArray, s->getLength());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
             delete[] charArray;
@@ -265,8 +270,9 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         const Unicode *uniChar = outlineItem->getTitle();
         int titleLength = outlineItem->getTitleLength();
         name = unicodeToQString(uniChar, titleLength);
-        if (name.isEmpty())
+        if (name.isEmpty()) {
             continue;
+        }
 
         QDomElement item = docSyn->createElement(name);
         parent->appendChild(item);
@@ -280,8 +286,9 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         // 3. recursively descend over children
         outlineItem->open();
         const std::vector<::OutlineItem *> *children = outlineItem->getKids();
-        if (children)
+        if (children) {
             addTocChildren(docSyn, &item, children);
+        }
     }
 }
 

@@ -975,8 +975,9 @@ std::map<std::string, destination> document::create_destination_map() const
     std::map<std::string, destination> m;
 
     Catalog *catalog = d->doc->getCatalog();
-    if (!catalog)
+    if (!catalog) {
         return m;
+    }
 
     // Iterate from name-dict
     const int nDests = catalog->numDests();

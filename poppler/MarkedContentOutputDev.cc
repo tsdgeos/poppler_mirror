@@ -68,8 +68,9 @@ void MarkedContentOutputDev::endForm(Ref id)
 bool MarkedContentOutputDev::contentStreamMatch()
 {
     if (stmRef.isRef()) {
-        if (formStack.empty())
+        if (formStack.empty()) {
             return false;
+        }
         return formStack.back() == stmRef.getRef();
     }
     return formStack.empty();
@@ -78,15 +79,18 @@ bool MarkedContentOutputDev::contentStreamMatch()
 void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properties)
 {
     int id = -1;
-    if (properties)
+    if (properties) {
         properties->lookupInt("MCID", nullptr, &id);
+    }
 
-    if (id == -1)
+    if (id == -1) {
         return;
+    }
 
     // The stack keep track of MCIDs of nested marked content.
-    if (inMarkedContent() || (id == mcid && contentStreamMatch()))
+    if (inMarkedContent() || (id == mcid && contentStreamMatch())) {
         mcidStack.push_back(id);
+    }
 }
 
 void MarkedContentOutputDev::endMarkedContent(GfxState *state)
@@ -95,43 +99,50 @@ void MarkedContentOutputDev::endMarkedContent(GfxState *state)
         mcidStack.pop_back();
         // The outer marked content sequence MCID was popped, ensure
         // that the last piece of text collected ends up in a TextSpan.
-        if (!inMarkedContent())
+        if (!inMarkedContent()) {
             endSpan();
+        }
     }
 }
 
 bool MarkedContentOutputDev::needFontChange(const std::shared_ptr<const GfxFont> &font) const
 {
-    if (currentFont == font)
+    if (currentFont == font) {
         return false;
+    }
 
-    if (!currentFont)
+    if (!currentFont) {
         return font != nullptr && font->isOk();
+    }
 
-    if (font == nullptr)
+    if (font == nullptr) {
         return true;
+    }
 
     // Two non-null valid fonts are the same if they point to the same Ref
-    if (*currentFont->getID() == *font->getID())
+    if (*currentFont->getID() == *font->getID()) {
         return false;
+    }
 
     return true;
 }
 
 void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, double dx, double dy, double ox, double oy, CharCode c, int nBytes, const Unicode *u, int uLen)
 {
-    if (!inMarkedContent() || !uLen)
+    if (!inMarkedContent() || !uLen) {
         return;
+    }
 
     // Color changes are tracked here so the color can be chosen depending on
     // the render mode (for mode 1 stroke color is used), so there is no need
     // to implement both updateFillColor() and updateStrokeColor().
     bool colorChange = false;
     GfxRGB color;
-    if ((state->getRender() & 3) == 1)
+    if ((state->getRender() & 3) == 1) {
         state->getStrokeRGB(&color);
-    else
+    } else {
         state->getFillRGB(&color);
+    }
 
     colorChange = (color.r != currentColor.r || color.g != currentColor.g || color.b != currentColor.b);
 
@@ -144,8 +155,9 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
     }
 
     // Perform the color/font changes.
-    if (colorChange)
+    if (colorChange) {
         currentColor = color;
+    }
 
     if (fontChange) {
         currentFont = state->getFont();
@@ -155,8 +167,9 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
 
     // Subtract char and word spacing from the (dx,dy) values
     sp = state->getCharSpace();
-    if (c == (CharCode)0x20)
+    if (c == (CharCode)0x20) {
         sp += state->getWordSpace();
+    }
     state->textTransformDelta(sp * state->getHorizScaling(), 0, &dx2, &dy2);
     dx -= dx2;
     dy -= dy2;
@@ -164,12 +177,14 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
     state->transform(xx, yy, &x1, &y1);
 
     // Throw away characters that are not inside the page boundaries.
-    if (x1 + w1 < 0 || x1 > pageWidth || y1 + h1 < 0 || y1 > pageHeight)
+    if (x1 + w1 < 0 || x1 > pageWidth || y1 + h1 < 0 || y1 > pageHeight) {
         return;
+    }
 
     // Make a sanity check on character size. Note: (x != x) <-> isnan(x)
-    if (x1 != x1 || y1 != y1 || w1 != w1 || h1 != h1)
+    if (x1 != x1 || y1 != y1 || w1 != w1 || h1 != h1) {
         return;
+    }
 
     for (int i = 0; i < uLen; i++) {
         // Soft hyphen markers are skipped, as they are invisible unless
@@ -177,14 +192,16 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
         // used. MarkedContentOutputDev extracts the *visible* text content.
         if (u[i] != 0x00AD) {
             // Add the UTF-8 sequence to the current text span.
-            if (!unicodeMap)
+            if (!unicodeMap) {
                 unicodeMap = globalParams->getTextEncoding();
+            }
 
             char buf[8];
             int n = unicodeMap->mapUnicode(u[i], buf, sizeof(buf));
             if (n > 0) {
-                if (currentText == nullptr)
+                if (currentText == nullptr) {
                     currentText = new GooString();
+                }
                 currentText->append(buf, n);
             }
         }

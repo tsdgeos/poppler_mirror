@@ -99,10 +99,11 @@ static int fromRoman(const char *buffer)
             return -1;
         }
 
-        if (digit_value <= prev_digit_value)
+        if (digit_value <= prev_digit_value) {
             value += digit_value;
-        else
+        } else {
             value += digit_value - prev_digit_value * 2;
+        }
         prev_digit_value = digit_value;
     }
 
@@ -122,10 +123,11 @@ static void toRoman(int number, GooString *str, bool uppercase)
         return;
     }
 
-    if (uppercase)
+    if (uppercase) {
         wh = uppercaseNumerals;
-    else
+    } else {
         wh = lowercaseNumerals;
+    }
 
     divisor = 1000;
     for (k = 3; k >= 0; k--) {
@@ -166,15 +168,18 @@ static int fromLatin(const char *buffer)
     const char *p;
 
     for (p = buffer; *p; p++) {
-        if (*p != buffer[0])
+        if (*p != buffer[0]) {
             return -1;
+        }
     }
 
     count = p - buffer;
-    if (buffer[0] >= 'a' && buffer[0] <= 'z')
+    if (buffer[0] >= 'a' && buffer[0] <= 'z') {
         return 26 * (count - 1) + buffer[0] - 'a' + 1;
-    if (buffer[0] >= 'A' && buffer[0] <= 'Z')
+    }
+    if (buffer[0] >= 'A' && buffer[0] <= 'Z') {
         return 26 * (count - 1) + buffer[0] - 'A' + 1;
+    }
 
     return -1;
 }
@@ -184,16 +189,18 @@ static void toLatin(int number, GooString *str, bool uppercase)
     char base, letter;
     int i, count;
 
-    if (uppercase)
+    if (uppercase) {
         base = 'A';
-    else
+    } else {
         base = 'a';
+    }
 
     count = (number - 1) / 26 + 1;
     letter = base + (number - 1) % 26;
 
-    for (i = 0; i < count; i++)
+    for (i = 0; i < count; i++) {
         str->append(letter);
+    }
 }
 
 #endif

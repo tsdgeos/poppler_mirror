@@ -422,8 +422,9 @@ static void print_page_text_list(poppler::page *p, int opt_flag = 0)
         std::string font_name = text.get_font_name();
         std::cout << "[" << ustr << "] @ ";
         std::cout << "( x=" << bbox.x() << " y=" << bbox.y() << " w=" << bbox.width() << " h=" << bbox.height() << " )";
-        if (text.has_font_info())
+        if (text.has_font_info()) {
             std::cout << "( fontname=" << font_name << " fontsize=" << font_size << " wmode=" << wmode << " )";
+        }
         std::cout << std::endl;
     }
     std::cout << "---" << std::endl;
@@ -508,8 +509,9 @@ int main(int argc, char *argv[])
         for (const auto &pair : map) {
             std::string s = pair.first;
             for (auto &c : s) {
-                if (c < 0x20 || c > 0x7e)
+                if (c < 0x20 || c > 0x7e) {
                     c = '.';
+                }
             }
             std::cout << "Named destination \"" << s << "\":" << std::endl;
             print_destination(&pair.second);
@@ -528,10 +530,11 @@ int main(int argc, char *argv[])
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
             std::unique_ptr<poppler::page> p(doc->create_page(i));
-            if (show_text_list_with_font)
+            if (show_text_list_with_font) {
                 print_page_text_list(p.get(), poppler::page::text_list_include_font);
-            else
+            } else {
                 print_page_text_list(p.get(), 0);
+            }
         }
     }
 

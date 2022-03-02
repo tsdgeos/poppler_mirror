@@ -36,8 +36,9 @@ int main(int argc, char *argv[])
 
     g_print("file: %s\n", argv[1]);
     infile = g_file_new_for_path(argv[1]);
-    if (!infile)
+    if (!infile) {
         exit(EXIT_FAILURE);
+    }
 
     doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
     if (doc == NULL) {

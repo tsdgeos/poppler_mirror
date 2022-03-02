@@ -46,8 +46,9 @@ public:
     int test(int x, int y, unsigned char value)
     {
         int xx, yy;
-        if (mat == nullptr)
+        if (mat == nullptr) {
             createMatrix();
+        }
         xx = x & sizeM1;
         yy = y & sizeM1;
         return value < mat[(yy << log2Size) + xx] ? 0 : 1;
@@ -58,8 +59,9 @@ public:
     // solid white or black.
     bool isStatic(unsigned char value)
     {
-        if (mat == nullptr)
+        if (mat == nullptr) {
             createMatrix();
+        }
         return value < minVal || value >= maxVal;
     }
 

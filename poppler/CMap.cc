@@ -373,8 +373,9 @@ void CMap::setReverseMapVector(unsigned int startCode, CMapVectorEntry *vec, uns
 {
     int i;
 
-    if (vec == nullptr)
+    if (vec == nullptr) {
         return;
+    }
     for (i = 0; i < 256; i++) {
         if (vec[i].isVector) {
             setReverseMapVector((startCode + i) << 8, vec[i].vector, rmap, rmapSize, ncand);

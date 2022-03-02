@@ -291,9 +291,11 @@ static EnumType name_to_enum(const Object *name_value)
      */
     g_assert(name_value != nullptr);
 
-    for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values; item->name; item++)
-        if (name_value->isName(item->name))
+    for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values; item->name; item++) {
+        if (name_value->isName(item->name)) {
             return item->value;
+        }
+    }
 
     g_assert_not_reached();
     return static_cast<EnumType>(-1);
@@ -466,8 +468,9 @@ gchar *poppler_structure_element_get_abbreviation(PopplerStructureElement *poppl
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-    if (poppler_structure_element->elem->getType() != StructElement::Span)
+    if (poppler_structure_element->elem->getType() != StructElement::Span) {
         return nullptr;
+    }
 
     const GooString *string = poppler_structure_element->elem->getExpandedAbbr();
     return string ? _poppler_goo_string_to_utf8(string) : nullptr;
@@ -616,8 +619,9 @@ PopplerStructureElementIter *poppler_structure_element_iter_copy(PopplerStructur
  */
 void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
 {
-    if (G_UNLIKELY(iter == nullptr))
+    if (G_UNLIKELY(iter == nullptr)) {
         return;
+    }
 
     g_object_unref(iter->document);
     g_slice_free(PopplerStructureElementIter, iter);
@@ -669,11 +673,13 @@ PopplerStructureElementIter *poppler_structure_element_iter_new(PopplerDocument 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(poppler_document), NULL);
 
     const StructTreeRoot *root = poppler_document->doc->getStructTreeRoot();
-    if (root == nullptr)
+    if (root == nullptr) {
         return nullptr;
+    }
 
-    if (root->getNumChildren() == 0)
+    if (root->getNumChildren() == 0) {
         return nullptr;
+    }
 
     iter = g_slice_new0(PopplerStructureElementIter);
     iter->document = (PopplerDocument *)g_object_ref(poppler_document);
@@ -776,8 +782,9 @@ enum
 static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
     PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
-    if (GooString *text = span.getText())
+    if (GooString *text = span.getText()) {
         new_span->text = _poppler_goo_string_to_utf8(text);
+    }
 
     new_span->color.red = colToDbl(span.getColor().r) * 65535;
     new_span->color.green = colToDbl(span.getColor().g) * 65535;
@@ -787,18 +794,23 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
         // GfxFont sometimes does not have a family name but there
         // is always a font name that can be used as fallback.
         const GooString *font_name = span.getFont()->getFamily();
-        if (font_name == nullptr)
+        if (font_name == nullptr) {
             font_name = span.getFont()->getName();
+        }
 
         new_span->font_name = _poppler_goo_string_to_utf8(font_name);
-        if (span.getFont()->isFixedWidth())
+        if (span.getFont()->isFixedWidth()) {
             new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
-        if (span.getFont()->isSerif())
+        }
+        if (span.getFont()->isSerif()) {
             new_span->flags |= POPPLER_TEXT_SPAN_SERIF;
-        if (span.getFont()->isItalic())
+        }
+        if (span.getFont()->isItalic()) {
             new_span->flags |= POPPLER_TEXT_SPAN_ITALIC;
-        if (span.getFont()->isBold())
+        }
+        if (span.getFont()->isBold()) {
             new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
+        }
 
         /* isBold() can return false for some fonts whose weight is heavy */
         switch (span.getFont()->getWeight()) {
@@ -834,8 +846,9 @@ PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span)
 
     new_span = g_slice_dup(PopplerTextSpan, poppler_text_span);
     new_span->text = g_strdup(poppler_text_span->text);
-    if (poppler_text_span->font_name)
+    if (poppler_text_span->font_name) {
         new_span->font_name = g_strdup(poppler_text_span->font_name);
+    }
     return new_span;
 }
 
@@ -849,8 +862,9 @@ PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span)
  */
 void poppler_text_span_free(PopplerTextSpan *poppler_text_span)
 {
-    if (G_UNLIKELY(poppler_text_span == nullptr))
+    if (G_UNLIKELY(poppler_text_span == nullptr)) {
         return;
+    }
 
     g_free(poppler_text_span->text);
     g_free(poppler_text_span->font_name);
@@ -992,15 +1006,17 @@ PopplerTextSpan **poppler_structure_element_get_text_spans(PopplerStructureEleme
     g_return_val_if_fail(n_text_spans != nullptr, NULL);
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-    if (!poppler_structure_element->elem->isContent())
+    if (!poppler_structure_element->elem->isContent()) {
         return nullptr;
+    }
 
     const TextSpanArray spans(poppler_structure_element->elem->getTextSpans());
     PopplerTextSpan **text_spans = g_new0(PopplerTextSpan *, spans.size());
 
     size_t i = 0;
-    for (const TextSpan &s : spans)
+    for (const TextSpan &s : spans) {
         text_spans[i++] = text_span_poppler_text_span(s);
+    }
 
     *n_text_spans = spans.size();
 
@@ -1124,8 +1140,9 @@ gboolean poppler_structure_element_get_color(PopplerStructureElement *poppler_st
     g_return_val_if_fail(color != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Color);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return TRUE;
@@ -1150,8 +1167,9 @@ gboolean poppler_structure_element_get_background_color(PopplerStructureElement 
     g_return_val_if_fail(color != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BackgroundColor);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return TRUE;
@@ -1181,8 +1199,9 @@ gboolean poppler_structure_element_get_border_color(PopplerStructureElement *pop
     g_return_val_if_fail(colors != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderColor);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     g_assert(value->isArray());
     if (value->arrayGetLength() == 4) {
@@ -1238,8 +1257,9 @@ gboolean poppler_structure_element_get_border_thickness(PopplerStructureElement 
     g_return_val_if_fail(border_thicknesses != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderThickness);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_double_or_4_doubles(value, border_thicknesses);
     return TRUE;
@@ -1382,8 +1402,9 @@ gboolean poppler_structure_element_get_bounding_box(PopplerStructureElement *pop
     g_return_val_if_fail(bounding_box != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BBox);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     gdouble dimensions[4];
     convert_double_or_4_doubles(value, dimensions);
@@ -1567,8 +1588,9 @@ gboolean poppler_structure_element_get_text_decoration_color(PopplerStructureEle
     g_return_val_if_fail(color != nullptr, FALSE);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationColor);
-    if (value == nullptr)
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return FALSE;
@@ -1744,8 +1766,9 @@ gdouble *poppler_structure_element_get_column_widths(PopplerStructureElement *po
     g_return_val_if_fail(n_values != nullptr, NULL);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnWidths);
-    if (value == nullptr)
+    if (value == nullptr) {
         return nullptr;
+    }
 
     gdouble *result = nullptr;
     convert_doubles_array(value, &result, n_values);
@@ -1792,8 +1815,9 @@ PopplerStructureFormRole poppler_structure_element_get_form_role(PopplerStructur
      * The Role attribute can actually be undefined.
      */
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Role);
-    if (value == nullptr)
+    if (value == nullptr) {
         return POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED;
+    }
 
     return name_to_enum<PopplerStructureFormRole>(value);
 }
@@ -1838,12 +1862,15 @@ gchar *poppler_structure_element_get_form_description(PopplerStructureElement *p
     g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, NULL);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Desc);
-    if (value == nullptr)
+    if (value == nullptr) {
         return nullptr;
-    if (value->isString())
+    }
+    if (value->isString()) {
         return _poppler_goo_string_to_utf8(value->getString());
-    if (value->isName())
+    }
+    if (value->isName()) {
         return g_strdup(value->getName());
+    }
 
     g_assert_not_reached();
     return nullptr;
@@ -1905,8 +1932,9 @@ gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *pop
     g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, NULL);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Headers);
-    if (value == nullptr)
+    if (value == nullptr) {
         return nullptr;
+    }
 
     g_assert(value->isArray());
 
@@ -1916,12 +1944,13 @@ gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *pop
     for (guint i = 0; i < n_values; i++) {
         Object item = value->arrayGet(i);
 
-        if (item.isString())
+        if (item.isString()) {
             result[i] = _poppler_goo_string_to_utf8(item.getString());
-        else if (item.isName())
+        } else if (item.isName()) {
             result[i] = g_strdup(item.getName());
-        else
+        } else {
             g_assert_not_reached();
+        }
     }
 
     return result;
@@ -1967,12 +1996,15 @@ gchar *poppler_structure_element_get_table_summary(PopplerStructureElement *popp
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
 
     const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Summary);
-    if (value == nullptr)
+    if (value == nullptr) {
         return nullptr;
-    if (value->isString())
+    }
+    if (value->isString()) {
         return _poppler_goo_string_to_utf8(value->getString());
-    if (value->isName())
+    }
+    if (value->isName()) {
         return g_strdup(value->getName());
+    }
 
     g_assert_not_reached();
     return nullptr;

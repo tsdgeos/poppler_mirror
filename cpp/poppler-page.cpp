@@ -52,8 +52,9 @@ page_private::~page_private()
 
 void page_private::init_font_info_cache()
 {
-    if (font_info_cache_initialized)
+    if (font_info_cache_initialized) {
         return;
+    }
 
     poppler::font_iterator it(index, doc);
 
@@ -332,8 +333,9 @@ int text_box::rotation() const
 
 rectf text_box::char_bbox(size_t i) const
 {
-    if (i < m_data->char_bboxes.size())
+    if (i < m_data->char_bboxes.size()) {
         return m_data->char_bboxes[i];
+    }
     return rectf(0, 0, 0, 0);
 }
 
@@ -349,24 +351,27 @@ bool text_box::has_font_info() const
 
 text_box::writing_mode_enum text_box::get_wmode(int i) const
 {
-    if (this->has_font_info())
+    if (this->has_font_info()) {
         return m_data->text_box_font->wmodes[i];
-    else
+    } else {
         return text_box::invalid_wmode;
+    }
 }
 
 double text_box::get_font_size() const
 {
-    if (this->has_font_info())
+    if (this->has_font_info()) {
         return m_data->text_box_font->font_size;
-    else
+    } else {
         return -1;
+    }
 }
 
 std::string text_box::get_font_name(int i) const
 {
-    if (!this->has_font_info())
+    if (!this->has_font_info()) {
         return std::string("*ignored*");
+    }
 
     int j = m_data->text_box_font->glyph_to_cache_index[i];
     if (j < 0) {

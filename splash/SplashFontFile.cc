@@ -77,16 +77,19 @@ SplashFontSrc::~SplashFontSrc()
 {
     if (deleteSrc) {
         if (isFile) {
-            if (fileName)
+            if (fileName) {
                 unlink(fileName->c_str());
+            }
         } else {
-            if (buf)
+            if (buf) {
                 gfree(buf);
+            }
         }
     }
 
-    if (isFile && fileName)
+    if (isFile && fileName) {
         delete fileName;
+    }
 }
 
 void SplashFontSrc::ref()
@@ -96,8 +99,9 @@ void SplashFontSrc::ref()
 
 void SplashFontSrc::unref()
 {
-    if (!--refcnt)
+    if (!--refcnt) {
         delete this;
+    }
 }
 
 void SplashFontSrc::setFile(const GooString *file, bool del)
