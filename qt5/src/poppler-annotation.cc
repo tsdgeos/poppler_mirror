@@ -1832,7 +1832,7 @@ public:
     TextAnnotation::TextType textType;
     QString textIcon;
     std::optional<QFont> textFont;
-    QColor textColor;
+    QColor textColor = Qt::black;
     int inplaceAlign; // 0:left, 1:center, 2:right
     QVector<QPointF> inplaceCallout;
     TextAnnotation::InplaceIntent inplaceIntent;
@@ -2090,7 +2090,6 @@ void TextAnnotation::setTextFont(const QFont &font)
 {
     Q_D(TextAnnotation);
     d->textFont = font;
-    d->textColor = Qt::black;
 
     d->setDefaultAppearanceToNative();
 }
