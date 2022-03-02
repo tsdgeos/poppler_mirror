@@ -2089,6 +2089,9 @@ QFont TextAnnotation::textFont() const
 void TextAnnotation::setTextFont(const QFont &font)
 {
     Q_D(TextAnnotation);
+    if (font == d->textFont) {
+        return;
+    }
     d->textFont = font;
 
     d->setDefaultAppearanceToNative();
@@ -2111,6 +2114,9 @@ QColor TextAnnotation::textColor() const
 void TextAnnotation::setTextColor(const QColor &color)
 {
     Q_D(TextAnnotation);
+    if (color == d->textColor) {
+        return;
+    }
     d->textColor = color;
 
     d->setDefaultAppearanceToNative();
