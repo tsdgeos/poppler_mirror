@@ -2032,6 +2032,7 @@ void TextAnnotation::setTextType(TextAnnotation::TextType type)
     }
 
     // Type cannot be changed if annotation is already tied
+    qWarning() << "You can't change the type of a TextAnnotation that is already in a page";
 }
 
 QString TextAnnotation::textIcon() const
@@ -2453,6 +2454,7 @@ void LineAnnotation::setLineType(LineAnnotation::LineType type)
     }
 
     // Type cannot be changed if annotation is already tied
+    qWarning() << "You can't change the type of a LineAnnotation that is already in a page";
 }
 
 QLinkedList<QPointF> LineAnnotation::linePoints() const
