@@ -147,20 +147,20 @@ GooString *appendToPath(GooString *path, const char *fileName)
 #endif
 }
 
+#ifndef _WIN32
+
 static bool makeFileDescriptorCloexec(int fd)
 {
-#ifdef FD_CLOEXEC
+#    ifdef FD_CLOEXEC
     int flags = fcntl(fd, F_GETFD);
     if (flags >= 0 && !(flags & FD_CLOEXEC))
         flags = fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
 
     return flags >= 0;
-#else
+#    else
     return true;
-#endif
+#    endif
 }
-
-#ifndef _WIN32
 
 int openFileDescriptor(const char *path, int flags)
 {
