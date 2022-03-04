@@ -496,8 +496,9 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
         stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
     } else {
-        GooFile *file = GooFile::open(fd);
-        stream = new FileStream(file, 0, false, file->size(), Object(objNull));
+        std::unique_ptr<GooFile> file = GooFile::open(fd);
+        // FIXME file is getting leak here
+        stream = new FileStream(file.release(), 0, false, file->size(), Object(objNull));
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);

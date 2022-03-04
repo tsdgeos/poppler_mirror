@@ -139,7 +139,7 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
     file = GooFile::open(fileName->toStr());
 #endif
 
-    if (file == nullptr) {
+    if (!file) {
         // fopen() has failed.
         // Keep a copy of the errno returned by fopen so that it can be
         // referred to later.
@@ -150,7 +150,7 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
     }
 
     // create stream
-    str = new FileStream(file, 0, false, file->size(), Object(objNull));
+    str = new FileStream(file.get(), 0, false, file->size(), Object(objNull));
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
@@ -186,7 +186,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     }
 
     // create stream
-    str = new FileStream(file, 0, false, file->size(), Object(objNull));
+    str = new FileStream(file.get(), 0, false, file->size(), Object(objNull));
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
@@ -300,7 +300,6 @@ PDFDoc::~PDFDoc()
     delete hints;
     delete linearization;
     delete str;
-    delete file;
 #ifdef _WIN32
     gfree(fileNameU);
 #endif

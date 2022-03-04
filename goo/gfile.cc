@@ -358,18 +358,18 @@ Goffset GooFile::size() const
     return size.QuadPart;
 }
 
-GooFile *GooFile::open(const std::string &fileName)
+std::unique_ptr<GooFile> GooFile::open(const std::string &fileName)
 {
     HANDLE handle = CreateFileA(fileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-    return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
+    return handle == INVALID_HANDLE_VALUE ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(handle));
 }
 
-GooFile *GooFile::open(const wchar_t *fileName)
+std::unique_ptr<GooFile> GooFile::open(const wchar_t *fileName)
 {
     HANDLE handle = CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-    return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
+    return handle == INVALID_HANDLE_VALUE ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(handle));
 }
 
 bool GooFile::modificationTimeChangedSinceOpen() const
@@ -400,16 +400,16 @@ Goffset GooFile::size() const
 #    endif
 }
 
-GooFile *GooFile::open(const std::string &fileName)
+std::unique_ptr<GooFile> GooFile::open(const std::string &fileName)
 {
     int fd = openFileDescriptor(fileName.c_str(), O_RDONLY);
 
     return GooFile::open(fd);
 }
 
-GooFile *GooFile::open(int fdA)
+std::unique_ptr<GooFile> GooFile::open(int fdA)
 {
-    return fdA < 0 ? nullptr : new GooFile(fdA);
+    return fdA < 0 ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(fdA));
 }
 
 GooFile::GooFile(int fdA) : fd(fdA)
