@@ -3748,6 +3748,8 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
                 appearBuilder.setDrawColor(color.get(), false);
             }
             appearBuilder.append("[] 0 d 1 w\n");
+            // use a borderwidth, which is consistent with the line width
+            appearBBox->setBorderWidth(1.0);
 
             for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
                 double x3, y3, x4, y4;
