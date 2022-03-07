@@ -31,7 +31,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
-// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -562,7 +562,7 @@ static void _free_type3_font_info(void *closure)
     type3_font_info_t *info = (type3_font_info_t *)closure;
 
     info->font->decRefCnt();
-    free(info);
+    delete info;
 }
 
 static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_t *cr, cairo_font_extents_t *extents)
@@ -657,7 +657,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
 
 CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref)
 {
-    type3_font_info_t *info;
     cairo_font_face_t *font_face;
     Ref ref;
     int *codeToGID;
@@ -668,7 +667,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc, CairoFontE
     char *name;
 
     charProcs = ((Gfx8BitFont *)gfxFont)->getCharProcs();
-    info = (type3_font_info_t *)malloc(sizeof(*info));
+    type3_font_info_t *info = new type3_font_info_t();
     ref = *gfxFont->getID();
     font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
