@@ -550,6 +550,8 @@ static const cairo_user_data_key_t type3_font_key = { 0 };
 
 typedef struct _type3_font_info
 {
+    _type3_font_info(GfxFont *fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, bool printingA, XRef *xrefA) : font(fontA), doc(docA), fontEngine(fontEngineA), printing(printingA), xref(xrefA) { }
+
     GfxFont *font;
     PDFDoc *doc;
     CairoFontEngine *fontEngine;
@@ -667,17 +669,12 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc, CairoFontE
     char *name;
 
     charProcs = ((Gfx8BitFont *)gfxFont)->getCharProcs();
-    type3_font_info_t *info = new type3_font_info_t();
     ref = *gfxFont->getID();
     font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
     cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_glyph);
     gfxFont->incRefCnt();
-    info->font = gfxFont;
-    info->doc = doc;
-    info->fontEngine = fontEngine;
-    info->printing = printing;
-    info->xref = xref;
+    type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, printing, xref);
 
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);
 
