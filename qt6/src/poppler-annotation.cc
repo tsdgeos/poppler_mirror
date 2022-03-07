@@ -1220,8 +1220,8 @@ QRectF Annotation::boundary() const
     if (!d->pdfAnnot)
         return d->boundary;
 
-    const PDFRectangle *rect = d->pdfAnnot->getRect();
-    return d->fromPdfRectangle(*rect);
+    const PDFRectangle &rect = d->pdfAnnot->getRect();
+    return d->fromPdfRectangle(rect);
 }
 
 void Annotation::setBoundary(const QRectF &boundary)
@@ -1335,8 +1335,8 @@ Annotation::Popup Annotation::popup() const
         if (!popup->getOpen())
             flags |= Annotation::Hidden;
 
-        const PDFRectangle *rect = popup->getRect();
-        w.setGeometry(d->fromPdfRectangle(*rect));
+        const PDFRectangle &rect = popup->getRect();
+        w.setGeometry(d->fromPdfRectangle(rect));
     }
 
     if (d->pdfAnnot->getType() == Annot::typeText) {

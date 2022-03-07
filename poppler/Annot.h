@@ -735,7 +735,7 @@ public:
     Ref getRef() const { return ref; }
     const Object &getAnnotObj() const { return annotObj; }
     AnnotSubtype getType() const { return type; }
-    PDFRectangle *getRect() const { return rect.get(); }
+    const PDFRectangle &getRect() const { return *rect; }
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
     const GooString *getContents() const { return contents.get(); }
     int getPageNum() const { return page; }
