@@ -18,7 +18,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2008-2011, 2016-2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2011, 2016-2018, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -589,13 +589,24 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec, bool tri
 
 GooString *GooString::lowerCase()
 {
-    for (auto &c : *this) {
+    lowerCase(*this);
+    return this;
+}
+
+void GooString::lowerCase(std::string &s)
+{
+    for (auto &c : s) {
         if (std::isupper(c)) {
             c = std::tolower(c);
         }
     }
+}
 
-    return this;
+std::string GooString::toLowerCase(const std::string &s)
+{
+    std::string newString = s;
+    lowerCase(newString);
+    return s;
 }
 
 void GooString::prependUnicodeMarker()
