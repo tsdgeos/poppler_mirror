@@ -35,7 +35,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2061,7 +2061,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
     return n;
 }
 
-int GfxCIDFont::getWMode()
+int GfxCIDFont::getWMode() const
 {
     return cMap ? cMap->getWMode() : 0;
 }

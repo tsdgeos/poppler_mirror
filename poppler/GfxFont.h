@@ -24,7 +24,7 @@
 // Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -274,7 +274,7 @@ public:
     double getDescent() const { return descent; }
 
     // Return the writing mode (0=horizontal, 1=vertical).
-    virtual int getWMode() { return 0; }
+    virtual int getWMode() const { return 0; }
 
     // Locate the font file for this font.  If <ps> is not null, includes PS
     // printer-resident fonts.  Returns std::optional without a value on failure.
@@ -410,7 +410,7 @@ public:
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
     // Return the writing mode (0=horizontal, 1=vertical).
-    int getWMode() override;
+    int getWMode() const override;
 
     // Return the Unicode map.
     const CharCodeToUnicode *getToUnicode() const override;
