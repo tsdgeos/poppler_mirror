@@ -464,15 +464,14 @@ public:
     GfxFont *lookup(const char *tag) const;
 
     // Iterative access.
-    int getNumFonts() const { return numFonts; }
+    int getNumFonts() const { return fonts.size(); }
     GfxFont *getFont(int i) const { return fonts[i]; }
 
 private:
     int hashFontObject(Object *obj);
     void hashFontObject1(const Object *obj, FNVHash *h);
 
-    GfxFont **fonts; // list of fonts
-    int numFonts; // number of fonts
+    std::vector<GfxFont *> fonts;
 };
 
 #endif
