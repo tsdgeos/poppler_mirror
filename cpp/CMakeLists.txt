@@ -1,7 +1,6 @@
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${ICONV_INCLUDE_DIR}
 )
 
 configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h @ONLY)
@@ -31,7 +30,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
-target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
+target_link_libraries(poppler-cpp poppler Iconv::Iconv)
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES

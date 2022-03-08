@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 
 project(poppler)
 
@@ -26,6 +26,7 @@ CHECK_FILE_OFFSET_BITS()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
+include(CMakePushCheckState)
 
 set(ENABLE_FUZZER FALSE)
 
@@ -136,15 +137,16 @@ set(OPI_SUPPORT ON)
 set(TEXTOUT_WORD_LIST ON)
 
 # setting the minimum required versions for some components
-set(CAIRO_VERSION "1.10.0")
-set(GLIB_REQUIRED "2.56")
-set(GTK_REQUIRED "3.22")
-set(GDK_PIXBUF_REQUIRED "2.36")
-set(FREETYPE_VERSION "2.8")
+set(CAIRO_VERSION "1.16.0")
+set(GLIB_REQUIRED "2.64")
+set(GTK_REQUIRED "3.24")
+set(GDK_PIXBUF_REQUIRED "2.40")
+set(FREETYPE_VERSION "2.10")
+set(FONTCONFIG_VERSION "2.13")
 
 find_package(Freetype ${FREETYPE_VERSION} REQUIRED)
 if(WITH_FONTCONFIGURATION_FONTCONFIG)
-  find_package(Fontconfig REQUIRED)
+  find_package(Fontconfig ${FONTCONFIG_VERSION} REQUIRED)
 endif()
 macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
@@ -172,7 +174,7 @@ else()
 endif()
 
 if (ENABLE_QT5)
-  find_package(Qt5Core 5.9)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
+  find_package(Qt5Core 5.12)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
   find_package(Qt5Gui)
   find_package(Qt5Xml)
   find_package(Qt5Widgets)
@@ -195,7 +197,7 @@ endif()
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-find_package(Boost 1.58.0)
+find_package(Boost 1.71.0)
 if(Boost_FOUND)
   set(USE_BOOST_HEADERS ON)
 elseif(ENABLE_BOOST)
@@ -217,7 +219,7 @@ if(CAIRO_FOUND)
   if(ENABLE_GLIB)
     if(ENABLE_GOBJECT_INTROSPECTION)
       # Check for introspection
-      macro_optional_find_package(GObjectIntrospection 0.9.12)
+      macro_optional_find_package(GObjectIntrospection 1.64.0)
       set(HAVE_INTROSPECTION ${INTROSPECTION_FOUND})
     endif()
     set(POPPLER_GLIB_DISABLE_DEPRECATED "${POPPLER_GLIB_DISABLE_DEPRECATED} -DG_DISABLE_DEPRECATED")
@@ -245,7 +247,25 @@ if(ENABLE_GTK_DOC)
 endif()
 
 if(ENABLE_CPP)
+  cmake_push_check_state()
   find_package(Iconv REQUIRED)
+  set(CMAKE_REQUIRED_LIBRARIES Iconv::Iconv)
+  check_cxx_source_compiles("
+    #include <iconv.h>
+    int main(){
+      iconv_t conv = 0;
+      const char* in = 0;
+      size_t ilen = 0;
+      char* out = 0;
+      size_t olen = 0;
+      iconv(conv, &in, &ilen, &out, &olen);
+      return 0;
+    }
+  " ICONV_SECOND_ARGUMENT_IS_CONST)
+  cmake_pop_check_state()
+  if(ICONV_SECOND_ARGUMENT_IS_CONST)
+    set(ICONV_CONST "const")
+  endif()
 endif()
 if(ENABLE_ZLIB)
   find_package(ZLIB)
@@ -460,21 +480,14 @@ set(poppler_SRCS
 )
 set(poppler_LIBS Freetype::Freetype)
 if(FONTCONFIG_FOUND)
-  add_definitions(${FONTCONFIG_DEFINITIONS})
-  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
-  set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
+  set(poppler_LIBS ${poppler_LIBS} Fontconfig::Fontconfig)
 endif()
 
 if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
   )
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
-    set(poppler_LIBS ${poppler_LIBS} ${JPEG_LIBRARIES})
-  else()
-    set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
-  endif()
+  set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
 endif()
 if(ENABLE_ZLIB)
   set(poppler_SRCS ${poppler_SRCS}
@@ -492,12 +505,7 @@ if(ENABLE_LIBCURL)
     poppler/CurlCachedFile.cc
     poppler/CurlPDFDocBuilder.cc
   )
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    include_directories(SYSTEM ${CURL_INCLUDE_DIRS})
-    set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
-  else()
-    set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
-  endif()
+  set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}

@@ -65,9 +65,9 @@ build_clang14_libcpp:
     - cp "$srcdir/.clang-tidy" .
     - run-clang-tidy-14
 
-build_ubuntu_18_04:
+build_ubuntu_20_04:
   stage: build
-  image: ubuntu:bionic
+  image: ubuntu:20.04
   before_script:
     - apt-get update
     - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev
