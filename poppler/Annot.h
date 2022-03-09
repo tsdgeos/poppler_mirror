@@ -719,7 +719,7 @@ public:
 
     // Sets the annot contents to new_content
     // new_content should never be NULL
-    virtual void setContents(GooString *new_content);
+    virtual void setContents(std::unique_ptr<GooString> &&new_content);
     void setName(GooString *new_name);
     void setModified(GooString *new_modified);
     void setFlags(unsigned int new_flags);
@@ -735,7 +735,7 @@ public:
     Ref getRef() const { return ref; }
     const Object &getAnnotObj() const { return annotObj; }
     AnnotSubtype getType() const { return type; }
-    PDFRectangle *getRect() const { return rect.get(); }
+    const PDFRectangle &getRect() const { return *rect; }
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
     const GooString *getContents() const { return contents.get(); }
     int getPageNum() const { return page; }
@@ -866,7 +866,7 @@ public:
 
     // The annotation takes the ownership of new_popup
     void setPopup(std::unique_ptr<AnnotPopup> &&new_popup);
-    void setLabel(GooString *new_label);
+    void setLabel(std::unique_ptr<GooString> &&new_label);
     void setOpacity(double opacityA);
     void setDate(GooString *new_date);
 
@@ -1051,7 +1051,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
     Object getAppearanceResDict() override;
-    void setContents(GooString *new_content) override;
+    void setContents(std::unique_ptr<GooString> &&new_content) override;
 
     void setDefaultAppearance(const DefaultAppearance &da);
     void setQuadding(AnnotFreeTextQuadding new_quadding);
@@ -1115,7 +1115,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
     Object getAppearanceResDict() override;
-    void setContents(GooString *new_content) override;
+    void setContents(std::unique_ptr<GooString> &&new_content) override;
 
     void setVertices(double x1, double y1, double x2, double y2);
     void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);

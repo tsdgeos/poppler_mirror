@@ -1,3 +1,20 @@
+Release 22.03.0:
+        core:
+         * Signature: Fix finding Signatures that are in Pages not not in the global the Forms object
+         * Signature: Improve getting the path to the firefox certificate database
+         * Splash: Fix rendering of some joints. Issue #1212
+         * Fix get_poppler_localdir for relocatable Windows builds
+         * Minor code improvements
+
+        qt:
+         * Minor code improvements
+
+        utils:
+         * pdfimages: Fix the wrong Stream being passed for drawMaskedImage
+
+        build system:
+         * Small code improvements
+
 Release 22.02.0:
         core:
          * Signature: Add a way to detect unsigned FormFieldSignature

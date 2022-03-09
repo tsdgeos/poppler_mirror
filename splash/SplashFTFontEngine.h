@@ -64,7 +64,6 @@ private:
     bool enableFreeTypeHinting;
     bool enableSlightHinting;
     FT_Library lib;
-    bool useCIDs;
 
     friend class SplashFTFontFile;
     friend class SplashFTFont;

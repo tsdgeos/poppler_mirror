@@ -35,7 +35,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2061,7 +2061,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
     return n;
 }
 
-int GfxCIDFont::getWMode()
+int GfxCIDFont::getWMode() const
 {
     return cMap ? cMap->getWMode() : 0;
 }
@@ -2353,12 +2353,10 @@ double GfxCIDFont::getWidth(char *s, int len) const
 
 GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict)
 {
-    int i;
     Ref r;
 
-    numFonts = fontDict->getLength();
-    fonts = (GfxFont **)gmallocn(numFonts, sizeof(GfxFont *));
-    for (i = 0; i < numFonts; ++i) {
+    fonts.resize(fontDict->getLength());
+    for (std::size_t i = 0; i < fonts.size(); ++i) {
         const Object &obj1 = fontDict->getValNF(i);
         Object obj2 = obj1.fetch(xref);
         if (obj2.isDict()) {
@@ -2393,23 +2391,18 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict)
 
 GfxFontDict::~GfxFontDict()
 {
-    int i;
-
-    for (i = 0; i < numFonts; ++i) {
-        if (fonts[i]) {
-            fonts[i]->decRefCnt();
+    for (auto &font : fonts) {
+        if (font) {
+            font->decRefCnt();
         }
     }
-    gfree(fonts);
 }
 
 GfxFont *GfxFontDict::lookup(const char *tag) const
 {
-    int i;
-
-    for (i = 0; i < numFonts; ++i) {
-        if (fonts[i] && fonts[i]->matches(tag)) {
-            return fonts[i];
+    for (const auto &font : fonts) {
+        if (font && font->matches(tag)) {
+            return font;
         }
     }
     return nullptr;

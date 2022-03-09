@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -382,7 +382,8 @@ public:
         Find = 10,
         GoToPage = 11,
         Close = 12,
-        Print = 13
+        Print = 13,
+        SaveAs = 14 ///< \since 22.04
     };
 
     /**

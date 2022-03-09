@@ -639,7 +639,7 @@ bool FoFiTrueType::getCFFBlock(char **start, int *length) const
         return false;
     }
     i = seekTable("CFF ");
-    if (!checkRegion(tables[i].offset, tables[i].len)) {
+    if (i < 0 || !checkRegion(tables[i].offset, tables[i].len)) {
         return false;
     }
     *start = (char *)file + tables[i].offset;
@@ -1550,7 +1550,7 @@ void FoFiTrueType::parse()
 
     // check for tables that are required by both the TrueType spec and
     // the Type 42 spec
-    if (seekTable("head") < 0 || seekTable("hhea") < 0 || seekTable("maxp") < 0 || (!openTypeCFF && seekTable("loca") < 0) || (!openTypeCFF && seekTable("glyf") < 0) || (openTypeCFF && seekTable("CFF ") < 0)) {
+    if (seekTable("head") < 0 || seekTable("hhea") < 0 || seekTable("maxp") < 0 || (!openTypeCFF && seekTable("loca") < 0) || (!openTypeCFF && seekTable("glyf") < 0) || (openTypeCFF && (seekTable("CFF ") < 0 && seekTable("CFF2") < 0))) {
         parsedOk = false;
         return;
     }

@@ -1361,9 +1361,7 @@ void Annotation::setAuthor(const QString &author)
 
     AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
     if (markupann) {
-        GooString *s = QStringToUnicodeGooString(author);
-        markupann->setLabel(s);
-        delete s;
+        markupann->setLabel(std::unique_ptr<GooString>(QStringToUnicodeGooString(author)));
     }
 }
 
@@ -1386,9 +1384,7 @@ void Annotation::setContents(const QString &contents)
         return;
     }
 
-    GooString *s = QStringToUnicodeGooString(contents);
-    d->pdfAnnot->setContents(s);
-    delete s;
+    d->pdfAnnot->setContents(std::unique_ptr<GooString>(QStringToUnicodeGooString(contents)));
 }
 
 QString Annotation::uniqueName() const
@@ -1559,8 +1555,8 @@ QRectF Annotation::boundary() const
     if (!d->pdfAnnot)
         return d->boundary;
 
-    const PDFRectangle *rect = d->pdfAnnot->getRect();
-    return d->fromPdfRectangle(*rect);
+    const PDFRectangle &rect = d->pdfAnnot->getRect();
+    return d->fromPdfRectangle(rect);
 }
 
 void Annotation::setBoundary(const QRectF &boundary)
@@ -1674,8 +1670,8 @@ Annotation::Popup Annotation::popup() const
         if (!popup->getOpen())
             flags |= Annotation::Hidden;
 
-        const PDFRectangle *rect = popup->getRect();
-        w.setGeometry(d->fromPdfRectangle(*rect));
+        const PDFRectangle &rect = popup->getRect();
+        w.setGeometry(d->fromPdfRectangle(rect));
     }
 
     if (d->pdfAnnot->getType() == Annot::typeText) {
@@ -1836,7 +1832,7 @@ public:
     TextAnnotation::TextType textType;
     QString textIcon;
     std::optional<QFont> textFont;
-    QColor textColor;
+    QColor textColor = Qt::black;
     int inplaceAlign; // 0:left, 1:center, 2:right
     QVector<QPointF> inplaceCallout;
     TextAnnotation::InplaceIntent inplaceIntent;
@@ -2036,6 +2032,7 @@ void TextAnnotation::setTextType(TextAnnotation::TextType type)
     }
 
     // Type cannot be changed if annotation is already tied
+    qWarning() << "You can't change the type of a TextAnnotation that is already in a page";
 }
 
 QString TextAnnotation::textIcon() const
@@ -2093,8 +2090,10 @@ QFont TextAnnotation::textFont() const
 void TextAnnotation::setTextFont(const QFont &font)
 {
     Q_D(TextAnnotation);
+    if (font == d->textFont) {
+        return;
+    }
     d->textFont = font;
-    d->textColor = Qt::black;
 
     d->setDefaultAppearanceToNative();
 }
@@ -2116,6 +2115,9 @@ QColor TextAnnotation::textColor() const
 void TextAnnotation::setTextColor(const QColor &color)
 {
     Q_D(TextAnnotation);
+    if (color == d->textColor) {
+        return;
+    }
     d->textColor = color;
 
     d->setDefaultAppearanceToNative();
@@ -2452,6 +2454,7 @@ void LineAnnotation::setLineType(LineAnnotation::LineType type)
     }
 
     // Type cannot be changed if annotation is already tied
+    qWarning() << "You can't change the type of a LineAnnotation that is already in a page";
 }
 
 QLinkedList<QPointF> LineAnnotation::linePoints() const
@@ -3846,6 +3849,9 @@ void LinkAnnotation::store(QDomNode &node, QDomDocument &document) const
                 break;
             case Poppler::LinkAction::Print:
                 hyperlinkElement.setAttribute(QStringLiteral("action"), QStringLiteral("Print"));
+                break;
+            case Poppler::LinkAction::SaveAs:
+                hyperlinkElement.setAttribute(QStringLiteral("action"), QStringLiteral("SaveAs"));
                 break;
             }
             break;

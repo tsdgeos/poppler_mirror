@@ -2785,7 +2785,7 @@ const char *poppler_fonts_iter_get_full_name(PopplerFontsIter *iter)
 
     info = iter->items[iter->index];
 
-    std::optional<std::string> name = info->getName();
+    const std::optional<std::string> &name = info->getName();
     if (name) {
         return name->c_str();
     } else {
@@ -2837,7 +2837,7 @@ const char *poppler_fonts_iter_get_substitute_name(PopplerFontsIter *iter)
 
     info = iter->items[iter->index];
 
-    std::optional<std::string> name = info->getSubstituteName();
+    const std::optional<std::string> &name = info->getSubstituteName();
     if (name) {
         return name->c_str();
     } else {
@@ -2860,7 +2860,7 @@ const char *poppler_fonts_iter_get_file_name(PopplerFontsIter *iter)
 
     info = iter->items[iter->index];
 
-    std::optional<std::string> file = info->getFile();
+    const std::optional<std::string> &file = info->getFile();
     if (file) {
         return file->c_str();
     } else {

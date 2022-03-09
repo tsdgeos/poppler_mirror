@@ -21,7 +21,9 @@
 static int requested_page = 0;
 static gboolean cairo_output = FALSE;
 static gboolean splash_output = FALSE;
+#ifndef G_OS_WIN32
 static gboolean args_are_fds = FALSE;
+#endif
 static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr },
                                         { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr },

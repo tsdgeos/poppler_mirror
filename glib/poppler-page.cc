@@ -1289,7 +1289,6 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
         PopplerAnnotMapping *mapping;
         PopplerRectangle rect;
         Annot *annot;
-        PDFRectangle *annot_rect;
         gboolean flag_no_rotate;
         gint rotation = 0;
 
@@ -1335,11 +1334,11 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
             break;
         }
 
-        annot_rect = annot->getRect();
-        rect.x1 = annot_rect->x1 - crop_box->x1;
-        rect.y1 = annot_rect->y1 - crop_box->y1;
-        rect.x2 = annot_rect->x2 - crop_box->x1;
-        rect.y2 = annot_rect->y2 - crop_box->y1;
+        const PDFRectangle &annot_rect = annot->getRect();
+        rect.x1 = annot_rect.x1 - crop_box->x1;
+        rect.y1 = annot_rect.y1 - crop_box->y1;
+        rect.x2 = annot_rect.x2 - crop_box->x1;
+        rect.y2 = annot_rect.y2 - crop_box->y1;
 
         rotation = page->page->getRotate();
 

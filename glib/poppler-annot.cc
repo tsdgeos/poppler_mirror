@@ -700,17 +700,14 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
  **/
 void poppler_annot_set_contents(PopplerAnnot *poppler_annot, const gchar *contents)
 {
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
     g_return_if_fail(POPPLER_IS_ANNOT(poppler_annot));
 
     tmp = contents ? g_convert(contents, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    poppler_annot->annot->setContents(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    poppler_annot->annot->setContents(goo_tmp);
-    delete (goo_tmp);
 }
 
 /**
@@ -927,7 +924,6 @@ const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot)
  */
 void poppler_annot_get_rectangle(PopplerAnnot *poppler_annot, PopplerRectangle *poppler_rect)
 {
-    PDFRectangle *annot_rect;
     const PDFRectangle *crop_box;
     PDFRectangle zerobox;
     Page *page = nullptr;
@@ -941,11 +937,11 @@ void poppler_annot_get_rectangle(PopplerAnnot *poppler_annot, PopplerRectangle *
         crop_box = &zerobox;
     }
 
-    annot_rect = poppler_annot->annot->getRect();
-    poppler_rect->x1 = annot_rect->x1 - crop_box->x1;
-    poppler_rect->x2 = annot_rect->x2 - crop_box->x1;
-    poppler_rect->y1 = annot_rect->y1 - crop_box->y1;
-    poppler_rect->y2 = annot_rect->y2 - crop_box->y1;
+    const PDFRectangle &annot_rect = poppler_annot->annot->getRect();
+    poppler_rect->x1 = annot_rect.x1 - crop_box->x1;
+    poppler_rect->x2 = annot_rect.x2 - crop_box->x1;
+    poppler_rect->y1 = annot_rect.y1 - crop_box->y1;
+    poppler_rect->y2 = annot_rect.y2 - crop_box->y1;
 }
 
 /**
@@ -1023,7 +1019,6 @@ gchar *poppler_annot_markup_get_label(PopplerAnnotMarkup *poppler_annot)
 void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gchar *label)
 {
     AnnotMarkup *annot;
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
@@ -1032,10 +1027,8 @@ void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gch
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     tmp = label ? g_convert(label, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    annot->setLabel(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    annot->setLabel(goo_tmp);
-    delete goo_tmp;
 }
 
 /**
@@ -1145,7 +1138,6 @@ gboolean poppler_annot_markup_get_popup_rectangle(PopplerAnnotMarkup *poppler_an
 {
     AnnotMarkup *annot;
     Annot *annot_popup;
-    PDFRectangle *annot_rect;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), FALSE);
     g_return_val_if_fail(poppler_rect != nullptr, FALSE);
@@ -1155,11 +1147,11 @@ gboolean poppler_annot_markup_get_popup_rectangle(PopplerAnnotMarkup *poppler_an
     if (!annot_popup)
         return FALSE;
 
-    annot_rect = annot_popup->getRect();
-    poppler_rect->x1 = annot_rect->x1;
-    poppler_rect->x2 = annot_rect->x2;
-    poppler_rect->y1 = annot_rect->y1;
-    poppler_rect->y2 = annot_rect->y2;
+    const PDFRectangle &annot_rect = annot_popup->getRect();
+    poppler_rect->x1 = annot_rect.x1;
+    poppler_rect->x2 = annot_rect.x2;
+    poppler_rect->y1 = annot_rect.y1;
+    poppler_rect->y2 = annot_rect.y2;
 
     return TRUE;
 }

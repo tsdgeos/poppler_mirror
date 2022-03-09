@@ -53,6 +53,7 @@
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
+// Copyright (C) 2022 Andreas Naumann <42870-ANaumann85@users.noreply.gitlab.freedesktop.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1484,12 +1485,12 @@ void Annot::update(const char *key, Object &&value)
     doc->getXRef()->setModifiedObject(&annotObj, ref);
 }
 
-void Annot::setContents(GooString *new_content)
+void Annot::setContents(std::unique_ptr<GooString> &&new_content)
 {
     annotLocker();
 
     if (new_content) {
-        contents = std::make_unique<GooString>(new_content);
+        contents = std::move(new_content);
         // append the unicode marker <FE FF> if needed
         if (!contents->hasUnicodeMarker()) {
             contents->prependUnicodeMarker();
@@ -2184,10 +2185,10 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotMarkup::setLabel(GooString *new_label)
+void AnnotMarkup::setLabel(std::unique_ptr<GooString> &&new_label)
 {
     if (new_label) {
-        label = std::make_unique<GooString>(new_label);
+        label = std::move(new_label);
         // append the unicode marker <FE FF> if needed
         if (!label->hasUnicodeMarker()) {
             label->prependUnicodeMarker();
@@ -2884,9 +2885,9 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotFreeText::setContents(GooString *new_content)
+void AnnotFreeText::setContents(std::unique_ptr<GooString> &&new_content)
 {
-    Annot::setContents(new_content);
+    Annot::setContents(std::move(new_content));
     invalidateAppearance();
 }
 
@@ -3279,9 +3280,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotLine::setContents(GooString *new_content)
+void AnnotLine::setContents(std::unique_ptr<GooString> &&new_content)
 {
-    Annot::setContents(new_content);
+    Annot::setContents(std::move(new_content));
     if (caption)
         invalidateAppearance();
 }
@@ -3748,6 +3749,8 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
                 appearBuilder.setDrawColor(color.get(), false);
             }
             appearBuilder.append("[] 0 d 1 w\n");
+            // use a borderwidth, which is consistent with the line width
+            appearBBox->setBorderWidth(1.0);
 
             for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
                 double x3, y3, x4, y4;

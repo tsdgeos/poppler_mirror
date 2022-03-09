@@ -70,9 +70,6 @@
 /* Defines if timegm is available on your system */
 #cmakedefine HAVE_TIMEGM 1
 
-/* Define if you have the iconv() function and it works. */
-#cmakedefine HAVE_ICONV 1
-
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
 
