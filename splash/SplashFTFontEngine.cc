@@ -43,16 +43,10 @@
 
 SplashFTFontEngine::SplashFTFontEngine(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHintingA, FT_Library libA)
 {
-    FT_Int major, minor, patch;
-
     aa = aaA;
     enableFreeTypeHinting = enableFreeTypeHintingA;
     enableSlightHinting = enableSlightHintingA;
     lib = libA;
-
-    // as of FT 2.1.8, CID fonts are indexed by CID instead of GID
-    FT_Library_Version(lib, &major, &minor, &patch);
-    useCIDs = major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
 SplashFTFontEngine *SplashFTFontEngine::init(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHintingA)
@@ -87,64 +81,12 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, S
 
 SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src)
 {
-    FoFiType1C *ff;
-    int *cidToGIDMap;
-    int nCIDs;
-    SplashFontFile *ret;
-
-    // check for a CFF font
-    if (useCIDs) {
-        cidToGIDMap = nullptr;
-        nCIDs = 0;
-    } else {
-        if (src->isFile) {
-            ff = FoFiType1C::load(src->fileName->c_str());
-        } else {
-            ff = FoFiType1C::make(src->buf, src->bufLen);
-        }
-        if (ff) {
-            cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
-            delete ff;
-        } else {
-            cidToGIDMap = nullptr;
-            nCIDs = 0;
-        }
-    }
-    ret = SplashFTFontFile::loadCIDFont(this, idA, src, cidToGIDMap, nCIDs);
-    if (!ret) {
-        gfree(cidToGIDMap);
-    }
-    return ret;
+    return SplashFTFontFile::loadCIDFont(this, idA, src, nullptr, 0);
 }
 
 SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen)
 {
-    int *cidToGIDMap;
-    int nCIDs;
-    SplashFontFile *ret;
-
-    cidToGIDMap = nullptr;
-    nCIDs = 0;
-    if (!codeToGID) {
-        if (!useCIDs) {
-            std::unique_ptr<FoFiTrueType> ff;
-            if (src->isFile) {
-                ff = FoFiTrueType::load(src->fileName->c_str());
-            } else {
-                ff = FoFiTrueType::make(src->buf, src->bufLen);
-            }
-            if (ff) {
-                if (ff->isOpenTypeCFF()) {
-                    cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
-                }
-            }
-        }
-    }
-    ret = SplashFTFontFile::loadCIDFont(this, idA, src, codeToGID ? codeToGID : cidToGIDMap, codeToGID ? codeToGIDLen : nCIDs);
-    if (!ret) {
-        gfree(cidToGIDMap);
-    }
-    return ret;
+    return SplashFTFontFile::loadCIDFont(this, idA, src, codeToGID ? codeToGID : nullptr, codeToGID ? codeToGIDLen : 0);
 }
 
 SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
