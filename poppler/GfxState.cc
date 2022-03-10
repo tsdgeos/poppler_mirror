@@ -29,7 +29,7 @@
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2015, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Marek Kasik <mkasik@redhat.com>
-// Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>

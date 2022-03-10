@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2020 sgerwk <sgerwk@aol.com>
+// Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 

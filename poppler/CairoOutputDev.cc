@@ -33,7 +33,7 @@
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Uli Schlachter <psychon@znc.in>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 //
