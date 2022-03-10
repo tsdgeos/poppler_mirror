@@ -121,7 +121,7 @@ GooString *HtmlFontColor::toString() const
     return tmp;
 }
 
-HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb, double opacity)
+HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
 {
     color = HtmlFontColor(rgb, opacity);
 
@@ -132,12 +132,12 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb, double opacity)
     bold = false;
     rotOrSkewed = false;
 
-    if (font->isBold() || font->getWeight() >= GfxFont::W700)
+    if (font.isBold() || font.getWeight() >= GfxFont::W700)
         bold = true;
-    if (font->isItalic())
+    if (font.isItalic())
         italic = true;
 
-    if (const GooString *fontname = font->getName()) {
+    if (const GooString *fontname = font.getName()) {
         FontName = new GooString(fontname);
 
         GooString fontnameLower(fontname);

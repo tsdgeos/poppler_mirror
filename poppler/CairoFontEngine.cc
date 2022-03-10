@@ -550,9 +550,9 @@ static const cairo_user_data_key_t type3_font_key = { 0 };
 
 typedef struct _type3_font_info
 {
-    _type3_font_info(GfxFont *fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, bool printingA, XRef *xrefA) : font(fontA), doc(docA), fontEngine(fontEngineA), printing(printingA), xref(xrefA) { }
+    _type3_font_info(const std::shared_ptr<const GfxFont> &fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, bool printingA, XRef *xrefA) : font(fontA), doc(docA), fontEngine(fontEngineA), printing(printingA), xref(xrefA) { }
 
-    GfxFont *font;
+    std::shared_ptr<const GfxFont> font;
     PDFDoc *doc;
     CairoFontEngine *fontEngine;
     bool printing;
@@ -562,18 +562,15 @@ typedef struct _type3_font_info
 static void _free_type3_font_info(void *closure)
 {
     type3_font_info_t *info = (type3_font_info_t *)closure;
-
-    info->font->decRefCnt();
     delete info;
 }
 
 static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_t *cr, cairo_font_extents_t *extents)
 {
     type3_font_info_t *info;
-    GfxFont *font;
 
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
-    font = info->font;
+    std::shared_ptr<const GfxFont> font = info->font;
     const double *mat = font->getFontBBox();
     extents->ascent = mat[3]; /* y2 */
     extents->descent = -mat[3]; /* -y1 */
@@ -594,15 +591,13 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     double wx, wy;
     PDFRectangle box;
     type3_font_info_t *info;
-    GfxFont *font;
-    Dict *resDict;
     Gfx *gfx;
 
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
 
-    font = info->font;
-    resDict = ((Gfx8BitFont *)font)->getResources();
-    charProcs = ((Gfx8BitFont *)(info->font))->getCharProcs();
+    std::shared_ptr<const GfxFont> font = info->font;
+    Dict *resDict = ((Gfx8BitFont *)font.get())->getResources();
+    charProcs = ((Gfx8BitFont *)(info->font.get()))->getCharProcs();
     if (!charProcs)
         return CAIRO_STATUS_USER_FONT_ERROR;
 
@@ -657,28 +652,25 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     return CAIRO_STATUS_SUCCESS;
 }
 
-CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref)
+CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref)
 {
     cairo_font_face_t *font_face;
     Ref ref;
     int *codeToGID;
     unsigned int codeToGIDLen;
     int i, j;
-    char **enc;
-    Dict *charProcs;
     char *name;
 
-    charProcs = ((Gfx8BitFont *)gfxFont)->getCharProcs();
+    Dict *charProcs = ((Gfx8BitFont *)gfxFont.get())->getCharProcs();
     ref = *gfxFont->getID();
     font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
     cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_glyph);
-    gfxFont->incRefCnt();
     type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, printing, xref);
 
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);
 
-    enc = ((Gfx8BitFont *)gfxFont)->getEncoding();
+    char **enc = ((Gfx8BitFont *)gfxFont.get())->getEncoding();
     codeToGID = (int *)gmallocn(256, sizeof(int));
     codeToGIDLen = 256;
     for (i = 0; i < 256; ++i) {
@@ -735,7 +727,7 @@ CairoFontEngine::~CairoFontEngine()
     }
 }
 
-CairoFont *CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, bool printing, XRef *xref)
+CairoFont *CairoFontEngine::getFont(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, bool printing, XRef *xref)
 {
     int i, j;
     Ref ref;
@@ -760,7 +752,7 @@ CairoFont *CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, bool printing
     if (fontType == fontType3)
         font = CairoType3Font::create(gfxFont, doc, this, printing, xref);
     else
-        font = CairoFreeTypeFont::create(gfxFont, xref, lib, useCIDs);
+        font = CairoFreeTypeFont::create(gfxFont.get(), xref, lib, useCIDs);
 
     // XXX: if font is null should we still insert it into the cache?
     if (fontCache[cairoFontCacheSize - 1]) {

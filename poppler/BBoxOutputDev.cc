@@ -93,7 +93,6 @@ void BBoxOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *st
 
 void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
 {
-    GfxFont *font;
     double leftent, rightent, ascent, descent;
     const double *fm, *fb;
     double fontSize, w, adjust;
@@ -102,7 +101,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
     if (!text)
         return;
 
-    font = state->getFont();
+    const GfxFont *const font = state->getFont().get();
     if (!font)
         return;
 

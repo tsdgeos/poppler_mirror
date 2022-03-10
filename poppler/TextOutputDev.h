@@ -119,7 +119,7 @@ public:
 #endif
 
 private:
-    GfxFont *gfxFont;
+    std::shared_ptr<GfxFont> gfxFont;
 #ifdef TEXTOUT_WORD_LIST
     GooString *fontName;
     int flags;

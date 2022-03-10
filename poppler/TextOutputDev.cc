@@ -350,8 +350,6 @@ public:
 TextFontInfo::TextFontInfo(const GfxState *state)
 {
     gfxFont = state->getFont();
-    if (gfxFont)
-        gfxFont->incRefCnt();
 #ifdef TEXTOUT_WORD_LIST
     fontName = (gfxFont && gfxFont->getName()) ? gfxFont->getName()->copy() : nullptr;
     flags = gfxFont ? gfxFont->getFlags() : 0;
@@ -360,8 +358,6 @@ TextFontInfo::TextFontInfo(const GfxState *state)
 
 TextFontInfo::~TextFontInfo()
 {
-    if (gfxFont)
-        gfxFont->decRefCnt();
 #ifdef TEXTOUT_WORD_LIST
     if (fontName) {
         delete fontName;
@@ -2510,7 +2506,6 @@ void TextPage::clear()
 
 void TextPage::updateFont(const GfxState *state)
 {
-    GfxFont *gfxFont;
     const double *fm;
     const char *name;
     int code, mCode, letterCode, anyCode;
@@ -2530,7 +2525,7 @@ void TextPage::updateFont(const GfxState *state)
     }
 
     // adjust the font size
-    gfxFont = state->getFont();
+    GfxFont *const gfxFont = state->getFont().get();
     curFontSize = state->getTransformedFontSize();
     if (gfxFont && gfxFont->getType() == fontType3) {
         // This is a hack which makes it possible to deal with some Type 3
@@ -2573,7 +2568,6 @@ void TextPage::updateFont(const GfxState *state)
 
 void TextPage::beginWord(const GfxState *state)
 {
-    GfxFont *gfxFont;
     const double *fontm;
     double m[4], m2[4];
     int rot;
@@ -2588,7 +2582,7 @@ void TextPage::beginWord(const GfxState *state)
 
     // compute the rotation
     state->getFontTransMat(&m[0], &m[1], &m[2], &m[3]);
-    gfxFont = state->getFont();
+    std::shared_ptr<GfxFont> gfxFont = state->getFont();
     if (gfxFont && gfxFont->getType() == fontType3) {
         fontm = state->getFont()->getFontMatrix();
         m2[0] = fontm[0] * m[0] + fontm[1] * m[2];
@@ -4751,7 +4745,6 @@ void TextSelectionPainter::endPage()
 
         while (begin < sel->end) {
             TextFontInfo *font = sel->word->font[begin];
-            font->gfxFont->incRefCnt();
             Matrix *mat = &sel->word->textMat[begin];
 
             state->setTextMat(mat->m[0], mat->m[1], mat->m[2], mat->m[3], 0, 0);

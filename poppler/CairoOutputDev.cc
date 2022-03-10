@@ -671,7 +671,7 @@ void CairoOutputDev::updateFont(GfxState *state)
     /* NOTE: adjusting by a constant is hack. The correct solution
      * is probably to use user-fonts and compute the scale on a per
      * glyph basis instead of for the entire font */
-    double w = currentFont->getSubstitutionCorrection(state->getFont());
+    double w = currentFont->getSubstitutionCorrection(state->getFont().get());
     matrix.xx = m[0] * fontSize * state->getHorizScaling() * w;
     matrix.yx = m[1] * fontSize * state->getHorizScaling() * w;
     matrix.xy = -m[2] * fontSize;

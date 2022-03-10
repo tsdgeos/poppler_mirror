@@ -83,7 +83,7 @@ private:
 class CairoType3Font : public CairoFont
 {
 public:
-    static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref);
+    static CairoType3Font *create(const std::shared_ptr<const GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref);
     ~CairoType3Font() override;
 
     bool matches(Ref &other, bool printing) override;
@@ -109,7 +109,7 @@ public:
     CairoFontEngine(const CairoFontEngine &) = delete;
     CairoFontEngine &operator=(const CairoFontEngine &other) = delete;
 
-    CairoFont *getFont(GfxFont *gfxFont, PDFDoc *doc, bool printing, XRef *xref);
+    CairoFont *getFont(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, bool printing, XRef *xref);
 
 private:
     CairoFont *fontCache[cairoFontCacheSize];

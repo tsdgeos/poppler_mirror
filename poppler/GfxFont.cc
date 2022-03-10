@@ -197,12 +197,11 @@ const GooString *GfxFontLoc::pathAsGooString() const
 // GfxFont
 //------------------------------------------------------------------------
 
-GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict)
+std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict)
 {
     GooString *nameA;
     Ref embFontIDA;
     GfxFontType typeA;
-    GfxFont *font;
 
     // get base font name
     nameA = nullptr;
@@ -215,14 +214,14 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
     typeA = getFontType(xref, fontDict, &embFontIDA);
 
     // create the font object
-    font = nullptr;
+    GfxFont *font;
     if (typeA < fontCIDType0) {
         font = new Gfx8BitFont(xref, tagA, idA, nameA, typeA, embFontIDA, fontDict);
     } else {
         font = new GfxCIDFont(xref, tagA, idA, nameA, typeA, embFontIDA, fontDict);
     }
 
-    return font;
+    return std::unique_ptr<GfxFont>(font);
 }
 
 GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), type(typeA)
@@ -234,7 +233,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType 
     family = nullptr;
     stretch = StretchNotDefined;
     weight = WeightNotDefined;
-    refCnt = 1;
     hasToUnicode = false;
 }
 
@@ -247,17 +245,6 @@ GfxFont::~GfxFont()
     if (embFontName) {
         delete embFontName;
     }
-}
-
-void GfxFont::incRefCnt()
-{
-    refCnt++;
-}
-
-void GfxFont::decRefCnt()
-{
-    if (--refCnt == 0)
-        delete this;
 }
 
 bool GfxFont::isSubset() const
@@ -984,7 +971,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     Object obj1;
     int n, i, a, b, m;
 
-    refCnt = 1;
     ctu = nullptr;
 
     // do font name substitution for various aliases of the Base 14 font
@@ -1735,7 +1721,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
     int c1, c2;
     int excepsSize;
 
-    refCnt = 1;
     ascent = 0.95;
     descent = -0.35;
     fontBBox[0] = fontBBox[1] = fontBBox[2] = fontBBox[3] = 0;
@@ -2379,8 +2364,7 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict)
                 // NULL and !isOk() so that when we do lookups
                 // we can tell the difference between a missing font
                 // and a font that is just !isOk()
-                fonts[i]->decRefCnt();
-                fonts[i] = nullptr;
+                fonts[i].reset();
             }
         } else {
             error(errSyntaxError, -1, "font resource is not a dictionary");
@@ -2389,16 +2373,7 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict)
     }
 }
 
-GfxFontDict::~GfxFontDict()
-{
-    for (auto &font : fonts) {
-        if (font) {
-            font->decRefCnt();
-        }
-    }
-}
-
-GfxFont *GfxFontDict::lookup(const char *tag) const
+std::shared_ptr<GfxFont> GfxFontDict::lookup(const char *tag) const
 {
     for (const auto &font : fonts) {
         if (font && font->matches(tag)) {

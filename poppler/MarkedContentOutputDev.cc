@@ -26,8 +26,6 @@ MarkedContentOutputDev::MarkedContentOutputDev(int mcidA, const Object &stmObj) 
 
 MarkedContentOutputDev::~MarkedContentOutputDev()
 {
-    if (currentFont)
-        currentFont->decRefCnt();
     delete currentText;
 }
 
@@ -101,7 +99,7 @@ void MarkedContentOutputDev::endMarkedContent(GfxState *state)
     }
 }
 
-bool MarkedContentOutputDev::needFontChange(const GfxFont *font) const
+bool MarkedContentOutputDev::needFontChange(const std::shared_ptr<const GfxFont> &font) const
 {
     if (currentFont == font)
         return false;
@@ -149,14 +147,7 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
         currentColor = color;
 
     if (fontChange) {
-        if (currentFont != nullptr) {
-            currentFont->decRefCnt();
-            currentFont = nullptr;
-        }
-        if (state->getFont() != nullptr) {
-            currentFont = state->getFont();
-            currentFont->incRefCnt();
-        }
+        currentFont = state->getFont();
     }
 
     double sp, dx2, dy2, w1, h1, x1, y1;

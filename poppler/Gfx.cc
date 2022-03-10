@@ -293,14 +293,13 @@ GfxResources::~GfxResources()
     delete fonts;
 }
 
-GfxFont *GfxResources::doLookupFont(const char *name) const
+std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
 {
-    GfxFont *font;
     const GfxResources *resPtr;
 
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->fonts) {
-            if ((font = resPtr->fonts->lookup(name)))
+            if (std::shared_ptr<GfxFont> font = resPtr->fonts->lookup(name))
                 return font;
         }
     }
@@ -308,12 +307,12 @@ GfxFont *GfxResources::doLookupFont(const char *name) const
     return nullptr;
 }
 
-GfxFont *GfxResources::lookupFont(const char *name)
+std::shared_ptr<GfxFont> GfxResources::lookupFont(const char *name)
 {
     return doLookupFont(name);
 }
 
-const GfxFont *GfxResources::lookupFont(const char *name) const
+std::shared_ptr<const GfxFont> GfxResources::lookupFont(const char *name) const
 {
     return doLookupFont(name);
 }
@@ -1174,7 +1173,6 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
     }
     obj2 = obj1.dictLookup("Font");
     if (obj2.isArray()) {
-        GfxFont *font;
         if (obj2.arrayGetLength() == 2) {
             const Object &fargs0 = obj2.arrayGetNF(0);
             Object fargs1 = obj2.arrayGet(1);
@@ -1182,7 +1180,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
                 Object fobj = fargs0.fetch(xref);
                 if (fobj.isDict()) {
                     Ref r = fargs0.getRef();
-                    font = GfxFont::makeFont(xref, args[0].getName(), r, fobj.getDict());
+                    std::shared_ptr<GfxFont> font = GfxFont::makeFont(xref, args[0].getName(), r, fobj.getDict());
                     state->setFont(font, fargs1.getNum());
                     fontChanged = true;
                 }
@@ -3603,7 +3601,7 @@ void Gfx::opSetCharSpacing(Object args[], int numArgs)
 
 void Gfx::opSetFont(Object args[], int numArgs)
 {
-    GfxFont *font;
+    std::shared_ptr<GfxFont> font;
 
     if (!(font = res->lookupFont(args[0].getName()))) {
         // unsetting the font (drawing no text) is better than using the
@@ -3617,7 +3615,6 @@ void Gfx::opSetFont(Object args[], int numArgs)
         fflush(stdout);
     }
 
-    font->incRefCnt();
     state->setFont(font, args[1].getNum());
     fontChanged = true;
 }
@@ -3819,7 +3816,6 @@ void Gfx::opShowSpaceText(Object args[], int numArgs)
 
 void Gfx::doShowText(const GooString *s)
 {
-    GfxFont *font;
     int wMode;
     double riseX, riseY;
     CharCode code;
@@ -3837,7 +3833,7 @@ void Gfx::doShowText(const GooString *s)
     bool patternFill;
     int len, n, uLen, nChars, nSpaces;
 
-    font = state->getFont();
+    GfxFont *const font = state->getFont().get();
     wMode = font->getWMode();
 
     if (out->useDrawChar()) {

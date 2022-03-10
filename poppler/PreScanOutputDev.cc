@@ -151,7 +151,7 @@ void PreScanOutputDev::beginStringOp(GfxState *state)
         check(state->getStrokeColorSpace(), state->getStrokeColor(), state->getStrokeOpacity(), state->getBlendMode());
     }
 
-    const GfxFont *font = state->getFont();
+    std::shared_ptr<const GfxFont> font = state->getFont();
     state->getFontTransMat(&m11, &m12, &m21, &m22);
     //~ this should check for external fonts that are non-TrueType
     simpleTTF = fabs(m11 + m22) < 0.01 && m11 > 0 && fabs(m12) < 0.01 && fabs(m21) < 0.01 && fabs(state->getHorizScaling() - 1) < 0.001 && (font->getType() == fontTrueType || font->getType() == fontTrueTypeOT);

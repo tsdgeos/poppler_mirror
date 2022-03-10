@@ -188,15 +188,13 @@ public:
     };
 
     // Build a GfxFont object.
-    static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
+    static std::unique_ptr<GfxFont> makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
     GfxFont(const GfxFont &) = delete;
     GfxFont &operator=(const GfxFont &other) = delete;
+    virtual ~GfxFont();
 
     bool isOk() const { return ok; }
-
-    void incRefCnt();
-    void decRefCnt();
 
     // Get font tag.
     const std::string &getTag() const { return tag; }
@@ -308,8 +306,6 @@ public:
 protected:
     GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA);
 
-    virtual ~GfxFont();
-
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
     void readFontDescriptor(XRef *xref, Dict *fontDict);
     CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
@@ -330,7 +326,6 @@ protected:
     double missingWidth; // "default" width
     double ascent; // max height above baseline
     double descent; // max depth below baseline
-    int refCnt;
     bool ok;
     bool hasToUnicode;
     std::string encodingName;
@@ -454,24 +449,21 @@ public:
     // Build the font dictionary, given the PDF font dictionary.
     GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict);
 
-    // Destructor.
-    ~GfxFontDict();
-
     GfxFontDict(const GfxFontDict &) = delete;
     GfxFontDict &operator=(const GfxFontDict &) = delete;
 
     // Get the specified font.
-    GfxFont *lookup(const char *tag) const;
+    std::shared_ptr<GfxFont> lookup(const char *tag) const;
 
     // Iterative access.
     int getNumFonts() const { return fonts.size(); }
-    GfxFont *getFont(int i) const { return fonts[i]; }
+    const std::shared_ptr<GfxFont> &getFont(int i) const { return fonts[i]; }
 
 private:
     int hashFontObject(Object *obj);
     void hashFontObject1(const Object *obj, FNVHash *h);
 
-    std::vector<GfxFont *> fonts;
+    std::vector<std::shared_ptr<GfxFont>> fonts;
 };
 
 #endif
