@@ -67,9 +67,10 @@
 #include <sstream>
 #include <iomanip>
 #include "Win32Console.h"
+#include "DateInfo.h"
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap);
-static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt);
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2);
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 
@@ -321,8 +322,8 @@ int main(int argc, char *argv[])
             printInfoString(f, info.getDict(), "Author", "<meta name=\"Author\" content=\"", "\"/>\n", uMap);
             printInfoString(f, info.getDict(), "Creator", "<meta name=\"Creator\" content=\"", "\"/>\n", uMap);
             printInfoString(f, info.getDict(), "Producer", "<meta name=\"Producer\" content=\"", "\"/>\n", uMap);
-            printInfoDate(f, info.getDict(), "CreationDate", "<meta name=\"CreationDate\" content=\"\"/>\n");
-            printInfoDate(f, info.getDict(), "LastModifiedDate", "<meta name=\"ModDate\" content=\"\"/>\n");
+            printInfoDate(f, info.getDict(), "CreationDate", "<meta name=\"CreationDate\" content=\"", "\"/>\n");
+            printInfoDate(f, info.getDict(), "ModDate", "<meta name=\"ModDate\" content=\"", "\"/>\n");
         }
         fputs("</head>\n", f);
         fputs("<body>\n", f);
@@ -448,15 +449,27 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     }
 }
 
-static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt)
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2)
 {
+    int year, mon, day, hour, min, sec, tz_hour, tz_minute;
+    char tz;
+
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
-        const char *s = obj.getString()->c_str();
-        if (s[0] == 'D' && s[1] == ':') {
-            s += 2;
+        const GooString *s = obj.getString();
+        if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
+            fputs(text1, f);
+            fprintf(f, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
+            if (tz_hour == 0 && tz_minute == 0) {
+                fprintf(f, "Z");
+            } else {
+                fprintf(f, "%c%02d", tz, tz_hour);
+                if (tz_minute) {
+                    fprintf(f, ":%02d", tz_minute);
+                }
+            }
+            fputs(text2, f);
         }
-        fprintf(f, fmt, s);
     }
 }
 
