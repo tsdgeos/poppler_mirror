@@ -148,19 +148,13 @@ static void _ft_done_face_uncached(void *closure)
     FT_Done_Face(face);
 }
 
-static bool _ft_new_face_uncached(FT_Library lib, const char *filename, unsigned char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
+static bool _ft_new_face_uncached(FT_Library lib, const char *filename, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
     FT_Face face;
     cairo_font_face_t *font_face;
 
-    if (font_data == nullptr) {
-        if (FT_New_Face(lib, filename, 0, &face)) {
-            return false;
-        }
-    } else {
-        if (FT_New_Memory_Face(lib, font_data, font_data_len, 0, &face)) {
-            return false;
-        }
+    if (FT_New_Face(lib, filename, 0, &face)) {
+        return false;
     }
 
     font_face = cairo_ft_font_face_create_for_ft_face(face, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP);
@@ -239,7 +233,7 @@ static bool _ft_new_face(FT_Library lib, const char *filename, Ref embFontID, un
         /* if we fail to open the file, just pass it to FreeType instead */
         std::ifstream font_data_fstream(filename, std::ios::binary);
         if (!font_data_fstream.is_open()) {
-            return _ft_new_face_uncached(lib, filename, font_data, font_data_len, face_out, font_face_out);
+            return _ft_new_face_uncached(lib, filename, face_out, font_face_out);
         }
 
         /* get length of file */
