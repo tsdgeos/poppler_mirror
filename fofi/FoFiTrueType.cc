@@ -605,6 +605,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         gid = getU16BE(pos + 10 + 2 * (c - cmapFirst), &ok);
         break;
     case 12:
+    case 13:
         segCnt = getU32BE(pos + 12, &ok);
         a = -1;
         b = segCnt - 1;
@@ -627,7 +628,10 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         if (c < segStart) {
             return 0;
         }
-        gid = segDelta + (c - segStart);
+        // In format 12, the glyph codes increment through
+        // each segment; in format 13 the same glyph code is used
+        // for an entire segment.
+        gid = segDelta + (cmaps[i].fmt == 12 ? (c - segStart) : 0);
         break;
     default:
         return 0;
