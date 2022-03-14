@@ -44,6 +44,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <vector>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -155,22 +156,23 @@ public:
 
     inline void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
 
-    inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
+    inline std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
+        std::vector<unsigned char> buf(initialSize);
+
         int readChars;
-        unsigned char *buf = (unsigned char *)gmalloc(initialSize);
         int size = initialSize;
-        *length = 0;
+        int length = 0;
         int charsToRead = initialSize;
         bool continueReading = true;
         reset();
-        while (continueReading && (readChars = doGetChars(charsToRead, &buf[*length])) != 0) {
-            *length += readChars;
+        while (continueReading && (readChars = doGetChars(charsToRead, buf.data() + length)) != 0) {
+            length += readChars;
             if (readChars == charsToRead) {
                 if (lookChar() != EOF) {
                     size += sizeIncrement;
                     charsToRead = sizeIncrement;
-                    buf = (unsigned char *)grealloc(buf, size);
+                    buf.resize(size);
                 } else {
                     continueReading = false;
                 }
@@ -178,6 +180,8 @@ public:
                 continueReading = false;
             }
         }
+
+        buf.resize(length);
         return buf;
     }
 

@@ -1845,8 +1845,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
-    unsigned char *tmpBuf;
-    int tmpBufLen;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;
     int faceIndex = 0;
@@ -1856,7 +1854,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
 
     needFontUpdate = false;
     font = nullptr;
-    tmpBuf = nullptr;
 
     GfxFont *const gfxFont = state->getFont().get();
     if (!gfxFont) {
@@ -1895,11 +1892,12 @@ reload:
 
         // embedded font
         std::string fileName;
+        std::vector<unsigned char> tmpBuf;
 
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
-            tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef(), &tmpBufLen);
-            if (!tmpBuf) {
+            tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef());
+            if (tmpBuf.empty()) {
                 goto err2;
             }
 
@@ -1914,7 +1912,7 @@ reload:
         if (!fileName.empty()) {
             fontsrc->setFile(fileName);
         } else {
-            fontsrc->setBuf(tmpBuf, tmpBufLen);
+            fontsrc->setBuf(std::move(tmpBuf));
         }
 
         // load the font file
@@ -1952,7 +1950,7 @@ reload:
             if (!fileName.empty()) {
                 ff = FoFiTrueType::load(fileName.c_str());
             } else {
-                ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
+                ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
             }
             int *codeToGID;
             const int n = ff ? 256 : 0;
@@ -2026,7 +2024,7 @@ reload:
                 if (!fileName.empty()) {
                     ff = FoFiTrueType::load(fileName.c_str());
                 } else {
-                    ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
+                    ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
                 }
                 if (!ff) {
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");

@@ -1773,14 +1773,11 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
         delete cs;
         return nullptr;
     }
-    unsigned char *profBuf;
     Stream *iccStream = obj1.getStream();
-    int length = 0;
 
-    profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf, length));
+    const std::vector<unsigned char> profBuf = iccStream->toUnsignedChars(65536, 65536);
+    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
     cs->profile = hp;
-    gfree(profBuf);
     if (!hp) {
         error(errSyntaxWarning, -1, "read ICCBased color space profile error");
     } else {

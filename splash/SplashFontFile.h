@@ -24,6 +24,7 @@
 #define SPLASHFONTFILE_H
 
 #include <string>
+#include <vector>
 
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
@@ -46,15 +47,14 @@ public:
 
     void setFile(const std::string &file);
     void setBuf(char *bufA, int buflenA);
-    void setBuf(unsigned char *bufA, int buflenA);
+    void setBuf(std::vector<unsigned char> &&bufA);
 
     void ref();
     void unref();
 
     bool isFile;
     std::string fileName;
-    char *buf;
-    int bufLen;
+    std::vector<unsigned char> buf;
 
 private:
     ~SplashFontSrc();

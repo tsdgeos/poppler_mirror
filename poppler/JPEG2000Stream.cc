@@ -39,7 +39,7 @@ struct JPXStreamPrivate
     int ncomps;
     bool inited;
     int smaskInData;
-    void init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length, bool indexed);
+    void init2(OPJ_CODEC_FORMAT format, const unsigned char *buf, int length, bool indexed);
 };
 
 static inline unsigned char adjustComp(int r, int adjust, int depth, int sgndcorr, bool indexed)
@@ -198,7 +198,7 @@ static void libopenjpeg_warning_callback(const char *msg, void * /*client_data*/
 
 typedef struct JPXData_s
 {
-    unsigned char *data;
+    const unsigned char *data;
     int size;
     int pos;
 } JPXData;
@@ -272,10 +272,8 @@ void JPXStream::init()
         priv->smaskInData = smaskInData.getInt();
     }
 
-    int length = 0;
-    unsigned char *buf = str->toUnsignedChars(&length, bufSize);
-    priv->init2(OPJ_CODEC_JP2, buf, length, indexed);
-    gfree(buf);
+    const std::vector<unsigned char> buf = str->toUnsignedChars(bufSize);
+    priv->init2(OPJ_CODEC_JP2, buf.data(), buf.size(), indexed);
 
     if (priv->image) {
         int numComps = priv->image->numcomps;
@@ -335,7 +333,7 @@ void JPXStream::init()
     priv->inited = true;
 }
 
-void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length, bool indexed)
+void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, const unsigned char *buf, int length, bool indexed)
 {
     JPXData jpxData;
 

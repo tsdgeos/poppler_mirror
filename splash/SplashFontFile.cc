@@ -68,18 +68,10 @@ void SplashFontFile::decRefCnt()
 SplashFontSrc::SplashFontSrc()
 {
     isFile = false;
-    buf = nullptr;
     refcnt = 1;
 }
 
-SplashFontSrc::~SplashFontSrc()
-{
-    if (!isFile) {
-        if (buf) {
-            gfree(buf);
-        }
-    }
-}
+SplashFontSrc::~SplashFontSrc() = default;
 
 void SplashFontSrc::ref()
 {
@@ -99,17 +91,8 @@ void SplashFontSrc::setFile(const std::string &file)
     fileName = file;
 }
 
-void SplashFontSrc::setBuf(char *bufA, int bufLenA)
+void SplashFontSrc::setBuf(std::vector<unsigned char> &&bufA)
 {
     isFile = false;
-    buf = bufA;
-    bufLen = bufLenA;
-}
-
-void SplashFontSrc::setBuf(unsigned char *bufA, int bufLenA, bool del)
-{
-    isFile = false;
-    buf = (char *)bufA;
-    bufLen = bufLenA;
-    deleteSrc = del;
+    buf = std::move(bufA);
 }

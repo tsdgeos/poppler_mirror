@@ -830,7 +830,7 @@ std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
     return std::move(fontLoc); // std::move only required to please g++-7
 }
 
-unsigned char *GfxFont::readEmbFontFile(XRef *xref, int *len)
+std::vector<unsigned char> GfxFont::readEmbFontFile(XRef *xref)
 {
     Stream *str;
 
@@ -839,12 +839,11 @@ unsigned char *GfxFont::readEmbFontFile(XRef *xref, int *len)
     if (!obj2.isStream()) {
         error(errSyntaxError, -1, "Embedded font file is not a stream");
         embFontID = Ref::INVALID();
-        *len = 0;
-        return nullptr;
+        return std::vector<unsigned char> {};
     }
     str = obj2.getStream();
 
-    unsigned char *buf = str->toUnsignedChars(len);
+    std::vector<unsigned char> buf = str->toUnsignedChars();
     str->close();
 
     return buf;
@@ -1135,10 +1134,10 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     // TrueType font is a losing proposition)
     ffT1 = nullptr;
     ffT1C = nullptr;
-    unsigned char *buf = nullptr;
     if (type == fontType1 && embFontID != Ref::INVALID()) {
-        if ((buf = readEmbFontFile(xref, &len))) {
-            if ((ffT1 = FoFiType1::make(buf, len))) {
+        const std::vector<unsigned char> buf = readEmbFontFile(xref);
+        if (!buf.empty()) {
+            if ((ffT1 = FoFiType1::make(buf.data(), buf.size()))) {
                 if (ffT1->getName()) {
                     if (embFontName) {
                         delete embFontName;
@@ -1150,11 +1149,11 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
                     baseEncFromFontFile = true;
                 }
             }
-            gfree(buf);
         }
     } else if (type == fontType1C && embFontID != Ref::INVALID()) {
-        if ((buf = readEmbFontFile(xref, &len))) {
-            if ((ffT1C = FoFiType1C::make(buf, len))) {
+        const std::vector<unsigned char> buf = readEmbFontFile(xref);
+        if (!buf.empty()) {
+            if ((ffT1C = FoFiType1C::make(buf.data(), buf.size()))) {
                 if (ffT1C->getName()) {
                     if (embFontName) {
                         delete embFontName;
@@ -1166,7 +1165,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
                     baseEncFromFontFile = true;
                 }
             }
-            gfree(buf);
         }
     }
 
