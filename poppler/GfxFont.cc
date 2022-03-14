@@ -830,9 +830,8 @@ std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
     return std::move(fontLoc); // std::move only required to please g++-7
 }
 
-char *GfxFont::readEmbFontFile(XRef *xref, int *len)
+unsigned char *GfxFont::readEmbFontFile(XRef *xref, int *len)
 {
-    char *buf;
     Stream *str;
 
     Object obj1(embFontID);
@@ -845,7 +844,7 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len)
     }
     str = obj2.getStream();
 
-    buf = (char *)str->toUnsignedChars(len);
+    unsigned char *buf = str->toUnsignedChars(len);
     str->close();
 
     return buf;
@@ -966,7 +965,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     const BuiltinFont *builtinFont;
     const char **baseEnc;
     bool baseEncFromFontFile;
-    char *buf;
     int len;
     FoFiType1 *ffT1;
     FoFiType1C *ffT1C;
@@ -1137,7 +1135,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     // TrueType font is a losing proposition)
     ffT1 = nullptr;
     ffT1C = nullptr;
-    buf = nullptr;
+    unsigned char *buf = nullptr;
     if (type == fontType1 && embFontID != Ref::INVALID()) {
         if ((buf = readEmbFontFile(xref, &len))) {
             if ((ffT1 = FoFiType1::make(buf, len))) {

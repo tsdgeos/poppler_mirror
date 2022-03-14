@@ -282,7 +282,7 @@ public:
     static std::optional<GfxFontLoc> locateBase14Font(const GooString *base14Name);
 
     // Read an external or embedded font file into a buffer.
-    char *readEmbFontFile(XRef *xref, int *len);
+    unsigned char *readEmbFontFile(XRef *xref, int *len);
 
     // Get the next char from a string <s> of <len> bytes, returning the
     // char <code>, its Unicode mapping <u>, its displacement vector

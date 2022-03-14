@@ -1845,7 +1845,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
-    char *tmpBuf;
+    unsigned char *tmpBuf;
     int tmpBufLen;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;

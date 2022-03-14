@@ -105,3 +105,11 @@ void SplashFontSrc::setBuf(char *bufA, int bufLenA)
     buf = bufA;
     bufLen = bufLenA;
 }
+
+void SplashFontSrc::setBuf(unsigned char *bufA, int bufLenA, bool del)
+{
+    isFile = false;
+    buf = (char *)bufA;
+    bufLen = bufLenA;
+    deleteSrc = del;
+}

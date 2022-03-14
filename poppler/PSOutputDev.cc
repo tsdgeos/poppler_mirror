@@ -2374,7 +2374,7 @@ void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *p
 
 void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
     FoFiType1C *ffT1C;
     int i;
@@ -2416,7 +2416,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
 
 void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
     int i;
 
@@ -2458,7 +2458,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
 
 void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
     int *codeToGID;
 
@@ -2580,7 +2580,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *f
 
 void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
     FoFiType1C *ffT1C;
     int i;
@@ -2628,7 +2628,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
 
 void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, bool needVerticalMetrics)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
 
     // beginning comment
@@ -2659,7 +2659,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
 
 void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName)
 {
-    char *fontBuf;
+    unsigned char *fontBuf;
     int fontLen;
     int i;
 

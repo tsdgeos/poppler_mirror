@@ -45,11 +45,9 @@ static const char hexChars[17] = "0123456789ABCDEF";
 // FoFiType1C
 //------------------------------------------------------------------------
 
-FoFiType1C *FoFiType1C::make(const char *fileA, int lenA)
+FoFiType1C *FoFiType1C::make(const unsigned char *fileA, int lenA)
 {
-    FoFiType1C *ff;
-
-    ff = new FoFiType1C(fileA, lenA, false);
+    FoFiType1C *ff = new FoFiType1C(fileA, lenA, false);
     if (!ff->parse()) {
         delete ff;
         return nullptr;
@@ -66,7 +64,7 @@ FoFiType1C *FoFiType1C::load(const char *fileName)
     if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
         return nullptr;
     }
-    ff = new FoFiType1C(fileA, lenA, true);
+    ff = new FoFiType1C((unsigned char *)fileA, lenA, true);
     if (!ff->parse()) {
         delete ff;
         return nullptr;
@@ -74,7 +72,7 @@ FoFiType1C *FoFiType1C::load(const char *fileName)
     return ff;
 }
 
-FoFiType1C::FoFiType1C(const char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiType1C::FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
     name = nullptr;
     encoding = nullptr;

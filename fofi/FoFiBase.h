@@ -40,7 +40,7 @@ public:
     virtual ~FoFiBase();
 
 protected:
-    FoFiBase(const char *fileA, int lenA, bool freeFileDataA);
+    FoFiBase(const unsigned char *fileA, int lenA, bool freeFileDataA);
     static char *readFile(const char *fileName, int *fileLen);
 
     // S = signed / U = unsigned

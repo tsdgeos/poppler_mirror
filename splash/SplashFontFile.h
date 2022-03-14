@@ -46,6 +46,7 @@ public:
 
     void setFile(const std::string &file);
     void setBuf(char *bufA, int buflenA);
+    void setBuf(unsigned char *bufA, int buflenA);
 
     void ref();
     void unref();

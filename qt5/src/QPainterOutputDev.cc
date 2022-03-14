@@ -463,9 +463,9 @@ void QPainterOutputDev::updateFont(GfxState *state)
             switch (fontLoc->locType) {
             case gfxFontLocEmbedded: { // if there is an embedded font, read it to memory
                 int fontDataLen;
-                const char *fontData = gfxFont->readEmbFontFile(xref, &fontDataLen);
+                const unsigned char *fontData = gfxFont->readEmbFontFile(xref, &fontDataLen);
 
-                m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize, m_hintingPreference);
+                m_rawFont = new QRawFont(QByteArray((const char *)fontData, fontDataLen), fontSize, m_hintingPreference);
                 m_rawFontCache.insert(std::make_pair(fontID, std::unique_ptr<QRawFont>(m_rawFont)));
 
                 // Free the font data, it was copied in the QByteArray constructor
@@ -521,7 +521,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
     } else {
 
-        std::unique_ptr<char[], void (*)(char *)> tmpBuf(nullptr, [](char *b) { free(b); });
+        std::unique_ptr<unsigned char[], void (*)(unsigned char *)> tmpBuf(nullptr, [](unsigned char *b) { free(b); });
         int tmpBufLen = 0;
 
         std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont(xref, nullptr);

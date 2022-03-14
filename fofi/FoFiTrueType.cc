@@ -451,7 +451,7 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const char *fileA, int lenA, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const unsigned char *fileA, int lenA, int faceIndexA)
 {
     // Cannot use std::make_unique, because the constructor is private
     auto ff = new FoFiTrueType(fileA, lenA, false, faceIndexA);
@@ -471,7 +471,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
         return nullptr;
     }
     // Cannot use std::make_unique, because the constructor is private
-    auto ff = new FoFiTrueType(fileA, lenA, true, faceIndexA);
+    auto ff = new FoFiTrueType((unsigned char *)fileA, lenA, true, faceIndexA);
     if (!ff->parsedOk) {
         delete ff;
         return nullptr;
@@ -479,7 +479,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
     return std::unique_ptr<FoFiTrueType>(ff);
 }
 
-FoFiTrueType::FoFiTrueType(const char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiTrueType::FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
     tables = nullptr;
     nTables = 0;
@@ -679,7 +679,7 @@ int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) const
     if (!getCFFBlock(&start, &length)) {
         return nullptr;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return nullptr;
     }
     map = ff->getCIDToGIDMap(nCIDs);
@@ -721,7 +721,7 @@ void FoFiTrueType::getFontMatrix(double *mat) const
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->getFontMatrix(mat);
@@ -774,7 +774,7 @@ void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, 
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToType1(psName, newEncoding, ascii, outputFunc, outputStream);
@@ -909,7 +909,7 @@ void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToCIDType0(psName, cidMap, nCIDs, outputFunc, outputStream);
@@ -1033,7 +1033,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, Fo
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToType0(psName, cidMap, nCIDs, outputFunc, outputStream);

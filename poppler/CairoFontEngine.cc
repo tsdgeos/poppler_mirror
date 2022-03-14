@@ -148,7 +148,7 @@ static void _ft_done_face_uncached(void *closure)
     FT_Done_Face(face);
 }
 
-static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
+static bool _ft_new_face_uncached(FT_Library lib, const char *filename, unsigned char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
     FT_Face face;
     cairo_font_face_t *font_face;
@@ -158,7 +158,7 @@ static bool _ft_new_face_uncached(FT_Library lib, const char *filename, char *fo
             return false;
         }
     } else {
-        if (FT_New_Memory_Face(lib, (unsigned char *)font_data, font_data_len, 0, &face)) {
+        if (FT_New_Memory_Face(lib, font_data, font_data_len, 0, &face)) {
             return false;
         }
     }
@@ -230,7 +230,7 @@ static void _ft_done_face(void *closure)
     delete data;
 }
 
-static bool _ft_new_face(FT_Library lib, const char *filename, Ref embFontID, char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
+static bool _ft_new_face(FT_Library lib, const char *filename, Ref embFontID, unsigned char *font_data, int font_data_len, FT_Face *face_out, cairo_font_face_t **font_face_out)
 {
     struct _ft_face_data ft_face_data(lib, filename, embFontID);
 
@@ -246,7 +246,7 @@ static bool _ft_new_face(FT_Library lib, const char *filename, Ref embFontID, ch
         font_data_fstream.seekg(0, font_data_fstream.end);
         ft_face_data.size = font_data_fstream.tellg();
     } else {
-        ft_face_data.bytes = (unsigned char *)font_data;
+        ft_face_data.bytes = font_data;
         ft_face_data.size = font_data_len;
     }
 
@@ -302,7 +302,7 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
 {
     const char *fileNameC;
-    char *font_data;
+    unsigned char *font_data;
     int font_data_len;
     int i, n;
     GfxFontType fontType;

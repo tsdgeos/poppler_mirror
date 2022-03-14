@@ -33,7 +33,7 @@ class FoFiType1 : public FoFiBase
 {
 public:
     // Create a FoFiType1 object from a memory buffer.
-    static FoFiType1 *make(const char *fileA, int lenA);
+    static FoFiType1 *make(const unsigned char *fileA, int lenA);
 
     // Create a FoFiType1 object from a file on disk.
     static FoFiType1 *load(const char *fileName);
@@ -54,7 +54,7 @@ public:
     void writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc, void *outputStream) const;
 
 private:
-    FoFiType1(const char *fileA, int lenA, bool freeFileDataA);
+    FoFiType1(const unsigned char *fileA, int lenA, bool freeFileDataA);
 
     char *getNextLine(char *line) const;
     void parse();
