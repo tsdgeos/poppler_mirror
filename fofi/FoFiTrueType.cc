@@ -531,6 +531,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
     unsigned int segCnt, segEnd, segStart, segDelta, segOffset;
     unsigned int cmapFirst, cmapLen;
     int pos, a, b, m;
+    unsigned int high, low, idx;
     bool ok;
 
     if (i < 0 || i >= nCmaps) {
@@ -544,6 +545,21 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
             return 0;
         }
         gid = getU8(cmaps[i].offset + 6 + c, &ok);
+        break;
+    case 2:
+        high = c >> 8;
+        low = c & 0xFFU;
+        idx = getU16BE(pos + 6 + high * 2, &ok);
+        segStart = getU16BE(pos + 6 + 512 + idx, &ok);
+        segCnt = getU16BE(pos + 6 + 512 + idx + 2, &ok);
+        segDelta = getS16BE(pos + 6 + 512 + idx + 4, &ok);
+        segOffset = getU16BE(pos + 6 + 512 + idx + 6, &ok);
+        if (low < segStart || low >= segStart + segCnt) {
+            gid = 0;
+        } else {
+            int val = getU16BE(pos + 6 + 512 + idx + 6 + segOffset + (low - segStart) * 2, &ok);
+            gid = val == 0 ? 0 : (val + segDelta) & 0xFFFFU;
+        }
         break;
     case 4:
         segCnt = getU16BE(pos + 6, &ok) / 2;
