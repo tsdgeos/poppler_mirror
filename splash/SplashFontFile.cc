@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -68,7 +68,6 @@ void SplashFontFile::decRefCnt()
 SplashFontSrc::SplashFontSrc()
 {
     isFile = false;
-    fileName = nullptr;
     buf = nullptr;
     refcnt = 1;
 }
