@@ -66,7 +66,7 @@ document_private::document_private(const char *file_data, int file_data_length, 
 {
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
-    MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, Object(objNull));
+    MemStream *memstr = new MemStream(raw_doc_data, 0, raw_doc_data_length, Object(objNull));
     doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
