@@ -14,6 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -67,7 +68,6 @@ void SplashFontFile::decRefCnt()
 SplashFontSrc::SplashFontSrc()
 {
     isFile = false;
-    deleteSrc = false;
     fileName = nullptr;
     buf = nullptr;
     refcnt = 1;
@@ -75,15 +75,9 @@ SplashFontSrc::SplashFontSrc()
 
 SplashFontSrc::~SplashFontSrc()
 {
-    if (deleteSrc) {
-        if (isFile) {
-            if (fileName) {
-                unlink(fileName->c_str());
-            }
-        } else {
-            if (buf) {
-                gfree(buf);
-            }
+    if (!isFile) {
+        if (buf) {
+            gfree(buf);
         }
     }
 
@@ -104,17 +98,15 @@ void SplashFontSrc::unref()
     }
 }
 
-void SplashFontSrc::setFile(const GooString *file, bool del)
+void SplashFontSrc::setFile(const GooString *file)
 {
     isFile = true;
     fileName = file->copy();
-    deleteSrc = del;
 }
 
-void SplashFontSrc::setBuf(char *bufA, int bufLenA, bool del)
+void SplashFontSrc::setBuf(char *bufA, int bufLenA)
 {
     isFile = false;
     buf = bufA;
     bufLen = bufLenA;
-    deleteSrc = del;
 }

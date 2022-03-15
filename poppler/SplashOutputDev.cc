@@ -1912,9 +1912,9 @@ reload:
 
         fontsrc = new SplashFontSrc;
         if (fileName) {
-            fontsrc->setFile(fileName, false);
+            fontsrc->setFile(fileName);
         } else {
-            fontsrc->setBuf(tmpBuf, tmpBufLen, true);
+            fontsrc->setBuf(tmpBuf, tmpBufLen);
         }
 
         // load the font file
