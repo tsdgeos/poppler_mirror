@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2011, 2013, 2014, 2016-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2011, 2013, 2014, 2016-2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010, 2013 Pino Toscano <pino@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -189,21 +189,31 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
     char *p = &buf[0];
 
     if (hintsOffset && hintsLength) {
-        Stream *s = str->makeSubStream(hintsOffset, false, hintsLength, Object(objNull));
+        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object(objNull)));
         s->reset();
         for (unsigned int i = 0; i < hintsLength; i++) {
-            *p++ = s->getChar();
+            const int c = s->getChar();
+            if (unlikely(c == EOF)) {
+                error(errSyntaxWarning, -1, "Found EOF while reading hints");
+                ok = false;
+                return;
+            }
+            *p++ = c;
         }
-        delete s;
     }
 
     if (hintsOffset2 && hintsLength2) {
-        Stream *s = str->makeSubStream(hintsOffset2, false, hintsLength2, Object(objNull));
+        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset2, false, hintsLength2, Object(objNull)));
         s->reset();
         for (unsigned int i = 0; i < hintsLength2; i++) {
-            *p++ = s->getChar();
+            const int c = s->getChar();
+            if (unlikely(c == EOF)) {
+                error(errSyntaxWarning, -1, "Found EOF while reading hints2");
+                ok = false;
+                return;
+            }
+            *p++ = c;
         }
-        delete s;
     }
 
     MemStream *memStream = new MemStream(&buf[0], 0, bufLength, Object(objNull));
