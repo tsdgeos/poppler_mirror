@@ -1894,7 +1894,7 @@ reload:
         }
 
         // embedded font
-        const GooString *fileName = nullptr;
+        std::string fileName;
 
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
@@ -1905,13 +1905,13 @@ reload:
 
             // external font
         } else { // gfxFontLocExternal
-            fileName = fontLoc->pathAsGooString();
+            fileName = fontLoc->path;
             fontType = fontLoc->fontType;
             doAdjustFontMatrix = true;
         }
 
         fontsrc = new SplashFontSrc;
-        if (fileName) {
+        if (!fileName.empty()) {
             fontsrc->setFile(fileName);
         } else {
             fontsrc->setBuf(tmpBuf, tmpBufLen);
@@ -1949,8 +1949,8 @@ reload:
         case fontTrueType:
         case fontTrueTypeOT: {
             std::unique_ptr<FoFiTrueType> ff;
-            if (fileName) {
-                ff = FoFiTrueType::load(fileName->c_str());
+            if (!fileName.empty()) {
+                ff = FoFiTrueType::load(fileName.c_str());
             } else {
                 ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
             }
@@ -2023,8 +2023,8 @@ reload:
                 }
             } else {
                 std::unique_ptr<FoFiTrueType> ff;
-                if (fileName) {
-                    ff = FoFiTrueType::load(fileName->c_str());
+                if (!fileName.empty()) {
+                    ff = FoFiTrueType::load(fileName.c_str());
                 } else {
                     ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
                 }

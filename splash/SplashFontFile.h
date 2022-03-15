@@ -23,10 +23,11 @@
 #ifndef SPLASHFONTFILE_H
 #define SPLASHFONTFILE_H
 
+#include <string>
+
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
 
-class GooString;
 class SplashFontEngine;
 class SplashFont;
 class SplashFontFileID;
@@ -43,14 +44,14 @@ public:
     SplashFontSrc(const SplashFontSrc &) = delete;
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
 
-    void setFile(const GooString *file);
+    void setFile(const std::string &file);
     void setBuf(char *bufA, int buflenA);
 
     void ref();
     void unref();
 
     bool isFile;
-    GooString *fileName;
+    std::string fileName;
     char *buf;
     int bufLen;
 

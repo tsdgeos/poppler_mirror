@@ -80,10 +80,6 @@ SplashFontSrc::~SplashFontSrc()
             gfree(buf);
         }
     }
-
-    if (isFile && fileName) {
-        delete fileName;
-    }
 }
 
 void SplashFontSrc::ref()
@@ -98,10 +94,10 @@ void SplashFontSrc::unref()
     }
 }
 
-void SplashFontSrc::setFile(const GooString *file)
+void SplashFontSrc::setFile(const std::string &file)
 {
     isFile = true;
-    fileName = file->copy();
+    fileName = file;
 }
 
 void SplashFontSrc::setBuf(char *bufA, int bufLenA)

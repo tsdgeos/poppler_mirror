@@ -42,7 +42,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, Spl
     int i;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), 0, &faceA)) {
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
         }
     } else {
@@ -72,7 +72,7 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, Splas
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), 0, &faceA)) {
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
         }
     } else {
@@ -89,7 +89,7 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, 
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), faceIndexA, &faceA)) {
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
             return nullptr;
         }
     } else {
