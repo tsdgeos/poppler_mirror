@@ -1541,7 +1541,9 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
         // only update the second part of the array
         Object obj4 = xRef->getTrailerDict()->getDict()->lookup("ID");
         if (!obj4.isArray()) {
-            error(errSyntaxWarning, -1, "PDFDoc::createTrailerDict original file's ID entry isn't an array. Trying to continue");
+            if (hasEncrypt) {
+                error(errSyntaxWarning, -1, "PDFDoc::createTrailerDict original file's ID entry isn't an array. Trying to continue");
+            }
         } else {
             Array *array = new Array(xRef);
             // Get the first part of the ID
