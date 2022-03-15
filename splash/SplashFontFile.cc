@@ -111,13 +111,6 @@ void SplashFontSrc::setFile(const GooString *file, bool del)
     deleteSrc = del;
 }
 
-void SplashFontSrc::setFile(const char *file, bool del)
-{
-    isFile = true;
-    fileName = new GooString(file);
-    deleteSrc = del;
-}
-
 void SplashFontSrc::setBuf(char *bufA, int bufLenA, bool del)
 {
     isFile = false;

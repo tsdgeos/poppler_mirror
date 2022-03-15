@@ -43,7 +43,6 @@ public:
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
 
     void setFile(const GooString *file, bool del);
-    void setFile(const char *file, bool del);
     void setBuf(char *bufA, int buflenA, bool del);
 
     void ref();
