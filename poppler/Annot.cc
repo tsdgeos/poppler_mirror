@@ -3157,7 +3157,7 @@ void AnnotFreeText::generateFreeTextAppearance()
             break;
         }
         appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
-        appearBuilder.writeString(out);
+        appearBuilder.writeString(out.toStr());
         appearBuilder.append("Tj\n");
         xposPrev = xpos;
     }
@@ -3568,7 +3568,7 @@ void AnnotLine::generateLineAppearance()
             linewidth *= fontsize;
             xpos = (captionwidth - linewidth) / 2;
             appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);
-            appearBuilder.writeString(out);
+            appearBuilder.writeString(out.toStr());
             appearBuilder.append("Tj\n");
             xposPrev = xpos;
         }
@@ -4284,15 +4284,11 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
 
 // Copy the given string to appearBuf, adding parentheses around it and
 // escaping characters as appropriate.
-void AnnotAppearanceBuilder::writeString(const GooString &str)
+void AnnotAppearanceBuilder::writeString(const std::string &str)
 {
-    char c;
-    int i;
-
     appearBuf->append('(');
 
-    for (i = 0; i < str.getLength(); ++i) {
-        c = str.getChar(i);
+    for (const char c : str) {
         if (c == '(' || c == ')' || c == '\\') {
             appearBuf->append('\\');
             appearBuf->append(c);
@@ -4514,7 +4510,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
             // draw the line
             appearBuf->appendf("{0:.2f} {1:.2f} Td\n", x - xPrev, -fontSize);
-            writeString(convertedText);
+            writeString(convertedText.toStr());
             appearBuf->append(" Tj\n");
 
             // next line
@@ -4609,7 +4605,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 appearBuf->appendf("{0:.2f} 0 Td\n", x - xPrev + w);
 
                 GooString charBuf(s, n);
-                writeString(charBuf);
+                writeString(charBuf.toStr());
                 appearBuf->append(" Tj\n");
 
                 i++;
@@ -4677,7 +4673,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             // write the text string
-            writeString(convertedText);
+            writeString(convertedText.toStr());
             appearBuf->append(" Tj\n");
         }
     }
@@ -4861,7 +4857,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
 
         // write the text string
-        writeString(convertedText);
+        writeString(convertedText.toStr());
         appearBuf->append(" Tj\n");
 
         // cleanup
@@ -5185,7 +5181,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
         }
 
         appendf("{0:.2f} {1:.2f} Td\n", xDelta, yDelta);
-        writeString(GooString(outText.first));
+        writeString(outText.first);
         append("Tj\n");
 
         if (!centerHorizontally) {

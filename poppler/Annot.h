@@ -589,7 +589,7 @@ public:
                        const GooString *appearState, XRef *xref, Dict *resourcesDict);
     static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
     static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
-    void writeString(const GooString &str);
+    void writeString(const std::string &str);
 
     void append(const char *text);
     void appendf(const char *fmt, ...) GOOSTRING_FORMAT;
