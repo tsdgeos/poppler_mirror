@@ -70,7 +70,9 @@
 #include <cstddef>
 #include <cstring>
 #include <ctime>
+#include <iomanip>
 #include <regex>
+#include <sstream>
 #include <sys/stat.h>
 #include "goo/glibc.h"
 #include "goo/gstrtod.h"
@@ -1277,16 +1279,14 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     if (s->hasUnicodeMarker()) {
         // unicode string don't necessary end with \0
         const char *c = s->c_str();
-        outStr->printf("(");
+        std::stringstream stream;
+        stream << std::setfill('0') << std::hex;
         for (int i = 0; i < s->getLength(); i++) {
-            char unescaped = *(c + i) & 0x000000ff;
-            // escape if needed
-            if (unescaped == '(' || unescaped == ')' || unescaped == '\\') {
-                outStr->printf("%c", '\\');
-            }
-            outStr->printf("%c", unescaped);
+            stream << std::setw(2) << (0xff & (unsigned int)*(c + i));
         }
-        outStr->printf(") ");
+        outStr->printf("<");
+        outStr->printf("%s", stream.str().c_str());
+        outStr->printf("> ");
     } else {
         const char *c = s->c_str();
         outStr->printf("(");
