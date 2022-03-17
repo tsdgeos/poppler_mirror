@@ -1835,7 +1835,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, 
     obj1 = desFontDict->lookup("CIDToGIDMap");
     if (obj1.isStream()) {
         cidToGIDLen = 0;
-        int i = 64;
+        unsigned int i = 64;
         cidToGID = (int *)gmallocn(i, sizeof(int));
         obj1.streamReset();
         while ((c1 = obj1.streamGetChar()) != EOF && (c2 = obj1.streamGetChar()) != EOF) {

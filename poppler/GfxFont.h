@@ -416,7 +416,7 @@ public:
     // Return the CID-to-GID mapping table.  These should only be called
     // if type is fontCIDType2.
     int *getCIDToGID() const { return cidToGID; }
-    int getCIDToGIDLen() const { return cidToGIDLen; }
+    unsigned int getCIDToGIDLen() const { return cidToGIDLen; }
 
     int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
 
@@ -436,7 +436,7 @@ private:
     GfxFontCIDWidths widths; // character widths
     int *cidToGID; // CID --> GID mapping (for embedded
                    //   TrueType fonts)
-    int cidToGIDLen;
+    unsigned int cidToGIDLen;
 };
 
 //------------------------------------------------------------------------
