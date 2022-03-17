@@ -1064,7 +1064,7 @@ Form *Catalog::getForm()
     catalogLocker();
     if (!form) {
         if (acroForm.isDict()) {
-            form = new Form(doc, &acroForm);
+            form = new Form(doc);
             // perform form-related loading after all widgets have been loaded
             form->postWidgetsLoad();
         }

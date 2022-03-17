@@ -2489,13 +2489,11 @@ void FormFieldSignature::print(int indent)
 // Form
 //------------------------------------------------------------------------
 
-Form::Form(PDFDoc *docA, Object *acroFormA)
+Form::Form(PDFDoc *doc)
 {
     Object obj1;
 
-    doc = docA;
-    xref = doc->getXRef();
-    acroForm = acroFormA;
+    XRef *xref = doc->getXRef();
 
     size = 0;
     numFields = 0;
@@ -2503,6 +2501,8 @@ Form::Form(PDFDoc *docA, Object *acroFormA)
     quadding = quaddingLeftJustified;
     defaultAppearance = nullptr;
     defaultResources = nullptr;
+
+    Object *acroForm = doc->getCatalog()->getAcroForm();
 
     needAppearances = acroForm->dictLookup("NeedAppearances").getBoolWithDefaultValue(false);
 
