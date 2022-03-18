@@ -10,6 +10,7 @@
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2015 Jakub Wilk <jwilk@jwilk.net>
+// Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Licensed under GPLv2 or later
 //
