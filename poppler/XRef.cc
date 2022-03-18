@@ -1697,10 +1697,11 @@ struct DummyXRefEntry : XRefEntry
 {
     DummyXRefEntry()
     {
-        offset = 0;
-        gen = -1;
+        offset = -1;
+        gen = 0;
         type = xrefEntryNone;
         flags = 0;
+        obj = Object(objNull);
     }
 };
 
