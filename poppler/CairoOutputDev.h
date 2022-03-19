@@ -249,6 +249,7 @@ public:
     }
     bool hasType3GlyphBBox() { return t3_glyph_has_bbox; }
     double *getType3GlyphBBox() { return t3_glyph_bbox; }
+    bool hasColor() { return has_color; }
 
 protected:
     void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
@@ -316,6 +317,7 @@ protected:
     bool inType3Char; // inside a Type 3 CharProc
     double t3_glyph_wx, t3_glyph_wy;
     bool t3_glyph_has_bbox;
+    bool has_color;
     double t3_glyph_bbox[4];
     bool prescaleImages;
 
