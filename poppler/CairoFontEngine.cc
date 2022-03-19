@@ -588,8 +588,9 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     }
 
     status = CAIRO_STATUS_SUCCESS;
-    if (color && !output_dev->hasColor())
+    if (color && !output_dev->hasColor()) {
         status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
+    }
 
     delete gfx;
     delete output_dev;
