@@ -3101,6 +3101,90 @@ private:
     std::vector<Data> data;
 };
 
+struct DrawFreeTextResult
+{
+    std::string text;
+    int nLines = 0;
+};
+
+static DrawFreeTextResult drawFreeTextText(const GooString &text, double availableWidth, const Form *form, const GfxFont &font, const std::string &fontName, double fontSize, VariableTextQuadding quadding)
+{
+    DrawFreeTextResult result;
+    int i = 0;
+    double xposPrev = 0;
+    const bool isUnicode = text.hasUnicodeMarker();
+    while (i < text.getLength()) {
+        HorizontalTextLayouter textLayouter;
+
+        GooString out;
+        double availableTextWidthInFontPtSize = availableWidth / fontSize;
+        double blockWidth;
+        bool newFontNeeded;
+        Annot::layoutText(&text, &out, &i, font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+        availableTextWidthInFontPtSize -= blockWidth;
+        textLayouter.add(out.toStr(), fontName, blockWidth * fontSize);
+
+        while (availableTextWidthInFontPtSize >= 0 && newFontNeeded) {
+            if (!form) {
+                // There's no fonts to look for, so just skip the characters
+                i += isUnicode ? 2 : 1;
+                error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, found character that the font can't represent");
+                newFontNeeded = false;
+            } else {
+                Unicode uChar;
+                if (isUnicode) {
+                    uChar = (unsigned char)(text.getChar(i)) << 8;
+                    uChar += (unsigned char)(text.getChar(i + 1));
+                } else {
+                    uChar = pdfDocEncoding[text.getChar(i) & 0xff];
+                }
+                const std::string auxFontName = form->getFallbackFontForChar(uChar, font);
+                if (!auxFontName.empty()) {
+                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName.c_str());
+
+                    // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
+                    GooString auxContents = GooString(text.toStr().substr(i, isUnicode ? 2 : 1));
+                    if (isUnicode) {
+                        auxContents.prependUnicodeMarker();
+                    }
+                    int auxI = 0;
+                    Annot::layoutText(&auxContents, &out, &auxI, *auxFont, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+                    assert(!newFontNeeded);
+                    // layoutText will always at least layout one character even if it doesn't fit in
+                    // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                    availableTextWidthInFontPtSize -= blockWidth;
+                    if (availableTextWidthInFontPtSize >= 0) {
+                        i += auxI - (isUnicode ? 2 : 0); // the second term is the unicode marker
+                        textLayouter.add(out.toStr(), auxFontName, blockWidth * fontSize);
+                    }
+
+                } else {
+                    error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, couldn't find a font for character U+{0:04uX}", uChar);
+                    newFontNeeded = false;
+                    i += text.hasUnicodeMarker() ? 2 : 1;
+                }
+            }
+
+            // Now layout the rest of the text with the original font if we still have space
+            if (availableTextWidthInFontPtSize >= 0) {
+                Annot::layoutText(&text, &out, &i, font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
+                availableTextWidthInFontPtSize -= blockWidth;
+                // layoutText will always at least layout one character even if it doesn't fit in
+                // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                if (availableTextWidthInFontPtSize >= 0) {
+                    textLayouter.add(out.toStr(), fontName, blockWidth * fontSize);
+                } else {
+                    i -= isUnicode ? 2 : 1;
+                }
+            }
+        }
+
+        result.text += textLayouter.layout(quadding, availableWidth, fontSize, xposPrev);
+        result.nLines += 1;
+    }
+    return result;
+}
+
 void AnnotFreeText::generateFreeTextAppearance()
 {
     double borderWidth, ca = opacity;
@@ -3192,80 +3276,8 @@ void AnnotFreeText::generateFreeTextAppearance()
     // Set font state
     appearBuilder.setDrawColor(da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-
-    int i = 0;
-    double xposPrev = 0;
-    const bool isUnicode = contents->hasUnicodeMarker();
-    while (i < contents->getLength()) {
-        HorizontalTextLayouter textLayouter;
-
-        GooString out;
-        double availableTextWidthInFontPtSize = textwidth / da.getFontPtSize();
-        double blockWidth;
-        bool newFontNeeded;
-        layoutText(contents.get(), &out, &i, *font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
-        availableTextWidthInFontPtSize -= blockWidth;
-        textLayouter.add(out.toStr(), da.getFontName().getName(), blockWidth * da.getFontPtSize());
-
-        while (availableTextWidthInFontPtSize >= 0 && newFontNeeded) {
-            if (!form) {
-                // There's no fonts to look for, so just skip the characters
-                i += isUnicode ? 2 : 1;
-                error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, found character that the font can't represent");
-                newFontNeeded = false;
-            } else {
-                Unicode uChar;
-                if (isUnicode) {
-                    uChar = (unsigned char)(contents->getChar(i)) << 8;
-                    uChar += (unsigned char)(contents->getChar(i + 1));
-                } else {
-                    uChar = pdfDocEncoding[contents->getChar(i) & 0xff];
-                }
-                const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
-                if (!auxFontName.empty()) {
-                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName.c_str());
-
-                    // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
-                    GooString auxContents = GooString(contents->toStr().substr(i, isUnicode ? 2 : 1));
-                    if (isUnicode) {
-                        auxContents.prependUnicodeMarker();
-                    }
-                    int auxI = 0;
-                    layoutText(&auxContents, &out, &auxI, *auxFont, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
-                    assert(!newFontNeeded);
-                    // layoutText will always at least layout one character even if it doesn't fit in
-                    // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
-                    availableTextWidthInFontPtSize -= blockWidth;
-                    if (availableTextWidthInFontPtSize >= 0) {
-                        i += auxI - (isUnicode ? 2 : 0); // the second term is the unicode marker
-                        textLayouter.add(out.toStr(), auxFontName, blockWidth * da.getFontPtSize());
-                    }
-
-                } else {
-                    error(errSyntaxError, -1, "AnnotFreeText::generateFreeTextAppearance, couldn't find a font for character U+{0:04uX}", uChar);
-                    newFontNeeded = false;
-                    i += contents->hasUnicodeMarker() ? 2 : 1;
-                }
-            }
-
-            // Now layout the rest of the text with the original font if we still have space
-            if (availableTextWidthInFontPtSize >= 0) {
-                layoutText(contents.get(), &out, &i, *font, &blockWidth, availableTextWidthInFontPtSize, nullptr, false, &newFontNeeded);
-                availableTextWidthInFontPtSize -= blockWidth;
-                // layoutText will always at least layout one character even if it doesn't fit in
-                // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
-                if (availableTextWidthInFontPtSize >= 0) {
-                    textLayouter.add(out.toStr(), da.getFontName().getName(), blockWidth * da.getFontPtSize());
-                } else {
-                    i -= isUnicode ? 2 : 1;
-                }
-            }
-        }
-
-        const std::string layoutedLine = textLayouter.layout(quadding, textwidth, da.getFontPtSize(), xposPrev);
-        appearBuilder.append(layoutedLine.c_str());
-    }
-
+    const DrawFreeTextResult textCommands = drawFreeTextText(*contents, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding);
+    appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
     double bbox[4];
@@ -5195,23 +5207,23 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     const GooString &leftText = field->getCustomAppearanceLeftContent();
     if (leftText.toStr().empty()) {
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
         DefaultAppearance daLeft(_da);
         daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
         const double halfWidth = (rect->x2 - rect->x1) / 2;
         PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
-        drawSignatureFieldText(leftText, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
+        drawSignatureFieldText(leftText, form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
 
         PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
     }
 
     return true;
 }
 
-void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
-                                                    bool centerHorizontally)
+void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin,
+                                                    bool centerVertically, bool centerHorizontally)
 {
     double borderWidth = 0;
     append("q\n");
@@ -5230,52 +5242,25 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::unique_ptr<const GfxFont> font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
-
-    // calculate the string tokenization
-    int i = 0;
-    std::vector<std::pair<std::string, double>> outTexts;
-    while (i < text.getLength()) {
-        GooString out;
-        double textWidth;
-        Annot::layoutText(&text, &out, &i, *font, &textWidth, textwidth / da.getFontPtSize(), nullptr, false);
-        outTexts.emplace_back(out.toStr(), textWidth * da.getFontPtSize());
+    std::shared_ptr<const GfxFont> font = form->getDefaultResources()->lookupFont(da.getFontName().getName());
+    if (!font) {
+        font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
     }
 
     // Setup text clipping
     appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re W n\n", leftMargin + textmargin, textmargin, textwidth, height - 2 * textmargin);
-
-    // Set font state
     setDrawColor(da.getFontColor(), true);
-    appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-    setTextFont(da.getFontName(), da.getFontPtSize());
+    const DrawFreeTextResult textCommands = drawFreeTextText(text, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified);
 
-    double xDelta = centerHorizontally ? 0 : leftMargin;
-    double currentX = 0;
-    double yDelta = -da.getFontPtSize();
+    double yDelta = height - textmargin - da.getFontPtSize() * font->getDescent();
     if (centerVertically) {
-        const double outTextHeight = outTexts.size() * da.getFontPtSize();
+        const double outTextHeight = textCommands.nLines * da.getFontPtSize();
         if (outTextHeight < height) {
             yDelta -= (height - outTextHeight) / 2;
         }
     }
-    for (const std::pair<std::string, double> &outText : outTexts) {
-        if (centerHorizontally) {
-            const double lineX = (width - outText.second) / 2;
-            xDelta = (lineX - currentX);
-            currentX += xDelta;
-        }
-
-        appendf("{0:.2f} {1:.2f} Td\n", xDelta, yDelta);
-        writeString(outText.first);
-        append("Tj\n");
-
-        if (!centerHorizontally) {
-            xDelta = 0;
-        }
-        yDelta = -da.getFontPtSize();
-    }
-
+    appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", leftMargin + textmargin, yDelta);
+    append(textCommands.text.c_str());
     append("ET Q\n");
 }
 

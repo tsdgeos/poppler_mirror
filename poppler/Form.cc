@@ -693,7 +693,13 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     GooString *aux = getField()->getDefaultAppearance();
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
-    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+    Form *form = doc->getCatalog()->getForm();
+    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
+    if (pdfFontName.empty()) {
+        pdfFontName = form->addFontToDefaultResources("Helvetica", "");
+    }
+
+    const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
     getField()->setDefaultAppearance(da.toAppearanceString());
 
     std::unique_ptr<AnnotAppearanceCharacs> origAppearCharacs = getWidgetAnnotation()->getAppearCharacs() ? getWidgetAnnotation()->getAppearCharacs()->copy() : nullptr;
@@ -709,6 +715,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
 
     getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
+
+    form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
+    form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
     ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
     ffs->setCustomAppearanceContent(signatureText);
@@ -2656,7 +2665,7 @@ FormField *Form::createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref,
 
 static const std::string kOurDictFontNamePrefix = "popplerfont";
 
-std::string Form::findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
+std::string Form::findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const
 {
     if (!resDict.isDict()) {
         return {};
@@ -2899,9 +2908,11 @@ std::string Form::addFontToDefaultResources(const std::string &filepath, int fac
     return dictFontName;
 }
 
-std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate)
+std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate) const
 {
-    return doGetAddFontToDefaultResources(uChar, fontToEmulate, false /*addIfNotFound*/);
+    const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
+
+    return findFontInDefaultResources(res.family, res.style);
 }
 
 void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate)
@@ -2927,18 +2938,18 @@ void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::
         if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
             const int glyph = cidFont->getCIDToGID()[c];
             if (glyph == 0) {
-                doGetAddFontToDefaultResources(uChar, *f, true /*addIfNotFound*/);
+                doGetAddFontToDefaultResources(uChar, *f);
             }
         }
     }
 }
 
-std::string Form::doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate, bool addIfNotFound)
+std::string Form::doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate)
 {
     const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
 
     std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
-    if (addIfNotFound && pdfFontName.empty()) {
+    if (pdfFontName.empty()) {
         pdfFontName = addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
     }
     return pdfFontName;

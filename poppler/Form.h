@@ -679,7 +679,7 @@ public:
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves
-    std::string findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle);
+    std::string findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const;
 
     // Finds in the system a font name matching the given fontFamily and fontStyle
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX
@@ -687,7 +687,7 @@ public:
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // emulates fontToEmulate and can draw the given char
-    std::string getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate);
+    std::string getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate) const;
 
     // Makes sure the default resources has fonts to draw all the given chars and as close as possible to the given pdfFontNameToEmulate
     // If needed adds fonts to the default resources dictionary, font names will be popplerfontXXX
@@ -716,7 +716,7 @@ private:
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX
     std::string addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle);
 
-    std::string doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate, bool addIfNotFound);
+    std::string doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 
     FormField **rootFields;
     int numFields;
