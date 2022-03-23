@@ -615,8 +615,8 @@ private:
     };
 
     bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState,
-                             XRef *xref, Dict *resourcesDict);
+    bool drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                             const GooString *appearState, XRef *xref, Dict *resourcesDict);
     bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
                            Dict *resourcesDict);
     bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
@@ -625,8 +625,8 @@ private:
                                 XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const GooString &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
-    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const VariableTextQuadding quadding, XRef *xref,
-                  Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
+    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                  const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     GooString *appearBuf;

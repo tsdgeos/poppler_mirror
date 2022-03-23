@@ -1660,6 +1660,18 @@ void FormFieldText::setContentCopy(const GooString *new_content)
         if (!content->hasUnicodeMarker()) {
             content->prependUnicodeMarker();
         }
+        Form *form = doc->getCatalog()->getForm();
+        if (form) {
+            DefaultAppearance da(defaultAppearance);
+            if (da.getFontName().isName()) {
+                const std::string fontName = da.getFontName().getName();
+                if (!fontName.empty()) {
+                    form->ensureFontsForAllCharacters(new_content, fontName);
+                }
+            } else {
+                // This is wrong, there has to be a Tf in DA
+            }
+        }
     }
 
     obj.getDict()->set("V", Object(content ? content->copy() : new GooString("")));
@@ -2922,24 +2934,25 @@ void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::
     if (!ccToUnicode) {
         return; // will never happen with current code
     }
-    if (!f->isCIDFont()) {
-        return; // will never happen with current code
-    }
 
-    auto cidFont = static_cast<const GfxCIDFont *>(f.get());
     // If the text has some characters that are not available in the font, try adding a font for those
     for (int i = 2; i < unicodeText->getLength(); i += 2) {
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 
         CharCode c;
-        ccToUnicode->mapToCharCode(&uChar, &c, 1);
-
-        if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
-            const int glyph = cidFont->getCIDToGID()[c];
-            if (glyph == 0) {
-                doGetAddFontToDefaultResources(uChar, *f);
+        if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
+            if (f->isCIDFont()) {
+                auto cidFont = static_cast<const GfxCIDFont *>(f.get());
+                if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
+                    const int glyph = cidFont->getCIDToGID()[c];
+                    if (glyph == 0) {
+                        doGetAddFontToDefaultResources(uChar, *f);
+                    }
+                }
             }
+        } else {
+            doGetAddFontToDefaultResources(uChar, *f);
         }
     }
 }
