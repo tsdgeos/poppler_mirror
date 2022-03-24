@@ -4299,8 +4299,8 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int combMaxLen,
-                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags)
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int combMaxLen)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
@@ -5015,7 +5015,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -5030,16 +5030,16 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     } break;
     case formButtonPush:
         if (caption) {
-            return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict);
+            return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict);
         }
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(&checkMark, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
         }
         break;
@@ -5073,7 +5073,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         if (fieldText->isPassword()) {
             flags = flags | TurnTextToStarsDrawTextFlag;
         }
-        return drawText(contents, da, resources, border, appearCharacs, rect, combMaxLen, quadding, xref, resourcesDict, flags);
+        return drawText(contents, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, combMaxLen);
     }
 
     return true;
@@ -5213,7 +5213,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
         if (selected) {
-            return drawText(selected, da, resources, border, appearCharacs, rect, 0, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
+            return drawText(selected, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
