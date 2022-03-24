@@ -4303,9 +4303,11 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, bool multiline, int comb,
-                                      int quadding, bool txField, bool forceZapfDingbats, XRef *xref, bool password, Dict *resourcesDict, const char *defaultFallback)
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb,
+                                      const int quadding, XRef *xref, Dict *resourcesDict, const int flags)
 {
+    const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
+
     std::vector<GooString *> daToks;
     GooString *tok;
     GooString convertedText;
@@ -4361,7 +4363,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok->toStr(), defaultFallback);
+                    const char *fallback = determineFallbackFont(tok->toStr(), forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
                     // The font variable sometimes points to an object that needs to be deleted
                     // and sometimes not, depending on whether the call to lookupFont above fails.
                     // When the code path right here is taken, the destructor of fontToFree
@@ -4391,7 +4393,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     borderWidth = border ? border->getWidth() : 0;
 
     // for a password field, replace all characters with asterisks
-    if (password) {
+    if (flags & TurnTextToStarsDrawTextFlag) {
         int len;
         if (text->hasUnicodeMarker()) {
             len = (text->getLength() - 2) / 2;
@@ -4408,7 +4410,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     }
 
     // setup
-    if (txField) {
+    if (flags & EmitMarkedContentDrawTextFlag) {
         appearBuf->append("/Tx BMC\n");
     }
     appearBuf->append("q\n");
@@ -4436,7 +4438,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     }
     appearBuf->append("BT\n");
     // multi-line text
-    if (multiline) {
+    if (flags & MultilineDrawTextFlag) {
         // note: the comb flag is ignored in multiline mode
 
         wMax = dx - 2 * borderWidth - 4;
@@ -4680,7 +4682,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     // cleanup
     appearBuf->append("ET\n");
     appearBuf->append("Q\n");
-    if (txField) {
+    if (flags & EmitMarkedContentDrawTextFlag) {
         appearBuf->append("EMC\n");
     }
     for (auto entry : daToks) {
@@ -5016,7 +5018,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -5031,16 +5033,16 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     } break;
     case formButtonPush:
         if (caption) {
-            return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, false, xref, false, resourcesDict);
+            return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict);
         }
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(&checkMark, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
         }
         break;
@@ -5070,7 +5072,14 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
             comb = fieldText->getMaxLen();
         }
 
-        return drawText(contents, da, resources, border, appearCharacs, rect, fieldText->isMultiline(), comb, quadding, true, false, xref, fieldText->isPassword(), resourcesDict);
+        int flags = EmitMarkedContentDrawTextFlag;
+        if (fieldText->isMultiline()) {
+            flags = flags | MultilineDrawTextFlag;
+        }
+        if (fieldText->isPassword()) {
+            flags = flags | TurnTextToStarsDrawTextFlag;
+        }
+        return drawText(contents, da, resources, border, appearCharacs, rect, comb, quadding, xref, resourcesDict, flags);
     }
 
     return true;
@@ -5210,7 +5219,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
         if (selected) {
-            return drawText(selected, da, resources, border, appearCharacs, rect, false, 0, quadding, true, false, xref, false, resourcesDict);
+            return drawText(selected, da, resources, border, appearCharacs, rect, 0, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
