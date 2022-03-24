@@ -4511,7 +4511,6 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
     std::vector<std::string> daToks;
     const GfxFont *font;
-    double dx, dy;
     double fontSize;
     int tfPos, tmPos;
     bool freeText = false; // true if text should be freed before return
@@ -4601,28 +4600,28 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         appearBuf->append("/Tx BMC\n");
     }
     appearBuf->append("q\n");
-    const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
-    switch (rot) {
-    case 90:
-        appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
-        dx = rect->y2 - rect->y1;
-        dy = rect->x2 - rect->x1;
-        break;
-    case 180:
-        appearBuf->appendf("-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
-        dx = rect->x2 - rect->y2;
-        dy = rect->y2 - rect->y1;
-        break;
-    case 270:
-        appearBuf->appendf("0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
-        dx = rect->y2 - rect->y1;
-        dy = rect->x2 - rect->x1;
-        break;
-    default: // assume rot == 0
-        dx = rect->x2 - rect->x1;
-        dy = rect->y2 - rect->y1;
-        break;
-    }
+    auto calculateDxDy = [this, appearCharacs, rect]() -> std::tuple<double, double> {
+        const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
+        switch (rot) {
+        case 90:
+            appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
+            return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+
+        case 180:
+            appearBuf->appendf("-1 0 0 -1 {0:.2f} {1:.2f} cm\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
+            return { rect->x2 - rect->y2, rect->y2 - rect->y1 };
+
+        case 270:
+            appearBuf->appendf("0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
+            return { rect->y2 - rect->y1, rect->x2 - rect->x1 };
+
+        default: // assume rot == 0
+            return { rect->x2 - rect->x1, rect->y2 - rect->y1 };
+        }
+    };
+    const auto dxdy = calculateDxDy();
+    const double dx = std::get<0>(dxdy);
+    const double dy = std::get<1>(dxdy);
     appearBuf->append("BT\n");
     // multi-line text
     if (flags & MultilineDrawTextFlag) {
