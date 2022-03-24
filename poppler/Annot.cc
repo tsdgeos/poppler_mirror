@@ -4299,7 +4299,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb,
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int combMaxLen,
                                       const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
@@ -4435,7 +4435,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     appearBuf->append("BT\n");
     // multi-line text
     if (flags & MultilineDrawTextFlag) {
-        // note: the comb flag is ignored in multiline mode
+        // note: comb is ignored in multiline mode as mentioned in the spec
 
         wMax = dx - 2 * borderWidth - 4;
 
@@ -4520,11 +4520,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         //~ replace newlines with spaces? - what does Acrobat do?
 
         // comb formatting
-        if (comb > 0) {
+        if (combMaxLen > 0) {
             int charCount;
 
             // compute comb spacing
-            w = (dx - 2 * borderWidth) / comb;
+            w = (dx - 2 * borderWidth) / combMaxLen;
 
             // compute font autosize
             if (fontSize == 0) {
@@ -4540,10 +4540,10 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 }
             }
 
-            int i = 0;
-            Annot::layoutText(text, &convertedText, &i, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
-            if (charCount > comb) {
-                charCount = comb;
+            int dummy = 0;
+            Annot::layoutText(text, &convertedText, &dummy, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
+            if (charCount > combMaxLen) {
+                charCount = combMaxLen;
             }
 
             // compute starting text cell
@@ -4553,10 +4553,10 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 x = borderWidth;
                 break;
             case VariableTextQuadding::centered:
-                x = borderWidth + (comb - charCount) / 2.0 * w;
+                x = borderWidth + (combMaxLen - charCount) / 2.0 * w;
                 break;
             case VariableTextQuadding::rightJustified:
-                x = borderWidth + (comb - charCount) * w;
+                x = borderWidth + (combMaxLen - charCount) * w;
                 break;
             }
             y = 0.5 * dy - 0.4 * fontSize;
@@ -4572,8 +4572,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             // write the DA string
-            for (i = 0; i < (int)daToks.size(); ++i) {
-                appearBuf->append(daToks[i])->append(' ');
+            for (const GooString *daTok : daToks) {
+                appearBuf->append(daTok)->append(' ');
             }
 
             // write the font matrix (if not part of the DA string)
@@ -4584,9 +4584,9 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             // write the text string
             const char *s = convertedText.c_str();
             int len = convertedText.getLength();
-            i = 0;
+            int i = 0;
             xPrev = w; // so that first character is placed properly
-            while (i < comb && len > 0) {
+            while (i < combMaxLen && len > 0) {
                 CharCode code;
                 const Unicode *uAux;
                 int uLen, n;
@@ -5064,10 +5064,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
             quadding = VariableTextQuadding::leftJustified;
         }
 
-        int comb = 0;
-        if (fieldText->isComb()) {
-            comb = fieldText->getMaxLen();
-        }
+        const int combMaxLen = fieldText->isComb() ? fieldText->getMaxLen() : 0;
 
         int flags = EmitMarkedContentDrawTextFlag;
         if (fieldText->isMultiline()) {
@@ -5076,7 +5073,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         if (fieldText->isPassword()) {
             flags = flags | TurnTextToStarsDrawTextFlag;
         }
-        return drawText(contents, da, resources, border, appearCharacs, rect, comb, quadding, xref, resourcesDict, flags);
+        return drawText(contents, da, resources, border, appearCharacs, rect, combMaxLen, quadding, xref, resourcesDict, flags);
     }
 
     return true;

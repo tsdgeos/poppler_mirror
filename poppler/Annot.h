@@ -624,7 +624,7 @@ private:
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                                 XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically, bool centerHorizontally);
-    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb,
+    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int combMaxLen,
                   const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
