@@ -4305,13 +4305,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
     std::vector<GooString *> daToks;
-    GooString *tok;
     GooString convertedText;
     const GfxFont *font;
     double dx, dy;
-    double fontSize, borderWidth, x, xPrev, y, w, wMax;
-    int tfPos, tmPos, j;
-    int rot;
+    double fontSize;
+    int tfPos, tmPos;
     bool freeText = false; // true if text should be freed before return
     std::unique_ptr<const GfxFont> fontToFree = nullptr;
 
@@ -4328,9 +4326,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 ++i;
             }
             if (i < da->getLength()) {
-                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
-                    ;
-                }
+                int j;
+                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) { }
                 daToks.push_back(new GooString(da, i, j - i));
                 i = j;
             }
@@ -4348,7 +4345,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     font = nullptr;
     fontSize = 0;
     if (tfPos >= 0) {
-        tok = daToks[tfPos];
+        GooString *tok = daToks[tfPos];
         if (forceZapfDingbats) {
             assert(xref != nullptr);
             if (tok->cmp("/ZaDb")) {
@@ -4386,7 +4383,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     }
 
     // get the border width
-    borderWidth = border ? border->getWidth() : 0;
+    const double borderWidth = border ? border->getWidth() : 0;
 
     // for a password field, replace all characters with asterisks
     if (flags & TurnTextToStarsDrawTextFlag) {
@@ -4410,7 +4407,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         appearBuf->append("/Tx BMC\n");
     }
     appearBuf->append("q\n");
-    rot = appearCharacs ? appearCharacs->getRotation() : 0;
+    const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
     switch (rot) {
     case 90:
         appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
@@ -4437,15 +4434,15 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     if (flags & MultilineDrawTextFlag) {
         // note: comb is ignored in multiline mode as mentioned in the spec
 
-        wMax = dx - 2 * borderWidth - 4;
+        const double wMax = dx - 2 * borderWidth - 4;
 
         // compute font autosize
         if (fontSize == 0) {
             for (fontSize = 20; fontSize > 1; --fontSize) {
-                y = dy - 3;
+                double y = dy - 3;
                 int i = 0;
                 while (i < text->getLength()) {
-                    Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
+                    Annot::layoutText(text, &convertedText, &i, *font, nullptr, wMax / fontSize, nullptr, forceZapfDingbats);
                     y -= fontSize;
                 }
                 // approximate the descender for the last line
@@ -4454,7 +4451,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 }
             }
             if (tfPos >= 0) {
-                tok = daToks[tfPos + 1];
+                GooString *tok = daToks[tfPos + 1];
                 tok->clear();
                 tok->appendf("{0:.2f}", fontSize);
             }
@@ -4463,11 +4460,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         // starting y coordinate
         // (note: each line of text starts with a Td operator that moves
         // down a line)
-        y = dy - 3;
+        const double y = dy - 3;
 
         // set the font matrix
         if (tmPos >= 0) {
-            tok = daToks[tmPos + 4];
+            GooString *tok = daToks[tmPos + 4];
             tok->clear();
             tok->append('0');
             tok = daToks[tmPos + 5];
@@ -4487,24 +4484,25 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
         // write a series of lines of text
         int i = 0;
-        xPrev = 0;
+        double xPrev = 0;
         while (i < text->getLength()) {
+            double w;
             Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
             w *= fontSize;
 
             // compute text start position
-            switch (quadding) {
-            case VariableTextQuadding::leftJustified:
-            default:
-                x = borderWidth + 2;
-                break;
-            case VariableTextQuadding::centered:
-                x = (dx - w) / 2;
-                break;
-            case VariableTextQuadding::rightJustified:
-                x = dx - borderWidth - 2 - w;
-                break;
-            }
+            auto calculateX = [quadding, borderWidth, dx, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth + 2;
+                case VariableTextQuadding::centered:
+                    return (dx - w) / 2;
+                case VariableTextQuadding::rightJustified:
+                    return dx - borderWidth - 2 - w;
+                }
+            };
+            const double x = calculateX();
 
             // draw the line
             appearBuf->appendf("{0:.2f} {1:.2f} Td\n", x - xPrev, -fontSize);
@@ -4524,7 +4522,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             int charCount;
 
             // compute comb spacing
-            w = (dx - 2 * borderWidth) / combMaxLen;
+            const double w = (dx - 2 * borderWidth) / combMaxLen;
 
             // compute font autosize
             if (fontSize == 0) {
@@ -4534,7 +4532,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 }
                 fontSize = floor(fontSize);
                 if (tfPos >= 0) {
-                    tok = daToks[tfPos + 1];
+                    GooString *tok = daToks[tfPos + 1];
                     tok->clear();
                     tok->appendf("{0:.2f}", fontSize);
                 }
@@ -4547,23 +4545,23 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             // compute starting text cell
-            switch (quadding) {
-            case VariableTextQuadding::leftJustified:
-            default:
-                x = borderWidth;
-                break;
-            case VariableTextQuadding::centered:
-                x = borderWidth + (combMaxLen - charCount) / 2.0 * w;
-                break;
-            case VariableTextQuadding::rightJustified:
-                x = borderWidth + (combMaxLen - charCount) * w;
-                break;
-            }
-            y = 0.5 * dy - 0.4 * fontSize;
+            auto calculateX = [quadding, borderWidth, combMaxLen, charCount, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth;
+                case VariableTextQuadding::centered:
+                    return borderWidth + (combMaxLen - charCount) / 2.0 * w;
+                case VariableTextQuadding::rightJustified:
+                    return borderWidth + (combMaxLen - charCount) * w;
+                }
+            };
+            const double x = calculateX();
+            const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
             if (tmPos >= 0) {
-                tok = daToks[tmPos + 4];
+                GooString *tok = daToks[tmPos + 4];
                 tok->clear();
                 tok->appendf("{0:.2f}", x);
                 tok = daToks[tmPos + 5];
@@ -4585,7 +4583,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const char *s = convertedText.c_str();
             int len = convertedText.getLength();
             int i = 0;
-            xPrev = w; // so that first character is placed properly
+            double xPrev = w; // so that first character is placed properly
             while (i < combMaxLen && len > 0) {
                 CharCode code;
                 const Unicode *uAux;
@@ -4599,8 +4597,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 // center each character within its cell, by advancing the text
                 // position the appropriate amount relative to the start of the
                 // previous character
-                x = 0.5 * (w - char_dx);
-                appearBuf->appendf("{0:.2f} 0 Td\n", x - xPrev + w);
+                const double combX = 0.5 * (w - char_dx);
+                appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
 
                 GooString charBuf(s, n);
                 writeString(charBuf.toStr());
@@ -4609,12 +4607,13 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 i++;
                 s += n;
                 len -= n;
-                xPrev = x;
+                xPrev = combX;
             }
 
             // regular (non-comb) formatting
         } else {
             int ii = 0;
+            double w;
             Annot::layoutText(text, &convertedText, &ii, *font, &w, 0.0, nullptr, forceZapfDingbats);
 
             // compute font autosize
@@ -4628,7 +4627,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 }
                 fontSize = floor(fontSize);
                 if (tfPos >= 0) {
-                    tok = daToks[tfPos + 1];
+                    GooString *tok = daToks[tfPos + 1];
                     tok->clear();
                     tok->appendf("{0:.2f}", fontSize);
                 }
@@ -4636,23 +4635,23 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
             // compute text start position
             w *= fontSize;
-            switch (quadding) {
-            case VariableTextQuadding::leftJustified:
-            default:
-                x = borderWidth + 2;
-                break;
-            case VariableTextQuadding::centered:
-                x = (dx - w) / 2;
-                break;
-            case VariableTextQuadding::rightJustified:
-                x = dx - borderWidth - 2 - w;
-                break;
-            }
-            y = 0.5 * dy - 0.4 * fontSize;
+            auto calculateX = [quadding, borderWidth, dx, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth + 2;
+                case VariableTextQuadding::centered:
+                    return (dx - w) / 2;
+                case VariableTextQuadding::rightJustified:
+                    return dx - borderWidth - 2 - w;
+                }
+            };
+            const double x = calculateX();
+            const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
             if (tmPos >= 0) {
-                tok = daToks[tmPos + 4];
+                GooString *tok = daToks[tmPos + 4];
                 tok->clear();
                 tok->appendf("{0:.2f}", x);
                 tok = daToks[tmPos + 5];
@@ -4699,7 +4698,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     GooString *tok;
     GooString convertedText;
     const GfxFont *font;
-    double fontSize, borderWidth, x, y, w, wMax;
+    double fontSize, borderWidth, x, y;
     int tfPos, tmPos, i, j;
     std::unique_ptr<const GfxFont> fontToFree;
 
@@ -4771,7 +4770,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // compute font autosize
     if (fontSize == 0) {
-        wMax = 0;
+        double wMax = 0;
         for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
             j = 0;
             if (fieldChoice->getChoice(i) == nullptr) {
@@ -4781,6 +4780,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 }
                 return false;
             }
+            double w;
             Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
             if (w > wMax) {
                 wMax = w;
@@ -4815,6 +4815,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // compute text width and start position
         j = 0;
+        double w;
         Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
         switch (quadding) {
