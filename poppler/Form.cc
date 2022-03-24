@@ -915,7 +915,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     readOnly = false;
     defaultAppearance = nullptr;
     fullyQualifiedName = nullptr;
-    quadding = quaddingLeftJustified;
+    quadding = VariableTextQuadding::leftJustified;
     hasQuadding = false;
     standAlone = false;
 
@@ -998,8 +998,8 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = Form::fieldLookup(dict, "Q");
     if (obj1.isInt()) {
-        const int aux = obj1.getInt();
-        hasQuadding = aux == quaddingLeftJustified || aux == quaddingCentered || aux == quaddingRightJustified;
+        const VariableTextQuadding aux = static_cast<VariableTextQuadding>(obj1.getInt());
+        hasQuadding = aux == VariableTextQuadding::leftJustified || aux == VariableTextQuadding::centered || aux == VariableTextQuadding::rightJustified;
         if (likely(hasQuadding)) {
             quadding = static_cast<VariableTextQuadding>(aux);
         }
@@ -2498,7 +2498,7 @@ Form::Form(PDFDoc *doc)
     size = 0;
     numFields = 0;
     rootFields = nullptr;
-    quadding = quaddingLeftJustified;
+    quadding = VariableTextQuadding::leftJustified;
     defaultAppearance = nullptr;
     defaultResources = nullptr;
 
@@ -2513,8 +2513,8 @@ Form::Form(PDFDoc *doc)
 
     obj1 = acroForm->dictLookup("Q");
     if (obj1.isInt()) {
-        const int aux = obj1.getInt();
-        if (aux == quaddingLeftJustified || aux == quaddingCentered || aux == quaddingRightJustified) {
+        const VariableTextQuadding aux = static_cast<VariableTextQuadding>(obj1.getInt());
+        if (aux == VariableTextQuadding::leftJustified || aux == VariableTextQuadding::centered || aux == VariableTextQuadding::rightJustified) {
             quadding = static_cast<VariableTextQuadding>(aux);
         }
     }

@@ -129,10 +129,6 @@
 #define fieldFlagRadiosInUnison 0x02000000
 #define fieldFlagCommitOnSelChange 0x04000000
 
-#define fieldQuadLeft 0
-#define fieldQuadCenter 1
-#define fieldQuadRight 2
-
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
@@ -2868,9 +2864,9 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Q");
     if (obj1.isInt()) {
-        quadding = (AnnotFreeTextQuadding)obj1.getInt();
+        quadding = (VariableTextQuadding)obj1.getInt();
     } else {
-        quadding = quaddingLeftJustified;
+        quadding = VariableTextQuadding::leftJustified;
     }
 
     obj1 = dict->lookup("DS");
@@ -2951,7 +2947,7 @@ void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da)
     invalidateAppearance();
 }
 
-void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding)
+void AnnotFreeText::setQuadding(VariableTextQuadding new_quadding)
 {
     quadding = new_quadding;
     update("Q", Object((int)quadding));
@@ -3146,13 +3142,13 @@ void AnnotFreeText::generateFreeTextAppearance()
         layoutText(contents.get(), &out, &i, *font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
         linewidth *= da.getFontPtSize();
         switch (quadding) {
-        case quaddingCentered:
+        case VariableTextQuadding::centered:
             xpos = (textwidth - linewidth) / 2;
             break;
-        case quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             xpos = textwidth - linewidth;
             break;
-        default: // quaddingLeftJustified:
+        default: // VariableTextQuadding::leftJustified:
             xpos = 0;
             break;
         }
@@ -4304,7 +4300,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb,
-                                      const int quadding, XRef *xref, Dict *resourcesDict, const int flags)
+                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
@@ -4498,14 +4494,14 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
             // compute text start position
             switch (quadding) {
-            case quaddingLeftJustified:
+            case VariableTextQuadding::leftJustified:
             default:
                 x = borderWidth + 2;
                 break;
-            case quaddingCentered:
+            case VariableTextQuadding::centered:
                 x = (dx - w) / 2;
                 break;
-            case quaddingRightJustified:
+            case VariableTextQuadding::rightJustified:
                 x = dx - borderWidth - 2 - w;
                 break;
             }
@@ -4552,14 +4548,14 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
             // compute starting text cell
             switch (quadding) {
-            case quaddingLeftJustified:
+            case VariableTextQuadding::leftJustified:
             default:
                 x = borderWidth;
                 break;
-            case quaddingCentered:
+            case VariableTextQuadding::centered:
                 x = borderWidth + (comb - charCount) / 2.0 * w;
                 break;
-            case quaddingRightJustified:
+            case VariableTextQuadding::rightJustified:
                 x = borderWidth + (comb - charCount) * w;
                 break;
             }
@@ -4641,14 +4637,14 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             // compute text start position
             w *= fontSize;
             switch (quadding) {
-            case quaddingLeftJustified:
+            case VariableTextQuadding::leftJustified:
             default:
                 x = borderWidth + 2;
                 break;
-            case quaddingCentered:
+            case VariableTextQuadding::centered:
                 x = (dx - w) / 2;
                 break;
-            case quaddingRightJustified:
+            case VariableTextQuadding::rightJustified:
                 x = dx - borderWidth - 2 - w;
                 break;
             }
@@ -4696,7 +4692,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, int quadding, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
+                                         Dict *resourcesDict)
 {
     std::vector<GooString *> daToks;
     GooString *tok;
@@ -4821,14 +4818,14 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
         switch (quadding) {
-        case quaddingLeftJustified:
+        case VariableTextQuadding::leftJustified:
         default:
             x = borderWidth + 2;
             break;
-        case quaddingCentered:
+        case VariableTextQuadding::centered:
             x = (rect->x2 - rect->x1 - w) / 2;
             break;
-        case quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             x = rect->x2 - rect->x1 - borderWidth - 2 - w;
             break;
         }
@@ -5018,7 +5015,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -5033,16 +5030,16 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     } break;
     case formButtonPush:
         if (caption) {
-            return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict);
+            return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict);
         }
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(&checkMark, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, 0, fieldQuadCenter, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, da, resources, border, appearCharacs, rect, 0, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
         }
         break;
@@ -5064,7 +5061,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         } else if (form) {
             quadding = form->getTextQuadding();
         } else {
-            quadding = quaddingLeftJustified;
+            quadding = VariableTextQuadding::leftJustified;
         }
 
         int comb = 0;
@@ -5213,7 +5210,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     } else if (form) {
         quadding = form->getTextQuadding();
     } else {
-        quadding = quaddingLeftJustified;
+        quadding = VariableTextQuadding::leftJustified;
     }
 
     if (fieldChoice->isCombo()) {

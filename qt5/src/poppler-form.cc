@@ -64,13 +64,13 @@ Qt::Alignment formTextAlignment(::FormWidget *fm)
 {
     Qt::Alignment qtalign = Qt::AlignLeft;
     switch (fm->getField()->getTextQuadding()) {
-    case quaddingCentered:
+    case VariableTextQuadding::centered:
         qtalign = Qt::AlignHCenter;
         break;
-    case quaddingRightJustified:
+    case VariableTextQuadding::rightJustified:
         qtalign = Qt::AlignRight;
         break;
-    case quaddingLeftJustified:
+    case VariableTextQuadding::leftJustified:
         qtalign = Qt::AlignLeft;
     }
     return qtalign;

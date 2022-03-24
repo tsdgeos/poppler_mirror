@@ -1587,11 +1587,11 @@ PopplerAnnotFreeTextQuadding poppler_annot_free_text_get_quadding(PopplerAnnotFr
     annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     switch (annot->getQuadding()) {
-    case AnnotFreeText::quaddingLeftJustified:
+    case VariableTextQuadding::leftJustified:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED;
-    case AnnotFreeText::quaddingCentered:
+    case VariableTextQuadding::centered:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED;
-    case AnnotFreeText::quaddingRightJustified:
+    case VariableTextQuadding::rightJustified:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED;
     default:
         g_warning("Unsupported Annot Free Text Quadding");

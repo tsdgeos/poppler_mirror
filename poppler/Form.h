@@ -71,13 +71,6 @@ enum FormButtonType
     formButtonRadio
 };
 
-enum VariableTextQuadding
-{
-    quaddingLeftJustified,
-    quaddingCentered,
-    quaddingRightJustified
-};
-
 enum FormSignatureType
 {
     adbe_pkcs7_sha1,

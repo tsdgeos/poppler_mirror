@@ -1775,11 +1775,11 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
         switch (ftextann->getQuadding()) {
-        case AnnotFreeText::quaddingLeftJustified:
+        case VariableTextQuadding::leftJustified:
             return InplaceAlignLeft;
-        case AnnotFreeText::quaddingCentered:
+        case VariableTextQuadding::centered:
             return InplaceAlignCenter;
-        case AnnotFreeText::quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             return InplaceAlignRight;
         }
     }
@@ -1787,17 +1787,17 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
     return InplaceAlignLeft;
 }
 
-static AnnotFreeText::AnnotFreeTextQuadding alignToQuadding(TextAnnotation::InplaceAlignPosition align)
+static VariableTextQuadding alignToQuadding(TextAnnotation::InplaceAlignPosition align)
 {
     switch (align) {
     case TextAnnotation::InplaceAlignLeft:
-        return AnnotFreeText::quaddingLeftJustified;
+        return VariableTextQuadding::leftJustified;
     case TextAnnotation::InplaceAlignCenter:
-        return AnnotFreeText::quaddingCentered;
+        return VariableTextQuadding::centered;
     case TextAnnotation::InplaceAlignRight:
-        return AnnotFreeText::quaddingRightJustified;
+        return VariableTextQuadding::rightJustified;
     }
-    return AnnotFreeText::quaddingLeftJustified;
+    return VariableTextQuadding::leftJustified;
 }
 
 void TextAnnotation::setInplaceAlign(InplaceAlignPosition align)

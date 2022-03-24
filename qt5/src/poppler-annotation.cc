@@ -2238,7 +2238,7 @@ int TextAnnotation::inplaceAlign() const
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
-        return ftextann->getQuadding();
+        return static_cast<int>(ftextann->getQuadding());
     }
 
     return 0;
@@ -2255,7 +2255,7 @@ void TextAnnotation::setInplaceAlign(int align)
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot);
-        ftextann->setQuadding((AnnotFreeText::AnnotFreeTextQuadding)align);
+        ftextann->setQuadding((VariableTextQuadding)align);
     }
 }
 

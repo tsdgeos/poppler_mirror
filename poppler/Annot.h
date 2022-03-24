@@ -100,6 +100,13 @@ enum AnnotExternalDataType
     annotExternalDataMarkup3D // Markup3D
 };
 
+enum class VariableTextQuadding
+{
+    leftJustified,
+    centered,
+    rightJustified
+};
+
 //------------------------------------------------------------------------
 // AnnotCoord
 //------------------------------------------------------------------------
@@ -562,6 +569,7 @@ private:
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
 class Matrix;
+
 class AnnotAppearanceBuilder
 {
 public:
@@ -606,7 +614,7 @@ private:
         TurnTextToStarsDrawTextFlag = 8
     };
 
-    bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, int quadding, XRef *xref, Dict *resourcesDict);
+    bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
     bool drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState,
                              XRef *xref, Dict *resourcesDict);
     bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
@@ -616,8 +624,8 @@ private:
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                                 XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically, bool centerHorizontally);
-    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb, const int quadding, XRef *xref,
-                  Dict *resourcesDict, const int flags = NoDrawTextFlags);
+    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const int comb,
+                  const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     GooString *appearBuf;
@@ -1038,13 +1046,6 @@ protected:
 class POPPLER_PRIVATE_EXPORT AnnotFreeText : public AnnotMarkup
 {
 public:
-    enum AnnotFreeTextQuadding
-    {
-        quaddingLeftJustified, // 0
-        quaddingCentered, // 1
-        quaddingRightJustified // 2
-    };
-
     enum AnnotFreeTextIntent
     {
         intentFreeText, // FreeText
@@ -1063,14 +1064,14 @@ public:
     void setContents(std::unique_ptr<GooString> &&new_content) override;
 
     void setDefaultAppearance(const DefaultAppearance &da);
-    void setQuadding(AnnotFreeTextQuadding new_quadding);
+    void setQuadding(VariableTextQuadding new_quadding);
     void setStyleString(GooString *new_string);
     void setCalloutLine(AnnotCalloutLine *line);
     void setIntent(AnnotFreeTextIntent new_intent);
 
     // getters
     std::unique_ptr<DefaultAppearance> getDefaultAppearance() const;
-    AnnotFreeTextQuadding getQuadding() const { return quadding; }
+    VariableTextQuadding getQuadding() const { return quadding; }
     // return rc
     const GooString *getStyleString() const { return styleString.get(); }
     AnnotCalloutLine *getCalloutLine() const { return calloutLine.get(); }
@@ -1087,7 +1088,7 @@ protected:
     std::unique_ptr<GooString> appearanceString; // DA
 
     // optional
-    AnnotFreeTextQuadding quadding; // Q  (Default 0)
+    VariableTextQuadding quadding; // Q  (Default 0)
     // RC
     std::unique_ptr<GooString> styleString; // DS
     std::unique_ptr<AnnotCalloutLine> calloutLine; // CL
