@@ -4366,6 +4366,12 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         return false;
     }
 
+    if (tmPos < 0) {
+        // Add fake Tm to the DA tokens
+        tmPos = daToks.size();
+        daToks.insert(daToks.end(), { "1", "0", "0", "1", "0", "0", "Tm" });
+    }
+
     // get the border width
     const double borderWidth = border ? border->getWidth() : 0;
 
@@ -4443,19 +4449,12 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         const double y = dy - 3;
 
         // set the font matrix
-        if (tmPos >= 0) {
-            daToks[tmPos + 4] = "0";
-            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
-        }
+        daToks[tmPos + 4] = "0";
+        daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
         // write the DA string
         for (const std::string &daTok : daToks) {
             appearBuf->append(daTok)->append(' ');
-        }
-
-        // write the font matrix (if not part of the DA string)
-        if (tmPos < 0) {
-            appearBuf->appendf("1 0 0 1 0 {0:.2f} Tm\n", y);
         }
 
         // write a series of lines of text
@@ -4532,19 +4531,12 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            if (tmPos >= 0) {
-                daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-                daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
-            }
+            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
                 appearBuf->append(daTok)->append(' ');
-            }
-
-            // write the font matrix (if not part of the DA string)
-            if (tmPos < 0) {
-                appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
             }
 
             // write the text string
@@ -4614,20 +4606,16 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            if (tmPos >= 0) {
-                daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-                daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
-            }
+            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
                 appearBuf->append(daTok)->append(' ');
             }
-
-            // write the font matrix (if not part of the DA string)
-            if (tmPos < 0) {
-                appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
-            }
+            // This newline is not neeed at all but it makes for easier reading
+            // and our auto tests "wrongly" assume it will be there, so add it anyway
+            appearBuf->append("\n");
 
             // write the text string
             writeString(convertedText.toStr());
