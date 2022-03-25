@@ -4434,9 +4434,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     break;
                 }
             }
-            if (tfPos >= 0) {
-                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
-            }
+            daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
         }
 
         // starting y coordinate
@@ -4509,9 +4507,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                if (tfPos >= 0) {
-                    daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
-                }
+                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
             }
 
             int dummy = 0;
@@ -4598,9 +4594,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     }
                 }
                 fontSize = floor(fontSize);
-                if (tfPos >= 0) {
-                    daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
-                }
+                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
             }
 
             // compute text start position
