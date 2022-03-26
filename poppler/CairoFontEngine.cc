@@ -281,7 +281,7 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
 {
     const char *fileNameC;
-    std::vector<unsigned char> font_data;
+    std::optional<std::vector<unsigned char>> font_data;
     int i, n;
     GfxFontType fontType;
     std::optional<GfxFontLoc> fontLoc;
@@ -315,7 +315,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     // embedded font
     if (fontLoc->locType == gfxFontLocEmbedded) {
         font_data = gfxFont->readEmbFontFile(xref);
-        if (font_data.empty()) {
+        if (!font_data) {
             goto err2;
         }
 
@@ -334,7 +334,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     case fontType1:
     case fontType1C:
     case fontType1COT:
-        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data), &face, &font_face)) {
+        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data.value()), &face, &font_face)) {
             error(errSyntaxError, -1, "could not create type1 face");
             goto err2;
         }
@@ -373,8 +373,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
             }
         } else {
             std::unique_ptr<FoFiTrueType> ff;
-            if (!font_data.empty()) {
-                ff = FoFiTrueType::make(font_data.data(), font_data.size());
+            if (font_data) {
+                ff = FoFiTrueType::make(font_data->data(), font_data->size());
             } else {
                 ff = FoFiTrueType::load(fileNameC);
             }
@@ -388,8 +388,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
     case fontTrueType:
     case fontTrueTypeOT: {
         std::unique_ptr<FoFiTrueType> ff;
-        if (!font_data.empty()) {
-            ff = FoFiTrueType::make(font_data.data(), font_data.size());
+        if (font_data) {
+            ff = FoFiTrueType::make(font_data->data(), font_data->size());
         } else {
             ff = FoFiTrueType::load(fileNameC);
         }
@@ -402,7 +402,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
             codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
             codeToGIDLen = 256;
         }
-        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data), &face, &font_face)) {
+        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data.value()), &face, &font_face)) {
             error(errSyntaxError, -1, "could not create truetype face\n");
             goto err2;
         }
@@ -415,8 +415,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         codeToGIDLen = 0;
 
         if (!useCIDs) {
-            if (!font_data.empty()) {
-                ff1c = FoFiType1C::make(font_data.data(), font_data.size());
+            if (font_data) {
+                ff1c = FoFiType1C::make(font_data->data(), font_data->size());
             } else {
                 ff1c = FoFiType1C::load(fileNameC);
             }
@@ -426,7 +426,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
             }
         }
 
-        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data), &face, &font_face)) {
+        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data.value()), &face, &font_face)) {
             error(errSyntaxError, -1, "could not create cid face\n");
             goto err2;
         }
@@ -447,8 +447,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
         if (!codeToGID) {
             if (!useCIDs) {
                 std::unique_ptr<FoFiTrueType> ff;
-                if (!font_data.empty()) {
-                    ff = FoFiTrueType::make(font_data.data(), font_data.size());
+                if (font_data) {
+                    ff = FoFiTrueType::make(font_data->data(), font_data->size());
                 } else {
                     ff = FoFiTrueType::load(fileNameC);
                 }
@@ -459,7 +459,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
                 }
             }
         }
-        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data), &face, &font_face)) {
+        if (!_ft_new_face(lib, fileNameC, embFontID, std::move(font_data.value()), &face, &font_face)) {
             error(errSyntaxError, -1, "could not create cid (OT) face\n");
             goto err2;
         }

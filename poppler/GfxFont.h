@@ -279,7 +279,7 @@ public:
     std::optional<GfxFontLoc> locateFont(XRef *xref, PSOutputDev *ps);
 
     // Read an external or embedded font file into a buffer.
-    std::vector<unsigned char> readEmbFontFile(XRef *xref);
+    std::optional<std::vector<unsigned char>> readEmbFontFile(XRef *xref);
 
     // Get the next char from a string <s> of <len> bytes, returning the
     // char <code>, its Unicode mapping <u>, its displacement vector

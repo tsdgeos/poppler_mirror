@@ -819,7 +819,7 @@ std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
     return std::move(fontLoc); // std::move only required to please g++-7
 }
 
-std::vector<unsigned char> GfxFont::readEmbFontFile(XRef *xref)
+std::optional<std::vector<unsigned char>> GfxFont::readEmbFontFile(XRef *xref)
 {
     Stream *str;
 
@@ -828,7 +828,7 @@ std::vector<unsigned char> GfxFont::readEmbFontFile(XRef *xref)
     if (!obj2.isStream()) {
         error(errSyntaxError, -1, "Embedded font file is not a stream");
         embFontID = Ref::INVALID();
-        return std::vector<unsigned char> {};
+        return {};
     }
     str = obj2.getStream();
 
@@ -1124,9 +1124,9 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     ffT1 = nullptr;
     ffT1C = nullptr;
     if (type == fontType1 && embFontID != Ref::INVALID()) {
-        const std::vector<unsigned char> buf = readEmbFontFile(xref);
-        if (!buf.empty()) {
-            if ((ffT1 = FoFiType1::make(buf.data(), buf.size()))) {
+        const std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
+        if (buf) {
+            if ((ffT1 = FoFiType1::make(buf->data(), buf->size()))) {
                 if (ffT1->getName()) {
                     if (embFontName) {
                         delete embFontName;
@@ -1140,9 +1140,9 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
             }
         }
     } else if (type == fontType1C && embFontID != Ref::INVALID()) {
-        const std::vector<unsigned char> buf = readEmbFontFile(xref);
-        if (!buf.empty()) {
-            if ((ffT1C = FoFiType1C::make(buf.data(), buf.size()))) {
+        const std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
+        if (buf) {
+            if ((ffT1C = FoFiType1C::make(buf->data(), buf->size()))) {
                 if (ffT1C->getName()) {
                     if (embFontName) {
                         delete embFontName;

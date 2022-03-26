@@ -2395,9 +2395,9 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     embFontList->append("\n");
 
     // convert it to a Type 1 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if ((ffT1C = FoFiType1C::make(fontBuf.data(), fontBuf.size()))) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if ((ffT1C = FoFiType1C::make(fontBuf->data(), fontBuf->size()))) {
             ffT1C->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
             delete ffT1C;
         }
@@ -2434,9 +2434,9 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 1 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (ffTT->isOpenTypeCFF()) {
                 ffTT->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
             }
@@ -2458,9 +2458,9 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
     embFontList->append("\n");
 
     // convert it to a Type 42 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
             ffTT->convertToType42(psName->c_str(), ((Gfx8BitFont *)font)->getHasEncoding() ? ((Gfx8BitFont *)font)->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
             if (codeToGID) {
@@ -2595,9 +2595,9 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if ((ffT1C = FoFiType1C::make(fontBuf.data(), fontBuf.size()))) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if ((ffT1C = FoFiType1C::make(fontBuf->data(), fontBuf->size()))) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffT1C->convertToCIDType0(psName->c_str(), nullptr, 0, outputFunc, outputStream);
@@ -2622,9 +2622,9 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffTT->convertToCIDType2(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), needVerticalMetrics, outputFunc, outputStream);
@@ -2668,9 +2668,9 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (ffTT->isOpenTypeCFF()) {
                 if (level >= psLevel3) {
                     // Level 3: use a CID font

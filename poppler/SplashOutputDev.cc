@@ -1892,12 +1892,12 @@ reload:
 
         // embedded font
         std::string fileName;
-        std::vector<unsigned char> tmpBuf;
+        std::optional<std::vector<unsigned char>> tmpBuf;
 
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
             tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef());
-            if (tmpBuf.empty()) {
+            if (!tmpBuf) {
                 goto err2;
             }
 
@@ -1912,7 +1912,7 @@ reload:
         if (!fileName.empty()) {
             fontsrc->setFile(fileName);
         } else {
-            fontsrc->setBuf(std::move(tmpBuf));
+            fontsrc->setBuf(std::move(tmpBuf.value()));
         }
 
         // load the font file
