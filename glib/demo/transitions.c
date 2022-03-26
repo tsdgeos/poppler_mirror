@@ -45,8 +45,9 @@ typedef struct
 
 static void pgd_transitions_free(PgdTransitionsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->idle_id > 0) {
         g_source_remove(demo->idle_id);
@@ -129,12 +130,14 @@ static gboolean pgd_transitions_fill_model(PgdTransitionsDemo *demo)
 
         pgd_transitions_update_progress(demo, n_pages, i);
 
-        while (gtk_events_pending())
+        while (gtk_events_pending()) {
             gtk_main_iteration();
+        }
 
         page = poppler_document_get_page(demo->doc, i);
-        if (!page)
+        if (!page) {
             continue;
+        }
 
         transition = poppler_page_get_transition(page);
         if (transition) {
@@ -172,8 +175,9 @@ static gboolean pgd_transitions_fill_model(PgdTransitionsDemo *demo)
 
 static void pgd_transitions_scan_button_clicked(GtkButton *button, PgdTransitionsDemo *demo)
 {
-    if (demo->idle_id > 0)
+    if (demo->idle_id > 0) {
         g_source_remove(demo->idle_id);
+    }
 
     demo->idle_id = g_idle_add((GSourceFunc)pgd_transitions_fill_model, demo);
 }

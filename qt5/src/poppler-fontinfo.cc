@@ -111,8 +111,9 @@ QString FontInfo::typeName() const
 
 FontInfo &FontInfo::operator=(const FontInfo &fi)
 {
-    if (this == &fi)
+    if (this == &fi) {
         return *this;
+    }
 
     *m_data = *fi.m_data;
     return *this;

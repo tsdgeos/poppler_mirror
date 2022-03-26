@@ -582,8 +582,9 @@ Unicode GlobalParams::mapNameToUnicodeAll(const char *charName)
 {
     // no need to lock - nameToUnicodeZapfDingbats and nameToUnicodeText are constant
     Unicode u = nameToUnicodeZapfDingbats->lookup(charName);
-    if (!u)
+    if (!u) {
         u = nameToUnicodeText->lookup(charName);
+    }
     return u;
 }
 
@@ -660,13 +661,15 @@ static bool findModifier(const char *name, const char *modifier, const char **st
 {
     const char *match;
 
-    if (name == nullptr)
+    if (name == nullptr) {
         return false;
+    }
 
     match = strstr(name, modifier);
     if (match) {
-        if (*start == nullptr || match < *start)
+        if (*start == nullptr || match < *start) {
             *start = match;
+        }
         return true;
     } else {
         return false;
@@ -681,28 +684,30 @@ static const char *getFontLang(const GfxFont *font)
     if (font->isCIDFont()) {
         const GooString *collection = ((GfxCIDFont *)font)->getCollection();
         if (collection) {
-            if (strcmp(collection->c_str(), "Adobe-GB1") == 0)
+            if (strcmp(collection->c_str(), "Adobe-GB1") == 0) {
                 lang = "zh-cn"; // Simplified Chinese
-            else if (strcmp(collection->c_str(), "Adobe-CNS1") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-CNS1") == 0) {
                 lang = "zh-tw"; // Traditional Chinese
-            else if (strcmp(collection->c_str(), "Adobe-Japan1") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-Japan1") == 0) {
                 lang = "ja"; // Japanese
-            else if (strcmp(collection->c_str(), "Adobe-Japan2") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-Japan2") == 0) {
                 lang = "ja"; // Japanese
-            else if (strcmp(collection->c_str(), "Adobe-Korea1") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-Korea1") == 0) {
                 lang = "ko"; // Korean
-            else if (strcmp(collection->c_str(), "Adobe-UCS") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-UCS") == 0) {
                 lang = "xx";
-            else if (strcmp(collection->c_str(), "Adobe-Identity") == 0)
+            } else if (strcmp(collection->c_str(), "Adobe-Identity") == 0) {
                 lang = "xx";
-            else {
+            } else {
                 error(errUnimplemented, -1, "Unknown CID font collection, please report to poppler bugzilla.");
                 lang = "xx";
             }
-        } else
+        } else {
             lang = "xx";
-    } else
+        }
+    } else {
         lang = "xx";
+    }
     return lang;
 }
 
@@ -717,31 +722,39 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     char *fontName = strdup(((base14Name == nullptr) ? font->getNameWithoutSubsetTag() : base14Name->toStr()).c_str());
 
     const char *modifiers = strchr(fontName, ',');
-    if (modifiers == nullptr)
+    if (modifiers == nullptr) {
         modifiers = strchr(fontName, '-');
+    }
 
     // remove the - from the names, for some reason, Fontconfig does not
     // understand "MS-Mincho" but does with "MS Mincho"
     const int len = strlen(fontName);
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
         fontName[i] = (fontName[i] == '-' ? ' ' : fontName[i]);
+    }
 
     start = nullptr;
     findModifier(modifiers, "Regular", &start);
     findModifier(modifiers, "Roman", &start);
 
-    if (findModifier(modifiers, "Oblique", &start))
+    if (findModifier(modifiers, "Oblique", &start)) {
         slant = FC_SLANT_OBLIQUE;
-    if (findModifier(modifiers, "Italic", &start))
+    }
+    if (findModifier(modifiers, "Italic", &start)) {
         slant = FC_SLANT_ITALIC;
-    if (findModifier(modifiers, "Bold", &start))
+    }
+    if (findModifier(modifiers, "Bold", &start)) {
         weight = FC_WEIGHT_BOLD;
-    if (findModifier(modifiers, "Light", &start))
+    }
+    if (findModifier(modifiers, "Light", &start)) {
         weight = FC_WEIGHT_LIGHT;
-    if (findModifier(modifiers, "Medium", &start))
+    }
+    if (findModifier(modifiers, "Medium", &start)) {
         weight = FC_WEIGHT_MEDIUM;
-    if (findModifier(modifiers, "Condensed", &start))
+    }
+    if (findModifier(modifiers, "Condensed", &start)) {
         width = FC_WIDTH_CONDENSED;
+    }
 
     if (start) {
         // There have been "modifiers" in the name, crop them to obtain
@@ -755,12 +768,15 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     }
 
     // use font flags
-    if (font->isFixedWidth())
+    if (font->isFixedWidth()) {
         spacing = FC_MONO;
-    if (font->isBold())
+    }
+    if (font->isBold()) {
         weight = FC_WEIGHT_BOLD;
-    if (font->isItalic())
+    }
+    if (font->isItalic()) {
         slant = FC_SLANT_ITALIC;
+    }
 
     bool freeFamily = true;
     // if the FontDescriptor specified a family name use it
@@ -839,17 +855,22 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     const char *lang = getFontLang(font);
 
     p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family, FC_LANG, FcTypeString, lang, NULL);
-    if (slant != -1)
+    if (slant != -1) {
         FcPatternAddInteger(p, FC_SLANT, slant);
-    if (weight != -1)
+    }
+    if (weight != -1) {
         FcPatternAddInteger(p, FC_WEIGHT, weight);
-    if (width != -1)
+    }
+    if (width != -1) {
         FcPatternAddInteger(p, FC_WIDTH, width);
-    if (spacing != -1)
+    }
+    if (spacing != -1) {
         FcPatternAddInteger(p, FC_SPACING, spacing);
+    }
 
-    if (freeFamily)
+    if (freeFamily) {
         free((char *)family);
+    }
     return p;
 }
 #endif
@@ -890,8 +911,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     GooString *path = nullptr;
     const GooString *fontName = font->getName();
     GooString substituteName;
-    if (!fontName)
+    if (!fontName) {
         return nullptr;
+    }
 
     globalParamsLocker();
 
@@ -909,13 +931,15 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         FcLangSet *lb = nullptr;
         p = buildFcPattern(font, base14Name);
 
-        if (!p)
+        if (!p) {
             goto fin;
+        }
         FcConfigSubstitute(nullptr, p, FcMatchPattern);
         FcDefaultSubstitute(p);
         set = FcFontSort(nullptr, p, FcFalse, nullptr, &res);
-        if (!set)
+        if (!set) {
             goto fin;
+        }
 
         // find the language we want the font to support
         const char *lang = getFontLang(font);
@@ -932,8 +956,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         while (fi == nullptr) {
             for (i = 0; i < set->nfont; ++i) {
                 res = FcPatternGetString(set->fonts[i], FC_FILE, 0, &s);
-                if (res != FcResultMatch || !s)
+                if (res != FcResultMatch || !s) {
                     continue;
+                }
                 if (lb != nullptr) {
                     FcLangSet *l;
                     res = FcPatternGetLangSet(set->fonts[i], FC_LANG, 0, &l);
@@ -963,8 +988,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     }
                 }
                 ext = strrchr((char *)s, '.');
-                if (!ext)
+                if (!ext) {
                     continue;
+                }
                 if (!strncasecmp(ext, ".ttf", 4) || !strncasecmp(ext, ".ttc", 4) || !strncasecmp(ext, ".otf", 4)) {
                     int weight, slant;
                     bool bold = font->isBold();
@@ -975,10 +1001,12 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD || weight == FC_WEIGHT_EXTRABOLD || weight == FC_WEIGHT_BLACK) {
                         bold = true;
                     }
-                    if (slant == FC_SLANT_ITALIC)
+                    if (slant == FC_SLANT_ITALIC) {
                         italic = true;
-                    if (slant == FC_SLANT_OBLIQUE)
+                    }
+                    if (slant == FC_SLANT_OBLIQUE) {
                         oblique = true;
+                    }
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
@@ -996,10 +1024,12 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD || weight == FC_WEIGHT_EXTRABOLD || weight == FC_WEIGHT_BLACK) {
                         bold = true;
                     }
-                    if (slant == FC_SLANT_ITALIC)
+                    if (slant == FC_SLANT_ITALIC) {
                         italic = true;
-                    if (slant == FC_SLANT_OBLIQUE)
+                    }
+                    if (slant == FC_SLANT_OBLIQUE) {
                         oblique = true;
+                    }
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
@@ -1007,8 +1037,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = new GooString((char *)s);
-                } else
+                } else {
                     continue;
+                }
                 break;
             }
             if (lb != nullptr) {
@@ -1030,8 +1061,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         substituteFontName->Set(substituteName.c_str());
     }
 fin:
-    if (p)
+    if (p) {
         FcPatternDestroy(p);
+    }
 
     return path;
 }

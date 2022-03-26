@@ -44,8 +44,9 @@ GQuark poppler_error_quark(void)
 {
     static GQuark q = 0;
 
-    if (q == 0)
+    if (q == 0) {
         q = g_quark_from_static_string("poppler-quark");
+    }
 
     return q;
 }
@@ -86,8 +87,9 @@ void _poppler_error_cb(ErrorCategory category, Goffset pos, const char *message)
     static const char *const cat_str[] = { "Syntax warning", "Syntax error", nullptr, nullptr, "IO error", nullptr, "Unimplemented feature", "Internal error" };
 
     /* The following will never occur in poppler-glib */
-    if (category == errConfig || category == errCommandLine || category == errNotAllowed)
+    if (category == errConfig || category == errCommandLine || category == errNotAllowed) {
         return;
+    }
 
     g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "%s at position %" G_GOFFSET_FORMAT ": %s", cat_str[category], (goffset)pos, message);
 }

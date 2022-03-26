@@ -71,8 +71,9 @@ void PDFDisplay::display()
                 for (const std::unique_ptr<Poppler::TextBox> &tb : textRects) {
                     painter.drawRect(tb->boundingBox());
                 }
-            } else
+            } else {
                 textRects.clear();
+            }
             update();
         }
     } else {

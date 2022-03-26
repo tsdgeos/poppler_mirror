@@ -303,23 +303,27 @@ static SECStatus my_SEC_StringToOID(SECItem *to, const char *from, PRUint32 len)
         while (len > 0 && (*from >= '0' && *from <= '9')) {
             PRUint32 addend = *from++ - '0';
             --len;
-            if (decimal > max_decimal) /* overflow */
+            if (decimal > max_decimal) { /* overflow */
                 goto bad_data;
+            }
             decimal = (decimal * 10) + addend;
-            if (decimal < addend) /* overflow */
+            if (decimal < addend) { /* overflow */
                 goto bad_data;
+            }
         }
         if (len != 0 && *from != '.') {
             goto bad_data;
         }
         if (decimal_numbers == 0) {
-            if (decimal > 2)
+            if (decimal > 2) {
                 goto bad_data;
+            }
             result[0] = decimal * 40;
             result_bytes = 1;
         } else if (decimal_numbers == 1) {
-            if (decimal > 40)
+            if (decimal > 40) {
                 goto bad_data;
+            }
             result[0] += decimal;
         } else {
             /* encode the decimal number,  */
@@ -330,10 +334,12 @@ static SECStatus my_SEC_StringToOID(SECItem *to, const char *from, PRUint32 len)
                 num_bytes++;
                 tmp >>= 7;
             }
-            if (!num_bytes)
+            if (!num_bytes) {
                 ++num_bytes; /* use one byte for a zero value */
-            if (num_bytes + result_bytes > sizeof result)
+            }
+            if (num_bytes + result_bytes > sizeof result) {
                 goto bad_data;
+            }
             tmp = num_bytes;
             rp = result + result_bytes - 1;
             rp[tmp] = static_cast<PRUint8>(decimal & 0x7f);
@@ -369,31 +375,38 @@ static NSSCMSAttribute *my_NSS_CMSAttributeArray_FindAttrByOidTag(NSSCMSAttribut
     SECOidData *oid;
     NSSCMSAttribute *attr1, *attr2;
 
-    if (attrs == nullptr)
+    if (attrs == nullptr) {
         return nullptr;
+    }
 
     oid = SECOID_FindOIDByTag(oidtag);
-    if (oid == nullptr)
+    if (oid == nullptr) {
         return nullptr;
+    }
 
     while ((attr1 = *attrs++) != nullptr) {
-        if (attr1->type.len == oid->oid.len && PORT_Memcmp(attr1->type.data, oid->oid.data, oid->oid.len) == 0)
+        if (attr1->type.len == oid->oid.len && PORT_Memcmp(attr1->type.data, oid->oid.data, oid->oid.len) == 0) {
             break;
+        }
     }
 
-    if (attr1 == nullptr)
+    if (attr1 == nullptr) {
         return nullptr;
+    }
 
-    if (!only)
+    if (!only) {
         return attr1;
+    }
 
     while ((attr2 = *attrs++) != nullptr) {
-        if (attr2->type.len == oid->oid.len && PORT_Memcmp(attr2->type.data, oid->oid.data, oid->oid.len) == 0)
+        if (attr2->type.len == oid->oid.len && PORT_Memcmp(attr2->type.data, oid->oid.data, oid->oid.len) == 0) {
             break;
+        }
     }
 
-    if (attr2 != nullptr)
+    if (attr2 != nullptr) {
         return nullptr;
+    }
 
     return attr1;
 }
@@ -404,20 +417,23 @@ static SECStatus my_NSS_CMSArray_Add(PLArenaPool *poolp, void ***array, void *ob
     void **dest;
 
     PORT_Assert(array != NULL);
-    if (array == nullptr)
+    if (array == nullptr) {
         return SECFailure;
+    }
 
     if (*array == nullptr) {
         dest = static_cast<void **>(PORT_ArenaAlloc(poolp, 2 * sizeof(void *)));
     } else {
         void **p = *array;
-        while (*p++)
+        while (*p++) {
             n++;
+        }
         dest = static_cast<void **>(PORT_ArenaGrow(poolp, *array, (n + 1) * sizeof(void *), (n + 2) * sizeof(void *)));
     }
 
-    if (dest == nullptr)
+    if (dest == nullptr) {
         return SECFailure;
+    }
 
     dest[n] = obj;
     dest[n + 1] = nullptr;
@@ -430,8 +446,9 @@ static SECOidTag my_NSS_CMSAttribute_GetType(NSSCMSAttribute *attr)
     SECOidData *typetag;
 
     typetag = SECOID_FindOID(&(attr->type));
-    if (typetag == nullptr)
+    if (typetag == nullptr) {
         return SEC_OID_UNKNOWN;
+    }
 
     return typetag->offset;
 }
@@ -450,12 +467,14 @@ static SECStatus my_NSS_CMSAttributeArray_AddAttr(PLArenaPool *poolp, NSSCMSAttr
     /* see if we have one already */
     oattr = my_NSS_CMSAttributeArray_FindAttrByOidTag(*attrs, type, PR_FALSE);
     PORT_Assert(oattr == NULL);
-    if (oattr != nullptr)
+    if (oattr != nullptr) {
         goto loser; /* XXX or would it be better to replace it? */
+    }
 
     /* no, shove it in */
-    if (my_NSS_CMSArray_Add(poolp, reinterpret_cast<void ***>(attrs), static_cast<void *>(attr)) != SECSuccess)
+    if (my_NSS_CMSArray_Add(poolp, reinterpret_cast<void ***>(attrs), static_cast<void *>(attr)) != SECSuccess) {
         goto loser;
+    }
 
     PORT_ArenaUnmark(poolp, mark);
     return SECSuccess;
@@ -506,14 +525,17 @@ std::string SignatureHandler::getSignerName()
 {
     char *commonName;
 
-    if (!CMSSignerInfo || !NSS_IsInitialized())
+    if (!CMSSignerInfo || !NSS_IsInitialized()) {
         return {};
+    }
 
-    if (!signing_cert)
+    if (!signing_cert) {
         signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    }
 
-    if (!signing_cert)
+    if (!signing_cert) {
         return {};
+    }
 
     commonName = CERT_GetCommonName(&signing_cert->subject);
     std::string name(commonName);
@@ -524,14 +546,17 @@ std::string SignatureHandler::getSignerName()
 
 const char *SignatureHandler::getSignerSubjectDN()
 {
-    if (!signing_cert && !CMSSignerInfo)
+    if (!signing_cert && !CMSSignerInfo) {
         return nullptr;
+    }
 
-    if (!signing_cert)
+    if (!signing_cert) {
         signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    }
 
-    if (!signing_cert)
+    if (!signing_cert) {
         return nullptr;
+    }
 
     return signing_cert->subjectName;
 }
@@ -548,8 +573,9 @@ time_t SignatureHandler::getSigningTime()
 {
     PRTime sTime; // time in microseconds since the epoch
 
-    if (NSS_CMSSignerInfo_GetSigningTime(CMSSignerInfo, &sTime) != SECSuccess)
+    if (NSS_CMSSignerInfo_GetSigningTime(CMSSignerInfo, &sTime) != SECSuccess) {
         return 0;
+    }
 
     return static_cast<time_t>(sTime / 1000000);
 }
@@ -558,8 +584,9 @@ static X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName)
 {
     X509CertificateInfo::EntityInfo info;
 
-    if (!entityName)
+    if (!entityName) {
         return info;
+    }
 
     char *dn = CERT_NameToAscii(entityName);
     if (dn) {
@@ -655,12 +682,14 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
 {
     if (CMSSignerInfo) {
         CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-        if (!cert)
+        if (!cert) {
             return nullptr;
+        }
         return getCertificateInfoFromCERT(cert);
     } else {
-        if (!signing_cert)
+        if (!signing_cert) {
             return nullptr;
+        }
 
         return getCertificateInfoFromCERT(signing_cert);
     }
@@ -706,8 +735,9 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
         return;
     }
 
-    if (setNssDirCalled)
+    if (setNssDirCalled) {
         return;
+    }
 
     setNssDirCalled = true;
 
@@ -802,19 +832,22 @@ void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
 
 void SignatureHandler::restartHash()
 {
-    if (hash_context)
+    if (hash_context) {
         HASH_Destroy(hash_context);
+    }
     hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digest_alg_tag));
 }
 
 SignatureHandler::~SignatureHandler()
 {
     SECITEM_FreeItem(&CMSitem, PR_FALSE);
-    if (CMSMessage)
+    if (CMSMessage) {
         NSS_CMSMessage_Destroy(CMSMessage);
+    }
 
-    if (hash_context)
+    if (hash_context) {
         HASH_Destroy(hash_context);
+    }
 
     free(temp_certs);
 }
@@ -859,8 +892,9 @@ NSSCMSSignedData *SignatureHandler::CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
         signedData->tempCerts = (CERTCertificate **)gmallocn(i + 1, sizeof(CERTCertificate *));
         memset(signedData->tempCerts, 0, (i + 1) * sizeof(CERTCertificate *));
         // store the addresses of these temporary certificates for future release
-        for (i = 0; signedData->rawCerts[i]; ++i)
+        for (i = 0; signedData->rawCerts[i]; ++i) {
             signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);
+        }
 
         temp_certs = signedData->tempCerts;
         return signedData;
@@ -904,14 +938,17 @@ SignatureValidationStatus SignatureHandler::validateSignature()
 {
     unsigned char *digest_buffer = nullptr;
 
-    if (!CMSSignedData)
+    if (!CMSSignedData) {
         return SIGNATURE_GENERIC_ERROR;
+    }
 
-    if (!NSS_IsInitialized())
+    if (!NSS_IsInitialized()) {
         return SIGNATURE_GENERIC_ERROR;
+    }
 
-    if (!hash_context)
+    if (!hash_context) {
         return SIGNATURE_GENERIC_ERROR;
+    }
 
     digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
     unsigned int result_len = 0;
@@ -922,8 +959,9 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     digest.data = digest_buffer;
     digest.len = hash_length;
 
-    if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr)
+    if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
         CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
+    }
 
     SECItem *content_info_data = CMSSignedData->contentInfo.content.data;
     if (content_info_data != nullptr && content_info_data->data != nullptr) {
@@ -953,15 +991,18 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
 {
     CERTCertificate *cert;
 
-    if (!CMSSignerInfo)
+    if (!CMSSignerInfo) {
         return CERTIFICATE_GENERIC_ERROR;
+    }
 
-    if ((cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr)
+    if ((cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
         CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
+    }
 
     PRTime vTime = 0; // time in microseconds since the epoch, special value 0 means now
-    if (validation_time > 0)
+    if (validation_time > 0) {
         vTime = 1000000 * (PRTime)validation_time;
+    }
     CERTValInParam inParams[4];
     inParams[0].type = cert_pi_revocationFlags;
     if (ocspRevocationCheck) {
@@ -1004,8 +1045,9 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
 
 std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) const
 {
-    if (!hash_context)
+    if (!hash_context) {
         return nullptr;
+    }
     unsigned char *digest_buffer = reinterpret_cast<unsigned char *>(PORT_Alloc(hash_length));
     unsigned int result_len = 0;
     HASH_End(hash_context, digest_buffer, &result_len, hash_length);
@@ -1018,40 +1060,49 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     /////////////////////////////////////
 
     NSSCMSMessage *cms_msg = NSS_CMSMessage_Create(nullptr);
-    if (!cms_msg)
+    if (!cms_msg) {
         return nullptr;
+    }
 
     NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg);
-    if (!cms_sd)
+    if (!cms_sd) {
         return nullptr;
+    }
 
     NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg);
 
-    if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg, cms_cinfo, cms_sd) != SECSuccess)
+    if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg, cms_cinfo, cms_sd) != SECSuccess) {
         return nullptr;
+    }
 
     cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
 
     // Attach NULL data as detached data
-    if (NSS_CMSContentInfo_SetContent_Data(cms_msg, cms_cinfo, nullptr, PR_TRUE) != SECSuccess)
+    if (NSS_CMSContentInfo_SetContent_Data(cms_msg, cms_cinfo, nullptr, PR_TRUE) != SECSuccess) {
         return nullptr;
+    }
 
     // hardcode SHA256 these days...
     NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg, signing_cert, SEC_OID_SHA256);
-    if (!cms_signer)
+    if (!cms_signer) {
         return nullptr;
+    }
 
-    if (NSS_CMSSignerInfo_IncludeCerts(cms_signer, NSSCMSCM_CertChain, certUsageEmailSigner) != SECSuccess)
+    if (NSS_CMSSignerInfo_IncludeCerts(cms_signer, NSSCMSCM_CertChain, certUsageEmailSigner) != SECSuccess) {
         return nullptr;
+    }
 
-    if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess)
+    if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess) {
         return nullptr;
+    }
 
-    if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess)
+    if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess) {
         return nullptr;
+    }
 
-    if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess)
+    if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess) {
         return nullptr;
+    }
 
     // Add the signing certificate as a signed attribute.
     ESSCertIDv2 *aCertIDs[2];
@@ -1065,8 +1116,9 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     SECItem aCertHashItem;
     unsigned char certhash[32];
     SECStatus rv = PK11_HashBuf(SEC_OID_SHA256, certhash, signing_cert->derCert.data, signing_cert->derCert.len);
-    if (rv != SECSuccess)
+    if (rv != SECSuccess) {
         return nullptr;
+    }
 
     aCertHashItem.type = siBuffer;
     aCertHashItem.data = certhash;
@@ -1087,8 +1139,9 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     aCertificate.certs = &aCertIDs[0];
 
     SECItem *pEncodedCertificate = SEC_ASN1EncodeItem(nullptr, nullptr, &aCertificate, SigningCertificateV2Template);
-    if (!pEncodedCertificate)
+    if (!pEncodedCertificate) {
         return nullptr;
+    }
 
     NSSCMSAttribute aAttribute;
     SECItem aAttributeValues[2];
@@ -1108,8 +1161,9 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
      * { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs9(9)
      *   smime(16) id-aa(2) 47 }
      */
-    if (my_SEC_StringToOID(&aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess)
+    if (my_SEC_StringToOID(&aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
         return nullptr;
+    }
 
     aOidData.offset = SEC_OID_UNKNOWN;
     aOidData.desc = "id-aa-signingCertificateV2";
@@ -1119,8 +1173,9 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     aAttribute.type = aOidData.oid;
     aAttribute.encoded = PR_TRUE;
 
-    if (my_NSS_CMSSignerInfo_AddAuthAttr(cms_signer, &aAttribute) != SECSuccess)
+    if (my_NSS_CMSSignerInfo_AddAuthAttr(cms_signer, &aAttribute) != SECSuccess) {
         return nullptr;
+    }
 
     SECItem cms_output;
     cms_output.data = nullptr;
@@ -1172,8 +1227,9 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
                 // PK11_Authenticate may fail in case the a slot has not been initialized.
                 // this is the case if the user has a new profile, so that they have never
                 // added a personal certificate.
-                if (nRet != SECSuccess && PORT_GetError() != SEC_ERROR_IO)
+                if (nRet != SECSuccess && PORT_GetError() != SEC_ERROR_IO) {
                     continue;
+                }
             }
 
             SECKEYPrivateKeyList *privKeyList = PK11_ListPrivateKeysInSlot(pSlot);

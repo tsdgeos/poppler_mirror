@@ -91,8 +91,9 @@ static void pgd_annots_viewer_queue_redraw(PgdAnnotsDemo *demo);
 
 static void pgd_annots_free(PgdAnnotsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->annotations_idle > 0) {
         g_source_remove(demo->annotations_idle);
@@ -217,8 +218,9 @@ gchar *get_markup_date(PopplerAnnotMarkup *poppler_annot)
     time_t timet;
 
     date = poppler_annot_markup_get_date(poppler_annot);
-    if (!date)
+    if (!date) {
         return NULL;
+    }
 
     g_date_to_struct_tm(date, &t);
     g_date_free(date);
@@ -302,8 +304,9 @@ gchar *get_free_text_callout_line(PopplerAnnotFreeText *poppler_annot)
 
     if ((callout = poppler_annot_free_text_get_callout_line(poppler_annot))) {
         text = g_strdup_printf("%f,%f,%f,%f", callout->x1, callout->y1, callout->x2, callout->y2);
-        if (callout->multiline)
+        if (callout->multiline) {
             text = g_strdup_printf("%s,%f,%f", text, callout->x3, callout->y3);
+        }
 
         return text;
     }
@@ -315,8 +318,9 @@ static void pgd_annots_update_cursor(PgdAnnotsDemo *demo, GdkCursorType cursor_t
 {
     GdkCursor *cursor = NULL;
 
-    if (cursor_type == demo->cursor)
+    if (cursor_type == demo->cursor) {
         return;
+    }
 
     if (cursor_type != GDK_LAST_CURSOR) {
         cursor = gdk_cursor_new_for_display(gtk_widget_get_display(demo->main_box), cursor_type);
@@ -326,8 +330,9 @@ static void pgd_annots_update_cursor(PgdAnnotsDemo *demo, GdkCursorType cursor_t
 
     gdk_window_set_cursor(gtk_widget_get_window(demo->main_box), cursor);
     gdk_display_flush(gtk_widget_get_display(demo->main_box));
-    if (cursor)
+    if (cursor) {
         g_object_unref(cursor);
+    }
 }
 
 static void pgd_annots_start_add_annot(GtkWidget *button, PgdAnnotsDemo *demo)
@@ -482,8 +487,9 @@ static void pgd_annot_save_file_attachment_button_clicked(GtkButton *button, Pop
     PopplerAttachment *attachment;
 
     attachment = poppler_annot_file_attachment_get_attachment(annot);
-    if (!attachment)
+    if (!attachment) {
         return;
+    }
 
     file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(button))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), poppler_attachment_get_name(attachment));
@@ -544,8 +550,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
         gtk_container_remove(GTK_CONTAINER(demo->annot_view), table);
     }
 
-    if (!annot)
+    if (!annot) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -581,8 +588,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
     pgd_table_add_property(GTK_GRID(table), "<b>Coords:</b>", text, &row);
     g_free(text);
 
-    if (POPPLER_IS_ANNOT_MARKUP(annot))
+    if (POPPLER_IS_ANNOT_MARKUP(annot)) {
         pgd_annot_view_set_annot_markup(table, POPPLER_ANNOT_MARKUP(annot), &row);
+    }
 
     switch (poppler_annot_get_annot_type(annot)) {
     case POPPLER_ANNOT_TEXT:
@@ -635,8 +643,9 @@ static void pgd_annots_add_annot_to_model(PgdAnnotsDemo *demo, PopplerAnnot *ann
         gtk_tree_path_free(path);
     }
 
-    if (pixbuf)
+    if (pixbuf) {
         g_object_unref(pixbuf);
+    }
 }
 
 static void pgd_annots_get_annots(PgdAnnotsDemo *demo)
@@ -654,8 +663,9 @@ static void pgd_annots_get_annots(PgdAnnotsDemo *demo)
     }
 
     demo->page = poppler_document_get_page(demo->doc, demo->num_page);
-    if (!demo->page)
+    if (!demo->page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_annot_mapping(demo->page);
@@ -725,10 +735,11 @@ static void pgd_annots_flags_toggled(GtkCellRendererToggle *renderer, gchar *pat
     fixed ^= 1;
     flags = poppler_annot_get_flags(annot);
 
-    if (fixed)
+    if (fixed) {
         flags |= flag_bit;
-    else
+    } else {
         flags &= ~flag_bit;
+    }
 
     poppler_annot_set_flags(annot, flags);
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, column, fixed, -1);
@@ -889,8 +900,9 @@ static void pgd_annots_update_selected_text(PgdAnnotsDemo *demo)
     doc_area.x2 = demo->stop.x;
     doc_area.y2 = demo->stop.y;
 
-    if (!poppler_page_get_text_layout_for_area(demo->page, &doc_area, &rects, &n_rects))
+    if (!poppler_page_get_text_layout_for_area(demo->page, &doc_area, &rects, &n_rects)) {
         return;
+    }
 
     r = g_slice_new(PopplerRectangle);
     r->x1 = G_MAXDOUBLE;
@@ -904,8 +916,9 @@ static void pgd_annots_update_selected_text(PgdAnnotsDemo *demo)
            On the same line, make an union of rectangles at
            the same line */
         if (ABS(r->y2 - rects[i].y2) > 0.0001) {
-            if (i > 0)
+            if (i > 0) {
                 l_rects = g_list_append(l_rects, r);
+            }
             r = g_slice_new(PopplerRectangle);
             r->x1 = rects[i].x1;
             r->y1 = rects[i].y1;
@@ -957,8 +970,9 @@ static cairo_surface_t *pgd_annots_render_page(PgdAnnotsDemo *demo)
     cairo_surface_t *surface = NULL;
 
     page = poppler_document_get_page(demo->doc, demo->num_page);
-    if (!page)
+    if (!page) {
         return NULL;
+    }
 
     poppler_page_get_size(page, &width, &height);
     gtk_widget_set_size_request(demo->darea, width, height);
@@ -984,13 +998,15 @@ static cairo_surface_t *pgd_annots_render_page(PgdAnnotsDemo *demo)
 
 static gboolean pgd_annots_view_drawing_area_draw(GtkWidget *area, cairo_t *cr, PgdAnnotsDemo *demo)
 {
-    if (demo->num_page == -1)
+    if (demo->num_page == -1) {
         return FALSE;
+    }
 
     if (!demo->surface) {
         demo->surface = pgd_annots_render_page(demo);
-        if (!demo->surface)
+        if (!demo->surface) {
             return FALSE;
+        }
     }
 
     cairo_set_source_surface(cr, demo->surface, 0, 0);
@@ -1013,8 +1029,9 @@ static gboolean pgd_annots_viewer_redraw(PgdAnnotsDemo *demo)
 
 static void pgd_annots_viewer_queue_redraw(PgdAnnotsDemo *demo)
 {
-    if (demo->annotations_idle == 0)
+    if (demo->annotations_idle == 0) {
         demo->annotations_idle = g_idle_add((GSourceFunc)pgd_annots_viewer_redraw, demo);
+    }
 }
 
 static void pgd_annots_drawing_area_realize(GtkWidget *area, PgdAnnotsDemo *demo)
@@ -1024,8 +1041,9 @@ static void pgd_annots_drawing_area_realize(GtkWidget *area, PgdAnnotsDemo *demo
 
 static gboolean pgd_annots_drawing_area_button_press(GtkWidget *area, GdkEventButton *event, PgdAnnotsDemo *demo)
 {
-    if (!demo->page || demo->mode != MODE_ADD || event->button != 1)
+    if (!demo->page || demo->mode != MODE_ADD || event->button != 1) {
         return FALSE;
+    }
 
     demo->start.x = event->x;
     demo->start.y = event->y;
@@ -1044,8 +1062,9 @@ static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventM
     PopplerPoint start, end;
     gdouble width, height;
 
-    if (!demo->page || demo->mode != MODE_DRAWING || demo->start.x == -1)
+    if (!demo->page || demo->mode != MODE_DRAWING || demo->start.x == -1) {
         return FALSE;
+    }
 
     demo->stop.x = event->x;
     demo->stop.y = event->y;
@@ -1063,11 +1082,13 @@ static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventM
 
     poppler_annot_set_rectangle(demo->active_annot, &rect);
 
-    if (demo->annot_type == POPPLER_ANNOT_LINE)
+    if (demo->annot_type == POPPLER_ANNOT_LINE) {
         poppler_annot_line_set_vertices(POPPLER_ANNOT_LINE(demo->active_annot), &start, &end);
+    }
 
-    if (POPPLER_IS_ANNOT_TEXT_MARKUP(demo->active_annot))
+    if (POPPLER_IS_ANNOT_TEXT_MARKUP(demo->active_annot)) {
         pgd_annots_update_selected_text(demo);
+    }
 
     pgd_annot_view_set_annot(demo, demo->active_annot);
     pgd_annots_viewer_queue_redraw(demo);
@@ -1077,8 +1098,9 @@ static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventM
 
 static gboolean pgd_annots_drawing_area_button_release(GtkWidget *area, GdkEventButton *event, PgdAnnotsDemo *demo)
 {
-    if (!demo->page || demo->mode != MODE_DRAWING || event->button != 1)
+    if (!demo->page || demo->mode != MODE_DRAWING || event->button != 1) {
         return FALSE;
+    }
 
     pgd_annots_finish_add_annot(demo);
 

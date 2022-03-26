@@ -173,8 +173,9 @@ Object Lexer::getObj(int objNum)
             return Object(objEOF);
         }
         if (comment) {
-            if (c == '\r' || c == '\n')
+            if (c == '\r' || c == '\n') {
                 comment = false;
+            }
         } else if (c == '%') {
             comment = true;
         } else if (specialChars[c] != 1) {
@@ -387,10 +388,11 @@ Object Lexer::getObj(int objNum)
 
             if (c2 != EOF) {
                 if (n == tokBufSize) {
-                    if (!s)
+                    if (!s) {
                         s = new GooString(tokBuf, tokBufSize);
-                    else
+                    } else {
                         s->append(tokBuf, tokBufSize);
+                    }
                     p = tokBuf;
                     n = 0;
 
@@ -410,10 +412,11 @@ Object Lexer::getObj(int objNum)
             }
         } while (!done);
         if (n >= 0) {
-            if (!s)
+            if (!s) {
                 s = new GooString(tokBuf, n);
-            else
+            } else {
                 s->append(tokBuf, n);
+            }
             return Object(s);
         } else {
             return Object(objEOF);
@@ -510,20 +513,22 @@ Object Lexer::getObj(int objNum)
                     break;
                 } else if (specialChars[c] != 1) {
                     c2 = c2 << 4;
-                    if (c >= '0' && c <= '9')
+                    if (c >= '0' && c <= '9') {
                         c2 += c - '0';
-                    else if (c >= 'A' && c <= 'F')
+                    } else if (c >= 'A' && c <= 'F') {
                         c2 += c - 'A' + 10;
-                    else if (c >= 'a' && c <= 'f')
+                    } else if (c >= 'a' && c <= 'f') {
                         c2 += c - 'a' + 10;
-                    else
+                    } else {
                         error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in hex string", c);
+                    }
                     if (++m == 2) {
                         if (n == tokBufSize) {
-                            if (!s)
+                            if (!s) {
                                 s = new GooString(tokBuf, tokBufSize);
-                            else
+                            } else {
                                 s->append(tokBuf, tokBufSize);
+                            }
                             p = tokBuf;
                             n = 0;
                         }
@@ -534,12 +539,14 @@ Object Lexer::getObj(int objNum)
                     }
                 }
             }
-            if (!s)
+            if (!s) {
                 s = new GooString(tokBuf, n);
-            else
+            } else {
                 s->append(tokBuf, n);
-            if (m == 1)
+            }
+            if (m == 1) {
                 s->append((char)(c2 << 4));
+            }
             return Object(s);
         }
         break;

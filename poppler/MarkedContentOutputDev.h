@@ -7,6 +7,7 @@
 // Copyright 2013 Igalia S.L.
 // Copyright 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -39,8 +40,9 @@ public:
 
     ~TextSpan()
     {
-        if (data && --data->refcount == 0)
+        if (data && --data->refcount == 0) {
             delete data;
+        }
     }
 
     const std::shared_ptr<GfxFont> &getFont() const { return data->font; }

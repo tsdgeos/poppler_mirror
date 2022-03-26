@@ -117,14 +117,16 @@ GooString *appendToPath(GooString *path, const char *fileName)
     int i;
 
     // appending "." does nothing
-    if (!strcmp(fileName, "."))
+    if (!strcmp(fileName, ".")) {
         return path;
+    }
 
     // appending ".." goes up one directory
     if (!strcmp(fileName, "..")) {
         for (i = path->getLength() - 2; i >= 0; --i) {
-            if (path->getChar(i) == '/')
+            if (path->getChar(i) == '/') {
                 break;
+            }
         }
         if (i <= 0) {
             if (path->getChar(0) == '/') {
@@ -140,8 +142,9 @@ GooString *appendToPath(GooString *path, const char *fileName)
     }
 
     // otherwise, append "/" and new path component
-    if (path->getLength() > 0 && path->getChar(path->getLength() - 1) != '/')
+    if (path->getLength() > 0 && path->getChar(path->getLength() - 1) != '/') {
         path->append('/');
+    }
     path->append(fileName);
     return path;
 #endif
@@ -153,8 +156,9 @@ static bool makeFileDescriptorCloexec(int fd)
 {
 #    ifdef FD_CLOEXEC
     int flags = fcntl(fd, F_GETFD);
-    if (flags >= 0 && !(flags & FD_CLOEXEC))
+    if (flags >= 0 && !(flags & FD_CLOEXEC)) {
         flags = fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+    }
 
     return flags >= 0;
 #    else
@@ -234,13 +238,15 @@ FILE *openFile(const char *path, const char *mode)
     // First try to atomically open the file with CLOEXEC
     const std::string modeStr = mode + "e"s;
     FILE *file = fopen(path, modeStr.c_str());
-    if (file != nullptr)
+    if (file != nullptr) {
         return file;
+    }
 
     // Fall back to the provided mode and apply CLOEXEC afterwards
     file = fopen(path, mode);
-    if (file == nullptr)
+    if (file == nullptr) {
         return nullptr;
+    }
 
     if (!makeFileDescriptorCloexec(fileno(file))) {
         fclose(file);
@@ -358,18 +364,18 @@ Goffset GooFile::size() const
     return size.QuadPart;
 }
 
-GooFile *GooFile::open(const std::string &fileName)
+std::unique_ptr<GooFile> GooFile::open(const std::string &fileName)
 {
     HANDLE handle = CreateFileA(fileName.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-    return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
+    return handle == INVALID_HANDLE_VALUE ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(handle));
 }
 
-GooFile *GooFile::open(const wchar_t *fileName)
+std::unique_ptr<GooFile> GooFile::open(const wchar_t *fileName)
 {
     HANDLE handle = CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-    return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
+    return handle == INVALID_HANDLE_VALUE ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(handle));
 }
 
 bool GooFile::modificationTimeChangedSinceOpen() const
@@ -400,16 +406,16 @@ Goffset GooFile::size() const
 #    endif
 }
 
-GooFile *GooFile::open(const std::string &fileName)
+std::unique_ptr<GooFile> GooFile::open(const std::string &fileName)
 {
     int fd = openFileDescriptor(fileName.c_str(), O_RDONLY);
 
     return GooFile::open(fd);
 }
 
-GooFile *GooFile::open(int fdA)
+std::unique_ptr<GooFile> GooFile::open(int fdA)
 {
-    return fdA < 0 ? nullptr : new GooFile(fdA);
+    return fdA < 0 ? std::unique_ptr<GooFile>() : std::unique_ptr<GooFile>(new GooFile(fdA));
 }
 
 GooFile::GooFile(int fdA) : fd(fdA)
@@ -450,8 +456,9 @@ GDirEntry::GDirEntry(const char *dirPath, const char *nameA, bool doStat)
         fa = GetFileAttributesA(fullPath->c_str());
         dir = (fa != 0xFFFFFFFF && (fa & FILE_ATTRIBUTE_DIRECTORY));
 #else
-        if (stat(fullPath->c_str(), &st) == 0)
+        if (stat(fullPath->c_str(), &st) == 0) {
             dir = S_ISDIR(st.st_mode);
+        }
 #endif
     }
 }
@@ -487,8 +494,9 @@ GDir::~GDir()
         hnd = INVALID_HANDLE_VALUE;
     }
 #else
-    if (dir)
+    if (dir) {
         closedir(dir);
+    }
 #endif
 }
 
@@ -530,7 +538,8 @@ void GDir::rewind()
     hnd = FindFirstFileA(tmp->c_str(), &ffd);
     delete tmp;
 #else
-    if (dir)
+    if (dir) {
         rewinddir(dir);
+    }
 #endif
 }

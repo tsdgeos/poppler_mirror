@@ -155,19 +155,21 @@ void PSConverter::setTopMargin(int marginTop)
 void PSConverter::setStrictMargins(bool strictMargins)
 {
     Q_D(PSConverter);
-    if (strictMargins)
+    if (strictMargins) {
         d->opts |= StrictMargins;
-    else
+    } else {
         d->opts &= ~StrictMargins;
+    }
 }
 
 void PSConverter::setForceRasterize(bool forceRasterize)
 {
     Q_D(PSConverter);
-    if (forceRasterize)
+    if (forceRasterize) {
         d->opts |= ForceRasterization;
-    else
+    } else {
         d->opts &= ~ForceRasterization;
+    }
 }
 
 void PSConverter::setPSOptions(PSConverter::PSOptions options)
@@ -191,10 +193,11 @@ void PSConverter::setPageConvertedCallback(void (*callback)(int page, void *payl
 
 static bool annotDisplayDecideCbk(Annot *annot, void *user_data)
 {
-    if (annot->getType() == Annot::typeWidget)
+    if (annot->getType() == Annot::typeWidget) {
         return true; // Never hide forms
-    else
+    } else {
         return *(bool *)user_data;
+    }
 }
 
 bool PSConverter::convert()
@@ -219,10 +222,11 @@ bool PSConverter::convert()
 
     QByteArray pstitle8Bit = d->title.toLocal8Bit();
     char *pstitlechar;
-    if (!d->title.isEmpty())
+    if (!d->title.isEmpty()) {
         pstitlechar = pstitle8Bit.data();
-    else
+    } else {
         pstitlechar = nullptr;
+    }
 
     std::vector<int> pages;
     foreach (int page, d->pageList) {
@@ -243,8 +247,9 @@ bool PSConverter::convert()
         bool showAnnotations = (d->opts & HideAnnotations) ? false : true;
         foreach (int page, d->pageList) {
             d->document->doc->displayPage(psOut, page, d->hDPI, d->vDPI, d->rotate, false, true, isPrinting, nullptr, nullptr, annotDisplayDecideCbk, &showAnnotations, true);
-            if (d->pageConvertedCallback)
+            if (d->pageConvertedCallback) {
                 (*d->pageConvertedCallback)(page, d->pageConvertedPayload);
+            }
         }
         delete psOut;
         d->closeDevice();

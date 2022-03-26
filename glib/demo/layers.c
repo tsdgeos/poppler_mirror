@@ -45,8 +45,9 @@ typedef struct
 
 static void pgd_layers_free(PgdLayersDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -91,13 +92,15 @@ static void build_tree(PopplerDocument *document, GtkTreeModel *model, GtkTreeIt
         gtk_tree_store_append(GTK_TREE_STORE(model), &tree_iter, parent);
         gtk_tree_store_set(GTK_TREE_STORE(model), &tree_iter, LAYERS_TITLE_COLUMN, markup, LAYERS_VISIBILITY_COLUMN, visible, LAYERS_ENABLE_COLUMN, TRUE, /* FIXME */
                            LAYERS_SHOWTOGGLE_COLUMN, (layer != NULL), LAYERS_RB_GROUP_COLUMN, rb_group, LAYERS_LAYER_COLUMN, layer, -1);
-        if (layer)
+        if (layer) {
             g_object_unref(layer);
+        }
         g_free(markup);
 
         child = poppler_layers_iter_get_child(iter);
-        if (child)
+        if (child) {
             build_tree(document, model, &tree_iter, child);
+        }
         poppler_layers_iter_free(child);
     } while (poppler_layers_iter_next(iter));
 }
@@ -134,8 +137,9 @@ static cairo_surface_t *pgd_layers_render_page(PgdLayersDemo *demo)
     cairo_surface_t *surface = NULL;
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return NULL;
+    }
 
     poppler_page_get_size(page, &width, &height);
     gtk_widget_set_size_request(demo->darea, width, height);
@@ -163,8 +167,9 @@ static gboolean pgd_layers_viewer_drawing_area_draw(GtkWidget *area, cairo_t *cr
 {
     if (!demo->surface) {
         demo->surface = pgd_layers_render_page(demo);
-        if (!demo->surface)
+        if (!demo->surface) {
             return FALSE;
+        }
     }
 
     cairo_set_source_surface(cr, demo->surface, 0, 0);

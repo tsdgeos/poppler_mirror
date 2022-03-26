@@ -141,10 +141,11 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 
     png_set_pHYs(priv->png_ptr, priv->info_ptr, hDPI / 0.0254, vDPI / 0.0254, PNG_RESOLUTION_METER);
 
-    if (priv->icc_data)
+    if (priv->icc_data) {
         png_set_iCCP(priv->png_ptr, priv->info_ptr, priv->icc_name, PNG_COMPRESSION_TYPE_BASE, icc_data_ptr, priv->icc_data_size);
-    else if (priv->sRGB_profile)
+    } else if (priv->sRGB_profile) {
         png_set_sRGB(priv->png_ptr, priv->info_ptr, PNG_sRGB_INTENT_RELATIVE);
+    }
 
     png_write_info(priv->png_ptr, priv->info_ptr);
     if (setjmp(png_jmpbuf(priv->png_ptr))) {

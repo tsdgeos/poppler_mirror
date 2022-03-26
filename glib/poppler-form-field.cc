@@ -174,12 +174,14 @@ PopplerAction *poppler_form_field_get_action(PopplerFormField *field)
 {
     LinkAction *action;
 
-    if (field->action)
+    if (field->action) {
         return field->action;
+    }
 
     action = field->widget->getActivationAction();
-    if (!action)
+    if (!action) {
         return nullptr;
+    }
 
     field->action = _poppler_action_new(field->document, action, nullptr);
 
@@ -227,12 +229,14 @@ PopplerAction *poppler_form_field_get_additional_action(PopplerFormField *field,
         return nullptr;
     }
 
-    if (*action)
+    if (*action) {
         return *action;
+    }
 
     std::unique_ptr<LinkAction> link_action = field->widget->getAdditionalAction(form_action);
-    if (!link_action)
+    if (!link_action) {
         return nullptr;
+    }
 
     *action = _poppler_action_new(nullptr, link_action.get(), nullptr);
 
@@ -604,8 +608,9 @@ PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *si
  **/
 void poppler_signature_info_free(PopplerSignatureInfo *siginfo)
 {
-    if (siginfo == nullptr)
+    if (siginfo == nullptr) {
         return;
+    }
 
     g_date_time_unref(siginfo->local_signing_time);
     g_free(siginfo->signer_name);
@@ -701,10 +706,11 @@ PopplerFormTextType poppler_form_field_text_get_text_type(PopplerFormField *fiel
 
     text_field = static_cast<FormWidgetText *>(field->widget);
 
-    if (text_field->isMultiline())
+    if (text_field->isMultiline()) {
         return POPPLER_FORM_TEXT_MULTILINE;
-    else if (text_field->isFileSelect())
+    } else if (text_field->isFileSelect()) {
         return POPPLER_FORM_TEXT_FILE_SELECT;
+    }
 
     return POPPLER_FORM_TEXT_NORMAL;
 }
@@ -832,10 +838,11 @@ PopplerFormChoiceType poppler_form_field_choice_get_choice_type(PopplerFormField
 {
     g_return_val_if_fail(field->widget->getType() == formChoice, POPPLER_FORM_CHOICE_COMBO);
 
-    if (static_cast<FormWidgetChoice *>(field->widget)->isCombo())
+    if (static_cast<FormWidgetChoice *>(field->widget)->isCombo()) {
         return POPPLER_FORM_CHOICE_COMBO;
-    else
+    } else {
         return POPPLER_FORM_CHOICE_LIST;
+    }
 }
 
 /**

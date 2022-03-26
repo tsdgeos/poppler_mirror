@@ -126,15 +126,18 @@ char *Stream::getLine(char *buf, int size)
     int i;
     int c;
 
-    if (lookChar() == EOF || size < 0)
+    if (lookChar() == EOF || size < 0) {
         return nullptr;
+    }
     for (i = 0; i < size - 1; ++i) {
         c = getChar();
-        if (c == EOF || c == '\n')
+        if (c == EOF || c == '\n') {
             break;
+        }
         if (c == '\r') {
-            if ((c = lookChar()) == '\n')
+            if ((c = lookChar()) == '\n') {
                 getChar();
+            }
             break;
         }
         buf[i] = c;
@@ -198,10 +201,11 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
     } else if (obj.isArray()) {
         for (i = 0; i < obj.arrayGetLength(); ++i) {
             obj2 = obj.arrayGet(i, recursion);
-            if (params.isArray())
+            if (params.isArray()) {
                 params2 = params.arrayGet(i, recursion);
-            else
+            } else {
                 params2.setToNull();
+            }
             if (obj2.isName()) {
                 str = makeFilter(obj2.getName(), str, &params2, recursion);
             } else {
@@ -219,8 +223,9 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
 bool Stream::isEncrypted() const
 {
     for (const Stream *str = this; str != nullptr; str = str->getNextStream()) {
-        if (str->getKind() == strCrypt)
+        if (str->getKind() == strCrypt) {
             return true;
+        }
     }
     return false;
 }
@@ -274,20 +279,25 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         early = 1;
         if (params->isDict()) {
             obj = params->dictLookup("Predictor", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 pred = obj.getInt();
+            }
             obj = params->dictLookup("Columns", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 columns = obj.getInt();
+            }
             obj = params->dictLookup("Colors", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 colors = obj.getInt();
+            }
             obj = params->dictLookup("BitsPerComponent", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 bits = obj.getInt();
+            }
             obj = params->dictLookup("EarlyChange", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 early = obj.getInt();
+            }
         }
         str = new LZWStream(str, pred, columns, colors, bits, early);
     } else if (!strcmp(name, "RunLengthDecode") || !strcmp(name, "RL")) {
@@ -357,17 +367,21 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         bits = 8;
         if (params->isDict()) {
             obj = params->dictLookup("Predictor", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 pred = obj.getInt();
+            }
             obj = params->dictLookup("Columns", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 columns = obj.getInt();
+            }
             obj = params->dictLookup("Colors", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 colors = obj.getInt();
+            }
             obj = params->dictLookup("BitsPerComponent", recursion);
-            if (obj.isInt())
+            if (obj.isInt()) {
                 bits = obj.getInt();
+            }
         }
         str = new FlateStream(str, pred, columns, colors, bits);
     } else if (!strcmp(name, "JBIG2Decode")) {
@@ -473,8 +487,9 @@ void BaseSeekInputStream::reset()
 
 void BaseSeekInputStream::close()
 {
-    if (!saved)
+    if (!saved) {
         return;
+    }
     setCurrentPos(savePos);
     saved = false;
 }
@@ -485,8 +500,9 @@ void BaseSeekInputStream::setPos(Goffset pos, int dir)
         setCurrentPos(pos);
         bufPos = pos;
     } else {
-        if (pos > length)
+        if (pos > length) {
             pos = length;
+        }
 
         bufPos = length - pos;
         setCurrentPos(bufPos);
@@ -648,8 +664,9 @@ unsigned char *ImageStream::getLine()
     if (unlikely(readChars == -1)) {
         readChars = 0;
     }
-    for (; readChars < inputLineSize; readChars++)
+    for (; readChars < inputLineSize; readChars++) {
         inputLine[readChars] = EOF;
+    }
     if (nBits == 1) {
         unsigned char *p = inputLine;
         for (int i = 0; i < nVals; i += 8) {
@@ -826,18 +843,22 @@ bool StreamPredictor::getNextLine()
             up = predLine[i];
             upLeft = upLeftBuf[pixBytes];
             p = left + up - upLeft;
-            if ((pa = p - left) < 0)
+            if ((pa = p - left) < 0) {
                 pa = -pa;
-            if ((pb = p - up) < 0)
+            }
+            if ((pb = p - up) < 0) {
                 pb = -pb;
-            if ((pc = p - upLeft) < 0)
+            }
+            if ((pc = p - upLeft) < 0) {
                 pc = -pc;
-            if (pa <= pb && pa <= pc)
+            }
+            if (pa <= pb && pa <= pc) {
                 predLine[i] = left + (unsigned char)c;
-            else if (pb <= pc)
+            } else if (pb <= pc) {
                 predLine[i] = up + (unsigned char)c;
-            else
+            } else {
                 predLine[i] = upLeft + (unsigned char)c;
+            }
             break;
         case 10: // PNG none
         default: // no predictor or TIFF predictor
@@ -980,8 +1001,9 @@ void FileStream::setPos(Goffset pos, int dir)
         offset = bufPos = pos;
     } else {
         size = file->size();
-        if (pos > size)
+        if (pos > size) {
             pos = size;
+        }
         offset = size - pos;
         bufPos = offset;
     }
@@ -1080,8 +1102,9 @@ void CachedFileStream::setPos(Goffset pos, int dir)
         cc->seek(0, SEEK_END);
         size = (unsigned int)cc->tell();
 
-        if (pos > size)
+        if (pos > size) {
             pos = (unsigned int)size;
+        }
 
         cc->seek(-(int)pos, SEEK_END);
         bufPos = (unsigned int)cc->tell();
@@ -1137,8 +1160,9 @@ EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset le
 
 EmbedStream::~EmbedStream()
 {
-    if (reusable)
+    if (reusable) {
         gfree(bufData);
+    }
 }
 
 void EmbedStream::reset()
@@ -1186,19 +1210,21 @@ void EmbedStream::restore()
 
 Goffset EmbedStream::getPos()
 {
-    if (replay)
+    if (replay) {
         return bufPos;
-    else
+    } else {
         return str->getPos();
+    }
 }
 
 int EmbedStream::getChar()
 {
     if (replay) {
-        if (bufPos < bufLen)
+        if (bufPos < bufLen) {
             return bufData[bufPos++];
-        else
+        } else {
             return EOF;
+        }
     } else {
         if (limited && !length) {
             return EOF;
@@ -1220,10 +1246,11 @@ int EmbedStream::getChar()
 int EmbedStream::lookChar()
 {
     if (replay) {
-        if (bufPos < bufLen)
+        if (bufPos < bufLen) {
             return bufData[bufPos];
-        else
+        } else {
             return EOF;
+        }
     } else {
         if (limited && !length) {
             return EOF;
@@ -1240,11 +1267,13 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
         return 0;
     }
     if (replay) {
-        if (bufPos >= bufLen)
+        if (bufPos >= bufLen) {
             return EOF;
+        }
         len = bufLen - bufPos;
-        if (nChars > len)
+        if (nChars > len) {
             nChars = len;
+        }
         memcpy(buffer, bufData, nChars);
         return len;
     } else {
@@ -1254,8 +1283,9 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
         len = str->doGetChars(nChars, buffer);
         if (record) {
             if (bufLen + len >= bufMax) {
-                while (bufLen + len >= bufMax)
+                while (bufLen + len >= bufMax) {
                     bufMax *= 2;
+                }
                 bufData = (unsigned char *)grealloc(bufData, bufMax);
             }
             memcpy(bufData + bufLen, buffer, len);
@@ -1307,8 +1337,9 @@ int ASCIIHexStream::lookChar()
 {
     int c1, c2, x;
 
-    if (buf != EOF)
+    if (buf != EOF) {
         return buf;
+    }
     if (eof) {
         buf = EOF;
         return EOF;
@@ -1404,8 +1435,9 @@ int ASCII85Stream::lookChar()
     unsigned long t;
 
     if (index >= n) {
-        if (eof)
+        if (eof) {
             return EOF;
+        }
         index = 0;
         do {
             c[0] = str->getChar();
@@ -1422,18 +1454,21 @@ int ASCII85Stream::lookChar()
                 do {
                     c[k] = str->getChar();
                 } while (Lexer::isSpace(c[k]));
-                if (c[k] == '~' || c[k] == EOF)
+                if (c[k] == '~' || c[k] == EOF) {
                     break;
+                }
             }
             n = k - 1;
             if (k < 5 && (c[k] == '~' || c[k] == EOF)) {
-                for (++k; k < 5; ++k)
+                for (++k; k < 5; ++k) {
                     c[k] = 0x21 + 84;
+                }
                 eof = true;
             }
             t = 0;
-            for (k = 0; k < 5; ++k)
+            for (k = 0; k < 5; ++k) {
                 t = t * 85 + (c[k] - 0x21);
+            }
             for (k = 3; k >= 0; --k) {
                 b[k] = (int)(t & 0xff);
                 t >>= 8;
@@ -1525,8 +1560,9 @@ int LZWStream::lookChar()
 
 void LZWStream::getRawChars(int nChars, int *buffer)
 {
-    for (int i = 0; i < nChars; ++i)
+    for (int i = 0; i < nChars; ++i) {
         buffer[i] = doGetRawChar();
+    }
 }
 
 int LZWStream::getRawChar()
@@ -1623,12 +1659,13 @@ start:
             table[nextCode].tail = newChar;
             ++nextCode;
         }
-        if (nextCode + early == 512)
+        if (nextCode + early == 512) {
             nextBits = 10;
-        else if (nextCode + early == 1024)
+        } else if (nextCode + early == 1024) {
             nextBits = 11;
-        else if (nextCode + early == 2048)
+        } else if (nextCode + early == 2048) {
             nextBits = 12;
+        }
     }
     prevCode = code;
 
@@ -1653,8 +1690,9 @@ int LZWStream::getCode()
     int code;
 
     while (inputBits < nextBits) {
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             return EOF;
+        }
         inputBuf = (inputBuf << 8) | static_cast<unsigned>(c & 0xff);
         inputBits += 8;
     }
@@ -1754,8 +1792,9 @@ bool RunLengthStream::fillBuf()
     int c;
     int n, i;
 
-    if (eof)
+    if (eof) {
         return false;
+    }
     c = str->getChar();
     if (c == 0x80 || c == EOF) {
         eof = true;
@@ -1763,13 +1802,15 @@ bool RunLengthStream::fillBuf()
     }
     if (c < 0x80) {
         n = c + 1;
-        for (i = 0; i < n; ++i)
+        for (i = 0; i < n; ++i) {
             buf[i] = (char)str->getChar();
+        }
     } else {
         n = 0x101 - c;
         c = str->getChar();
-        for (i = 0; i < n; ++i)
+        for (i = 0; i < n; ++i) {
             buf[i] = (char)c;
+        }
     }
     bufPtr = buf;
     bufEnd = buf + n;
@@ -1826,10 +1867,11 @@ CCITTFaxStream::~CCITTFaxStream()
 
 void CCITTFaxStream::ccittReset(bool unfiltered)
 {
-    if (unfiltered)
+    if (unfiltered) {
         str->unfilteredReset();
-    else
+    } else {
         str->reset();
+    }
 
     row = 0;
     nextLine2D = encoding < 0;
@@ -4136,10 +4178,11 @@ FlateStream::~FlateStream()
 
 void FlateStream::flateReset(bool unfiltered)
 {
-    if (unfiltered)
+    if (unfiltered) {
         str->unfilteredReset();
-    else
+    } else {
         str->reset();
+    }
 
     index = 0;
     remain = 0;
@@ -4166,8 +4209,9 @@ void FlateStream::reset()
     endOfBlock = eof = true;
     cmf = str->getChar();
     flg = str->getChar();
-    if (cmf == EOF || flg == EOF)
+    if (cmf == EOF || flg == EOF) {
         return;
+    }
     if ((cmf & 0x0f) != 0x08) {
         error(errSyntaxError, getPos(), "Unknown compression method in flate stream");
         return;
@@ -4199,10 +4243,11 @@ int FlateStream::getChars(int nChars, unsigned char *buffer)
     } else {
         for (int i = 0; i < nChars; ++i) {
             const int c = doGetRawChar();
-            if (likely(c != EOF))
+            if (likely(c != EOF)) {
                 buffer[i] = c;
-            else
+            } else {
                 return i;
+            }
         }
         return nChars;
     }
@@ -4216,8 +4261,9 @@ int FlateStream::lookChar()
         return pred->lookChar();
     }
     while (remain == 0) {
-        if (endOfBlock && eof)
+        if (endOfBlock && eof) {
             return EOF;
+        }
         readSome();
     }
     c = buf[index];
@@ -4226,8 +4272,9 @@ int FlateStream::lookChar()
 
 void FlateStream::getRawChars(int nChars, int *buffer)
 {
-    for (int i = 0; i < nChars; ++i)
+    for (int i = 0; i < nChars; ++i) {
         buffer[i] = doGetRawChar();
+    }
 }
 
 int FlateStream::getRawChar()
@@ -4262,13 +4309,15 @@ void FlateStream::readSome()
     int c;
 
     if (endOfBlock) {
-        if (!startBlock())
+        if (!startBlock()) {
             return;
+        }
     }
 
     if (compressedBlock) {
-        if ((code1 = getHuffmanCodeWord(&litCodeTab)) == EOF)
+        if ((code1 = getHuffmanCodeWord(&litCodeTab)) == EOF) {
             goto err;
+        }
         if (code1 < 256) {
             buf[index] = code1;
             remain = 1;
@@ -4278,14 +4327,17 @@ void FlateStream::readSome()
         } else {
             code1 -= 257;
             code2 = lengthDecode[code1].bits;
-            if (code2 > 0 && (code2 = getCodeWord(code2)) == EOF)
+            if (code2 > 0 && (code2 = getCodeWord(code2)) == EOF) {
                 goto err;
+            }
             len = lengthDecode[code1].first + code2;
-            if ((code1 = getHuffmanCodeWord(&distCodeTab)) == EOF)
+            if ((code1 = getHuffmanCodeWord(&distCodeTab)) == EOF) {
                 goto err;
+            }
             code2 = distDecode[code1].bits;
-            if (code2 > 0 && (code2 = getCodeWord(code2)) == EOF)
+            if (code2 > 0 && (code2 = getCodeWord(code2)) == EOF) {
                 goto err;
+            }
             dist = distDecode[code1].first + code2;
             i = index;
             j = (index - dist) & flateMask;
@@ -4308,8 +4360,9 @@ void FlateStream::readSome()
         }
         remain = i;
         blockLen -= len;
-        if (blockLen == 0)
+        if (blockLen == 0) {
             endOfBlock = true;
+        }
     }
 
     return;
@@ -4338,27 +4391,33 @@ bool FlateStream::startBlock()
 
     // read block header
     blockHdr = getCodeWord(3);
-    if (blockHdr & 1)
+    if (blockHdr & 1) {
         eof = true;
+    }
     blockHdr >>= 1;
 
     // uncompressed block
     if (blockHdr == 0) {
         compressedBlock = false;
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             goto err;
+        }
         blockLen = c & 0xff;
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             goto err;
+        }
         blockLen |= (c & 0xff) << 8;
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             goto err;
+        }
         check = c & 0xff;
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             goto err;
+        }
         check |= (c & 0xff) << 8;
-        if (check != (~blockLen & 0xffff))
+        if (check != (~blockLen & 0xffff)) {
             error(errSyntaxError, getPos(), "Bad uncompressed block length in flate stream");
+        }
         codeBuf = 0;
         codeSize = 0;
 
@@ -4572,8 +4631,9 @@ int FlateStream::getCodeWord(int bits)
     int c;
 
     while (codeSize < bits) {
-        if ((c = str->getChar()) == EOF)
+        if ((c = str->getChar()) == EOF) {
             return EOF;
+        }
         codeBuf |= (c & 0xff) << codeSize;
         codeSize += 8;
     }
@@ -4660,8 +4720,9 @@ FixedLengthEncoder::FixedLengthEncoder(Stream *strA, int lengthA) : FilterStream
 
 FixedLengthEncoder::~FixedLengthEncoder()
 {
-    if (str->isEncoder())
+    if (str->isEncoder()) {
         delete str;
+    }
 }
 
 void FixedLengthEncoder::reset()
@@ -4672,16 +4733,18 @@ void FixedLengthEncoder::reset()
 
 int FixedLengthEncoder::getChar()
 {
-    if (length >= 0 && count >= length)
+    if (length >= 0 && count >= length) {
         return EOF;
+    }
     ++count;
     return str->getChar();
 }
 
 int FixedLengthEncoder::lookChar()
 {
-    if (length >= 0 && count >= length)
+    if (length >= 0 && count >= length) {
         return EOF;
+    }
     return str->getChar();
 }
 
@@ -4753,8 +4816,9 @@ ASCII85Encoder::ASCII85Encoder(Stream *strA) : FilterStream(strA)
 
 ASCII85Encoder::~ASCII85Encoder()
 {
-    if (str->isEncoder())
+    if (str->isEncoder()) {
         delete str;
+    }
 }
 
 void ASCII85Encoder::reset()
@@ -4847,8 +4911,9 @@ RunLengthEncoder::RunLengthEncoder(Stream *strA) : FilterStream(strA)
 
 RunLengthEncoder::~RunLengthEncoder()
 {
-    if (str->isEncoder())
+    if (str->isEncoder()) {
         delete str;
+    }
 }
 
 void RunLengthEncoder::reset()
@@ -4872,8 +4937,9 @@ bool RunLengthEncoder::fillBuf()
     int n;
 
     // already hit EOF?
-    if (eof)
+    if (eof) {
         return false;
+    }
 
     // grab two bytes
     if (nextEnd < bufEnd + 1) {
@@ -4901,8 +4967,9 @@ bool RunLengthEncoder::fillBuf()
     c = 0; // make gcc happy
     if (c1 == c2) {
         n = 2;
-        while (n < 128 && (c = str->getChar()) == c1)
+        while (n < 128 && (c = str->getChar()) == c1) {
             ++n;
+        }
         buf[0] = (char)(257 - n);
         buf[1] = c1;
         bufEnd = &buf[2];
@@ -4927,8 +4994,9 @@ bool RunLengthEncoder::fillBuf()
             }
             ++n;
             buf[n] = c;
-            if (buf[n] == buf[n - 1])
+            if (buf[n] == buf[n - 1]) {
                 break;
+            }
         }
         if (buf[n] == buf[n - 1]) {
             buf[0] = (char)(n - 2 - 1);
@@ -5104,8 +5172,9 @@ CMYKGrayEncoder::CMYKGrayEncoder(Stream *strA) : FilterStream(strA)
 
 CMYKGrayEncoder::~CMYKGrayEncoder()
 {
-    if (str->isEncoder())
+    if (str->isEncoder()) {
         delete str;
+    }
 }
 
 void CMYKGrayEncoder::reset()
@@ -5132,8 +5201,9 @@ bool CMYKGrayEncoder::fillBuf()
         return false;
     }
     i = (3 * c0 + 6 * c1 + c2) / 10 + c3;
-    if (i > 255)
+    if (i > 255) {
         i = 255;
+    }
     bufPtr = bufEnd = buf;
     *bufEnd++ = (char)i;
     return true;
@@ -5151,8 +5221,9 @@ RGBGrayEncoder::RGBGrayEncoder(Stream *strA) : FilterStream(strA)
 
 RGBGrayEncoder::~RGBGrayEncoder()
 {
-    if (str->isEncoder())
+    if (str->isEncoder()) {
         delete str;
+    }
 }
 
 void RGBGrayEncoder::reset()
@@ -5178,8 +5249,9 @@ bool RGBGrayEncoder::fillBuf()
         return false;
     }
     i = 255 - (3 * c0 + 6 * c1 + c2) / 10;
-    if (i < 0)
+    if (i < 0) {
         i = 0;
+    }
     bufPtr = bufEnd = buf;
     *bufEnd++ = (char)i;
     return true;

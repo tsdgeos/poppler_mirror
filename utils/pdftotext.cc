@@ -32,6 +32,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 William Bader <williambader@hotmail.com>
+// Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -67,9 +68,10 @@
 #include <sstream>
 #include <iomanip>
 #include "Win32Console.h"
+#include "DateInfo.h"
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap);
-static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt);
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2);
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 
@@ -192,8 +194,9 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftotext", "<PDF-file> [<text-file>]", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exitCode = 0;
+        }
         goto err0;
     }
 
@@ -320,8 +323,8 @@ int main(int argc, char *argv[])
             printInfoString(f, info.getDict(), "Author", "<meta name=\"Author\" content=\"", "\"/>\n", uMap);
             printInfoString(f, info.getDict(), "Creator", "<meta name=\"Creator\" content=\"", "\"/>\n", uMap);
             printInfoString(f, info.getDict(), "Producer", "<meta name=\"Producer\" content=\"", "\"/>\n", uMap);
-            printInfoDate(f, info.getDict(), "CreationDate", "<meta name=\"CreationDate\" content=\"\"/>\n");
-            printInfoDate(f, info.getDict(), "LastModifiedDate", "<meta name=\"ModDate\" content=\"\"/>\n");
+            printInfoDate(f, info.getDict(), "CreationDate", "<meta name=\"CreationDate\" content=\"", "\"/>\n");
+            printInfoDate(f, info.getDict(), "ModDate", "<meta name=\"ModDate\" content=\"", "\"/>\n");
         }
         fputs("</head>\n", f);
         fputs("<body>\n", f);
@@ -388,8 +391,9 @@ int main(int argc, char *argv[])
                 goto err3;
             }
         }
-        if (!bbox)
+        if (!bbox) {
             fputs("</pre>\n", f);
+        }
         fputs("</body>\n", f);
         fputs("</html>\n", f);
         if (f != stdout) {
@@ -446,15 +450,27 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     }
 }
 
-static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt)
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2)
 {
+    int year, mon, day, hour, min, sec, tz_hour, tz_minute;
+    char tz;
+
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
-        const char *s = obj.getString()->c_str();
-        if (s[0] == 'D' && s[1] == ':') {
-            s += 2;
+        const GooString *s = obj.getString();
+        if (parseDateString(s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute)) {
+            fputs(text1, f);
+            fprintf(f, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
+            if (tz_hour == 0 && tz_minute == 0) {
+                fprintf(f, "Z");
+            } else {
+                fprintf(f, "%c%02d", tz, tz_hour);
+                if (tz_minute) {
+                    fprintf(f, ":%02d", tz_minute);
+                }
+            }
+            fputs(text2, f);
         }
-        fprintf(f, fmt, s);
     }
 }
 
@@ -469,14 +485,18 @@ static void printLine(FILE *f, const TextLine *line)
     for (word = line->getWords(); word; word = word->getNext()) {
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-        if (lineXMin == 0 || lineXMin > xMin)
+        if (lineXMin == 0 || lineXMin > xMin) {
             lineXMin = xMin;
-        if (lineYMin == 0 || lineYMin > yMin)
+        }
+        if (lineYMin == 0 || lineYMin > yMin) {
             lineYMin = yMin;
-        if (lineXMax < xMax)
+        }
+        if (lineXMax < xMax) {
             lineXMax = xMax;
-        if (lineYMax < yMax)
+        }
+        if (lineYMax < yMax) {
             lineYMax = yMax;
+        }
 
         GooString *wordText = word->getText();
         const std::string myString = myXmlTokenReplace(wordText->c_str());
@@ -530,8 +550,9 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
         const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
         TextWord *word;
         double xMinA, yMinA, xMaxA, yMaxA;
-        if (word_length == 0)
+        if (word_length == 0) {
             fprintf(stderr, "no word list\n");
+        }
 
         for (int i = 0; i < word_length; ++i) {
             word = wordlist->get(i);

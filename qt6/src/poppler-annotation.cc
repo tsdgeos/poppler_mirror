@@ -142,8 +142,9 @@ AnnotationPrivate::~AnnotationPrivate()
     qDeleteAll(revisions);
 
     // Release Annot object
-    if (pdfAnnot)
+    if (pdfAnnot) {
         pdfAnnot->decRefCnt();
+    }
 }
 
 void AnnotationPrivate::tieToNativeAnnot(Annot *ann, ::Page *page, Poppler::DocumentData *doc)
@@ -322,14 +323,15 @@ PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags
     const double width = br_x - tl_x;
     const double height = br_y - tl_y;
 
-    if (rotationFixUp == 0)
+    if (rotationFixUp == 0) {
         return PDFRectangle(tl_x, tl_y, br_x, br_y);
-    else if (rotationFixUp == 90)
+    } else if (rotationFixUp == 90) {
         return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
-    else if (rotationFixUp == 180)
+    } else if (rotationFixUp == 180) {
         return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
-    else // rotationFixUp == 270
+    } else { // rotationFixUp == 270
         return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
+    }
 }
 
 PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
@@ -391,10 +393,12 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
         AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(ann);
         if (!markupann) {
             // Assume it's a root annotation, and skip if user didn't request it
-            if (parentID != -1)
+            if (parentID != -1) {
                 continue;
-        } else if (markupann->getInReplyToID() != parentID)
+            }
+        } else if (markupann->getInReplyToID() != parentID) {
             continue;
+        }
 
         /* Create Annotation of the right subclass */
         std::unique_ptr<Annotation> annotation;
@@ -402,54 +406,63 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
         switch (subType) {
         case Annot::typeText:
-            if (!wantTextAnnotations)
+            if (!wantTextAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<TextAnnotation>(TextAnnotation::Linked);
             break;
         case Annot::typeFreeText:
-            if (!wantTextAnnotations)
+            if (!wantTextAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<TextAnnotation>(TextAnnotation::InPlace);
             break;
         case Annot::typeLine:
-            if (!wantLineAnnotations)
+            if (!wantLineAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<LineAnnotation>(LineAnnotation::StraightLine);
             break;
         case Annot::typePolygon:
         case Annot::typePolyLine:
-            if (!wantLineAnnotations)
+            if (!wantLineAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<LineAnnotation>(LineAnnotation::Polyline);
             break;
         case Annot::typeSquare:
         case Annot::typeCircle:
-            if (!wantGeomAnnotations)
+            if (!wantGeomAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<GeomAnnotation>();
             break;
         case Annot::typeHighlight:
         case Annot::typeUnderline:
         case Annot::typeSquiggly:
         case Annot::typeStrikeOut:
-            if (!wantHighlightAnnotations)
+            if (!wantHighlightAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<HighlightAnnotation>();
             break;
         case Annot::typeStamp:
-            if (!wantStampAnnotations)
+            if (!wantStampAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<StampAnnotation>();
             break;
         case Annot::typeInk:
-            if (!wantInkAnnotations)
+            if (!wantInkAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<InkAnnotation>();
             break;
         case Annot::typeLink: /* TODO: Move logic to getters */
         {
-            if (!wantLinkAnnotations)
+            if (!wantLinkAnnotations) {
                 continue;
+            }
             // parse Link params
             AnnotLink *linkann = static_cast<AnnotLink *>(ann);
             LinkAnnotation *l = new LinkAnnotation();
@@ -471,14 +484,16 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             break;
         }
         case Annot::typeCaret:
-            if (!wantCaretAnnotations)
+            if (!wantCaretAnnotations) {
                 continue;
+            }
             annotation = std::make_unique<CaretAnnotation>();
             break;
         case Annot::typeFileAttachment: /* TODO: Move logic to getters */
         {
-            if (!wantFileAttachmentAnnotations)
+            if (!wantFileAttachmentAnnotations) {
                 continue;
+            }
             AnnotFileAttachment *attachann = static_cast<AnnotFileAttachment *>(ann);
             FileAttachmentAnnotation *f = new FileAttachmentAnnotation();
             // -> fileIcon
@@ -491,8 +506,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
         }
         case Annot::typeSound: /* TODO: Move logic to getters */
         {
-            if (!wantSoundAnnotations)
+            if (!wantSoundAnnotations) {
                 continue;
+            }
             AnnotSound *soundann = static_cast<AnnotSound *>(ann);
             SoundAnnotation *s = new SoundAnnotation();
 
@@ -505,8 +521,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
         }
         case Annot::typeMovie: /* TODO: Move logic to getters */
         {
-            if (!wantMovieAnnotations)
+            if (!wantMovieAnnotations) {
                 continue;
+            }
             AnnotMovie *movieann = static_cast<AnnotMovie *>(ann);
             MovieAnnotation *m = new MovieAnnotation();
 
@@ -515,18 +532,21 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             m->setMovie(movie);
             // -> movieTitle
             const GooString *movietitle = movieann->getTitle();
-            if (movietitle)
+            if (movietitle) {
                 m->setMovieTitle(QString::fromLatin1(movietitle->c_str()));
+            }
             annotation.reset(m);
             break;
         }
         case Annot::typeScreen: {
-            if (!wantScreenAnnotations)
+            if (!wantScreenAnnotations) {
                 continue;
+            }
             AnnotScreen *screenann = static_cast<AnnotScreen *>(ann);
             // TODO Support other link types than Link::Rendition in ScreenAnnotation
-            if (!screenann->getAction() || screenann->getAction()->getKind() != actionRendition)
+            if (!screenann->getAction() || screenann->getAction()->getKind() != actionRendition) {
                 continue;
+            }
             ScreenAnnotation *s = new ScreenAnnotation();
 
             // -> screen
@@ -535,8 +555,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
             // -> screenTitle
             const GooString *screentitle = screenann->getTitle();
-            if (screentitle)
+            if (screentitle) {
                 s->setScreenTitle(UnicodeParsedString(screentitle));
+            }
             annotation.reset(s);
             break;
         }
@@ -545,8 +566,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
         case Annot::typeUnknown:
             continue; // special case for ignoring unknown annotations
         case Annot::typeWidget:
-            if (!wantWidgetAnnotations)
+            if (!wantWidgetAnnotations) {
                 continue;
+            }
             annotation.reset(new WidgetAnnotation());
             break;
         case Annot::typeRichMedia: {
@@ -607,13 +629,15 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
                     for (int i = 0; i < configurationsCount; ++i) {
                         const AnnotRichMedia::Configuration *annotConfiguration = annotContent->getConfiguration(i);
-                        if (!annotConfiguration)
+                        if (!annotConfiguration) {
                             continue;
+                        }
 
                         RichMediaAnnotation::Configuration *configuration = new RichMediaAnnotation::Configuration;
 
-                        if (annotConfiguration->getName())
+                        if (annotConfiguration->getName()) {
                             configuration->setName(UnicodeParsedString(annotConfiguration->getName()));
+                        }
 
                         switch (annotConfiguration->getType()) {
                         case AnnotRichMedia::Configuration::type3D:
@@ -636,8 +660,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
                             for (int j = 0; j < instancesCount; ++j) {
                                 const AnnotRichMedia::Instance *annotInstance = annotConfiguration->getInstance(j);
-                                if (!annotInstance)
+                                if (!annotInstance) {
                                     continue;
+                                }
 
                                 RichMediaAnnotation::Instance *instance = new RichMediaAnnotation::Instance;
 
@@ -660,8 +685,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
                                 if (annotParams) {
                                     RichMediaAnnotation::Params *params = new RichMediaAnnotation::Params;
 
-                                    if (annotParams->getFlashVars())
+                                    if (annotParams->getFlashVars()) {
                                         params->setFlashVars(UnicodeParsedString(annotParams->getFlashVars()));
+                                    }
 
                                     instance->setParams(params);
                                 }
@@ -684,13 +710,15 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
                     for (int i = 0; i < assetsCount; ++i) {
                         const AnnotRichMedia::Asset *annotAsset = annotContent->getAsset(i);
-                        if (!annotAsset)
+                        if (!annotAsset) {
                             continue;
+                        }
 
                         RichMediaAnnotation::Asset *asset = new RichMediaAnnotation::Asset;
 
-                        if (annotAsset->getName())
+                        if (annotAsset->getName()) {
                             asset->setName(UnicodeParsedString(annotAsset->getName()));
+                        }
 
                         auto fileSpec = std::make_unique<FileSpec>(annotAsset->getFileSpec());
                         asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec))));
@@ -744,19 +772,22 @@ Ref AnnotationPrivate::pdfObjectReference() const
 
 std::unique_ptr<Link> AnnotationPrivate::additionalAction(Annotation::AdditionalActionType type) const
 {
-    if (pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget)
+    if (pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget) {
         return {};
+    }
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
     std::unique_ptr<::LinkAction> linkAction;
-    if (pdfAnnot->getType() == Annot::typeScreen)
+    if (pdfAnnot->getType() == Annot::typeScreen) {
         linkAction = static_cast<AnnotScreen *>(pdfAnnot)->getAdditionalAction(actionType);
-    else
+    } else {
         linkAction = static_cast<AnnotWidget *>(pdfAnnot)->getAdditionalAction(actionType);
+    }
 
-    if (linkAction)
+    if (linkAction) {
         return PageData::convertLinkActionToLink(linkAction.get(), parentDoc, QRectF());
+    }
 
     return {};
 }
@@ -773,8 +804,9 @@ void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, 
     Annot *nativeAnnot = ann->d_ptr->createNativeAnnot(pdfPage, doc);
     Q_ASSERT(nativeAnnot);
 
-    if (ann->d_ptr->annotationAppearance.isStream())
+    if (ann->d_ptr->annotationAppearance.isStream()) {
         nativeAnnot->setNewAppearance(ann->d_ptr->annotationAppearance.copy());
+    }
 
     pdfPage->addAnnot(nativeAnnot);
 }
@@ -824,8 +856,9 @@ Annotation::Style::Style(const Style &other) : d(other.d) { }
 
 Annotation::Style &Annotation::Style::operator=(const Style &other)
 {
-    if (this != &other)
+    if (this != &other) {
         d = other.d;
+    }
 
     return *this;
 }
@@ -940,8 +973,9 @@ Annotation::Popup::Popup(const Popup &other) : d(other.d) { }
 
 Annotation::Popup &Annotation::Popup::operator=(const Popup &other)
 {
-    if (this != &other)
+    if (this != &other) {
         d = other.d;
+    }
 
     return *this;
 }
@@ -1006,8 +1040,9 @@ QString Annotation::author() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->author;
+    }
 
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup *>(d->pdfAnnot);
     return markupann ? UnicodeParsedString(markupann->getLabel()) : QString();
@@ -1032,8 +1067,9 @@ QString Annotation::contents() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->contents;
+    }
 
     return UnicodeParsedString(d->pdfAnnot->getContents());
 }
@@ -1054,8 +1090,9 @@ QString Annotation::uniqueName() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->uniqueName;
+    }
 
     return UnicodeParsedString(d->pdfAnnot->getName());
 }
@@ -1078,13 +1115,15 @@ QDateTime Annotation::modificationDate() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->modDate;
+    }
 
-    if (d->pdfAnnot->getModified())
+    if (d->pdfAnnot->getModified()) {
         return convertDate(d->pdfAnnot->getModified()->c_str());
-    else
+    } else {
         return QDateTime();
+    }
 }
 
 void Annotation::setModificationDate(const QDateTime &date)
@@ -1112,13 +1151,15 @@ QDateTime Annotation::creationDate() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->creationDate;
+    }
 
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup *>(d->pdfAnnot);
 
-    if (markupann && markupann->getDate())
+    if (markupann && markupann->getDate()) {
         return convertDate(markupann->getDate()->c_str());
+    }
 
     return modificationDate();
 }
@@ -1149,22 +1190,28 @@ static Annotation::Flags fromPdfFlags(int flags)
 {
     Annotation::Flags qtflags;
 
-    if (flags & Annot::flagHidden)
+    if (flags & Annot::flagHidden) {
         qtflags |= Annotation::Hidden;
-    if (flags & Annot::flagNoZoom)
+    }
+    if (flags & Annot::flagNoZoom) {
         qtflags |= Annotation::FixedSize;
-    if (flags & Annot::flagNoRotate)
+    }
+    if (flags & Annot::flagNoRotate) {
         qtflags |= Annotation::FixedRotation;
-    if (!(flags & Annot::flagPrint))
+    }
+    if (!(flags & Annot::flagPrint)) {
         qtflags |= Annotation::DenyPrint;
+    }
     if (flags & Annot::flagReadOnly) {
         qtflags |= Annotation::DenyWrite;
         qtflags |= Annotation::DenyDelete;
     }
-    if (flags & Annot::flagLocked)
+    if (flags & Annot::flagLocked) {
         qtflags |= Annotation::DenyDelete;
-    if (flags & Annot::flagToggleNoView)
+    }
+    if (flags & Annot::flagToggleNoView) {
         qtflags |= Annotation::ToggleHidingOnMouse;
+    }
 
     return qtflags;
 }
@@ -1173,20 +1220,27 @@ static int toPdfFlags(Annotation::Flags qtflags)
 {
     int flags = 0;
 
-    if (qtflags & Annotation::Hidden)
+    if (qtflags & Annotation::Hidden) {
         flags |= Annot::flagHidden;
-    if (qtflags & Annotation::FixedSize)
+    }
+    if (qtflags & Annotation::FixedSize) {
         flags |= Annot::flagNoZoom;
-    if (qtflags & Annotation::FixedRotation)
+    }
+    if (qtflags & Annotation::FixedRotation) {
         flags |= Annot::flagNoRotate;
-    if (!(qtflags & Annotation::DenyPrint))
+    }
+    if (!(qtflags & Annotation::DenyPrint)) {
         flags |= Annot::flagPrint;
-    if (qtflags & Annotation::DenyWrite)
+    }
+    if (qtflags & Annotation::DenyWrite) {
         flags |= Annot::flagReadOnly;
-    if (qtflags & Annotation::DenyDelete)
+    }
+    if (qtflags & Annotation::DenyDelete) {
         flags |= Annot::flagLocked;
-    if (qtflags & Annotation::ToggleHidingOnMouse)
+    }
+    if (qtflags & Annotation::ToggleHidingOnMouse) {
         flags |= Annot::flagToggleNoView;
+    }
 
     return flags;
 }
@@ -1195,8 +1249,9 @@ Annotation::Flags Annotation::flags() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->flags;
+    }
 
     return fromPdfFlags(d->pdfAnnot->getFlags());
 }
@@ -1217,8 +1272,9 @@ QRectF Annotation::boundary() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->boundary;
+    }
 
     const PDFRectangle &rect = d->pdfAnnot->getRect();
     return d->fromPdfRectangle(rect);
@@ -1241,15 +1297,17 @@ Annotation::Style Annotation::style() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->style;
+    }
 
     Style s;
     s.setColor(convertAnnotColor(d->pdfAnnot->getColor()));
 
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup *>(d->pdfAnnot);
-    if (markupann)
+    if (markupann) {
         s.setOpacity(markupann->getOpacity());
+    }
 
     const AnnotBorder *border = d->pdfAnnot->getBorder();
     if (border) {
@@ -1265,8 +1323,9 @@ Annotation::Style Annotation::style() const
         const int dashArrLen = border->getDashLength();
         const double *dashArrData = border->getDash();
         QVector<double> dashArrVect(dashArrLen);
-        for (int i = 0; i < dashArrLen; ++i)
+        for (int i = 0; i < dashArrLen; ++i) {
             dashArrVect[i] = dashArrData[i];
+        }
         s.setDashArray(dashArrVect);
     }
 
@@ -1302,8 +1361,9 @@ void Annotation::setStyle(const Annotation::Style &style)
     d->pdfAnnot->setColor(convertQColor(style.color()));
 
     AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
-    if (markupann)
+    if (markupann) {
         markupann->setOpacity(style.opacity());
+    }
 
     auto border = std::make_unique<AnnotBorderArray>();
     border->setWidth(style.width());
@@ -1316,8 +1376,9 @@ Annotation::Popup Annotation::popup() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->popup;
+    }
 
     Popup w;
     AnnotPopup *popup = nullptr;
@@ -1332,8 +1393,9 @@ Annotation::Popup Annotation::popup() const
     if (popup) {
         flags = fromPdfFlags(popup->getFlags()) & (Annotation::Hidden | Annotation::FixedSize | Annotation::FixedRotation);
 
-        if (!popup->getOpen())
+        if (!popup->getOpen()) {
             flags |= Annotation::Hidden;
+        }
 
         const PDFRectangle &rect = popup->getRect();
         w.setGeometry(d->fromPdfRectangle(rect));
@@ -1350,8 +1412,9 @@ Annotation::Popup Annotation::popup() const
 
         // If text is not 'opened', force window hiding. if the window
         // was parsed from popup, the flag should already be set
-        if (!textann->getOpen() && flags != -1)
+        if (!textann->getOpen() && flags != -1) {
             flags |= Annotation::Hidden;
+        }
     }
 
     w.setFlags(flags);
@@ -1391,8 +1454,9 @@ Annotation::RevScope Annotation::revisionScope() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->revisionScope;
+    }
 
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup *>(d->pdfAnnot);
 
@@ -1412,8 +1476,9 @@ Annotation::RevType Annotation::revisionType() const
 {
     Q_D(const Annotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->revisionType;
+    }
 
     const AnnotText *textann = dynamic_cast<const AnnotText *>(d->pdfAnnot);
 
@@ -1453,8 +1518,9 @@ std::vector<std::unique_ptr<Annotation>> Annotation::revisions() const
 
     /* If the annotation doesn't live in a object on its own (eg bug51361), it
      * has no ref, therefore it can't have revisions */
-    if (!d->pdfAnnot->getHasRef())
+    if (!d->pdfAnnot->getHasRef()) {
         return std::vector<std::unique_ptr<Annotation>>();
+    }
 
     return AnnotationPrivate::findAnnotations(d->pdfPage, d->parentDoc, QSet<Annotation::SubType>(), d->pdfAnnot->getId());
 }
@@ -1587,8 +1653,9 @@ TextAnnotation::TextType TextAnnotation::textType() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->textType;
+    }
 
     return d->pdfAnnot->getType() == Annot::typeText ? TextAnnotation::Linked : TextAnnotation::InPlace;
 }
@@ -1610,8 +1677,9 @@ QString TextAnnotation::textIcon() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->textIcon;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeText) {
         const AnnotText *textann = static_cast<const AnnotText *>(d->pdfAnnot);
@@ -1642,8 +1710,9 @@ QFont TextAnnotation::textFont() const
 {
     Q_D(const TextAnnotation);
 
-    if (d->textFont)
+    if (d->textFont) {
         return *d->textFont;
+    }
 
     double fontSize { AnnotFreeText::undefinedFontPtSize };
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
@@ -1673,8 +1742,9 @@ QColor TextAnnotation::textColor() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->textColor;
+    }
 
     if (std::unique_ptr<DefaultAppearance> da { d->getDefaultAppearanceFromNative() }) {
         return convertAnnotColor(da->getFontColor());
@@ -1698,17 +1768,18 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->inplaceAlign;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
         switch (ftextann->getQuadding()) {
-        case AnnotFreeText::quaddingLeftJustified:
+        case VariableTextQuadding::leftJustified:
             return InplaceAlignLeft;
-        case AnnotFreeText::quaddingCentered:
+        case VariableTextQuadding::centered:
             return InplaceAlignCenter;
-        case AnnotFreeText::quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             return InplaceAlignRight;
         }
     }
@@ -1716,17 +1787,17 @@ TextAnnotation::InplaceAlignPosition TextAnnotation::inplaceAlign() const
     return InplaceAlignLeft;
 }
 
-static AnnotFreeText::AnnotFreeTextQuadding alignToQuadding(TextAnnotation::InplaceAlignPosition align)
+static VariableTextQuadding alignToQuadding(TextAnnotation::InplaceAlignPosition align)
 {
     switch (align) {
     case TextAnnotation::InplaceAlignLeft:
-        return AnnotFreeText::quaddingLeftJustified;
+        return VariableTextQuadding::leftJustified;
     case TextAnnotation::InplaceAlignCenter:
-        return AnnotFreeText::quaddingCentered;
+        return VariableTextQuadding::centered;
     case TextAnnotation::InplaceAlignRight:
-        return AnnotFreeText::quaddingRightJustified;
+        return VariableTextQuadding::rightJustified;
     }
-    return AnnotFreeText::quaddingLeftJustified;
+    return VariableTextQuadding::leftJustified;
 }
 
 void TextAnnotation::setInplaceAlign(InplaceAlignPosition align)
@@ -1747,27 +1818,31 @@ void TextAnnotation::setInplaceAlign(InplaceAlignPosition align)
 QPointF TextAnnotation::calloutPoint(int id) const
 {
     const QVector<QPointF> points = calloutPoints();
-    if (id < 0 || id >= points.size())
+    if (id < 0 || id >= points.size()) {
         return QPointF();
-    else
+    } else {
         return points[id];
+    }
 }
 
 QVector<QPointF> TextAnnotation::calloutPoints() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->inplaceCallout;
+    }
 
-    if (d->pdfAnnot->getType() == Annot::typeText)
+    if (d->pdfAnnot->getType() == Annot::typeText) {
         return QVector<QPointF>();
+    }
 
     const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
     const AnnotCalloutLine *callout = ftextann->getCalloutLine();
 
-    if (!callout)
+    if (!callout) {
         return QVector<QPointF>();
+    }
 
     double MTX[6];
     d->fillTransformationMTX(MTX);
@@ -1776,8 +1851,9 @@ QVector<QPointF> TextAnnotation::calloutPoints() const
     QVector<QPointF> res(callout_v6 ? 3 : 2);
     XPDFReader::transform(MTX, callout->getX1(), callout->getY1(), res[0]);
     XPDFReader::transform(MTX, callout->getX2(), callout->getY2(), res[1]);
-    if (callout_v6)
+    if (callout_v6) {
         XPDFReader::transform(MTX, callout_v6->getX3(), callout_v6->getY3(), res[2]);
+    }
     return res;
 }
 
@@ -1789,8 +1865,9 @@ void TextAnnotation::setCalloutPoints(const QVector<QPointF> &points)
         return;
     }
 
-    if (d->pdfAnnot->getType() != Annot::typeFreeText)
+    if (d->pdfAnnot->getType() != Annot::typeFreeText) {
         return;
+    }
 
     AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(d->pdfAnnot);
     const int count = points.size();
@@ -1828,8 +1905,9 @@ TextAnnotation::InplaceIntent TextAnnotation::inplaceIntent() const
 {
     Q_D(const TextAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->inplaceIntent;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeFreeText) {
         const AnnotFreeText *ftextann = static_cast<const AnnotFreeText *>(d->pdfAnnot);
@@ -1938,8 +2016,9 @@ LineAnnotation::LineType LineAnnotation::lineType() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineType;
+    }
 
     return (d->pdfAnnot->getType() == Annot::typeLine) ? LineAnnotation::StraightLine : LineAnnotation::Polyline;
 }
@@ -1961,8 +2040,9 @@ QVector<QPointF> LineAnnotation::linePoints() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->linePoints;
+    }
 
     double MTX[6];
     d->fillTransformationMTX(MTX);
@@ -2022,8 +2102,9 @@ LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineStartStyle;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
@@ -2056,8 +2137,9 @@ LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineEndStyle;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
@@ -2090,8 +2172,9 @@ bool LineAnnotation::isLineClosed() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineClosed;
+    }
 
     return d->pdfAnnot->getType() == Annot::typePolygon;
 }
@@ -2111,12 +2194,14 @@ void LineAnnotation::setLineClosed(bool closed)
         // Set new subtype and switch intent if necessary
         if (closed) {
             polyann->setType(Annot::typePolygon);
-            if (polyann->getIntent() == AnnotPolygon::polylineDimension)
+            if (polyann->getIntent() == AnnotPolygon::polylineDimension) {
                 polyann->setIntent(AnnotPolygon::polygonDimension);
+            }
         } else {
             polyann->setType(Annot::typePolyLine);
-            if (polyann->getIntent() == AnnotPolygon::polygonDimension)
+            if (polyann->getIntent() == AnnotPolygon::polygonDimension) {
                 polyann->setIntent(AnnotPolygon::polylineDimension);
+            }
         }
     }
 }
@@ -2125,8 +2210,9 @@ QColor LineAnnotation::lineInnerColor() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineInnerColor;
+    }
 
     AnnotColor *c;
 
@@ -2165,8 +2251,9 @@ double LineAnnotation::lineLeadingForwardPoint() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineLeadingFwdPt;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
@@ -2195,8 +2282,9 @@ double LineAnnotation::lineLeadingBackPoint() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineLeadingBackPt;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
@@ -2225,8 +2313,9 @@ bool LineAnnotation::lineShowCaption() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineShowCaption;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
@@ -2255,18 +2344,20 @@ LineAnnotation::LineIntent LineAnnotation::lineIntent() const
 {
     Q_D(const LineAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->lineIntent;
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot);
         return (LineAnnotation::LineIntent)(lineann->getIntent() + 1);
     } else {
         const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot);
-        if (polyann->getIntent() == AnnotPolygon::polygonCloud)
+        if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
             return LineAnnotation::PolygonCloud;
-        else // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
+        } else { // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
             return LineAnnotation::Dimension;
+        }
     }
 }
 
@@ -2279,22 +2370,24 @@ void LineAnnotation::setLineIntent(LineAnnotation::LineIntent intent)
         return;
     }
 
-    if (intent == LineAnnotation::Unknown)
+    if (intent == LineAnnotation::Unknown) {
         return; // Do not set (actually, it should clear the property)
+    }
 
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         AnnotLine *lineann = static_cast<AnnotLine *>(d->pdfAnnot);
         lineann->setIntent((AnnotLine::AnnotLineIntent)(intent - 1));
     } else {
         AnnotPolygon *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot);
-        if (intent == LineAnnotation::PolygonCloud)
+        if (intent == LineAnnotation::PolygonCloud) {
             polyann->setIntent(AnnotPolygon::polygonCloud);
-        else // LineAnnotation::Dimension
+        } else // LineAnnotation::Dimension
         {
-            if (d->pdfAnnot->getType() == Annot::typePolygon)
+            if (d->pdfAnnot->getType() == Annot::typePolygon) {
                 polyann->setIntent(AnnotPolygon::polygonDimension);
-            else // Annot::typePolyLine
+            } else { // Annot::typePolyLine
                 polyann->setIntent(AnnotPolygon::polylineDimension);
+            }
         }
     }
 }
@@ -2329,10 +2422,11 @@ Annot *GeomAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     parentDoc = doc;
 
     Annot::AnnotSubtype type;
-    if (geomType == GeomAnnotation::InscribedSquare)
+    if (geomType == GeomAnnotation::InscribedSquare) {
         type = Annot::typeSquare;
-    else // GeomAnnotation::InscribedCircle
+    } else { // GeomAnnotation::InscribedCircle
         type = Annot::typeCircle;
+    }
 
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
@@ -2361,13 +2455,15 @@ GeomAnnotation::GeomType GeomAnnotation::geomType() const
 {
     Q_D(const GeomAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->geomType;
+    }
 
-    if (d->pdfAnnot->getType() == Annot::typeSquare)
+    if (d->pdfAnnot->getType() == Annot::typeSquare) {
         return GeomAnnotation::InscribedSquare;
-    else // Annot::typeCircle
+    } else { // Annot::typeCircle
         return GeomAnnotation::InscribedCircle;
+    }
 }
 
 void GeomAnnotation::setGeomType(GeomAnnotation::GeomType type)
@@ -2380,18 +2476,20 @@ void GeomAnnotation::setGeomType(GeomAnnotation::GeomType type)
     }
 
     AnnotGeometry *geomann = static_cast<AnnotGeometry *>(d->pdfAnnot);
-    if (type == GeomAnnotation::InscribedSquare)
+    if (type == GeomAnnotation::InscribedSquare) {
         geomann->setType(Annot::typeSquare);
-    else // GeomAnnotation::InscribedCircle
+    } else { // GeomAnnotation::InscribedCircle
         geomann->setType(Annot::typeCircle);
+    }
 }
 
 QColor GeomAnnotation::geomInnerColor() const
 {
     Q_D(const GeomAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->geomInnerColor;
+    }
 
     const AnnotGeometry *geomann = static_cast<const AnnotGeometry *>(d->pdfAnnot);
     return convertAnnotColor(geomann->getInteriorColor());
@@ -2453,8 +2551,9 @@ QList<HighlightAnnotation::Quad> HighlightAnnotationPrivate::fromQuadrilaterals(
 {
     QList<HighlightAnnotation::Quad> quads;
 
-    if (!hlquads || !hlquads->getQuadrilateralsLength())
+    if (!hlquads || !hlquads->getQuadrilateralsLength()) {
         return quads;
+    }
     const int quadsCount = hlquads->getQuadrilateralsLength();
 
     double MTX[6];
@@ -2543,19 +2642,21 @@ HighlightAnnotation::HighlightType HighlightAnnotation::highlightType() const
 {
     Q_D(const HighlightAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->highlightType;
+    }
 
     Annot::AnnotSubtype subType = d->pdfAnnot->getType();
 
-    if (subType == Annot::typeHighlight)
+    if (subType == Annot::typeHighlight) {
         return HighlightAnnotation::Highlight;
-    else if (subType == Annot::typeUnderline)
+    } else if (subType == Annot::typeUnderline) {
         return HighlightAnnotation::Underline;
-    else if (subType == Annot::typeSquiggly)
+    } else if (subType == Annot::typeSquiggly) {
         return HighlightAnnotation::Squiggly;
-    else // Annot::typeStrikeOut
+    } else { // Annot::typeStrikeOut
         return HighlightAnnotation::StrikeOut;
+    }
 }
 
 void HighlightAnnotation::setHighlightType(HighlightAnnotation::HighlightType type)
@@ -2575,8 +2676,9 @@ QList<HighlightAnnotation::Quad> HighlightAnnotation::highlightQuads() const
 {
     Q_D(const HighlightAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->highlightQuads;
+    }
 
     const AnnotTextMarkup *hlann = static_cast<AnnotTextMarkup *>(d->pdfAnnot);
     return d->fromQuadrilaterals(hlann->getQuadrilaterals());
@@ -2749,8 +2851,9 @@ QString StampAnnotation::stampIconName() const
 {
     Q_D(const StampAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->stampIconName;
+    }
 
     const AnnotStamp *stampann = static_cast<const AnnotStamp *>(d->pdfAnnot);
     return QString::fromLatin1(stampann->getIcon()->c_str());
@@ -2816,8 +2919,9 @@ AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList<QVector<QPointF>> &pa
 {
     const int pathsNumber = paths.size();
     AnnotPath **res = new AnnotPath *[pathsNumber];
-    for (int i = 0; i < pathsNumber; ++i)
+    for (int i = 0; i < pathsNumber; ++i) {
         res[i] = toAnnotPath(paths[i]);
+    }
     return res;
 }
 
@@ -2860,14 +2964,16 @@ QList<QVector<QPointF>> InkAnnotation::inkPaths() const
 {
     Q_D(const InkAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->inkPaths;
+    }
 
     const AnnotInk *inkann = static_cast<const AnnotInk *>(d->pdfAnnot);
 
     const AnnotPath *const *paths = inkann->getInkList();
-    if (!paths || !inkann->getInkListLength())
+    if (!paths || !inkann->getInkListLength()) {
         return {};
+    }
 
     double MTX[6];
     d->fillTransformationMTX(MTX);
@@ -2905,8 +3011,9 @@ void InkAnnotation::setInkPaths(const QList<QVector<QPointF>> &paths)
     const int pathsNumber = paths.size();
     inkann->setInkList(annotpaths, pathsNumber);
 
-    for (int i = 0; i < pathsNumber; ++i)
+    for (int i = 0; i < pathsNumber; ++i) {
         delete annotpaths[i];
+    }
     delete[] annotpaths;
 }
 
@@ -2976,8 +3083,9 @@ void LinkAnnotation::setLinkHighlightMode(LinkAnnotation::HighlightMode mode)
 
 QPointF LinkAnnotation::linkRegionPoint(int id) const
 {
-    if (id < 0 || id >= 4)
+    if (id < 0 || id >= 4) {
         return QPointF();
+    }
 
     Q_D(const LinkAnnotation);
     return d->linkRegion[id];
@@ -2985,8 +3093,9 @@ QPointF LinkAnnotation::linkRegionPoint(int id) const
 
 void LinkAnnotation::setLinkRegionPoint(int id, const QPointF point)
 {
-    if (id < 0 || id >= 4)
+    if (id < 0 || id >= 4) {
         return;
+    }
 
     Q_D(LinkAnnotation);
     d->linkRegion[id] = point;
@@ -3047,8 +3156,9 @@ CaretAnnotation::CaretSymbol CaretAnnotation::caretSymbol() const
 {
     Q_D(const CaretAnnotation);
 
-    if (!d->pdfAnnot)
+    if (!d->pdfAnnot) {
         return d->symbol;
+    }
 
     const AnnotCaret *caretann = static_cast<const AnnotCaret *>(d->pdfAnnot);
     return (CaretAnnotation::CaretSymbol)caretann->getSymbol();
@@ -3728,8 +3838,9 @@ RichMediaAnnotation::Content *RichMediaAnnotation::content() const
 // BEGIN utility annotation functions
 QColor convertAnnotColor(const AnnotColor *color)
 {
-    if (!color)
+    if (!color) {
         return QColor();
+    }
 
     QColor newcolor;
     const double *color_data = color->getValues();
@@ -3752,8 +3863,9 @@ QColor convertAnnotColor(const AnnotColor *color)
 
 std::unique_ptr<AnnotColor> convertQColor(const QColor &c)
 {
-    if (c.alpha() == 0)
+    if (c.alpha() == 0) {
         return {}; // Transparent
+    }
 
     switch (c.spec()) {
     case QColor::Rgb:

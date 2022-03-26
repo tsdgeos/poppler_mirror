@@ -113,13 +113,15 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdfimages", "<PDF-file> <image-root>", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             return 0;
+        }
         return 99;
     }
     fileName = new GooString(argv[1]);
-    if (!listImages)
+    if (!listImages) {
         imgRoot = argv[2];
+    }
 
     // read config file
     globalParams = std::make_unique<GlobalParams>();
@@ -155,14 +157,16 @@ int main(int argc, char *argv[])
 #endif
 
     // get page range
-    if (firstPage < 1)
+    if (firstPage < 1) {
         firstPage = 1;
+    }
     if (firstPage > doc->getNumPages()) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be larger then the number of pages in the document ({1:d}).", firstPage, doc->getNumPages());
         return 99;
     }
-    if (lastPage < 1 || lastPage > doc->getNumPages())
+    if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
+    }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
         return 99;

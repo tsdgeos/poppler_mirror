@@ -239,29 +239,31 @@ LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDe
         d->name = QString::fromLatin1(data.namedDest->c_str());
     }
 
-    if (!ld)
+    if (!ld) {
         return;
+    }
 
-    if (ld->getKind() == ::destXYZ)
+    if (ld->getKind() == ::destXYZ) {
         d->kind = destXYZ;
-    else if (ld->getKind() == ::destFit)
+    } else if (ld->getKind() == ::destFit) {
         d->kind = destFit;
-    else if (ld->getKind() == ::destFitH)
+    } else if (ld->getKind() == ::destFitH) {
         d->kind = destFitH;
-    else if (ld->getKind() == ::destFitV)
+    } else if (ld->getKind() == ::destFitV) {
         d->kind = destFitV;
-    else if (ld->getKind() == ::destFitR)
+    } else if (ld->getKind() == ::destFitR) {
         d->kind = destFitR;
-    else if (ld->getKind() == ::destFitB)
+    } else if (ld->getKind() == ::destFitB) {
         d->kind = destFitB;
-    else if (ld->getKind() == ::destFitBH)
+    } else if (ld->getKind() == ::destFitBH) {
         d->kind = destFitBH;
-    else if (ld->getKind() == ::destFitBV)
+    } else if (ld->getKind() == ::destFitBV) {
         d->kind = destFitBV;
+    }
 
-    if (!ld->isPageRef())
+    if (!ld->isPageRef()) {
         d->pageNum = ld->getPageNum();
-    else {
+    } else {
         const Ref ref = ld->getPageRef();
         d->pageNum = data.doc->doc->findPage(ref);
     }
@@ -286,12 +288,14 @@ LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDe
             d->top = topAux / (double)page->getCropHeight();
             d->right = rightAux / (double)page->getCropWidth();
             d->bottom = bottomAux / (double)page->getCropHeight();
-        } else
+        } else {
             d->pageNum = 0;
+        }
     }
 
-    if (deleteDest)
+    if (deleteDest) {
         delete ld;
+    }
 }
 
 LinkDestination::LinkDestination(const QString &description) : d(new LinkDestinationPrivate)
@@ -387,8 +391,9 @@ QString LinkDestination::destinationName() const
 
 LinkDestination &LinkDestination::operator=(const LinkDestination &other)
 {
-    if (this == &other)
+    if (this == &other) {
         return *this;
+    }
 
     d = other.d;
     return *this;

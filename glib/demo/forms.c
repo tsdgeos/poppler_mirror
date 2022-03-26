@@ -50,8 +50,9 @@ typedef struct
 
 static void pgd_forms_free(PgdFormsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -108,8 +109,9 @@ static void pgd_form_field_view_add_choice_items(GtkGrid *table, PopplerFormFiel
         gtk_text_buffer_insert_at_cursor(buffer, "\n", strlen("\n"));
         g_free(item);
 
-        if (poppler_form_field_choice_is_item_selected(field, i))
+        if (poppler_form_field_choice_is_item_selected(field, i)) {
             *selected = i;
+        }
     }
 
     gtk_container_add(GTK_CONTAINER(swindow), textview);
@@ -135,8 +137,9 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
         gtk_container_remove(GTK_CONTAINER(field_view), table);
     }
 
-    if (!field)
+    if (!field) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -324,8 +327,9 @@ static void pgd_forms_get_form_fields(GtkWidget *button, PgdFormsDemo *demo)
     pgd_form_field_view_set_field(demo->field_view, NULL);
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_form_field_mapping(page);

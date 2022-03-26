@@ -219,10 +219,11 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftops", "<PDF-file> [<PS-file>]", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exit(0);
-        else
+        } else {
             exit(1);
+        }
     }
     if ((level1 ? 1 : 0) + (level1Sep ? 1 : 0) + (level2 ? 1 : 0) + (level2Sep ? 1 : 0) + (level3 ? 1 : 0) + (level3Sep ? 1 : 0) > 1) {
         fprintf(stderr, "Error: use only one of the 'level' options.\n");
@@ -465,8 +466,9 @@ int main(int argc, char *argv[])
     if (splashResolution > 0) {
         psOut->setRasterResolution(splashResolution);
     }
-    if (processcolorformatspecified)
+    if (processcolorformatspecified) {
         psOut->setProcessColorFormat(processcolorformat);
+    }
 #ifdef USE_CMS
     psOut->setDisplayProfile(processcolorprofile);
     psOut->setDefaultGrayProfile(defaultgrayprofile);

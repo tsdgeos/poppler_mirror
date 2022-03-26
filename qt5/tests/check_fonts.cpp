@@ -35,18 +35,24 @@ static QList<Poppler::FontInfo> loadFontsViaIterator(Poppler::Document *doc, int
 namespace Poppler {
 static bool operator==(const FontInfo &f1, const FontInfo &f2)
 {
-    if (f1.name() != f2.name())
+    if (f1.name() != f2.name()) {
         return false;
-    if (f1.file() != f2.file())
+    }
+    if (f1.file() != f2.file()) {
         return false;
-    if (f1.isEmbedded() != f2.isEmbedded())
+    }
+    if (f1.isEmbedded() != f2.isEmbedded()) {
         return false;
-    if (f1.isSubset() != f2.isSubset())
+    }
+    if (f1.isSubset() != f2.isSubset()) {
         return false;
-    if (f1.type() != f2.type())
+    }
+    if (f1.type() != f2.type()) {
         return false;
-    if (f1.typeName() != f2.typeName())
+    }
+    if (f1.typeName() != f2.typeName()) {
         return false;
+    }
     return true;
 }
 }

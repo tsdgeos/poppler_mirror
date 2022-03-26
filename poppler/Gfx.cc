@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
@@ -299,8 +299,9 @@ std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
 
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->fonts) {
-            if (std::shared_ptr<GfxFont> font = resPtr->fonts->lookup(name))
+            if (std::shared_ptr<GfxFont> font = resPtr->fonts->lookup(name)) {
                 return font;
+            }
         }
     }
     error(errSyntaxError, -1, "Unknown font tag '{0:s}'", name);
@@ -324,8 +325,9 @@ Object GfxResources::lookupXObject(const char *name)
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->xObjDict.isDict()) {
             Object obj = resPtr->xObjDict.dictLookup(name);
-            if (!obj.isNull())
+            if (!obj.isNull()) {
                 return obj;
+            }
         }
     }
     error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
@@ -339,8 +341,9 @@ Object GfxResources::lookupXObjectNF(const char *name)
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->xObjDict.isDict()) {
             Object obj = resPtr->xObjDict.dictLookupNF(name).copy();
-            if (!obj.isNull())
+            if (!obj.isNull()) {
                 return obj;
+            }
         }
     }
     error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
@@ -354,8 +357,9 @@ Object GfxResources::lookupMarkedContentNF(const char *name)
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->propertiesDict.isDict()) {
             Object obj = resPtr->propertiesDict.dictLookupNF(name).copy();
-            if (!obj.isNull())
+            if (!obj.isNull()) {
                 return obj;
+            }
         }
     }
     error(errSyntaxError, -1, "Marked Content '{0:s}' is unknown", name);
@@ -415,11 +419,13 @@ GfxShading *GfxResources::lookupShading(const char *name, OutputDev *out, GfxSta
 Object GfxResources::lookupGState(const char *name)
 {
     Object obj = lookupGStateNF(name);
-    if (obj.isNull())
+    if (obj.isNull()) {
         return Object(objNull);
+    }
 
-    if (!obj.isRef())
+    if (!obj.isRef()) {
         return obj;
+    }
 
     const Ref ref = obj.getRef();
 
@@ -579,15 +585,13 @@ void Gfx::initDisplayProfile()
                 Object profile = firstElement.dictLookup("DestOutputProfile");
                 if (profile.isStream()) {
                     Stream *iccStream = profile.getStream();
-                    int length = 0;
-                    unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf, length));
+                    const std::vector<unsigned char> profBuf = iccStream->toUnsignedChars(65536, 65536);
+                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
                     if (!hp) {
                         error(errSyntaxWarning, -1, "read ICCBased color space profile error");
                     } else {
                         state->setDisplayProfile(hp);
                     }
-                    gfree(profBuf);
                 }
             }
         }
@@ -687,8 +691,9 @@ void Gfx::go(bool topLevel)
                 }
                 delete timer;
             }
-            for (i = 0; i < numArgs; ++i)
+            for (i = 0; i < numArgs; ++i) {
                 args[i].setToNull(); // Free memory early
+            }
             numArgs = 0;
 
             // periodically update display
@@ -765,8 +770,9 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs)
     // find operator
     const char *name = cmd->getCmd();
     if (!(op = findOp(name))) {
-        if (ignoreUndef == 0)
+        if (ignoreUndef == 0) {
             error(errSyntaxError, getPos(), "Unknown operator '{0:s}'", name);
+        }
         return;
     }
 
@@ -814,15 +820,17 @@ const Operator *Gfx::findOp(const char *name)
     while (b - a > 1) {
         m = (a + b) / 2;
         cmp = strcmp(opTab[m].name, name);
-        if (cmp < 0)
+        if (cmp < 0) {
             a = m;
-        else if (cmp > 0)
+        } else if (cmp > 0) {
             b = m;
-        else
+        } else {
             a = b = m;
+        }
     }
-    if (cmp != 0)
+    if (cmp != 0) {
         return nullptr;
+    }
     return &opTab[a];
 }
 
@@ -1253,9 +1261,9 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     }
     for (i = 0; i < 4; ++i) {
         Object obj2 = obj1.arrayGet(i);
-        if (likely(obj2.isNum()))
+        if (likely(obj2.isNum())) {
             bbox[i] = obj2.getNum();
-        else {
+        } else {
             error(errSyntaxError, getPos(), "Bad form bounding box (non number)");
             return;
         }
@@ -1266,10 +1274,11 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
     if (obj1.isArray()) {
         for (i = 0; i < 6; ++i) {
             Object obj2 = obj1.arrayGet(i);
-            if (likely(obj2.isNum()))
+            if (likely(obj2.isNum())) {
                 m[i] = obj2.getNum();
-            else
+            } else {
                 m[i] = 0;
+            }
         }
     } else {
         m[0] = 1;
@@ -2731,8 +2740,9 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
                 // is making sure use the exact bboxIntersections[] value as one of the used ta[] values
                 if (!doneBBox1 && ta[i] < bboxIntersections[1] && ta[j] > bboxIntersections[1]) {
                     int teoricalj = (int)((bboxIntersections[1] - tMin) * axialMaxSplits / (tMax - tMin));
-                    if (teoricalj <= i)
+                    if (teoricalj <= i) {
                         teoricalj = i + 1;
+                    }
                     if (teoricalj < j) {
                         next[i] = teoricalj;
                         next[teoricalj] = j;
@@ -2745,8 +2755,9 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
                 }
                 if (!doneBBox2 && ta[i] < bboxIntersections[2] && ta[j] > bboxIntersections[2]) {
                     int teoricalj = (int)((bboxIntersections[2] - tMin) * axialMaxSplits / (tMax - tMin));
-                    if (teoricalj <= i)
+                    if (teoricalj <= i) {
                         teoricalj = i + 1;
+                    }
                     if (teoricalj < j) {
                         next[i] = teoricalj;
                         next[teoricalj] = j;
@@ -2810,10 +2821,11 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
 
         // set the color
         state->setFillColor(&color0);
-        if (out->useFillColorStop())
+        if (out->useFillColorStop()) {
             out->updateFillColorStop(state, (ta[j] - tMin) / (tMax - tMin));
-        else
+        } else {
             out->updateFillColor(state);
+        }
 
         if (needExtend) {
             // fill the region
@@ -3014,10 +3026,11 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         n = 3;
     } else {
         const double tmp = 1 - 0.1 / t;
-        if (unlikely(tmp == 1))
+        if (unlikely(tmp == 1)) {
             n = 200;
-        else
+        } else {
             n = (int)(M_PI / acos(tmp));
+        }
         if (n < 3) {
             n = 3;
         } else if (n > 200) {
@@ -3084,10 +3097,11 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             colorA.c[k] = safeAverage(colorA.c[k], colorB.c[k]);
         }
         state->setFillColor(&colorA);
-        if (out->useFillColorStop())
+        if (out->useFillColorStop()) {
             out->updateFillColorStop(state, (sa - sMin) / (sMax - sMin));
-        else
+        } else {
             out->updateFillColor(state);
+        }
 
         if (needExtend) {
             if (enclosed) {
@@ -3165,8 +3179,9 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         state->clearPath();
     }
 
-    if (!needExtend)
+    if (!needExtend) {
         return;
+    }
 
     if (enclosed) {
         // extend the smaller circle
@@ -3234,8 +3249,9 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
     int i;
 
     if (out->useShadedFills(shading->getType())) {
-        if (out->gouraudTriangleShadedFill(state, shading))
+        if (out->gouraudTriangleShadedFill(state, shading)) {
             return;
+        }
     }
 
     // preallocate a path (speed improvements)
@@ -3382,8 +3398,9 @@ void Gfx::doPatchMeshShFill(GfxPatchMeshShading *shading)
     int start, i;
 
     if (out->useShadedFills(shading->getType())) {
-        if (out->patchMeshShadedFill(state, shading))
+        if (out->patchMeshShadedFill(state, shading)) {
             return;
+        }
     }
 
     if (shading->getNPatches() > 128) {
@@ -3983,8 +4000,9 @@ void Gfx::doShowText(const GooString *s)
             originX *= state->getFontSize();
             originY *= state->getFontSize();
             state->textTransformDelta(originX, originY, &tOriginX, &tOriginY);
-            if (ocState)
+            if (ocState) {
                 out->drawChar(state, state->getCurX() + riseX, state->getCurY() + riseY, tdx, tdy, tOriginX, tOriginY, code, n, u, uLen);
+            }
             state->shift(tdx, tdy);
             p += n;
             len -= n;
@@ -4014,8 +4032,9 @@ void Gfx::doShowText(const GooString *s)
             dy *= state->getFontSize();
         }
         state->textTransformDelta(dx, dy, &tdx, &tdy);
-        if (ocState)
+        if (ocState) {
             out->drawString(state, s);
+        }
         state->shift(tdx, tdy);
     }
 
@@ -4186,35 +4205,39 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     if (obj1.isNull()) {
         obj1 = dict->lookup("W");
     }
-    if (obj1.isInt())
+    if (obj1.isInt()) {
         width = obj1.getInt();
-    else if (obj1.isReal())
+    } else if (obj1.isReal()) {
         width = (int)obj1.getReal();
-    else
+    } else {
         goto err1;
+    }
     obj1 = dict->lookup("Height");
     if (obj1.isNull()) {
         obj1 = dict->lookup("H");
     }
-    if (obj1.isInt())
+    if (obj1.isInt()) {
         height = obj1.getInt();
-    else if (obj1.isReal())
+    } else if (obj1.isReal()) {
         height = (int)obj1.getReal();
-    else
+    } else {
         goto err1;
+    }
 
-    if (width < 1 || height < 1)
+    if (width < 1 || height < 1) {
         goto err1;
+    }
 
     // image interpolation
     obj1 = dict->lookup("Interpolate");
     if (obj1.isNull()) {
         obj1 = dict->lookup("I");
     }
-    if (obj1.isBool())
+    if (obj1.isBool()) {
         interpolate = obj1.getBool();
-    else
+    } else {
         interpolate = false;
+    }
     maskInterpolate = false;
 
     // image or mask?
@@ -4223,10 +4246,11 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         obj1 = dict->lookup("IM");
     }
     mask = false;
-    if (obj1.isBool())
+    if (obj1.isBool()) {
         mask = obj1.getBool();
-    else if (!obj1.isNull())
+    } else if (!obj1.isNull()) {
         goto err1;
+    }
 
     // bit depth
     if (bits == 0) {
@@ -4247,8 +4271,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     if (mask) {
 
         // check for inverted mask
-        if (bits != 1)
+        if (bits != 1) {
             goto err1;
+        }
         invert = false;
         obj1 = dict->lookup("Decode");
         if (obj1.isNull()) {
@@ -4259,8 +4284,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             obj2 = obj1.arrayGet(0);
             // Table 4.39 says /Decode must be [1 0] or [0 1]. Adobe
             // accepts [1.0 0.0] as well.
-            if (obj2.isNum() && obj2.getNum() >= 0.9)
+            if (obj2.isNum() && obj2.getNum() >= 0.9) {
                 invert = true;
+            }
         } else if (!obj1.isNull()) {
             goto err1;
         }
@@ -4378,8 +4404,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                     if (obj1.isNull()) {
                         obj1 = maskDict->lookup("IM");
                     }
-                    if (obj1.isNull() || !obj1.isBool())
+                    if (obj1.isNull() || !obj1.isBool()) {
                         haveMaskImage = true;
+                    }
                 }
             }
         }
@@ -4413,10 +4440,11 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("I");
             }
-            if (obj1.isBool())
+            if (obj1.isBool()) {
                 maskInterpolate = obj1.getBool();
-            else
+            } else {
                 maskInterpolate = false;
+            }
             obj1 = maskDict->lookup("BitsPerComponent");
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("BPC");
@@ -4518,10 +4546,11 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
             if (obj1.isNull()) {
                 obj1 = maskDict->lookup("I");
             }
-            if (obj1.isBool())
+            if (obj1.isBool()) {
                 maskInterpolate = obj1.getBool();
-            else
+            } else {
                 maskInterpolate = false;
+            }
 
             obj1 = maskDict->lookup("ImageMask");
             if (obj1.isNull()) {
@@ -4589,8 +4618,9 @@ bool Gfx::checkTransparencyGroup(Dict *resDict)
     bool transpGroup = false;
     double opac;
 
-    if (resDict == nullptr)
+    if (resDict == nullptr) {
         return false;
+    }
     pushResources(resDict);
     Object extGStates = resDict->lookup("ExtGState");
     if (extGStates.isDict()) {
@@ -4603,8 +4633,9 @@ bool Gfx::checkTransparencyGroup(Dict *resDict)
                 Object obj2 = obj1.dictLookup("BM");
                 if (!obj2.isNull()) {
                     if (state->parseBlendMode(&obj2, &mode)) {
-                        if (mode != gfxBlendNormal)
+                        if (mode != gfxBlendNormal) {
                             transpGroup = true;
+                        }
                     } else {
                         error(errSyntaxError, getPos(), "Invalid blend mode in ExtGState");
                     }
@@ -4613,15 +4644,17 @@ bool Gfx::checkTransparencyGroup(Dict *resDict)
                 if (obj2.isNum()) {
                     opac = obj2.getNum();
                     opac = opac < 0 ? 0 : opac > 1 ? 1 : opac;
-                    if (opac != 1)
+                    if (opac != 1) {
                         transpGroup = true;
+                    }
                 }
                 obj2 = obj1.dictLookup("CA");
                 if (obj2.isNum()) {
                     opac = obj2.getNum();
                     opac = opac < 0 ? 0 : opac > 1 ? 1 : opac;
-                    if (opac != 1)
+                    if (opac != 1) {
                         transpGroup = true;
+                    }
                 }
                 // alpha is shape
                 obj2 = obj1.dictLookup("AIS");
@@ -4695,10 +4728,11 @@ void Gfx::doForm(Object *str)
     if (matrixObj.isArray()) {
         for (i = 0; i < 6; ++i) {
             obj1 = matrixObj.arrayGet(i);
-            if (likely(obj1.isNum()))
+            if (likely(obj1.isNum())) {
                 m[i] = obj1.getNum();
-            else
+            } else {
                 m[i] = 0;
+            }
         }
     } else {
         m[0] = 1;
@@ -4948,8 +4982,9 @@ void Gfx::opBeginIgnoreUndef(Object args[], int numArgs)
 
 void Gfx::opEndIgnoreUndef(Object args[], int numArgs)
 {
-    if (ignoreUndef > 0)
+    if (ignoreUndef > 0) {
         --ignoreUndef;
+    }
 }
 
 //------------------------------------------------------------------------
@@ -5034,8 +5069,9 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
 
     if (printCommands) {
         printf("  marked content: %s ", args[0].getName());
-        if (numArgs == 2)
+        if (numArgs == 2) {
             args[1].print(stdout);
+        }
         printf("\n");
         fflush(stdout);
     }
@@ -5061,8 +5097,9 @@ void Gfx::opEndMarkedContent(Object args[], int numArgs)
     // pop the stack
     popMarkedContent();
 
-    if (mcKind == gfxMCActualText)
+    if (mcKind == gfxMCActualText) {
         out->endActualText(state);
+    }
     ocState = !contentIsHidden();
 
     out->endMarkedContent(state);
@@ -5072,8 +5109,9 @@ void Gfx::opMarkPoint(Object args[], int numArgs)
 {
     if (printCommands) {
         printf("  mark point: %s ", args[0].getName());
-        if (numArgs == 2)
+        if (numArgs == 2) {
             args[1].print(stdout);
+        }
         printf("\n");
         fflush(stdout);
     }
@@ -5317,8 +5355,9 @@ void Gfx::pushStateGuard()
 
 void Gfx::popStateGuard()
 {
-    while (stackHeight > bottomGuard() && state->hasSaves())
+    while (stackHeight > bottomGuard() && state->hasSaves()) {
         restoreState();
+    }
     stateGuards.pop_back();
 }
 

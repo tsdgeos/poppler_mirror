@@ -16,6 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -154,7 +155,7 @@ class POPPLER_PRIVATE_EXPORT FoFiType1C : public FoFiBase
 {
 public:
     // Create a FoFiType1C object from a memory buffer.
-    static FoFiType1C *make(const char *fileA, int lenA);
+    static FoFiType1C *make(const unsigned char *fileA, int lenA);
 
     // Create a FoFiType1C object from a file on disk.
     static FoFiType1C *load(const char *fileName);
@@ -209,7 +210,7 @@ public:
     void convertToType0(const char *psName, const int *codeMap, int nCodes, FoFiOutputFunc outputFunc, void *outputStream);
 
 private:
-    FoFiType1C(const char *fileA, int lenA, bool freeFileDataA);
+    FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA);
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);
     void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
     void cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict);

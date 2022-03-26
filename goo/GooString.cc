@@ -456,8 +456,9 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             append('}');
 
         } else {
-            for (p1 = p0 + 1; *p1 && *p1 != '{' && *p1 != '}'; ++p1)
+            for (p1 = p0 + 1; *p1 && *p1 != '{' && *p1 != '}'; ++p1) {
                 ;
+            }
             append(p0, p1 - p0);
             p0 = p1;
         }
@@ -619,8 +620,9 @@ bool GooString::startsWith(const char *prefix) const
     const auto len = size();
     const auto prefixLen = std::strlen(prefix);
 
-    if (len < prefixLen)
+    if (len < prefixLen) {
         return false;
+    }
 
     return static_cast<const std::string &>(*this).compare(0, prefixLen, prefix) == 0;
 }
@@ -630,8 +632,9 @@ bool GooString::endsWith(const char *suffix) const
     const auto len = size();
     const auto suffixLen = std::strlen(suffix);
 
-    if (len < suffixLen)
+    if (len < suffixLen) {
         return false;
+    }
 
     return static_cast<const std::string &>(*this).compare(len - suffixLen, suffixLen, suffix) == 0;
 }

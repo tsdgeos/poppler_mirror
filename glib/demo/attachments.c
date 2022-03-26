@@ -122,13 +122,15 @@ static void pgd_attachments_save_button_clicked(GtkButton *button, GtkTreeView *
     PopplerAttachment *attachment;
 
     selection = gtk_tree_view_get_selection(treeview);
-    if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+    if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
         return;
+    }
 
     gtk_tree_model_get(model, &iter, ATTACHMENTS_ATTACHMENT_COLUMN, &attachment, -1);
 
-    if (!attachment)
+    if (!attachment) {
         return;
+    }
 
     file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(treeview))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), poppler_attachment_get_name(attachment));
@@ -167,13 +169,15 @@ static void pgd_attachments_validate_button_clicked(GtkButton *button, GtkTreeVi
     gboolean valid = TRUE;
 
     selection = gtk_tree_view_get_selection(treeview);
-    if (!gtk_tree_selection_get_selected(selection, &model, &iter))
+    if (!gtk_tree_selection_get_selected(selection, &model, &iter)) {
         return;
+    }
 
     gtk_tree_model_get(model, &iter, ATTACHMENTS_ATTACHMENT_COLUMN, &attachment, -1);
 
-    if (!attachment)
+    if (!attachment) {
         return;
+    }
 
     checksum = poppler_attachment_get_checksum(attachment);
 
@@ -255,8 +259,9 @@ GtkWidget *pgd_attachments_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), swindow, TRUE, TRUE, 0);
     gtk_widget_show(swindow);
 
-    if (!has_attachments)
+    if (!has_attachments) {
         return vbox;
+    }
 
     hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_SPREAD);

@@ -18,6 +18,7 @@
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -186,8 +187,9 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
     if (inlineImg) {
         str->reset();
         j = height * ((width + 7) / 8);
-        for (i = 0; i < j; ++i)
+        for (i = 0; i < j; ++i) {
             str->getChar();
+        }
         str->close();
     }
 }
@@ -220,8 +222,9 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
     if (inlineImg) {
         str->reset();
         j = height * ((width * colorMap->getNumPixelComps() * colorMap->getBits() + 7) / 8);
-        for (i = 0; i < j; ++i)
+        for (i = 0; i < j; ++i) {
             str->getChar();
+        }
         str->close();
     }
 }

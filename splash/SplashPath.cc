@@ -106,8 +106,9 @@ void SplashPath::append(SplashPath *path)
     int i;
 
     grow(path->length);
-    if (unlikely(size == 0))
+    if (unlikely(size == 0)) {
         return;
+    }
 
     curSubpath = length + path->curSubpath;
     for (i = 0; i < path->length; ++i) {
@@ -123,8 +124,9 @@ SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y)
         return splashErrBogusPath;
     }
     grow(1);
-    if (unlikely(size == 0))
+    if (unlikely(size == 0)) {
         return splashErrBogusPath;
+    }
     pts[length].x = x;
     pts[length].y = y;
     flags[length] = splashPathFirst | splashPathLast;
@@ -139,8 +141,9 @@ SplashError SplashPath::lineTo(SplashCoord x, SplashCoord y)
     }
     flags[length - 1] &= ~splashPathLast;
     grow(1);
-    if (unlikely(size == 0))
+    if (unlikely(size == 0)) {
         return splashErrBogusPath;
+    }
     pts[length].x = x;
     pts[length].y = y;
     flags[length] = splashPathLast;
@@ -155,8 +158,9 @@ SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1, SplashCoord x2, 
     }
     flags[length - 1] &= ~splashPathLast;
     grow(3);
-    if (unlikely(size == 0))
+    if (unlikely(size == 0)) {
         return splashErrBogusPath;
+    }
     pts[length].x = x1;
     pts[length].y = y1;
     flags[length] = splashPathCurve;

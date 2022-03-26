@@ -71,13 +71,6 @@ enum FormButtonType
     formButtonRadio
 };
 
-enum VariableTextQuadding
-{
-    quaddingLeftJustified,
-    quaddingCentered,
-    quaddingRightJustified
-};
-
 enum FormSignatureType
 {
     adbe_pkcs7_sha1,
@@ -668,7 +661,7 @@ private:
 class POPPLER_PRIVATE_EXPORT Form
 {
 public:
-    Form(PDFDoc *docA, Object *acroForm);
+    explicit Form(PDFDoc *doc);
 
     ~Form();
 
@@ -683,7 +676,6 @@ public:
        Page::loadStandaloneFields */
     static FormField *createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
-    Object *getObj() const { return acroForm; }
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return numFields; }
     FormField *getRootField(int i) const { return rootFields[i]; }
@@ -706,9 +698,6 @@ private:
     FormField **rootFields;
     int numFields;
     int size;
-    PDFDoc *doc;
-    XRef *xref;
-    Object *acroForm;
     bool needAppearances;
     GfxResources *defaultResources;
     Object resDict;

@@ -41,7 +41,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018-2020 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) 2018-2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018-2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
@@ -128,10 +128,6 @@
 #define fieldFlagRichText 0x02000000
 #define fieldFlagRadiosInUnison 0x02000000
 #define fieldFlagCommitOnSelChange 0x04000000
-
-#define fieldQuadLeft 0
-#define fieldQuadCenter 1
-#define fieldQuadRight 2
 
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
@@ -253,8 +249,9 @@ static std::unique_ptr<LinkAction> getAdditionalAction(Annot::AdditionalActionsT
                                                                         : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
-        if (actionObject.isDict())
+        if (actionObject.isDict()) {
             return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+        }
     }
 
     return nullptr;
@@ -292,10 +289,11 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict)
     if (obj1.isName()) {
         const char *effectName = obj1.getName();
 
-        if (!strcmp(effectName, "C"))
+        if (!strcmp(effectName, "C")) {
             effectType = borderEffectCloudy;
-        else
+        } else {
             effectType = borderEffectNoEffect;
+        }
     } else {
         effectType = borderEffectNoEffect;
     }
@@ -327,22 +325,25 @@ AnnotPath::~AnnotPath() = default;
 
 double AnnotPath::getX(int coord) const
 {
-    if (coord >= 0 && coord < getCoordsLength())
+    if (coord >= 0 && coord < getCoordsLength()) {
         return coords[coord].getX();
+    }
     return 0;
 }
 
 double AnnotPath::getY(int coord) const
 {
-    if (coord >= 0 && coord < getCoordsLength())
+    if (coord >= 0 && coord < getCoordsLength()) {
         return coords[coord].getY();
+    }
     return 0;
 }
 
 AnnotCoord *AnnotPath::getCoord(int coord)
 {
-    if (coord >= 0 && coord < getCoordsLength())
+    if (coord >= 0 && coord < getCoordsLength()) {
         return &coords[coord];
+    }
     return nullptr;
 }
 
@@ -442,57 +443,65 @@ AnnotQuadrilaterals::~AnnotQuadrilaterals() = default;
 
 double AnnotQuadrilaterals::getX1(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord1.getX();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getY1(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord1.getY();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getX2(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord2.getX();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getY2(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord2.getY();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getX3(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord3.getX();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getY3(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord3.getY();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getX4(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord4.getX();
+    }
     return 0;
 }
 
 double AnnotQuadrilaterals::getY4(int quadrilateral)
 {
-    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength)
+    if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord4.getY();
+    }
     return 0;
 }
 
@@ -542,8 +551,9 @@ bool AnnotBorder::parseDashArray(Object *dashObj)
 
 AnnotBorder::~AnnotBorder()
 {
-    if (dash)
+    if (dash) {
         gfree(dash);
+    }
 }
 
 //------------------------------------------------------------------------
@@ -566,29 +576,33 @@ AnnotBorderArray::AnnotBorderArray(Array *array)
         // implementation note 81 in Appendix H.
 
         obj1 = array->get(0);
-        if (obj1.isNum())
+        if (obj1.isNum()) {
             horizontalCorner = obj1.getNum();
-        else
+        } else {
             correct = false;
+        }
 
         obj1 = array->get(1);
-        if (obj1.isNum())
+        if (obj1.isNum()) {
             verticalCorner = obj1.getNum();
-        else
+        } else {
             correct = false;
+        }
 
         obj1 = array->get(2);
-        if (obj1.isNum())
+        if (obj1.isNum()) {
             width = obj1.getNum();
-        else
+        } else {
             correct = false;
+        }
 
         if (arrayLength == 4) {
             obj1 = array->get(3);
-            if (obj1.isArray())
+            if (obj1.isArray()) {
                 correct = parseDashArray(&obj1);
-            else
+            } else {
                 correct = false;
+            }
         }
     } else {
         correct = false;
@@ -625,8 +639,9 @@ Object AnnotBorderArray::writeToObject(XRef *xref) const
     if (dashLength > 0) {
         Array *a = new Array(xref);
 
-        for (int i = 0; i < dashLength; i++)
+        for (int i = 0; i < dashLength; i++) {
             a->add(Object(dash[i]));
+        }
 
         borderArray->add(Object(a));
     }
@@ -671,8 +686,9 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict)
     // Border dash style
     if (style == borderDashed) {
         obj1 = dict->lookup("D");
-        if (obj1.isArray())
+        if (obj1.isArray()) {
             parseDashArray(&obj1);
+        }
 
         if (!dash) {
             dashLength = 1;
@@ -722,8 +738,9 @@ Object AnnotBorderBS::writeToObject(XRef *xref) const
     if (style == borderDashed && dashLength > 0) {
         Array *a = new Array(xref);
 
-        for (int i = 0; i < dashLength; i++)
+        for (int i = 0; i < dashLength; i++) {
             a->add(Object(dash[i]));
+        }
         dict->set("D", Object(a));
     }
     return Object(dict);
@@ -772,23 +789,26 @@ AnnotColor::AnnotColor(Array *array, int adjust)
     int i;
 
     length = array->getLength();
-    if (length > 4)
+    if (length > 4) {
         length = 4;
+    }
 
     for (i = 0; i < length; i++) {
         Object obj1 = array->get(i);
         if (obj1.isNum()) {
             values[i] = obj1.getNum();
 
-            if (values[i] < 0 || values[i] > 1)
+            if (values[i] < 0 || values[i] > 1) {
                 values[i] = 0;
+            }
         } else {
             values[i] = 0;
         }
     }
 
-    if (adjust != 0)
+    if (adjust != 0) {
         adjustColor(adjust);
+    }
 }
 
 void AnnotColor::adjustColor(int adjust)
@@ -815,8 +835,9 @@ Object AnnotColor::writeToObject(XRef *xref) const
         return Object(objNull); // Transparent (no color)
     } else {
         Array *a = new Array(xref);
-        for (int i = 0; i < length; ++i)
+        for (int i = 0; i < length; ++i) {
             a->add(Object(values[i]));
+        }
         return Object(a);
     }
 }
@@ -929,11 +950,13 @@ AnnotIconFit::AnnotIconFit(Dict *dict)
         left = obj1.arrayGet(0).getNumWithDefaultValue(0);
         bottom = obj1.arrayGet(1).getNumWithDefaultValue(0);
 
-        if (left < 0 || left > 1)
+        if (left < 0 || left > 1) {
             left = 0.5;
+        }
 
-        if (bottom < 0 || bottom > 1)
+        if (bottom < 0 || bottom > 1) {
             bottom = 0.5;
+        }
 
     } else {
         left = bottom = 0.5;
@@ -963,23 +986,26 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     switch (type) {
     case appearRollover:
         apData = appearDict.dictLookupNF("R").copy();
-        if (apData.isNull())
+        if (apData.isNull()) {
             apData = appearDict.dictLookupNF("N").copy();
+        }
         break;
     case appearDown:
         apData = appearDict.dictLookupNF("D").copy();
-        if (apData.isNull())
+        if (apData.isNull()) {
             apData = appearDict.dictLookupNF("N").copy();
+        }
         break;
     case appearNormal:
         apData = appearDict.dictLookupNF("N").copy();
         break;
     }
 
-    if (apData.isDict() && state)
+    if (apData.isDict() && state) {
         return apData.dictLookupNF(state).copy();
-    else if (apData.isRef())
+    } else if (apData.isRef()) {
         return apData;
+    }
 
     return Object();
 }
@@ -987,8 +1013,9 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
 std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i)
 {
     const Object &obj1 = appearDict.dictLookupNF("N");
-    if (obj1.isDict())
+    if (obj1.isDict()) {
         return std::make_unique<GooString>(obj1.dictGetKey(i));
+    }
     return nullptr;
 }
 
@@ -996,8 +1023,9 @@ int AnnotAppearance::getNumStates()
 {
     int res = 0;
     const Object &obj1 = appearDict.dictLookupNF("N");
-    if (obj1.isDict())
+    if (obj1.isDict()) {
         res = obj1.dictGetLength();
+    }
     return res;
 }
 
@@ -1032,13 +1060,15 @@ bool AnnotAppearance::referencesStream(Ref refToStream)
     // Scan each state's ref/subdictionary
     const Object &objN = appearDict.dictLookupNF("N");
     found = referencesStream(&objN, refToStream);
-    if (found)
+    if (found) {
         return true;
+    }
 
     const Object &objR = appearDict.dictLookupNF("R");
     found = referencesStream(&objR, refToStream);
-    if (found)
+    if (found) {
         return true;
+    }
 
     const Object &objD = appearDict.dictLookupNF("D");
     found = referencesStream(&objD, refToStream);
@@ -1585,8 +1615,9 @@ void Annot::setPage(int pageIndex, bool updateP)
 void Annot::setAppearanceState(const char *state)
 {
     annotLocker();
-    if (!state)
+    if (!state) {
         return;
+    }
 
     appearState = std::make_unique<GooString>(state);
     appearBBox = nullptr;
@@ -1613,12 +1644,14 @@ void Annot::invalidateAppearance()
     appearance.setToNull();
 
     Object obj2 = annotObj.dictLookup("AP");
-    if (!obj2.isNull())
+    if (!obj2.isNull()) {
         update("AP", Object(objNull)); // Remove AP
+    }
 
     obj2 = annotObj.dictLookup("AS");
-    if (!obj2.isNull())
+    if (!obj2.isNull()) {
         update("AS", Object(objNull)); // Remove AS
+    }
 }
 
 double Annot::getXMin()
@@ -1694,8 +1727,9 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor *drawColor, bool fill
 
 void AnnotAppearanceBuilder::setTextFont(const Object &fontName, double fontSize)
 {
-    if (fontName.isName() && strlen(fontName.getName()) > 0)
+    if (fontName.isName() && strlen(fontName.getName()) > 0) {
         appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.getName(), fontSize);
+    }
 }
 
 void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
@@ -1708,8 +1742,9 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
         appearBuf->append("[");
         dashLength = border->getDashLength();
         dash = border->getDash();
-        for (i = 0; i < dashLength; ++i)
+        for (i = 0; i < dashLength; ++i) {
             appearBuf->appendf(" {0:.2f}", dash[i]);
+        }
         appearBuf->append(" ] 0 d\n");
         break;
     default:
@@ -1723,10 +1758,11 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
 // If <fill> is true, the circle is filled; otherwise it is stroked.
 void AnnotAppearanceBuilder::drawCircle(double cx, double cy, double r, bool fill)
 {
-    if (fill)
+    if (fill) {
         drawEllipse(cx, cy, r, r, true, false);
-    else
+    } else {
         drawEllipse(cx, cy, r, r, false, true);
+    }
 }
 
 // Draw an (approximate) ellipse of radius <rx> on x-axis and <ry> on y-axis, centered at (<cx>, <cy>).
@@ -1740,12 +1776,13 @@ void AnnotAppearanceBuilder::drawEllipse(double cx, double cy, double rx, double
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - bezierCircle * rx, cy + ry, cx - rx, cy + bezierCircle * ry, cx - rx, cy);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - rx, cy - bezierCircle * ry, cx - bezierCircle * rx, cy - ry, cx, cy - ry);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + bezierCircle * rx, cy - ry, cx + rx, cy - bezierCircle * ry, cx + rx, cy);
-    if (!fill && stroke)
+    if (!fill && stroke) {
         appearBuf->append("s\n");
-    else if (fill && !stroke)
+    } else if (fill && !stroke) {
         appearBuf->append("f\n");
-    else if (fill && stroke)
+    } else if (fill && stroke) {
         appearBuf->append("b\n");
+    }
 }
 
 // Draw the top-left half of an (approximate) circle of radius <r>
@@ -1953,8 +1990,9 @@ Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool tr
         d->set("S", Object(objName, "Transparency"));
         appearDict->set("Group", Object(d));
     }
-    if (resDictObject.isDict())
+    if (resDictObject.isDict()) {
         appearDict->set("Resources", std::move(resDictObject));
+    }
 
     Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
     return Object(mStream);
@@ -1967,8 +2005,9 @@ Dict *Annot::createResourcesDict(const char *formName, Object &&formStream, cons
         gsDict->set("CA", Object(opacity));
         gsDict->set("ca", Object(opacity));
     }
-    if (blendMode)
+    if (blendMode) {
         gsDict->set("BM", Object(objName, blendMode));
+    }
     Dict *stateDict = new Dict(doc->getXRef());
     stateDict->set(stateName, Object(gsDict));
     Dict *formDict = new Dict(doc->getXRef());
@@ -2007,8 +2046,9 @@ bool Annot::isVisible(bool printing)
     // check the OC
     OCGs *optContentConfig = doc->getCatalog()->getOptContentConfig();
     if (optContentConfig) {
-        if (!optContentConfig->optContentIsVisible(&oc))
+        if (!optContentConfig->optContentIsVisible(&oc)) {
             return false;
+        }
     }
 
     return true;
@@ -2029,8 +2069,9 @@ int Annot::getRotation() const
 void Annot::draw(Gfx *gfx, bool printing)
 {
     annotLocker();
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
@@ -2039,8 +2080,9 @@ void Annot::draw(Gfx *gfx, bool printing)
 
 void Annot::setNewAppearance(Object &&newAppearance)
 {
-    if (newAppearance.isNull())
+    if (newAppearance.isNull()) {
         return;
+    }
 
     annotLocker();
     if (newAppearance.getType() == ObjType::objStream) {
@@ -2059,8 +2101,9 @@ void Annot::setNewAppearance(Object &&newAppearance)
         appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
         update("AP", std::move(newAppearance));
 
-        if (appearStreams)
+        if (appearStreams) {
             appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        }
     }
 }
 
@@ -2372,8 +2415,9 @@ void AnnotText::setOpen(bool openA)
 
 void AnnotText::setIcon(GooString *new_icon)
 {
-    if (new_icon && icon->cmp(new_icon) == 0)
+    if (new_icon && icon->cmp(new_icon) == 0) {
         return;
+    }
 
     if (new_icon) {
         icon = std::make_unique<GooString>(new_icon);
@@ -2633,8 +2677,9 @@ void AnnotText::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -2643,28 +2688,30 @@ void AnnotText::draw(Gfx *gfx, bool printing)
         AnnotAppearanceBuilder appearBuilder;
 
         appearBuilder.append("q\n");
-        if (color)
+        if (color) {
             appearBuilder.setDrawColor(color.get(), true);
-        else
+        } else {
             appearBuilder.append("1 1 1 rg\n");
-        if (!icon->cmp("Note"))
+        }
+        if (!icon->cmp("Note")) {
             appearBuilder.append(ANNOT_TEXT_AP_NOTE);
-        else if (!icon->cmp("Comment"))
+        } else if (!icon->cmp("Comment")) {
             appearBuilder.append(ANNOT_TEXT_AP_COMMENT);
-        else if (!icon->cmp("Key"))
+        } else if (!icon->cmp("Key")) {
             appearBuilder.append(ANNOT_TEXT_AP_KEY);
-        else if (!icon->cmp("Help"))
+        } else if (!icon->cmp("Help")) {
             appearBuilder.append(ANNOT_TEXT_AP_HELP);
-        else if (!icon->cmp("NewParagraph"))
+        } else if (!icon->cmp("NewParagraph")) {
             appearBuilder.append(ANNOT_TEXT_AP_NEW_PARAGRAPH);
-        else if (!icon->cmp("Paragraph"))
+        } else if (!icon->cmp("Paragraph")) {
             appearBuilder.append(ANNOT_TEXT_AP_PARAGRAPH);
-        else if (!icon->cmp("Insert"))
+        } else if (!icon->cmp("Insert")) {
             appearBuilder.append(ANNOT_TEXT_AP_INSERT);
-        else if (!icon->cmp("Cross"))
+        } else if (!icon->cmp("Cross")) {
             appearBuilder.append(ANNOT_TEXT_AP_CROSS);
-        else if (!icon->cmp("Circle"))
+        } else if (!icon->cmp("Circle")) {
             appearBuilder.append(ANNOT_TEXT_AP_CIRCLE);
+        }
         appearBuilder.append("Q\n");
 
         // Force 24x24 rectangle
@@ -2769,8 +2816,9 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict)
 
 void AnnotLink::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     // draw the appearance stream
@@ -2816,9 +2864,9 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Q");
     if (obj1.isInt()) {
-        quadding = (AnnotFreeTextQuadding)obj1.getInt();
+        quadding = (VariableTextQuadding)obj1.getInt();
     } else {
-        quadding = quaddingLeftJustified;
+        quadding = VariableTextQuadding::leftJustified;
     }
 
     obj1 = dict->lookup("DS");
@@ -2899,7 +2947,7 @@ void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da)
     invalidateAppearance();
 }
 
-void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding)
+void AnnotFreeText::setQuadding(VariableTextQuadding new_quadding)
 {
     quadding = new_quadding;
     update("Q", Object((int)quadding));
@@ -2956,12 +3004,13 @@ void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent)
     const char *intentName;
 
     intent = new_intent;
-    if (new_intent == intentFreeText)
+    if (new_intent == intentFreeText) {
         intentName = "FreeText";
-    else if (new_intent == intentFreeTextCallout)
+    } else if (new_intent == intentFreeTextCallout) {
         intentName = "FreeTextCallout";
-    else // intentFreeTextTypeWriter
+    } else { // intentFreeTextTypeWriter
         intentName = "FreeTextTypeWriter";
+    }
     update("IT", Object(objName, intentName));
 }
 
@@ -3000,8 +3049,9 @@ void AnnotFreeText::generateFreeTextAppearance()
     appearBuilder.append("q\n");
 
     borderWidth = border->getWidth();
-    if (borderWidth > 0)
+    if (borderWidth > 0) {
         appearBuilder.setLineStyleForBorder(border.get());
+    }
 
     // Box size
     const double width = rect->x2 - rect->x1;
@@ -3011,14 +3061,18 @@ void AnnotFreeText::generateFreeTextAppearance()
     DefaultAppearance da { appearanceString.get() };
 
     // Default values
-    if (!da.getFontName().isName())
+    if (!da.getFontName().isName()) {
         da.setFontName(Object(objName, "AnnotDrawFont"));
-    if (da.getFontPtSize() <= 0)
+    }
+    if (da.getFontPtSize() <= 0) {
         da.setFontPtSize(undefinedFontPtSize);
-    if (!da.getFontColor())
+    }
+    if (!da.getFontColor()) {
         da.setFontColor(std::make_unique<AnnotColor>(0, 0, 0));
-    if (!contents)
+    }
+    if (!contents) {
         contents = std::make_unique<GooString>();
+    }
 
     // Draw box
     bool doFill = (color && color->getSpace() != AnnotColor::colorTransparent);
@@ -3088,18 +3142,18 @@ void AnnotFreeText::generateFreeTextAppearance()
         layoutText(contents.get(), &out, &i, *font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
         linewidth *= da.getFontPtSize();
         switch (quadding) {
-        case quaddingCentered:
+        case VariableTextQuadding::centered:
             xpos = (textwidth - linewidth) / 2;
             break;
-        case quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             xpos = textwidth - linewidth;
             break;
-        default: // quaddingLeftJustified:
+        default: // VariableTextQuadding::leftJustified:
             xpos = 0;
             break;
         }
         appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
-        appearBuilder.writeString(out);
+        appearBuilder.writeString(out.toStr());
         appearBuilder.append("Tj\n");
         xposPrev = xpos;
     }
@@ -3124,8 +3178,9 @@ void AnnotFreeText::generateFreeTextAppearance()
 
 void AnnotFreeText::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -3217,8 +3272,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
     leaderLineLength = dict->lookup("LL").getNumWithDefaultValue(0);
 
     leaderLineExtension = dict->lookup("LLE").getNumWithDefaultValue(0);
-    if (leaderLineExtension < 0)
+    if (leaderLineExtension < 0) {
         leaderLineExtension = 0;
+    }
 
     caption = dict->lookup("Cap").getBoolWithDefaultValue(false);
 
@@ -3238,8 +3294,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
     }
 
     leaderLineOffset = dict->lookup("LLO").getNumWithDefaultValue(0);
-    if (leaderLineOffset < 0)
+    if (leaderLineOffset < 0) {
         leaderLineOffset = 0;
+    }
 
     obj1 = dict->lookup("CP");
     if (obj1.isName()) {
@@ -3282,8 +3339,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
 void AnnotLine::setContents(std::unique_ptr<GooString> &&new_content)
 {
     Annot::setContents(std::move(new_content));
-    if (caption)
+    if (caption) {
         invalidateAppearance();
+    }
 }
 
 void AnnotLine::setVertices(double x1, double y1, double x2, double y2)
@@ -3355,10 +3413,11 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent)
     const char *intentName;
 
     intent = new_intent;
-    if (new_intent == intentLineArrow)
+    if (new_intent == intentLineArrow) {
         intentName = "LineArrow";
-    else // intentLineDimension
+    } else { // intentLineDimension
         intentName = "LineDimension";
+    }
     update("IT", Object(objName, intentName));
 }
 
@@ -3505,7 +3564,7 @@ void AnnotLine::generateLineAppearance()
             linewidth *= fontsize;
             xpos = (captionwidth - linewidth) / 2;
             appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);
-            appearBuilder.writeString(out);
+            appearBuilder.writeString(out.toStr());
             appearBuilder.append("Tj\n");
             xposPrev = xpos;
         }
@@ -3548,8 +3607,9 @@ void AnnotLine::generateLineAppearance()
 
 void AnnotLine::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -3692,8 +3752,9 @@ void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints)
 
 bool AnnotTextMarkup::shouldCreateApperance(Gfx *gfx) const
 {
-    if (appearance.isNull())
+    if (appearance.isNull()) {
         return true;
+    }
 
     // Adobe Reader seems to have a complex condition for when to use the
     // appearance stream of typeHighlight, which is "use it if it has a Resources dictionary with ExtGState"
@@ -3721,8 +3782,9 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
     double ca = 1;
     int i;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (shouldCreateApperance(gfx)) {
@@ -3817,8 +3879,9 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
             break;
         default:
         case typeHighlight:
-            if (color)
+            if (color) {
                 appearBuilder.setDrawColor(color.get(), true);
+            }
 
             double biggestBorder = 0;
             for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
@@ -3961,8 +4024,9 @@ std::unique_ptr<LinkAction> AnnotWidget::getFormAdditionalAction(FormAdditionalA
         const char *key = getFormAdditionalActionKey(formAdditionalActionType);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
-        if (actionObject.isDict())
+        if (actionObject.isDict()) {
             return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+        }
     }
 
     return nullptr;
@@ -4023,10 +4087,12 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     int uLen, n;
     double dx, dy, ox, oy;
 
-    if (width != nullptr)
+    if (width != nullptr) {
         *width = 0.0;
-    if (charCount != nullptr)
+    }
+    if (charCount != nullptr) {
         *charCount = 0;
+    }
 
     if (!text) {
         return;
@@ -4049,8 +4115,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     }
 
     // skip Unicode marker on string if needed
-    if (unicode && *i == 0)
+    if (unicode && *i == 0) {
         *i = 2;
+    }
 
     // Start decoding and copying characters, until either:
     //   we reach the end of the string
@@ -4072,10 +4139,11 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
             uChar += (unsigned char)(text->getChar(*i + 1));
             *i += 2;
         } else {
-            if (noReencode)
+            if (noReencode) {
                 uChar = text->getChar(*i) & 0xff;
-            else
+            } else {
                 uChar = pdfDocEncoding[text->getChar(*i) & 0xff];
+            }
             *i += 1;
         }
 
@@ -4083,10 +4151,11 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         if (uChar == '\r' || uChar == '\n') {
             // Treat a <CR><LF> sequence as a single line break
             if (uChar == '\r' && *i < text->getLength()) {
-                if (unicode && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n')
+                if (unicode && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n') {
                     *i += 2;
-                else if (!unicode && text->getChar(*i) == '\n')
+                } else if (!unicode && text->getChar(*i) == '\n') {
                     *i += 1;
+                }
             }
 
             break;
@@ -4118,8 +4187,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         // If we see a space, then we have a linebreak opportunity.
         if (uChar == ' ') {
             last_i1 = *i;
-            if (!spacePrev)
+            if (!spacePrev) {
                 last_o1 = last_o2;
+            }
             spacePrev = true;
         } else {
             spacePrev = false;
@@ -4159,19 +4229,25 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     // widthLimit still.
     if (widthLimit > 0.0 && w > widthLimit) {
         if (unicode) {
-            while (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == ' ')
+            while (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == ' ') {
                 *i += 2;
-            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\r')
+            }
+            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\r') {
                 *i += 2;
-            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n')
+            }
+            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n') {
                 *i += 2;
+            }
         } else {
-            while (*i < text->getLength() && text->getChar(*i) == ' ')
+            while (*i < text->getLength() && text->getChar(*i) == ' ') {
                 *i += 1;
-            if (*i < text->getLength() && text->getChar(*i) == '\r')
+            }
+            if (*i < text->getLength() && text->getChar(*i) == '\r') {
                 *i += 1;
-            if (*i < text->getLength() && text->getChar(*i) == '\n')
+            }
+            if (*i < text->getLength() && text->getChar(*i) == '\n') {
                 *i += 1;
+            }
         }
     }
 
@@ -4189,10 +4265,12 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
                 break;
             }
 
-            if (width != nullptr)
+            if (width != nullptr) {
                 *width += dx;
-            if (charCount != nullptr)
+            }
+            if (charCount != nullptr) {
                 *charCount += 1;
+            }
 
             s += n;
             len -= n;
@@ -4202,15 +4280,11 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
 
 // Copy the given string to appearBuf, adding parentheses around it and
 // escaping characters as appropriate.
-void AnnotAppearanceBuilder::writeString(const GooString &str)
+void AnnotAppearanceBuilder::writeString(const std::string &str)
 {
-    char c;
-    int i;
-
     appearBuf->append('(');
 
-    for (i = 0; i < str.getLength(); ++i) {
-        c = str.getChar(i);
+    for (const char c : str) {
         if (c == '(' || c == ')' || c == '\\') {
             appearBuf->append('\\');
             appearBuf->append(c);
@@ -4225,17 +4299,17 @@ void AnnotAppearanceBuilder::writeString(const GooString &str)
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, bool multiline, int comb,
-                                      int quadding, bool txField, bool forceZapfDingbats, XRef *xref, bool password, Dict *resourcesDict, const char *defaultFallback)
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int combMaxLen)
 {
-    std::vector<GooString *> daToks;
-    GooString *tok;
+    const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
+
+    std::vector<std::string> daToks;
     GooString convertedText;
     const GfxFont *font;
     double dx, dy;
-    double fontSize, borderWidth, x, xPrev, y, w, wMax;
-    int tfPos, tmPos, j;
-    int rot;
+    double fontSize;
+    int tfPos, tmPos;
     bool freeText = false; // true if text should be freed before return
     std::unique_ptr<const GfxFont> fontToFree = nullptr;
 
@@ -4246,22 +4320,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     // parse the default appearance string
     tfPos = tmPos = -1;
     if (da) {
-        int i = 0;
-        while (i < da->getLength()) {
-            while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
-                ++i;
-            }
-            if (i < da->getLength()) {
-                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j)
-                    ;
-                daToks.push_back(new GooString(da, i, j - i));
-                i = j;
-            }
-        }
-        for (i = 2; i < (int)daToks.size(); ++i) {
-            if (i >= 2 && !(daToks[i])->cmp("Tf")) {
+        FormFieldText::tokenizeDA(da->toStr(), &daToks, nullptr /*searchTok*/);
+        for (int i = 2; i < (int)daToks.size(); ++i) {
+            if (i >= 2 && daToks[i] == "Tf") {
                 tfPos = i - 2;
-            } else if (i >= 6 && !(daToks[i])->cmp("Tm")) {
+            } else if (i >= 6 && daToks[i] == "Tm") {
                 tmPos = i - 6;
             }
         }
@@ -4271,23 +4334,22 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     font = nullptr;
     fontSize = 0;
     if (tfPos >= 0) {
-        tok = daToks[tfPos];
+        std::string &tok = daToks[tfPos];
         if (forceZapfDingbats) {
             assert(xref != nullptr);
-            if (tok->cmp("/ZaDb")) {
-                tok->clear();
-                tok->append("/ZaDb");
+            if (tok != "/ZaDb") {
+                tok = "/ZaDb";
             }
         }
-        if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-            if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
+        if (tok.size() >= 1 && tok[0] == '/') {
+            if (!resources || !(font = resources->lookupFont(tok.c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
-                    const char *fallback = determineFallbackFont(tok->toStr(), defaultFallback);
+                    const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");
                     // The font variable sometimes points to an object that needs to be deleted
                     // and sometimes not, depending on whether the call to lookupFont above fails.
                     // When the code path right here is taken, the destructor of fontToFree
                     // (which is a std::unique_ptr) will delete the font object at the end of this method.
-                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok->c_str() + 1, fallback);
+                    fontToFree = createAnnotDrawFont(xref, resourcesDict, tok.c_str() + 1, fallback);
                     font = fontToFree.get();
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
@@ -4296,42 +4358,46 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         } else {
             error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
         }
-        tok = daToks[tfPos + 1];
-        fontSize = gatof(tok->c_str());
+        fontSize = gatof(daToks[tfPos + 1].c_str());
     } else {
         error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
     }
     if (!font) {
-        for (auto entry : daToks) {
-            delete entry;
-        }
         return false;
     }
 
+    if (tmPos < 0) {
+        // Add fake Tm to the DA tokens
+        tmPos = daToks.size();
+        daToks.insert(daToks.end(), { "1", "0", "0", "1", "0", "0", "Tm" });
+    }
+
     // get the border width
-    borderWidth = border ? border->getWidth() : 0;
+    const double borderWidth = border ? border->getWidth() : 0;
 
     // for a password field, replace all characters with asterisks
-    if (password) {
+    if (flags & TurnTextToStarsDrawTextFlag) {
         int len;
-        if (text->hasUnicodeMarker())
+        if (text->hasUnicodeMarker()) {
             len = (text->getLength() - 2) / 2;
-        else
+        } else {
             len = text->getLength();
+        }
 
         GooString *newText = new GooString;
-        for (int i = 0; i < len; ++i)
+        for (int i = 0; i < len; ++i) {
             newText->append('*');
+        }
         text = newText;
         freeText = true;
     }
 
     // setup
-    if (txField) {
+    if (flags & EmitMarkedContentDrawTextFlag) {
         appearBuf->append("/Tx BMC\n");
     }
     appearBuf->append("q\n");
-    rot = appearCharacs ? appearCharacs->getRotation() : 0;
+    const int rot = appearCharacs ? appearCharacs->getRotation() : 0;
     switch (rot) {
     case 90:
         appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
@@ -4355,18 +4421,18 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     }
     appearBuf->append("BT\n");
     // multi-line text
-    if (multiline) {
-        // note: the comb flag is ignored in multiline mode
+    if (flags & MultilineDrawTextFlag) {
+        // note: comb is ignored in multiline mode as mentioned in the spec
 
-        wMax = dx - 2 * borderWidth - 4;
+        const double wMax = dx - 2 * borderWidth - 4;
 
         // compute font autosize
         if (fontSize == 0) {
             for (fontSize = 20; fontSize > 1; --fontSize) {
-                y = dy - 3;
+                double y = dy - 3;
                 int i = 0;
                 while (i < text->getLength()) {
-                    Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
+                    Annot::layoutText(text, &convertedText, &i, *font, nullptr, wMax / fontSize, nullptr, forceZapfDingbats);
                     y -= fontSize;
                 }
                 // approximate the descender for the last line
@@ -4374,62 +4440,48 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     break;
                 }
             }
-            if (tfPos >= 0) {
-                tok = daToks[tfPos + 1];
-                tok->clear();
-                tok->appendf("{0:.2f}", fontSize);
-            }
+            daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
         }
 
         // starting y coordinate
         // (note: each line of text starts with a Td operator that moves
         // down a line)
-        y = dy - 3;
+        const double y = dy - 3;
 
         // set the font matrix
-        if (tmPos >= 0) {
-            tok = daToks[tmPos + 4];
-            tok->clear();
-            tok->append('0');
-            tok = daToks[tmPos + 5];
-            tok->clear();
-            tok->appendf("{0:.2f}", y);
-        }
+        daToks[tmPos + 4] = "0";
+        daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
         // write the DA string
-        for (const GooString *daTok : daToks) {
+        for (const std::string &daTok : daToks) {
             appearBuf->append(daTok)->append(' ');
-        }
-
-        // write the font matrix (if not part of the DA string)
-        if (tmPos < 0) {
-            appearBuf->appendf("1 0 0 1 0 {0:.2f} Tm\n", y);
         }
 
         // write a series of lines of text
         int i = 0;
-        xPrev = 0;
+        double xPrev = 0;
         while (i < text->getLength()) {
+            double w;
             Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
             w *= fontSize;
 
             // compute text start position
-            switch (quadding) {
-            case quaddingLeftJustified:
-            default:
-                x = borderWidth + 2;
-                break;
-            case quaddingCentered:
-                x = (dx - w) / 2;
-                break;
-            case quaddingRightJustified:
-                x = dx - borderWidth - 2 - w;
-                break;
-            }
+            auto calculateX = [quadding, borderWidth, dx, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth + 2;
+                case VariableTextQuadding::centered:
+                    return (dx - w) / 2;
+                case VariableTextQuadding::rightJustified:
+                    return dx - borderWidth - 2 - w;
+                }
+            };
+            const double x = calculateX();
 
             // draw the line
             appearBuf->appendf("{0:.2f} {1:.2f} Td\n", x - xPrev, -fontSize);
-            writeString(convertedText);
+            writeString(convertedText.toStr());
             appearBuf->append(" Tj\n");
 
             // next line
@@ -4441,11 +4493,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         //~ replace newlines with spaces? - what does Acrobat do?
 
         // comb formatting
-        if (comb > 0) {
+        if (combMaxLen > 0) {
             int charCount;
 
             // compute comb spacing
-            w = (dx - 2 * borderWidth) / comb;
+            const double w = (dx - 2 * borderWidth) / combMaxLen;
 
             // compute font autosize
             if (fontSize == 0) {
@@ -4454,59 +4506,45 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                if (tfPos >= 0) {
-                    tok = daToks[tfPos + 1];
-                    tok->clear();
-                    tok->appendf("{0:.2f}", fontSize);
-                }
+                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
             }
 
-            int i = 0;
-            Annot::layoutText(text, &convertedText, &i, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
-            if (charCount > comb)
-                charCount = comb;
+            int dummy = 0;
+            Annot::layoutText(text, &convertedText, &dummy, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
+            if (charCount > combMaxLen) {
+                charCount = combMaxLen;
+            }
 
             // compute starting text cell
-            switch (quadding) {
-            case quaddingLeftJustified:
-            default:
-                x = borderWidth;
-                break;
-            case quaddingCentered:
-                x = borderWidth + (comb - charCount) / 2.0 * w;
-                break;
-            case quaddingRightJustified:
-                x = borderWidth + (comb - charCount) * w;
-                break;
-            }
-            y = 0.5 * dy - 0.4 * fontSize;
+            auto calculateX = [quadding, borderWidth, combMaxLen, charCount, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth;
+                case VariableTextQuadding::centered:
+                    return borderWidth + (combMaxLen - charCount) / 2.0 * w;
+                case VariableTextQuadding::rightJustified:
+                    return borderWidth + (combMaxLen - charCount) * w;
+                }
+            };
+            const double x = calculateX();
+            const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            if (tmPos >= 0) {
-                tok = daToks[tmPos + 4];
-                tok->clear();
-                tok->appendf("{0:.2f}", x);
-                tok = daToks[tmPos + 5];
-                tok->clear();
-                tok->appendf("{0:.2f}", y);
-            }
+            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
             // write the DA string
-            for (i = 0; i < (int)daToks.size(); ++i) {
-                appearBuf->append(daToks[i])->append(' ');
-            }
-
-            // write the font matrix (if not part of the DA string)
-            if (tmPos < 0) {
-                appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
+            for (const std::string &daTok : daToks) {
+                appearBuf->append(daTok)->append(' ');
             }
 
             // write the text string
             const char *s = convertedText.c_str();
             int len = convertedText.getLength();
-            i = 0;
-            xPrev = w; // so that first character is placed properly
-            while (i < comb && len > 0) {
+            int i = 0;
+            double xPrev = w; // so that first character is placed properly
+            while (i < combMaxLen && len > 0) {
                 CharCode code;
                 const Unicode *uAux;
                 int uLen, n;
@@ -4519,22 +4557,23 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 // center each character within its cell, by advancing the text
                 // position the appropriate amount relative to the start of the
                 // previous character
-                x = 0.5 * (w - char_dx);
-                appearBuf->appendf("{0:.2f} 0 Td\n", x - xPrev + w);
+                const double combX = 0.5 * (w - char_dx);
+                appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
 
                 GooString charBuf(s, n);
-                writeString(charBuf);
+                writeString(charBuf.toStr());
                 appearBuf->append(" Tj\n");
 
                 i++;
                 s += n;
                 len -= n;
-                xPrev = x;
+                xPrev = combX;
             }
 
             // regular (non-comb) formatting
         } else {
             int ii = 0;
+            double w;
             Annot::layoutText(text, &convertedText, &ii, *font, &w, 0.0, nullptr, forceZapfDingbats);
 
             // compute font autosize
@@ -4547,62 +4586,47 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     }
                 }
                 fontSize = floor(fontSize);
-                if (tfPos >= 0) {
-                    tok = daToks[tfPos + 1];
-                    tok->clear();
-                    tok->appendf("{0:.2f}", fontSize);
-                }
+                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
             }
 
             // compute text start position
             w *= fontSize;
-            switch (quadding) {
-            case quaddingLeftJustified:
-            default:
-                x = borderWidth + 2;
-                break;
-            case quaddingCentered:
-                x = (dx - w) / 2;
-                break;
-            case quaddingRightJustified:
-                x = dx - borderWidth - 2 - w;
-                break;
-            }
-            y = 0.5 * dy - 0.4 * fontSize;
+            auto calculateX = [quadding, borderWidth, dx, w] {
+                switch (quadding) {
+                case VariableTextQuadding::leftJustified:
+                default:
+                    return borderWidth + 2;
+                case VariableTextQuadding::centered:
+                    return (dx - w) / 2;
+                case VariableTextQuadding::rightJustified:
+                    return dx - borderWidth - 2 - w;
+                }
+            };
+            const double x = calculateX();
+            const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            if (tmPos >= 0) {
-                tok = daToks[tmPos + 4];
-                tok->clear();
-                tok->appendf("{0:.2f}", x);
-                tok = daToks[tmPos + 5];
-                tok->clear();
-                tok->appendf("{0:.2f}", y);
-            }
+            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
 
             // write the DA string
-            for (const GooString *daTok : daToks) {
+            for (const std::string &daTok : daToks) {
                 appearBuf->append(daTok)->append(' ');
             }
-
-            // write the font matrix (if not part of the DA string)
-            if (tmPos < 0) {
-                appearBuf->appendf("1 0 0 1 {0:.2f} {1:.2f} Tm\n", x, y);
-            }
+            // This newline is not neeed at all but it makes for easier reading
+            // and our auto tests "wrongly" assume it will be there, so add it anyway
+            appearBuf->append("\n");
 
             // write the text string
-            writeString(convertedText);
+            writeString(convertedText.toStr());
             appearBuf->append(" Tj\n");
         }
     }
     // cleanup
     appearBuf->append("ET\n");
     appearBuf->append("Q\n");
-    if (txField) {
+    if (flags & EmitMarkedContentDrawTextFlag) {
         appearBuf->append("EMC\n");
-    }
-    for (auto entry : daToks) {
-        delete entry;
     }
     if (freeText) {
         delete text;
@@ -4612,13 +4636,14 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, int quadding, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
+                                         Dict *resourcesDict)
 {
     std::vector<GooString *> daToks;
     GooString *tok;
     GooString convertedText;
     const GfxFont *font;
-    double fontSize, borderWidth, x, y, w, wMax;
+    double fontSize, borderWidth, x, y;
     int tfPos, tmPos, i, j;
     std::unique_ptr<const GfxFont> fontToFree;
 
@@ -4635,8 +4660,9 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 ++i;
             }
             if (i < da->getLength()) {
-                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j)
+                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
                     ;
+                }
                 daToks.push_back(new GooString(da, i, j - i));
                 i = j;
             }
@@ -4689,7 +4715,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // compute font autosize
     if (fontSize == 0) {
-        wMax = 0;
+        double wMax = 0;
         for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
             j = 0;
             if (fieldChoice->getChoice(i) == nullptr) {
@@ -4699,6 +4725,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 }
                 return false;
             }
+            double w;
             Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
             if (w > wMax) {
                 wMax = w;
@@ -4733,17 +4760,18 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // compute text width and start position
         j = 0;
+        double w;
         Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
         switch (quadding) {
-        case quaddingLeftJustified:
+        case VariableTextQuadding::leftJustified:
         default:
             x = borderWidth + 2;
             break;
-        case quaddingCentered:
+        case VariableTextQuadding::centered:
             x = (rect->x2 - rect->x1 - w) / 2;
             break;
-        case quaddingRightJustified:
+        case VariableTextQuadding::rightJustified:
             x = rect->x2 - rect->x1 - borderWidth - 2 - w;
             break;
         }
@@ -4774,7 +4802,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
 
         // write the text string
-        writeString(convertedText);
+        writeString(convertedText.toStr());
         appearBuf->append(" Tj\n");
 
         // cleanup
@@ -4800,10 +4828,12 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
     const double w = border->getWidth();
 
     const AnnotColor *aColor = appearCharacs->getBorderColor();
-    if (!aColor)
+    if (!aColor) {
         aColor = appearCharacs->getBackColor();
-    if (!aColor)
+    }
+    if (!aColor) {
         return;
+    }
 
     const double dx = rect->x2 - rect->x1;
     const double dy = rect->y2 - rect->y1;
@@ -4922,15 +4952,16 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
                                                  const GooString *appearState, XRef *xref, Dict *resourcesDict)
 {
     const GooString *caption = nullptr;
-    if (appearCharacs)
+    if (appearCharacs) {
         caption = appearCharacs->getNormalCaption();
+    }
 
     switch (field->getButtonType()) {
     case formButtonRadio: {
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -4944,16 +4975,17 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         }
     } break;
     case formButtonPush:
-        if (caption)
-            return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, false, xref, false, resourcesDict);
+        if (caption) {
+            return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict);
+        }
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(&checkMark, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, false, resourcesDict, "ZapfDingbats");
+                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
         }
         break;
@@ -4975,14 +5007,19 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         } else if (form) {
             quadding = form->getTextQuadding();
         } else {
-            quadding = quaddingLeftJustified;
+            quadding = VariableTextQuadding::leftJustified;
         }
 
-        int comb = 0;
-        if (fieldText->isComb())
-            comb = fieldText->getMaxLen();
+        const int combMaxLen = fieldText->isComb() ? fieldText->getMaxLen() : 0;
 
-        return drawText(contents, da, resources, border, appearCharacs, rect, fieldText->isMultiline(), comb, quadding, true, false, xref, fieldText->isPassword(), resourcesDict);
+        int flags = EmitMarkedContentDrawTextFlag;
+        if (fieldText->isMultiline()) {
+            flags = flags | MultilineDrawTextFlag;
+        }
+        if (fieldText->isPassword()) {
+            flags = flags | TurnTextToStarsDrawTextFlag;
+        }
+        return drawText(contents, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, combMaxLen);
     }
 
     return true;
@@ -5002,8 +5039,9 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
                                                     const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
     const GooString &contents = field->getCustomAppearanceContent();
-    if (contents.toStr().empty())
+    if (contents.toStr().empty()) {
         return false;
+    }
 
     if (field->getImageResource() != Ref::INVALID()) {
         const double width = rect->x2 - rect->x1;
@@ -5043,8 +5081,9 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
 
     if (border) {
         borderWidth = border->getWidth();
-        if (borderWidth > 0)
+        if (borderWidth > 0) {
             setLineStyleForBorder(border);
+        }
     }
 
     // Box size
@@ -5091,7 +5130,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
         }
 
         appendf("{0:.2f} {1:.2f} Td\n", xDelta, yDelta);
-        writeString(GooString(outText.first));
+        writeString(outText.first);
         append("Tj\n");
 
         if (!centerHorizontally) {
@@ -5114,13 +5153,13 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     } else if (form) {
         quadding = form->getTextQuadding();
     } else {
-        quadding = quaddingLeftJustified;
+        quadding = VariableTextQuadding::leftJustified;
     }
 
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
         if (selected) {
-            return drawText(selected, da, resources, border, appearCharacs, rect, false, 0, quadding, true, false, xref, false, resourcesDict);
+            return drawText(selected, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
@@ -5147,12 +5186,14 @@ void AnnotWidget::generateFieldAppearance()
     }
 
     // draw the border
-    if (appearCharacs && border && border->getWidth() > 0)
+    if (appearCharacs && border && border->getWidth() > 0) {
         appearBuilder.drawFieldBorder(field, border.get(), appearCharacs.get(), rect.get());
+    }
 
     da = field->getDefaultAppearance();
-    if (!da && form)
+    if (!da && form) {
         da = form->getDefaultAppearance();
+    }
 
     Dict *appearDict = new Dict(doc->getXRef());
 
@@ -5223,8 +5264,9 @@ void AnnotWidget::updateAppearanceStream()
 
     // There's no need to create a new appearance stream if NeedAppearances is
     // set, because it will be ignored next time anyway.
-    if (form && form->getNeedAppearances())
+    if (form && form->getNeedAppearances()) {
         return;
+    }
 
     // Create the new appearance
     generateFieldAppearance();
@@ -5255,8 +5297,9 @@ void AnnotWidget::updateAppearanceStream()
 
 void AnnotWidget::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
 
@@ -5314,10 +5357,11 @@ void AnnotMovie::initialize(PDFDoc *docA, Dict *dict)
     Object movieDict = dict->lookup("Movie");
     if (movieDict.isDict()) {
         Object obj2 = dict->lookup("A");
-        if (obj2.isDict())
+        if (obj2.isDict()) {
             movie = std::make_unique<Movie>(&movieDict, &obj2);
-        else
+        } else {
             movie = std::make_unique<Movie>(&movieDict);
+        }
         if (!movie->isOk()) {
             movie = nullptr;
             ok = false;
@@ -5330,8 +5374,9 @@ void AnnotMovie::initialize(PDFDoc *docA, Dict *dict)
 
 void AnnotMovie::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull() && movie->getShowPoster()) {
@@ -5451,8 +5496,9 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict *dict)
 
 std::unique_ptr<LinkAction> AnnotScreen::getAdditionalAction(AdditionalActionsType additionalActionType)
 {
-    if (additionalActionType == actionFocusIn || additionalActionType == actionFocusOut) // not defined for screen annotation
+    if (additionalActionType == actionFocusIn || additionalActionType == actionFocusOut) { // not defined for screen annotation
         return nullptr;
+    }
 
     return ::getAdditionalAction(additionalActionType, &additionalActions, doc);
 }
@@ -5612,15 +5658,17 @@ void AnnotStamp::generateStampDefaultAppearance()
 
 void AnnotStamp::draw(Gfx *gfx, bool printing)
 {
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
-        if (stampImageHelper != nullptr)
+        if (stampImageHelper != nullptr) {
             generateStampCustomAppearance();
-        else
+        } else {
             generateStampDefaultAppearance();
+        }
     }
 
     // draw the appearance stream
@@ -5646,8 +5694,9 @@ void AnnotStamp::setIcon(GooString *new_icon)
 
 void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
 {
-    if (!stampImageHelperA)
+    if (!stampImageHelperA) {
         return;
+    }
 
     annotLocker();
     clearCustomImage();
@@ -5778,8 +5827,9 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -5788,14 +5838,16 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
 
         AnnotAppearanceBuilder appearBuilder;
         appearBuilder.append("q\n");
-        if (color)
+        if (color) {
             appearBuilder.setDrawColor(color.get(), false);
+        }
 
         double borderWidth = border->getWidth();
         appearBuilder.setLineStyleForBorder(border.get());
 
-        if (interiorColor)
+        if (interiorColor) {
             appearBuilder.setDrawColor(interiorColor.get(), true);
+        }
 
         if (type == typeSquare) {
             appearBuilder.appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n", borderWidth / 2.0, borderWidth / 2.0, (rect->x2 - rect->x1) - borderWidth, (rect->y2 - rect->y1) - borderWidth);
@@ -6008,12 +6060,13 @@ void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent)
     const char *intentName;
 
     intent = new_intent;
-    if (new_intent == polygonCloud)
+    if (new_intent == polygonCloud) {
         intentName = "PolygonCloud";
-    else if (new_intent == polylineDimension)
+    } else if (new_intent == polylineDimension) {
         intentName = "PolyLineDimension";
-    else // polygonDimension
+    } else { // polygonDimension
         intentName = "PolygonDimension";
+    }
     update("IT", Object(objName, intentName));
 }
 
@@ -6096,8 +6149,9 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -6293,16 +6347,18 @@ void AnnotInk::parseInkList(Array *array)
     memset(inkList, 0, inkListLength * sizeof(AnnotPath *));
     for (int i = 0; i < inkListLength; i++) {
         Object obj2 = array->get(i);
-        if (obj2.isArray())
+        if (obj2.isArray()) {
             inkList[i] = new AnnotPath(obj2.getArray());
+        }
     }
 }
 
 void AnnotInk::freeInkList()
 {
     if (inkList) {
-        for (int i = 0; i < inkListLength; ++i)
+        for (int i = 0; i < inkListLength; ++i) {
             delete inkList[i];
+        }
         gfree(inkList);
     }
 }
@@ -6323,8 +6379,9 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -6535,8 +6592,9 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -6545,18 +6603,20 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
         AnnotAppearanceBuilder appearBuilder;
 
         appearBuilder.append("q\n");
-        if (color)
+        if (color) {
             appearBuilder.setDrawColor(color.get(), true);
-        else
+        } else {
             appearBuilder.append("1 1 1 rg\n");
-        if (!name->cmp("PushPin"))
+        }
+        if (!name->cmp("PushPin")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PUSHPIN);
-        else if (!name->cmp("Paperclip"))
+        } else if (!name->cmp("Paperclip")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PAPERCLIP);
-        else if (!name->cmp("Graph"))
+        } else if (!name->cmp("Graph")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_GRAPH);
-        else if (!name->cmp("Tag"))
+        } else if (!name->cmp("Tag")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_TAG);
+        }
         appearBuilder.append("Q\n");
 
         double bbox[4];
@@ -6685,8 +6745,9 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
     Object obj;
     double ca = 1;
 
-    if (!isVisible(printing))
+    if (!isVisible(printing)) {
         return;
+    }
 
     annotLocker();
     if (appearance.isNull()) {
@@ -6695,14 +6756,16 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
         AnnotAppearanceBuilder appearBuilder;
 
         appearBuilder.append("q\n");
-        if (color)
+        if (color) {
             appearBuilder.setDrawColor(color.get(), true);
-        else
+        } else {
             appearBuilder.append("1 1 1 rg\n");
-        if (!name->cmp("Speaker"))
+        }
+        if (!name->cmp("Speaker")) {
             appearBuilder.append(ANNOT_SOUND_AP_SPEAKER);
-        else if (!name->cmp("Mic"))
+        } else if (!name->cmp("Mic")) {
             appearBuilder.append(ANNOT_SOUND_AP_MIC);
+        }
         appearBuilder.append("Q\n");
 
         double bbox[4];
@@ -6996,14 +7059,16 @@ AnnotRichMedia::Content::Content(Dict *dict)
 AnnotRichMedia::Content::~Content()
 {
     if (configurations) {
-        for (int i = 0; i < nConfigurations; ++i)
+        for (int i = 0; i < nConfigurations; ++i) {
             delete configurations[i];
+        }
         gfree(configurations);
     }
 
     if (assets) {
-        for (int i = 0; i < nAssets; ++i)
+        for (int i = 0; i < nAssets; ++i) {
             delete assets[i];
+        }
         gfree(assets);
     }
 }
@@ -7015,8 +7080,9 @@ int AnnotRichMedia::Content::getConfigurationsCount() const
 
 AnnotRichMedia::Configuration *AnnotRichMedia::Content::getConfiguration(int index) const
 {
-    if (index < 0 || index >= nConfigurations)
+    if (index < 0 || index >= nConfigurations) {
         return nullptr;
+    }
 
     return configurations[index];
 }
@@ -7028,8 +7094,9 @@ int AnnotRichMedia::Content::getAssetsCount() const
 
 AnnotRichMedia::Asset *AnnotRichMedia::Content::getAsset(int index) const
 {
-    if (index < 0 || index >= nAssets)
+    if (index < 0 || index >= nAssets) {
         return nullptr;
+    }
 
     return assets[index];
 }
@@ -7118,8 +7185,9 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 AnnotRichMedia::Configuration::~Configuration()
 {
     if (instances) {
-        for (int i = 0; i < nInstances; ++i)
+        for (int i = 0; i < nInstances; ++i) {
             delete instances[i];
+        }
         gfree(instances);
     }
 }
@@ -7131,8 +7199,9 @@ int AnnotRichMedia::Configuration::getInstancesCount() const
 
 AnnotRichMedia::Instance *AnnotRichMedia::Configuration::getInstance(int index) const
 {
-    if (index < 0 || index >= nInstances)
+    if (index < 0 || index >= nInstances) {
         return nullptr;
+    }
 
     return instances[index];
 }
@@ -7305,8 +7374,9 @@ Annot *Annots::createAnnot(Object &&dictObject, const Object *obj)
                     }
                 }
             }
-            if (!annot)
+            if (!annot) {
                 annot = new AnnotWidget(doc, std::move(dictObject), obj);
+            }
         } else if (!strcmp(typeName, "Screen")) {
             annot = new AnnotScreen(doc, std::move(dictObject), obj);
         } else if (!strcmp(typeName, "PrinterMark")) {
@@ -7325,10 +7395,11 @@ Annot *Annots::createAnnot(Object &&dictObject, const Object *obj)
              * markup annotation associated
              */
             Object obj2 = dictObject.dictLookup("Parent");
-            if (obj2.isNull())
+            if (obj2.isNull()) {
                 annot = new AnnotPopup(doc, std::move(dictObject), obj);
-            else
+            } else {
                 annot = nullptr;
+            }
         } else {
             annot = new Annot(doc, std::move(dictObject), obj);
         }

@@ -64,13 +64,13 @@ Qt::Alignment formTextAlignment(::FormWidget *fm)
 {
     Qt::Alignment qtalign = Qt::AlignLeft;
     switch (fm->getField()->getTextQuadding()) {
-    case quaddingCentered:
+    case VariableTextQuadding::centered:
         qtalign = Qt::AlignHCenter;
         break;
-    case quaddingRightJustified:
+    case VariableTextQuadding::rightJustified:
         qtalign = Qt::AlignRight;
         break;
-    case quaddingLeftJustified:
+    case VariableTextQuadding::leftJustified:
         qtalign = Qt::AlignLeft;
     }
     return qtalign;
@@ -120,8 +120,9 @@ FormField::FormField(std::unique_ptr<FormFieldData> dd) : m_formData(std::move(d
         double pageWidth = m_formData->page->getCropWidth();
         double pageHeight = m_formData->page->getCropHeight();
         // landscape and seascape page rotation: be sure to use the correct (== rotated) page size
-        if (((rotation / 90) % 2) == 1)
+        if (((rotation / 90) % 2) == 1) {
             qSwap(pageWidth, pageHeight);
+        }
         for (int i = 0; i < 6; i += 2) {
             MTX[i] = gfxCTM[i] / pageWidth;
             MTX[i + 1] = gfxCTM[i + 1] / pageHeight;
@@ -333,15 +334,17 @@ FormFieldIcon FormFieldButton::icon() const
 
 void FormFieldButton::setIcon(const FormFieldIcon &icon)
 {
-    if (FormFieldIconData::getData(icon) == nullptr)
+    if (FormFieldIconData::getData(icon) == nullptr) {
         return;
+    }
 
     FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     if (fwb->getButtonType() == formButtonPush) {
         ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
         FormFieldIconData *data = FormFieldIconData::getData(icon);
-        if (data->icon != nullptr)
+        if (data->icon != nullptr) {
             w->setNewAppearance(data->icon->lookup("AP"));
+        }
     }
 }
 
@@ -361,16 +364,18 @@ QList<int> FormFieldButton::siblings() const
 {
     FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     ::FormFieldButton *ffb = static_cast<::FormFieldButton *>(fwb->getField());
-    if (fwb->getButtonType() == formButtonPush)
+    if (fwb->getButtonType() == formButtonPush) {
         return QList<int>();
+    }
 
     QList<int> ret;
     for (int i = 0; i < ffb->getNumSiblings(); ++i) {
         ::FormFieldButton *sibling = static_cast<::FormFieldButton *>(ffb->getSibling(i));
         for (int j = 0; j < sibling->getNumWidgets(); ++j) {
             FormWidget *w = sibling->getWidget(j);
-            if (w)
+            if (w) {
                 ret.append(w->getID());
+            }
         }
     }
 
@@ -389,10 +394,11 @@ FormField::FormType FormFieldText::type() const
 FormFieldText::TextType FormFieldText::textType() const
 {
     FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
-    if (fwt->isFileSelect())
+    if (fwt->isFileSelect()) {
         return FormFieldText::FileSelect;
-    else if (fwt->isMultiline())
+    } else if (fwt->isMultiline()) {
         return FormFieldText::Multiline;
+    }
     return FormFieldText::Normal;
 }
 
@@ -472,8 +478,9 @@ FormFieldChoice::FormType FormFieldChoice::type() const
 FormFieldChoice::ChoiceType FormFieldChoice::choiceType() const
 {
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
-    if (fwc->isCombo())
+    if (fwc->isCombo()) {
         return FormFieldChoice::ComboBox;
+    }
     return FormFieldChoice::ListBox;
 }
 
@@ -521,9 +528,11 @@ QList<int> FormFieldChoice::currentChoices() const
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     int num = fwc->getNumChoices();
     QList<int> choices;
-    for (int i = 0; i < num; ++i)
-        if (fwc->isSelected(i))
+    for (int i = 0; i < num; ++i) {
+        if (fwc->isSelected(i)) {
             choices.append(i);
+        }
+    }
     return choices;
 }
 
@@ -531,18 +540,20 @@ void FormFieldChoice::setCurrentChoices(const QList<int> &choice)
 {
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     fwc->deselectAll();
-    for (int i = 0; i < choice.count(); ++i)
+    for (int i = 0; i < choice.count(); ++i) {
         fwc->select(choice.at(i));
+    }
 }
 
 QString FormFieldChoice::editChoice() const
 {
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
 
-    if (fwc->isCombo() && fwc->hasEdit())
+    if (fwc->isCombo() && fwc->hasEdit()) {
         return UnicodeParsedString(fwc->getEditChoice());
-    else
+    } else {
         return QString();
+    }
 }
 
 void FormFieldChoice::setEditChoice(const QString &text)
@@ -607,8 +618,9 @@ CertificateInfo::~CertificateInfo() = default;
 
 CertificateInfo &CertificateInfo::operator=(const CertificateInfo &other)
 {
-    if (this != &other)
+    if (this != &other) {
         d_ptr = other.d_ptr;
+    }
 
     return *this;
 }
@@ -688,22 +700,30 @@ CertificateInfo::KeyUsageExtensions CertificateInfo::keyUsageExtensions() const
     Q_D(const CertificateInfo);
 
     KeyUsageExtensions kuExtensions = KuNone;
-    if (d->ku_extensions & KU_DIGITAL_SIGNATURE)
+    if (d->ku_extensions & KU_DIGITAL_SIGNATURE) {
         kuExtensions |= KuDigitalSignature;
-    if (d->ku_extensions & KU_NON_REPUDIATION)
+    }
+    if (d->ku_extensions & KU_NON_REPUDIATION) {
         kuExtensions |= KuNonRepudiation;
-    if (d->ku_extensions & KU_KEY_ENCIPHERMENT)
+    }
+    if (d->ku_extensions & KU_KEY_ENCIPHERMENT) {
         kuExtensions |= KuKeyEncipherment;
-    if (d->ku_extensions & KU_DATA_ENCIPHERMENT)
+    }
+    if (d->ku_extensions & KU_DATA_ENCIPHERMENT) {
         kuExtensions |= KuDataEncipherment;
-    if (d->ku_extensions & KU_KEY_AGREEMENT)
+    }
+    if (d->ku_extensions & KU_KEY_AGREEMENT) {
         kuExtensions |= KuKeyAgreement;
-    if (d->ku_extensions & KU_KEY_CERT_SIGN)
+    }
+    if (d->ku_extensions & KU_KEY_CERT_SIGN) {
         kuExtensions |= KuKeyCertSign;
-    if (d->ku_extensions & KU_CRL_SIGN)
+    }
+    if (d->ku_extensions & KU_CRL_SIGN) {
         kuExtensions |= KuClrSign;
-    if (d->ku_extensions & KU_ENCIPHER_ONLY)
+    }
+    if (d->ku_extensions & KU_ENCIPHER_ONLY) {
         kuExtensions |= KuEncipherOnly;
+    }
 
     return kuExtensions;
 }
@@ -878,8 +898,9 @@ bool SignatureValidationInfo::signsTotalDocument() const
         // A potential range after d->range_bounds.value(3) would be also not
         // authenticated. Therefore d->range_bounds.value(3) should coincide with
         // the end of the document.
-        if (d->docLength == d->range_bounds.value(3) && !d->signature.isEmpty())
+        if (d->docLength == d->range_bounds.value(3) && !d->signature.isEmpty()) {
             return true;
+        }
     }
     return false;
 }
@@ -892,8 +913,9 @@ CertificateInfo SignatureValidationInfo::certificateInfo() const
 
 SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
 {
-    if (this != &other)
+    if (this != &other) {
         d_ptr = other.d_ptr;
+    }
 
     return *this;
 }
@@ -1123,8 +1145,9 @@ QString POPPLER_QT5_EXPORT getNSSDir()
 void setNSSDir(const QString &path)
 {
 #ifdef ENABLE_NSS3
-    if (path.isEmpty())
+    if (path.isEmpty()) {
         return;
+    }
 
     GooString *goo = QStringToGooString(path);
     SignatureHandler::setNSSDir(*goo);

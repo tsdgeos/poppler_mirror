@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -42,11 +42,13 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, Spl
     int i;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), 0, &faceA))
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
+        }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, 0, &faceA))
+        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), 0, &faceA)) {
             return nullptr;
+        }
     }
     codeToGIDA = (int *)gmallocn(256, sizeof(int));
     for (i = 0; i < 256; ++i) {
@@ -70,11 +72,13 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, Splas
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), 0, &faceA))
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
+        }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, 0, &faceA))
+        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), 0, &faceA)) {
             return nullptr;
+        }
     }
 
     return new SplashFTFontFile(engineA, idA, src, faceA, codeToGIDA, codeToGIDLenA, false, false);
@@ -85,11 +89,13 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, 
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName->c_str(), faceIndexA, &faceA))
+        if (FT_New_Face(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
             return nullptr;
+        }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, faceIndexA, &faceA))
+        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), faceIndexA, &faceA)) {
             return nullptr;
+        }
     }
 
     return new SplashFTFontFile(engineA, idA, src, faceA, codeToGIDA, codeToGIDLenA, true, false);

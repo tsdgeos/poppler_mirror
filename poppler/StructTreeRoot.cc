@@ -31,8 +31,9 @@ StructTreeRoot::StructTreeRoot(PDFDoc *docA, Dict *structTreeRootDict) : doc(doc
 
 StructTreeRoot::~StructTreeRoot()
 {
-    for (StructElement *element : elements)
+    for (StructElement *element : elements) {
         delete element;
+    }
 }
 
 void StructTreeRoot::parse(Dict *root)
@@ -91,8 +92,9 @@ void StructTreeRoot::parse(Dict *root)
         if (child->isOk()) {
             appendChild(child);
             const Object &ref = root->lookupNF("K");
-            if (ref.isRef())
+            if (ref.isRef()) {
                 parentTreeAdd(ref.getRef(), child);
+            }
         } else {
             error(errSyntaxWarning, -1, "StructTreeRoot element could not be parsed");
             delete child;
@@ -172,6 +174,7 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 void StructTreeRoot::parentTreeAdd(const Ref objectRef, StructElement *element)
 {
     auto range = refToParentMap.equal_range(objectRef);
-    for (auto it = range.first; it != range.second; ++it)
+    for (auto it = range.first; it != range.second; ++it) {
         it->second->element = element;
+    }
 }

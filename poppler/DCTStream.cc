@@ -30,15 +30,17 @@ static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
     } else if (src->index == 1) {
         c = 0xD8;
         src->index++;
-    } else
+    } else {
         c = src->str->getChar();
+    }
     if (c != EOF) {
         src->buffer = c;
         src->pub.next_input_byte = &src->buffer;
         src->pub.bytes_in_buffer = 1;
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
 static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
@@ -64,8 +66,9 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) :
         err.width = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
         obj = dict->lookup("Height", recursion);
         err.height = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
-    } else
+    } else {
         err.height = err.width = 0;
+    }
     init();
 }
 
@@ -136,15 +139,17 @@ void DCTStream::reset()
                 error(errSyntaxError, -1, "Could not find start of jpeg data");
                 return;
             }
-            if (c != 0xFF)
+            if (c != 0xFF) {
                 c = 0;
+            }
         } else {
             c2 = str->getChar();
             if (c2 != 0xD8) {
                 c = 0;
                 c2 = 0;
-            } else
+            } else {
                 startFound = true;
+            }
         }
     }
 
@@ -188,24 +193,28 @@ bool DCTStream::readLine()
 {
     if (cinfo.output_scanline < cinfo.output_height) {
         if (!setjmp(err.setjmp_buffer)) {
-            if (!jpeg_read_scanlines(&cinfo, row_buffer, 1))
+            if (!jpeg_read_scanlines(&cinfo, row_buffer, 1)) {
                 return false;
-            else {
+            } else {
                 current = &row_buffer[0][0];
                 limit = &row_buffer[0][(cinfo.output_width - 1) * cinfo.output_components] + cinfo.output_components;
                 return true;
             }
-        } else
+        } else {
             return false;
-    } else
+        }
+    } else {
         return false;
+    }
 }
 
 int DCTStream::getChar()
 {
-    if (current == limit)
-        if (!readLine())
+    if (current == limit) {
+        if (!readLine()) {
             return EOF;
+        }
+    }
 
     return *current++;
 }
@@ -214,12 +223,14 @@ int DCTStream::getChars(int nChars, unsigned char *buffer)
 {
     for (int i = 0; i < nChars;) {
         if (current == limit) {
-            if (!readLine())
+            if (!readLine()) {
                 return i;
+            }
         }
         int left = limit - current;
-        if (left + i > nChars)
+        if (left + i > nChars) {
             left = nChars - i;
+        }
         memcpy(buffer + i, current, left);
         current += left;
         i += left;

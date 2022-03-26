@@ -223,8 +223,9 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
         } else {
             ok = false;
         }
-        if (tmp.x1 == 0 && tmp.x2 == 0 && tmp.y1 == 0 && tmp.y2 == 0)
+        if (tmp.x1 == 0 && tmp.x2 == 0 && tmp.y1 == 0 && tmp.y2 == 0) {
             ok = false;
+        }
         if (ok) {
             if (tmp.x1 > tmp.x2) {
                 t = tmp.x1;
@@ -368,20 +369,23 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
 {
     const int numAnnots = annotations ? annotations->getNumAnnots() : 0;
 
-    if (numAnnots < 1)
+    if (numAnnots < 1) {
         return;
+    }
 
     /* Look for standalone annots, identified by being: 1) of type Widget
      * 2) not referenced from the Catalog's Form Field array */
     for (int i = 0; i < numAnnots; ++i) {
         Annot *annot = annotations->getAnnot(i);
 
-        if (annot->getType() != Annot::typeWidget || !annot->getHasRef())
+        if (annot->getType() != Annot::typeWidget || !annot->getHasRef()) {
             continue;
+        }
 
         const Ref r = annot->getRef();
-        if (form && form->findWidgetByRef(r))
+        if (form && form->findWidgetByRef(r)) {
             continue; // this annot is referenced inside Form, skip it
+        }
 
         std::set<int> parents;
         FormField *field = Form::createFieldFromDict(annot->getAnnotObj().copy(), annot->getDoc(), r, nullptr, &parents);
@@ -393,8 +397,9 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);
 
-            if (!formWidget->getWidgetAnnotation())
+            if (!formWidget->getWidgetAnnotation()) {
                 formWidget->createWidgetAnnotation();
+            }
 
             standaloneFields.push_back(field);
 
@@ -442,10 +447,11 @@ void Page::addAnnot(Annot *annot)
         Object obj1 = getAnnotsObject();
         if (obj1.isArray()) {
             obj1.arrayAdd(Object(annotRef));
-            if (annotsObj.isRef())
+            if (annotsObj.isRef()) {
                 xref->setModifiedObject(&obj1, annotsObj.getRef());
-            else
+            } else {
                 xref->setModifiedObject(&pageObj, pageRef);
+            }
         }
     }
 
@@ -460,8 +466,9 @@ void Page::addAnnot(Annot *annot)
     AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup *>(annot);
     if (annotMarkup) {
         AnnotPopup *annotPopup = annotMarkup->getPopup();
-        if (annotPopup)
+        if (annotPopup) {
             addAnnot(annotPopup);
+        }
     }
 }
 
@@ -634,18 +641,23 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     dict = fetched_thumb.streamGetDict();
     str = fetched_thumb.getStream();
 
-    if (!dict->lookupInt("Width", "W", &width))
+    if (!dict->lookupInt("Width", "W", &width)) {
         return false;
-    if (!dict->lookupInt("Height", "H", &height))
+    }
+    if (!dict->lookupInt("Height", "H", &height)) {
         return false;
-    if (!dict->lookupInt("BitsPerComponent", "BPC", &bits))
+    }
+    if (!dict->lookupInt("BitsPerComponent", "BPC", &bits)) {
         return false;
+    }
 
     /* Check for invalid dimensions and integer overflow. */
-    if (width <= 0 || height <= 0)
+    if (width <= 0 || height <= 0) {
         return false;
-    if (width > INT_MAX / 3 / height)
+    }
+    if (width > INT_MAX / 3 / height) {
         return false;
+    }
     pixbufdatasize = width * height * 3;
 
     /* Get color space */
@@ -697,12 +709,15 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
         delete imgstr;
     }
 
-    if (width_out)
+    if (width_out) {
         *width_out = width;
-    if (height_out)
+    }
+    if (height_out) {
         *height_out = height;
-    if (rowstride_out)
+    }
+    if (rowstride_out) {
         *rowstride_out = width * 3;
+    }
 
     delete colorMap;
 
@@ -801,8 +816,9 @@ std::unique_ptr<LinkAction> Page::getAdditionalAction(PageAdditionalActionsType 
         const char *key = (type == actionOpenPage ? "O" : type == actionClosePage ? "C" : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
-        if (actionObject.isDict())
+        if (actionObject.isDict()) {
             return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+        }
     }
 
     return nullptr;

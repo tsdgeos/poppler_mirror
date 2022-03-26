@@ -101,8 +101,9 @@ static void pgd_action_view_add_destination(GtkWidget *action_view, GtkGrid *tab
             }
         }
 
-        if (!str)
+        if (!str) {
             str = g_strdup_printf("%d", dest->page_num);
+        }
         pgd_table_add_property(table, "<b>Page:</b>", str, row);
         g_free(str);
 
@@ -267,10 +268,11 @@ static void pgd_action_view_do_action_layer(GtkWidget *button, GList *state_list
                 poppler_layer_hide(layer);
                 break;
             case POPPLER_ACTION_LAYER_TOGGLE:
-                if (poppler_layer_is_visible(layer))
+                if (poppler_layer_is_visible(layer)) {
                     poppler_layer_hide(layer);
-                else
+                } else {
                     poppler_layer_show(layer);
+                }
                 break;
             }
         }
@@ -287,8 +289,9 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
         gtk_container_remove(GTK_CONTAINER(action_view), table);
     }
 
-    if (!action)
+    if (!action) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -405,8 +408,9 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
         pgd_table_add_property(GTK_GRID(table), "<b>Type:</b>", "JavaScript", &row);
 
         buffer = gtk_text_buffer_new(NULL);
-        if (action->javascript.script)
+        if (action->javascript.script) {
             gtk_text_buffer_set_text(buffer, action->javascript.script, -1);
+        }
 
         textview = gtk_text_view_new_with_buffer(buffer);
         gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
@@ -436,11 +440,13 @@ gchar *pgd_format_date(time_t utime)
     GDateTime *dt = NULL;
     gchar *s = NULL;
 
-    if (utime == 0)
+    if (utime == 0) {
         return NULL;
+    }
     dt = g_date_time_new_from_unix_local(utime);
-    if (dt == NULL)
+    if (dt == NULL) {
         return NULL;
+    }
     s = g_date_time_format(dt, "%c");
     g_date_time_unref(dt);
 
@@ -513,8 +519,9 @@ void pgd_movie_view_set_movie(GtkWidget *movie_view, PopplerMovie *movie)
         gtk_container_remove(GTK_CONTAINER(movie_view), table);
     }
 
-    if (!movie)
+    if (!movie) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -558,8 +565,9 @@ GdkPixbuf *pgd_pixbuf_new_for_color(PopplerColor *poppler_color)
     gint num, x;
     guchar *pixels;
 
-    if (!poppler_color)
+    if (!poppler_color) {
         return NULL;
+    }
 
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 16);
 

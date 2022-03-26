@@ -44,8 +44,9 @@ static void build_tree(PopplerDocument *document, GtkTreeModel *model, GtkTreeIt
         action = poppler_index_iter_get_action(iter);
         expand = poppler_index_iter_is_open(iter);
 
-        if (!action)
+        if (!action) {
             continue;
+        }
 
         markup = g_markup_escape_text(action->any.title, -1);
         enum_value = g_enum_get_value((GEnumClass *)g_type_class_ref(POPPLER_TYPE_ACTION_TYPE), action->type);
@@ -61,8 +62,9 @@ static void build_tree(PopplerDocument *document, GtkTreeModel *model, GtkTreeIt
         g_free(markup);
 
         child = poppler_index_iter_get_child(iter);
-        if (child)
+        if (child) {
             build_tree(document, model, &tree_iter, child);
+        }
         poppler_index_iter_free(child);
     } while (poppler_index_iter_next(iter));
 }

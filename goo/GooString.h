@@ -49,7 +49,7 @@
 #    define GOOSTRING_FORMAT
 #endif
 
-class POPPLER_PRIVATE_EXPORT GooString : private std::string
+class GooString : private std::string
 {
 public:
     // Create an empty string.
@@ -138,8 +138,8 @@ public:
     //     t -- GooString *
     //     w -- blank space; arg determines width
     // To get literal curly braces, use {{ or }}.
-    static GooString *format(const char *fmt, ...) GOOSTRING_FORMAT;
-    static GooString *formatv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT static GooString *format(const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT static GooString *formatv(const char *fmt, va_list argList);
 
     // Get length.
     int getLength() const { return size(); }
@@ -188,8 +188,8 @@ public:
     }
 
     // Append a formatted string.
-    GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
-    GooString *appendfv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT GooString *appendfv(const char *fmt, va_list argList);
 
     // Insert a character or string.
     GooString *insert(int i, char c)
@@ -221,11 +221,11 @@ public:
     }
 
     // Convert string to all-lower case.
-    GooString *lowerCase();
-    static void lowerCase(std::string &s);
+    POPPLER_PRIVATE_EXPORT GooString *lowerCase();
+    POPPLER_PRIVATE_EXPORT static void lowerCase(std::string &s);
 
     // Returns a new string converted to all-lower case.
-    static std::string toLowerCase(const std::string &s);
+    POPPLER_PRIVATE_EXPORT static std::string toLowerCase(const std::string &s);
 
     // Compare two strings:  -1:<  0:=  +1:>
     int cmp(const GooString *str) const { return compare(*str); }
@@ -235,9 +235,9 @@ public:
     int cmpN(const char *sA, int n) const { return compare(0, n, sA); }
 
     // Return true if strings starts with prefix
-    bool startsWith(const char *prefix) const;
+    POPPLER_PRIVATE_EXPORT bool startsWith(const char *prefix) const;
     // Return true if string ends with suffix
-    bool endsWith(const char *suffix) const;
+    POPPLER_PRIVATE_EXPORT bool endsWith(const char *suffix) const;
 
     bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
     static bool hasUnicodeMarker(const std::string &s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
@@ -245,13 +245,13 @@ public:
     static bool hasUnicodeMarkerLE(const std::string &s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
     bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
-    void prependUnicodeMarker();
+    POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
 
     // Sanitizes the string so that it does
     // not contain any ( ) < > [ ] { } / %
     // The postscript mode also has some more strict checks
     // The caller owns the return value
-    GooString *sanitizedName(bool psmode) const;
+    POPPLER_PRIVATE_EXPORT GooString *sanitizedName(bool psmode) const;
 };
 
 #endif

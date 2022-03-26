@@ -45,8 +45,9 @@ typedef struct
 
 static void pgd_images_free(PgdImagesDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -66,8 +67,9 @@ static gboolean pgd_image_view_drawing_area_draw(GtkWidget *area, cairo_t *cr, G
     cairo_surface_t *image;
 
     image = g_object_get_data(G_OBJECT(image_view), "image-surface");
-    if (!image)
+    if (!image) {
         return FALSE;
+    }
 
     gtk_widget_set_size_request(area, cairo_image_surface_get_width(image), cairo_image_surface_get_height(image));
 
@@ -114,8 +116,9 @@ static void pgd_images_get_images(GtkWidget *button, PgdImagesDemo *demo)
     pgd_image_view_set_image(demo->image_view, NULL);
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_image_mapping(page);

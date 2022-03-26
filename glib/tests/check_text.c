@@ -25,8 +25,9 @@ int main(int argc, char *argv[])
     /* open file */
 
     infile = g_file_new_for_path(TESTDATADIR "/unittestcases/WithActualText.pdf");
-    if (!infile)
+    if (!infile) {
         exit(EXIT_FAILURE);
+    }
 
     doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
     if (doc == NULL) {
@@ -62,8 +63,9 @@ int main(int argc, char *argv[])
     g_print("Consistency test between poppler_page_get_text() and poppler_page_get_text_layout()\n");
     g_print("Issue #1100 \n");
     infile = g_file_new_for_path(TESTDATADIR "/unittestcases/searchAcrossLines.pdf");
-    if (!infile)
+    if (!infile) {
         exit(EXIT_FAILURE);
+    }
 
     doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
     if (doc == NULL) {

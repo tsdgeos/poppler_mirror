@@ -383,8 +383,9 @@ int main(int argc, char *argv[])
             printf("Signature number %d is already signed\n", signatureNumber);
             return 2;
         }
-        if (etsiCAdESdetached)
+        if (etsiCAdESdetached) {
             ffs->setSignatureType(ETSI_CAdES_detached);
+        }
         const char *pw = (strlen(password) == 0) ? nullptr : password;
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
         if (ffs->getNumWidgets() != 1) {

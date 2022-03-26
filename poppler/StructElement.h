@@ -254,14 +254,16 @@ public:
     // Optional ISO language name, e.g. en_US
     GooString *getLanguage()
     {
-        if (!isContent() && s->language)
+        if (!isContent() && s->language) {
             return s->language;
+        }
         return parent ? parent->getLanguage() : nullptr;
     }
     const GooString *getLanguage() const
     {
-        if (!isContent() && s->language)
+        if (!isContent() && s->language) {
             return s->language;
+        }
         return parent ? parent->getLanguage() : nullptr;
     }
 
@@ -269,8 +271,9 @@ public:
     unsigned int getRevision() const { return isContent() ? 0 : s->revision; }
     void setRevision(unsigned int revision)
     {
-        if (isContent())
+        if (isContent()) {
             s->revision = revision;
+        }
     }
 
     // Optional element title, in human-readable form.
@@ -328,8 +331,9 @@ public:
 
     const TextSpanArray getTextSpans() const
     {
-        if (!isContent())
+        if (!isContent()) {
             return TextSpanArray();
+        }
         MarkedContentOutputDev mcdev(getMCID(), stmRef);
         return getTextSpansInternal(mcdev);
     }

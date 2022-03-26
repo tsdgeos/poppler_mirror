@@ -107,8 +107,9 @@ inline bool operator!=(const Ref lhs, const Ref rhs) noexcept
 
 inline bool operator<(const Ref lhs, const Ref rhs) noexcept
 {
-    if (lhs.num != rhs.num)
+    if (lhs.num != rhs.num) {
         return lhs.num < rhs.num;
+    }
     return lhs.gen < rhs.gen;
 }
 

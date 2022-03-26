@@ -28,18 +28,21 @@ int main(int argc, char **argv)
 
         std::unique_ptr<Poppler::Page> page(doc->page(i));
 
-        if (!page)
+        if (!page) {
             continue;
+        }
 
         const QByteArray utf8str = page->label().toUtf8();
-        for (j = 0; j < utf8str.size(); j++)
+        for (j = 0; j < utf8str.size(); j++) {
             std::cout << utf8str[j];
+        }
         std::cout << std::endl;
 
         std::unique_ptr<Poppler::Page> pageFromPageLabel(doc->page(page->label()));
         const int indexFromPageLabel = pageFromPageLabel ? pageFromPageLabel->index() : -1;
-        if (indexFromPageLabel != i)
+        if (indexFromPageLabel != i) {
             std::cout << "WARNING: Page label didn't link back to the same page index " << indexFromPageLabel << " " << i << std::endl;
+        }
     }
     delete doc;
 }

@@ -58,8 +58,9 @@ typedef struct
 
 static void pgd_text_free(PgdTextDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -94,12 +95,14 @@ static void pgd_text_get_text(GtkWidget *button, PgdTextDemo *demo)
     gint i;
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     gtk_list_store_clear(demo->model);
-    if (demo->text_attrs)
+    if (demo->text_attrs) {
         poppler_page_free_text_attributes(demo->text_attrs);
+    }
     demo->text_attrs = NULL;
 
     timer = g_timer_new();
@@ -255,8 +258,9 @@ static void pgd_text_area_selector_setup(PgdTextDemo *demo)
     gdouble width, height;
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     poppler_page_get_size(page, &width, &height);
 

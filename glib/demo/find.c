@@ -54,8 +54,9 @@ typedef struct
 
 static void pgd_find_free(PgdFindDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->idle_id > 0) {
         g_source_remove(demo->idle_id);
@@ -136,8 +137,9 @@ static gboolean pgd_find_find_text(PgdFindDemo *demo)
             rect->y2 = height - tmp;
             gtk_tree_store_append(GTK_TREE_STORE(model), &iter_child, &iter);
             pgd_find_append_match(demo, model, &iter_child, rect, n_match);
-            if (!poppler_rectangle_find_get_match_continued(rect))
+            if (!poppler_rectangle_find_get_match_continued(rect)) {
                 ++n_match;
+            }
         }
         g_list_free(matches);
 
@@ -169,8 +171,9 @@ static cairo_surface_t *pgd_find_render_page(PgdFindDemo *demo)
     cairo_surface_t *surface = NULL;
 
     page = poppler_document_get_page(demo->doc, demo->selected_page);
-    if (!page)
+    if (!page) {
         return NULL;
+    }
 
     poppler_page_get_size(page, &width, &height);
     gtk_widget_set_size_request(demo->darea, width, height);
@@ -196,13 +199,15 @@ static cairo_surface_t *pgd_find_render_page(PgdFindDemo *demo)
 
 static gboolean pgd_find_viewer_drawing_area_draw(GtkWidget *area, cairo_t *cr, PgdFindDemo *demo)
 {
-    if (demo->selected_page == -1)
+    if (demo->selected_page == -1) {
         return FALSE;
+    }
 
     if (!demo->surface) {
         demo->surface = pgd_find_render_page(demo);
-        if (!demo->surface)
+        if (!demo->surface) {
             return FALSE;
+        }
     }
 
     cairo_set_source_surface(cr, demo->surface, 0, 0);
@@ -257,8 +262,9 @@ static void pgd_find_button_clicked(GtkButton *button, PgdFindDemo *demo)
 
     demo->page_index = 0;
     pgd_find_update_progress(demo, demo->page_index);
-    if (demo->idle_id > 0)
+    if (demo->idle_id > 0) {
         g_source_remove(demo->idle_id);
+    }
     demo->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, (GSourceFunc)pgd_find_find_text, demo, (GDestroyNotify)find_text_idle_finish);
 }
 
@@ -302,42 +308,47 @@ static void pgd_find_selection_changed(GtkTreeSelection *treeselection, PgdFindD
 
 static void pgd_find_case_sensitive_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
-    if (gtk_toggle_button_get_active(togglebutton))
+    if (gtk_toggle_button_get_active(togglebutton)) {
         demo->options |= POPPLER_FIND_CASE_SENSITIVE;
-    else
+    } else {
         demo->options &= ~POPPLER_FIND_CASE_SENSITIVE;
+    }
 }
 
 static void pgd_find_backwards_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
-    if (gtk_toggle_button_get_active(togglebutton))
+    if (gtk_toggle_button_get_active(togglebutton)) {
         demo->options |= POPPLER_FIND_BACKWARDS;
-    else
+    } else {
         demo->options &= ~POPPLER_FIND_BACKWARDS;
+    }
 }
 
 static void pgd_find_multiline_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
-    if (gtk_toggle_button_get_active(togglebutton))
+    if (gtk_toggle_button_get_active(togglebutton)) {
         demo->options |= POPPLER_FIND_MULTILINE;
-    else
+    } else {
         demo->options &= ~POPPLER_FIND_MULTILINE;
+    }
 }
 
 static void pgd_find_ignore_diacritics_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
-    if (gtk_toggle_button_get_active(togglebutton))
+    if (gtk_toggle_button_get_active(togglebutton)) {
         demo->options |= POPPLER_FIND_IGNORE_DIACRITICS;
-    else
+    } else {
         demo->options &= ~POPPLER_FIND_IGNORE_DIACRITICS;
+    }
 }
 
 static void pgd_find_whole_words_toggled(GtkToggleButton *togglebutton, PgdFindDemo *demo)
 {
-    if (gtk_toggle_button_get_active(togglebutton))
+    if (gtk_toggle_button_get_active(togglebutton)) {
         demo->options |= POPPLER_FIND_WHOLE_WORDS_ONLY;
-    else
+    } else {
         demo->options &= ~POPPLER_FIND_WHOLE_WORDS_ONLY;
+    }
 }
 
 GtkWidget *pgd_find_create_widget(PopplerDocument *document)

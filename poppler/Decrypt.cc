@@ -365,8 +365,9 @@ int BaseCryptStream::getChar()
     int c = lookChar();
     nextCharBuff = EOF;
 
-    if (c != EOF)
+    if (c != EOF) {
         charactersRead++;
+    }
     return c;
 }
 
@@ -432,8 +433,9 @@ int EncryptStream::lookChar()
     unsigned char in[16];
     int c;
 
-    if (nextCharBuff != EOF)
+    if (nextCharBuff != EOF) {
         return nextCharBuff;
+    }
 
     c = EOF; // make gcc happy
     switch (algo) {
@@ -513,8 +515,9 @@ int DecryptStream::lookChar()
     unsigned char in[16];
     int c;
 
-    if (nextCharBuff != EOF)
+    if (nextCharBuff != EOF) {
         return nextCharBuff;
+    }
 
     c = EOF; // make gcc happy
     switch (algo) {
@@ -563,11 +566,13 @@ static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *stat
     unsigned char t;
     int i;
 
-    for (i = 0; i < 256; ++i)
+    for (i = 0; i < 256; ++i) {
         state[i] = i;
+    }
 
-    if (unlikely(keyLen == 0))
+    if (unlikely(keyLen == 0)) {
         return;
+    }
 
     index1 = index2 = 0;
     for (i = 0; i < 256; ++i) {

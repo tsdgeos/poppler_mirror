@@ -369,7 +369,6 @@ void GlobalParams::setupBaseFonts(const char *dir)
 {
     const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
     GooString *fileName = nullptr;
-    GooFile *file;
 
     if (baseFontsInitialized)
         return;
@@ -416,11 +415,11 @@ void GlobalParams::setupBaseFonts(const char *dir)
     fileName->append("/cidfmap");
 
     // try to open file
-    file = GooFile::open(fileName->toStr());
+    const std::unique_ptr<GooFile> file = GooFile::open(fileName->toStr());
 
-    if (file != nullptr) {
+    if (file) {
         Parser *parser;
-        parser = new Parser(nullptr, new FileStream(file, 0, false, file->size(), Object(objNull)), true);
+        parser = new Parser(nullptr, new FileStream(file.get(), 0, false, file->size(), Object(objNull)), true);
         Object obj1 = parser->getObj();
         while (!obj1.isEOF()) {
             Object obj2 = parser->getObj();
@@ -441,7 +440,6 @@ void GlobalParams::setupBaseFonts(const char *dir)
                 obj1 = parser->getObj();
             }
         }
-        delete file;
         delete parser;
     } else {
         delete fileName;

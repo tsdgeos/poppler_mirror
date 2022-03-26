@@ -81,8 +81,9 @@ static void pgd_selections_clear_selections(PgdSelectionsDemo *demo)
 
 static void pgd_selections_free(PgdSelectionsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->selections_idle > 0) {
         g_source_remove(demo->selections_idle);
@@ -113,8 +114,9 @@ static void pgd_selections_update_selection_region(PgdSelectionsDemo *demo)
 {
     PopplerRectangle area = { 0, 0, 0, 0 };
 
-    if (demo->selection_region)
+    if (demo->selection_region) {
         cairo_region_destroy(demo->selection_region);
+    }
 
     poppler_page_get_size(demo->page, &area.x2, &area.y2);
     demo->selection_region = poppler_page_get_selected_region(demo->page, 1.0, POPPLER_SELECTION_GLYPH, &area);
@@ -124,11 +126,13 @@ static void pgd_selections_update_selected_text(PgdSelectionsDemo *demo)
 {
     gchar *text;
 
-    if (demo->selected_region)
+    if (demo->selected_region) {
         cairo_region_destroy(demo->selected_region);
+    }
     demo->selected_region = poppler_page_get_selected_region(demo->page, 1.0, demo->style, &demo->doc_area);
-    if (demo->selected_text)
+    if (demo->selected_text) {
         g_free(demo->selected_text);
+    }
     demo->selected_text = NULL;
 
     text = poppler_page_get_selected_text(demo->page, demo->style, &demo->doc_area);
@@ -147,8 +151,9 @@ static void pgd_selections_update_cursor(PgdSelectionsDemo *demo, GdkCursorType 
     GdkWindow *window = gtk_widget_get_window(demo->darea);
     GdkCursor *cursor = NULL;
 
-    if (cursor_type == demo->cursor)
+    if (cursor_type == demo->cursor) {
         return;
+    }
 
     if (cursor_type != GDK_LAST_CURSOR) {
         cursor = gdk_cursor_new_for_display(gtk_widget_get_display(demo->darea), cursor_type);
@@ -158,8 +163,9 @@ static void pgd_selections_update_cursor(PgdSelectionsDemo *demo, GdkCursorType 
 
     gdk_window_set_cursor(window, cursor);
     gdk_display_flush(gtk_widget_get_display(demo->darea));
-    if (cursor)
+    if (cursor) {
         g_object_unref(cursor);
+    }
 }
 
 static gboolean pgd_selections_render_selections(PgdSelectionsDemo *demo)
@@ -183,12 +189,14 @@ static gboolean pgd_selections_render_selections(PgdSelectionsDemo *demo)
     doc_area.x2 = demo->stop.x / demo->scale;
     doc_area.y2 = demo->stop.y / demo->scale;
 
-    if (demo->selection_surface)
+    if (demo->selection_surface) {
         cairo_surface_destroy(demo->selection_surface);
+    }
     demo->selection_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, page_width, page_height);
     cr = cairo_create(demo->selection_surface);
-    if (demo->scale != 1.0)
+    if (demo->scale != 1.0) {
         cairo_scale(cr, demo->scale, demo->scale);
+    }
     poppler_page_render_selection(demo->page, cr, &doc_area, &demo->doc_area, demo->style, &demo->glyph_color, &demo->background_color);
     cairo_destroy(cr);
 
@@ -202,8 +210,9 @@ static gboolean pgd_selections_render_selections(PgdSelectionsDemo *demo)
 
 static gboolean pgd_selections_drawing_area_draw(GtkWidget *area, cairo_t *cr, PgdSelectionsDemo *demo)
 {
-    if (!demo->surface)
+    if (!demo->surface) {
         return FALSE;
+    }
 
     cairo_save(cr);
     cairo_set_source_surface(cr, demo->surface, 0, 0);
@@ -220,11 +229,13 @@ static gboolean pgd_selections_drawing_area_draw(GtkWidget *area, cairo_t *cr, P
 
 static gboolean pgd_selections_drawing_area_button_press(GtkWidget *area, GdkEventButton *event, PgdSelectionsDemo *demo)
 {
-    if (!demo->page)
+    if (!demo->page) {
         return FALSE;
+    }
 
-    if (event->button != 1)
+    if (event->button != 1) {
         return FALSE;
+    }
 
     demo->start.x = event->x;
     demo->start.y = event->y;
@@ -248,8 +259,9 @@ static gboolean pgd_selections_drawing_area_button_press(GtkWidget *area, GdkEve
 
 static gboolean pgd_selections_drawing_area_motion_notify(GtkWidget *area, GdkEventMotion *event, PgdSelectionsDemo *demo)
 {
-    if (!demo->page)
+    if (!demo->page) {
         return FALSE;
+    }
 
     if (demo->start.x != -1) {
         demo->stop.x = event->x;
@@ -269,14 +281,17 @@ static gboolean pgd_selections_drawing_area_motion_notify(GtkWidget *area, GdkEv
 
 static gboolean pgd_selections_drawing_area_button_release(GtkWidget *area, GdkEventButton *event, PgdSelectionsDemo *demo)
 {
-    if (!demo->page)
+    if (!demo->page) {
         return FALSE;
+    }
 
-    if (event->button != 1)
+    if (event->button != 1) {
         return FALSE;
+    }
 
-    if (demo->start.x != -1)
+    if (demo->start.x != -1) {
         pgd_selections_update_selected_text(demo);
+    }
 
     demo->start.x = -1;
 
@@ -306,8 +321,9 @@ static gboolean pgd_selections_drawing_area_query_tooltip(GtkWidget *area, gint 
 {
     gboolean over_selection;
 
-    if (!demo->selected_text)
+    if (!demo->selected_text) {
         return FALSE;
+    }
 
     over_selection = cairo_region_contains_point(demo->selected_region, x / demo->scale, y / demo->scale);
 
@@ -334,18 +350,21 @@ static void pgd_selections_render(GtkButton *button, PgdSelectionsDemo *demo)
     gdouble page_width, page_height;
     cairo_t *cr;
 
-    if (!demo->page)
+    if (!demo->page) {
         demo->page = poppler_document_get_page(demo->doc, demo->page_index);
+    }
 
-    if (!demo->page)
+    if (!demo->page) {
         return;
+    }
 
     pgd_selections_clear_selections(demo);
     pgd_selections_update_selection_region(demo);
     gtk_widget_set_sensitive(demo->copy_button, FALSE);
 
-    if (demo->surface)
+    if (demo->surface) {
         cairo_surface_destroy(demo->surface);
+    }
     demo->surface = NULL;
 
     poppler_page_get_size(demo->page, &page_width, &page_height);
@@ -357,8 +376,9 @@ static void pgd_selections_render(GtkButton *button, PgdSelectionsDemo *demo)
 
     cairo_save(cr);
 
-    if (demo->scale != 1.0)
+    if (demo->scale != 1.0) {
         cairo_scale(cr, demo->scale, demo->scale);
+    }
 
     poppler_page_render(demo->page, cr);
     cairo_restore(cr);
@@ -382,8 +402,9 @@ static void pgd_selections_copy(GtkButton *button, PgdSelectionsDemo *demo)
 static void pgd_selections_page_selector_value_changed(GtkSpinButton *spinbutton, PgdSelectionsDemo *demo)
 {
     demo->page_index = (gint)gtk_spin_button_get_value(spinbutton) - 1;
-    if (demo->page)
+    if (demo->page) {
         g_object_unref(demo->page);
+    }
     demo->page = NULL;
 }
 

@@ -373,8 +373,9 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, Splas
 void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
 {
     grow(1);
-    if (unlikely(!segs))
+    if (unlikely(!segs)) {
         return;
+    }
     segs[length].x0 = x0;
     segs[length].y0 = y0;
     segs[length].x1 = x1;

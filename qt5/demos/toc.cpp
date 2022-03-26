@@ -58,8 +58,9 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override
     {
-        if (role != Qt::DisplayRole)
+        if (role != Qt::DisplayRole) {
             return {};
+        }
 
         Node *n = static_cast<Node *>(index.internalPointer());
         return n->m_item.name();
@@ -76,10 +77,11 @@ public:
     QModelIndex parent(const QModelIndex &child) const override
     {
         Node *n = static_cast<Node *>(child.internalPointer());
-        if (n->m_parent == nullptr)
+        if (n->m_parent == nullptr) {
             return QModelIndex();
-        else
+        } else {
             return createIndex(n->m_parent->m_row, 0, n->m_parent);
+        }
     }
 
     int rowCount(const QModelIndex &parent) const override
@@ -102,8 +104,9 @@ public:
     bool hasChildren(const QModelIndex &parent) const override
     {
         Node *n = static_cast<Node *>(parent.internalPointer());
-        if (!n)
+        if (!n) {
             return true;
+        }
 
         return n->m_item.hasChildren();
     }

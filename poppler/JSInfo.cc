@@ -42,8 +42,9 @@ void JSInfo::printJS(const GooString *js)
     char buf[8];
     int i, n, len;
 
-    if (!js || !js->c_str())
+    if (!js || !js->c_str()) {
         return;
+    }
 
     len = TextStringToUCS4(js->toStr(), &u);
     for (i = 0; i < len; i++) {
@@ -55,8 +56,9 @@ void JSInfo::printJS(const GooString *js)
 
 void JSInfo::scanLinkAction(LinkAction *link, const char *action)
 {
-    if (!link)
+    if (!link) {
         return;
+    }
 
     if (link->getKind() == actionJavaScript) {
         hasJS = true;
@@ -179,8 +181,9 @@ void JSInfo::scan(int nPages)
 
     for (int pg = currentPage; pg < lastPage; ++pg) {
         page = doc->getPage(pg);
-        if (!page)
+        if (!page) {
             continue;
+        }
 
         // page actions (open, close)
         scanLinkAction(page->getAdditionalAction(Page::actionOpenPage).get(), "Page Open");

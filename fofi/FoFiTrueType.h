@@ -19,6 +19,7 @@
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,7 +48,7 @@ class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
 public:
     // Create a FoFiTrueType object from a memory buffer.
-    static std::unique_ptr<FoFiTrueType> make(const char *fileA, int lenA, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA = 0);
 
     // Create a FoFiTrueType object from a file on disk.
     static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA = 0);
@@ -155,7 +156,7 @@ public:
     int setupGSUB(const char *scriptName, const char *languageName);
 
 private:
-    FoFiTrueType(const char *fileA, int lenA, bool freeFileDataA, int faceIndexA);
+    FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA);
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtCharStrings(char **encoding, const int *codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const;

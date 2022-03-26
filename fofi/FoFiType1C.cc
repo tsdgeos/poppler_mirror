@@ -18,6 +18,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,11 +46,9 @@ static const char hexChars[17] = "0123456789ABCDEF";
 // FoFiType1C
 //------------------------------------------------------------------------
 
-FoFiType1C *FoFiType1C::make(const char *fileA, int lenA)
+FoFiType1C *FoFiType1C::make(const unsigned char *fileA, int lenA)
 {
-    FoFiType1C *ff;
-
-    ff = new FoFiType1C(fileA, lenA, false);
+    FoFiType1C *ff = new FoFiType1C(fileA, lenA, false);
     if (!ff->parse()) {
         delete ff;
         return nullptr;
@@ -66,7 +65,7 @@ FoFiType1C *FoFiType1C::load(const char *fileName)
     if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
         return nullptr;
     }
-    ff = new FoFiType1C(fileA, lenA, true);
+    ff = new FoFiType1C((unsigned char *)fileA, lenA, true);
     if (!ff->parse()) {
         delete ff;
         return nullptr;
@@ -74,7 +73,7 @@ FoFiType1C *FoFiType1C::load(const char *fileName)
     return ff;
 }
 
-FoFiType1C::FoFiType1C(const char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiType1C::FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
     name = nullptr;
     encoding = nullptr;
@@ -124,8 +123,9 @@ GooString *FoFiType1C::getGlyphName(int gid) const
     bool ok;
 
     ok = true;
-    if (gid < 0 || gid >= charsetLength)
+    if (gid < 0 || gid >= charsetLength) {
         return nullptr;
+    }
     getString(charset[gid], buf, &ok);
     if (!ok) {
         return nullptr;
@@ -847,8 +847,9 @@ void FoFiType1C::convertToType0(const char *psName, const int *codeMap, int nCod
                 }
             }
 
-            if (fd >= nFDs)
+            if (fd >= nFDs) {
                 continue;
+            }
 
             // font dictionary (unencrypted section)
             (*outputFunc)(outputStream, "16 dict begin\n", 14);

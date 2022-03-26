@@ -63,10 +63,12 @@ static bool extractPages(const char *srcFileName, const char *destFileName)
         firstPage = 1;
         lastPage = doc->getNumPages();
     }
-    if (lastPage == 0)
+    if (lastPage == 0) {
         lastPage = doc->getNumPages();
-    if (firstPage == 0)
+    }
+    if (firstPage == 0) {
         firstPage = 1;
+    }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
         delete doc;

@@ -355,8 +355,9 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
 
     //----- samples
     nSamples = n;
-    for (i = 0; i < m; ++i)
+    for (i = 0; i < m; ++i) {
         nSamples *= sampleSize[i];
+    }
     samples = (double *)gmallocn_checkoverflow(nSamples, sizeof(double));
     if (!samples) {
         error(errSyntaxError, -1, "Function has invalid number of samples");
@@ -525,12 +526,14 @@ bool SampledFunction::hasDifferentResultSet(const Function *func) const
 {
     if (func->getType() == 0) {
         SampledFunction *compTo = (SampledFunction *)func;
-        if (compTo->getSampleNumber() != nSamples)
+        if (compTo->getSampleNumber() != nSamples) {
             return true;
+        }
         const double *compSamples = compTo->getSamples();
         for (int i = 0; i < nSamples; i++) {
-            if (samples[i] != compSamples[i])
+            if (samples[i] != compSamples[i]) {
                 return true;
+            }
         }
     }
     return false;
@@ -1428,8 +1431,9 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 r2 = stack->popNum();
                 r1 = stack->popNum();
                 result = atan2(r1, r2) * 180.0 / M_PI;
-                if (result < 0)
+                if (result < 0) {
                     result += 360.0;
+                }
                 stack->pushReal(result);
                 break;
             case psOpBitshift:

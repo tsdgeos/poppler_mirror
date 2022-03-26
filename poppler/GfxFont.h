@@ -282,7 +282,7 @@ public:
     static std::optional<GfxFontLoc> locateBase14Font(const GooString *base14Name);
 
     // Read an external or embedded font file into a buffer.
-    char *readEmbFontFile(XRef *xref, int *len);
+    std::vector<unsigned char> readEmbFontFile(XRef *xref);
 
     // Get the next char from a string <s> of <len> bytes, returning the
     // char <code>, its Unicode mapping <u>, its displacement vector
@@ -416,7 +416,7 @@ public:
     // Return the CID-to-GID mapping table.  These should only be called
     // if type is fontCIDType2.
     int *getCIDToGID() const { return cidToGID; }
-    int getCIDToGIDLen() const { return cidToGIDLen; }
+    unsigned int getCIDToGIDLen() const { return cidToGIDLen; }
 
     int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
 
@@ -436,7 +436,7 @@ private:
     GfxFontCIDWidths widths; // character widths
     int *cidToGID; // CID --> GID mapping (for embedded
                    //   TrueType fonts)
-    int cidToGIDLen;
+    unsigned int cidToGIDLen;
 };
 
 //------------------------------------------------------------------------

@@ -608,8 +608,9 @@ CharCodeToUnicode::~CharCodeToUnicode()
     }
     gfree(map);
     if (sMap) {
-        for (int i = 0; i < sMapLen; ++i)
+        for (int i = 0; i < sMapLen; ++i) {
             gfree(sMap[i].u);
+        }
         gfree(sMap);
     }
 }
@@ -714,8 +715,9 @@ int CharCodeToUnicode::mapToCharCode(const Unicode *u, CharCode *c, int usize) c
         for (i = 0; i < sMapLen; i++) {
             // if the entry's unicode length isn't the same are usize, the strings
             // are obviously different
-            if (sMap[i].len != usize)
+            if (sMap[i].len != usize) {
                 continue;
+            }
             // compare the string char by char
             for (j = 0; j < sMap[i].len; j++) {
                 if (sMap[i].u[j] != u[j]) {

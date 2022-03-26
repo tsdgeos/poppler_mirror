@@ -58,14 +58,15 @@ void PageView::pageChanged(int page)
     const double resY = m_dpiY * m_zoom;
 
     Poppler::Page::Rotation rot;
-    if (m_rotation == 0)
+    if (m_rotation == 0) {
         rot = Poppler::Page::Rotate0;
-    else if (m_rotation == 90)
+    } else if (m_rotation == 90) {
         rot = Poppler::Page::Rotate90;
-    else if (m_rotation == 180)
+    } else if (m_rotation == 180) {
         rot = Poppler::Page::Rotate180;
-    else // m_rotation == 270
+    } else { // m_rotation == 270
         rot = Poppler::Page::Rotate270;
+    }
 
     QImage image = popplerPage->renderToImage(resX, resY, -1, -1, -1, -1, rot);
     if (!image.isNull()) {

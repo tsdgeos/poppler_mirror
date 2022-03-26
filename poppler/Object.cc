@@ -183,8 +183,9 @@ void Object::print(FILE *f) const
     case objArray:
         fprintf(f, "[");
         for (i = 0; i < arrayGetLength(); ++i) {
-            if (i > 0)
+            if (i > 0) {
                 fprintf(f, " ");
+            }
             const Object &obj = arrayGetNF(i);
             obj.print(f);
         }

@@ -105,8 +105,9 @@ void OptContentItem::appendRBGroup(RadioButtonGroup *rbgroup)
 
 void OptContentItem::setState(ItemState state, bool obeyRadioGroups, QSet<OptContentItem *> &changedItems)
 {
-    if (state == m_state)
+    if (state == m_state) {
         return;
+    }
 
     m_state = state;
     m_stateBackup = m_state;

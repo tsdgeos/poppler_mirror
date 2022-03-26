@@ -386,7 +386,7 @@ private:
 #ifdef _WIN32
     wchar_t *fileNameU = nullptr;
 #endif
-    GooFile *file = nullptr;
+    std::unique_ptr<GooFile> file;
     BaseStream *str = nullptr;
     void *guiData = nullptr;
     int headerPdfMajorVersion;

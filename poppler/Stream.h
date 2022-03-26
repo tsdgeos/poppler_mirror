@@ -28,7 +28,7 @@
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
-// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
@@ -44,6 +44,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <vector>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -133,10 +134,11 @@ public:
         } else {
             for (int i = 0; i < nChars; ++i) {
                 const int c = getChar();
-                if (likely(c != EOF))
+                if (likely(c != EOF)) {
                     buffer[i] = c;
-                else
+                } else {
                     return i;
+                }
             }
             return nChars;
         }
@@ -154,22 +156,23 @@ public:
 
     inline void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
 
-    inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
+    inline std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
+        std::vector<unsigned char> buf(initialSize);
+
         int readChars;
-        unsigned char *buf = (unsigned char *)gmalloc(initialSize);
         int size = initialSize;
-        *length = 0;
+        int length = 0;
         int charsToRead = initialSize;
         bool continueReading = true;
         reset();
-        while (continueReading && (readChars = doGetChars(charsToRead, &buf[*length])) != 0) {
-            *length += readChars;
+        while (continueReading && (readChars = doGetChars(charsToRead, buf.data() + length)) != 0) {
+            length += readChars;
             if (readChars == charsToRead) {
                 if (lookChar() != EOF) {
                     size += sizeIncrement;
                     charsToRead = sizeIncrement;
-                    buf = (unsigned char *)grealloc(buf, size);
+                    buf.resize(size);
                 } else {
                     continueReading = false;
                 }
@@ -177,6 +180,8 @@ public:
                 continueReading = false;
             }
         }
+
+        buf.resize(length);
         return buf;
     }
 
@@ -1001,8 +1006,9 @@ private:
     short lookBits(int n);
     void eatBits(int n)
     {
-        if ((inputBits -= n) < 0)
+        if ((inputBits -= n) < 0) {
             inputBits = 0;
+        }
     }
 };
 
@@ -1166,8 +1172,9 @@ private:
         int c;
 
         while (remain == 0) {
-            if (endOfBlock && eof)
+            if (endOfBlock && eof) {
                 return EOF;
+            }
             readSome();
         }
         c = buf[index];

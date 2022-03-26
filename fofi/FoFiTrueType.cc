@@ -24,6 +24,8 @@
 // Copyright (C) 2015 Aleksei Volkov <Aleksei Volkov>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -450,7 +452,7 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const char *fileA, int lenA, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const unsigned char *fileA, int lenA, int faceIndexA)
 {
     // Cannot use std::make_unique, because the constructor is private
     auto ff = new FoFiTrueType(fileA, lenA, false, faceIndexA);
@@ -470,7 +472,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
         return nullptr;
     }
     // Cannot use std::make_unique, because the constructor is private
-    auto ff = new FoFiTrueType(fileA, lenA, true, faceIndexA);
+    auto ff = new FoFiTrueType((unsigned char *)fileA, lenA, true, faceIndexA);
     if (!ff->parsedOk) {
         delete ff;
         return nullptr;
@@ -478,7 +480,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
     return std::unique_ptr<FoFiTrueType>(ff);
 }
 
-FoFiTrueType::FoFiTrueType(const char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiTrueType::FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
     tables = nullptr;
     nTables = 0;
@@ -531,6 +533,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
     unsigned int segCnt, segEnd, segStart, segDelta, segOffset;
     unsigned int cmapFirst, cmapLen;
     int pos, a, b, m;
+    unsigned int high, low, idx;
     bool ok;
 
     if (i < 0 || i >= nCmaps) {
@@ -544,6 +547,21 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
             return 0;
         }
         gid = getU8(cmaps[i].offset + 6 + c, &ok);
+        break;
+    case 2:
+        high = c >> 8;
+        low = c & 0xFFU;
+        idx = getU16BE(pos + 6 + high * 2, &ok);
+        segStart = getU16BE(pos + 6 + 512 + idx, &ok);
+        segCnt = getU16BE(pos + 6 + 512 + idx + 2, &ok);
+        segDelta = getS16BE(pos + 6 + 512 + idx + 4, &ok);
+        segOffset = getU16BE(pos + 6 + 512 + idx + 6, &ok);
+        if (low < segStart || low >= segStart + segCnt) {
+            gid = 0;
+        } else {
+            int val = getU16BE(pos + 6 + 512 + idx + 6 + segOffset + (low - segStart) * 2, &ok);
+            gid = val == 0 ? 0 : (val + segDelta) & 0xFFFFU;
+        }
         break;
     case 4:
         segCnt = getU16BE(pos + 6, &ok) / 2;
@@ -589,6 +607,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         gid = getU16BE(pos + 10 + 2 * (c - cmapFirst), &ok);
         break;
     case 12:
+    case 13:
         segCnt = getU32BE(pos + 12, &ok);
         a = -1;
         b = segCnt - 1;
@@ -611,7 +630,10 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         if (c < segStart) {
             return 0;
         }
-        gid = segDelta + (c - segStart);
+        // In format 12, the glyph codes increment through
+        // each segment; in format 13 the same glyph code is used
+        // for an entire segment.
+        gid = segDelta + (cmaps[i].fmt == 12 ? (c - segStart) : 0);
         break;
     default:
         return 0;
@@ -658,7 +680,7 @@ int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) const
     if (!getCFFBlock(&start, &length)) {
         return nullptr;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return nullptr;
     }
     map = ff->getCIDToGIDMap(nCIDs);
@@ -700,7 +722,7 @@ void FoFiTrueType::getFontMatrix(double *mat) const
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->getFontMatrix(mat);
@@ -753,7 +775,7 @@ void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, 
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToType1(psName, newEncoding, ascii, outputFunc, outputStream);
@@ -888,7 +910,7 @@ void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToCIDType0(psName, cidMap, nCIDs, outputFunc, outputStream);
@@ -1012,7 +1034,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, Fo
     if (!getCFFBlock(&start, &length)) {
         return;
     }
-    if (!(ff = FoFiType1C::make(start, length))) {
+    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
     ff->convertToType0(psName, cidMap, nCIDs, outputFunc, outputStream);
@@ -1496,18 +1518,21 @@ void FoFiTrueType::parse()
         int dircount;
 
         dircount = getU32BE(8, &parsedOk);
-        if (!parsedOk)
+        if (!parsedOk) {
             return;
+        }
         if (!dircount) {
             parsedOk = false;
             return;
         }
 
-        if (faceIndex >= dircount)
+        if (faceIndex >= dircount) {
             faceIndex = 0;
+        }
         pos = getU32BE(12 + faceIndex * 4, &parsedOk);
-        if (!parsedOk)
+        if (!parsedOk) {
             return;
+        }
     } else {
         pos = 0;
     }
@@ -1641,8 +1666,9 @@ void FoFiTrueType::readPostTable()
             } else {
                 j -= 258;
                 if (j != stringIdx) {
-                    for (stringIdx = 0, stringPos = tablePos + 34 + 2 * n; stringIdx < j; ++stringIdx, stringPos += 1 + getU8(stringPos, &ok))
+                    for (stringIdx = 0, stringPos = tablePos + 34 + 2 * n; stringIdx < j; ++stringIdx, stringPos += 1 + getU8(stringPos, &ok)) {
                         ;
+                    }
                     if (!ok) {
                         continue;
                     }
@@ -1696,8 +1722,9 @@ unsigned int FoFiTrueType::charToTag(const char *tagName)
     unsigned int tag = 0;
     int i;
 
-    if (n > 4)
+    if (n > 4) {
         n = 4;
+    }
     for (i = 0; i < n; i++) {
         tag <<= 8;
         tag |= tagName[i] & 0xff;
@@ -1880,8 +1907,9 @@ unsigned int FoFiTrueType::mapToVertGID(unsigned int orgGID)
 {
     unsigned int mapped;
 
-    if (gsubFeatureTable == 0)
+    if (gsubFeatureTable == 0) {
         return orgGID;
+    }
     if ((mapped = doMapToVertGID(orgGID)) != 0) {
         return mapped;
     }
@@ -1897,8 +1925,9 @@ unsigned int FoFiTrueType::scanLookupList(unsigned int listIndex, unsigned int o
     unsigned int gid = 0;
     unsigned int pos;
 
-    if (gsubLookupList == 0)
+    if (gsubLookupList == 0) {
         return 0; /* no lookup list */
+    }
     pos = gsubLookupList + 2 + listIndex * 2;
     lookupTable = getU16BE(pos, &parsedOk);
     /* read lookup table */
@@ -1909,8 +1938,9 @@ unsigned int FoFiTrueType::scanLookupList(unsigned int listIndex, unsigned int o
     for (i = 0; i < subTableCount; i++) {
         subTable = getU16BE(pos, &parsedOk);
         pos += 2;
-        if ((gid = scanLookupSubTable(gsubLookupList + lookupTable + subTable, orgGID)) != 0)
+        if ((gid = scanLookupSubTable(gsubLookupList + lookupTable + subTable, orgGID)) != 0) {
             break;
+        }
     }
     return gid;
 }

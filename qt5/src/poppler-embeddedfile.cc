@@ -95,11 +95,13 @@ QString EmbeddedFile::mimeType() const
 
 QByteArray EmbeddedFile::data()
 {
-    if (!isValid())
+    if (!isValid()) {
         return QByteArray();
+    }
     Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : nullptr;
-    if (!stream)
+    if (!stream) {
         return QByteArray();
+    }
 
     stream->reset();
     int dataLen = 0;

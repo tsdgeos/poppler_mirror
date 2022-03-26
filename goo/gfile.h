@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2009, 2011, 2012, 2017, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012, 2017, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -75,6 +75,8 @@ extern "C" {
 #endif
 }
 
+#include <memory>
+
 class GooString;
 
 /* Integer type for all file offsets and file sizes */
@@ -122,13 +124,13 @@ public:
     int read(char *buf, int n, Goffset offset) const;
     Goffset size() const;
 
-    static GooFile *open(const std::string &fileName);
+    static std::unique_ptr<GooFile> open(const std::string &fileName);
 #ifndef _WIN32
-    static GooFile *open(int fdA);
+    static std::unique_ptr<GooFile> open(int fdA);
 #endif
 
 #ifdef _WIN32
-    static GooFile *open(const wchar_t *fileName);
+    static std::unique_ptr<GooFile> open(const wchar_t *fileName);
 
     ~GooFile() { CloseHandle(handle); }
 

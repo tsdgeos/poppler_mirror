@@ -41,8 +41,9 @@ PopplerDest *poppler_dest_copy(PopplerDest *dest)
 
     new_dest = g_slice_dup(PopplerDest, dest);
 
-    if (dest->named_dest)
+    if (dest->named_dest) {
         new_dest->named_dest = g_strdup(dest->named_dest);
+    }
 
     return new_dest;
 }
@@ -55,19 +56,22 @@ PopplerDest *poppler_dest_copy(PopplerDest *dest)
  **/
 void poppler_dest_free(PopplerDest *dest)
 {
-    if (!dest)
+    if (!dest) {
         return;
+    }
 
-    if (dest->named_dest)
+    if (dest->named_dest) {
         g_free(dest->named_dest);
+    }
 
     g_slice_free(PopplerDest, dest);
 }
 
 static void poppler_action_layer_free(PopplerActionLayer *action_layer)
 {
-    if (!action_layer)
+    if (!action_layer) {
         return;
+    }
 
     if (action_layer->layers) {
         g_list_free_full(action_layer->layers, g_object_unref);
@@ -82,8 +86,9 @@ static PopplerActionLayer *poppler_action_layer_copy(PopplerActionLayer *action_
     PopplerActionLayer *retval = g_slice_dup(PopplerActionLayer, action_layer);
 
     retval->layers = g_list_copy(action_layer->layers);
-    for (GList *l = retval->layers; l != nullptr; l = l->next)
+    for (GList *l = retval->layers; l != nullptr; l = l->next) {
         g_object_ref(l->data);
+    }
 
     return retval;
 }
@@ -98,8 +103,9 @@ G_DEFINE_BOXED_TYPE(PopplerAction, poppler_action, poppler_action_copy, poppler_
  **/
 void poppler_action_free(PopplerAction *action)
 {
-    if (action == nullptr)
+    if (action == nullptr) {
         return;
+    }
 
     /* Action specific stuff */
     switch (action->type) {
@@ -121,12 +127,14 @@ void poppler_action_free(PopplerAction *action)
         g_free(action->named.named_dest);
         break;
     case POPPLER_ACTION_MOVIE:
-        if (action->movie.movie)
+        if (action->movie.movie) {
             g_object_unref(action->movie.movie);
+        }
         break;
     case POPPLER_ACTION_RENDITION:
-        if (action->rendition.media)
+        if (action->rendition.media) {
             g_object_unref(action->rendition.media);
+        }
         break;
     case POPPLER_ACTION_OCG_STATE:
         if (action->ocg_state.state_list) {
@@ -134,12 +142,14 @@ void poppler_action_free(PopplerAction *action)
         }
         break;
     case POPPLER_ACTION_JAVASCRIPT:
-        if (action->javascript.script)
+        if (action->javascript.script) {
             g_free(action->javascript.script);
+        }
         break;
     case POPPLER_ACTION_RESET_FORM:
-        if (action->reset_form.fields)
+        if (action->reset_form.fields) {
             g_list_free_full(action->reset_form.fields, g_free);
+        }
         break;
     default:
         break;
@@ -166,8 +176,9 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
     /* Do a straight copy of the memory */
     new_action = g_slice_dup(PopplerAction, action);
 
-    if (action->any.title != nullptr)
+    if (action->any.title != nullptr) {
         new_action->any.title = g_strdup(action->any.title);
+    }
 
     switch (action->type) {
     case POPPLER_ACTION_GOTO_DEST:
@@ -175,30 +186,37 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
         break;
     case POPPLER_ACTION_GOTO_REMOTE:
         new_action->goto_remote.dest = poppler_dest_copy(action->goto_remote.dest);
-        if (action->goto_remote.file_name)
+        if (action->goto_remote.file_name) {
             new_action->goto_remote.file_name = g_strdup(action->goto_remote.file_name);
+        }
         break;
     case POPPLER_ACTION_URI:
-        if (action->uri.uri)
+        if (action->uri.uri) {
             new_action->uri.uri = g_strdup(action->uri.uri);
+        }
         break;
     case POPPLER_ACTION_LAUNCH:
-        if (action->launch.file_name)
+        if (action->launch.file_name) {
             new_action->launch.file_name = g_strdup(action->launch.file_name);
-        if (action->launch.params)
+        }
+        if (action->launch.params) {
             new_action->launch.params = g_strdup(action->launch.params);
+        }
         break;
     case POPPLER_ACTION_NAMED:
-        if (action->named.named_dest)
+        if (action->named.named_dest) {
             new_action->named.named_dest = g_strdup(action->named.named_dest);
+        }
         break;
     case POPPLER_ACTION_MOVIE:
-        if (action->movie.movie)
+        if (action->movie.movie) {
             new_action->movie.movie = (PopplerMovie *)g_object_ref(action->movie.movie);
+        }
         break;
     case POPPLER_ACTION_RENDITION:
-        if (action->rendition.media)
+        if (action->rendition.media) {
             new_action->rendition.media = (PopplerMedia *)g_object_ref(action->rendition.media);
+        }
         break;
     case POPPLER_ACTION_OCG_STATE:
         if (action->ocg_state.state_list) {
@@ -215,16 +233,18 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
 
         break;
     case POPPLER_ACTION_JAVASCRIPT:
-        if (action->javascript.script)
+        if (action->javascript.script) {
             new_action->javascript.script = g_strdup(action->javascript.script);
+        }
         break;
     case POPPLER_ACTION_RESET_FORM:
         if (action->reset_form.fields) {
             GList *iter;
 
             new_action->reset_form.fields = nullptr;
-            for (iter = action->reset_form.fields; iter != nullptr; iter = iter->next)
+            for (iter = action->reset_form.fields; iter != nullptr; iter = iter->next) {
                 new_action->reset_form.fields = g_list_append(new_action->reset_form.fields, g_strdup((char *)iter->data));
+            }
         }
         break;
     default:
@@ -398,15 +418,17 @@ static void build_launch(PopplerAction *action, const LinkLaunch *link)
 static void build_uri(PopplerAction *action, const LinkURI *link)
 {
     const gchar *uri = link->getURI().c_str();
-    if (uri != nullptr)
+    if (uri != nullptr) {
         action->uri.uri = g_strdup(uri);
+    }
 }
 
 static void build_named(PopplerAction *action, const LinkNamed *link)
 {
     const gchar *name = link->getName().c_str();
-    if (name != nullptr)
+    if (name != nullptr) {
         action->named.named_dest = g_strdup(name);
+    }
 }
 
 static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const LinkMovie *link)
@@ -425,8 +447,9 @@ static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const 
 
         for (i = 1; i <= document->doc->getNumPages(); ++i) {
             Page *p = document->doc->getPage(i);
-            if (!p)
+            if (!p) {
                 continue;
+            }
 
             Object annots = p->getAnnotsObject();
             if (annots.isArray()) {
@@ -446,8 +469,9 @@ static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const 
                             found = true;
                         }
                     }
-                    if (!found)
+                    if (!found) {
                         annotObj.setToNull();
+                    }
                 }
                 if (found) {
                     break;
@@ -510,8 +534,9 @@ static void build_reset_form(PopplerAction *action, const LinkResetForm *link)
 {
     const std::vector<std::string> &fields = link->getFields();
 
-    if (action->reset_form.fields != nullptr)
+    if (action->reset_form.fields != nullptr) {
         g_list_free_full(action->reset_form.fields, g_free);
+    }
 
     action->reset_form.fields = nullptr;
     for (const auto &field : fields) {
@@ -524,8 +549,9 @@ static void build_reset_form(PopplerAction *action, const LinkResetForm *link)
 static void build_rendition(PopplerAction *action, const LinkRendition *link)
 {
     action->rendition.op = link->getOperation();
-    if (link->getMedia())
+    if (link->getMedia()) {
         action->rendition.media = _poppler_media_new(link->getMedia());
+    }
     // TODO: annotation reference
 }
 
@@ -542,16 +568,18 @@ static PopplerLayer *get_layer_for_ref(PopplerDocument *document, GList *layers,
             if (ref == ocgRef) {
                 GList *rb_group = nullptr;
 
-                if (preserve_rb)
+                if (preserve_rb) {
                     rb_group = _poppler_document_get_layer_rbgroup(document, layer);
+                }
                 return _poppler_layer_new(document, layer, rb_group);
             }
         }
 
         if (layer->kids) {
             PopplerLayer *retval = get_layer_for_ref(document, layer->kids, ref, preserve_rb);
-            if (retval)
+            if (retval) {
                 return retval;
+            }
         }
     }
 
@@ -565,8 +593,9 @@ static void build_ocg_state(PopplerDocument *document, PopplerAction *action, co
     GList *layer_state = nullptr;
 
     if (!document->layers) {
-        if (!_poppler_document_get_layers(document))
+        if (!_poppler_document_get_layers(document)) {
             return;
+        }
     }
 
     for (const LinkOCGState::StateList &list : st_list) {
@@ -602,8 +631,9 @@ PopplerAction *_poppler_action_new(PopplerDocument *document, const LinkAction *
 
     action = g_slice_new0(PopplerAction);
 
-    if (title)
+    if (title) {
         action->any.title = g_strdup(title);
+    }
 
     if (link == nullptr) {
         action->type = POPPLER_ACTION_NONE;

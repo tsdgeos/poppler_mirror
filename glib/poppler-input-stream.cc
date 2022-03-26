@@ -30,8 +30,9 @@ PopplerInputStream::~PopplerInputStream()
 {
     close();
     g_object_unref(inputStream);
-    if (cancellable)
+    if (cancellable) {
         g_object_unref(cancellable);
+    }
 }
 
 BaseStream *PopplerInputStream::copy()

@@ -18,6 +18,7 @@
 // Copyright (C) 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,9 +38,9 @@
 // FoFiBase
 //------------------------------------------------------------------------
 
-FoFiBase::FoFiBase(const char *fileA, int lenA, bool freeFileDataA)
+FoFiBase::FoFiBase(const unsigned char *fileA, int lenA, bool freeFileDataA)
 {
-    file = (const unsigned char *)fileA;
+    file = fileA;
     len = lenA;
     freeFileData = freeFileDataA;
 }

@@ -29,8 +29,9 @@ static bool compare(const char *a, const char *b)
 static bool compare(const uint16_t *a, const uint16_t *b)
 {
     while (*a && *b) {
-        if (*a++ != *b++)
+        if (*a++ != *b++) {
             return false;
+        }
     }
     return *a == *b;
 }
@@ -38,8 +39,9 @@ static bool compare(const uint16_t *a, const uint16_t *b)
 static bool compare(const Unicode *a, const char *b, int len)
 {
     for (int i = 0; i < len; i++) {
-        if (a[i] != (Unicode)b[i])
+        if (a[i] != (Unicode)b[i]) {
             return false;
+        }
     }
 
     return true;
@@ -48,8 +50,9 @@ static bool compare(const Unicode *a, const char *b, int len)
 static bool compare(const Unicode *a, const uint16_t *b, int len)
 {
     for (int i = 0; i < len; i++) {
-        if (a[i] != b[i])
+        if (a[i] != b[i]) {
             return false;
+        }
     }
 
     return true;

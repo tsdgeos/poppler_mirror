@@ -101,8 +101,9 @@ QString UnicodeParsedString(const GooString *s1)
 
 QString UnicodeParsedString(const std::string &s1)
 {
-    if (s1.empty())
+    if (s1.empty()) {
         return QString();
+    }
 
     if (GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const char16_t *>(s1.c_str()), s1.size() / 2);
@@ -137,8 +138,9 @@ GooString *QStringToGooString(const QString &s)
 {
     int len = s.length();
     char *cstring = (char *)gmallocn(s.length(), sizeof(char));
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
+    }
     GooString *ret = new GooString(cstring, len);
     gfree(cstring);
     return ret;

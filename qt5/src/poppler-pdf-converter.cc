@@ -91,8 +91,9 @@ bool PDFConverter::convert()
     }
 
     bool deleteFile = false;
-    if (QFile *file = qobject_cast<QFile *>(dev))
+    if (QFile *file = qobject_cast<QFile *>(dev)) {
         deleteFile = !file->exists();
+    }
 
     int errorCode = errNone;
     QIODeviceOutStream stream(dev);
@@ -106,10 +107,11 @@ bool PDFConverter::convert()
         if (deleteFile) {
             qobject_cast<QFile *>(dev)->remove();
         }
-        if (errorCode == errOpenFile)
+        if (errorCode == errOpenFile) {
             d->lastError = OpenOutputError;
-        else
+        } else {
             d->lastError = NotSupportedInputFileError;
+        }
     }
 
     return (errorCode == errNone);

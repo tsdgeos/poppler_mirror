@@ -190,8 +190,9 @@ SplashState::SplashState(const SplashState *state)
     memcpy(cmykTransferM, state->cmykTransferM, 256);
     memcpy(cmykTransferY, state->cmykTransferY, 256);
     memcpy(cmykTransferK, state->cmykTransferK, 256);
-    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
         memcpy(deviceNTransfer[cp], state->deviceNTransfer[cp], 256);
+    }
     overprintMask = state->overprintMask;
     overprintAdditive = state->overprintAdditive;
     next = nullptr;

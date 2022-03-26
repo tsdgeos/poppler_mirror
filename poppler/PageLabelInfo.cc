@@ -49,10 +49,11 @@ PageLabelInfo::Interval::Interval(Object *dict, int baseA)
     }
 
     obj = dict->dictLookup("St");
-    if (obj.isInt())
+    if (obj.isInt()) {
         first = obj.getInt();
-    else
+    } else {
         first = 1;
+    }
 
     base = baseA;
 }
@@ -62,8 +63,9 @@ PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
     std::set<int> alreadyParsedRefs;
     parse(tree, alreadyParsedRefs);
 
-    if (intervals.empty())
+    if (intervals.empty()) {
         return;
+    }
 
     auto curr = intervals.begin();
     for (auto next = curr + 1; next != intervals.end(); ++next, ++curr) {
@@ -123,8 +125,9 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 
     for (const auto &interval : intervals) {
         const std::size_t prefixLen = interval.prefix.size();
-        if (strLen < prefixLen || interval.prefix.compare(0, prefixLen, str, prefixLen) != 0)
+        if (strLen < prefixLen || interval.prefix.compare(0, prefixLen, str, prefixLen) != 0) {
             continue;
+        }
 
         switch (interval.style) {
         case Interval::Arabic:
@@ -181,8 +184,9 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
         base += interval.length;
     }
 
-    if (!matching_interval)
+    if (!matching_interval) {
         return false;
+    }
 
     number = index - base + matching_interval->first;
     switch (matching_interval->style) {

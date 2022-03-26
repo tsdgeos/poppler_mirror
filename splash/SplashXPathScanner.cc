@@ -249,8 +249,9 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
         if (seg->flags & splashXPathHoriz) {
             y = splashFloor(seg->y0);
             if (y >= yMin && y <= yMax) {
-                if (!addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0))
+                if (!addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0)) {
                     break;
+                }
             }
         } else if (seg->flags & splashXPathVert) {
             y0 = splashFloor(segYMin);
@@ -264,8 +265,9 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             x = splashFloor(seg->x0);
             int count = eo || (seg->flags & splashXPathFlip) ? 1 : -1;
             for (y = y0; y <= y1; ++y) {
-                if (!addIntersection(segYMin, segYMax, y, x, x, count))
+                if (!addIntersection(segYMin, segYMax, y, x, x, count)) {
                     break;
+                }
             }
         } else {
             if (seg->x0 < seg->x1) {
@@ -305,8 +307,9 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                     xx1 = segXMax;
                 }
                 int x1 = splashFloor(xx1);
-                if (!addIntersection(segYMin, segYMax, y, x0, x1, count))
+                if (!addIntersection(segYMin, segYMax, y, x0, x1, count)) {
                     break;
+                }
 
                 xx0 = xx1;
                 x0 = x1;
@@ -445,8 +448,9 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y
         xx = *x0 * splashAASize;
         if (yy >= yyMin && yy <= yyMax) {
             const int intersectionIndex = splashAASize * y + yy - yMin;
-            if (unlikely(intersectionIndex < 0 || (unsigned)intersectionIndex >= allIntersections.size()))
+            if (unlikely(intersectionIndex < 0 || (unsigned)intersectionIndex >= allIntersections.size())) {
                 break;
+            }
             const auto &line = allIntersections[intersectionIndex];
             interIdx = 0;
             interCount = 0;
@@ -489,8 +493,9 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y
             }
         }
         xx0 = (*x1 + 1) * splashAASize;
-        if (xx0 > aaBuf->getWidth())
+        if (xx0 > aaBuf->getWidth()) {
             xx0 = aaBuf->getWidth();
+        }
         // set [xx, xx0) to 0
         if (xx < xx0 && xx >= 0) {
             p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);

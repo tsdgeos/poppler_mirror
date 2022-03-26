@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public:
     int height;
     int bytes_per_row;
     int bytes_num;
-    image::format_enum format : 3;
+    image::format_enum format;
     bool own_data : 1;
 };
 
