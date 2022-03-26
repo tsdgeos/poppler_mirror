@@ -1106,8 +1106,6 @@ static const char *displayFontDirs[] = { "/usr/share/ghostscript/fonts", "/usr/l
 
 void GlobalParams::setupBaseFonts(const char *dir)
 {
-    GooString *fontName;
-    GooString *fileName;
     FILE *f;
     int i, j;
 
@@ -1115,32 +1113,29 @@ void GlobalParams::setupBaseFonts(const char *dir)
         if (fontFiles.count(displayFontTab[i].name) > 0) {
             continue;
         }
-        fontName = new GooString(displayFontTab[i].name);
-        fileName = nullptr;
+        std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
+        std::unique_ptr<GooString> fileName;
         if (dir) {
-            fileName = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
+            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                delete fileName;
-                fileName = nullptr;
+                fileName.reset();
             }
         }
         for (j = 0; !fileName && displayFontDirs[j]; ++j) {
-            fileName = appendToPath(new GooString(displayFontDirs[j]), displayFontTab[i].t1FileName);
+            fileName.reset(appendToPath(new GooString(displayFontDirs[j]), displayFontTab[i].t1FileName));
             if ((f = openFile(fileName->c_str(), "rb"))) {
                 fclose(f);
             } else {
-                delete fileName;
-                fileName = nullptr;
+                fileName.reset();
             }
         }
         if (!fileName) {
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
-            delete fontName;
             continue;
         }
-        addFontFile(fontName, fileName);
+        addFontFile(fontName.get(), fileName.get());
     }
 }
 
