@@ -250,7 +250,7 @@ public:
     ~SysFontList();
     SysFontList(const SysFontList &) = delete;
     SysFontList &operator=(const SysFontList &) = delete;
-    const SysFontInfo *find(const GooString *name, bool isFixedWidth, bool exact);
+    const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact);
 
 #ifdef _WIN32
     void scanWindowsFonts(GooString *winFontDir);
@@ -275,13 +275,13 @@ SysFontList::~SysFontList()
     }
 }
 
-const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact)
+const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact)
 {
     GooString *name2;
     bool bold, italic, oblique;
     int n;
 
-    name2 = name->copy();
+    name2 = new GooString(name);
 
     // remove space, comma, dash chars
     {
@@ -909,7 +909,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     const SysFontInfo *fi = nullptr;
     FcPattern *p = nullptr;
     GooString *path = nullptr;
-    const GooString *fontName = font->getName();
+    const std::optional<std::string> &fontName = font->getName();
     GooString substituteName;
     if (!fontName) {
         return nullptr;
@@ -917,7 +917,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 
     globalParamsLocker();
 
-    if ((fi = sysFonts->find(fontName, font->isFixedWidth(), true))) {
+    if ((fi = sysFonts->find(*fontName, font->isFixedWidth(), true))) {
         path = fi->path->copy();
         *type = fi->type;
         *fontNum = fi->fontNum;
@@ -1010,7 +1010,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(fontName->copy(), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
+                    SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = new GooString((char *)s);
@@ -1033,7 +1033,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(fontName->copy(), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
+                    SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = new GooString((char *)s);
@@ -1052,7 +1052,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         }
         FcFontSetDestroy(set);
     }
-    if (path == nullptr && (fi = sysFonts->find(fontName, font->isFixedWidth(), false))) {
+    if (path == nullptr && (fi = sysFonts->find(*fontName, font->isFixedWidth(), false))) {
         path = fi->path->copy();
         *type = fi->type;
         *fontNum = fi->fontNum;
@@ -1149,13 +1149,13 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     const SysFontInfo *fi;
     GooString *path;
 
-    const GooString *fontName = font->getName();
+    const std::optional<std::string> &fontName = font->getName();
     if (!fontName)
         return nullptr;
 
     path = nullptr;
     globalParamsLocker();
-    if ((fi = sysFonts->find(fontName, font->isFixedWidth(), false))) {
+    if ((fi = sysFonts->find(*fontName, font->isFixedWidth(), false))) {
         path = fi->path->copy();
         *type = fi->type;
         *fontNum = fi->fontNum;

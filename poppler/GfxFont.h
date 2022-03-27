@@ -216,7 +216,7 @@ public:
 
     // Get the original font name (ignornig any munging that might have
     // been done to map to a canonical Base-14 font name).
-    const GooString *getName() const { return name; }
+    const std::optional<std::string> &getName() const { return name; }
 
     bool isSubset() const;
 
@@ -301,7 +301,7 @@ public:
     static const char *getAlternateName(const char *name);
 
 protected:
-    GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA);
+    GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA);
 
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
     void readFontDescriptor(XRef *xref, Dict *fontDict);
@@ -310,7 +310,7 @@ protected:
 
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)
-    const GooString *name; // font name
+    std::optional<std::string> name; // font name
     GooString *family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
@@ -335,7 +335,7 @@ protected:
 class POPPLER_PRIVATE_EXPORT Gfx8BitFont : public GfxFont
 {
 public:
-    Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
+    Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
@@ -395,7 +395,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxCIDFont : public GfxFont
 {
 public:
-    GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
+    GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
     bool isCIDFont() const override { return true; }
 

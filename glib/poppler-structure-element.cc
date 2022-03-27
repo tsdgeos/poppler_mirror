@@ -794,11 +794,15 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
         // GfxFont sometimes does not have a family name but there
         // is always a font name that can be used as fallback.
         const GooString *font_name = span.getFont()->getFamily();
-        if (font_name == nullptr) {
-            font_name = span.getFont()->getName();
+        if (font_name) {
+            new_span->font_name = _poppler_goo_string_to_utf8(font_name);
+        } else if (span.getFont()->getName()) {
+            const GooString aux(*span.getFont()->getName());
+            new_span->font_name = _poppler_goo_string_to_utf8(&aux);
+        } else {
+            new_span->font_name = nullptr;
         }
 
-        new_span->font_name = _poppler_goo_string_to_utf8(font_name);
         if (span.getFont()->isFixedWidth()) {
             new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
         }

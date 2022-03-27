@@ -2511,7 +2511,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const GooString *file
 void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
 {
     if (maxValidGlyph >= 0 && font->getName()) {
-        auto &fontMaxValidGlyph = perFontMaxValidGlyph[font->getName()->toStr()];
+        auto &fontMaxValidGlyph = perFontMaxValidGlyph[*font->getName()];
         if (fontMaxValidGlyph < maxValidGlyph) {
             fontMaxValidGlyph = maxValidGlyph;
         }
@@ -2789,8 +2789,8 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
         }
         delete psName;
     }
-    if ((s = font->getName())) {
-        psName = filterPSName(s->toStr());
+    if (font->getName()) {
+        psName = filterPSName(*font->getName());
         if (fontNames.emplace(psName->toStr()).second) {
             return psName;
         }
@@ -2801,8 +2801,8 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
         s = filterPSName(s->toStr());
         psName->append('_')->append(s);
         delete s;
-    } else if ((s = font->getName())) {
-        s = filterPSName(s->toStr());
+    } else if (font->getName()) {
+        s = filterPSName(*font->getName());
         psName->append('_')->append(s);
         delete s;
     }
@@ -5045,7 +5045,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     if (!(font = state->getFont())) {
         return;
     }
-    maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[font->getName()->toStr()] : 0);
+    maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[*font->getName()] : 0);
     if (maxGlyphInt < 0) {
         maxGlyphInt = 0;
     }

@@ -199,15 +199,14 @@ const GooString *GfxFontLoc::pathAsGooString() const
 
 std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict)
 {
-    GooString *nameA;
+    std::optional<std::string> name;
     Ref embFontIDA;
     GfxFontType typeA;
 
     // get base font name
-    nameA = nullptr;
     Object obj1 = fontDict->lookup("BaseFont");
     if (obj1.isName()) {
-        nameA = new GooString(obj1.getName());
+        name = obj1.getName();
     }
 
     // get embedded font ID and font type
@@ -216,18 +215,17 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     // create the font object
     GfxFont *font;
     if (typeA < fontCIDType0) {
-        font = new Gfx8BitFont(xref, tagA, idA, nameA, typeA, embFontIDA, fontDict);
+        font = new Gfx8BitFont(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     } else {
-        font = new GfxCIDFont(xref, tagA, idA, nameA, typeA, embFontIDA, fontDict);
+        font = new GfxCIDFont(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     }
 
     return std::unique_ptr<GfxFont>(font);
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), type(typeA)
+GfxFont::GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), name(std::move(nameA)), type(typeA)
 {
     ok = false;
-    name = nameA;
     embFontID = embFontIDA;
     embFontName = nullptr;
     family = nullptr;
@@ -239,9 +237,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType 
 GfxFont::~GfxFont()
 {
     delete family;
-    if (name) {
-        delete name;
-    }
     if (embFontName) {
         delete embFontName;
     }
@@ -250,13 +245,13 @@ GfxFont::~GfxFont()
 bool GfxFont::isSubset() const
 {
     if (name) {
-        int i;
-        for (i = 0; i < name->getLength(); ++i) {
-            if (name->getChar(i) < 'A' || name->getChar(i) > 'Z') {
+        unsigned int i;
+        for (i = 0; i < name->size(); ++i) {
+            if ((*name)[i] < 'A' || (*name)[i] > 'Z') {
                 break;
             }
         }
-        return i == 6 && name->getLength() > 7 && name->getChar(6) == '+';
+        return i == 6 && name->size() > 7 && (*name)[6] == '+';
     }
     return false;
 }
@@ -268,10 +263,10 @@ std::string GfxFont::getNameWithoutSubsetTag() const
     }
 
     if (!isSubset()) {
-        return name->toStr();
+        return *name;
     }
 
-    return name->toStr().substr(7);
+    return name->substr(7);
 }
 
 // This function extracts three pieces of information:
@@ -672,7 +667,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
         GfxFontLoc fontLoc;
         fontLoc.locType = gfxFontLocResident;
         fontLoc.fontType = fontType1;
-        fontLoc.setPath(name->copy());
+        fontLoc.path = *name;
         return std::move(fontLoc); // std::move only required to please g++-7
     }
 
@@ -686,7 +681,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
     }
 
     //----- external font file (fontFile, fontDir)
-    if (name && (path = globalParams->findFontFile(name->toStr()))) {
+    if (name && (path = globalParams->findFontFile(*name))) {
         if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, isCIDFont())) {
             return fontLoc;
         }
@@ -760,7 +755,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
             if (path) {
                 if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, false)) {
                     error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
-                    name = new GooString(base14SubstFonts[substIdx]);
+                    name = base14SubstFonts[substIdx];
                     fontLoc->substIdx = substIdx;
                     return fontLoc;
                 }
@@ -947,9 +942,8 @@ static bool testForNumericNames(Dict *fontDict, bool hex)
     return numeric;
 }
 
-Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, nameA, typeA, embFontIDA)
+Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
-    GooString *name2;
     const BuiltinFont *builtinFont;
     const char **baseEnc;
     bool baseEncFromFontFile;
@@ -965,7 +959,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     int firstChar, lastChar;
     unsigned short w;
     Object obj1;
-    int n, i, a, b, m;
+    int n, a, b, m;
 
     ctu = nullptr;
 
@@ -973,11 +967,11 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     // names
     base14 = nullptr;
     if (name) {
-        name2 = name->copy();
-        i = 0;
-        while (i < name2->getLength()) {
-            if (name2->getChar(i) == ' ') {
-                name2->del(i);
+        std::string name2 = *name;
+        size_t i = 0;
+        while (i < name2.size()) {
+            if (name2[i] == ' ') {
+                name2.erase(i, 1);
             } else {
                 ++i;
             }
@@ -987,16 +981,15 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
         // invariant: base14FontMap[a].altName <= name2 < base14FontMap[b].altName
         while (b - a > 1) {
             m = (a + b) / 2;
-            if (name2->cmp(base14FontMap[m].altName) >= 0) {
+            if (name2.compare(base14FontMap[m].altName) >= 0) {
                 a = m;
             } else {
                 b = m;
             }
         }
-        if (!name2->cmp(base14FontMap[a].altName)) {
+        if (name2 == base14FontMap[a].altName) {
             base14 = &base14FontMap[a];
         }
-        delete name2;
     }
 
     // is it a built-in font?
@@ -1043,7 +1036,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     fontMat[1] = fontMat[2] = fontMat[4] = fontMat[5] = 0;
     obj1 = fontDict->lookup("FontMatrix");
     if (obj1.isArray()) {
-        for (i = 0; i < 6 && i < obj1.arrayGetLength(); ++i) {
+        for (int i = 0; i < 6 && i < obj1.arrayGetLength(); ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isNum()) {
                 fontMat[i] = obj2.getNum();
@@ -1055,7 +1048,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (type == fontType3) {
         obj1 = fontDict->lookup("FontBBox");
         if (obj1.isArray()) {
-            for (i = 0; i < 4 && i < obj1.arrayGetLength(); ++i) {
+            for (int i = 0; i < 4 && i < obj1.arrayGetLength(); ++i) {
                 Object obj2 = obj1.arrayGet(i);
                 if (obj2.isNum()) {
                     fontBBox[i] = obj2.getNum();
@@ -1186,7 +1179,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     }
 
     // copy the base encoding
-    for (i = 0; i < 256; ++i) {
+    for (int i = 0; i < 256; ++i) {
         enc[i] = (char *)baseEnc[i];
         if ((encFree[i] = baseEncFromFontFile) && enc[i]) {
             enc[i] = copyString(baseEnc[i]);
@@ -1198,7 +1191,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     // the accents in the encoding), so we fill in any gaps from
     // StandardEncoding
     if (type == fontType1C && embFontID != Ref::INVALID() && baseEncFromFontFile) {
-        for (i = 0; i < 256; ++i) {
+        for (int i = 0; i < 256; ++i) {
             if (!enc[i] && standardEncoding[i]) {
                 enc[i] = (char *)standardEncoding[i];
                 encFree[i] = false;
@@ -1213,7 +1206,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
             encodingName = "Custom";
             hasEncoding = true;
             int code = 0;
-            for (i = 0; i < obj2.arrayGetLength(); ++i) {
+            for (int i = 0; i < obj2.arrayGetLength(); ++i) {
                 Object obj3 = obj2.arrayGet(i);
                 if (obj3.isInt()) {
                     code = obj3.getInt();
@@ -1239,7 +1232,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
     // pass 1: use the name-to-Unicode mapping table
     missing = hex = false;
-    bool isZapfDingbats = name && name->endsWith("ZapfDingbats");
+    bool isZapfDingbats = name && GooString::endsWith(*name, "ZapfDingbats");
     for (int code = 0; code < 256; ++code) {
         if ((charName = enc[code])) {
             if (isZapfDingbats) {
@@ -1372,6 +1365,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
         // this is technically an error -- the Widths entry is required
         // for all but the Base-14 fonts -- but certain PDF generators
         // apparently don't include widths for Arial and TimesNewRoman
+        int i;
         if (isFixedWidth()) {
             i = 0;
         } else if (isSerif()) {
@@ -1713,7 +1707,7 @@ struct cmpWidthExcepVFunctor
     bool operator()(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) { return w1.first < w2.first; }
 };
 
-GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, nameA, typeA, embFontIDA)
+GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     Dict *desFontDict;
     Object desFontDictObj;
@@ -2225,7 +2219,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         ff->setupGSUB(lp->scriptTag, lp->languageTag);
     } else {
         if (getCollection()->cmp("Adobe-Identity") == 0) {
-            error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:t}", getName());
+            error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:s}", name ? name->c_str() : "(null)");
         } else {
             error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
         }

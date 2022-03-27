@@ -500,7 +500,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 {
     const SysFontInfo *fi;
     GooString *path = nullptr;
-    const GooString *fontName = font->getName();
+    const std::optional<std::string> &fontName = font->getName();
     if (!fontName)
         return nullptr;
     const std::scoped_lock locker(mutex);
@@ -510,7 +510,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     // In the system using FontConfig, findSystemFontFile() uses
     // base14Name only for the creation of query pattern.
 
-    if ((fi = sysFonts->find(fontName, false, false))) {
+    if ((fi = sysFonts->find(*fontName, false, false))) {
         path = fi->path->copy();
         *type = fi->type;
         *fontNum = fi->fontNum;
@@ -518,7 +518,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
             substituteFontName->Set(fi->substituteName->c_str());
     } else {
         GooString *substFontName = new GooString(findSubstituteName(font, fontFiles, substFiles, fontName->c_str()));
-        error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
+        error(errSyntaxError, -1, "Couldn't find a font for '{0:s}', subst is '{1:t}'", fontName->c_str(), substFontName);
         const auto fontFile = fontFiles.find(substFontName->toStr());
         if (fontFile != fontFiles.end()) {
             path = new GooString(fontFile->second.c_str());
