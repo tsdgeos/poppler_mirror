@@ -4440,7 +4440,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     break;
                 }
             }
-            daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+            daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
         }
 
         // starting y coordinate
@@ -4450,7 +4450,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
         // set the font matrix
         daToks[tmPos + 4] = "0";
-        daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+        daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
         // write the DA string
         for (const std::string &daTok : daToks) {
@@ -4506,7 +4506,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
             }
 
             int dummy = 0;
@@ -4531,8 +4531,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
@@ -4586,7 +4586,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     }
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
             }
 
             // compute text start position
@@ -4606,8 +4606,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
