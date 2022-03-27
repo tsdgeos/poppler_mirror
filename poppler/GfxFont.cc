@@ -775,17 +775,6 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
     return std::nullopt;
 }
 
-std::optional<GfxFontLoc> GfxFont::locateBase14Font(const GooString *base14Name)
-{
-    GooString *path;
-
-    path = globalParams->findFontFile(base14Name);
-    if (!path) {
-        return std::nullopt;
-    }
-    return getExternalFont(path, false);
-}
-
 std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
 {
     FoFiIdentifierType fft;

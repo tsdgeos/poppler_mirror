@@ -278,9 +278,6 @@ public:
     // printer-resident fonts.  Returns std::optional without a value on failure.
     std::optional<GfxFontLoc> locateFont(XRef *xref, PSOutputDev *ps);
 
-    // Locate a Base-14 font file for a specified font name.
-    static std::optional<GfxFontLoc> locateBase14Font(const GooString *base14Name);
-
     // Read an external or embedded font file into a buffer.
     std::vector<unsigned char> readEmbFontFile(XRef *xref);
 
