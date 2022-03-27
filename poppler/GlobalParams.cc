@@ -875,13 +875,13 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
 }
 #endif
 
-GooString *GlobalParams::findFontFile(const GooString *fontName)
+GooString *GlobalParams::findFontFile(const std::string &fontName)
 {
     GooString *path = nullptr;
 
     setupBaseFonts(POPPLER_FONTSDIR);
     globalParamsLocker();
-    const auto fontFile = fontFiles.find(fontName->toStr());
+    const auto fontFile = fontFiles.find(fontName);
     if (fontFile != fontFiles.end()) {
         path = new GooString(fontFile->second);
     }
@@ -1073,12 +1073,12 @@ fin:
 
 GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
 {
-    return findFontFile(base14Name);
+    return findFontFile(base14Name->toStr());
 }
 #else
 GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
 {
-    return findFontFile(base14Name);
+    return findFontFile(base14Name->toStr());
 }
 
 static struct

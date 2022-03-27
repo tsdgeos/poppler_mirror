@@ -686,7 +686,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
     }
 
     //----- external font file (fontFile, fontDir)
-    if (name && (path = globalParams->findFontFile(name))) {
+    if (name && (path = globalParams->findFontFile(name->toStr()))) {
         if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, isCIDFont())) {
             return fontLoc;
         }
@@ -746,17 +746,17 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
         if (isItalic()) {
             substIdx += 1;
         }
-        GooString substName(base14SubstFonts[substIdx]);
+        const std::string substName = base14SubstFonts[substIdx];
         if (ps) {
             error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "null");
             GfxFontLoc fontLoc;
             fontLoc.locType = gfxFontLocResident;
             fontLoc.fontType = fontType1;
-            fontLoc.path = substName.toStr();
+            fontLoc.path = substName;
             fontLoc.substIdx = substIdx;
             return std::move(fontLoc); // std::move only required to please g++-7
         } else {
-            path = globalParams->findFontFile(&substName);
+            path = globalParams->findFontFile(substName);
             if (path) {
                 if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, false)) {
                     error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
