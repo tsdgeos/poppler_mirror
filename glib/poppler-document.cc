@@ -285,6 +285,19 @@ public:
 
 BytesStream::~BytesStream() = default;
 
+class OwningFileStream final : public FileStream
+{
+public:
+    OwningFileStream(std::unique_ptr<GooFile> fileA, Object &&dictA) : FileStream(fileA.get(), 0, false, fileA->size(), std::move(dictA)), file(std::move(fileA)) { }
+
+    ~OwningFileStream() override;
+
+private:
+    std::unique_ptr<GooFile> file;
+};
+
+OwningFileStream::~OwningFileStream() = default;
+
 /**
  * poppler_document_new_from_bytes:
  * @bytes: a #GBytes
@@ -499,9 +512,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
         stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
     } else {
-        std::unique_ptr<GooFile> file = GooFile::open(fd);
-        // FIXME file is getting leak here
-        stream = new FileStream(file.release(), 0, false, file->size(), Object(objNull));
+        stream = new OwningFileStream(GooFile::open(fd), Object(objNull));
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
