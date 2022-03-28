@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -402,7 +402,7 @@ private:
     void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1);
 #endif
     void cvtFunction(const Function *func, bool invertPSFunction = false);
-    GooString *filterPSName(const GooString *name);
+    GooString *filterPSName(const std::string &name);
 
     // Write the document-level setup.
     void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);

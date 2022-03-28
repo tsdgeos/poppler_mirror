@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -2789,14 +2789,14 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
     const GooString *s;
 
     if ((s = font->getEmbeddedFontName())) {
-        psName = filterPSName(s);
+        psName = filterPSName(s->toStr());
         if (fontNames.emplace(psName->toStr()).second) {
             return psName;
         }
         delete psName;
     }
     if ((s = font->getName())) {
-        psName = filterPSName(s);
+        psName = filterPSName(s->toStr());
         if (fontNames.emplace(psName->toStr()).second) {
             return psName;
         }
@@ -2804,11 +2804,11 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
     }
     psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen);
     if ((s = font->getEmbeddedFontName())) {
-        s = filterPSName(s);
+        s = filterPSName(s->toStr());
         psName->append('_')->append(s);
         delete s;
     } else if ((s = font->getName())) {
-        s = filterPSName(s);
+        s = filterPSName(s->toStr());
         psName->append('_')->append(s);
         delete s;
     }
@@ -7433,25 +7433,22 @@ void PSOutputDev::writePSName(const char *s)
     }
 }
 
-GooString *PSOutputDev::filterPSName(const GooString *name)
+GooString *PSOutputDev::filterPSName(const std::string &name)
 {
     GooString *name2;
     char buf[8];
-    int i;
-    char c;
 
     name2 = new GooString();
 
     // ghostscript chokes on names that begin with out-of-limits
     // numbers, e.g., 1e4foo is handled correctly (as a name), but
     // 1e999foo generates a limitcheck error
-    c = name->getChar(0);
-    if (c >= '0' && c <= '9') {
+    const char c0 = name[0];
+    if (c0 >= '0' && c0 <= '9') {
         name2->append('f');
     }
 
-    for (i = 0; i < name->getLength(); ++i) {
-        c = name->getChar(i);
+    for (const char c : name) {
         if (c <= (char)0x20 || c >= (char)0x7f || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%') {
             sprintf(buf, "#%02x", c & 0xff);
             name2->append(buf);
