@@ -1,4 +1,4 @@
-image: debian:unstable
+image: debian:testing
 
 stages:
   - build
@@ -6,7 +6,7 @@ stages:
   - publish
 
 before_script:
-  - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+  - echo 'deb-src http://deb.debian.org/debian testing main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
   - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libgtk-3-dev wget p7zip-full libbrotli-dev libboost-container-dev qt6-base-dev
