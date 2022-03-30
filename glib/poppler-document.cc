@@ -387,7 +387,7 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
         }
         str = new PopplerInputStream(stream, cancellable, 0, false, length, Object(objNull));
     } else {
-        CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
+        CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length));
         str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
     }
 
@@ -509,7 +509,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
             }
         }
 
-        CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file), nullptr);
+        CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file));
         stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
     } else {
         stream = new OwningFileStream(GooFile::open(fd), Object(objNull));

@@ -24,7 +24,7 @@
 
 std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
 {
-    CachedFile *cachedFile = new CachedFile(new CurlCachedFileLoader(), uri.copy());
+    CachedFile *cachedFile = new CachedFile(new CurlCachedFileLoader(uri.toStr()));
 
     if (cachedFile->getLength() == ((unsigned int)-1)) {
         cachedFile->decRefCnt();

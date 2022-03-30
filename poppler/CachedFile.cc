@@ -6,7 +6,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 //========================================================================
@@ -18,29 +18,27 @@
 // CachedFile
 //------------------------------------------------------------------------
 
-CachedFile::CachedFile(CachedFileLoader *cacheLoader, GooString *uriA)
+CachedFile::CachedFile(CachedFileLoader *cacheLoader)
 {
-    uri = uriA;
     loader = cacheLoader;
 
     streamPos = 0;
     chunks = new std::vector<Chunk>();
     length = 0;
 
-    length = loader->init(uri, this);
+    length = loader->init(this);
     refCnt = 1;
 
     if (length != ((size_t)-1)) {
         chunks->resize(length / CachedFileChunkSize + 1);
     } else {
-        error(errInternal, -1, "Failed to initialize file cache for '{0:t}'.", uri);
+        error(errInternal, -1, "Failed to initialize file cache.");
         chunks->resize(0);
     }
 }
 
 CachedFile::~CachedFile()
 {
-    delete uri;
     delete loader;
     delete chunks;
 }
