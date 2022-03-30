@@ -170,7 +170,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
         }
 
         actionList.reserve(1);
-        actionList.push_back(parseAction(&nextObj, nullptr, seenNextActions));
+        actionList.push_back(parseAction(&nextObj, {}, seenNextActions));
     } else if (nextObj.isArray()) {
         const Array *a = nextObj.getArray();
         const int n = a->getLength();
@@ -192,7 +192,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
                 }
             }
 
-            actionList.push_back(parseAction(&obj3, nullptr, seenNextActions));
+            actionList.push_back(parseAction(&obj3, {}, seenNextActions));
         }
     }
 
