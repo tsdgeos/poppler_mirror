@@ -42,6 +42,7 @@
 #include "poppler_private_export.h"
 
 #include <cstdarg>
+#include <memory>
 #include <string>
 
 #ifdef __clang__
@@ -139,8 +140,8 @@ public:
     //     t -- GooString *
     //     w -- blank space; arg determines width
     // To get literal curly braces, use {{ or }}.
-    POPPLER_PRIVATE_EXPORT static GooString *format(const char *fmt, ...) GOOSTRING_FORMAT;
-    POPPLER_PRIVATE_EXPORT static GooString *formatv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT static std::unique_ptr<GooString> format(const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT static std::unique_ptr<GooString> formatv(const char *fmt, va_list argList);
 
     // Get length.
     int getLength() const { return size(); }

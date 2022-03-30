@@ -5,7 +5,7 @@
  * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
- * Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, 2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -3799,7 +3799,7 @@ GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
 {
     int offset_min;
     gchar *date_str;
-    GooString *out_str;
+    std::unique_ptr<GooString> out_str;
 
     offset_min = g_date_time_get_utc_offset(datetime) / 1000000 / 60;
     date_str = g_date_time_format(datetime, "D:%Y%m%d%H%M%S");
@@ -3813,5 +3813,5 @@ GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
     }
 
     g_free(date_str);
-    return out_str;
+    return out_str.release();
 }

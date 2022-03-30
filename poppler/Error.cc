@@ -47,14 +47,13 @@ void setErrorCallback(ErrorCallback cbk)
 void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
 {
     va_list args;
-    GooString *s;
 
     // NB: this can be called before the globalParams object is created
     if (!errorCbk && globalParams && globalParams->getErrQuiet()) {
         return;
     }
     va_start(args, msg);
-    s = GooString::formatv(msg, args);
+    const std::unique_ptr<GooString> s = GooString::formatv(msg, args);
     va_end(args);
 
     GooString sanitized;
@@ -77,5 +76,4 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
         }
         fflush(stderr);
     }
-    delete s;
 }
