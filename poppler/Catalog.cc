@@ -79,7 +79,6 @@ Catalog::Catalog(PDFDoc *docA)
     doc = docA;
     xref = doc->getXRef();
     numPages = -1;
-    baseURI = nullptr;
     pageLabelInfo = nullptr;
     form = nullptr;
     optContent = nullptr;
@@ -111,7 +110,7 @@ Catalog::Catalog(PDFDoc *docA)
     if (obj.isDict()) {
         Object obj2 = obj.getDict()->lookupEnsureEncryptedIfNeeded("Base");
         if (obj2.isString()) {
-            baseURI = obj2.getString()->copy();
+            baseURI = obj2.getString()->toStr();
         }
     }
 
@@ -156,9 +155,6 @@ Catalog::~Catalog()
     delete destNameTree;
     delete embeddedFileNameTree;
     delete jsNameTree;
-    if (baseURI) {
-        delete baseURI;
-    }
     delete pageLabelInfo;
     delete form;
     delete optContent;

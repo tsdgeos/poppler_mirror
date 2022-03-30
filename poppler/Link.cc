@@ -63,13 +63,13 @@ std::unique_ptr<LinkAction> LinkAction::parseDest(const Object *obj)
     return action;
 }
 
-std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI)
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std::optional<std::string> &baseURI)
 {
     std::set<int> seenNextActions;
     return parseAction(obj, baseURI, &seenNextActions);
 }
 
-std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions)
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions)
 {
 
     if (!obj->isDict()) {
@@ -513,7 +513,7 @@ LinkLaunch::~LinkLaunch() = default;
 // LinkURI
 //------------------------------------------------------------------------
 
-LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI)
+LinkURI::LinkURI(const Object *uriObj, const std::optional<std::string> &baseURI)
 {
     hasURIFlag = false;
     if (uriObj->isString()) {
@@ -529,7 +529,7 @@ LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI)
         } else {
             // relative URI
             if (baseURI) {
-                uri = baseURI->toStr();
+                uri = *baseURI;
                 if (uri.size() > 0) {
                     char c = uri.back();
                     if (c != '/' && c != '?') {
