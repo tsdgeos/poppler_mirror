@@ -183,7 +183,7 @@ public:
         static_cast<std::string &>(*this).append(str);
         return this;
     }
-    GooString *append(const char *str, int lengthA)
+    GooString *append(const char *str, size_t lengthA)
     {
         static_cast<std::string &>(*this).append(str, lengthA);
         return this;
