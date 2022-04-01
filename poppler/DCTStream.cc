@@ -232,8 +232,8 @@ int DCTStream::getChars(int nChars, unsigned char *buffer)
             left = nChars - i;
         }
         memcpy(buffer + i, current, left);
-        current += static_cast<int>(left);
-        i += left;
+        current += left;
+        i += static_cast<int>(left);
     }
     return nChars;
 }
