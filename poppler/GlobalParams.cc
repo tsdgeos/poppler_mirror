@@ -78,9 +78,7 @@
 #    include <fontconfig/fontconfig.h>
 #endif
 
-#ifdef _MSC_VER
-#    define strcasecmp stricmp
-#else
+#ifndef _MSC_VER
 #    include <strings.h>
 #endif
 
