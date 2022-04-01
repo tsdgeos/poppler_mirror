@@ -787,8 +787,8 @@ void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool 
 void Page::processLinks(OutputDev *out)
 {
     std::unique_ptr<Links> links = getLinks();
-    for (int i = 0; i < links->getNumLinks(); ++i) {
-        out->processLink(links->getLink(i));
+    for (AnnotLink *link : links->getLinks()) {
+        out->processLink(link);
     }
 }
 

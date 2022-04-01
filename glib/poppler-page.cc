@@ -1119,7 +1119,6 @@ static void poppler_page_init(PopplerPage *page) { }
 GList *poppler_page_get_link_mapping(PopplerPage *page)
 {
     GList *map_list = nullptr;
-    gint i;
     Links *links;
     double width, height;
 
@@ -1133,13 +1132,11 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
 
     poppler_page_get_size(page, &width, &height);
 
-    for (i = 0; i < links->getNumLinks(); i++) {
+    for (AnnotLink *link : links->getLinks()) {
         PopplerLinkMapping *mapping;
         PopplerRectangle rect;
         LinkAction *link_action;
-        AnnotLink *link;
 
-        link = links->getLink(i);
         link_action = link->getAction();
 
         /* Create the mapping */

@@ -555,9 +555,7 @@ public:
     Links(const Links &) = delete;
     Links &operator=(const Links &) = delete;
 
-    // Iterate through list of links.
-    int getNumLinks() const { return links.size(); }
-    AnnotLink *getLink(int i) const { return links[i]; }
+    const std::vector<AnnotLink *> &getLinks() const { return links; }
 
 private:
     std::vector<AnnotLink *> links;
