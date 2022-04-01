@@ -2,7 +2,7 @@
 //
 // DateInfo.cc
 //
-// Copyright (C) 2008, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
@@ -102,7 +102,7 @@ GooString *timeToDateString(const time_t *timeA)
     // calculate time zone offset by comparing local and gmtime time_t value for same
     // time.
     const time_t timeg = timegm(&localtime_tm);
-    const int offset = difftime(timeg, timet); // find time zone offset in seconds
+    const int offset = static_cast<int>(difftime(timeg, timet)); // find time zone offset in seconds
     if (offset > 0) {
         dateString->appendf("+{0:02d}'{1:02d}'", offset / 3600, (offset % 3600) / 60);
     } else if (offset < 0) {

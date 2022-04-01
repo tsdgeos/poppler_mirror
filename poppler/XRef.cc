@@ -992,7 +992,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
             } else {
                 char *endstream = strstr(p, "endstream");
                 if (endstream) {
-                    int endstreamPos = endstream - p;
+                    intptr_t endstreamPos = endstream - p;
                     if ((endstreamPos == 0 || Lexer::isSpace(p[endstreamPos - 1] & 0xff)) // endstream is either at beginning or preceeded by space
                         && (endstreamPos + 9 >= 256 || Lexer::isSpace(p[endstreamPos + 9] & 0xff))) // endstream is either at end or followed by space
                     {

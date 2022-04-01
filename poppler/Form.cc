@@ -575,7 +575,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
         }
         int len = BUF_SIZE;
         if (end - start < len) {
-            len = end - start;
+            len = static_cast<int>(end - start);
         }
         if (fread(buf, 1, len, f) != static_cast<size_t>(len)) {
             delete[] buf;
@@ -2259,8 +2259,8 @@ void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset 
     while (i < block_len) {
         Goffset bytes_left = block_len - i;
         if (bytes_left < BLOCK_SIZE) {
-            doc->getBaseStream()->doGetChars(bytes_left, signed_data_buffer);
-            handler->updateHash(signed_data_buffer, bytes_left);
+            doc->getBaseStream()->doGetChars(static_cast<int>(bytes_left), signed_data_buffer);
+            handler->updateHash(signed_data_buffer, static_cast<int>(bytes_left));
             i = block_len;
         } else {
             doc->getBaseStream()->doGetChars(BLOCK_SIZE, signed_data_buffer);
