@@ -1087,8 +1087,8 @@ void AnnotAppearance::removeStream(Ref refToStream)
             continue;
         }
         Annots *annots = page->getAnnots();
-        for (int i = 0; i < annots->getNumAnnots(); ++i) {
-            AnnotAppearance *annotAp = annots->getAnnot(i)->getAppearStreams();
+        for (Annot *annot : annots->getAnnots()) {
+            AnnotAppearance *annotAp = annot->getAppearStreams();
             if (annotAp && annotAp != this && annotAp->referencesStream(refToStream)) {
                 return; // Another annotation points to the stream -> Don't delete it
             }

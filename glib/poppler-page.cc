@@ -1282,7 +1282,6 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
 {
     GList *map_list = nullptr;
     double width, height;
-    gint i;
     Annots *annots;
     const PDFRectangle *crop_box;
 
@@ -1296,14 +1295,12 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
     poppler_page_get_size(page, &width, &height);
     crop_box = page->page->getCropBox();
 
-    for (i = 0; i < annots->getNumAnnots(); i++) {
+    for (Annot *annot : annots->getAnnots()) {
         PopplerAnnotMapping *mapping;
         PopplerRectangle rect;
-        Annot *annot;
         gboolean flag_no_rotate;
         gint rotation = 0;
 
-        annot = annots->getAnnot(i);
         flag_no_rotate = annot->getFlags() & Annot::flagNoRotate;
 
         /* Create the mapping */

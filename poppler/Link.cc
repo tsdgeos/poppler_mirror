@@ -890,8 +890,7 @@ Links::Links(Annots *annots)
         return;
     }
 
-    for (int i = 0; i < annots->getNumAnnots(); ++i) {
-        Annot *annot = annots->getAnnot(i);
+    for (Annot *annot : annots->getAnnots()) {
 
         if (annot->getType() != Annot::typeLink) {
             continue;

@@ -2732,14 +2732,13 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
     widgets = nullptr;
     size = 0;
 
-    if (annots && annots->getNumAnnots() > 0 && form) {
-        size = annots->getNumAnnots();
+    if (annots && !annots->getAnnots().empty() > 0 && form) {
+        size = annots->getAnnots().size();
         widgets = (FormWidget **)greallocn(widgets, size, sizeof(FormWidget *));
 
         /* For each entry in the page 'Annots' dict, try to find
            a matching form field */
-        for (int i = 0; i < size; ++i) {
-            Annot *annot = annots->getAnnot(i);
+        for (Annot *annot : annots->getAnnots()) {
 
             if (annot->getType() != Annot::typeWidget) {
                 continue;

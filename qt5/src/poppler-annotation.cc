@@ -438,10 +438,6 @@ AnnotPath *AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) cons
 QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
 {
     Annots *annots = pdfPage->getAnnots();
-    const uint numAnnotations = annots->getNumAnnots();
-    if (numAnnotations == 0) {
-        return QList<Annotation *>();
-    }
 
     const bool wantTextAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AText);
     const bool wantLineAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ALine);
@@ -459,11 +455,9 @@ QList<Annotation *> AnnotationPrivate::findAnnotations(::Page *pdfPage, Document
 
     // Create Annotation objects and tie to their native Annot
     QList<Annotation *> res;
-    for (uint k = 0; k < numAnnotations; k++) {
-        // get the j-th annotation
-        Annot *ann = annots->getAnnot(k);
+    for (Annot *ann : annots->getAnnots()) {
         if (!ann) {
-            error(errInternal, -1, "Annot {0:ud} is null", k);
+            error(errInternal, -1, "Annot is null");
             continue;
         }
 

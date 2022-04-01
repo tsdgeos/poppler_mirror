@@ -360,10 +360,6 @@ AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
 std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
 {
     Annots *annots = pdfPage->getAnnots();
-    const uint numAnnotations = annots->getNumAnnots();
-    if (numAnnotations == 0) {
-        return std::vector<std::unique_ptr<Annotation>>();
-    }
 
     const bool wantTextAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AText);
     const bool wantLineAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ALine);
@@ -381,11 +377,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
     // Create Annotation objects and tie to their native Annot
     std::vector<std::unique_ptr<Annotation>> res;
-    for (uint k = 0; k < numAnnotations; k++) {
-        // get the j-th annotation
-        Annot *ann = annots->getAnnot(k);
+    for (Annot *ann : annots->getAnnots()) {
         if (!ann) {
-            error(errInternal, -1, "Annot {0:ud} is null", k);
+            error(errInternal, -1, "Annot is null");
             continue;
         }
 

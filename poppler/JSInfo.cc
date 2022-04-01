@@ -194,15 +194,15 @@ void JSInfo::scan(int nPages)
         }
         // annotation actions (links, screen, widget)
         annots = page->getAnnots();
-        for (int i = 0; i < annots->getNumAnnots(); ++i) {
-            if (annots->getAnnot(i)->getType() == Annot::typeLink) {
-                AnnotLink *annot = static_cast<AnnotLink *>(annots->getAnnot(i));
+        for (Annot *a : annots->getAnnots()) {
+            if (a->getType() == Annot::typeLink) {
+                AnnotLink *annot = static_cast<AnnotLink *>(a);
                 scanLinkAction(annot->getAction(), "Link Annotation Activated");
                 if (onlyFirstJS && hasJS) {
                     return;
                 }
-            } else if (annots->getAnnot(i)->getType() == Annot::typeScreen) {
-                AnnotScreen *annot = static_cast<AnnotScreen *>(annots->getAnnot(i));
+            } else if (a->getType() == Annot::typeScreen) {
+                AnnotScreen *annot = static_cast<AnnotScreen *>(a);
                 scanLinkAction(annot->getAction(), "Screen Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Screen Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Screen Annotation Cursor Leave");
@@ -218,8 +218,8 @@ void JSInfo::scan(int nPages)
                 if (onlyFirstJS && hasJS) {
                     return;
                 }
-            } else if (annots->getAnnot(i)->getType() == Annot::typeWidget) {
-                AnnotWidget *annot = static_cast<AnnotWidget *>(annots->getAnnot(i));
+            } else if (a->getType() == Annot::typeWidget) {
+                AnnotWidget *annot = static_cast<AnnotWidget *>(a);
                 scanLinkAction(annot->getAction(), "Widget Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Widget Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Widget Annotation Cursor Leave");

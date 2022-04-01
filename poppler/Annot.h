@@ -1766,9 +1766,8 @@ public:
     Annots(const Annots &) = delete;
     Annots &operator=(const Annots &) = delete;
 
-    // Iterate through list of annotations.
-    int getNumAnnots() const { return annots.size(); }
-    Annot *getAnnot(int i) { return annots[i]; }
+    const std::vector<Annot *> &getAnnots() { return annots; }
+
     void appendAnnot(Annot *annot);
     bool removeAnnot(Annot *annot);
 
