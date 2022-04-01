@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Christian Persch <chpe@src.gnome.org>
 //
 //========================================================================
@@ -27,7 +27,7 @@ public:
 
     explicit FILECacheLoader(FILE *fileA) : file(fileA) { }
 
-    size_t init(GooString *dummy, CachedFile *cachedFile) override;
+    size_t init(CachedFile *cachedFile) override;
     int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
 };
 

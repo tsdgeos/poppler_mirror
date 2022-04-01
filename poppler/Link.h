@@ -35,6 +35,7 @@
 #include "Object.h"
 #include "poppler_private_export.h"
 #include <memory>
+#include <optional>
 #include <set>
 
 class GooString;
@@ -86,13 +87,13 @@ public:
     static std::unique_ptr<LinkAction> parseDest(const Object *obj);
 
     // Parse an action dictionary.
-    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI = nullptr);
+    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const std::optional<std::string> &baseURI = {});
 
     // A List of the next actions to execute in order.
     const std::vector<std::unique_ptr<LinkAction>> &nextActions() const;
 
 private:
-    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
+    static std::unique_ptr<LinkAction> parseAction(const Object *obj, const std::optional<std::string> &baseURI, std::set<int> *seenNextActions);
 
     std::vector<std::unique_ptr<LinkAction>> nextActionList;
 };
@@ -242,7 +243,7 @@ class POPPLER_PRIVATE_EXPORT LinkURI : public LinkAction
 {
 public:
     // Build a LinkURI given the URI (string) and base URI.
-    LinkURI(const Object *uriObj, const GooString *baseURI);
+    LinkURI(const Object *uriObj, const std::optional<std::string> &baseURI);
 
     ~LinkURI() override;
 

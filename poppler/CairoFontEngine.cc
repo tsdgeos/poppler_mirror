@@ -314,10 +314,11 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref, FT_Li
 
     // embedded font
     if (fontLoc->locType == gfxFontLocEmbedded) {
-        font_data = gfxFont->readEmbFontFile(xref);
-        if (font_data.empty()) {
+        auto fd = gfxFont->readEmbFontFile(xref);
+        if (!fd || fd->empty()) {
             goto err2;
         }
+        font_data = std::move(fd.value());
 
         // external font
     } else { // gfxFontLocExternal

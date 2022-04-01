@@ -4300,7 +4300,7 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int combMaxLen)
+                                      const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int nCombs)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
@@ -4440,7 +4440,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     break;
                 }
             }
-            daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+            daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
         }
 
         // starting y coordinate
@@ -4450,7 +4450,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
         // set the font matrix
         daToks[tmPos + 4] = "0";
-        daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+        daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
         // write the DA string
         for (const std::string &daTok : daToks) {
@@ -4493,11 +4493,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         //~ replace newlines with spaces? - what does Acrobat do?
 
         // comb formatting
-        if (combMaxLen > 0) {
+        if (nCombs > 0) {
             int charCount;
 
             // compute comb spacing
-            const double w = (dx - 2 * borderWidth) / combMaxLen;
+            const double w = (dx - 2 * borderWidth) / nCombs;
 
             // compute font autosize
             if (fontSize == 0) {
@@ -4506,33 +4506,33 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     fontSize = w;
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
             }
 
             int dummy = 0;
             Annot::layoutText(text, &convertedText, &dummy, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
-            if (charCount > combMaxLen) {
-                charCount = combMaxLen;
+            if (charCount > nCombs) {
+                charCount = nCombs;
             }
 
             // compute starting text cell
-            auto calculateX = [quadding, borderWidth, combMaxLen, charCount, w] {
+            auto calculateX = [quadding, borderWidth, nCombs, charCount, w] {
                 switch (quadding) {
                 case VariableTextQuadding::leftJustified:
                 default:
                     return borderWidth;
                 case VariableTextQuadding::centered:
-                    return borderWidth + (combMaxLen - charCount) / 2.0 * w;
+                    return borderWidth + (nCombs - charCount) / 2.0 * w;
                 case VariableTextQuadding::rightJustified:
-                    return borderWidth + (combMaxLen - charCount) * w;
+                    return borderWidth + (nCombs - charCount) * w;
                 }
             };
             const double x = calculateX();
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
@@ -4544,7 +4544,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             int len = convertedText.getLength();
             int i = 0;
             double xPrev = w; // so that first character is placed properly
-            while (i < combMaxLen && len > 0) {
+            while (i < nCombs && len > 0) {
                 CharCode code;
                 const Unicode *uAux;
                 int uLen, n;
@@ -4586,7 +4586,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                     }
                 }
                 fontSize = floor(fontSize);
-                daToks[tfPos + 1] = GooString().format("{0:.2f}", fontSize)->toStr();
+                daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
             }
 
             // compute text start position
@@ -4606,8 +4606,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             const double y = 0.5 * dy - 0.4 * fontSize;
 
             // set the font matrix
-            daToks[tmPos + 4] = GooString().format("{0:.2f}", x)->toStr();
-            daToks[tmPos + 5] = GooString().format("{0:.2f}", y)->toStr();
+            daToks[tmPos + 4] = GooString().appendf("{0:.2f}", x)->toStr();
+            daToks[tmPos + 5] = GooString().appendf("{0:.2f}", y)->toStr();
 
             // write the DA string
             for (const std::string &daTok : daToks) {
@@ -5010,7 +5010,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
             quadding = VariableTextQuadding::leftJustified;
         }
 
-        const int combMaxLen = fieldText->isComb() ? fieldText->getMaxLen() : 0;
+        const int nCombs = fieldText->isComb() ? fieldText->getMaxLen() : 0;
 
         int flags = EmitMarkedContentDrawTextFlag;
         if (fieldText->isMultiline()) {
@@ -5019,7 +5019,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         if (fieldText->isPassword()) {
             flags = flags | TurnTextToStarsDrawTextFlag;
         }
-        return drawText(contents, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, combMaxLen);
+        return drawText(contents, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, nCombs);
     }
 
     return true;
@@ -5051,9 +5051,8 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
         Matrix matrix = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
         matrix.scale(width, height);
         static const char *IMG_TMPL = "\nq {0:.1g} {1:.1g} {2:.1g} {3:.1g} {4:.1g} {5:.1g} cm /{6:s} Do Q\n";
-        const GooString *imgBuffer = GooString::format(IMG_TMPL, matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
+        const std::unique_ptr<GooString> imgBuffer = GooString::format(IMG_TMPL, matrix.m[0], matrix.m[1], matrix.m[2], matrix.m[3], matrix.m[4], matrix.m[5], imageResourceId);
         append(imgBuffer->c_str());
-        delete imgBuffer;
     }
 
     const GooString &leftText = field->getCustomAppearanceLeftContent();
@@ -5639,11 +5638,10 @@ void AnnotStamp::generateStampDefaultAppearance()
     }
 
     const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
-    const GooString *scale = GooString::format("{0:.6g} 0 0 {1:.6g} 0 0 cm\nq\n", bboxArray[2] / stampUnscaledWidth, bboxArray[3] / stampUnscaledHeight);
+    const std::unique_ptr<GooString> scale = GooString::format("{0:.6g} 0 0 {1:.6g} 0 0 cm\nq\n", bboxArray[2] / stampUnscaledWidth, bboxArray[3] / stampUnscaledHeight);
     defaultAppearanceBuilder.append(scale->c_str());
     defaultAppearanceBuilder.append(stampCode);
     defaultAppearanceBuilder.append("Q\n");
-    delete scale;
 
     Dict *resDict = new Dict(doc->getXRef());
     resDict->add("ExtGState", Object(extGStateDict));

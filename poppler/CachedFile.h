@@ -8,7 +8,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -45,7 +45,7 @@ class POPPLER_PRIVATE_EXPORT CachedFile
     friend class CachedFileWriter;
 
 public:
-    CachedFile(CachedFileLoader *cacheLoader, GooString *uri);
+    explicit CachedFile(CachedFileLoader *cacheLoader);
 
     CachedFile(const CachedFile &) = delete;
     CachedFile &operator=(const CachedFile &) = delete;
@@ -79,7 +79,6 @@ private:
     int cache(size_t offset, size_t length);
 
     CachedFileLoader *loader;
-    GooString *uri;
 
     size_t length;
     size_t streamPos;
@@ -136,8 +135,8 @@ public:
 
     // Initializes the file load.
     // Returns the length of the file.
-    // The caller is responsible for deleting uri and cachedFile.
-    virtual size_t init(GooString *uri, CachedFile *cachedFile) = 0;
+    // The caller is responsible for deleting cachedFile.
+    virtual size_t init(CachedFile *cachedFile) = 0;
 
     // Loads specified byte ranges and passes it to the writer to store them.
     // Returns 0 on success, Anything but 0 on failure.

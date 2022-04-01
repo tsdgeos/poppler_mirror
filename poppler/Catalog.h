@@ -46,8 +46,9 @@
 #include "Object.h"
 #include "Link.h"
 
-#include <vector>
 #include <memory>
+#include <optional>
+#include <vector>
 
 class PDFDoc;
 class XRef;
@@ -132,7 +133,7 @@ public:
     Ref *getPageRef(int i);
 
     // Return base URI, or NULL if none.
-    GooString *getBaseURI() { return baseURI; }
+    const std::optional<std::string> &getBaseURI() const { return baseURI; }
 
     // Return the contents of the metadata stream, or NULL if there is
     // no metadata.
@@ -285,7 +286,7 @@ private:
     NameTree *destNameTree; // named destination name-tree
     NameTree *embeddedFileNameTree; // embedded file name-tree
     NameTree *jsNameTree; // Java Script name-tree
-    GooString *baseURI; // base URI for URI-type links
+    std::optional<std::string> baseURI; // base URI for URI-type links
     Object metadata; // metadata stream
     StructTreeRoot *structTreeRoot; // structure tree root
     unsigned int markInfo; // Flags from MarkInfo dictionary

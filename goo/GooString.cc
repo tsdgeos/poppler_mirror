@@ -121,9 +121,9 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec, bool tri
 
 //------------------------------------------------------------------------
 
-GooString *GooString::format(const char *fmt, ...)
+std::unique_ptr<GooString> GooString::format(const char *fmt, ...)
 {
-    auto *s = new GooString();
+    auto s = std::make_unique<GooString>();
 
     va_list argList;
     va_start(argList, fmt);
@@ -133,9 +133,9 @@ GooString *GooString::format(const char *fmt, ...)
     return s;
 }
 
-GooString *GooString::formatv(const char *fmt, va_list argList)
+std::unique_ptr<GooString> GooString::formatv(const char *fmt, va_list argList)
 {
-    auto *s = new GooString();
+    auto s = std::make_unique<GooString>();
 
     s->appendfv(fmt, argList);
 
@@ -617,26 +617,12 @@ void GooString::prependUnicodeMarker()
 
 bool GooString::startsWith(const char *prefix) const
 {
-    const auto len = size();
-    const auto prefixLen = std::strlen(prefix);
-
-    if (len < prefixLen) {
-        return false;
-    }
-
-    return static_cast<const std::string &>(*this).compare(0, prefixLen, prefix) == 0;
+    return startsWith(toStr(), prefix);
 }
 
 bool GooString::endsWith(const char *suffix) const
 {
-    const auto len = size();
-    const auto suffixLen = std::strlen(suffix);
-
-    if (len < suffixLen) {
-        return false;
-    }
-
-    return static_cast<const std::string &>(*this).compare(len - suffixLen, suffixLen, suffix) == 0;
+    return endsWith(toStr(), suffix);
 }
 
 GooString *GooString::sanitizedName(bool psmode) const

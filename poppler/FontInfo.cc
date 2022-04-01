@@ -162,14 +162,12 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
 
 FontInfo::FontInfo(GfxFont *font, XRef *xref)
 {
-    const GooString *origName;
-
     fontRef = *font->getID();
 
     // font name
-    origName = font->getName();
-    if (origName != nullptr) {
-        name = font->getName()->toStr();
+    const std::optional<std::string> &origName = font->getName();
+    if (origName) {
+        name = *font->getName();
     }
 
     // font type

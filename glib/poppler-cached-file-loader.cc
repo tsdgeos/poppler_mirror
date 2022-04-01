@@ -1,6 +1,7 @@
 /* poppler-cached-file-loader.h: glib interface to poppler
  *
  * Copyright (C) 2012 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2022 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +26,6 @@ PopplerCachedFileLoader::PopplerCachedFileLoader(GInputStream *inputStreamA, GCa
     inputStream = (GInputStream *)g_object_ref(inputStreamA);
     cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
     length = lengthA;
-    url = nullptr;
     cachedFile = nullptr;
 }
 
@@ -37,13 +37,12 @@ PopplerCachedFileLoader::~PopplerCachedFileLoader()
     }
 }
 
-size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
+size_t PopplerCachedFileLoader::init(CachedFile *cachedFileA)
 {
     size_t size;
     gssize bytesRead;
     char buf[CachedFileChunkSize];
 
-    url = urlA;
     cachedFile = cachedFileA;
 
     if (length != (goffset)-1) {
@@ -55,7 +54,7 @@ size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
 
         info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM(inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, nullptr);
         if (!info) {
-            error(errInternal, -1, "Failed to get size of '{0:t}'.", urlA);
+            error(errInternal, -1, "Failed to get size.");
             return (size_t)-1;
         }
 

@@ -29,6 +29,7 @@
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -41,6 +42,7 @@
 #include "poppler_private_export.h"
 
 #include <cstdarg>
+#include <memory>
 #include <string>
 
 #ifdef __clang__
@@ -138,8 +140,8 @@ public:
     //     t -- GooString *
     //     w -- blank space; arg determines width
     // To get literal curly braces, use {{ or }}.
-    POPPLER_PRIVATE_EXPORT static GooString *format(const char *fmt, ...) GOOSTRING_FORMAT;
-    POPPLER_PRIVATE_EXPORT static GooString *formatv(const char *fmt, va_list argList);
+    POPPLER_PRIVATE_EXPORT static std::unique_ptr<GooString> format(const char *fmt, ...) GOOSTRING_FORMAT;
+    POPPLER_PRIVATE_EXPORT static std::unique_ptr<GooString> formatv(const char *fmt, va_list argList);
 
     // Get length.
     int getLength() const { return size(); }
@@ -238,6 +240,9 @@ public:
     POPPLER_PRIVATE_EXPORT bool startsWith(const char *prefix) const;
     // Return true if string ends with suffix
     POPPLER_PRIVATE_EXPORT bool endsWith(const char *suffix) const;
+
+    static bool startsWith(std::string_view str, std::string_view prefix) { return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix); }
+    static bool endsWith(std::string_view str, std::string_view suffix) { return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix); }
 
     bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
     static bool hasUnicodeMarker(const std::string &s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }

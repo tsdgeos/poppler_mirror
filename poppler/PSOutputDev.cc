@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -976,16 +976,11 @@ struct PSOutImgClipRect
 
 struct PSOutPaperSize
 {
-    PSOutPaperSize(GooString *nameA, int wA, int hA)
-    {
-        name = nameA;
-        w = wA;
-        h = hA;
-    }
-    ~PSOutPaperSize() { delete name; }
+    PSOutPaperSize(std::unique_ptr<GooString> &&nameA, int wA, int hA) : name(std::move(nameA)), w(wA), h(hA) { }
+    ~PSOutPaperSize() = default;
     PSOutPaperSize(const PSOutPaperSize &) = delete;
     PSOutPaperSize &operator=(const PSOutPaperSize &) = delete;
-    GooString *name;
+    std::unique_ptr<GooString> name;
     int w, h;
 };
 
@@ -1379,10 +1374,10 @@ void PSOutputDev::postInit()
         }
         if (i == (int)paperSizes->size()) {
             const StandardMedia *media = standardMedia;
-            GooString *name = nullptr;
+            std::unique_ptr<GooString> name;
             while (media->name) {
                 if (pageDimensionEqual(w, media->width) && pageDimensionEqual(h, media->height)) {
-                    name = new GooString(media->name);
+                    name = std::make_unique<GooString>(media->name);
                     w = media->width;
                     h = media->height;
                     break;
@@ -1392,7 +1387,7 @@ void PSOutputDev::postInit()
             if (!name) {
                 name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72));
             }
-            paperSizes->push_back(new PSOutPaperSize(name, w, h));
+            paperSizes->push_back(new PSOutPaperSize(std::move(name), w, h));
         }
         pagePaperSize.insert(std::pair<int, int>(pg, i));
         if (!paperMatch) {
@@ -1638,7 +1633,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
     case psModePS:
         for (std::size_t i = 0; i < paperSizes->size(); ++i) {
             size = (*paperSizes)[i];
-            writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n", i == 0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
+            writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n", i == 0 ? "DocumentMedia:" : "+", size->name.get(), size->w, size->h);
         }
         writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
         writePSFmt("%%Pages: {0:d}\n", nPages);
@@ -1646,7 +1641,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
         if (!paperMatch) {
             size = (*paperSizes)[0];
             writePS("%%BeginDefaults\n");
-            writePSFmt("%%PageMedia: {0:t}\n", size->name);
+            writePSFmt("%%PageMedia: {0:t}\n", size->name.get());
             writePS("%%EndDefaults\n");
         }
         break;
@@ -1981,7 +1976,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     subst = false;
 
     if (font->getType() == fontType3) {
-        psName = GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen);
+        psName = GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen).release();
         setupType3Font(font, psName, parentResDict);
     } else {
         std::optional<GfxFontLoc> fontLoc = font->locateFont(xref, this);
@@ -2400,9 +2395,9 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     embFontList->append("\n");
 
     // convert it to a Type 1 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if ((ffT1C = FoFiType1C::make(fontBuf.data(), fontBuf.size()))) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if ((ffT1C = FoFiType1C::make(fontBuf->data(), fontBuf->size()))) {
             ffT1C->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
             delete ffT1C;
         }
@@ -2439,9 +2434,9 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 1 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (ffTT->isOpenTypeCFF()) {
                 ffTT->convertToType1(psName->c_str(), nullptr, true, outputFunc, outputStream);
             }
@@ -2463,9 +2458,9 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
     embFontList->append("\n");
 
     // convert it to a Type 42 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
             ffTT->convertToType42(psName->c_str(), ((Gfx8BitFont *)font)->getHasEncoding() ? ((Gfx8BitFont *)font)->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
             if (codeToGID) {
@@ -2516,7 +2511,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const GooString *file
 void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
 {
     if (maxValidGlyph >= 0 && font->getName()) {
-        auto &fontMaxValidGlyph = perFontMaxValidGlyph[font->getName()->toStr()];
+        auto &fontMaxValidGlyph = perFontMaxValidGlyph[*font->getName()];
         if (fontMaxValidGlyph < maxValidGlyph) {
             fontMaxValidGlyph = maxValidGlyph;
         }
@@ -2600,9 +2595,9 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if ((ffT1C = FoFiType1C::make(fontBuf.data(), fontBuf.size()))) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if ((ffT1C = FoFiType1C::make(fontBuf->data(), fontBuf->size()))) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffT1C->convertToCIDType0(psName->c_str(), nullptr, 0, outputFunc, outputStream);
@@ -2627,9 +2622,9 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffTT->convertToCIDType2(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), needVerticalMetrics, outputFunc, outputStream);
@@ -2673,9 +2668,9 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
     embFontList->append("\n");
 
     // convert it to a Type 0 font
-    const std::vector<unsigned char> fontBuf = font->readEmbFontFile(xref);
-    if (!fontBuf.empty()) {
-        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf.data(), fontBuf.size())) {
+    const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
+    if (fontBuf) {
+        if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size())) {
             if (ffTT->isOpenTypeCFF()) {
                 if (level >= psLevel3) {
                     // Level 3: use a CID font
@@ -2699,7 +2694,6 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     Gfx *gfx;
     PDFRectangle box;
     const double *m;
-    GooString *buf;
     int i;
 
     // set up resources used by font
@@ -2754,13 +2748,13 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
             Object charProc = charProcs->getVal(i);
             gfx->display(&charProc);
             if (t3String) {
+                std::unique_ptr<GooString> buf;
                 if (t3Cacheable) {
                     buf = GooString::format("{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g} setcachedevice\n", t3WX, t3WY, t3LLX, t3LLY, t3URX, t3URY);
                 } else {
                     buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
                 }
                 (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
-                delete buf;
                 (*outputFunc)(outputStream, t3String->c_str(), t3String->getLength());
                 delete t3String;
                 t3String = nullptr;
@@ -2789,26 +2783,26 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
     const GooString *s;
 
     if ((s = font->getEmbeddedFontName())) {
-        psName = filterPSName(s);
+        psName = filterPSName(s->toStr());
         if (fontNames.emplace(psName->toStr()).second) {
             return psName;
         }
         delete psName;
     }
-    if ((s = font->getName())) {
-        psName = filterPSName(s);
+    if (font->getName()) {
+        psName = filterPSName(*font->getName());
         if (fontNames.emplace(psName->toStr()).second) {
             return psName;
         }
         delete psName;
     }
-    psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen);
+    psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen).release();
     if ((s = font->getEmbeddedFontName())) {
-        s = filterPSName(s);
+        s = filterPSName(s->toStr());
         psName->append('_')->append(s);
         delete s;
-    } else if ((s = font->getName())) {
-        s = filterPSName(s);
+    } else if (font->getName()) {
+        s = filterPSName(*font->getName());
         psName->append('_')->append(s);
         delete s;
     }
@@ -3785,7 +3779,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 
         if (paperMatch) {
             paperSize = (*paperSizes)[pagePaperSize[pageNum]];
-            writePSFmt("%%PageMedia: {0:t}\n", paperSize->name);
+            writePSFmt("%%PageMedia: {0:t}\n", paperSize->name.get());
         }
 
         // Create a matrix with the same transform that will be output to PS
@@ -5051,7 +5045,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     if (!(font = state->getFont())) {
         return;
     }
-    maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[font->getName()->toStr()] : 0);
+    maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[*font->getName()] : 0);
     if (maxGlyphInt < 0) {
         maxGlyphInt = 0;
     }
@@ -6659,7 +6653,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         Ref ref = iccBasedCS->getRef();
         const bool validref = ref != Ref::INVALID();
         int intent = state->getCmsRenderingIntent();
-        GooString *name;
+        std::unique_ptr<GooString> name;
         if (validref) {
             name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
         } else {
@@ -6668,16 +6662,16 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         }
         const auto &it = iccEmitted.find(name->toStr());
         if (it != iccEmitted.end()) {
-            writePSFmt("{0:t}", name);
+            writePSFmt("{0:t}", name.get());
             if (genXform) {
                 writePS(" {}");
             }
         } else {
             char *csa = iccBasedCS->getPostScriptCSA();
             if (csa) {
-                writePSFmt("userdict /{0:t} {1:s} put\n", name, csa);
+                writePSFmt("userdict /{0:t} {1:s} put\n", name.get(), csa);
                 iccEmitted.emplace(name->toStr());
-                writePSFmt("{0:t}", name);
+                writePSFmt("{0:t}", name.get());
                 if (genXform) {
                     writePS(" {}");
                 }
@@ -6685,7 +6679,6 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
                 dumpColorSpaceL2(state, ((GfxICCBasedColorSpace *)colorSpace)->getAlt(), genXform, updateColors, false);
             }
         }
-        delete name;
     }
 #else
         // there is no transform function to the alternate color space, so
@@ -7375,15 +7368,13 @@ void PSOutputDev::writePSBuf(const char *s, int len)
 void PSOutputDev::writePSFmt(const char *fmt, ...)
 {
     va_list args;
-    GooString *buf;
 
     va_start(args, fmt);
     if (t3String) {
         t3String->appendfv((char *)fmt, args);
     } else {
-        buf = GooString::formatv((char *)fmt, args);
+        const std::unique_ptr<GooString> buf = GooString::formatv((char *)fmt, args);
         (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
-        delete buf;
     }
     va_end(args);
 }
@@ -7433,25 +7424,22 @@ void PSOutputDev::writePSName(const char *s)
     }
 }
 
-GooString *PSOutputDev::filterPSName(const GooString *name)
+GooString *PSOutputDev::filterPSName(const std::string &name)
 {
     GooString *name2;
     char buf[8];
-    int i;
-    char c;
 
     name2 = new GooString();
 
     // ghostscript chokes on names that begin with out-of-limits
     // numbers, e.g., 1e4foo is handled correctly (as a name), but
     // 1e999foo generates a limitcheck error
-    c = name->getChar(0);
-    if (c >= '0' && c <= '9') {
+    const char c0 = name[0];
+    if (c0 >= '0' && c0 <= '9') {
         name2->append('f');
     }
 
-    for (i = 0; i < name->getLength(); ++i) {
-        c = name->getChar(i);
+    for (const char c : name) {
         if (c <= (char)0x20 || c >= (char)0x7f || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%') {
             sprintf(buf, "#%02x", c & 0xff);
             name2->append(buf);
@@ -7513,10 +7501,9 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
         } else if (c == '(') {
             label2->append("\\(");
         } else if (c < 0x20 || c > 0x7e) {
-            GooString *aux = GooString::format("\\{0:03o}", c);
-            label2->append(aux);
+            std::unique_ptr<GooString> aux = GooString::format("\\{0:03o}", c);
+            label2->append(aux.get());
             j += 4;
-            delete aux;
         } else {
             label2->append(c);
             ++j;

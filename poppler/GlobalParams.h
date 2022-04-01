@@ -108,7 +108,7 @@ public:
     FILE *getUnicodeMapFile(const std::string &encodingName);
     FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
     FILE *findToUnicodeFile(const GooString *name);
-    GooString *findFontFile(const GooString *fontName);
+    GooString *findFontFile(const std::string &fontName);
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     std::string getTextEncodingName() const;
