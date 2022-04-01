@@ -2732,7 +2732,7 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
     widgets = nullptr;
     size = 0;
 
-    if (annots && !annots->getAnnots().empty() > 0 && form) {
+    if (annots && !annots->getAnnots().empty() && form) {
         size = annots->getAnnots().size();
         widgets = (FormWidget **)greallocn(widgets, size, sizeof(FormWidget *));
 
