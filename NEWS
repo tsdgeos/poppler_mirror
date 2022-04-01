@@ -1,3 +1,31 @@
+Release 22.04.0:
+        core:
+         * Fix underline sometimes being drawn only partially
+         * Fix Adobe Reader not reading some of the contents we write correctly
+         * Fix code that workarounds some broken-ish files
+         * FoFiTrueType: Parse CFF2 fonts too
+         * FoFiTrueType: Support cmap types 2 and 13
+         * Fix a few small memory leaks
+         * code improvements
+
+        qt:
+         * Handle SaveAs named action
+         * Annotations: don't change the text color when changing the font
+
+        utils:
+         * pdftotext: print creation and modification date when using htmlmeta param
+
+        glib:
+         * Fix returning internal data of temporary strings
+
+        cpp:
+         * Fix code incompatibility with MSVC
+
+        build system:
+         * poppler internal library is no longer forced to static on MSVC
+         * Error out if iconv is not available and the cpp frontend is enabled
+         * Require FreeType 2.8
+
 Release 22.03.0:
         core:
          * Signature: Fix finding Signatures that are in Pages not not in the global the Forms object
