@@ -3,7 +3,7 @@
 // ImageEmbeddingUtils.cc
 //
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 //
 // This file is licensed under the GPLv2 or later
@@ -339,7 +339,9 @@ public:
         }
 
         jpeg_create_decompress(&info);
-        jpeg_mem_src(&info, fileContent.get(), fileSize);
+        // fileSize is guaranteed to be in the range 0..int max by the checks in embed()
+        // jpeg_mem_src takes an unsigned long in the 3rd parameter
+        jpeg_mem_src(&info, fileContent.get(), static_cast<unsigned long>(fileSize));
         jpeg_read_header(&info, TRUE);
         jpeg_start_decompress(&info);
         auto result = std::unique_ptr<ImageEmbedder>(new JpegEmbedder(info.output_width, info.output_height, std::move(fileContent), fileSize));
@@ -369,8 +371,13 @@ Ref embed(XRef *xref, const GooFile &imageFile)
         error(errIO, -1, "Image file size could not be calculated");
         return Ref::INVALID();
     }
+    // GooFile::read only takes an integer so for now we don't support huge images
+    if (fileSize > std::numeric_limits<int>::max()) {
+        error(errIO, -1, "file size too big");
+        return Ref::INVALID();
+    }
     std::unique_ptr<uint8_t[]> fileContent = std::make_unique<uint8_t[]>(fileSize);
-    const Goffset bytesRead = imageFile.read((char *)fileContent.get(), fileSize, 0);
+    const int bytesRead = imageFile.read((char *)fileContent.get(), fileSize, 0);
     if ((bytesRead != fileSize) || (fileSize < MAX_MAGIC_NUM_SIZE)) {
         error(errIO, -1, "Couldn't load the image file");
         return Ref::INVALID();
