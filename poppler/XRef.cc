@@ -832,17 +832,17 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n
             switch (type) {
             case 0:
                 entries[i].offset = offset;
-                entries[i].gen = gen;
+                entries[i].gen = static_cast<int>(gen);
                 entries[i].type = xrefEntryFree;
                 break;
             case 1:
                 entries[i].offset = offset;
-                entries[i].gen = gen;
+                entries[i].gen = static_cast<int>(gen);
                 entries[i].type = xrefEntryUncompressed;
                 break;
             case 2:
                 entries[i].offset = offset;
-                entries[i].gen = gen;
+                entries[i].gen = static_cast<int>(gen);
                 entries[i].type = xrefEntryCompressed;
                 break;
             default:
@@ -869,7 +869,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
     bool gotRoot;
     char *token = nullptr;
     bool oneCycle = true;
-    int offset = 0;
+    Goffset offset = 0;
 
     resize(0); // free entries properly
     gfree(entries);
@@ -1076,7 +1076,12 @@ bool XRef::isRefEncrypted(Ref r)
     }
 
     case xrefEntryCompressed: {
-        const Object objStr = fetch(e->offset, 0);
+        const Goffset objStrNum = e->offset;
+        if (unlikely(objStrNum < 0 || objStrNum >= size)) {
+            error(errSyntaxError, -1, "XRef::isRefEncrypted - Compressed object offset out of xref bounds");
+            return false;
+        }
+        const Object objStr = fetch(static_cast<int>(e->offset), 0);
         return objStr.getStream()->isEncrypted();
     }
 
@@ -1225,7 +1230,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
 
         ObjectStream *objStr = objStrs.lookup(e->offset);
         if (!objStr) {
-            objStr = new ObjectStream(this, e->offset, recursion + 1);
+            objStr = new ObjectStream(this, static_cast<int>(e->offset), recursion + 1);
             if (!objStr->isOk()) {
                 delete objStr;
                 objStr = nullptr;
@@ -1815,11 +1820,11 @@ void XRef::scanSpecialFlags()
     // individually in full rewrite mode.
     for (int i = 0; i < size; ++i) {
         if (entries[i].type == xrefEntryCompressed) {
-            const int objStmNum = entries[i].offset;
+            const Goffset objStmNum = entries[i].offset;
             if (unlikely(objStmNum < 0 || objStmNum >= size)) {
                 error(errSyntaxError, -1, "Compressed object offset out of xref bounds");
             } else {
-                getEntry(objStmNum)->setFlag(XRefEntry::DontRewrite, true);
+                getEntry(static_cast<int>(objStmNum))->setFlag(XRefEntry::DontRewrite, true);
             }
         }
     }
