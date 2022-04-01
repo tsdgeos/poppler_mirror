@@ -1989,7 +1989,7 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
             int segnum = 0;
             int maxXRefSearch = 24576;
             if (str->getLength() < maxXRefSearch) {
-                maxXRefSearch = str->getLength();
+                maxXRefSearch = static_cast<int>(str->getLength());
             }
             for (; (xrefSearchSize - 16) * segnum < maxXRefSearch; segnum++) {
                 str->setPos((xrefSearchSize - 16) * segnum + xrefSearchSize, -1);
