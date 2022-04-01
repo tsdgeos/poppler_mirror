@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2014, 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2019, 2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -164,7 +164,6 @@ static void toRoman(int number, GooString *str, bool uppercase)
 
 static int fromLatin(const char *buffer)
 {
-    int count;
     const char *p;
 
     for (p = buffer; *p; p++) {
@@ -173,7 +172,12 @@ static int fromLatin(const char *buffer)
         }
     }
 
-    count = p - buffer;
+    const intptr_t diff = p - buffer;
+    if (unlikely(diff > std::numeric_limits<int>::max() / 100)) {
+        error(errUnimplemented, -1, "Something went wrong in fromLatin conversion");
+        return -1;
+    }
+    const int count = static_cast<int>(diff);
     if (buffer[0] >= 'a' && buffer[0] <= 'z') {
         return 26 * (count - 1) + buffer[0] - 'a' + 1;
     }
