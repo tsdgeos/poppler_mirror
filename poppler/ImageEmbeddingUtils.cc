@@ -377,7 +377,7 @@ Ref embed(XRef *xref, const GooFile &imageFile)
         return Ref::INVALID();
     }
     std::unique_ptr<uint8_t[]> fileContent = std::make_unique<uint8_t[]>(fileSize);
-    const int bytesRead = imageFile.read((char *)fileContent.get(), fileSize, 0);
+    const int bytesRead = imageFile.read((char *)fileContent.get(), static_cast<int>(fileSize), 0);
     if ((bytesRead != fileSize) || (fileSize < MAX_MAGIC_NUM_SIZE)) {
         error(errIO, -1, "Couldn't load the image file");
         return Ref::INVALID();
