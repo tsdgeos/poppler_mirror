@@ -254,7 +254,7 @@ protected:
 // AnnotBorder
 //------------------------------------------------------------------------
 
-class AnnotBorder
+class POPPLER_PRIVATE_EXPORT AnnotBorder
 {
 public:
     enum AnnotBorderType

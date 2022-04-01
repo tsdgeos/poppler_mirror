@@ -851,7 +851,7 @@ private:
 // GfxShading
 //------------------------------------------------------------------------
 
-class GfxShading
+class POPPLER_PRIVATE_EXPORT GfxShading
 {
 public:
     explicit GfxShading(int typeA);

@@ -31,7 +31,7 @@ class SplashScreen;
 // SplashPattern
 //------------------------------------------------------------------------
 
-class SplashPattern
+class POPPLER_PRIVATE_EXPORT SplashPattern
 {
 public:
     SplashPattern();

@@ -335,7 +335,7 @@ private:
 // only interact with FormWidgets.
 //------------------------------------------------------------------------
 
-class FormField
+class POPPLER_PRIVATE_EXPORT FormField
 {
 public:
     FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
