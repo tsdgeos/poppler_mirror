@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
@@ -194,9 +194,9 @@ static void print_info(poppler::document *doc)
         std::cout << std::setw(out_width) << *key_it << ": " << doc->info_key(*key_it) << std::endl;
     }
     std::cout << std::setw(out_width) << "Date (creation)"
-              << ": " << out_date(doc->info_date("CreationDate")) << std::endl;
+              << ": " << out_date(doc->info_date_t("CreationDate")) << std::endl;
     std::cout << std::setw(out_width) << "Date (modification)"
-              << ": " << out_date(doc->info_date("ModDate")) << std::endl;
+              << ": " << out_date(doc->info_date_t("ModDate")) << std::endl;
     std::cout << std::setw(out_width) << "Number of pages"
               << ": " << doc->pages() << std::endl;
     std::cout << std::setw(out_width) << "Linearized"
@@ -280,7 +280,7 @@ static void print_embedded_files(poppler::document *doc)
         std::left(std::cout);
         for (; it != it_end; ++it) {
             poppler::embedded_file *f = *it;
-            std::cout << " " << std::setw(out_width + 10) << f->name() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date()) << " " << std::setw(20) << out_date(f->modification_date())
+            std::cout << " " << std::setw(out_width + 10) << f->name() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20) << out_date(f->modification_date_t())
                       << std::endl
                       << "     ";
             if (f->description().empty()) {

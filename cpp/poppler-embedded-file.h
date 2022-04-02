@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,10 @@ public:
     std::string name() const;
     ustring description() const;
     int size() const;
-    time_type modification_date() const;
-    time_type creation_date() const;
+    [[deprecated]] time_type modification_date() const;
+    [[deprecated]] time_type creation_date() const;
+    time_t modification_date_t() const;
+    time_t creation_date_t() const;
     byte_array checksum() const;
     std::string mime_type() const;
     byte_array data() const;

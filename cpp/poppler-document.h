@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
- * Copyright (C) 2019, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,8 +72,10 @@ public:
     ustring info_key(const std::string &key) const;
     bool set_info_key(const std::string &key, const ustring &val);
 
-    time_type info_date(const std::string &key) const;
-    bool set_info_date(const std::string &key, time_type val);
+    [[deprecated]] time_type info_date(const std::string &key) const;
+    [[deprecated]] bool set_info_date(const std::string &key, time_type val);
+    time_t info_date_t(const std::string &key) const;
+    bool set_info_date_t(const std::string &key, time_t val);
 
     ustring get_title() const;
     bool set_title(const ustring &title);
@@ -87,10 +89,14 @@ public:
     bool set_creator(const ustring &creator);
     ustring get_producer() const;
     bool set_producer(const ustring &producer);
-    time_type get_creation_date() const;
-    bool set_creation_date(time_type creation_date);
-    time_type get_modification_date() const;
-    bool set_modification_date(time_type mod_date);
+    [[deprecated]] time_type get_creation_date() const;
+    [[deprecated]] bool set_creation_date(time_type creation_date);
+    time_t get_creation_date_t() const;
+    bool set_creation_date_t(time_t creation_date);
+    [[deprecated]] time_type get_modification_date() const;
+    [[deprecated]] bool set_modification_date(time_type mod_date);
+    time_t get_modification_date_t() const;
+    bool set_modification_date_t(time_t mod_date);
 
     bool remove_info();
 
