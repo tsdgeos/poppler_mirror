@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,8 @@ public:
     ~page_transition();
 
     type_enum type() const;
-    int duration() const;
+    [[deprecated]] int duration() const;
+    double durationReal() const;
     alignment_enum alignment() const;
     direction_enum direction() const;
     int angle() const;

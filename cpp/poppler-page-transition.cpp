@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2011, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2011, 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,11 @@ page_transition::type_enum page_transition::type() const
 }
 
 int page_transition::duration() const
+{
+    return static_cast<int>(d->pt.getDuration());
+}
+
+double page_transition::durationReal() const
 {
     return d->pt.getDuration();
 }
