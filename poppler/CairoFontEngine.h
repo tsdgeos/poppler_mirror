@@ -18,7 +18,7 @@
 // Copyright (C) 2005, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>

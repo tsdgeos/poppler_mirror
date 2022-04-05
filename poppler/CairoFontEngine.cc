@@ -21,7 +21,7 @@
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
-// Copyright (C) 2008, 2012, 2014, 2016, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2012, 2014, 2016, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Darren Kenny <darren.kenny@sun.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2010 Jan Kümmel <jan+freedesktop@snorc.org>
