@@ -4,7 +4,7 @@
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2020, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  *
@@ -322,7 +322,7 @@ ustring ustring::from_latin1(const std::string &str)
 time_type poppler::convert_date(const std::string &date)
 {
     GooString gooDateStr(date.c_str());
-    return dateStringToTime(&gooDateStr);
+    return static_cast<time_type>(dateStringToTime(&gooDateStr));
 }
 
 std::ostream &poppler::operator<<(std::ostream &stream, const byte_array &array)
