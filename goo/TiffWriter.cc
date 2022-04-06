@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
 // Copyright (C) 2014 Steven Lee <roc.sky@gmail.com>
@@ -61,7 +61,7 @@ void TiffWriter::setCompressionString(const char *compressionStringArg)
 
 // Write a TIFF file.
 
-bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDPI)
+bool TiffWriter::init(FILE *openedFile, int width, int height, double hDPI, double vDPI)
 {
     unsigned int compression;
     uint16_t photometric = 0;
@@ -186,8 +186,8 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
     TIFFSetField(priv->f, TIFFTAG_PHOTOMETRIC, photometric);
     TIFFSetField(priv->f, TIFFTAG_COMPRESSION, (uint16_t)compression);
     TIFFSetField(priv->f, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(priv->f, rowsperstrip));
-    TIFFSetField(priv->f, TIFFTAG_XRESOLUTION, (double)hDPI);
-    TIFFSetField(priv->f, TIFFTAG_YRESOLUTION, (double)vDPI);
+    TIFFSetField(priv->f, TIFFTAG_XRESOLUTION, hDPI);
+    TIFFSetField(priv->f, TIFFTAG_YRESOLUTION, vDPI);
     TIFFSetField(priv->f, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
     if (priv->format == RGBA_PREMULTIPLIED) {
