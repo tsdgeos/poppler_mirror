@@ -360,10 +360,6 @@ AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
 std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
 {
     Annots *annots = pdfPage->getAnnots();
-    const uint numAnnotations = annots->getNumAnnots();
-    if (numAnnotations == 0) {
-        return std::vector<std::unique_ptr<Annotation>>();
-    }
 
     const bool wantTextAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AText);
     const bool wantLineAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ALine);
@@ -381,11 +377,9 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
 
     // Create Annotation objects and tie to their native Annot
     std::vector<std::unique_ptr<Annotation>> res;
-    for (uint k = 0; k < numAnnotations; k++) {
-        // get the j-th annotation
-        Annot *ann = annots->getAnnot(k);
+    for (Annot *ann : annots->getAnnots()) {
         if (!ann) {
-            error(errInternal, -1, "Annot {0:ud} is null", k);
+            error(errInternal, -1, "Annot is null");
             continue;
         }
 
@@ -830,6 +824,25 @@ void AnnotationPrivate::removeAnnotationFromPage(::Page *pdfPage, const Annotati
     delete ann;
 }
 
+class TextAnnotationPrivate : public AnnotationPrivate
+{
+public:
+    TextAnnotationPrivate();
+    Annotation *makeAlias() override;
+    Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
+    void setDefaultAppearanceToNative();
+    std::unique_ptr<DefaultAppearance> getDefaultAppearanceFromNative() const;
+
+    // data fields
+    TextAnnotation::TextType textType;
+    QString textIcon;
+    std::optional<QFont> textFont;
+    QColor textColor = Qt::black;
+    TextAnnotation::InplaceAlignPosition inplaceAlign;
+    QVector<QPointF> inplaceCallout;
+    TextAnnotation::InplaceIntent inplaceIntent;
+};
+
 class Annotation::Style::Private : public QSharedData
 {
 public:
@@ -1084,6 +1097,11 @@ void Annotation::setContents(const QString &contents)
     }
 
     d->pdfAnnot->setContents(std::unique_ptr<GooString>(QStringToUnicodeGooString(contents)));
+
+    TextAnnotationPrivate *textAnnotD = dynamic_cast<TextAnnotationPrivate *>(d);
+    if (textAnnotD) {
+        textAnnotD->setDefaultAppearanceToNative();
+    }
 }
 
 QString Annotation::uniqueName() const
@@ -1289,7 +1307,10 @@ void Annotation::setBoundary(const QRectF &boundary)
         return;
     }
 
-    PDFRectangle rect = d->boundaryToPdfRectangle(boundary, flags());
+    const PDFRectangle rect = d->boundaryToPdfRectangle(boundary, flags());
+    if (rect == d->pdfAnnot->getRect()) {
+        return;
+    }
     d->pdfAnnot->setRect(&rect);
 }
 
@@ -1550,25 +1571,6 @@ void Annotation::setAnnotationAppearance(const AnnotationAppearance &annotationA
 // END Annotation implementation
 
 /** TextAnnotation [Annotation] */
-class TextAnnotationPrivate : public AnnotationPrivate
-{
-public:
-    TextAnnotationPrivate();
-    Annotation *makeAlias() override;
-    Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
-    void setDefaultAppearanceToNative();
-    std::unique_ptr<DefaultAppearance> getDefaultAppearanceFromNative() const;
-
-    // data fields
-    TextAnnotation::TextType textType;
-    QString textIcon;
-    std::optional<QFont> textFont;
-    QColor textColor = Qt::black;
-    TextAnnotation::InplaceAlignPosition inplaceAlign;
-    QVector<QPointF> inplaceCallout;
-    TextAnnotation::InplaceIntent inplaceIntent;
-};
-
 TextAnnotationPrivate::TextAnnotationPrivate() : AnnotationPrivate(), textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(TextAnnotation::InplaceAlignLeft), inplaceIntent(TextAnnotation::Unknown) { }
 
 Annotation *TextAnnotationPrivate::makeAlias()
@@ -1594,8 +1596,7 @@ Annot *TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
         if (pointSize < 0) {
             qWarning() << "TextAnnotationPrivate::createNativeAnnot: font pointSize < 0";
         }
-        DefaultAppearance da { { objName, "Invalid_font" }, pointSize, convertQColor(textColor) };
-        pdfAnnot = new AnnotFreeText { destPage->getDoc(), &rect, da };
+        pdfAnnot = new AnnotFreeText { destPage->getDoc(), &rect };
     }
 
     // Set properties
@@ -1609,6 +1610,8 @@ Annot *TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
 
     inplaceCallout.clear(); // Free up memory
 
+    setDefaultAppearanceToNative();
+
     return pdfAnnot;
 }
 
@@ -1620,7 +1623,21 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
         if (pointSize < 0) {
             qWarning() << "TextAnnotationPrivate::createNativeAnnot: font pointSize < 0";
         }
-        DefaultAppearance da { { objName, "Invalid_font" }, pointSize, convertQColor(textColor) };
+        std::string fontName = "Invalid_font";
+        if (textFont) {
+            Form *form = pdfPage->getDoc()->getCatalog()->getCreateForm();
+            fontName = form->findFontInDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
+            if (fontName.empty()) {
+                fontName = form->addFontToDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
+            }
+
+            if (!fontName.empty()) {
+                form->ensureFontsForAllCharacters(pdfAnnot->getContents(), fontName);
+            } else {
+                fontName = "Invalid_font";
+            }
+        }
+        DefaultAppearance da { { objName, fontName.c_str() }, pointSize, convertQColor(textColor) };
         ftextann->setDefaultAppearance(da);
     }
 }

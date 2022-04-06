@@ -78,11 +78,11 @@ public:
 
     // Create a string from <lengthA> chars at <sA>.  This string
     // can contain null characters.
-    GooString(const char *sA, int lengthA) : std::string(sA ? sA : "", sA ? lengthA : 0) { }
+    GooString(const char *sA, size_t lengthA) : std::string(sA ? sA : "", sA ? lengthA : 0) { }
 
     // Create a string from <lengthA> chars at <idx> in <str>.
-    GooString(const GooString *str, int idx, int lengthA) : std::string(*str, idx, lengthA) { }
-    GooString(const std::string &str, int idx, int lengthA) : std::string(str, idx, lengthA) { }
+    GooString(const GooString *str, int idx, size_t lengthA) : std::string(*str, idx, lengthA) { }
+    GooString(const std::string &str, int idx, size_t lengthA) : std::string(str, idx, lengthA) { }
 
     // Set content of a string to <newStr>.
     GooString *Set(const GooString *newStr)
@@ -150,7 +150,7 @@ public:
     using std::string::c_str;
 
     // Get <i>th character.
-    char getChar(int i) const { return (*this)[i]; }
+    char getChar(size_t i) const { return (*this)[i]; }
 
     // Change <i>th character.
     void setChar(int i, char c) { (*this)[i] = c; }
@@ -183,7 +183,7 @@ public:
         static_cast<std::string &>(*this).append(str);
         return this;
     }
-    GooString *append(const char *str, int lengthA)
+    GooString *append(const char *str, size_t lengthA)
     {
         static_cast<std::string &>(*this).append(str, lengthA);
         return this;

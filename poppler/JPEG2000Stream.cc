@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -201,7 +201,7 @@ typedef struct JPXData_s
 {
     const unsigned char *data;
     int size;
-    int pos;
+    OPJ_OFF_T pos;
 } JPXData;
 
 #define BUFFER_INITIAL_SIZE 4096
@@ -209,16 +209,12 @@ typedef struct JPXData_s
 static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *p_user_data)
 {
     JPXData *jpxData = (JPXData *)p_user_data;
-    int len;
 
-    len = jpxData->size - jpxData->pos;
-    if (len < 0) {
-        len = 0;
-    }
-    if (len == 0) {
+    if (unlikely(jpxData->size <= jpxData->pos)) {
         return (OPJ_SIZE_T)-1; /* End of file! */
     }
-    if ((OPJ_SIZE_T)len > p_nb_bytes) {
+    OPJ_SIZE_T len = jpxData->size - jpxData->pos;
+    if (len > p_nb_bytes) {
         len = p_nb_bytes;
     }
     memcpy(p_buffer, jpxData->data + jpxData->pos, len);

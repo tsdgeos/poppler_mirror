@@ -78,9 +78,7 @@
 #    include <fontconfig/fontconfig.h>
 #endif
 
-#ifdef _MSC_VER
-#    define strcasecmp stricmp
-#else
+#ifndef _MSC_VER
 #    include <strings.h>
 #endif
 
@@ -91,6 +89,9 @@
 #include "NameToUnicodeTable.h"
 #include "UnicodeMapTables.h"
 #include "UnicodeMapFuncs.h"
+
+#include "fofi/FoFiTrueType.h"
+#include "fofi/FoFiIdentifier.h"
 
 //------------------------------------------------------------------------
 
@@ -252,6 +253,8 @@ public:
     SysFontList(const SysFontList &) = delete;
     SysFontList &operator=(const SysFontList &) = delete;
     const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact);
+
+    const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
 
 #ifdef _WIN32
     void scanWindowsFonts(GooString *winFontDir);
@@ -890,6 +893,39 @@ GooString *GlobalParams::findFontFile(const std::string &fontName)
     return path;
 }
 
+static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int faceIndex)
+{
+    if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
+        // for now we only support ttf, ttc, otf fonts
+        return false;
+    }
+
+    const FoFiIdentifierType fontFoFiType = FoFiIdentifier::identifyFile(filepath);
+    if (fontFoFiType != fofiIdTrueType && fontFoFiType != fofiIdTrueTypeCollection && fontFoFiType != fofiIdOpenTypeCFF8Bit && fontFoFiType != fofiIdOpenTypeCFFCID) {
+        // for now we only support ttf, ttc, otf fonts
+        return false;
+    }
+
+    const std::unique_ptr<FoFiTrueType> fft = FoFiTrueType::load(filepath, faceIndex);
+    if (!fft) {
+        error(errIO, -1, "Form::addFontToDefaultResources. Failed to FoFiTrueType::load %s", filepath);
+        return false;
+    }
+
+    // Look for the Unicode BMP cmaps, which are 0/3 or 3/1
+    int unicodeBMPCMap = fft->findCmap(0, 3);
+    if (unicodeBMPCMap < 0) {
+        unicodeBMPCMap = fft->findCmap(3, 1);
+    }
+    if (unicodeBMPCMap < 0) {
+        // for now we only support files with unicode bmp cmaps
+        return false;
+    }
+
+    const int glyph = fft->mapCodeToGID(unicodeBMPCMap, uChar);
+    return glyph > 0;
+}
+
 /* if you can't or don't want to use Fontconfig, you need to implement
    this function for your platform. For Windows, it's in GlobalParamsWin.cc
 */
@@ -1069,6 +1105,71 @@ fin:
     return path;
 }
 
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+{
+    FcChar8 *fcFilePath = nullptr;
+    int faceIndex = 0;
+    FcPattern *p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, fontFamily.c_str(), FC_STYLE, FcTypeString, fontStyle.c_str(), nullptr);
+    FcConfigSubstitute(nullptr, p, FcMatchPattern);
+    FcDefaultSubstitute(p);
+    if (p) {
+        FcResult res;
+        FcFontSet *set = FcFontSort(nullptr, p, FcFalse, nullptr, &res);
+        if (set) {
+            if (res == FcResultMatch && set->nfont > 0) {
+                FcPatternGetString(set->fonts[0], FC_FILE, 0, &fcFilePath);
+                FcPatternGetInteger(set->fonts[0], FC_INDEX, 0, &faceIndex);
+            }
+            FcFontSetDestroy(set);
+        }
+        FcPatternDestroy(p);
+    }
+
+    if (!fcFilePath) {
+        error(errIO, -1, "Couldn't find font file for %s %s", fontFamily.c_str(), fontStyle.c_str());
+        return {};
+    }
+
+    return FamilyStyleFontSearchResult(reinterpret_cast<char *>(fcFilePath), faceIndex);
+}
+
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+{
+    FcPattern *pattern = buildFcPattern(&fontToEmulate, nullptr);
+
+    FcConfigSubstitute(nullptr, pattern, FcMatchPattern);
+    FcDefaultSubstitute(pattern);
+
+    FcResult result = FcResultMatch;
+    FcFontSet *fontSet = FcFontSort(nullptr, pattern, FcFalse, nullptr, &result);
+    FcPatternDestroy(pattern);
+
+    if (fontSet) {
+        const std::unique_ptr<FcFontSet, void (*)(FcFontSet *)> fontSetDeleter(fontSet, [](FcFontSet *fSet) { FcFontSetDestroy(fSet); });
+        for (int i = 0; i < fontSet->nfont; i++) {
+            FcChar8 *fcFilePath = nullptr;
+            int faceIndex = 0;
+            FcChar8 *fcFamily = nullptr;
+            FcChar8 *fcStyle = nullptr;
+            FcPatternGetString(fontSet->fonts[i], FC_FILE, 0, &fcFilePath);
+            FcPatternGetInteger(fontSet->fonts[i], FC_INDEX, 0, &faceIndex);
+            FcPatternGetString(fontSet->fonts[i], FC_FAMILY, 0, &fcFamily);
+            FcPatternGetString(fontSet->fonts[i], FC_STYLE, 0, &fcStyle);
+            if (!fcFilePath || !fcFamily || !fcStyle) {
+                continue;
+            }
+
+            const char *filepath = reinterpret_cast<char *>(fcFilePath);
+
+            if (supportedFontForEmbedding(uChar, filepath, faceIndex)) {
+                return UCharFontSearchResult(filepath, faceIndex, reinterpret_cast<char *>(fcFamily), reinterpret_cast<char *>(fcStyle));
+            }
+        }
+    }
+
+    return {};
+}
+
 #elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
 
@@ -1076,7 +1177,21 @@ GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const G
 {
     return findFontFile(base14Name->toStr());
 }
+
 #else
+
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+{
+    error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForFamilyAndStyle not implemented for this platform");
+    return {};
+}
+
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+{
+    error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForUChar not implemented for this platform");
+    return {};
+}
+
 GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
 {
     return findFontFile(base14Name->toStr());

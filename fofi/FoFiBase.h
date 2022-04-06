@@ -32,7 +32,7 @@ typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
 // FoFiBase
 //------------------------------------------------------------------------
 
-class FoFiBase
+class POPPLER_PRIVATE_EXPORT FoFiBase
 {
 public:
     FoFiBase(const FoFiBase &) = delete;

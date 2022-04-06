@@ -79,6 +79,32 @@ enum SysFontType
 
 //------------------------------------------------------------------------
 
+struct FamilyStyleFontSearchResult
+{
+    FamilyStyleFontSearchResult() = default;
+
+    FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA) : filepath(filepathA), faceIndex(faceIndexA) { }
+
+    const std::string filepath;
+    const int faceIndex = 0;
+};
+
+//------------------------------------------------------------------------
+
+struct UCharFontSearchResult
+{
+    UCharFontSearchResult() = default;
+
+    UCharFontSearchResult(const std::string &filepathA, int faceIndexA, const std::string &familyA, const std::string &styleA) : filepath(filepathA), faceIndex(faceIndexA), family(familyA), style(styleA) { }
+
+    const std::string filepath;
+    const int faceIndex = 0;
+    const std::string family;
+    const std::string style;
+};
+
+//------------------------------------------------------------------------
+
 class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
@@ -111,6 +137,8 @@ public:
     GooString *findFontFile(const std::string &fontName);
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
+    FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle);
+    UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);
     std::string getTextEncodingName() const;
     bool getPrintCommands();
     bool getProfileCommands();

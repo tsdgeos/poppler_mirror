@@ -1087,8 +1087,8 @@ void AnnotAppearance::removeStream(Ref refToStream)
             continue;
         }
         Annots *annots = page->getAnnots();
-        for (int i = 0; i < annots->getNumAnnots(); ++i) {
-            AnnotAppearance *annotAp = annots->getAnnot(i)->getAppearStreams();
+        for (Annot *annot : annots->getAnnots()) {
+            AnnotAppearance *annotAp = annot->getAppearStreams();
             if (annotAp && annotAp != this && annotAp->referencesStream(refToStream)) {
                 return; // Another annotation points to the stream -> Don't delete it
             }
@@ -1513,6 +1513,8 @@ void Annot::update(const char *key, Object &&value)
     annotObj.dictSet(const_cast<char *>(key), std::move(value));
 
     doc->getXRef()->setModifiedObject(&annotObj, ref);
+
+    hasBeenUpdated = true;
 }
 
 void Annot::setContents(std::unique_ptr<GooString> &&new_content)
@@ -2094,6 +2096,7 @@ void Annot::setNewAppearance(Object &&newAppearance)
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
         update("AP", std::move(obj1));
+        update("AS", Object(objName, "N"));
 
         Object updatedAP = annotObj.dictLookup("AP");
         appearStreams = std::make_unique<AnnotAppearance>(doc, &updatedAP);
@@ -2831,13 +2834,12 @@ void AnnotLink::draw(Gfx *gfx, bool printing)
 //------------------------------------------------------------------------
 const double AnnotFreeText::undefinedFontPtSize = 10.;
 
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppearance &da) : AnnotMarkup(docA, rectA)
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 {
     type = typeFreeText;
 
-    const std::string daStr = da.toAppearanceString();
     annotObj.dictSet("Subtype", Object(objName, "FreeText"));
-    annotObj.dictSet("DA", Object(new GooString(daStr)));
+    annotObj.dictSet("DA", Object(new GooString()));
 
     initialize(docA, annotObj.getDict());
 }
@@ -3041,6 +3043,197 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
     return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
 }
 
+class HorizontalTextLayouter
+{
+public:
+    HorizontalTextLayouter() = default;
+
+    HorizontalTextLayouter(const GooString *text, const Form *form, const GfxFont *font, std::optional<double> availableWidth, const bool noReencode)
+    {
+        int i = 0;
+        double blockWidth;
+        bool newFontNeeded = false;
+        GooString outputText;
+        const bool isUnicode = text->hasUnicodeMarker();
+        int charCount;
+
+        Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
+        data.emplace_back(outputText.toStr(), std::string(), blockWidth, charCount);
+        if (availableWidth) {
+            *availableWidth -= blockWidth;
+        }
+
+        while (newFontNeeded && (!availableWidth || *availableWidth > 0)) {
+            if (!form) {
+                // There's no fonts to look for, so just skip the characters
+                i += isUnicode ? 2 : 1;
+                error(errSyntaxError, -1, "HorizontalTextLayouter, found character that the font can't represent");
+                newFontNeeded = false;
+            } else {
+                Unicode uChar;
+                if (isUnicode) {
+                    uChar = (unsigned char)(text->getChar(i)) << 8;
+                    uChar += (unsigned char)(text->getChar(i + 1));
+                } else {
+                    uChar = pdfDocEncoding[text->getChar(i) & 0xff];
+                }
+                const std::string auxFontName = form->getFallbackFontForChar(uChar, *font);
+                if (!auxFontName.empty()) {
+                    std::shared_ptr<GfxFont> auxFont = form->getDefaultResources()->lookupFont(auxFontName.c_str());
+
+                    // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
+                    GooString auxContents = GooString(text->toStr().substr(i, isUnicode ? 2 : 1));
+                    if (isUnicode) {
+                        auxContents.prependUnicodeMarker();
+                    }
+                    int auxI = 0;
+                    Annot::layoutText(&auxContents, &outputText, &auxI, *auxFont, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
+                    assert(!newFontNeeded);
+                    if (availableWidth) {
+                        *availableWidth -= blockWidth;
+                    }
+                    // layoutText will always at least layout one character even if it doesn't fit in
+                    // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                    if (!availableWidth || *availableWidth > 0) {
+                        i += isUnicode ? 2 : 1;
+                        data.emplace_back(outputText.toStr(), auxFontName, blockWidth, charCount);
+                    }
+                } else {
+                    error(errSyntaxError, -1, "HorizontalTextLayouter, couldn't find a font for character U+{0:04uX}", uChar);
+                    newFontNeeded = false;
+                    i += isUnicode ? 2 : 1;
+                }
+            }
+            // Now layout the rest of the text with the original font
+            if (!availableWidth || *availableWidth > 0) {
+                Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
+                if (availableWidth) {
+                    *availableWidth -= blockWidth;
+                }
+                // layoutText will always at least layout one character even if it doesn't fit in
+                // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
+                if (!availableWidth || *availableWidth > 0) {
+                    data.emplace_back(outputText.toStr(), std::string(), blockWidth, charCount);
+                } else {
+                    i -= isUnicode ? 2 : 1;
+                }
+            }
+        }
+        consumedText = i;
+    }
+
+    HorizontalTextLayouter(const HorizontalTextLayouter &) = delete;
+    HorizontalTextLayouter &operator=(const HorizontalTextLayouter &) = delete;
+
+    double totalWidth() const
+    {
+        double totalWidth = 0;
+        for (const Data &d : data) {
+            totalWidth += d.width;
+        }
+        return totalWidth;
+    }
+
+    int totalCharCount() const
+    {
+        int total = 0;
+        for (const Data &d : data) {
+            total += d.charCount;
+        }
+        return total;
+    }
+
+    struct Data
+    {
+        Data(const std::string &t, const std::string &fName, double w, int cc) : text(t), fontName(fName), width(w), charCount(cc) { }
+
+        const std::string text;
+        const std::string fontName;
+        const double width;
+        const int charCount;
+    };
+
+    std::vector<Data> data;
+    int consumedText;
+};
+
+struct DrawMultiLineTextResult
+{
+    std::string text;
+    int nLines = 0;
+};
+
+// if fontName is empty it is assumed it is sent from the outside
+// so for text that is in font no Tf is added and for text that is in the aux fonts
+// a pair of q/Q is added
+static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double availableWidth, const Form *form, const GfxFont &font, const std::string &fontName, double fontSize, VariableTextQuadding quadding, double borderWidth)
+{
+    DrawMultiLineTextResult result;
+    int i = 0;
+    double xPosPrev = 0;
+    const double availableTextWidthInFontPtSize = availableWidth / fontSize;
+    while (i < text.getLength()) {
+        GooString lineText(text.toStr().substr(i));
+        if (!lineText.hasUnicodeMarker() && text.hasUnicodeMarker()) {
+            lineText.prependUnicodeMarker();
+        }
+        const HorizontalTextLayouter textLayouter(&lineText, form, &font, availableTextWidthInFontPtSize, false);
+
+        const double totalWidth = textLayouter.totalWidth() * fontSize;
+
+        auto calculateX = [quadding, availableWidth, totalWidth, borderWidth] {
+            switch (quadding) {
+            case VariableTextQuadding::centered:
+                return (availableWidth - totalWidth) / 2;
+                break;
+            case VariableTextQuadding::rightJustified:
+                return availableWidth - totalWidth - borderWidth;
+                break;
+            default: // VariableTextQuadding::lLeftJustified:
+                return borderWidth;
+                break;
+            }
+        };
+        const double xPos = calculateX();
+
+        AnnotAppearanceBuilder builder;
+        bool first = true;
+        double prevBlockWidth = 0;
+        for (const HorizontalTextLayouter::Data &d : textLayouter.data) {
+            const std::string &fName = d.fontName.empty() ? fontName : d.fontName;
+            if (!fName.empty()) {
+                if (fontName.empty()) {
+                    builder.append(" q\n");
+                }
+                builder.appendf("/{0:s} {1:.2f} Tf\n", fName.c_str(), fontSize);
+            }
+
+            const double yDiff = first ? -fontSize : 0;
+            const double xDiff = first ? xPos - xPosPrev : prevBlockWidth;
+
+            builder.appendf("{0:.2f} {1:.2f} Td\n", xDiff, yDiff);
+            builder.writeString(d.text);
+            builder.append(" Tj\n");
+            first = false;
+            prevBlockWidth = d.width * fontSize;
+
+            if (!fName.empty() && fontName.empty()) {
+                builder.append(" Q\n");
+            }
+        }
+        xPosPrev = xPos + totalWidth - prevBlockWidth;
+
+        result.text += builder.buffer()->toStr();
+        result.nLines += 1;
+        if (i == 0) {
+            i += textLayouter.consumedText;
+        } else {
+            i += textLayouter.consumedText - (text.hasUnicodeMarker() ? 2 : 0);
+        }
+    }
+    return result;
+}
+
 void AnnotFreeText::generateFreeTextAppearance()
 {
     double borderWidth, ca = opacity;
@@ -3132,32 +3325,8 @@ void AnnotFreeText::generateFreeTextAppearance()
     // Set font state
     appearBuilder.setDrawColor(da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-    appearBuilder.setTextFont(da.getFontName(), da.getFontPtSize());
-
-    int i = 0;
-    double xposPrev = 0;
-    while (i < contents->getLength()) {
-        GooString out;
-        double linewidth, xpos;
-        layoutText(contents.get(), &out, &i, *font, &linewidth, textwidth / da.getFontPtSize(), nullptr, false);
-        linewidth *= da.getFontPtSize();
-        switch (quadding) {
-        case VariableTextQuadding::centered:
-            xpos = (textwidth - linewidth) / 2;
-            break;
-        case VariableTextQuadding::rightJustified:
-            xpos = textwidth - linewidth;
-            break;
-        default: // VariableTextQuadding::leftJustified:
-            xpos = 0;
-            break;
-        }
-        appearBuilder.appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -da.getFontPtSize());
-        appearBuilder.writeString(out.toStr());
-        appearBuilder.append("Tj\n");
-        xposPrev = xpos;
-    }
-
+    const DrawMultiLineTextResult textCommands = drawMultiLineText(*contents, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
+    appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
     double bbox[4];
@@ -3165,14 +3334,23 @@ void AnnotFreeText::generateFreeTextAppearance()
     bbox[2] = rect->x2 - rect->x1;
     bbox[3] = rect->y2 - rect->y1;
 
+    Object newAppearance;
     if (ca == 1) {
-        appearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resourceObj));
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, std::move(resourceObj));
     } else {
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, std::move(resourceObj));
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
         Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-        appearance = createForm(&appearBuf, bbox, false, resDict);
+        newAppearance = createForm(&appearBuf, bbox, false, resDict);
+    }
+    if (hasBeenUpdated) {
+        // We should technically do this for all annots but AnnotFreeText
+        // is particularly special since we're potentially embeddeing a font so we really need
+        // to set the AP and not let other renderers guess it from the contents
+        setNewAppearance(std::move(newAppearance));
+    } else {
+        appearance = std::move(newAppearance);
     }
 }
 
@@ -4078,7 +4256,7 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode)
+void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded)
 {
     CharCode c;
     Unicode uChar;
@@ -4087,6 +4265,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     int uLen, n;
     double dx, dy, ox, oy;
 
+    if (newFontNeeded) {
+        *newFontNeeded = false;
+    }
     if (width != nullptr) {
         *width = 0.0;
     }
@@ -4171,16 +4352,40 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
                 outBuf->append(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
                 if (font.isCIDFont()) {
-                    // TODO: This assumes an identity CMap.  It should be extended to
-                    // handle the general case.
-                    outBuf->append((c >> 8) & 0xff);
-                    outBuf->append(c & 0xff);
+                    auto cidFont = static_cast<const GfxCIDFont *>(&font);
+                    if (c < cidFont->getCIDToGIDLen()) {
+                        const int glyph = cidFont->getCIDToGID()[c];
+                        if (glyph > 0 || c == 0) {
+                            outBuf->append((c >> 8) & 0xff);
+                            outBuf->append(c & 0xff);
+                        } else {
+                            if (newFontNeeded) {
+                                *newFontNeeded = true;
+                                *i -= unicode ? 2 : 1;
+                                break;
+                            }
+                            outBuf->append((c >> 8) & 0xff);
+                            outBuf->append(c & 0xff);
+                            error(errSyntaxError, -1, "AnnotWidget::layoutText, font doesn't have glyph for charcode U+{0:04uX}", c);
+                        }
+                    } else {
+                        // TODO: This assumes an identity CMap.  It should be extended to
+                        // handle the general case.
+                        outBuf->append((c >> 8) & 0xff);
+                        outBuf->append(c & 0xff);
+                    }
                 } else {
                     // 8-bit font
                     outBuf->append(c);
                 }
             } else {
-                error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
+                if (newFontNeeded) {
+                    *newFontNeeded = true;
+                    *i -= unicode ? 2 : 1;
+                    break;
+                } else {
+                    error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
+                }
             }
         }
 
@@ -4299,13 +4504,12 @@ void AnnotAppearanceBuilder::writeString(const std::string &str)
 }
 
 // Draw the variable text or caption for a field.
-bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                                       const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags, const int nCombs)
 {
     const bool forceZapfDingbats = flags & ForceZapfDingbatsDrawTextFlag;
 
     std::vector<std::string> daToks;
-    GooString convertedText;
     const GfxFont *font;
     double dx, dy;
     double fontSize;
@@ -4425,15 +4629,26 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         // note: comb is ignored in multiline mode as mentioned in the spec
 
         const double wMax = dx - 2 * borderWidth - 4;
+        const bool isUnicode = text->hasUnicodeMarker();
 
         // compute font autosize
         if (fontSize == 0) {
             for (fontSize = 20; fontSize > 1; --fontSize) {
+                const double availableWidthInFontSize = wMax / fontSize;
                 double y = dy - 3;
                 int i = 0;
                 while (i < text->getLength()) {
-                    Annot::layoutText(text, &convertedText, &i, *font, nullptr, wMax / fontSize, nullptr, forceZapfDingbats);
+                    GooString lineText(text->toStr().substr(i));
+                    if (!lineText.hasUnicodeMarker() && isUnicode) {
+                        lineText.prependUnicodeMarker();
+                    }
+                    const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
                     y -= fontSize;
+                    if (i == 0) {
+                        i += textLayouter.consumedText;
+                    } else {
+                        i += textLayouter.consumedText - (isUnicode ? 2 : 0);
+                    }
                 }
                 // approximate the descender for the last line
                 if (y >= 0.33 * fontSize) {
@@ -4457,36 +4672,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             appearBuf->append(daTok)->append(' ');
         }
 
-        // write a series of lines of text
-        int i = 0;
-        double xPrev = 0;
-        while (i < text->getLength()) {
-            double w;
-            Annot::layoutText(text, &convertedText, &i, *font, &w, wMax / fontSize, nullptr, forceZapfDingbats);
-            w *= fontSize;
-
-            // compute text start position
-            auto calculateX = [quadding, borderWidth, dx, w] {
-                switch (quadding) {
-                case VariableTextQuadding::leftJustified:
-                default:
-                    return borderWidth + 2;
-                case VariableTextQuadding::centered:
-                    return (dx - w) / 2;
-                case VariableTextQuadding::rightJustified:
-                    return dx - borderWidth - 2 - w;
-                }
-            };
-            const double x = calculateX();
-
-            // draw the line
-            appearBuf->appendf("{0:.2f} {1:.2f} Td\n", x - xPrev, -fontSize);
-            writeString(convertedText.toStr());
-            appearBuf->append(" Tj\n");
-
-            // next line
-            xPrev = x;
-        }
+        const DrawMultiLineTextResult textCommands = drawMultiLineText(*text, dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
+        appearBuf->append(textCommands.text);
 
         // single-line text
     } else {
@@ -4494,8 +4681,6 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
         // comb formatting
         if (nCombs > 0) {
-            int charCount;
-
             // compute comb spacing
             const double w = (dx - 2 * borderWidth) / nCombs;
 
@@ -4509,11 +4694,9 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
                 daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
             }
 
-            int dummy = 0;
-            Annot::layoutText(text, &convertedText, &dummy, *font, nullptr, 0.0, &charCount, forceZapfDingbats);
-            if (charCount > nCombs) {
-                charCount = nCombs;
-            }
+            const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
+
+            const int charCount = std::min(textLayouter.totalCharCount(), nCombs);
 
             // compute starting text cell
             auto calculateX = [quadding, borderWidth, nCombs, charCount, w] {
@@ -4540,47 +4723,60 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             // write the text string
-            const char *s = convertedText.c_str();
-            int len = convertedText.getLength();
             int i = 0;
             double xPrev = w; // so that first character is placed properly
-            while (i < nCombs && len > 0) {
-                CharCode code;
-                const Unicode *uAux;
-                int uLen, n;
-                double char_dx, char_dy, ox, oy;
+            for (const HorizontalTextLayouter::Data &d : textLayouter.data) {
+                const char *s = d.text.c_str();
+                int len = d.text.size();
+                while (i < nCombs && len > 0) {
+                    CharCode code;
+                    const Unicode *uAux;
+                    int uLen, n;
+                    double char_dx, char_dy, ox, oy;
 
-                char_dx = 0.0;
-                n = font->getNextChar(s, len, &code, &uAux, &uLen, &char_dx, &char_dy, &ox, &oy);
-                char_dx *= fontSize;
+                    const GfxFont *currentFont = font;
+                    if (!d.fontName.empty()) {
+                        appearBuf->append(" q\n");
+                        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                        currentFont = form->getDefaultResources()->lookupFont(d.fontName.c_str()).get();
+                    }
 
-                // center each character within its cell, by advancing the text
-                // position the appropriate amount relative to the start of the
-                // previous character
-                const double combX = 0.5 * (w - char_dx);
-                appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
+                    char_dx = 0.0;
+                    n = currentFont->getNextChar(s, len, &code, &uAux, &uLen, &char_dx, &char_dy, &ox, &oy);
+                    char_dx *= fontSize;
 
-                GooString charBuf(s, n);
-                writeString(charBuf.toStr());
-                appearBuf->append(" Tj\n");
+                    // center each character within its cell, by advancing the text
+                    // position the appropriate amount relative to the start of the
+                    // previous character
+                    const double combX = 0.5 * (w - char_dx);
+                    appearBuf->appendf("{0:.2f} 0 Td\n", combX - xPrev + w);
 
-                i++;
-                s += n;
-                len -= n;
-                xPrev = combX;
+                    GooString charBuf(s, n);
+                    writeString(charBuf.toStr());
+                    appearBuf->append(" Tj\n");
+
+                    if (!d.fontName.empty()) {
+                        appearBuf->append(" Q\n");
+                    }
+
+                    i++;
+                    s += n;
+                    len -= n;
+                    xPrev = combX;
+                }
             }
 
             // regular (non-comb) formatting
         } else {
-            int ii = 0;
-            double w;
-            Annot::layoutText(text, &convertedText, &ii, *font, &w, 0.0, nullptr, forceZapfDingbats);
+            const HorizontalTextLayouter textLayouter(text, form, font, {}, forceZapfDingbats);
+
+            const double usedWidthUnscaled = textLayouter.totalWidth();
 
             // compute font autosize
             if (fontSize == 0) {
                 fontSize = dy - 2 * borderWidth;
-                if (w > 0) {
-                    const double fontSize2 = (dx - 4 - 2 * borderWidth) / w;
+                if (usedWidthUnscaled > 0) {
+                    const double fontSize2 = (dx - 4 - 2 * borderWidth) / usedWidthUnscaled;
                     if (fontSize2 < fontSize) {
                         fontSize = fontSize2;
                     }
@@ -4590,16 +4786,16 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             }
 
             // compute text start position
-            w *= fontSize;
-            auto calculateX = [quadding, borderWidth, dx, w] {
+            const double usedWidth = usedWidthUnscaled * fontSize;
+            auto calculateX = [quadding, borderWidth, dx, usedWidth] {
                 switch (quadding) {
                 case VariableTextQuadding::leftJustified:
                 default:
                     return borderWidth + 2;
                 case VariableTextQuadding::centered:
-                    return (dx - w) / 2;
+                    return (dx - usedWidth) / 2;
                 case VariableTextQuadding::rightJustified:
-                    return dx - borderWidth - 2 - w;
+                    return dx - borderWidth - 2 - usedWidth;
                 }
             };
             const double x = calculateX();
@@ -4617,9 +4813,18 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
             // and our auto tests "wrongly" assume it will be there, so add it anyway
             appearBuf->append("\n");
 
-            // write the text string
-            writeString(convertedText.toStr());
-            appearBuf->append(" Tj\n");
+            // write the text strings
+            for (const HorizontalTextLayouter::Data &d : textLayouter.data) {
+                if (!d.fontName.empty()) {
+                    appearBuf->append(" q\n");
+                    appearBuf->appendf("/{0:s} {1:.2f} Tf\n", d.fontName.c_str(), fontSize);
+                }
+                writeString(d.text);
+                appearBuf->append(" Tj\n");
+                if (!d.fontName.empty()) {
+                    appearBuf->append(" Q\n");
+                }
+            }
         }
     }
     // cleanup
@@ -4930,7 +5135,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
     // draw the field contents
     switch (field->getType()) {
     case formButton:
-        return drawFormFieldButton(static_cast<const FormFieldButton *>(field), resources, da, border, appearCharacs, rect, appearState, xref, resourcesDict);
+        return drawFormFieldButton(static_cast<const FormFieldButton *>(field), form, resources, da, border, appearCharacs, rect, appearState, xref, resourcesDict);
         break;
     case formText:
         return drawFormFieldText(static_cast<const FormFieldText *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
@@ -4948,8 +5153,8 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
     return false;
 }
 
-bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                                 const GooString *appearState, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
+                                                 const PDFRectangle *rect, const GooString *appearState, XRef *xref, Dict *resourcesDict)
 {
     const GooString *caption = nullptr;
     if (appearCharacs) {
@@ -4961,7 +5166,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
         if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
-                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
@@ -4976,16 +5181,16 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     } break;
     case formButtonPush:
         if (caption) {
-            return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict);
+            return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict);
         }
         break;
     case formButtonCheck:
         if (appearState && appearState->cmp("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
-                return drawText(&checkMark, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(&checkMark, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else {
-                return drawText(caption, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
+                return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
         }
         break;
@@ -5019,7 +5224,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
         if (fieldText->isPassword()) {
             flags = flags | TurnTextToStarsDrawTextFlag;
         }
-        return drawText(contents, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, nCombs);
+        return drawText(contents, form, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, flags, nCombs);
     }
 
     return true;
@@ -5057,23 +5262,23 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     const GooString &leftText = field->getCustomAppearanceLeftContent();
     if (leftText.toStr().empty()) {
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
         DefaultAppearance daLeft(_da);
         daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
         const double halfWidth = (rect->x2 - rect->x1) / 2;
         PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
-        drawSignatureFieldText(leftText, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
+        drawSignatureFieldText(leftText, form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
 
         PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
-        drawSignatureFieldText(contents, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
     }
 
     return true;
 }
 
-void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
-                                                    bool centerHorizontally)
+void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin,
+                                                    bool centerVertically, bool centerHorizontally)
 {
     double borderWidth = 0;
     append("q\n");
@@ -5092,52 +5297,26 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::unique_ptr<const GfxFont> font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
-
-    // calculate the string tokenization
-    int i = 0;
-    std::vector<std::pair<std::string, double>> outTexts;
-    while (i < text.getLength()) {
-        GooString out;
-        double textWidth;
-        Annot::layoutText(&text, &out, &i, *font, &textWidth, textwidth / da.getFontPtSize(), nullptr, false);
-        outTexts.emplace_back(out.toStr(), textWidth * da.getFontPtSize());
+    std::shared_ptr<const GfxFont> font = form->getDefaultResources()->lookupFont(da.getFontName().getName());
+    if (!font) {
+        font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
     }
 
     // Setup text clipping
     appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re W n\n", leftMargin + textmargin, textmargin, textwidth, height - 2 * textmargin);
-
-    // Set font state
     setDrawColor(da.getFontColor(), true);
-    appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-    setTextFont(da.getFontName(), da.getFontPtSize());
+    const DrawMultiLineTextResult textCommands =
+            drawMultiLineText(text, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified, 0 /*borderWidth*/);
 
-    double xDelta = centerHorizontally ? 0 : leftMargin;
-    double currentX = 0;
-    double yDelta = -da.getFontPtSize();
+    double yDelta = height - textmargin - da.getFontPtSize() * font->getDescent();
     if (centerVertically) {
-        const double outTextHeight = outTexts.size() * da.getFontPtSize();
+        const double outTextHeight = textCommands.nLines * da.getFontPtSize();
         if (outTextHeight < height) {
             yDelta -= (height - outTextHeight) / 2;
         }
     }
-    for (const std::pair<std::string, double> &outText : outTexts) {
-        if (centerHorizontally) {
-            const double lineX = (width - outText.second) / 2;
-            xDelta = (lineX - currentX);
-            currentX += xDelta;
-        }
-
-        appendf("{0:.2f} {1:.2f} Td\n", xDelta, yDelta);
-        writeString(outText.first);
-        append("Tj\n");
-
-        if (!centerHorizontally) {
-            xDelta = 0;
-        }
-        yDelta = -da.getFontPtSize();
-    }
-
+    appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", leftMargin + textmargin, yDelta);
+    append(textCommands.text.c_str());
     append("ET Q\n");
 }
 
@@ -5158,7 +5337,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     if (fieldChoice->isCombo()) {
         selected = fieldChoice->getSelectedChoice();
         if (selected) {
-            return drawText(selected, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
+            return drawText(selected, form, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side
         }
         // list box
@@ -5246,7 +5425,14 @@ void AnnotWidget::generateFieldAppearance()
 
     // build the appearance stream
     Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
-    appearance = Object(appearStream);
+    if (hasBeenUpdated) {
+        // We should technically do this for all annots but AnnotFreeText
+        // forms are particularly special since we're potentially embeddeing a font so we really need
+        // to set the AP and not let other renderers guess it from the contents
+        setNewAppearance(Object(appearStream));
+    } else {
+        appearance = Object(appearStream);
+    }
 
     if (resourcesToFree) {
         delete resourcesToFree;

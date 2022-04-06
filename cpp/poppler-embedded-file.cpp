@@ -103,7 +103,7 @@ time_type embedded_file::modification_date() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->modDate() : nullptr;
-    return goo ? dateStringToTime(goo) : time_type(-1);
+    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
 }
 
 /**
@@ -114,7 +114,7 @@ time_type embedded_file::creation_date() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->createDate() : nullptr;
-    return goo ? dateStringToTime(goo) : time_type(-1);
+    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
 }
 
 /**

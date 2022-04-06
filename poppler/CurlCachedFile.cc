@@ -36,7 +36,7 @@ static size_t noop_cb(char *ptr, size_t size, size_t nmemb, void *ptr2)
 
 size_t CurlCachedFileLoader::init(CachedFile *cachedFileA)
 {
-    double contentLength = -1;
+    curl_off_t contentLength = -1;
     long code = 0;
     size_t size;
 
@@ -50,7 +50,7 @@ size_t CurlCachedFileLoader::init(CachedFile *cachedFileA)
     curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
     if (code) {
-        curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &contentLength);
+        curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &contentLength);
         size = contentLength;
     } else {
         error(errInternal, -1, "Failed to get size of '{0:s}'.", url.c_str());

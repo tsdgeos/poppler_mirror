@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -102,6 +102,11 @@ public:
     XRef *getXRef() const { return xref; }
 
     bool hasKey(const char *key) const;
+
+    // Returns a key name that is not in the dictionary
+    // It will be suggestedKey itself if available
+    // otherwise it will start adding 0, 1, 2, 3, etc. to suggestedKey until there's one available
+    std::string findAvailableKey(const std::string &suggestedKey);
 
 private:
     friend class Object; // for incRef/decRef

@@ -1989,7 +1989,7 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
             int segnum = 0;
             int maxXRefSearch = 24576;
             if (str->getLength() < maxXRefSearch) {
-                maxXRefSearch = str->getLength();
+                maxXRefSearch = static_cast<int>(str->getLength());
             }
             for (; (xrefSearchSize - 16) * segnum < maxXRefSearch; segnum++) {
                 str->setPos((xrefSearchSize - 16) * segnum + xrefSearchSize, -1);
@@ -2123,7 +2123,13 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
         }
     }
 
-    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+    Form *form = catalog->getCreateForm();
+    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
+    if (pdfFontName.empty()) {
+        pdfFontName = form->addFontToDefaultResources("Helvetica", "");
+    }
+
+    const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
 
     Object annotObj = Object(new Dict(getXRef()));
     annotObj.dictSet("Type", Object(objName, "Annot"));
@@ -2142,6 +2148,10 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
+    // say that there a now signatures and that we should append only
+    catalog->getAcroForm()->dictSet("SigFlags", Object(3));
+    form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
+    form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
     field->setCustomAppearanceContent(signatureText);

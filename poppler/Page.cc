@@ -367,16 +367,9 @@ void Page::replaceXRef(XRef *xrefA)
 /* Loads standalone fields into Page, should be called once per page only */
 void Page::loadStandaloneFields(Annots *annotations, Form *form)
 {
-    const int numAnnots = annotations ? annotations->getNumAnnots() : 0;
-
-    if (numAnnots < 1) {
-        return;
-    }
-
     /* Look for standalone annots, identified by being: 1) of type Widget
      * 2) not referenced from the Catalog's Form Field array */
-    for (int i = 0; i < numAnnots; ++i) {
-        Annot *annot = annotations->getAnnot(i);
+    for (Annot *annot : annots->getAnnots()) {
 
         if (annot->getType() != Annot::typeWidget || !annot->getHasRef()) {
             continue;
@@ -564,7 +557,6 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
 {
     Gfx *gfx;
     Annots *annotList;
-    int i;
 
     if (!out->checkPageSlice(this, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData)) {
         return;
@@ -591,14 +583,13 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
     // draw annotations
     annotList = getAnnots();
 
-    if (annotList->getNumAnnots() > 0) {
+    if (!annotList->getAnnots().empty()) {
         if (globalParams->getPrintCommands()) {
             printf("***** Annotations\n");
         }
-        for (i = 0; i < annotList->getNumAnnots(); ++i) {
-            Annot *annot = annotList->getAnnot(i);
+        for (Annot *annot : annots->getAnnots()) {
             if ((annotDisplayDecideCbk && (*annotDisplayDecideCbk)(annot, annotDisplayDecideCbkData)) || !annotDisplayDecideCbk) {
-                annotList->getAnnot(i)->draw(gfx, printing);
+                annot->draw(gfx, printing);
             }
         }
         out->dump();
@@ -787,8 +778,8 @@ void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool 
 void Page::processLinks(OutputDev *out)
 {
     std::unique_ptr<Links> links = getLinks();
-    for (int i = 0; i < links->getNumLinks(); ++i) {
-        out->processLink(links->getLink(i));
+    for (AnnotLink *link : links->getLinks()) {
+        out->processLink(link);
     }
 }
 

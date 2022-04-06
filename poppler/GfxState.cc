@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -3805,11 +3805,11 @@ int GfxUnivariateShading::getColor(double t, GfxColor *color)
 
         if (cacheBounds[lastMatch - 1] >= t) {
             upper = std::lower_bound(cacheBounds, cacheBounds + lastMatch - 1, t);
-            lastMatch = upper - cacheBounds;
+            lastMatch = static_cast<int>(upper - cacheBounds);
             lastMatch = std::min<int>(std::max<int>(1, lastMatch), cacheSize - 1);
         } else if (cacheBounds[lastMatch] < t) {
             upper = std::lower_bound(cacheBounds + lastMatch + 1, cacheBounds + cacheSize, t);
-            lastMatch = upper - cacheBounds;
+            lastMatch = static_cast<int>(upper - cacheBounds);
             lastMatch = std::min<int>(std::max<int>(1, lastMatch), cacheSize - 1);
         }
 
@@ -3855,7 +3855,7 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm, double xMin, double yMi
 
     getParameterRange(&sMin, &sMax, xMin, yMin, xMax, yMax);
     upperBound = ctm->norm() * getDistance(sMin, sMax);
-    maxSize = ceil(upperBound);
+    maxSize = static_cast<int>(ceil(upperBound));
     maxSize = std::max<int>(maxSize, 2);
 
     {

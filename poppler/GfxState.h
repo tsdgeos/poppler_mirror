@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -122,7 +122,7 @@ static inline double colToDbl(GfxColorComp x)
 
 static inline unsigned char dblToByte(double x)
 {
-    return (x * 255.0);
+    return static_cast<unsigned char>(x * 255.0);
 }
 
 static inline double byteToDbl(unsigned char x)
@@ -851,7 +851,7 @@ private:
 // GfxShading
 //------------------------------------------------------------------------
 
-class GfxShading
+class POPPLER_PRIVATE_EXPORT GfxShading
 {
 public:
     explicit GfxShading(int typeA);

@@ -254,7 +254,7 @@ protected:
 // AnnotBorder
 //------------------------------------------------------------------------
 
-class AnnotBorder
+class POPPLER_PRIVATE_EXPORT AnnotBorder
 {
 public:
     enum AnnotBorderType
@@ -615,17 +615,18 @@ private:
     };
 
     bool drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict);
-    bool drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState,
-                             XRef *xref, Dict *resourcesDict);
+    bool drawFormFieldButton(const FormFieldButton *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                             const GooString *appearState, XRef *xref, Dict *resourcesDict);
     bool drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, XRef *xref,
                            Dict *resourcesDict);
     bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                              XRef *xref, Dict *resourcesDict);
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                                 XRef *xref, Dict *resourcesDict);
-    void drawSignatureFieldText(const GooString &text, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically, bool centerHorizontally);
-    bool drawText(const GooString *text, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const VariableTextQuadding quadding, XRef *xref,
-                  Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
+    void drawSignatureFieldText(const GooString &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
+                                bool centerHorizontally);
+    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+                  const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     GooString *appearBuf;
@@ -772,7 +773,8 @@ public:
     // Check if point is inside the annot rectangle.
     bool inRect(double x, double y) const;
 
-    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode);
+    // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
+    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
 private:
     void readArrayNum(Object *pdfArray, int key, double *value);
@@ -827,6 +829,8 @@ protected:
 
     bool hasRef;
     mutable std::recursive_mutex mutex;
+
+    bool hasBeenUpdated = false;
 };
 
 //------------------------------------------------------------------------
@@ -1055,7 +1059,7 @@ public:
 
     static const double undefinedFontPtSize;
 
-    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
+    AnnotFreeText(PDFDoc *docA, PDFRectangle *rect);
     AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);
     ~AnnotFreeText() override;
 
@@ -1766,9 +1770,8 @@ public:
     Annots(const Annots &) = delete;
     Annots &operator=(const Annots &) = delete;
 
-    // Iterate through list of annotations.
-    int getNumAnnots() const { return annots.size(); }
-    Annot *getAnnot(int i) { return annots[i]; }
+    const std::vector<Annot *> &getAnnots() { return annots; }
+
     void appendAnnot(Annot *annot);
     bool removeAnnot(Annot *annot);
 

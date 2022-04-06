@@ -69,11 +69,13 @@
 #include <iomanip>
 #include "Win32Console.h"
 #include "DateInfo.h"
+#include <cfloat>
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap);
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2);
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
+void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -100,6 +102,7 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool printEnc = false;
+static bool tsvMode = false;
 
 static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
                                    { "-l", argInt, &lastPage, 0, "last page to convert" },
@@ -113,11 +116,12 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-raw", argFlag, &rawOrder, 0, "keep strings in content stream order" },
                                    { "-nodiag", argFlag, &discardDiag, 0, "discard diagonal text" },
                                    { "-htmlmeta", argFlag, &htmlMeta, 0, "generate a simple HTML file, including the meta information" },
+                                   { "-tsv", argFlag, &tsvMode, 0, "generate a simple TSV file, including the meta information for bounding boxes" },
                                    { "-enc", argString, textEncName, sizeof(textEncName), "output text encoding name" },
                                    { "-listenc", argFlag, &printEnc, 0, "list available encodings" },
                                    { "-eol", argString, textEOLStr, sizeof(textEOLStr), "output end-of-line convention (unix, dos, or mac)" },
                                    { "-nopgbrk", argFlag, &noPageBreaks, 0, "don't insert page breaks between pages" },
-                                   { "-bbox", argFlag, &bbox, 0, "output bounding box for each word and page size to html.  Sets -htmlmeta" },
+                                   { "-bbox", argFlag, &bbox, 0, "output bounding box for each word and page size to html. Sets -htmlmeta" },
                                    { "-bbox-layout", argFlag, &bboxLayout, 0, "like -bbox but with extra layout bounding box data.  Sets -htmlmeta" },
                                    { "-cropbox", argFlag, &useCropBox, 0, "use the crop box rather than media box" },
                                    { "-colspacing", argFP, &colspacing, 0,
@@ -356,26 +360,46 @@ int main(int argc, char *argv[])
             fclose(f);
         }
     } else {
-        textOut = new TextOutputDev(textFileName->c_str(), physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
-        if (textOut->isOk()) {
-            textOut->setTextEOL(textEOL);
-            textOut->setMinColSpacing1(colspacing);
-            if (noPageBreaks) {
-                textOut->setTextPageBreaks(false);
-            }
-            if ((w == 0) && (h == 0) && (x == 0) && (y == 0)) {
-                doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0, true, false, false);
-            } else {
 
-                for (int page = firstPage; page <= lastPage; ++page) {
-                    doc->displayPageSlice(textOut, page, resolution, resolution, 0, true, false, false, x, y, w, h);
+        if (tsvMode) {
+            textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            if (!textFileName->cmp("-")) {
+                f = stdout;
+            } else {
+                if (!(f = fopen(textFileName->c_str(), "wb"))) {
+                    error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
+                    delete textOut;
+                    exitCode = 2;
+                    goto err3;
                 }
             }
-
+            printTSVBBox(f, doc.get(), textOut, firstPage, lastPage);
+            if (f != stdout) {
+                fclose(f);
+            }
         } else {
-            delete textOut;
-            exitCode = 2;
-            goto err3;
+            textOut = new TextOutputDev(textFileName->c_str(), physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            if (textOut->isOk()) {
+                textOut->setTextEOL(textEOL);
+                textOut->setMinColSpacing1(colspacing);
+                if (noPageBreaks) {
+                    textOut->setTextPageBreaks(false);
+                }
+
+                if ((w == 0) && (h == 0) && (x == 0) && (y == 0)) {
+                    doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0, true, false, false);
+                } else {
+
+                    for (int page = firstPage; page <= lastPage; ++page) {
+                        doc->displayPageSlice(textOut, page, resolution, resolution, 0, true, false, false, x, y, w, h);
+                    }
+                }
+
+            } else {
+                delete textOut;
+                exitCode = 2;
+                goto err3;
+            }
         }
     }
     delete textOut;
@@ -536,6 +560,84 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
         fprintf(f, "  </page>\n");
     }
     fprintf(f, "</doc>\n");
+}
+
+void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last)
+{
+    double xMin = 0, yMin = 0, xMax = 0, yMax = 0;
+    const TextFlow *flow;
+    const TextBlock *blk;
+    const TextLine *line;
+    const TextWord *word;
+    int blockNum = 0;
+    int lineNum = 0;
+    int flowNum = 0;
+    int wordNum = 0;
+    const int pageLevel = 1;
+    const int blockLevel = 3;
+    const int lineLevel = 4;
+    const int wordLevel = 5;
+    const int metaConf = -1;
+    const int wordConf = 100;
+
+    fputs("level\tpage_num\tpar_num\tblock_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n", f);
+
+    for (int page = first; page <= last; ++page) {
+        const double wid = useCropBox ? doc->getPageCropWidth(page) : doc->getPageMediaWidth(page);
+        const double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
+
+        fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###PAGE###\n", pageLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, wid, hgt, metaConf);
+        doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
+
+        for (flow = textOut->getFlows(); flow; flow = flow->getNext()) {
+            // flow->getBBox(&xMin, &yMin, &xMax, &yMax);
+            // fprintf(f, "%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t\n", page,flowNum,blockNum,lineNum,wordNum,xMin,yMin,wid, hgt);
+
+            for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
+                blk->getBBox(&xMin, &yMin, &xMax, &yMax);
+                fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###FLOW###\n", blockLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin, metaConf);
+
+                for (line = blk->getLines(); line; line = line->getNext()) {
+
+                    double lxMin = 1E+37, lyMin = 1E+37;
+                    double lxMax = 0, lyMax = 0;
+                    GooString *lineWordsBuffer = new GooString();
+
+                    for (word = line->getWords(); word; word = word->getNext()) {
+                        word->getBBox(&xMin, &yMin, &xMax, &yMax);
+                        if (lxMin > xMin) {
+                            lxMin = xMin;
+                        }
+                        if (lxMax < xMax) {
+                            lxMax = xMax;
+                        }
+                        if (lyMin > yMin) {
+                            lyMin = yMin;
+                        }
+                        if (lyMax < yMax) {
+                            lyMax = yMax;
+                        }
+
+                        lineWordsBuffer->appendf("{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:t}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin,
+                                                 wordConf, word->getText());
+                        wordNum++;
+                    }
+
+                    // Print Link Bounding Box info
+                    fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%d\t###LINE###\n", lineLevel, page, flowNum, blockNum, lineNum, 0, lxMin, lyMin, lxMax - lxMin, lyMax - lyMin, metaConf);
+                    fprintf(f, "%s", lineWordsBuffer->c_str());
+                    delete lineWordsBuffer;
+                    wordNum = 0;
+                    lineNum++;
+                }
+                lineNum = 0;
+                blockNum++;
+            }
+            blockNum = 0;
+            flowNum++;
+        }
+        flowNum = 0;
+    }
 }
 
 void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last)

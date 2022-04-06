@@ -21,7 +21,7 @@
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
-// Copyright (C) 2008, 2012, 2014, 2016, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2012, 2014, 2016, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Darren Kenny <darren.kenny@sun.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2010 Jan Kümmel <jan+freedesktop@snorc.org>
@@ -519,7 +519,7 @@ static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_
     return CAIRO_STATUS_SUCCESS;
 }
 
-static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsigned long glyph, cairo_t *cr, cairo_text_extents_t *metrics)
+static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsigned long glyph, cairo_t *cr, cairo_text_extents_t *metrics, bool color)
 {
     Dict *charProcs;
     Object charProc;
@@ -530,6 +530,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     PDFRectangle box;
     type3_font_info_t *info;
     Gfx *gfx;
+    cairo_status_t status;
 
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
 
@@ -586,10 +587,27 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         metrics->height = bbox[3] - bbox[1];
     }
 
+    status = CAIRO_STATUS_SUCCESS;
+    if (color && !output_dev->hasColor()) {
+        status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
+    }
+
     delete gfx;
     delete output_dev;
 
-    return CAIRO_STATUS_SUCCESS;
+    return status;
+}
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
+static cairo_status_t _render_type3_color_glyph(cairo_scaled_font_t *scaled_font, unsigned long glyph, cairo_t *cr, cairo_text_extents_t *metrics)
+{
+    return _render_type3_glyph(scaled_font, glyph, cr, metrics, true);
+}
+#endif
+
+static cairo_status_t _render_type3_noncolor_glyph(cairo_scaled_font_t *scaled_font, unsigned long glyph, cairo_t *cr, cairo_text_extents_t *metrics)
+{
+    return _render_type3_glyph(scaled_font, glyph, cr, metrics, false);
 }
 
 CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref)
@@ -605,7 +623,10 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfx
     ref = *gfxFont->getID();
     font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
-    cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_glyph);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
+    cairo_user_font_face_set_render_color_glyph_func(font_face, _render_type3_color_glyph);
+#endif
+    cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_noncolor_glyph);
     type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, printing, xref);
 
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);

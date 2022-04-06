@@ -156,6 +156,7 @@ CairoOutputDev::CairoOutputDev()
     inUncoloredPattern = false;
     inType3Char = false;
     t3_glyph_has_bbox = false;
+    has_color = false;
     text_matrix_valid = true;
 
     groupColorSpaceStack = nullptr;
@@ -545,6 +546,7 @@ void CairoOutputDev::updateFillColor(GfxState *state)
 
         LOG(printf("fill color: %d %d %d\n", fill_color.r, fill_color.g, fill_color.b));
     }
+    has_color = true;
 }
 
 void CairoOutputDev::updateStrokeColor(GfxState *state)
@@ -562,6 +564,7 @@ void CairoOutputDev::updateStrokeColor(GfxState *state)
 
         LOG(printf("stroke color: %d %d %d\n", stroke_color.r, stroke_color.g, stroke_color.b));
     }
+    has_color = true;
 }
 
 void CairoOutputDev::updateFillOpacity(GfxState *state)
@@ -613,6 +616,7 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset)
     auto opacity = (state->getStrokePattern()) ? state->getStrokeOpacity() : state->getFillOpacity();
 
     cairo_pattern_add_color_stop_rgba(fill_pattern, offset, colToDbl(fill_color.r), colToDbl(fill_color.g), colToDbl(fill_color.b), opacity);
+    has_color = true;
     LOG(printf("fill color stop: %f (%d, %d, %d, %d)\n", offset, fill_color.r, fill_color.g, fill_color.b, dblToCol(opacity)));
 }
 
@@ -2845,6 +2849,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
     cairo_pattern_destroy(maskPattern);
     cairo_pattern_destroy(pattern);
+    has_color = true;
 
 cleanup:
     imgStr->close();
@@ -3499,6 +3504,7 @@ void CairoImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, i
         setCairo(nullptr);
         cairo_surface_destroy(surface);
         cairo_destroy(cr);
+        has_color = true;
     }
 }
 
@@ -3556,5 +3562,6 @@ void CairoImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *
         setCairo(nullptr);
         cairo_surface_destroy(surface);
         cairo_destroy(cr);
+        has_color = true;
     }
 }

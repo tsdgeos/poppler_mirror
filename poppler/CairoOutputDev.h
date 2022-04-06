@@ -18,7 +18,7 @@
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2011-2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2009, 2011-2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -249,6 +249,7 @@ public:
     }
     bool hasType3GlyphBBox() { return t3_glyph_has_bbox; }
     double *getType3GlyphBBox() { return t3_glyph_bbox; }
+    bool hasColor() { return has_color; }
 
 protected:
     void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
@@ -316,6 +317,7 @@ protected:
     bool inType3Char; // inside a Type 3 CharProc
     double t3_glyph_wx, t3_glyph_wy;
     bool t3_glyph_has_bbox;
+    bool has_color;
     double t3_glyph_bbox[4];
     bool prescaleImages;
 

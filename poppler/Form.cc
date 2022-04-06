@@ -49,10 +49,13 @@
 #include "goo/GooString.h"
 #include "Error.h"
 #include "ErrorCodes.h"
+#include "CharCodeToUnicode.h"
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"
 #include "Gfx.h"
+#include "GfxFont.h"
+#include "GlobalParams.h"
 #include "Form.h"
 #include "PDFDoc.h"
 #include "DateInfo.h"
@@ -67,6 +70,12 @@
 #include "Link.h"
 #include "Lexer.h"
 #include "Parser.h"
+
+#include "fofi/FoFiTrueType.h"
+#include "fofi/FoFiIdentifier.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 // return a newly allocated char* containing an UTF16BE string of size length
 char *pdfDocEncodingToUTF16(const std::string &orig, int *length)
@@ -575,7 +584,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
         }
         int len = BUF_SIZE;
         if (end - start < len) {
-            len = end - start;
+            len = static_cast<int>(end - start);
         }
         if (fread(buf, 1, len, f) != static_cast<size_t>(len)) {
             delete[] buf;
@@ -684,7 +693,13 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     GooString *aux = getField()->getDefaultAppearance();
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
-    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+    Form *form = doc->getCatalog()->getForm();
+    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
+    if (pdfFontName.empty()) {
+        pdfFontName = form->addFontToDefaultResources("Helvetica", "");
+    }
+
+    const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
     getField()->setDefaultAppearance(da.toAppearanceString());
 
     std::unique_ptr<AnnotAppearanceCharacs> origAppearCharacs = getWidgetAnnotation()->getAppearCharacs() ? getWidgetAnnotation()->getAppearCharacs()->copy() : nullptr;
@@ -700,6 +715,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
 
     getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
+
+    form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
+    form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
     ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
     ffs->setCustomAppearanceContent(signatureText);
@@ -1642,6 +1660,18 @@ void FormFieldText::setContentCopy(const GooString *new_content)
         if (!content->hasUnicodeMarker()) {
             content->prependUnicodeMarker();
         }
+        Form *form = doc->getCatalog()->getForm();
+        if (form) {
+            DefaultAppearance da(defaultAppearance);
+            if (da.getFontName().isName()) {
+                const std::string fontName = da.getFontName().getName();
+                if (!fontName.empty()) {
+                    form->ensureFontsForAllCharacters(new_content, fontName);
+                }
+            } else {
+                // This is wrong, there has to be a Tf in DA
+            }
+        }
     }
 
     obj.getDict()->set("V", Object(content ? content->copy() : new GooString("")));
@@ -2259,8 +2289,8 @@ void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset 
     while (i < block_len) {
         Goffset bytes_left = block_len - i;
         if (bytes_left < BLOCK_SIZE) {
-            doc->getBaseStream()->doGetChars(bytes_left, signed_data_buffer);
-            handler->updateHash(signed_data_buffer, bytes_left);
+            doc->getBaseStream()->doGetChars(static_cast<int>(bytes_left), signed_data_buffer);
+            handler->updateHash(signed_data_buffer, static_cast<int>(bytes_left));
             i = block_len;
         } else {
             doc->getBaseStream()->doGetChars(BLOCK_SIZE, signed_data_buffer);
@@ -2489,7 +2519,7 @@ void FormFieldSignature::print(int indent)
 // Form
 //------------------------------------------------------------------------
 
-Form::Form(PDFDoc *doc)
+Form::Form(PDFDoc *docA) : doc(docA)
 {
     Object obj1;
 
@@ -2645,6 +2675,299 @@ FormField *Form::createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref,
     return field;
 }
 
+static const std::string kOurDictFontNamePrefix = "popplerfont";
+
+std::string Form::findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const
+{
+    if (!resDict.isDict()) {
+        return {};
+    }
+
+    const std::string fontFamilyAndStyle = fontFamily + " " + fontStyle;
+
+    Object fontDictObj = resDict.dictLookup("Font");
+    assert(fontDictObj.isDict());
+
+    const Dict *fontDict = fontDictObj.getDict();
+    for (int i = 0; i < fontDict->getLength(); ++i) {
+        const char *key = fontDict->getKey(i);
+        if (GooString::startsWith(key, kOurDictFontNamePrefix)) {
+            const Object fontObj = fontDict->getVal(i);
+            if (fontObj.isDict() && fontObj.dictIs("Font")) {
+                const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");
+                if (fontBaseFontObj.isName(fontFamilyAndStyle.c_str())) {
+                    return key;
+                }
+            }
+        }
+    }
+
+    return {};
+}
+
+std::string Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
+{
+    const FamilyStyleFontSearchResult res = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
+
+    return addFontToDefaultResources(res.filepath, res.faceIndex, fontFamily, fontStyle);
+}
+
+std::string Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)
+{
+    if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for %s %s was %s", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
+        return {};
+    }
+
+    const FoFiIdentifierType fontFoFiType = FoFiIdentifier::identifyFile(filepath.c_str());
+    if (fontFoFiType != fofiIdTrueType && fontFoFiType != fofiIdTrueTypeCollection && fontFoFiType != fofiIdOpenTypeCFF8Bit && fontFoFiType != fofiIdOpenTypeCFFCID) {
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for %s %s was %s of type %d", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str(), fontFoFiType);
+        return {};
+    }
+
+    const std::string fontFamilyAndStyle = fontFamily + " " + fontStyle;
+
+    XRef *xref = doc->getXRef();
+    Object fontDict(new Dict(xref));
+    fontDict.dictSet("Type", Object(objName, "Font"));
+    fontDict.dictSet("Subtype", Object(objName, "Type0"));
+    fontDict.dictSet("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
+
+    fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
+
+    {
+        std::unique_ptr<Array> descendantFonts = std::make_unique<Array>(xref);
+
+        const bool isTrueType = (fontFoFiType == fofiIdTrueType || fontFoFiType == fofiIdTrueTypeCollection);
+        std::unique_ptr<Dict> descendantFont = std::make_unique<Dict>(xref);
+        descendantFont->set("Type", Object(objName, "Font"));
+        descendantFont->set("Subtype", Object(objName, isTrueType ? "CIDFontType2" : "CIDFontType0"));
+        descendantFont->set("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
+
+        {
+            // We only support fonts with identity cmaps for now
+            Dict *cidSystemInfo = new Dict(xref);
+            cidSystemInfo->set("Registry", Object(new GooString("Adobe")));
+            cidSystemInfo->set("Ordering", Object(new GooString("Identity")));
+            cidSystemInfo->set("Supplement", Object(0));
+            descendantFont->set("CIDSystemInfo", Object(cidSystemInfo));
+        }
+
+        FT_Library freetypeLib;
+        if (FT_Init_FreeType(&freetypeLib)) {
+            error(errIO, -1, "FT_Init_FreeType failed");
+            return {};
+        }
+        const std::unique_ptr<FT_Library, void (*)(FT_Library *)> freetypeLibDeleter(&freetypeLib, [](FT_Library *l) { FT_Done_FreeType(*l); });
+
+        FT_Face face;
+        if (FT_New_Face(freetypeLib, filepath.c_str(), faceIndex, &face)) {
+            error(errIO, -1, "FT_New_Face failed for %s", filepath.c_str());
+            return {};
+        }
+        const std::unique_ptr<FT_Face, void (*)(FT_Face *)> faceDeleter(&face, [](FT_Face *f) { FT_Done_Face(*f); });
+
+        if (FT_Set_Char_Size(face, 1000, 1000, 0, 0)) {
+            error(errIO, -1, "FT_Set_Char_Size failed for %s", filepath.c_str());
+            return {};
+        }
+
+        {
+            std::unique_ptr<Dict> fontDescriptor = std::make_unique<Dict>(xref);
+            fontDescriptor->set("Type", Object(objName, "FontDescriptor"));
+            fontDescriptor->set("FontName", Object(objName, "Noto Sans"));
+
+            // a bit arbirary but the Flags field is mandatory...
+            const std::string lowerCaseFontFamily = GooString::toLowerCase(fontFamily);
+            if (lowerCaseFontFamily.find("serif") != std::string::npos && lowerCaseFontFamily.find("sans") == std::string::npos) {
+                fontDescriptor->set("Flags", Object(2)); // Serif
+            } else {
+                fontDescriptor->set("Flags", Object(0)); // Sans Serif
+            }
+
+            Array *fontBBox = new Array(xref);
+            fontBBox->add(Object(static_cast<int>(face->bbox.xMin)));
+            fontBBox->add(Object(static_cast<int>(face->bbox.yMin)));
+            fontBBox->add(Object(static_cast<int>(face->bbox.xMax)));
+            fontBBox->add(Object(static_cast<int>(face->bbox.yMax)));
+            fontDescriptor->set("FontBBox", Object(fontBBox));
+
+            fontDescriptor->set("Ascent", Object(static_cast<int>(face->ascender)));
+
+            fontDescriptor->set("Descent", Object(static_cast<int>(face->descender)));
+
+            {
+                const std::unique_ptr<GooFile> file(GooFile::open(filepath));
+                if (!file) {
+                    error(errIO, -1, "Failed to open %s", filepath.c_str());
+                    return {};
+                }
+                const Goffset fileSize = file->size();
+                if (fileSize < 0) {
+                    error(errIO, -1, "Failed to get file size for %s", filepath.c_str());
+                    return {};
+                }
+                char *dataPtr = static_cast<char *>(gmalloc(fileSize));
+                const Goffset bytesRead = file->read(dataPtr, fileSize, 0);
+                if (bytesRead != fileSize) {
+                    error(errIO, -1, "Failed to read contents of %s", filepath.c_str());
+                    gfree(dataPtr);
+                    return {};
+                }
+
+                if (isTrueType) {
+                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), dataPtr, fileSize);
+                    fontDescriptor->set("FontFile2", Object(fontFile2Ref));
+                } else {
+                    Dict *fontFileStreamDict = new Dict(xref);
+                    fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
+                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, dataPtr, fileSize);
+                    fontDescriptor->set("FontFile3", Object(fontFile3Ref));
+                }
+            }
+
+            const Ref fontDescriptorRef = xref->addIndirectObject(Object(fontDescriptor.release()));
+            descendantFont->set("FontDescriptor", Object(fontDescriptorRef));
+        }
+
+        static const int basicMultilingualMaxCode = 65535;
+
+        const std::unique_ptr<FoFiTrueType> fft = FoFiTrueType::load(filepath.c_str());
+        if (fft) {
+
+            // Look for the Unicode BMP cmaps, which are 0/3 or 3/1
+            int unicodeBMPCMap = fft->findCmap(0, 3);
+            if (unicodeBMPCMap < 0) {
+                unicodeBMPCMap = fft->findCmap(3, 1);
+            }
+            if (unicodeBMPCMap < 0) {
+                error(errIO, -1, "Font does not have an unicode BMP cmap %s", filepath.c_str());
+                return {};
+            }
+
+            Array *widthsInner = new Array(xref);
+            for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
+                const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
+                if (FT_Load_Glyph(face, glyph, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING)) {
+                    widthsInner->add(Object(0));
+                } else {
+                    widthsInner->add(Object(static_cast<int>(face->glyph->metrics.horiAdvance)));
+                }
+            }
+            Array *widths = new Array(xref);
+            widths->add(Object(0));
+            widths->add(Object(widthsInner));
+            descendantFont->set("W", Object(widths));
+
+            char *dataPtr = static_cast<char *>(gmalloc(2 * (basicMultilingualMaxCode + 1)));
+            int i = 0;
+
+            for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
+                const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
+                dataPtr[i++] = (unsigned char)(glyph >> 8);
+                dataPtr[i++] = (unsigned char)(glyph & 0xff);
+            }
+            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), dataPtr, basicMultilingualMaxCode * 2);
+            descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
+        }
+
+        descendantFonts->add(Object(descendantFont.release()));
+
+        fontDict.dictSet("DescendantFonts", Object(descendantFonts.release()));
+    }
+
+    const Ref fontDictRef = xref->addIndirectObject(fontDict);
+
+    std::string dictFontName = kOurDictFontNamePrefix;
+    Object *acroForm = doc->getCatalog()->getAcroForm();
+    if (resDict.isDict()) {
+        Ref fontDictObjRef;
+        Object fontDictObj = resDict.getDict()->lookup("Font", &fontDictObjRef);
+        assert(fontDictObj.isDict());
+        dictFontName = fontDictObj.getDict()->findAvailableKey(dictFontName);
+        fontDictObj.dictSet(dictFontName.c_str(), Object(fontDictRef));
+
+        if (fontDictObjRef != Ref::INVALID()) {
+            xref->setModifiedObject(&fontDictObj, fontDictObjRef);
+        } else {
+            Ref resDictRef;
+            acroForm->getDict()->lookup("DR", &resDictRef);
+            if (resDictRef != Ref::INVALID()) {
+                xref->setModifiedObject(&resDict, resDictRef);
+            } else {
+                doc->getCatalog()->setAcroFormModified();
+            }
+        }
+
+        // maybe we can do something to reuse the existing data instead of recreating from scratch?
+        delete defaultResources;
+        defaultResources = new GfxResources(xref, resDict.getDict(), nullptr);
+    } else {
+        Dict *fontsDict = new Dict(xref);
+        fontsDict->set(dictFontName.c_str(), Object(fontDictRef));
+
+        Dict *defaultResourcesDict = new Dict(xref);
+        defaultResourcesDict->set("Font", Object(fontsDict));
+
+        assert(!defaultResources);
+        defaultResources = new GfxResources(xref, defaultResourcesDict, nullptr);
+        resDict = Object(defaultResourcesDict);
+
+        acroForm->dictSet("DR", resDict.copy());
+        doc->getCatalog()->setAcroFormModified();
+    }
+
+    return dictFontName;
+}
+
+std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate) const
+{
+    const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
+
+    return findFontInDefaultResources(res.family, res.style);
+}
+
+void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate)
+{
+    std::shared_ptr<GfxFont> f = defaultResources->lookupFont(pdfFontNameToEmulate.c_str());
+    const CharCodeToUnicode *ccToUnicode = f->getToUnicode();
+    if (!ccToUnicode) {
+        return; // will never happen with current code
+    }
+
+    // If the text has some characters that are not available in the font, try adding a font for those
+    for (int i = 2; i < unicodeText->getLength(); i += 2) {
+        Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
+        uChar += (unsigned char)(unicodeText->getChar(i + 1));
+
+        CharCode c;
+        if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
+            if (f->isCIDFont()) {
+                auto cidFont = static_cast<const GfxCIDFont *>(f.get());
+                if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
+                    const int glyph = cidFont->getCIDToGID()[c];
+                    if (glyph == 0) {
+                        doGetAddFontToDefaultResources(uChar, *f);
+                    }
+                }
+            }
+        } else {
+            doGetAddFontToDefaultResources(uChar, *f);
+        }
+    }
+}
+
+std::string Form::doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate)
+{
+    const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
+
+    std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
+    if (pdfFontName.empty()) {
+        pdfFontName = addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
+    }
+    return pdfFontName;
+}
+
 void Form::postWidgetsLoad()
 {
     // We create the widget annotations associated to
@@ -2732,14 +3055,13 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
     widgets = nullptr;
     size = 0;
 
-    if (annots && annots->getNumAnnots() > 0 && form) {
-        size = annots->getNumAnnots();
+    if (annots && !annots->getAnnots().empty() && form) {
+        size = annots->getAnnots().size();
         widgets = (FormWidget **)greallocn(widgets, size, sizeof(FormWidget *));
 
         /* For each entry in the page 'Annots' dict, try to find
            a matching form field */
-        for (int i = 0; i < size; ++i) {
-            Annot *annot = annots->getAnnot(i);
+        for (Annot *annot : annots->getAnnots()) {
 
             if (annot->getType() != Annot::typeWidget) {
                 continue;

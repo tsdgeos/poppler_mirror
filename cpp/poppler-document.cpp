@@ -344,7 +344,7 @@ time_type document::info_date(const std::string &key) const
         return time_type(-1);
     }
 
-    return dateStringToTime(goo_date.get());
+    return static_cast<time_type>(dateStringToTime(goo_date.get()));
 }
 
 /**
@@ -654,7 +654,7 @@ time_type document::get_creation_date() const
         return time_type(-1);
     }
 
-    return dateStringToTime(goo_creation_date.get());
+    return static_cast<time_type>(dateStringToTime(goo_creation_date.get()));
 }
 
 /**
@@ -699,7 +699,7 @@ time_type document::get_modification_date() const
         return time_type(-1);
     }
 
-    return dateStringToTime(goo_modification_date.get());
+    return static_cast<time_type>(dateStringToTime(goo_modification_date.get()));
 }
 
 /**

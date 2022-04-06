@@ -103,7 +103,13 @@ Catalog::Catalog(PDFDoc *docA)
         return;
     }
     // get the AcroForm dictionary
-    acroForm = catDict.dictLookup("AcroForm");
+    acroForm = catDict.getDict()->lookup("AcroForm");
+    if (acroForm.isDict()) {
+        // We later assume the Fields Array exists, so check it does
+        if (!acroForm.dictLookup("Fields").isArray()) {
+            acroForm.setToNull();
+        }
+    }
 
     // read base URI
     Object obj = catDict.getDict()->lookupEnsureEncryptedIfNeeded("URI");
@@ -1055,6 +1061,26 @@ Catalog::FormType Catalog::getFormType()
     return res;
 }
 
+Form *Catalog::getCreateForm()
+{
+    catalogLocker();
+    if (!form) {
+        if (!acroForm.isDict()) {
+            acroForm = Object(new Dict(xref));
+            acroForm.dictSet("Fields", Object(new Array(xref)));
+
+            const Ref newFormRef = xref->addIndirectObject(acroForm);
+
+            Object catDict = xref->getCatalog();
+            catDict.dictSet("AcroForm", Object(newFormRef));
+
+            xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+        }
+    }
+
+    return getForm();
+}
+
 Form *Catalog::getForm()
 {
     catalogLocker();
@@ -1073,28 +1099,23 @@ void Catalog::addFormToAcroForm(const Ref formRef)
 {
     catalogLocker();
 
+    if (!acroForm.isDict()) {
+        getCreateForm();
+    }
+
+    // append to field array
+    Ref fieldRef;
+    Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+    fieldArray.getArray()->add(Object(formRef));
+
+    setAcroFormModified();
+}
+
+void Catalog::setAcroFormModified()
+{
     Object catDict = xref->getCatalog();
     Ref acroFormRef;
-    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
-
-    if (!acroForm.isDict()) {
-        // none there yet, need to create a new fields dict
-        Object newForm = Object(new Dict(xref));
-        newForm.dictSet("SigFlags", Object(3));
-
-        Array *fieldArray = new Array(xref);
-        fieldArray->add(Object(formRef));
-        newForm.dictSet("Fields", Object(fieldArray));
-
-        Ref newRef = xref->addIndirectObject(newForm);
-        catDict.dictSet("AcroForm", Object(newRef));
-        acroForm = catDict.getDict()->lookup("AcroForm");
-    } else {
-        // append to field array
-        Ref fieldRef;
-        Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
-        fieldArray.getArray()->add(Object(formRef));
-    }
+    catDict.getDict()->lookup("AcroForm", &acroFormRef);
 
     if (acroFormRef != Ref::INVALID()) {
         xref->setModifiedObject(&acroForm, acroFormRef);
@@ -1108,9 +1129,6 @@ void Catalog::removeFormFromAcroForm(const Ref formRef)
     catalogLocker();
 
     Object catDict = xref->getCatalog();
-    Ref acroFormRef;
-    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
-
     if (acroForm.isDict()) {
         // remove from field array
         Ref fieldRef;
@@ -1124,7 +1142,7 @@ void Catalog::removeFormFromAcroForm(const Ref formRef)
             }
         }
 
-        xref->setModifiedObject(&acroForm, acroFormRef);
+        setAcroFormModified();
     }
 }
 

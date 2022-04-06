@@ -212,6 +212,7 @@ public:
     Object *getAcroForm() { return &acroForm; }
     void addFormToAcroForm(const Ref formRef);
     void removeFormFromAcroForm(const Ref formRef);
+    void setAcroFormModified();
 
     OCGs *getOptContentConfig() { return optContent; }
 
@@ -226,6 +227,7 @@ public:
     };
 
     FormType getFormType();
+    Form *getCreateForm();
     Form *getForm();
 
     ViewerPreferences *getViewerPreferences();

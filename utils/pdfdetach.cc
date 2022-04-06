@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
     int nFiles, nPages, n, i, j;
     Page *page;
     Annots *annots;
-    Annot *annot;
     const GooString *s1;
     Unicode u;
     bool isUnicode;
@@ -151,8 +150,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        for (j = 0; j < annots->getNumAnnots(); ++j) {
-            annot = annots->getAnnot(j);
+        for (Annot *annot : annots->getAnnots()) {
             if (annot->getType() != Annot::typeFileAttachment) {
                 continue;
             }

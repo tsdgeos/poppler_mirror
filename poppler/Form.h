@@ -32,8 +32,9 @@
 #ifndef FORM_H
 #define FORM_H
 
-#include "Object.h"
 #include "Annot.h"
+#include "CharTypes.h"
+#include "Object.h"
 #include "poppler_private_export.h"
 
 #include <ctime>
@@ -335,7 +336,7 @@ private:
 // only interact with FormWidgets.
 //------------------------------------------------------------------------
 
-class FormField
+class POPPLER_PRIVATE_EXPORT FormField
 {
 public:
     FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
@@ -676,6 +677,22 @@ public:
        Page::loadStandaloneFields */
     static FormField *createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
+    // Finds in the default resources dictionary a font named popplerfontXXX that
+    // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves
+    std::string findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const;
+
+    // Finds in the system a font name matching the given fontFamily and fontStyle
+    // And adds it to the default resources dictionary, font name there will be popplerfontXXX
+    std::string addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle);
+
+    // Finds in the default resources dictionary a font named popplerfontXXX that
+    // emulates fontToEmulate and can draw the given char
+    std::string getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate) const;
+
+    // Makes sure the default resources has fonts to draw all the given chars and as close as possible to the given pdfFontNameToEmulate
+    // If needed adds fonts to the default resources dictionary, font names will be popplerfontXXX
+    void ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate);
+
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return numFields; }
     FormField *getRootField(int i) const { return rootFields[i]; }
@@ -695,9 +712,16 @@ public:
     void reset(const std::vector<std::string> &fields, bool excludeFields);
 
 private:
+    // Finds in the system a font name matching the given fontFamily and fontStyle
+    // And adds it to the default resources dictionary, font name there will be popplerfontXXX
+    std::string addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle);
+
+    std::string doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
+
     FormField **rootFields;
     int numFields;
     int size;
+    PDFDoc *const doc;
     bool needAppearances;
     GfxResources *defaultResources;
     Object resDict;

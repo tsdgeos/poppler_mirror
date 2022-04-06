@@ -82,8 +82,8 @@ std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
             delete resDict;
         }
         annots = page->getAnnots();
-        for (int i = 0; i < annots->getNumAnnots(); ++i) {
-            Object obj1 = annots->getAnnot(i)->getAppearanceResDict();
+        for (Annot *annot : annots->getAnnots()) {
+            Object obj1 = annot->getAppearanceResDict();
             if (obj1.isDict()) {
                 scanFonts(xrefA.get(), obj1.getDict(), &result);
             }
