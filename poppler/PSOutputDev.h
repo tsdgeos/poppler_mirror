@@ -46,6 +46,7 @@
 #include "GfxState.h"
 #include "GlobalParams.h"
 #include "OutputDev.h"
+#include "fofi/FoFiBase.h"
 #include <set>
 #include <map>
 #include <vector>
@@ -112,8 +113,6 @@ enum PSForceRasterize
     psNeverRasterize // never rasterize, may produce incorrect output
 };
 
-typedef void (*PSOutputFunc)(void *stream, const char *data, int len);
-
 typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut, PSOutCustomCodeLocation loc, int n, void *data);
 
 class POPPLER_PRIVATE_EXPORT PSOutputDev : public OutputDev
@@ -131,7 +130,7 @@ public:
 
     // Open a PSOutputDev that will write to a generic stream.
     // pages has to be sorted in increasing order
-    PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pages, PSOutMode modeA, int paperWidthA = -1, int paperHeightA = -1, bool noCrop = false, bool duplexA = true,
+    PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pages, PSOutMode modeA, int paperWidthA = -1, int paperHeightA = -1, bool noCrop = false, bool duplexA = true,
                 int imgLLXA = 0, int imgLLYA = 0, int imgURXA = 0, int imgURYA = 0, PSForceRasterize forceRasterizeA = psRasterizeWhenNeeded, bool manualCtrlA = false, PSOutCustomCodeCbk customCodeCbkA = nullptr,
                 void *customCodeCbkDataA = nullptr, PSLevel levelA = psLevel2);
 
@@ -361,7 +360,7 @@ public:
     }
 
 private:
-    void init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
+    void init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
               int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA);
     void postInit();
     void setupResources(Dict *resDict);
@@ -433,7 +432,7 @@ private:
     char *psTitle;
     bool postInitDone; // true if postInit() was called
 
-    PSOutputFunc outputFunc;
+    FoFiOutputFunc outputFunc;
     void *outputStream;
     PSFileType fileType; // file / pipe / stdout
     bool manualCtrl;
