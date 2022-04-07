@@ -26,7 +26,7 @@
 
 //------------------------------------------------------------------------
 
-typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
+using FoFiOutputFunc = void (*)(void *stream, const char *data, int len);
 
 //------------------------------------------------------------------------
 // FoFiBase
