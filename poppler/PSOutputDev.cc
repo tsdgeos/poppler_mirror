@@ -1074,7 +1074,7 @@ extern "C" {
 typedef void (*SignalFunc)(int);
 }
 
-static void outputToFile(void *stream, const char *data, int len)
+static void outputToFile(void *stream, const char *data, size_t len)
 {
     fwrite(data, 1, len, (FILE *)stream);
 }
