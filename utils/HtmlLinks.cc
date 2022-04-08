@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
-// Copyright (C) 2010, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
@@ -140,7 +140,7 @@ HtmlLinks::HtmlLinks() { }
 
 HtmlLinks::~HtmlLinks() { }
 
-bool HtmlLinks::inLink(double xmin, double ymin, double xmax, double ymax, int &p) const
+bool HtmlLinks::inLink(double xmin, double ymin, double xmax, double ymax, size_t &p) const
 {
 
     for (std::vector<HtmlLink>::const_iterator i = accu.begin(); i != accu.end(); ++i) {
@@ -152,7 +152,7 @@ bool HtmlLinks::inLink(double xmin, double ymin, double xmax, double ymax, int &
     return false;
 }
 
-const HtmlLink *HtmlLinks::getLink(int i) const
+const HtmlLink *HtmlLinks::getLink(size_t i) const
 {
     return &accu[i];
 }
