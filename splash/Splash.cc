@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -1342,7 +1342,7 @@ inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y)
     // draw the pixel
     if (t != 0) {
         pipeSetXY(pipe, x, y);
-        pipe->shape = div255(aaGamma[t] * pipe->shape);
+        pipe->shape = div255(static_cast<int>(aaGamma[t] * pipe->shape));
         (this->*pipe->run)(pipe);
     }
 }
@@ -1417,7 +1417,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
 #endif
 
         if (t != 0) {
-            pipe->shape = (adjustLine) ? div255((int)lineOpacity * (double)aaGamma[t]) : (double)aaGamma[t];
+            pipe->shape = (adjustLine) ? div255(static_cast<int>((int)lineOpacity * (double)aaGamma[t])) : (int)aaGamma[t];
             (this->*pipe->run)(pipe);
         } else {
             pipeIncX(pipe);
@@ -2432,7 +2432,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
                     transform(state->matrix, 0, 0, &mx, &my);
                     transform(state->matrix, state->lineWidth, 0, &delta, &my);
                     doAdjustLine = true;
-                    lineShape = clip255((delta - mx) * 255);
+                    lineShape = clip255(static_cast<int>((delta - mx) * 255));
                 }
                 drawAALine(&pipe, x0, x1, y, doAdjustLine, lineShape);
             }
@@ -4719,7 +4719,7 @@ static void expandRow(unsigned char *srcBuf, unsigned char *dstBuf, int srcWidth
         xFrac = modf(xSrc, &xInt);
         p = (int)xInt;
         for (int c = 0; c < nComps; c++) {
-            dstBuf[nComps * x + c] = srcBuf[nComps * p + c] * (1.0 - xFrac) + srcBuf[nComps * (p + 1) + c] * xFrac;
+            dstBuf[nComps * x + c] = static_cast<unsigned char>(srcBuf[nComps * p + c] * (1.0 - xFrac) + srcBuf[nComps * (p + 1) + c] * xFrac);
         }
         xSrc += xStep;
     }
@@ -4788,7 +4788,7 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
         for (int x = 0; x < scaledWidth; ++x) {
             // compute the final pixel
             for (i = 0; i < nComps; ++i) {
-                pix[i] = lineBuf1[x * nComps + i] * (1.0 - yFrac) + lineBuf2[x * nComps + i] * yFrac;
+                pix[i] = static_cast<unsigned char>(lineBuf1[x * nComps + i] * (1.0 - yFrac) + lineBuf2[x * nComps + i] * yFrac);
             }
 
             // store the pixel
@@ -4831,7 +4831,7 @@ bool Splash::scaleImageYupXupBilinear(SplashImageSource src, void *srcData, Spla
             // process alpha
             if (srcAlpha) {
                 destAlphaPtr = destAlphaPtr0 + y * scaledWidth + x;
-                *destAlphaPtr = alphaLineBuf1[x] * (1.0 - yFrac) + alphaLineBuf2[x] * yFrac;
+                *destAlphaPtr = static_cast<unsigned char>(alphaLineBuf1[x] * (1.0 - yFrac) + alphaLineBuf2[x] * yFrac);
             }
         }
 
