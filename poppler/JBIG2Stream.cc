@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -1424,8 +1424,8 @@ void JBIG2Stream::readSegments()
             byteCounter += huffDecoder->getByteCounter();
             byteCounter += mmrDecoder->getByteCounter();
 
-            Goffset segExtraBytes = segLength - byteCounter;
-            if (segExtraBytes > 0) {
+            if (segLength > byteCounter) {
+                const unsigned int segExtraBytes = segLength - byteCounter;
 
                 // If we didn't read all of the bytes in the segment data,
                 // indicate an error, and throw away the rest of the data.
@@ -1435,9 +1435,9 @@ void JBIG2Stream::readSegments()
                 // arithmetic-coded symbol dictionary segments when numNewSyms
                 // == 0.  Segments like this often occur for blank pages.
 
-                error(errSyntaxError, curStr->getPos(), "{0:lld} extraneous byte{1:s} after segment", segExtraBytes, (segExtraBytes > 1) ? "s" : "");
-
-            } else if (segExtraBytes < 0 || segLength - byteCounter > 65536) {
+                error(errSyntaxError, curStr->getPos(), "{0:ud} extraneous byte{1:s} after segment", segExtraBytes, (segExtraBytes > 1) ? "s" : "");
+                byteCounter += curStr->discardChars(segExtraBytes);
+            } else if (segLength < byteCounter) {
 
                 // If we read more bytes than we should have, according to the
                 // segment length field, note an error.
@@ -1445,7 +1445,6 @@ void JBIG2Stream::readSegments()
                 error(errSyntaxError, curStr->getPos(), "Previous segment handler read too many bytes");
                 goto syntaxError;
             }
-            byteCounter += curStr->discardChars(segExtraBytes);
         }
 
         gfree(refSegs);
