@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2010, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2010, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2014 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -223,7 +223,7 @@ void FoFiType1::parse()
         // get font name
         if (!name && (line + 9 <= (char *)file + len) && !strncmp(line, "/FontName", 9)) {
             const auto availableFile = (char *)file + len - line;
-            const int lineLen = availableFile < 255 ? availableFile : 255;
+            const int lineLen = static_cast<int>(availableFile < 255 ? availableFile : 255);
             strncpy(buf, line, lineLen);
             buf[lineLen] = '\0';
             if ((p = strchr(buf + 9, '/')) && (p = strtok_r(p + 1, " \t\n\r", &tokptr))) {
@@ -337,7 +337,7 @@ void FoFiType1::parse()
 
         } else if (!gotMatrix && (line + 11 <= (char *)file + len) && !strncmp(line, "/FontMatrix", 11)) {
             const auto availableFile = (char *)file + len - (line + 11);
-            const int bufLen = availableFile < 255 ? availableFile : 255;
+            const int bufLen = static_cast<int>(availableFile < 255 ? availableFile : 255);
             strncpy(buf, line + 11, bufLen);
             buf[bufLen] = '\0';
             if ((p = strchr(buf, '['))) {

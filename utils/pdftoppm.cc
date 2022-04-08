@@ -226,7 +226,7 @@ static bool parseJpegOptions()
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, comma - nextOpt);
+            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
             opt.Set(nextOpt);
@@ -238,7 +238,7 @@ static bool parseJpegOptions()
             fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
             return false;
         }
-        int iequal = equal - opt.c_str();
+        const int iequal = static_cast<int>(equal - opt.c_str());
         GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
         opt.del(iequal, opt.getLength() - iequal);
         // here opt is "<optN>" and value is "<valN>"
