@@ -2807,8 +2807,13 @@ std::string Form::addFontToDefaultResources(const std::string &filepath, int fac
                     error(errIO, -1, "Failed to get file size for %s", filepath.c_str());
                     return {};
                 }
+                // GooFile::read only takes an integer so for now we don't support huge fonts
+                if (fileSize > std::numeric_limits<int>::max()) {
+                    error(errIO, -1, "Font size is too big %s", filepath.c_str());
+                    return {};
+                }
                 char *dataPtr = static_cast<char *>(gmalloc(fileSize));
-                const Goffset bytesRead = file->read(dataPtr, fileSize, 0);
+                const Goffset bytesRead = file->read(dataPtr, static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
                     error(errIO, -1, "Failed to read contents of %s", filepath.c_str());
                     gfree(dataPtr);
