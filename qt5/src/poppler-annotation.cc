@@ -1988,15 +1988,17 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
         std::string fontName = "Invalid_font";
         if (textFont) {
             Form *form = pdfPage->getDoc()->getCatalog()->getCreateForm();
-            fontName = form->findFontInDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
-            if (fontName.empty()) {
-                fontName = form->addFontToDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
-            }
+            if (form) {
+                fontName = form->findFontInDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
+                if (fontName.empty()) {
+                    fontName = form->addFontToDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
+                }
 
-            if (!fontName.empty()) {
-                form->ensureFontsForAllCharacters(pdfAnnot->getContents(), fontName);
-            } else {
-                fontName = "Invalid_font";
+                if (!fontName.empty()) {
+                    form->ensureFontsForAllCharacters(pdfAnnot->getContents(), fontName);
+                } else {
+                    fontName = "Invalid_font";
+                }
             }
         }
         DefaultAppearance da { { objName, fontName.c_str() }, pointSize, convertQColor(textColor) };
