@@ -634,7 +634,7 @@ void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
  * Returns the root #PopplerStructureElementIter for @document, or %NULL. The
  * returned value must be freed with poppler_structure_element_iter_free().
  *
- * Documents may have an associated structure tree &mdashmostly, Tagged-PDF
+ * Documents may have an associated structure tree &mdash;mostly, Tagged-PDF
  * compliant documents&mdash; which can be used to obtain information about
  * the document structure and its contents. Each node in the tree contains
  * a #PopplerStructureElement.
