@@ -77,9 +77,9 @@ build_ubuntu_18_04:
     - cmake -G Ninja ..
     - ninja
 
-build_mingw64_fedora35:
+build_mingw64_fedora36:
   stage: build
-  image: fedora:35
+  image: fedora:36
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
