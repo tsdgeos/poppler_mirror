@@ -4044,6 +4044,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     for (k = 0; k < len; ++k) {
                         bool last_char_of_line = j + k == m - 1;
                         bool last_char_of_search_term = k == len - 1;
+                        bool match_started = (bool)k;
 
                         if (p[k] != s2[k] || (nextline && last_char_of_line && !last_char_of_search_term)) {
                             // now check if the comparison failed at the end-of-line hyphen,
@@ -4055,7 +4056,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                     break;
                                 }
                                 k++;
-                            } else if (p[k] != (Unicode)'-' || UnicodeIsWhitespace(s2[k])) {
+                            } else if (!match_started || p[k] != (Unicode)'-' || !last_char_of_line || UnicodeIsWhitespace(s2[k])) {
                                 break;
                             } else {
                                 nextlineAfterHyphen = true;

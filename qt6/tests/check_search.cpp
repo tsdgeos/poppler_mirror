@@ -362,6 +362,11 @@ void TestSearch::testAcrossLinesSearch()
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode1), true);
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode2), true);
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode2W), true);
+
+    // BUG about false positives at start of a line.
+    const QString bug_str = QString::fromUtf8("nes y"); // clazy:exclude=qstring-allocations
+    // there's only 1 match, check for that
+    QCOMPARE(page->search(bug_str, mode2).size(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
