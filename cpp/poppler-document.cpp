@@ -327,7 +327,7 @@ bool document::set_info_key(const std::string &key, const ustring &val)
 }
 
 /**
- Gets the time_t value of the specified \p key of the document
+ Gets the time_type value of the specified \p key of the document
  information.
 
  \returns the time_t value for the \p key
@@ -345,6 +345,27 @@ time_type document::info_date(const std::string &key) const
     }
 
     return static_cast<time_type>(dateStringToTime(goo_date.get()));
+}
+
+/**
+ Gets the time_t value of the specified \p key of the document
+ information.
+
+ \returns the time_t value for the \p key
+ \see info_keys, info_date
+ */
+time_t document::info_date_t(const std::string &key) const
+{
+    if (d->is_locked) {
+        return time_t(-1);
+    }
+
+    std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
+    if (!goo_date.get()) {
+        return time_t(-1);
+    }
+
+    return dateStringToTime(goo_date.get());
 }
 
 /**
@@ -367,6 +388,31 @@ bool document::set_info_date(const std::string &key, time_type val)
     } else {
         time_t t = static_cast<time_t>(val);
         goo_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoStringEntry(key.c_str(), goo_date);
+    return true;
+}
+
+/**
+ Sets the time_t value of the specified \p key of the %document information
+ to \p val.
+ If \p val == time_t(-1), the entry specified by \p key is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_info_date_t(const std::string &key, time_t val)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_date;
+
+    if (val == time_t(-1)) {
+        goo_date = nullptr;
+    } else {
+        goo_date = timeToDateString(&val);
     }
 
     d->doc->setDocInfoStringEntry(key.c_str(), goo_date);
@@ -658,6 +704,26 @@ time_type document::get_creation_date() const
 }
 
 /**
+ Gets the document's creation date as a time_t value.
+
+ \returns the document's creation date as a time_t value
+ \see set_creation_date, info_date
+ */
+time_t document::get_creation_date_t() const
+{
+    if (d->is_locked) {
+        return time_t(-1);
+    }
+
+    std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
+    if (!goo_creation_date.get()) {
+        return time_t(-1);
+    }
+
+    return dateStringToTime(goo_creation_date.get());
+}
+
+/**
  Sets the %document's creation date to \p creation_date.
  If \p creation_date == time_type(-1), the %document's creation date is removed.
 
@@ -676,6 +742,30 @@ bool document::set_creation_date(time_type creation_date)
     } else {
         time_t t = static_cast<time_t>(creation_date);
         goo_creation_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoCreatDate(goo_creation_date);
+    return true;
+}
+
+/**
+ Sets the %document's creation date to \p creation_date.
+ If \p creation_date == time_t(-1), the %document's creation date is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_creation_date_t(time_t creation_date)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_creation_date;
+
+    if (creation_date == time_t(-1)) {
+        goo_creation_date = nullptr;
+    } else {
+        goo_creation_date = timeToDateString(&creation_date);
     }
 
     d->doc->setDocInfoCreatDate(goo_creation_date);
@@ -703,6 +793,26 @@ time_type document::get_modification_date() const
 }
 
 /**
+ Gets the document's modification date as a time_t value.
+
+ \returns the document's modification date as a time_t value
+ \see set_modification_date, info_date
+ */
+time_t document::get_modification_date_t() const
+{
+    if (d->is_locked) {
+        return time_t(-1);
+    }
+
+    std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
+    if (!goo_modification_date.get()) {
+        return time_t(-1);
+    }
+
+    return dateStringToTime(goo_modification_date.get());
+}
+
+/**
  Sets the %document's modification date to \p mod_date.
  If \p mod_date == time_type(-1), the %document's modification date is removed.
 
@@ -721,6 +831,30 @@ bool document::set_modification_date(time_type mod_date)
     } else {
         time_t t = static_cast<time_t>(mod_date);
         goo_mod_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoModDate(goo_mod_date);
+    return true;
+}
+
+/**
+ Sets the %document's modification date to \p mod_date.
+ If \p mod_date == time_t(-1), the %document's modification date is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_modification_date_t(time_t mod_date)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_mod_date;
+
+    if (mod_date == time_t(-1)) {
+        goo_mod_date = nullptr;
+    } else {
+        goo_mod_date = timeToDateString(&mod_date);
     }
 
     d->doc->setDocInfoModDate(goo_mod_date);

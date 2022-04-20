@@ -3,7 +3,7 @@
  * Copyright (C) 2010, Patrick Spendrin <ps_ml@gmx.de>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,7 +117,9 @@ private:
 #    pragma warning(pop)
 #endif
 
-POPPLER_CPP_EXPORT time_type convert_date(const std::string &date);
+[[deprecated]] POPPLER_CPP_EXPORT time_type convert_date(const std::string &date);
+
+POPPLER_CPP_EXPORT time_t convert_date_t(const std::string &date);
 
 POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const byte_array &array);
 
