@@ -103,7 +103,7 @@ public:
 };
 
 // returns true if x is closer to y than x is to z
-static inline bool IS_CLOSER(float x, float y, float z)
+static inline bool IS_CLOSER(double x, double y, double z)
 {
     return std::fabs((x) - (y)) < std::fabs((x) - (z));
 }
@@ -343,7 +343,7 @@ void HtmlPage::conv()
         delete tmp->htext;
         tmp->htext = HtmlFont::HtmlFilter(tmp->text, tmp->len);
 
-        int linkIndex = 0;
+        size_t linkIndex = 0;
         if (links->inLink(tmp->xMin, tmp->yMin, tmp->xMax, tmp->yMax, linkIndex)) {
             tmp->link = links->getLink(linkIndex);
         }

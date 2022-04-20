@@ -227,6 +227,7 @@ public:
     };
 
     FormType getFormType();
+    // This can return nullptr if the document is in a very damaged state
     Form *getCreateForm();
     Form *getForm();
 

@@ -1065,13 +1065,18 @@ Form *Catalog::getCreateForm()
 {
     catalogLocker();
     if (!form) {
+
+        Object catDict = xref->getCatalog();
+        if (!catDict.isDict()) {
+            error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
+            return nullptr;
+        }
+
         if (!acroForm.isDict()) {
             acroForm = Object(new Dict(xref));
             acroForm.dictSet("Fields", Object(new Array(xref)));
 
             const Ref newFormRef = xref->addIndirectObject(acroForm);
-
-            Object catDict = xref->getCatalog();
             catDict.dictSet("AcroForm", Object(newFormRef));
 
             xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });

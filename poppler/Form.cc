@@ -33,6 +33,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Even Rouault <even.rouault@spatialys.com>
+// Copyright 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
 //
 //========================================================================
 
@@ -687,7 +688,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
 bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location,
                                                      const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                     std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -722,6 +723,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
     ffs->setCustomAppearanceContent(signatureText);
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
+    ffs->setCustomAppearanceLeftFontSize(leftFontSize);
 
     const bool success = signDocument(saveFilename, certNickname, digestName, password, reason, location, ownerPassword, userPassword);
 
@@ -2807,8 +2809,13 @@ std::string Form::addFontToDefaultResources(const std::string &filepath, int fac
                     error(errIO, -1, "Failed to get file size for %s", filepath.c_str());
                     return {};
                 }
+                // GooFile::read only takes an integer so for now we don't support huge fonts
+                if (fileSize > std::numeric_limits<int>::max()) {
+                    error(errIO, -1, "Font size is too big %s", filepath.c_str());
+                    return {};
+                }
                 char *dataPtr = static_cast<char *>(gmalloc(fileSize));
-                const Goffset bytesRead = file->read(dataPtr, fileSize, 0);
+                const Goffset bytesRead = file->read(dataPtr, static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
                     error(errIO, -1, "Failed to read contents of %s", filepath.c_str());
                     gfree(dataPtr);

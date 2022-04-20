@@ -282,7 +282,7 @@ static bool parseJpegOptions()
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, comma - nextOpt);
+            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
             opt.Set(nextOpt);
@@ -294,7 +294,7 @@ static bool parseJpegOptions()
             fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
             return false;
         }
-        int iequal = equal - opt.c_str();
+        const int iequal = static_cast<int>(equal - opt.c_str());
         GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
         opt.del(iequal, opt.getLength() - iequal);
         // here opt is "<optN>" and value is "<valN>"
@@ -658,7 +658,7 @@ static void beginPage(double *w, double *h)
         cairo_surface_set_fallback_resolution(surface, x_resolution, y_resolution);
 
     } else {
-        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, ceil(*w), ceil(*h));
+        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, static_cast<int>(ceil(*w)), static_cast<int>(ceil(*h)));
     }
 }
 

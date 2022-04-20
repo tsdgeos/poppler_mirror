@@ -1074,7 +1074,7 @@ extern "C" {
 typedef void (*SignalFunc)(int);
 }
 
-static void outputToFile(void *stream, const char *data, int len)
+static void outputToFile(void *stream, const char *data, size_t len)
 {
     fwrite(data, 1, len, (FILE *)stream);
 }
@@ -1181,8 +1181,8 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     init(outputToFile, f, fileTypeA, psTitleA, docA, pagesA, modeA, imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA, paperWidthA, paperHeightA, noCropA, duplexA, levelA);
 }
 
-PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA, int imgLLYA,
-                         int imgURXA, int imgURYA, PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA, PSLevel levelA)
+PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, int imgLLXA,
+                         int imgLLYA, int imgURXA, int imgURYA, PSForceRasterize forceRasterizeA, bool manualCtrlA, PSOutCustomCodeCbk customCodeCbkA, void *customCodeCbkDataA, PSLevel levelA)
 {
     underlayCbk = nullptr;
     underlayCbkData = nullptr;
@@ -1233,8 +1233,8 @@ static bool pageDimensionEqual(int a, int b)
 //   Store the values but do not process them so the function that
 //   created the PSOutputDev can use the various setters to change defaults.
 
-void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
-                       int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA)
+void PSOutputDev::init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *docA, const std::vector<int> &pagesA, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
+                       bool manualCtrlA, int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA)
 {
 
     if (pagesA.empty()) {

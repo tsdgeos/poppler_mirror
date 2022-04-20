@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -69,8 +69,8 @@ public:
     HtmlLinks(const HtmlLinks &) = delete;
     HtmlLinks &operator=(const HtmlLinks &) = delete;
     void AddLink(const HtmlLink &x) { accu.push_back(x); }
-    bool inLink(double xmin, double ymin, double xmax, double ymax, int &p) const;
-    const HtmlLink *getLink(int i) const;
+    bool inLink(double xmin, double ymin, double xmax, double ymax, size_t &p) const;
+    const HtmlLink *getLink(size_t i) const;
 };
 
 #endif
