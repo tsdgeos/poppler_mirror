@@ -179,6 +179,8 @@ typedef GfxColorComp GfxGray;
 struct GfxRGB
 {
     GfxColorComp r, g, b;
+
+    bool operator==(GfxRGB other) const { return r == other.r && g == other.g && b == other.b; }
 };
 
 //------------------------------------------------------------------------
