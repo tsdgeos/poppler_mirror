@@ -257,7 +257,7 @@ public:
     const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
 
 #ifdef _WIN32
-    void scanWindowsFonts(GooString *winFontDir);
+    void scanWindowsFonts(const std::string &winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
     void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
