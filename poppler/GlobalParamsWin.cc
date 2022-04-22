@@ -26,9 +26,7 @@ description for all fonts available in Windows. That's how MuPDF works.
 #endif
 
 #include <windows.h>
-#if !(_WIN32_IE >= 0x0500)
-#    error "_WIN32_IE must be defined >= 0x0500 for SHGFP_TYPE_CURRENT from shlobj.h"
-#endif
+
 #include <shlobj.h>
 #include <cstring>
 #include <cstdio>
@@ -163,37 +161,11 @@ static std::string GetWindowsFontDir()
     char winFontDir[MAX_PATH];
     winFontDir[0] = '\0';
 
-    // SHGetSpecialFolderPath isn't available in older versions of shell32.dll (Win95 and
-    // WinNT4), so do a dynamic load of ANSI versions.
-    HMODULE hLib = LoadLibraryA("shell32.dll");
-    if (hLib) {
-        auto SHGetFolderPathFunc = reinterpret_cast<HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR)>(GetProcAddress(hLib, "SHGetFolderPathA"));
-        if (SHGetFolderPathFunc)
-            (*SHGetFolderPathFunc)(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, winFontDir);
-
-        if (!winFontDir[0]) {
-            // Try an older function
-            auto SHGetSpecialFolderPathFunc = reinterpret_cast<BOOL(__stdcall *)(HWND, LPSTR, int, BOOL)>(GetProcAddress(hLib, "SHGetSpecialFolderPathA"));
-            if (SHGetSpecialFolderPathFunc)
-                (*SHGetSpecialFolderPathFunc)(nullptr, winFontDir, CSIDL_FONTS, FALSE);
-        }
-        FreeLibrary(hLib);
-    }
-    if (winFontDir[0])
+    if (SHGetFolderPathA(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, winFontDir) == S_OK) {
         return winFontDir;
-
-    // Try older DLL
-    hLib = LoadLibraryA("SHFolder.dll");
-    if (hLib) {
-        auto SHGetFolderPathFunc = reinterpret_cast<HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR)>(GetProcAddress(hLib, "SHGetFolderPathA"));
-        if (SHGetFolderPathFunc)
-            (*SHGetFolderPathFunc)(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, winFontDir);
-        FreeLibrary(hLib);
     }
-    if (winFontDir[0])
-        return winFontDir;
 
-    // Everything else failed so the standard fonts directory.
+    // return the windows directory + fonts
     GetWindowsDirectoryA(winFontDir, MAX_PATH);
     if (winFontDir[0]) {
         return std::string(winFontDir) + "\\fonts";
