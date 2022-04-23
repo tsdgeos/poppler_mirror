@@ -4146,6 +4146,12 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                             continueMatch->x2 = xMax2;
                                             continueMatch->y2 = yMin2;
                                         }
+                                    } else if (continueMatch && continueMatch->x1 != std::numeric_limits<double>::max()) {
+                                        if (ignoredHyphen) {
+                                            *ignoredHyphen = false;
+                                        }
+
+                                        continueMatch->x1 = std::numeric_limits<double>::max();
                                     }
                                 }
                             }
