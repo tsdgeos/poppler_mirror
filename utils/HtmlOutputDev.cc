@@ -79,10 +79,6 @@
 #include "Outline.h"
 #include "PDFDoc.h"
 
-#ifdef ENABLE_LIBPNG
-#    include <png.h>
-#endif
-
 #define DEBUG __FILE__ << ": " << __LINE__ << ": DEBUG: "
 
 class HtmlImage
@@ -1359,8 +1355,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     if (!isMask) {
         unsigned char *p;
         GfxRGB rgb;
-        png_byte *row = (png_byte *)gmalloc(3 * width); // 3 bytes/pixel: RGB
-        png_bytep *row_pointer = &row;
+        unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
+        unsigned char **row_pointer = &row;
 
         // Initialize the image stream
         ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
