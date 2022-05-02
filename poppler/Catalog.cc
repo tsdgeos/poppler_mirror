@@ -104,12 +104,6 @@ Catalog::Catalog(PDFDoc *docA)
     }
     // get the AcroForm dictionary
     acroForm = catDict.getDict()->lookup("AcroForm");
-    if (acroForm.isDict()) {
-        // We later assume the Fields Array exists, so check it does
-        if (!acroForm.dictLookup("Fields").isArray()) {
-            acroForm.setToNull();
-        }
-    }
 
     // read base URI
     Object obj = catDict.getDict()->lookupEnsureEncryptedIfNeeded("URI");
