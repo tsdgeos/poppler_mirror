@@ -39,7 +39,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2018-2021 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018-2022 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
@@ -4044,6 +4044,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     for (k = 0; k < len; ++k) {
                         bool last_char_of_line = j + k == m - 1;
                         bool last_char_of_search_term = k == len - 1;
+                        bool match_started = (bool)k;
 
                         if (p[k] != s2[k] || (nextline && last_char_of_line && !last_char_of_search_term)) {
                             // now check if the comparison failed at the end-of-line hyphen,
@@ -4055,7 +4056,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                     break;
                                 }
                                 k++;
-                            } else if (p[k] != (Unicode)'-' || UnicodeIsWhitespace(s2[k])) {
+                            } else if (!match_started || p[k] != (Unicode)'-' || !last_char_of_line || UnicodeIsWhitespace(s2[k])) {
                                 break;
                             } else {
                                 nextlineAfterHyphen = true;
@@ -4145,6 +4146,12 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                             continueMatch->x2 = xMax2;
                                             continueMatch->y2 = yMin2;
                                         }
+                                    } else if (continueMatch && continueMatch->x1 != std::numeric_limits<double>::max()) {
+                                        if (ignoredHyphen) {
+                                            *ignoredHyphen = false;
+                                        }
+
+                                        continueMatch->x1 = std::numeric_limits<double>::max();
                                     }
                                 }
                             }

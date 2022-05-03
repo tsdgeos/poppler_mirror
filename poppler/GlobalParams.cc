@@ -257,7 +257,7 @@ public:
     const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
 
 #ifdef _WIN32
-    void scanWindowsFonts(GooString *winFontDir);
+    void scanWindowsFonts(const std::string &winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
     void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
@@ -893,6 +893,8 @@ GooString *GlobalParams::findFontFile(const std::string &fontName)
     return path;
 }
 
+#if defined(WITH_FONTCONFIGURATION_FONTCONFIG) || defined(WITH_FONTCONFIGURATION_WIN32)
+
 static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int faceIndex)
 {
     if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
@@ -925,6 +927,8 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
     const int glyph = fft->mapCodeToGID(unicodeBMPCMap, uChar);
     return glyph > 0;
 }
+
+#endif
 
 /* if you can't or don't want to use Fontconfig, you need to implement
    this function for your platform. For Windows, it's in GlobalParamsWin.cc

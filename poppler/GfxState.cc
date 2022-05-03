@@ -664,6 +664,7 @@ static const double white_d65_X = 0.9505;
 static const double white_d65_Y = 1.0;
 static const double white_d65_Z = 1.0890;
 
+#ifdef USE_CMS
 // D50 is the default white point as used in ICC profiles and in the lcms2 library
 static const double white_d50_X = 0.96422;
 static const double white_d50_Y = 1.0;
@@ -691,6 +692,7 @@ static void inline bradford_transform_to_d50(double &X, double &Y, double &Z, co
     Y = 0.43069901 * rho_in + 0.52894900 * gamma_in + 0.04035199 * beta_in;
     Z = 0.00849698 * rho_in + 0.04086079 * gamma_in + 0.79284618 * beta_in;
 }
+#endif
 
 static void inline bradford_transform_to_d65(double &X, double &Y, double &Z, const double source_whiteX, const double source_whiteY, const double source_whiteZ)
 {

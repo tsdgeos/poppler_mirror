@@ -864,7 +864,7 @@ GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, 
     xMin = 0;
     yMin = backwards ? height : 0;
 
-    continueMatch.x1 = G_MAXDOUBLE; // we use this to detect valid returned values
+    continueMatch.x1 = std::numeric_limits<double>::max(); // we use this to detect valid returned values
 
     while (text_dev->findText(ucs4, ucs4_len, false, true, // startAtTop, stopAtBottom
                               start_at_last,
@@ -881,7 +881,7 @@ GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, 
         matches = g_list_prepend(matches, match);
         start_at_last = TRUE;
 
-        if (continueMatch.x1 != G_MAXDOUBLE) {
+        if (continueMatch.x1 != std::numeric_limits<double>::max()) {
             // received rect for next-line part of a multi-line match, add it.
             if (multiline) {
                 match->match_continued = true;
@@ -896,7 +896,7 @@ GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, 
                 matches = g_list_prepend(matches, match);
             }
 
-            continueMatch.x1 = G_MAXDOUBLE;
+            continueMatch.x1 = std::numeric_limits<double>::max();
         }
     }
 

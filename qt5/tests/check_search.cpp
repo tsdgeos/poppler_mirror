@@ -11,6 +11,7 @@ public:
     explicit TestSearch(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testAcrossLinesSearch(); // leave it first
+    void testAcrossLinesSearchDoubleColumn();
     void bug7063();
     void testNextAndPrevious();
     void testWholeWordsOnly();
@@ -363,6 +364,32 @@ void TestSearch::testAcrossLinesSearch()
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode1), true);
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode2), true);
     QCOMPARE(page->search(full2linesHyphenated, l, t, r, b, direction, mode2W), true);
+
+    // BUG about false positives at start of a line.
+    const QString bug_str = QString::fromUtf8("nes y"); // clazy:exclude=qstring-allocations
+    // there's only 1 match, check for that
+    QCOMPARE(page->search(bug_str, mode2).size(), 1);
+}
+
+void TestSearch::testAcrossLinesSearchDoubleColumn()
+{
+    // Test for searching across lines with new flag Poppler::Page::AcrossLines
+    // in a document with two columns of text.
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/searchAcrossLinesDoubleColumn.pdf"));
+    QVERIFY(document);
+
+    QScopedPointer<Poppler::Page> page(document->page(0));
+    QVERIFY(page);
+
+    const Poppler::Page::SearchFlags mode = Poppler::Page::AcrossLines | Poppler::Page::IgnoreDiacritics | Poppler::Page::IgnoreCase;
+
+    // Test for a bug in double column documents where single line matches are
+    // wrongly returned as being multiline matches.
+    const QString bug_str = QString::fromUtf8("betw"); // clazy:exclude=qstring-allocations
+
+    // there's only 3 matches for 'betw' in document, where only the last
+    // one is a multiline match, so that's a total of 4 rects returned
+    QCOMPARE(page->search(bug_str, mode).size(), 4);
 }
 
 QTEST_GUILESS_MAIN(TestSearch)

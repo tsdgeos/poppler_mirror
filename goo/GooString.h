@@ -204,6 +204,11 @@ public:
         static_cast<std::string &>(*this).insert(i, *str);
         return this;
     }
+    GooString *insert(int i, const std::string &str)
+    {
+        static_cast<std::string &>(*this).insert(i, str);
+        return this;
+    }
     GooString *insert(int i, const char *str)
     {
         static_cast<std::string &>(*this).insert(i, str);

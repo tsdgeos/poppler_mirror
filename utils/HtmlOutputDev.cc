@@ -25,7 +25,7 @@
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Reece Dunn <msclrhd@gmail.com>
-// Copyright (C) 2010, 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010, 2012, 2013, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
@@ -78,10 +78,6 @@
 #include "InMemoryFile.h"
 #include "Outline.h"
 #include "PDFDoc.h"
-
-#ifdef ENABLE_LIBPNG
-#    include <png.h>
-#endif
 
 #define DEBUG __FILE__ << ": " << __LINE__ << ": DEBUG: "
 
@@ -1359,8 +1355,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     if (!isMask) {
         unsigned char *p;
         GfxRGB rgb;
-        png_byte *row = (png_byte *)gmalloc(3 * width); // 3 bytes/pixel: RGB
-        png_bytep *row_pointer = &row;
+        unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
+        unsigned char **row_pointer = &row;
 
         // Initialize the image stream
         ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());

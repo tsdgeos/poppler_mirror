@@ -158,51 +158,48 @@ static const struct
                        { "ArialUnicode", nullptr, "arialuni.ttf", true },
                        {} };
 
-#define FONTS_SUBDIR "\\fonts"
-
-static void GetWindowsFontDir(char *winFontDir, int cbWinFontDirLen)
+static std::string GetWindowsFontDir()
 {
-    BOOL(__stdcall * SHGetSpecialFolderPathFunc)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-    HRESULT(__stdcall * SHGetFolderPathFunc)(HWND hwndOwner, int nFolder, HANDLE hToken, DWORD dwFlags, LPSTR pszPath);
+    char winFontDir[MAX_PATH];
+    winFontDir[0] = '\0';
 
     // SHGetSpecialFolderPath isn't available in older versions of shell32.dll (Win95 and
     // WinNT4), so do a dynamic load of ANSI versions.
-    winFontDir[0] = '\0';
-
     HMODULE hLib = LoadLibraryA("shell32.dll");
     if (hLib) {
-        SHGetFolderPathFunc = (HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR))GetProcAddress(hLib, "SHGetFolderPathA");
+        auto SHGetFolderPathFunc = reinterpret_cast<HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR)>(GetProcAddress(hLib, "SHGetFolderPathA"));
         if (SHGetFolderPathFunc)
             (*SHGetFolderPathFunc)(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, winFontDir);
 
         if (!winFontDir[0]) {
             // Try an older function
-            SHGetSpecialFolderPathFunc = (BOOL(__stdcall *)(HWND, LPSTR, int, BOOL))GetProcAddress(hLib, "SHGetSpecialFolderPathA");
+            auto SHGetSpecialFolderPathFunc = reinterpret_cast<BOOL(__stdcall *)(HWND, LPSTR, int, BOOL)>(GetProcAddress(hLib, "SHGetSpecialFolderPathA"));
             if (SHGetSpecialFolderPathFunc)
                 (*SHGetSpecialFolderPathFunc)(nullptr, winFontDir, CSIDL_FONTS, FALSE);
         }
         FreeLibrary(hLib);
     }
     if (winFontDir[0])
-        return;
+        return winFontDir;
 
     // Try older DLL
     hLib = LoadLibraryA("SHFolder.dll");
     if (hLib) {
-        SHGetFolderPathFunc = (HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR))GetProcAddress(hLib, "SHGetFolderPathA");
+        auto SHGetFolderPathFunc = reinterpret_cast<HRESULT(__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR)>(GetProcAddress(hLib, "SHGetFolderPathA"));
         if (SHGetFolderPathFunc)
             (*SHGetFolderPathFunc)(nullptr, CSIDL_FONTS, nullptr, SHGFP_TYPE_CURRENT, winFontDir);
         FreeLibrary(hLib);
     }
     if (winFontDir[0])
-        return;
+        return winFontDir;
 
     // Everything else failed so the standard fonts directory.
-    GetWindowsDirectoryA(winFontDir, cbWinFontDirLen);
+    GetWindowsDirectoryA(winFontDir, MAX_PATH);
     if (winFontDir[0]) {
-        strncat(winFontDir, FONTS_SUBDIR, cbWinFontDirLen);
-        winFontDir[cbWinFontDirLen - 1] = 0;
+        return std::string(winFontDir) + "\\fonts";
     }
+
+    return {};
 }
 
 static bool FileExists(const char *path)
@@ -215,7 +212,7 @@ static bool FileExists(const char *path)
     return false;
 }
 
-void SysFontList::scanWindowsFonts(GooString *winFontDir)
+void SysFontList::scanWindowsFonts(const std::string &winFontDir)
 {
     OSVERSIONINFO version;
     const char *path;
@@ -374,8 +371,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
         return;
     baseFontsInitialized = true;
 
-    char winFontDir[MAX_PATH];
-    GetWindowsFontDir(winFontDir, sizeof(winFontDir));
+    const std::string winFontDir = GetWindowsFontDir();
 
     for (int i = 0; displayFontTab[i].name; ++i) {
         if (fontFiles.count(displayFontTab[i].name) > 0)
@@ -392,7 +388,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
             delete fontPath;
         }
 
-        if (winFontDir[0] && displayFontTab[i].ttFileName) {
+        if (!winFontDir.empty() && displayFontTab[i].ttFileName) {
             GooString *fontPath = appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName);
             if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath, ".ttc", ".ttf")->c_str())) {
                 addFontFile(fontName, fontPath);
@@ -406,9 +402,8 @@ void GlobalParams::setupBaseFonts(const char *dir)
             delete fontName;
         }
     }
-    if (winFontDir[0]) {
-        GooString gooWinFontsDir(winFontDir);
-        sysFonts->scanWindowsFonts(&gooWinFontsDir);
+    if (!winFontDir.empty()) {
+        sysFonts->scanWindowsFonts(winFontDir);
     }
 
     fileName = new GooString(dataRoot);
