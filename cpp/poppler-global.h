@@ -25,6 +25,7 @@
 
 #include "poppler_cpp_export.h"
 
+#include <ctime>
 #include <iosfwd>
 #include <string>
 #include <vector>
