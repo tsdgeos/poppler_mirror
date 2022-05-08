@@ -21,6 +21,7 @@
 #include "PDFDocFactory.h"
 #include "Error.h"
 #include "ErrorCodes.h"
+#include "UTF.h"
 #include "Win32Console.h"
 
 static bool doReplace = false;
@@ -85,14 +86,14 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    const std::string attachFileName = gbasename(attachFilePath.c_str());
+    const std::unique_ptr<GooString> attachFileName = utf8ToUtf16WithBom(gbasename(attachFilePath.c_str()));
 
-    if (!doReplace && doc->getCatalog()->hasEmbeddedFile(attachFileName)) {
-        fprintf(stderr, "There is already an embedded file named %s.\n", attachFileName.c_str());
+    if (!doReplace && doc->getCatalog()->hasEmbeddedFile(attachFileName->toStr())) {
+        fprintf(stderr, "There is already an embedded file named %s.\n", attachFileName->c_str());
         return 4;
     }
 
-    doc->getCatalog()->addEmbeddedFile(attachFile.get(), attachFileName);
+    doc->getCatalog()->addEmbeddedFile(attachFile.get(), attachFileName->toStr());
 
     const GooString outputPdfFilePath(argv[3]);
     const int saveResult = doc->saveAs(outputPdfFilePath);
