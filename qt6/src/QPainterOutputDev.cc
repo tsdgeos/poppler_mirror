@@ -40,6 +40,7 @@
 
 #include <array>
 
+#include "goo/ft_utils.h"
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
@@ -552,7 +553,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             FT_Face freeTypeFace;
 
             if (fontLoc->locType != gfxFontLocEmbedded) {
-                if (FT_New_Face(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
+                if (ft_new_face_from_file(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }

@@ -47,6 +47,7 @@
 #include "GlobalParams.h"
 #include <fofi/FoFiTrueType.h>
 #include <fofi/FoFiType1C.h>
+#include "goo/ft_utils.h"
 #include "goo/gfile.h"
 #include "Error.h"
 #include "XRef.h"
@@ -167,7 +168,7 @@ static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, co
     FreeTypeFontFace font_face;
 
     if (font_data.empty()) {
-        FT_Error err = FT_New_Face(lib, filename.c_str(), 0, &resource->face);
+        FT_Error err = ft_new_face_from_file(lib, filename.c_str(), 0, &resource->face);
         if (err) {
             delete resource;
             return {};

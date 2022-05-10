@@ -45,6 +45,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+#include "goo/ft_utils.h"
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"
@@ -2775,8 +2776,8 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         const std::unique_ptr<FT_Library, void (*)(FT_Library *)> freetypeLibDeleter(&freetypeLib, [](FT_Library *l) { FT_Done_FreeType(*l); });
 
         FT_Face face;
-        if (FT_New_Face(freetypeLib, filepath.c_str(), faceIndex, &face)) {
-            error(errIO, -1, "FT_New_Face failed for %s", filepath.c_str());
+        if (ft_new_face_from_file(freetypeLib, filepath.c_str(), faceIndex, &face)) {
+            error(errIO, -1, "ft_new_face_from_file failed for %s", filepath.c_str());
             return {};
         }
         const std::unique_ptr<FT_Face, void (*)(FT_Face *)> faceDeleter(&face, [](FT_Face *f) { FT_Done_Face(*f); });
