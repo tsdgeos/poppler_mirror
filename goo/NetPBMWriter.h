@@ -38,7 +38,7 @@ public:
     };
 
     explicit NetPBMWriter(Format formatA = RGB);
-    ~NetPBMWriter() override {};
+    ~NetPBMWriter() override = default;
 
     bool init(FILE *f, int width, int height, double /*hDPI*/, double /*vDPI*/) override;
 
