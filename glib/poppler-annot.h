@@ -72,6 +72,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_SQUARE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_SQUARE, PopplerAnnotSquare))
 #define POPPLER_IS_ANNOT_SQUARE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_SQUARE))
 
+#define POPPLER_TYPE_ANNOT_STAMP (poppler_annot_stamp_get_type())
+#define POPPLER_ANNOT_STAMP(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_STAMP, PopplerAnnotStamp))
+#define POPPLER_IS_ANNOT_STAMP(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_STAMP))
+
 typedef enum
 {
     POPPLER_ANNOT_UNKNOWN,
@@ -168,6 +172,25 @@ struct _PopplerAnnotCalloutLine
     gdouble x3;
     gdouble y3;
 };
+
+typedef enum
+{
+    POPPLER_ANNOT_STAMP_ICON_UNKNOWN = 0,
+    POPPLER_ANNOT_STAMP_ICON_APPROVED,
+    POPPLER_ANNOT_STAMP_ICON_AS_IS,
+    POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL,
+    POPPLER_ANNOT_STAMP_ICON_FINAL,
+    POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL,
+    POPPLER_ANNOT_STAMP_ICON_EXPIRED,
+    POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED,
+    POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE,
+    POPPLER_ANNOT_STAMP_ICON_SOLD,
+    POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL,
+    POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT,
+    POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE,
+    POPPLER_ANNOT_STAMP_ICON_TOP_SECRET,
+    POPPLER_ANNOT_STAMP_ICON_NONE
+} PopplerAnnotStampIcon;
 
 POPPLER_PUBLIC
 GType poppler_annot_get_type(void) G_GNUC_CONST;
@@ -327,6 +350,18 @@ POPPLER_PUBLIC
 void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, PopplerColor *poppler_color);
 POPPLER_PUBLIC
 PopplerColor *poppler_annot_square_get_interior_color(PopplerAnnotSquare *poppler_annot);
+
+/* PopplerAnnotStamp */
+POPPLER_PUBLIC
+GType poppler_annot_stamp_get_type(void) G_GNUC_CONST;
+POPPLER_PUBLIC
+PopplerAnnot *poppler_annot_stamp_new(PopplerDocument *doc, PopplerRectangle *rect);
+POPPLER_PUBLIC
+PopplerAnnotStampIcon poppler_annot_stamp_get_icon(PopplerAnnotStamp *poppler_annot);
+POPPLER_PUBLIC
+void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnotStampIcon icon);
+POPPLER_PUBLIC
+gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, cairo_surface_t *image, GError **error);
 
 G_END_DECLS
 

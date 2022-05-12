@@ -1337,6 +1337,9 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
         case Annot::typeStrikeOut:
             mapping->annot = _poppler_annot_text_markup_new(annot);
             break;
+        case Annot::typeStamp:
+            mapping->annot = _poppler_annot_stamp_new(annot);
+            break;
         default:
             mapping->annot = _poppler_annot_new(annot);
             break;
