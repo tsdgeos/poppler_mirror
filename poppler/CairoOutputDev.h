@@ -277,7 +277,7 @@ protected:
     bool stroke_adjust;
     bool adjusted_stroke_width;
     bool align_stroke_coords;
-    CairoFont *currentFont;
+    std::shared_ptr<CairoFont> currentFont;
     XRef *xref;
 
     struct StrokePathClip
