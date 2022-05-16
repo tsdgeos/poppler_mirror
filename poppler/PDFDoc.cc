@@ -2126,7 +2126,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     Form *form = catalog->getCreateForm();
     std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
     if (pdfFontName.empty()) {
-        pdfFontName = form->addFontToDefaultResources("Helvetica", "");
+        pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };

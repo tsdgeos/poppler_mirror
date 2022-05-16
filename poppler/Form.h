@@ -682,9 +682,15 @@ public:
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves
     std::string findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const;
 
+    struct AddFontResult
+    {
+        std::string fontName;
+        Ref ref;
+    };
+
     // Finds in the system a font name matching the given fontFamily and fontStyle
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX
-    std::string addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle);
+    AddFontResult addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle);
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // emulates fontToEmulate and can draw the given char
@@ -692,7 +698,9 @@ public:
 
     // Makes sure the default resources has fonts to draw all the given chars and as close as possible to the given pdfFontNameToEmulate
     // If needed adds fonts to the default resources dictionary, font names will be popplerfontXXX
-    void ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate);
+    // If fieldResources is not nullptr, it is used instead of the to query the font to emulate instead of the default resources
+    // Returns a list of all the added fonts (if any)
+    std::vector<AddFontResult> ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
 
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return numFields; }
@@ -715,9 +723,9 @@ public:
 private:
     // Finds in the system a font name matching the given fontFamily and fontStyle
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX
-    std::string addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle);
+    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle);
 
-    std::string doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
+    AddFontResult doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 
     FormField **rootFields;
     int numFields;
