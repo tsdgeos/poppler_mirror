@@ -44,6 +44,27 @@ if (GTK_FOUND)
 
 endif ()
 
+if (HAVE_CAIRO)
+  include(CheckCXXSymbolExists)
+  set (CMAKE_REQUIRED_INCLUDES ${CAIRO_INCLUDE_DIRS})
+  check_cxx_symbol_exists(CAIRO_HAS_PNG_FUNCTIONS "cairo.h" HAVE_CAIRO_PNG)
+  check_cxx_symbol_exists(CAIRO_HAS_PDF_SURFACE "cairo.h" HAVE_CAIRO_PDF)
+  check_cxx_symbol_exists(CAIRO_HAS_PS_SURFACE "cairo.h" HAVE_CAIRO_PS)
+  check_cxx_symbol_exists(CAIRO_HAS_SVG_SURFACE "cairo.h" HAVE_CAIRO_SVG)
+
+  if (HAVE_CAIRO_PNG AND HAVE_CAIRO_PDF AND HAVE_CAIRO_PS AND HAVE_CAIRO_SVG)
+    find_package(Threads)
+    set(cairo_thread_test_SRCS
+      cairo-thread-test.cc
+      ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
+      ${CMAKE_SOURCE_DIR}/poppler/CairoOutputDev.cc
+      ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
+      )
+    add_executable(cairo-thread-test ${cairo_thread_test_SRCS})
+    target_link_libraries(cairo-thread-test ${CAIRO_LIBRARIES} Freetype::Freetype Threads::Threads poppler)
+  endif ()
+endif ()
+
 set (pdf_fullrewrite_SRCS
   pdf-fullrewrite.cc
   ../utils/parseargs.cc
