@@ -22,7 +22,7 @@
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
-// Copyright (C) 2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2015, 2017, 2020, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
@@ -179,6 +179,8 @@ typedef GfxColorComp GfxGray;
 struct GfxRGB
 {
     GfxColorComp r, g, b;
+
+    bool operator==(GfxRGB other) const { return r == other.r && g == other.g && b == other.b; }
 };
 
 //------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
-// Copyright (C) 2008-2018, 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008-2018, 2021, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
@@ -137,9 +137,9 @@ CairoOutputDev::CairoOutputDev()
     fontEngine_owner = false;
     glyphs = nullptr;
     fill_pattern = nullptr;
-    fill_color.r = fill_color.g = fill_color.b = 0;
+    fill_color = {};
     stroke_pattern = nullptr;
-    stroke_color.r = stroke_color.g = stroke_color.b = 0;
+    stroke_color = {};
     stroke_opacity = 1.0;
     fill_opacity = 1.0;
     textClipPath = nullptr;
@@ -156,11 +156,10 @@ CairoOutputDev::CairoOutputDev()
     inUncoloredPattern = false;
     inType3Char = false;
     t3_glyph_has_bbox = false;
-    has_color = false;
+    t3_glyph_has_color = false;
     text_matrix_valid = true;
 
     groupColorSpaceStack = nullptr;
-    maskStack = nullptr;
     group = nullptr;
     mask = nullptr;
     shape = nullptr;
@@ -281,9 +280,9 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     cairo_pattern_destroy(stroke_pattern);
 
     fill_pattern = cairo_pattern_create_rgb(0., 0., 0.);
-    fill_color.r = fill_color.g = fill_color.b = 0;
+    fill_color = { 0, 0, 0 };
     stroke_pattern = cairo_pattern_reference(fill_pattern);
-    stroke_color.r = stroke_color.g = stroke_color.b = 0;
+    stroke_color = { 0, 0, 0 };
 
     if (textPage) {
         textPage->startPage(state);
@@ -301,6 +300,42 @@ void CairoOutputDev::endPage()
     }
 }
 
+void CairoOutputDev::startType3Render(GfxState *state, XRef *xrefA)
+{
+    /* When cairo calls a user font render function, the default
+     * source set on the provided cairo_t must be used, except in the
+     * case of a color user font explicitly setting a color.
+     *
+     * As startPage() resets the source to solid black, this function
+     * is used instead to initialise the CairoOutputDev when rendering
+     * a user font glyph.
+     *
+     * As noted in the Cairo documentation, the default source of a
+     * render callback contains an internal marker denoting the
+     * foreground color is to be used when the glyph is rendered, even
+     * though querying the default source will reveal solid black.
+     * For this reason, fill_color and stroke_color are set to nullopt
+     * to ensure updateFillColor()/updateStrokeColor() will update the
+     * color even if the new color is black.
+     *
+     * The saveState()/restoreState() functions also ensure the
+     * default source is saved and restored, and the fill_color and
+     * stroke_color is reset to nullopt for the same reason.
+     */
+
+    /* Initialise fill and stroke pattern to the current source pattern */
+    fill_pattern = cairo_pattern_reference(cairo_get_source(cairo));
+    stroke_pattern = cairo_pattern_reference(cairo_get_source(cairo));
+    fill_color = {};
+    stroke_color = {};
+    t3_glyph_has_bbox = false;
+    t3_glyph_has_color = false;
+
+    if (xrefA != nullptr) {
+        xref = xrefA;
+    }
+}
+
 void CairoOutputDev::saveState(GfxState *state)
 {
     LOG(printf("save\n"));
@@ -309,11 +344,20 @@ void CairoOutputDev::saveState(GfxState *state)
         cairo_save(cairo_shape);
     }
 
-    MaskStack *ms = new MaskStack;
-    ms->mask = cairo_pattern_reference(mask);
-    ms->mask_matrix = mask_matrix;
-    ms->next = maskStack;
-    maskStack = ms;
+    /* To ensure the current source, potentially containing the hidden
+     * foreground color maker, is saved and restored as required by
+     * _render_type3_glyph, we avoid using the update color and
+     * opacity functions in restoreState() and instead be careful to
+     * save all the color related variables that have been set by the
+     * update functions on the stack. */
+    SaveStateElement elem;
+    elem.fill_pattern = cairo_pattern_reference(fill_pattern);
+    elem.fill_opacity = fill_opacity;
+    elem.stroke_pattern = cairo_pattern_reference(stroke_pattern);
+    elem.stroke_opacity = stroke_opacity;
+    elem.mask = mask ? cairo_pattern_reference(mask) : nullptr;
+    elem.mask_matrix = mask_matrix;
+    saveStateStack.push_back(elem);
 
     if (strokePathClip) {
         strokePathClip->ref_count++;
@@ -330,24 +374,26 @@ void CairoOutputDev::restoreState(GfxState *state)
 
     text_matrix_valid = true;
 
-    /* These aren't restored by cairo_restore() since we keep them in
-     * the output device. */
-    updateFillColor(state);
-    updateStrokeColor(state);
-    updateFillOpacity(state);
-    updateStrokeOpacity(state);
+    cairo_pattern_destroy(fill_pattern);
+    fill_pattern = saveStateStack.back().fill_pattern;
+    fill_color = {};
+    fill_opacity = saveStateStack.back().fill_opacity;
+
+    cairo_pattern_destroy(stroke_pattern);
+    stroke_pattern = saveStateStack.back().stroke_pattern;
+    stroke_color = {};
+    stroke_opacity = saveStateStack.back().stroke_opacity;
+
+    /* This isn't restored by cairo_restore() since we keep it in the
+     * output device. */
     updateBlendMode(state);
 
-    MaskStack *ms = maskStack;
-    if (ms) {
-        if (mask) {
-            cairo_pattern_destroy(mask);
-        }
-        mask = ms->mask;
-        mask_matrix = ms->mask_matrix;
-        maskStack = ms->next;
-        delete ms;
+    if (mask) {
+        cairo_pattern_destroy(mask);
     }
+    mask = saveStateStack.back().mask;
+    mask_matrix = saveStateStack.back().mask_matrix;
+    saveStateStack.pop_back();
 
     if (strokePathClip && --strokePathClip->ref_count == 0) {
         delete strokePathClip->path;
@@ -533,38 +579,37 @@ void CairoOutputDev::updateLineWidth(GfxState *state)
 
 void CairoOutputDev::updateFillColor(GfxState *state)
 {
-    GfxRGB color = fill_color;
-
     if (inUncoloredPattern) {
         return;
     }
 
-    state->getFillRGB(&fill_color);
-    if (cairo_pattern_get_type(fill_pattern) != CAIRO_PATTERN_TYPE_SOLID || color.r != fill_color.r || color.g != fill_color.g || color.b != fill_color.b) {
+    GfxRGB new_color;
+    state->getFillRGB(&new_color);
+    bool color_match = fill_color && *fill_color == new_color;
+    if (cairo_pattern_get_type(fill_pattern) != CAIRO_PATTERN_TYPE_SOLID || !color_match) {
         cairo_pattern_destroy(fill_pattern);
-        fill_pattern = cairo_pattern_create_rgba(colToDbl(fill_color.r), colToDbl(fill_color.g), colToDbl(fill_color.b), fill_opacity);
-
-        LOG(printf("fill color: %d %d %d\n", fill_color.r, fill_color.g, fill_color.b));
+        fill_pattern = cairo_pattern_create_rgba(colToDbl(new_color.r), colToDbl(new_color.g), colToDbl(new_color.b), fill_opacity);
+        fill_color = new_color;
+        LOG(printf("fill color: %d %d %d\n", fill_color->r, fill_color->g, fill_color->b));
     }
-    has_color = true;
 }
 
 void CairoOutputDev::updateStrokeColor(GfxState *state)
 {
-    GfxRGB color = stroke_color;
 
     if (inUncoloredPattern) {
         return;
     }
 
-    state->getStrokeRGB(&stroke_color);
-    if (cairo_pattern_get_type(fill_pattern) != CAIRO_PATTERN_TYPE_SOLID || color.r != stroke_color.r || color.g != stroke_color.g || color.b != stroke_color.b) {
+    GfxRGB new_color;
+    state->getStrokeRGB(&new_color);
+    bool color_match = stroke_color && *stroke_color == new_color;
+    if (cairo_pattern_get_type(fill_pattern) != CAIRO_PATTERN_TYPE_SOLID || !color_match) {
         cairo_pattern_destroy(stroke_pattern);
-        stroke_pattern = cairo_pattern_create_rgba(colToDbl(stroke_color.r), colToDbl(stroke_color.g), colToDbl(stroke_color.b), stroke_opacity);
-
-        LOG(printf("stroke color: %d %d %d\n", stroke_color.r, stroke_color.g, stroke_color.b));
+        stroke_pattern = cairo_pattern_create_rgba(colToDbl(new_color.r), colToDbl(new_color.g), colToDbl(new_color.b), stroke_opacity);
+        stroke_color = new_color;
+        LOG(printf("stroke color: %d %d %d\n", stroke_color->r, stroke_color->g, stroke_color->b));
     }
-    has_color = true;
 }
 
 void CairoOutputDev::updateFillOpacity(GfxState *state)
@@ -577,8 +622,13 @@ void CairoOutputDev::updateFillOpacity(GfxState *state)
 
     fill_opacity = state->getFillOpacity();
     if (opacity != fill_opacity) {
+        if (!fill_color) {
+            GfxRGB color;
+            state->getFillRGB(&color);
+            fill_color = color;
+        }
         cairo_pattern_destroy(fill_pattern);
-        fill_pattern = cairo_pattern_create_rgba(colToDbl(fill_color.r), colToDbl(fill_color.g), colToDbl(fill_color.b), fill_opacity);
+        fill_pattern = cairo_pattern_create_rgba(colToDbl(fill_color->r), colToDbl(fill_color->g), colToDbl(fill_color->b), fill_opacity);
 
         LOG(printf("fill opacity: %f\n", fill_opacity));
     }
@@ -594,8 +644,13 @@ void CairoOutputDev::updateStrokeOpacity(GfxState *state)
 
     stroke_opacity = state->getStrokeOpacity();
     if (opacity != stroke_opacity) {
+        if (!stroke_color) {
+            GfxRGB color;
+            state->getStrokeRGB(&color);
+            stroke_color = color;
+        }
         cairo_pattern_destroy(stroke_pattern);
-        stroke_pattern = cairo_pattern_create_rgba(colToDbl(stroke_color.r), colToDbl(stroke_color.g), colToDbl(stroke_color.b), stroke_opacity);
+        stroke_pattern = cairo_pattern_create_rgba(colToDbl(stroke_color->r), colToDbl(stroke_color->g), colToDbl(stroke_color->b), stroke_opacity);
 
         LOG(printf("stroke opacity: %f\n", stroke_opacity));
     }
@@ -607,7 +662,8 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset)
         return;
     }
 
-    state->getFillRGB(&fill_color);
+    GfxRGB color;
+    state->getFillRGB(&color);
 
     // If stroke pattern is set then the current fill is clipped
     // to a stroke path.  In that case, the stroke opacity has to be used
@@ -615,9 +671,8 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset)
     // See https://gitlab.freedesktop.org/poppler/poppler/issues/178
     auto opacity = (state->getStrokePattern()) ? state->getStrokeOpacity() : state->getFillOpacity();
 
-    cairo_pattern_add_color_stop_rgba(fill_pattern, offset, colToDbl(fill_color.r), colToDbl(fill_color.g), colToDbl(fill_color.b), opacity);
-    has_color = true;
-    LOG(printf("fill color stop: %f (%d, %d, %d, %d)\n", offset, fill_color.r, fill_color.g, fill_color.b, dblToCol(opacity)));
+    cairo_pattern_add_color_stop_rgba(fill_pattern, offset, colToDbl(color.r), colToDbl(color.g), colToDbl(color.b), opacity);
+    LOG(printf("fill color stop: %f (%d, %d, %d, %d)\n", offset, color.r, color.g, color.b, dblToCol(opacity)));
 }
 
 void CairoOutputDev::updateBlendMode(GfxState *state)
@@ -1580,6 +1635,7 @@ void CairoOutputDev::type3D0(GfxState *state, double wx, double wy)
 {
     t3_glyph_wx = wx;
     t3_glyph_wy = wy;
+    t3_glyph_has_color = true;
 }
 
 void CairoOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury)
@@ -1591,6 +1647,7 @@ void CairoOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, 
     t3_glyph_bbox[2] = urx;
     t3_glyph_bbox[3] = ury;
     t3_glyph_has_bbox = true;
+    t3_glyph_has_color = false;
 }
 
 void CairoOutputDev::beginTextObject(GfxState *state) { }
@@ -2849,7 +2906,6 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
     cairo_pattern_destroy(maskPattern);
     cairo_pattern_destroy(pattern);
-    has_color = true;
 
 cleanup:
     imgStr->close();
@@ -3504,7 +3560,6 @@ void CairoImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, i
         setCairo(nullptr);
         cairo_surface_destroy(surface);
         cairo_destroy(cr);
-        has_color = true;
     }
 }
 
@@ -3562,6 +3617,5 @@ void CairoImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *
         setCairo(nullptr);
         cairo_surface_destroy(surface);
         cairo_destroy(cr);
-        has_color = true;
     }
 }

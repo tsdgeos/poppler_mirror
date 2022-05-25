@@ -567,7 +567,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     box.y2 = mat[3];
     gfx = new Gfx(info->doc, output_dev, resDict, &box, nullptr);
     output_dev->startDoc(info->doc, info->fontEngine);
-    output_dev->startPage(1, gfx->getState(), gfx->getXRef());
+    output_dev->startType3Render(gfx->getState(), gfx->getXRef());
     output_dev->setInType3Char(true);
     charProc = charProcs->getVal(glyph);
     gfx->display(&charProc);
@@ -588,7 +588,11 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     }
 
     status = CAIRO_STATUS_SUCCESS;
-    if (color && !output_dev->hasColor()) {
+
+    // If this is a render color glyph callback but the Type 3 glyph
+    // specified non-color, return NOT_IMPLEMENTED. Cairo will then
+    // call the render non-color glyph callback.
+    if (color && !output_dev->type3GlyphHasColor()) {
         status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
     }
 
@@ -624,6 +628,9 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<const GfxFont> &gfx
     font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
+    // When both callbacks are set, Cairo will call the color glyph
+    // callback first.  If that returns NOT_IMPLEMENTED, Cairo will
+    // then call the non-color glyph callback.
     cairo_user_font_face_set_render_color_glyph_func(font_face, _render_type3_color_glyph);
 #endif
     cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_noncolor_glyph);

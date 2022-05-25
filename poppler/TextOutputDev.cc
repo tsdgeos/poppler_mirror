@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010-2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012, 2014-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -3637,6 +3637,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         envelopes[i].x2 = DBL_MIN;
         envelopes[i].y1 = DBL_MAX;
         envelopes[i].y2 = DBL_MIN;
+        ending_blocks[i] = nullptr;
     }
 
     for (blk1 = blkList; blk1; blk1 = blk1->next) {
@@ -3661,7 +3662,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
     }
 
     for (blk1 = blkList; blk1; blk1 = blk1->next) {
-        if (blk1->tableId >= 0 && blk1->xMin <= ending_blocks[blk1->tableId]->xMax && blk1->xMax >= ending_blocks[blk1->tableId]->xMin) {
+        if (blk1->tableId >= 0 && ending_blocks[blk1->tableId] && blk1->xMin <= ending_blocks[blk1->tableId]->xMax && blk1->xMax >= ending_blocks[blk1->tableId]->xMin) {
             blk1->tableEnd = true;
         }
     }

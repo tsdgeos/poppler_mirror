@@ -230,6 +230,9 @@ public:
     // Called to indicate that a new PDF document has been loaded.
     void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = nullptr);
 
+    // Called to prepare this output dev for rendering CairoType3Font.
+    void startType3Render(GfxState *state, XRef *xref);
+
     bool isReverseVideo() { return false; }
 
     void setCairo(cairo_t *cr);
@@ -249,7 +252,7 @@ public:
     }
     bool hasType3GlyphBBox() { return t3_glyph_has_bbox; }
     double *getType3GlyphBBox() { return t3_glyph_bbox; }
-    bool hasColor() { return has_color; }
+    bool type3GlyphHasColor() { return t3_glyph_has_color; }
 
 protected:
     void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
@@ -267,7 +270,7 @@ protected:
     bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
 #endif
 
-    GfxRGB fill_color, stroke_color;
+    std::optional<GfxRGB> fill_color, stroke_color;
     cairo_pattern_t *fill_pattern, *stroke_pattern;
     double fill_opacity;
     double stroke_opacity;
@@ -317,6 +320,7 @@ protected:
     bool inType3Char; // inside a Type 3 CharProc
     double t3_glyph_wx, t3_glyph_wy;
     bool t3_glyph_has_bbox;
+    bool t3_glyph_has_color;
     bool has_color;
     double t3_glyph_bbox[4];
     bool prescaleImages;
@@ -338,12 +342,17 @@ protected:
         struct ColorSpaceStack *next;
     } * groupColorSpaceStack;
 
-    struct MaskStack
+    struct SaveStateElement
     {
-        cairo_pattern_t *mask;
+        // These patterns hold a reference
+        cairo_pattern_t *fill_pattern;
+        cairo_pattern_t *stroke_pattern;
+        double fill_opacity;
+        double stroke_opacity;
+        cairo_pattern_t *mask; // can be null
         cairo_matrix_t mask_matrix;
-        struct MaskStack *next;
-    } * maskStack;
+    };
+    std::vector<SaveStateElement> saveStateStack;
 };
 
 //------------------------------------------------------------------------

@@ -2244,11 +2244,11 @@ void FoFiType1C::readPrivateDict(int offset, int length, Type1CPrivateDict *pDic
 
 void FoFiType1C::readFDSelect()
 {
-    int fdSelectFmt, pos, nRanges, gid0, gid1, fd, i, j;
+    int fdSelectFmt, pos, nRanges, gid0, gid1, fd;
 
     fdSelect = (unsigned char *)gmalloc(nGlyphs);
     if (topDict.fdSelectOffset == 0) {
-        for (i = 0; i < nGlyphs; ++i) {
+        for (int i = 0; i < nGlyphs; ++i) {
             fdSelect[i] = 0;
         }
     } else {
@@ -2268,7 +2268,7 @@ void FoFiType1C::readFDSelect()
             pos += 2;
             gid0 = getU16BE(pos, &parsedOk);
             pos += 2;
-            for (i = 1; i <= nRanges; ++i) {
+            for (int i = 1; i <= nRanges; ++i) {
                 fd = getU8(pos++, &parsedOk);
                 gid1 = getU16BE(pos, &parsedOk);
                 if (!parsedOk) {
@@ -2280,14 +2280,17 @@ void FoFiType1C::readFDSelect()
                     parsedOk = false;
                     return;
                 }
-                for (j = gid0; j < gid1; ++j) {
+                for (int j = gid0; j < gid1; ++j) {
                     fdSelect[j] = fd;
                 }
                 gid0 = gid1;
             }
+            for (int i = gid0; i < nGlyphs; ++i) {
+                fdSelect[i] = 0;
+            }
         } else {
             //~ error(-1, "Unknown FDSelect table format in CID font");
-            for (i = 0; i < nGlyphs; ++i) {
+            for (int i = 0; i < nGlyphs; ++i) {
                 fdSelect[i] = 0;
             }
         }

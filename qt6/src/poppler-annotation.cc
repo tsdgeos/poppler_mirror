@@ -1629,7 +1629,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
             if (form) {
                 fontName = form->findFontInDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
                 if (fontName.empty()) {
-                    fontName = form->addFontToDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString());
+                    fontName = form->addFontToDefaultResources(textFont->family().toStdString(), textFont->styleName().toStdString()).fontName;
                 }
 
                 if (!fontName.empty()) {

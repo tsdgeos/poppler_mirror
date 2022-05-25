@@ -1,3 +1,23 @@
+Release 22.05.0:
+        core:
+         * Annotations: Make sure we embed fonts for the FreeText annots
+         * Forms: Make sure we embedd fonts as needed
+         * Signatures: Make sure we embed the needed fonts
+         * CairoOutputDev: color type 3 fonts
+         * fix two bugs in multiline find_text()
+         * code improvements
+
+        utils:
+         * pdftotext: added TSV mode
+         * HtmlOutputDev: don't use png.h
+
+        cpp:
+         * Use time_t for time
+         * Add page_transition::durationReal
+
+        qt:
+         * Pass leftFontSize down to `FormWidgetSignature::signDocumentWithAppearence`
+
 Release 22.04.0:
         core:
          * Fix underline sometimes being drawn only partially

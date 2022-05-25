@@ -697,7 +697,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     Form *form = doc->getCatalog()->getForm();
     std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
     if (pdfFontName.empty()) {
-        pdfFontName = form->addFontToDefaultResources("Helvetica", "");
+        pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
@@ -1668,7 +1668,19 @@ void FormFieldText::setContentCopy(const GooString *new_content)
             if (da.getFontName().isName()) {
                 const std::string fontName = da.getFontName().getName();
                 if (!fontName.empty()) {
-                    form->ensureFontsForAllCharacters(new_content, fontName);
+                    // Use the field resource dictionary if it exists
+                    Object fieldResourcesDictObj = obj.dictLookup("DR");
+                    if (fieldResourcesDictObj.isDict()) {
+                        GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
+                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(new_content, fontName, &fieldResources);
+                        // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
+                        // to the field DR dictionary
+                        for (const Form::AddFontResult &afr : newFonts) {
+                            fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                        }
+                    } else {
+                        form->ensureFontsForAllCharacters(new_content, fontName);
+                    }
                 }
             } else {
                 // This is wrong, there has to be a Tf in DA
@@ -2707,14 +2719,14 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
     return {};
 }
 
-std::string Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
 {
     const FamilyStyleFontSearchResult res = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
 
     return addFontToDefaultResources(res.filepath, res.faceIndex, fontFamily, fontStyle);
 }
 
-std::string Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)
 {
     if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
         error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for %s %s was %s", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
@@ -2924,7 +2936,7 @@ std::string Form::addFontToDefaultResources(const std::string &filepath, int fac
         doc->getCatalog()->setAcroFormModified();
     }
 
-    return dictFontName;
+    return { dictFontName, fontDictRef };
 }
 
 std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmulate) const
@@ -2934,13 +2946,17 @@ std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmu
     return findFontInDefaultResources(res.family, res.style);
 }
 
-void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate)
+std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
 {
-    std::shared_ptr<GfxFont> f = defaultResources->lookupFont(pdfFontNameToEmulate.c_str());
+    GfxResources *resources = fieldResources ? fieldResources : defaultResources;
+    std::shared_ptr<GfxFont> f = resources->lookupFont(pdfFontNameToEmulate.c_str());
     const CharCodeToUnicode *ccToUnicode = f->getToUnicode();
     if (!ccToUnicode) {
-        return; // will never happen with current code
+        error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen\n");
+        return {}; // will never happen with current code
     }
+
+    std::vector<AddFontResult> newFonts;
 
     // If the text has some characters that are not available in the font, try adding a font for those
     for (int i = 2; i < unicodeText->getLength(); i += 2) {
@@ -2948,31 +2964,41 @@ void Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 
         CharCode c;
+        bool addFont = false;
         if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
             if (f->isCIDFont()) {
                 auto cidFont = static_cast<const GfxCIDFont *>(f.get());
                 if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
                     const int glyph = cidFont->getCIDToGID()[c];
                     if (glyph == 0) {
-                        doGetAddFontToDefaultResources(uChar, *f);
+                        addFont = true;
                     }
                 }
             }
         } else {
-            doGetAddFontToDefaultResources(uChar, *f);
+            addFont = true;
+        }
+
+        if (addFont) {
+            Form::AddFontResult res = doGetAddFontToDefaultResources(uChar, *f);
+            if (res.ref != Ref::INVALID()) {
+                newFonts.emplace_back(res);
+            }
         }
     }
+
+    return newFonts;
 }
 
-std::string Form::doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate)
+Form::AddFontResult Form::doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate)
 {
     const UCharFontSearchResult res = globalParams->findSystemFontFileForUChar(uChar, fontToEmulate);
 
     std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
     if (pdfFontName.empty()) {
-        pdfFontName = addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
+        return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
     }
-    return pdfFontName;
+    return { pdfFontName, Ref::INVALID() };
 }
 
 void Form::postWidgetsLoad()

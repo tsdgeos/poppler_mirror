@@ -688,6 +688,9 @@ JBIG2Bitmap *JBIG2Bitmap::getSlice(unsigned int x, unsigned int y, unsigned int 
 
 void JBIG2Bitmap::expand(int newH, unsigned int pixel)
 {
+    if (unlikely(!data)) {
+        return;
+    }
     if (newH <= h || line <= 0 || newH >= (INT_MAX - 1) / line) {
         error(errSyntaxError, -1, "invalid width/height");
         gfree(data);

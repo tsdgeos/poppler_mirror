@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
- * Copyright (C) 2018-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
@@ -172,8 +172,8 @@ public:
     page_transition *transition() const;
 
     bool search(const ustring &text, rectf &r, search_direction_enum direction, case_sensitivity_enum case_sensitivity, rotation_enum rotation = rotate_0) const;
-    ustring text(const rectf &rect = rectf()) const;
-    ustring text(const rectf &rect, text_layout_enum layout_mode) const;
+    ustring text(const rectf &r = rectf()) const;
+    ustring text(const rectf &r, text_layout_enum layout_mode) const;
 
     /**
        Returns a list of text of the page
