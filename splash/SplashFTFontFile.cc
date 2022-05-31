@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2018, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
