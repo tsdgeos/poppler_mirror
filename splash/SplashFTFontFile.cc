@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2018, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
@@ -23,6 +23,7 @@
 
 #include <config.h>
 
+#include "goo/ft_utils.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "poppler/GfxFont.h"
@@ -42,7 +43,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, Spl
     int i;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
+        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
         }
     } else {
@@ -72,7 +73,7 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, Splas
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
+        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
             return nullptr;
         }
     } else {
@@ -89,7 +90,7 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, 
     FT_Face faceA;
 
     if (src->isFile) {
-        if (FT_New_Face(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
+        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
             return nullptr;
         }
     } else {

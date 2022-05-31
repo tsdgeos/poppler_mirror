@@ -46,6 +46,7 @@
 // Copyright (C) 2019, 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
 // Copyright (C) 2021 Christopher Hasse <hasse.christopher@gmail.com>
+// Copyright (C) 2022 Brian Rosenfield <brosenfi@yahoo.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -177,7 +178,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
         yMax = y - descent * fontSize;
         GfxRGB rgb;
         state->getFillRGB(&rgb);
-        HtmlFont hfont = HtmlFont(*font, static_cast<int>(fontSize), rgb, state->getFillOpacity());
+        HtmlFont hfont = HtmlFont(*font, std::lround(fontSize), rgb, state->getFillOpacity());
         if (isMatRotOrSkew(state->getTextMat())) {
             double normalizedMatrix[4];
             memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));
@@ -297,33 +298,41 @@ void HtmlPage::updateFont(GfxState *state)
 {
     const char *name;
     int code;
-    double w;
+    double dimLength;
 
     // adjust the font size
     fontSize = state->getTransformedFontSize();
     const GfxFont *const font = state->getFont().get();
     if (font && font->getType() == fontType3) {
-        // This is a hack which makes it possible to deal with some Type 3
-        // fonts.  The problem is that it's impossible to know what the
-        // base coordinate system used in the font is without actually
-        // rendering the font.  This code tries to guess by looking at the
-        // width of the character 'm' (which breaks if the font is a
-        // subset that doesn't contain 'm').
-        for (code = 0; code < 256; ++code) {
-            if ((name = ((Gfx8BitFont *)font)->getCharName(code)) && name[0] == 'm' && name[1] == '\0') {
-                break;
+        // Grab the font size from the font bounding box if possible - remember to
+        // scale from the glyph coordinate system.
+        const double *fontBBox = font->getFontBBox();
+        const double *fontMat = font->getFontMatrix();
+        dimLength = (fontBBox[3] - fontBBox[1]) * fontMat[3];
+        if (dimLength > 0) {
+            fontSize *= dimLength;
+        } else {
+            // This is a hack which makes it possible to deal with some Type 3
+            // fonts.  The problem is that it's impossible to know what the
+            // base coordinate system used in the font is without actually
+            // rendering the font.  This code tries to guess by looking at the
+            // width of the character 'm' (which breaks if the font is a
+            // subset that doesn't contain 'm').
+            for (code = 0; code < 256; ++code) {
+                if ((name = ((Gfx8BitFont *)font)->getCharName(code)) && name[0] == 'm' && name[1] == '\0') {
+                    break;
+                }
             }
-        }
-        if (code < 256) {
-            w = ((Gfx8BitFont *)font)->getWidth(code);
-            if (w != 0) {
-                // 600 is a generic average 'm' width -- yes, this is a hack
-                fontSize *= w / 0.6;
+            if (code < 256) {
+                dimLength = ((Gfx8BitFont *)font)->getWidth(code);
+                if (dimLength != 0) {
+                    // 600 is a generic average 'm' width -- yes, this is a hack
+                    fontSize *= dimLength / 0.6;
+                }
             }
-        }
-        const double *fm = font->getFontMatrix();
-        if (fm[0] != 0) {
-            fontSize *= fabs(fm[3] / fm[0]);
+            if (fontMat[0] != 0) {
+                fontSize *= fabs(fontMat[3] / fontMat[0]);
+            }
         }
     }
 }

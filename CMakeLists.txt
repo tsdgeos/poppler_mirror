@@ -352,20 +352,21 @@ configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/popple
 find_program(GPERF gperf)
 
 set(poppler_SRCS
-  goo/gbase64.cc
-  goo/gbasename.cc
-  goo/gfile.cc
-  goo/GooTimer.cc
   goo/GooString.cc
+  goo/GooTimer.cc
+  goo/ImgWriter.cc
+  goo/JpegWriter.cc
   goo/NetPBMWriter.cc
   goo/PNGWriter.cc
   goo/TiffWriter.cc
-  goo/JpegWriter.cc
-  goo/ImgWriter.cc
-  goo/gstrtod.cc
-  goo/grandom.cc
+  goo/ft_utils.cc
+  goo/gbase64.cc
+  goo/gbasename.cc
+  goo/gfile.cc
   goo/glibc.cc
   goo/glibc_strtok_r.cc
+  goo/grandom.cc
+  goo/gstrtod.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc

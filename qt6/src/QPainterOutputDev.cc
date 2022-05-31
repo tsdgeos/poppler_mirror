@@ -24,7 +24,7 @@
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
 // Copyright (C) 2017, 2018, 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -40,6 +40,7 @@
 
 #include <array>
 
+#include "goo/ft_utils.h"
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
@@ -552,7 +553,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             FT_Face freeTypeFace;
 
             if (fontLoc->locType != gfxFontLocEmbedded) {
-                if (FT_New_Face(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
+                if (ft_new_face_from_file(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
