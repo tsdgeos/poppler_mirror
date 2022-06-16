@@ -350,6 +350,7 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
 
 find_program(GPERF gperf)
+find_program(SED sed)
 
 set(poppler_SRCS
   goo/GooString.cc
@@ -536,11 +537,12 @@ if(Boost_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Boost::boost)
 endif()
 
-if (GPERF AND RUN_GPERF_IF_PRESENT)
+if (GPERF AND SED AND RUN_GPERF_IF_PRESENT)
     macro(ADD_GPERF_FILE input)
         add_custom_command(OUTPUT poppler/${input}.c
                        COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
                        COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND ${SED} -i "s#${GPERF}#gperf#" ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
                        COMMAND clang-format -i ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c || true
                        DEPENDS poppler/${input}.gperf
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
