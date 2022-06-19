@@ -2951,7 +2951,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
 {
     GfxResources *resources = fieldResources ? fieldResources : defaultResources;
     std::shared_ptr<GfxFont> f = resources->lookupFont(pdfFontNameToEmulate.c_str());
-    const CharCodeToUnicode *ccToUnicode = f->getToUnicode();
+    const CharCodeToUnicode *ccToUnicode = f ? f->getToUnicode() : nullptr;
     if (!ccToUnicode) {
         error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen\n");
         return {}; // will never happen with current code
