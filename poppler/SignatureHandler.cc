@@ -538,6 +538,9 @@ std::string SignatureHandler::getSignerName()
     }
 
     commonName = CERT_GetCommonName(&signing_cert->subject);
+    if (!commonName) {
+        return {};
+    }
     std::string name(commonName);
     PORT_Free(commonName);
 

@@ -3324,7 +3324,7 @@ void AnnotFreeText::generateFreeTextAppearance()
 
     // Set font state
     appearBuilder.setDrawColor(da.getFontColor(), true);
-    appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
+    appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin);
     const DrawMultiLineTextResult textCommands = drawMultiLineText(*contents, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
     appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
@@ -5307,7 +5307,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const DrawMultiLineTextResult textCommands =
             drawMultiLineText(text, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified, 0 /*borderWidth*/);
 
-    double yDelta = height - textmargin - da.getFontPtSize() * font->getDescent();
+    double yDelta = height - textmargin;
     if (centerVertically) {
         const double outTextHeight = textCommands.nLines * da.getFontPtSize();
         if (outTextHeight < height) {

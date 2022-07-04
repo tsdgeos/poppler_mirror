@@ -39,7 +39,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "22")
-set(POPPLER_MINOR_VERSION_STRING "05")
+set(POPPLER_MINOR_VERSION_STRING "06")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -350,6 +350,7 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
 
 find_program(GPERF gperf)
+find_program(SED sed)
 
 set(poppler_SRCS
   goo/GooString.cc
@@ -536,11 +537,12 @@ if(Boost_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Boost::boost)
 endif()
 
-if (GPERF AND RUN_GPERF_IF_PRESENT)
+if (GPERF AND SED AND RUN_GPERF_IF_PRESENT)
     macro(ADD_GPERF_FILE input)
         add_custom_command(OUTPUT poppler/${input}.c
-                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
-                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
+                       COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND ${SED} -i "s#${GPERF}#gperf#" ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
                        COMMAND clang-format -i ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c || true
                        DEPENDS poppler/${input}.gperf
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -577,7 +579,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 add_library(poppler ${poppler_SRCS})
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
-set_target_properties(poppler PROPERTIES VERSION 121.0.0 SOVERSION 121)
+set_target_properties(poppler PROPERTIES VERSION 122.0.0 SOVERSION 122)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")

@@ -1,3 +1,18 @@
+Release 22.06.0:
+        core:
+         * Forms: Fix crash in forms with their own DR
+         * Refactor CairoFontEngine caching
+         * CairoOutputDev: preserve text color when drawing type 3 glyphs
+         * Windows: font code simplification
+         * Minor code improvements
+
+        cpp:
+         * Add missing header
+
+        utils:
+         * pdfattach: Assume filename is utf8 encoded
+         * pdftohtml: Fix type 3 font size calculation
+
 Release 22.05.0:
         core:
          * Annotations: Make sure we embed fonts for the FreeText annots

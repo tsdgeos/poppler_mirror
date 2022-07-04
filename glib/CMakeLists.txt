@@ -18,7 +18,7 @@ add_definitions(
 
 configure_file(poppler-features.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h @ONLY)
 
-if (GTK_FOUND AND BUILD_GTK_TESTS)
+if (GTK_FOUND AND BUILD_GTK_TESTS AND NOT MSVC)
   add_subdirectory(demo)
   add_subdirectory(tests)
 endif ()
@@ -39,7 +39,7 @@ set(poppler_glib_public_headers
 )
 
 find_program(GLIB2_MKENUMS glib-mkenums)
-find_program(GLIB2_MKENUMS_PYTHON python3)
+find_program(GLIB2_MKENUMS_PYTHON NAMES python3 python)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h

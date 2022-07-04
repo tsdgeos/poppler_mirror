@@ -156,6 +156,7 @@ PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, Annot *annot);
 PopplerAnnot *_poppler_annot_line_new(Annot *annot);
 PopplerAnnot *_poppler_annot_circle_new(Annot *annot);
 PopplerAnnot *_poppler_annot_square_new(Annot *annot);
+PopplerAnnot *_poppler_annot_stamp_new(Annot *annot);
 
 const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 
@@ -163,6 +164,7 @@ char *_poppler_goo_string_to_utf8(const GooString *s);
 gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate);
 GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date);
 GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime);
+AnnotStampImageHelper *_poppler_convert_cairo_image_to_stamp_image_helper(const cairo_surface_t *image);
 
 void _poppler_error_cb(ErrorCategory category, Goffset pos, const char *message);
 

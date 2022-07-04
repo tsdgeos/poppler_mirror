@@ -219,6 +219,7 @@ typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
 typedef struct _PopplerTextSpan PopplerTextSpan;
 typedef struct _PopplerPageRange PopplerPageRange;
 typedef struct _PopplerSignatureInfo PopplerSignatureInfo;
+typedef struct _PopplerAnnotStamp PopplerAnnotStamp;
 
 /**
  * PopplerBackend:

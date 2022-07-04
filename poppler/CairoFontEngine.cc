@@ -635,7 +635,9 @@ std::optional<FreeTypeFontFace> CairoFontEngine::getExternalFontFace(FT_Library 
 
     auto it = fontFileCache.find(filename);
     if (it != fontFileCache.end()) {
-        return it->second;
+        FreeTypeFontFace font = it->second;
+        cairo_font_face_reference(font.cairo_font_face);
+        return font;
     }
 
     std::optional<FreeTypeFontFace> font_face = createFreeTypeFontFace(ftlib, filename, {});
