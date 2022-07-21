@@ -484,7 +484,17 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     output_dev->startType3Render(gfx->getState(), gfx->getXRef());
     output_dev->setInType3Char(true);
     charProc = charProcs->getVal(glyph);
+    if (!charProc.isStream()) {
+        return CAIRO_STATUS_USER_FONT_ERROR;
+    }
+    Object charProcResObject = charProc.streamGetDict()->lookup("Resources");
+    if (charProcResObject.isDict()) {
+        gfx->pushResources(charProcResObject.getDict());
+    }
     gfx->display(&charProc);
+    if (charProcResObject.isDict()) {
+        gfx->popResources();
+    }
 
     output_dev->getType3GlyphWidth(&wx, &wy);
     cairo_matrix_transform_distance(&matrix, &wx, &wy);
