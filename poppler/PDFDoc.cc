@@ -886,6 +886,10 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
 
     // get and mark output intents etc.
     Object catObj = getXRef()->getCatalog();
+    if (!catObj.isDict()) {
+        error(errSyntaxError, -1, "XRef's Catelog is not a dictionary");
+        return errOpenFile;
+    }
     Dict *catDict = catObj.getDict();
     Object pagesObj = catDict->lookup("Pages");
     Object afObj = catDict->lookupNF("AcroForm").copy();
