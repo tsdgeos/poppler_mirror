@@ -887,7 +887,11 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     // get and mark output intents etc.
     Object catObj = getXRef()->getCatalog();
     if (!catObj.isDict()) {
-        error(errSyntaxError, -1, "XRef's Catelog is not a dictionary");
+        fclose(f);
+        delete yRef;
+        delete countRef;
+        delete outStr;
+        error(errSyntaxError, -1, "XRef's Catalog is not a dictionary");
         return errOpenFile;
     }
     Dict *catDict = catObj.getDict();
