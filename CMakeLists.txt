@@ -154,6 +154,23 @@ macro_optional_find_package(TIFF)
 macro_optional_find_package(NSS3)
 if(ENABLE_DCTDECODER STREQUAL "libjpeg")
   if(JPEG_FOUND)
+    include(CheckCSourceCompiles)
+    set(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
+    set(CMAKE_REQUIRED_LIBRARIES JPEG::JPEG)
+    check_c_source_compiles("
+    #include <stddef.h>
+    #include <stdio.h>
+    #include <jpeglib.h>
+    int main() { struct jpeg_decompress_struct info; jpeg_mem_src(&info, 0, 0); return 0; }" HAVE_JPEG_MEM_SRC)
+    set(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
+
+    if(NOT HAVE_JPEG_MEM_SRC)
+      message(FATAL_ERROR "Your libjpeg is too old. Poppler needs one that provides jpeg_mem_src. That is provided in libjpeg >= 8 or libjpeg-turbo >= 1.1.0. You can \
+also decide to use the internal unmaintained DCT decoder or none at all.\n\
+Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
+-DENABLE_DCTDECODER=unmaintained")
+    endif()
+
     set(ENABLE_LIBJPEG ${JPEG_FOUND})
   else()
     message(STATUS "Could NOT find libjpeg.")
