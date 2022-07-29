@@ -565,14 +565,12 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
 
     // First search
     const Form *f = catalog->getForm();
-    if (!f) {
-        return res;
-    }
-
-    const int nRootFields = f->getNumFields();
-    for (int i = 0; i < nRootFields; ++i) {
-        FormField *ff = f->getRootField(i);
-        addSignatureFieldsToVector(ff, res);
+    if (f) {
+        const int nRootFields = f->getNumFields();
+        for (int i = 0; i < nRootFields; ++i) {
+            FormField *ff = f->getRootField(i);
+            addSignatureFieldsToVector(ff, res);
+        }
     }
 
     // Second search
