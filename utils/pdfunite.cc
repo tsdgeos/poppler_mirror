@@ -197,6 +197,14 @@ int main(int argc, char *argv[])
     Object ocObj;
     if (docs.size() >= 1) {
         Object catObj = docs[0]->getXRef()->getCatalog();
+        if(!catObj.isDict()){
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *catDict = catObj.getDict();
         intents = catDict->lookup("OutputIntents");
         afObj = catDict->lookupNF("AcroForm").copy();
@@ -295,6 +303,14 @@ int main(int argc, char *argv[])
             }
         }
         Object pageCatObj = docs[i]->getXRef()->getCatalog();
+        if(!pageCatObj.isDict()){
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *pageCatDict = pageCatObj.getDict();
         Object pageNames = pageCatDict->lookup("Names");
         if (!pageNames.isNull() && pageNames.isDict()) {
