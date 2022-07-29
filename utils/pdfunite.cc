@@ -15,6 +15,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 //
 //========================================================================
 
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
     Object ocObj;
     if (docs.size() >= 1) {
         Object catObj = docs[0]->getXRef()->getCatalog();
-        if(!catObj.isDict()){
+        if (!catObj.isDict()) {
             fclose(f);
             delete yRef;
             delete countRef;
@@ -303,7 +304,7 @@ int main(int argc, char *argv[])
             }
         }
         Object pageCatObj = docs[i]->getXRef()->getCatalog();
-        if(!pageCatObj.isDict()){
+        if (!pageCatObj.isDict()) {
             fclose(f);
             delete yRef;
             delete countRef;
