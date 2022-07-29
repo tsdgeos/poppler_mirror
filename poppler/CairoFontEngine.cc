@@ -32,6 +32,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2022 Marcel Fabian Krüger <tex@2krueger.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -484,7 +485,17 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     output_dev->startType3Render(gfx->getState(), gfx->getXRef());
     output_dev->setInType3Char(true);
     charProc = charProcs->getVal(glyph);
+    if (!charProc.isStream()) {
+        return CAIRO_STATUS_USER_FONT_ERROR;
+    }
+    Object charProcResObject = charProc.streamGetDict()->lookup("Resources");
+    if (charProcResObject.isDict()) {
+        gfx->pushResources(charProcResObject.getDict());
+    }
     gfx->display(&charProc);
+    if (charProcResObject.isDict()) {
+        gfx->popResources();
+    }
 
     output_dev->getType3GlyphWidth(&wx, &wy);
     cairo_matrix_transform_distance(&matrix, &wx, &wy);

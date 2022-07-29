@@ -1,3 +1,17 @@
+Release 22.07.0:
+        core:
+         * Fix crash when filling in forms in some files. Issue #1258
+         * Fix first lines of Annotations sometimes being cut off. Issue #1246
+         * Signatures: Don't crash if the signature doesn't have a common name
+         * CairoFontEngine: increment font_face reference when retrieving from the cache
+         * Add ToUnicode support for lessorequalslant and greaterorequalslant
+
+        glib:
+         * Add support for stamp annotation
+
+        build system:
+         * Tweaks on how gperf is run
+
 Release 22.06.0:
         core:
          * Forms: Fix crash in forms with their own DR
