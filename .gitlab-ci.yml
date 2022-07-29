@@ -132,6 +132,19 @@ qt5_docs:
     paths:
       - qt5/src/APIDOCS-html
 
+qt6_docs:
+  only:
+    - master
+  stage: document
+  script:
+    - apt-get install --yes --no-install-recommends doxygen graphviz qt6-documentation-tools
+    - cd qt6/src
+    - ( cat Doxyfile ; echo "QHG_LOCATION=/usr/lib/qt6/bin/qhelpgenerator" ) | doxygen -
+  cache: {}
+  artifacts:
+    paths:
+      - qt6/src/APIDOCS-html
+
 cpp_docs:
   only:
     - master
