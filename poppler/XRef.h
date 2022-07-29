@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010-2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -207,7 +207,7 @@ public:
     void setModifiedObject(const Object *o, Ref r);
     Ref addIndirectObject(const Object &o);
     void removeIndirectObject(Ref r);
-    void add(int num, int gen, Goffset offs, bool used);
+    bool add(int num, int gen, Goffset offs, bool used);
     void add(Ref ref, Goffset offs, bool used);
     // Adds a stream object using AutoFreeMemStream.
     // The function takes ownership over dict and buffer.

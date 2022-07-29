@@ -906,7 +906,14 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     if (resourcesObj.isDict()) {
         markPageObjects(resourcesObj.getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
     }
-    markPageObjects(catDict, yRef, countRef, 0, refPage->num, rootNum + 2);
+    if (!markPageObjects(catDict, yRef, countRef, 0, refPage->num, rootNum + 2)) {
+        fclose(f);
+        delete yRef;
+        delete countRef;
+        delete outStr;
+        error(errSyntaxError, -1, "markPageObjects failed");
+        return errDamaged;
+    }
 
     Dict *pageDict = page.getDict();
     if (resourcesObj.isNull() && !pageDict->hasKey("Resources")) {
@@ -1637,7 +1644,7 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
     outStr->printf("%%%c%c%c%c\n", 0xE2, 0xE3, 0xCF, 0xD3);
 }
 
-void PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
 {
     bool deleteSet = false;
     if (!alreadyMarkedDicts) {
@@ -1650,7 +1657,7 @@ void PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned in
         if (deleteSet) {
             delete alreadyMarkedDicts;
         }
-        return;
+        return true;
     } else {
         alreadyMarkedDicts->insert(dict);
     }
@@ -1659,7 +1666,10 @@ void PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned in
         const char *key = dict->getKey(i);
         if (strcmp(key, "Annots") != 0) {
             Object obj1 = dict->getValNF(i).copy();
-            markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            if (unlikely(!success)) {
+                return false;
+            }
         } else {
             Object annotsObj = dict->getValNF(i).copy();
             if (!annotsObj.isNull()) {
@@ -1671,9 +1681,11 @@ void PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned in
     if (deleteSet) {
         delete alreadyMarkedDicts;
     }
+
+    return true;
 }
 
-void PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
 {
     Array *array;
 
@@ -1682,22 +1694,34 @@ void PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         array = obj->getArray();
         for (int i = 0; i < array->getLength(); i++) {
             Object obj1 = array->getNF(i).copy();
-            markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            if (unlikely(!success)) {
+                return false;
+            }
         }
         break;
-    case objDict:
-        markDictionnary(obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
-        break;
+    case objDict: {
+        const bool success = markDictionnary(obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+        if (unlikely(!success)) {
+            return false;
+        }
+    } break;
     case objStream: {
         Stream *stream = obj->getStream();
-        markDictionnary(stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+        const bool success = markDictionnary(stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+        if (unlikely(!success)) {
+            return false;
+        }
     } break;
     case objRef: {
         if (obj->getRef().num + (int)numOffset >= xRef->getNumObjects() || xRef->getEntry(obj->getRef().num + numOffset)->type == xrefEntryFree) {
             if (getXRef()->getEntry(obj->getRef().num)->type == xrefEntryFree) {
-                return; // already marked as free => should be replaced
+                return true; // already marked as free => should be replaced
             }
-            xRef->add(obj->getRef().num + numOffset, obj->getRef().gen, 0, true);
+            const bool success = xRef->add(obj->getRef().num + numOffset, obj->getRef().gen, 0, true);
+            if (unlikely(!success)) {
+                return false;
+            }
             if (getXRef()->getEntry(obj->getRef().num)->type == xrefEntryCompressed) {
                 xRef->getEntry(obj->getRef().num + numOffset)->type = xrefEntryCompressed;
             }
@@ -1712,11 +1736,16 @@ void PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
             }
         }
         Object obj1 = getXRef()->fetch(obj->getRef());
-        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
+        const bool success = markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
+        if (unlikely(!success)) {
+            return false;
+        }
     } break;
     default:
         break;
     }
+
+    return true;
 }
 
 void PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox)
@@ -1754,7 +1783,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     getXRef()->setModifiedObject(&page, *refPage);
 }
 
-void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
 {
     pageDict->remove("OpenAction");
     pageDict->remove("Outlines");
@@ -1764,9 +1793,13 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigne
         const char *key = pageDict->getKey(n);
         Object value = pageDict->getValNF(n).copy();
         if (strcmp(key, "Parent") != 0 && strcmp(key, "Pages") != 0 && strcmp(key, "AcroForm") != 0 && strcmp(key, "Annots") != 0 && strcmp(key, "P") != 0 && strcmp(key, "Root") != 0) {
-            markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            const bool success = markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+            if (unlikely(!success)) {
+                return false;
+            }
         }
     }
+    return true;
 }
 
 bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict *> *alreadyMarkedDicts)

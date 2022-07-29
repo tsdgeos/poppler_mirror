@@ -1380,12 +1380,18 @@ void XRef::add(Ref ref, Goffset offs, bool used)
     add(ref.num, ref.gen, offs, used);
 }
 
-void XRef::add(int num, int gen, Goffset offs, bool used)
+bool XRef::add(int num, int gen, Goffset offs, bool used)
 {
     xrefLocker();
     if (num >= size) {
         if (num >= capacity) {
-            entries = (XRefEntry *)greallocn(entries, num + 1, sizeof(XRefEntry));
+            entries = (XRefEntry *)greallocn_checkoverflow(entries, num + 1, sizeof(XRefEntry));
+            if (unlikely(entries == nullptr)) {
+                size = 0;
+                capacity = 0;
+                return false;
+            }
+
             capacity = num + 1;
         }
         for (int i = size; i < num + 1; ++i) {
@@ -1408,6 +1414,7 @@ void XRef::add(int num, int gen, Goffset offs, bool used)
         e->type = xrefEntryFree;
         e->offset = 0;
     }
+    return true;
 }
 
 void XRef::setModifiedObject(const Object *o, Ref r)
