@@ -145,19 +145,34 @@ public:
     static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA);
 
     // Was PDF document successfully opened?
-    bool isOk() const { return ok; }
+    bool isOk() const
+    {
+        return ok;
+    }
 
     // Get the error code (if isOk() returns false).
-    int getErrorCode() const { return errCode; }
+    int getErrorCode() const
+    {
+        return errCode;
+    }
 
     // Get the error code returned by fopen() (if getErrorCode() ==
     // errOpenFile).
-    int getFopenErrno() const { return fopenErrno; }
+    int getFopenErrno() const
+    {
+        return fopenErrno;
+    }
 
     // Get file name.
-    const GooString *getFileName() const { return fileName.get(); }
+    const GooString *getFileName() const
+    {
+        return fileName.get();
+    }
 #ifdef _WIN32
-    wchar_t *getFileNameU() { return fileNameU; }
+    wchar_t *getFileNameU()
+    {
+        return fileNameU;
+    }
 #endif
 
     // Get the linearization table.
@@ -165,33 +180,66 @@ public:
     bool checkLinearization();
 
     // Get the xref table.
-    XRef *getXRef() const { return xref; }
+    XRef *getXRef() const
+    {
+        return xref;
+    }
 
     // Get catalog.
-    Catalog *getCatalog() const { return catalog; }
+    Catalog *getCatalog() const
+    {
+        return catalog;
+    }
 
     // Get optional content configuration
-    OCGs *getOptContentConfig() const { return catalog->getOptContentConfig(); }
+    OCGs *getOptContentConfig() const
+    {
+        return catalog->getOptContentConfig();
+    }
 
     // Get base stream.
-    BaseStream *getBaseStream() const { return str; }
+    BaseStream *getBaseStream() const
+    {
+        return str;
+    }
 
     // Get page parameters.
-    double getPageMediaWidth(int page) { return getPage(page) ? getPage(page)->getMediaWidth() : 0.0; }
-    double getPageMediaHeight(int page) { return getPage(page) ? getPage(page)->getMediaHeight() : 0.0; }
-    double getPageCropWidth(int page) { return getPage(page) ? getPage(page)->getCropWidth() : 0.0; }
-    double getPageCropHeight(int page) { return getPage(page) ? getPage(page)->getCropHeight() : 0.0; }
-    int getPageRotate(int page) { return getPage(page) ? getPage(page)->getRotate() : 0; }
+    double getPageMediaWidth(int page)
+    {
+        return getPage(page) ? getPage(page)->getMediaWidth() : 0.0;
+    }
+    double getPageMediaHeight(int page)
+    {
+        return getPage(page) ? getPage(page)->getMediaHeight() : 0.0;
+    }
+    double getPageCropWidth(int page)
+    {
+        return getPage(page) ? getPage(page)->getCropWidth() : 0.0;
+    }
+    double getPageCropHeight(int page)
+    {
+        return getPage(page) ? getPage(page)->getCropHeight() : 0.0;
+    }
+    int getPageRotate(int page)
+    {
+        return getPage(page) ? getPage(page)->getRotate() : 0;
+    }
 
     // Get number of pages.
     int getNumPages();
 
     // Return the contents of the metadata stream, or nullptr if there is
     // no metadata.
-    std::unique_ptr<GooString> readMetadata() const { return catalog->readMetadata(); }
+    std::unique_ptr<GooString> readMetadata() const
+    {
+        return catalog->readMetadata();
+    }
 
     // Return the structure tree root object.
-    const StructTreeRoot *getStructTreeRoot() const { return catalog->getStructTreeRoot(); }
+    const StructTreeRoot *getStructTreeRoot() const
+    {
+        return catalog->getStructTreeRoot();
+    }
 
     // Get page.
     Page *getPage(int page);
@@ -210,7 +258,10 @@ public:
 
     // Find a page, given its object ID.  Returns page number, or 0 if
     // not found.
-    int findPage(const Ref ref) { return catalog->findPage(ref); }
+    int findPage(const Ref ref)
+    {
+        return catalog->findPage(ref);
+    }
 
     // Returns the links for the current page, transferring ownership to
     // the caller.
@@ -218,7 +269,10 @@ public:
 
     // Find a named destination.  Returns the link destination, or
     // nullptr if <name> is not a destination.
-    std::unique_ptr<LinkDest> findDest(const GooString *name) { return catalog->findDest(name); }
+    std::unique_ptr<LinkDest> findDest(const GooString *name)
+    {
+        return catalog->findDest(name);
+    }
 
     // Process the links for a page.
     void processLinks(OutputDev *out, int page);
@@ -227,29 +281,65 @@ public:
     Outline *getOutline();
 
     // Is the file encrypted?
-    bool isEncrypted() { return xref->isEncrypted(); }
+    bool isEncrypted()
+    {
+        return xref->isEncrypted();
+    }
 
     std::vector<FormFieldSignature *> getSignatureFields();
 
     // Check various permissions.
-    bool okToPrint(bool ignoreOwnerPW = false) { return xref->okToPrint(ignoreOwnerPW); }
-    bool okToPrintHighRes(bool ignoreOwnerPW = false) { return xref->okToPrintHighRes(ignoreOwnerPW); }
-    bool okToChange(bool ignoreOwnerPW = false) { return xref->okToChange(ignoreOwnerPW); }
-    bool okToCopy(bool ignoreOwnerPW = false) { return xref->okToCopy(ignoreOwnerPW); }
-    bool okToAddNotes(bool ignoreOwnerPW = false) { return xref->okToAddNotes(ignoreOwnerPW); }
-    bool okToFillForm(bool ignoreOwnerPW = false) { return xref->okToFillForm(ignoreOwnerPW); }
-    bool okToAccessibility(bool ignoreOwnerPW = false) { return xref->okToAccessibility(ignoreOwnerPW); }
-    bool okToAssemble(bool ignoreOwnerPW = false) { return xref->okToAssemble(ignoreOwnerPW); }
+    bool okToPrint(bool ignoreOwnerPW = false)
+    {
+        return xref->okToPrint(ignoreOwnerPW);
+    }
+    bool okToPrintHighRes(bool ignoreOwnerPW = false)
+    {
+        return xref->okToPrintHighRes(ignoreOwnerPW);
+    }
+    bool okToChange(bool ignoreOwnerPW = false)
+    {
+        return xref->okToChange(ignoreOwnerPW);
+    }
+    bool okToCopy(bool ignoreOwnerPW = false)
+    {
+        return xref->okToCopy(ignoreOwnerPW);
+    }
+    bool okToAddNotes(bool ignoreOwnerPW = false)
+    {
+        return xref->okToAddNotes(ignoreOwnerPW);
+    }
+    bool okToFillForm(bool ignoreOwnerPW = false)
+    {
+        return xref->okToFillForm(ignoreOwnerPW);
+    }
+    bool okToAccessibility(bool ignoreOwnerPW = false)
+    {
+        return xref->okToAccessibility(ignoreOwnerPW);
+    }
+    bool okToAssemble(bool ignoreOwnerPW = false)
+    {
+        return xref->okToAssemble(ignoreOwnerPW);
+    }
 
     // Is this document linearized?
     bool isLinearized(bool tryingToReconstruct = false);
 
     // Return the document's Info dictionary (if any).
-    Object getDocInfo() { return xref->getDocInfo(); }
-    Object getDocInfoNF() { return xref->getDocInfoNF(); }
+    Object getDocInfo()
+    {
+        return xref->getDocInfo();
+    }
+    Object getDocInfoNF()
+    {
+        return xref->getDocInfoNF();
+    }
 
     // Remove the document's Info dictionary and update the trailer dictionary.
-    void removeDocInfo() { xref->removeDocInfo(); }
+    void removeDocInfo()
+    {
+        xref->removeDocInfo();
+    }
 
     // Set doc info string entry. nullptr or empty value will cause a removal.
     // Takes ownership of value.
@@ -258,35 +348,95 @@ public:
     // Set document's properties in document's Info dictionary.
     // nullptr or empty value will cause a removal.
     // Takes ownership of value.
-    void setDocInfoTitle(GooString *title) { setDocInfoStringEntry("Title", title); }
-    void setDocInfoAuthor(GooString *author) { setDocInfoStringEntry("Author", author); }
-    void setDocInfoSubject(GooString *subject) { setDocInfoStringEntry("Subject", subject); }
-    void setDocInfoKeywords(GooString *keywords) { setDocInfoStringEntry("Keywords", keywords); }
-    void setDocInfoCreator(GooString *creator) { setDocInfoStringEntry("Creator", creator); }
-    void setDocInfoProducer(GooString *producer) { setDocInfoStringEntry("Producer", producer); }
-    void setDocInfoCreatDate(GooString *creatDate) { setDocInfoStringEntry("CreationDate", creatDate); }
-    void setDocInfoModDate(GooString *modDate) { setDocInfoStringEntry("ModDate", modDate); }
+    void setDocInfoTitle(GooString *title)
+    {
+        setDocInfoStringEntry("Title", title);
+    }
+    void setDocInfoAuthor(GooString *author)
+    {
+        setDocInfoStringEntry("Author", author);
+    }
+    void setDocInfoSubject(GooString *subject)
+    {
+        setDocInfoStringEntry("Subject", subject);
+    }
+    void setDocInfoKeywords(GooString *keywords)
+    {
+        setDocInfoStringEntry("Keywords", keywords);
+    }
+    void setDocInfoCreator(GooString *creator)
+    {
+        setDocInfoStringEntry("Creator", creator);
+    }
+    void setDocInfoProducer(GooString *producer)
+    {
+        setDocInfoStringEntry("Producer", producer);
+    }
+    void setDocInfoCreatDate(GooString *creatDate)
+    {
+        setDocInfoStringEntry("CreationDate", creatDate);
+    }
+    void setDocInfoModDate(GooString *modDate)
+    {
+        setDocInfoStringEntry("ModDate", modDate);
+    }
 
     // Get document's properties from document's Info dictionary.
     // Returns nullptr on fail.
     std::unique_ptr<GooString> getDocInfoStringEntry(const char *key);
 
-    std::unique_ptr<GooString> getDocInfoTitle() { return getDocInfoStringEntry("Title"); }
-    std::unique_ptr<GooString> getDocInfoAuthor() { return getDocInfoStringEntry("Author"); }
-    std::unique_ptr<GooString> getDocInfoSubject() { return getDocInfoStringEntry("Subject"); }
-    std::unique_ptr<GooString> getDocInfoKeywords() { return getDocInfoStringEntry("Keywords"); }
-    std::unique_ptr<GooString> getDocInfoCreator() { return getDocInfoStringEntry("Creator"); }
-    std::unique_ptr<GooString> getDocInfoProducer() { return getDocInfoStringEntry("Producer"); }
-    std::unique_ptr<GooString> getDocInfoCreatDate() { return getDocInfoStringEntry("CreationDate"); }
-    std::unique_ptr<GooString> getDocInfoModDate() { return getDocInfoStringEntry("ModDate"); }
+    std::unique_ptr<GooString> getDocInfoTitle()
+    {
+        return getDocInfoStringEntry("Title");
+    }
+    std::unique_ptr<GooString> getDocInfoAuthor()
+    {
+        return getDocInfoStringEntry("Author");
+    }
+    std::unique_ptr<GooString> getDocInfoSubject()
+    {
+        return getDocInfoStringEntry("Subject");
+    }
+    std::unique_ptr<GooString> getDocInfoKeywords()
+    {
+        return getDocInfoStringEntry("Keywords");
+    }
+    std::unique_ptr<GooString> getDocInfoCreator()
+    {
+        return getDocInfoStringEntry("Creator");
+    }
+    std::unique_ptr<GooString> getDocInfoProducer()
+    {
+        return getDocInfoStringEntry("Producer");
+    }
+    std::unique_ptr<GooString> getDocInfoCreatDate()
+    {
+        return getDocInfoStringEntry("CreationDate");
+    }
+    std::unique_ptr<GooString> getDocInfoModDate()
+    {
+        return getDocInfoStringEntry("ModDate");
+    }
 
     // Return the PDF subtype, part, and conformance
-    PDFSubtype getPDFSubtype() const { return pdfSubtype; }
-    PDFSubtypePart getPDFSubtypePart() const { return pdfPart; }
-    PDFSubtypeConformance getPDFSubtypeConformance() const { return pdfConformance; }
+    PDFSubtype getPDFSubtype() const
+    {
+        return pdfSubtype;
+    }
+    PDFSubtypePart getPDFSubtypePart() const
+    {
+        return pdfPart;
+    }
+    PDFSubtypeConformance getPDFSubtypeConformance() const
+    {
+        return pdfConformance;
+    }
 
     // Return the PDF version specified by the file (either header or catalog).
-    int getPDFMajorVersion() const { return std::max(headerPdfMajorVersion, catalog->getPDFMajorVersion()); }
+    int getPDFMajorVersion() const
+    {
+        return std::max(headerPdfMajorVersion, catalog->getPDFMajorVersion());
+    }
     int getPDFMinorVersion() const
     {
         const int catalogMajorVersion = catalog->getPDFMajorVersion();
@@ -314,7 +464,10 @@ public:
     int saveWithoutChangesAs(OutStream *outStr);
 
     // Return a pointer to the GUI (XPDFCore or WinPDFCore object).
-    void *getGUIData() { return guiData; }
+    void *getGUIData()
+    {
+        return guiData;
+    }
 
     // rewrite pageDict with MediaBox, CropBox and new page CTM
     void replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox);
@@ -355,7 +508,10 @@ private:
     {
         writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, { objNum, objGen });
     }
-    inline void writeObject(Object *obj, OutStream *outStr, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref) { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
+    inline void writeObject(Object *obj, OutStream *outStr, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref)
+    {
+        writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref);
+    }
     static void writeStream(Stream *str, OutStream *outStr);
     static void writeRawStream(Stream *str, OutStream *outStr);
     void writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeAllEntries, int uxrefSize, OutStream *outStr, bool incrUpdate);

@@ -242,9 +242,18 @@ public:
     void setDebugMode(bool debugModeA) { debugMode = debugModeA; }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
-    void setInShading(bool sh) { inShading = sh; }
-    bool getVectorAntialias() { return vectorAntialias; }
-    void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
+    void setInShading(bool sh)
+    {
+        inShading = sh;
+    }
+    bool getVectorAntialias()
+    {
+        return vectorAntialias;
+    }
+    void setVectorAntialias(bool vaa)
+    {
+        vectorAntialias = vaa;
+    }
 #endif
 
     // Do shaded fills with dynamic patterns

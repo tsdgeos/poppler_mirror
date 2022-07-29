@@ -166,7 +166,10 @@ public:
     Gfx(const Gfx &) = delete;
     Gfx &operator=(const Gfx &other) = delete;
 
-    XRef *getXRef() { return xref; }
+    XRef *getXRef()
+    {
+        return xref;
+    }
 
     // Interpret a stream or array of streams.
     void display(Object *obj, bool topLevel = true);
@@ -188,7 +191,10 @@ public:
     void popStateGuard();
 
     // Get the current graphics state object.
-    GfxState *getState() { return state; }
+    GfxState *getState()
+    {
+        return state;
+    }
 
     bool checkTransparencyGroup(Dict *resDict);
 

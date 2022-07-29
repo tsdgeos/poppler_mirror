@@ -132,7 +132,10 @@ public:
 #ifdef _WIN32
     static std::unique_ptr<GooFile> open(const wchar_t *fileName);
 
-    ~GooFile() { CloseHandle(handle); }
+    ~GooFile()
+    {
+        CloseHandle(handle);
+    }
 
     // Asuming than on windows you can't change files that are already open
     bool modificationTimeChangedSinceOpen() const;
@@ -142,7 +145,10 @@ private:
     HANDLE handle;
     struct _FILETIME modifiedTimeOnOpen;
 #else
-    ~GooFile() { close(fd); }
+    ~GooFile()
+    {
+        close(fd);
+    }
 
     bool modificationTimeChangedSinceOpen() const;
 

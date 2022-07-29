@@ -260,7 +260,10 @@ public:
     void scanWindowsFonts(const std::string &winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
+    void addFcFont(SysFontInfo *si)
+    {
+        fonts.push_back(si);
+    }
 #endif
 private:
 #ifdef _WIN32
