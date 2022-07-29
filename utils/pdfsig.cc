@@ -217,6 +217,23 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
     return vCerts;
 }
 
+static std::string TextStringToUTF8(const std::string &str)
+{
+    const UnicodeMap *utf8Map = globalParams->getUtf8Map();
+
+    Unicode *u;
+    int len = TextStringToUCS4(str, &u);
+
+    std::string convertedStr;
+    for (int i = 0; i < len; ++i) {
+        char buf[8];
+        const int n = utf8Map->mapUnicode(u[i], buf, sizeof(buf));
+        convertedStr.append(buf, n);
+    }
+
+    return convertedStr;
+}
+
 int main(int argc, char *argv[])
 {
     char *time_str = nullptr;
@@ -422,6 +439,11 @@ int main(int argc, char *argv[])
     for (unsigned int i = 0; i < sigCount; i++) {
         FormFieldSignature *ffs = signatures.at(i);
         printf("Signature #%u:\n", i + 1);
+        const GooString *goo = ffs->getCreateWidget()->getField()->getFullyQualifiedName();
+        if (goo) {
+            const std::string name = TextStringToUTF8(goo->toStr());
+            printf("  - Signature Field Name: %s\n", name.c_str());
+        }
 
         if (ffs->getSignatureType() == unsigned_signature_field) {
             printf("  The signature form field is not signed.\n");
