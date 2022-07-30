@@ -5261,7 +5261,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::shared_ptr<const GfxFont> font = form->getDefaultResources()->lookupFont(da.getFontName().getName());
+    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName().getName()) : nullptr;
     if (!font) {
         font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
     }
