@@ -696,7 +696,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     GooString *aux = getField()->getDefaultAppearance();
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
-    Form *form = doc->getCatalog()->getForm();
+    Form *form = doc->getCatalog()->getCreateForm();
     std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
     if (pdfFontName.empty()) {
         pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
