@@ -89,12 +89,12 @@ build_mingw64_fedora36:
     - mingw64-cmake -G Ninja ..
     - ninja
 
-build_clazy_clang13:
+build_clazy_clang14:
   stage: build
   script:
-    - apt-get install --yes --no-install-recommends clazy clang-13
+    - apt-get install --yes --no-install-recommends clazy clang-14
     - mkdir -p build && cd build
-    - CC=clang-13 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
+    - CC=clang-14 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja
 
 build_android:
