@@ -136,6 +136,7 @@ static bool dontVerifyCert = false;
 static bool noOCSPRevocationCheck = false;
 static bool dumpSignatures = false;
 static bool etsiCAdESdetached = false;
+static char signatureName[256] = "";
 static int signatureNumber = 0;
 static char certNickname[256] = "";
 static char password[256] = "";
@@ -154,7 +155,7 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-dump", argFlag, &dumpSignatures, 0, "dump all signatures into current directory" },
                                    { "-add-signature", argFlag, &addNewSignature, 0, "adds a new signature to the document" },
                                    { "-new-signature-field-name", argGooString, &newSignatureFieldName, 0, "field name used for the newly added signature. A random ID will be used if empty" },
-                                   { "-sign", argInt, &signatureNumber, 0, "sign the document in the signature field with the given number" },
+                                   { "-sign", argString, &signatureName, 256, "sign the document in the given signature field (by name or number)" },
                                    { "-etsi", argFlag, &etsiCAdESdetached, 0, "create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached" },
                                    { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
                                    { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
@@ -301,6 +302,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    if (strlen(signatureName) > 0) {
+        signatureNumber = atoi(signatureName);
+        if (signatureNumber == 0) {
+            signatureNumber = -1;
+        }
+    } else {
+        signatureNumber = 0;
+    }
+
     if (addNewSignature && signatureNumber > 0) {
         // incompatible options
         print_version_usage(true);
@@ -366,6 +376,26 @@ int main(int argc, char *argv[])
 
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
+
+    if (signatureNumber == -1) {
+        for (unsigned int i = 0; i < sigCount; i++) {
+            const GooString *goo = signatures.at(i)->getCreateWidget()->getField()->getFullyQualifiedName();
+            if (!goo) {
+                continue;
+            }
+
+            const std::string name = TextStringToUTF8(goo->toStr());
+            if (name == signatureName) {
+                signatureNumber = i + 1;
+                break;
+            }
+        }
+
+        if (signatureNumber == -1) {
+            fprintf(stderr, "Signature field not found by name\n");
+            return 2;
+        }
+    }
 
     if (signatureNumber > 0) {
         // We are signing an existing signature field
