@@ -5347,23 +5347,46 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     return true;
 }
 
+static bool insertIfNotAlreadyPresent(Ref r, std::set<int> *alreadySeenDicts)
+{
+    if (r == Ref::INVALID()) {
+        return true;
+    }
+
+    // std::pair<iterator,bool>
+    const auto insertResult = alreadySeenDicts->insert(r.num);
+    return insertResult.second;
+}
+
 // Should we also merge Arrays?
-static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
+static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<int> *alreadySeenDicts)
 {
     for (int i = 0; i < secondary->getLength(); ++i) {
         const char *key = secondary->getKey(i);
         if (!primary->hasKey(key)) {
             primary->add(key, secondary->lookup(key).deepCopy());
         } else {
-            Object primaryObj = primary->lookup(key);
+            Ref primaryRef;
+            Object primaryObj = primary->lookup(key, &primaryRef);
             if (primaryObj.isDict()) {
-                Object secondaryObj = secondary->lookup(key);
+                Ref secondaryRef;
+                Object secondaryObj = secondary->lookup(key, &secondaryRef);
                 if (secondaryObj.isDict()) {
-                    recursiveMergeDicts(primaryObj.getDict(), secondaryObj.getDict());
+                    if (!insertIfNotAlreadyPresent(primaryRef, alreadySeenDicts) || !insertIfNotAlreadyPresent(secondaryRef, alreadySeenDicts)) {
+                        // bad PDF
+                        return;
+                    }
+                    recursiveMergeDicts(primaryObj.getDict(), secondaryObj.getDict(), alreadySeenDicts);
                 }
             }
         }
     }
+}
+
+static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
+{
+    std::set<int> alreadySeenDicts;
+    recursiveMergeDicts(primary, secondary, &alreadySeenDicts);
 }
 
 void AnnotWidget::generateFieldAppearance()
