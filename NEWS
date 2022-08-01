@@ -1,3 +1,9 @@
+Release 22.08.0:
+        core:
+         * Fix rendering text on some forms
+         * CairoOutputDev: Support Type3 charprocs having Resources
+         * Fix crashes on malformed files
+
 Release 22.07.0:
         core:
          * Fix crash when filling in forms in some files. Issue #1258
