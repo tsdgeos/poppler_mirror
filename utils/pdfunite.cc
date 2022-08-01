@@ -15,6 +15,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 //
 //========================================================================
 
@@ -197,6 +198,14 @@ int main(int argc, char *argv[])
     Object ocObj;
     if (docs.size() >= 1) {
         Object catObj = docs[0]->getXRef()->getCatalog();
+        if (!catObj.isDict()) {
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *catDict = catObj.getDict();
         intents = catDict->lookup("OutputIntents");
         afObj = catDict->lookupNF("AcroForm").copy();
@@ -295,6 +304,14 @@ int main(int argc, char *argv[])
             }
         }
         Object pageCatObj = docs[i]->getXRef()->getCatalog();
+        if (!pageCatObj.isDict()) {
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *pageCatDict = pageCatObj.getDict();
         Object pageNames = pageCatDict->lookup("Names");
         if (!pageNames.isNull() && pageNames.isDict()) {

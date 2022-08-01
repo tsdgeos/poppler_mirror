@@ -2751,6 +2751,10 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossl
     if (imm) {
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
+            if (!pageBitmap->isOk()) {
+                error(errSyntaxError, curStr->getPos(), "JBIG2Stream::readGenericRegionSeg: expand failed");
+                return;
+            }
         }
         pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 

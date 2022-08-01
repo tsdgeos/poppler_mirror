@@ -5347,6 +5347,25 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     return true;
 }
 
+// Should we also merge Arrays?
+static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
+{
+    for (int i = 0; i < secondary->getLength(); ++i) {
+        const char *key = secondary->getKey(i);
+        if (!primary->hasKey(key)) {
+            primary->add(key, secondary->lookup(key).deepCopy());
+        } else {
+            Object primaryObj = primary->lookup(key);
+            if (primaryObj.isDict()) {
+                Object secondaryObj = secondary->lookup(key);
+                if (secondaryObj.isDict()) {
+                    recursiveMergeDicts(primaryObj.getDict(), secondaryObj.getDict());
+                }
+            }
+        }
+    }
+}
+
 void AnnotWidget::generateFieldAppearance()
 {
     const GooString *da;
@@ -5385,7 +5404,11 @@ void AnnotWidget::generateFieldAppearance()
         // Let's use a field's resource dictionary.
         resourcesDictObj = field->getObj()->dictLookup("DR");
         if (resourcesDictObj.isDict()) {
-            resourcesToFree = new GfxResources(doc->getXRef(), resourcesDictObj.getDict(), form ? form->getDefaultResources() : nullptr);
+            if (form && form->getDefaultResourcesObj()->isDict()) {
+                resourcesDictObj = resourcesDictObj.deepCopy();
+                recursiveMergeDicts(resourcesDictObj.getDict(), form->getDefaultResourcesObj()->getDict());
+            }
+            resourcesToFree = new GfxResources(doc->getXRef(), resourcesDictObj.getDict(), nullptr);
             resources = resourcesToFree;
         }
     }
