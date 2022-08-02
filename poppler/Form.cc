@@ -2730,13 +2730,13 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
 Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)
 {
     if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
-        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for %s %s was %s", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
         return {};
     }
 
     const FoFiIdentifierType fontFoFiType = FoFiIdentifier::identifyFile(filepath.c_str());
     if (fontFoFiType != fofiIdTrueType && fontFoFiType != fofiIdTrueTypeCollection && fontFoFiType != fofiIdOpenTypeCFF8Bit && fontFoFiType != fofiIdOpenTypeCFFCID) {
-        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for %s %s was %s of type %d", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str(), fontFoFiType);
+        error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s} of type {3:d}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str(), fontFoFiType);
         return {};
     }
 
@@ -2777,13 +2777,13 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
         FT_Face face;
         if (ft_new_face_from_file(freetypeLib, filepath.c_str(), faceIndex, &face)) {
-            error(errIO, -1, "ft_new_face_from_file failed for %s", filepath.c_str());
+            error(errIO, -1, "ft_new_face_from_file failed for {0:s}", filepath.c_str());
             return {};
         }
         const std::unique_ptr<FT_Face, void (*)(FT_Face *)> faceDeleter(&face, [](FT_Face *f) { FT_Done_Face(*f); });
 
         if (FT_Set_Char_Size(face, 1000, 1000, 0, 0)) {
-            error(errIO, -1, "FT_Set_Char_Size failed for %s", filepath.c_str());
+            error(errIO, -1, "FT_Set_Char_Size failed for {0:s}", filepath.c_str());
             return {};
         }
 
@@ -2814,23 +2814,23 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
             {
                 const std::unique_ptr<GooFile> file(GooFile::open(filepath));
                 if (!file) {
-                    error(errIO, -1, "Failed to open %s", filepath.c_str());
+                    error(errIO, -1, "Failed to open {0:s}", filepath.c_str());
                     return {};
                 }
                 const Goffset fileSize = file->size();
                 if (fileSize < 0) {
-                    error(errIO, -1, "Failed to get file size for %s", filepath.c_str());
+                    error(errIO, -1, "Failed to get file size for {0:s}", filepath.c_str());
                     return {};
                 }
                 // GooFile::read only takes an integer so for now we don't support huge fonts
                 if (fileSize > std::numeric_limits<int>::max()) {
-                    error(errIO, -1, "Font size is too big %s", filepath.c_str());
+                    error(errIO, -1, "Font size is too big {0:s}", filepath.c_str());
                     return {};
                 }
                 char *dataPtr = static_cast<char *>(gmalloc(fileSize));
                 const Goffset bytesRead = file->read(dataPtr, static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
-                    error(errIO, -1, "Failed to read contents of %s", filepath.c_str());
+                    error(errIO, -1, "Failed to read contents of {0:s}", filepath.c_str());
                     gfree(dataPtr);
                     return {};
                 }
@@ -2861,7 +2861,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 unicodeBMPCMap = fft->findCmap(3, 1);
             }
             if (unicodeBMPCMap < 0) {
-                error(errIO, -1, "Font does not have an unicode BMP cmap %s", filepath.c_str());
+                error(errIO, -1, "Font does not have an unicode BMP cmap {0:s}", filepath.c_str());
                 return {};
             }
 
