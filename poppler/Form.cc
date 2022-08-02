@@ -103,7 +103,7 @@ static GooString *convertToUtf16(GooString *pdfDocEncodingString)
     int tmp_length;
     char *tmp_str = pdfDocEncodingToUTF16(pdfDocEncodingString->toStr(), &tmp_length);
     delete pdfDocEncodingString;
-    pdfDocEncodingString = new GooString(tmp_str, tmp_length);
+    pdfDocEncodingString = new GooString(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
     delete[] tmp_str;
     return pdfDocEncodingString;
 }
