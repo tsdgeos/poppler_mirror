@@ -138,7 +138,6 @@ static bool noOCSPRevocationCheck = false;
 static bool dumpSignatures = false;
 static bool etsiCAdESdetached = false;
 static char signatureName[256] = "";
-static int signatureNumber = 0;
 static char certNickname[256] = "";
 static char password[256] = "";
 static char digestName[256] = "SHA256";
@@ -303,6 +302,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    int signatureNumber;
     if (strlen(signatureName) > 0) {
         signatureNumber = atoi(signatureName);
         if (signatureNumber == 0) {
