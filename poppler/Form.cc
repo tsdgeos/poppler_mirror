@@ -34,6 +34,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
+// Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 //
 //========================================================================
 
