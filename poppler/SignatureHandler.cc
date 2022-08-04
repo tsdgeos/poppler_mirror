@@ -525,7 +525,11 @@ std::string SignatureHandler::getSignerName()
 {
     char *commonName;
 
-    if (!CMSSignerInfo || !NSS_IsInitialized()) {
+    if (!NSS_IsInitialized()) {
+        return {};
+    }
+
+    if (!signing_cert && !CMSSignerInfo) {
         return {};
     }
 
