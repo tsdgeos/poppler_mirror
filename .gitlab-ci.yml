@@ -46,6 +46,7 @@ build:
 
 build_clang13_libcpp:
   stage: build
+  image: debian:bookworm
   script:
     - echo "We want to compile with C++23 here because it has some nice things like deleted std::string nullptr constructor"
     - sed -i -e "s@CMAKE_CXX_STANDARD 17@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
@@ -91,6 +92,7 @@ build_mingw64_fedora36:
 
 build_clazy_clang14:
   stage: build
+  image: debian:bookworm
   script:
     - apt-get install --yes --no-install-recommends clazy clang-14
     - mkdir -p build && cd build
