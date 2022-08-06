@@ -1558,16 +1558,6 @@ SplashCoord Splash::getFlatness()
     return state->flatness;
 }
 
-SplashCoord *Splash::getLineDash()
-{
-    return state->lineDash;
-}
-
-int Splash::getLineDashLength()
-{
-    return state->lineDashLength;
-}
-
 SplashCoord Splash::getLineDashPhase()
 {
     return state->lineDashPhase;
@@ -1690,9 +1680,9 @@ void Splash::setFlatness(SplashCoord flatness)
     }
 }
 
-void Splash::setLineDash(SplashCoord *lineDash, int lineDashLength, SplashCoord lineDashPhase)
+void Splash::setLineDash(std::vector<SplashCoord> &&lineDash, SplashCoord lineDashPhase)
 {
-    state->setLineDash(lineDash, lineDashLength, lineDashPhase);
+    state->setLineDash(std::move(lineDash), lineDashPhase);
 }
 
 void Splash::setStrokeAdjust(bool strokeAdjust)
@@ -1898,7 +1888,7 @@ SplashError Splash::stroke(SplashPath *path)
     SplashCoord d1, d2, t1, t2, w;
 
     if (debugMode) {
-        printf("stroke [dash:%d] [width:%.2f]:\n", state->lineDashLength, (double)state->lineWidth);
+        printf("stroke [dash:%ld] [width:%.2f]:\n", state->lineDash.size(), (double)state->lineWidth);
         dumpPath(path);
     }
     opClipRes = splashClipAllOutside;
@@ -1906,7 +1896,7 @@ SplashError Splash::stroke(SplashPath *path)
         return splashErrEmptyPath;
     }
     path2 = flattenPath(path, state->matrix, state->flatness);
-    if (state->lineDashLength > 0) {
+    if (!state->lineDash.empty()) {
         dPath = makeDashedPath(path2);
         delete path2;
         path2 = dPath;
@@ -2175,12 +2165,11 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
     SplashCoord lineDashStartPhase, lineDashDist, segLen;
     SplashCoord x0, y0, x1, y1, xa, ya;
     bool lineDashStartOn, lineDashOn, newPath;
-    int lineDashStartIdx, lineDashIdx;
     int i, j, k;
 
     lineDashTotal = 0;
-    for (i = 0; i < state->lineDashLength; ++i) {
-        lineDashTotal += state->lineDash[i];
+    for (SplashCoord dash : state->lineDash) {
+        lineDashTotal += dash;
     }
     // Acrobat simply draws nothing if the dash array is [0]
     if (lineDashTotal == 0) {
@@ -2190,14 +2179,14 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
     i = splashFloor(lineDashStartPhase / lineDashTotal);
     lineDashStartPhase -= (SplashCoord)i * lineDashTotal;
     lineDashStartOn = true;
-    lineDashStartIdx = 0;
+    size_t lineDashStartIdx = 0;
     if (lineDashStartPhase > 0) {
-        while (lineDashStartIdx < state->lineDashLength && lineDashStartPhase >= state->lineDash[lineDashStartIdx]) {
+        while (lineDashStartIdx < state->lineDash.size() && lineDashStartPhase >= state->lineDash[lineDashStartIdx]) {
             lineDashStartOn = !lineDashStartOn;
             lineDashStartPhase -= state->lineDash[lineDashStartIdx];
             ++lineDashStartIdx;
         }
-        if (unlikely(lineDashStartIdx == state->lineDashLength)) {
+        if (unlikely(lineDashStartIdx == state->lineDash.size())) {
             return new SplashPath();
         }
     }
@@ -2215,7 +2204,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
 
         // initialize the dash parameters
         lineDashOn = lineDashStartOn;
-        lineDashIdx = lineDashStartIdx;
+        size_t lineDashIdx = lineDashStartIdx;
         lineDashDist = state->lineDash[lineDashIdx] - lineDashStartPhase;
 
         // process each segment of the subpath
@@ -2262,7 +2251,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
                 // get the next entry in the dash array
                 if (lineDashDist <= 0) {
                     lineDashOn = !lineDashOn;
-                    if (++lineDashIdx == state->lineDashLength) {
+                    if (++lineDashIdx == state->lineDash.size()) {
                         lineDashIdx = 0;
                     }
                     lineDashDist = state->lineDash[lineDashIdx];
@@ -5864,7 +5853,7 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
 
     if (flatten) {
         pathIn = flattenPath(path, state->matrix, state->flatness);
-        if (state->lineDashLength > 0) {
+        if (!state->lineDash.empty()) {
             dashPath = makeDashedPath(pathIn);
             delete pathIn;
             pathIn = dashPath;

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -1404,7 +1404,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     splash->setFillPattern(new SplashSolidColor(color));
     splash->setLineCap(splashLineCapButt);
     splash->setLineJoin(splashLineJoinMiter);
-    splash->setLineDash(nullptr, 0, 0);
+    splash->setLineDash({}, 0);
     splash->setMiterLimit(10);
     splash->setFlatness(1);
     // the SA parameter supposedly defaults to false, but Acrobat
@@ -1485,7 +1485,7 @@ void SplashOutputDev::updateLineDash(GfxState *state)
             dash[i] = 0;
         }
     }
-    splash->setLineDash(dash.data(), dashLength, (SplashCoord)dashStart);
+    splash->setLineDash(std::move(dash), (SplashCoord)dashStart);
 }
 
 void SplashOutputDev::updateFlatness(GfxState *state)
