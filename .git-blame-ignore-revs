@@ -2,3 +2,5 @@
 814fbda28cc8a37fed3134c2db8da28f86fb5ee0
 # readability-braces-around-statements added
 f7466e31408ba884c44728f7da04227863177241
+# clang-format-14 wanted a bit of reformat
+a94a444e5acff86e04d1688d862e81a82108cf03
