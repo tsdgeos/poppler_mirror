@@ -240,22 +240,20 @@ void QPainterOutputDev::updateCTM(GfxState *state, double m11, double m12, doubl
 
 void QPainterOutputDev::updateLineDash(GfxState *state)
 {
-    double *dashPattern;
-    int dashLength;
     double dashStart;
-    state->getLineDash(&dashPattern, &dashLength, &dashStart);
+    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
 
     // Special handling for zero-length patterns, i.e., solid lines.
     // Simply calling QPen::setDashPattern with an empty pattern does *not*
     // result in a solid line.  Rather, the current pattern is unchanged.
     // See the implementation of the setDashPattern method in the file qpen.cpp.
-    if (dashLength == 0) {
+    if (dashPattern.empty()) {
         m_currentPen.setStyle(Qt::SolidLine);
         m_painter.top()->setPen(m_currentPen);
         return;
     }
 
-    QVector<qreal> pattern(dashLength);
+    QVector<qreal> pattern(dashPattern.size());
     double scaling = state->getLineWidth();
 
     //  Negative line widths are not allowed, width 0 counts as 'one pixel width'.
@@ -263,7 +261,7 @@ void QPainterOutputDev::updateLineDash(GfxState *state)
         scaling = 1.0;
     }
 
-    for (int i = 0; i < dashLength; ++i) {
+    for (std::vector<double>::size_type i = 0; i < dashPattern.size(); ++i) {
         // pdf measures the dash pattern in dots, but Qt uses the
         // line width as the unit.
         pattern[i] = dashPattern[i] / scaling;

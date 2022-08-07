@@ -515,8 +515,6 @@ AnnotQuadrilaterals::AnnotQuadrilateral::AnnotQuadrilateral(double x1, double y1
 AnnotBorder::AnnotBorder()
 {
     width = 1;
-    dashLength = 0;
-    dash = nullptr;
     style = borderSolid;
 }
 
@@ -524,7 +522,7 @@ bool AnnotBorder::parseDashArray(Object *dashObj)
 {
     bool correct = true;
     const int tempLength = dashObj->arrayGetLength();
-    double *tempDash = (double *)gmallocn(tempLength, sizeof(double));
+    std::vector<double> tempDash(tempLength);
 
     // TODO: check not all zero (Line Dash Pattern Page 217 PDF 8.1)
     for (int i = 0; i < tempLength && i < DASH_LIMIT && correct; i++) {
@@ -539,22 +537,14 @@ bool AnnotBorder::parseDashArray(Object *dashObj)
     }
 
     if (correct) {
-        dashLength = tempLength;
-        dash = tempDash;
+        dash = std::move(tempDash);
         style = borderDashed;
-    } else {
-        gfree(tempDash);
     }
 
     return correct;
 }
 
-AnnotBorder::~AnnotBorder()
-{
-    if (dash) {
-        gfree(dash);
-    }
-}
+AnnotBorder::~AnnotBorder() = default;
 
 //------------------------------------------------------------------------
 // AnnotBorderArray
@@ -618,11 +608,7 @@ std::unique_ptr<AnnotBorder> AnnotBorderArray::copy() const
     AnnotBorderArray *res = new AnnotBorderArray();
     res->type = type;
     res->width = width;
-    res->dashLength = dashLength;
-    if (dashLength > 0) {
-        res->dash = (double *)gmallocn(dashLength, sizeof(double));
-        memcpy(res->dash, dash, dashLength * sizeof(double));
-    }
+    res->dash = dash;
     res->style = style;
     res->horizontalCorner = horizontalCorner;
     res->verticalCorner = verticalCorner;
@@ -636,11 +622,11 @@ Object AnnotBorderArray::writeToObject(XRef *xref) const
     borderArray->add(Object(verticalCorner));
     borderArray->add(Object(width));
 
-    if (dashLength > 0) {
+    if (dash.size() > 0) {
         Array *a = new Array(xref);
 
-        for (int i = 0; i < dashLength; i++) {
-            a->add(Object(dash[i]));
+        for (double d : dash) {
+            a->add(Object(d));
         }
 
         borderArray->add(Object(a));
@@ -686,14 +672,8 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict)
     // Border dash style
     if (style == borderDashed) {
         obj1 = dict->lookup("D");
-        if (obj1.isArray()) {
-            parseDashArray(&obj1);
-        }
-
-        if (!dash) {
-            dashLength = 1;
-            dash = (double *)gmallocn(dashLength, sizeof(double));
-            dash[0] = 3;
+        if (!obj1.isArray() || !parseDashArray(&obj1)) {
+            dash = { 3 };
         }
     }
 }
@@ -721,11 +701,7 @@ std::unique_ptr<AnnotBorder> AnnotBorderBS::copy() const
     AnnotBorderBS *res = new AnnotBorderBS();
     res->type = type;
     res->width = width;
-    res->dashLength = dashLength;
-    if (dashLength > 0) {
-        res->dash = (double *)gmallocn(dashLength, sizeof(double));
-        memcpy(res->dash, dash, dashLength * sizeof(double));
-    }
+    res->dash = dash;
     res->style = style;
     return std::unique_ptr<AnnotBorder>(res);
 }
@@ -735,11 +711,11 @@ Object AnnotBorderBS::writeToObject(XRef *xref) const
     Dict *dict = new Dict(xref);
     dict->set("W", Object(width));
     dict->set("S", Object(objName, getStyleName()));
-    if (style == borderDashed && dashLength > 0) {
+    if (style == borderDashed && dash.size() > 0) {
         Array *a = new Array(xref);
 
-        for (int i = 0; i < dashLength; i++) {
-            a->add(Object(dash[i]));
+        for (double d : dash) {
+            a->add(Object(d));
         }
         dict->set("D", Object(a));
     }
@@ -1736,16 +1712,11 @@ void AnnotAppearanceBuilder::setTextFont(const Object &fontName, double fontSize
 
 void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
 {
-    int i, dashLength;
-    double *dash;
-
     switch (border->getStyle()) {
     case AnnotBorder::borderDashed:
         appearBuf->append("[");
-        dashLength = border->getDashLength();
-        dash = border->getDash();
-        for (i = 0; i < dashLength; ++i) {
-            appearBuf->appendf(" {0:.2f}", dash[i]);
+        for (double dash : border->getDash()) {
+            appearBuf->appendf(" {0:.2f}", dash);
         }
         appearBuf->append(" ] 0 d\n");
         break;
@@ -5026,8 +4997,6 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
 void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect)
 {
-    int dashLength;
-    double *dash;
     AnnotColor adjustedColor;
     const double w = border->getWidth();
 
@@ -5049,10 +5018,8 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         switch (border->getStyle()) {
         case AnnotBorder::borderDashed:
             appearBuf->append("[");
-            dashLength = border->getDashLength();
-            dash = border->getDash();
-            for (int i = 0; i < dashLength; ++i) {
-                appearBuf->appendf(" {0:.2f}", dash[i]);
+            for (double dash : border->getDash()) {
+                appearBuf->appendf(" {0:.2f}", dash);
             }
             appearBuf->append("] 0 d\n");
             // fallthrough
@@ -5081,10 +5048,8 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         switch (border->getStyle()) {
         case AnnotBorder::borderDashed:
             appearBuf->append("[");
-            dashLength = border->getDashLength();
-            dash = border->getDash();
-            for (int i = 0; i < dashLength; ++i) {
-                appearBuf->appendf(" {0:.2f}", dash[i]);
+            for (double dash : border->getDash()) {
+                appearBuf->appendf(" {0:.2f}", dash);
             }
             appearBuf->append("] 0 d\n");
             // fallthrough

@@ -44,6 +44,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <vector>
 
 class Array;
 class Gfx;
@@ -1502,11 +1503,10 @@ public:
     int getOverprintMode() const { return overprintMode; }
     Function **getTransfer() { return transfer; }
     double getLineWidth() const { return lineWidth; }
-    void getLineDash(double **dash, int *length, double *start)
+    const std::vector<double> &getLineDash(double *start)
     {
-        *dash = lineDash;
-        *length = lineDashLength;
         *start = lineDashStart;
+        return lineDash;
     }
     int getFlatness() const { return flatness; }
     int getLineJoin() const { return lineJoin; }
@@ -1588,7 +1588,7 @@ public:
     void setOverprintMode(int op) { overprintMode = op; }
     void setTransfer(Function **funcs);
     void setLineWidth(double width) { lineWidth = width; }
-    void setLineDash(double *dash, int length, double start);
+    void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
     void setLineJoin(int lineJoin1) { lineJoin = lineJoin1; }
     void setLineCap(int lineCap1) { lineCap = lineCap1; }
@@ -1750,8 +1750,7 @@ private:
                            //   R,G,B,gray functions)
 
     double lineWidth; // line width
-    double *lineDash; // line dash
-    int lineDashLength;
+    std::vector<double> lineDash; // line dash
     double lineDashStart;
     int flatness; // curve flatness
     int lineJoin; // line join style

@@ -6504,8 +6504,6 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
     transfer[0] = transfer[1] = transfer[2] = transfer[3] = nullptr;
 
     lineWidth = 1;
-    lineDash = nullptr;
-    lineDashLength = 0;
     lineDashStart = 0;
     flatness = 1;
     lineJoin = 0;
@@ -6587,7 +6585,6 @@ GfxState::~GfxState()
             delete transfer[i];
         }
     }
-    gfree(lineDash);
     if (path) {
         // this gets set to NULL by restore()
         delete path;
@@ -6646,12 +6643,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
         }
     }
     lineWidth = state->lineWidth;
-    lineDashLength = state->lineDashLength;
-    lineDash = nullptr;
-    if (lineDashLength > 0) {
-        lineDash = (double *)gmallocn(lineDashLength, sizeof(double));
-        memcpy(lineDash, state->lineDash, lineDashLength * sizeof(double));
-    }
+    lineDash = state->lineDash;
     lineDashStart = state->lineDashStart;
     flatness = state->flatness;
     lineJoin = state->lineJoin;
@@ -6973,13 +6965,9 @@ void GfxState::setTransfer(Function **funcs)
     }
 }
 
-void GfxState::setLineDash(double *dash, int length, double start)
+void GfxState::setLineDash(std::vector<double> &&dash, double start)
 {
-    if (lineDash) {
-        gfree(lineDash);
-    }
     lineDash = dash;
-    lineDashLength = length;
     lineDashStart = start;
 }
 

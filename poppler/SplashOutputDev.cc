@@ -1471,15 +1471,12 @@ void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12, double 
 
 void SplashOutputDev::updateLineDash(GfxState *state)
 {
-    double *dashPattern;
-    int dashLength;
     double dashStart;
-    int i;
 
-    state->getLineDash(&dashPattern, &dashLength, &dashStart);
+    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
 
-    std::vector<SplashCoord> dash(dashLength);
-    for (i = 0; i < dashLength; ++i) {
+    std::vector<SplashCoord> dash(dashPattern.size());
+    for (std::vector<double>::size_type i = 0; i < dashPattern.size(); ++i) {
         dash[i] = (SplashCoord)dashPattern[i];
         if (dash[i] < 0) {
             dash[i] = 0;

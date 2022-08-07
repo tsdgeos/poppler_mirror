@@ -887,22 +887,13 @@ void Gfx::opConcat(Object args[], int numArgs)
 
 void Gfx::opSetDash(Object args[], int numArgs)
 {
-    Array *a;
-    int length;
-    double *dash;
-    int i;
-
-    a = args[0].getArray();
-    length = a->getLength();
-    if (length == 0) {
-        dash = nullptr;
-    } else {
-        dash = (double *)gmallocn(length, sizeof(double));
-        for (i = 0; i < length; ++i) {
-            dash[i] = a->get(i).getNumWithDefaultValue(0);
-        }
+    const Array *a = args[0].getArray();
+    int length = a->getLength();
+    std::vector<double> dash(length);
+    for (int i = 0; i < length; ++i) {
+        dash[i] = a->get(i).getNumWithDefaultValue(0);
     }
-    state->setLineDash(dash, length, args[1].getNum());
+    state->setLineDash(std::move(dash), args[1].getNum());
     out->updateLineDash(state);
 }
 
@@ -5146,8 +5137,6 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     double x, y, sx, sy, tx, ty;
     double m[6], bbox[4];
     GfxColor color;
-    double *dash, *dash2;
-    int dashLength;
     int i;
 
     // this function assumes that we are in the default user space,
@@ -5322,12 +5311,10 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         out->updateStrokeColor(state);
         state->setLineWidth(border->getWidth());
         out->updateLineWidth(state);
-        dashLength = border->getDashLength();
-        dash = border->getDash();
-        if (border->getStyle() == AnnotBorder::borderDashed && dashLength > 0) {
-            dash2 = (double *)gmallocn(dashLength, sizeof(double));
-            memcpy(dash2, dash, dashLength * sizeof(double));
-            state->setLineDash(dash2, dashLength, 0);
+        const std::vector<double> &dash = border->getDash();
+        if (border->getStyle() == AnnotBorder::borderDashed && dash.size() > 0) {
+            std::vector<double> dash2 = dash;
+            state->setLineDash(std::move(dash2), 0);
             out->updateLineDash(state);
         }
         //~ this doesn't currently handle the beveled and engraved styles
