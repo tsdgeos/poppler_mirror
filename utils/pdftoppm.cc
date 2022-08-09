@@ -666,10 +666,10 @@ int main(int argc, char *argv[])
 
             // No specific image size requested---compute the size from the resolution
             if (x_scaleTo <= 0) {
-                pg_w = pg_w * (x_resolution / 72.0);
+                pg_w = pg_w * x_resolution / 72.0;
             }
             if (y_scaleTo <= 0) {
-                pg_h = pg_h * (y_resolution / 72.0);
+                pg_h = pg_h * y_resolution / 72.0;
             }
         }
 

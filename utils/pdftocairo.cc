@@ -527,7 +527,7 @@ static void getOutputSize(double page_w, double page_h, double *width, double *h
             }
         }
     } else {
-        getCropSize(page_w * (x_resolution / 72.0), page_h * (y_resolution / 72.0), width, height);
+        getCropSize(page_w * x_resolution / 72.0, page_h * y_resolution / 72.0, width, height);
     }
 }
 
