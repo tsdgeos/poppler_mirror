@@ -287,7 +287,14 @@ int main(int argc, char *argv[])
             if (docs[i]->getCatalog()->getPage(j)->isCropped()) {
                 cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
             }
-            docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
+            if (!docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox)) {
+                fclose(f);
+                delete yRef;
+                delete countRef;
+                delete outStr;
+                error(errSyntaxError, -1, "PDFDoc::replacePageDict failed.");
+                return -1;
+            }
             Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
             Object page = docs[i]->getXRef()->fetch(*refPage);
             Dict *pageDict = page.getDict();

@@ -1748,10 +1748,13 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
     return true;
 }
 
-void PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox)
+bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox)
 {
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);
+    if (!page.isDict()) {
+        return false;
+    }
     Dict *pageDict = page.getDict();
     pageDict->remove("MediaBoxssdf");
     pageDict->remove("MediaBox");
@@ -1781,6 +1784,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     pageDict->add("TrimBox", std::move(trimBoxObject));
     pageDict->add("Rotate", Object(rotate));
     getXRef()->setModifiedObject(&page, *refPage);
+    return true;
 }
 
 bool PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
