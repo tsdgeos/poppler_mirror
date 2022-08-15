@@ -36,6 +36,12 @@ bool POPPLER_PRIVATE_EXPORT parseDateString(const GooString *date, int *year, in
  */
 GooString POPPLER_PRIVATE_EXPORT *timeToDateString(const time_t *timeA);
 
+/* Converts the time_t into a string with the specified format.
+ * If timeA is NULL, current time is used.
+ * Returns std::string
+ */
+std::string POPPLER_PRIVATE_EXPORT timeToStringWithFormat(const time_t *timeA, const char *format);
+
 /* Convert PDF date string to time.
  * Returns -1 if conversion fails.
  */

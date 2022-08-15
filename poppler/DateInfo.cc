@@ -86,16 +86,14 @@ bool parseDateString(const GooString *date, int *year, int *month, int *day, int
     return false;
 }
 
-GooString *timeToDateString(const time_t *timeA)
+std::string timeToStringWithFormat(const time_t *timeA, const char *format)
 {
     const time_t timet = timeA ? *timeA : time(nullptr);
 
     struct tm localtime_tm;
     localtime_r(&timet, &localtime_tm);
 
-    char buf[50];
-    strftime(buf, sizeof(buf), "D:%Y%m%d%H%M%S", &localtime_tm);
-    GooString *dateString = new GooString(buf);
+    char timeOffset[12];
 
     // strftime "%z" does not work on windows (it prints zone name, not offset)
     // calculate time zone offset by comparing local and gmtime time_t value for same
@@ -103,14 +101,33 @@ GooString *timeToDateString(const time_t *timeA)
     const time_t timeg = timegm(&localtime_tm);
     const int offset = static_cast<int>(difftime(timeg, timet)); // find time zone offset in seconds
     if (offset > 0) {
-        dateString->appendf("+{0:02d}'{1:02d}'", offset / 3600, (offset % 3600) / 60);
+        snprintf(timeOffset, sizeof(timeOffset), "+%02d'%02d'", offset / 3600, (offset % 3600) / 60);
     } else if (offset < 0) {
-        dateString->appendf("-{0:02d}'{1:02d}'", -offset / 3600, (-offset % 3600) / 60);
+        snprintf(timeOffset, sizeof(timeOffset), "-%02d'%02d'", -offset / 3600, (-offset % 3600) / 60);
     } else {
-        dateString->append("Z");
+        snprintf(timeOffset, sizeof(timeOffset), "Z");
+    }
+    std::string fmt(format);
+    const char timeOffsetPattern[] = "%z";
+    size_t timeOffsetPosition = fmt.find(timeOffsetPattern);
+    if (timeOffsetPosition != std::string::npos) {
+        fmt.replace(timeOffsetPosition, sizeof(timeOffsetPattern) - 1, timeOffset);
     }
 
-    return dateString;
+    if (fmt.length() == 0) {
+        return "";
+    }
+    size_t bufLen = 50;
+    std::string buf(bufLen, ' ');
+    while (strftime(&buf[0], buf.size(), fmt.c_str(), &localtime_tm) == 0) {
+        buf.resize(bufLen *= 2);
+    }
+    return buf;
+}
+
+GooString *timeToDateString(const time_t *timeA)
+{
+    return new GooString(timeToStringWithFormat(timeA, "D:%Y%m%d%H%M%S%z"));
 }
 
 // Convert PDF date string to time. Returns -1 if conversion fails.
