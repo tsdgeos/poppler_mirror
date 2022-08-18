@@ -106,16 +106,21 @@ static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     }
 }
 
-static void doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
+static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
 {
     Object srcFields = srcFormDict->lookup("Fields");
     Object mergeFields = mergeFormDict->lookup("Fields");
     if (srcFields.isArray() && mergeFields.isArray()) {
         for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
             const Object &value = mergeFields.arrayGetNF(i);
+            if (!value.isRef()) {
+                error(errSyntaxError, -1, "Fields object is not a Ref.");
+                return false;
+            }
             srcFields.arrayAdd(Object({ value.getRef().num + numOffset, value.getRef().gen }));
         }
     }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -332,7 +337,13 @@ int main(int argc, char *argv[])
             if (afObj.isNull()) {
                 afObj = pageCatDict->lookupNF("AcroForm").copy();
             } else if (afObj.isDict()) {
-                doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset);
+                if (!doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset)) {
+                    fclose(f);
+                    delete yRef;
+                    delete countRef;
+                    delete outStr;
+                    return -1;
+                }
             }
         }
         objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, true);
