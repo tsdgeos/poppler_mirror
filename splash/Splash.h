@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -105,8 +105,6 @@ public:
     int getLineJoin();
     SplashCoord getMiterLimit();
     SplashCoord getFlatness();
-    SplashCoord *getLineDash();
-    int getLineDashLength();
     SplashCoord getLineDashPhase();
     bool getStrokeAdjust();
     SplashClip *getClip();
@@ -133,7 +131,7 @@ public:
     void setMiterLimit(SplashCoord miterLimit);
     void setFlatness(SplashCoord flatness);
     // the <lineDash> array will be copied
-    void setLineDash(SplashCoord *lineDash, int lineDashLength, SplashCoord lineDashPhase);
+    void setLineDash(std::vector<SplashCoord> &&lineDash, SplashCoord lineDashPhase);
     void setStrokeAdjust(bool strokeAdjust);
     // NB: uses transformed coordinates.
     void clipResetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
@@ -244,9 +242,18 @@ public:
     void setDebugMode(bool debugModeA) { debugMode = debugModeA; }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
-    void setInShading(bool sh) { inShading = sh; }
-    bool getVectorAntialias() { return vectorAntialias; }
-    void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
+    void setInShading(bool sh)
+    {
+        inShading = sh;
+    }
+    bool getVectorAntialias()
+    {
+        return vectorAntialias;
+    }
+    void setVectorAntialias(bool vaa)
+    {
+        vectorAntialias = vaa;
+    }
 #endif
 
     // Do shaded fills with dynamic patterns

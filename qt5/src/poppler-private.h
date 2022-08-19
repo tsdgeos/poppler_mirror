@@ -143,7 +143,10 @@ public:
 
     void addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items);
 
-    void setPaperColor(const QColor &color) { paperColor = color; }
+    void setPaperColor(const QColor &color)
+    {
+        paperColor = color;
+    }
 
     void fillMembers()
     {

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -17,6 +17,7 @@
 #include "GfxState.h"
 #include "GfxFont.h"
 #include "Annot.h"
+#include <cmath>
 #include <vector>
 
 MarkedContentOutputDev::MarkedContentOutputDev(int mcidA, const Object &stmObj) : currentFont(nullptr), currentText(nullptr), mcid(mcidA), pageWidth(0.0), pageHeight(0.0), unicodeMap(nullptr)
@@ -181,8 +182,7 @@ void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, dou
         return;
     }
 
-    // Make a sanity check on character size. Note: (x != x) <-> isnan(x)
-    if (x1 != x1 || y1 != y1 || w1 != w1 || h1 != h1) {
+    if (std::isnan(x1) || std::isnan(y1) || std::isnan(w1) || std::isnan(h1)) {
         return;
     }
 

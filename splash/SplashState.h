@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -74,8 +74,8 @@ public:
     // Set the screen.  This does not copy <screenA>.
     void setScreen(SplashScreen *screenA);
 
-    // Set the line dash pattern.  This copies the <lineDashA> array.
-    void setLineDash(SplashCoord *lineDashA, int lineDashLengthA, SplashCoord lineDashPhaseA);
+    // Set the line dash pattern.
+    void setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA);
 
     // Set the soft mask bitmap.
     void setSoftMask(SplashBitmap *softMaskA);
@@ -106,8 +106,7 @@ private:
     int lineJoin;
     SplashCoord miterLimit;
     SplashCoord flatness;
-    SplashCoord *lineDash;
-    int lineDashLength;
+    std::vector<SplashCoord> lineDash;
     SplashCoord lineDashPhase;
     bool strokeAdjust;
     SplashClip *clip;

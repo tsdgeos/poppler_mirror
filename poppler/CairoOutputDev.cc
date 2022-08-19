@@ -479,14 +479,12 @@ void CairoOutputDev::updateCTM(GfxState *state, double m11, double m12, double m
 
 void CairoOutputDev::updateLineDash(GfxState *state)
 {
-    double *dashPattern;
-    int dashLength;
     double dashStart;
 
-    state->getLineDash(&dashPattern, &dashLength, &dashStart);
-    cairo_set_dash(cairo, dashPattern, dashLength, dashStart);
+    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
+    cairo_set_dash(cairo, dashPattern.data(), dashPattern.size(), dashStart);
     if (cairo_shape) {
-        cairo_set_dash(cairo_shape, dashPattern, dashLength, dashStart);
+        cairo_set_dash(cairo_shape, dashPattern.data(), dashPattern.size(), dashStart);
     }
 }
 

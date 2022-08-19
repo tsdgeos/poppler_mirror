@@ -58,8 +58,8 @@ Add a new signature to the document.
 .B \-new-signature-field-name " name"
 Specifies the field name to be used when adding a new signature. A random ID will be used by default.
 .TP
-.B \-sign " n"
-Sign the document in the n-th signature field present in the document (must be unsigned).
+.B \-sign " field"
+Sign the document in the specified signature field present in the document (must be unsigned).  Field can be specified by field name (string) or the n-th signature field in the document (integer).
 .TP
 .B \-nick " nickname"
 Use the certificate with the given nickname for signing.

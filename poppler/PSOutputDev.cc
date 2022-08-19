@@ -3919,14 +3919,12 @@ void PSOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21,
 
 void PSOutputDev::updateLineDash(GfxState *state)
 {
-    double *dash;
     double start;
-    int length, i;
 
-    state->getLineDash(&dash, &length, &start);
+    const std::vector<double> &dash = state->getLineDash(&start);
     writePS("[");
-    for (i = 0; i < length; ++i) {
-        writePSFmt("{0:.6g}{1:w}", dash[i] < 0 ? 0 : dash[i], (i == length - 1) ? 0 : 1);
+    for (std::vector<double>::size_type i = 0; i < dash.size(); ++i) {
+        writePSFmt("{0:.6g}{1:w}", dash[i] < 0 ? 0 : dash[i], (i == dash.size() - 1) ? 0 : 1);
     }
     writePSFmt("] {0:.6g} d\n", start);
 }

@@ -2666,8 +2666,7 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
     // throw away chars that aren't inside the page bounds
     // (and also do a sanity check on the character size)
     state->transform(x, y, &x1, &y1);
-    if (x1 + w1 < 0 || x1 > pageWidth || y1 + h1 < 0 || y1 > pageHeight || x1 != x1 || y1 != y1 || // IEEE way of checking for isnan
-        w1 != w1 || h1 != h1) {
+    if (x1 + w1 < 0 || x1 > pageWidth || y1 + h1 < 0 || y1 > pageHeight || std::isnan(x1) || std::isnan(y1) || std::isnan(w1) || std::isnan(h1)) {
         charPos += nBytes;
         return;
     }

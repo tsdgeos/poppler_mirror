@@ -260,7 +260,10 @@ public:
     void scanWindowsFonts(const std::string &winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
+    void addFcFont(SysFontInfo *si)
+    {
+        fonts.push_back(si);
+    }
 #endif
 private:
 #ifdef _WIN32
@@ -910,7 +913,7 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 
     const std::unique_ptr<FoFiTrueType> fft = FoFiTrueType::load(filepath, faceIndex);
     if (!fft) {
-        error(errIO, -1, "Form::addFontToDefaultResources. Failed to FoFiTrueType::load %s", filepath);
+        error(errIO, -1, "Form::addFontToDefaultResources. Failed to FoFiTrueType::load {0:s}", filepath);
         return false;
     }
 
@@ -1130,7 +1133,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
     }
 
     if (!fcFilePath) {
-        error(errIO, -1, "Couldn't find font file for %s %s", fontFamily.c_str(), fontStyle.c_str());
+        error(errIO, -1, "Couldn't find font file for {0:s} {1:s}", fontFamily.c_str(), fontStyle.c_str());
         return {};
     }
 

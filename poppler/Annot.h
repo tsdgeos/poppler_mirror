@@ -281,8 +281,7 @@ public:
 
     virtual AnnotBorderType getType() const = 0;
     virtual double getWidth() const { return width; }
-    virtual int getDashLength() const { return dashLength; }
-    virtual double *getDash() const { return dash; }
+    virtual const std::vector<double> &getDash() const { return dash; }
     virtual AnnotBorderStyle getStyle() const { return style; }
 
     virtual Object writeToObject(XRef *xref) const = 0;
@@ -296,8 +295,7 @@ protected:
     AnnotBorderType type;
     double width;
     static const int DASH_LIMIT = 10; // implementation note 82 in Appendix H.
-    int dashLength;
-    double *dash;
+    std::vector<double> dash;
     AnnotBorderStyle style;
 };
 

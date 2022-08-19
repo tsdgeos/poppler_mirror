@@ -106,16 +106,21 @@ static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     }
 }
 
-static void doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
+static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
 {
     Object srcFields = srcFormDict->lookup("Fields");
     Object mergeFields = mergeFormDict->lookup("Fields");
     if (srcFields.isArray() && mergeFields.isArray()) {
         for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
             const Object &value = mergeFields.arrayGetNF(i);
+            if (!value.isRef()) {
+                error(errSyntaxError, -1, "Fields object is not a Ref.");
+                return false;
+            }
             srcFields.arrayAdd(Object({ value.getRef().num + numOffset, value.getRef().gen }));
         }
     }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -134,7 +139,7 @@ int main(int argc, char *argv[])
     OutStream *outStr;
     int i;
     int j, rootNum;
-    std::vector<PDFDoc *> docs;
+    std::vector<std::unique_ptr<PDFDoc>> docs;
     int majorVersion = 0;
     int minorVersion = 0;
     char *fileName = argv[argc - 1];
@@ -155,9 +160,8 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     for (i = 1; i < argc - 1; i++) {
-        PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(argv[i]));
+        std::unique_ptr<PDFDoc> doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(argv[i]));
         if (doc->isOk() && !doc->isEncrypted() && doc->getXRef()->getCatalog().isDict()) {
-            docs.push_back(doc);
             if (doc->getPDFMajorVersion() > majorVersion) {
                 majorVersion = doc->getPDFMajorVersion();
                 minorVersion = doc->getPDFMinorVersion();
@@ -166,6 +170,7 @@ int main(int argc, char *argv[])
                     minorVersion = doc->getPDFMinorVersion();
                 }
             }
+            docs.push_back(std::move(doc));
         } else if (doc->isOk()) {
             if (doc->isEncrypted()) {
                 error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
@@ -287,7 +292,14 @@ int main(int argc, char *argv[])
             if (docs[i]->getCatalog()->getPage(j)->isCropped()) {
                 cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
             }
-            docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
+            if (!docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox)) {
+                fclose(f);
+                delete yRef;
+                delete countRef;
+                delete outStr;
+                error(errSyntaxError, -1, "PDFDoc::replacePageDict failed.");
+                return -1;
+            }
             Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
             Object page = docs[i]->getXRef()->fetch(*refPage);
             Dict *pageDict = page.getDict();
@@ -318,14 +330,20 @@ int main(int argc, char *argv[])
             if (!names.isDict()) {
                 names = Object(new Dict(yRef));
             }
-            doMergeNameDict(docs[i], yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
+            doMergeNameDict(docs[i].get(), yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
         }
         Object pageForm = pageCatDict->lookup("AcroForm");
         if (i > 0 && !pageForm.isNull() && pageForm.isDict()) {
             if (afObj.isNull()) {
                 afObj = pageCatDict->lookupNF("AcroForm").copy();
             } else if (afObj.isDict()) {
-                doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset);
+                if (!doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset)) {
+                    fclose(f);
+                    delete yRef;
+                    delete countRef;
+                    delete outStr;
+                    return -1;
+                }
             }
         }
         objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, true);
@@ -409,8 +427,5 @@ int main(int argc, char *argv[])
     fclose(f);
     delete yRef;
     delete countRef;
-    for (i = 0; i < (int)docs.size(); i++) {
-        delete docs[i];
-    }
     return 0;
 }

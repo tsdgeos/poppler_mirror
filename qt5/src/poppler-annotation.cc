@@ -10,7 +10,7 @@
  * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
@@ -1702,13 +1702,12 @@ Annotation::Style Annotation::style() const
         s.setWidth(border->getWidth());
         s.setLineStyle((Annotation::LineStyle)(1 << border->getStyle()));
 
-        const int dashArrLen = border->getDashLength();
-        const double *dashArrData = border->getDash();
-        QVector<double> dashArrVect(dashArrLen);
-        for (int i = 0; i < dashArrLen; ++i) {
-            dashArrVect[i] = dashArrData[i];
-        }
-        s.setDashArray(dashArrVect);
+        const std::vector<double> &dashArray = border->getDash();
+#if QT_VERSION <= QT_VERSION_CHECK(5, 14, 0)
+        s.setDashArray(QVector<double>::fromStdVector(dashArray));
+#else
+        s.setDashArray(QVector<double>(dashArray.begin(), dashArray.end()));
+#endif
     }
 
     AnnotBorderEffect *border_effect;
