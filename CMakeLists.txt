@@ -87,7 +87,6 @@ else()
   set(ENABLE_RELOCATABLE OFF)
 endif()
 option(EXTRA_WARN "Enable extra compile warnings" OFF)
-option(ADD_CLAZY_FLAGS "Enable clazy compile warnings" OFF)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -130,11 +129,6 @@ elseif(font_configuration STREQUAL "generic")
   message(STATUS "no fontconfig or win32 specific code")
 else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
-endif()
-
-if(ADD_CLAZY_FLAGS)
-  set(DEFAULT_CLAZY_FLAGS "SHELL:-Xclang -plugin-arg-clazy" "SHELL:-Xclang level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static")
-  add_compile_options(${DEFAULT_CLAZY_FLAGS})
 endif()
 
 # Enable these unconditionally.

@@ -14,18 +14,6 @@ macro(QT5_ADD_SIMPLETEST exe source)
   )
   poppler_add_test(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
   target_link_libraries(${exe} poppler-qt5 Qt5::Widgets)
-
-  if (ADD_CLAZY_FLAGS)
-    # Workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/23823
-    get_target_property(TARGET_FLAGS ${exe} COMPILE_OPTIONS)
-    string(REPLACE "${DEFAULT_CLAZY_FLAGS}" "" TARGET_FLAGS "${TARGET_FLAGS}")
-    set_target_properties(${exe} PROPERTIES COMPILE_OPTIONS "${TARGET_FLAGS}")
-  endif()
-
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    # Workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/23823
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${exe}_autogen/mocs_compilation.cpp PROPERTIES COMPILE_FLAGS "-Wno-weak-vtables")
-  endif()
 endmacro(QT5_ADD_SIMPLETEST)
 
 macro(QT5_ADD_QTEST exe source)
@@ -37,18 +25,6 @@ macro(QT5_ADD_QTEST exe source)
     poppler_add_test(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
     add_test(${exe} ${EXECUTABLE_OUTPUT_PATH}/${exe})
     target_link_libraries(${exe} poppler-qt5 Qt5::Widgets Qt5::Test Qt5::Core Qt5::Gui)
-
-    if (ADD_CLAZY_FLAGS)
-      # Workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/23823
-      get_target_property(TARGET_FLAGS ${exe} COMPILE_OPTIONS)
-      string(REPLACE "${DEFAULT_CLAZY_FLAGS}" "" TARGET_FLAGS "${TARGET_FLAGS}")
-      set_target_properties(${exe} PROPERTIES COMPILE_OPTIONS "${TARGET_FLAGS}")
-    endif()
-
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-      # Workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/23823
-      set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${exe}_autogen/mocs_compilation.cpp PROPERTIES COMPILE_FLAGS "-Wno-weak-vtables")
-    endif()
   endif ()
 endmacro(QT5_ADD_QTEST)
 
