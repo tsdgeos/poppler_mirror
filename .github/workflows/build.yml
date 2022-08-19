@@ -10,8 +10,8 @@ jobs:
     name: SonarCloudBuild
     runs-on: ubuntu-20.04
     env:
-      SONAR_SCANNER_VERSION: 4.7 # Find the latest version in the "Linux" link on this page:
-                                 # https://docs.sonarcloud.io/advanced-setup/ci-based-analysis/sonarscanner-cli/
+      SONAR_SCANNER_VERSION: 4.7.0.2747 # Find the latest version in the "Linux" link on this page:
+                                        # https://docs.sonarcloud.io/advanced-setup/ci-based-analysis/sonarscanner-cli/
       SONAR_SERVER_URL: "https://sonarcloud.io"
       BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory # Directory where build-wrapper output will be placed
     steps:
