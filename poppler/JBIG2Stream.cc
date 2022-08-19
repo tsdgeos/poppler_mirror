@@ -2532,7 +2532,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2Segment *seg;
     JBIG2PatternDict *patternDict;
-    JBIG2Bitmap *skipBitmap;
+    std::unique_ptr<JBIG2Bitmap> skipBitmap;
     unsigned int *grayImg;
     JBIG2Bitmap *patternBitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
@@ -2615,9 +2615,8 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     // compute the skip bitmap
-    skipBitmap = nullptr;
     if (enableSkip) {
-        skipBitmap = new JBIG2Bitmap(0, gridW, gridH);
+        skipBitmap = std::make_unique<JBIG2Bitmap>(0, gridW, gridH);
         skipBitmap->clearToZero();
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
@@ -2645,7 +2644,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     atx[3] = -2;
     aty[3] = -2;
     for (j = bpp - 1; j >= 0; --j) {
-        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap, atx, aty, -1);
+        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
         i = 0;
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
@@ -2665,7 +2664,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
             if (!(enableSkip && skipBitmap->getPixel(n, m))) {
                 patternBitmap = patternDict->getBitmap(grayImg[i]);
                 if (unlikely(patternBitmap == nullptr)) {
-                    delete skipBitmap;
                     gfree(grayImg);
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
                     return;
@@ -2679,9 +2677,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     gfree(grayImg);
-    if (skipBitmap) {
-        delete skipBitmap;
-    }
 
     // combine the region bitmap into the page bitmap
     if (imm) {
