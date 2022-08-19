@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     OutStream *outStr;
     int i;
     int j, rootNum;
-    std::vector<PDFDoc *> docs;
+    std::vector<std::unique_ptr<PDFDoc>> docs;
     int majorVersion = 0;
     int minorVersion = 0;
     char *fileName = argv[argc - 1];
@@ -160,9 +160,8 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     for (i = 1; i < argc - 1; i++) {
-        PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(argv[i]));
+        std::unique_ptr<PDFDoc> doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(argv[i]));
         if (doc->isOk() && !doc->isEncrypted() && doc->getXRef()->getCatalog().isDict()) {
-            docs.push_back(doc);
             if (doc->getPDFMajorVersion() > majorVersion) {
                 majorVersion = doc->getPDFMajorVersion();
                 minorVersion = doc->getPDFMinorVersion();
@@ -171,6 +170,7 @@ int main(int argc, char *argv[])
                     minorVersion = doc->getPDFMinorVersion();
                 }
             }
+            docs.push_back(std::move(doc));
         } else if (doc->isOk()) {
             if (doc->isEncrypted()) {
                 error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
             if (!names.isDict()) {
                 names = Object(new Dict(yRef));
             }
-            doMergeNameDict(docs[i], yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
+            doMergeNameDict(docs[i].get(), yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
         }
         Object pageForm = pageCatDict->lookup("AcroForm");
         if (i > 0 && !pageForm.isNull() && pageForm.isDict()) {
@@ -427,8 +427,5 @@ int main(int argc, char *argv[])
     fclose(f);
     delete yRef;
     delete countRef;
-    for (i = 0; i < (int)docs.size(); i++) {
-        delete docs[i];
-    }
     return 0;
 }
