@@ -1050,7 +1050,6 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     Catalog *catalog;
     PopplerDest *dest;
     int i;
-    gchar *key;
 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
@@ -1067,9 +1066,9 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
         // The names of name-dict cannot contain \0,
         // so we can use strlen().
         auto name = catalog->getDestsName(i);
-        key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name), strlen(name));
         std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest(i);
         if (link_dest) {
+            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name), strlen(name));
             dest = _poppler_dest_new_goto(document, link_dest.get());
             g_tree_insert(tree, key, dest);
         }
@@ -1079,9 +1078,9 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     const int nDestsNameTree = catalog->numDestNameTree();
     for (i = 0; i < nDestsNameTree; ++i) {
         auto name = catalog->getDestNameTreeName(i);
-        key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->getLength());
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
         if (link_dest) {
+            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->getLength());
             dest = _poppler_dest_new_goto(document, link_dest.get());
             g_tree_insert(tree, key, dest);
         }
