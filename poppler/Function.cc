@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2013-2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2013-2015, 2017-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
@@ -463,7 +463,7 @@ void SampledFunction::transform(const double *in, double *out) const
     // map input values into sample array
     for (int i = 0; i < m; ++i) {
         x = (in[i] - domain[i][0]) * inputMul[i] + encode[i][0];
-        if (x < 0 || x != x) { // x!=x is a more portable version of isnan(x)
+        if (x < 0 || std::isnan(x)) {
             x = 0;
         } else if (x > sampleSize[i] - 1) {
             x = sampleSize[i] - 1;
