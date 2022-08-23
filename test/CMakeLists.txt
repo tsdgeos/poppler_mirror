@@ -14,11 +14,6 @@ endif ()
 if (GTK_FOUND)
 
   include_directories(
-    SYSTEM
-    ${GTK3_INCLUDE_DIRS}
-  )
-
-  include_directories(
     ${CMAKE_SOURCE_DIR}/glib
     ${CMAKE_BINARY_DIR}/glib
   )
@@ -27,7 +22,7 @@ if (GTK_FOUND)
     gtk-test.cc
   )
   poppler_add_test(gtk-test BUILD_GTK_TESTS ${gtk_splash_test_SRCS})
-  target_link_libraries(gtk-test ${CAIRO_LIBRARIES} poppler-glib ${GTK3_LIBRARIES})
+  target_link_libraries(gtk-test ${CAIRO_LIBRARIES} poppler-glib PkgConfig::GTK3)
 
   if (HAVE_CAIRO)
 
@@ -38,7 +33,7 @@ if (GTK_FOUND)
       ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
     )
     poppler_add_test(pdf-inspector BUILD_GTK_TESTS ${pdf_inspector_SRCS})
-    target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} Freetype::Freetype ${common_libs} ${GTK3_LIBRARIES} poppler)
+    target_link_libraries(pdf-inspector ${CAIRO_LIBRARIES} Freetype::Freetype ${common_libs} PkgConfig::GTK3 poppler)
     target_compile_definitions(pdf-inspector PRIVATE -DSRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
   endif ()
 

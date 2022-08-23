@@ -1,12 +1,7 @@
-include_directories(
-  ${GTK3_INCLUDE_DIRS}
-)
-
 macro(POPPLER_ADD_TESTCASE exe arg1)
   add_test(${exe}-${arg1} ${EXE} ${EXECUTABLE_OUTPUT_PATH}/poppler-check-bb ${TESTDATADIR}/unittestcases/${arg1} ${ARGN})
 endmacro(POPPLER_ADD_TESTCASE)
 
-add_definitions(${GTK3_CFLAGS_OTHER})
 add_definitions(-DTESTDATADIR=\"${TESTDATADIR}\")
 
 set(poppler_check_text_SRCS
@@ -54,7 +49,7 @@ macro(GLIB_ADD_FUZZER exe)
     ${ARGN}
   )
   poppler_add_test(${exe} BUILD_GTK_TESTS ${${test_name}_SOURCES})
-  target_link_libraries(${exe} poppler-glib ${GTK3_LIBRARIES})
+  target_link_libraries(${exe} poppler-glib PkgConfig::GTK3)
 endmacro(GLIB_ADD_FUZZER)
 
 if(ENABLE_FUZZER)

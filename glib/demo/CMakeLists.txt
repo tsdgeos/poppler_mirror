@@ -1,10 +1,3 @@
-include_directories(
-  SYSTEM
-  ${GTK3_INCLUDE_DIRS}
-)
-
-add_definitions(${GTK3_CFLAGS_OTHER})
-
 set(poppler_glib_demo_SRCS
   main.c
   find.c
