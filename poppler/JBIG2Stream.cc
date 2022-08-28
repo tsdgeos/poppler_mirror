@@ -1976,7 +1976,11 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     for (i = 0; i < nRefSegs; ++i) {
         if ((seg = findSegment(refSegs[i]))) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                numSyms += ((JBIG2SymbolDict *)seg)->getSize();
+                const unsigned int segSize = ((JBIG2SymbolDict *)seg)->getSize();
+                if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
+                    error(errSyntaxError, getPos(), "Too many symbols in JBIG2 text region");
+                    return;
+                }
             } else if (seg->getType() == jbig2SegCodeTable) {
                 codeTables.push_back(seg);
             }
