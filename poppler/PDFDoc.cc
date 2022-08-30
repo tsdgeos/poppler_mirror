@@ -53,6 +53,7 @@
 // Copyright (C) 2021-2022 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
+// Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
