@@ -445,7 +445,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     double wx, wy;
     PDFRectangle box;
     type3_font_info_t *info;
-    Gfx *gfx;
     cairo_status_t status;
 
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
@@ -480,7 +479,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     box.y1 = mat[1];
     box.x2 = mat[2];
     box.y2 = mat[3];
-    gfx = new Gfx(info->doc, output_dev, resDict, &box, nullptr);
+    auto gfx = std::make_unique<Gfx>(info->doc, output_dev, resDict, &box, nullptr);
     output_dev->startDoc(info->doc, info->fontEngine);
     output_dev->startType3Render(gfx->getState(), gfx->getXRef());
     output_dev->setInType3Char(true);
@@ -521,7 +520,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         status = CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED;
     }
 
-    delete gfx;
     delete output_dev;
 
     return status;
