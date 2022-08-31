@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         correct.x2 = atof(argv[argx++]);
         correct.y2 = atof(argv[argx++]);
         g_print("        correct:      %g,%g - %g,%g\n", correct.x1, correct.y1, correct.x2, correct.y2);
-        if (!equal(bb.x1, correct.x1, precision) || !equal(bb.x2, correct.x2, precision) || !equal(bb.y1, correct.y1, precision) || !equal(bb.x2, correct.x2, precision)) {
+        if (!equal(bb.x1, correct.x1, precision) || !equal(bb.x2, correct.x2, precision) || !equal(bb.y1, correct.y1, precision) || !equal(bb.y2, correct.y2, precision)) {
             g_print("bounding box differs from expected\n");
             exit(EXIT_FAILURE);
         }

@@ -5,6 +5,7 @@
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2022, Tobias C. Berner <tcberner@gmail.com>
+ * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +46,7 @@ public:
 protected:
     noncopyable();
     ~noncopyable();
+    noncopyable &operator=(noncopyable &&other) noexcept;
 };
 
 }

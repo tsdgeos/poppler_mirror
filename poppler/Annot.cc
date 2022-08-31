@@ -54,6 +54,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
 // Copyright (C) 2022 Andreas Naumann <42870-ANaumann85@users.noreply.gitlab.freedesktop.org>
+// Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5261,7 +5262,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::shared_ptr<const GfxFont> font = form->getDefaultResources()->lookupFont(da.getFontName().getName());
+    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName().getName()) : nullptr;
     if (!font) {
         font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
     }

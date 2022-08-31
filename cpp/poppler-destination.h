@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
 #ifndef POPPLER_DESTINATION_H
 #define POPPLER_DESTINATION_H
 
+#include <memory>
 #include "poppler-global.h"
 
 namespace poppler {
@@ -60,7 +62,7 @@ public:
 private:
     explicit destination(destination_private *dd);
 
-    destination_private *d;
+    std::unique_ptr<destination_private> d;
     friend class document;
 };
 

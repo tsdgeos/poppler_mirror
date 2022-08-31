@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -264,20 +265,9 @@ bool destination::is_change_zoom() const
 /**
  Move assignment operator.
  */
-destination &destination::operator=(destination &&other) noexcept
-{
-    if (this != &other) {
-        d = other.d;
-        other.d = nullptr;
-    }
-
-    return *this;
-}
+destination &destination::operator=(destination &&other) noexcept = default;
 
 /**
  Destructor.
  */
-destination::~destination()
-{
-    delete d;
-}
+destination::~destination() = default;

@@ -223,7 +223,7 @@ static std::string TextStringToUTF8(const std::string &str)
     const UnicodeMap *utf8Map = globalParams->getUtf8Map();
 
     Unicode *u;
-    int len = TextStringToUCS4(str, &u);
+    const int len = TextStringToUCS4(str, &u);
 
     std::string convertedStr;
     for (int i = 0; i < len; ++i) {
@@ -231,6 +231,7 @@ static std::string TextStringToUTF8(const std::string &str)
         const int n = utf8Map->mapUnicode(u[i], buf, sizeof(buf));
         convertedStr.append(buf, n);
     }
+    gfree(u);
 
     return convertedStr;
 }
