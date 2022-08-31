@@ -1,3 +1,22 @@
+Release 22.09.0:
+        core:
+         * Splash: Do not truncate line dash patterns with more than 20 entries. Issue #1281
+         * Various signature related improvements
+         * Fix FormField::getFullyQualifiedName in some scenarios
+         * Splash: Small optimization on dash pattern handling
+         * JBIG2Stream::readHalftoneRegionSeg: Fix potential memory leak
+         * Fix crashes on malformed files. Including CVE-2022-38784
+         * Fix string formatting in error reporting
+
+        glib:
+         * Fix two potential memory leaks in poppler_document_create_dests_tree
+
+        utils:
+         * pdfsig: List signature field names when listing signature information
+         * pdfsig: Add support for specifying signature by field name
+         * pdfunite: Fix crashes on malformed files
+         * pdfunite: Fix potential memory leak of docs
+
 Release 22.08.0:
         core:
          * Fix rendering text on some forms
