@@ -542,7 +542,7 @@ if (GPERF AND SED AND RUN_GPERF_IF_PRESENT)
         add_custom_command(OUTPUT poppler/${input}.c
                        COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
                        COMMAND ${GPERF} poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
-                       COMMAND ${SED} -i "s#${GPERF}#gperf#" ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND ${SED} -i -e "s#${GPERF}#gperf#" ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
                        COMMAND clang-format -i ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c || true
                        DEPENDS poppler/${input}.gperf
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
