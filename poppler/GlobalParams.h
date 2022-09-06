@@ -85,8 +85,8 @@ struct FamilyStyleFontSearchResult
 
     FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA) : filepath(filepathA), faceIndex(faceIndexA) { }
 
-    const std::string filepath;
-    const int faceIndex = 0;
+    std::string filepath;
+    int faceIndex = 0;
 };
 
 //------------------------------------------------------------------------
@@ -137,7 +137,7 @@ public:
     GooString *findFontFile(const std::string &fontName);
     GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
-    FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle);
+    FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore = {});
     UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);
     std::string getTextEncodingName() const;
     bool getPrintCommands();

@@ -503,14 +503,14 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     return path;
 }
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
 {
     const std::scoped_lock locker(mutex);
     setupBaseFonts(POPPLER_FONTSDIR);
 
     const std::string familyAndStyle = fontFamily + " " + fontStyle;
 
-    const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false);
+    const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false, filesToIgnore);
     if (fi) {
         return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum);
     }
