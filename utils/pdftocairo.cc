@@ -39,6 +39,7 @@
 // Copyright (C) 2020 Salvo Miosi <salvo.ilmiosi@gmail.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -527,7 +528,7 @@ static void getOutputSize(double page_w, double page_h, double *width, double *h
             }
         }
     } else {
-        getCropSize(page_w * (x_resolution / 72.0), page_h * (y_resolution / 72.0), width, height);
+        getCropSize(page_w * x_resolution / 72.0, page_h * y_resolution / 72.0, width, height);
     }
 }
 

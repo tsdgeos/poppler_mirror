@@ -194,7 +194,14 @@ void FormField::setReadOnly(bool value)
 
 bool FormField::isVisible() const
 {
-    return !(m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagHidden);
+    const unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+    if (flags & Annot::flagHidden) {
+        return false;
+    }
+    if (flags & Annot::flagNoView) {
+        return false;
+    }
+    return true;
 }
 
 void FormField::setVisible(bool value)
@@ -202,6 +209,7 @@ void FormField::setVisible(bool value)
     unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
     if (value) {
         flags &= ~Annot::flagHidden;
+        flags &= ~Annot::flagNoView;
     } else {
         flags |= Annot::flagHidden;
     }

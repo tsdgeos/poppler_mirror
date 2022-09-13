@@ -2506,7 +2506,19 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[2] = -2;
     atx[3] = -2;
     aty[3] = -2;
-    bitmap = readGenericBitmap(mmr, (grayMax + 1) * patternW, patternH, templ, false, false, nullptr, atx, aty, length - 7);
+
+    unsigned int grayMaxPlusOne;
+    if (unlikely(checkedAdd(grayMax, 1u, &grayMaxPlusOne))) {
+        return;
+    }
+    unsigned int bitmapW;
+    if (unlikely(checkedMultiply(grayMaxPlusOne, patternW, &bitmapW))) {
+        return;
+    }
+    if (bitmapW >= INT_MAX) {
+        return;
+    }
+    bitmap = readGenericBitmap(mmr, static_cast<int>(bitmapW), patternH, templ, false, false, nullptr, atx, aty, length - 7);
 
     if (!bitmap) {
         return;

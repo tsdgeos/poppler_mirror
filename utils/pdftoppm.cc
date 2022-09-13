@@ -37,6 +37,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
+// Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -666,10 +667,10 @@ int main(int argc, char *argv[])
 
             // No specific image size requested---compute the size from the resolution
             if (x_scaleTo <= 0) {
-                pg_w = pg_w * (x_resolution / 72.0);
+                pg_w = pg_w * x_resolution / 72.0;
             }
             if (y_scaleTo <= 0) {
-                pg_h = pg_h * (y_resolution / 72.0);
+                pg_h = pg_h * y_resolution / 72.0;
             }
         }
 
