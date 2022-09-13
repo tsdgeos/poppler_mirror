@@ -165,19 +165,15 @@ static std::string myXmlTokenReplace(const char *inString)
 int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
-    GooString *fileName;
-    GooString *textFileName;
+    std::unique_ptr<GooString> textFileName;
     std::optional<GooString> ownerPW, userPW;
-    TextOutputDev *textOut;
     FILE *f;
     const UnicodeMap *uMap;
     Object info;
     bool ok;
-    int exitCode;
     EndOfLineKind textEOL = TextOutputDev::defaultEndOfLine();
 
     Win32Console win32Console(&argc, &argv);
-    exitCode = 99;
 
     // parse args
     ok = parseArgs(argDesc, &argc, argv);
@@ -189,7 +185,7 @@ int main(int argc, char *argv[])
     }
     if (colspacing <= 0 || colspacing > 10) {
         error(errCommandLine, -1, "Bogus value provided for -colspacing");
-        goto err1;
+        return 99;
     }
     if (!ok || (argc < 2 && !printEnc) || argc > 3 || printVersion || printHelp) {
         fprintf(stderr, "pdftotext version %s\n", PACKAGE_VERSION);
@@ -199,9 +195,9 @@ int main(int argc, char *argv[])
             printUsage("pdftotext", "<PDF-file> [<text-file>]", argDesc);
         }
         if (printVersion || printHelp) {
-            exitCode = 0;
+            return 0;
         }
-        goto err0;
+        return 99;
     }
 
     // read config file
@@ -209,11 +205,10 @@ int main(int argc, char *argv[])
 
     if (printEnc) {
         printEncodings();
-        exitCode = 0;
-        goto err0;
+        return 0;
     }
 
-    fileName = new GooString(argv[1]);
+    GooString fileName(argv[1]);
     if (fixedPitch) {
         physLayout = true;
     }
@@ -239,8 +234,7 @@ int main(int argc, char *argv[])
     // get mapping to output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
         error(errCommandLine, -1, "Couldn't get text encoding");
-        delete fileName;
-        goto err1;
+        return 99;
     }
 
     // open PDF file
@@ -251,39 +245,36 @@ int main(int argc, char *argv[])
         userPW = GooString(userPassword);
     }
 
-    if (fileName->cmp("-") == 0) {
-        delete fileName;
-        fileName = new GooString("fd://0");
+    if (fileName.cmp("-") == 0) {
+        fileName = GooString("fd://0");
     }
 
-    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    doc = PDFDocFactory().createPDFDoc(fileName, ownerPW, userPW);
 
     if (!doc->isOk()) {
-        exitCode = 1;
-        goto err2;
+        return 1;
     }
 
 #ifdef ENFORCE_PERMISSIONS
     // check for copy permission
     if (!doc->okToCopy()) {
         error(errNotAllowed, -1, "Copying of text from this document is not allowed.");
-        exitCode = 3;
-        goto err2;
+        return 3;
     }
 #endif
 
     // construct text file name
     if (argc == 3) {
-        textFileName = new GooString(argv[2]);
-    } else if (fileName->cmp("fd://0") == 0) {
+        textFileName = std::make_unique<GooString>(argv[2]);
+    } else if (fileName.cmp("fd://0") == 0) {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
-        goto err2;
+        return 99;
     } else {
-        const char *p = fileName->c_str() + fileName->getLength() - 4;
+        const char *p = fileName.c_str() + fileName.getLength() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            textFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
+            textFileName = std::make_unique<GooString>(fileName.c_str(), fileName.getLength() - 4);
         } else {
-            textFileName = fileName->copy();
+            textFileName.reset(fileName.copy());
         }
         textFileName->append(htmlMeta ? ".html" : ".txt");
     }
@@ -297,7 +288,7 @@ int main(int argc, char *argv[])
     }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
-        goto err3;
+        return 99;
     }
 
     // write HTML header
@@ -306,9 +297,8 @@ int main(int argc, char *argv[])
             f = stdout;
         } else {
             if (!(f = fopen(textFileName->c_str(), "wb"))) {
-                error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
-                exitCode = 2;
-                goto err3;
+                error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName.get());
+                return 2;
             }
         }
         fputs("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">", f);
@@ -342,18 +332,18 @@ int main(int argc, char *argv[])
 
     // write text file
     if (htmlMeta && bbox) { // htmlMeta && is superfluous but makes gcc happier
-        textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+        TextOutputDev textOut(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
 
-        if (textOut->isOk()) {
-            textOut->setTextEOL(textEOL);
-            textOut->setMinColSpacing1(colspacing);
+        if (textOut.isOk()) {
+            textOut.setTextEOL(textEOL);
+            textOut.setMinColSpacing1(colspacing);
             if (noPageBreaks) {
-                textOut->setTextPageBreaks(false);
+                textOut.setTextPageBreaks(false);
             }
             if (bboxLayout) {
-                printDocBBox(f, doc.get(), textOut, firstPage, lastPage);
+                printDocBBox(f, doc.get(), &textOut, firstPage, lastPage);
             } else {
-                printWordBBox(f, doc.get(), textOut, firstPage, lastPage);
+                printWordBBox(f, doc.get(), &textOut, firstPage, lastPage);
             }
         }
         if (f != stdout) {
@@ -362,47 +352,42 @@ int main(int argc, char *argv[])
     } else {
 
         if (tsvMode) {
-            textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            TextOutputDev textOut(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
             if (!textFileName->cmp("-")) {
                 f = stdout;
             } else {
                 if (!(f = fopen(textFileName->c_str(), "wb"))) {
-                    error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
-                    delete textOut;
-                    exitCode = 2;
-                    goto err3;
+                    error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName.get());
+                    return 2;
                 }
             }
-            printTSVBBox(f, doc.get(), textOut, firstPage, lastPage);
+            printTSVBBox(f, doc.get(), &textOut, firstPage, lastPage);
             if (f != stdout) {
                 fclose(f);
             }
         } else {
-            textOut = new TextOutputDev(textFileName->c_str(), physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
-            if (textOut->isOk()) {
-                textOut->setTextEOL(textEOL);
-                textOut->setMinColSpacing1(colspacing);
+            TextOutputDev textOut(textFileName->c_str(), physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
+            if (textOut.isOk()) {
+                textOut.setTextEOL(textEOL);
+                textOut.setMinColSpacing1(colspacing);
                 if (noPageBreaks) {
-                    textOut->setTextPageBreaks(false);
+                    textOut.setTextPageBreaks(false);
                 }
 
                 if ((w == 0) && (h == 0) && (x == 0) && (y == 0)) {
-                    doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0, true, false, false);
+                    doc->displayPages(&textOut, firstPage, lastPage, resolution, resolution, 0, true, false, false);
                 } else {
 
                     for (int page = firstPage; page <= lastPage; ++page) {
-                        doc->displayPageSlice(textOut, page, resolution, resolution, 0, true, false, false, x, y, w, h);
+                        doc->displayPageSlice(&textOut, page, resolution, resolution, 0, true, false, false, x, y, w, h);
                     }
                 }
 
             } else {
-                delete textOut;
-                exitCode = 2;
-                goto err3;
+                return 2;
             }
         }
     }
-    delete textOut;
 
     // write end of HTML file
     if (htmlMeta) {
@@ -410,9 +395,8 @@ int main(int argc, char *argv[])
             f = stdout;
         } else {
             if (!(f = fopen(textFileName->c_str(), "ab"))) {
-                error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
-                exitCode = 2;
-                goto err3;
+                error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName.get());
+                return 2;
             }
         }
         if (!bbox) {
@@ -425,17 +409,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    exitCode = 0;
-
-    // clean up
-err3:
-    delete textFileName;
-err2:
-    delete fileName;
-err1:
-err0:
-
-    return exitCode;
+    return 0;
 }
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap)
