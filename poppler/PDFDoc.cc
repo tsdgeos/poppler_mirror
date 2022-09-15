@@ -1200,7 +1200,7 @@ void PDFDoc::saveCompleteRewrite(OutStream *outStr)
     delete uxref;
 }
 
-void PDFDoc::writeDictionnary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
+void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
 {
     bool deleteSet = false;
     if (!alreadyWrittenDicts) {
@@ -1209,7 +1209,7 @@ void PDFDoc::writeDictionnary(Dict *dict, OutStream *outStr, XRef *xRef, unsigne
     }
 
     if (alreadyWrittenDicts->find(dict) != alreadyWrittenDicts->end()) {
-        error(errSyntaxWarning, -1, "PDFDoc::writeDictionnary: Found recursive dicts");
+        error(errSyntaxWarning, -1, "PDFDoc::writeDictionary: Found recursive dicts");
         if (deleteSet) {
             delete alreadyWrittenDicts;
         }
@@ -1389,7 +1389,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         outStr->printf("] ");
         break;
     case objDict:
-        writeDictionnary(obj->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
+        writeDictionary(obj->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
         break;
     case objStream: {
         // We can't modify stream with the current implementation (no write functions in Stream API)
@@ -1449,13 +1449,13 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             }
             stream->getDict()->remove("DecodeParms");
 
-            writeDictionnary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
+            writeDictionary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(stream, outStr);
             delete encStream;
         } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream *>(stream)->getNeedsEncryptionOnSave()) {
             EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
             encStream->setAutoDelete(false);
-            writeDictionnary(encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
+            writeDictionary(encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(encStream, outStr);
             delete encStream;
         } else {
@@ -1471,7 +1471,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                     }
                 }
             }
-            writeDictionnary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
+            writeDictionary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeRawStream(stream, outStr);
         }
         break;
@@ -1511,7 +1511,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
     // - current time
     // - file name
     // - file size
-    // - values of entry in information dictionnary
+    // - values of entry in information dictionary
     GooString message;
     char buffer[256];
     sprintf(buffer, "%i", (int)time(nullptr));
@@ -1594,7 +1594,7 @@ void PDFDoc::writeXRefTableTrailer(Object &&trailerDict, XRef *uxref, bool write
 {
     uxref->writeTableToFile(outStr, writeAllEntries);
     outStr->printf("trailer\r\n");
-    writeDictionnary(trailerDict.getDict(), outStr, xRef, 0, nullptr, cryptRC4, 0, { 0, 0 }, nullptr);
+    writeDictionary(trailerDict.getDict(), outStr, xRef, 0, nullptr, cryptRC4, 0, { 0, 0 }, nullptr);
     outStr->printf("\r\nstartxref\r\n");
     outStr->printf("%lli\r\n", uxrefOffset);
     outStr->printf("%%%%EOF\r\n");
@@ -1643,7 +1643,7 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
     outStr->printf("%%%c%c%c%c\n", 0xE2, 0xE3, 0xCF, 0xD3);
 }
 
-bool PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
+bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts)
 {
     bool deleteSet = false;
     if (!alreadyMarkedDicts) {
@@ -1652,7 +1652,7 @@ bool PDFDoc::markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned in
     }
 
     if (alreadyMarkedDicts->find(dict) != alreadyMarkedDicts->end()) {
-        error(errSyntaxWarning, -1, "PDFDoc::markDictionnary: Found recursive dicts");
+        error(errSyntaxWarning, -1, "PDFDoc::markDictionary: Found recursive dicts");
         if (deleteSet) {
             delete alreadyMarkedDicts;
         }
@@ -1700,14 +1700,14 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
         }
         break;
     case objDict: {
-        const bool success = markDictionnary(obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+        const bool success = markDictionary(obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
         if (unlikely(!success)) {
             return false;
         }
     } break;
     case objStream: {
         Stream *stream = obj->getStream();
-        const bool success = markDictionnary(stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
+        const bool success = markDictionary(stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
         if (unlikely(!success)) {
             return false;
         }
