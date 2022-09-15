@@ -625,19 +625,9 @@ bool GooString::endsWith(const char *suffix) const
     return endsWith(toStr(), suffix);
 }
 
-GooString *GooString::sanitizedName(bool psmode) const
+GooString *GooString::sanitizedName() const
 {
     auto *name = new GooString();
-
-    if (psmode) {
-        // ghostscript chokes on names that begin with out-of-limits
-        // numbers, e.g., 1e4foo is handled correctly (as a name), but
-        // 1e999foo generates a limitcheck error
-        const auto c = getChar(0);
-        if (c >= '0' && c <= '9') {
-            name->append('f');
-        }
-    }
 
     for (const auto c : *this) {
         if (c <= (char)0x20 || c >= (char)0x7f || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {

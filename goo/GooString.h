@@ -259,9 +259,8 @@ public:
 
     // Sanitizes the string so that it does
     // not contain any ( ) < > [ ] { } / %
-    // The postscript mode also has some more strict checks
     // The caller owns the return value
-    POPPLER_PRIVATE_EXPORT GooString *sanitizedName(bool psmode) const;
+    POPPLER_PRIVATE_EXPORT GooString *sanitizedName() const;
 };
 
 #endif

@@ -1221,7 +1221,7 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
     outStr->printf("<<");
     for (int i = 0; i < dict->getLength(); i++) {
         GooString keyName(dict->getKey(i));
-        GooString *keyNameToPrint = keyName.sanitizedName(false /* non ps mode */);
+        GooString *keyNameToPrint = keyName.sanitizedName();
         outStr->printf("/%s ", keyNameToPrint->c_str());
         delete keyNameToPrint;
         Object obj1 = dict->getValNF(i).copy();
@@ -1371,7 +1371,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
     }
     case objName: {
         GooString name(obj->getName());
-        GooString *nameToPrint = name.sanitizedName(false /* non ps mode */);
+        GooString *nameToPrint = name.sanitizedName();
         outStr->printf("/%s ", nameToPrint->c_str());
         delete nameToPrint;
         break;
