@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
@@ -259,9 +259,8 @@ public:
 
     // Sanitizes the string so that it does
     // not contain any ( ) < > [ ] { } / %
-    // The postscript mode also has some more strict checks
     // The caller owns the return value
-    POPPLER_PRIVATE_EXPORT GooString *sanitizedName(bool psmode) const;
+    POPPLER_PRIVATE_EXPORT GooString *sanitizedName() const;
 };
 
 #endif

@@ -29,7 +29,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -625,19 +625,9 @@ bool GooString::endsWith(const char *suffix) const
     return endsWith(toStr(), suffix);
 }
 
-GooString *GooString::sanitizedName(bool psmode) const
+GooString *GooString::sanitizedName() const
 {
     auto *name = new GooString();
-
-    if (psmode) {
-        // ghostscript chokes on names that begin with out-of-limits
-        // numbers, e.g., 1e4foo is handled correctly (as a name), but
-        // 1e999foo generates a limitcheck error
-        const auto c = getChar(0);
-        if (c >= '0' && c <= '9') {
-            name->append('f');
-        }
-    }
 
     for (const auto c : *this) {
         if (c <= (char)0x20 || c >= (char)0x7f || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {

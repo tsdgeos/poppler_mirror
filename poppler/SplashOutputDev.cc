@@ -4457,6 +4457,9 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
     }
     delete tBitmap;
+    if (!retValue) {
+        state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+    }
     return retValue;
 }
 
