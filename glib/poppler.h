@@ -47,7 +47,8 @@ typedef enum
     POPPLER_ERROR_ENCRYPTED,
     POPPLER_ERROR_OPEN_FILE,
     POPPLER_ERROR_BAD_CATALOG,
-    POPPLER_ERROR_DAMAGED
+    POPPLER_ERROR_DAMAGED,
+    POPPLER_ERROR_SIGNING
 } PopplerError;
 
 /**
@@ -220,6 +221,8 @@ typedef struct _PopplerTextSpan PopplerTextSpan;
 typedef struct _PopplerPageRange PopplerPageRange;
 typedef struct _PopplerSignatureInfo PopplerSignatureInfo;
 typedef struct _PopplerAnnotStamp PopplerAnnotStamp;
+typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
+typedef struct _PopplerSigningData PopplerSigningData;
 
 /**
  * PopplerBackend:

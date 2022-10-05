@@ -92,3 +92,5 @@ poppler_structure_writing_mode_get_type
 poppler_text_attributes_get_type
 poppler_text_span_get_type
 poppler_viewer_preferences_get_type
+poppler_signing_data_get_type
+poppler_certificate_info_get_type

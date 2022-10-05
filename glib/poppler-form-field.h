@@ -249,6 +249,120 @@ const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *
 POPPLER_PUBLIC
 GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureInfo *siginfo);
 
+/* Signing Data */
+#define POPPLER_TYPE_SIGNING_DATA (poppler_signing_data_get_type())
+POPPLER_PUBLIC
+GType poppler_signing_data_get_type(void) G_GNUC_CONST;
+POPPLER_PUBLIC
+PopplerSigningData *poppler_signing_data_new(void);
+POPPLER_PUBLIC
+PopplerSigningData *poppler_signing_data_copy(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_free(PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_destination_filename(PopplerSigningData *signing_data, const gchar *filename);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_destination_filename(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_certificate_info(PopplerSigningData *signing_data, const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const PopplerCertificateInfo *poppler_signing_data_get_certificate_info(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_page(PopplerSigningData *signing_data, int page);
+POPPLER_PUBLIC
+int poppler_signing_data_get_page(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_signature_text(PopplerSigningData *signing_data, const gchar *signature_text);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_signature_text(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_signature_text_left(PopplerSigningData *signing_data, const gchar *signature_text_left);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_signature_text_left(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_signature_rectangle(PopplerSigningData *signing_data, const PopplerRectangle *signature_rect);
+POPPLER_PUBLIC
+const PopplerRectangle *poppler_signing_data_get_signature_rectangle(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_font_color(PopplerSigningData *signing_data, const PopplerColor *font_color);
+POPPLER_PUBLIC
+const PopplerColor *poppler_signing_data_get_font_color(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_font_size(PopplerSigningData *signing_data, gdouble font_size);
+POPPLER_PUBLIC
+gdouble poppler_signing_data_get_font_size(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_left_font_size(PopplerSigningData *signing_data, gdouble font_size);
+POPPLER_PUBLIC
+gdouble poppler_signing_data_get_left_font_size(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_border_color(PopplerSigningData *signing_data, const PopplerColor *border_color);
+POPPLER_PUBLIC
+const PopplerColor *poppler_signing_data_get_border_color(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_border_width(PopplerSigningData *signing_data, gdouble border_width);
+POPPLER_PUBLIC
+gdouble poppler_signing_data_get_border_width(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_background_color(PopplerSigningData *signing_data, const PopplerColor *background_color);
+POPPLER_PUBLIC
+const PopplerColor *poppler_signing_data_get_background_color(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_field_partial_name(PopplerSigningData *signing_data, const gchar *field_partial_name);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_field_partial_name(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_reason(PopplerSigningData *signing_data, const gchar *reason);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_reason(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_location(PopplerSigningData *signing_data, const gchar *location);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_location(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_image_path(PopplerSigningData *signing_data, const gchar *image_path);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_image_path(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_password(PopplerSigningData *signing_data, const gchar *password);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_password(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_document_owner_password(PopplerSigningData *signing_data, const gchar *document_owner_password);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_document_owner_password(const PopplerSigningData *signing_data);
+POPPLER_PUBLIC
+void poppler_signing_data_set_document_user_password(PopplerSigningData *signing_data, const gchar *document_user_password);
+POPPLER_PUBLIC
+const gchar *poppler_signing_data_get_document_user_password(const PopplerSigningData *signing_data);
+
+/* Certificate Information */
+#define POPPLER_TYPE_CERTIFICATE_INFO (poppler_certificate_info_get_type())
+POPPLER_PUBLIC
+GType poppler_certificate_info_get_type(void) G_GNUC_CONST;
+PopplerCertificateInfo *poppler_certificate_info_new(void);
+POPPLER_PUBLIC
+PopplerCertificateInfo *poppler_certificate_info_copy(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+void poppler_certificate_info_free(PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_id(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_subject_common_name(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id);
+POPPLER_PUBLIC
+GList *poppler_get_available_signing_certificates(void);
+
+/* NSS */
+POPPLER_PUBLIC
+void poppler_set_nss_dir(const char *path);
+POPPLER_PUBLIC
+char *poppler_get_nss_dir(void);
+typedef char *(*PopplerNssPasswordFunc)(const gchar *text);
+POPPLER_PUBLIC
+void poppler_set_nss_password_callback(PopplerNssPasswordFunc func);
+
 G_END_DECLS
 
 #endif /* __POPPLER_FORM_FIELD_H__ */

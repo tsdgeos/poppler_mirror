@@ -99,6 +99,10 @@ target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} F
 target_include_directories(poppler-glib SYSTEM PRIVATE ${CAIRO_INCLUDE_DIRS})
 install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+if (ENABLE_NSS3)
+    target_include_directories(poppler-glib SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
+endif()
+
 install(FILES
   ${poppler_glib_public_headers}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
@@ -150,3 +154,5 @@ endif ()
 if(ENABLE_GTK_DOC)
   add_subdirectory(reference)
 endif()
+
+check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
