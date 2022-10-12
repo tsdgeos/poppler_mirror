@@ -2226,7 +2226,7 @@ void poppler_document_reset_form(PopplerDocument *document, GList *fields, gbool
 
         if (form) {
             for (iter = fields; iter != nullptr; iter = iter->next) {
-                list.emplace_back(std::string((char *)iter->data));
+                list.emplace_back((char *)iter->data);
             }
 
             form->reset(list, exclude_fields);

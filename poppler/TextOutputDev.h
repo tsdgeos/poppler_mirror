@@ -108,32 +108,14 @@ public:
 
 #ifdef TEXTOUT_WORD_LIST
     // Get the font name (which may be NULL).
-    const GooString *getFontName() const
-    {
-        return fontName;
-    }
+    const GooString *getFontName() const { return fontName; }
 
     // Get font descriptor flags.
-    bool isFixedWidth() const
-    {
-        return flags & fontFixedWidth;
-    }
-    bool isSerif() const
-    {
-        return flags & fontSerif;
-    }
-    bool isSymbolic() const
-    {
-        return flags & fontSymbolic;
-    }
-    bool isItalic() const
-    {
-        return flags & fontItalic;
-    }
-    bool isBold() const
-    {
-        return flags & fontBold;
-    }
+    bool isFixedWidth() const { return flags & fontFixedWidth; }
+    bool isSerif() const { return flags & fontSerif; }
+    bool isSymbolic() const { return flags & fontSymbolic; }
+    bool isItalic() const { return flags & fontItalic; }
+    bool isBold() const { return flags & fontBold; }
 #endif
 
 private:
@@ -195,19 +177,10 @@ public:
     const TextWord *getNext() const { return next; }
 
 #ifdef TEXTOUT_WORD_LIST
-    int getLength() const
-    {
-        return len;
-    }
-    const Unicode *getChar(int idx) const
-    {
-        return &text[idx];
-    }
+    int getLength() const { return len; }
+    const Unicode *getChar(int idx) const { return &text[idx]; }
     GooString *getText() const;
-    const GooString *getFontName(int idx) const
-    {
-        return font[idx]->fontName;
-    }
+    const GooString *getFontName(int idx) const { return font[idx]->fontName; }
     void getColor(double *r, double *g, double *b) const
     {
         *r = colorR;
@@ -222,51 +195,18 @@ public:
         *yMaxA = yMax;
     }
     void getCharBBox(int charIdx, double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const;
-    double getFontSize() const
-    {
-        return fontSize;
-    }
-    int getRotation() const
-    {
-        return rot;
-    }
-    int getCharPos() const
-    {
-        return charPos[0];
-    }
-    int getCharLen() const
-    {
-        return charPos[len] - charPos[0];
-    }
-    bool getSpaceAfter() const
-    {
-        return spaceAfter;
-    }
+    double getFontSize() const { return fontSize; }
+    int getRotation() const { return rot; }
+    int getCharPos() const { return charPos[0]; }
+    int getCharLen() const { return charPos[len] - charPos[0]; }
+    bool getSpaceAfter() const { return spaceAfter; }
 #endif
-    bool isUnderlined() const
-    {
-        return underlined;
-    }
-    const AnnotLink *getLink() const
-    {
-        return link;
-    }
-    double getEdge(int i) const
-    {
-        return edge[i];
-    }
-    double getBaseline() const
-    {
-        return base;
-    }
-    bool hasSpaceAfter() const
-    {
-        return spaceAfter;
-    }
-    const TextWord *nextWord() const
-    {
-        return next;
-    };
+    bool isUnderlined() const { return underlined; }
+    const AnnotLink *getLink() const { return link; }
+    double getEdge(int i) const { return edge[i]; }
+    double getBaseline() const { return base; }
+    bool hasSpaceAfter() const { return spaceAfter; }
+    const TextWord *nextWord() const { return next; };
 
 private:
     void ensureCapacity(int capacity);
@@ -932,10 +872,7 @@ public:
     TextPage *takeText();
 
     // Turn extra processing for HTML conversion on or off.
-    void enableHTMLExtras(bool doHTMLA)
-    {
-        doHTML = doHTMLA;
-    }
+    void enableHTMLExtras(bool doHTMLA) { doHTML = doHTMLA; }
 
     // Get the head of the linked list of TextFlows for the
     // last rasterized page.
@@ -949,22 +886,10 @@ public:
         return eolUnix;
 #endif
     }
-    void setTextEOL(EndOfLineKind textEOLA)
-    {
-        textEOL = textEOLA;
-    }
-    void setTextPageBreaks(bool textPageBreaksA)
-    {
-        textPageBreaks = textPageBreaksA;
-    }
-    double getMinColSpacing1() const
-    {
-        return minColSpacing1;
-    }
-    void setMinColSpacing1(double val)
-    {
-        minColSpacing1 = val;
-    }
+    void setTextEOL(EndOfLineKind textEOLA) { textEOL = textEOLA; }
+    void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
+    double getMinColSpacing1() const { return minColSpacing1; }
+    void setMinColSpacing1(double val) { minColSpacing1 = val; }
 
 private:
     TextOutputFunc outputFunc; // output function

@@ -35,7 +35,7 @@
 // before it's tested. This is desired if a file is on a slow drive.
 // Currently copying only works on Windows.
 // Not enabled by default.
-//#define COPY_FILE 1
+// #define COPY_FILE 1
 
 #include <cassert>
 #include <cstdio>

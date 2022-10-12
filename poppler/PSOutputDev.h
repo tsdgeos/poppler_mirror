@@ -286,10 +286,7 @@ public:
         xScale0 = x;
         yScale0 = y;
     }
-    void setRotate(int rotateA)
-    {
-        rotate0 = rotateA;
-    }
+    void setRotate(int rotateA) { rotate0 = rotateA; }
     void setClip(double llx, double lly, double urx, double ury)
     {
         clipLLX0 = llx;
@@ -307,82 +304,31 @@ public:
         overlayCbk = cbk;
         overlayCbkData = data;
     }
-    void setDisplayText(bool display)
-    {
-        displayText = display;
-    }
+    void setDisplayText(bool display) { displayText = display; }
 
-    void setPSCenter(bool center)
-    {
-        psCenter = center;
-    }
-    void setPSExpandSmaller(bool expand)
-    {
-        psExpandSmaller = expand;
-    }
-    void setPSShrinkLarger(bool shrink)
-    {
-        psShrinkLarger = shrink;
-    }
-    void setOverprintPreview(bool overprintPreviewA)
-    {
-        overprintPreview = overprintPreviewA;
-    }
-    void setRasterAntialias(bool a)
-    {
-        rasterAntialias = a;
-    }
-    void setForceRasterize(PSForceRasterize f)
-    {
-        forceRasterize = f;
-    }
-    void setRasterResolution(double r)
-    {
-        rasterResolution = r;
-    }
+    void setPSCenter(bool center) { psCenter = center; }
+    void setPSExpandSmaller(bool expand) { psExpandSmaller = expand; }
+    void setPSShrinkLarger(bool shrink) { psShrinkLarger = shrink; }
+    void setOverprintPreview(bool overprintPreviewA) { overprintPreview = overprintPreviewA; }
+    void setRasterAntialias(bool a) { rasterAntialias = a; }
+    void setForceRasterize(PSForceRasterize f) { forceRasterize = f; }
+    void setRasterResolution(double r) { rasterResolution = r; }
     void setRasterMono(bool b)
     {
         processColorFormat = splashModeMono8;
         processColorFormatSpecified = true;
     }
 
-    void setUncompressPreloadedImages(bool b)
-    {
-        uncompressPreloadedImages = b;
-    }
+    void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
 
-    bool getEmbedType1() const
-    {
-        return embedType1;
-    }
-    bool getEmbedTrueType() const
-    {
-        return embedTrueType;
-    }
-    bool getEmbedCIDPostScript() const
-    {
-        return embedCIDPostScript;
-    }
-    bool getEmbedCIDTrueType() const
-    {
-        return embedCIDTrueType;
-    }
-    bool getFontPassthrough() const
-    {
-        return fontPassthrough;
-    }
-    bool getOptimizeColorSpace() const
-    {
-        return optimizeColorSpace;
-    }
-    bool getPassLevel1CustomColor() const
-    {
-        return passLevel1CustomColor;
-    }
-    bool getEnableLZW() const
-    {
-        return enableLZW;
-    };
+    bool getEmbedType1() const { return embedType1; }
+    bool getEmbedTrueType() const { return embedTrueType; }
+    bool getEmbedCIDPostScript() const { return embedCIDPostScript; }
+    bool getEmbedCIDTrueType() const { return embedCIDTrueType; }
+    bool getFontPassthrough() const { return fontPassthrough; }
+    bool getOptimizeColorSpace() const { return optimizeColorSpace; }
+    bool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
+    bool getEnableLZW() const { return enableLZW; };
     bool getEnableFlate() const
 #ifdef ENABLE_ZLIB
     {
@@ -393,58 +339,19 @@ public:
         return false;
     }
 #endif
-    void setEmbedType1(bool b)
-    {
-        embedType1 = b;
-    }
-    void setEmbedTrueType(bool b)
-    {
-        embedTrueType = b;
-    }
-    void setEmbedCIDPostScript(bool b)
-    {
-        embedCIDPostScript = b;
-    }
-    void setEmbedCIDTrueType(bool b)
-    {
-        embedCIDTrueType = b;
-    }
-    void setFontPassthrough(bool b)
-    {
-        fontPassthrough = b;
-    }
-    void setOptimizeColorSpace(bool b)
-    {
-        optimizeColorSpace = b;
-    }
-    void setPassLevel1CustomColor(bool b)
-    {
-        passLevel1CustomColor = b;
-    }
-    void setPreloadImagesForms(bool b)
-    {
-        preloadImagesForms = b;
-    }
-    void setGenerateOPI(bool b)
-    {
-        generateOPI = b;
-    }
-    void setUseASCIIHex(bool b)
-    {
-        useASCIIHex = b;
-    }
-    void setUseBinary(bool b)
-    {
-        useBinary = b;
-    }
-    void setEnableLZW(bool b)
-    {
-        enableLZW = b;
-    }
-    void setEnableFlate(bool b)
-    {
-        enableFlate = b;
-    }
+    void setEmbedType1(bool b) { embedType1 = b; }
+    void setEmbedTrueType(bool b) { embedTrueType = b; }
+    void setEmbedCIDPostScript(bool b) { embedCIDPostScript = b; }
+    void setEmbedCIDTrueType(bool b) { embedCIDTrueType = b; }
+    void setFontPassthrough(bool b) { fontPassthrough = b; }
+    void setOptimizeColorSpace(bool b) { optimizeColorSpace = b; }
+    void setPassLevel1CustomColor(bool b) { passLevel1CustomColor = b; }
+    void setPreloadImagesForms(bool b) { preloadImagesForms = b; }
+    void setGenerateOPI(bool b) { generateOPI = b; }
+    void setUseASCIIHex(bool b) { useASCIIHex = b; }
+    void setUseBinary(bool b) { useBinary = b; }
+    void setEnableLZW(bool b) { enableLZW = b; }
+    void setEnableFlate(bool b) { enableFlate = b; }
 
     void setProcessColorFormat(SplashColorMode format)
     {

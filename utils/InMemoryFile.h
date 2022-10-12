@@ -50,10 +50,7 @@ public:
      * and must be fclosed() by the caller before destruction. */
     FILE *open(const char *mode);
 
-    const std::vector<char> &getBuffer() const
-    {
-        return data;
-    }
+    const std::vector<char> &getBuffer() const { return data; }
 };
 
 #endif // IN_MEMORY_FILE_H
