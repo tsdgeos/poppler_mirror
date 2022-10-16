@@ -84,7 +84,10 @@ void PageLabelInfo::parse(const Object *tree, std::set<int> &alreadyParsedRefs)
             if (!obj.isInt()) {
                 continue;
             }
-            int base = obj.getInt();
+            const int base = obj.getInt();
+            if (base < 0) {
+                continue;
+            }
             obj = nums.arrayGet(i + 1);
             if (!obj.isDict()) {
                 continue;
