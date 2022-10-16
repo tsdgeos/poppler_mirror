@@ -33,12 +33,12 @@
 
 struct JPXStreamPrivate
 {
-    opj_image_t *image;
-    int counter;
-    int ccounter;
-    int npixels;
-    int ncomps;
-    bool inited;
+    opj_image_t *image = nullptr;
+    int counter = 0;
+    int ccounter = 0;
+    int npixels = 0;
+    int ncomps = 0;
+    bool inited = false;
     void init2(OPJ_CODEC_FORMAT format, const unsigned char *buf, int length, bool indexed);
 };
 
@@ -80,10 +80,6 @@ static inline int doGetChar(JPXStreamPrivate *priv)
 JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 {
     priv = new JPXStreamPrivate;
-    priv->inited = false;
-    priv->image = nullptr;
-    priv->npixels = 0;
-    priv->ncomps = 0;
 }
 
 JPXStream::~JPXStream()
