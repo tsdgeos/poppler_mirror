@@ -39,7 +39,6 @@ struct JPXStreamPrivate
     int npixels;
     int ncomps;
     bool inited;
-    int smaskInData;
     void init2(OPJ_CODEC_FORMAT format, const unsigned char *buf, int length, bool indexed);
 };
 
@@ -244,11 +243,11 @@ static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void *p_user_data)
 
 void JPXStream::init()
 {
-    Object oLen, cspace, smaskInData;
+    Object oLen, cspace, smaskInDataObj;
     if (getDict()) {
         oLen = getDict()->lookup("Length");
         cspace = getDict()->lookup("ColorSpace");
-        smaskInData = getDict()->lookup("SMaskInData");
+        smaskInDataObj = getDict()->lookup("SMaskInData");
     }
 
     int bufSize = BUFFER_INITIAL_SIZE;
@@ -264,11 +263,7 @@ void JPXStream::init()
         }
     }
 
-    priv->smaskInData = 0;
-    if (smaskInData.isInt()) {
-        priv->smaskInData = smaskInData.getInt();
-    }
-
+    const int smaskInData = smaskInDataObj.isInt() ? smaskInDataObj.getInt() : 0;
     const std::vector<unsigned char> buf = str->toUnsignedChars(bufSize);
     priv->init2(OPJ_CODEC_JP2, buf.data(), buf.size(), indexed);
 
@@ -292,7 +287,7 @@ void JPXStream::init()
         }
         priv->npixels = priv->image->comps[0].w * priv->image->comps[0].h;
         priv->ncomps = priv->image->numcomps;
-        if (alpha == 1 && priv->smaskInData == 0) {
+        if (alpha == 1 && smaskInData == 0) {
             priv->ncomps--;
         }
         for (int component = 0; component < priv->ncomps; component++) {
