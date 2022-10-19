@@ -1845,6 +1845,10 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     obj1 = dict->lookup("TI");
     if (obj1.isInt()) {
         topIdx = obj1.getInt();
+        if (topIdx < 0) {
+            error(errSyntaxError, -1, "FormFieldChoice:: invalid topIdx entry\n");
+            topIdx = 0;
+        }
     }
 
     obj1 = Form::fieldLookup(dict, "Opt");
