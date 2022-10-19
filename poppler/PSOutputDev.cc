@@ -1908,8 +1908,13 @@ void PSOutputDev::setupResources(Dict *resDict)
                 // process the Pattern's resource dictionary
                 Object pat = patDict.dictGetVal(i);
                 if (pat.isStream()) {
-                    Object resObj = pat.streamGetDict()->lookup("Resources");
+                    Ref resObjRef;
+                    Object resObj = pat.streamGetDict()->lookup("Resources", &resObjRef);
                     if (resObj.isDict()) {
+                        if (resObjRef != Ref::INVALID() && !resourceIDs.insert(resObjRef.num).second) {
+                            error(errSyntaxWarning, -1, "PSOutputDev::setupResources: Circular resources found.");
+                            continue;
+                        }
                         setupResources(resObj.getDict());
                     }
                 }
