@@ -114,7 +114,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
             rowSize = -rowSize;
         }
         if (alphaA) {
-            alpha = (unsigned char *)gmallocn(width, height);
+            alpha = (unsigned char *)gmallocn_checkoverflow(width, height);
         } else {
             alpha = nullptr;
         }
