@@ -3132,6 +3132,36 @@ public:
     int consumedText;
 };
 
+double Annot::calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, const bool forceZapfDingbats)
+{
+    const bool isUnicode = text->hasUnicodeMarker();
+    double fontSize;
+
+    for (fontSize = 20; fontSize > 1; --fontSize) {
+        const double availableWidthInFontSize = wMax / fontSize;
+        double y = hMax - 3;
+        int i = 0;
+        while (i < text->getLength()) {
+            GooString lineText(text->toStr().substr(i));
+            if (!lineText.hasUnicodeMarker() && isUnicode) {
+                lineText.prependUnicodeMarker();
+            }
+            const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
+            y -= fontSize;
+            if (i == 0) {
+                i += textLayouter.consumedText;
+            } else {
+                i += textLayouter.consumedText - (isUnicode ? 2 : 0);
+            }
+        }
+        // approximate the descender for the last line
+        if (y >= 0.33 * fontSize) {
+            break;
+        }
+    }
+    return fontSize;
+}
+
 struct DrawMultiLineTextResult
 {
     std::string text;
@@ -4603,32 +4633,10 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         // note: comb is ignored in multiline mode as mentioned in the spec
 
         const double wMax = dx - 2 * borderWidth - 4;
-        const bool isUnicode = text->hasUnicodeMarker();
 
         // compute font autosize
         if (fontSize == 0) {
-            for (fontSize = 20; fontSize > 1; --fontSize) {
-                const double availableWidthInFontSize = wMax / fontSize;
-                double y = dy - 3;
-                int i = 0;
-                while (i < text->getLength()) {
-                    GooString lineText(text->toStr().substr(i));
-                    if (!lineText.hasUnicodeMarker() && isUnicode) {
-                        lineText.prependUnicodeMarker();
-                    }
-                    const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
-                    y -= fontSize;
-                    if (i == 0) {
-                        i += textLayouter.consumedText;
-                    } else {
-                        i += textLayouter.consumedText - (isUnicode ? 2 : 0);
-                    }
-                }
-                // approximate the descender for the last line
-                if (y >= 0.33 * fontSize) {
-                    break;
-                }
-            }
+            fontSize = Annot::calculateFontSize(form, font, text, wMax, dy, forceZapfDingbats);
             daToks[tfPos + 1] = GooString().appendf("{0:.2f}", fontSize)->toStr();
         }
 

@@ -716,6 +716,8 @@ public:
     Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
     bool isOk() { return ok; }
 
+    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, const double wMax, const double hMax, const bool forceZapfDingbats = {});
+
     void incRefCnt();
     void decRefCnt();
 
