@@ -34,11 +34,13 @@
 #define SPLASHBITMAP_H
 
 #include "SplashTypes.h"
-#include "poppler/GfxState.h"
 #include "poppler_private_export.h"
 #include <cstdio>
+#include <string>
+#include <vector>
 
 class ImgWriter;
+class GfxSeparationColorSpace;
 
 //------------------------------------------------------------------------
 // SplashBitmap
@@ -80,7 +82,7 @@ public:
     {
         int jpegQuality = -1;
         bool jpegProgressive = false;
-        GooString tiffCompression;
+        std::string tiffCompression;
         bool jpegOptimize = false;
     };
 

@@ -40,6 +40,7 @@
 #include <cmath>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
+#include "poppler/GfxState.h"
 #include "poppler/Error.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"

@@ -43,6 +43,7 @@
 #include "SplashErrorCodes.h"
 #include "SplashBitmap.h"
 #include "poppler/Error.h"
+#include "poppler/GfxState.h"
 #include "goo/JpegWriter.h"
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
