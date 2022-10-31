@@ -1,3 +1,21 @@
+Release 22.10.0:
+        core:
+         * SplashOutputDev::tilingPatternFill: Properly restore CTM on failure. Issue #1292
+         * Protect against malformed files
+         * Refactor code to not use strndup
+         * Other small code refactoring
+
+        utils:
+         * pdftoppm: Avoid round-off errors when determining raster dimensions
+         * pdftocairo: Avoid round-off errors when determining raster dimensions
+         * pdftotext: Simplify memory handling
+
+        qt:
+         * Take into account flagNoView when getting/setting the visible status. KDE bug #456313
+
+        build system:
+         * Fix sed invocation
+
 Release 22.09.0:
         core:
          * Splash: Do not truncate line dash patterns with more than 20 entries. Issue #1281

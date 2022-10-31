@@ -43,6 +43,7 @@
 #include "SplashErrorCodes.h"
 #include "SplashBitmap.h"
 #include "poppler/Error.h"
+#include "poppler/GfxState.h"
 #include "goo/JpegWriter.h"
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
@@ -114,7 +115,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
             rowSize = -rowSize;
         }
         if (alphaA) {
-            alpha = (unsigned char *)gmallocn(width, height);
+            alpha = (unsigned char *)gmallocn_checkoverflow(width, height);
         } else {
             alpha = nullptr;
         }

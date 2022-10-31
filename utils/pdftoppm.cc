@@ -298,7 +298,7 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
     params.jpegQuality = jpegQuality;
     params.jpegProgressive = jpegProgressive;
     params.jpegOptimize = jpegOptimize;
-    params.tiffCompression.Set(TiffCompressionStr);
+    params.tiffCompression = TiffCompressionStr;
 
     if (ppmFile != nullptr) {
         SplashError e;

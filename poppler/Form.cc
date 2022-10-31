@@ -27,7 +27,7 @@
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
-// Copyright 2020, 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020-2022 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
@@ -1674,14 +1674,14 @@ void FormFieldText::setContentCopy(const GooString *new_content)
                     Object fieldResourcesDictObj = obj.dictLookup("DR");
                     if (fieldResourcesDictObj.isDict()) {
                         GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(new_content, fontName, &fieldResources);
+                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content, fontName, &fieldResources);
                         // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                         // to the field DR dictionary
                         for (const Form::AddFontResult &afr : newFonts) {
                             fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
                         }
                     } else {
-                        form->ensureFontsForAllCharacters(new_content, fontName);
+                        form->ensureFontsForAllCharacters(content, fontName);
                     }
                 }
             } else {
@@ -1845,6 +1845,10 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     obj1 = dict->lookup("TI");
     if (obj1.isInt()) {
         topIdx = obj1.getInt();
+        if (topIdx < 0) {
+            error(errSyntaxError, -1, "FormFieldChoice:: invalid topIdx entry\n");
+            topIdx = 0;
+        }
     }
 
     obj1 = Form::fieldLookup(dict, "Opt");

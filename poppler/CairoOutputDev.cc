@@ -31,7 +31,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2019, 2020, 2022 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Uli Schlachter <psychon@znc.in>
@@ -357,6 +357,7 @@ void CairoOutputDev::saveState(GfxState *state)
     elem.stroke_opacity = stroke_opacity;
     elem.mask = mask ? cairo_pattern_reference(mask) : nullptr;
     elem.mask_matrix = mask_matrix;
+    elem.fontRef = currentFont ? currentFont->getRef() : Ref::INVALID();
     saveStateStack.push_back(elem);
 
     if (strokePathClip) {
@@ -383,6 +384,10 @@ void CairoOutputDev::restoreState(GfxState *state)
     stroke_pattern = saveStateStack.back().stroke_pattern;
     stroke_color = {};
     stroke_opacity = saveStateStack.back().stroke_opacity;
+
+    if (saveStateStack.back().fontRef != (currentFont ? currentFont->getRef() : Ref::INVALID())) {
+        needFontUpdate = true;
+    }
 
     /* This isn't restored by cairo_restore() since we keep it in the
      * output device. */
