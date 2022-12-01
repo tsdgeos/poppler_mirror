@@ -24,7 +24,7 @@ jobs:
         brew list --cask
         brew update
         brew uninstall -f poppler gdal postgis python@2 mercurial
-        brew install glib-utils
+        brew install glib-utils qt6
         brew install poppler --only-dependencies
         brew upgrade cmake pkg-config && brew install ninja boost
         sudo rm -rf /Library/Frameworks/Mono.framework
