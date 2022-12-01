@@ -254,7 +254,7 @@ public:
     ~SysFontList();
     SysFontList(const SysFontList &) = delete;
     SysFontList &operator=(const SysFontList &) = delete;
-    const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact);
+    const SysFontInfo *find(const std::string &name, bool isFixedWidth, bool exact, const std::vector<std::string> &filesToIgnore = {});
 
     const std::vector<SysFontInfo *> &getFonts() const { return fonts; }
 
@@ -284,7 +284,7 @@ SysFontList::~SysFontList()
     }
 }
 
-const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact)
+const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, bool exact, const std::vector<std::string> &filesToIgnore)
 {
     GooString *name2;
     bool bold, italic, oblique;
@@ -368,7 +368,9 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     for (const SysFontInfo *f : fonts) {
         fi = f;
         if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
-            break;
+            if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+                break;
+            }
         }
         fi = nullptr;
     }
@@ -377,7 +379,9 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, italic)) {
-                break;
+                if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+                    break;
+                }
             }
             fi = nullptr;
         }
@@ -387,7 +391,9 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, false)) {
-                break;
+                if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+                    break;
+                }
             }
             fi = nullptr;
         }
@@ -1104,32 +1110,34 @@ fin:
     return path;
 }
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
 {
-    FcChar8 *fcFilePath = nullptr;
-    int faceIndex = 0;
     FcPattern *p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, fontFamily.c_str(), FC_STYLE, FcTypeString, fontStyle.c_str(), nullptr);
     FcConfigSubstitute(nullptr, p, FcMatchPattern);
     FcDefaultSubstitute(p);
     if (p) {
         FcResult res;
-        FcFontSet *set = FcFontSort(nullptr, p, FcFalse, nullptr, &res);
-        if (set) {
-            if (res == FcResultMatch && set->nfont > 0) {
-                FcPatternGetString(set->fonts[0], FC_FILE, 0, &fcFilePath);
-                FcPatternGetInteger(set->fonts[0], FC_INDEX, 0, &faceIndex);
+        FcFontSet *fontSet = FcFontSort(nullptr, p, FcFalse, nullptr, &res);
+        if (fontSet) {
+            const std::unique_ptr<FcFontSet, void (*)(FcFontSet *)> fontSetDeleter(fontSet, [](FcFontSet *fSet) { FcFontSetDestroy(fSet); });
+            if (res == FcResultMatch) {
+                for (int i = 0; i < fontSet->nfont; i++) {
+                    FcChar8 *fcFilePath = nullptr;
+                    int faceIndex = 0;
+                    FcPatternGetString(fontSet->fonts[i], FC_FILE, 0, &fcFilePath);
+                    FcPatternGetInteger(fontSet->fonts[i], FC_INDEX, 0, &faceIndex);
+
+                    const std::string sFilePath = reinterpret_cast<char *>(fcFilePath);
+                    if (std::find(filesToIgnore.begin(), filesToIgnore.end(), sFilePath) == filesToIgnore.end()) {
+                        return FamilyStyleFontSearchResult(sFilePath, faceIndex);
+                    }
+                }
             }
-            FcFontSetDestroy(set);
         }
-        FcPatternDestroy(p);
     }
 
-    if (!fcFilePath) {
-        error(errIO, -1, "Couldn't find font file for {0:s} {1:s}", fontFamily.c_str(), fontStyle.c_str());
-        return {};
-    }
-
-    return FamilyStyleFontSearchResult(reinterpret_cast<char *>(fcFilePath), faceIndex);
+    error(errIO, -1, "Couldn't find font file for {0:s} {1:s}", fontFamily.c_str(), fontStyle.c_str());
+    return {};
 }
 
 UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
@@ -1179,7 +1187,7 @@ GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const G
 
 #else
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
 {
     error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForFamilyAndStyle not implemented for this platform");
     return {};

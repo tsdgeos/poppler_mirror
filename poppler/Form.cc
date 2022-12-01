@@ -2727,9 +2727,17 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
 
 Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
 {
-    const FamilyStyleFontSearchResult res = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
-
-    return addFontToDefaultResources(res.filepath, res.faceIndex, fontFamily, fontStyle);
+    FamilyStyleFontSearchResult findFontRes = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
+    std::vector<std::string> filesToIgnore;
+    while (!findFontRes.filepath.empty()) {
+        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle);
+        if (!addFontRes.fontName.empty()) {
+            return addFontRes;
+        }
+        filesToIgnore.emplace_back(findFontRes.filepath);
+        findFontRes = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle, filesToIgnore);
+    }
+    return {};
 }
 
 Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)

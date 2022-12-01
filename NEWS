@@ -1,3 +1,9 @@
+Release 22.11.0:
+        core:
+         * CairoOutputDev: Update font after restore
+         * Protect against broken files
+         * Small code refactoring
+
 Release 22.10.0:
         core:
          * SplashOutputDev::tilingPatternFill: Properly restore CTM on failure. Issue #1292
