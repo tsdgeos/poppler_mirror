@@ -5,7 +5,7 @@ if(ENABLE_QT_STRICT_ITERATORS)
   add_definitions(-DQT_STRICT_ITERATORS)
 endif()
 
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050900)
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050C00)
 add_definitions(-DQT_NO_DEPRECATED_WARNINGS)
 
 add_subdirectory(src)

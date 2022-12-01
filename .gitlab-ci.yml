@@ -9,7 +9,7 @@ before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
-  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libgtk-3-dev wget p7zip-full libbrotli-dev libboost-container-dev qt6-base-dev
+  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libgtk-3-dev libbrotli-dev libboost-container-dev qt6-base-dev
   - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   - locale-gen
 
@@ -65,16 +65,22 @@ build_clang14_libcpp:
     - cp "$srcdir/.clang-tidy" .
     - run-clang-tidy-14
 
-build_ubuntu_18_04:
+build_ubuntu_20_04:
   stage: build
-  image: ubuntu:bionic
+  image: ubuntu:20.04
   before_script:
     - apt-get update
-    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git
+    - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/" -A "6.2.0-0-*qtbase-Linux-RHEL_8_2-GCC-Linux-RHEL_8_2-X86_64.7z"
+    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/6.2.0-0-*qtbase-Linux-RHEL_8_2-GCC-Linux-RHEL_8_2-X86_64.7z
+    - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/" -A "6.2.0-0-*icu-linux-Rhel7.2-x64.7z"
+    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/6.2.0-0-*icu-linux-Rhel7.2-x64.7z
   script:
+    - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja ..
+    - cmake -G Ninja  -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/../6.2.0/gcc_64/lib/cmake ..
     - ninja
+    - ctest --output-on-failure
 
 build_mingw64_fedora37:
   stage: build
