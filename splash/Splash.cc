@@ -3892,6 +3892,9 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
             if (xa == xb) {
                 ++xb;
             }
+            if (unlikely(clipRes == splashClipAllInside && xb > bitmap->getWidth())) {
+                xb = bitmap->getWidth();
+            }
             if (clipRes != splashClipAllInside) {
                 clipRes2 = state->clip->testSpan(xa, xb - 1, y);
             } else {
