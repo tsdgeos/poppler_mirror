@@ -42,11 +42,6 @@ if (GTK_FOUND)
 endif ()
 
 if (HAVE_CAIRO)
-  include_directories(
-    SYSTEM
-    ${CAIRO_INCLUDE_DIRS}
-  )
-
   include(CheckCXXSymbolExists)
   set (CMAKE_REQUIRED_INCLUDES ${CAIRO_INCLUDE_DIRS})
   check_cxx_symbol_exists(CAIRO_HAS_PNG_FUNCTIONS "cairo.h" HAVE_CAIRO_PNG)
