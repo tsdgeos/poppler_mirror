@@ -1,12 +1,8 @@
 # - try to find NSS3 libraries
 # Once done this will define
 #
-#  NSS_FOUND - system has NSS3
+#  NSS3_FOUND - system has NSS3
 #  PkgConfig::NSS3 - Use this in target_link_libraries to bring both includes and link libraries
-#
-#  Deprecated, use the above variables:
-#     NSS3_CFLAGS - the NSS CFlags
-#     NSS3_LIBRARIES - Link these to use NSS
 #
 # Copyright 2015 André Guerreiro, <aguerreiro1985@gmail.com>
 # Copyright 2022 Albert Astals Cid, <aacid@kde.org>
