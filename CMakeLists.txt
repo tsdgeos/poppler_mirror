@@ -535,15 +535,12 @@ if (OpenJPEG_FOUND)
     poppler/JPEG2000Stream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} openjp2)
-  # target openjp2 may lack interface include directories
-  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
 else ()
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPXStream.cc
   )
 endif()
 if(USE_CMS)
-  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
   set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
 endif()
 if(WIN32)
@@ -603,6 +600,14 @@ if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 add_library(poppler ${poppler_SRCS})
+if (OpenJPEG_FOUND)
+  # check if we can remove this when we depend on newer openjpeg versions, 2.5 seems fixed
+  # target openjp2 may lack interface include directories
+  target_include_directories(poppler SYSTEM PRIVATE ${OPENJPEG_INCLUDE_DIRS})
+endif()
+if(USE_CMS)
+  target_include_directories(poppler SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
+endif()
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
 set_target_properties(poppler PROPERTIES VERSION 126.0.0 SOVERSION 126)
 if(MINGW AND BUILD_SHARED_LIBS)
