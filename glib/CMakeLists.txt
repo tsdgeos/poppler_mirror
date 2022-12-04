@@ -96,6 +96,7 @@ if(MINGW AND BUILD_SHARED_LIBS)
     set_target_properties(poppler-glib PROPERTIES SUFFIX "-${POPPLER_GLIB_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} Freetype::Freetype)
+target_include_directories(poppler-glib SYSTEM PRIVATE ${CAIRO_INCLUDE_DIRS})
 install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
