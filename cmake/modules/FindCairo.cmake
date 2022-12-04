@@ -47,7 +47,7 @@ if(CAIRO_FOUND)
             HINTS ${_pc_cairo_INCLUDE_DIRS}
             PATH_SUFFIXES cairo
   )
-  set(CAIRO_INCLUDE_DIRS "${CAIRO_INCLUDE_DIR}")
+  set(CAIRO_INCLUDE_DIRS "${CAIRO_INCLUDE_DIR};${_pc_cairo_INCLUDE_DIRS}")
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Cairo DEFAULT_MSG CAIRO_LIBRARIES CAIRO_INCLUDE_DIRS)
