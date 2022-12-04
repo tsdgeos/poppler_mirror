@@ -33,8 +33,6 @@ if (HAVE_CAIRO)
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    SYSTEM
-    ${CAIRO_INCLUDE_DIRS}
   )
   add_definitions(${CAIRO_CFLAGS})
   add_executable(pdftocairo ${pdftocairo_SOURCES})
