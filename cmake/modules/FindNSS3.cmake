@@ -18,6 +18,6 @@ include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(NSS3 IMPORTED_TARGET "nss>=3.19")
+pkg_check_modules(NSS3 IMPORTED_TARGET "nss>=3.49")
 
 find_package_handle_standard_args(NSS3 DEFAULT_MSG NSS3_LIBRARIES NSS3_CFLAGS)
