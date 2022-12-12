@@ -2174,6 +2174,10 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
         pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
     }
 
+    if (pdfFontName.empty()) {
+        return false;
+    }
+
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
 
     Object annotObj = Object(new Dict(getXRef()));
