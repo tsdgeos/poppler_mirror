@@ -47,17 +47,6 @@ FoFiType1 *FoFiType1::make(const unsigned char *fileA, int lenA)
     return new FoFiType1(fileA, lenA, false);
 }
 
-FoFiType1 *FoFiType1::load(const char *fileName)
-{
-    char *fileA;
-    int lenA;
-
-    if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
-        return nullptr;
-    }
-    return new FoFiType1((unsigned char *)fileA, lenA, true);
-}
-
 FoFiType1::FoFiType1(const unsigned char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
     name = nullptr;
