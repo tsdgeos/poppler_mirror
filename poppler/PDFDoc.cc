@@ -63,6 +63,7 @@
 #include <config.h>
 #include <poppler-config.h>
 
+#include <array>
 #include <cctype>
 #include <clocale>
 #include <cstdio>
@@ -2152,6 +2153,24 @@ bool PDFDoc::hasJavascript()
     return jsInfo.containsJS();
 }
 
+static std::string findPdfFontNameToUseForSigning(Form *form)
+{
+    static constexpr std::array<const char *, 2> fontsToUseToSign = { "Helvetica", "Arial" };
+    for (const char *fontToUseToSign : fontsToUseToSign) {
+        std::string pdfFontName = form->findFontInDefaultResources(fontToUseToSign, "");
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+
+        pdfFontName = form->addFontToDefaultResources(fontToUseToSign, "").fontName;
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+    }
+
+    return {};
+}
+
 bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
                   double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason,
                   const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
@@ -2169,11 +2188,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
     }
 
     Form *form = catalog->getCreateForm();
-    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
-    if (pdfFontName.empty()) {
-        pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
-    }
-
+    const std::string pdfFontName = findPdfFontNameToUseForSigning(form);
     if (pdfFontName.empty()) {
         return false;
     }
