@@ -221,109 +221,132 @@ void FoFiType1::parse()
             line = getNextLine(line);
 
             // get encoding
-        } else if (!encoding && (line + 30 <= (char *)file + len) && !strncmp(line, "/Encoding StandardEncoding def", 30)) {
-            encoding = (char **)fofiType1StandardEncoding;
-        } else if (!encoding && (line + 19 <= (char *)file + len) && !strncmp(line, "/Encoding 256 array", 19)) {
-            encoding = (char **)gmallocn(256, sizeof(char *));
-            for (j = 0; j < 256; ++j) {
-                encoding[j] = nullptr;
-            }
-            continueLine = false;
-            for (j = 0, line = getNextLine(line); j < 300 && line && (line1 = getNextLine(line)); ++j, line = line1) {
-                if ((n = (int)(line1 - line)) > 255) {
-                    error(errSyntaxWarning, -1, "FoFiType1::parse a line has more than 255 characters, we don't support this");
-                    n = 255;
-                }
-                if (continueLine) {
+        } else if (!encoding && (line + 9 <= (char *)file + len) && !strncmp(line, "/Encoding", 9)) {
+            line = line + 9;
+            const auto availableFile = (char *)file + len - line;
+            const int lineLen = static_cast<int>(availableFile < 255 ? availableFile : 255);
+            strncpy(buf, line, lineLen);
+            buf[lineLen] = '\0';
+            p = strtok_r(buf, " \t\n\r", &tokptr);
+            if (p && (p + 3 <= (char *)buf + lineLen) && !strncmp(p, "256", 3)) {
+                p = strtok_r(nullptr, " \t\n\r", &tokptr);
+                if (p && (p + 5 <= (char *)buf + lineLen) && !strncmp(p, "array", 5)) {
+                    encoding = (char **)gmallocn(256, sizeof(char *));
+                    for (j = 0; j < 256; ++j) {
+                        encoding[j] = nullptr;
+                    }
                     continueLine = false;
-                    if ((line1 - firstLine) + 1 > (int)sizeof(buf)) {
-                        break;
-                    }
-                    p = firstLine;
-                    p2 = buf;
-                    while (p < line1) {
-                        if (*p == '\n' || *p == '\r') {
-                            *p2++ = ' ';
-                            p++;
-                        } else {
-                            *p2++ = *p++;
+                    for (j = 0, line = getNextLine(line); j < 1200 && line && (line1 = getNextLine(line)); ++j, line = line1) {
+                        if ((n = (int)(line1 - line)) > 255) {
+                            error(errSyntaxWarning, -1, "FoFiType1::parse a line has more than 255 characters, we don't support this");
+                            n = 255;
                         }
-                    }
-                    *p2 = '\0';
-                } else {
-                    firstLine = line;
-                    strncpy(buf, line, n);
-                    buf[n] = '\0';
-                }
-                for (p = buf; *p == ' ' || *p == '\t'; ++p) {
-                    ;
-                }
-                if (!strncmp(p, "dup", 3)) {
-                    while (true) {
-                        p += 3;
-                        for (; *p == ' ' || *p == '\t'; ++p) {
-                            ;
-                        }
-                        code = 0;
-                        if (*p == '8' && p[1] == '#') {
-                            base = 8;
-                            p += 2;
-                        } else if (*p >= '0' && *p <= '9') {
-                            base = 10;
-                        } else if (*p == '\n' || *p == '\r') {
-                            continueLine = true;
-                            break;
-                        } else {
-                            break;
-                        }
-                        for (; *p >= '0' && *p < '0' + base && code < INT_MAX / (base + (*p - '0')); ++p) {
-                            code = code * base + (*p - '0');
-                        }
-                        for (; *p == ' ' || *p == '\t'; ++p) {
-                            ;
-                        }
-                        if (*p == '\n' || *p == '\r') {
-                            continueLine = true;
-                            break;
-                        } else if (*p != '/') {
-                            break;
-                        }
-                        ++p;
-                        for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2) {
-                            ;
-                        }
-                        if (code >= 0 && code < 256) {
-                            c = *p2;
+                        if (continueLine) {
+                            continueLine = false;
+                            if ((line1 - firstLine) + 1 > (int)sizeof(buf)) {
+                                break;
+                            }
+                            p = firstLine;
+                            p2 = buf;
+                            while (p < line1) {
+                                if (*p == '\n' || *p == '\r') {
+                                    *p2++ = ' ';
+                                    p++;
+                                } else {
+                                    *p2++ = *p++;
+                                }
+                            }
                             *p2 = '\0';
-                            gfree(encoding[code]);
-                            encoding[code] = copyString(p);
-                            *p2 = c;
+                        } else {
+                            firstLine = line;
+                            strncpy(buf, line, n);
+                            buf[n] = '\0';
                         }
-                        for (p = p2; *p == ' ' || *p == '\t'; ++p) {
+                        for (p = buf; *p == ' ' || *p == '\t'; ++p) {
                             ;
                         }
-                        if (*p == '\n' || *p == '\r') {
-                            continueLine = true;
-                            break;
+                        if (!strncmp(p, "dup", 3)) {
+                            while (true) {
+                                p += 3;
+                                for (; *p == ' ' || *p == '\t'; ++p) {
+                                    ;
+                                }
+                                code = 0;
+                                if (*p == '8' && p[1] == '#') {
+                                    base = 8;
+                                    p += 2;
+                                } else if (*p >= '0' && *p <= '9') {
+                                    base = 10;
+                                } else if (*p == '\n' || *p == '\r') {
+                                    continueLine = true;
+                                    break;
+                                } else {
+                                    break;
+                                }
+                                for (; *p >= '0' && *p < '0' + base && code < INT_MAX / (base + (*p - '0')); ++p) {
+                                    code = code * base + (*p - '0');
+                                }
+                                for (; *p == ' ' || *p == '\t'; ++p) {
+                                    ;
+                                }
+                                if (*p == '\n' || *p == '\r' || *p == '\0') {
+                                    continueLine = true;
+                                    break;
+                                } else if (*p != '/') {
+                                    break;
+                                }
+                                ++p;
+                                for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2) {
+                                    ;
+                                }
+                                if (code >= 0 && code < 256) {
+                                    c = *p2;
+                                    *p2 = '\0';
+                                    gfree(encoding[code]);
+                                    encoding[code] = copyString(p);
+                                    *p2 = c;
+                                }
+                                for (p = p2; *p == ' ' || *p == '\t'; ++p) {
+                                    ;
+                                }
+                                if (*p == '\n' || *p == '\r') {
+                                    continueLine = true;
+                                    break;
+                                }
+                                if (strncmp(p, "put", 3)) {
+                                    break;
+                                }
+                                for (p += 3; *p == ' ' || *p == '\t'; ++p) {
+                                    ;
+                                }
+                                if (strncmp(p, "dup", 3)) {
+                                    break;
+                                }
+                            }
+                        } else {
+                            if (strtok_r(buf, " \t", &tokptr) && (p = strtok_r(nullptr, " \t\n\r", &tokptr)) && !strcmp(p, "def")) {
+                                break;
+                            }
                         }
-                        if (strncmp(p, "put", 3)) {
-                            break;
-                        }
-                        for (p += 3; *p == ' ' || *p == '\t'; ++p) {
-                            ;
-                        }
-                        if (strncmp(p, "dup", 3)) {
-                            break;
-                        }
-                    }
-                } else {
-                    if (strtok_r(buf, " \t", &tokptr) && (p = strtok_r(nullptr, " \t\n\r", &tokptr)) && !strcmp(p, "def")) {
-                        break;
-                    }
-                }
-            }
-            //~ check for getinterval/putinterval junk
 
+                        bool allEncodingSet = true;
+                        for (int k = 0; allEncodingSet && k < 256; ++k) {
+                            allEncodingSet = encoding[k] != nullptr;
+                        }
+                        if (allEncodingSet) {
+                            break;
+                        }
+                    }
+                    //~ check for getinterval/putinterval junk
+                }
+            } else if (p && (p + 16 <= (char *)buf + lineLen) && !strncmp(p, "StandardEncoding", 16)) {
+                p = strtok_r(nullptr, " \t\n\r", &tokptr);
+                if (p && (p + 3 <= (char *)buf + lineLen) && !strncmp(p, "def", 3)) {
+                    encoding = (char **)fofiType1StandardEncoding;
+                }
+            } else {
+                line = getNextLine(line);
+            }
         } else if (!gotMatrix && (line + 11 <= (char *)file + len) && !strncmp(line, "/FontMatrix", 11)) {
             const auto availableFile = (char *)file + len - (line + 11);
             const int bufLen = static_cast<int>(availableFile < 255 ? availableFile : 255);
