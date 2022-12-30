@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -5049,12 +5049,21 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
         } else {
             error(errSyntaxError, getPos(), "insufficient arguments for Marked Content");
         }
-    } else if (args[0].isName("Span") && numArgs == 2 && args[1].isDict()) {
-        Object obj = args[1].dictLookup("ActualText");
-        if (obj.isString()) {
-            out->beginActualText(state, obj.getString());
-            MarkedContentStack *mc = mcStack;
-            mc->kind = gfxMCActualText;
+    } else if (args[0].isName("Span") && numArgs == 2) {
+        Object dictToUse;
+        if (args[1].isDict()) {
+            dictToUse = args[1].copy();
+        } else if (args[1].isName()) {
+            dictToUse = res->lookupMarkedContentNF(args[1].getName()).fetch(xref);
+        }
+
+        if (dictToUse.isDict()) {
+            Object obj = dictToUse.dictLookup("ActualText");
+            if (obj.isString()) {
+                out->beginActualText(state, obj.getString());
+                MarkedContentStack *mc = mcStack;
+                mc->kind = gfxMCActualText;
+            }
         }
     }
 

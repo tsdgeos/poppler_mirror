@@ -36,6 +36,7 @@
 // Copyright (C) 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Uli Schlachter <psychon@znc.in>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1534,6 +1535,12 @@ void CairoOutputDev::endString(GfxState *state)
     render = state->getRender();
     if (render == 3 || glyphCount == 0 || !text_matrix_valid) {
         goto finish;
+    }
+
+    if (state->getFont()->getType() == fontType3 && render != 7) {
+        // If the current font is a type 3 font, we should ignore the text rendering mode
+        // (and use the default of 0) as long as we are going to either fill or stroke.
+        render = 0;
     }
 
     if (!(render & 1)) {

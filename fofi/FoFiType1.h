@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -35,9 +35,6 @@ class FoFiType1 : public FoFiBase
 public:
     // Create a FoFiType1 object from a memory buffer.
     static FoFiType1 *make(const unsigned char *fileA, int lenA);
-
-    // Create a FoFiType1 object from a file on disk.
-    static FoFiType1 *load(const char *fileName);
 
     ~FoFiType1() override;
 

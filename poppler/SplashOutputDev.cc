@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016, 2020, 2022 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2014-2016, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -796,51 +796,34 @@ static void splashOutBlendExclusion(SplashColorPtr src, SplashColorPtr dest, Spl
 
 static int getLum(int r, int g, int b)
 {
-    return (int)(0.3 * r + 0.59 * g + 0.11 * b);
+    // (int)(0.3 * r + 0.59 * g + 0.11 * b) =
+    // (int)(256 / 256 * 0.3 * r + 256 / 256 * 0.59 * g + 256 / 256 * 0.11 * b)
+    // (int)((77 * r + 151 * g + 28 * b) / 256)  = // round!
+    return (int)((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
 }
 
 static int getSat(int r, int g, int b)
 {
-    int rgbMin, rgbMax;
+    int rgbMin = std::min({ r, g, b });
+    int rgbMax = std::max({ r, g, b });
 
-    rgbMin = rgbMax = r;
-    if (g < rgbMin) {
-        rgbMin = g;
-    } else if (g > rgbMax) {
-        rgbMax = g;
-    }
-    if (b < rgbMin) {
-        rgbMin = b;
-    } else if (b > rgbMax) {
-        rgbMax = b;
-    }
     return rgbMax - rgbMin;
 }
 
 static void clipColor(int rIn, int gIn, int bIn, unsigned char *rOut, unsigned char *gOut, unsigned char *bOut)
 {
-    int lum, rgbMin, rgbMax;
+    int lum = getLum(rIn, gIn, bIn);
+    int rgbMin = std::min({ rIn, bIn, gIn });
+    int rgbMax = std::max({ rIn, bIn, gIn });
 
-    lum = getLum(rIn, gIn, bIn);
-    rgbMin = rgbMax = rIn;
-    if (gIn < rgbMin) {
-        rgbMin = gIn;
-    } else if (gIn > rgbMax) {
-        rgbMax = gIn;
-    }
-    if (bIn < rgbMin) {
-        rgbMin = bIn;
-    } else if (bIn > rgbMax) {
-        rgbMax = bIn;
-    }
     if (rgbMin < 0) {
-        *rOut = (unsigned char)(lum + ((rIn - lum) * lum) / (lum - rgbMin));
-        *gOut = (unsigned char)(lum + ((gIn - lum) * lum) / (lum - rgbMin));
-        *bOut = (unsigned char)(lum + ((bIn - lum) * lum) / (lum - rgbMin));
+        *rOut = (unsigned char)std::clamp(lum + ((rIn - lum) * lum) / (lum - rgbMin), 0, 255);
+        *gOut = (unsigned char)std::clamp(lum + ((gIn - lum) * lum) / (lum - rgbMin), 0, 255);
+        *bOut = (unsigned char)std::clamp(lum + ((bIn - lum) * lum) / (lum - rgbMin), 0, 255);
     } else if (rgbMax > 255) {
-        *rOut = (unsigned char)(lum + ((rIn - lum) * (255 - lum)) / (rgbMax - lum));
-        *gOut = (unsigned char)(lum + ((gIn - lum) * (255 - lum)) / (rgbMax - lum));
-        *bOut = (unsigned char)(lum + ((bIn - lum) * (255 - lum)) / (rgbMax - lum));
+        *rOut = (unsigned char)std::clamp(lum + ((rIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
+        *gOut = (unsigned char)std::clamp(lum + ((gIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
+        *bOut = (unsigned char)std::clamp(lum + ((bIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
     } else {
         *rOut = rIn;
         *gOut = gIn;
@@ -889,8 +872,8 @@ static void setSat(unsigned char rIn, unsigned char gIn, unsigned char bIn, int 
         minOut = bOut;
     }
     if (rgbMax > rgbMin) {
-        *midOut = (unsigned char)((rgbMid - rgbMin) * sat) / (rgbMax - rgbMin);
-        *maxOut = (unsigned char)sat;
+        *midOut = (unsigned char)std::clamp(((rgbMid - rgbMin) * sat) / (rgbMax - rgbMin), 0, 255);
+        *maxOut = (unsigned char)std::clamp(sat, 0, 255);
     } else {
         *midOut = *maxOut = 0;
     }
