@@ -482,7 +482,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     auto gfx = std::make_unique<Gfx>(info->doc, output_dev, resDict, &box, nullptr);
     output_dev->startDoc(info->doc, info->fontEngine);
     output_dev->startType3Render(gfx->getState(), gfx->getXRef());
-    output_dev->setInType3Char(true);
+    output_dev->setType3RenderType(color ? CairoOutputDev::Type3RenderColor : CairoOutputDev::Type3RenderMask);
     charProc = charProcs->getVal(glyph);
     if (!charProc.isStream()) {
         return CAIRO_STATUS_USER_FONT_ERROR;

@@ -155,7 +155,7 @@ CairoOutputDev::CairoOutputDev()
     printing = true;
     use_show_text_glyphs = false;
     inUncoloredPattern = false;
-    inType3Char = false;
+    t3_render_state = Type3RenderNone;
     t3_glyph_has_bbox = false;
     t3_glyph_has_color = false;
     text_matrix_valid = true;
@@ -888,7 +888,7 @@ void CairoOutputDev::doPath(cairo_t *c, GfxState *state, const GfxPath *path)
 
 void CairoOutputDev::stroke(GfxState *state)
 {
-    if (inType3Char) {
+    if (t3_render_state == Type3RenderMask) {
         GfxGray gray;
         state->getFillGray(&gray);
         if (colToDbl(gray) > 0.5) {
@@ -919,7 +919,7 @@ void CairoOutputDev::stroke(GfxState *state)
 
 void CairoOutputDev::fill(GfxState *state)
 {
-    if (inType3Char) {
+    if (t3_render_state == Type3RenderMask) {
         GfxGray gray;
         state->getFillGray(&gray);
         if (colToDbl(gray) > 0.5) {
