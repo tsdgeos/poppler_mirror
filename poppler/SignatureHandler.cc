@@ -858,6 +858,10 @@ SignatureHandler::~SignatureHandler()
         HASH_Destroy(hash_context);
     }
 
+    if (signing_cert) {
+        CERT_DestroyCertificate(signing_cert);
+    }
+
     free(temp_certs);
 }
 
