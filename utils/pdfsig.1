@@ -62,7 +62,7 @@ Specifies the field name to be used when adding a new signature. A random ID wil
 Sign the document in the specified signature field present in the document (must be unsigned).  Field can be specified by field name (string) or the n-th signature field in the document (integer).
 .TP
 .B \-nick " nickname"
-Use the certificate with the given nickname for signing.
+Use the certificate with the given nickname for signing. If nickname starts with pkcs11:, it's treated as PKCS#11 URI.
 .TP
 .B \-kpw " password"
 Use the given password for the signing key
@@ -96,6 +96,9 @@ Displays signature info for signed_file.pdf.
 .TP
 pdfsig input.pdf output.pdf -add-signature -nss-pwd password -nick my-cert -reason 'for fun!'
 Creates a new pdf named output.pdf with the contents of input.pdf signed by the 'my-cert' certificate.
+.TP
+pdfsig input.pdf output.pdf -add-signature -nss-pwd password -nick 'pkcs11:token=smartcard0;object=Second%20certificate;type=cert'
+Same, but uses a PKCS#11 URI as defined in IETF RFC 7512 to select the certificate to be used for signing.
 .TP
 pdfsig input.pdf output.pdf -sign 0 -nss-pwd password -nick my-cert -reason 'for fun!'
 Creates a new pdf named output.pdf with the contents of input.pdf signed by the 'my-cert' certificate. input.pdf must have an already existing un-signed signature field.

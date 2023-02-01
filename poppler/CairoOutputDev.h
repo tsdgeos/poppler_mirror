@@ -18,7 +18,7 @@
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2011-2017, 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2009, 2011-2017, 2022, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -263,9 +263,15 @@ public:
     }
     void copyAntialias(cairo_t *cr, cairo_t *source_cr);
 
-    void setInType3Char(bool inType3CharA)
+    enum Type3RenderType
     {
-        inType3Char = inType3CharA;
+        Type3RenderNone,
+        Type3RenderMask,
+        Type3RenderColor
+    };
+    void setType3RenderType(Type3RenderType state)
+    {
+        t3_render_state = state;
     }
     void getType3GlyphWidth(double *wx, double *wy)
     {
@@ -348,7 +354,7 @@ protected:
     int utf8Max;
     cairo_path_t *textClipPath;
     bool inUncoloredPattern; // inside a uncolored pattern (PaintType = 2)
-    bool inType3Char; // inside a Type 3 CharProc
+    Type3RenderType t3_render_state;
     double t3_glyph_wx, t3_glyph_wy;
     bool t3_glyph_has_bbox;
     bool t3_glyph_has_color;

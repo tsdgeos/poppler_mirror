@@ -20,7 +20,7 @@
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
-// Copyright (C) 2008-2018, 2021, 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008-2018, 2021-2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
@@ -37,6 +37,7 @@
 // Copyright (C) 2021 Uli Schlachter <psychon@znc.in>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
+// Copyright (C) 2023 Artemy Gordon <artemy.gordon@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -155,7 +156,7 @@ CairoOutputDev::CairoOutputDev()
     printing = true;
     use_show_text_glyphs = false;
     inUncoloredPattern = false;
-    inType3Char = false;
+    t3_render_state = Type3RenderNone;
     t3_glyph_has_bbox = false;
     t3_glyph_has_color = false;
     text_matrix_valid = true;
@@ -888,7 +889,7 @@ void CairoOutputDev::doPath(cairo_t *c, GfxState *state, const GfxPath *path)
 
 void CairoOutputDev::stroke(GfxState *state)
 {
-    if (inType3Char) {
+    if (t3_render_state == Type3RenderMask) {
         GfxGray gray;
         state->getFillGray(&gray);
         if (colToDbl(gray) > 0.5) {
@@ -919,7 +920,7 @@ void CairoOutputDev::stroke(GfxState *state)
 
 void CairoOutputDev::fill(GfxState *state)
 {
-    if (inType3Char) {
+    if (t3_render_state == Type3RenderMask) {
         GfxGray gray;
         state->getFillGray(&gray);
         if (colToDbl(gray) > 0.5) {
@@ -2763,12 +2764,35 @@ cleanup:
     delete imgStr;
 }
 
+static inline void getMatteColorRgb(GfxImageColorMap *colorMap, const GfxColor *matteColorIn, GfxRGB *matteColorRgb)
+{
+    colorMap->getColorSpace()->getRGB(matteColorIn, matteColorRgb);
+    matteColorRgb->r = colToByte(matteColorRgb->r);
+    matteColorRgb->g = colToByte(matteColorRgb->g);
+    matteColorRgb->b = colToByte(matteColorRgb->b);
+}
+
+static inline void applyMask(unsigned int *imagePointer, int length, GfxRGB matteColor, unsigned char *alphaPointer)
+{
+    unsigned char *p, r, g, b;
+    int i;
+
+    for (i = 0, p = (unsigned char *)imagePointer; i < length; i++, p += 4, alphaPointer++) {
+        if (*alphaPointer) {
+            b = std::clamp(matteColor.b + (int)(p[0] - matteColor.b) * 255 / *alphaPointer, 0, 255);
+            g = std::clamp(matteColor.g + (int)(p[1] - matteColor.g) * 255 / *alphaPointer, 0, 255);
+            r = std::clamp(matteColor.r + (int)(p[2] - matteColor.r) * 255 / *alphaPointer, 0, 255);
+            imagePointer[i] = (r << 16) | (g << 8) | (b << 0);
+        }
+    }
+}
+
 // XXX: is this affect by AIS(alpha is shape)?
 void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                          bool maskInterpolate)
 {
     ImageStream *maskImgStr, *imgStr;
-    ptrdiff_t row_stride;
+    ptrdiff_t row_stride, mask_row_stride;
     unsigned char *maskBuffer, *buffer;
     unsigned char *maskDest;
     unsigned int *dest;
@@ -2779,6 +2803,12 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     int y;
     cairo_filter_t filter;
     cairo_filter_t maskFilter;
+    GfxRGB matteColorRgb;
+
+    const GfxColor *matteColor = maskColorMap->getMatteColor();
+    if (matteColor != nullptr) {
+        getMatteColorRgb(colorMap, matteColor, &matteColorRgb);
+    }
 
     maskImgStr = new ImageStream(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
     maskImgStr->reset();
@@ -2791,9 +2821,9 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     }
 
     maskBuffer = cairo_image_surface_get_data(maskImage);
-    row_stride = cairo_image_surface_get_stride(maskImage);
+    mask_row_stride = cairo_image_surface_get_stride(maskImage);
     for (y = 0; y < maskHeight; y++) {
-        maskDest = (unsigned char *)(maskBuffer + y * row_stride);
+        maskDest = (unsigned char *)(maskBuffer + y * mask_row_stride);
         pix = maskImgStr->getLine();
         if (likely(pix != nullptr)) {
             maskColorMap->getGrayLine(pix, maskDest, maskWidth);
@@ -2835,14 +2865,22 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     for (y = 0; y < height; y++) {
         dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
         pix = imgStr->getLine();
-        colorMap->getRGBLine(pix, dest, width);
+        if (likely(pix != nullptr)) {
+            colorMap->getRGBLine(pix, dest, width);
+            if (matteColor != nullptr) {
+                maskDest = (unsigned char *)(maskBuffer + y * mask_row_stride);
+                applyMask(dest, width, matteColorRgb, maskDest);
+            }
+        }
     }
 
     filter = getFilterForSurface(image, interpolate);
 
     cairo_surface_mark_dirty(image);
 
-    setMimeData(state, str, ref, colorMap, image, height);
+    if (matteColor == nullptr) {
+        setMimeData(state, str, ref, colorMap, image, height);
+    }
 
     pattern = cairo_pattern_create_for_surface(image);
     cairo_surface_destroy(image);

@@ -17,6 +17,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
 //
 //========================================================================
 
@@ -769,15 +770,15 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
             homeNssDb.append("/.pki/nssdb");
             initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
             sNssDir = homeNssDb.toStr();
-            if (!initSuccess) {
-                NSS_NoDB_Init(nullptr);
-            }
         }
     }
 
     if (initSuccess) {
         // Make sure NSS root certificates module is loaded
         SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
+    } else {
+        fprintf(stderr, "NSS_Init failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
+        NSS_NoDB_Init(nullptr);
     }
 }
 
@@ -855,6 +856,10 @@ SignatureHandler::~SignatureHandler()
 
     if (hash_context) {
         HASH_Destroy(hash_context);
+    }
+
+    if (signing_cert) {
+        CERT_DestroyCertificate(signing_cert);
     }
 
     free(temp_certs);
