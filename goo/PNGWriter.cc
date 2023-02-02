@@ -29,23 +29,23 @@
 
 struct PNGWriterPrivate
 {
+    explicit PNGWriterPrivate(PNGWriter::Format f) : format(f) { }
+
     PNGWriter::Format format;
-    png_structp png_ptr;
-    png_infop info_ptr;
-    unsigned char *icc_data;
-    int icc_data_size;
-    char *icc_name;
-    bool sRGB_profile;
+    png_structp png_ptr = nullptr;
+    png_infop info_ptr = nullptr;
+    unsigned char *icc_data = nullptr;
+    int icc_data_size = 0;
+    char *icc_name = nullptr;
+    bool sRGB_profile = false;
+
+    PNGWriterPrivate(const PNGWriterPrivate &) = delete;
+    PNGWriterPrivate &operator=(const PNGWriterPrivate &) = delete;
 };
 
 PNGWriter::PNGWriter(Format formatA)
 {
-    priv = new PNGWriterPrivate;
-    priv->format = formatA;
-    priv->icc_data = nullptr;
-    priv->icc_data_size = 0;
-    priv->icc_name = nullptr;
-    priv->sRGB_profile = false;
+    priv = new PNGWriterPrivate(formatA);
 }
 
 PNGWriter::~PNGWriter()
