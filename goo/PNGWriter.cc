@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2011, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2011, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2011 Thomas Klausner <wiz@danbala.tuwien.ac.at>
@@ -29,23 +29,23 @@
 
 struct PNGWriterPrivate
 {
+    explicit PNGWriterPrivate(PNGWriter::Format f) : format(f) { }
+
     PNGWriter::Format format;
-    png_structp png_ptr;
-    png_infop info_ptr;
-    unsigned char *icc_data;
-    int icc_data_size;
-    char *icc_name;
-    bool sRGB_profile;
+    png_structp png_ptr = nullptr;
+    png_infop info_ptr = nullptr;
+    unsigned char *icc_data = nullptr;
+    int icc_data_size = 0;
+    char *icc_name = nullptr;
+    bool sRGB_profile = false;
+
+    PNGWriterPrivate(const PNGWriterPrivate &) = delete;
+    PNGWriterPrivate &operator=(const PNGWriterPrivate &) = delete;
 };
 
 PNGWriter::PNGWriter(Format formatA)
 {
-    priv = new PNGWriterPrivate;
-    priv->format = formatA;
-    priv->icc_data = nullptr;
-    priv->icc_data_size = 0;
-    priv->icc_name = nullptr;
-    priv->sRGB_profile = false;
+    priv = new PNGWriterPrivate(formatA);
 }
 
 PNGWriter::~PNGWriter()
