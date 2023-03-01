@@ -1,3 +1,7 @@
+Release 23.03.0:
+        core:
+         * PngWriter: Fix potential uninitialized memory use
+
 Release 23.02.0:
         core:
          * CairoOutputDev: Fix rendering of color type 3 fonts
@@ -7,10 +11,6 @@ Release 23.02.0:
 
         utils:
          * pdfsig: Point out supports PKCS#11 URIs as nickname
-
-
-        qt6:
-         *
 
 Release 23.01.0:
         core:
