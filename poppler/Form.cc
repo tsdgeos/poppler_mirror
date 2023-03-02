@@ -613,7 +613,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     // calculate a signature over tmp_buffer with the certificate to get its size
     unsigned char tmp_buffer[4];
     memcpy(tmp_buffer, "PDF", 4);
-    SignatureHandler sigHandler(certNickname, SEC_OID_SHA256);
+    SignatureHandler sigHandler(certNickname, HashAlgorithm::Sha256);
     sigHandler.updateHash(tmp_buffer, 4);
     const std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password);
     if (!tmpSignature) {

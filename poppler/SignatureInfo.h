@@ -24,6 +24,7 @@
 
 #include "poppler_private_export.h"
 #include "goo/GooString.h"
+#include "HashAlgorithm.h"
 
 enum SignatureValidationStatus
 {
@@ -66,7 +67,7 @@ public:
     const char *getSubjectDN() const;
     const GooString &getLocation() const;
     const GooString &getReason() const;
-    int getHashAlgorithm() const; // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
+    HashAlgorithm getHashAlgorithm() const; // Returns the used HashAlgorithm, and unknown if compiled without signature support
     time_t getSigningTime() const;
     bool isSubfilterSupported() const { return sig_subfilter_supported; }
     const X509CertificateInfo *getCertificateInfo() const;
@@ -78,7 +79,7 @@ public:
     void setSubjectDN(const char *);
     void setLocation(const GooString *);
     void setReason(const GooString *);
-    void setHashAlgorithm(int);
+    void setHashAlgorithm(HashAlgorithm);
     void setSigningTime(time_t);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo>);
@@ -91,7 +92,7 @@ private:
     char *subject_dn;
     GooString location;
     GooString reason;
-    int hash_type;
+    HashAlgorithm hash_type;
     time_t signing_time;
     bool sig_subfilter_supported;
 };

@@ -24,6 +24,7 @@
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
 #include "poppler_private_export.h"
+#include "HashAlgorithm.h"
 
 #include <vector>
 #include <functional>
@@ -46,12 +47,12 @@ class POPPLER_PRIVATE_EXPORT SignatureHandler
 public:
     explicit SignatureHandler();
     SignatureHandler(unsigned char *p7, int p7_length);
-    SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
+    SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime();
     std::string getSignerName();
     const char *getSignerSubjectDN();
-    HASH_HashType getHashAlgorithm();
+    HashAlgorithm getHashAlgorithm();
     void setSignature(unsigned char *, int);
     void updateHash(unsigned char *data_block, int data_len);
     void restartHash();
@@ -62,7 +63,7 @@ public:
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     std::unique_ptr<GooString> signDetached(const char *password) const;
 
-    static SECOidTag getHashOidTag(const char *digestName);
+    static HashAlgorithm getHashOidTag(const char *digestName);
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
@@ -91,7 +92,7 @@ private:
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
-    unsigned int digestLength(SECOidTag digestAlgId);
+    unsigned int digestLength(HashAlgorithm digestAlgId);
     NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
     NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
     NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
@@ -99,7 +100,7 @@ private:
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
     unsigned int hash_length;
-    SECOidTag digest_alg_tag;
+    HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
     HASHContext *hash_context;
     NSSCMSMessage *CMSMessage;

@@ -24,12 +24,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef ENABLE_NSS3
-#    include <hasht.h>
-#else
-static const int HASH_AlgNULL = -1;
-#endif
-
 /* Constructor & Destructor */
 
 SignatureInfo::SignatureInfo()
@@ -39,7 +33,7 @@ SignatureInfo::SignatureInfo()
     cert_info = nullptr;
     signer_name = nullptr;
     subject_dn = nullptr;
-    hash_type = HASH_AlgNULL;
+    hash_type = HashAlgorithm::Unknown;
     signing_time = 0;
     sig_subfilter_supported = false;
 }
@@ -51,7 +45,7 @@ SignatureInfo::SignatureInfo(SignatureValidationStatus sig_val_status, Certifica
     cert_info = nullptr;
     signer_name = nullptr;
     subject_dn = nullptr;
-    hash_type = HASH_AlgNULL;
+    hash_type = HashAlgorithm::Unknown;
     signing_time = 0;
     sig_subfilter_supported = false;
 }
@@ -94,7 +88,7 @@ const GooString &SignatureInfo::getReason() const
     return reason;
 }
 
-int SignatureInfo::getHashAlgorithm() const
+HashAlgorithm SignatureInfo::getHashAlgorithm() const
 {
     return hash_type;
 }
@@ -143,7 +137,7 @@ void SignatureInfo::setReason(const GooString *signingReason)
     reason = GooString(signingReason->toStr());
 }
 
-void SignatureInfo::setHashAlgorithm(int type)
+void SignatureInfo::setHashAlgorithm(HashAlgorithm type)
 {
     hash_type = type;
 }

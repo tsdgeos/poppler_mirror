@@ -780,7 +780,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 {
 #ifdef ENABLE_NSS3
     Q_D(const CertificateInfo);
-    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), SEC_OID_SHA256);
+    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), HashAlgorithm::Sha256);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler.updateHash(buffer, 5);
@@ -805,7 +805,7 @@ public:
     QString signer_subject_dn;
     QString location;
     QString reason;
-    int hash_algorithm;
+    HashAlgorithm hash_algorithm;
     time_t signing_time;
     QList<qint64> range_bounds;
     qint64 docLength;
@@ -859,20 +859,22 @@ SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() 
     Q_D(const SignatureValidationInfo);
 
     switch (d->hash_algorithm) {
-    case HASH_AlgMD2:
+    case ::HashAlgorithm::Md2:
         return HashAlgorithmMd2;
-    case HASH_AlgMD5:
+    case ::HashAlgorithm::Md5:
         return HashAlgorithmMd5;
-    case HASH_AlgSHA1:
+    case ::HashAlgorithm::Sha1:
         return HashAlgorithmSha1;
-    case HASH_AlgSHA256:
+    case ::HashAlgorithm::Sha256:
         return HashAlgorithmSha256;
-    case HASH_AlgSHA384:
+    case ::HashAlgorithm::Sha384:
         return HashAlgorithmSha384;
-    case HASH_AlgSHA512:
+    case ::HashAlgorithm::Sha512:
         return HashAlgorithmSha512;
-    case HASH_AlgSHA224:
+    case ::HashAlgorithm::Sha224:
         return HashAlgorithmSha224;
+    case ::HashAlgorithm::Unknown:
+        return HashAlgorithmUnknown;
     }
 #endif
     return HashAlgorithmUnknown;

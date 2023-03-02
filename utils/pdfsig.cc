@@ -488,25 +488,25 @@ int main(int argc, char *argv[])
         printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
         printf("  - Signing Hash Algorithm: ");
         switch (sig_info->getHashAlgorithm()) {
-        case HASH_AlgMD2:
+        case HashAlgorithm::Md2:
             printf("MD2\n");
             break;
-        case HASH_AlgMD5:
+        case HashAlgorithm::Md5:
             printf("MD5\n");
             break;
-        case HASH_AlgSHA1:
+        case HashAlgorithm::Sha1:
             printf("SHA1\n");
             break;
-        case HASH_AlgSHA256:
+        case HashAlgorithm::Sha256:
             printf("SHA-256\n");
             break;
-        case HASH_AlgSHA384:
+        case HashAlgorithm::Sha384:
             printf("SHA-384\n");
             break;
-        case HASH_AlgSHA512:
+        case HashAlgorithm::Sha512:
             printf("SHA-512\n");
             break;
-        case HASH_AlgSHA224:
+        case HashAlgorithm::Sha224:
             printf("SHA-224\n");
             break;
         default:
