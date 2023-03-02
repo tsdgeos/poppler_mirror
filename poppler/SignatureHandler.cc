@@ -895,7 +895,7 @@ HASHContext *SignatureHandler::initHashContext()
 {
 
     SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
-    auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
+    const auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
     hash_length = digestLength(ConvertHashAlgorithmFromNss(hashAlgorithm));
     HASH_HashType hashType;
     hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
