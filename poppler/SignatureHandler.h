@@ -53,7 +53,6 @@ public:
     std::string getSignerName();
     const char *getSignerSubjectDN();
     HashAlgorithm getHashAlgorithm();
-    void setSignature(unsigned char *, int);
     void updateHash(unsigned char *data_block, int data_len);
     void restartHash();
     SignatureValidationStatus validateSignature();
@@ -77,18 +76,6 @@ public:
     static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 
 private:
-    typedef struct
-    {
-        enum
-        {
-            PW_NONE = 0,
-            PW_FROMFILE = 1,
-            PW_PLAINTEXT = 2,
-            PW_EXTERNAL = 3
-        } source;
-        const char *data;
-    } PWData;
-
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
