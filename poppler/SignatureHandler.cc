@@ -513,21 +513,6 @@ unsigned int SignatureHandler::digestLength(HashAlgorithm digestAlgId)
     }
 }
 
-HashAlgorithm SignatureHandler::getHashOidTag(const char *digestName)
-{
-    HashAlgorithm tag = HashAlgorithm::Unknown;
-    if (strcmp(digestName, "SHA1") == 0) {
-        tag = HashAlgorithm::Sha1;
-    } else if (strcmp(digestName, "SHA256") == 0) {
-        tag = HashAlgorithm::Sha256;
-    } else if (strcmp(digestName, "SHA384") == 0) {
-        tag = HashAlgorithm::Sha384;
-    } else if (strcmp(digestName, "SHA512") == 0) {
-        tag = HashAlgorithm::Sha512;
-    }
-    return tag;
-}
-
 std::string SignatureHandler::getSignerName()
 {
     char *commonName;

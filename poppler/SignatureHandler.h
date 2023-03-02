@@ -61,8 +61,6 @@ public:
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     std::unique_ptr<GooString> signDetached(const char *password) const;
 
-    static HashAlgorithm getHashOidTag(const char *digestName);
-
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
     // If you don't want a custom NSS dir and the default entries are fine for you, not calling this function is fine
