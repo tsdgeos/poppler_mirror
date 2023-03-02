@@ -45,7 +45,6 @@
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
-    explicit SignatureHandler();
     SignatureHandler(unsigned char *p7, int p7_length);
     SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
     ~SignatureHandler();

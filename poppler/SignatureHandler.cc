@@ -821,12 +821,6 @@ SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm diges
     hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag)));
 }
 
-SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
-{
-    setNSSDir({});
-    CMSMessage = NSS_CMSMessage_Create(nullptr);
-}
-
 HASHContext *SignatureHandler::initHashContext()
 {
 
