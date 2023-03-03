@@ -498,30 +498,21 @@ static unsigned int digestLength(HashAlgorithm digestAlgId)
     }
 }
 
-std::string SignatureHandler::getSignerName() const
+std::string SignatureVerificationHandler::getSignerName() const
 {
     if (!NSS_IsInitialized()) {
         return {};
     }
-
-    if (!signing_cert && !CMSSignerInfo) {
+    if (!CMSSignerInfo) {
         return {};
     }
-    CERTCertificate *activeCert = nullptr;
 
+    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
-        // we are signing, and thus getting the name of the SignerInfo, not of the signing cert. Data owned by CMSSignerInfo
-        activeCert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-    } else {
-        // We are verifying. data owned by us.
-        activeCert = signing_cert;
-    }
-
-    if (!activeCert) {
         return {};
     }
 
-    char *commonName = CERT_GetCommonName(&activeCert->subject);
+    char *commonName = CERT_GetCommonName(&signing_cert->subject);
     if (!commonName) {
         return {};
     }
@@ -531,38 +522,23 @@ std::string SignatureHandler::getSignerName() const
     return name;
 }
 
-std::string SignatureHandler::getSignerSubjectDN() const
+std::string SignatureVerificationHandler::getSignerSubjectDN() const
 {
-    if (!signing_cert && !CMSSignerInfo) {
+    if (!CMSSignerInfo) {
         return {};
     }
-    CERTCertificate *activeCert = nullptr;
-
+    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
-        // we are signing, and thus getting the name of the SignerInfo, not of the signing cert. Data owned by CMSSignerInfo
-        activeCert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-    } else {
-        // We are verifying. data owned by us.
-        activeCert = signing_cert;
-    }
-
-    if (!activeCert) {
         return {};
     }
-
-    return activeCert->subjectName;
+    return std::string { signing_cert->subjectName };
 }
 
-HashAlgorithm SignatureHandler::getHashAlgorithm() const
+time_t SignatureVerificationHandler::getSigningTime() const
 {
-    if (hashContext) {
-        return hashContext->getHashAlgorithm();
+    if (!CMSSignerInfo) {
+        return {};
     }
-    return HashAlgorithm::Unknown;
-}
-
-time_t SignatureHandler::getSigningTime() const
-{
     PRTime sTime; // time in microseconds since the epoch
 
     if (NSS_CMSSignerInfo_GetSigningTime(CMSSignerInfo, &sTime) != SECSuccess) {
@@ -670,21 +646,24 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
     return certInfo;
 }
 
-std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() const
+std::unique_ptr<X509CertificateInfo> SignatureVerificationHandler::getCertificateInfo() const
 {
-    if (CMSSignerInfo) {
-        CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-        if (!cert) {
-            return nullptr;
-        }
-        return getCertificateInfoFromCERT(cert);
-    } else {
-        if (!signing_cert) {
-            return nullptr;
-        }
-
-        return getCertificateInfoFromCERT(signing_cert);
+    if (!CMSSignerInfo) {
+        return nullptr;
     }
+    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    if (!cert) {
+        return nullptr;
+    }
+    return getCertificateInfoFromCERT(cert);
+}
+
+std::unique_ptr<X509CertificateInfo> SignatureSignHandler::getCertificateInfo() const
+{
+    if (!signing_cert) {
+        return nullptr;
+    }
+    return getCertificateInfoFromCERT(signing_cert);
 }
 
 static std::optional<std::string> getDefaultFirefoxCertDB()
@@ -777,16 +756,15 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
     PasswordFunction = f;
 }
 
-SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), hashContext(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
+SignatureVerificationHandler::SignatureVerificationHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
 {
-    setNSSDir({});
+    SignatureHandler::setNSSDir({});
     CMSitem.data = p7.data();
     CMSitem.len = p7.size();
     CMSMessage = CMS_MessageCreate(&CMSitem);
     CMSSignedData = CMS_SignedDataCreate(CMSMessage);
     if (CMSSignedData) {
         CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
-
         SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
         auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
         HASH_HashType hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
@@ -794,22 +772,34 @@ SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std
     }
 }
 
-SignatureHandler::SignatureHandler(const std::string &certNickname, HashAlgorithm digestAlgTag)
-    : CMSitem(), hashContext(std::make_unique<HashContext>(digestAlgTag)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
+SignatureSignHandler::SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(std::make_unique<HashContext>(digestAlgTag)), signing_cert(nullptr)
 {
-    setNSSDir({});
-    CMSMessage = NSS_CMSMessage_Create(nullptr);
+    SignatureHandler::setNSSDir({});
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
 }
 
-void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
+HashAlgorithm SignatureVerificationHandler::getHashAlgorithm() const
 {
-    if (hashContext) {
-        hashContext->updateHash(data_block, data_len);
-    }
+    return hashContext->getHashAlgorithm();
 }
 
-SignatureHandler::~SignatureHandler()
+void SignatureVerificationHandler::updateHash(unsigned char *data_block, int data_len)
+{
+    hashContext->updateHash(data_block, data_len);
+}
+
+void SignatureSignHandler::updateHash(unsigned char *data_block, int data_len)
+{
+    hashContext->updateHash(data_block, data_len);
+}
+
+SignatureSignHandler::~SignatureSignHandler()
+{
+    if (signing_cert) {
+        CERT_DestroyCertificate(signing_cert);
+    }
+}
+SignatureVerificationHandler::~SignatureVerificationHandler()
 {
     if (CMSMessage) {
         // in the CMS_SignedDataCreate, we malloc some memory
@@ -825,10 +815,6 @@ SignatureHandler::~SignatureHandler()
         }
         NSS_CMSMessage_Destroy(CMSMessage);
         free(toFree);
-    }
-
-    if (signing_cert) {
-        CERT_DestroyCertificate(signing_cert);
     }
 }
 
@@ -881,7 +867,7 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
     }
 }
 
-NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
+static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
 {
     NSSCMSSignerInfo *signerInfo = NSS_CMSSignedData_GetSignerInfo(cms_sig_data, 0);
     if (!signerInfo) {
@@ -912,7 +898,7 @@ static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_c
     }
 }
 
-SignatureValidationStatus SignatureHandler::validateSignature()
+SignatureValidationStatus SignatureVerificationHandler::validateSignature()
 {
     if (!CMSSignedData) {
         return SIGNATURE_GENERIC_ERROR;
@@ -955,7 +941,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
+CertificateValidationStatus SignatureVerificationHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
 {
     CERTCertificate *cert;
 
@@ -1011,7 +997,7 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     return CERTIFICATE_GENERIC_ERROR;
 }
 
-std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &password) const
+std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string &password)
 {
     if (!hashContext) {
         return nullptr;
@@ -1024,7 +1010,6 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &pas
     /////////////////////////////////////
     /// Code from LibreOffice under MPLv2
     /////////////////////////////////////
-
     struct NSSCMSMessageDestroyer
     {
         void operator()(NSSCMSMessage *message) { NSS_CMSMessage_Destroy(message); }
@@ -1166,11 +1151,11 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &pas
         return nullptr;
     }
 
-    GooString *signature = new GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
+    auto signature = std::make_unique<GooString>(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
 
-    return std::unique_ptr<GooString>(signature);
+    return signature;
 }
 
 static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
