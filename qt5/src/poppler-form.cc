@@ -1114,7 +1114,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
     const bool success =
-            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText,
+            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText,
                                             *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
 
     return success ? SigningSuccess : GenericSigningError;

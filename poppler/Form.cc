@@ -601,7 +601,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
                                        const std::optional<GooString> &userPassword)
 {
 #ifdef ENABLE_NSS3
@@ -688,9 +688,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 #endif
 }
 
-bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location,
-                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+                                                     const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
+                                                     std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -727,7 +727,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
 
-    const bool success = signDocument(saveFilename, certNickname, digestName, password, reason, location, ownerPassword, userPassword);
+    const bool success = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
     // Now bring back the annotation appearance back to what it was
     ffs->setDefaultAppearance(originalDefaultAppearance);

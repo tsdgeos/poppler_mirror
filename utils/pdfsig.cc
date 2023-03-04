@@ -416,6 +416,12 @@ int main(int argc, char *argv[])
             return 2;
         }
 
+        if (digestName != std::string("SHA256")) {
+            printf("Only digest SHA256 is supported at the moment\n");
+            printf("Please file a bug report if this is important for you\n");
+            return 2;
+        }
+
         bool getCertsError;
         // We need to call this otherwise NSS spins forever
         getAvailableSigningCertificates(&getCertsError);
@@ -440,7 +446,7 @@ int main(int argc, char *argv[])
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs.get());
+        const bool success = fws->signDocument(argv[2], certNickname, pw, rs.get());
         return success ? 0 : 3;
     }
 
