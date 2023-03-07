@@ -64,8 +64,8 @@ public:
     /* GETTERS */
     SignatureValidationStatus getSignatureValStatus() const;
     CertificateValidationStatus getCertificateValStatus() const;
-    const char *getSignerName() const;
-    const char *getSubjectDN() const;
+    std::string getSignerName() const;
+    std::string getSubjectDN() const;
     const GooString &getLocation() const;
     const GooString &getReason() const;
     HashAlgorithm getHashAlgorithm() const; // Returns the used HashAlgorithm, and unknown if compiled without signature support
@@ -76,8 +76,8 @@ public:
     /* SETTERS */
     void setSignatureValStatus(enum SignatureValidationStatus);
     void setCertificateValStatus(enum CertificateValidationStatus);
-    void setSignerName(const char *);
-    void setSubjectDN(const char *);
+    void setSignerName(const std::string &);
+    void setSubjectDN(const std::string &);
     void setLocation(const GooString *);
     void setReason(const GooString *);
     void setHashAlgorithm(HashAlgorithm);
@@ -89,8 +89,8 @@ private:
     SignatureValidationStatus sig_status;
     CertificateValidationStatus cert_status;
     std::unique_ptr<X509CertificateInfo> cert_info;
-    char *signer_name;
-    char *subject_dn;
+    std::string signer_name;
+    std::string subject_dn;
     GooString location;
     GooString reason;
     HashAlgorithm hash_type;

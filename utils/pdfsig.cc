@@ -490,8 +490,8 @@ int main(int argc, char *argv[])
         }
 
         const SignatureInfo *sig_info = ffs->validateSignature(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch);
-        printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
-        printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
+        printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName().c_str());
+        printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN().c_str());
         printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
         printf("  - Signing Hash Algorithm: ");
         switch (sig_info->getHashAlgorithm()) {
