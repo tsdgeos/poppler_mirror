@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -18,6 +18,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2022 Felix Jung <fxjung@posteo.de>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -416,6 +417,12 @@ int main(int argc, char *argv[])
             return 2;
         }
 
+        if (digestName != std::string("SHA256")) {
+            printf("Only digest SHA256 is supported at the moment\n");
+            printf("Please file a bug report if this is important for you\n");
+            return 2;
+        }
+
         bool getCertsError;
         // We need to call this otherwise NSS spins forever
         getAvailableSigningCertificates(&getCertsError);
@@ -440,7 +447,7 @@ int main(int argc, char *argv[])
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        const bool success = fws->signDocument(argv[2], certNickname, digestName, pw, rs.get());
+        const bool success = fws->signDocument(argv[2], certNickname, pw, rs.get());
         return success ? 0 : 3;
     }
 
@@ -488,25 +495,25 @@ int main(int argc, char *argv[])
         printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
         printf("  - Signing Hash Algorithm: ");
         switch (sig_info->getHashAlgorithm()) {
-        case HASH_AlgMD2:
+        case HashAlgorithm::Md2:
             printf("MD2\n");
             break;
-        case HASH_AlgMD5:
+        case HashAlgorithm::Md5:
             printf("MD5\n");
             break;
-        case HASH_AlgSHA1:
+        case HashAlgorithm::Sha1:
             printf("SHA1\n");
             break;
-        case HASH_AlgSHA256:
+        case HashAlgorithm::Sha256:
             printf("SHA-256\n");
             break;
-        case HASH_AlgSHA384:
+        case HashAlgorithm::Sha384:
             printf("SHA-384\n");
             break;
-        case HASH_AlgSHA512:
+        case HashAlgorithm::Sha512:
             printf("SHA-512\n");
             break;
-        case HASH_AlgSHA224:
+        case HashAlgorithm::Sha224:
             printf("SHA-224\n");
             break;
         default:

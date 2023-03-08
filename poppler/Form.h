@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -307,13 +307,13 @@ public:
     // field "ByteRange" in the dictionary "V".
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Returns success.
-    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const std::optional<GooString> &ownerPassword = {},
+    bool signDocument(const char *filename, const char *certNickname, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const std::optional<GooString> &ownerPassword = {},
                       const std::optional<GooString> &userPassword = {});
 
     // Same as above but adds text, font color, etc.
-    bool signDocumentWithAppearance(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr,
-                                    const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const GooString &signatureText = {}, const GooString &signatureTextLeft = {}, double fontSize = {},
-                                    double leftFontSize = {}, std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {}, std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
+    bool signDocumentWithAppearance(const char *filename, const char *certNickname, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const std::optional<GooString> &ownerPassword = {},
+                                    const std::optional<GooString> &userPassword = {}, const GooString &signatureText = {}, const GooString &signatureTextLeft = {}, double fontSize = {}, double leftFontSize = {},
+                                    std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {}, std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
 
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)

@@ -18,6 +18,8 @@
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
+// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023 Ingo Klöcker <kloecker@kde.org>
 //
 //========================================================================
 
@@ -45,70 +47,6 @@
 #include <sechash.h>
 #include <cms.h>
 #include <cmst.h>
-
-// ASN.1 used in the (much simpler) time stamp request. From RFC3161
-// and other sources.
-
-/*
-AlgorithmIdentifier  ::=  SEQUENCE  {
-     algorithm  OBJECT IDENTIFIER,
-     parameters ANY DEFINED BY algorithm OPTIONAL  }
-                   -- contains a value of the type
-                   -- registered for use with the
-                   -- algorithm object identifier value
-
-MessageImprint ::= SEQUENCE  {
-    hashAlgorithm AlgorithmIdentifier,
-    hashedMessage OCTET STRING  }
-*/
-
-struct MessageImprint
-{
-    SECAlgorithmID hashAlgorithm;
-    SECItem hashedMessage;
-};
-
-/*
-Extension  ::=  SEQUENCE  {
-    extnID    OBJECT IDENTIFIER,
-    critical  BOOLEAN DEFAULT FALSE,
-    extnValue OCTET STRING  }
-*/
-
-struct Extension
-{
-    SECItem const extnID;
-    SECItem const critical;
-    SECItem const extnValue;
-};
-
-/*
-Extensions ::= SEQUENCE SIZE (1..MAX) OF Extension
-*/
-
-/*
-TSAPolicyId ::= OBJECT IDENTIFIER
-
-TimeStampReq ::= SEQUENCE  {
-    version            INTEGER  { v1(1) },
-    messageImprint     MessageImprint,
-    --a hash algorithm OID and the hash value of the data to be
-    --time-stamped
-    reqPolicy          TSAPolicyId         OPTIONAL,
-    nonce              INTEGER             OPTIONAL,
-    certReq            BOOLEAN             DEFAULT FALSE,
-    extensions     [0] IMPLICIT Extensions OPTIONAL  }
-*/
-
-struct TimeStampReq
-{
-    SECItem version;
-    MessageImprint messageImprint;
-    SECItem reqPolicy;
-    SECItem nonce;
-    SECItem certReq;
-    Extension *extensions;
-};
 
 /**
  * General name, defined by RFC 3280.
@@ -491,36 +429,90 @@ static SECStatus my_NSS_CMSSignerInfo_AddAuthAttr(NSSCMSSignerInfo *signerinfo, 
     return my_NSS_CMSAttributeArray_AddAttr(signerinfo->cmsg->poolp, &(signerinfo->authAttr), attr);
 }
 
-unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
+static SECOidTag ConvertHashAlgorithmToNss(HashAlgorithm digestAlgId)
 {
     switch (digestAlgId) {
+    case HashAlgorithm::Md2:
+        return SEC_OID_MD2;
+    case HashAlgorithm::Md5:
+        return SEC_OID_MD5;
+    case HashAlgorithm::Sha1:
+        return SEC_OID_SHA1;
+    case HashAlgorithm::Sha256:
+        return SEC_OID_SHA256;
+    case HashAlgorithm::Sha384:
+        return SEC_OID_SHA384;
+    case HashAlgorithm::Sha512:
+        return SEC_OID_SHA512;
+    case HashAlgorithm::Sha224:
+        return SEC_OID_SHA224;
+    case HashAlgorithm::Unknown:
+        return SEC_OID_UNKNOWN;
+    }
+    return SEC_OID_UNKNOWN;
+}
+
+static HashAlgorithm ConvertHashAlgorithmFromNss(SECOidTag digestAlgId)
+{
+    switch (digestAlgId) {
+    case SEC_OID_MD2:
+        return HashAlgorithm::Md2;
+    case SEC_OID_MD5:
+        return HashAlgorithm::Md5;
     case SEC_OID_SHA1:
-        return 20;
+        return HashAlgorithm::Sha1;
     case SEC_OID_SHA256:
-        return 32;
+        return HashAlgorithm::Sha256;
     case SEC_OID_SHA384:
-        return 48;
+        return HashAlgorithm::Sha384;
     case SEC_OID_SHA512:
+        return HashAlgorithm::Sha512;
+    case SEC_OID_SHA224:
+        return HashAlgorithm::Sha224;
+    default:
+        return HashAlgorithm::Unknown;
+    }
+}
+
+static HashAlgorithm ConvertHashTypeFromNss(HASH_HashType type)
+{
+    switch (type) {
+    case HASH_AlgMD2:
+        return HashAlgorithm::Md2;
+    case HASH_AlgMD5:
+        return HashAlgorithm::Md5;
+    case HASH_AlgSHA1:
+        return HashAlgorithm::Sha1;
+    case HASH_AlgSHA256:
+        return HashAlgorithm::Sha256;
+    case HASH_AlgSHA384:
+        return HashAlgorithm::Sha384;
+    case HASH_AlgSHA512:
+        return HashAlgorithm::Sha512;
+    case HASH_AlgSHA224:
+        return HashAlgorithm::Sha224;
+    case HASH_AlgNULL:
+    case HASH_AlgTOTAL:
+        return HashAlgorithm::Unknown;
+    }
+    return HashAlgorithm::Unknown;
+}
+
+unsigned int SignatureHandler::digestLength(HashAlgorithm digestAlgId)
+{
+    switch (digestAlgId) {
+    case HashAlgorithm::Sha1:
+        return 20;
+    case HashAlgorithm::Sha256:
+        return 32;
+    case HashAlgorithm::Sha384:
+        return 48;
+    case HashAlgorithm::Sha512:
         return 64;
     default:
         printf("ERROR: Unrecognized Hash ID\n");
         return 0;
     }
-}
-
-SECOidTag SignatureHandler::getHashOidTag(const char *digestName)
-{
-    SECOidTag tag = SEC_OID_UNKNOWN;
-    if (strcmp(digestName, "SHA1") == 0) {
-        tag = SEC_OID_SHA1;
-    } else if (strcmp(digestName, "SHA256") == 0) {
-        tag = SEC_OID_SHA256;
-    } else if (strcmp(digestName, "SHA384") == 0) {
-        tag = SEC_OID_SHA384;
-    } else if (strcmp(digestName, "SHA512") == 0) {
-        tag = SEC_OID_SHA512;
-    }
-    return tag;
 }
 
 std::string SignatureHandler::getSignerName()
@@ -570,12 +562,12 @@ const char *SignatureHandler::getSignerSubjectDN()
     return signing_cert->subjectName;
 }
 
-HASH_HashType SignatureHandler::getHashAlgorithm()
+HashAlgorithm SignatureHandler::getHashAlgorithm()
 {
     if (hash_context && hash_context->hashobj) {
-        return hash_context->hashobj->type;
+        return ConvertHashTypeFromNss(hash_context->hashobj->type);
     }
-    return HASH_AlgNULL;
+    return HashAlgorithm::Unknown;
 }
 
 time_t SignatureHandler::getSigningTime()
@@ -807,28 +799,23 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
     }
 }
 
-SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlgTag)
+SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag)
     : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
 {
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digestAlgTag));
-}
-
-SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
-{
-    setNSSDir({});
-    CMSMessage = NSS_CMSMessage_Create(nullptr);
+    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag)));
 }
 
 HASHContext *SignatureHandler::initHashContext()
 {
 
     SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
-    hash_length = digestLength(SECOID_FindOIDTag(&usedAlgorithm));
+    const auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
+    hash_length = digestLength(ConvertHashAlgorithmFromNss(hashAlgorithm));
     HASH_HashType hashType;
-    hashType = HASH_GetHashTypeByOidTag(SECOID_FindOIDTag(&usedAlgorithm));
+    hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
     return HASH_Create(hashType);
 }
 
@@ -844,7 +831,7 @@ void SignatureHandler::restartHash()
     if (hash_context) {
         HASH_Destroy(hash_context);
     }
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digest_alg_tag));
+    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag)));
 }
 
 SignatureHandler::~SignatureHandler()

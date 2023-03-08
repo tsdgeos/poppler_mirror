@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016, 2019, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -35,6 +35,7 @@
 // Copyright 2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -601,7 +602,7 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
                                        const std::optional<GooString> &userPassword)
 {
 #ifdef ENABLE_NSS3
@@ -613,7 +614,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     // calculate a signature over tmp_buffer with the certificate to get its size
     unsigned char tmp_buffer[4];
     memcpy(tmp_buffer, "PDF", 4);
-    SignatureHandler sigHandler(certNickname, SEC_OID_SHA256);
+    SignatureHandler sigHandler(certNickname, HashAlgorithm::Sha256);
     sigHandler.updateHash(tmp_buffer, 4);
     const std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password);
     if (!tmpSignature) {
@@ -688,9 +689,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 #endif
 }
 
-bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *digestName, const char *password, const GooString *reason, const GooString *location,
-                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+                                                     const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
+                                                     std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -727,7 +728,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, c
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
 
-    const bool success = signDocument(saveFilename, certNickname, digestName, password, reason, location, ownerPassword, userPassword);
+    const bool success = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
     // Now bring back the annotation appearance back to what it was
     ffs->setDefaultAppearance(originalDefaultAppearance);

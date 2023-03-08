@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -2246,7 +2246,7 @@ bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
     if (fws) {
-        const bool res = fws->signDocument(saveFilename, certNickname, "SHA256", password, reason, location, ownerPassword, userPassword);
+        const bool res = fws->signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
         // Now remove the signature stuff in case the user wants to continue editing stuff
         // So the document object is clean

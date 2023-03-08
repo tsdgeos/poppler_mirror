@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2023 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -16,6 +16,7 @@
  * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Copyright (C) 2021 Theofilos Intzoglou <int.teo@gmail.com>
  * Copyright (C) 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
+ * Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -780,7 +781,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 {
 #ifdef ENABLE_NSS3
     Q_D(const CertificateInfo);
-    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), SEC_OID_SHA256);
+    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), HashAlgorithm::Sha256);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler.updateHash(buffer, 5);
@@ -805,7 +806,7 @@ public:
     QString signer_subject_dn;
     QString location;
     QString reason;
-    int hash_algorithm;
+    HashAlgorithm hash_algorithm;
     time_t signing_time;
     QList<qint64> range_bounds;
     qint64 docLength;
@@ -859,20 +860,22 @@ SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() 
     Q_D(const SignatureValidationInfo);
 
     switch (d->hash_algorithm) {
-    case HASH_AlgMD2:
+    case ::HashAlgorithm::Md2:
         return HashAlgorithmMd2;
-    case HASH_AlgMD5:
+    case ::HashAlgorithm::Md5:
         return HashAlgorithmMd5;
-    case HASH_AlgSHA1:
+    case ::HashAlgorithm::Sha1:
         return HashAlgorithmSha1;
-    case HASH_AlgSHA256:
+    case ::HashAlgorithm::Sha256:
         return HashAlgorithmSha256;
-    case HASH_AlgSHA384:
+    case ::HashAlgorithm::Sha384:
         return HashAlgorithmSha384;
-    case HASH_AlgSHA512:
+    case ::HashAlgorithm::Sha512:
         return HashAlgorithmSha512;
-    case HASH_AlgSHA224:
+    case ::HashAlgorithm::Sha224:
         return HashAlgorithmSha224;
+    case ::HashAlgorithm::Unknown:
+        return HashAlgorithmUnknown;
     }
 #endif
     return HashAlgorithmUnknown;
@@ -1112,7 +1115,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
     const bool success =
-            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), "SHA256", data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText,
+            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText,
                                             *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
 
     return success ? SigningSuccess : GenericSigningError;

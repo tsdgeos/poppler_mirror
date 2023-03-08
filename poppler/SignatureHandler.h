@@ -14,6 +14,7 @@
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -24,6 +25,7 @@
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
 #include "poppler_private_export.h"
+#include "HashAlgorithm.h"
 
 #include <vector>
 #include <functional>
@@ -44,15 +46,13 @@
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
-    explicit SignatureHandler();
     SignatureHandler(unsigned char *p7, int p7_length);
-    SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
+    SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime();
     std::string getSignerName();
     const char *getSignerSubjectDN();
-    HASH_HashType getHashAlgorithm();
-    void setSignature(unsigned char *, int);
+    HashAlgorithm getHashAlgorithm();
     void updateHash(unsigned char *data_block, int data_len);
     void restartHash();
     SignatureValidationStatus validateSignature();
@@ -61,8 +61,6 @@ public:
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     std::unique_ptr<GooString> signDetached(const char *password) const;
-
-    static SECOidTag getHashOidTag(const char *digestName);
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
@@ -76,22 +74,10 @@ public:
     static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 
 private:
-    typedef struct
-    {
-        enum
-        {
-            PW_NONE = 0,
-            PW_FROMFILE = 1,
-            PW_PLAINTEXT = 2,
-            PW_EXTERNAL = 3
-        } source;
-        const char *data;
-    } PWData;
-
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
-    unsigned int digestLength(SECOidTag digestAlgId);
+    unsigned int digestLength(HashAlgorithm digestAlgId);
     NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
     NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
     NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
@@ -99,7 +85,7 @@ private:
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
     unsigned int hash_length;
-    SECOidTag digest_alg_tag;
+    HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
     HASHContext *hash_context;
     NSSCMSMessage *CMSMessage;
