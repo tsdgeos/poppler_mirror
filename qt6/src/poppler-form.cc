@@ -1072,8 +1072,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
         priv->certificate_status = SignatureValidationInfo::CertificateNotVerified;
         break;
     }
-    priv->signer_name = si->getSignerName();
-    priv->signer_subject_dn = si->getSubjectDN();
+    priv->signer_name = QString::fromStdString(si->getSignerName());
+    priv->signer_subject_dn = QString::fromStdString(si->getSubjectDN());
     priv->hash_algorithm = si->getHashAlgorithm();
     priv->location = UnicodeParsedString(si->getLocation().toStr());
     priv->reason = UnicodeParsedString(si->getReason().toStr());

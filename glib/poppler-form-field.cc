@@ -5,6 +5,7 @@
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -468,7 +469,7 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
         break;
     }
 
-    poppler_sig_info->signer_name = g_strdup(sig_info->getSignerName());
+    poppler_sig_info->signer_name = g_strdup(sig_info->getSignerName().c_str());
     poppler_sig_info->local_signing_time = g_date_time_new_from_unix_local(sig_info->getSigningTime());
 
     return poppler_sig_info;

@@ -51,26 +51,26 @@ public:
 
     struct PublicKeyInfo
     {
-        PublicKeyInfo();
+        PublicKeyInfo() = default;
 
-        PublicKeyInfo(PublicKeyInfo &&) noexcept;
-        PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept;
+        PublicKeyInfo(PublicKeyInfo &&) noexcept = default;
+        PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept = default;
 
         PublicKeyInfo(const PublicKeyInfo &) = delete;
         PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
 
         GooString publicKey;
-        PublicKeyType publicKeyType;
-        unsigned int publicKeyStrength; // in bits
+        PublicKeyType publicKeyType = OTHERKEY;
+        unsigned int publicKeyStrength = 0; // in bits
     };
 
     struct EntityInfo
     {
-        EntityInfo();
-        ~EntityInfo();
+        EntityInfo() = default;
+        ~EntityInfo() = default;
 
-        EntityInfo(EntityInfo &&) noexcept;
-        EntityInfo &operator=(EntityInfo &&) noexcept;
+        EntityInfo(EntityInfo &&) noexcept = default;
+        EntityInfo &operator=(EntityInfo &&) noexcept = default;
 
         EntityInfo(const EntityInfo &) = delete;
         EntityInfo &operator=(const EntityInfo &) = delete;

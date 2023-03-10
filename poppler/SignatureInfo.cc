@@ -27,35 +27,7 @@
 
 /* Constructor & Destructor */
 
-SignatureInfo::SignatureInfo()
-{
-    sig_status = SIGNATURE_NOT_VERIFIED;
-    cert_status = CERTIFICATE_NOT_VERIFIED;
-    cert_info = nullptr;
-    signer_name = nullptr;
-    subject_dn = nullptr;
-    hash_type = HashAlgorithm::Unknown;
-    signing_time = 0;
-    sig_subfilter_supported = false;
-}
-
-SignatureInfo::SignatureInfo(SignatureValidationStatus sig_val_status, CertificateValidationStatus cert_val_status)
-{
-    sig_status = sig_val_status;
-    cert_status = cert_val_status;
-    cert_info = nullptr;
-    signer_name = nullptr;
-    subject_dn = nullptr;
-    hash_type = HashAlgorithm::Unknown;
-    signing_time = 0;
-    sig_subfilter_supported = false;
-}
-
-SignatureInfo::~SignatureInfo()
-{
-    free(signer_name);
-    free(subject_dn);
-}
+SignatureInfo::~SignatureInfo() = default;
 
 /* GETTERS */
 
@@ -69,12 +41,12 @@ CertificateValidationStatus SignatureInfo::getCertificateValStatus() const
     return cert_status;
 }
 
-const char *SignatureInfo::getSignerName() const
+std::string SignatureInfo::getSignerName() const
 {
     return signer_name;
 }
 
-const char *SignatureInfo::getSubjectDN() const
+std::string SignatureInfo::getSubjectDN() const
 {
     return subject_dn;
 }
@@ -116,26 +88,24 @@ void SignatureInfo::setCertificateValStatus(enum CertificateValidationStatus cer
     cert_status = cert_val_status;
 }
 
-void SignatureInfo::setSignerName(const char *signerName)
+void SignatureInfo::setSignerName(const std::string &signerName)
 {
-    free(signer_name);
-    signer_name = signerName ? strdup(signerName) : nullptr;
+    signer_name = signerName;
 }
 
-void SignatureInfo::setSubjectDN(const char *subjectDN)
+void SignatureInfo::setSubjectDN(const std::string &subjectDN)
 {
-    free(subject_dn);
-    subject_dn = subjectDN ? strdup(subjectDN) : nullptr;
+    subject_dn = subjectDN;
 }
 
 void SignatureInfo::setLocation(const GooString *loc)
 {
-    location = GooString(loc->toStr());
+    location = GooString(loc);
 }
 
 void SignatureInfo::setReason(const GooString *signingReason)
 {
-    reason = GooString(signingReason->toStr());
+    reason = GooString(signingReason);
 }
 
 void SignatureInfo::setHashAlgorithm(HashAlgorithm type)
