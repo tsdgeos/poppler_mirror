@@ -54,8 +54,7 @@ class X509CertificateInfo;
 class POPPLER_PRIVATE_EXPORT SignatureInfo
 {
 public:
-    SignatureInfo();
-    SignatureInfo(SignatureValidationStatus, CertificateValidationStatus);
+    SignatureInfo() = default;
     ~SignatureInfo();
 
     SignatureInfo(const SignatureInfo &) = delete;
@@ -86,16 +85,16 @@ public:
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo>);
 
 private:
-    SignatureValidationStatus sig_status;
-    CertificateValidationStatus cert_status;
+    SignatureValidationStatus sig_status = SIGNATURE_NOT_VERIFIED;
+    CertificateValidationStatus cert_status = CERTIFICATE_NOT_VERIFIED;
     std::unique_ptr<X509CertificateInfo> cert_info;
     std::string signer_name;
     std::string subject_dn;
     GooString location;
     GooString reason;
-    HashAlgorithm hash_type;
-    time_t signing_time;
-    bool sig_subfilter_supported;
+    HashAlgorithm hash_type = HashAlgorithm::Unknown;
+    time_t signing_time = 0;
+    bool sig_subfilter_supported = false;
 };
 
 #endif

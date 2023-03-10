@@ -16,31 +16,6 @@
 #include <cstring>
 #include <cstdlib>
 
-X509CertificateInfo::PublicKeyInfo::PublicKeyInfo() : publicKeyType(OTHERKEY), publicKeyStrength(0) { }
-
-X509CertificateInfo::PublicKeyInfo::PublicKeyInfo(X509CertificateInfo::PublicKeyInfo &&other) noexcept
-{
-    publicKey = std::move(other.publicKey);
-    publicKeyType = other.publicKeyType;
-    publicKeyStrength = other.publicKeyStrength;
-}
-
-X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator=(X509CertificateInfo::PublicKeyInfo &&other) noexcept
-{
-    publicKey = std::move(other.publicKey);
-    publicKeyType = other.publicKeyType;
-    publicKeyStrength = other.publicKeyStrength;
-    return *this;
-}
-
-X509CertificateInfo::EntityInfo::EntityInfo() = default;
-
-X509CertificateInfo::EntityInfo::~EntityInfo() = default;
-
-X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other) noexcept = default;
-
-X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other) noexcept = default;
-
 X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_self_signed(false) { }
 
 X509CertificateInfo::~X509CertificateInfo() = default;
