@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -1116,6 +1116,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
     FcConfigSubstitute(nullptr, p, FcMatchPattern);
     FcDefaultSubstitute(p);
     if (p) {
+        const std::unique_ptr<FcPattern, void (*)(FcPattern *)> pDeleter(p, [](FcPattern *pattern) { FcPatternDestroy(pattern); });
         FcResult res;
         FcFontSet *fontSet = FcFontSort(nullptr, p, FcFalse, nullptr, &res);
         if (fontSet) {
