@@ -906,6 +906,7 @@ int main(int argc, char *argv[])
     int pg, pg_num_len;
     double pg_w, pg_h, tmp, output_w, output_h;
     int num_outputs;
+    bool documentInitialized = false;
 
     // parse args
     Win32Console win32Console(&argc, &argv);
@@ -1195,7 +1196,7 @@ int main(int argc, char *argv[])
             pg_h = doc->getPageMediaHeight(pg);
         }
 
-        if (printing && pg == firstPage) {
+        if (printing && !documentInitialized) {
             if (paperWidth < 0 || paperHeight < 0) {
                 paperWidth = (int)ceil(pg_w);
                 paperHeight = (int)ceil(pg_h);
@@ -1233,8 +1234,9 @@ int main(int argc, char *argv[])
         }
         getOutputSize(pg_w, pg_h, &output_w, &output_h);
 
-        if (pg == firstPage) {
+        if (!documentInitialized) {
             beginDocument(fileName, outputFileName, output_w, output_h);
+            documentInitialized = true;
         }
         beginPage(&output_w, &output_h);
         renderPage(doc.get(), cairoOut, pg, pg_w, pg_h, output_w, output_h);
