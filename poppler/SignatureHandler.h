@@ -87,7 +87,11 @@ private:
     unsigned int hash_length;
     HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
-    HASHContext *hash_context;
+    struct HashDestroyer
+    {
+        void operator()(HASHContext *hash) { HASH_Destroy(hash); }
+    };
+    std::unique_ptr<HASHContext, HashDestroyer> hash_context;
     NSSCMSMessage *CMSMessage;
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;

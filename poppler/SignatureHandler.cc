@@ -212,7 +212,7 @@ static void shutdownNss()
 // SEC_StringToOID() and NSS_CMSSignerInfo_AddUnauthAttr() are
 // not exported from libsmime, so copy them here. Sigh.
 
-static SECStatus my_SEC_StringToOID(SECItem *to, const char *from, PRUint32 len)
+static SECStatus my_SEC_StringToOID(PLArenaPool *arena, SECItem *to, const char *from, PRUint32 len)
 {
     PRUint32 decimal_numbers = 0;
     PRUint32 result_bytes = 0;
@@ -305,7 +305,7 @@ static SECStatus my_SEC_StringToOID(SECItem *to, const char *from, PRUint32 len)
         SECItem result_item = { siBuffer, nullptr, 0 };
         result_item.data = result;
         result_item.len = result_bytes;
-        rv = SECITEM_CopyItem(nullptr, to, &result_item);
+        rv = SECITEM_CopyItem(arena, to, &result_item);
     }
     return rv;
 }
@@ -795,7 +795,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
     CMSSignedData = CMS_SignedDataCreate(CMSMessage);
     if (CMSSignedData) {
         CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
-        hash_context = initHashContext();
+        hash_context.reset(initHashContext());
     }
 }
 
@@ -805,7 +805,7 @@ SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm diges
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag)));
+    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag))));
 }
 
 HASHContext *SignatureHandler::initHashContext()
@@ -822,16 +822,13 @@ HASHContext *SignatureHandler::initHashContext()
 void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
 {
     if (hash_context) {
-        HASH_Update(hash_context, data_block, data_len);
+        HASH_Update(hash_context.get(), data_block, data_len);
     }
 }
 
 void SignatureHandler::restartHash()
 {
-    if (hash_context) {
-        HASH_Destroy(hash_context);
-    }
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag)));
+    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag))));
 }
 
 SignatureHandler::~SignatureHandler()
@@ -839,10 +836,6 @@ SignatureHandler::~SignatureHandler()
     SECITEM_FreeItem(&CMSitem, PR_FALSE);
     if (CMSMessage) {
         NSS_CMSMessage_Destroy(CMSMessage);
-    }
-
-    if (hash_context) {
-        HASH_Destroy(hash_context);
     }
 
     if (signing_cert) {
@@ -953,7 +946,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
     unsigned int result_len = 0;
 
-    HASH_End(hash_context, digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
 
     SECItem digest;
     digest.data = digest_buffer;
@@ -1050,7 +1043,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     }
     unsigned char *digest_buffer = reinterpret_cast<unsigned char *>(PORT_Alloc(hash_length));
     unsigned int result_len = 0;
-    HASH_End(hash_context, digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
     SECItem digest;
     digest.data = digest_buffer;
     digest.len = result_len;
@@ -1104,13 +1097,19 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
         return nullptr;
     }
 
+    struct PLArenaFreeFalse
+    {
+        void operator()(PLArenaPool *arena) { PORT_FreeArena(arena, PR_FALSE); }
+    };
+    std::unique_ptr<PLArenaPool, PLArenaFreeFalse> arena { PORT_NewArena(10000) };
+
     // Add the signing certificate as a signed attribute.
     ESSCertIDv2 *aCertIDs[2];
     ESSCertIDv2 aCertID;
     // Write ESSCertIDv2.hashAlgorithm.
     aCertID.hashAlgorithm.algorithm.data = nullptr;
     aCertID.hashAlgorithm.parameters.data = nullptr;
-    SECOID_SetAlgorithmID(nullptr, &aCertID.hashAlgorithm, SEC_OID_SHA256, nullptr);
+    SECOID_SetAlgorithmID(arena.get(), &aCertID.hashAlgorithm, SEC_OID_SHA256, nullptr);
 
     // Write ESSCertIDv2.certHash.
     SECItem aCertHashItem;
@@ -1161,7 +1160,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
      * { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs9(9)
      *   smime(16) id-aa(2) 47 }
      */
-    if (my_SEC_StringToOID(&aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
+    if (my_SEC_StringToOID(arena.get(), &aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
         return nullptr;
     }
 
@@ -1180,16 +1179,13 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     SECItem cms_output;
     cms_output.data = nullptr;
     cms_output.len = 0;
-    PLArenaPool *arena = PORT_NewArena(10000);
 
-    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg, nullptr, nullptr, &cms_output, arena, passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
+    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg, nullptr, nullptr, &cms_output, arena.get(), passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx) {
-        PORT_FreeArena(arena, PR_FALSE);
         return nullptr;
     }
 
     if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess) {
-        PORT_FreeArena(arena, PR_FALSE);
         return nullptr;
     }
 
@@ -1197,7 +1193,6 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
     NSS_CMSMessage_Destroy(cms_msg);
-    PORT_FreeArena(arena, PR_FALSE);
 
     return std::unique_ptr<GooString>(signature);
 }
