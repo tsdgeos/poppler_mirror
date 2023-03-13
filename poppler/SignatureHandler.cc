@@ -795,7 +795,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
     CMSSignedData = CMS_SignedDataCreate(CMSMessage);
     if (CMSSignedData) {
         CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
-        hash_context = initHashContext();
+        hash_context.reset(initHashContext());
     }
 }
 
@@ -805,7 +805,7 @@ SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm diges
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag)));
+    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag))));
 }
 
 HASHContext *SignatureHandler::initHashContext()
@@ -822,16 +822,13 @@ HASHContext *SignatureHandler::initHashContext()
 void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
 {
     if (hash_context) {
-        HASH_Update(hash_context, data_block, data_len);
+        HASH_Update(hash_context.get(), data_block, data_len);
     }
 }
 
 void SignatureHandler::restartHash()
 {
-    if (hash_context) {
-        HASH_Destroy(hash_context);
-    }
-    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag)));
+    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag))));
 }
 
 SignatureHandler::~SignatureHandler()
@@ -839,10 +836,6 @@ SignatureHandler::~SignatureHandler()
     SECITEM_FreeItem(&CMSitem, PR_FALSE);
     if (CMSMessage) {
         NSS_CMSMessage_Destroy(CMSMessage);
-    }
-
-    if (hash_context) {
-        HASH_Destroy(hash_context);
     }
 
     if (signing_cert) {
@@ -953,7 +946,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
     unsigned int result_len = 0;
 
-    HASH_End(hash_context, digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
 
     SECItem digest;
     digest.data = digest_buffer;
@@ -1050,7 +1043,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     }
     unsigned char *digest_buffer = reinterpret_cast<unsigned char *>(PORT_Alloc(hash_length));
     unsigned int result_len = 0;
-    HASH_End(hash_context, digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
     SECItem digest;
     digest.data = digest_buffer;
     digest.len = result_len;
