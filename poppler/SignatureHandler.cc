@@ -30,6 +30,7 @@
 #include "goo/gmem.h"
 
 #include <optional>
+#include <vector>
 
 #include <Error.h>
 
@@ -937,8 +938,6 @@ static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_c
 
 SignatureValidationStatus SignatureHandler::validateSignature()
 {
-    unsigned char *digest_buffer = nullptr;
-
     if (!CMSSignedData) {
         return SIGNATURE_GENERIC_ERROR;
     }
@@ -951,14 +950,14 @@ SignatureValidationStatus SignatureHandler::validateSignature()
         return SIGNATURE_GENERIC_ERROR;
     }
 
-    digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
+    auto digest_buffer = std::vector<unsigned char>(hash_length);
     unsigned int result_len = 0;
 
-    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer.data(), &result_len, digest_buffer.size());
 
     SECItem digest;
-    digest.data = digest_buffer;
-    digest.len = hash_length;
+    digest.data = digest_buffer.data();
+    digest.len = digest_buffer.size();
 
     if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
         CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
@@ -970,20 +969,15 @@ SignatureValidationStatus SignatureHandler::validateSignature()
           This means it's not a detached type signature
           so the digest is contained in SignedData->contentInfo
         */
-        if (memcmp(digest.data, content_info_data->data, hash_length) == 0 && digest.len == content_info_data->len) {
-            PORT_Free(digest_buffer);
+        if (digest.len == content_info_data->len && memcmp(digest.data, content_info_data->data, digest.len) == 0) {
             return SIGNATURE_VALID;
         } else {
-            PORT_Free(digest_buffer);
             return SIGNATURE_DIGEST_MISMATCH;
         }
 
     } else if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, nullptr) != SECSuccess) {
-
-        PORT_Free(digest_buffer);
         return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
     } else {
-        PORT_Free(digest_buffer);
         return SIGNATURE_VALID;
     }
 }
