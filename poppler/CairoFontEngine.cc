@@ -405,16 +405,11 @@ static const cairo_user_data_key_t type3_font_key = { 0 };
 
 typedef struct _type3_font_info
 {
-    _type3_font_info(const std::shared_ptr<GfxFont> &fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, bool printingA, XRef *xrefA, CairoOutputDev *outputDevA, Gfx *gfxA)
-        : font(fontA), doc(docA), fontEngine(fontEngineA), printing(printingA), xref(xrefA), outputDev(outputDevA), gfx(gfxA)
-    {
-    }
+    _type3_font_info(const std::shared_ptr<GfxFont> &fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, CairoOutputDev *outputDevA, Gfx *gfxA) : font(fontA), doc(docA), fontEngine(fontEngineA), outputDev(outputDevA), gfx(gfxA) { }
 
     std::shared_ptr<GfxFont> font;
     PDFDoc *doc;
     CairoFontEngine *fontEngine;
-    bool printing;
-    XRef *xref;
     CairoOutputDev *outputDev;
     Gfx *gfx;
 } type3_font_info_t;
@@ -566,7 +561,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     box.y2 = mat[3];
     Gfx *gfx = new Gfx(doc, output_dev, resDict, &box, nullptr);
 
-    type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, printing, xref, output_dev, gfx);
+    type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, output_dev, gfx);
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);
 
     char **enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
