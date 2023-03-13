@@ -96,7 +96,6 @@ private:
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;
     CERTCertificate *signing_cert;
-    CERTCertificate **temp_certs;
 
     static std::string sNssDir;
 };

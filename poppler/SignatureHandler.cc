@@ -786,7 +786,7 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
     PasswordFunction = f;
 }
 
-SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
     CMSitem.data = p7;
@@ -800,7 +800,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
 }
 
 SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag)
-    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
@@ -835,14 +835,24 @@ SignatureHandler::~SignatureHandler()
 {
     SECITEM_FreeItem(&CMSitem, PR_FALSE);
     if (CMSMessage) {
+        // in the CMS_SignedDataCreate, we malloc some memory
+        // inside the CMSSignedData structure
+        // which is otherwise destructed by NSS_CMSMessage_Destroy
+        // but given we did the malloc ourselves
+        // we also need to free it ourselves.
+        // After we free the surrounding memory but we need
+        // a handle to it before.
+        CERTCertificate **toFree = nullptr;
+        if (CMSSignedData) {
+            toFree = CMSSignedData->tempCerts;
+        }
         NSS_CMSMessage_Destroy(CMSMessage);
+        free(toFree);
     }
 
     if (signing_cert) {
         CERT_DestroyCertificate(signing_cert);
     }
-
-    free(temp_certs);
 }
 
 NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem *cms_item)
@@ -888,8 +898,6 @@ NSSCMSSignedData *SignatureHandler::CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
         for (i = 0; signedData->rawCerts[i]; ++i) {
             signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);
         }
-
-        temp_certs = signedData->tempCerts;
         return signedData;
     } else {
         return nullptr;
