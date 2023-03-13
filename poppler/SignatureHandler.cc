@@ -1052,31 +1052,35 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     /// Code from LibreOffice under MPLv2
     /////////////////////////////////////
 
-    NSSCMSMessage *cms_msg = NSS_CMSMessage_Create(nullptr);
+    struct NSSCMSMessageDestroyer
+    {
+        void operator()(NSSCMSMessage *message) { NSS_CMSMessage_Destroy(message); }
+    };
+    std::unique_ptr<NSSCMSMessage, NSSCMSMessageDestroyer> cms_msg { NSS_CMSMessage_Create(nullptr) };
     if (!cms_msg) {
         return nullptr;
     }
 
-    NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg);
+    NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg.get());
     if (!cms_sd) {
         return nullptr;
     }
 
-    NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg);
+    NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg.get());
 
-    if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg, cms_cinfo, cms_sd) != SECSuccess) {
+    if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg.get(), cms_cinfo, cms_sd) != SECSuccess) {
         return nullptr;
     }
 
     cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
 
     // Attach NULL data as detached data
-    if (NSS_CMSContentInfo_SetContent_Data(cms_msg, cms_cinfo, nullptr, PR_TRUE) != SECSuccess) {
+    if (NSS_CMSContentInfo_SetContent_Data(cms_msg.get(), cms_cinfo, nullptr, PR_TRUE) != SECSuccess) {
         return nullptr;
     }
 
     // hardcode SHA256 these days...
-    NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg, signing_cert, SEC_OID_SHA256);
+    NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg.get(), signing_cert, SEC_OID_SHA256);
     if (!cms_signer) {
         return nullptr;
     }
@@ -1180,7 +1184,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     cms_output.data = nullptr;
     cms_output.len = 0;
 
-    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg, nullptr, nullptr, &cms_output, arena.get(), passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
+    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg.get(), nullptr, nullptr, &cms_output, arena.get(), passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx) {
         return nullptr;
     }
@@ -1192,7 +1196,6 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     GooString *signature = new GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
-    NSS_CMSMessage_Destroy(cms_msg);
 
     return std::unique_ptr<GooString>(signature);
 }
