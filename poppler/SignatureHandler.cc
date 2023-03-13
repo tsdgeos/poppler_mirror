@@ -1043,11 +1043,11 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     if (!hash_context) {
         return nullptr;
     }
-    unsigned char *digest_buffer = reinterpret_cast<unsigned char *>(PORT_Alloc(hash_length));
+    auto digest_buffer = std::vector<unsigned char>(hash_length);
     unsigned int result_len = 0;
-    HASH_End(hash_context.get(), digest_buffer, &result_len, hash_length);
+    HASH_End(hash_context.get(), digest_buffer.data(), &result_len, hash_length);
     SECItem digest;
-    digest.data = digest_buffer;
+    digest.data = digest_buffer.data();
     digest.len = result_len;
 
     /////////////////////////////////////
