@@ -522,8 +522,6 @@ unsigned int SignatureHandler::digestLength(HashAlgorithm digestAlgId)
 
 std::string SignatureHandler::getSignerName()
 {
-    char *commonName;
-
     if (!NSS_IsInitialized()) {
         return {};
     }
@@ -531,16 +529,21 @@ std::string SignatureHandler::getSignerName()
     if (!signing_cert && !CMSSignerInfo) {
         return {};
     }
+    CERTCertificate *activeCert = nullptr;
 
     if (!signing_cert) {
-        signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+        // we are signing, and thus getting the name of the SignerInfo, not of the signing cert. Data owned by CMSSignerInfo
+        activeCert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    } else {
+        // We are verifying. data owned by us.
+        activeCert = signing_cert;
     }
 
-    if (!signing_cert) {
+    if (!activeCert) {
         return {};
     }
 
-    commonName = CERT_GetCommonName(&signing_cert->subject);
+    char *commonName = CERT_GetCommonName(&activeCert->subject);
     if (!commonName) {
         return {};
     }
@@ -550,21 +553,26 @@ std::string SignatureHandler::getSignerName()
     return name;
 }
 
-const char *SignatureHandler::getSignerSubjectDN()
+std::string SignatureHandler::getSignerSubjectDN()
 {
     if (!signing_cert && !CMSSignerInfo) {
-        return nullptr;
+        return {};
     }
+    CERTCertificate *activeCert = nullptr;
 
     if (!signing_cert) {
-        signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+        // we are signing, and thus getting the name of the SignerInfo, not of the signing cert. Data owned by CMSSignerInfo
+        activeCert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    } else {
+        // We are verifying. data owned by us.
+        activeCert = signing_cert;
     }
 
-    if (!signing_cert) {
-        return nullptr;
+    if (!activeCert) {
+        return {};
     }
 
-    return signing_cert->subjectName;
+    return activeCert->subjectName;
 }
 
 HashAlgorithm SignatureHandler::getHashAlgorithm()

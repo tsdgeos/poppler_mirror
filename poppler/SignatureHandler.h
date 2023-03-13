@@ -51,7 +51,7 @@ public:
     ~SignatureHandler();
     time_t getSigningTime();
     std::string getSignerName();
-    const char *getSignerSubjectDN();
+    std::string getSignerSubjectDN();
     HashAlgorithm getHashAlgorithm();
     void updateHash(unsigned char *data_block, int data_len);
     void restartHash();
