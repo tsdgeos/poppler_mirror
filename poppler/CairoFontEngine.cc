@@ -33,6 +33,8 @@
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2022 Marcel Fabian Krüger <tex@2krueger.de>
+// Copyright (C) 2023 Pablo Correa Gómez <ablocorrea@hotmail.com>
+// Copyright (C) 2023 Frederic Germain <frederic.germain@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
