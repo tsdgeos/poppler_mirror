@@ -43,6 +43,11 @@
 #include <secmodt.h>
 #include <sechash.h>
 
+// experiments seems to say that this is a bit above
+// what we have seen in the wild, and much larger than
+// what we have managed to get nss and gpgme to create.
+static const int maxSupportedSignatureSize = 10000;
+
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
@@ -54,7 +59,6 @@ public:
     std::string getSignerSubjectDN() const;
     HashAlgorithm getHashAlgorithm() const;
     void updateHash(unsigned char *data_block, int data_len);
-    void restartHash();
     SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);

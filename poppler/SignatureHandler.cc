@@ -839,11 +839,6 @@ void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
     }
 }
 
-void SignatureHandler::restartHash()
-{
-    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digest_alg_tag))));
-}
-
 SignatureHandler::~SignatureHandler()
 {
     if (CMSMessage) {
@@ -1118,7 +1113,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &pas
     {
         void operator()(PLArenaPool *arena) { PORT_FreeArena(arena, PR_FALSE); }
     };
-    std::unique_ptr<PLArenaPool, PLArenaFreeFalse> arena { PORT_NewArena(10000) };
+    std::unique_ptr<PLArenaPool, PLArenaFreeFalse> arena { PORT_NewArena(maxSupportedSignatureSize) };
 
     // Add the signing certificate as a signed attribute.
     ESSCertIDv2 *aCertIDs[2];
