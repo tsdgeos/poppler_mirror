@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -957,7 +957,7 @@ SignatureValidationStatus SignatureHandler::validateSignature()
 
     SECItem digest;
     digest.data = digest_buffer.data();
-    digest.len = digest_buffer.size();
+    digest.len = result_len;
 
     if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
         CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
