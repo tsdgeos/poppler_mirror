@@ -799,11 +799,11 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
     PasswordFunction = f;
 }
 
-SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
+SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
-    CMSitem.data = p7;
-    CMSitem.len = p7_length;
+    CMSitem.data = p7.data();
+    CMSitem.len = p7.size();
     CMSMessage = CMS_MessageCreate(&CMSitem);
     CMSSignedData = CMS_SignedDataCreate(CMSMessage);
     if (CMSSignedData) {
@@ -846,7 +846,6 @@ void SignatureHandler::restartHash()
 
 SignatureHandler::~SignatureHandler()
 {
-    SECITEM_FreeItem(&CMSitem, PR_FALSE);
     if (CMSMessage) {
         // in the CMS_SignedDataCreate, we malloc some memory
         // inside the CMSSignedData structure

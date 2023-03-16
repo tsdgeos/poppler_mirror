@@ -2356,9 +2356,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     }
 
     const int signature_len = signature->getLength();
-    unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
-    memcpy(signatureuchar, signature->c_str(), signature_len);
-    SignatureHandler signature_handler(signatureuchar, signature_len);
+    std::vector<unsigned char> signatureData(signature_len);
+    memcpy(signatureData.data(), signature->c_str(), signature_len);
+    SignatureHandler signature_handler(std::move(signatureData));
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {

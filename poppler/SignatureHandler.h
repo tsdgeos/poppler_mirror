@@ -46,7 +46,7 @@
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
-    SignatureHandler(unsigned char *p7, int p7_length);
+    explicit SignatureHandler(std::vector<unsigned char> &&p7data);
     SignatureHandler(const std::string &certNickName, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime() const;
@@ -81,6 +81,7 @@ private:
     HASHContext *initHashContext();
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
+    std::vector<unsigned char> p7;
     unsigned int hash_length;
     HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
