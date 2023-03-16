@@ -197,6 +197,10 @@ const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullp
                                                    { 0, 0, nullptr, 0 } };
 */
 
+static NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
+static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
+static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
+
 // a dummy, actually
 static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
 {
@@ -856,7 +860,7 @@ SignatureHandler::~SignatureHandler()
     }
 }
 
-NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem *cms_item)
+static NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item)
 {
     if (cms_item->data) {
         return NSS_CMSMessage_CreateFromDER(cms_item, nullptr, nullptr /* Content callback */
@@ -869,7 +873,7 @@ NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem *cms_item)
     }
 }
 
-NSSCMSSignedData *SignatureHandler::CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
+static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
 {
     if (!NSS_CMSMessage_IsSigned(cms_msg)) {
         error(errInternal, 0, "Input couldn't be parsed as a CMS signature");
@@ -905,7 +909,7 @@ NSSCMSSignedData *SignatureHandler::CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
     }
 }
 
-NSSCMSSignerInfo *SignatureHandler::CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
+NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
 {
     NSSCMSSignerInfo *signerInfo = NSS_CMSSignedData_GetSignerInfo(cms_sig_data, 0);
     if (!signerInfo) {

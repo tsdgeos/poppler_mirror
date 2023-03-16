@@ -78,9 +78,6 @@ private:
     SignatureHandler &operator=(const SignatureHandler &);
 
     unsigned int digestLength(HashAlgorithm digestAlgId);
-    NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
-    NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
-    NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
     HASHContext *initHashContext();
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
