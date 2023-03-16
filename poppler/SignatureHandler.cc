@@ -457,28 +457,6 @@ static SECOidTag ConvertHashAlgorithmToNss(HashAlgorithm digestAlgId)
     return SEC_OID_UNKNOWN;
 }
 
-static HashAlgorithm ConvertHashAlgorithmFromNss(SECOidTag digestAlgId)
-{
-    switch (digestAlgId) {
-    case SEC_OID_MD2:
-        return HashAlgorithm::Md2;
-    case SEC_OID_MD5:
-        return HashAlgorithm::Md5;
-    case SEC_OID_SHA1:
-        return HashAlgorithm::Sha1;
-    case SEC_OID_SHA256:
-        return HashAlgorithm::Sha256;
-    case SEC_OID_SHA384:
-        return HashAlgorithm::Sha384;
-    case SEC_OID_SHA512:
-        return HashAlgorithm::Sha512;
-    case SEC_OID_SHA224:
-        return HashAlgorithm::Sha224;
-    default:
-        return HashAlgorithm::Unknown;
-    }
-}
-
 static HashAlgorithm ConvertHashTypeFromNss(HASH_HashType type)
 {
     switch (type) {
@@ -503,7 +481,7 @@ static HashAlgorithm ConvertHashTypeFromNss(HASH_HashType type)
     return HashAlgorithm::Unknown;
 }
 
-unsigned int SignatureHandler::digestLength(HashAlgorithm digestAlgId)
+static unsigned int digestLength(HashAlgorithm digestAlgId)
 {
     switch (digestAlgId) {
     case HashAlgorithm::Sha1:
@@ -577,8 +555,8 @@ std::string SignatureHandler::getSignerSubjectDN() const
 
 HashAlgorithm SignatureHandler::getHashAlgorithm() const
 {
-    if (hash_context && hash_context->hashobj) {
-        return ConvertHashTypeFromNss(hash_context->hashobj->type);
+    if (hashContext) {
+        return hashContext->getHashAlgorithm();
     }
     return HashAlgorithm::Unknown;
 }
@@ -799,7 +777,7 @@ void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const c
     PasswordFunction = f;
 }
 
-SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
+SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), hashContext(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
     CMSitem.data = p7.data();
@@ -808,34 +786,26 @@ SignatureHandler::SignatureHandler(std::vector<unsigned char> &&p7data) : p7(std
     CMSSignedData = CMS_SignedDataCreate(CMSMessage);
     if (CMSSignedData) {
         CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
-        hash_context.reset(initHashContext());
+
+        SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
+        auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
+        HASH_HashType hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
+        hashContext = std::make_unique<HashContext>(ConvertHashTypeFromNss(hashType));
     }
 }
 
 SignatureHandler::SignatureHandler(const std::string &certNickname, HashAlgorithm digestAlgTag)
-    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
+    : CMSitem(), hashContext(std::make_unique<HashContext>(digestAlgTag)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
-    hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag))));
-}
-
-HASHContext *SignatureHandler::initHashContext()
-{
-
-    SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
-    const auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
-    hash_length = digestLength(ConvertHashAlgorithmFromNss(hashAlgorithm));
-    HASH_HashType hashType;
-    hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
-    return HASH_Create(hashType);
 }
 
 void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
 {
-    if (hash_context) {
-        HASH_Update(hash_context.get(), data_block, data_len);
+    if (hashContext) {
+        hashContext->updateHash(data_block, data_len);
     }
 }
 
@@ -952,18 +922,15 @@ SignatureValidationStatus SignatureHandler::validateSignature()
         return SIGNATURE_GENERIC_ERROR;
     }
 
-    if (!hash_context) {
+    if (!hashContext) {
         return SIGNATURE_GENERIC_ERROR;
     }
 
-    auto digest_buffer = std::vector<unsigned char>(hash_length);
-    unsigned int result_len = 0;
-
-    HASH_End(hash_context.get(), digest_buffer.data(), &result_len, digest_buffer.size());
+    std::vector<unsigned char> digest_buffer = hashContext->endHash();
 
     SECItem digest;
     digest.data = digest_buffer.data();
-    digest.len = result_len;
+    digest.len = digest_buffer.size();
 
     if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
         CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
@@ -1046,15 +1013,13 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
 
 std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &password) const
 {
-    if (!hash_context) {
+    if (!hashContext) {
         return nullptr;
     }
-    auto digest_buffer = std::vector<unsigned char>(hash_length);
-    unsigned int result_len = 0;
-    HASH_End(hash_context.get(), digest_buffer.data(), &result_len, hash_length);
+    std::vector<unsigned char> digest_buffer = hashContext->endHash();
     SECItem digest;
     digest.data = digest_buffer.data();
-    digest.len = result_len;
+    digest.len = digest_buffer.size();
 
     /////////////////////////////////////
     /// Code from LibreOffice under MPLv2
@@ -1258,4 +1223,27 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
     PK11_SetPasswordFunc(nullptr);
 
     return certsList;
+}
+
+void HashContext::updateHash(unsigned char *data_block, int data_len)
+{
+    HASH_Update(hash_context.get(), data_block, data_len);
+}
+
+std::vector<unsigned char> HashContext::endHash()
+{
+    auto hash_length = digestLength(digest_alg_tag);
+    std::vector<unsigned char> digestBuffer(hash_length);
+    unsigned int result_length = 0;
+    HASH_End(hash_context.get(), digestBuffer.data(), &result_length, digestBuffer.size());
+    digestBuffer.resize(result_length);
+
+    return digestBuffer;
+}
+
+HashContext::HashContext(HashAlgorithm algorithm) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
+
+HashAlgorithm HashContext::getHashAlgorithm() const
+{
+    return digest_alg_tag;
 }

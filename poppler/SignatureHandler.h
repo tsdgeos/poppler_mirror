@@ -48,6 +48,24 @@
 // what we have managed to get nss and gpgme to create.
 static const int maxSupportedSignatureSize = 10000;
 
+class HashContext
+{
+public:
+    explicit HashContext(HashAlgorithm algorithm);
+    void updateHash(unsigned char *data_block, int data_len);
+    std::vector<unsigned char> endHash();
+    HashAlgorithm getHashAlgorithm() const;
+    ~HashContext() = default;
+
+private:
+    struct HashDestroyer
+    {
+        void operator()(HASHContext *hash) { HASH_Destroy(hash); }
+    };
+    std::unique_ptr<HASHContext, HashDestroyer> hash_context;
+    HashAlgorithm digest_alg_tag;
+};
+
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
@@ -81,19 +99,12 @@ private:
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
-    unsigned int digestLength(HashAlgorithm digestAlgId);
-    HASHContext *initHashContext();
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
     std::vector<unsigned char> p7;
-    unsigned int hash_length;
     HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
-    struct HashDestroyer
-    {
-        void operator()(HASHContext *hash) { HASH_Destroy(hash); }
-    };
-    std::unique_ptr<HASHContext, HashDestroyer> hash_context;
+    std::unique_ptr<HashContext> hashContext;
     NSSCMSMessage *CMSMessage;
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;
