@@ -2171,9 +2171,9 @@ static std::string findPdfFontNameToUseForSigning(Form *form)
     return {};
 }
 
-bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
-                  double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason,
-                  const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
+bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
+                  const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
+                  std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {

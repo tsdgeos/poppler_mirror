@@ -781,7 +781,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 {
 #ifdef ENABLE_NSS3
     Q_D(const CertificateInfo);
-    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), HashAlgorithm::Sha256);
+    SignatureHandler sigHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler.updateHash(buffer, 5);
@@ -1114,9 +1114,8 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
-    const bool success =
-            fws->signDocumentWithAppearance(outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText,
-                                            *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+    const bool success = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
+                                                         data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
 
     return success ? SigningSuccess : GenericSigningError;
 }

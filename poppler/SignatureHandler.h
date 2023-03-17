@@ -47,7 +47,7 @@ class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
     SignatureHandler(unsigned char *p7, int p7_length);
-    SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
+    SignatureHandler(const std::string &certNickName, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime() const;
     std::string getSignerName() const;
@@ -60,7 +60,7 @@ public:
     CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
-    std::unique_ptr<GooString> signDetached(const char *password) const;
+    std::unique_ptr<GooString> signDetached(const std::string &password) const;
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb

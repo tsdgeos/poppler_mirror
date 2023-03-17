@@ -812,12 +812,12 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
     }
 }
 
-SignatureHandler::SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag)
+SignatureHandler::SignatureHandler(const std::string &certNickname, HashAlgorithm digestAlgTag)
     : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr)
 {
     setNSSDir({});
     CMSMessage = NSS_CMSMessage_Create(nullptr);
-    signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
+    signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
     hash_context.reset(HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(digestAlgTag))));
 }
 
@@ -1050,7 +1050,7 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     return CERTIFICATE_GENERIC_ERROR;
 }
 
-std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) const
+std::unique_ptr<GooString> SignatureHandler::signDetached(const std::string &password) const
 {
     if (!hash_context) {
         return nullptr;
@@ -1198,7 +1198,7 @@ std::unique_ptr<GooString> SignatureHandler::signDetached(const char *password) 
     cms_output.data = nullptr;
     cms_output.len = 0;
 
-    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg.get(), nullptr, nullptr, &cms_output, arena.get(), passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
+    NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg.get(), nullptr, nullptr, &cms_output, arena.get(), passwordCallback, password.empty() ? nullptr : const_cast<char *>(password.c_str()), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx) {
         return nullptr;
     }
