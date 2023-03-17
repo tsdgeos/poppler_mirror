@@ -520,7 +520,7 @@ unsigned int SignatureHandler::digestLength(HashAlgorithm digestAlgId)
     }
 }
 
-std::string SignatureHandler::getSignerName()
+std::string SignatureHandler::getSignerName() const
 {
     if (!NSS_IsInitialized()) {
         return {};
@@ -553,7 +553,7 @@ std::string SignatureHandler::getSignerName()
     return name;
 }
 
-std::string SignatureHandler::getSignerSubjectDN()
+std::string SignatureHandler::getSignerSubjectDN() const
 {
     if (!signing_cert && !CMSSignerInfo) {
         return {};
@@ -575,7 +575,7 @@ std::string SignatureHandler::getSignerSubjectDN()
     return activeCert->subjectName;
 }
 
-HashAlgorithm SignatureHandler::getHashAlgorithm()
+HashAlgorithm SignatureHandler::getHashAlgorithm() const
 {
     if (hash_context && hash_context->hashobj) {
         return ConvertHashTypeFromNss(hash_context->hashobj->type);
@@ -583,7 +583,7 @@ HashAlgorithm SignatureHandler::getHashAlgorithm()
     return HashAlgorithm::Unknown;
 }
 
-time_t SignatureHandler::getSigningTime()
+time_t SignatureHandler::getSigningTime() const
 {
     PRTime sTime; // time in microseconds since the epoch
 

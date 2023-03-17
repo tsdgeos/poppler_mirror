@@ -49,10 +49,10 @@ public:
     SignatureHandler(unsigned char *p7, int p7_length);
     SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
-    time_t getSigningTime();
-    std::string getSignerName();
-    std::string getSignerSubjectDN();
-    HashAlgorithm getHashAlgorithm();
+    time_t getSigningTime() const;
+    std::string getSignerName() const;
+    std::string getSignerSubjectDN() const;
+    HashAlgorithm getHashAlgorithm() const;
     void updateHash(unsigned char *data_block, int data_len);
     void restartHash();
     SignatureValidationStatus validateSignature();
