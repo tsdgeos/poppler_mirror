@@ -461,7 +461,10 @@ int main(int argc, char *argv[])
             for (unsigned int i = 0; i < sigCount; i++) {
                 const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
                 if (!dumpingOk) {
-                    return 3;
+                    // for now, do nothing. We have logged a message
+                    // to the user before returning false in dumpSignature
+                    // and it is possible to have "holes" in the signatures
+                    continue;
                 }
             }
             return 0;
