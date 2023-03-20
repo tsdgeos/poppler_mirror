@@ -439,14 +439,13 @@ int main(int argc, char *argv[])
         if (etsiCAdESdetached) {
             ffs->setSignatureType(ETSI_CAdES_detached);
         }
-        const char *pw = (strlen(password) == 0) ? nullptr : password;
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
         if (ffs->getNumWidgets() != 1) {
             printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        const bool success = fws->signDocument(argv[2], certNickname, pw, rs.get());
+        const bool success = fws->signDocument(std::string { argv[2] }, std::string { certNickname }, std::string { password }, rs.get());
         return success ? 0 : 3;
     }
 

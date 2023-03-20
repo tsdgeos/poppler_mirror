@@ -785,7 +785,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler.updateHash(buffer, 5);
-    std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password.toUtf8().constData());
+    std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password.toStdString());
     return tmpSignature.get() != nullptr;
 #else
     return false;
