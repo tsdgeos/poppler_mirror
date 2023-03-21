@@ -168,6 +168,7 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
+                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
 
