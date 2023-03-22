@@ -623,6 +623,10 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
+    if (!certInfo) {
+        fprintf(stderr, "signDocument: error getting signature info\n");
+        return false;
+    }
     const std::string signerName = certInfo->getSubjectInfo().commonName;
     signatureField->setCertificateInfo(certInfo);
     updateWidgetAppearance(); // add visible signing info to appearance
@@ -644,6 +648,7 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     Goffset objStart, objEnd;
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
+        return false;
     }
 
     // Update byte range of signature in the saved PDF
