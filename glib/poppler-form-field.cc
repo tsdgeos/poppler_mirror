@@ -469,7 +469,8 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
         break;
     }
 
-    poppler_sig_info->signer_name = g_strdup(sig_info->getSignerName().c_str());
+    std::string signerName = sig_info->getSignerName();
+    poppler_sig_info->signer_name = g_strdup(signerName.c_str());
     poppler_sig_info->local_signing_time = g_date_time_new_from_unix_local(sig_info->getSigningTime());
 
     return poppler_sig_info;
