@@ -602,41 +602,37 @@ static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Gof
 }
 #endif
 
-bool FormWidgetSignature::signDocument(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
+bool FormWidgetSignature::signDocument(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
                                        const std::optional<GooString> &userPassword)
 {
 #ifdef ENABLE_NSS3
-    if (!certNickname) {
+    if (certNickname.empty()) {
         fprintf(stderr, "signDocument: Empty nickname\n");
         return false;
     }
 
-    // calculate a signature over tmp_buffer with the certificate to get its size
-    unsigned char tmp_buffer[4];
-    memcpy(tmp_buffer, "PDF", 4);
     SignatureHandler sigHandler(certNickname, HashAlgorithm::Sha256);
-    sigHandler.updateHash(tmp_buffer, 4);
-    const std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password);
-    if (!tmpSignature) {
-        return false;
-    }
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
+    if (!certInfo) {
+        fprintf(stderr, "signDocument: error getting signature info\n");
+        return false;
+    }
     const std::string signerName = certInfo->getSubjectInfo().commonName;
     signatureField->setCertificateInfo(certInfo);
     updateWidgetAppearance(); // add visible signing info to appearance
 
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), tmpSignature.get(), reason, location)) {
+    if (!createSignature(vObj, vref, GooString(signerName), maxSupportedSignatureSize, reason, location)) {
         return false;
     }
 
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
-        fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename);
+        fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename.c_str());
         return false;
     }
 
@@ -644,11 +640,12 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     Goffset objStart, objEnd;
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
+        return false;
     }
 
     // Update byte range of signature in the saved PDF
     Goffset sigStart, sigEnd, fileSize;
-    FILE *file = openFile(saveFilename, "r+b");
+    FILE *file = openFile(saveFilename.c_str(), "r+b");
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
         fprintf(stderr, "signDocument: unable update byte range\n");
         fclose(file);
@@ -656,7 +653,6 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     }
 
     // compute hash of byte ranges
-    sigHandler.restartHash();
     if (!hashFileRange(file, &sigHandler, 0LL, sigStart)) {
         fclose(file);
         return false;
@@ -672,6 +668,15 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
         fclose(file);
         return false;
     }
+
+    if (signature->getLength() > maxSupportedSignatureSize) {
+        fclose(file);
+        return false;
+    }
+
+    // pad with zeroes to placeholder length
+    auto length = signature->getLength();
+    signature->append(std::string(maxSupportedSignatureSize - length, '\0'));
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, signature.get())) {
@@ -689,9 +694,9 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 #endif
 }
 
-bool FormWidgetSignature::signDocumentWithAppearance(const char *saveFilename, const char *certNickname, const char *password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
-                                                     const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
-                                                     std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
+                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -806,12 +811,12 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
     }
     buf[bufSize] = 0; // prevent string functions from searching past the end
 
-    // search for the Contents field which contains the signature
-    // which always must start with hex digits 308
+    // search for the Contents field which contains the signature placeholder
+    // which always must start with hex digits 000
     *sigStart = -1;
     *sigEnd = -1;
     for (size_t i = 0; i < bufSize - 14; i++) {
-        if (buf[i] == '/' && strncmp(&buf[i], "/Contents <308", 14) == 0) {
+        if (buf[i] == '/' && strncmp(&buf[i], "/Contents <000", 14) == 0) {
             *sigStart = objStart + i + 10;
             char *p = strchr(&buf[i], '>');
             if (p) {
@@ -873,7 +878,7 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     return true;
 }
 
-bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason, const GooString *location)
+bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
     vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
@@ -888,7 +893,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
         vObj.dictAdd("Location", Object(location->copy()));
     }
 
-    vObj.dictAdd("Contents", Object(objHexString, signature->copy()));
+    vObj.dictAdd("Contents", Object(objHexString, new GooString(std::string(placeholderLength, '\0'))));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(static_cast<long long>(0LL)));
@@ -2356,9 +2361,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     }
 
     const int signature_len = signature->getLength();
-    unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
-    memcpy(signatureuchar, signature->c_str(), signature_len);
-    SignatureHandler signature_handler(signatureuchar, signature_len);
+    std::vector<unsigned char> signatureData(signature_len);
+    memcpy(signatureData.data(), signature->c_str(), signature_len);
+    SignatureHandler signature_handler(std::move(signatureData));
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {

@@ -168,6 +168,7 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
+                                   { "--help", argFlag, &printHelp, 0, "print usage information" },
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
 
@@ -355,7 +356,6 @@ int main(int argc, char *argv[])
             return 2;
         }
 
-        const char *pw = (strlen(password) == 0) ? nullptr : password;
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
 
         if (newSignatureFieldName.getLength() == 0) {
@@ -371,7 +371,7 @@ int main(int argc, char *argv[])
         }
 
         // We don't provide a way to customize the UI from pdfsig for now
-        const bool success = doc->sign(argv[2], certNickname, pw, newSignatureFieldName.copy(), /*page*/ 1,
+        const bool success = doc->sign(std::string { argv[2] }, std::string { certNickname }, std::string { password }, newSignatureFieldName.copy(), /*page*/ 1,
                                        /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
                                        /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get(), /* location */ nullptr, /* image path */ "", ownerPW, userPW);
         return success ? 0 : 3;
@@ -440,14 +440,13 @@ int main(int argc, char *argv[])
         if (etsiCAdESdetached) {
             ffs->setSignatureType(ETSI_CAdES_detached);
         }
-        const char *pw = (strlen(password) == 0) ? nullptr : password;
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : utf8ToUtf16WithBom(reason.toStr()));
         if (ffs->getNumWidgets() != 1) {
             printf("Unexpected number of widgets for the signature: %d\n", ffs->getNumWidgets());
             return 2;
         }
         FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
-        const bool success = fws->signDocument(argv[2], certNickname, pw, rs.get());
+        const bool success = fws->signDocument(std::string { argv[2] }, std::string { certNickname }, std::string { password }, rs.get());
         return success ? 0 : 3;
     }
 
@@ -463,7 +462,10 @@ int main(int argc, char *argv[])
             for (unsigned int i = 0; i < sigCount; i++) {
                 const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
                 if (!dumpingOk) {
-                    return 3;
+                    // for now, do nothing. We have logged a message
+                    // to the user before returning false in dumpSignature
+                    // and it is possible to have "holes" in the signatures
+                    continue;
                 }
             }
             return 0;

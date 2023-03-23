@@ -43,24 +43,46 @@
 #include <secmodt.h>
 #include <sechash.h>
 
+// experiments seems to say that this is a bit above
+// what we have seen in the wild, and much larger than
+// what we have managed to get nss and gpgme to create.
+static const int maxSupportedSignatureSize = 10000;
+
+class HashContext
+{
+public:
+    explicit HashContext(HashAlgorithm algorithm);
+    void updateHash(unsigned char *data_block, int data_len);
+    std::vector<unsigned char> endHash();
+    HashAlgorithm getHashAlgorithm() const;
+    ~HashContext() = default;
+
+private:
+    struct HashDestroyer
+    {
+        void operator()(HASHContext *hash) { HASH_Destroy(hash); }
+    };
+    std::unique_ptr<HASHContext, HashDestroyer> hash_context;
+    HashAlgorithm digest_alg_tag;
+};
+
 class POPPLER_PRIVATE_EXPORT SignatureHandler
 {
 public:
-    SignatureHandler(unsigned char *p7, int p7_length);
-    SignatureHandler(const char *certNickname, HashAlgorithm digestAlgTag);
+    explicit SignatureHandler(std::vector<unsigned char> &&p7data);
+    SignatureHandler(const std::string &certNickName, HashAlgorithm digestAlgTag);
     ~SignatureHandler();
-    time_t getSigningTime();
-    std::string getSignerName();
-    const char *getSignerSubjectDN();
-    HashAlgorithm getHashAlgorithm();
+    time_t getSigningTime() const;
+    std::string getSignerName() const;
+    std::string getSignerSubjectDN() const;
+    HashAlgorithm getHashAlgorithm() const;
     void updateHash(unsigned char *data_block, int data_len);
-    void restartHash();
     SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
-    std::unique_ptr<GooString> signDetached(const char *password) const;
+    std::unique_ptr<GooString> signDetached(const std::string &password) const;
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
@@ -77,26 +99,16 @@ private:
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
-    unsigned int digestLength(HashAlgorithm digestAlgId);
-    NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item);
-    NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
-    NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
-    HASHContext *initHashContext();
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
-    unsigned int hash_length;
+    std::vector<unsigned char> p7;
     HashAlgorithm digest_alg_tag;
     SECItem CMSitem;
-    struct HashDestroyer
-    {
-        void operator()(HASHContext *hash) { HASH_Destroy(hash); }
-    };
-    std::unique_ptr<HASHContext, HashDestroyer> hash_context;
+    std::unique_ptr<HashContext> hashContext;
     NSSCMSMessage *CMSMessage;
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;
     CERTCertificate *signing_cert;
-    CERTCertificate **temp_certs;
 
     static std::string sNssDir;
 };
