@@ -490,7 +490,6 @@ void Page::removeAnnot(Annot *annot)
         }
         annots->removeAnnot(annot); // Gracefully fails on popup windows
         annArray.arrayRemove(idx);
-        xref->removeIndirectObject(annotRef);
 
         if (annotsObj.isRef()) {
             xref->setModifiedObject(&annArray, annotsObj.getRef());
@@ -499,6 +498,9 @@ void Page::removeAnnot(Annot *annot)
         }
     }
     annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
+    if (annArray.isArray()) {
+        xref->removeIndirectObject(annotRef);
+    }
     annot->setPage(0, false);
 }
 
