@@ -1425,6 +1425,9 @@ void XRef::setModifiedObject(const Object *o, Ref r)
         return;
     }
     XRefEntry *e = getEntry(r.num);
+    if (unlikely(e->type == xrefEntryFree)) {
+        error(errInternal, -1, "XRef::setModifiedObject on ref: {0:d}, {1:d} that is marked as free. This will cause a memory leak\n", r.num, r.gen);
+    }
     e->obj = o->copy();
     e->setFlag(XRefEntry::Updated, true);
     setModified();
