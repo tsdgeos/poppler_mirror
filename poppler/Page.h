@@ -181,7 +181,7 @@ public:
     // Get annotations array.
     Object getAnnotsObject(XRef *xrefA = nullptr) { return annotsObj.fetch(xrefA ? xrefA : xref); }
     // Add a new annotation to the page
-    void addAnnot(Annot *annot);
+    bool addAnnot(Annot *annot);
     // Remove an existing annotation from the page
     void removeAnnot(Annot *annot);
 
@@ -249,7 +249,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
     Object pageObj; // page dictionary
-    Ref pageRef; // page reference
+    const Ref pageRef; // page reference
     int num; // page number
     PageAttrs *attrs; // page attributes
     Annots *annots; // annotations

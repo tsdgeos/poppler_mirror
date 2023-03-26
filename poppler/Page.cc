@@ -251,7 +251,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 
 #define pageLocker() const std::scoped_lock locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form)
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) : pageRef(pageRefA)
 {
     ok = true;
     doc = docA;
@@ -261,7 +261,6 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
     annots = nullptr;
 
     pageObj = std::move(pageDict);
-    pageRef = pageRefA;
 
     // get attributes
     attrs = attrsA;
@@ -414,8 +413,14 @@ Annots *Page::getAnnots(XRef *xrefA)
     return annots;
 }
 
-void Page::addAnnot(Annot *annot)
+bool Page::addAnnot(Annot *annot)
 {
+    if (unlikely(xref->getEntry(pageRef.num)->type == xrefEntryFree)) {
+        // something very wrong happened if we're here
+        error(errInternal, -1, "Can not addAnnot to page with an invalid ref");
+        return false;
+    }
+
     const Ref annotRef = annot->getRef();
 
     // Make sure we have annots before adding the new one
@@ -463,6 +468,8 @@ void Page::addAnnot(Annot *annot)
             addAnnot(annotPopup);
         }
     }
+
+    return true;
 }
 
 void Page::removeAnnot(Annot *annot)
