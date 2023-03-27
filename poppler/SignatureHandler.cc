@@ -780,12 +780,18 @@ SignatureSignHandler::SignatureSignHandler(const std::string &certNickname, Hash
 
 HashAlgorithm SignatureVerificationHandler::getHashAlgorithm() const
 {
-    return hashContext->getHashAlgorithm();
+    if (hashContext) {
+        return hashContext->getHashAlgorithm();
+    } else {
+        return HashAlgorithm::Unknown;
+    }
 }
 
 void SignatureVerificationHandler::updateHash(unsigned char *data_block, int data_len)
 {
-    hashContext->updateHash(data_block, data_len);
+    if (hashContext) {
+        hashContext->updateHash(data_block, data_len);
+    }
 }
 
 void SignatureSignHandler::updateHash(unsigned char *data_block, int data_len)
