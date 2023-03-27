@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <optional>
+#include <algorithm>
 
 namespace DN {
 namespace detail {
@@ -306,6 +307,15 @@ static Result parseString(std::string_view string)
     return result;
 }
 
+/// returns the first value of a given key (note. there can be multiple)
+/// or nullopt if key is not available
+inline std::optional<std::string> FindFirstValue(const Result &dn, std::string_view key)
+{
+    auto first = std::find_if(dn.begin(), dn.end(), [&key](const auto &it) { return it.first == key; });
+    if (first == dn.end()) {
+        return {};
+    }
+    return first->second;
 }
-
+} // namespace DN
 #endif // DISTINGUISHEDNAMEPARSER_H
