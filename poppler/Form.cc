@@ -63,9 +63,7 @@
 #include "Form.h"
 #include "PDFDoc.h"
 #include "DateInfo.h"
-#ifdef ENABLE_NSS3
-#    include "SignatureHandler.h"
-#endif
+#include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
 #include "XRef.h"
@@ -573,10 +571,12 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
     return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime, ocspRevocationCheck, enableAIA);
 }
 
-#ifdef ENABLE_NSS3
 // update hash with the specified range of data from the file
-static bool hashFileRange(FILE *f, SignatureSignHandler *handler, Goffset start, Goffset end)
+static bool hashFileRange(FILE *f, CryptoSign::SigningInterface *handler, Goffset start, Goffset end)
 {
+    if (!handler) {
+        return false;
+    }
     const int BUF_SIZE = 65536;
 
     unsigned char *buf = new unsigned char[BUF_SIZE];
@@ -594,27 +594,29 @@ static bool hashFileRange(FILE *f, SignatureSignHandler *handler, Goffset start,
             delete[] buf;
             return false;
         }
-        handler->updateHash(buf, len);
+        handler->addData(buf, len);
         start += len;
     }
     delete[] buf;
     return true;
 }
-#endif
 
 bool FormWidgetSignature::signDocument(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
                                        const std::optional<GooString> &userPassword)
 {
-#ifdef ENABLE_NSS3
+    auto backend = CryptoSign::Factory::createActive();
+    if (!backend) {
+        return false;
+    }
     if (certNickname.empty()) {
         fprintf(stderr, "signDocument: Empty nickname\n");
         return false;
     }
 
-    SignatureSignHandler sigHandler(certNickname, HashAlgorithm::Sha256);
+    auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
-    std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
+    std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
         fprintf(stderr, "signDocument: error getting signature info\n");
         return false;
@@ -625,7 +627,7 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
 
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), maxSupportedSignatureSize, reason, location)) {
+    if (!createSignature(vObj, vref, GooString(signerName), CryptoSign::maxSupportedSignatureSize, reason, location)) {
         return false;
     }
 
@@ -653,33 +655,33 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     }
 
     // compute hash of byte ranges
-    if (!hashFileRange(file, &sigHandler, 0LL, sigStart)) {
+    if (!hashFileRange(file, sigHandler.get(), 0LL, sigStart)) {
         fclose(file);
         return false;
     }
-    if (!hashFileRange(file, &sigHandler, sigEnd, fileSize)) {
+    if (!hashFileRange(file, sigHandler.get(), sigEnd, fileSize)) {
         fclose(file);
         return false;
     }
 
     // and sign it
-    const std::unique_ptr<GooString> signature = sigHandler.signDetached(password);
+    auto signature = sigHandler->signDetached(password);
     if (!signature) {
         fclose(file);
         return false;
     }
 
-    if (signature->getLength() > maxSupportedSignatureSize) {
+    if (signature->getLength() > CryptoSign::maxSupportedSignatureSize) {
         fclose(file);
         return false;
     }
 
     // pad with zeroes to placeholder length
     auto length = signature->getLength();
-    signature->append(std::string(maxSupportedSignatureSize - length, '\0'));
+    signature->append(std::string(CryptoSign::maxSupportedSignatureSize - length, '\0'));
 
     // write signature to saved file
-    if (!updateSignature(file, sigStart, sigEnd, signature.get())) {
+    if (!updateSignature(file, sigStart, sigEnd, signature.value())) {
         fprintf(stderr, "signDocument: unable update signature\n");
         fclose(file);
         return false;
@@ -689,9 +691,6 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     fclose(file);
 
     return true;
-#else
-    return false;
-#endif
 }
 
 bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
@@ -859,18 +858,18 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
 }
 
 // Overwrite signature string in the file with new signature
-bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature)
+bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString &signature)
 {
-    if (signature->getLength() * 2 + 2 != sigEnd - sigStart) {
+    if (signature.getLength() * 2 + 2 != sigEnd - sigStart) {
         return false;
     }
 
     if (Gfseek(f, sigStart, SEEK_SET) != 0) {
         return false;
     }
-    const char *c = signature->c_str();
+    const char *c = signature.c_str();
     fprintf(f, "<");
-    for (int i = 0; i < signature->getLength(); i++) {
+    for (int i = 0; i < signature.getLength(); i++) {
         unsigned char value = *(c + i) & 0x000000ff;
         fprintf(f, "%2.2x", value);
     }
@@ -2305,9 +2304,11 @@ void FormFieldSignature::parseInfo()
     }
 }
 
-void FormFieldSignature::hashSignedDataBlock(SignatureVerificationHandler *handler, Goffset block_len)
+void FormFieldSignature::hashSignedDataBlock(CryptoSign::VerificationInterface *handler, Goffset block_len)
 {
-#ifdef ENABLE_NSS3
+    if (!handler) {
+        return;
+    }
     const int BLOCK_SIZE = 4096;
     unsigned char signed_data_buffer[BLOCK_SIZE];
 
@@ -2316,15 +2317,14 @@ void FormFieldSignature::hashSignedDataBlock(SignatureVerificationHandler *handl
         Goffset bytes_left = block_len - i;
         if (bytes_left < BLOCK_SIZE) {
             doc->getBaseStream()->doGetChars(static_cast<int>(bytes_left), signed_data_buffer);
-            handler->updateHash(signed_data_buffer, static_cast<int>(bytes_left));
+            handler->addData(signed_data_buffer, static_cast<int>(bytes_left));
             i = block_len;
         } else {
             doc->getBaseStream()->doGetChars(BLOCK_SIZE, signed_data_buffer);
-            handler->updateHash(signed_data_buffer, BLOCK_SIZE);
+            handler->addData(signed_data_buffer, BLOCK_SIZE);
             i += BLOCK_SIZE;
         }
     }
-#endif
 }
 
 FormSignatureType FormWidgetSignature::signatureType() const
@@ -2339,7 +2339,11 @@ void FormWidgetSignature::setSignatureType(FormSignatureType fst)
 
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA)
 {
-#ifdef ENABLE_NSS3
+    auto backend = CryptoSign::Factory::createActive();
+    if (!backend) {
+        return signature_info;
+    }
+
     if (signature_info->getSignatureValStatus() != SIGNATURE_NOT_VERIFIED && !forceRevalidation) {
         return signature_info;
     }
@@ -2363,7 +2367,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     const int signature_len = signature->getLength();
     std::vector<unsigned char> signatureData(signature_len);
     memcpy(signatureData.data(), signature->c_str(), signature_len);
-    SignatureVerificationHandler signature_handler(std::move(signatureData));
+    auto signature_handler = backend->createVerificationHandler(std::move(signatureData));
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {
@@ -2384,35 +2388,32 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         }
 
         doc->getBaseStream()->setPos(offset);
-        hashSignedDataBlock(&signature_handler, len);
+        hashSignedDataBlock(signature_handler.get(), len);
     }
-
-    signature_info->setSignerName(signature_handler.getSignerName().c_str());
-    signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
-    signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
 
     if (!signature_info->isSubfilterSupported()) {
         error(errUnimplemented, 0, "Unable to validate this type of signature");
         return signature_info;
     }
-
-    const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
+    const SignatureValidationStatus sig_val_state = signature_handler->validateSignature();
     signature_info->setSignatureValStatus(sig_val_state);
+    signature_info->setSignerName(signature_handler->getSignerName());
+    signature_info->setSubjectDN(signature_handler->getSignerSubjectDN());
+    signature_info->setHashAlgorithm(signature_handler->getHashAlgorithm());
 
     // verify if signature contains a 'signing time' attribute
-    if (signature_handler.getSigningTime() != 0) {
-        signature_info->setSigningTime(signature_handler.getSigningTime());
+    if (signature_handler->getSigningTime() != std::chrono::system_clock::time_point {}) {
+        signature_info->setSigningTime(std::chrono::system_clock::to_time_t(signature_handler->getSigningTime()));
     }
 
     if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
         return signature_info;
     }
 
-    const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime, ocspRevocationCheck, enableAIA);
+    const CertificateValidationStatus cert_val_state = signature_handler->validateCertificate(std::chrono::system_clock::from_time_t(validationTime), ocspRevocationCheck, enableAIA);
     signature_info->setCertificateValStatus(cert_val_state);
-    signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
+    signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
 
-#endif
     return signature_info;
 }
 

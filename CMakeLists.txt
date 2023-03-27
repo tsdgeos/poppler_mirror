@@ -358,6 +358,29 @@ if(TIFF_FOUND)
   set(ENABLE_LIBTIFF ON)
 endif()
 
+set(SIGNATURE_BACKENDS "")
+if(ENABLE_NSS3)
+  list(APPEND SIGNATURE_BACKENDS "NSS")
+endif()
+
+list(LENGTH SIGNATURE_BACKENDS _signing_backends_count)
+if (_signing_backends_count GREATER 0)
+  if (NOT DEFAULT_SIGNATURE_BACKEND)
+    # If not specified at compiletime, we take the first one added.
+    # This means that the order we append them to the list is significant
+    list(GET SIGNATURE_BACKENDS 0 DEFAULT_SIGNATURE_BACKEND)
+  endif()
+  if (NOT DEFAULT_SIGNATURE_BACKEND IN_LIST SIGNATURE_BACKENDS)
+    message(FATAL_ERROR "default signature backend must be one of ${SIGNATURE_BACKENDS}, was ${DEFAULT_SIGNATURE_BACKEND}")
+  endif()
+  set(ENABLE_SIGNATURES ON)
+endif()
+if (NOT DEFAULT_SIGNATURE_BACKEND)
+  set(DEFAULT_SIGNATURE_BACKEND "None")
+endif()
+
+
+
 # Recent versions of poppler-data install a .pc file.
 # Use it to determine the encoding data path, if available.
 # Default to the same prefix otherwise.
@@ -418,6 +441,7 @@ set(poppler_SRCS
   poppler/Catalog.cc
   poppler/CharCodeToUnicode.cc
   poppler/CMap.cc
+  poppler/CryptoSignBackend.cc
   poppler/DateInfo.cc
   poppler/Decrypt.cc
   poppler/Dict.cc
@@ -836,6 +860,7 @@ show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
 show_end_message_yesno("use zlib compress" ENABLE_ZLIB)
 show_end_message_yesno("use zlib uncompress" ENABLE_ZLIB_UNCOMPRESS)
 show_end_message_yesno("use nss3" ENABLE_NSS3)
+show_end_message("  default signature backend" ${DEFAULT_SIGNATURE_BACKEND})
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)

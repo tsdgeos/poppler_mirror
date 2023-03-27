@@ -43,11 +43,7 @@
 #include <secoid.h>
 #include <secmodt.h>
 #include <sechash.h>
-
-// experiments seems to say that this is a bit above
-// what we have seen in the wild, and much larger than
-// what we have managed to get nss and gpgme to create.
-static const int maxSupportedSignatureSize = 10000;
+#include "CryptoSignBackend.h"
 
 class HashContext
 {
@@ -67,20 +63,20 @@ private:
     HashAlgorithm digest_alg_tag;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureVerificationHandler
+class POPPLER_PRIVATE_EXPORT SignatureVerificationHandler final : public CryptoSign::VerificationInterface
 {
 public:
     explicit SignatureVerificationHandler(std::vector<unsigned char> &&p7data);
-    ~SignatureVerificationHandler();
-    SignatureValidationStatus validateSignature();
-    time_t getSigningTime() const;
-    std::string getSignerName() const;
-    std::string getSignerSubjectDN() const;
+    ~SignatureVerificationHandler() final;
+    SignatureValidationStatus validateSignature() final;
+    std::chrono::system_clock::time_point getSigningTime() const final;
+    std::string getSignerName() const final;
+    std::string getSignerSubjectDN() const final;
     // Use -1 as validation_time for now
-    CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);
-    std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
-    void updateHash(unsigned char *data_block, int data_len);
-    HashAlgorithm getHashAlgorithm() const;
+    CertificateValidationStatus validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch) final;
+    std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
+    void addData(unsigned char *data_block, int data_len) final;
+    HashAlgorithm getHashAlgorithm() const final;
 
     SignatureVerificationHandler(const SignatureVerificationHandler &) = delete;
     SignatureVerificationHandler &operator=(const SignatureVerificationHandler &) = delete;
@@ -94,14 +90,14 @@ private:
     std::unique_ptr<HashContext> hashContext;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureSignHandler
+class POPPLER_PRIVATE_EXPORT SignatureSignHandler final : public CryptoSign::SigningInterface
 {
 public:
     SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag);
-    ~SignatureSignHandler();
-    std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
-    void updateHash(unsigned char *data_block, int data_len);
-    std::unique_ptr<GooString> signDetached(const std::string &password);
+    ~SignatureSignHandler() final;
+    std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
+    void addData(unsigned char *data_block, int data_len) final;
+    std::optional<GooString> signDetached(const std::string &password) final;
 
     SignatureSignHandler(const SignatureSignHandler &) = delete;
     SignatureSignHandler &operator=(const SignatureSignHandler &) = delete;
@@ -131,6 +127,15 @@ public:
 
 private:
     static std::string sNssDir;
+};
+
+class NSSCryptoSignBackend final : public CryptoSign::Backend
+{
+public:
+    std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) final { return std::make_unique<SignatureVerificationHandler>(std::move(pkcs7)); }
+    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final { return std::make_unique<SignatureSignHandler>(certID, digestAlgTag); }
+    std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final { return SignatureHandler::getAvailableSigningCertificates(); }
+    ~NSSCryptoSignBackend() final;
 };
 
 #endif

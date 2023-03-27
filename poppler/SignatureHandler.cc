@@ -534,7 +534,7 @@ std::string SignatureVerificationHandler::getSignerSubjectDN() const
     return std::string { signing_cert->subjectName };
 }
 
-time_t SignatureVerificationHandler::getSigningTime() const
+std::chrono::system_clock::time_point SignatureVerificationHandler::getSigningTime() const
 {
     if (!CMSSignerInfo) {
         return {};
@@ -542,10 +542,10 @@ time_t SignatureVerificationHandler::getSigningTime() const
     PRTime sTime; // time in microseconds since the epoch
 
     if (NSS_CMSSignerInfo_GetSigningTime(CMSSignerInfo, &sTime) != SECSuccess) {
-        return 0;
+        return {};
     }
 
-    return static_cast<time_t>(sTime / 1000000);
+    return std::chrono::system_clock::from_time_t(static_cast<time_t>(sTime / 1000000));
 }
 
 static X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName)
@@ -787,14 +787,14 @@ HashAlgorithm SignatureVerificationHandler::getHashAlgorithm() const
     }
 }
 
-void SignatureVerificationHandler::updateHash(unsigned char *data_block, int data_len)
+void SignatureVerificationHandler::addData(unsigned char *data_block, int data_len)
 {
     if (hashContext) {
         hashContext->updateHash(data_block, data_len);
     }
 }
 
-void SignatureSignHandler::updateHash(unsigned char *data_block, int data_len)
+void SignatureSignHandler::addData(unsigned char *data_block, int data_len)
 {
     hashContext->updateHash(data_block, data_len);
 }
@@ -947,7 +947,7 @@ SignatureValidationStatus SignatureVerificationHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureVerificationHandler::validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
+CertificateValidationStatus SignatureVerificationHandler::validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
 {
     CERTCertificate *cert;
 
@@ -960,8 +960,8 @@ CertificateValidationStatus SignatureVerificationHandler::validateCertificate(ti
     }
 
     PRTime vTime = 0; // time in microseconds since the epoch, special value 0 means now
-    if (validation_time > 0) {
-        vTime = 1000000 * (PRTime)validation_time;
+    if (validation_time > std::chrono::system_clock::time_point {}) {
+        vTime = 1000000 * (PRTime)std::chrono::system_clock::to_time_t(validation_time);
     }
     CERTValInParam inParams[4];
     inParams[0].type = cert_pi_revocationFlags;
@@ -1003,10 +1003,10 @@ CertificateValidationStatus SignatureVerificationHandler::validateCertificate(ti
     return CERTIFICATE_GENERIC_ERROR;
 }
 
-std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string &password)
+std::optional<GooString> SignatureSignHandler::signDetached(const std::string &password)
 {
     if (!hashContext) {
-        return nullptr;
+        return {};
     }
     std::vector<unsigned char> digest_buffer = hashContext->endHash();
     SECItem digest;
@@ -1022,54 +1022,54 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
     };
     std::unique_ptr<NSSCMSMessage, NSSCMSMessageDestroyer> cms_msg { NSS_CMSMessage_Create(nullptr) };
     if (!cms_msg) {
-        return nullptr;
+        return {};
     }
 
     NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg.get());
     if (!cms_sd) {
-        return nullptr;
+        return {};
     }
 
     NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg.get());
 
     if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg.get(), cms_cinfo, cms_sd) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
 
     // Attach NULL data as detached data
     if (NSS_CMSContentInfo_SetContent_Data(cms_msg.get(), cms_cinfo, nullptr, PR_TRUE) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     // hardcode SHA256 these days...
     NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg.get(), signing_cert, SEC_OID_SHA256);
     if (!cms_signer) {
-        return nullptr;
+        return {};
     }
 
     if (NSS_CMSSignerInfo_IncludeCerts(cms_signer, NSSCMSCM_CertChain, certUsageEmailSigner) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     struct PLArenaFreeFalse
     {
         void operator()(PLArenaPool *arena) { PORT_FreeArena(arena, PR_FALSE); }
     };
-    std::unique_ptr<PLArenaPool, PLArenaFreeFalse> arena { PORT_NewArena(maxSupportedSignatureSize) };
+    std::unique_ptr<PLArenaPool, PLArenaFreeFalse> arena { PORT_NewArena(CryptoSign::maxSupportedSignatureSize) };
 
     // Add the signing certificate as a signed attribute.
     ESSCertIDv2 *aCertIDs[2];
@@ -1084,7 +1084,7 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
     unsigned char certhash[32];
     SECStatus rv = PK11_HashBuf(SEC_OID_SHA256, certhash, signing_cert->derCert.data, signing_cert->derCert.len);
     if (rv != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     aCertHashItem.type = siBuffer;
@@ -1107,7 +1107,7 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
 
     SECItem *pEncodedCertificate = SEC_ASN1EncodeItem(nullptr, nullptr, &aCertificate, SigningCertificateV2Template);
     if (!pEncodedCertificate) {
-        return nullptr;
+        return {};
     }
 
     NSSCMSAttribute aAttribute;
@@ -1129,7 +1129,7 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
      *   smime(16) id-aa(2) 47 }
      */
     if (my_SEC_StringToOID(arena.get(), &aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     aOidData.offset = SEC_OID_UNKNOWN;
@@ -1141,7 +1141,7 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
     aAttribute.encoded = PR_TRUE;
 
     if (my_NSS_CMSSignerInfo_AddAuthAttr(cms_signer, &aAttribute) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
     SECItem cms_output;
@@ -1150,14 +1150,14 @@ std::unique_ptr<GooString> SignatureSignHandler::signDetached(const std::string 
 
     NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg.get(), nullptr, nullptr, &cms_output, arena.get(), passwordCallback, password.empty() ? nullptr : const_cast<char *>(password.c_str()), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx) {
-        return nullptr;
+        return {};
     }
 
     if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess) {
-        return nullptr;
+        return {};
     }
 
-    auto signature = std::make_unique<GooString>(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
+    auto signature = GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
 
@@ -1238,3 +1238,5 @@ HashAlgorithm HashContext::getHashAlgorithm() const
 {
     return digest_alg_tag;
 }
+
+NSSCryptoSignBackend::~NSSCryptoSignBackend() = default;

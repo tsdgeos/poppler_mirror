@@ -27,6 +27,12 @@
 /* Build against libnss3 for digital signature validation */
 #cmakedefine ENABLE_NSS3 1
 
+/* Signatures enabled */
+#cmakedefine ENABLE_SIGNATURES 1
+
+/* Default signature backend */
+#cmakedefine DEFAULT_SIGNATURE_BACKEND "${DEFAULT_SIGNATURE_BACKEND}"
+
 /* Use cairo for rendering. */
 #cmakedefine HAVE_CAIRO 1
 

@@ -45,6 +45,7 @@
 #include <Link.h>
 #include <SignatureInfo.h>
 #include <CertificateInfo.h>
+#include <CryptoSignBackend.h>
 #ifdef ENABLE_NSS3
 #    include <SignatureHandler.h>
 #endif
@@ -55,10 +56,6 @@
 
 #include <cmath>
 #include <cctype>
-
-#ifdef ENABLE_NSS3
-#    include <hasht.h>
-#endif
 
 namespace {
 
@@ -779,14 +776,18 @@ QByteArray CertificateInfo::certificateData() const
 
 bool CertificateInfo::checkPassword(const QString &password) const
 {
-#ifdef ENABLE_NSS3
+#ifdef ENABLE_SIGNATURES
+    auto backend = CryptoSign::Factory::createActive();
+    if (!backend) {
+        return false;
+    }
     Q_D(const CertificateInfo);
-    SignatureSignHandler sigHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
+    auto sigHandler = backend->createSigningHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
-    sigHandler.updateHash(buffer, 5);
-    std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password.toStdString());
-    return tmpSignature.get() != nullptr;
+    sigHandler->addData(buffer, 5);
+    std::optional<GooString> tmpSignature = sigHandler->signDetached(password.toStdString());
+    return tmpSignature.has_value();
 #else
     return false;
 #endif
@@ -856,7 +857,7 @@ QString SignatureValidationInfo::reason() const
 
 SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
 {
-#ifdef ENABLE_NSS3
+#ifdef ENABLE_SIGNATURES
     Q_D(const SignatureValidationInfo);
 
     switch (d->hash_algorithm) {
@@ -1131,16 +1132,17 @@ bool hasNSSSupport()
 
 QVector<CertificateInfo> getAvailableSigningCertificates()
 {
+    auto backend = CryptoSign::Factory::createActive();
+    if (!backend) {
+        return {};
+    }
     QVector<CertificateInfo> vReturnCerts;
-
-#ifdef ENABLE_NSS3
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
 
     for (auto &cert : vCerts) {
         CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
         vReturnCerts.append(CertificateInfo(certPriv));
     }
-#endif
 
     return vReturnCerts;
 }

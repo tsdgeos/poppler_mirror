@@ -56,7 +56,9 @@ class GfxResources;
 class PDFDoc;
 class SignatureInfo;
 class X509CertificateInfo;
-class SignatureVerificationHandler;
+namespace CryptoSign {
+class VerificationInterface;
+}
 
 enum FormFieldType
 {
@@ -328,7 +330,7 @@ private:
     bool getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
-    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);
+    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString &signature);
 };
 
 //------------------------------------------------------------------------
@@ -640,7 +642,7 @@ public:
 
 private:
     void parseInfo();
-    void hashSignedDataBlock(SignatureVerificationHandler *handler, Goffset block_len);
+    void hashSignedDataBlock(CryptoSign::VerificationInterface *handler, Goffset block_len);
 
     FormSignatureType signature_type;
     Object byte_range;
