@@ -35,7 +35,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019, 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021-2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
@@ -1092,7 +1092,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    fontIDs = nullptr;
     t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
@@ -1151,7 +1150,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    fontIDs = nullptr;
     t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
@@ -1191,7 +1189,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    fontIDs = nullptr;
     t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
@@ -1407,9 +1404,8 @@ void PSOutputDev::postInit()
     }
 
     // initialize fontIDs, fontFileIDs, and fontFileNames lists
-    fontIDSize = 64;
-    fontIDLen = 0;
-    fontIDs = (Ref *)gmallocn(fontIDSize, sizeof(Ref));
+    fontIDs.reserve(64);
+    fontIDs.resize(0);
     for (i = 0; i < 14; ++i) {
         fontNames.emplace(psBase14SubstFonts[i].psName);
     }
@@ -1549,9 +1545,6 @@ PSOutputDev::~PSOutputDev()
     }
     if (embFontList) {
         delete embFontList;
-    }
-    if (fontIDs) {
-        gfree(fontIDs);
     }
     if (t1FontNames) {
         for (i = 0; i < t1FontNameLen; ++i) {
@@ -1963,18 +1956,13 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     int i, j;
 
     // check if font is already set up
-    for (i = 0; i < fontIDLen; ++i) {
-        if (fontIDs[i] == *font->getID()) {
+    for (Ref fontID : fontIDs) {
+        if (fontID == *font->getID()) {
             return;
         }
     }
 
-    // add entry to fontIDs list
-    if (fontIDLen >= fontIDSize) {
-        fontIDSize += 64;
-        fontIDs = (Ref *)greallocn(fontIDs, fontIDSize, sizeof(Ref));
-    }
-    fontIDs[fontIDLen++] = *font->getID();
+    fontIDs.push_back(*font->getID());
 
     psName = nullptr;
     xs = ys = 1;

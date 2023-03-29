@@ -27,7 +27,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018, 2020 Philipp Knechtges <philipp-dev@knechtges.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 //
@@ -447,9 +447,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
 
-    Ref *fontIDs; // list of object IDs of all used fonts
-    int fontIDLen; // number of entries in fontIDs array
-    int fontIDSize; // size of fontIDs array
+    std::vector<Ref> fontIDs; // list of object IDs of all used fonts
     std::set<int> resourceIDs; // list of object IDs of objects containing Resources we've already set up
     std::unordered_set<std::string> fontNames; // all used font names
     std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font
