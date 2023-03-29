@@ -25,7 +25,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
-    GooString *psFileName;
+    std::string psFileName;
     PSLevel level;
     PSOutMode mode;
     std::optional<GooString> ownerPW, userPW;
@@ -391,18 +391,19 @@ int main(int argc, char *argv[])
 
     // construct PostScript file name
     if (argc == 3) {
-        psFileName = new GooString(argv[2]);
+        psFileName = std::string(argv[2]);
     } else if (fileName->cmp("fd://0") == 0) {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto err1;
     } else {
         const char *p = fileName->c_str() + fileName->getLength() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            psFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
+            psFileName = std::string(fileName->c_str(), fileName->getLength() - 4);
+
         } else {
-            psFileName = fileName->copy();
+            psFileName = fileName->toStr();
         }
-        psFileName->append(doEPS ? ".eps" : ".ps");
+        psFileName += (doEPS ? ".eps" : ".ps");
     }
 
     // get page range
@@ -414,13 +415,13 @@ int main(int argc, char *argv[])
     }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
-        goto err2;
+        goto err1;
     }
 
     // check for multi-page EPS or form
     if ((doEPS || doForm) && firstPage != lastPage) {
         error(errCommandLine, -1, "EPS and form files can only contain one page.");
-        goto err2;
+        goto err1;
     }
 
     for (int i = firstPage; i <= lastPage; ++i) {
@@ -428,7 +429,7 @@ int main(int argc, char *argv[])
     }
 
     // write PostScript file
-    psOut = new PSOutputDev(psFileName->c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
+    psOut = new PSOutputDev(psFileName.c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
                             /*imgURXA*/ 0, /*imgURYA*/ 0, psRasterizeWhenNeeded, /*manualCtrlA*/ false, /*customCodeCbkA*/ nullptr, /*customCodeCbkDataA*/ nullptr, level);
     if (noCenter) {
         psOut->setPSCenter(false);
@@ -496,15 +497,13 @@ int main(int argc, char *argv[])
     } else {
         delete psOut;
         exitCode = 2;
-        goto err2;
+        goto err1;
     }
     delete psOut;
 
     exitCode = 0;
 
     // clean up
-err2:
-    delete psFileName;
 err1:
     delete fileName;
 err0:
