@@ -587,14 +587,8 @@ public:
 #ifdef USE_CMS
     char *getPostScriptCSA();
     void buildTransforms(GfxState *state);
-    void setProfile(GfxLCMSProfilePtr &profileA)
-    {
-        profile = profileA;
-    }
-    GfxLCMSProfilePtr getProfile()
-    {
-        return profile;
-    }
+    void setProfile(GfxLCMSProfilePtr &profileA) { profile = profileA; }
+    GfxLCMSProfilePtr getProfile() { return profile; }
 #endif
 
 private:
@@ -606,10 +600,7 @@ private:
 #ifdef USE_CMS
     GfxLCMSProfilePtr profile;
     char *psCSA;
-    int getIntent()
-    {
-        return (transform != nullptr) ? transform->getIntent() : 0;
-    }
+    int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
     std::shared_ptr<GfxColorTransform> transform;
     std::shared_ptr<GfxColorTransform> lineTransform; // color transform for line
     mutable std::map<unsigned int, unsigned int> cmsCache;
@@ -1616,29 +1607,17 @@ public:
 
 #ifdef USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA);
-    GfxLCMSProfilePtr getDisplayProfile()
-    {
-        return localDisplayProfile;
-    }
+    GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
     std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
     int getCmsRenderingIntent();
     static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
-    void setDefaultGrayColorSpace(GfxColorSpace *cs)
-    {
-        defaultGrayColorSpace = cs;
-    }
+    void setDefaultGrayColorSpace(GfxColorSpace *cs) { defaultGrayColorSpace = cs; }
 
-    void setDefaultRGBColorSpace(GfxColorSpace *cs)
-    {
-        defaultRGBColorSpace = cs;
-    }
+    void setDefaultRGBColorSpace(GfxColorSpace *cs) { defaultRGBColorSpace = cs; }
 
-    void setDefaultCMYKColorSpace(GfxColorSpace *cs)
-    {
-        defaultCMYKColorSpace = cs;
-    }
+    void setDefaultCMYKColorSpace(GfxColorSpace *cs) { defaultCMYKColorSpace = cs; }
 
     GfxColorSpace *copyDefaultGrayColorSpace()
     {
@@ -1665,18 +1644,9 @@ public:
     }
 
     // Add to path.
-    void moveTo(double x, double y)
-    {
-        path->moveTo(curX = x, curY = y);
-    }
-    void lineTo(double x, double y)
-    {
-        path->lineTo(curX = x, curY = y);
-    }
-    void curveTo(double x1, double y1, double x2, double y2, double x3, double y3)
-    {
-        path->curveTo(x1, y1, x2, y2, curX = x3, curY = y3);
-    }
+    void moveTo(double x, double y) { path->moveTo(curX = x, curY = y); }
+    void lineTo(double x, double y) { path->lineTo(curX = x, curY = y); }
+    void curveTo(double x1, double y1, double x2, double y2, double x3, double y3) { path->curveTo(x1, y1, x2, y2, curX = x3, curY = y3); }
     void closePath()
     {
         path->close();
@@ -1708,22 +1678,13 @@ public:
     // Push/pop GfxState on/off stack.
     GfxState *save();
     GfxState *restore();
-    bool hasSaves() const
-    {
-        return saved != nullptr;
-    }
-    bool isParentState(GfxState *state)
-    {
-        return saved == state || (saved && saved->isParentState(state));
-    }
+    bool hasSaves() const { return saved != nullptr; }
+    bool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
 
     // Misc
     bool parseBlendMode(Object *obj, GfxBlendMode *mode);
 
-    ReusablePathIterator *getReusablePath()
-    {
-        return new ReusablePathIterator(path);
-    }
+    ReusablePathIterator *getReusablePath() { return new ReusablePathIterator(path); }
 
 private:
     double hDPI, vDPI; // resolution

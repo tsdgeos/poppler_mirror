@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
     threads.reserve(4);
     for (int i = 0; i < numThreads; i++) {
-        threads.emplace_back(std::thread(runThread, jobQueue));
+        threads.emplace_back(runThread, jobQueue);
     }
 
     std::vector<InputFile> inputFiles;

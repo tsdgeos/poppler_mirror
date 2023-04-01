@@ -781,7 +781,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
 {
 #ifdef ENABLE_NSS3
     Q_D(const CertificateInfo);
-    SignatureHandler sigHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
+    SignatureSignHandler sigHandler(d->nick_name.toStdString(), HashAlgorithm::Sha256);
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler.updateHash(buffer, 5);

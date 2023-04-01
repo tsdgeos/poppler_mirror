@@ -575,7 +575,7 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 #ifdef ENABLE_NSS3
 // update hash with the specified range of data from the file
-static bool hashFileRange(FILE *f, SignatureHandler *handler, Goffset start, Goffset end)
+static bool hashFileRange(FILE *f, SignatureSignHandler *handler, Goffset start, Goffset end)
 {
     const int BUF_SIZE = 65536;
 
@@ -611,7 +611,7 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
         return false;
     }
 
-    SignatureHandler sigHandler(certNickname, HashAlgorithm::Sha256);
+    SignatureSignHandler sigHandler(certNickname, HashAlgorithm::Sha256);
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
@@ -2305,7 +2305,7 @@ void FormFieldSignature::parseInfo()
     }
 }
 
-void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset block_len)
+void FormFieldSignature::hashSignedDataBlock(SignatureVerificationHandler *handler, Goffset block_len)
 {
 #ifdef ENABLE_NSS3
     const int BLOCK_SIZE = 4096;
@@ -2363,7 +2363,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     const int signature_len = signature->getLength();
     std::vector<unsigned char> signatureData(signature_len);
     memcpy(signatureData.data(), signature->c_str(), signature_len);
-    SignatureHandler signature_handler(std::move(signatureData));
+    SignatureVerificationHandler signature_handler(std::move(signatureData));
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {

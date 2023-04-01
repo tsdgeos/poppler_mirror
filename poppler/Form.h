@@ -56,7 +56,7 @@ class GfxResources;
 class PDFDoc;
 class SignatureInfo;
 class X509CertificateInfo;
-class SignatureHandler;
+class SignatureVerificationHandler;
 
 enum FormFieldType
 {
@@ -640,7 +640,7 @@ public:
 
 private:
     void parseInfo();
-    void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
+    void hashSignedDataBlock(SignatureVerificationHandler *handler, Goffset block_len);
 
     FormSignatureType signature_type;
     Object byte_range;

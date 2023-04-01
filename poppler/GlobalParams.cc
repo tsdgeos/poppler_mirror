@@ -262,10 +262,7 @@ public:
     void scanWindowsFonts(const std::string &winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-    void addFcFont(SysFontInfo *si)
-    {
-        fonts.push_back(si);
-    }
+    void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
 #endif
 private:
 #ifdef _WIN32
@@ -1361,6 +1358,7 @@ const UnicodeMap *GlobalParams::getTextEncoding()
 std::vector<std::string> GlobalParams::getEncodingNames()
 {
     std::vector<std::string> result;
+    result.reserve(residentUnicodeMaps.size() + unicodeMaps.size());
     for (const auto &unicodeMap : residentUnicodeMaps) {
         result.push_back(unicodeMap.first);
     }

@@ -27,7 +27,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018, 2020 Philipp Knechtges <philipp-dev@knechtges.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 //
@@ -286,10 +286,7 @@ public:
         xScale0 = x;
         yScale0 = y;
     }
-    void setRotate(int rotateA)
-    {
-        rotate0 = rotateA;
-    }
+    void setRotate(int rotateA) { rotate0 = rotateA; }
     void setClip(double llx, double lly, double urx, double ury)
     {
         clipLLX0 = llx;
@@ -307,82 +304,31 @@ public:
         overlayCbk = cbk;
         overlayCbkData = data;
     }
-    void setDisplayText(bool display)
-    {
-        displayText = display;
-    }
+    void setDisplayText(bool display) { displayText = display; }
 
-    void setPSCenter(bool center)
-    {
-        psCenter = center;
-    }
-    void setPSExpandSmaller(bool expand)
-    {
-        psExpandSmaller = expand;
-    }
-    void setPSShrinkLarger(bool shrink)
-    {
-        psShrinkLarger = shrink;
-    }
-    void setOverprintPreview(bool overprintPreviewA)
-    {
-        overprintPreview = overprintPreviewA;
-    }
-    void setRasterAntialias(bool a)
-    {
-        rasterAntialias = a;
-    }
-    void setForceRasterize(PSForceRasterize f)
-    {
-        forceRasterize = f;
-    }
-    void setRasterResolution(double r)
-    {
-        rasterResolution = r;
-    }
+    void setPSCenter(bool center) { psCenter = center; }
+    void setPSExpandSmaller(bool expand) { psExpandSmaller = expand; }
+    void setPSShrinkLarger(bool shrink) { psShrinkLarger = shrink; }
+    void setOverprintPreview(bool overprintPreviewA) { overprintPreview = overprintPreviewA; }
+    void setRasterAntialias(bool a) { rasterAntialias = a; }
+    void setForceRasterize(PSForceRasterize f) { forceRasterize = f; }
+    void setRasterResolution(double r) { rasterResolution = r; }
     void setRasterMono(bool b)
     {
         processColorFormat = splashModeMono8;
         processColorFormatSpecified = true;
     }
 
-    void setUncompressPreloadedImages(bool b)
-    {
-        uncompressPreloadedImages = b;
-    }
+    void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
 
-    bool getEmbedType1() const
-    {
-        return embedType1;
-    }
-    bool getEmbedTrueType() const
-    {
-        return embedTrueType;
-    }
-    bool getEmbedCIDPostScript() const
-    {
-        return embedCIDPostScript;
-    }
-    bool getEmbedCIDTrueType() const
-    {
-        return embedCIDTrueType;
-    }
-    bool getFontPassthrough() const
-    {
-        return fontPassthrough;
-    }
-    bool getOptimizeColorSpace() const
-    {
-        return optimizeColorSpace;
-    }
-    bool getPassLevel1CustomColor() const
-    {
-        return passLevel1CustomColor;
-    }
-    bool getEnableLZW() const
-    {
-        return enableLZW;
-    };
+    bool getEmbedType1() const { return embedType1; }
+    bool getEmbedTrueType() const { return embedTrueType; }
+    bool getEmbedCIDPostScript() const { return embedCIDPostScript; }
+    bool getEmbedCIDTrueType() const { return embedCIDTrueType; }
+    bool getFontPassthrough() const { return fontPassthrough; }
+    bool getOptimizeColorSpace() const { return optimizeColorSpace; }
+    bool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
+    bool getEnableLZW() const { return enableLZW; };
     bool getEnableFlate() const
 #ifdef ENABLE_ZLIB
     {
@@ -393,58 +339,19 @@ public:
         return false;
     }
 #endif
-    void setEmbedType1(bool b)
-    {
-        embedType1 = b;
-    }
-    void setEmbedTrueType(bool b)
-    {
-        embedTrueType = b;
-    }
-    void setEmbedCIDPostScript(bool b)
-    {
-        embedCIDPostScript = b;
-    }
-    void setEmbedCIDTrueType(bool b)
-    {
-        embedCIDTrueType = b;
-    }
-    void setFontPassthrough(bool b)
-    {
-        fontPassthrough = b;
-    }
-    void setOptimizeColorSpace(bool b)
-    {
-        optimizeColorSpace = b;
-    }
-    void setPassLevel1CustomColor(bool b)
-    {
-        passLevel1CustomColor = b;
-    }
-    void setPreloadImagesForms(bool b)
-    {
-        preloadImagesForms = b;
-    }
-    void setGenerateOPI(bool b)
-    {
-        generateOPI = b;
-    }
-    void setUseASCIIHex(bool b)
-    {
-        useASCIIHex = b;
-    }
-    void setUseBinary(bool b)
-    {
-        useBinary = b;
-    }
-    void setEnableLZW(bool b)
-    {
-        enableLZW = b;
-    }
-    void setEnableFlate(bool b)
-    {
-        enableFlate = b;
-    }
+    void setEmbedType1(bool b) { embedType1 = b; }
+    void setEmbedTrueType(bool b) { embedTrueType = b; }
+    void setEmbedCIDPostScript(bool b) { embedCIDPostScript = b; }
+    void setEmbedCIDTrueType(bool b) { embedCIDTrueType = b; }
+    void setFontPassthrough(bool b) { fontPassthrough = b; }
+    void setOptimizeColorSpace(bool b) { optimizeColorSpace = b; }
+    void setPassLevel1CustomColor(bool b) { passLevel1CustomColor = b; }
+    void setPreloadImagesForms(bool b) { preloadImagesForms = b; }
+    void setGenerateOPI(bool b) { generateOPI = b; }
+    void setUseASCIIHex(bool b) { useASCIIHex = b; }
+    void setUseBinary(bool b) { useBinary = b; }
+    void setEnableLZW(bool b) { enableLZW = b; }
+    void setEnableFlate(bool b) { enableFlate = b; }
 
     void setProcessColorFormat(SplashColorMode format)
     {
@@ -540,9 +447,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
 
-    Ref *fontIDs; // list of object IDs of all used fonts
-    int fontIDLen; // number of entries in fontIDs array
-    int fontIDSize; // size of fontIDs array
+    std::vector<Ref> fontIDs; // list of object IDs of all used fonts
     std::set<int> resourceIDs; // list of object IDs of objects containing Resources we've already set up
     std::unordered_set<std::string> fontNames; // all used font names
     std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font

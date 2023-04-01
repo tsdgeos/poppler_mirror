@@ -2218,14 +2218,14 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
     form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
     form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
-    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
+    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, std::move(annotObj), ref, nullptr, nullptr);
     field->setCustomAppearanceContent(signatureText);
     field->setCustomAppearanceLeftContent(signatureTextLeft);
     field->setCustomAppearanceLeftFontSize(leftFontSize);
     field->setImageResource(imageResourceRef);
 
     Object refObj(ref);
-    AnnotWidget *signatureAnnot = new AnnotWidget(this, &annotObj, &refObj, field.get());
+    AnnotWidget *signatureAnnot = new AnnotWidget(this, field->getObj(), &refObj, field.get());
     signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
     Dict dummy(getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
@@ -2251,7 +2251,7 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
 
         // Now remove the signature stuff in case the user wants to continue editing stuff
         // So the document object is clean
-        const Object &vRefObj = annotObj.dictLookupNF("V");
+        const Object &vRefObj = field->getObj()->dictLookupNF("V");
         if (vRefObj.isRef()) {
             getXRef()->removeIndirectObject(vRefObj.getRef());
         }

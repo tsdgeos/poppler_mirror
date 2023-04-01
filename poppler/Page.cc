@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -251,7 +251,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 
 #define pageLocker() const std::scoped_lock locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form)
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) : pageRef(pageRefA)
 {
     ok = true;
     doc = docA;
@@ -261,7 +261,6 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
     annots = nullptr;
 
     pageObj = std::move(pageDict);
-    pageRef = pageRefA;
 
     // get attributes
     attrs = attrsA;
@@ -414,8 +413,14 @@ Annots *Page::getAnnots(XRef *xrefA)
     return annots;
 }
 
-void Page::addAnnot(Annot *annot)
+bool Page::addAnnot(Annot *annot)
 {
+    if (unlikely(xref->getEntry(pageRef.num)->type == xrefEntryFree)) {
+        // something very wrong happened if we're here
+        error(errInternal, -1, "Can not addAnnot to page with an invalid ref");
+        return false;
+    }
+
     const Ref annotRef = annot->getRef();
 
     // Make sure we have annots before adding the new one
@@ -463,6 +468,8 @@ void Page::addAnnot(Annot *annot)
             addAnnot(annotPopup);
         }
     }
+
+    return true;
 }
 
 void Page::removeAnnot(Annot *annot)
@@ -490,7 +497,6 @@ void Page::removeAnnot(Annot *annot)
         }
         annots->removeAnnot(annot); // Gracefully fails on popup windows
         annArray.arrayRemove(idx);
-        xref->removeIndirectObject(annotRef);
 
         if (annotsObj.isRef()) {
             xref->setModifiedObject(&annArray, annotsObj.getRef());
@@ -499,6 +505,9 @@ void Page::removeAnnot(Annot *annot)
         }
     }
     annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
+    if (annArray.isArray()) {
+        xref->removeIndirectObject(annotRef);
+    }
     annot->setPage(0, false);
 }
 

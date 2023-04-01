@@ -341,20 +341,11 @@ public:
     void setVectorAntialias(bool vaa) override;
 #endif
 
-    bool getFontAntialias()
-    {
-        return fontAntialias;
-    }
-    void setFontAntialias(bool anti)
-    {
-        fontAntialias = anti;
-    }
+    bool getFontAntialias() { return fontAntialias; }
+    void setFontAntialias(bool anti) { fontAntialias = anti; }
 
     void setFreeTypeHinting(bool enable, bool enableSlightHinting);
-    void setEnableFreeType(bool enable)
-    {
-        enableFreeType = enable;
-    }
+    void setEnableFreeType(bool enable) { enableFreeType = enable; }
 
 protected:
     void doUpdateFont(GfxState *state);

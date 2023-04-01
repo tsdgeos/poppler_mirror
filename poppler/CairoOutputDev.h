@@ -119,36 +119,21 @@ public:
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
-    bool useShadedFills(int type) override
-    {
-        return type <= 7;
-    }
+    bool useShadedFills(int type) override { return type <= 7; }
 #else
-    bool useShadedFills(int type) override
-    {
-        return type > 1 && type < 4;
-    }
+    bool useShadedFills(int type) override { return type > 1 && type < 4; }
 #endif
 
     // Does this device use FillColorStop()?
-    bool useFillColorStop() override
-    {
-        return true;
-    }
+    bool useFillColorStop() override { return true; }
 
     // Does this device use beginType3Char/endType3Char?  Otherwise,
     // text in Type 3 fonts will be drawn with drawChar/drawString.
-    bool interpretType3Chars() override
-    {
-        return false;
-    }
+    bool interpretType3Chars() override { return false; }
 
     // Does this device need to clip pages to the crop box even when the
     // box is the crop box?
-    bool needClipToCropBox() override
-    {
-        return true;
-    }
+    bool needClipToCropBox() override { return true; }
 
     //----- initialization and control
 
@@ -249,10 +234,7 @@ public:
     // Called to prepare this output dev for rendering CairoType3Font.
     void startType3Render(GfxState *state, XRef *xref);
 
-    bool isReverseVideo()
-    {
-        return false;
-    }
+    bool isReverseVideo() { return false; }
 
     void setCairo(cairo_t *cr);
     void setTextPage(TextPage *text);
@@ -269,27 +251,15 @@ public:
         Type3RenderMask,
         Type3RenderColor
     };
-    void setType3RenderType(Type3RenderType state)
-    {
-        t3_render_state = state;
-    }
+    void setType3RenderType(Type3RenderType state) { t3_render_state = state; }
     void getType3GlyphWidth(double *wx, double *wy)
     {
         *wx = t3_glyph_wx;
         *wy = t3_glyph_wy;
     }
-    bool hasType3GlyphBBox()
-    {
-        return t3_glyph_has_bbox;
-    }
-    double *getType3GlyphBBox()
-    {
-        return t3_glyph_bbox;
-    }
-    bool type3GlyphHasColor()
-    {
-        return t3_glyph_has_color;
-    }
+    bool hasType3GlyphBBox() { return t3_glyph_has_bbox; }
+    double *getType3GlyphBBox() { return t3_glyph_bbox; }
+    bool type3GlyphHasColor() { return t3_glyph_has_color; }
 
 protected:
     void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
@@ -329,7 +299,7 @@ protected:
         cairo_line_join_t join;
         double miter;
         int ref_count;
-    } * strokePathClip;
+    } *strokePathClip;
 
     PDFDoc *doc; // the current document
 
@@ -377,7 +347,7 @@ protected:
         GfxColorSpace *cs;
         cairo_matrix_t group_matrix;
         struct ColorSpaceStack *next;
-    } * groupColorSpaceStack;
+    } *groupColorSpaceStack;
 
     struct SaveStateElement
     {
@@ -425,35 +395,20 @@ public:
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    bool useShadedFills(int type) override
-    {
-        return type <= 7;
-    }
+    bool useShadedFills(int type) override { return type <= 7; }
 #else
-    bool useShadedFills(int type) override
-    {
-        return type < 4;
-    }
+    bool useShadedFills(int type) override { return type < 4; }
 #endif
 
     // Does this device use FillColorStop()?
-    bool useFillColorStop() override
-    {
-        return false;
-    }
+    bool useFillColorStop() override { return false; }
 
     // Does this device use beginType3Char/endType3Char?  Otherwise,
     // text in Type 3 fonts will be drawn with drawChar/drawString.
-    bool interpretType3Chars() override
-    {
-        return false;
-    }
+    bool interpretType3Chars() override { return false; }
 
     // Does this device need non-text content?
-    bool needNonText() override
-    {
-        return true;
-    }
+    bool needNonText() override { return true; }
 
     //----- save/restore graphics state
     void saveState(GfxState *state) override { }
@@ -483,18 +438,9 @@ public:
     void fill(GfxState *state) override { }
     void eoFill(GfxState *state) override { }
     void clipToStrokePath(GfxState *state) override { }
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override
-    {
-        return true;
-    }
-    bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override
-    {
-        return true;
-    }
-    bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double sMin, double sMax) override
-    {
-        return true;
-    }
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override { return true; }
+    bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override { return true; }
+    bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double sMin, double sMax) override { return true; }
 
     //----- path clipping
     void clip(GfxState *state) override { }
@@ -524,14 +470,8 @@ public:
         imgDrawCbkData = data;
     }
     // Iterate through list of images.
-    int getNumImages() const
-    {
-        return numImages;
-    }
-    CairoImage *getImage(int i) const
-    {
-        return images[i];
-    }
+    int getNumImages() const { return numImages; }
+    CairoImage *getImage(int i) const { return images[i]; }
 
 private:
     void saveImage(CairoImage *image);

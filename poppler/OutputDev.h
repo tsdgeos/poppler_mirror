@@ -173,14 +173,8 @@ public:
     virtual void cvtDevToUser(double dx, double dy, double *ux, double *uy);
     virtual void cvtUserToDev(double ux, double uy, int *dx, int *dy);
 
-    const double *getDefCTM() const
-    {
-        return defCTM;
-    }
-    const double *getDefICTM() const
-    {
-        return defICTM;
-    }
+    const double *getDefCTM() const { return defCTM; }
+    const double *getDefICTM() const { return defICTM; }
 
     //----- save/restore graphics state
     virtual void saveState(GfxState * /*state*/) { }
@@ -240,34 +234,13 @@ public:
     {
         return false;
     }
-    virtual bool functionShadedFill(GfxState * /*state*/, GfxFunctionShading * /*shading*/)
-    {
-        return false;
-    }
-    virtual bool axialShadedFill(GfxState * /*state*/, GfxAxialShading * /*shading*/, double /*tMin*/, double /*tMax*/)
-    {
-        return false;
-    }
-    virtual bool axialShadedSupportExtend(GfxState * /*state*/, GfxAxialShading * /*shading*/)
-    {
-        return false;
-    }
-    virtual bool radialShadedFill(GfxState * /*state*/, GfxRadialShading * /*shading*/, double /*sMin*/, double /*sMax*/)
-    {
-        return false;
-    }
-    virtual bool radialShadedSupportExtend(GfxState * /*state*/, GfxRadialShading * /*shading*/)
-    {
-        return false;
-    }
-    virtual bool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
-    {
-        return false;
-    }
-    virtual bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading)
-    {
-        return false;
-    }
+    virtual bool functionShadedFill(GfxState * /*state*/, GfxFunctionShading * /*shading*/) { return false; }
+    virtual bool axialShadedFill(GfxState * /*state*/, GfxAxialShading * /*shading*/, double /*tMin*/, double /*tMax*/) { return false; }
+    virtual bool axialShadedSupportExtend(GfxState * /*state*/, GfxAxialShading * /*shading*/) { return false; }
+    virtual bool radialShadedFill(GfxState * /*state*/, GfxRadialShading * /*shading*/, double /*sMin*/, double /*sMax*/) { return false; }
+    virtual bool radialShadedSupportExtend(GfxState * /*state*/, GfxRadialShading * /*shading*/) { return false; }
+    virtual bool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading) { return false; }
+    virtual bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) { return false; }
 
     //----- path clipping
 
@@ -356,17 +329,11 @@ public:
 
     //----- Profiling
     void startProfile();
-    std::unordered_map<std::string, ProfileData> *getProfileHash() const
-    {
-        return profileHash.get();
-    }
+    std::unordered_map<std::string, ProfileData> *getProfileHash() const { return profileHash.get(); }
     std::unique_ptr<std::unordered_map<std::string, ProfileData>> endProfile();
 
     //----- transparency groups and soft masks
-    virtual bool checkTransparencyGroup(GfxState * /*state*/, bool /*knockout*/)
-    {
-        return true;
-    }
+    virtual bool checkTransparencyGroup(GfxState * /*state*/, bool /*knockout*/) { return true; }
     virtual void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) { }
     virtual void endTransparencyGroup(GfxState * /*state*/) { }
     virtual void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) { }
@@ -377,51 +344,21 @@ public:
     virtual void processLink(AnnotLink * /*link*/) { }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
-    virtual bool getVectorAntialias()
-    {
-        return false;
-    }
+    virtual bool getVectorAntialias() { return false; }
     virtual void setVectorAntialias(bool /*vaa*/) { }
 #endif
 
 #ifdef USE_CMS
-    void setDisplayProfile(const GfxLCMSProfilePtr &profile)
-    {
-        displayprofile = profile;
-    }
-    GfxLCMSProfilePtr getDisplayProfile() const
-    {
-        return displayprofile;
-    }
-    void setDefaultGrayProfile(const GfxLCMSProfilePtr &profile)
-    {
-        defaultGrayProfile = profile;
-    }
-    GfxLCMSProfilePtr getDefaultGrayProfile() const
-    {
-        return defaultGrayProfile;
-    }
-    void setDefaultRGBProfile(const GfxLCMSProfilePtr &profile)
-    {
-        defaultRGBProfile = profile;
-    }
-    GfxLCMSProfilePtr getDefaultRGBProfile() const
-    {
-        return defaultRGBProfile;
-    }
-    void setDefaultCMYKProfile(const GfxLCMSProfilePtr &profile)
-    {
-        defaultCMYKProfile = profile;
-    }
-    GfxLCMSProfilePtr getDefaultCMYKProfile() const
-    {
-        return defaultCMYKProfile;
-    }
+    void setDisplayProfile(const GfxLCMSProfilePtr &profile) { displayprofile = profile; }
+    GfxLCMSProfilePtr getDisplayProfile() const { return displayprofile; }
+    void setDefaultGrayProfile(const GfxLCMSProfilePtr &profile) { defaultGrayProfile = profile; }
+    GfxLCMSProfilePtr getDefaultGrayProfile() const { return defaultGrayProfile; }
+    void setDefaultRGBProfile(const GfxLCMSProfilePtr &profile) { defaultRGBProfile = profile; }
+    GfxLCMSProfilePtr getDefaultRGBProfile() const { return defaultRGBProfile; }
+    void setDefaultCMYKProfile(const GfxLCMSProfilePtr &profile) { defaultCMYKProfile = profile; }
+    GfxLCMSProfilePtr getDefaultCMYKProfile() const { return defaultCMYKProfile; }
 
-    PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache()
-    {
-        return &iccColorSpaceCache;
-    }
+    PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache() { return &iccColorSpaceCache; }
 #endif
 
 private:

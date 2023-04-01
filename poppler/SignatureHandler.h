@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <functional>
+#include <memory>
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -66,23 +67,54 @@ private:
     HashAlgorithm digest_alg_tag;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureHandler
+class POPPLER_PRIVATE_EXPORT SignatureVerificationHandler
 {
 public:
-    explicit SignatureHandler(std::vector<unsigned char> &&p7data);
-    SignatureHandler(const std::string &certNickName, HashAlgorithm digestAlgTag);
-    ~SignatureHandler();
+    explicit SignatureVerificationHandler(std::vector<unsigned char> &&p7data);
+    ~SignatureVerificationHandler();
+    SignatureValidationStatus validateSignature();
     time_t getSigningTime() const;
     std::string getSignerName() const;
     std::string getSignerSubjectDN() const;
-    HashAlgorithm getHashAlgorithm() const;
-    void updateHash(unsigned char *data_block, int data_len);
-    SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time, bool ocspRevocationCheck, bool useAIACertFetch);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
+    void updateHash(unsigned char *data_block, int data_len);
+    HashAlgorithm getHashAlgorithm() const;
+
+    SignatureVerificationHandler(const SignatureVerificationHandler &) = delete;
+    SignatureVerificationHandler &operator=(const SignatureVerificationHandler &) = delete;
+
+private:
+    std::vector<unsigned char> p7;
+    NSSCMSMessage *CMSMessage;
+    NSSCMSSignedData *CMSSignedData;
+    NSSCMSSignerInfo *CMSSignerInfo;
+    SECItem CMSitem;
+    std::unique_ptr<HashContext> hashContext;
+};
+
+class POPPLER_PRIVATE_EXPORT SignatureSignHandler
+{
+public:
+    SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag);
+    ~SignatureSignHandler();
+    std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
+    void updateHash(unsigned char *data_block, int data_len);
+    std::unique_ptr<GooString> signDetached(const std::string &password);
+
+    SignatureSignHandler(const SignatureSignHandler &) = delete;
+    SignatureSignHandler &operator=(const SignatureSignHandler &) = delete;
+
+private:
+    std::unique_ptr<HashContext> hashContext;
+    CERTCertificate *signing_cert;
+};
+
+class POPPLER_PRIVATE_EXPORT SignatureHandler
+{
+public:
     static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
-    std::unique_ptr<GooString> signDetached(const std::string &password) const;
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
@@ -95,21 +127,9 @@ public:
 
     static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 
+    SignatureHandler() = delete;
+
 private:
-    SignatureHandler(const SignatureHandler &);
-    SignatureHandler &operator=(const SignatureHandler &);
-
-    static void outputCallback(void *arg, const char *buf, unsigned long len);
-
-    std::vector<unsigned char> p7;
-    HashAlgorithm digest_alg_tag;
-    SECItem CMSitem;
-    std::unique_ptr<HashContext> hashContext;
-    NSSCMSMessage *CMSMessage;
-    NSSCMSSignedData *CMSSignedData;
-    NSSCMSSignerInfo *CMSSignerInfo;
-    CERTCertificate *signing_cert;
-
     static std::string sNssDir;
 };
 
