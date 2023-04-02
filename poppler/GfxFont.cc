@@ -2179,7 +2179,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
     }
     const unsigned int n = 65536;
-    tumap = new Unicode[n];
     humap = new Unicode[n * N_UCS_CANDIDATES];
     memset(humap, 0, sizeof(Unicode) * n * N_UCS_CANDIDATES);
     if (lp->collection != nullptr) {
@@ -2187,6 +2186,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         GooString tname(lp->toUnicodeMap);
 
         if ((tctu = CharCodeToUnicode::parseCMapFromFile(&tname, 16)) != nullptr) {
+            tumap = new Unicode[n];
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
                 int len;
