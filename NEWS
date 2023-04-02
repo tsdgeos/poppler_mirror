@@ -1,3 +1,15 @@
+Release 23.04.0:
+        core:
+         * Fix memory issue when signing fails. Issue #1372
+         * Internal improvements of signature related code
+         * CairoOutputDev: improve type3 font rendering
+         * Fix memory leak in GlobalParams::findSystemFontFileForFamilyAndStyle
+
+        utils:
+         * pdftocairo: Fix crash in some special situations
+         * pdfsig: allow holes in -dump signature list
+         * pdfsig: Support --help
+
 Release 23.03.0:
         core:
          * PngWriter: Fix potential uninitialized memory use
