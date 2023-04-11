@@ -8,6 +8,9 @@
 //========================================================================
 #include "CryptoSignBackend.h"
 #include "config.h"
+#ifdef ENABLE_GPGME
+#    include "GPGMECryptoSignBackend.h"
+#endif
 #ifdef ENABLE_NSS3
 #    include "SignatureHandler.h"
 #endif
@@ -30,6 +33,9 @@ std::optional<CryptoSign::Backend::Type> Factory::typeFromString(std::string_vie
 {
     if (string.empty()) {
         return std::nullopt;
+    }
+    if ("GPG" == string) {
+        return Backend::Type::GPGME;
     }
     if ("NSS" == string) {
         return Backend::Type::NSS3;
@@ -59,6 +65,11 @@ static std::vector<Backend::Type> createAvailableBackends()
 #ifdef ENABLE_NSS3
     backends.push_back(Backend::Type::NSS3);
 #endif
+#ifdef ENABLE_GPGME
+    if (GpgSignatureBackend::hasSufficientVersion()) {
+        backends.push_back(Backend::Type::GPGME);
+    }
+#endif
     return backends;
 }
 std::vector<Backend::Type> Factory::getAvailable()
@@ -83,6 +94,13 @@ std::unique_ptr<CryptoSign::Backend> CryptoSign::Factory::create(Backend::Type b
 #else
         return nullptr;
 #endif
+    case Backend::Type::GPGME: {
+#ifdef ENABLE_GPGME
+        return std::make_unique<GpgSignatureBackend>();
+#else
+        return nullptr;
+#endif
+    }
     }
     return nullptr;
 }

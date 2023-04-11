@@ -63,7 +63,8 @@ class Backend
 public:
     enum class Type
     {
-        NSS3
+        NSS3,
+        GPGME
     };
     virtual std::unique_ptr<VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) = 0;
     virtual std::unique_ptr<SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) = 0;

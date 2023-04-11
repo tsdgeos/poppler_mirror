@@ -377,9 +377,6 @@ if (_signing_backends_count GREATER 0)
     # This means that the order we append them to the list is significant
     list(GET SIGNATURE_BACKENDS 0 DEFAULT_SIGNATURE_BACKEND)
   endif()
-  if (NOT DEFAULT_SIGNATURE_BACKEND IN_LIST SIGNATURE_BACKENDS)
-    message(FATAL_ERROR "default signature backend must be one of ${SIGNATURE_BACKENDS}, was ${DEFAULT_SIGNATURE_BACKEND}")
-  endif()
   set(ENABLE_SIGNATURES ON)
 endif()
 if (NOT DEFAULT_SIGNATURE_BACKEND)
@@ -558,6 +555,12 @@ if (ENABLE_NSS3)
     poppler/SignatureHandler.cc
   )
   set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
+endif()
+if (ENABLE_GPGME)
+  set(poppler_SRCS ${poppler_SRCS}
+    poppler/GPGMECryptoSignBackend.cc
+  )
+  set(poppler_LIBS ${poppler_LIBS} Gpgmepp)
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}

@@ -27,6 +27,9 @@
 /* Build against libnss3 for digital signature validation */
 #cmakedefine ENABLE_NSS3 1
 
+/* Build against libgpgme for digital signature validation */
+#cmakedefine ENABLE_GPGME 1
+
 /* Signatures enabled */
 #cmakedefine ENABLE_SIGNATURES 1
 

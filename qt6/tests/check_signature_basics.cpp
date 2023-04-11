@@ -16,6 +16,7 @@
 #include "PDFDoc.h"
 #include "GlobalParams.h"
 #include "SignatureInfo.h"
+#include "CryptoSignBackend.h"
 #include "config.h"
 
 class TestSignatureBasics : public QObject
@@ -27,7 +28,9 @@ public:
 private:
     std::unique_ptr<PDFDoc> doc;
 private Q_SLOTS:
-    void initTestCase();
+    void init();
+    void initTestCase_data();
+    void initTestCase() { }
     void cleanupTestCase();
     void testSignatureCount();
     void testSignatureSizes();
@@ -35,13 +38,32 @@ private Q_SLOTS:
     void testSignedRanges();
 };
 
-void TestSignatureBasics::initTestCase()
+void TestSignatureBasics::init()
 {
+#ifdef ENABLE_SIGNATURES
+    QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
+    CryptoSign::Factory::setPreferredBackend(backend);
+    QCOMPARE(CryptoSign::Factory::getActive(), backend);
+#endif
+
     globalParams = std::make_unique<GlobalParams>();
     doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs.pdf"));
     QVERIFY(doc);
     QVERIFY(doc->isOk());
 }
+
+void TestSignatureBasics::initTestCase_data()
+{
+    QTest::addColumn<CryptoSign::Backend::Type>("backend");
+
+#ifdef ENABLE_NSS3
+    QTest::newRow("nss") << CryptoSign::Backend::Type::NSS3;
+#endif
+#ifdef ENABLE_GPGME
+    QTest::newRow("gpg") << CryptoSign::Backend::Type::GPGME;
+#endif
+}
+
 void TestSignatureBasics::cleanupTestCase()
 {
     globalParams.reset();
@@ -62,11 +84,13 @@ void TestSignatureBasics::testSignatureCount()
 void TestSignatureBasics::testSignatureSizes()
 {
     auto signatureFields = doc->getSignatureFields();
-    // Note for later. Unpadding a signature on a command line with openssl can
-    // be done just by rewriting after using e.g. pdfsig -dump to extract them
-    // openssl pkcs7 -inform der -in pdf-signature-sample-2sigs.pdf.sig0 -outform der -out pdf-signature-sample-2sigs.pdf.sig0.unpadded
-    QCOMPARE(signatureFields[0]->getSignature()->getLength(), 10230); // This is technically wrong, because the signatures in this document has been padded. The correct size is 2340
-    QCOMPARE(signatureFields[1]->getSignature()->getLength(), 10196); // This is technically wrong, because the signatures in this document has been padded. The correct size is 2340
+    // These are not the actual signature lengths, but rather
+    // the length of the signature field, which is likely
+    // a padded field. At least the pdf specification suggest to pad
+    // the field.
+    // Poppler before 23.04 did not have a padded field, later versions do.
+    QCOMPARE(signatureFields[0]->getSignature()->getLength(), 10230); // Signature data size is 2340
+    QCOMPARE(signatureFields[1]->getSignature()->getLength(), 10196); // Signature data size is 2340
 }
 
 void TestSignatureBasics::testSignerInfo()
@@ -75,9 +99,10 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(signatureFields[0]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature0_B_" });
     QCOMPARE(signatureFields[0]->getSignatureType(), ETSI_CAdES_detached);
     auto siginfo0 = signatureFields[0]->validateSignature(false, false, -1 /* now */, false, false);
-#ifdef ENABLE_NSS3
+#ifdef ENABLE_SIGNATURES
     QCOMPARE(siginfo0->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo0->getHashAlgorithm(), HashAlgorithm::Sha256);
+    QCOMPARE(siginfo0->getCertificateInfo()->getPublicKeyInfo().publicKeyStrength, 2048 / 8);
 #else
     QCOMPARE(siginfo0->getSignerName(), std::string {});
     QCOMPARE(siginfo0->getHashAlgorithm(), HashAlgorithm::Unknown);
@@ -87,9 +112,16 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(signatureFields[1]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature1_B_" });
     QCOMPARE(signatureFields[1]->getSignatureType(), ETSI_CAdES_detached);
     auto siginfo1 = signatureFields[1]->validateSignature(false, false, -1 /* now */, false, false);
-#ifdef ENABLE_NSS3
+#ifdef ENABLE_SIGNATURES
     QCOMPARE(siginfo1->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo1->getHashAlgorithm(), HashAlgorithm::Sha256);
+    QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
+    if (backend == CryptoSign::Backend::Type::GPGME) {
+        QCOMPARE(siginfo1->getCertificateInfo()->getPublicKeyInfo().publicKeyStrength, 2048 / 8);
+    } else if (backend == CryptoSign::Backend::Type::NSS3) {
+        // Not fully sure why it is zero here, but it seems to be.
+        QCOMPARE(siginfo1->getCertificateInfo()->getPublicKeyInfo().publicKeyStrength, 0);
+    }
 #else
     QCOMPARE(siginfo1->getSignerName(), std::string {});
     QCOMPARE(siginfo1->getHashAlgorithm(), HashAlgorithm::Unknown);
