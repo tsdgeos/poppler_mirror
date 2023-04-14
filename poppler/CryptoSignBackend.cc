@@ -37,7 +37,7 @@ std::optional<CryptoSign::Backend::Type> Factory::typeFromString(std::string_vie
     return std::nullopt;
 }
 
-CryptoSign::Backend::Type Factory::getActive()
+std::optional<CryptoSign::Backend::Type> Factory::getActive()
 {
     if (preferredBackend) {
         return *preferredBackend;
@@ -51,7 +51,7 @@ CryptoSign::Backend::Type Factory::getActive()
         return *backendFromCompiledDefault;
     }
 
-    return Backend::Type::None;
+    return std::nullopt;
 }
 static std::vector<Backend::Type> createAvailableBackends()
 {
@@ -68,7 +68,11 @@ std::vector<Backend::Type> Factory::getAvailable()
 }
 std::unique_ptr<Backend> Factory::createActive()
 {
-    return create(getActive());
+    auto active = getActive();
+    if (active) {
+        return create(active.value());
+    }
+    return nullptr;
 }
 std::unique_ptr<CryptoSign::Backend> CryptoSign::Factory::create(Backend::Type backend)
 {
@@ -79,9 +83,6 @@ std::unique_ptr<CryptoSign::Backend> CryptoSign::Factory::create(Backend::Type b
 #else
         return nullptr;
 #endif
-    case Backend::Type::None: {
-        return nullptr;
-    }
     }
     return nullptr;
 }

@@ -63,7 +63,6 @@ class Backend
 public:
     enum class Type
     {
-        None,
         NSS3
     };
     virtual std::unique_ptr<VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) = 0;
@@ -84,7 +83,7 @@ public:
     // prioritized from 1) setPreferredBackend,
     //                  2) POPPLER_SIGNATURE_BACKEND
     //                  3) Compiled in default
-    static Backend::Type getActive();
+    static std::optional<Backend::Type> getActive();
     static std::vector<Backend::Type> getAvailable();
     static std::unique_ptr<Backend> createActive();
     static std::unique_ptr<Backend> create(Backend::Type);
