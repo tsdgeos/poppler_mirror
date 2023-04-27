@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -728,9 +728,10 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA, int widthA, int n
     predLine = nullptr;
     ok = false;
 
-    nVals = width * nComps;
-    if (width <= 0 || nComps <= 0 || nBits <= 0 || nComps > gfxColorMaxComps || nBits > 16 || width >= INT_MAX / nComps || // check for overflow in nVals
-        nVals >= (INT_MAX - 7) / nBits) { // check for overflow in rowBytes
+    if (checkedMultiply(width, nComps, &nVals)) {
+        return;
+    }
+    if (width <= 0 || nComps <= 0 || nBits <= 0 || nComps > gfxColorMaxComps || nBits > 16 || nVals >= (INT_MAX - 7) / nBits) { // check for overflow in rowBytes
         return;
     }
     pixBytes = (nComps * nBits + 7) >> 3;
