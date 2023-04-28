@@ -732,6 +732,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
 
+    // say that there a now signatures and that we should append only
+    doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));
+
     const bool success = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
     // Now bring back the annotation appearance back to what it was
