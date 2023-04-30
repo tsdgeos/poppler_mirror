@@ -2763,7 +2763,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         return {};
     }
 
-    const std::string fontFamilyAndStyle = fontFamily + " " + fontStyle;
+    const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
 
     XRef *xref = doc->getXRef();
     Object fontDict(new Dict(xref));
