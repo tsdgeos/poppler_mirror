@@ -2813,7 +2813,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         {
             std::unique_ptr<Dict> fontDescriptor = std::make_unique<Dict>(xref);
             fontDescriptor->set("Type", Object(objName, "FontDescriptor"));
-            fontDescriptor->set("FontName", Object(objName, "Noto Sans"));
+            fontDescriptor->set("FontName", Object(objName, fontFamilyAndStyle.c_str()));
 
             // a bit arbirary but the Flags field is mandatory...
             const std::string lowerCaseFontFamily = GooString::toLowerCase(fontFamily);
