@@ -692,8 +692,9 @@ public:
     };
 
     // Finds in the system a font name matching the given fontFamily and fontStyle
-    // And adds it to the default resources dictionary, font name there will be popplerfontXXX
-    AddFontResult addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle);
+    // And adds it to the default resources dictionary, font name there will be popplerfontXXX except if forceName is true,
+    // in that case the font name will be fontFamily + " " + fontStyle (if fontStyle is empty just fontFamily)
+    AddFontResult addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle, bool forceName = false);
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // emulates fontToEmulate and can draw the given char
@@ -725,8 +726,9 @@ public:
 
 private:
     // Finds in the system a font name matching the given fontFamily and fontStyle
-    // And adds it to the default resources dictionary, font name there will be popplerfontXXX
-    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle);
+    // And adds it to the default resources dictionary, font name there will be popplerfontXXX except if forceName is true,
+    // in that case the font name will be fontFamily + " " + fontStyle (if fontStyle is empty just fontFamily)
+    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName = false);
 
     AddFontResult doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 

@@ -2735,12 +2735,12 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
     return {};
 }
 
-Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamily, const std::string &fontStyle, bool forceName)
 {
     FamilyStyleFontSearchResult findFontRes = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
     std::vector<std::string> filesToIgnore;
     while (!findFontRes.filepath.empty()) {
-        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle);
+        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle, forceName);
         if (!addFontRes.fontName.empty()) {
             return addFontRes;
         }
@@ -2750,7 +2750,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
     return {};
 }
 
-Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName)
 {
     if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
         error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
@@ -2764,6 +2764,11 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
     }
 
     const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
+
+    if (forceName && defaultResources && defaultResources->lookupFont(fontFamilyAndStyle.c_str())) {
+        error(errInternal, -1, "Form::addFontToDefaultResources: Asked to forceName but font name exists {0:s}", fontFamilyAndStyle.c_str());
+        return {};
+    }
 
     XRef *xref = doc->getXRef();
     Object fontDict(new Dict(xref));
@@ -2921,7 +2926,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
     const Ref fontDictRef = xref->addIndirectObject(fontDict);
 
-    std::string dictFontName = kOurDictFontNamePrefix;
+    std::string dictFontName = forceName ? fontFamilyAndStyle : kOurDictFontNamePrefix;
     Object *acroForm = doc->getCatalog()->getAcroForm();
     if (resDict.isDict()) {
         Ref fontDictObjRef;
@@ -2973,7 +2978,13 @@ std::string Form::getFallbackFontForChar(Unicode uChar, const GfxFont &fontToEmu
 std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources)
 {
     GfxResources *resources = fieldResources ? fieldResources : defaultResources;
-    std::shared_ptr<GfxFont> f = resources->lookupFont(pdfFontNameToEmulate.c_str());
+    std::shared_ptr<GfxFont> f;
+    if (!resources) {
+        // There's no resources, so create one with the needed font name
+        addFontToDefaultResources(pdfFontNameToEmulate, "", /*forceName*/ true);
+        resources = defaultResources;
+    }
+    f = resources->lookupFont(pdfFontNameToEmulate.c_str());
     const CharCodeToUnicode *ccToUnicode = f ? f->getToUnicode() : nullptr;
     if (!ccToUnicode) {
         error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen\n");
