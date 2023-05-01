@@ -2410,13 +2410,14 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         signature_info->setSigningTime(std::chrono::system_clock::to_time_t(signature_handler->getSigningTime()));
     }
 
+    signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
+
     if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
         return signature_info;
     }
 
     const CertificateValidationStatus cert_val_state = signature_handler->validateCertificate(std::chrono::system_clock::from_time_t(validationTime), ocspRevocationCheck, enableAIA);
     signature_info->setCertificateValStatus(cert_val_state);
-    signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
 
     return signature_info;
 }
