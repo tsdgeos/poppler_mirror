@@ -401,7 +401,7 @@ private:
     void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1);
 #endif
     void cvtFunction(const Function *func, bool invertPSFunction = false);
-    GooString *filterPSName(const std::string &name);
+    static std::string filterPSName(const std::string &name);
 
     // Write the document-level setup.
     void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);

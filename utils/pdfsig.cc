@@ -42,6 +42,7 @@
 #include "Error.h"
 #include "GlobalParams.h"
 #include "SignatureHandler.h"
+#include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
@@ -201,7 +202,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         }
     };
     SignatureHandler::setNSSPasswordCallback(passwordCallback);
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = CryptoSign::Factory::createActive()->getAvailableSigningCertificates();
     SignatureHandler::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;

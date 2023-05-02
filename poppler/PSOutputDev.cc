@@ -2772,32 +2772,27 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
 // font object, and an object ID (font file object for
 GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
 {
-    GooString *psName;
     const GooString *s;
 
     if ((s = font->getEmbeddedFontName())) {
-        psName = filterPSName(s->toStr());
-        if (fontNames.emplace(psName->toStr()).second) {
-            return psName;
+        std::string psName = filterPSName(s->toStr());
+        if (fontNames.emplace(psName).second) {
+            return new GooString(std::move(psName));
         }
-        delete psName;
     }
     if (font->getName()) {
-        psName = filterPSName(*font->getName());
-        if (fontNames.emplace(psName->toStr()).second) {
-            return psName;
+        std::string psName = filterPSName(*font->getName());
+        if (fontNames.emplace(psName).second) {
+            return new GooString(std::move(psName));
         }
-        delete psName;
     }
-    psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen).release();
+    GooString *psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen).release();
     if ((s = font->getEmbeddedFontName())) {
-        s = filterPSName(s->toStr());
-        psName->append('_')->append(s);
-        delete s;
+        std::string filteredName = filterPSName(s->toStr());
+        psName->append('_')->append(filteredName);
     } else if (font->getName()) {
-        s = filterPSName(*font->getName());
-        psName->append('_')->append(s);
-        delete s;
+        std::string filteredName = filterPSName(*font->getName());
+        psName->append('_')->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
     return psName;
@@ -7415,27 +7410,25 @@ void PSOutputDev::writePSName(const char *s)
     }
 }
 
-GooString *PSOutputDev::filterPSName(const std::string &name)
+std::string PSOutputDev::filterPSName(const std::string &name)
 {
-    GooString *name2;
-    char buf[8];
-
-    name2 = new GooString();
+    std::string name2;
 
     // ghostscript chokes on names that begin with out-of-limits
     // numbers, e.g., 1e4foo is handled correctly (as a name), but
     // 1e999foo generates a limitcheck error
     const char c0 = name[0];
     if (c0 >= '0' && c0 <= '9') {
-        name2->append('f');
+        name2 += 'f';
     }
 
     for (const char c : name) {
         if (c <= (char)0x20 || c >= (char)0x7f || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%') {
+            char buf[8];
             sprintf(buf, "#%02x", c & 0xff);
-            name2->append(buf);
+            name2.append(buf);
         } else {
-            name2->append(c);
+            name2 += c;
         }
     }
     return name2;

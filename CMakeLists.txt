@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "23")
-set(POPPLER_MINOR_VERSION_STRING "03")
+set(POPPLER_MINOR_VERSION_STRING "04")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -358,6 +358,29 @@ if(TIFF_FOUND)
   set(ENABLE_LIBTIFF ON)
 endif()
 
+set(SIGNATURE_BACKENDS "")
+if(ENABLE_NSS3)
+  list(APPEND SIGNATURE_BACKENDS "NSS")
+endif()
+
+list(LENGTH SIGNATURE_BACKENDS _signing_backends_count)
+if (_signing_backends_count GREATER 0)
+  if (NOT DEFAULT_SIGNATURE_BACKEND)
+    # If not specified at compiletime, we take the first one added.
+    # This means that the order we append them to the list is significant
+    list(GET SIGNATURE_BACKENDS 0 DEFAULT_SIGNATURE_BACKEND)
+  endif()
+  if (NOT DEFAULT_SIGNATURE_BACKEND IN_LIST SIGNATURE_BACKENDS)
+    message(FATAL_ERROR "default signature backend must be one of ${SIGNATURE_BACKENDS}, was ${DEFAULT_SIGNATURE_BACKEND}")
+  endif()
+  set(ENABLE_SIGNATURES ON)
+endif()
+if (NOT DEFAULT_SIGNATURE_BACKEND)
+  set(DEFAULT_SIGNATURE_BACKEND "None")
+endif()
+
+
+
 # Recent versions of poppler-data install a .pc file.
 # Use it to determine the encoding data path, if available.
 # Default to the same prefix otherwise.
@@ -418,6 +441,7 @@ set(poppler_SRCS
   poppler/Catalog.cc
   poppler/CharCodeToUnicode.cc
   poppler/CMap.cc
+  poppler/CryptoSignBackend.cc
   poppler/DateInfo.cc
   poppler/Decrypt.cc
   poppler/Dict.cc
@@ -609,7 +633,7 @@ if(USE_CMS)
   target_include_directories(poppler SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
 endif()
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
-set_target_properties(poppler PROPERTIES VERSION 126.0.0 SOVERSION 126)
+set_target_properties(poppler PROPERTIES VERSION 127.0.0 SOVERSION 127)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -836,6 +860,7 @@ show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
 show_end_message_yesno("use zlib compress" ENABLE_ZLIB)
 show_end_message_yesno("use zlib uncompress" ENABLE_ZLIB_UNCOMPRESS)
 show_end_message_yesno("use nss3" ENABLE_NSS3)
+show_end_message("  default signature backend" ${DEFAULT_SIGNATURE_BACKEND})
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)
