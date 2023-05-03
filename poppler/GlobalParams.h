@@ -135,7 +135,7 @@ public:
     FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
     FILE *findToUnicodeFile(const GooString *name);
     GooString *findFontFile(const std::string &fontName);
-    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore = {});
     UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);

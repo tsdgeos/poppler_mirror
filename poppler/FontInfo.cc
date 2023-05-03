@@ -181,12 +181,10 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     }
 
     if (!emb) {
-        SysFontType dummy;
-        int dummy2;
         GooString substituteNameAux;
-        std::unique_ptr<GooString> tmpFile(globalParams->findSystemFontFile(font, &dummy, &dummy2, &substituteNameAux));
-        if (tmpFile) {
-            file = tmpFile->toStr();
+        const std::optional<GfxFontLoc> fontLoc = font->locateFont(xref, nullptr, &substituteNameAux);
+        if (fontLoc && fontLoc->locType == gfxFontLocExternal) {
+            file = fontLoc->path;
         }
         if (substituteNameAux.getLength() > 0) {
             substituteName = substituteNameAux.toStr();

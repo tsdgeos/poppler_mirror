@@ -608,7 +608,7 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits, CharCod
     return ctu;
 }
 
-std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
+std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooString *substituteFontName)
 {
     SysFontType sysFontType;
     GooString *path, *base14Name;
@@ -690,7 +690,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
     //----- external font file for Base-14 font
     if (!ps && !isCIDFont() && ((Gfx8BitFont *)this)->base14) {
         base14Name = new GooString(((Gfx8BitFont *)this)->base14->base14Name);
-        if ((path = globalParams->findBase14FontFile(base14Name, this))) {
+        if ((path = globalParams->findBase14FontFile(base14Name, this, substituteFontName))) {
             if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, false)) {
                 delete base14Name;
                 return fontLoc;
@@ -700,7 +700,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps)
     }
 
     //----- system font
-    if ((path = globalParams->findSystemFontFile(this, &sysFontType, &fontNum))) {
+    if ((path = globalParams->findSystemFontFile(this, &sysFontType, &fontNum, substituteFontName))) {
         if (isCIDFont()) {
             if (sysFontType == sysFontTTF || sysFontType == sysFontTTC) {
                 GfxFontLoc fontLoc;
