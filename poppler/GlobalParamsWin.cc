@@ -336,9 +336,6 @@ static GooString *replaceSuffix(GooString *path, const char *suffixA, const char
 
 void GlobalParams::setupBaseFonts(const char *dir)
 {
-    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
-    GooString *fileName = nullptr;
-
     if (baseFontsInitialized)
         return;
     baseFontsInitialized = true;
@@ -375,11 +372,11 @@ void GlobalParams::setupBaseFonts(const char *dir)
         sysFonts->scanWindowsFonts(winFontDir);
     }
 
-    fileName = new GooString(dataRoot);
-    fileName->append("/cidfmap");
+    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
+    const std::string fileName = std::string(dataRoot).append("/cidfmap");
 
     // try to open file
-    const std::unique_ptr<GooFile> file = GooFile::open(fileName->toStr());
+    const std::unique_ptr<GooFile> file = GooFile::open(fileName);
 
     if (file) {
         Parser *parser;
@@ -405,8 +402,6 @@ void GlobalParams::setupBaseFonts(const char *dir)
             }
         }
         delete parser;
-    } else {
-        delete fileName;
     }
 }
 
