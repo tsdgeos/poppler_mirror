@@ -1256,7 +1256,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }
-        addFontFile(fontName.get(), fileName.get());
+        addFontFile(fontName->toStr(), fileName->toStr());
     }
 }
 
@@ -1372,10 +1372,10 @@ std::vector<std::string> GlobalParams::getEncodingNames()
 // functions to set parameters
 //------------------------------------------------------------------------
 
-void GlobalParams::addFontFile(const GooString *fontName, const GooString *path)
+void GlobalParams::addFontFile(const std::string &fontName, const std::string &path)
 {
     globalParamsLocker();
-    fontFiles[fontName->toStr()] = path->toStr();
+    fontFiles[fontName] = path;
 }
 
 void GlobalParams::setTextEncoding(const char *encodingName)

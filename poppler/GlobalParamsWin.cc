@@ -9,7 +9,7 @@
    // Copyright (C) 2013, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
-   // Copyright (C) 2017, 2018, 2020-2022 Albert Astals Cid <aacid@kde.org>
+   // Copyright (C) 2017, 2018, 2020-2023 Albert Astals Cid <aacid@kde.org>
    // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
    // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
    // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -349,29 +349,26 @@ void GlobalParams::setupBaseFonts(const char *dir)
         if (fontFiles.count(displayFontTab[i].name) > 0)
             continue;
 
-        GooString *fontName = new GooString(displayFontTab[i].name);
+        const GooString fontName = GooString(displayFontTab[i].name);
 
         if (dir && displayFontTab[i].t1FileName) {
-            GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
-            if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath, ".pfb", ".pfa")->c_str())) {
-                addFontFile(fontName, fontPath);
+            const std::unique_ptr<GooString> fontPath(appendToPath(new GooString(dir), displayFontTab[i].t1FileName));
+            if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".pfb", ".pfa")->c_str())) {
+                addFontFile(fontName.toStr(), fontPath->toStr());
                 continue;
             }
-            delete fontPath;
         }
 
         if (!winFontDir.empty() && displayFontTab[i].ttFileName) {
-            GooString *fontPath = appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName);
-            if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath, ".ttc", ".ttf")->c_str())) {
-                addFontFile(fontName, fontPath);
+            const std::unique_ptr<GooString> fontPath(appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName));
+            if (FileExists(fontPath->c_str()) || FileExists(replaceSuffix(fontPath.get(), ".ttc", ".ttf")->c_str())) {
+                addFontFile(fontName.toStr(), fontPath->toStr());
                 continue;
             }
-            delete fontPath;
         }
 
         if (displayFontTab[i].warnIfMissing) {
             error(errSyntaxError, -1, "No display font for '{0:s}'", displayFontTab[i].name);
-            delete fontName;
         }
     }
     if (!winFontDir.empty()) {
@@ -395,7 +392,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
                 if (obj2.isDict()) {
                     Object obj3 = obj2.getDict()->lookup("Path");
                     if (obj3.isString())
-                        addFontFile(new GooString(obj1.getName()), obj3.getString()->copy());
+                        addFontFile(GooString(obj1.getName()).toStr(), obj3.getString()->toStr());
                     // Aliases
                 } else if (obj2.isName()) {
                     substFiles.emplace(obj1.getName(), obj2.getName());
