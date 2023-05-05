@@ -41,6 +41,7 @@
 
 #include <config.h>
 
+#include <array>
 #include <set>
 #include <limits>
 #include <cstddef>
@@ -702,9 +703,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
     Form *form = doc->getCatalog()->getCreateForm();
-    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
+    const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
     if (pdfFontName.empty()) {
-        pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
+        return false;
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
@@ -3111,6 +3112,26 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
             }
         }
     }
+}
+
+std::string Form::findPdfFontNameToUseForSigning()
+{
+    static constexpr std::array<const char *, 2> fontsToUseToSign = { "Helvetica", "Arial" };
+    for (const char *fontToUseToSign : fontsToUseToSign) {
+        std::string pdfFontName = findFontInDefaultResources(fontToUseToSign, "");
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+
+        pdfFontName = addFontToDefaultResources(fontToUseToSign, "").fontName;
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+    }
+
+    error(errInternal, -1, "Form::findPdfFontNameToUseForSigning: No suitable font found'\n");
+
+    return {};
 }
 
 //------------------------------------------------------------------------

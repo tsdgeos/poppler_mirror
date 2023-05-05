@@ -685,6 +685,10 @@ public:
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves
     std::string findFontInDefaultResources(const std::string &fontFamily, const std::string &fontStyle) const;
 
+    // Finds in the default resources a font that is suitable to create a signature annotation.
+    // If none is found then it is added to the default resources.
+    std::string findPdfFontNameToUseForSigning();
+
     struct AddFontResult
     {
         std::string fontName;
