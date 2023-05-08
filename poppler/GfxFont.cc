@@ -209,6 +209,25 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
         name = obj1.getName();
     }
 
+    // There is no BaseFont in Type 3 fonts, try fontDescriptor.FontName
+    if (!name) {
+        Object fontDesc = fontDict->lookup("FontDescriptor");
+        if (fontDesc.isDict()) {
+            Object obj2 = fontDesc.dictLookup("FontName");
+            if (obj2.isName()) {
+                name = obj2.getName();
+            }
+        }
+    }
+
+    // As a last resort try the Name key
+    if (!name) {
+        Object obj2 = fontDict->lookup("Name");
+        if (obj2.isName()) {
+            name = obj2.getName();
+        }
+    }
+
     // get embedded font ID and font type
     typeA = getFontType(xref, fontDict, &embFontIDA);
 
