@@ -104,18 +104,8 @@ QByteArray EmbeddedFile::data()
     }
 
     stream->reset();
-    int dataLen = 0;
-    QByteArray fileArray;
-    int i;
-    while ((i = stream->getChar()) != EOF) {
-        if (dataLen >= fileArray.size()) {
-            fileArray.resize(dataLen + 32768);
-        }
-        fileArray[dataLen] = (char)i;
-        ++dataLen;
-    }
-    fileArray.resize(dataLen);
-    return fileArray;
+    auto data = stream->toUnsignedChars();
+    return QByteArray(reinterpret_cast<const char *>(data.data()), data.size());
 }
 
 bool EmbeddedFile::isValid() const
