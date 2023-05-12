@@ -2999,6 +2999,10 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 
+        if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
+            continue;
+        }
+
         CharCode c;
         bool addFont = false;
         if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
