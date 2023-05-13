@@ -71,8 +71,7 @@ static const struct
                        { "Helvetica-Bold", { "n019004l.pfb", "arialbd.ttf" }, true },
                        { "Helvetica-BoldOblique", { "n019024l.pfb", "arialbi.ttf" }, true },
                        { "Helvetica-Oblique", { "n019023l.pfb", "ariali.ttf" }, true },
-                       // TODO: not sure if "symbol.ttf" is right
-                       { "Symbol", { "s050000l.pfb", "symbol.ttf" }, true },
+                       { "Symbol", { "s050000l.pfb", "StandardSymbolsPS.otf", "StandardSymbolsPS.ttf" }, true },
                        { "Times-Bold", { "n021004l.pfb", "timesbd.ttf" }, true },
                        { "Times-BoldItalic", { "n021024l.pfb", "timesbi.ttf" }, true },
                        { "Times-Italic", { "n021023l.pfb", "timesi.ttf" }, true },
