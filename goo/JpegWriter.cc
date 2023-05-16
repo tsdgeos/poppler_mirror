@@ -23,7 +23,7 @@
 #ifdef ENABLE_LIBJPEG
 
 #    include "poppler/Error.h"
-
+#    include <cstdio>
 extern "C" {
 #    include <jpeglib.h>
 }

@@ -14,6 +14,7 @@
 
 #include <memory>
 #ifdef ENABLE_LIBJPEG
+#    include <cstdio>
 extern "C" {
 #    include <jpeglib.h>
 }
