@@ -2714,7 +2714,7 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
         return {};
     }
 
-    const std::string fontFamilyAndStyle = fontFamily + " " + fontStyle;
+    const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
 
     Object fontDictObj = resDict.dictLookup("Font");
     assert(fontDictObj.isDict());
