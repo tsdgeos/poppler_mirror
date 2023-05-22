@@ -768,11 +768,11 @@ SignatureVerificationHandler::SignatureVerificationHandler(std::vector<unsigned 
         SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
         auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
         HASH_HashType hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
-        hashContext = std::make_unique<HashContext>(ConvertHashTypeFromNss(hashType));
+        hashContext = HashContext::create(ConvertHashTypeFromNss(hashType));
     }
 }
 
-SignatureSignHandler::SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(std::make_unique<HashContext>(digestAlgTag)), signing_cert(nullptr)
+SignatureSignHandler::SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag)), signing_cert(nullptr)
 {
     SignatureHandler::setNSSDir({});
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
@@ -1232,7 +1232,16 @@ std::vector<unsigned char> HashContext::endHash()
     return digestBuffer;
 }
 
-HashContext::HashContext(HashAlgorithm algorithm) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
+HashContext::HashContext(HashAlgorithm algorithm, private_tag) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
+
+std::unique_ptr<HashContext> HashContext::create(HashAlgorithm algorithm)
+{
+    auto ctx = std::make_unique<HashContext>(algorithm, private_tag {});
+    if (ctx->hash_context) {
+        return ctx;
+    }
+    return {};
+}
 
 HashAlgorithm HashContext::getHashAlgorithm() const
 {
