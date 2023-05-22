@@ -419,8 +419,8 @@ typedef struct _type3_font_info
 static void _free_type3_font_info(void *closure)
 {
     type3_font_info_t *info = (type3_font_info_t *)closure;
-    delete info->outputDev;
     delete info->gfx;
+    delete info->outputDev;
     delete info;
 }
 
