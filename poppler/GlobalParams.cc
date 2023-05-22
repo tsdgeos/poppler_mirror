@@ -935,12 +935,12 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 // not needed for fontconfig
 void GlobalParams::setupBaseFonts(const char *) { }
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
 {
     SysFontType type;
     int fontNum;
 
-    return findSystemFontFile(font, &type, &fontNum, nullptr, base14Name);
+    return findSystemFontFile(font, &type, &fontNum, substituteFontName, base14Name);
 }
 
 GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
@@ -1178,7 +1178,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 #elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1197,7 +1197,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     return {};
 }
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font)
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1256,7 +1256,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
             error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
             continue;
         }
-        addFontFile(fontName.get(), fileName.get());
+        addFontFile(fontName->toStr(), fileName->toStr());
     }
 }
 
@@ -1372,10 +1372,10 @@ std::vector<std::string> GlobalParams::getEncodingNames()
 // functions to set parameters
 //------------------------------------------------------------------------
 
-void GlobalParams::addFontFile(const GooString *fontName, const GooString *path)
+void GlobalParams::addFontFile(const std::string &fontName, const std::string &path)
 {
     globalParamsLocker();
-    fontFiles[fontName->toStr()] = path->toStr();
+    fontFiles[fontName] = path;
 }
 
 void GlobalParams::setTextEncoding(const char *encodingName)

@@ -29,7 +29,7 @@
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020-2022 Marek Kasik <mkasik@redhat.com>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
-// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2020, 2023 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Even Rouault <even.rouault@spatialys.com>
@@ -41,6 +41,7 @@
 
 #include <config.h>
 
+#include <array>
 #include <set>
 #include <limits>
 #include <cstddef>
@@ -702,9 +703,9 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
     Form *form = doc->getCatalog()->getCreateForm();
-    std::string pdfFontName = form->findFontInDefaultResources("Helvetica", "");
+    const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
     if (pdfFontName.empty()) {
-        pdfFontName = form->addFontToDefaultResources("Helvetica", "").fontName;
+        return false;
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
@@ -2409,13 +2410,14 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
         signature_info->setSigningTime(std::chrono::system_clock::to_time_t(signature_handler->getSigningTime()));
     }
 
+    signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
+
     if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
         return signature_info;
     }
 
     const CertificateValidationStatus cert_val_state = signature_handler->validateCertificate(std::chrono::system_clock::from_time_t(validationTime), ocspRevocationCheck, enableAIA);
     signature_info->setCertificateValStatus(cert_val_state);
-    signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
 
     return signature_info;
 }
@@ -2713,7 +2715,7 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
         return {};
     }
 
-    const std::string fontFamilyAndStyle = fontFamily + " " + fontStyle;
+    const std::string fontFamilyAndStyle = fontStyle.empty() ? fontFamily : fontFamily + " " + fontStyle;
 
     Object fontDictObj = resDict.dictLookup("Font");
     assert(fontDictObj.isDict());
@@ -2998,6 +3000,10 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 
+        if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
+            continue;
+        }
+
         CharCode c;
         bool addFont = false;
         if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
@@ -3111,6 +3117,26 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
             }
         }
     }
+}
+
+std::string Form::findPdfFontNameToUseForSigning()
+{
+    static constexpr std::array<const char *, 2> fontsToUseToSign = { "Helvetica", "Arial" };
+    for (const char *fontToUseToSign : fontsToUseToSign) {
+        std::string pdfFontName = findFontInDefaultResources(fontToUseToSign, "");
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+
+        pdfFontName = addFontToDefaultResources(fontToUseToSign, "").fontName;
+        if (!pdfFontName.empty()) {
+            return pdfFontName;
+        }
+    }
+
+    error(errInternal, -1, "Form::findPdfFontNameToUseForSigning: No suitable font found'\n");
+
+    return {};
 }
 
 //------------------------------------------------------------------------

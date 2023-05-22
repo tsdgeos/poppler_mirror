@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -135,7 +135,7 @@ public:
     FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
     FILE *findToUnicodeFile(const GooString *name);
     GooString *findFontFile(const std::string &fontName);
-    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore = {});
     UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);
@@ -154,7 +154,7 @@ public:
     std::vector<std::string> getEncodingNames();
 
     //----- functions to set parameters
-    void addFontFile(const GooString *fontName, const GooString *path);
+    void addFontFile(const std::string &fontName, const std::string &path);
     void setTextEncoding(const char *encodingName);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);

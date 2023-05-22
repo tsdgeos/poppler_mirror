@@ -276,7 +276,8 @@ public:
 
     // Locate the font file for this font.  If <ps> is not null, includes PS
     // printer-resident fonts.  Returns std::optional without a value on failure.
-    std::optional<GfxFontLoc> locateFont(XRef *xref, PSOutputDev *ps);
+    // substituteFontName is passed down to the GlobalParams::findSystemFontFile/findBase14FontFile call
+    std::optional<GfxFontLoc> locateFont(XRef *xref, PSOutputDev *ps, GooString *substituteFontName = nullptr);
 
     // Read an external or embedded font file into a buffer.
     std::optional<std::vector<unsigned char>> readEmbFontFile(XRef *xref);

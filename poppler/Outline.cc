@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -483,8 +483,12 @@ void OutlineItem::open()
 {
     if (!kids) {
         Object itemDict = xref->fetch(ref);
-        const Object &firstRef = itemDict.dictLookupNF("First");
-        kids = readItemList(this, &firstRef, xref, doc);
+        if (itemDict.isDict()) {
+            const Object &firstRef = itemDict.dictLookupNF("First");
+            kids = readItemList(this, &firstRef, xref, doc);
+        } else {
+            kids = new std::vector<OutlineItem *>();
+        }
     }
 }
 

@@ -38,9 +38,11 @@ clang_format:
 build:
   stage: build
   script:
+    - apt-get update
+    - bash do-the-gnupg-2.4-dance.sh $PWD/build/gnupg/
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data ..
+    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/gnupg ..
     - ninja -j ${FDO_CI_CONCURRENT}
     - ctest --output-on-failure
 

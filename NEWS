@@ -1,3 +1,11 @@
+Release 23.05.0:
+        core:
+         * Fix crash when filling some forms
+         * Set SigFlags when signing unsigned signature
+         * Add some infrastructure code to support multiple signing backends
+         * Fix potential stack overflow in PostScriptFunction::parseCode
+         * Fix some minor uninitialised memory reads
+
 Release 23.04.0:
         core:
          * Fix memory issue when signing fails. Issue #1372

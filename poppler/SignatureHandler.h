@@ -47,12 +47,17 @@
 
 class HashContext
 {
+    class private_tag
+    {
+    };
+
 public:
-    explicit HashContext(HashAlgorithm algorithm);
+    HashContext(HashAlgorithm algorithm, private_tag);
     void updateHash(unsigned char *data_block, int data_len);
     std::vector<unsigned char> endHash();
     HashAlgorithm getHashAlgorithm() const;
     ~HashContext() = default;
+    static std::unique_ptr<HashContext> create(HashAlgorithm algorithm);
 
 private:
     struct HashDestroyer
