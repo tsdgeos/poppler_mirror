@@ -1147,6 +1147,94 @@ QVector<CertificateInfo> getAvailableSigningCertificates()
     return vReturnCerts;
 }
 
+static std::optional<CryptoSignBackend> convertToFrontend(std::optional<CryptoSign::Backend::Type> type)
+{
+    if (!type) {
+        return std::nullopt;
+    }
+    switch (type.value()) {
+    case CryptoSign::Backend::Type::NSS3:
+        return CryptoSignBackend::NSS;
+    case CryptoSign::Backend::Type::GPGME:
+        return CryptoSignBackend::GPG;
+    }
+    return std::nullopt;
+}
+
+static std::optional<CryptoSign::Backend::Type> convertToBackend(std::optional<CryptoSignBackend> backend)
+{
+    if (!backend) {
+        return std::nullopt;
+    }
+    switch (backend.value()) {
+    case CryptoSignBackend::NSS:
+        return CryptoSign::Backend::Type::NSS3;
+    case CryptoSignBackend::GPG:
+        return CryptoSign::Backend::Type::GPGME;
+    }
+    return std::nullopt;
+}
+
+QVector<CryptoSignBackend> availableCryptoSignBackends()
+{
+    QVector<CryptoSignBackend> backends;
+    for (auto &backend : CryptoSign::Factory::getAvailable()) {
+        auto converted = convertToFrontend(backend);
+        if (converted) {
+            backends.push_back(converted.value());
+        }
+    }
+    return backends;
+}
+
+std::optional<CryptoSignBackend> activeCryptoSignBackend()
+{
+    return convertToFrontend(CryptoSign::Factory::getActive());
+}
+
+bool setActiveCryptoSignBackend(CryptoSignBackend backend)
+{
+    auto available = availableCryptoSignBackends();
+    if (!available.contains(backend)) {
+        return false;
+    }
+    auto converted = convertToBackend(backend);
+    if (!converted) {
+        return false;
+    }
+    CryptoSign::Factory::setPreferredBackend(converted.value());
+    return activeCryptoSignBackend() == backend;
+}
+
+static bool hasNSSBackendFeature(CryptoSignBackendFeature feature)
+{
+    switch (feature) {
+    case CryptoSignBackendFeature::BackendAsksPassphrase:
+        return false;
+    }
+    return false;
+}
+
+static bool hasGPGBackendFeature(CryptoSignBackendFeature feature)
+{
+    switch (feature) {
+    case CryptoSignBackendFeature::BackendAsksPassphrase:
+        return true;
+    }
+    return false;
+}
+
+bool hasCryptoSignBackendFeature(CryptoSignBackend backend, CryptoSignBackendFeature feature)
+{
+    switch (backend) {
+    case CryptoSignBackend::NSS:
+        return hasNSSBackendFeature(feature);
+    case CryptoSignBackend::GPG:
+        return hasGPGBackendFeature(feature);
+    }
+    return false;
+}
+
 QString POPPLER_QT5_EXPORT getNSSDir()
 {
 #ifdef ENABLE_NSS3

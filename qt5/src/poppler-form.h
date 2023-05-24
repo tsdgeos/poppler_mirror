@@ -35,6 +35,7 @@
 #include <functional>
 #include <memory>
 #include <ctime>
+#include <optional>
 #include <QtCore/QDateTime>
 #include <QtCore/QVector>
 #include <QtCore/QList>
@@ -847,11 +848,63 @@ private:
 };
 
 /**
+ * Possible compiled in backends for signature handling
+ *
+ * \since 23.06
+ */
+enum class CryptoSignBackend
+{
+    NSS,
+    GPG
+};
+
+/**
+ * The available compiled-in backends
+ *
+ * \since 23.06
+ */
+QVector<CryptoSignBackend> POPPLER_QT5_EXPORT availableCryptoSignBackends();
+
+/**
+ * Returns current active backend or nullopt if none is active
+ *
+ * \note there will always be an active backend if there is available backends
+ *
+ * \since 23.06
+ */
+std::optional<CryptoSignBackend> POPPLER_QT5_EXPORT activeCryptoSignBackend();
+
+/**
+ * Sets active backend
+ *
+ * \return true on success
+ *
+ * \since 23.06
+ */
+bool POPPLER_QT5_EXPORT setActiveCryptoSignBackend(CryptoSignBackend backend);
+
+enum class CryptoSignBackendFeature
+{
+    /// If the backend itself out of band requests passwords
+    /// or if the host applicaion somehow must do it
+    BackendAsksPassphrase
+};
+
+/**
+ * Queries if a backend supports or not supports a given feature.
+ *
+ * \since 23.06
+ */
+bool POPPLER_QT5_EXPORT hasCryptoSignBackendFeature(CryptoSignBackend, CryptoSignBackendFeature);
+
+/**
   Returns is poppler was compiled with NSS support
+
+  \deprecated Use availableBackends instead
 
   \since 21.01
 */
-bool POPPLER_QT5_EXPORT hasNSSSupport();
+bool POPPLER_QT5_DEPRECATED POPPLER_QT5_EXPORT hasNSSSupport();
 
 /**
   Return vector of suitable signing certificates
