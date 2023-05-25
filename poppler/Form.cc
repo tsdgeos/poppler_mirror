@@ -73,12 +73,18 @@
 #include "Link.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "CIDFontsWidthsBuilder.h"
 
 #include "fofi/FoFiTrueType.h"
 #include "fofi/FoFiIdentifier.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+// helper for using std::visit to get a dependent false for static_asserts
+// to help get compile errors if one ever extends variants
+template<class>
+inline constexpr bool always_false_v = false;
 
 // return a newly allocated char* containing an UTF16BE string of size length
 char *pdfDocEncodingToUTF16(const std::string &orig, int *length)
@@ -2895,18 +2901,38 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 return {};
             }
 
-            Array *widthsInner = new Array(xref);
+            CIDFontsWidthsBuilder fontsWidths;
+
             for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
                 const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
                 if (FT_Load_Glyph(face, glyph, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING)) {
-                    widthsInner->add(Object(0));
+                    fontsWidths.addWidth(code, 0);
                 } else {
-                    widthsInner->add(Object(static_cast<int>(face->glyph->metrics.horiAdvance)));
+                    fontsWidths.addWidth(code, static_cast<int>(face->glyph->metrics.horiAdvance));
                 }
             }
             Array *widths = new Array(xref);
-            widths->add(Object(0));
-            widths->add(Object(widthsInner));
+            for (const auto &segment : fontsWidths.takeSegments()) {
+                std::visit(
+                        [&widths, &xref](auto &&s) {
+                            using T = std::decay_t<decltype(s)>;
+                            if constexpr (std::is_same_v<T, CIDFontsWidthsBuilder::ListSegment>) {
+                                widths->add(Object(s.first));
+                                auto widthsInner = std::make_unique<Array>(xref);
+                                for (const auto &w : s.widths) {
+                                    widthsInner->add(Object(w));
+                                }
+                                widths->add(Object(widthsInner.release()));
+                            } else if constexpr (std::is_same_v<T, CIDFontsWidthsBuilder::RangeSegment>) {
+                                widths->add(Object(s.first));
+                                widths->add(Object(s.last));
+                                widths->add(Object(s.width));
+                            } else {
+                                static_assert(always_false_v<T>, "non-exhaustive visitor");
+                            }
+                        },
+                        segment);
+            }
             descendantFont->set("W", Object(widths));
 
             char *dataPtr = static_cast<char *>(gmalloc(2 * (basicMultilingualMaxCode + 1)));
