@@ -552,7 +552,7 @@ if(ENABLE_LIBCURL)
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
-    poppler/SignatureHandler.cc
+    poppler/NSSCryptoSignBackend.cc
   )
   set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
 endif()

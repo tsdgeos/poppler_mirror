@@ -41,7 +41,7 @@
 #include "PDFDocFactory.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#include "SignatureHandler.h"
+#include "NSSCryptoSignBackend.h"
 #include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
@@ -201,9 +201,9 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
             return nullptr;
         }
     };
-    SignatureHandler::setNSSPasswordCallback(passwordCallback);
+    NSSSignatureConfiguration::setNSSPasswordCallback(passwordCallback);
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = CryptoSign::Factory::createActive()->getAvailableSigningCertificates();
-    SignatureHandler::setNSSPasswordCallback({});
+    NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
         printf("Password is needed to access the NSS database.\n");
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    SignatureHandler::setNSSDir(nssDir);
+    NSSSignatureConfiguration::setNSSDir(nssDir);
 
     if (listNicknames) {
         bool getCertsError;

@@ -47,7 +47,7 @@
 #include <CertificateInfo.h>
 #include <CryptoSignBackend.h>
 #ifdef ENABLE_NSS3
-#    include <SignatureHandler.h>
+#    include <NSSCryptoSignBackend.h>
 #endif
 
 #include "poppler-page-private.h"
@@ -1238,7 +1238,7 @@ bool hasCryptoSignBackendFeature(CryptoSignBackend backend, CryptoSignBackendFea
 QString POPPLER_QT5_EXPORT getNSSDir()
 {
 #ifdef ENABLE_NSS3
-    return QString::fromLocal8Bit(SignatureHandler::getNSSDir().c_str());
+    return QString::fromLocal8Bit(NSSSignatureConfiguration::getNSSDir().c_str());
 #else
     return QString();
 #endif
@@ -1252,7 +1252,7 @@ void setNSSDir(const QString &path)
     }
 
     GooString *goo = QStringToGooString(path);
-    SignatureHandler::setNSSDir(*goo);
+    NSSSignatureConfiguration::setNSSDir(*goo);
     delete goo;
 #else
     (void)path;
@@ -1266,7 +1266,7 @@ std::function<QString(const QString &)> nssPasswordCall;
 void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 {
 #ifdef ENABLE_NSS3
-    SignatureHandler::setNSSPasswordCallback(f);
+    NSSSignatureConfiguration::setNSSPasswordCallback(f);
 #else
     qWarning() << "setNSSPasswordCallback called but this poppler is built without NSS support";
     (void)f;

@@ -12,7 +12,7 @@
 #    include "GPGMECryptoSignBackend.h"
 #endif
 #ifdef ENABLE_NSS3
-#    include "SignatureHandler.h"
+#    include "NSSCryptoSignBackend.h"
 #endif
 
 namespace CryptoSign {
