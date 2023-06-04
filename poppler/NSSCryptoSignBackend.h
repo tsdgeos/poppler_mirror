@@ -68,11 +68,11 @@ private:
     HashAlgorithm digest_alg_tag;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureVerificationHandler final : public CryptoSign::VerificationInterface
+class NSSSignatureVerification final : public CryptoSign::VerificationInterface
 {
 public:
-    explicit SignatureVerificationHandler(std::vector<unsigned char> &&p7data);
-    ~SignatureVerificationHandler() final;
+    explicit NSSSignatureVerification(std::vector<unsigned char> &&p7data);
+    ~NSSSignatureVerification() final;
     SignatureValidationStatus validateSignature() final;
     std::chrono::system_clock::time_point getSigningTime() const final;
     std::string getSignerName() const final;
@@ -83,8 +83,8 @@ public:
     void addData(unsigned char *data_block, int data_len) final;
     HashAlgorithm getHashAlgorithm() const final;
 
-    SignatureVerificationHandler(const SignatureVerificationHandler &) = delete;
-    SignatureVerificationHandler &operator=(const SignatureVerificationHandler &) = delete;
+    NSSSignatureVerification(const NSSSignatureVerification &) = delete;
+    NSSSignatureVerification &operator=(const NSSSignatureVerification &) = delete;
 
 private:
     std::vector<unsigned char> p7;
@@ -95,28 +95,26 @@ private:
     std::unique_ptr<HashContext> hashContext;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureSignHandler final : public CryptoSign::SigningInterface
+class NSSSignatureCreation final : public CryptoSign::SigningInterface
 {
 public:
-    SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag);
-    ~SignatureSignHandler() final;
+    NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag);
+    ~NSSSignatureCreation() final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     void addData(unsigned char *data_block, int data_len) final;
     std::optional<GooString> signDetached(const std::string &password) final;
 
-    SignatureSignHandler(const SignatureSignHandler &) = delete;
-    SignatureSignHandler &operator=(const SignatureSignHandler &) = delete;
+    NSSSignatureCreation(const NSSSignatureCreation &) = delete;
+    NSSSignatureCreation &operator=(const NSSSignatureCreation &) = delete;
 
 private:
     std::unique_ptr<HashContext> hashContext;
     CERTCertificate *signing_cert;
 };
 
-class POPPLER_PRIVATE_EXPORT SignatureHandler
+class POPPLER_PRIVATE_EXPORT NSSSignatureConfiguration
 {
 public:
-    static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
-
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
     // If you don't want a custom NSS dir and the default entries are fine for you, not calling this function is fine
@@ -128,7 +126,7 @@ public:
 
     static void setNSSPasswordCallback(const std::function<char *(const char *)> &f);
 
-    SignatureHandler() = delete;
+    NSSSignatureConfiguration() = delete;
 
 private:
     static std::string sNssDir;
@@ -137,9 +135,9 @@ private:
 class NSSCryptoSignBackend final : public CryptoSign::Backend
 {
 public:
-    std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) final { return std::make_unique<SignatureVerificationHandler>(std::move(pkcs7)); }
-    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final { return std::make_unique<SignatureSignHandler>(certID, digestAlgTag); }
-    std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final { return SignatureHandler::getAvailableSigningCertificates(); }
+    std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) final;
+    std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final;
+    std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final;
     ~NSSCryptoSignBackend() final;
 };
 

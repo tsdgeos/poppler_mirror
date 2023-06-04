@@ -36,6 +36,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023 Khaled Hosny <khaled@aliftype.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -207,6 +208,25 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     Object obj1 = fontDict->lookup("BaseFont");
     if (obj1.isName()) {
         name = obj1.getName();
+    }
+
+    // There is no BaseFont in Type 3 fonts, try fontDescriptor.FontName
+    if (!name) {
+        Object fontDesc = fontDict->lookup("FontDescriptor");
+        if (fontDesc.isDict()) {
+            Object obj2 = fontDesc.dictLookup("FontName");
+            if (obj2.isName()) {
+                name = obj2.getName();
+            }
+        }
+    }
+
+    // As a last resort try the Name key
+    if (!name) {
+        Object obj2 = fontDict->lookup("Name");
+        if (obj2.isName()) {
+            name = obj2.getName();
+        }
     }
 
     // get embedded font ID and font type

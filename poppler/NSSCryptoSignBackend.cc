@@ -25,7 +25,7 @@
 
 #include <config.h>
 
-#include "SignatureHandler.h"
+#include "NSSCryptoSignBackend.h"
 #include "goo/gdir.h"
 #include "goo/gmem.h"
 
@@ -498,7 +498,7 @@ static unsigned int digestLength(HashAlgorithm digestAlgId)
     }
 }
 
-std::string SignatureVerificationHandler::getSignerName() const
+std::string NSSSignatureVerification::getSignerName() const
 {
     if (!NSS_IsInitialized()) {
         return {};
@@ -522,7 +522,7 @@ std::string SignatureVerificationHandler::getSignerName() const
     return name;
 }
 
-std::string SignatureVerificationHandler::getSignerSubjectDN() const
+std::string NSSSignatureVerification::getSignerSubjectDN() const
 {
     if (!CMSSignerInfo) {
         return {};
@@ -534,7 +534,7 @@ std::string SignatureVerificationHandler::getSignerSubjectDN() const
     return std::string { signing_cert->subjectName };
 }
 
-std::chrono::system_clock::time_point SignatureVerificationHandler::getSigningTime() const
+std::chrono::system_clock::time_point NSSSignatureVerification::getSigningTime() const
 {
     if (!CMSSignerInfo) {
         return {};
@@ -646,7 +646,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
     return certInfo;
 }
 
-std::unique_ptr<X509CertificateInfo> SignatureVerificationHandler::getCertificateInfo() const
+std::unique_ptr<X509CertificateInfo> NSSSignatureVerification::getCertificateInfo() const
 {
     if (!CMSSignerInfo) {
         return nullptr;
@@ -658,7 +658,7 @@ std::unique_ptr<X509CertificateInfo> SignatureVerificationHandler::getCertificat
     return getCertificateInfoFromCERT(cert);
 }
 
-std::unique_ptr<X509CertificateInfo> SignatureSignHandler::getCertificateInfo() const
+std::unique_ptr<X509CertificateInfo> NSSSignatureCreation::getCertificateInfo() const
 {
     if (!signing_cert) {
         return nullptr;
@@ -692,12 +692,12 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
     return {};
 }
 
-std::string SignatureHandler::sNssDir;
+std::string NSSSignatureConfiguration::sNssDir;
 
 /**
  * Initialise NSS
  */
-void SignatureHandler::setNSSDir(const GooString &nssDir)
+void NSSSignatureConfiguration::setNSSDir(const GooString &nssDir)
 {
     static bool setNssDirCalled = false;
 
@@ -744,21 +744,21 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
     }
 }
 
-std::string SignatureHandler::getNSSDir()
+std::string NSSSignatureConfiguration::getNSSDir()
 {
     return sNssDir;
 }
 
 static std::function<char *(const char *)> PasswordFunction;
 
-void SignatureHandler::setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+void NSSSignatureConfiguration::setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 {
     PasswordFunction = f;
 }
 
-SignatureVerificationHandler::SignatureVerificationHandler(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
+NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
 {
-    SignatureHandler::setNSSDir({});
+    NSSSignatureConfiguration::setNSSDir({});
     CMSitem.data = p7.data();
     CMSitem.len = p7.size();
     CMSMessage = CMS_MessageCreate(&CMSitem);
@@ -772,13 +772,13 @@ SignatureVerificationHandler::SignatureVerificationHandler(std::vector<unsigned 
     }
 }
 
-SignatureSignHandler::SignatureSignHandler(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag)), signing_cert(nullptr)
+NSSSignatureCreation::NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag)), signing_cert(nullptr)
 {
-    SignatureHandler::setNSSDir({});
+    NSSSignatureConfiguration::setNSSDir({});
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
 }
 
-HashAlgorithm SignatureVerificationHandler::getHashAlgorithm() const
+HashAlgorithm NSSSignatureVerification::getHashAlgorithm() const
 {
     if (hashContext) {
         return hashContext->getHashAlgorithm();
@@ -787,25 +787,25 @@ HashAlgorithm SignatureVerificationHandler::getHashAlgorithm() const
     }
 }
 
-void SignatureVerificationHandler::addData(unsigned char *data_block, int data_len)
+void NSSSignatureVerification::addData(unsigned char *data_block, int data_len)
 {
     if (hashContext) {
         hashContext->updateHash(data_block, data_len);
     }
 }
 
-void SignatureSignHandler::addData(unsigned char *data_block, int data_len)
+void NSSSignatureCreation::addData(unsigned char *data_block, int data_len)
 {
     hashContext->updateHash(data_block, data_len);
 }
 
-SignatureSignHandler::~SignatureSignHandler()
+NSSSignatureCreation::~NSSSignatureCreation()
 {
     if (signing_cert) {
         CERT_DestroyCertificate(signing_cert);
     }
 }
-SignatureVerificationHandler::~SignatureVerificationHandler()
+NSSSignatureVerification::~NSSSignatureVerification()
 {
     if (CMSMessage) {
         // in the CMS_SignedDataCreate, we malloc some memory
@@ -904,7 +904,7 @@ static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_c
     }
 }
 
-SignatureValidationStatus SignatureVerificationHandler::validateSignature()
+SignatureValidationStatus NSSSignatureVerification::validateSignature()
 {
     if (!CMSSignedData) {
         return SIGNATURE_GENERIC_ERROR;
@@ -947,7 +947,7 @@ SignatureValidationStatus SignatureVerificationHandler::validateSignature()
     }
 }
 
-CertificateValidationStatus SignatureVerificationHandler::validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
+CertificateValidationStatus NSSSignatureVerification::validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
 {
     CERTCertificate *cert;
 
@@ -1003,7 +1003,7 @@ CertificateValidationStatus SignatureVerificationHandler::validateCertificate(st
     return CERTIFICATE_GENERIC_ERROR;
 }
 
-std::optional<GooString> SignatureSignHandler::signDetached(const std::string &password)
+std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &password)
 {
     if (!hashContext) {
         return {};
@@ -1173,11 +1173,21 @@ static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*
     return nullptr;
 }
 
-std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates()
+std::unique_ptr<CryptoSign::VerificationInterface> NSSCryptoSignBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7)
+{
+    return std::make_unique<NSSSignatureVerification>(std::move(pkcs7));
+}
+
+std::unique_ptr<CryptoSign::SigningInterface> NSSCryptoSignBackend::createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag)
+{
+    return std::make_unique<NSSSignatureCreation>(certID, digestAlgTag);
+}
+
+std::vector<std::unique_ptr<X509CertificateInfo>> NSSCryptoSignBackend::getAvailableSigningCertificates()
 {
     // set callback, in case one of the slots has a password set
     PK11_SetPasswordFunc(GetPasswordFunction);
-    setNSSDir({});
+    NSSSignatureConfiguration::setNSSDir({});
 
     std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
     PK11SlotList *slotList = PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_FALSE, nullptr);
