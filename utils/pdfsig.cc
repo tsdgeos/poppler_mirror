@@ -202,7 +202,13 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         }
     };
     NSSSignatureConfiguration::setNSSPasswordCallback(passwordCallback);
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = CryptoSign::Factory::createActive()->getAvailableSigningCertificates();
+    auto backend = CryptoSign::Factory::createActive();
+    if (!backend) {
+        *error = true;
+        printf("No backends for cryptographic signatures available");
+        return {};
+    }
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
