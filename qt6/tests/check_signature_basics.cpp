@@ -56,11 +56,23 @@ void TestSignatureBasics::initTestCase_data()
 {
     QTest::addColumn<CryptoSign::Backend::Type>("backend");
 
-#ifdef ENABLE_NSS3
-    QTest::newRow("nss") << CryptoSign::Backend::Type::NSS3;
-#endif
-#ifdef ENABLE_GPGME
-    QTest::newRow("gpg") << CryptoSign::Backend::Type::GPGME;
+#ifdef ENABLE_SIGNATURES
+    const auto availableBackends = CryptoSign::Factory::getAvailable();
+
+#    ifdef ENABLE_NSS3
+    if (std::find(availableBackends.begin(), availableBackends.end(), CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
+        QTest::newRow("nss") << CryptoSign::Backend::Type::NSS3;
+    } else {
+        QWARN("Compiled with NSS3, but NSS not functional");
+    }
+#    endif
+#    ifdef ENABLE_GPGME
+    if (std::find(availableBackends.begin(), availableBackends.end(), CryptoSign::Backend::Type::GPGME) != availableBackends.end()) {
+        QTest::newRow("gpg") << CryptoSign::Backend::Type::GPGME;
+    } else {
+        QWARN("Compiled with GPGME, but GPGME not functional");
+    }
+#    endif
 #endif
 }
 
