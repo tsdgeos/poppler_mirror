@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <cstring>
 #include <ctime>
-#include <hasht.h>
 #include <fstream>
 #include <random>
 #include "parseargs.h"
@@ -41,7 +40,9 @@
 #include "PDFDocFactory.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#include "NSSCryptoSignBackend.h"
+#ifdef ENABLE_NSS3
+#    include "NSSCryptoSignBackend.h"
+#endif
 #include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
@@ -135,10 +136,12 @@ static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
+static bool printCryptoSignBackends = false;
 static bool dontVerifyCert = false;
 static bool noOCSPRevocationCheck = false;
 static bool dumpSignatures = false;
 static bool etsiCAdESdetached = false;
+static char backendString[256] = "";
 static char signatureName[256] = "";
 static char certNickname[256] = "";
 static char password[256] = "";
@@ -159,11 +162,13 @@ static const ArgDesc argDesc[] = { { "-nssdir", argGooString, &nssDir, 0, "path 
                                    { "-new-signature-field-name", argGooString, &newSignatureFieldName, 0, "field name used for the newly added signature. A random ID will be used if empty" },
                                    { "-sign", argString, &signatureName, 256, "sign the document in the given signature field (by name or number)" },
                                    { "-etsi", argFlag, &etsiCAdESdetached, 0, "create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached" },
-                                   { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname for signing" },
+                                   { "-backend", argString, &backendString, 256, "use given backend for signing/verification" },
+                                   { "-nick", argString, &certNickname, 256, "use the certificate with the given nickname/fingerprint for signing" },
                                    { "-kpw", argString, &password, 256, "password for the signing key (might be missing if the key isn't password protected)" },
                                    { "-digest", argString, &digestName, 256, "name of the digest algorithm (default: SHA256)" },
                                    { "-reason", argGooString, &reason, 0, "reason for signing (default: no reason given)" },
                                    { "-list-nicks", argFlag, &listNicknames, 0, "list available nicknames in the NSS database" },
+                                   { "-list-backends", argFlag, &printCryptoSignBackends, 0, "print cryptographic signature backends" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
@@ -183,8 +188,29 @@ static void print_version_usage(bool usage)
     }
 }
 
+static void print_backends()
+{
+    fprintf(stderr, "pdfsig backends:\n");
+    for (const auto &backend : CryptoSign::Factory::getAvailable()) {
+        switch (backend) {
+        case CryptoSign::Backend::Type::NSS3:
+            fprintf(stderr, "NSS");
+            break;
+        case CryptoSign::Backend::Type::GPGME:
+            fprintf(stderr, "GPG");
+            break;
+        }
+        if (backend == CryptoSign::Factory::getActive()) {
+            fprintf(stderr, " (active)\n");
+        } else {
+            fprintf(stderr, "\n");
+        }
+    }
+}
+
 static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
 {
+#ifdef ENABLE_NSS3
     bool wrongPassword = false;
     bool passwordNeeded = false;
     auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
@@ -202,12 +228,14 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         }
     };
     NSSSignatureConfiguration::setNSSPasswordCallback(passwordCallback);
+#endif
     auto backend = CryptoSign::Factory::createActive();
     if (!backend) {
         *error = true;
         printf("No backends for cryptographic signatures available");
         return {};
     }
+#ifdef ENABLE_NSS3
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
@@ -223,6 +251,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         return {};
     }
 
+#endif
     *error = false;
     return vCerts;
 }
@@ -269,7 +298,24 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if (strlen(backendString) > 0) {
+        auto backend = CryptoSign::Factory::typeFromString(backendString);
+        if (backend) {
+            CryptoSign::Factory::setPreferredBackend(backend.value());
+        } else {
+            fprintf(stderr, "Unsupported backend\n");
+            return 98;
+        }
+    }
+
+    if (printCryptoSignBackends) {
+        print_backends();
+        return 0;
+    }
+
+#ifdef ENABLE_NSS3
     NSSSignatureConfiguration::setNSSDir(nssDir);
+#endif
 
     if (listNicknames) {
         bool getCertsError;
