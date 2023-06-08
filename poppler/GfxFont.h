@@ -295,6 +295,8 @@ public:
     // http://sourceforge.net/adobe/aglfn/wiki/AGL%20Specification/
     static const char *getAlternateName(const char *name);
 
+    static bool isBase14Font(std::string_view family, std::string_view style);
+
 protected:
     GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA);
 

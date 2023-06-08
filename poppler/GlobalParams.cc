@@ -1099,12 +1099,14 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
                 for (int i = 0; i < fontSet->nfont; i++) {
                     FcChar8 *fcFilePath = nullptr;
                     int faceIndex = 0;
+                    FcChar8 *fcFamily = nullptr;
                     FcPatternGetString(fontSet->fonts[i], FC_FILE, 0, &fcFilePath);
                     FcPatternGetInteger(fontSet->fonts[i], FC_INDEX, 0, &faceIndex);
+                    FcPatternGetString(fontSet->fonts[i], FC_FAMILY, 0, &fcFamily);
 
                     const std::string sFilePath = reinterpret_cast<char *>(fcFilePath);
                     if (std::ranges::find(filesToIgnore, sFilePath) == filesToIgnore.end()) {
-                        return FamilyStyleFontSearchResult(sFilePath, faceIndex);
+                        return FamilyStyleFontSearchResult(sFilePath, faceIndex, fontFamily != std::string(reinterpret_cast<char *>(fcFamily)));
                     }
                 }
             }

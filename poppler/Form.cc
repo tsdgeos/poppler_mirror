@@ -2711,7 +2711,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
     FamilyStyleFontSearchResult findFontRes = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
     std::vector<std::string> filesToIgnore;
     while (!findFontRes.filepath.empty()) {
-        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle, forceName);
+        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle, findFontRes.substituted, forceName);
         if (!addFontRes.fontName.empty()) {
             return addFontRes;
         }
@@ -2721,7 +2721,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
     return {};
 }
 
-Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool fontSubstitutedIn, bool forceName)
 {
     if (!filepath.ends_with(".ttf") && !filepath.ends_with(".ttc") && !filepath.ends_with(".otf")) {
         error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
@@ -2741,15 +2741,19 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         return {};
     }
 
+    // If caller asked for one of the base14 fonts and got something named differently
+    // we are only having something close anyways, so don't embed the font program (and
+    // when we don't embed the font program, also don't embed widths and the CIDToGIDMap)
+    bool embedActualFont = !(fontSubstitutedIn && GfxFont::isBase14Font(fontFamily, fontStyle));
+
     XRef *xref = doc->getXRef();
     Object fontDict(new Dict(xref));
     fontDict.dictSet("Type", Object(objName, "Font"));
-    fontDict.dictSet("Subtype", Object(objName, "Type0"));
+    fontDict.dictSet("Subtype", Object(objName, (embedActualFont ? "Type0" : "Type1")));
     fontDict.dictSet("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
 
-    fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
-
-    {
+    if (embedActualFont) {
+        fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
         std::unique_ptr<Array> descendantFonts = std::make_unique<Array>(xref);
 
         const bool isTrueType = (fontFoFiType == fofiIdTrueType || fontFoFiType == fofiIdTrueTypeCollection);
@@ -3031,7 +3035,9 @@ Form::AddFontResult Form::doGetAddFontToDefaultResources(Unicode uChar, const Gf
 
     std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
     if (pdfFontName.empty()) {
-        return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
+        return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style,
+                                         true /*This is called when a string contains a uChar that is not present in the font for that string so we find a another font to display it, thus it's always a 'substitute' font*/,
+                                         false /*forceName*/);
     }
     return { pdfFontName, Ref::INVALID() };
 }

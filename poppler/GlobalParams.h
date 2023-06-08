@@ -87,10 +87,11 @@ struct FamilyStyleFontSearchResult
 {
     FamilyStyleFontSearchResult() = default;
 
-    FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA) : filepath(filepathA), faceIndex(faceIndexA) { }
+    FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA, bool substitutedA) : filepath(filepathA), faceIndex(faceIndexA), substituted(substitutedA) { }
 
     std::string filepath;
     int faceIndex = 0;
+    bool substituted = false; /**True if you got something close but different*/
 };
 
 //------------------------------------------------------------------------

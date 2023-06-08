@@ -749,7 +749,8 @@ private:
     // Finds in the system a font name matching the given fontFamily and fontStyle
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX except if forceName is true,
     // in that case the font name will be fontFamily + " " + fontStyle (if fontStyle is empty just fontFamily)
-    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName = false);
+    // if fileSubstitutedIn is true,
+    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool fontSubstitutedIn, bool forceName);
 
     AddFontResult doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 
