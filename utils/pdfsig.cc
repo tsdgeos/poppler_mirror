@@ -235,8 +235,8 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         printf("No backends for cryptographic signatures available");
         return {};
     }
-#ifdef ENABLE_NSS3
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
+#ifdef ENABLE_NSS3
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
