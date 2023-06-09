@@ -6,6 +6,7 @@
 //
 // Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
+#include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
 #include <gpgme.h>
