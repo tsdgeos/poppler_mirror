@@ -50,7 +50,7 @@ Do not perform online OCSP certificate revocation check (local Certificate Revoc
 Enable the use of Authority Information Access (AIA) extension to fetch missing certificates to build the certificate chain.
 .TP
 .B \-dump
-Dump all signatures into current directory.
+Dump all signatures into current directory in their native format. Most likely it is either a unpadded or zero-padded CMS/PKCS7 bundle.
 .TP
 .B \-add-signature
 Add a new signature to the document.
