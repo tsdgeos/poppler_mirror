@@ -73,6 +73,17 @@ int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int ma
 // Allocate utf16 string and convert utf8 into it.
 uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
 
+inline bool isUtf8WithBom(std::string_view str)
+{
+    if (str.size() < 4) {
+        return false;
+    }
+    if (str[0] == '\xef' && str[1] == '\xbb' && str[2] == '\xbf') {
+        return true;
+    }
+    return false;
+}
+
 // Converts a UTF-8 string to a big endian UTF-16 string with BOM.
 // The caller owns the returned pointer.
 //  utf8 - UTF-8 string to convert. An empty string is acceptable.

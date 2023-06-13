@@ -17,7 +17,7 @@ macro(QT5_ADD_SIMPLETEST exe source)
 endmacro(QT5_ADD_SIMPLETEST)
 
 macro(QT5_ADD_QTEST exe source)
-  if (Qt5Test_FOUND)	
+  if (Qt5Test_FOUND)
     string(REPLACE "-" "" test_name ${exe})
     set(${test_name}_SOURCES
       ${source}
@@ -71,6 +71,7 @@ qt5_add_qtest(check_qt5_stroke_opacity check_stroke_opacity.cpp)
 qt5_add_qtest(check_qt5_utf_conversion check_utf_conversion.cpp)
 qt5_add_qtest(check_qt5_outline check_outline.cpp)
 qt5_add_qtest(check_qt5_signature_basics check_signature_basics.cpp)
+qt5_add_qtest(check_qt5_utf8document check_utf8document.cpp)
 qt5_add_qtest(check_qt5_distinguished_name_parser check_distinguished_name_parser.cpp)
 qt5_add_qtest(check_qt5_cidfontswidthsbuilder check_cidfontswidthsbuilder.cpp)
 if (NOT WIN32)

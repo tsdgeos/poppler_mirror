@@ -33,6 +33,7 @@
 #include <cctype>
 #include "Lexer.h"
 #include "Error.h"
+#include "UTF.h"
 #include "XRef.h"
 
 //------------------------------------------------------------------------
@@ -163,7 +164,7 @@ Object Lexer::getObj(int objNum)
     int xi;
     long long xll = 0;
     double xf = 0, scale;
-    GooString *s;
+    std::unique_ptr<GooString> s;
     int n, m;
 
     // skip whitespace and comments
@@ -389,7 +390,7 @@ Object Lexer::getObj(int objNum)
             if (c2 != EOF) {
                 if (n == tokBufSize) {
                     if (!s) {
-                        s = new GooString(tokBuf, tokBufSize);
+                        s = std::make_unique<GooString>(tokBuf, tokBufSize);
                     } else {
                         s->append(tokBuf, tokBufSize);
                     }
@@ -402,7 +403,7 @@ Object Lexer::getObj(int objNum)
                         if (newObjNum != objNum) {
                             error(errSyntaxError, getPos(), "Unterminated string");
                             done = true;
-                            delete s;
+                            s.reset();
                             n = -2;
                         }
                     }
@@ -413,11 +414,15 @@ Object Lexer::getObj(int objNum)
         } while (!done);
         if (n >= 0) {
             if (!s) {
-                s = new GooString(tokBuf, n);
+                s = std::make_unique<GooString>(tokBuf, n);
             } else {
                 s->append(tokBuf, n);
             }
-            return Object(s);
+            // Check utf8
+            if (isUtf8WithBom(s->toStr())) {
+                s = utf8ToUtf16WithBom(s->toStr());
+            }
+            return Object(s.release());
         } else {
             return Object(objEOF);
         }
@@ -464,7 +469,7 @@ Object Lexer::getObj(int objNum)
             } else if (n == tokBufSize) {
                 error(errSyntaxError, getPos(), "Warning: name token is longer than what the specification says it can be");
                 *p = c;
-                s = new GooString(tokBuf, n);
+                s = std::make_unique<GooString>(tokBuf, n);
             } else {
                 s->append((char)c);
             }
@@ -474,7 +479,6 @@ Object Lexer::getObj(int objNum)
             return Object(objName, tokBuf);
         } else {
             Object obj(objName, s->c_str());
-            delete s;
             return obj;
         }
         break;
@@ -525,7 +529,7 @@ Object Lexer::getObj(int objNum)
                     if (++m == 2) {
                         if (n == tokBufSize) {
                             if (!s) {
-                                s = new GooString(tokBuf, tokBufSize);
+                                s = std::make_unique<GooString>(tokBuf, tokBufSize);
                             } else {
                                 s->append(tokBuf, tokBufSize);
                             }
@@ -540,14 +544,17 @@ Object Lexer::getObj(int objNum)
                 }
             }
             if (!s) {
-                s = new GooString(tokBuf, n);
+                s = std::make_unique<GooString>(tokBuf, n);
             } else {
                 s->append(tokBuf, n);
             }
             if (m == 1) {
                 s->append((char)(c2 << 4));
             }
-            return Object(s);
+            if (isUtf8WithBom(s->toStr())) {
+                s = utf8ToUtf16WithBom(s->toStr());
+            }
+            return Object(s.release());
         }
         break;
 

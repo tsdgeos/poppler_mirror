@@ -356,6 +356,9 @@ int utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8)
 // Allocate utf16 string and convert utf8 into it.
 uint16_t *utf8ToUtf16(const char *utf8, int *len)
 {
+    if (isUtf8WithBom(utf8)) {
+        utf8 += 3;
+    }
     int n = utf8CountUtf16CodeUnits(utf8);
     if (len) {
         *len = n;
