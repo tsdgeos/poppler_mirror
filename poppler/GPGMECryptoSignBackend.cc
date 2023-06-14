@@ -345,7 +345,7 @@ CertificateValidationStatus GpgSignatureVerification::validateCertificate(std::c
         return CERTIFICATE_GENERIC_ERROR;
     }
     const auto offline = gpgContext->offline();
-    gpgContext->setOffline(!ocspRevocationCheck);
+    gpgContext->setOffline((!ocspRevocationCheck) || useAIACertFetch);
     const auto key = signature->key(true, true);
     gpgContext->setOffline(offline);
     if (key.isExpired()) {
