@@ -360,6 +360,16 @@ public:
     }
 
 private:
+    struct PSOutPaperSize
+    {
+        PSOutPaperSize() = default;
+        PSOutPaperSize(std::string &&nameA, int wA, int hA) : name(nameA), w(wA), h(hA) { }
+        ~PSOutPaperSize() = default;
+        PSOutPaperSize &operator=(const PSOutPaperSize &) = delete;
+        std::string name;
+        int w, h;
+    };
+
     void init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
               int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA);
     void postInit();
@@ -470,8 +480,8 @@ private:
     int numTilingPatterns; // current number of nested tiling patterns
     int nextFunc; // next unique number to use for a function
 
-    std::vector<PSOutPaperSize *> paperSizes; // list of used paper sizes, if paperMatch
-                                              //   is true
+    std::vector<PSOutPaperSize> paperSizes; // list of used paper sizes, if paperMatch
+                                            //   is true
     std::map<int, int> pagePaperSize; // page num to paperSize entry mapping
     double tx0, ty0; // global translation
     double xScale0, yScale0; // global scaling
