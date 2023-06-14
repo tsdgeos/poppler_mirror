@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -409,7 +409,7 @@ private:
     void writePSChar(char c);
     void writePS(const char *s);
     void writePSBuf(const char *s, int len);
-    void writePSFmt(const char *fmt, ...);
+    void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);
     GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
