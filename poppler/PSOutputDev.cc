@@ -1097,7 +1097,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
-    paperSizes = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
@@ -1155,7 +1154,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
-    paperSizes = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
@@ -1194,7 +1192,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
-    paperSizes = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
@@ -1328,7 +1325,7 @@ void PSOutputDev::postInit()
         paperMatch = false;
     }
 
-    paperSizes = new std::vector<PSOutPaperSize *>();
+    paperSizes.clear();
     for (const int pg : pages) {
         Page *page = catalog->getPage(pg);
         if (page == nullptr) {
@@ -1363,13 +1360,13 @@ void PSOutputDev::postInit()
         if (h > paperHeight) {
             paperHeight = h;
         }
-        for (i = 0; i < (int)paperSizes->size(); ++i) {
-            size = (*paperSizes)[i];
+        for (i = 0; i < (int)paperSizes.size(); ++i) {
+            size = paperSizes[i];
             if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h)) {
                 break;
             }
         }
-        if (i == (int)paperSizes->size()) {
+        if (i == (int)paperSizes.size()) {
             const StandardMedia *media = standardMedia;
             std::unique_ptr<GooString> name;
             while (media->name) {
@@ -1384,7 +1381,7 @@ void PSOutputDev::postInit()
             if (!name) {
                 name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72));
             }
-            paperSizes->push_back(new PSOutPaperSize(std::move(name), w, h));
+            paperSizes.push_back(new PSOutPaperSize(std::move(name), w, h));
         }
         pagePaperSize.insert(std::pair<int, int>(pg, i));
         if (!paperMatch) {
@@ -1537,11 +1534,8 @@ PSOutputDev::~PSOutputDev()
         }
 #endif
     }
-    if (paperSizes) {
-        for (auto entry : *paperSizes) {
-            delete entry;
-        }
-        delete paperSizes;
+    for (auto entry : paperSizes) {
+        delete entry;
     }
     if (embFontList) {
         delete embFontList;
@@ -1624,15 +1618,15 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
 
     switch (mode) {
     case psModePS:
-        for (std::size_t i = 0; i < paperSizes->size(); ++i) {
-            size = (*paperSizes)[i];
+        for (std::size_t i = 0; i < paperSizes.size(); ++i) {
+            size = paperSizes[i];
             writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n", i == 0 ? "DocumentMedia:" : "+", size->name.get(), size->w, size->h);
         }
         writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
         writePSFmt("%%Pages: {0:d}\n", nPages);
         writePS("%%EndComments\n");
         if (!paperMatch) {
-            size = (*paperSizes)[0];
+            size = paperSizes[0];
             writePS("%%BeginDefaults\n");
             writePSFmt("%%PageMedia: {0:t}\n", size->name.get());
             writePS("%%EndDefaults\n");
@@ -3766,7 +3760,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         ty += (rotate == 0 || rotate == 180) ? imgLLY : -imgLLX;
 
         if (paperMatch) {
-            paperSize = (*paperSizes)[pagePaperSize[pageNum]];
+            paperSize = paperSizes[pagePaperSize[pageNum]];
             writePSFmt("%%PageMedia: {0:t}\n", paperSize->name.get());
         }
 
