@@ -976,11 +976,11 @@ struct PSOutImgClipRect
 
 struct PSOutPaperSize
 {
-    PSOutPaperSize(std::unique_ptr<GooString> &&nameA, int wA, int hA) : name(std::move(nameA)), w(wA), h(hA) { }
+    PSOutPaperSize(std::string &&nameA, int wA, int hA) : name(nameA), w(wA), h(hA) { }
     ~PSOutPaperSize() = default;
     PSOutPaperSize(const PSOutPaperSize &) = delete;
     PSOutPaperSize &operator=(const PSOutPaperSize &) = delete;
-    std::unique_ptr<GooString> name;
+    std::string name;
     int w, h;
 };
 
@@ -1368,18 +1368,18 @@ void PSOutputDev::postInit()
         }
         if (i == (int)paperSizes.size()) {
             const StandardMedia *media = standardMedia;
-            std::unique_ptr<GooString> name;
+            std::string name;
             while (media->name) {
                 if (pageDimensionEqual(w, media->width) && pageDimensionEqual(h, media->height)) {
-                    name = std::make_unique<GooString>(media->name);
+                    name = std::string(media->name);
                     w = media->width;
                     h = media->height;
                     break;
                 }
                 media++;
             }
-            if (!name) {
-                name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72));
+            if (name.empty()) {
+                name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72))->toStr();
             }
             paperSizes.push_back(new PSOutPaperSize(std::move(name), w, h));
         }
@@ -1620,7 +1620,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
     case psModePS:
         for (std::size_t i = 0; i < paperSizes.size(); ++i) {
             size = paperSizes[i];
-            writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n", i == 0 ? "DocumentMedia:" : "+", size->name.get(), size->w, size->h);
+            writePSFmt("%%{0:s} {1:s} {2:d} {3:d} 0 () ()\n", i == 0 ? "DocumentMedia:" : "+", size->name.c_str(), size->w, size->h);
         }
         writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
         writePSFmt("%%Pages: {0:d}\n", nPages);
@@ -1628,7 +1628,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
         if (!paperMatch) {
             size = paperSizes[0];
             writePS("%%BeginDefaults\n");
-            writePSFmt("%%PageMedia: {0:t}\n", size->name.get());
+            writePSFmt("%%PageMedia: {0:s}\n", size->name.c_str());
             writePS("%%EndDefaults\n");
         }
         break;
@@ -3761,7 +3761,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 
         if (paperMatch) {
             paperSize = paperSizes[pagePaperSize[pageNum]];
-            writePSFmt("%%PageMedia: {0:t}\n", paperSize->name.get());
+            writePSFmt("%%PageMedia: {0:s}\n", paperSize->name.c_str());
         }
 
         // Create a matrix with the same transform that will be output to PS
