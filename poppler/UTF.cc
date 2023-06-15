@@ -365,7 +365,7 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
         *len = n;
     }
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
-    utf8ToUtf16(utf8, utf16);
+    utf8ToUtf16(utf8, utf16, n + 1, INT_MAX);
     return utf16;
 }
 
