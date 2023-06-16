@@ -11,6 +11,7 @@
 // Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 //
 //========================================================================
 
