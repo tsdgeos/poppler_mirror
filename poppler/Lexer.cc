@@ -20,6 +20,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -422,7 +423,7 @@ Object Lexer::getObj(int objNum)
             }
             // Check utf8
             if (isUtf8WithBom(s->toStr())) {
-                s = utf8ToUtf16WithBom(s->toStr());
+                s = std::make_unique<GooString>(utf8ToUtf16WithBom(s->toStr()));
             }
             return Object(s.release());
         } else {
@@ -559,7 +560,7 @@ Object Lexer::getObj(int objNum)
                 s->append((char)(c2 << 4));
             }
             if (isUtf8WithBom(s->toStr())) {
-                s = utf8ToUtf16WithBom(s->toStr());
+                s = std::make_unique<GooString>(utf8ToUtf16WithBom(s->toStr()));
             }
             return Object(s.release());
         }

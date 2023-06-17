@@ -3850,8 +3850,8 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     border_color = poppler_signing_data_get_border_color(signing_data);
     background_color = poppler_signing_data_get_background_color(signing_data);
 
-    std::unique_ptr<GooString> signature_text = std::unique_ptr<GooString>(utf8ToUtf16WithBom(signing_data_signature_text));
-    std::unique_ptr<GooString> signature_text_left = std::unique_ptr<GooString>(utf8ToUtf16WithBom(poppler_signing_data_get_signature_text_left(signing_data)));
+    std::unique_ptr<GooString> signature_text = std::make_unique<GooString>(utf8ToUtf16WithBom(signing_data_signature_text));
+    std::unique_ptr<GooString> signature_text_left = std::make_unique<GooString>(utf8ToUtf16WithBom(poppler_signing_data_get_signature_text_left(signing_data)));
     const auto field_partial_name = new GooString(poppler_signing_data_get_field_partial_name(signing_data), strlen(poppler_signing_data_get_field_partial_name(signing_data)));
     const auto owner_pwd = std::optional<GooString>(poppler_signing_data_get_document_owner_password(signing_data));
     const auto user_pwd = std::optional<GooString>(poppler_signing_data_get_document_user_password(signing_data));
