@@ -5368,7 +5368,6 @@ void Gfx::restoreState()
 {
     if (stackHeight <= bottomGuard() || !state->hasSaves()) {
         error(errSyntaxError, -1, "Restoring state when no valid states to pop");
-        commandAborted = true;
         return;
     }
     state = state->restore();
