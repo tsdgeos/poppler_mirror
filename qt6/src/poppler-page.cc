@@ -128,10 +128,6 @@ public:
     {
         SplashBitmap *b = getBitmap();
 
-        const int bw = b->getWidth();
-        const int bh = b->getHeight();
-        const int brs = b->getRowSize();
-
         // If we use DeviceN8, convert to XBGR8.
         // If requested, also transfer Splash's internal alpha channel.
         const SplashBitmap::ConversionMode mode = ignorePaperColor ? SplashBitmap::conversionAlphaPremultiplied : SplashBitmap::conversionOpaque;
@@ -139,6 +135,10 @@ public:
         const QImage::Format format = ignorePaperColor ? QImage::Format_ARGB32_Premultiplied : QImage::Format_RGB32;
 
         if (b->convertToXBGR(mode)) {
+            const int bw = b->getWidth();
+            const int bh = b->getHeight();
+            const int brs = b->getRowSize();
+
             SplashColorPtr data = takeImageData ? b->takeData() : b->getDataPtr();
 
             if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
