@@ -1485,17 +1485,24 @@ void XRef::removeIndirectObject(Ref r)
     setModified();
 }
 
-Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize)
+Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression)
 {
     dict->add("Length", Object((int)bufferSize));
     AutoFreeMemStream *stream = new AutoFreeMemStream(buffer, 0, bufferSize, Object(dict));
     stream->setFilterRemovalForbidden(true);
+    switch (compression) {
+    case StreamCompression::None:;
+        break;
+    case StreamCompression::Compress:
+        stream->getDict()->add("Filter", Object(objName, "FlateDecode"));
+        break;
+    }
     return addIndirectObject(Object((Stream *)stream));
 }
 
-Ref XRef::addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize)
+Ref XRef::addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression)
 {
-    return addStreamObject(dict, (char *)buffer, bufferSize);
+    return addStreamObject(dict, (char *)buffer, bufferSize, compression);
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)

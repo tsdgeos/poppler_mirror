@@ -77,7 +77,6 @@ set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams
 set(ENABLE_CMS "lcms2" CACHE STRING "Use color management system. Possible values: lcms2, none. 'none' disables color management system.")
 set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, unmaintained, none. will use libjpeg if available or fail if not. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
-option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
@@ -285,14 +284,8 @@ if(ENABLE_CPP)
     set(ICONV_CONST "const")
   endif()
 endif()
-if(ENABLE_ZLIB)
-  find_package(ZLIB)
-  set(ENABLE_ZLIB ${ZLIB_FOUND})
-endif()
-if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
-  message("Warning: ENABLE_ZLIB_UNCOMPRESS requires ENABLE_ZLIB")
-  set(ENABLE_ZLIB_UNCOMPRESS FALSE)
-endif()
+find_package(ZLIB REQUIRED)
+
 set(WITH_OPENJPEG FALSE)
 if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
   find_package(OpenJPEG)
@@ -451,6 +444,7 @@ set(poppler_SRCS
   poppler/FDPDFDocBuilder.cc
   poppler/FILECacheLoader.cc
   poppler/FileSpec.cc
+  poppler/FlateEncoder.cc
   poppler/FontEncodingTables.cc
   poppler/Form.cc
   poppler/FontInfo.cc
@@ -521,7 +515,7 @@ set(poppler_SRCS
   splash/SplashXPath.cc
   splash/SplashXPathScanner.cc
 )
-set(poppler_LIBS Freetype::Freetype)
+set(poppler_LIBS Freetype::Freetype ZLIB::ZLIB)
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Fontconfig::Fontconfig)
 endif()
@@ -531,12 +525,6 @@ if(JPEG_FOUND)
     poppler/DCTStream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
-endif()
-if(ENABLE_ZLIB)
-  set(poppler_SRCS ${poppler_SRCS}
-    poppler/FlateEncoder.cc
-  )
-  set(poppler_LIBS ${poppler_LIBS} ZLIB::ZLIB)
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS)
   set(poppler_SRCS ${poppler_SRCS}
@@ -865,7 +853,6 @@ show_end_message_yesno("cpp wrapper" ENABLE_CPP)
 show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)
 show_end_message_yesno("use libpng" ENABLE_LIBPNG)
 show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
-show_end_message_yesno("use zlib compress" ENABLE_ZLIB)
 show_end_message_yesno("use zlib uncompress" ENABLE_ZLIB_UNCOMPRESS)
 show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use gpg" ENABLE_GPGME)

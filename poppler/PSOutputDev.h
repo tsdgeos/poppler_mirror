@@ -329,16 +329,7 @@ public:
     bool getOptimizeColorSpace() const { return optimizeColorSpace; }
     bool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
     bool getEnableLZW() const { return enableLZW; };
-    bool getEnableFlate() const
-#ifdef ENABLE_ZLIB
-    {
-        return enableFlate;
-    }
-#else
-    {
-        return false;
-    }
-#endif
+    bool getEnableFlate() const { return enableFlate; }
     void setEmbedType1(bool b) { embedType1 = b; }
     void setEmbedTrueType(bool b) { embedTrueType = b; }
     void setEmbedCIDPostScript(bool b) { embedCIDPostScript = b; }

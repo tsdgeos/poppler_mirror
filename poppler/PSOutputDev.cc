@@ -69,9 +69,7 @@
 #include "Catalog.h"
 #include "Page.h"
 #include "Stream.h"
-#ifdef ENABLE_ZLIB
-#    include "FlateEncoder.h"
-#endif
+#include "FlateEncoder.h"
 #ifdef ENABLE_ZLIB_UNCOMPRESS
 #    include "FlateStream.h"
 #endif
@@ -2867,12 +2865,9 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
     if (useCompressed) {
         str = str->getUndecodedStream();
     }
-#ifdef ENABLE_ZLIB
     if (useFlate) {
         str = new FlateEncoder(str);
-    } else
-#endif
-            if (useLZW) {
+    } else if (useLZW) {
         str = new LZWEncoder(str);
     } else if (useRLE) {
         str = new RunLengthEncoder(str);
@@ -3466,7 +3461,6 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                 isOptimizedGray = false;
             }
             str0->reset();
-#ifdef ENABLE_ZLIB
             if (useFlate) {
                 if (isOptimizedGray && numComps == 4) {
                     str = new FlateEncoder(new CMYKGrayEncoder(str0));
@@ -3477,9 +3471,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                 } else {
                     str = new FlateEncoder(str0);
                 }
-            } else
-#endif
-                    if (useLZW) {
+            } else if (useLZW) {
                 if (isOptimizedGray && numComps == 4) {
                     str = new LZWEncoder(new CMYKGrayEncoder(str0));
                     numComps = 1;
@@ -6171,12 +6163,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             if (maskUseCompressed) {
                 maskStr = maskStr->getUndecodedStream();
             }
-#ifdef ENABLE_ZLIB
             if (maskUseFlate) {
                 maskStr = new FlateEncoder(maskStr);
-            } else
-#endif
-                    if (maskUseLZW) {
+            } else if (maskUseLZW) {
                 maskStr = new LZWEncoder(maskStr);
             } else if (maskUseRLE) {
                 maskStr = new RunLengthEncoder(maskStr);
@@ -6218,12 +6207,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         if (inlineImg) {
             // create an array
             str2 = new FixedLengthEncoder(str, len);
-#ifdef ENABLE_ZLIB
             if (getEnableFlate()) {
                 str2 = new FlateEncoder(str2);
-            } else
-#endif
-                    if (getEnableLZW()) {
+            } else if (getEnableLZW()) {
                 str2 = new LZWEncoder(str2);
             } else {
                 str2 = new RunLengthEncoder(str2);
@@ -6450,12 +6436,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         }
 
         // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
-#ifdef ENABLE_ZLIB
         if (useFlate) {
             str = new FlateEncoder(str);
-        } else
-#endif
-                if (useLZW) {
+        } else if (useLZW) {
             str = new LZWEncoder(str);
         } else if (useRLE) {
             str = new RunLengthEncoder(str);

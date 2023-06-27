@@ -2872,12 +2872,12 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 }
 
                 if (isTrueType) {
-                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), dataPtr, fileSize);
+                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), dataPtr, fileSize, StreamCompression::Compress);
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
                     Dict *fontFileStreamDict = new Dict(xref);
                     fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
-                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, dataPtr, fileSize);
+                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, dataPtr, fileSize, StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }
             }
@@ -2943,7 +2943,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 dataPtr[i++] = (unsigned char)(glyph >> 8);
                 dataPtr[i++] = (unsigned char)(glyph & 0xff);
             }
-            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), dataPtr, basicMultilingualMaxCode * 2);
+            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), dataPtr, basicMultilingualMaxCode * 2, StreamCompression::Compress);
             descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
         }
 
