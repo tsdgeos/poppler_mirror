@@ -709,7 +709,7 @@ static const char *getFontLang(const GfxFont *font)
             } else if (strcmp(collection->c_str(), "Adobe-Identity") == 0) {
                 lang = "xx";
             } else {
-                error(errUnimplemented, -1, "Unknown CID font collection, please report to poppler bugzilla.");
+                error(errUnimplemented, -1, "Unknown CID font collection: {0:t}. If this is expected to be a valid PDF document, please report to poppler bugtracker.", collection);
                 lang = "xx";
             }
         } else {
