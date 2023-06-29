@@ -27,6 +27,12 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
+#include <CertificateInfo.h>
+#ifdef ENABLE_NSS3
+#    include <NSSCryptoSignBackend.h>
+#endif
+#include <CryptoSignBackend.h>
+
 /**
  * SECTION:poppler-form-field
  * @short_description: Form Field
@@ -1032,4 +1038,1086 @@ gchar *poppler_form_field_choice_get_text(PopplerFormField *field)
 
     tmp = static_cast<FormWidgetChoice *>(field->widget)->getEditChoice();
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
+}
+
+/* Signing Data */
+
+struct _PopplerSigningData
+{
+    char *destination_filename;
+    PopplerCertificateInfo *certificate_info;
+    int page;
+
+    char *signature_text;
+    char *signature_text_left;
+    PopplerRectangle signature_rect;
+
+    PopplerColor font_color;
+    gdouble font_size;
+    gdouble left_font_size;
+
+    PopplerColor border_color;
+    gdouble border_width;
+
+    PopplerColor background_color;
+
+    char *field_partial_name;
+    char *reason;
+    char *location;
+    char *image_path;
+    char *password;
+    char *document_owner_password;
+    char *document_user_password;
+};
+
+typedef struct _PopplerSigningData PopplerSigningData;
+
+G_DEFINE_BOXED_TYPE(PopplerSigningData, poppler_signing_data, poppler_signing_data_copy, poppler_signing_data_free)
+
+/**
+ * poppler_signing_data_new:
+ *
+ * Creates a new #PopplerSigningData with default content.
+ *
+ * Return value: a new #PopplerSigningData. It must be freed with poppler_signing_data_free() when done.
+ *
+ * Since: 23.07.0
+ **/
+PopplerSigningData *poppler_signing_data_new(void)
+{
+    PopplerSigningData *data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
+
+    data->password = g_strdup("");
+    data->page = 0;
+
+    data->font_size = 10.0;
+    data->left_font_size = 20.0;
+    data->border_width = 1.5;
+
+    /* Grey background */
+    auto background_color = PopplerColor();
+    background_color.red = 0xEF;
+    background_color.green = 0xEF;
+    background_color.blue = 0xEF;
+    poppler_signing_data_set_background_color(data, &background_color);
+
+    /* Red border color */
+    auto border_color = PopplerColor();
+    border_color.red = 0xFF;
+    border_color.green = 0x00;
+    border_color.blue = 0x00;
+    poppler_signing_data_set_border_color(data, &border_color);
+
+    /* Red font color */
+    auto font_color = PopplerColor();
+    font_color.red = 0xFF;
+    font_color.green = 0x00;
+    border_color.blue = 0x00;
+    poppler_signing_data_set_font_color(data, &font_color);
+
+    return data;
+}
+
+/**
+ * poppler_signing_data_copy:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Copies @signing_data, creating an identical #PopplerSigningData.
+ *
+ * Return value: (transfer full): a new #PopplerSigningData structure identical to @signing_data
+ *
+ * Since: 23.07.0
+ **/
+PopplerSigningData *poppler_signing_data_copy(const PopplerSigningData *signing_data)
+{
+    PopplerSigningData *data;
+
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+
+    data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
+    data->destination_filename = g_strdup(signing_data->destination_filename);
+    data->certificate_info = poppler_certificate_info_copy(signing_data->certificate_info);
+    data->page = signing_data->page;
+
+    data->signature_text = g_strdup(signing_data->signature_text);
+    data->signature_text_left = g_strdup(signing_data->signature_text_left);
+    memcpy(&data->signature_rect, &signing_data->signature_rect, sizeof(PopplerRectangle));
+
+    memcpy(&data->font_color, &signing_data->font_color, sizeof(PopplerColor));
+    data->font_size = signing_data->font_size;
+    data->left_font_size = signing_data->left_font_size;
+
+    memcpy(&data->border_color, &signing_data->border_color, sizeof(PopplerColor));
+    data->border_width = signing_data->border_width;
+
+    memcpy(&data->background_color, &signing_data->background_color, sizeof(PopplerColor));
+
+    data->field_partial_name = g_strdup(signing_data->field_partial_name);
+    data->reason = g_strdup(signing_data->reason);
+    data->location = g_strdup(signing_data->location);
+    data->image_path = g_strdup(signing_data->image_path);
+    data->password = g_strdup(signing_data->password);
+    data->document_owner_password = g_strdup(signing_data->document_owner_password);
+    data->document_user_password = g_strdup(signing_data->document_user_password);
+
+    return data;
+}
+
+/**
+ * poppler_signing_data_free:
+ * @signing_data: (nullable): a #PopplerSigningData structure containing signing data
+ *
+ * Frees @signing_data
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_free(PopplerSigningData *signing_data)
+{
+    if (!signing_data) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->destination_filename, g_free);
+    g_clear_pointer(&signing_data->certificate_info, poppler_certificate_info_free);
+    g_clear_pointer(&signing_data->signature_text, g_free);
+    g_clear_pointer(&signing_data->signature_text_left, g_free);
+    g_clear_pointer(&signing_data->field_partial_name, g_free);
+    g_clear_pointer(&signing_data->reason, g_free);
+    g_clear_pointer(&signing_data->location, g_free);
+    g_clear_pointer(&signing_data->image_path, g_free);
+
+    if (signing_data->password) {
+#ifdef HAVE_EXPLICIT_BZERO
+        explicit_bzero(signing_data->password, strlen(signing_data->password));
+#else
+        memset(signing_data->password, 0, strlen(signing_data->password));
+#endif
+        g_clear_pointer(&signing_data->password, g_free);
+    }
+
+    if (signing_data->document_owner_password) {
+#ifdef HAVE_EXPLICIT_BZERO
+        explicit_bzero(signing_data->document_owner_password, strlen(signing_data->document_owner_password));
+#else
+        memset(signing_data->document_owner_password, 0, strlen(signing_data->document_owner_password));
+#endif
+        g_clear_pointer(&signing_data->document_owner_password, g_free);
+    }
+
+    if (signing_data->document_user_password) {
+#ifdef HAVE_EXPLICIT_BZERO
+        explicit_bzero(signing_data->document_user_password, strlen(signing_data->document_user_password));
+#else
+        memset(signing_data->document_user_password, 0, strlen(signing_data->document_user_password));
+#endif
+        g_clear_pointer(&signing_data->document_user_password, g_free);
+    }
+
+    g_free(signing_data);
+}
+
+/**
+ * poppler_signing_data_set_destination_filename:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @filename: destination filename
+ *
+ * Set destination file name.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_destination_filename(PopplerSigningData *signing_data, const gchar *filename)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(filename != nullptr);
+
+    if (signing_data->destination_filename == filename) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->destination_filename, g_free);
+    signing_data->destination_filename = g_strdup(filename);
+}
+
+/**
+ * poppler_signing_data_get_destination_filename:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get destination file name.
+ *
+ * Return value: destination filename
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_destination_filename(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+
+    return signing_data->destination_filename;
+}
+
+/**
+ * poppler_signing_data_set_certificate_info:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @certificate_info: a #PopplerCertificateInfo
+ *
+ * Set certification information.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_certificate_info(PopplerSigningData *signing_data, const PopplerCertificateInfo *certificate_info)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(certificate_info != nullptr);
+
+    if (signing_data->certificate_info == certificate_info) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->certificate_info, poppler_certificate_info_free);
+    signing_data->certificate_info = poppler_certificate_info_copy(certificate_info);
+}
+
+/**
+ * poppler_signing_data_get_certificate_info:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get certification information.
+ *
+ * Return value: a #PopplerCertificateInfo
+ *
+ * Since: 23.07.0
+ **/
+const PopplerCertificateInfo *poppler_signing_data_get_certificate_info(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->certificate_info;
+}
+
+/**
+ * poppler_signing_data_set_page:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @page: a page number
+ *
+ * Set page (>=0).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_page(PopplerSigningData *signing_data, int page)
+{
+    g_return_if_fail(signing_data != nullptr);
+
+    if (page < 0) {
+        return;
+    }
+
+    signing_data->page = page;
+}
+
+/**
+ * poppler_signing_data_get_page:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get page.
+ *
+ * Return value: page number
+ *
+ * Since: 23.07.0
+ **/
+int poppler_signing_data_get_page(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, 0);
+    return signing_data->page;
+}
+
+/**
+ * poppler_signing_data_set_signature_text:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @signature_text: text to show as main signature
+ *
+ * Set signature text.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_signature_text(PopplerSigningData *signing_data, const gchar *signature_text)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(signature_text != nullptr);
+
+    if (signing_data->signature_text == signature_text) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->signature_text, g_free);
+    signing_data->signature_text = g_strdup(signature_text);
+}
+
+/**
+ * poppler_signing_data_get_signature_text:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature text.
+ *
+ * Return value: signature text
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_signature_text(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->signature_text;
+}
+
+/**
+ * poppler_signing_data_set_signature_text_left:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @signature_text_left: text to show as small left signature
+ *
+ * Set small signature text on the left hand.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_signature_text_left(PopplerSigningData *signing_data, const gchar *signature_text_left)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(signature_text_left != nullptr);
+
+    if (signing_data->signature_text_left == signature_text_left) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->signature_text_left, g_free);
+    signing_data->signature_text_left = g_strdup(signature_text_left);
+}
+
+/**
+ * poppler_signing_data_get_signature_text_left:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature text left.
+ *
+ * Return value: signature text left
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_signature_text_left(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->signature_text_left;
+}
+
+/**
+ * poppler_signing_data_set_signature_rectangle:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @signature_rect: a #PopplerRectangle where signature should be shown
+ *
+ * Set signature rectangle.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_signature_rectangle(PopplerSigningData *signing_data, const PopplerRectangle *signature_rect)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(signature_rect != nullptr);
+
+    memcpy(&signing_data->signature_rect, signature_rect, sizeof(PopplerRectangle));
+}
+
+/**
+ * poppler_signing_data_get_signature_rectangle:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature rectangle.
+ *
+ * Return value: a #PopplerRectangle
+ *
+ * Since: 23.07.0
+ **/
+const PopplerRectangle *poppler_signing_data_get_signature_rectangle(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return &signing_data->signature_rect;
+}
+
+/**
+ * poppler_signing_data_set_font_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @font_color: a #PopplerColor to be used as signature font color
+ *
+ * Set signature font color.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_font_color(PopplerSigningData *signing_data, const PopplerColor *font_color)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(font_color != nullptr);
+
+    memcpy(&signing_data->font_color, font_color, sizeof(PopplerColor));
+}
+
+/**
+ * poppler_signing_data_get_font_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature font color.
+ *
+ * Return value: a #PopplerColor
+ *
+ * Since: 23.07.0
+ **/
+const PopplerColor *poppler_signing_data_get_font_color(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return &signing_data->font_color;
+}
+
+/**
+ * poppler_signing_data_set_font_size:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @font_size: signature font size
+ *
+ * Set signature font size (>0).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_font_size(PopplerSigningData *signing_data, gdouble font_size)
+{
+    g_return_if_fail(signing_data != nullptr);
+
+    if (font_size <= 0) {
+        return;
+    }
+
+    signing_data->font_size = font_size;
+}
+
+/**
+ * poppler_signing_data_get_font_size:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature font size.
+ *
+ * Return value: font size
+ *
+ * Since: 23.07.0
+ **/
+gdouble poppler_signing_data_get_font_size(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, 20.0f);
+    return signing_data->font_size;
+}
+
+/**
+ * poppler_signing_data_set_left_font_size:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @font_size: signature font size
+ *
+ * Set signature left font size (> 0).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_left_font_size(PopplerSigningData *signing_data, gdouble left_font_size)
+{
+    g_return_if_fail(signing_data != nullptr);
+
+    if (left_font_size <= 0) {
+        return;
+    }
+
+    signing_data->left_font_size = left_font_size;
+}
+
+/**
+ * poppler_signing_data_get_left_font_size:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature left font size.
+ *
+ * Return value: left font size
+ *
+ * Since: 23.07.0
+ **/
+gdouble poppler_signing_data_get_left_font_size(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, 12.0);
+    return signing_data->left_font_size;
+}
+
+/**
+ * poppler_signing_data_set_border_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @border_color: a #PopplerColor to be used for signature border
+ *
+ * Set signature border color.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_border_color(PopplerSigningData *signing_data, const PopplerColor *border_color)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(border_color != nullptr);
+
+    memcpy(&signing_data->border_color, border_color, sizeof(PopplerColor));
+}
+
+/**
+ * poppler_signing_data_get_border_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature border color.
+ *
+ * Return value: a #PopplerColor
+ *
+ * Since: 23.07.0
+ **/
+const PopplerColor *poppler_signing_data_get_border_color(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return &signing_data->border_color;
+}
+
+/**
+ * poppler_signing_data_set_border_width:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @border_width: border width
+ *
+ * Set signature border width.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_border_width(PopplerSigningData *signing_data, gdouble border_width)
+{
+    g_return_if_fail(signing_data != nullptr);
+
+    if (border_width < 0) {
+        return;
+    }
+
+    signing_data->border_width = border_width;
+}
+
+/**
+ * poppler_signing_data_get_border_width:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature border width.
+ *
+ * Return value: border width
+ *
+ * Since: 23.07.0
+ **/
+gdouble poppler_signing_data_get_border_width(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, 12);
+    return signing_data->border_width;
+}
+
+/**
+ * poppler_signing_data_set_background_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @background_color: a #PopplerColor to be used for signature background
+ *
+ * Set signature background color.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_background_color(PopplerSigningData *signing_data, const PopplerColor *background_color)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(background_color != nullptr);
+
+    memcpy(&signing_data->background_color, background_color, sizeof(PopplerColor));
+}
+
+/**
+ * poppler_signing_data_get_background_color:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signature background color.
+ *
+ * Return value: a #PopplerColor
+ *
+ * Since: 23.07.0
+ **/
+const PopplerColor *poppler_signing_data_get_background_color(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return &signing_data->background_color;
+}
+
+/**
+ * poppler_signing_data_set_field_partial_name:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @field_partial_name: a field partial name
+ *
+ * Set field partial name (existing field id or a new one) where signature is placed.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_field_partial_name(PopplerSigningData *signing_data, const gchar *field_partial_name)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(field_partial_name != nullptr);
+
+    g_clear_pointer(&signing_data->field_partial_name, g_free);
+    signing_data->field_partial_name = g_strdup(field_partial_name);
+}
+
+/**
+ * poppler_signing_data_get_field_partial_name:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get field partial name.
+ *
+ * Return value: field partial name
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_field_partial_name(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, "");
+    return signing_data->field_partial_name;
+}
+
+/**
+ * poppler_signing_data_set_reason:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @reason: a reason
+ *
+ * Set reason for signature (e.g. I'm approver).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_reason(PopplerSigningData *signing_data, const gchar *reason)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(reason != nullptr);
+
+    if (signing_data->reason == reason) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->reason, g_free);
+    signing_data->reason = g_strdup(reason);
+}
+
+/**
+ * poppler_signing_data_get_reason:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get reason.
+ *
+ * Return value: reason
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_reason(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->reason;
+}
+
+/**
+ * poppler_signing_data_set_location:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @location: a location
+ *
+ * Set signature location (e.g. "At my desk").
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_location(PopplerSigningData *signing_data, const gchar *location)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(location != nullptr);
+
+    if (signing_data->location == location) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->location, g_free);
+    signing_data->location = g_strdup(location);
+}
+
+/**
+ * poppler_signing_data_get_location:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get location.
+ *
+ * Return value: location
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_location(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->location;
+}
+
+/**
+ * poppler_signing_data_set_image_path:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @image_path: signature image path
+ *
+ * Set signature background (watermark) image path.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_image_path(PopplerSigningData *signing_data, const gchar *image_path)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(image_path != nullptr);
+
+    if (signing_data->image_path == image_path) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->image_path, g_free);
+    signing_data->image_path = g_strdup(image_path);
+}
+
+/**
+ * poppler_signing_data_get_image_path:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get image path.
+ *
+ * Return value: image path
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_image_path(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->image_path;
+}
+
+/**
+ * poppler_signing_data_set_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @password: a password
+ *
+ * Set password for the signing key.
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_password(PopplerSigningData *signing_data, const gchar *password)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(password != nullptr);
+
+    if (signing_data->password == password) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->password, g_free);
+    signing_data->password = g_strdup(password);
+}
+
+/**
+ * poppler_signing_data_get_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get signing key password.
+ *
+ * Return value: password
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_password(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->password;
+}
+
+/**
+ * poppler_signing_data_set_document_owner_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @document_owner_password: document owner password
+ *
+ * Set document owner password (for encrypted files).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_document_owner_password(PopplerSigningData *signing_data, const gchar *document_owner_password)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(document_owner_password != nullptr);
+
+    if (signing_data->document_owner_password == document_owner_password) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->document_owner_password, g_free);
+    signing_data->document_owner_password = g_strdup(document_owner_password);
+}
+
+/**
+ * poppler_signing_data_get_document_owner_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get document owner password.
+ *
+ * Return value: document owner password (for encrypted files)
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_document_owner_password(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, nullptr);
+    return signing_data->document_owner_password;
+}
+
+/**
+ * poppler_signing_data_set_document_user_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ * @document_user_password: document user password
+ *
+ * Set document user password (for encrypted files).
+ *
+ * Since: 23.07.0
+ **/
+void poppler_signing_data_set_document_user_password(PopplerSigningData *signing_data, const gchar *document_user_password)
+{
+    g_return_if_fail(signing_data != nullptr);
+    g_return_if_fail(document_user_password != nullptr);
+
+    if (signing_data->document_user_password == document_user_password) {
+        return;
+    }
+
+    g_clear_pointer(&signing_data->document_user_password, g_free);
+    signing_data->document_user_password = g_strdup(document_user_password);
+}
+
+/**
+ * poppler_signing_data_get_document_user_password:
+ * @signing_data: a #PopplerSigningData structure containing signing data
+ *
+ * Get document user password.
+ *
+ * Return value: document user password (for encrypted files)
+ *
+ * Since: 23.07.0
+ **/
+const gchar *poppler_signing_data_get_document_user_password(const PopplerSigningData *signing_data)
+{
+    g_return_val_if_fail(signing_data != nullptr, "");
+    return signing_data->document_user_password;
+}
+
+/* Certificate Information */
+
+struct _PopplerCertificateInfo
+{
+    char *id;
+    char *subject_common_name;
+};
+
+typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
+
+G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_certificate_info_copy, poppler_certificate_info_free)
+
+/**
+ * poppler_certificate_info_new:
+ *
+ * Creates a new #PopplerCertificateInfo
+ *
+ * Return value: a new #PopplerCertificateInfo. It must be freed with poppler_certificate_info_free() when done.
+ *
+ * Since: 23.07.0
+ **/
+PopplerCertificateInfo *poppler_certificate_info_new(void)
+{
+    return (PopplerCertificateInfo *)g_malloc0(sizeof(PopplerCertificateInfo));
+}
+
+/**
+ * poppler_certificate_info_get_id:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate nick name
+ *
+ * Return value: certificate nick name
+ *
+ * Since: 23.07.0
+ **/
+const char *poppler_certificate_info_get_id(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->id;
+}
+
+/**
+ * poppler_certificate_info_get_subject_common_name:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate subject common name
+ *
+ * Return value: certificate subject common name
+ *
+ * Since: 23.07.0
+ **/
+const char *poppler_certificate_info_get_subject_common_name(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->subject_common_name;
+}
+
+static PopplerCertificateInfo *create_certificate_info(const X509CertificateInfo *ci)
+{
+    PopplerCertificateInfo *certificate_info;
+
+    g_return_val_if_fail(ci != nullptr, nullptr);
+
+    certificate_info = poppler_certificate_info_new();
+    certificate_info->id = g_strdup(ci->getNickName().c_str());
+    certificate_info->subject_common_name = g_strdup(ci->getSubjectInfo().commonName.c_str());
+    return certificate_info;
+}
+
+/**
+ * poppler_certificate_info_copy:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Copies @certificate_info, creating an identical #PopplerCertificateInfo.
+ *
+ * Return value: (transfer full): a new #PopplerCertificateInfo structure identical to @certificate_info
+ *
+ * Since: 23.07.0
+ **/
+PopplerCertificateInfo *poppler_certificate_info_copy(const PopplerCertificateInfo *certificate_info)
+{
+    PopplerCertificateInfo *dup;
+
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+
+    dup = (PopplerCertificateInfo *)g_malloc0(sizeof(PopplerCertificateInfo));
+    dup->id = g_strdup(certificate_info->id);
+    dup->subject_common_name = g_strdup(certificate_info->subject_common_name);
+
+    return dup;
+}
+
+/**
+ * poppler_certificate_info_free:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Frees @certificate_info
+ *
+ * Since: 23.07.0
+ **/
+void poppler_certificate_info_free(PopplerCertificateInfo *certificate_info)
+{
+    if (certificate_info == nullptr) {
+        return;
+    }
+
+    g_clear_pointer(&certificate_info->id, g_free);
+    g_clear_pointer(&certificate_info->subject_common_name, g_free);
+
+    g_free(certificate_info);
+}
+
+/**
+ * poppler_get_available_signing_certificates:
+ *
+ * Get all available signing certificate information
+ *
+ * Returns: (transfer full) (element-type PopplerCertificateInfo): all available signing certificate information
+ **/
+GList *poppler_get_available_signing_certificates(void)
+{
+    GList *list = nullptr;
+#ifdef ENABLE_NSS3
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = CryptoSign::Factory::createActive()->getAvailableSigningCertificates();
+
+    for (auto &cert : vCerts) {
+        PopplerCertificateInfo *certificate_info = create_certificate_info(cert.get());
+        list = g_list_append(list, certificate_info);
+    }
+#endif
+    return list;
+}
+
+/**
+ * poppler_get_certificate_info_by_id:
+ *
+ * Get certificate by nick name
+ *
+ * Returns: (transfer full): a #PopplerCertificateInfo or %NULL if not found
+ **/
+PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
+{
+    PopplerCertificateInfo *ret = nullptr;
+    GList *certificate_info = poppler_get_available_signing_certificates();
+    GList *list;
+
+    for (list = certificate_info; list != nullptr; list = list->next) {
+        PopplerCertificateInfo *info = (PopplerCertificateInfo *)list->data;
+
+        if (g_strcmp0(info->id, id) == 0) {
+            ret = poppler_certificate_info_copy(info);
+            break;
+        }
+    }
+
+    g_list_free_full(certificate_info, (GDestroyNotify)poppler_certificate_info_free);
+
+    return ret;
+}
+
+/* NSS functions */
+
+/**
+ * poppler_set_nss_dir:
+ *
+ * Set NSS directory
+ *
+ * Since: 23.07.0
+ **/
+void poppler_set_nss_dir(const char *path)
+{
+#ifdef ENABLE_NSS3
+    NSSSignatureConfiguration::setNSSDir(GooString(path));
+#else
+    (void)path;
+#endif
+}
+
+/**
+ * poppler_get_nss_dir:
+ *
+ * Get NSS directory
+ *
+ * Return value: (transfer full): nss directroy.
+ *
+ * Since: 23.07.0
+ **/
+char *poppler_get_nss_dir(void)
+{
+#ifdef ENABLE_NSS3
+    return g_strdup(NSSSignatureConfiguration::getNSSDir().c_str());
+#else
+    return nullptr;
+#endif
+}
+
+/**
+ * poppler_set_nss_password_callback:
+ * @func: (scope call): a #PopplerNssPasswordFunc that represents a signature annotation
+ *
+ * A callback which asks for certificate password
+ *
+ * Since: 23.07.0
+ **/
+void poppler_set_nss_password_callback(PopplerNssPasswordFunc func)
+{
+#ifdef ENABLE_NSS3
+    NSSSignatureConfiguration::setNSSPasswordCallback(func);
+#else
+    g_warning("poppler_set_nss_password_callback called but this poppler is built without NSS support");
+    (void)func;
+#endif
 }

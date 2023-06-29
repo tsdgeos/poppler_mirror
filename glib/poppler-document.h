@@ -521,6 +521,11 @@ void poppler_ps_file_set_duplex(PopplerPSFile *ps_file, gboolean duplex);
 POPPLER_PUBLIC
 void poppler_ps_file_free(PopplerPSFile *ps_file);
 
+POPPLER_PUBLIC
+void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable, GAsyncReadyCallback callback, gpointer user_data);
+POPPLER_PUBLIC
+gboolean poppler_document_sign_finish(PopplerDocument *document, GAsyncResult *result, GError **error);
+
 /**
  * PopplerPageRange:
  * @start_page: first page in the range of pages

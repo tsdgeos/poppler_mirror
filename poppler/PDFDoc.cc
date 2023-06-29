@@ -54,7 +54,7 @@
 // Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 // Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -99,6 +99,7 @@
 #include "PDFDoc.h"
 #include "Hints.h"
 #include "UTF.h"
+#include "FlateEncoder.h"
 #include "JSInfo.h"
 #include "ImageEmbeddingUtils.h"
 
@@ -1400,8 +1401,8 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             // we write the stream unencoded => TODO: write stream encoder
 
             // Encrypt stream
-            EncryptStream *encStream = nullptr;
             bool removeFilter = true;
+            bool addEncryptstream = false;
             if (stream->getKind() == strWeird && fileKey) {
                 Object filter = stream->getDict()->lookup("Filter");
                 if (!filter.isName("Crypt")) {
@@ -1414,22 +1415,30 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                             }
                         }
                         if (removeFilter) {
-                            encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
-                            encStream->setAutoDelete(false);
-                            stream = encStream;
+                            addEncryptstream = true;
                         }
                     } else {
-                        encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
-                        encStream->setAutoDelete(false);
-                        stream = encStream;
+                        addEncryptstream = true;
                     }
                 } else {
                     removeFilter = false;
                 }
             } else if (fileKey != nullptr) { // Encrypt stream
-                encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
+                addEncryptstream = true;
+            }
+
+            std::unique_ptr<EncryptStream> encStream;
+            std::unique_ptr<Stream> compressStream;
+            Object filter = stream->getDict()->lookup("Filter");
+            if (filter.isName("FlateDecode")) {
+                compressStream = std::make_unique<FlateEncoder>(stream);
+                stream = compressStream.get();
+                removeFilter = false;
+            }
+            if (addEncryptstream) {
+                encStream = std::make_unique<EncryptStream>(stream, fileKey, encAlgorithm, keyLength, ref);
                 encStream->setAutoDelete(false);
-                stream = encStream;
+                stream = encStream.get();
             }
 
             stream->reset();
@@ -1452,7 +1461,6 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
 
             writeDictionary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(stream, outStr);
-            delete encStream;
         } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream *>(stream)->getNeedsEncryptionOnSave()) {
             EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
             encStream->setAutoDelete(false);

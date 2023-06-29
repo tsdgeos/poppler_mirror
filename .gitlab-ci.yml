@@ -85,6 +85,18 @@ build_ubuntu_20_04:
     - ninja
     - ctest --output-on-failure
 
+build_mingw64_fedora38:
+  stage: build
+  image: fedora:38
+  before_script:
+    - dnf install -y 'dnf-command(builddep)'
+    - dnf builddep -y mingw64-poppler
+    - dnf -y install glibc-langpack-en make ninja-build mingw64-boost mingw64-curl mingw64-qt6-qtbase mingw64-gcc-c++
+  script:
+    - mkdir -p build && cd build
+    - mingw64-cmake -G Ninja ..
+    - ninja
+
 build_clazy_clang15:
   stage: build
   script:

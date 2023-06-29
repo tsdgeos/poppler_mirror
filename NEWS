@@ -1,3 +1,26 @@
+Release 23.06.0:
+        core:
+         * CairoOutputDev: Fix crash when doing type3 rendering
+         * Fix crash with unknown signature hashing algorithms
+         * Add gpgme backend for signature handling
+         * Windows: Fix crash when signing existing signature
+         * FontInfo: Make it return proper information about font substitution
+         * FontInfo: Try harder to get Type 3 font name
+         * Store embedded fonts widths table in a more effective manner
+         * Skip font lookup for nonprintable characters
+         * Windows: Look for fonts in both windows font dir and poppler fonts dir
+         * Windows: symbol.ttf is not a good Symbol font
+         * Windows: Fix memory leak when looking for fonts
+         * Fix crash on malformed files
+
+        qt5:
+         * Add API to allow selecting signature backend (nss or gpgme)
+         * Convert embedded files to bytearray a bit smarter
+
+        qt6:
+         * Add API to allow selecting signature backend (nss or gpgme)
+         * Convert embedded files to bytearray a bit smarter
+
 Release 23.05.0:
         core:
          * Fix crash when filling some forms

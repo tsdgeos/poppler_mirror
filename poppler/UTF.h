@@ -10,6 +10,8 @@
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 //
 //========================================================================
 
@@ -68,10 +70,21 @@ int POPPLER_PRIVATE_EXPORT utf8CountUtf16CodeUnits(const char *utf8);
 //  maxUtf8 - maximum number of UTF-8 bytes to convert. Conversion stops when
 //            either this count is reached or a null is encountered.
 // Returns number of UTF-16 code units written (excluding NULL).
-int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16 = INT_MAX, int maxUtf8 = INT_MAX);
+int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8);
 
 // Allocate utf16 string and convert utf8 into it.
 uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
+
+inline bool isUtf8WithBom(std::string_view str)
+{
+    if (str.size() < 4) {
+        return false;
+    }
+    if (str[0] == '\xef' && str[1] == '\xbb' && str[2] == '\xbf') {
+        return true;
+    }
+    return false;
+}
 
 // Converts a UTF-8 string to a big endian UTF-16 string with BOM.
 // The caller owns the returned pointer.

@@ -18,9 +18,6 @@
 /* Do not hardcode the library location */
 #cmakedefine ENABLE_RELOCATABLE 1
 
-/* Build against zlib. */
-#cmakedefine ENABLE_ZLIB 1
-
 /* Use zlib instead of builtin zlib decoder to uncompress flate streams. */
 #cmakedefine ENABLE_ZLIB_UNCOMPRESS 1
 

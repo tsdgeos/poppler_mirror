@@ -74,11 +74,6 @@
 #cmakedefine ENABLE_LIBPNG 1
 #endif
 
-/* Use zlib instead of builtin zlib decoder. */
-#ifndef ENABLE_ZLIB
-#cmakedefine ENABLE_ZLIB 1
-#endif
-
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #ifndef HAVE_DIRENT_H

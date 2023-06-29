@@ -46,6 +46,7 @@
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -709,7 +710,7 @@ static const char *getFontLang(const GfxFont *font)
             } else if (strcmp(collection->c_str(), "Adobe-Identity") == 0) {
                 lang = "xx";
             } else {
-                error(errUnimplemented, -1, "Unknown CID font collection, please report to poppler bugzilla.");
+                error(errUnimplemented, -1, "Unknown CID font collection: {0:t}. If this is expected to be a valid PDF document, please report to poppler bugtracker.", collection);
                 lang = "xx";
             }
         } else {

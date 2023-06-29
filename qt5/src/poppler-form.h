@@ -813,6 +813,12 @@ public:
       Validate the signature with now as validation time.
 
       Reset signature validatation info of scoped instance.
+
+      \note depending on the backend, some options are only
+      partially respected. In case of the NSS backend, the two options
+      requiring network access, AIAFetch and OCSP,
+      can be toggled individually. In case of the GPG backend, if either
+      OCSP is used or AIAFetch is used, the other one is also used.
      */
     SignatureValidationInfo validate(ValidateOptions opt) const;
 
@@ -822,6 +828,12 @@ public:
       Reset signature validatation info of scoped instance.
 
       \since 0.58
+
+      \note depending on the backend, some options are only
+      partially respected. In case of the NSS backend, the two options
+      requiring network access, AIAFetch and OCSP,
+      can be toggled individually. In case of the GPG backend, if either
+      OCSP is used or AIAFetch is used, the other one is also used.
      */
     SignatureValidationInfo validate(int opt, const QDateTime &validationTime) const;
 

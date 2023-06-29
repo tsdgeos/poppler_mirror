@@ -26,6 +26,7 @@
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
+ * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,10 +129,6 @@ public:
     {
         SplashBitmap *b = getBitmap();
 
-        const int bw = b->getWidth();
-        const int bh = b->getHeight();
-        const int brs = b->getRowSize();
-
         // If we use DeviceN8, convert to XBGR8.
         // If requested, also transfer Splash's internal alpha channel.
         const SplashBitmap::ConversionMode mode = ignorePaperColor ? SplashBitmap::conversionAlphaPremultiplied : SplashBitmap::conversionOpaque;
@@ -139,6 +136,10 @@ public:
         const QImage::Format format = ignorePaperColor ? QImage::Format_ARGB32_Premultiplied : QImage::Format_RGB32;
 
         if (b->convertToXBGR(mode)) {
+            const int bw = b->getWidth();
+            const int bh = b->getHeight();
+            const int brs = b->getRowSize();
+
             SplashColorPtr data = takeImageData ? b->takeData() : b->getDataPtr();
 
             if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {

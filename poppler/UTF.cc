@@ -21,6 +21,8 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -356,12 +358,15 @@ int utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8)
 // Allocate utf16 string and convert utf8 into it.
 uint16_t *utf8ToUtf16(const char *utf8, int *len)
 {
+    if (isUtf8WithBom(utf8)) {
+        utf8 += 3;
+    }
     int n = utf8CountUtf16CodeUnits(utf8);
     if (len) {
         *len = n;
     }
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
-    utf8ToUtf16(utf8, utf16);
+    utf8ToUtf16(utf8, utf16, n + 1, INT_MAX);
     return utf16;
 }
 

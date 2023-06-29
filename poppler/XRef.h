@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -95,6 +96,13 @@ struct XRefEntry
             flags &= ~mask;
         }
     }
+};
+
+// How to compress the a added stream
+enum class StreamCompression
+{
+    None, /* No compression */
+    Compress, /* Compresses the stream */
 };
 
 class POPPLER_PRIVATE_EXPORT XRef
@@ -213,8 +221,8 @@ public:
     // The function takes ownership over dict and buffer.
     // The buffer should be created using gmalloc().
     // Returns ref to a new object.
-    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize);
-    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize);
+    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
+    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
 
     // Output XRef table to stream
     void writeTableToFile(OutStream *outStr, bool writeAllEntries);

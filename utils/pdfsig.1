@@ -50,7 +50,7 @@ Do not perform online OCSP certificate revocation check (local Certificate Revoc
 Enable the use of Authority Information Access (AIA) extension to fetch missing certificates to build the certificate chain.
 .TP
 .B \-dump
-Dump all signatures into current directory.
+Dump all signatures into current directory in their native format. Most likely it is either a unpadded or zero-padded CMS/PKCS7 bundle.
 .TP
 .B \-add-signature
 Add a new signature to the document.
@@ -62,7 +62,10 @@ Specifies the field name to be used when adding a new signature. A random ID wil
 Sign the document in the specified signature field present in the document (must be unsigned).  Field can be specified by field name (string) or the n-th signature field in the document (integer).
 .TP
 .B \-nick " nickname"
-Use the certificate with the given nickname for signing. If nickname starts with pkcs11:, it's treated as PKCS#11 URI.
+Use the certificate with the given nickname for signing (NSS backend). If nickname starts with pkcs11:, it's treated as PKCS#11 URI (NSS backend). If the nickname is given as a fingerprint, it will be the certificate used (GPG backend)
+.TP
+.B \-backend " backend"
+Use the specified backeng for cryptographic signatures
 .TP
 .B \-kpw " password"
 Use the given password for the signing key
@@ -79,6 +82,9 @@ Create a signature of type ETSI.CAdES.detached instead of adbe.pkcs7.detached.
 .TP
 .B \-list-nicks
 List available nicknames in the NSS database.
+.TP
+.B \-list-backends
+List available backends for cryptographic signatures
 .TP
 .B \-v
 Print copyright and version information.

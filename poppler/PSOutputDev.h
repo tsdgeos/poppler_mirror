@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -30,6 +30,7 @@
 // Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -329,16 +330,7 @@ public:
     bool getOptimizeColorSpace() const { return optimizeColorSpace; }
     bool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
     bool getEnableLZW() const { return enableLZW; };
-    bool getEnableFlate() const
-#ifdef ENABLE_ZLIB
-    {
-        return enableFlate;
-    }
-#else
-    {
-        return false;
-    }
-#endif
+    bool getEnableFlate() const { return enableFlate; }
     void setEmbedType1(bool b) { embedType1 = b; }
     void setEmbedTrueType(bool b) { embedTrueType = b; }
     void setEmbedCIDPostScript(bool b) { embedCIDPostScript = b; }
@@ -360,6 +352,16 @@ public:
     }
 
 private:
+    struct PSOutPaperSize
+    {
+        PSOutPaperSize() = default;
+        PSOutPaperSize(std::string &&nameA, int wA, int hA) : name(nameA), w(wA), h(hA) { }
+        ~PSOutPaperSize() = default;
+        PSOutPaperSize &operator=(const PSOutPaperSize &) = delete;
+        std::string name;
+        int w, h;
+    };
+
     void init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
               int paperWidthA, int paperHeightA, bool noCropA, bool duplexA, PSLevel levelA);
     void postInit();
@@ -409,7 +411,7 @@ private:
     void writePSChar(char c);
     void writePS(const char *s);
     void writePSBuf(const char *s, int len);
-    void writePSFmt(const char *fmt, ...);
+    void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);
     GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
@@ -470,8 +472,8 @@ private:
     int numTilingPatterns; // current number of nested tiling patterns
     int nextFunc; // next unique number to use for a function
 
-    std::vector<PSOutPaperSize *> *paperSizes; // list of used paper sizes, if paperMatch
-                                               //   is true
+    std::vector<PSOutPaperSize> paperSizes; // list of used paper sizes, if paperMatch
+                                            //   is true
     std::map<int, int> pagePaperSize; // page num to paperSize entry mapping
     double tx0, ty0; // global translation
     double xScale0, yScale0; // global scaling

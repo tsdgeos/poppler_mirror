@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "23")
-set(POPPLER_MINOR_VERSION_STRING "05")
+set(POPPLER_MINOR_VERSION_STRING "06")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -77,7 +77,6 @@ set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams
 set(ENABLE_CMS "lcms2" CACHE STRING "Use color management system. Possible values: lcms2, none. 'none' disables color management system.")
 set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, unmaintained, none. will use libjpeg if available or fail if not. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
-option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
@@ -285,14 +284,8 @@ if(ENABLE_CPP)
     set(ICONV_CONST "const")
   endif()
 endif()
-if(ENABLE_ZLIB)
-  find_package(ZLIB)
-  set(ENABLE_ZLIB ${ZLIB_FOUND})
-endif()
-if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
-  message("Warning: ENABLE_ZLIB_UNCOMPRESS requires ENABLE_ZLIB")
-  set(ENABLE_ZLIB_UNCOMPRESS FALSE)
-endif()
+find_package(ZLIB REQUIRED)
+
 set(WITH_OPENJPEG FALSE)
 if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
   find_package(OpenJPEG)
@@ -451,6 +444,7 @@ set(poppler_SRCS
   poppler/FDPDFDocBuilder.cc
   poppler/FILECacheLoader.cc
   poppler/FileSpec.cc
+  poppler/FlateEncoder.cc
   poppler/FontEncodingTables.cc
   poppler/Form.cc
   poppler/FontInfo.cc
@@ -521,7 +515,7 @@ set(poppler_SRCS
   splash/SplashXPath.cc
   splash/SplashXPathScanner.cc
 )
-set(poppler_LIBS Freetype::Freetype)
+set(poppler_LIBS Freetype::Freetype ZLIB::ZLIB)
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Fontconfig::Fontconfig)
 endif()
@@ -531,12 +525,6 @@ if(JPEG_FOUND)
     poppler/DCTStream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
-endif()
-if(ENABLE_ZLIB)
-  set(poppler_SRCS ${poppler_SRCS}
-    poppler/FlateEncoder.cc
-  )
-  set(poppler_LIBS ${poppler_LIBS} ZLIB::ZLIB)
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS)
   set(poppler_SRCS ${poppler_SRCS}
@@ -641,7 +629,7 @@ if(USE_CMS)
   target_include_directories(poppler SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
 endif()
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
-set_target_properties(poppler PROPERTIES VERSION 128.0.0 SOVERSION 128)
+set_target_properties(poppler PROPERTIES VERSION 129.0.0 SOVERSION 129)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -865,7 +853,6 @@ show_end_message_yesno("cpp wrapper" ENABLE_CPP)
 show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)
 show_end_message_yesno("use libpng" ENABLE_LIBPNG)
 show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
-show_end_message_yesno("use zlib compress" ENABLE_ZLIB)
 show_end_message_yesno("use zlib uncompress" ENABLE_ZLIB_UNCOMPRESS)
 show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use gpg" ENABLE_GPGME)
