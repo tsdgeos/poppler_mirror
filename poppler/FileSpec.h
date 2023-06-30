@@ -36,7 +36,7 @@ public:
     Object *streamObject() { return &m_objStr; }
     Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
     bool isOk() const { return m_objStr.isStream(); }
-    bool save(const char *path);
+    bool save(const std::string &path);
 
 private:
     bool save2(FILE *f);

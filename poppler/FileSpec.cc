@@ -86,12 +86,12 @@ EmbFile::~EmbFile()
     delete m_mimetype;
 }
 
-bool EmbFile::save(const char *path)
+bool EmbFile::save(const std::string &path)
 {
     FILE *f;
     bool ret;
 
-    if (!(f = openFile(path, "wb"))) {
+    if (!(f = openFile(path.c_str(), "wb"))) {
         return false;
     }
     ret = save2(f);

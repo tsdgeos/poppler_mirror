@@ -77,8 +77,6 @@ int main(int argc, char *argv[])
     const UnicodeMap *uMap;
     std::optional<GooString> ownerPW, userPW;
     char uBuf[8];
-    char path[1024];
-    char *p;
     bool ok;
     bool hasSaveFile;
     std::vector<std::unique_ptr<FileSpec>> embeddedFiles;
@@ -193,19 +191,16 @@ int main(int argc, char *argv[])
 
         // save all embedded files
     } else if (saveAll) {
+        std::string basePath = savePath;
+        if (!basePath.empty()) {
+            if (basePath.back() != '/') {
+                basePath.push_back('/');
+            }
+        }
         for (i = 0; i < nFiles; ++i) {
             const std::unique_ptr<FileSpec> &fileSpec = embeddedFiles[i];
-            if (savePath[0]) {
-                n = strlen(savePath);
-                if (n > (int)sizeof(path) - 2) {
-                    n = sizeof(path) - 2;
-                }
-                memcpy(path, savePath, n);
-                path[n] = '/';
-                p = path + n + 1;
-            } else {
-                p = path;
-            }
+            std::string path;
+
             s1 = fileSpec->getFileName();
             if (!s1) {
                 return 3;
@@ -226,20 +221,27 @@ int main(int argc, char *argv[])
                     ++j;
                 }
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
-                if (p + n >= path + sizeof(path)) {
-                    break;
-                }
-                memcpy(p, uBuf, n);
-                p += n;
+                path.append(uBuf, n);
             }
-            *p = '\0';
+
+            if (path.empty()) {
+                return 3;
+            }
+            if (path.find("../") != std::string::npos) {
+                error(errIO, -1, "Preventing directory traversal");
+                return 3;
+            }
+            if (path[0] == '/' && basePath.empty()) {
+                error(errIO, -1, "Absolute path detected. Please provide a path to save to (-o)");
+                return 3;
+            }
 
             auto *embFile = fileSpec->getEmbeddedFile();
             if (!embFile || !embFile->isOk()) {
                 return 3;
             }
-            if (!embFile->save(path)) {
-                error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
+            if (!embFile->save(basePath + path)) {
+                error(errIO, -1, "Error saving embedded file as '{0:s}'", path.c_str());
                 return 2;
             }
         }
@@ -262,10 +264,8 @@ int main(int argc, char *argv[])
         }
 
         const std::unique_ptr<FileSpec> &fileSpec = embeddedFiles[saveNum - 1];
-        if (savePath[0]) {
-            p = savePath;
-        } else {
-            p = path;
+        std::string targetPath = savePath;
+        if (targetPath.empty()) {
             s1 = fileSpec->getFileName();
             if (!s1) {
                 return 3;
@@ -286,22 +286,20 @@ int main(int argc, char *argv[])
                     ++j;
                 }
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
-                if (p + n >= path + sizeof(path)) {
-                    break;
-                }
-                memcpy(p, uBuf, n);
-                p += n;
+                targetPath.append(uBuf, n);
             }
-            *p = '\0';
-            p = path;
+            if (targetPath.find("../") != std::string::npos) {
+                error(errIO, -1, "Preventing directory traversal");
+                return 3;
+            }
         }
 
         auto *embFile = fileSpec->getEmbeddedFile();
         if (!embFile || !embFile->isOk()) {
             return 3;
         }
-        if (!embFile->save(p)) {
-            error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
+        if (!embFile->save(targetPath)) {
+            error(errIO, -1, "Error saving embedded file as '{0:s}'", targetPath.c_str());
             return 2;
         }
     }
