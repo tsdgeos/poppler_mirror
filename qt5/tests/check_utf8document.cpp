@@ -33,9 +33,9 @@ void TestUtf8Document::checkStrings()
 
     QVERIFY(doc->getOptContentConfig() && doc->getOptContentConfig()->hasOCGs());
 
-    QCOMPARE(Poppler::UnicodeParsedString(doc->getDocInfoTitle().get()), QStringLiteral("表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀"));
+    QCOMPARE(Poppler::UnicodeParsedString(doc->getDocInfoTitle().get()), QString::fromUtf8("表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀")); // clazy:exclude=qstring-allocations
 
-    QSet<QString> expectedNames { QStringLiteral("گچپژ"), QStringLiteral("Layer 1") };
+    QSet<QString> expectedNames { QString::fromUtf8("گچپژ"), QString::fromUtf8("Layer 1") }; // clazy:exclude=qstring-allocations
     QSet<QString> foundNames;
 
     for (auto &[ref, group] : doc->getOptContentConfig()->getOCGs()) {
@@ -47,9 +47,9 @@ void TestUtf8Document::checkStrings()
     QVERIFY(outlineItems);
     QCOMPARE(outlineItems->size(), 3);
 
-    QCOMPARE(outlineItemTitle(outlineItems->at(0)), QStringLiteral("PDF 2.0 with UTF-8 test file"));
-    QCOMPARE(outlineItemTitle(outlineItems->at(1)), QStringLiteral("\u202A\u202Atest\u202A"));
-    QCOMPARE(outlineItemTitle(outlineItems->at(2)), QStringLiteral("🌈️\n" /*emoji rainbow flag*/));
+    QCOMPARE(outlineItemTitle(outlineItems->at(0)), QString::fromUtf8("PDF 2.0 with UTF-8 test file")); // clazy:exclude=qstring-allocations
+    QCOMPARE(outlineItemTitle(outlineItems->at(1)), QString::fromUtf8("\u202A\u202Atest\u202A")); // clazy:exclude=qstring-allocations
+    QCOMPARE(outlineItemTitle(outlineItems->at(2)), QString::fromUtf8("🌈️\n" /*emoji rainbow flag*/)); // clazy:exclude=qstring-allocations
 }
 
 QTEST_GUILESS_MAIN(TestUtf8Document)
