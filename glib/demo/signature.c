@@ -267,12 +267,13 @@ static gboolean pgd_signature_drawing_area_motion_notify(GtkWidget *area, GdkEve
 static void on_signing_done(GObject *source, GAsyncResult *result, gpointer user_data)
 {
     PopplerDocument *document = POPPLER_DOCUMENT(source);
-    g_autoptr(GError) error = NULL;
+    GError *error = NULL;
     gboolean ret = poppler_document_sign_finish(document, result, &error);
 
     g_print("%s: result %d\n", __FUNCTION__, ret);
     if (error) {
         g_print("Error: %s", error->message);
+        g_error_free(error);
     }
 }
 
@@ -290,8 +291,8 @@ static gboolean pgd_signature_drawing_area_button_release(GtkWidget *area, GdkEv
     GList *available_certificates = poppler_get_available_signing_certificates();
 
     if (available_certificates) {
-        g_autofree char *signature = NULL;
-        g_autofree char *signature_left = NULL;
+        char *signature;
+        char *signature_left;
         PopplerSigningData *data = poppler_signing_data_new();
         PopplerRectangle rect;
         PopplerCertificateInfo *certificate_info;
@@ -328,9 +329,11 @@ static gboolean pgd_signature_drawing_area_button_release(GtkWidget *area, GdkEv
 
         signature = g_strdup_printf("Digitally signed by %s\nDate: %s", poppler_certificate_info_get_subject_common_name(certificate_info), ctime(&t));
         poppler_signing_data_set_signature_text(data, signature);
+        g_free(signature);
 
         signature_left = g_strdup_printf("%s", poppler_certificate_info_get_subject_common_name(certificate_info));
         poppler_signing_data_set_signature_text_left(data, signature_left);
+        g_free(signature_left);
 
         poppler_document_sign(demo->doc, data, NULL, on_signing_done, NULL);
     }
