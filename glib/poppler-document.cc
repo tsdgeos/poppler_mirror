@@ -3883,7 +3883,7 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
  **/
 void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable, GAsyncReadyCallback callback, gpointer user_data)
 {
-    g_autoptr(GTask) task = nullptr;
+    GTask *task;
 
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
     g_return_if_fail(signing_data != nullptr);
@@ -3892,6 +3892,7 @@ void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *
     g_task_set_task_data(task, (void *)signing_data, nullptr);
 
     g_task_run_in_thread(task, (GTaskThreadFunc)_poppler_sign_document_thread);
+    g_object_unref(task);
 }
 
 /**
