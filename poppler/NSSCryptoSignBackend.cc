@@ -474,6 +474,13 @@ static HashAlgorithm ConvertHashTypeFromNss(HASH_HashType type)
         return HashAlgorithm::Sha512;
     case HASH_AlgSHA224:
         return HashAlgorithm::Sha224;
+#if NSS_VMAJOR >= 3 && NSS_VMINOR >= 91
+    // TODO Expose this in HashAlgorithm if PDF supports them
+    case HASH_AlgSHA3_224:
+    case HASH_AlgSHA3_256:
+    case HASH_AlgSHA3_384:
+    case HASH_AlgSHA3_512:
+#endif
     case HASH_AlgNULL:
     case HASH_AlgTOTAL:
         return HashAlgorithm::Unknown;
