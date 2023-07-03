@@ -48,7 +48,7 @@ void TestUtf8Document::checkStrings()
     QCOMPARE(outlineItems->size(), 3);
 
     QCOMPARE(outlineItemTitle(outlineItems->at(0)), QString::fromUtf8("PDF 2.0 with UTF-8 test file")); // clazy:exclude=qstring-allocations
-    QCOMPARE(outlineItemTitle(outlineItems->at(1)), QString::fromUtf8("\u202A\u202Atest\u202A")); // clazy:exclude=qstring-allocations
+    QCOMPARE(outlineItemTitle(outlineItems->at(1)), QStringLiteral(u"\u202A\u202Atest\u202A"));
     QCOMPARE(outlineItemTitle(outlineItems->at(2)), QString::fromUtf8("🌈️\n" /*emoji rainbow flag*/)); // clazy:exclude=qstring-allocations
 }
 
