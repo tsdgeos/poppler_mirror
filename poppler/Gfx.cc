@@ -46,6 +46,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
+// Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5368,7 +5369,6 @@ void Gfx::restoreState()
 {
     if (stackHeight <= bottomGuard() || !state->hasSaves()) {
         error(errSyntaxError, -1, "Restoring state when no valid states to pop");
-        commandAborted = true;
         return;
     }
     state = state->restore();
