@@ -2030,14 +2030,17 @@ void poppler_certificate_info_free(PopplerCertificateInfo *certificate_info)
 GList *poppler_get_available_signing_certificates(void)
 {
     GList *list = nullptr;
-#ifdef ENABLE_NSS3
-    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = CryptoSign::Factory::createActive()->getAvailableSigningCertificates();
+    auto backend = CryptoSign::Factory::createActive();
 
+    if (!backend) {
+        return nullptr;
+    }
+
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
     for (auto &cert : vCerts) {
         PopplerCertificateInfo *certificate_info = create_certificate_info(cert.get());
         list = g_list_append(list, certificate_info);
     }
-#endif
     return list;
 }
 
