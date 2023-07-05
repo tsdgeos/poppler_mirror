@@ -25,7 +25,7 @@ public:
 class GpgSignatureCreation : public CryptoSign::SigningInterface
 {
 public:
-    GpgSignatureCreation(const std::string &certId, HashAlgorithm digestAlgTag);
+    GpgSignatureCreation(const std::string &certId);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     std::optional<GooString> signDetached(const std::string &password) final;
