@@ -616,10 +616,17 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
+set(POPPLER_SOVERSION_NUMBER "130")
+
+set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
+configure_file(
+    "${CMAKE_SOURCE_DIR}/poppler/libpoppler.map.in"
+    ${LINKER_SCRIPT})
+
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
-add_library(poppler ${poppler_SRCS})
+add_library(poppler ${poppler_SRCS} ${LINKER_SCRIPT})
 if (OpenJPEG_FOUND)
   # check if we can remove this when we depend on newer openjpeg versions, 2.5 seems fixed
   # target openjp2 may lack interface include directories
@@ -629,7 +636,13 @@ if(USE_CMS)
   target_include_directories(poppler SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
 endif()
 generate_export_header(poppler BASE_NAME poppler-private EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h")
-set_target_properties(poppler PROPERTIES VERSION 130.0.0 SOVERSION 130)
+set_target_properties(poppler PROPERTIES
+                              VERSION ${POPPLER_SOVERSION_NUMBER}.0.0
+                              SOVERSION ${POPPLER_SOVERSION_NUMBER})
+
+if(UNIX AND (NOT APPLE))
+	set_target_properties(poppler PROPERTIES LINK_OPTIONS LINKER:--version-script=${LINKER_SCRIPT})
+endif()
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
