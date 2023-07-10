@@ -2856,7 +2856,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA, std::vector<std::string>
             overprintMask |= 0x08;
         } else if (names[i] == "All") {
             overprintMask = 0xffffffff;
-        } else {
+        } else if (names[i] != "None") {
             overprintMask = 0x0f;
         }
     }
