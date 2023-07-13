@@ -257,6 +257,7 @@ XRef::XRef() : objStrs { 5 }
     strOwner = false;
     xrefReconstructed = false;
     encAlgorithm = cryptNone;
+    keyLength = 0;
 }
 
 XRef::XRef(const Object *trailerDictA) : XRef {}
