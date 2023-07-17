@@ -1,3 +1,29 @@
+Release 23.07.0:
+        core:
+         * Fix reading of utf8-with-bom files
+         * Fix crash if CERT_ExtractPublicKey doesn't return a public key
+         * Fix rendering of some malformed documents. Issue #1395
+         * Allow for stream compression and compress font streams in forms
+         * Remove method Hints::getPageRanges
+
+        qt5:
+         * Fix crash when overprint preview is enabled
+         * Don't fail signature basics tests if backend is not configured
+
+        qt6:
+         * Fix crash when overprint preview is enabled
+         * Don't fail signature basics tests if backend is not configured
+
+        utils:
+         * pdfsig: Allow showung and selecting signature backend
+         * pdfsig: Describe signature dump format in manual page
+
+        glib:
+         * Add signing API
+
+        build system:
+         * zlib is now mandatory
+
 Release 23.06.0:
         core:
          * CairoOutputDev: Fix crash when doing type3 rendering

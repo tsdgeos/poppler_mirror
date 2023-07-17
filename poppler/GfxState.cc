@@ -18,7 +18,7 @@
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2011-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011-2016, 2020, 2023 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -2856,7 +2856,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA, std::vector<std::string>
             overprintMask |= 0x08;
         } else if (names[i] == "All") {
             overprintMask = 0xffffffff;
-        } else {
+        } else if (names[i] != "None") {
             overprintMask = 0x0f;
         }
     }

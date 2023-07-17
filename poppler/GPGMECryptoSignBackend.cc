@@ -163,9 +163,9 @@ GpgSignatureBackend::GpgSignatureBackend()
     GpgME::initializeLibrary();
 }
 
-std::unique_ptr<CryptoSign::SigningInterface> GpgSignatureBackend::createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag)
+std::unique_ptr<CryptoSign::SigningInterface> GpgSignatureBackend::createSigningHandler(const std::string &certID, HashAlgorithm /*digestAlgTag*/)
 {
-    return std::make_unique<GpgSignatureCreation>(certID, digestAlgTag);
+    return std::make_unique<GpgSignatureCreation>(certID);
 }
 
 std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7)
@@ -195,7 +195,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvaila
     return certificates;
 }
 
-GpgSignatureCreation::GpgSignatureCreation(const std::string &certId, HashAlgorithm digestAlgTag) : gpgContext { GpgME::Context::create(GpgME::CMS) }
+GpgSignatureCreation::GpgSignatureCreation(const std::string &certId) : gpgContext { GpgME::Context::create(GpgME::CMS) }
 {
     GpgME::Error error;
     const auto signingKey = gpgContext->key(certId.c_str(), error, true);

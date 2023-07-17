@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009-2016, 2020, 2022 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016, 2020, 2022, 2023 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2014-2016, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -1704,7 +1704,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
                 mask &= ~8;
             }
         }
-        if (grayIndexed) {
+        if (grayIndexed && colorSpace->getMode() != csDeviceN) {
             mask &= ~7;
         } else if (colorSpace->getMode() == csSeparation) {
             GfxSeparationColorSpace *deviceSep = (GfxSeparationColorSpace *)colorSpace;
@@ -4309,6 +4309,15 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         surface_height = (int)ceil(fabs(ky));
         repeatX = x1 - x0;
         repeatY = y1 - y0;
+        while ((unsigned long)repeatX * repeatY > 0x800000L) {
+            // try to avoid bogus memory allocation size
+            if (repeatX > 1) {
+                repeatX /= 2;
+            }
+            if (repeatY > 1) {
+                repeatY /= 2;
+            }
+        }
     } else {
         if ((unsigned long)surface_width * surface_height > 0x800000L) {
             state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
