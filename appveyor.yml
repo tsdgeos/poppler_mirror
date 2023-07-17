@@ -6,7 +6,7 @@ clone_depth: 1
 init:
 - ps: |
     function craft() {
-        & C:\python36\python.exe "C:\CraftMaster\CraftMaster\CraftMaster.py" --config "$env:APPVEYOR_BUILD_FOLDER\appveyor.ini" --variables "APPVEYOR_BUILD_FOLDER=$env:APPVEYOR_BUILD_FOLDER" --target $env:TARGET -c $args
+        & C:\python38\python.exe "C:\CraftMaster\CraftMaster\CraftMaster.py" --config "$env:APPVEYOR_BUILD_FOLDER\appveyor.ini" --variables "APPVEYOR_BUILD_FOLDER=$env:APPVEYOR_BUILD_FOLDER" --target $env:TARGET -c $args
         if($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
     }
 
