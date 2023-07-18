@@ -80,6 +80,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <unordered_set>
 
 // helper for using std::visit to get a dependent false for static_asserts
 // to help get compile errors if one ever extends variants
@@ -3022,6 +3023,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
     std::vector<AddFontResult> newFonts;
 
     // If the text has some characters that are not available in the font, try adding a font for those
+    std::unordered_set<Unicode> seen;
     for (int i = 2; i < unicodeText->getLength(); i += 2) {
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
@@ -3029,6 +3031,10 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;
         }
+        if (seen.find(uChar) != seen.end()) {
+            continue;
+        }
+        seen.insert(uChar);
 
         CharCode c;
         bool addFont = false;
