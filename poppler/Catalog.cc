@@ -875,7 +875,13 @@ int Catalog::getNumPages()
                 numPages = 0;
             }
         } else {
-            numPages = (int)obj.getNum();
+            if (obj.isInt()) {
+                numPages = obj.getInt();
+            } else if (obj.isInt64()) {
+                numPages = obj.getInt64();
+            } else {
+                numPages = obj.getNum();
+            }
             if (numPages <= 0) {
                 error(errSyntaxError, -1, "Invalid page count {0:d}", numPages);
                 numPages = 0;
