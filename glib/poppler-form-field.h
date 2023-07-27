@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
- * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -245,6 +245,8 @@ PopplerSignatureStatus poppler_signature_info_get_signature_status(const Poppler
 POPPLER_PUBLIC
 PopplerCertificateStatus poppler_signature_info_get_certificate_status(const PopplerSignatureInfo *siginfo);
 POPPLER_PUBLIC
+PopplerCertificateInfo *poppler_signature_info_get_certificate_info(const PopplerSignatureInfo *siginfo);
+POPPLER_PUBLIC
 const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *siginfo);
 POPPLER_PUBLIC
 GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureInfo *siginfo);
@@ -349,6 +351,20 @@ POPPLER_PUBLIC
 const char *poppler_certificate_info_get_id(const PopplerCertificateInfo *certificate_info);
 POPPLER_PUBLIC
 const char *poppler_certificate_info_get_subject_common_name(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_subject_organization(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_subject_email(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_issuer_common_name(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_issuer_organization(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+const char *poppler_certificate_info_get_issuer_email(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+GDateTime *poppler_certificate_info_get_issuance_time(const PopplerCertificateInfo *certificate_info);
+POPPLER_PUBLIC
+GDateTime *poppler_certificate_info_get_expiration_time(const PopplerCertificateInfo *certificate_info);
 POPPLER_PUBLIC
 PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id);
 POPPLER_PUBLIC

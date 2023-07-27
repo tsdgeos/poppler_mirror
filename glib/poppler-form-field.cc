@@ -4,7 +4,7 @@
  * Copyright (C) 2006 Julien Rebetez
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
- * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -395,6 +395,30 @@ gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
 }
 
 /**
+ * PopplerCertificateInfo:
+ *
+ * PopplerCertificateInfo contains detailed info about a signing certificate.
+ *
+ * Since: 23.07.0
+ */
+struct _PopplerCertificateInfo
+{
+    char *id;
+    char *subject_common_name;
+    char *subject_organization;
+    char *subject_email;
+    char *issuer_common_name;
+    char *issuer_organization;
+    char *issuer_email;
+    GDateTime *issued;
+    GDateTime *expires;
+};
+
+typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
+
+G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_certificate_info_copy, poppler_certificate_info_free)
+
+/**
  * PopplerSignatureInfo:
  *
  * PopplerSignatureInfo contains detailed info about a signature
@@ -408,6 +432,7 @@ struct _PopplerSignatureInfo
     PopplerCertificateStatus cert_status;
     char *signer_name;
     GDateTime *local_signing_time;
+    PopplerCertificateInfo *certificate_info;
 };
 
 static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormField *field, PopplerSignatureValidationFlags flags, gboolean force_revalidation, GError **error)
@@ -415,6 +440,7 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
     FormFieldSignature *sig_field;
     SignatureInfo *sig_info;
     PopplerSignatureInfo *poppler_sig_info;
+    const X509CertificateInfo *certificate_info;
 
     if (poppler_form_field_get_field_type(field) != POPPLER_FORM_FIELD_SIGNATURE) {
         g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Wrong FormField type");
@@ -478,6 +504,23 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
     std::string signerName = sig_info->getSignerName();
     poppler_sig_info->signer_name = g_strdup(signerName.c_str());
     poppler_sig_info->local_signing_time = g_date_time_new_from_unix_local(sig_info->getSigningTime());
+
+    certificate_info = sig_info->getCertificateInfo();
+    if (certificate_info != nullptr) {
+        const X509CertificateInfo::EntityInfo &subject_info = certificate_info->getSubjectInfo();
+        const X509CertificateInfo::EntityInfo &issuer_info = certificate_info->getIssuerInfo();
+        const X509CertificateInfo::Validity &validity = certificate_info->getValidity();
+
+        poppler_sig_info->certificate_info = poppler_certificate_info_new();
+        poppler_sig_info->certificate_info->subject_common_name = g_strdup(subject_info.commonName.c_str());
+        poppler_sig_info->certificate_info->subject_organization = g_strdup(subject_info.organization.c_str());
+        poppler_sig_info->certificate_info->subject_email = g_strdup(subject_info.email.c_str());
+        poppler_sig_info->certificate_info->issuer_common_name = g_strdup(issuer_info.commonName.c_str());
+        poppler_sig_info->certificate_info->issuer_email = g_strdup(issuer_info.email.c_str());
+        poppler_sig_info->certificate_info->issuer_organization = g_strdup(issuer_info.organization.c_str());
+        poppler_sig_info->certificate_info->issued = g_date_time_new_from_unix_utc(validity.notBefore);
+        poppler_sig_info->certificate_info->expires = g_date_time_new_from_unix_utc(validity.notAfter);
+    }
 
     return poppler_sig_info;
 }
@@ -602,6 +645,7 @@ PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *si
     new_info->cert_status = siginfo->cert_status;
     new_info->signer_name = g_strdup(siginfo->signer_name);
     new_info->local_signing_time = g_date_time_ref(siginfo->local_signing_time);
+    new_info->certificate_info = poppler_certificate_info_copy(siginfo->certificate_info);
 
     return new_info;
 }
@@ -622,6 +666,7 @@ void poppler_signature_info_free(PopplerSignatureInfo *siginfo)
 
     g_date_time_unref(siginfo->local_signing_time);
     g_free(siginfo->signer_name);
+    poppler_certificate_info_free(siginfo->certificate_info);
     g_free(siginfo);
 }
 
@@ -640,6 +685,23 @@ PopplerSignatureStatus poppler_signature_info_get_signature_status(const Poppler
     g_return_val_if_fail(siginfo != NULL, POPPLER_SIGNATURE_GENERIC_ERROR);
 
     return siginfo->sig_status;
+}
+
+/**
+ * poppler_signature_info_get_certificate_info:
+ * @siginfo: a #PopplerSignatureInfo
+ *
+ * Returns PopplerCertificateInfo for given PopplerSignatureInfo.
+ *
+ * Return value: (transfer none): certificate info of the signature
+ *
+ * Since: 23.08.0
+ **/
+PopplerCertificateInfo *poppler_signature_info_get_certificate_info(const PopplerSignatureInfo *siginfo)
+{
+    g_return_val_if_fail(siginfo != NULL, NULL);
+
+    return siginfo->certificate_info;
 }
 
 /**
@@ -1909,16 +1971,6 @@ const gchar *poppler_signing_data_get_document_user_password(const PopplerSignin
 
 /* Certificate Information */
 
-struct _PopplerCertificateInfo
-{
-    char *id;
-    char *subject_common_name;
-};
-
-typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
-
-G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_certificate_info_copy, poppler_certificate_info_free)
-
 /**
  * poppler_certificate_info_new:
  *
@@ -1965,15 +2017,139 @@ const char *poppler_certificate_info_get_subject_common_name(const PopplerCertif
     return certificate_info->subject_common_name;
 }
 
+/**
+ * poppler_certificate_info_get_subject_organization:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate subject organization
+ *
+ * Return value: certificate subject organization
+ *
+ * Since: 23.08.0
+ **/
+const char *poppler_certificate_info_get_subject_organization(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->subject_organization;
+}
+
+/**
+ * poppler_certificate_info_get_subject_email:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate subject email
+ *
+ * Return value: certificate subject email
+ *
+ * Since: 23.08.0
+ **/
+const char *poppler_certificate_info_get_subject_email(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->subject_email;
+}
+
+/**
+ * poppler_certificate_info_get_issuer_common_name:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate issuer common name
+ *
+ * Return value: certificate issuer common name
+ *
+ * Since: 23.08.0
+ **/
+const char *poppler_certificate_info_get_issuer_common_name(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->issuer_common_name;
+}
+
+/**
+ * poppler_certificate_info_get_issuer_organization:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate issuer organization
+ *
+ * Return value: certificate issuer organization
+ *
+ * Since: 23.08.0
+ **/
+const char *poppler_certificate_info_get_issuer_organization(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->issuer_organization;
+}
+
+/**
+ * poppler_certificate_info_get_issuer_email:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate issuer email
+ *
+ * Return value: certificate issuer email
+ *
+ * Since: 23.08.0
+ **/
+const char *poppler_certificate_info_get_issuer_email(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->issuer_email;
+}
+
+/**
+ * poppler_certificate_info_get_issuance_time:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate issuance time
+ *
+ * Return value: (transfer none): certificate issuance time
+ *
+ * Since: 23.08.0
+ **/
+GDateTime *poppler_certificate_info_get_issuance_time(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->issued;
+}
+
+/**
+ * poppler_certificate_info_get_expiration_time:
+ * @certificate_info: a #PopplerCertificateInfo structure containing certificate information
+ *
+ * Get certificate expiration time
+ *
+ * Return value: (transfer none): certificate expiration time
+ *
+ * Since: 23.08.0
+ **/
+GDateTime *poppler_certificate_info_get_expiration_time(const PopplerCertificateInfo *certificate_info)
+{
+    g_return_val_if_fail(certificate_info != nullptr, nullptr);
+    return certificate_info->expires;
+}
+
 static PopplerCertificateInfo *create_certificate_info(const X509CertificateInfo *ci)
 {
     PopplerCertificateInfo *certificate_info;
 
     g_return_val_if_fail(ci != nullptr, nullptr);
 
+    const X509CertificateInfo::EntityInfo &subject_info = ci->getSubjectInfo();
+    const X509CertificateInfo::EntityInfo &issuer_info = ci->getIssuerInfo();
+    const X509CertificateInfo::Validity &validity = ci->getValidity();
+
     certificate_info = poppler_certificate_info_new();
     certificate_info->id = g_strdup(ci->getNickName().c_str());
-    certificate_info->subject_common_name = g_strdup(ci->getSubjectInfo().commonName.c_str());
+    certificate_info->subject_common_name = g_strdup(subject_info.commonName.c_str());
+    certificate_info->subject_organization = g_strdup(subject_info.organization.c_str());
+    certificate_info->subject_email = g_strdup(subject_info.email.c_str());
+    certificate_info->issuer_common_name = g_strdup(issuer_info.commonName.c_str());
+    certificate_info->issuer_organization = g_strdup(issuer_info.organization.c_str());
+    certificate_info->issuer_email = g_strdup(issuer_info.email.c_str());
+    certificate_info->issued = g_date_time_new_from_unix_utc(validity.notBefore);
+    certificate_info->expires = g_date_time_new_from_unix_utc(validity.notAfter);
+
     return certificate_info;
 }
 
@@ -1996,6 +2172,13 @@ PopplerCertificateInfo *poppler_certificate_info_copy(const PopplerCertificateIn
     dup = (PopplerCertificateInfo *)g_malloc0(sizeof(PopplerCertificateInfo));
     dup->id = g_strdup(certificate_info->id);
     dup->subject_common_name = g_strdup(certificate_info->subject_common_name);
+    dup->subject_organization = g_strdup(certificate_info->subject_organization);
+    dup->subject_email = g_strdup(certificate_info->subject_email);
+    dup->issuer_common_name = g_strdup(certificate_info->issuer_common_name);
+    dup->issuer_organization = g_strdup(certificate_info->issuer_organization);
+    dup->issuer_email = g_strdup(certificate_info->issuer_email);
+    dup->issued = g_date_time_ref(certificate_info->issued);
+    dup->expires = g_date_time_ref(certificate_info->expires);
 
     return dup;
 }
@@ -2016,6 +2199,13 @@ void poppler_certificate_info_free(PopplerCertificateInfo *certificate_info)
 
     g_clear_pointer(&certificate_info->id, g_free);
     g_clear_pointer(&certificate_info->subject_common_name, g_free);
+    g_clear_pointer(&certificate_info->subject_organization, g_free);
+    g_clear_pointer(&certificate_info->subject_email, g_free);
+    g_clear_pointer(&certificate_info->issuer_common_name, g_free);
+    g_clear_pointer(&certificate_info->issuer_organization, g_free);
+    g_clear_pointer(&certificate_info->issuer_email, g_free);
+    g_clear_pointer(&certificate_info->issued, g_date_time_unref);
+    g_clear_pointer(&certificate_info->expires, g_date_time_unref);
 
     g_free(certificate_info);
 }
