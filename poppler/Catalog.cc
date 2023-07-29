@@ -40,6 +40,7 @@
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
+// Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -875,7 +876,13 @@ int Catalog::getNumPages()
                 numPages = 0;
             }
         } else {
-            numPages = (int)obj.getNum();
+            if (obj.isInt()) {
+                numPages = obj.getInt();
+            } else if (obj.isInt64()) {
+                numPages = obj.getInt64();
+            } else {
+                numPages = obj.getNum();
+            }
             if (numPages <= 0) {
                 error(errSyntaxError, -1, "Invalid page count {0:d}", numPages);
                 numPages = 0;
