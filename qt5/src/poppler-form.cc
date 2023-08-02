@@ -610,6 +610,7 @@ public:
     int version;
     bool is_self_signed;
     bool is_null;
+    CertificateInfo::KeyLocation keyLocation;
 };
 
 CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
@@ -733,6 +734,12 @@ CertificateInfo::KeyUsageExtensions CertificateInfo::keyUsageExtensions() const
     }
 
     return kuExtensions;
+}
+
+CertificateInfo::KeyLocation CertificateInfo::keyLocation() const
+{
+    Q_D(const CertificateInfo);
+    return d->keyLocation;
 }
 
 QByteArray CertificateInfo::publicKey() const
@@ -971,6 +978,21 @@ SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
     return validate(opt, QDateTime());
 }
 
+static CertificateInfo::KeyLocation fromPopplerCore(KeyLocation location)
+{
+    switch (location) {
+    case KeyLocation::Computer:
+        return CertificateInfo::KeyLocation::Computer;
+    case KeyLocation::Other:
+        return CertificateInfo::KeyLocation::Other;
+    case KeyLocation::Unknown:
+        return CertificateInfo::KeyLocation::Unknown;
+    case KeyLocation::HardwareToken:
+        return CertificateInfo::KeyLocation::HardwareToken;
+    }
+    return CertificateInfo::KeyLocation::Unknown;
+}
+
 static CertificateInfoPrivate *createCertificateInfoPrivate(const X509CertificateInfo *ci)
 {
     CertificateInfoPrivate *certPriv = new CertificateInfoPrivate;
@@ -978,6 +1000,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
     if (ci) {
         certPriv->version = ci->getVersion();
         certPriv->ku_extensions = ci->getKeyUsageExtensions();
+        certPriv->keyLocation = fromPopplerCore(ci->getKeyLocation());
 
         const GooString &certSerial = ci->getSerialNumber();
         certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());

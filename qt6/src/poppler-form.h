@@ -501,6 +501,24 @@ public:
         Organization,
     };
 
+    /** A signing key can be located in different places
+     sometimes. For the user, it might be easier to pick
+     the key located on a card if it has some visual
+     indicator that it is somehow removable.
+
+     \note a keylocation for a certificate without a private
+     key (cannot be used for signing) will likely be "Unknown"
+
+     \since 23.09
+     */
+    enum class KeyLocation
+    {
+        Unknown, /** We don't know the location */
+        Other, /** We know the location, but it is somehow not covered by this enum */
+        Computer, /** The key is on this computer */
+        HardwareToken /** The key is on a dedicated hardware token, either a smartcard or a dedicated usb token (e.g. gnuk, nitrokey or yubikey) */
+    };
+
     CertificateInfo();
     explicit CertificateInfo(CertificateInfoPrivate *priv);
     ~CertificateInfo();
@@ -583,6 +601,13 @@ public:
       \since 21.01
      */
     bool checkPassword(const QString &password) const;
+
+    /**
+     The storage location for this key
+
+     \since 23.09
+     */
+    KeyLocation keyLocation() const;
 
     CertificateInfo(const CertificateInfo &other);
     CertificateInfo &operator=(const CertificateInfo &other);

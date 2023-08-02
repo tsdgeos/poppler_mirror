@@ -153,6 +153,13 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
     }
     certificateInfo->setKeyUsageExtensions(kue);
 
+    auto subkey = key.subkey(0);
+    if (subkey.isCardKey()) {
+        certificateInfo->setKeyLocation(KeyLocation::HardwareToken);
+    } else if (subkey.isSecret()) {
+        certificateInfo->setKeyLocation(KeyLocation::Computer);
+    }
+
     return certificateInfo;
 }
 
