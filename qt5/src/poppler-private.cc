@@ -42,6 +42,15 @@
 #include <PDFDocEncoding.h>
 #include <UnicodeMap.h>
 
+#ifdef ANDROID
+#    include <QtCore/QString>
+#    include <QtCore/QDir>
+#    include <QtCore/QFile>
+#    include <QtCore/QFileInfo>
+#    include <QtCore/QStandardPaths>
+#    include <QtCore/QDirIterator>
+#endif
+
 namespace Poppler {
 
 namespace Debug {
@@ -258,6 +267,29 @@ void DocumentData::init()
     m_optContentModel = nullptr;
     xrefReconstructed = false;
     xrefReconstructedCallback = {};
+
+#ifdef ANDROID
+    // Copy fonts from android apk to the app's storage dir, and
+    // set the font directory path
+    QString assetsFontDir = QStringLiteral("assets:/share/fonts");
+    QString fontsdir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/fonts");
+    QDir fontPath = QDir(fontsdir);
+
+    if (fontPath.mkpath(fontPath.absolutePath())) {
+        GlobalParams::setFontDir(fontPath.absolutePath().toStdString());
+        QDirIterator iterator(assetsFontDir, QDir::NoFilter, QDirIterator::Subdirectories);
+
+        while (iterator.hasNext()) {
+            iterator.next();
+            QFileInfo fontFileInfo = iterator.fileInfo();
+            QString fontFilePath = assetsFontDir + QStringLiteral("/") + fontFileInfo.fileName();
+            QString destPath = fontPath.absolutePath() + QStringLiteral("/") + fontFileInfo.fileName();
+            QFile::copy(fontFilePath, destPath);
+        }
+    } else {
+        GlobalParams::setFontDir("");
+    }
+#endif
 }
 
 void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items)
@@ -312,5 +344,4 @@ FormFieldIconData *FormFieldIconData::getData(const FormFieldIcon &f)
 {
     return f.d_ptr;
 }
-
 }

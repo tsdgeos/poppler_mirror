@@ -159,7 +159,9 @@ public:
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
-
+#ifdef ANDROID
+    static void setFontDir(const std::string &fontDir);
+#endif
     static bool parseYesNo2(const char *token, bool *flag);
 
 private:
