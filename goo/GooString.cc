@@ -38,12 +38,14 @@
 
 #include <config.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 
 #include "gmem.h"
 #include "GooString.h"
@@ -414,7 +416,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     break;
                 case fmtString:
                     str = arg.s;
-                    len = strlen(str);
+                    len = static_cast<int>(std::min<size_t>(strlen(str), std::numeric_limits<int>::max()));
                     reverseAlign = !reverseAlign;
                     break;
                 case fmtGooString:
