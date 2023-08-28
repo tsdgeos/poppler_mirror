@@ -472,6 +472,11 @@ Object Lexer::getObj(int objNum)
                 *p = c;
                 s = std::make_unique<GooString>(tokBuf, n);
             } else {
+                // Somewhat arbitrary threshold
+                if (unlikely(n == 1024 * 1024)) {
+                    error(errSyntaxError, getPos(), "Error: name token is larger than 1 MB. Suspicion of hostile file. Stopping parsing");
+                    return Object(objEOF);
+                }
                 s->append((char)c);
             }
         }
