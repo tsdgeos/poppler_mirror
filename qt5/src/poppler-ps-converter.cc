@@ -162,6 +162,16 @@ void PSConverter::setStrictMargins(bool strictMargins)
     }
 }
 
+void PSConverter::setForceOverprintPreview(bool forceOverprintPreview)
+{
+    Q_D(PSConverter);
+    if (forceOverprintPreview) {
+        d->opts |= ForceOverprintPreview;
+    } else {
+        d->opts &= ~ForceOverprintPreview;
+    }
+}
+
 void PSConverter::setForceRasterize(bool forceRasterize)
 {
     Q_D(PSConverter);
@@ -235,6 +245,10 @@ bool PSConverter::convert()
 
     PSOutputDev *psOut = new PSOutputDev(outputToQIODevice, dev, pstitlechar, d->document->doc, pages, (d->opts & PrintToEPS) ? psModeEPS : psModePS, d->paperWidth, d->paperHeight, false, false, d->marginLeft, d->marginBottom,
                                          d->paperWidth - d->marginRight, d->paperHeight - d->marginTop, (d->opts & ForceRasterization) ? psAlwaysRasterize : psRasterizeWhenNeeded);
+    if (d->opts & ForceOverprintPreview) {
+        psOut->setForceRasterize(psAlwaysRasterize);
+        psOut->setOverprintPreview(true);
+    }
 
     if (d->opts & StrictMargins) {
         double xScale = ((double)d->paperWidth - (double)d->marginLeft - (double)d->marginRight) / (double)d->paperWidth;

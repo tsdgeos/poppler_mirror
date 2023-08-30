@@ -1822,7 +1822,8 @@ public:
         StrictMargins = 0x00000002,
         ForceRasterization = 0x00000004,
         PrintToEPS = 0x00000008, ///< Output EPS instead of PS
-        HideAnnotations = 0x00000010 ///< Don't print annotations
+        HideAnnotations = 0x00000010, ///< Don't print annotations
+        ForceOverprintPreview = 0x00000020 ///< Force rasterized overprint preview during conversion \since 23.09
     };
     Q_DECLARE_FLAGS(PSOptions, PSOption)
 
@@ -1892,6 +1893,16 @@ public:
       Defaults to false.
     */
     void setStrictMargins(bool strictMargins);
+
+    /**
+      Defines if the page will be rasterized to an image with overprint
+      preview enabled before printing.
+
+      Defaults to false
+
+      \since 23.09
+    */
+    void setForceOverprintPreview(bool forceOverprintPreview);
 
     /** Defines if the page will be rasterized to an image before printing. Defaults to false */
     void setForceRasterize(bool forceRasterize);
