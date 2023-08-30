@@ -48,6 +48,7 @@
 #include <limits>
 
 #include "gmem.h"
+#include "Error.h"
 #include "GooString.h"
 
 //------------------------------------------------------------------------
@@ -414,11 +415,18 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     len = 1;
                     reverseAlign = !reverseAlign;
                     break;
-                case fmtString:
+                case fmtString: {
                     str = arg.s;
-                    len = static_cast<int>(std::min<size_t>(strlen(str), std::numeric_limits<int>::max()));
+                    const size_t strlen_str = strlen(str);
+                    if (strlen_str > static_cast<size_t>(std::numeric_limits<int>::max())) {
+                        error(errSyntaxWarning, 0, "String truncated to INT_MAX bytes");
+                        len = std::numeric_limits<int>::max();
+                    } else {
+                        len = static_cast<int>(strlen_str);
+                    }
                     reverseAlign = !reverseAlign;
                     break;
+                }
                 case fmtGooString:
                     if (arg.gs) {
                         str = arg.gs->c_str();
