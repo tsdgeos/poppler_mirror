@@ -256,6 +256,21 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
     return vCerts;
 }
 
+static std::string locationToString(KeyLocation location)
+{
+    switch (location) {
+    case KeyLocation::Unknown:
+        return {};
+    case KeyLocation::Other:
+        return "(Other)";
+    case KeyLocation::Computer:
+        return "(Computer)";
+    case KeyLocation::HardwareToken:
+        return "(Hardware Token)";
+    }
+    return {};
+}
+
 static std::string TextStringToUTF8(const std::string &str)
 {
     const UnicodeMap *utf8Map = globalParams->getUtf8Map();
@@ -329,7 +344,8 @@ int main(int argc, char *argv[])
                 printf("Certificate nicknames available:\n");
                 for (auto &cert : vCerts) {
                     const GooString &nick = cert->getNickName();
-                    printf("%s\n", nick.c_str());
+                    const auto location = locationToString(cert->getKeyLocation());
+                    printf("%s %s\n", nick.c_str(), location.c_str());
                 }
             }
         }

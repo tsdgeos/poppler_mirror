@@ -55,6 +55,7 @@
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
 // Copyright (C) 2022 Andreas Naumann <42870-ANaumann85@users.noreply.gitlab.freedesktop.org>
 // Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5460,8 +5461,12 @@ void AnnotWidget::updateAppearanceStream()
 
     // There's no need to create a new appearance stream if NeedAppearances is
     // set, because it will be ignored next time anyway.
+    // except if signature type; most readers can't figure out how to create an
+    // appearance for those and thus renders nothing.
     if (form && form->getNeedAppearances()) {
-        return;
+        if (field->getType() != FormFieldType::formSignature) {
+            return;
+        }
     }
 
     // Create the new appearance
@@ -5501,9 +5506,9 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
 
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
-    // - NeedAppearances is true
+    // - NeedAppearances is true and it isn't a Signature. There isn't enough data in our objects to generate it for signatures
     if (field) {
-        if (appearance.isNull() || (form && form->getNeedAppearances())) {
+        if (appearance.isNull() || (field->getType() != FormFieldType::formSignature && form && form->getNeedAppearances())) {
             generateFieldAppearance();
         }
     }

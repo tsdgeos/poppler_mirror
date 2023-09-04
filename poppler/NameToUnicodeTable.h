@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2011, 2012, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
-// Copyright (C) 2022 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2022, 2023 Vincent Lefevre <vincent@vinc17.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3518,6 +3518,7 @@ static const struct NameToUnicodeTab nameToUnicodeTextTab[] = { { 0x0021, "!" },
                                                                 { 0x05bd, "siluqhebrew" },
                                                                 { 0x05bd, "siluqlefthebrew" },
                                                                 { 0x223c, "similar" },
+                                                                { 0x2243, "similarequal" },
                                                                 { 0x05c2, "sindothebrew" },
                                                                 { 0x3274, "siosacirclekorean" },
                                                                 { 0x3214, "siosaparenkorean" },

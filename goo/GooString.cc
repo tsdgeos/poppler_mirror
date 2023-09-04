@@ -30,6 +30,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
 // Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023 Even Rouault <even.rouault@mines-paris.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -38,14 +39,17 @@
 
 #include <config.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 
 #include "gmem.h"
+#include "Error.h"
 #include "GooString.h"
 
 //------------------------------------------------------------------------
@@ -412,11 +416,18 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                     len = 1;
                     reverseAlign = !reverseAlign;
                     break;
-                case fmtString:
+                case fmtString: {
                     str = arg.s;
-                    len = strlen(str);
+                    const size_t strlen_str = strlen(str);
+                    if (strlen_str > static_cast<size_t>(std::numeric_limits<int>::max())) {
+                        error(errSyntaxWarning, 0, "String truncated to INT_MAX bytes");
+                        len = std::numeric_limits<int>::max();
+                    } else {
+                        len = static_cast<int>(strlen_str);
+                    }
                     reverseAlign = !reverseAlign;
                     break;
+                }
                 case fmtGooString:
                     if (arg.gs) {
                         str = arg.gs->c_str();

@@ -33,6 +33,26 @@ simply need to add the following line to their C++ source files:
 #include <poppler-qt6.h>
 @endcode
 
+
+For using the Qt6 interface on Android, there is an additional step - you must place the following font files in the assets/share/fonts directory of the Android APK:
+
+  - NimbusMonoPS-Regular.otf
+  - NimbusMonoPS-Bold.otf
+  - NimbusMonoPS-BoldItalic.otf
+  - NimbusMonoPS-Italic.otf
+  - NimbusSans-Regular.otf
+  - NimbusSans-Bold.otf
+  - NimbusSans-BoldItalic.otf
+  - NimbusSans-Italic.otf
+  - StandardSymbolsPS.otf
+  - NimbusRoman-Bold.otf
+  - imbusRoman-BoldItalic.otf
+  - NimbusRoman-Italic.otf
+  - NimbusRoman-Regular.otf
+  - D050000L.otf
+
+These are used as substitute fonts for the base-14 fonts, and this step is required in order to reliably display documents with unembedded fonts. You can easily find these font files included within GhostScript.
+
 A PDF document can then be loaded as follows:
 @code
 QString filename;

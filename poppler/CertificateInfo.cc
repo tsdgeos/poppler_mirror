@@ -17,7 +17,7 @@
 #include <cstring>
 #include <cstdlib>
 
-X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_self_signed(false) { }
+X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_self_signed(false), keyLocation(KeyLocation::Unknown) { }
 
 X509CertificateInfo::~X509CertificateInfo() = default;
 
@@ -119,4 +119,13 @@ void X509CertificateInfo::setCertificateDER(const GooString &certDer)
 void X509CertificateInfo::setIsSelfSigned(bool isSelfSigned)
 {
     is_self_signed = isSelfSigned;
+}
+KeyLocation X509CertificateInfo::getKeyLocation() const
+{
+    return keyLocation;
+}
+
+void X509CertificateInfo::setKeyLocation(KeyLocation location)
+{
+    keyLocation = location;
 }

@@ -47,6 +47,7 @@
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -62,6 +63,11 @@
 #ifdef _WIN32
 #    include <shlobj.h>
 #    include <mbstring.h>
+#endif
+#ifdef ANDROID
+#    include <android/font.h>
+#    include <android/font_matcher.h>
+#    include <android/system_fonts.h>
 #endif
 #include "goo/glibc.h"
 #include "goo/gmem.h"
@@ -1175,6 +1181,152 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 
     return {};
 }
+#elif defined(WITH_FONTCONFIGURATION_ANDROID)
+// Uses the font file mapping created by GlobalParams::setupBaseFonts
+// to return the path to a base-14 font file
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
+{
+    return findFontFile(base14Name->toStr());
+}
+
+#    if __ANDROID_API__ >= 29
+
+// This struct is used by the AFontMatcher unique_ptr for destroying the
+// AFontMatcher object
+struct AFontMatcherDestroyer
+{
+    void operator()(AFontMatcher *fontmatcher) { AFontMatcher_destroy(fontmatcher); }
+};
+
+// This struct is used by the AFontMatcher unique_ptr for destroying the
+// AFont object
+struct AFontDestroyer
+{
+    void operator()(AFont *afont) { AFont_close(afont); }
+};
+
+#    endif
+
+GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+{
+    GooString *path = nullptr;
+    const std::optional<std::string> &fontName = font->getName();
+
+    if (!fontName) {
+        return nullptr;
+    }
+
+    globalParamsLocker();
+
+#    if __ANDROID_API__ >= 29
+    // If font is not found in the default base-14 fonts,
+    // use Android-NDK's AFontMatcher API instead.
+    // Documentation for AFontMatcher API can be found at:
+    // https://developer.android.com/ndk/reference/group/font
+    std::string genericFontFamily = "serif";
+
+    if (!font->isSerif()) {
+        genericFontFamily = "sans-serif";
+    } else if (font->isFixedWidth()) {
+        genericFontFamily = "monospace";
+    }
+
+    std::unique_ptr<AFontMatcher, AFontMatcherDestroyer> fontmatcher { AFontMatcher_create() };
+
+    // Set font weight and italics for the font.
+    AFontMatcher_setStyle(fontmatcher.get(), font->getWeight() * 100, font->isItalic());
+
+    // Get font match and the font file's path
+    std::unique_ptr<AFont, AFontDestroyer> afont { AFontMatcher_match(fontmatcher.get(), genericFontFamily.c_str(), (uint16_t *)u"A", 1, nullptr) };
+    path = new GooString(AFont_getFontFilePath(afont.get()));
+
+    // Set the type of font. Fonts returned by AFontMatcher are of
+    // four possible types - ttf, otf, ttc, otc.
+    if (path->endsWith(".ttf") || path->endsWith(".otf")) {
+        *type = sysFontTTF;
+    } else if (path->endsWith(".ttc") || path->endsWith(".otc")) {
+        *type = sysFontTTC;
+    }
+#    else
+#        pragma message("Compiling without AFontMatcher API due to Android API version being lower than 29.")
+#    endif
+
+    return path;
+}
+
+static struct
+{
+    const char *name;
+    const char *otFileName;
+} displayFontTab[] = { { "Courier", "NimbusMonoPS-Regular.otf" },
+                       { "Courier-Bold", "NimbusMonoPS-Bold.otf" },
+                       { "Courier-BoldOblique", "NimbusMonoPS-BoldItalic.otf" },
+                       { "Courier-Oblique", "NimbusMonoPS-Italic.otf" },
+                       { "Helvetica", "NimbusSans-Regular.otf" },
+                       { "Helvetica-Bold", "NimbusSans-Bold.otf" },
+                       { "Helvetica-BoldOblique", "NimbusSans-BoldItalic.otf" },
+                       { "Helvetica-Oblique", "NimbusSans-Italic.otf" },
+                       { "Symbol", "StandardSymbolsPS.otf" },
+                       { "Times-Bold", "NimbusRoman-Bold.otf" },
+                       { "Times-BoldItalic", "NimbusRoman-BoldItalic.otf" },
+                       { "Times-Italic", "NimbusRoman-Italic.otf" },
+                       { "Times-Roman", "NimbusRoman-Regular.otf" },
+                       { "ZapfDingbats", "D050000L.otf" },
+                       { nullptr, nullptr } };
+
+// The path to the font directory. Set by GlobalParams::setFontDir()
+static std::string displayFontDir;
+
+// This method creates a mapping from base-14 font names to their
+// paths on the file system. On Android, it searches within the
+// directory set by GlobalParams::setFontDir().
+void GlobalParams::setupBaseFonts(const char *dir)
+{
+    FILE *f;
+    int i;
+
+    for (i = 0; displayFontTab[i].name; ++i) {
+        if (fontFiles.count(displayFontTab[i].name) > 0) {
+            continue;
+        }
+
+        std::unique_ptr<GooString> fontName = std::make_unique<GooString>(displayFontTab[i].name);
+        std::unique_ptr<GooString> fileName;
+        if (dir) {
+            fileName.reset(appendToPath(new GooString(dir), displayFontTab[i].otFileName));
+            if ((f = openFile(fileName->c_str(), "rb"))) {
+                fclose(f);
+            } else {
+                fileName.reset();
+            }
+        }
+        if (!displayFontDir.empty()) {
+            fileName.reset(appendToPath(new GooString(displayFontDir), displayFontTab[i].otFileName));
+            if ((f = openFile(fileName->c_str(), "rb"))) {
+                fclose(f);
+            } else {
+                fileName.reset();
+            }
+        }
+        if (!fileName) {
+            error(errConfig, -1, "No display font for '{0:s}'", displayFontTab[i].name);
+            continue;
+        }
+        addFontFile(fontName->toStr(), fileName->toStr());
+    }
+}
+
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
+{
+    error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForFamilyAndStyle not implemented for this platform");
+    return {};
+}
+
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+{
+    error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForUChar not implemented for this platform");
+    return {};
+}
 
 #elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
@@ -1267,8 +1419,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     GooString *path;
 
     const std::optional<std::string> &fontName = font->getName();
-    if (!fontName)
+    if (!fontName) {
         return nullptr;
+    }
 
     path = nullptr;
     globalParamsLocker();
@@ -1403,6 +1556,13 @@ void GlobalParams::setErrQuiet(bool errQuietA)
     globalParamsLocker();
     errQuiet = errQuietA;
 }
+
+#ifdef ANDROID
+void GlobalParams::setFontDir(const std::string &fontDir)
+{
+    displayFontDir = fontDir;
+}
+#endif
 
 GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback)
 {
