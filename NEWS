@@ -1,3 +1,23 @@
+Release 23.09.0:
+        core:
+         * Add Android-specific font matching functionality
+         * Fix digital signatures for NeedAppearance=true
+         * Forms: Don't look up same glyph multiple times
+         * Provide the key location for certificates you can sign with
+         * Add ToUnicode support for similarequal
+         * Fix crash on malformed files
+
+        qt5:
+         * Provide the key location for certificates you can sign with
+         * Allow to force a rasterized overprint preview during PS conversion
+
+        qt6:
+         * Provide the key location for certificates you can sign with
+         * Allow to force a rasterized overprint preview during PS conversion
+
+        pdfsig:
+         * Provide the key location for certificates you can sign with
+
 Release 23.08.0:
         core:
          * Fix GWG 19.2 - DeviceN Overprint (White)
