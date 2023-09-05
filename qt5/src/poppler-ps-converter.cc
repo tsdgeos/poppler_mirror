@@ -7,6 +7,7 @@
  * Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2020 William Bader <williambader@hotmail.com>
+ * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,6 +163,16 @@ void PSConverter::setStrictMargins(bool strictMargins)
     }
 }
 
+void PSConverter::setForceOverprintPreview(bool forceOverprintPreview)
+{
+    Q_D(PSConverter);
+    if (forceOverprintPreview) {
+        d->opts |= ForceOverprintPreview;
+    } else {
+        d->opts &= ~ForceOverprintPreview;
+    }
+}
+
 void PSConverter::setForceRasterize(bool forceRasterize)
 {
     Q_D(PSConverter);
@@ -235,6 +246,10 @@ bool PSConverter::convert()
 
     PSOutputDev *psOut = new PSOutputDev(outputToQIODevice, dev, pstitlechar, d->document->doc, pages, (d->opts & PrintToEPS) ? psModeEPS : psModePS, d->paperWidth, d->paperHeight, false, false, d->marginLeft, d->marginBottom,
                                          d->paperWidth - d->marginRight, d->paperHeight - d->marginTop, (d->opts & ForceRasterization) ? psAlwaysRasterize : psRasterizeWhenNeeded);
+    if (d->opts & ForceOverprintPreview) {
+        psOut->setForceRasterize(psAlwaysRasterize);
+        psOut->setOverprintPreview(true);
+    }
 
     if (d->opts & StrictMargins) {
         double xScale = ((double)d->paperWidth - (double)d->marginLeft - (double)d->marginRight) / (double)d->paperWidth;

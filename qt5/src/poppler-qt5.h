@@ -29,6 +29,7 @@
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Copyright (C) 2022 Martin <martinbts@gmx.net>
+ * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2038,7 +2039,8 @@ public:
         StrictMargins = 0x00000002,
         ForceRasterization = 0x00000004,
         PrintToEPS = 0x00000008, ///< Output EPS instead of PS \since 0.20
-        HideAnnotations = 0x00000010 ///< Don't print annotations \since 0.20
+        HideAnnotations = 0x00000010, ///< Don't print annotations \since 0.20
+        ForceOverprintPreview = 0x00000020 ///< Force rasterized overprint preview during conversion \since 23.09
     };
     Q_DECLARE_FLAGS(PSOptions, PSOption)
 
@@ -2108,6 +2110,16 @@ public:
       Defaults to false.
     */
     void setStrictMargins(bool strictMargins);
+
+    /**
+      Defines if the page will be rasterized to an image with overprint
+      preview enabled before printing.
+
+      Defaults to false
+
+      \since 23.09
+    */
+    void setForceOverprintPreview(bool forceOverprintPreview);
 
     /** Defines if the page will be rasterized to an image before printing. Defaults to false */
     void setForceRasterize(bool forceRasterize);
