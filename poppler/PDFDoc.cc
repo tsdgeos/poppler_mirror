@@ -924,6 +924,14 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
         return errDamaged;
     }
 
+    if (!page.isDict()) {
+        fclose(f);
+        delete yRef;
+        delete countRef;
+        delete outStr;
+        error(errSyntaxError, -1, "page is not a dictionary");
+        return errOpenFile;
+    }
     Dict *pageDict = page.getDict();
     if (resourcesObj.isNull() && !pageDict->hasKey("Resources")) {
         Object *resourceDictObject = getCatalog()->getPage(pageNo)->getResourceDictObject();
