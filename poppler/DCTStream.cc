@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright 2005-2010, 2012, 2017, 2020-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2010, 2012, 2017, 2020-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2009 Ryszard Trojnacki <rysiek@menel.com>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
@@ -33,10 +33,10 @@ static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
     } else {
         c = src->str->getChar();
     }
+    src->buffer = c;
+    src->pub.next_input_byte = &src->buffer;
+    src->pub.bytes_in_buffer = 1;
     if (c != EOF) {
-        src->buffer = c;
-        src->pub.next_input_byte = &src->buffer;
-        src->pub.bytes_in_buffer = 1;
         return TRUE;
     } else {
         return FALSE;
