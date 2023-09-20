@@ -5314,19 +5314,8 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     return true;
 }
 
-static bool insertIfNotAlreadyPresent(Ref r, std::set<int> *alreadySeenDicts)
-{
-    if (r == Ref::INVALID()) {
-        return true;
-    }
-
-    // std::pair<iterator,bool>
-    const auto insertResult = alreadySeenDicts->insert(r.num);
-    return insertResult.second;
-}
-
 // Should we also merge Arrays?
-static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<int> *alreadySeenDicts)
+static void recursiveMergeDicts(Dict *primary, const Dict *secondary, RefRecursionChecker *alreadySeenDicts)
 {
     for (int i = 0; i < secondary->getLength(); ++i) {
         const char *key = secondary->getKey(i);
@@ -5339,7 +5328,7 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<i
                 Ref secondaryRef;
                 Object secondaryObj = secondary->lookup(key, &secondaryRef);
                 if (secondaryObj.isDict()) {
-                    if (!insertIfNotAlreadyPresent(primaryRef, alreadySeenDicts) || !insertIfNotAlreadyPresent(secondaryRef, alreadySeenDicts)) {
+                    if (!alreadySeenDicts->insert(primaryRef) || !alreadySeenDicts->insert(secondaryRef)) {
                         // bad PDF
                         return;
                     }
@@ -5352,7 +5341,7 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<i
 
 static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
 {
-    std::set<int> alreadySeenDicts;
+    RefRecursionChecker alreadySeenDicts;
     recursiveMergeDicts(primary, secondary, &alreadySeenDicts);
 }
 

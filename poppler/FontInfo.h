@@ -101,7 +101,7 @@ private:
     PDFDoc *doc;
     int currentPage;
     std::unordered_set<int> fonts;
-    std::unordered_set<int> visitedObjects;
+    RefRecursionChecker visitedObjects;
 
     void scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo *> *fontsList);
 };

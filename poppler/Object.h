@@ -113,6 +113,28 @@ inline bool operator<(const Ref lhs, const Ref rhs) noexcept
     return lhs.gen < rhs.gen;
 }
 
+struct RefRecursionChecker
+{
+    RefRecursionChecker() { }
+
+    RefRecursionChecker(const RefRecursionChecker &) = delete;
+    RefRecursionChecker &operator=(const RefRecursionChecker &) = delete;
+
+    bool insert(Ref ref)
+    {
+        if (ref == Ref::INVALID()) {
+            return true;
+        }
+
+        // insert returns std::pair<iterator,bool>
+        // where the bool is whether the insert succeeded
+        return alreadySeenRefs.insert(ref.num).second;
+    }
+
+private:
+    std::set<int> alreadySeenRefs;
+};
+
 namespace std {
 
 template<>

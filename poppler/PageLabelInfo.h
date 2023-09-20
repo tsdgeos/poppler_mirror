@@ -37,7 +37,7 @@ public:
     bool indexToLabel(int index, GooString *label) const;
 
 private:
-    void parse(const Object *tree, std::set<int> &parsedRefs);
+    void parse(const Object *tree, RefRecursionChecker &parsedRefs);
 
 private:
     struct Interval
