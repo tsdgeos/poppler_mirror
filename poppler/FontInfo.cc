@@ -129,7 +129,11 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
     // resource dictionary
     const char *resTypes[] = { "XObject", "Pattern" };
     for (const char *resType : resTypes) {
-        Object objDict = resDict->lookup(resType);
+        Ref objDictRef;
+        Object objDict = resDict->lookup(resType, &objDictRef);
+        if (!visitedObjects.insert(objDictRef)) {
+            continue;
+        }
         if (objDict.isDict()) {
             for (int i = 0; i < objDict.dictGetLength(); ++i) {
                 Ref obj2Ref;
