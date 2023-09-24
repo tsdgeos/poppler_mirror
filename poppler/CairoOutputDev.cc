@@ -79,6 +79,9 @@
 // cairo images to this size. 8192 is sufficient for an A2 sized
 // 300ppi image.
 #define MAX_PRINT_IMAGE_SIZE 8192
+// Cairo has a max size for image surfaces due to their fixed-point
+// coordinate handling, namely INT16_MAX, aka 32767.
+#define MAX_CAIRO_IMAGE_SIZE 32767
 
 #ifdef LOG_CAIRO
 #    define LOG(x) (x)
@@ -3090,7 +3093,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
    * so check its underlying color space as well */
   int is_identity_transform;
   is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased && 
+		  (colorMap->getColorSpace()->getMode() == csICCBased &&
 		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
@@ -3656,11 +3659,7 @@ public:
             }
         }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
-        bool needsCustomDownscaling = false;
-#else
-        bool needsCustomDownscaling = true;
-#endif
+        bool needsCustomDownscaling = (width > MAX_CAIRO_IMAGE_SIZE || height > MAX_CAIRO_IMAGE_SIZE);
 
         if (printing) {
             if (width > MAX_PRINT_IMAGE_SIZE || height > MAX_PRINT_IMAGE_SIZE) {
@@ -3679,8 +3678,6 @@ public:
                 if (scaledHeight == 0) {
                     scaledHeight = 1;
                 }
-            } else {
-                needsCustomDownscaling = false;
             }
         }
 
@@ -3701,12 +3698,12 @@ public:
                 getRow(y, dest);
             }
         } else {
-            // // Downscaling required. Create cairo image the size of the
-            // rescaled image and // downscale the source image data into
+            // Downscaling required. Create cairo image the size of the
+            // rescaled image and downscale the source image data into
             // the cairo image. downScaleImage() will call getRow() to read
             // source image data from the image stream. This avoids having
             // to create an image the size of the source image which may
-            // exceed cairo's 32676x32767 image size limit (and also saves a
+            // exceed cairo's 32767x32767 image size limit (and also saves a
             // lot of memory).
             image = cairo_image_surface_create(maskColors ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, scaledWidth, scaledHeight);
             if (cairo_surface_status(image)) {
