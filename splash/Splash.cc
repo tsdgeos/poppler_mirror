@@ -1889,7 +1889,7 @@ SplashError Splash::stroke(SplashPath *path)
     SplashCoord d1, d2, t1, t2, w;
 
     if (debugMode) {
-        printf("stroke [dash:%ld] [width:%.2f]:\n", state->lineDash.size(), (double)state->lineWidth);
+        printf("stroke [dash:%zu] [width:%.2f]:\n", state->lineDash.size(), (double)state->lineWidth);
         dumpPath(path);
     }
     opClipRes = splashClipAllOutside;

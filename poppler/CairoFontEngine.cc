@@ -473,6 +473,10 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     cairo_matrix_multiply(&matrix, &matrix, &invert_y_axis);
     cairo_transform(cr, &matrix);
 
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    cairo_set_source(cr, cairo_user_scaled_font_get_foreground_marker(scaled_font));
+#endif
+
     CairoOutputDev *output_dev = info->outputDev;
     output_dev->setCairo(cr);
 
@@ -522,7 +526,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     return status;
 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
 static cairo_status_t _render_type3_color_glyph(cairo_scaled_font_t *scaled_font, unsigned long glyph, cairo_t *cr, cairo_text_extents_t *metrics)
 {
     return _render_type3_glyph(scaled_font, glyph, cr, metrics, true);
@@ -544,7 +548,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     Ref ref = *gfxFont->getID();
     cairo_font_face_t *font_face = cairo_user_font_face_create();
     cairo_user_font_face_set_init_func(font_face, _init_type3_glyph);
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 6)
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     // When both callbacks are set, Cairo will call the color glyph
     // callback first.  If that returns NOT_IMPLEMENTED, Cairo will
     // then call the non-color glyph callback.
