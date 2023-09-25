@@ -24,7 +24,7 @@ jobs:
         brew list --cask
         brew update
         brew uninstall -f python@3.8 python@3.10 python@3.11 azure-cli pipx aws-sam-cli llvm cffi pycparser python-cryptography
-        brew install ninja boost cmake pkg-config glib qt6
+        brew install ninja boost cmake pkg-config glib qt6 gpgme
         brew install poppler --only-dependencies
         sudo rm -rf /Library/Frameworks/Mono.framework
         sudo rm -rf /Library/Receipts/MonoFramework-*
