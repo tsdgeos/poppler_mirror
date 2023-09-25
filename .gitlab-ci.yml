@@ -179,7 +179,7 @@ glib_docs:
   script:
     - apt-get install --yes --no-install-recommends gtk-doc-tools
     - mkdir -p build && cd build
-    - cmake -G Ninja -DENABLE_GTK_DOC=YES ..
+    - cmake -G Ninja -DENABLE_GTK_DOC=YES -DENABLE_GPGME=OFF ..
     - ninja -j ${FDO_CI_CONCURRENT} glib-docs
   cache: {}
   artifacts:
