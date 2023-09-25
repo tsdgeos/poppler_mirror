@@ -1191,86 +1191,92 @@ FormWidget *FormField::findWidgetByRef(Ref aref)
 
 GooString *FormField::getFullyQualifiedName()
 {
-    Object obj1;
     Object parentObj;
     const GooString *parent_name;
-    GooString *full_name;
     bool unicode_encoded = false;
 
     if (fullyQualifiedName) {
         return fullyQualifiedName;
     }
 
-    full_name = new GooString();
+    fullyQualifiedName = new GooString();
 
-    obj1 = obj.copy();
-    while (parentObj = obj1.dictLookup("Parent"), parentObj.isDict()) {
+    std::set<int> parsedRefs;
+    Ref parentRef;
+    parentObj = obj.getDict()->lookup("Parent", &parentRef);
+    if (parentRef != Ref::INVALID()) {
+        parsedRefs.insert(parentRef.num);
+    }
+    while (parentObj.isDict()) {
         Object obj2 = parentObj.dictLookup("T");
         if (obj2.isString()) {
             parent_name = obj2.getString();
 
             if (unicode_encoded) {
-                full_name->insert(0, "\0.", 2); // 2-byte unicode period
+                fullyQualifiedName->insert(0, "\0.", 2); // 2-byte unicode period
                 if (parent_name->hasUnicodeMarker()) {
-                    full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
                 } else {
                     int tmp_length;
                     char *tmp_str = pdfDocEncodingToUTF16(parent_name->toStr(), &tmp_length);
-                    full_name->insert(0, tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
                     delete[] tmp_str;
                 }
             } else {
-                full_name->insert(0, '.'); // 1-byte ascii period
+                fullyQualifiedName->insert(0, '.'); // 1-byte ascii period
                 if (parent_name->hasUnicodeMarker()) {
                     unicode_encoded = true;
-                    full_name = convertToUtf16(full_name);
-                    full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName = convertToUtf16(fullyQualifiedName);
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
                 } else {
-                    full_name->insert(0, parent_name);
+                    fullyQualifiedName->insert(0, parent_name);
                 }
             }
         }
-        obj1 = parentObj.copy();
+        parentObj = parentObj.getDict()->lookup("Parent", &parentRef);
+        if (parentRef != Ref::INVALID() && !parsedRefs.insert(parentRef.num).second) {
+            error(errSyntaxError, -1, "FormField: Loop while trying to look for Parents\n");
+            return fullyQualifiedName;
+        }
     }
 
     if (partialName) {
         if (unicode_encoded) {
             if (partialName->hasUnicodeMarker()) {
-                full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
                 int tmp_length;
                 char *tmp_str = pdfDocEncodingToUTF16(partialName->toStr(), &tmp_length);
-                full_name->append(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
                 delete[] tmp_str;
             }
         } else {
             if (partialName->hasUnicodeMarker()) {
                 unicode_encoded = true;
-                full_name = convertToUtf16(full_name);
-                full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName = convertToUtf16(fullyQualifiedName);
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
-                full_name->append(partialName);
+                fullyQualifiedName->append(partialName);
             }
         }
     } else {
-        int len = full_name->getLength();
+        int len = fullyQualifiedName->getLength();
         // Remove the last period
         if (unicode_encoded) {
             if (len > 1) {
-                full_name->del(len - 2, 2);
+                fullyQualifiedName->del(len - 2, 2);
             }
         } else {
             if (len > 0) {
-                full_name->del(len - 1, 1);
+                fullyQualifiedName->del(len - 1, 1);
             }
         }
     }
 
     if (unicode_encoded) {
-        full_name->prependUnicodeMarker();
+        fullyQualifiedName->prependUnicodeMarker();
     }
 
-    fullyQualifiedName = full_name;
     return fullyQualifiedName;
 }
 

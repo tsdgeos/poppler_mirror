@@ -101,9 +101,9 @@ void TestUTFConversion::testUTF()
     free(utf16String);
 
     std::string sUtf8(str);
-    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(sUtf8));
+    std::string gsUtf16_a(utf8ToUtf16WithBom(sUtf8));
     std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
-    QCOMPARE(gsUtf16_a->cmp(gsUtf16_b.get()), 0);
+    QCOMPARE(gsUtf16_b->cmp(gsUtf16_a), 0);
 
     // UTF-16 to UTF-8
 

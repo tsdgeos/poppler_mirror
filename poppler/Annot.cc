@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -5314,19 +5314,8 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     return true;
 }
 
-static bool insertIfNotAlreadyPresent(Ref r, std::set<int> *alreadySeenDicts)
-{
-    if (r == Ref::INVALID()) {
-        return true;
-    }
-
-    // std::pair<iterator,bool>
-    const auto insertResult = alreadySeenDicts->insert(r.num);
-    return insertResult.second;
-}
-
 // Should we also merge Arrays?
-static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<int> *alreadySeenDicts)
+static void recursiveMergeDicts(Dict *primary, const Dict *secondary, RefRecursionChecker *alreadySeenDicts)
 {
     for (int i = 0; i < secondary->getLength(); ++i) {
         const char *key = secondary->getKey(i);
@@ -5339,7 +5328,7 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<i
                 Ref secondaryRef;
                 Object secondaryObj = secondary->lookup(key, &secondaryRef);
                 if (secondaryObj.isDict()) {
-                    if (!insertIfNotAlreadyPresent(primaryRef, alreadySeenDicts) || !insertIfNotAlreadyPresent(secondaryRef, alreadySeenDicts)) {
+                    if (!alreadySeenDicts->insert(primaryRef) || !alreadySeenDicts->insert(secondaryRef)) {
                         // bad PDF
                         return;
                     }
@@ -5352,7 +5341,7 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary, std::set<i
 
 static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
 {
-    std::set<int> alreadySeenDicts;
+    RefRecursionChecker alreadySeenDicts;
     recursiveMergeDicts(primary, secondary, &alreadySeenDicts);
 }
 

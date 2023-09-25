@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -112,6 +112,28 @@ inline bool operator<(const Ref lhs, const Ref rhs) noexcept
     }
     return lhs.gen < rhs.gen;
 }
+
+struct RefRecursionChecker
+{
+    RefRecursionChecker() { }
+
+    RefRecursionChecker(const RefRecursionChecker &) = delete;
+    RefRecursionChecker &operator=(const RefRecursionChecker &) = delete;
+
+    bool insert(Ref ref)
+    {
+        if (ref == Ref::INVALID()) {
+            return true;
+        }
+
+        // insert returns std::pair<iterator,bool>
+        // where the bool is whether the insert succeeded
+        return alreadySeenRefs.insert(ref.num).second;
+    }
+
+private:
+    std::set<int> alreadySeenRefs;
+};
 
 namespace std {
 

@@ -34,6 +34,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -418,22 +419,34 @@ XRef *XRef::copy() const
 int XRef::reserve(int newSize)
 {
     if (newSize > capacity) {
-
-        int realNewSize;
-        for (realNewSize = capacity ? 2 * capacity : 1024; newSize > realNewSize && realNewSize > 0; realNewSize <<= 1) {
-            ;
+        int newCapacity = 1024;
+        if (capacity) {
+            if (capacity <= INT_MAX / 2) {
+                newCapacity = capacity * 2;
+            } else {
+                newCapacity = newSize;
+            }
         }
-        if ((realNewSize < 0) || (realNewSize >= INT_MAX / (int)sizeof(XRefEntry))) {
+        while (newSize > newCapacity) {
+            if (newCapacity > INT_MAX / 2) {
+                std::fputs("Too large XRef size\n", stderr);
+                return 0;
+            }
+            newCapacity *= 2;
+        }
+        if (newCapacity >= INT_MAX / (int)sizeof(XRefEntry)) {
+            std::fputs("Too large XRef size\n", stderr);
             return 0;
         }
 
-        void *p = greallocn_checkoverflow(entries, realNewSize, sizeof(XRefEntry));
+        void *p = grealloc(entries, newCapacity * sizeof(XRefEntry),
+                           /* checkoverflow=*/true);
         if (p == nullptr) {
             return 0;
         }
 
         entries = (XRefEntry *)p;
-        capacity = realNewSize;
+        capacity = newCapacity;
     }
 
     return capacity;

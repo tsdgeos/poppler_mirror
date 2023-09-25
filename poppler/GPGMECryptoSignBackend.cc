@@ -21,7 +21,15 @@ bool GpgSignatureBackend::hasSufficientVersion()
     // Most gpg signatures are padded. This is fixed for 2.4.1
     // gpg 2.4.0 does not support generating signatures
     // with definite lengths. This is also fixed for 2.4.1.
-    return GpgME::engineInfo(GpgME::GpgSMEngine).engineVersion() > "2.4.0";
+    // this has also been fixed in 2.2.42 in the 2.2 branch
+    auto version = GpgME::engineInfo(GpgME::GpgSMEngine).engineVersion();
+    if (version > "2.4.0") {
+        return true;
+    }
+    if (version >= "2.3.0") { // development branch for 2.4 releases; no more releases here
+        return false;
+    }
+    return version >= "2.2.42";
 }
 
 /// GPGME helper methods

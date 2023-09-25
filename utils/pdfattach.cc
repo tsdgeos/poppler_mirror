@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,14 +86,14 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    const std::unique_ptr<GooString> attachFileName = utf8ToUtf16WithBom(gbasename(attachFilePath.c_str()));
+    const std::string attachFileName = utf8ToUtf16WithBom(gbasename(attachFilePath.c_str()));
 
-    if (!doReplace && doc->getCatalog()->hasEmbeddedFile(attachFileName->toStr())) {
-        fprintf(stderr, "There is already an embedded file named %s.\n", attachFileName->c_str());
+    if (!doReplace && doc->getCatalog()->hasEmbeddedFile(attachFileName)) {
+        fprintf(stderr, "There is already an embedded file named %s.\n", attachFileName.c_str());
         return 4;
     }
 
-    doc->getCatalog()->addEmbeddedFile(attachFile.get(), attachFileName->toStr());
+    doc->getCatalog()->addEmbeddedFile(attachFile.get(), attachFileName);
 
     const GooString outputPdfFilePath(argv[3]);
     const int saveResult = doc->saveAs(outputPdfFilePath);

@@ -105,6 +105,13 @@
 
 //------------------------------------------------------------------------
 
+struct FILECloser
+{
+    void operator()(FILE *f) { fclose(f); }
+};
+
+//------------------------------------------------------------------------
+
 #define headerSearchSize                                                                                                                                                                                                                       \
     1024 // read this many bytes at beginning of
          //   file to look for '%PDF'
@@ -820,8 +827,6 @@ Hints *PDFDoc::getHints()
 int PDFDoc::savePageAs(const GooString &name, int pageNo)
 {
     FILE *f;
-    OutStream *outStr;
-    XRef *yRef, *countRef;
 
     if (file && file->modificationTimeChangedSinceOpen()) {
         return errFileChangedSinceOpen;
@@ -854,26 +859,28 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
         error(errIO, -1, "Couldn't open file '{0:t}'", &name);
         return errOpenFile;
     }
-    outStr = new FileOutStream(f, 0);
+    // Calls fclose on f when the fileCloser is destroyed because it goes out of scope
+    const std::unique_ptr<FILE, FILECloser> fileCloser(f);
+    const std::unique_ptr<OutStream> outStr = std::make_unique<FileOutStream>(f, 0);
 
-    yRef = new XRef(getXRef()->getTrailerDict());
+    const std::unique_ptr<XRef> yRef = std::make_unique<XRef>(getXRef()->getTrailerDict());
 
     if (secHdlr != nullptr && !secHdlr->isUnencrypted()) {
         yRef->setEncryption(secHdlr->getPermissionFlags(), secHdlr->getOwnerPasswordOk(), fileKey, keyLength, secHdlr->getEncVersion(), secHdlr->getEncRevision(), encAlgorithm);
     }
-    countRef = new XRef();
+    const std::unique_ptr<XRef> countRef = std::make_unique<XRef>();
     Object *trailerObj = getXRef()->getTrailerDict();
     if (trailerObj->isDict()) {
-        markPageObjects(trailerObj->getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
+        markPageObjects(trailerObj->getDict(), yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
     }
     yRef->add(0, 65535, 0, false);
-    writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
+    writeHeader(outStr.get(), getPDFMajorVersion(), getPDFMinorVersion());
 
     // get and mark info dict
     Object infoObj = getXRef()->getDocInfo();
     if (infoObj.isDict()) {
         Dict *infoDict = infoObj.getDict();
-        markPageObjects(infoDict, yRef, countRef, 0, refPage->num, rootNum + 2);
+        markPageObjects(infoDict, yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
         if (trailerObj->isDict()) {
             Dict *trailerDict = trailerObj->getDict();
             const Object &ref = trailerDict->lookupNF("Info");
@@ -889,56 +896,48 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     // get and mark output intents etc.
     Object catObj = getXRef()->getCatalog();
     if (!catObj.isDict()) {
-        fclose(f);
-        delete yRef;
-        delete countRef;
-        delete outStr;
         error(errSyntaxError, -1, "XRef's Catalog is not a dictionary");
         return errOpenFile;
     }
     Dict *catDict = catObj.getDict();
     Object pagesObj = catDict->lookup("Pages");
     if (!pagesObj.isDict()) {
-        fclose(f);
-        delete yRef;
-        delete countRef;
-        delete outStr;
         error(errSyntaxError, -1, "Catalog Pages is not a dictionary");
         return errOpenFile;
     }
     Object afObj = catDict->lookupNF("AcroForm").copy();
     if (!afObj.isNull()) {
-        markAcroForm(&afObj, yRef, countRef, 0, refPage->num, rootNum + 2);
+        markAcroForm(&afObj, yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
     }
     Dict *pagesDict = pagesObj.getDict();
     Object resourcesObj = pagesDict->lookup("Resources");
     if (resourcesObj.isDict()) {
-        markPageObjects(resourcesObj.getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
+        markPageObjects(resourcesObj.getDict(), yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
     }
-    if (!markPageObjects(catDict, yRef, countRef, 0, refPage->num, rootNum + 2)) {
-        fclose(f);
-        delete yRef;
-        delete countRef;
-        delete outStr;
+    if (!markPageObjects(catDict, yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2)) {
         error(errSyntaxError, -1, "markPageObjects failed");
         return errDamaged;
     }
 
+    if (!page.isDict()) {
+        error(errSyntaxError, -1, "page is not a dictionary");
+        return errOpenFile;
+    }
     Dict *pageDict = page.getDict();
     if (resourcesObj.isNull() && !pageDict->hasKey("Resources")) {
         Object *resourceDictObject = getCatalog()->getPage(pageNo)->getResourceDictObject();
         if (resourceDictObject->isDict()) {
             resourcesObj = resourceDictObject->copy();
-            markPageObjects(resourcesObj.getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
+            markPageObjects(resourcesObj.getDict(), yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
         }
     }
-    markPageObjects(pageDict, yRef, countRef, 0, refPage->num, rootNum + 2);
+    markPageObjects(pageDict, yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
     Object annotsObj = pageDict->lookupNF("Annots").copy();
     if (!annotsObj.isNull()) {
-        markAnnotations(&annotsObj, yRef, countRef, 0, refPage->num, rootNum + 2);
+        markAnnotations(&annotsObj, yRef.get(), countRef.get(), 0, refPage->num, rootNum + 2);
     }
     yRef->markUnencrypted();
-    writePageObjects(outStr, yRef, 0);
+    writePageObjects(outStr.get(), yRef.get(), 0);
 
     yRef->add(rootNum, 0, outStr->getPos(), true);
     outStr->printf("%d 0 obj\n", rootNum);
@@ -951,7 +950,7 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
             }
             Object value = catDict->getValNF(j).copy();
             outStr->printf("/%s ", key);
-            writeObject(&value, outStr, getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
+            writeObject(&value, outStr.get(), getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
         }
     }
     outStr->printf(">>\nendobj\n");
@@ -961,7 +960,7 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     outStr->printf("<< /Type /Pages /Kids [ %d 0 R ] /Count 1 ", rootNum + 2);
     if (resourcesObj.isDict()) {
         outStr->printf("/Resources ");
-        writeObject(&resourcesObj, outStr, getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
+        writeObject(&resourcesObj, outStr.get(), getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
     }
     outStr->printf(">>\n");
     outStr->printf("endobj\n");
@@ -979,7 +978,7 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
             outStr->printf("/Parent %d 0 R", rootNum + 1);
         } else {
             outStr->printf("/%s ", key);
-            writeObject(&value, outStr, getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
+            writeObject(&value, outStr.get(), getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
         }
     }
     outStr->printf(" >>\nendobj\n");
@@ -989,13 +988,9 @@ int PDFDoc::savePageAs(const GooString &name, int pageNo)
     ref.num = rootNum;
     ref.gen = 0;
     Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(), name.c_str(), uxrefOffset);
-    writeXRefTableTrailer(std::move(trailerDict), yRef, false /* do not write unnecessary entries */, uxrefOffset, outStr, getXRef());
+    writeXRefTableTrailer(std::move(trailerDict), yRef.get(), false /* do not write unnecessary entries */, uxrefOffset, outStr.get(), getXRef());
 
     outStr->close();
-    fclose(f);
-    delete yRef;
-    delete countRef;
-    delete outStr;
 
     return errNone;
 }

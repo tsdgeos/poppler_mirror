@@ -12,6 +12,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -20,11 +21,13 @@
 
 #include <cstdint>
 #include <climits>
-#include <memory>
+#include <string>
 
-#include "goo/GooString.h"
 #include "CharTypes.h"
 #include "poppler_private_export.h"
+
+// Magic bytes that mark the byte order in a UTF-16 unicode string
+constexpr std::string_view unicodeByteOrderMark = "\xFE\xFF";
 
 // Convert a UTF-16 string to a UCS-4
 //   utf16      - utf16 bytes
@@ -90,7 +93,7 @@ inline bool isUtf8WithBom(std::string_view str)
 // The caller owns the returned pointer.
 //  utf8 - UTF-8 string to convert. An empty string is acceptable.
 // Returns a big endian UTF-16 string with BOM or an empty string without BOM.
-std::unique_ptr<GooString> POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
+std::string POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).

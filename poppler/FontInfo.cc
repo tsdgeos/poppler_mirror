@@ -3,7 +3,7 @@
 // FontInfo.cc
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2017-2020, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
@@ -129,26 +129,25 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
     // resource dictionary
     const char *resTypes[] = { "XObject", "Pattern" };
     for (const char *resType : resTypes) {
-        Object objDict = resDict->lookup(resType);
+        Ref objDictRef;
+        Object objDict = resDict->lookup(resType, &objDictRef);
+        if (!visitedObjects.insert(objDictRef)) {
+            continue;
+        }
         if (objDict.isDict()) {
             for (int i = 0; i < objDict.dictGetLength(); ++i) {
                 Ref obj2Ref;
                 const Object obj2 = objDict.getDict()->getVal(i, &obj2Ref);
-                if (obj2Ref != Ref::INVALID()) {
-                    // check for an already-seen object
-                    if (!visitedObjects.insert(obj2Ref.num).second) {
-                        continue;
-                    }
+                // check for an already-seen object
+                if (!visitedObjects.insert(obj2Ref)) {
+                    continue;
                 }
 
                 if (obj2.isStream()) {
                     Ref resourcesRef;
                     const Object resObj = obj2.streamGetDict()->lookup("Resources", &resourcesRef);
-
-                    if (resourcesRef != Ref::INVALID()) {
-                        if (!visitedObjects.insert(resourcesRef.num).second) {
-                            continue;
-                        }
+                    if (!visitedObjects.insert(resourcesRef)) {
+                        continue;
                     }
 
                     if (resObj.isDict() && resObj.getDict() != resDict) {

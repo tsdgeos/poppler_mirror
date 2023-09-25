@@ -23,6 +23,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -370,11 +371,10 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
     return utf16;
 }
 
-std::unique_ptr<GooString> utf8ToUtf16WithBom(const std::string &utf8)
+std::string utf8ToUtf16WithBom(const std::string &utf8)
 {
-    auto result = std::make_unique<GooString>();
     if (utf8.empty()) {
-        return result;
+        return {};
     }
     int tmp_length; // Number of UTF-16 symbols.
     char *tmp_str = (char *)utf8ToUtf16(utf8.c_str(), &tmp_length);
@@ -384,8 +384,8 @@ std::unique_ptr<GooString> utf8ToUtf16WithBom(const std::string &utf8)
     }
 #endif
 
-    result->prependUnicodeMarker();
-    result->append(tmp_str, tmp_length * 2);
+    std::string result(unicodeByteOrderMark);
+    result.append(tmp_str, tmp_length * 2);
     gfree(tmp_str);
     return result;
 }
