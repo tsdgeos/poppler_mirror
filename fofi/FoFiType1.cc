@@ -207,7 +207,7 @@ void FoFiType1::parse()
     bool gotMatrix, continueLine;
 
     gotMatrix = false;
-    for (i = 1, line = (char *)file; i <= 100 && line && (!name || !encoding); ++i) {
+    for (i = 1, line = (char *)file; i <= 100 && line && (!name || !encoding || !gotMatrix); ++i) {
 
         // get font name
         if (!name && (line + 9 <= (char *)file + len) && !strncmp(line, "/FontName", 9)) {
