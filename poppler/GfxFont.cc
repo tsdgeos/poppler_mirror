@@ -1140,11 +1140,10 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         const std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
         if (buf) {
             if ((ffT1 = FoFiType1::make(buf->data(), buf->size()))) {
-                if (ffT1->getName()) {
-                    if (embFontName) {
-                        delete embFontName;
-                    }
-                    embFontName = new GooString(ffT1->getName());
+                const std::string fontName = ffT1->getName();
+                if (!fontName.empty()) {
+                    delete embFontName;
+                    embFontName = new GooString(fontName);
                 }
                 if (!baseEnc) {
                     baseEnc = (const char **)ffT1->getEncoding();
