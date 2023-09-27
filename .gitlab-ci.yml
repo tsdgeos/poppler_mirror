@@ -85,9 +85,9 @@ build_ubuntu_20_04:
     - ninja
     - ctest --output-on-failure
 
-build_mingw64_fedora38:
+build_mingw64_fedora39:
   stage: build
-  image: fedora:38
+  image: fedora:39
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
