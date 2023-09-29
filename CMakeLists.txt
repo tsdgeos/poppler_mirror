@@ -639,7 +639,25 @@ set_target_properties(poppler PROPERTIES
                               SOVERSION ${POPPLER_SOVERSION_NUMBER})
 
 if(UNIX AND (NOT APPLE))
-	set_target_properties(poppler PROPERTIES LINK_OPTIONS LINKER:--version-script=${LINKER_SCRIPT})
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map "VERS_1 {\nglobal:\n *;};\n")
+
+    # once we require cmake 3.18,
+    # the next set of lines can be changed
+    # to the check_linker_flags function instead
+    include(CheckCXXSourceCompiles)
+    set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map)
+    check_cxx_source_compiles("
+      int main(int, char**) {
+        return 0;
+      }
+    " SUPPORT_VERSION_SCRIPT)
+    set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+
+    file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/linkerscript_test.map)
+    if (SUPPORT_VERSION_SCRIPT)
+      set_target_properties(poppler PROPERTIES LINK_OPTIONS LINKER:--version-script=${LINKER_SCRIPT})
+    endif()
 endif()
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
