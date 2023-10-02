@@ -125,4 +125,9 @@ char POPPLER_PRIVATE_EXPORT *utf16ToUtf8(const uint16_t *utf16, int *len = nullp
 //              being passed in @in_idx parameter).
 void POPPLER_PRIVATE_EXPORT unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices);
 
+// Convert a PDF Text String to UTF-8
+//   textStr    - PDF text string
+//   returns UTF-8 string.
+std::string POPPLER_PRIVATE_EXPORT TextStringToUtf8(const std::string &textStr);
+
 #endif

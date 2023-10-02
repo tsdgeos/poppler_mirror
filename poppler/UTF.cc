@@ -561,3 +561,35 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
         *indices = idx;
     }
 }
+
+// Convert a PDF Text String to UTF-8
+//   textStr    - PDF text string
+//   returns UTF-8 string.
+std::string TextStringToUtf8(const std::string &textStr)
+{
+    int i, len;
+    const char *s;
+    char *utf8;
+
+    len = textStr.size();
+    s = textStr.c_str();
+    if (GooString::hasUnicodeMarker(textStr)) {
+        uint16_t *utf16;
+        len = len / 2 - 1;
+        utf16 = new uint16_t[len];
+        for (i = 0; i < len; i++) {
+            utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+        }
+        utf8 = utf16ToUtf8(utf16, &len);
+        delete[] utf16;
+    } else {
+        utf8 = (char *)gmalloc(len + 1);
+        for (i = 0; i < len; i++) {
+            utf8[i] = pdfDocEncoding[s[i] & 0xff];
+        }
+        utf8[i] = 0;
+    }
+    std::string utf8_string(utf8);
+    gfree(utf8);
+    return utf8_string;
+}

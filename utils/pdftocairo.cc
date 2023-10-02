@@ -132,6 +132,7 @@ static bool noShrink = false;
 static bool noCenter = false;
 static bool duplex = false;
 static char tiffCompressionStr[16] = "";
+static bool docStruct = false;
 
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
@@ -219,6 +220,10 @@ static const ArgDesc argDesc[] = {
     { "-noshrink", argFlag, &noShrink, 0, "don't shrink pages larger than the paper size" },
     { "-nocenter", argFlag, &noCenter, 0, "don't center pages smaller than the paper size" },
     { "-duplex", argFlag, &duplex, 0, "enable duplex printing" },
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    { "-struct", argFlag, &docStruct, 0, "enable logical document structure" },
+#endif
 
     { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
     { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
@@ -725,11 +730,25 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg, double pag
     cairo_destroy(cr);
 }
 
-static void endPage(GooString *imageFileName)
+static void endPage(GooString *imageFileName, CairoOutputDev *cairoOut, bool isLastPage)
 {
     cairo_status_t status;
+    cairo_t *cr;
 
     if (printing) {
+        if (isLastPage) {
+            cr = cairo_create(surface);
+            cairoOut->setCairo(cr);
+            cairoOut->setPrinting(printing);
+            cairoOut->emitStructTree();
+            cairoOut->setCairo(nullptr);
+            status = cairo_status(cr);
+            if (status) {
+                fprintf(stderr, "cairo error: %s\n", cairo_status_to_string(status));
+            }
+            cairo_destroy(cr);
+        }
+
         cairo_surface_show_page(surface);
 
 #ifdef CAIRO_HAS_WIN32_SURFACE
@@ -907,7 +926,6 @@ int main(int argc, char *argv[])
     int pg, pg_num_len;
     double pg_w, pg_h, tmp, output_w, output_h;
     int num_outputs;
-    bool documentInitialized = false;
 
     // parse args
     Win32Console win32Console(&argc, &argv);
@@ -1026,6 +1044,10 @@ int main(int argc, char *argv[])
         level3 = true;
     }
 
+    if (docStruct && !pdf) {
+        fprintf(stderr, "Error: -struct may only be used with pdf or output.\n");
+        exit(99);
+    }
     if (eps && (origPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
         fprintf(stderr, "Error: page size options may not be used with eps output.\n");
         exit(99);
@@ -1145,8 +1167,15 @@ int main(int argc, char *argv[])
 
     // If our page range selection and document size indicate we're only
     // outputting a single page, ensure that even/odd page selection doesn't
-    // filter out that single page.
-    if (firstPage == lastPage && ((printOnlyEven && firstPage % 2 == 1) || (printOnlyOdd && firstPage % 2 == 0))) {
+    // filter out that single page. Also adjust first and last page so there are no pages
+    // skipped at the start or end of the for loop.
+    if ((printOnlyEven && firstPage % 2 == 1) || (printOnlyOdd && firstPage % 2 == 0)) {
+        firstPage++;
+    }
+    if ((printOnlyEven && lastPage % 2 == 1) || (printOnlyOdd && lastPage % 2 == 0)) {
+        lastPage--;
+    }
+    if (lastPage < firstPage) {
         fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
         exit(99);
     }
@@ -1174,6 +1203,8 @@ int main(int argc, char *argv[])
 #endif
 
     cairoOut = new CairoOutputDev();
+    cairoOut->setLogicalStructure(docStruct);
+
 #ifdef USE_CMS
     cairoOut->setDisplayProfile(profile);
 #endif
@@ -1197,7 +1228,7 @@ int main(int argc, char *argv[])
             pg_h = doc->getPageMediaHeight(pg);
         }
 
-        if (printing && !documentInitialized) {
+        if (printing && pg == firstPage) {
             if (paperWidth < 0 || paperHeight < 0) {
                 paperWidth = (int)ceil(pg_w);
                 paperHeight = (int)ceil(pg_h);
@@ -1235,13 +1266,12 @@ int main(int argc, char *argv[])
         }
         getOutputSize(pg_w, pg_h, &output_w, &output_h);
 
-        if (!documentInitialized) {
+        if (pg == firstPage) {
             beginDocument(fileName, outputFileName, output_w, output_h);
-            documentInitialized = true;
         }
         beginPage(&output_w, &output_h);
         renderPage(doc.get(), cairoOut, pg, pg_w, pg_h, output_w, output_h);
-        endPage(imageFileName);
+        endPage(imageFileName, cairoOut, pg == lastPage);
     }
     endDocument();
 
