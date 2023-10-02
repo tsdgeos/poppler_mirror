@@ -320,9 +320,9 @@ public:
     virtual void type3D1(GfxState * /*state*/, double /*wx*/, double /*wy*/, double /*llx*/, double /*lly*/, double /*urx*/, double /*ury*/) { }
 
     //----- form XObjects
-    virtual void beginForm(Ref /*id*/) { }
+    virtual void beginForm(Object * /* obj */, Ref /*id*/) { }
     virtual void drawForm(Ref /*id*/) { }
-    virtual void endForm(Ref /*id*/) { }
+    virtual void endForm(Object * /* obj */, Ref /*id*/) { }
 
     //----- PostScript XObjects
     virtual void psXObject(Stream * /*psStream*/, Stream * /*level1Stream*/) { }

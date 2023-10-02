@@ -4135,9 +4135,9 @@ void Gfx::opXObject(Object args[], int numArgs)
                 out->drawForm(refObj.getRef());
             } else {
                 Ref ref = refObj.isRef() ? refObj.getRef() : Ref::INVALID();
-                out->beginForm(ref);
+                out->beginForm(&obj1, ref);
                 doForm(&obj1);
-                out->endForm(ref);
+                out->endForm(&obj1, ref);
             }
         }
         if (refObj.isRef() && shouldDoForm) {

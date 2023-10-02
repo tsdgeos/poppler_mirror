@@ -259,6 +259,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
     num = numA;
     duration = -1;
     annots = nullptr;
+    structParents = -1;
 
     pageObj = std::move(pageDict);
 
@@ -279,6 +280,14 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
         error(errSyntaxError, -1, "Page duration object (page {0:d}) is wrong type ({1:s})", num, tmp.getTypeName());
     } else if (tmp.isNum()) {
         duration = tmp.getNum();
+    }
+
+    // structParents
+    const Object &tmp2 = pageObj.dictLookup("StructParents");
+    if (!(tmp2.isInt() || tmp2.isNull())) {
+        error(errSyntaxError, -1, "Page StructParents object (page {0:d}) is wrong type ({1:s})", num, tmp2.getTypeName());
+    } else if (tmp2.isInt()) {
+        structParents = tmp2.getInt();
     }
 
     // annotations

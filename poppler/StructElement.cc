@@ -779,6 +779,15 @@ bool StructElement::getPageRef(Ref &ref) const
     return false;
 }
 
+bool StructElement::getStmRef(Ref &ref) const
+{
+    if (stmRef.isRef()) {
+        ref = stmRef.getRef();
+        return true;
+    }
+    return false;
+}
+
 const char *StructElement::getTypeName() const
 {
     return typeToName(type);

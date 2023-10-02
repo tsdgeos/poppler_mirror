@@ -56,12 +56,12 @@ void MarkedContentOutputDev::endPage()
     pageWidth = pageHeight = 0.0;
 }
 
-void MarkedContentOutputDev::beginForm(Ref id)
+void MarkedContentOutputDev::beginForm(Object * /* obj */, Ref id)
 {
     formStack.push_back(id);
 }
 
-void MarkedContentOutputDev::endForm(Ref id)
+void MarkedContentOutputDev::endForm(Object * /* obj */, Ref id)
 {
     formStack.pop_back();
 }

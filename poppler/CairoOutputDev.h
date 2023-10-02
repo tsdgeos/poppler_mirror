@@ -37,10 +37,16 @@
 #ifndef CAIROOUTPUTDEV_H
 #define CAIROOUTPUTDEV_H
 
+#include <unordered_set>
+
 #include <cairo-ft.h>
 #include "OutputDev.h"
 #include "TextOutputDev.h"
 #include "GfxState.h"
+#include "StructElement.h"
+#include "StructTreeRoot.h"
+#include "Annot.h"
+#include "Link.h"
 
 class PDFDoc;
 class GfxState;
@@ -143,6 +149,12 @@ public:
     // End a page.
     void endPage() override;
 
+    // Must be called before last call to endPage()
+    void emitStructTree();
+
+    void beginForm(Object *obj, Ref id) override;
+    void endForm(Object *obj, Ref id) override;
+
     //----- save/restore graphics state
     void saveState(GfxState *state) override;
     void restoreState(GfxState *state) override;
@@ -201,6 +213,9 @@ public:
     void beginTextObject(GfxState *state) override;
     void endTextObject(GfxState *state) override;
 
+    void beginMarkedContent(const char *name, Dict *properties) override;
+    void endMarkedContent(GfxState *state) override;
+
     //----- image drawing
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
     void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix) override;
@@ -244,6 +259,7 @@ public:
         needFontUpdate = true;
     }
     void copyAntialias(cairo_t *cr, cairo_t *source_cr);
+    void setLogicalStructure(bool logStruct) { this->logicalStruct = logStruct; }
 
     enum Type3RenderType
     {
@@ -270,12 +286,25 @@ protected:
     void setMimeData(GfxState *state, Stream *str, Object *ref, GfxImageColorMap *colorMap, cairo_surface_t *image, int height);
     void fillToStrokePathClip(GfxState *state);
     void alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y);
+    AnnotLink *findLinkObject(const StructElement *elem);
+    void quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double destPageHeight, cairo_rectangle_t *rect);
+    bool appendLinkDestRef(GooString *s, const LinkDest *dest);
+    void appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight);
+    bool beginLinkTag(AnnotLink *annotLink);
+    bool beginLink(const StructElement *linkElem);
+    void getStructElemAttributeString(const StructElement *elem);
+    int getContentElementStructParents(const StructElement *element);
+    bool checkIfStructElementNeeded(const StructElement *element);
+    void emitStructElement(const StructElement *elem);
+    void startFirstPage(int pageNum, GfxState *state, XRef *xrefA);
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
     bool setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image);
 #endif
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
     bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
 #endif
+    static void textStringToQuotedUtf8(const GooString *text, GooString *s);
+    bool isPDF();
 
     std::optional<GfxRGB> fill_color, stroke_color;
     cairo_pattern_t *fill_pattern, *stroke_pattern;
@@ -331,6 +360,14 @@ protected:
     bool has_color;
     double t3_glyph_bbox[4];
     bool prescaleImages;
+    bool logicalStruct;
+    bool firstPage;
+    int pdfPageNum; // page number of the PDF file
+    int cairoPageNum; // page number in cairo output
+    std::vector<std::string> markedContentStack;
+    std::vector<Annot *> annotations;
+    std::set<std::string> emittedDestinations;
+    std::map<int, int> pdfPageToCairoPageMap;
 
     TextPage *textPage; // text for the current page
     ActualText *actualText;
@@ -361,6 +398,19 @@ protected:
         Ref fontRef;
     };
     std::vector<SaveStateElement> saveStateStack;
+
+    std::map<Ref, std::map<std::string, std::unique_ptr<LinkDest>>> destsMap;
+    std::map<Ref, int> pdfPageRefToCairoPageNumMap;
+    std::vector<int> structParentsStack;
+    int currentStructParents;
+
+    struct StructParentsMcidHash
+    {
+        size_t operator()(std::pair<int, int> x) const { return x.first << 16 | x.second; }
+    };
+    std::unordered_set<std::pair<int, int>, StructParentsMcidHash> mcidEmitted; // <structParent, MCID>
+
+    std::unordered_set<const StructElement *> structElementNeeded;
 };
 
 //------------------------------------------------------------------------

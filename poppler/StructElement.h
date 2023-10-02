@@ -242,9 +242,12 @@ public:
 
     int getMCID() const { return c->mcid; }
     Ref getObjectRef() const { return c->ref; }
-    Ref getParentRef() { return isContent() ? parent->getParentRef() : s->parentRef; }
+    Ref getParentRef() const { return isContent() ? parent->getParentRef() : s->parentRef; }
+    StructElement *getParent() const { return parent; } // returns NULL if parent is StructTreeRoot
     bool hasPageRef() const;
     bool getPageRef(Ref &ref) const;
+    bool hasStmRef() const { return stmRef.isRef(); }
+    bool getStmRef(Ref &ref) const;
     StructTreeRoot *getStructTreeRoot() { return treeRoot; }
 
     // Optional element identifier.

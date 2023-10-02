@@ -1757,7 +1757,7 @@ private:
 // Annots
 //------------------------------------------------------------------------
 
-class Annots
+class POPPLER_PRIVATE_EXPORT Annots
 {
 public:
     // Build a list of Annot objects and call setPage on them

@@ -69,6 +69,7 @@
 #include "CairoFontEngine.h"
 #include "CairoRescaleBox.h"
 #include "UnicodeMap.h"
+#include "UTF.h"
 #include "JBIG2Stream.h"
 //------------------------------------------------------------------------
 
@@ -170,6 +171,9 @@ CairoOutputDev::CairoOutputDev()
 
     textPage = nullptr;
     actualText = nullptr;
+    logicalStruct = false;
+    pdfPageNum = 0;
+    cairoPageNum = 0;
 
     // the SA parameter supposedly defaults to false, but Acrobat
     // apparently hardwires it to true
@@ -177,6 +181,7 @@ CairoOutputDev::CairoOutputDev()
     align_stroke_coords = false;
     adjusted_stroke_width = false;
     xref = nullptr;
+    currentStructParents = -1;
 }
 
 CairoOutputDev::~CairoOutputDev()
@@ -232,6 +237,14 @@ void CairoOutputDev::setCairo(cairo_t *c)
     }
 }
 
+bool CairoOutputDev::isPDF()
+{
+    if (cairo) {
+        return cairo_surface_get_type(cairo_get_target(cairo)) == CAIRO_SURFACE_TYPE_PDF;
+    }
+    return false;
+}
+
 void CairoOutputDev::setTextPage(TextPage *text)
 {
     if (textPage) {
@@ -273,10 +286,66 @@ void CairoOutputDev::startDoc(PDFDoc *docA, CairoFontEngine *parentFontEngine)
         fontEngine_owner = true;
     }
     xref = doc->getXRef();
+
+    mcidEmitted.clear();
+    destsMap.clear();
+    emittedDestinations.clear();
+    pdfPageToCairoPageMap.clear();
+    pdfPageRefToCairoPageNumMap.clear();
+    cairoPageNum = 0;
+    firstPage = true;
+}
+
+void CairoOutputDev::textStringToQuotedUtf8(const GooString *text, GooString *s)
+{
+    std::string utf8 = TextStringToUtf8(text->toStr());
+    s->Set("'");
+    for (char c : utf8) {
+        if (c == '\\' || c == '\'') {
+            s->append("\\");
+        }
+        s->append(c);
+    }
+    s->append("'");
+}
+
+// Initialization that needs to be performed after setCairo() is called.
+void CairoOutputDev::startFirstPage(int pageNum, GfxState *state, XRef *xrefA)
+{
+    if (xrefA) {
+        xref = xrefA;
+    }
+
+    if (logicalStruct && isPDF()) {
+        int numDests = doc->getCatalog()->numDestNameTree();
+        for (int i = 0; i < numDests; i++) {
+            const GooString *name = doc->getCatalog()->getDestNameTreeName(i);
+            std::unique_ptr<LinkDest> dest = doc->getCatalog()->getDestNameTreeDest(i);
+            if (dest->isPageRef()) {
+                Ref ref = dest->getPageRef();
+                destsMap[ref].insert({ std::string(name->toStr()), std::move(dest) });
+            }
+        }
+
+        numDests = doc->getCatalog()->numDests();
+        for (int i = 0; i < numDests; i++) {
+            const char *name = doc->getCatalog()->getDestsName(i);
+            std::unique_ptr<LinkDest> dest = doc->getCatalog()->getDestsDest(i);
+            if (dest->isPageRef()) {
+                Ref ref = dest->getPageRef();
+                destsMap[ref].insert({ std::string(name), std::move(dest) });
+            }
+        }
+    }
 }
 
 void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 {
+    if (firstPage) {
+        startFirstPage(pageNum, state, xrefA);
+        firstPage = false;
+    }
+
     /* set up some per page defaults */
     cairo_pattern_destroy(fill_pattern);
     cairo_pattern_destroy(stroke_pattern);
@@ -289,8 +358,52 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     if (textPage) {
         textPage->startPage(state);
     }
-    if (xrefA != nullptr) {
-        xref = xrefA;
+
+    pdfPageNum = pageNum;
+    cairoPageNum++;
+    pdfPageToCairoPageMap[pdfPageNum] = cairoPageNum;
+
+    if (logicalStruct && isPDF()) {
+        Object obj = doc->getPage(pageNum)->getAnnotsObject(xref);
+        Annots *annots = new Annots(doc, pageNum, &obj);
+
+        for (Annot *annot : annots->getAnnots()) {
+            if (annot->getType() == Annot::typeLink) {
+                annot->incRefCnt();
+                annotations.push_back(annot);
+            }
+        }
+
+        delete annots;
+
+        // emit dests
+        Ref *ref = doc->getCatalog()->getPageRef(pageNum);
+        pdfPageRefToCairoPageNumMap[*ref] = cairoPageNum;
+        auto pageDests = destsMap.find(*ref);
+        if (pageDests != destsMap.end()) {
+            for (auto &it : pageDests->second) {
+                GooString quoted_name;
+                GooString name(it.first);
+                textStringToQuotedUtf8(&name, &quoted_name);
+                emittedDestinations.insert(quoted_name.toStr());
+
+                GooString attrib;
+                attrib.appendf("name={0:t} ", &quoted_name);
+                if (it.second->getChangeLeft()) {
+                    attrib.appendf("x={0:g} ", it.second->getLeft());
+                }
+                if (it.second->getChangeTop()) {
+                    attrib.appendf("y={0:g} ", state->getPageHeight() - it.second->getTop());
+                }
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+                cairo_tag_begin(cairo, CAIRO_TAG_DEST, attrib.c_str());
+                cairo_tag_end(cairo, CAIRO_TAG_DEST);
+#endif
+            }
+        }
+
+        currentStructParents = doc->getPage(pageNum)->getStructParents();
     }
 }
 
@@ -299,6 +412,309 @@ void CairoOutputDev::endPage()
     if (textPage) {
         textPage->endPage();
         textPage->coalesce(true, 0, false);
+    }
+}
+
+void CairoOutputDev::beginForm(Object *obj, Ref id)
+{
+    if (logicalStruct && isPDF()) {
+        structParentsStack.push_back(currentStructParents);
+
+        const Object tmp = obj->streamGetDict()->lookup("StructParents");
+        if (!(tmp.isInt() || tmp.isNull())) {
+            error(errSyntaxError, -1, "XObject StructParents object is wrong type ({0:s})", tmp.getTypeName());
+        } else if (tmp.isInt()) {
+            currentStructParents = tmp.getInt();
+        }
+    }
+}
+
+void CairoOutputDev::endForm(Object *obj, Ref id)
+{
+    if (logicalStruct && isPDF()) {
+        currentStructParents = structParentsStack.back();
+        structParentsStack.pop_back();
+    }
+}
+
+void CairoOutputDev::quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double pageHeight, cairo_rectangle_t *rect)
+{
+    double x1, x2, y1, y2;
+    x1 = x2 = quads->getX1(idx);
+    y1 = y2 = quads->getX2(idx);
+
+    x1 = std::min(x1, quads->getX2(idx));
+    x1 = std::min(x1, quads->getX3(idx));
+    x1 = std::min(x1, quads->getX4(idx));
+
+    y1 = std::min(y1, quads->getY2(idx));
+    y1 = std::min(y1, quads->getY3(idx));
+    y1 = std::min(y1, quads->getY4(idx));
+
+    x2 = std::max(x2, quads->getX2(idx));
+    x2 = std::max(x2, quads->getX3(idx));
+    x2 = std::max(x2, quads->getX4(idx));
+
+    y2 = std::max(y2, quads->getY2(idx));
+    y2 = std::max(y2, quads->getY3(idx));
+    y2 = std::max(y2, quads->getY4(idx));
+
+    rect->x = x1;
+    rect->y = pageHeight - y2;
+    rect->width = x2 - x1;
+    rect->height = y2 - y1;
+}
+
+bool CairoOutputDev::appendLinkDestRef(GooString *s, const LinkDest *dest)
+{
+    Ref ref = dest->getPageRef();
+    auto pageNum = pdfPageRefToCairoPageNumMap.find(ref);
+    if (pageNum != pdfPageRefToCairoPageNumMap.end()) {
+        auto cairoPage = pdfPageToCairoPageMap.find(pageNum->second);
+        if (cairoPage != pdfPageToCairoPageMap.end()) {
+            s->appendf("page={0:d} ", cairoPage->second);
+            double destPageHeight = doc->getPageMediaHeight(dest->getPageNum());
+            appendLinkDestXY(s, dest, destPageHeight);
+            return true;
+        }
+    }
+    return false;
+}
+
+void CairoOutputDev::appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight)
+{
+    double x = 0;
+    double y = 0;
+
+    if (dest->getChangeLeft()) {
+        x = dest->getLeft();
+    }
+
+    if (dest->getChangeTop()) {
+        y = dest->getTop();
+    }
+
+    // if pageHeight is 0, dest is remote document, cairo uses PDF coords in this
+    // case. So don't flip coords when pageHeight is 0.
+    s->appendf("pos=[{0:g} {1:g}] ", x, destPageHeight ? destPageHeight - y : y);
+}
+
+bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
+{
+    int page_num = annotLink->getPageNum();
+    double height = doc->getPageMediaHeight(page_num);
+
+    GooString attrib;
+    attrib.appendf("link_page={0:d} ", page_num);
+    attrib.append("rect=[");
+    AnnotQuadrilaterals *quads = annotLink->getQuadrilaterals();
+    if (quads && quads->getQuadrilateralsLength() > 0) {
+        for (int i = 0; i < quads->getQuadrilateralsLength(); i++) {
+            cairo_rectangle_t rect;
+            quadToCairoRect(quads, i, height, &rect);
+            attrib.appendf("{0:g} {1:g} {2:g} {3:g} ", rect.x, rect.y, rect.width, rect.height);
+        }
+    } else {
+        double x1, x2, y1, y2;
+        annotLink->getRect(&x1, &y1, &x2, &y2);
+        attrib.appendf("{0:g} {1:g} {2:g} {3:g} ", x1, height - y2, x2 - x1, y2 - y1);
+    }
+    attrib.append("] ");
+
+    LinkAction *action = annotLink->getAction();
+    if (action->getKind() == actionGoTo) {
+        LinkGoTo *act = static_cast<LinkGoTo *>(action);
+        if (act->isOk()) {
+            const GooString *namedDest = act->getNamedDest();
+            const LinkDest *linkDest = act->getDest();
+            if (namedDest) {
+                GooString name;
+                textStringToQuotedUtf8(namedDest, &name);
+                if (emittedDestinations.count(name.toStr()) == 0) {
+                    return false;
+                }
+                attrib.appendf("dest={0:t} ", &name);
+            } else if (linkDest && linkDest->isOk() && linkDest->isPageRef()) {
+                bool ok = appendLinkDestRef(&attrib, linkDest);
+                if (!ok) {
+                    return false;
+                }
+            }
+        }
+    } else if (action->getKind() == actionGoToR) {
+        LinkGoToR *act = static_cast<LinkGoToR *>(action);
+        attrib.appendf("file='{0:t}' ", act->getFileName());
+        const GooString *namedDest = act->getNamedDest();
+        const LinkDest *linkDest = act->getDest();
+        if (namedDest) {
+            GooString name;
+            textStringToQuotedUtf8(namedDest, &name);
+            if (emittedDestinations.count(name.toStr()) == 0) {
+                return false;
+            }
+            attrib.appendf("dest={0:t} ", &name);
+        } else if (linkDest && linkDest->isOk() && !linkDest->isPageRef()) {
+            auto cairoPage = pdfPageToCairoPageMap.find(linkDest->getPageNum());
+            if (cairoPage != pdfPageToCairoPageMap.end()) {
+                attrib.appendf("page={0:d} ", cairoPage->second);
+                appendLinkDestXY(&attrib, linkDest, 0.0);
+            } else {
+                return false;
+            }
+        }
+    } else if (action->getKind() == actionURI) {
+        LinkURI *act = static_cast<LinkURI *>(action);
+        if (act->isOk()) {
+            attrib.appendf("uri='{0:s}'", act->getURI().c_str());
+        }
+    }
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    cairo_tag_begin(cairo, CAIRO_TAG_LINK, attrib.c_str());
+#endif
+    return true;
+}
+
+AnnotLink *CairoOutputDev::findLinkObject(const StructElement *elem)
+{
+    if (elem->isObjectRef()) {
+        Ref ref = elem->getObjectRef();
+        for (Annot *annot : annotations) {
+            if (annot->getType() == Annot::typeLink && annot->match(&ref)) {
+                return static_cast<AnnotLink *>(annot);
+            }
+        }
+    }
+
+    for (unsigned i = 0; i < elem->getNumChildren(); i++) {
+        AnnotLink *link = findLinkObject(elem->getChild(i));
+        if (link) {
+            return link;
+        }
+    }
+
+    return nullptr;
+}
+
+bool CairoOutputDev::beginLink(const StructElement *linkElem)
+{
+    bool emitted = true;
+    AnnotLink *linkAnnot = findLinkObject(linkElem);
+    if (linkAnnot) {
+        emitted = beginLinkTag(linkAnnot);
+    } else {
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+        cairo_tag_begin(cairo, linkElem->getTypeName(), nullptr);
+#endif
+    }
+    return emitted;
+}
+
+void CairoOutputDev::getStructElemAttributeString(const StructElement *elem)
+{
+    int mcid = 0;
+    GooString attribs;
+    Ref ref = elem->getObjectRef();
+    attribs.appendf("id='{0:d}_{1:d}_{2:d}'", ref.num, ref.gen, mcid);
+    attribs.appendf(" parent='{0:d}_{1:d}'", ref.num, ref.gen);
+}
+
+int CairoOutputDev::getContentElementStructParents(const StructElement *element)
+{
+    int structParents = -1;
+    Ref ref;
+
+    if (element->hasStmRef()) {
+        element->getStmRef(ref);
+        Object xobjectObj = xref->fetch(ref);
+        const Object &spObj = xobjectObj.streamGetDict()->lookup("StructParents");
+        if (spObj.isInt()) {
+            structParents = spObj.getInt();
+        }
+    } else if (element->hasPageRef()) {
+        element->getPageRef(ref);
+        Object pageObj = xref->fetch(ref);
+        const Object &spObj = pageObj.dictLookup("StructParents");
+        if (spObj.isInt()) {
+            structParents = spObj.getInt();
+        }
+    }
+
+    if (structParents == -1) {
+        error(errSyntaxError, -1, "Unable to find StructParents object for StructElement");
+    }
+    return structParents;
+}
+
+bool CairoOutputDev::checkIfStructElementNeeded(const StructElement *element)
+{
+    if (element->isContent() && !element->isObjectRef()) {
+        int structParents = getContentElementStructParents(element);
+        int mcid = element->getMCID();
+        if (mcidEmitted.count(std::pair(structParents, mcid)) > 0) {
+            structElementNeeded.insert(element);
+            return true;
+        }
+    } else if (!element->isContent()) {
+        bool needed = false;
+        for (unsigned i = 0; i < element->getNumChildren(); i++) {
+            if (checkIfStructElementNeeded(element->getChild(i))) {
+                needed = true;
+            }
+        }
+        if (needed) {
+            structElementNeeded.insert(element);
+        }
+        return needed;
+    }
+    return false;
+}
+
+void CairoOutputDev::emitStructElement(const StructElement *element)
+{
+    if (structElementNeeded.count(element) == 0) {
+        return;
+    }
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    if (element->isContent() && !element->isObjectRef()) {
+        int structParents = getContentElementStructParents(element);
+        int mcid = element->getMCID();
+        GooString attribs;
+        attribs.appendf("ref='{0:d}_{1:d}'", structParents, mcid);
+        cairo_tag_begin(cairo, CAIRO_TAG_CONTENT_REF, attribs.c_str());
+        cairo_tag_end(cairo, CAIRO_TAG_CONTENT_REF);
+    } else if (!element->isContent()) {
+        if (element->getType() == StructElement::Link) {
+            bool ok = beginLink(element);
+            if (!ok) {
+                return;
+            }
+        } else {
+            cairo_tag_begin(cairo, element->getTypeName(), "");
+        }
+        for (unsigned i = 0; i < element->getNumChildren(); i++) {
+            emitStructElement(element->getChild(i));
+        }
+        cairo_tag_end(cairo, element->getTypeName());
+    }
+#endif
+}
+
+void CairoOutputDev::emitStructTree()
+{
+    if (logicalStruct && isPDF()) {
+        const StructTreeRoot *root = doc->getStructTreeRoot();
+        if (!root) {
+            return;
+        }
+
+        for (unsigned i = 0; i < root->getNumChildren(); i++) {
+            checkIfStructElementNeeded(root->getChild(i));
+        }
+
+        for (unsigned i = 0; i < root->getNumChildren(); i++) {
+            emitStructElement(root->getChild(i));
+        }
     }
 }
 
@@ -3466,6 +3882,58 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
     }
 
     cairo_pattern_destroy(pattern);
+}
+
+void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
+{
+    if (!logicalStruct || !isPDF()) {
+        return;
+    }
+
+    if (strcmp(name, "Artifact") == 0) {
+        markedContentStack.emplace_back(name);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+        cairo_tag_begin(cairo, name, nullptr);
+#endif
+        return;
+    }
+
+    int mcid = -1;
+    if (properties) {
+        properties->lookupInt("MCID", nullptr, &mcid);
+    }
+
+    if (mcid == -1) {
+        return;
+    }
+
+    GooString attribs;
+    attribs.appendf("tag_name='{0:s}' id='{1:d}_{2:d}'", name, currentStructParents, mcid);
+    mcidEmitted.insert(std::pair<int, int>(currentStructParents, mcid));
+
+    std::string tag;
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    tag = CAIRO_TAG_CONTENT;
+    cairo_tag_begin(cairo, CAIRO_TAG_CONTENT, attribs.c_str());
+#endif
+
+    markedContentStack.push_back(tag);
+}
+
+void CairoOutputDev::endMarkedContent(GfxState *state)
+{
+    if (!logicalStruct || !isPDF()) {
+        return;
+    }
+
+    if (markedContentStack.size() == 0) {
+        return;
+    }
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
+    cairo_tag_end(cairo, markedContentStack.back().c_str());
+#endif
+    markedContentStack.pop_back();
 }
 
 //------------------------------------------------------------------------

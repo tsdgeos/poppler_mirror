@@ -242,6 +242,10 @@ public:
 
     bool hasStandaloneFields() const { return !standaloneFields.empty(); }
 
+    // Get the integer key of the page's entry in the structural parent tree.
+    // Returns -1 if the page dict does not contain a StructParents key.
+    int getStructParents() const { return structParents; }
+
 private:
     // replace xref
     void replaceXRef(XRef *xrefA);
@@ -259,6 +263,7 @@ private:
     Object trans; // page transition
     Object actions; // page additional actions
     double duration; // page duration
+    int structParents; // integer key of page in structure parent tree
     bool ok; // true if page is valid
     mutable std::recursive_mutex mutex;
     // standalone widgets are special FormWidget's inside a Page that *are not*
