@@ -1,3 +1,13 @@
+Release 23.10.0:
+        core:
+         * cairo: update type 3 fonts for cairo 1.18 api
+         * Fix crash on malformed files
+
+        build system:
+         * Make a few more dependencies soft-mandatory
+         * Add more supported gnupg releases
+         * Check if linker supports version scripts
+
 Release 23.09.0:
         core:
          * Add Android-specific font matching functionality
