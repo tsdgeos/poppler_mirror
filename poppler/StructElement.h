@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2018, 2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -391,13 +391,13 @@ private:
         ContentData *c;
     };
 
-    StructElement(Dict *elementDict, StructTreeRoot *treeRootA, StructElement *parentA, std::set<int> &seen);
+    StructElement(Dict *elementDict, StructTreeRoot *treeRootA, StructElement *parentA, RefRecursionChecker &seen);
     StructElement(int mcid, StructTreeRoot *treeRootA, StructElement *parentA);
     StructElement(const Ref ref, StructTreeRoot *treeRootA, StructElement *parentA);
 
     void parse(Dict *elementDict);
-    StructElement *parseChild(const Object *ref, Object *childObj, std::set<int> &seen);
-    void parseChildren(Dict *element, std::set<int> &seen);
+    StructElement *parseChild(const Object *ref, Object *childObj, RefRecursionChecker &seen);
+    void parseChildren(Dict *element, RefRecursionChecker &seen);
     void parseAttributes(Dict *attributes, bool keepExisting = false);
 
     friend class StructTreeRoot;
