@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -2348,21 +2348,23 @@ void CairoOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha
 
         /* convert to a luminocity map */
         uint32_t *source_data = reinterpret_cast<uint32_t *>(cairo_image_surface_get_data(source));
-        /* get stride in units of 32 bits */
-        ptrdiff_t stride = cairo_image_surface_get_stride(source) / 4;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int lum = alpha ? fill_opacity : luminocity(source_data[y * stride + x]);
-                if (transferFunc) {
-                    double lum_in, lum_out;
-                    lum_in = lum / 256.0;
-                    transferFunc->transform(&lum_in, &lum_out);
-                    lum = (int)(lum_out * 255.0 + 0.5);
+        if (source_data) {
+            /* get stride in units of 32 bits */
+            ptrdiff_t stride = cairo_image_surface_get_stride(source) / 4;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int lum = alpha ? fill_opacity : luminocity(source_data[y * stride + x]);
+                    if (transferFunc) {
+                        double lum_in, lum_out;
+                        lum_in = lum / 256.0;
+                        transferFunc->transform(&lum_in, &lum_out);
+                        lum = (int)(lum_out * 255.0 + 0.5);
+                    }
+                    source_data[y * stride + x] = lum << 24;
                 }
-                source_data[y * stride + x] = lum << 24;
             }
+            cairo_surface_mark_dirty(source);
         }
-        cairo_surface_mark_dirty(source);
 
         /* setup the new mask pattern */
         mask = cairo_pattern_create_for_surface(source);
