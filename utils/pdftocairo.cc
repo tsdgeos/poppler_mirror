@@ -635,7 +635,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
 static void beginPage(double *w, double *h)
 {
     if (printing) {
-        if (ps || eps) {
+        if (ps) {
 #ifdef CAIRO_HAS_PS_SURFACE
             if (*w > *h) {
                 cairo_ps_surface_dsc_comment(surface, "%%PageOrientation: Landscape");
