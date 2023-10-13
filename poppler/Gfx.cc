@@ -20,7 +20,7 @@
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
-// Copyright (C) 2007, 2011, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2007, 2011, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>

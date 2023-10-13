@@ -6,7 +6,7 @@
 //
 // Copyright 2013 Igalia S.L.
 // Copyright 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
-// Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
