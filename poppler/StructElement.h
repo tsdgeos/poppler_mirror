@@ -8,7 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2018, 2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 

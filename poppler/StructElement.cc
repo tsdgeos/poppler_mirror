@@ -8,7 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2017-2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
-// Copyright 2018, 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
