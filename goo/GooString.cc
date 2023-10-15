@@ -635,20 +635,3 @@ bool GooString::endsWith(const char *suffix) const
 {
     return endsWith(toStr(), suffix);
 }
-
-GooString *GooString::sanitizedName() const
-{
-    auto *name = new GooString();
-
-    for (const auto c : *this) {
-        if (c <= (char)0x20 || c >= (char)0x7f || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {
-            char buf[8];
-            sprintf(buf, "#%02x", c & 0xff);
-            name->append(buf);
-        } else {
-            name->append(c);
-        }
-    }
-
-    return name;
-}

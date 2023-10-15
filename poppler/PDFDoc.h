@@ -347,6 +347,11 @@ private:
     // insert referenced objects in XRef
     bool markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts);
     bool markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts = nullptr);
+
+    // Sanitizes the string so that it does
+    // not contain any ( ) < > [ ] { } / %
+    static std::string sanitizedName(const std::string &name);
+
     static void writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts);
 
     // Write object header to current file stream and return its offset

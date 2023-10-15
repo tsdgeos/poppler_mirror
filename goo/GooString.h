@@ -256,11 +256,6 @@ public:
     bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
     POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
-
-    // Sanitizes the string so that it does
-    // not contain any ( ) < > [ ] { } / %
-    // The caller owns the return value
-    POPPLER_PRIVATE_EXPORT GooString *sanitizedName() const;
 };
 
 #endif
