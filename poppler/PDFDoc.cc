@@ -1205,6 +1205,23 @@ void PDFDoc::saveCompleteRewrite(OutStream *outStr)
     delete uxref;
 }
 
+std::string PDFDoc::sanitizedName(const std::string &name)
+{
+    std::string sanitizedName;
+
+    for (const auto c : name) {
+        if (c <= (char)0x20 || c >= (char)0x7f || c == ' ' || c == '(' || c == ')' || c == '<' || c == '>' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '%' || c == '#') {
+            char buf[8];
+            sprintf(buf, "#%02x", c & 0xff);
+            sanitizedName.append(buf);
+        } else {
+            sanitizedName.push_back(c);
+        }
+    }
+
+    return sanitizedName;
+}
+
 void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
 {
     bool deleteSet = false;
@@ -1226,9 +1243,7 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
     outStr->printf("<<");
     for (int i = 0; i < dict->getLength(); i++) {
         GooString keyName(dict->getKey(i));
-        GooString *keyNameToPrint = keyName.sanitizedName();
-        outStr->printf("/%s ", keyNameToPrint->c_str());
-        delete keyNameToPrint;
+        outStr->printf("/%s ", sanitizedName(keyName.toStr()).c_str());
         Object obj1 = dict->getValNF(i).copy();
         writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
     }
@@ -1376,9 +1391,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
     }
     case objName: {
         GooString name(obj->getName());
-        GooString *nameToPrint = name.sanitizedName();
-        outStr->printf("/%s ", nameToPrint->c_str());
-        delete nameToPrint;
+        outStr->printf("/%s ", sanitizedName(name.toStr()).c_str());
         break;
     }
     case objNull:
