@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
-// Copyright (C) 2019, 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020, 2022, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
@@ -253,7 +253,6 @@ public:
     static bool hasUnicodeMarker(const std::string &s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
     bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
     static bool hasUnicodeMarkerLE(const std::string &s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
-    bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
     POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
 };

@@ -46,7 +46,7 @@
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Adam Sampson <ats@offog.org>
-// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021-2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
@@ -718,7 +718,7 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
 
 void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
 {
-    bool removeEntry = !value || value->getLength() == 0 || value->hasJustUnicodeMarker();
+    bool removeEntry = !value || value->getLength() == 0 || (value->toStr() == unicodeByteOrderMark);
     if (removeEntry) {
         delete value;
     }
