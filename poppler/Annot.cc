@@ -4183,7 +4183,7 @@ std::unique_ptr<LinkAction> AnnotWidget::getFormAdditionalAction(FormAdditionalA
     return nullptr;
 }
 
-bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType, const GooString &js)
+bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType, const std::string &js)
 {
     Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
 
