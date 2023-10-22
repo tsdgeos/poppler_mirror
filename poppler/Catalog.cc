@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -698,14 +698,14 @@ int NameTree::Entry::cmpEntry(const void *voidEntry, const void *voidOtherEntry)
 void NameTree::init(XRef *xrefA, Object *tree)
 {
     xref = xrefA;
-    std::set<int> seen;
+    RefRecursionChecker seen;
     parse(tree, seen);
     if (entries && length > 0) {
         qsort(entries, length, sizeof(Entry *), Entry::cmpEntry);
     }
 }
 
-void NameTree::parse(const Object *tree, std::set<int> &seen)
+void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
 {
     if (!tree->isDict()) {
         return;
@@ -725,24 +725,16 @@ void NameTree::parse(const Object *tree, std::set<int> &seen)
     // root or intermediate node
     Ref ref;
     const Object kids = tree->getDict()->lookup("Kids", &ref);
-    if (ref != Ref::INVALID()) {
-        const int numObj = ref.num;
-        if (seen.find(numObj) != seen.end()) {
-            error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
-            return;
-        }
-        seen.insert(numObj);
+    if (!seen.insert(ref)) {
+        error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", ref.num);
+        return;
     }
     if (kids.isArray()) {
         for (int i = 0; i < kids.arrayGetLength(); ++i) {
             const Object kid = kids.getArray()->get(i, &ref);
-            if (ref != Ref::INVALID()) {
-                const int numObj = ref.num;
-                if (seen.find(numObj) != seen.end()) {
-                    error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
-                    continue;
-                }
-                seen.insert(numObj);
+            if (!seen.insert(ref)) {
+                error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", ref.num);
+                continue;
             }
             if (kid.isDict()) {
                 parse(&kid, seen);
