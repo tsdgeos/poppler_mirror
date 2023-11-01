@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -38,6 +38,7 @@
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2023 Artemy Gordon <artemy.gordon@gmail.com>
+// Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -79,6 +80,9 @@
 // cairo images to this size. 8192 is sufficient for an A2 sized
 // 300ppi image.
 #define MAX_PRINT_IMAGE_SIZE 8192
+// Cairo has a max size for image surfaces due to their fixed-point
+// coordinate handling, namely INT16_MAX, aka 32767.
+#define MAX_CAIRO_IMAGE_SIZE 32767
 
 #ifdef LOG_CAIRO
 #    define LOG(x) (x)
@@ -2345,21 +2349,23 @@ void CairoOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha
 
         /* convert to a luminocity map */
         uint32_t *source_data = reinterpret_cast<uint32_t *>(cairo_image_surface_get_data(source));
-        /* get stride in units of 32 bits */
-        ptrdiff_t stride = cairo_image_surface_get_stride(source) / 4;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int lum = alpha ? fill_opacity : luminocity(source_data[y * stride + x]);
-                if (transferFunc) {
-                    double lum_in, lum_out;
-                    lum_in = lum / 256.0;
-                    transferFunc->transform(&lum_in, &lum_out);
-                    lum = (int)(lum_out * 255.0 + 0.5);
+        if (source_data) {
+            /* get stride in units of 32 bits */
+            ptrdiff_t stride = cairo_image_surface_get_stride(source) / 4;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int lum = alpha ? fill_opacity : luminocity(source_data[y * stride + x]);
+                    if (transferFunc) {
+                        double lum_in, lum_out;
+                        lum_in = lum / 256.0;
+                        transferFunc->transform(&lum_in, &lum_out);
+                        lum = (int)(lum_out * 255.0 + 0.5);
+                    }
+                    source_data[y * stride + x] = lum << 24;
                 }
-                source_data[y * stride + x] = lum << 24;
             }
+            cairo_surface_mark_dirty(source);
         }
-        cairo_surface_mark_dirty(source);
 
         /* setup the new mask pattern */
         mask = cairo_pattern_create_for_surface(source);
@@ -3090,7 +3096,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
    * so check its underlying color space as well */
   int is_identity_transform;
   is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased && 
+		  (colorMap->getColorSpace()->getMode() == csICCBased &&
 		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
@@ -3656,11 +3662,7 @@ public:
             }
         }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
-        bool needsCustomDownscaling = false;
-#else
-        bool needsCustomDownscaling = true;
-#endif
+        bool needsCustomDownscaling = (width > MAX_CAIRO_IMAGE_SIZE || height > MAX_CAIRO_IMAGE_SIZE);
 
         if (printing) {
             if (width > MAX_PRINT_IMAGE_SIZE || height > MAX_PRINT_IMAGE_SIZE) {
@@ -3679,8 +3681,6 @@ public:
                 if (scaledHeight == 0) {
                     scaledHeight = 1;
                 }
-            } else {
-                needsCustomDownscaling = false;
             }
         }
 
@@ -3701,12 +3701,12 @@ public:
                 getRow(y, dest);
             }
         } else {
-            // // Downscaling required. Create cairo image the size of the
-            // rescaled image and // downscale the source image data into
+            // Downscaling required. Create cairo image the size of the
+            // rescaled image and downscale the source image data into
             // the cairo image. downScaleImage() will call getRow() to read
             // source image data from the image stream. This avoids having
             // to create an image the size of the source image which may
-            // exceed cairo's 32676x32767 image size limit (and also saves a
+            // exceed cairo's 32767x32767 image size limit (and also saves a
             // lot of memory).
             image = cairo_image_surface_create(maskColors ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, scaledWidth, scaledHeight);
             if (cairo_surface_status(image)) {

@@ -140,7 +140,7 @@ public:
 
     LinkAction *getActivationAction(); // The caller should not delete the result
     std::unique_ptr<LinkAction> getAdditionalAction(Annot::FormAdditionalActionsType type);
-    bool setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js);
+    bool setAdditionalAction(Annot::FormAdditionalActionsType t, const std::string &js);
 
     // return the unique ID corresponding to pageNum/fieldNum
     static int encodeID(unsigned pageNum, unsigned fieldNum);

@@ -219,7 +219,7 @@ std::unique_ptr<LinkAction> FormWidget::getAdditionalAction(Annot::FormAdditiona
     return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 
-bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js)
+bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const std::string &js)
 {
     if (!widget) {
         return false;
