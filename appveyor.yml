@@ -22,10 +22,6 @@ build_script:
 - ps: |
     craft --no-cache --src-dir $env:APPVEYOR_BUILD_FOLDER poppler
 
-after_build:
-- ps: |
-    craft --no-cache --src-dir $env:APPVEYOR_BUILD_FOLDER --package poppler
-
 test_script:
 - ps: |
    craft --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
