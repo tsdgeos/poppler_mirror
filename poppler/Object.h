@@ -214,6 +214,11 @@ public:
         type = objString;
         string = stringA;
     }
+    explicit Object(std::string &&stringA)
+    {
+        type = objString;
+        string = new GooString(stringA);
+    }
     Object(ObjType typeA, GooString *stringA)
     {
         assert(typeA == objHexString);
