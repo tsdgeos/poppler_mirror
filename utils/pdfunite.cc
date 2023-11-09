@@ -14,7 +14,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 //
 //========================================================================
