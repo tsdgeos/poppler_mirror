@@ -14,7 +14,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 //
 //========================================================================
@@ -49,7 +49,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                     if (mkey.isString() && mvalue.isRef()) {
                         if (mkey.getString()->cmp(key.getString()) < 0) {
                             newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
-                            newNameArray->add(Object({ mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
+                            newNameArray->add(Object(Ref { mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
                             j += 2;
                         } else if (mkey.getString()->cmp(key.getString()) == 0) {
                             j += 2;
@@ -69,7 +69,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
             if (mkey.isString() && mvalue.isRef()) {
                 newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
-                newNameArray->add(Object({ mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
+                newNameArray->add(Object(Ref { mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
             }
             j += 2;
         }
@@ -82,7 +82,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &value = mergeNameArray.arrayGetNF(i + 1);
             if (key.isString() && value.isRef()) {
                 newNameArray->add(Object(new GooString(key.getString()->c_str())));
-                newNameArray->add(Object({ value.getRef().num + numOffset, value.getRef().gen }));
+                newNameArray->add(Object(Ref { value.getRef().num + numOffset, value.getRef().gen }));
             }
         }
         srcNameTree->add("Names", Object(newNameArray));
@@ -117,7 +117,7 @@ static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
                 error(errSyntaxError, -1, "Fields object is not a Ref.");
                 return false;
             }
-            srcFields.arrayAdd(Object({ value.getRef().num + numOffset, value.getRef().gen }));
+            srcFields.arrayAdd(Object(Ref { value.getRef().num + numOffset, value.getRef().gen }));
         }
     }
     return true;

@@ -1,3 +1,13 @@
+Release 23.11.0:
+        core:
+         * CairoOutputDev: Use internal downscaling algorithm if image exceeds Cairo's maximum dimensions.
+         * Internal code improvements
+         * Fix crash on malformed files
+
+        utils:
+         * pdftocairo: Add option to document logical structure if output is pdf
+         * pdftocairo: EPS output should not contain %%PageOrientation
+
 Release 23.10.0:
         core:
          * cairo: update type 3 fonts for cairo 1.18 api
