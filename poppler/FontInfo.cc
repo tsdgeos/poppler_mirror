@@ -175,6 +175,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     // check for an embedded font
     if (font->getType() == fontType3) {
         emb = true;
+        embRef = Ref::INVALID();
     } else {
         emb = font->getEmbeddedFontID(&embRef);
     }
