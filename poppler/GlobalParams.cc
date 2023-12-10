@@ -1560,7 +1560,9 @@ void GlobalParams::setErrQuiet(bool errQuietA)
 #ifdef ANDROID
 void GlobalParams::setFontDir(const std::string &fontDir)
 {
+#    if defined(WITH_FONTCONFIGURATION_ANDROID)
     displayFontDir = fontDir;
+#    endif
 }
 #endif
 
