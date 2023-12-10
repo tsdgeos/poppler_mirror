@@ -20,17 +20,6 @@
 #include "JPEG2000Stream.h"
 #include <openjpeg.h>
 
-#define OPENJPEG_VERSION_ENCODE(major, minor, micro) (((major)*10000) + ((minor)*100) + ((micro)*1))
-
-#ifdef OPJ_VERSION_MAJOR
-#    define OPENJPEG_VERSION OPENJPEG_VERSION_ENCODE(OPJ_VERSION_MAJOR, OPJ_VERSION_MINOR, OPJ_VERSION_BUILD)
-#else
-// OpenJPEG started providing version macros in version 2.1.
-// If the version macro is not found, set the version to 2.0.0 and
-// assume there will be no API changes in 2.0.x.
-#    define OPENJPEG_VERSION OPENJPEG_VERSION_ENCODE(2, 0, 0)
-#endif
-
 struct JPXStreamPrivate
 {
     opj_image_t *image = nullptr;
@@ -333,11 +322,7 @@ void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, const unsigned char *buf, 
 
     stream = opj_stream_default_create(OPJ_TRUE);
 
-#if OPENJPEG_VERSION >= OPENJPEG_VERSION_ENCODE(2, 1, 0)
     opj_stream_set_user_data(stream, &jpxData, nullptr);
-#else
-    opj_stream_set_user_data(stream, &jpxData);
-#endif
 
     opj_stream_set_read_function(stream, jpxRead_callback);
     opj_stream_set_skip_function(stream, jpxSkip_callback);
