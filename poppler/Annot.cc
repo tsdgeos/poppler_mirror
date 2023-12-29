@@ -3036,7 +3036,7 @@ public:
             *availableWidth -= blockWidth;
         }
 
-        while (newFontNeeded && (!availableWidth || *availableWidth > 0)) {
+        while (newFontNeeded && (!availableWidth || *availableWidth > 0 || (isUnicode && i == 2) || (!isUnicode && i == 0))) {
             if (!form) {
                 // There's no fonts to look for, so just skip the characters
                 i += isUnicode ? 2 : 1;
