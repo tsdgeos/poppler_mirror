@@ -3036,7 +3036,7 @@ public:
             *availableWidth -= blockWidth;
         }
 
-        while (newFontNeeded && (!availableWidth || *availableWidth > 0)) {
+        while (newFontNeeded && (!availableWidth || *availableWidth > 0 || (isUnicode && i == 2) || (!isUnicode && i == 0))) {
             if (!form) {
                 // There's no fonts to look for, so just skip the characters
                 i += isUnicode ? 2 : 1;
@@ -3067,7 +3067,9 @@ public:
                     }
                     // layoutText will always at least layout one character even if it doesn't fit in
                     // the given space which makes sense (except in the case of switching fonts, so we control if we ran out of space here manually)
-                    if (!availableWidth || *availableWidth > 0) {
+                    // we also need to allow the character if we have not layouted anything yet because otherwise we will end up in an infinite loop
+                    // because it is assumed we at least layout one character
+                    if (!availableWidth || *availableWidth > 0 || (isUnicode && i == 2) || (!isUnicode && i == 0)) {
                         i += isUnicode ? 2 : 1;
                         data.emplace_back(outputText.toStr(), auxFontName, blockWidth, charCount);
                     }
