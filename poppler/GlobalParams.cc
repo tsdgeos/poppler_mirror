@@ -1163,11 +1163,16 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
             int faceIndex = 0;
             FcChar8 *fcFamily = nullptr;
             FcChar8 *fcStyle = nullptr;
+            FcCharSet *fcCharSet = nullptr;
             FcPatternGetString(fontSet->fonts[i], FC_FILE, 0, &fcFilePath);
             FcPatternGetInteger(fontSet->fonts[i], FC_INDEX, 0, &faceIndex);
             FcPatternGetString(fontSet->fonts[i], FC_FAMILY, 0, &fcFamily);
             FcPatternGetString(fontSet->fonts[i], FC_STYLE, 0, &fcStyle);
-            if (!fcFilePath || !fcFamily || !fcStyle) {
+            FcPatternGetCharSet(fontSet->fonts[i], FC_CHARSET, 0, &fcCharSet);
+            if (!fcFilePath || !fcFamily || !fcStyle || !fcCharSet) {
+                continue;
+            }
+            if (!FcCharSetHasChar(fcCharSet, uChar)) {
                 continue;
             }
 
