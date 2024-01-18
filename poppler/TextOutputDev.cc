@@ -6003,6 +6003,8 @@ TextPage *TextOutputDev::takeText()
 
     ret = text;
     text = new TextPage(rawOrder, discardDiag);
+    delete actualText;
+    actualText = new ActualText(text);
     return ret;
 }
 
