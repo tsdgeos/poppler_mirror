@@ -6,6 +6,7 @@
 // Copyright (C) 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 // Copyright (C) 2023 Jordan Abrahams-Whitehead <ajordanr@google.com>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // This file is licensed under the GPLv2 or later
 //
