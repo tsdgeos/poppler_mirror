@@ -89,8 +89,12 @@ public:
     // Use CCITT format for CCITT files
     void enableCCITT(bool ccitt) { dumpCCITT = ccitt; }
 
+    // Get the error code
+    // 0 = No error, 1 = Error opening a PDF file, 2 = Error opening an output file, 3 = Error related to PDF permissions, 99 = Other error.
+    int getErrorCode() { return errorCode; }
+
     // Check if file was successfully created.
-    virtual bool isOk() { return ok; }
+    virtual bool isOk() { return errorCode == 0; }
 
     // Does this device use tilingPatternFill()?  If this returns false,
     // tiling pattern fills will be reduced to a series of other drawing
@@ -147,7 +151,7 @@ private:
     bool pageNames; // set to include page number in file names
     int pageNum; // current page number
     int imgNum; // current image number
-    bool ok; // set up ok?
+    int errorCode; // code for any error creating the output files
 };
 
 #endif

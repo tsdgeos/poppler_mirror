@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
     std::optional<GooString> ownerPW, userPW;
     ImageOutputDev *imgOut;
     bool ok;
+    int exitCode = 0;
 
     Win32Console win32Console(&argc, &argv);
 
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
         }
         doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0, true, false, false);
     }
+    exitCode = imgOut->isOk() ? 0 : imgOut->getErrorCode();
     delete imgOut;
-
-    return 0;
+    return exitCode;
 }
