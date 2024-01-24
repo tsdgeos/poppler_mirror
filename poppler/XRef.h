@@ -220,9 +220,11 @@ public:
     // Adds a stream object using AutoFreeMemStream.
     // The function takes ownership over dict and buffer.
     // The buffer should be created using gmalloc().
+    // For stream compression, if the data is already compressed
+    // don't compress again. If it is not compressed, use compress (Flate / zlib)
     // Returns ref to a new object.
-    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
-    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
+    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression);
+    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression);
 
     // Output XRef table to stream
     void writeTableToFile(OutStream *outStr, bool writeAllEntries);
