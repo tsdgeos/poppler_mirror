@@ -1803,6 +1803,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
                     }
                     *p++ = (unsigned char)c;
                 }
+                byteCounter += k;
             } else {
                 collBitmap = readGenericBitmap(true, totalWidth, symHeight, 0, false, false, nullptr, nullptr, nullptr, bmSize).release();
             }
