@@ -6010,6 +6010,7 @@ void AnnotGeometry::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
+        update("IC", Object(objNull));
     }
     invalidateAppearance();
 }
