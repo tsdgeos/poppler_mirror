@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -6010,6 +6010,7 @@ void AnnotGeometry::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
+        update("IC", Object(objNull));
     }
     invalidateAppearance();
 }
@@ -6242,6 +6243,9 @@ void AnnotPolygon::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         Object obj1 = new_color->writeToObject(doc->getXRef());
         update("IC", std::move(obj1));
         interiorColor = std::move(new_color);
+    } else {
+        interiorColor = nullptr;
+        update("IC", Object(objNull));
     }
     invalidateAppearance();
 }

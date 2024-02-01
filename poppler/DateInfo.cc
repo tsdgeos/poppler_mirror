@@ -36,16 +36,14 @@
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
 bool parseDateString(const GooString *date, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
 {
-    Unicode *u;
-    int len = TextStringToUCS4(date->toStr(), &u);
+    std::vector<Unicode> u = TextStringToUCS4(date->toStr());
     GooString s;
-    for (int i = 0; i < len; i++) {
+    for (auto &c : u) {
         // Ignore any non ASCII characters
-        if (u[i] < 128) {
-            s.append(u[i]);
+        if (c < 128) {
+            s.append(c);
         }
     }
-    gfree(u);
     const char *dateString = s.c_str();
 
     if (strlen(dateString) < 2) {

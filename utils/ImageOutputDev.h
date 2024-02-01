@@ -19,7 +19,8 @@
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -89,8 +90,12 @@ public:
     // Use CCITT format for CCITT files
     void enableCCITT(bool ccitt) { dumpCCITT = ccitt; }
 
+    // Get the error code
+    // 0 = No error, 1 = Error opening a PDF file, 2 = Error opening an output file, 3 = Error related to PDF permissions, 99 = Other error.
+    int getErrorCode() const { return errorCode; }
+
     // Check if file was successfully created.
-    virtual bool isOk() { return ok; }
+    virtual bool isOk() { return errorCode == 0; }
 
     // Does this device use tilingPatternFill()?  If this returns false,
     // tiling pattern fills will be reduced to a series of other drawing
@@ -147,7 +152,7 @@ private:
     bool pageNames; // set to include page number in file names
     int pageNum; // current page number
     int imgNum; // current image number
-    bool ok; // set up ok?
+    int errorCode; // code for any error creating the output files
 };
 
 #endif

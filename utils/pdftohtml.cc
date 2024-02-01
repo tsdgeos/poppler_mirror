@@ -99,7 +99,7 @@ static char ownerPassword[33] = "";
 static char userPassword[33] = "";
 static bool printVersion = false;
 
-static GooString *getInfoString(Dict *infoDict, const char *key);
+static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key);
 static GooString *getInfoDate(Dict *infoDict, const char *key);
 
 static char textEncName[128] = "";
@@ -158,8 +158,11 @@ int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName = nullptr;
-    GooString *docTitle = nullptr;
-    GooString *author = nullptr, *keywords = nullptr, *subject = nullptr, *date = nullptr;
+    std::unique_ptr<GooString> docTitle;
+    std::unique_ptr<GooString> author;
+    std::unique_ptr<GooString> keywords;
+    std::unique_ptr<GooString> subject;
+    GooString *date = nullptr;
     GooString *htmlFileName = nullptr;
     HtmlOutputDev *htmlOut = nullptr;
     SplashOutputDev *splashOut = nullptr;
@@ -317,7 +320,7 @@ int main(int argc, char *argv[])
         }
     }
     if (!docTitle) {
-        docTitle = new GooString(htmlFileName);
+        docTitle = std::make_unique<GooString>(htmlFileName);
     }
 
     if (!singleHtml) {
@@ -330,16 +333,6 @@ int main(int argc, char *argv[])
     // write text file
     htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->c_str(), docTitle->c_str(), author ? author->c_str() : nullptr, keywords ? keywords->c_str() : nullptr, subject ? subject->c_str() : nullptr, date ? date->c_str() : nullptr,
                                 rawOrder, firstPage, doOutline);
-    delete docTitle;
-    if (author) {
-        delete author;
-    }
-    if (keywords) {
-        delete keywords;
-    }
-    if (subject) {
-        delete subject;
-    }
     if (date) {
         delete date;
     }
@@ -397,7 +390,7 @@ error:
     return exit_status;
 }
 
-static GooString *getInfoString(Dict *infoDict, const char *key)
+static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
 {
     Object obj;
     // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
@@ -406,7 +399,7 @@ static GooString *getInfoString(Dict *infoDict, const char *key)
     Unicode *unicodeString;
     int unicodeLength;
     // Value HTML escaped and converted to desired encoding
-    GooString *encodedString = nullptr;
+    std::unique_ptr<GooString> encodedString;
     // Is rawString UCS2 (as opposed to pdfDocEncoding)
     bool isUnicode;
 

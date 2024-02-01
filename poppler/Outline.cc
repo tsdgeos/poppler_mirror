@@ -407,15 +407,12 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
     parent = parentA;
     xref = xrefA;
     doc = docA;
-    title = nullptr;
     kids = nullptr;
 
     obj1 = dict->lookup("Title");
     if (obj1.isString()) {
         const GooString *s = obj1.getString();
-        titleLen = TextStringToUCS4(s->toStr(), &title);
-    } else {
-        titleLen = 0;
+        title = TextStringToUCS4(s->toStr());
     }
 
     obj1 = dict->lookup("Dest");
@@ -445,9 +442,6 @@ OutlineItem::~OutlineItem()
         }
         delete kids;
         kids = nullptr;
-    }
-    if (title) {
-        gfree(title);
     }
 }
 
@@ -494,11 +488,9 @@ void OutlineItem::open()
 
 void OutlineItem::setTitle(const std::string &titleA)
 {
-    gfree(title);
-
     Object dict = xref->fetch(ref);
     GooString *g = new GooString(titleA);
-    titleLen = TextStringToUCS4(g->toStr(), &title);
+    title = TextStringToUCS4(g->toStr());
     dict.dictSet("Title", Object(g));
     xref->setModifiedObject(&dict, ref);
 }

@@ -95,7 +95,7 @@ private:
     HtmlString *yxNext; // next string in y-major order
     HtmlString *xyNext; // next string in x-major order
     int fontpos;
-    GooString *htext;
+    std::unique_ptr<GooString> htext;
     int len; // length of text and xRight
     int size; // size of text and xRight arrays
     UnicodeTextDirection dir; // direction (left to right/right to left)

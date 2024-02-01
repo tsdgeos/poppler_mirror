@@ -230,9 +230,9 @@ GooString *HtmlFont::getFullName()
 }
 
 // this method if plain wrong todo
-GooString *HtmlFont::HtmlFilter(const Unicode *u, int uLen)
+std::unique_ptr<GooString> HtmlFont::HtmlFilter(const Unicode *u, int uLen)
 {
-    GooString *tmp = new GooString();
+    auto tmp = std::make_unique<GooString>();
     const UnicodeMap *uMap;
     char buf[8];
     int n;

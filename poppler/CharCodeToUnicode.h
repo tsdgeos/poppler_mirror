@@ -33,11 +33,11 @@
 
 #include <atomic>
 #include <optional>
+#include <vector>
 
 #include "poppler-config.h"
 #include "CharTypes.h"
 
-struct CharCodeToUnicodeString;
 class GooString;
 
 //------------------------------------------------------------------------
@@ -100,18 +100,22 @@ public:
     CharCode getLength() const { return mapLen; }
 
 private:
+    struct CharCodeToUnicodeString
+    {
+        CharCode c;
+        std::vector<Unicode> u;
+    };
     bool parseCMap1(int (*getCharFunc)(void *), void *data, int nBits);
     void addMapping(CharCode code, char *uStr, int n, int offset);
     void addMappingInt(CharCode code, Unicode u);
     CharCodeToUnicode();
     explicit CharCodeToUnicode(const std::optional<std::string> &tagA);
-    CharCodeToUnicode(const std::optional<std::string> &tagA, Unicode *mapA, CharCode mapLenA, bool copyMap, CharCodeToUnicodeString *sMapA, int sMapLenA, int sMapSizeA);
+    CharCodeToUnicode(const std::optional<std::string> &tagA, Unicode *mapA, CharCode mapLenA, bool copyMap, std::vector<CharCodeToUnicodeString> &&sMapA);
 
     const std::optional<std::string> tag;
     Unicode *map;
     CharCode mapLen;
-    CharCodeToUnicodeString *sMap;
-    int sMapLen, sMapSize;
+    std::vector<CharCodeToUnicodeString> sMap;
     std::atomic_int refCnt;
     bool isIdentity;
 };

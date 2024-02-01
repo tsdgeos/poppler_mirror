@@ -56,10 +56,10 @@ void TestInternalOutline::testCreateOutline()
 
 static std::string getTitle(const OutlineItem *item)
 {
-    const Unicode *u = item->getTitle();
+    const std::vector<Unicode> &u = item->getTitle();
     std::string s;
-    for (int i = 0; i < item->getTitleLength(); i++) {
-        s.append(1, (char)u[i]);
+    for (const auto &c : u) {
+        s.append(1, (char)(c));
     }
     return s;
 }

@@ -72,6 +72,7 @@ namespace Poppler {
 
 /* borrowed from kpdf */
 POPPLER_QT6_EXPORT QString unicodeToQString(const Unicode *u, int len);
+POPPLER_QT6_EXPORT QString unicodeToQString(const std::vector<Unicode> &u);
 
 POPPLER_QT6_EXPORT QString UnicodeParsedString(const GooString *s1);
 
