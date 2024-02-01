@@ -104,6 +104,11 @@ QString unicodeToQString(const Unicode *u, int len)
     return QString::fromUtf8(convertedStr.c_str(), convertedStr.getLength());
 }
 
+QString unicodeToQString(const std::vector<Unicode> &u)
+{
+    return unicodeToQString(u.data(), u.size());
+}
+
 QString UnicodeParsedString(const GooString *s1)
 {
     return (s1) ? UnicodeParsedString(s1->toStr()) : QString();
@@ -299,13 +304,7 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         // iterate over every object in 'items'
 
         // 1. create element using outlineItem's title as tagName
-        QString name;
-        const Unicode *uniChar = outlineItem->getTitle();
-        int titleLength = outlineItem->getTitleLength();
-        name = unicodeToQString(uniChar, titleLength);
-        if (name.isEmpty()) {
-            continue;
-        }
+        QString name = unicodeToQString(outlineItem->getTitle());
 
         QDomElement item = docSyn->createElement(name);
         parent->appendChild(item);

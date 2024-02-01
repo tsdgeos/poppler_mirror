@@ -104,6 +104,11 @@ QString unicodeToQString(const Unicode *u, int len)
     return QString::fromUtf8(convertedStr.c_str(), convertedStr.getLength());
 }
 
+QString unicodeToQString(const std::vector<Unicode> &u)
+{
+    return unicodeToQString(u.data(), u.size());
+}
+
 QString UnicodeParsedString(const GooString *s1)
 {
     return (s1) ? UnicodeParsedString(s1->toStr()) : QString();

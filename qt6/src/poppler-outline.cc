@@ -78,7 +78,7 @@ QString OutlineItem::name() const
 
     if (name.isEmpty()) {
         if (const ::OutlineItem *data = m_data->data) {
-            name = unicodeToQString(data->getTitle(), data->getTitleLength());
+            name = unicodeToQString(data->getTitle());
         }
     }
 

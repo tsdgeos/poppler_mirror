@@ -2773,7 +2773,8 @@ PopplerAction *poppler_index_iter_get_action(PopplerIndexIter *iter)
     item = (*iter->items)[iter->index];
     link_action = item->getAction();
 
-    title = unicode_to_char(item->getTitle(), item->getTitleLength());
+    const std::vector<Unicode> &itemTitle = item->getTitle();
+    title = unicode_to_char(itemTitle.data(), itemTitle.size());
 
     action = _poppler_action_new(iter->document, link_action, title);
     g_free(title);

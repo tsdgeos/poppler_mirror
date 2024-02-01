@@ -20,7 +20,8 @@ inline QString outlineItemTitle(OutlineItem *item)
     if (!item) {
         return {};
     }
-    return QString::fromUcs4(item->getTitle(), item->getTitleLength());
+    const std::vector<Unicode> &title = item->getTitle();
+    return QString::fromUcs4(title.data(), title.size());
 }
 
 void TestUtf8Document::checkStrings()

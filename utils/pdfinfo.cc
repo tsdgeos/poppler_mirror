@@ -114,14 +114,12 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
 static void printTextString(const GooString *s, const UnicodeMap *uMap)
 {
-    Unicode *u;
     char buf[8];
-    int len = TextStringToUCS4(s->toStr(), &u);
-    for (int i = 0; i < len; i++) {
-        int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+    std::vector<Unicode> u = TextStringToUCS4(s->toStr());
+    for (const auto &c : u) {
+        int n = uMap->mapUnicode(c, buf, sizeof(buf));
         fwrite(buf, 1, n, stdout);
     }
-    gfree(u);
 }
 
 static void printUCS4String(const Unicode *u, int len, const UnicodeMap *uMap)

@@ -131,16 +131,13 @@ void TestUTFConversion::testUnicodeToAscii7()
     // malloc() always returns 8-byte aligned memory addresses.
     GooString *goo = Poppler::QStringToUnicodeGooString(QString::fromUtf8("®©©©©©©©©©©©©©©©©©©©©")); // clazy:exclude=qstring-allocations
 
-    Unicode *in;
-    const int in_len = TextStringToUCS4(goo->toStr(), &in);
+    const std::vector<Unicode> in = TextStringToUCS4(goo->toStr());
 
     delete goo;
 
     int in_norm_len;
     int *in_norm_idx;
-    Unicode *in_norm = unicodeNormalizeNFKC(in, in_len, &in_norm_len, &in_norm_idx, true);
-
-    free(in);
+    Unicode *in_norm = unicodeNormalizeNFKC(in.data(), in.size(), &in_norm_len, &in_norm_idx, true);
 
     Unicode *out;
     int out_len;
@@ -172,25 +169,24 @@ void TestUTFConversion::testUnicodeLittleEndian()
     // Let's assert both GooString's are different
     QVERIFY(GooUTF16LE != GooUTF16BE);
 
-    Unicode *UCS4fromLE, *UCS4fromBE;
-    const int len1 = TextStringToUCS4(GooUTF16LE, &UCS4fromLE);
-    const int len2 = TextStringToUCS4(GooUTF16BE, &UCS4fromBE);
+    const std::vector<Unicode> UCS4fromLE = TextStringToUCS4(GooUTF16LE);
+    const std::vector<Unicode> UCS4fromBE = TextStringToUCS4(GooUTF16BE);
 
     // len is 4 because TextStringToUCS4() removes the two leading Byte Order Mark (BOM) code points
-    QCOMPARE(len1, len2);
-    QCOMPARE(len1, 4);
+    QCOMPARE(UCS4fromLE.size(), UCS4fromBE.size());
+    QCOMPARE(UCS4fromLE.size(), 4);
 
     // Check that now after conversion, UCS4fromLE and UCS4fromBE are now the same
-    for (int i = 0; i < len1; i++) {
+    for (size_t i = 0; i < UCS4fromLE.size(); i++) {
         QCOMPARE(UCS4fromLE[i], UCS4fromBE[i]);
     }
 
     const QString expected = QStringLiteral("HI!☑");
 
     // Do some final verifications, checking the strings to be "HI!"
-    QVERIFY(*UCS4fromLE == *UCS4fromBE);
-    QVERIFY(compare(UCS4fromLE, expected.utf16(), len1));
-    QVERIFY(compare(UCS4fromBE, expected.utf16(), len1));
+    QVERIFY(UCS4fromLE == UCS4fromBE);
+    QVERIFY(compare(UCS4fromLE.data(), expected.utf16(), UCS4fromLE.size()));
+    QVERIFY(compare(UCS4fromBE.data(), expected.utf16(), UCS4fromBE.size()));
 }
 
 QTEST_GUILESS_MAIN(TestUTFConversion)

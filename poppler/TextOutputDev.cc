@@ -5669,15 +5669,11 @@ void ActualText::end(const GfxState *state)
     // extents of all the glyphs inside the span
 
     if (actualTextNBytes) {
-        Unicode *uni = nullptr;
-        int length;
-
         // now that we have the position info for all of the text inside
         // the marked content span, we feed the "ActualText" back through
         // text->addChar()
-        length = TextStringToUCS4(actualText->toStr(), &uni);
-        text->addChar(state, actualTextX0, actualTextY0, actualTextX1 - actualTextX0, actualTextY1 - actualTextY0, 0, actualTextNBytes, uni, length);
-        gfree(uni);
+        std::vector<Unicode> uni = TextStringToUCS4(actualText->toStr());
+        text->addChar(state, actualTextX0, actualTextY0, actualTextX1 - actualTextX0, actualTextY1 - actualTextY0, 0, actualTextNBytes, uni.data(), uni.size());
     }
 
     delete actualText;

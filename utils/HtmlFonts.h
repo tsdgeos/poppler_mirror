@@ -104,7 +104,7 @@ public:
     }
     const double *getRotMat() const { return rotSkewMat; }
     GooString *getFontName();
-    static GooString *HtmlFilter(const Unicode *u, int uLen); // char* s);
+    static std::unique_ptr<GooString> HtmlFilter(const Unicode *u, int uLen); // char* s);
     bool isEqual(const HtmlFont &x) const;
     bool isEqualIgnoreBold(const HtmlFont &x) const;
     void print() const { printf("font: %s (%s) %d %s%s\n", FontName->c_str(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : ""); };

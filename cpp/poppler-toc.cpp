@@ -61,9 +61,8 @@ toc_item_private::~toc_item_private()
 
 void toc_item_private::load(const OutlineItem *item)
 {
-    const Unicode *title_unicode = item->getTitle();
-    const int title_length = item->getTitleLength();
-    title = detail::unicode_to_ustring(title_unicode, title_length);
+    const std::vector<Unicode> &title_unicode = item->getTitle();
+    title = detail::unicode_to_ustring(title_unicode.data(), title_unicode.size());
     is_open = item->isOpen();
 }
 
