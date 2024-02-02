@@ -40,11 +40,6 @@
 
 #include <config.h>
 
-bool UnicodeIsValid(Unicode ucs4)
-{
-    return (ucs4 < 0x110000) && ((ucs4 & 0xfffff800) != 0xd800) && (ucs4 < 0xfdd0 || ucs4 > 0xfdef) && ((ucs4 & 0xfffe) != 0xfffe);
-}
-
 std::vector<Unicode> UTF16toUCS4(const Unicode *utf16, int utf16Len)
 {
     // count characters
