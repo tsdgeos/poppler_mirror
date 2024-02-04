@@ -44,6 +44,8 @@
 #include "Error.h"
 #include "Win32Console.h"
 
+#include <filesystem>
+
 static bool doList = false;
 static int saveNum = 0;
 static char saveFile[128] = "";
@@ -191,15 +193,15 @@ int main(int argc, char *argv[])
 
         // save all embedded files
     } else if (saveAll) {
-        std::string basePath = savePath;
-        if (!basePath.empty()) {
-            if (basePath.back() != '/') {
-                basePath.push_back('/');
-            }
+        std::filesystem::path basePath = savePath;
+        if (basePath.empty()) {
+            basePath = std::filesystem::current_path();
         }
+        basePath = basePath.lexically_normal();
+
         for (i = 0; i < nFiles; ++i) {
             const std::unique_ptr<FileSpec> &fileSpec = embeddedFiles[i];
-            std::string path;
+            std::string filename;
 
             s1 = fileSpec->getFileName();
             if (!s1) {
@@ -221,18 +223,17 @@ int main(int argc, char *argv[])
                     ++j;
                 }
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
-                path.append(uBuf, n);
+                filename.append(uBuf, n);
             }
 
-            if (path.empty()) {
+            if (filename.empty()) {
                 return 3;
             }
-            if (path.find("../") != std::string::npos) {
+            std::filesystem::path filePath = basePath;
+            filePath = filePath.append(filename).lexically_normal();
+
+            if (filePath.generic_string().find(basePath.generic_string()) != 0) {
                 error(errIO, -1, "Preventing directory traversal");
-                return 3;
-            }
-            if (path[0] == '/' && basePath.empty()) {
-                error(errIO, -1, "Absolute path detected. Please provide a path to save to (-o)");
                 return 3;
             }
 
@@ -240,8 +241,8 @@ int main(int argc, char *argv[])
             if (!embFile || !embFile->isOk()) {
                 return 3;
             }
-            if (!embFile->save(basePath + path)) {
-                error(errIO, -1, "Error saving embedded file as '{0:s}'", path.c_str());
+            if (!embFile->save(filePath.generic_string())) {
+                error(errIO, -1, "Error saving embedded file as '{0:s}'", filePath.c_str());
                 return 2;
             }
         }
@@ -266,6 +267,7 @@ int main(int argc, char *argv[])
         const std::unique_ptr<FileSpec> &fileSpec = embeddedFiles[saveNum - 1];
         std::string targetPath = savePath;
         if (targetPath.empty()) {
+            // The user hasn't given a path to save, just use the filename specified in the pdf as name
             s1 = fileSpec->getFileName();
             if (!s1) {
                 return 3;
@@ -288,10 +290,16 @@ int main(int argc, char *argv[])
                 n = uMap->mapUnicode(u, uBuf, sizeof(uBuf));
                 targetPath.append(uBuf, n);
             }
-            if (targetPath.find("../") != std::string::npos) {
+
+            const std::filesystem::path basePath = std::filesystem::current_path().lexically_normal();
+            std::filesystem::path filePath = basePath;
+            filePath = filePath.append(targetPath).lexically_normal();
+
+            if (filePath.generic_string().find(basePath.generic_string()) != 0) {
                 error(errIO, -1, "Preventing directory traversal");
                 return 3;
             }
+            targetPath = filePath.generic_string();
         }
 
         auto *embFile = fileSpec->getEmbeddedFile();
