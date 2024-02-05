@@ -100,16 +100,17 @@ static const int hexCharVals[256] = {
 // error.
 static bool parseHex(const char *s, int len, unsigned int *val)
 {
-    int i, x;
+    int i, x, v = 0;
 
-    *val = 0;
     for (i = 0; i < len; ++i) {
         x = hexCharVals[s[i] & 0xff];
         if (x < 0) {
+            *val = 0;
             return false;
         }
-        *val = (*val << 4) + x;
+        v = (v << 4) + x;
     }
+    *val = v;
     return true;
 }
 
