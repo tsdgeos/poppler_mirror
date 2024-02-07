@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2012, 2018-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2012, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
@@ -504,7 +504,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len)
             }
         }
         if (!element) {
-            sMap.emplace_back(CharCodeToUnicodeString { c, {} });
+            sMap.emplace_back();
             element = std::ref(sMap.back());
         }
         map[c] = 0;
