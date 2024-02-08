@@ -43,7 +43,10 @@ std::vector<Unicode> UTF16toUCS4(const Unicode *utf16, int utf16Len);
 std::vector<Unicode> POPPLER_PRIVATE_EXPORT TextStringToUCS4(const std::string &textStr);
 
 // check if UCS-4 character is valid
-bool UnicodeIsValid(Unicode ucs4);
+inline bool UnicodeIsValid(Unicode ucs4)
+{
+    return (ucs4 < 0x110000) && ((ucs4 & 0xfffff800) != 0xd800) && (ucs4 < 0xfdd0 || ucs4 > 0xfdef) && ((ucs4 & 0xfffe) != 0xfffe);
+}
 
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);

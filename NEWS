@@ -1,3 +1,14 @@
+Release 24.02.0:
+        core:
+         * Fix reading some JBIG2 streams. Issue #1319
+         * Fix saving some annotation interior color when it's empty
+         * Make searching for fonts when adding annotations a bit faster
+         * Make sure images are compressed when adding them
+         * Small internal code cleanup
+
+        utils:
+         * pdfimages: return exit code 2 when error opening output files
+
 Release 24.01.0:
         core:
          * Don't crash on certain documents on the NSS signature backend
