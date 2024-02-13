@@ -4192,6 +4192,11 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
     }
 
+    const double *ctm = state->getCTM();
+    const double det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
+    // Detect singular matrix (non invertible) to avoid drawing Image in such case
+    const bool singular_matrix = fabs(det) < 0.000001;
+
     // get size
     Object obj1 = dict->lookup("Width");
     if (obj1.isNull()) {
@@ -4572,7 +4577,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
 
         // if drawing is disabled, skip over inline image data
-        if (!ocState || !out->needNonText()) {
+        if (!ocState || !out->needNonText() || singular_matrix) {
             str->reset();
             n = height * ((width * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8);
             for (i = 0; i < n; ++i) {
