@@ -66,6 +66,7 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImages
     dumpJBIG2 = false;
     dumpCCITT = false;
     pageNames = pageNamesA;
+    printFilenames = false;
     imgNum = 0;
     pageNum = 0;
     errorCode = 0;
@@ -689,6 +690,10 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
 
     if (inlineImg) {
         embedStr->restore();
+    }
+
+    if (printFilenames) {
+        printf("%s\n", fileName);
     }
 }
 
