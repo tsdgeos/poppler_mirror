@@ -17,7 +17,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2022 Felix Jung <fxjung@posteo.de>
-// Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
