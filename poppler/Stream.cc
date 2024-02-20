@@ -656,7 +656,7 @@ bool ImageStream::getPixel(unsigned char *pix)
 
 unsigned char *ImageStream::getLine()
 {
-    if (unlikely(inputLine == nullptr)) {
+    if (unlikely(inputLine == nullptr || imgLine == nullptr)) {
         return nullptr;
     }
 
