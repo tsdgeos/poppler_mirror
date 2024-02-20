@@ -2660,7 +2660,9 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
     splash->fillImageMask(&imageMaskSrc, &imgMaskData, width, height, mat, t3GlyphStack != nullptr);
     if (inlineImg) {
         while (imgMaskData.y < height) {
-            imgMaskData.imgStr->getLine();
+            if (!imgMaskData.imgStr->getLine()) {
+                break;
+            }
             ++imgMaskData.y;
         }
     }
