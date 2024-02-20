@@ -5773,7 +5773,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeMono8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + xDest];
-            sp = &src->data[(ySrc + y) * bitmap->rowSize + xSrc];
+            sp = &src->data[(ySrc + y) * src->rowSize + xSrc];
             for (x = 0; x < width; ++x) {
                 *p++ = *sp++;
             }
