@@ -4222,7 +4222,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         goto err1;
     }
 
-    if (width < 1 || height < 1) {
+    if (width < 1 || height < 1 || width > INT_MAX / height) {
         goto err1;
     }
 
