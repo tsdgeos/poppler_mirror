@@ -34,7 +34,7 @@
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
-// Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2012, 2024 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2014 Jason Crain <jason@aquaticape.us>
