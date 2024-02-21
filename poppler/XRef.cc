@@ -935,7 +935,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
                 Object newTrailerDict = parser->getObj();
                 if (newTrailerDict.isDict()) {
                     const Object &obj = newTrailerDict.dictLookupNF("Root");
-                    if (obj.isRef() && (!gotRoot || !needCatalogDict) && rootNum != obj.getRefNum()) {
+                    if (obj.isRef() && (!gotRoot || !needCatalogDict)) {
                         rootNum = obj.getRefNum();
                         rootGen = obj.getRefGen();
                         trailerDict = newTrailerDict.copy();
