@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Andreas Gruenbacher <agruenba@redhat.com>
 // Copyright (C) 2020 mrbax <12640-mrbax@users.noreply.gitlab.freedesktop.org>
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
+// Copyright (C) 2024 Sebastian J. Bronner <waschtl@sbronner.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,6 +67,7 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImages
     dumpJBIG2 = false;
     dumpCCITT = false;
     pageNames = pageNamesA;
+    printFilenames = false;
     imgNum = 0;
     pageNum = 0;
     errorCode = 0;
@@ -689,6 +691,10 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
 
     if (inlineImg) {
         embedStr->restore();
+    }
+
+    if (printFilenames) {
+        printf("%s\n", fileName);
     }
 }
 

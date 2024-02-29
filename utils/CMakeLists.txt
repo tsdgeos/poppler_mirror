@@ -1,3 +1,4 @@
+include(FindGettext)
 
 set(common_srcs
   parseargs.cc
@@ -92,6 +93,12 @@ add_executable(pdfinfo ${pdfinfo_SOURCES})
 target_link_libraries(pdfinfo ${common_libs})
 install(TARGETS pdfinfo DESTINATION bin)
 install(FILES pdfinfo.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+
+if (GETTEXT_FOUND AND ENABLE_SIGNATURES)
+  add_definitions(-DHAVE_GETTEXT)
+  add_definitions(-DCMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LOCALEDIR}")
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/po")
+endif ()
 
 if (ENABLE_SIGNATURES)
   # pdfsig
