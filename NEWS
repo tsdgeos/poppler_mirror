@@ -1,3 +1,15 @@
+Release 24.03.0:
+        core:
+         * Fix opening some malformed files. Issue #1447
+         * Skip drawing image when it has singular matrix. Issue #1114
+         * Fix crash on malformed files
+         * Small internal code cleanup
+
+        utils:
+         * pdfdetach: Fix potential directory traversal
+         * pdfimages: Enable to print filenames to stdout.
+         * pdfsig: Add visible name/date when signing an existing form signature field
+
 Release 24.02.0:
         core:
          * Fix reading some JBIG2 streams. Issue #1319
