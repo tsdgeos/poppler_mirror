@@ -5380,6 +5380,7 @@ void Gfx::restoreState()
     state = state->restore();
     out->restoreState(state);
     stackHeight--;
+    clip = clipNone;
 }
 
 // Create a new state stack, and initialize it with a copy of the
