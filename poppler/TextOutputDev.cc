@@ -3860,7 +3860,8 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     TextLine *line;
     Unicode *s2, *txt, *reordered;
     Unicode *p;
-    Unicode *nextline;
+    TextLine *nextline;
+    Unicode *nextline_txt;
     int nextline_len;
     bool nextlineAfterHyphen = false;
     int txtSize, m, i, j, k;
@@ -3969,11 +3970,22 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 line->normalized = unicodeNormalizeNFKC(line->text, line->len, &line->normalized_len, &line->normalized_idx, true);
             }
 
-            if (matchAcrossLines && line->next && !line->next->normalized) {
-                line->next->normalized = unicodeNormalizeNFKC(line->next->text, line->next->len, &line->next->normalized_len, &line->next->normalized_idx, true);
-            }
             nextline = nullptr;
+            nextline_txt = nullptr;
             nextline_len = 0;
+            if (line->next) {
+                nextline = line->next;
+            } else {
+                // set nextline to first line of next block
+                int ind = i + (backward ? -1 : 1);
+                if ((backward && ind >= 0) || (!backward && ind < nBlocks)) {
+                    nextline = blocks[ind]->lines;
+                }
+            }
+
+            if (matchAcrossLines && nextline && !nextline->normalized) {
+                nextline->normalized = unicodeNormalizeNFKC(nextline->text, nextline->len, &nextline->normalized_len, &nextline->normalized_idx, true);
+            }
 
             // convert the line to uppercase
             m = line->normalized_len;
@@ -3988,8 +4000,8 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     ignoreDiacritics = false;
                 }
 
-                if (matchAcrossLines && line->next && !line->next->ascii_translation) {
-                    unicodeToAscii7(line->next->normalized, line->next->normalized_len, &line->next->ascii_translation, &line->next->ascii_len, line->next->normalized_idx, &line->next->ascii_idx);
+                if (matchAcrossLines && nextline && !nextline->ascii_translation) {
+                    unicodeToAscii7(nextline->normalized, nextline->normalized_len, &nextline->ascii_translation, &nextline->ascii_len, nextline->normalized_idx, &nextline->ascii_idx);
                 }
             }
             if (!caseSensitive) {
@@ -4004,11 +4016,11 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                         txt[k] = unicodeToUpper(line->normalized[k]);
                     }
                 }
-                if (matchAcrossLines && line->next) {
-                    nextline_len = ignoreDiacritics ? line->next->ascii_len : line->next->normalized_len;
-                    nextline = (Unicode *)gmallocn(nextline_len, sizeof(Unicode));
+                if (matchAcrossLines && nextline) {
+                    nextline_len = ignoreDiacritics ? nextline->ascii_len : nextline->normalized_len;
+                    nextline_txt = (Unicode *)gmallocn(nextline_len, sizeof(Unicode));
                     for (k = 0; k < nextline_len; ++k) {
-                        nextline[k] = ignoreDiacritics ? unicodeToUpper(line->next->ascii_translation[k]) : unicodeToUpper(line->next->normalized[k]);
+                        nextline_txt[k] = ignoreDiacritics ? unicodeToUpper(nextline->ascii_translation[k]) : unicodeToUpper(nextline->normalized[k]);
                     }
                 }
             } else {
@@ -4018,20 +4030,20 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     txt = line->normalized;
                 }
 
-                if (matchAcrossLines && line->next) {
-                    nextline_len = ignoreDiacritics ? line->next->ascii_len : line->next->normalized_len;
-                    nextline = ignoreDiacritics ? line->next->ascii_translation : line->next->normalized;
+                if (matchAcrossLines && nextline) {
+                    nextline_len = ignoreDiacritics ? nextline->ascii_len : nextline->normalized_len;
+                    nextline_txt = ignoreDiacritics ? nextline->ascii_translation : nextline->normalized;
                 }
             }
 
             // search each position in this line
             j = backward ? m - len : 0;
             p = txt + j;
-            while (backward ? j >= 0 : j <= m - (nextline ? 1 : len)) {
+            while (backward ? j >= 0 : j <= m - (nextline_txt ? 1 : len)) {
                 bool wholeWordStartIsOk, wholeWordEndIsOk;
                 if (wholeWord) {
                     wholeWordStartIsOk = j == 0 || !unicodeTypeAlphaNum(txt[j - 1]);
-                    if (nextline) {
+                    if (nextline_txt) {
                         wholeWordEndIsOk = true; // word end may be in next line, so we'll check it later
                     } else {
                         wholeWordEndIsOk = j + len == m || !unicodeTypeAlphaNum(txt[j + len]);
@@ -4048,7 +4060,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                         bool last_char_of_search_term = k == len - 1;
                         bool match_started = (bool)k;
 
-                        if (p[k] != s2[k] || (nextline && last_char_of_line && !last_char_of_search_term)) {
+                        if (p[k] != s2[k] || (nextline_txt && last_char_of_line && !last_char_of_search_term)) {
                             // now check if the comparison failed at the end-of-line hyphen,
                             // and if so, keep on comparing at the next line
                             nextlineAfterHyphen = false;
@@ -4065,7 +4077,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                             }
 
                             for (; n < nextline_len && k < len; ++k, ++n) {
-                                if (nextline[n] != s2[k]) {
+                                if (nextline_txt[n] != s2[k]) {
                                     if (!spaceConsumedByNewline && !n && UnicodeIsWhitespace(s2[k])) {
                                         n = -1;
                                         spaceConsumedByNewline = true;
@@ -4079,9 +4091,9 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                     }
 
                     found_it = k == len;
-                    if (found_it && nextline && wholeWord) { // check word end for nextline case
+                    if (found_it && nextline_txt && wholeWord) { // check word end for nextline case
                         if (n) { // Match ended at next line
-                            wholeWordEndIsOk = n == nextline_len || !unicodeTypeAlphaNum(nextline[n]);
+                            wholeWordEndIsOk = n == nextline_len || !unicodeTypeAlphaNum(nextline_txt[n]);
                         } else { // Match ended on same line
                             wholeWordEndIsOk = j + len == m || !unicodeTypeAlphaNum(txt[j + len]);
                         }
@@ -4102,14 +4114,14 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                         int normStart, normAfterEnd;
                         if (ignoreDiacritics) {
                             normStart = line->ascii_idx[j];
-                            if (nextline) {
+                            if (nextline_txt) {
                                 normAfterEnd = line->ascii_idx[j + k - n];
                             } else {
                                 normAfterEnd = line->ascii_idx[j + len - 1] + 1;
                             }
                         } else {
                             normStart = line->normalized_idx[j];
-                            if (nextline) {
+                            if (nextline_txt) {
                                 normAfterEnd = line->normalized_idx[j + k - n];
                             } else {
                                 normAfterEnd = line->normalized_idx[j + len - 1] + 1;
@@ -4142,7 +4154,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                                         }
 
                                         if (continueMatch) {
-                                            adjustRotation(line->next, 0, n, &xMin2, &xMax2, &yMin2, &yMax2);
+                                            adjustRotation(nextline, 0, n, &xMin2, &xMax2, &yMin2, &yMax2);
                                             continueMatch->x1 = xMin2;
                                             continueMatch->y1 = yMax2;
                                             continueMatch->x2 = xMax2;
@@ -4169,8 +4181,8 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 }
             }
 
-            if (nextline && nextline != line->next->ascii_translation && nextline != line->next->normalized) {
-                gfree(nextline);
+            if (nextline_txt && nextline_txt != nextline->ascii_translation && nextline_txt != nextline->normalized) {
+                gfree(nextline_txt);
             }
         }
     }
