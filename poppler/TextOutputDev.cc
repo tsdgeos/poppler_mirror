@@ -4805,6 +4805,16 @@ bool TextSelectionPainter::hasGlyphLessFont()
 
 void TextSelectionPainter::endPage()
 {
+    /* Take a shortcut for glyphless fonts (eg. Tesseract scanned documents)
+     * cause we just paint a transparent fill over existent text.Issue #157 */
+    if (hasGlyphLessFont()) {
+        state->setFillOpacity(glyphlessSelectionOpacity);
+        out->updateFillOpacity(state);
+        out->fill(state);
+        out->endPage();
+        return;
+    }
+
     out->fill(state);
 
     out->saveState(state);
@@ -4813,12 +4823,6 @@ void TextSelectionPainter::endPage()
     state->clearPath();
 
     state->setFillColor(glyph_color);
-
-    bool usingGlyphLessFont = hasGlyphLessFont();
-    /* Paint transparent selection when using tesseract glyphless font. Issue #157 */
-    if (usingGlyphLessFont) {
-        state->setFillOpacity(glyphlessSelectionOpacity);
-    }
 
     out->updateFillColor(state);
 
@@ -4844,13 +4848,11 @@ void TextSelectionPainter::endPage()
             GooString *string = new GooString((char *)sel->word->charcode, fEnd - begin);
             out->beginString(state, string);
 
-            if (!usingGlyphLessFont) {
-                for (int j = begin; j < fEnd; j++) {
-                    if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1]) {
-                        continue;
-                    }
-                    out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0, sel->word->charcode[j], 1, nullptr, 0);
+            for (int j = begin; j < fEnd; j++) {
+                if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1]) {
+                    continue;
                 }
+                out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0, sel->word->charcode[j], 1, nullptr, 0);
             }
             out->endString(state);
             delete string;
