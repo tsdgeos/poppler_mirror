@@ -1611,33 +1611,33 @@ void TextBlock::addWord(TextWord *word)
 
 void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
 {
-    TextWord *word0, *word1, *word2, *bestWord0, *bestWord1, *lastWord;
-    TextLine *line, *line0, *line1;
-    int poolMinBaseIdx, startBaseIdx, minBaseIdx, maxBaseIdx;
-    int baseIdx, bestWordBaseIdx, idx0, idx1;
-    double minBase, maxBase;
-    double fontSize, wordSpacing, delta, priDelta, secDelta;
-    TextLine **lineArray;
-    bool found, overlap;
-    int col1, col2;
-    int i, j, k;
-
     // discard duplicated text (fake boldface, drop shadows)
-    for (idx0 = pool->minBaseIdx; idx0 <= pool->maxBaseIdx; ++idx0) {
-        word0 = pool->getPool(idx0);
+    for (int idx0 = pool->minBaseIdx; idx0 <= pool->maxBaseIdx; ++idx0) {
+        // Get the first LHS word from the pool
+        TextWord *word0 = pool->getPool(idx0);
+
         while (word0) {
-            priDelta = dupMaxPriDelta * word0->fontSize;
-            secDelta = dupMaxSecDelta * word0->fontSize;
-            maxBaseIdx = pool->getBaseIdx(word0->base + secDelta);
-            found = false;
-            word1 = word2 = nullptr; // make gcc happy
-            for (idx1 = idx0; idx1 <= maxBaseIdx; ++idx1) {
-                if (idx1 == idx0) {
-                    word1 = word0;
-                    word2 = word0->next;
+            double priDelta = dupMaxPriDelta * word0->fontSize;
+            double secDelta = dupMaxSecDelta * word0->fontSize;
+            double xDelta = ((rot == 0) || (rot == 2)) ? priDelta : secDelta;
+            double yDelta = ((rot == 0) || (rot == 2)) ? secDelta : priDelta;
+
+            int maxBaseIdx = pool->getBaseIdx(word0->base + secDelta);
+
+            for (int idx1 = idx0; idx1 <= maxBaseIdx; idx1++) {
+                TextWord *prevWord;
+                /* In case the RHS word is from the same pool as the LHS word,
+                 * start the inner loop with the word following the LHS word.
+                 * Otherwise, start with the second word from the subsequent pools
+                 * - the first word is compared at the end.
+                 */
+                if (idx0 == idx1) {
+                    prevWord = word0;
                 } else {
-                    word1 = nullptr;
-                    word2 = pool->getPool(idx1);
+                    prevWord = pool->getPool(idx1);
+                    if (!prevWord) {
+                        continue;
+                    }
                 }
                 TextWord *word1 = prevWord->next;
 
@@ -1645,39 +1645,50 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                     return std::equal(w1.chars.begin(), w1.chars.end(), w2.chars.begin(), w2.chars.end(), //
                                       [](auto c1, auto c2) { return c1.text == c2.text; });
                 };
-                for (; word2; word1 = word2, word2 = word2->next) {
-                    if (equalText(*word0, *word2)) {
-                        switch (rot) {
-                        case 0:
-                        case 2:
-                            found = fabs(word0->xMin - word2->xMin) < priDelta && fabs(word0->xMax - word2->xMax) < priDelta && fabs(word0->yMin - word2->yMin) < secDelta && fabs(word0->yMax - word2->yMax) < secDelta;
-                            break;
-                        case 1:
-                        case 3:
-                            found = fabs(word0->xMin - word2->xMin) < secDelta && fabs(word0->xMax - word2->xMax) < secDelta && fabs(word0->yMin - word2->yMin) < priDelta && fabs(word0->yMax - word2->yMax) < priDelta;
-                            break;
-                        }
+                auto match = [&equalText, xDelta, yDelta](const TextWord &w1, const TextWord &w2) -> bool {
+                    if (!equalText(w1, w2)) {
+                        return false;
                     }
-                    if (found) {
-                        break;
+                    return fabs(w1.xMin - w2.xMin) < xDelta && fabs(w1.xMax - w2.xMax) < xDelta //
+                            && fabs(w1.yMin - w2.yMin) < yDelta && fabs(w1.yMax - w2.yMax) < yDelta;
+                };
+
+                while (word1) {
+                    if (match(*word0, *word1)) {
+                        prevWord->next = word1->next;
+                        delete word1;
+                        word1 = prevWord->next;
+                    } else {
+                        prevWord = word1;
+                        word1 = word1->next;
                     }
                 }
-                if (found) {
-                    break;
+
+                // Check the first word from each subsequent pool
+                if (idx0 != idx1) {
+                    word1 = pool->getPool(idx1);
+                }
+                if (word1 && match(*word0, *word1)) {
+                    pool->setPool(idx1, word1->next);
+                    delete word1;
                 }
             }
-            if (found) {
-                if (word1) {
-                    word1->next = word2->next;
-                } else {
-                    pool->setPool(idx1, word2->next);
-                }
-                delete word2;
-            } else {
-                word0 = word0->next;
-            }
+
+            word0 = word0->next;
         }
     }
+
+    TextWord *word0, *word1;
+    TextWord *bestWord0, *bestWord1, *lastWord;
+    TextLine *line, *line0, *line1;
+    TextLine **lineArray;
+    int poolMinBaseIdx, startBaseIdx, minBaseIdx, maxBaseIdx;
+    int baseIdx, bestWordBaseIdx;
+    double minBase, maxBase;
+    double fontSize, wordSpacing, delta;
+    bool overlap;
+    int col1, col2;
+    int i, j, k;
 
     // build the lines
     curLine = nullptr;
