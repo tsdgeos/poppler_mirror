@@ -5539,17 +5539,11 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             (*outputFunc)(outputStream, s.c_str(), s.getLength());
 
             // print one or more returns if necessary
-            if (i == nFrags - 1 || frags[i + 1].col < col || fabs(frags[i + 1].base - frag->base) > maxIntraLineDelta * frag->line->words->fontSize) {
-                if (i < nFrags - 1) {
-                    d = (int)((frags[i + 1].base - frag->base) / frag->line->words->fontSize);
-                    if (d < 1) {
-                        d = 1;
-                    } else if (d > 5) {
-                        d = 5;
-                    }
-                } else {
-                    d = 1;
-                }
+            if (i == nFrags - 1) {
+                (*outputFunc)(outputStream, eol, eolLen);
+            } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag->base) > maxIntraLineDelta * frag->line->words->fontSize) {
+                d = (int)((frags[i + 1].base - frag->base) / frag->line->words->fontSize);
+                d = std::clamp(d, 1, 5);
                 for (; d > 0; --d) {
                     (*outputFunc)(outputStream, eol, eolLen);
                 }
