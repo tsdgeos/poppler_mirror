@@ -43,6 +43,7 @@
 
 #include "poppler-config.h"
 #include "Object.h"
+#include "PDFRectangle.h"
 #include "poppler_private_export.h"
 
 class Dict;
@@ -57,28 +58,6 @@ class Gfx;
 class FormPageWidgets;
 class Form;
 class FormField;
-
-//------------------------------------------------------------------------
-
-class PDFRectangle
-{
-public:
-    double x1, y1, x2, y2;
-
-    PDFRectangle() { x1 = y1 = x2 = y2 = 0; }
-    PDFRectangle(double x1A, double y1A, double x2A, double y2A)
-    {
-        x1 = x1A;
-        y1 = y1A;
-        x2 = x2A;
-        y2 = y2A;
-    }
-    bool isValid() const { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
-    bool contains(double x, double y) const { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
-    void clipTo(PDFRectangle *rect);
-
-    bool operator==(const PDFRectangle &rect) const { return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2; }
-};
 
 //------------------------------------------------------------------------
 // PageAttrs

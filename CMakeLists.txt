@@ -719,6 +719,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PDFDocBuilder.h
     poppler/PDFDocEncoding.h
     poppler/PDFDocFactory.h
+    poppler/PDFRectangle.h
     poppler/PopplerCache.h
     poppler/ProfileData.h
     poppler/Rendition.h

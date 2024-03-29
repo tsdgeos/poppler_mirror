@@ -66,29 +66,42 @@
 // PDFRectangle
 //------------------------------------------------------------------------
 
-void PDFRectangle::clipTo(PDFRectangle *rect)
-{
-    if (x1 < rect->x1) {
-        x1 = rect->x1;
-    } else if (x1 > rect->x2) {
-        x1 = rect->x2;
-    }
-    if (x2 < rect->x1) {
-        x2 = rect->x1;
-    } else if (x2 > rect->x2) {
-        x2 = rect->x2;
-    }
-    if (y1 < rect->y1) {
-        y1 = rect->y1;
-    } else if (y1 > rect->y2) {
-        y1 = rect->y2;
-    }
-    if (y2 < rect->y1) {
-        y2 = rect->y1;
-    } else if (y2 > rect->y2) {
-        y2 = rect->y2;
-    }
-}
+namespace {
+namespace testing {
+static_assert(PDFRectangle {} == PDFRectangle {});
+static_assert(PDFRectangle { 0, 0, 1, 1 } == PDFRectangle { 0, 0, 1, 1 });
+static_assert(PDFRectangle { 0, 0, 1, 1 }.isValid());
+static_assert(!PDFRectangle { 0, 0, 0, 0 }.isValid());
+static_assert(PDFRectangle { 0, 0, 2, 2 }.contains(1, 1));
+static_assert(!PDFRectangle { 0, 0, 1, 2 }.contains(2, 1));
+
+constexpr PDFRectangle r1 { 0, 0, 5, 5 };
+constexpr PDFRectangle r2 { 2, 2, 4, 4 };
+constexpr PDFRectangle r3 { 0, 3, 3, 3 };
+constexpr PDFRectangle r4 { 2, 3, 3, 3 };
+static_assert(r1.isValid());
+static_assert([]() {
+    auto r = r1;
+    r.clipTo(&r1);
+    return r == r1;
+}());
+static_assert([]() {
+    auto r = r1;
+    r.clipTo(&r2);
+    return r == r2;
+}());
+static_assert([]() {
+    auto r = r2;
+    r.clipTo(&r1);
+    return r == r2;
+}());
+static_assert([]() {
+    auto r = r2;
+    r.clipTo(&r3);
+    return r == r4;
+}());
+} // namespace testing
+} // namespace
 
 //------------------------------------------------------------------------
 // PageAttrs
