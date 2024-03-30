@@ -92,7 +92,6 @@ void TestActualText::checkAllOrientations()
     std::unique_ptr<Poppler::Page> page { doc->page(pageNr) };
     QVERIFY(page);
 
-    QEXPECT_FAIL("Landscape", "Cropbox not rotated", Continue);
     QCOMPARE(page->text(area), text);
 }
 
