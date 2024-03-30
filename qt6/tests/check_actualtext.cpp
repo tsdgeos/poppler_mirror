@@ -13,6 +13,8 @@ private slots:
     void checkActualText1();
     void checkActualText2();
     void checkActualText2_data();
+    void checkAllOrientations();
+    void checkAllOrientations_data();
 
 private:
     void checkActualText(Poppler::Document &doc, const QRectF &area, const QString &text);
@@ -67,6 +69,54 @@ void TestActualText::checkActualText2_data()
     QTest::newRow("last character") << QRectF { 320.0, 90.0, 8.0, 20.0 } << QStringLiteral("g");
     QTest::newRow("middle 'fox'") << QRectF { 190.0, 90.0, 15.0, 20.0 } << QStringLiteral("fox");
     QTest::newRow("middle 'x'") << QRectF { 200.0, 90.0, 5.0, 20.0 } << QStringLiteral("x");
+}
+
+void TestActualText::checkAllOrientations()
+{
+    QFETCH(int, pageNr);
+    QFETCH(QRectF, area);
+    QFETCH(QString, text);
+
+    QString path { TESTDATADIR "/unittestcases/orientation.pdf" };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(path) };
+    QVERIFY(doc);
+
+    std::unique_ptr<Poppler::Page> page { doc->page(pageNr) };
+    QVERIFY(page);
+
+    QEXPECT_FAIL("Landscape", "Cropbox not rotated", Continue);
+    QCOMPARE(page->text(area), text);
+}
+
+void TestActualText::checkAllOrientations_data()
+{
+    QTest::addColumn<int>("pageNr");
+    QTest::addColumn<QRectF>("area");
+    QTest::addColumn<QString>("text");
+
+    QTest::newRow("Portrait") << 0 << QRectF {} << QStringLiteral("Portrait");
+    QTest::newRow("Landscape") << 1 << QRectF {} << QStringLiteral("Landscape");
+    QTest::newRow("Upside down") << 2 << QRectF {} << QStringLiteral("Upside down");
+    QTest::newRow("Seacape") << 3 << QRectF {} << QStringLiteral("Seascape");
+
+    QTest::newRow("Portrait A4 rect") << 0 << QRectF { 0, 0, 595, 842 } << QStringLiteral("Portrait");
+    QTest::newRow("Landscape A4 rect") << 1 << QRectF { 0, 0, 842, 595 } << QStringLiteral("Landscape");
+    QTest::newRow("Upside down A4 rect") << 2 << QRectF { 0, 0, 595, 842 } << QStringLiteral("Upside down");
+    QTest::newRow("Seacape A4 rect") << 3 << QRectF { 0, 0, 842, 595 } << QStringLiteral("Seascape");
+
+    QTest::newRow("Portrait line rect") << 0 << QRectF { 30, 30, 60, 20 } << QStringLiteral("Portrait");
+    QTest::newRow("Landscape line rect") << 1 << QRectF { 790, 30, 20, 80 } << QStringLiteral("Landscape");
+    QTest::newRow("Upside down line rect") << 2 << QRectF { 485, 790, 75, 20 } << QStringLiteral("Upside down");
+    QTest::newRow("Seacape line rect") << 3 << QRectF { 30, 500, 20, 70 } << QStringLiteral("Seascape");
+
+    QTest::newRow("Portrait small rect B") << 0 << QRectF { 30, 35, 10, 10 } << QStringLiteral("P");
+    QTest::newRow("Portrait small rect E") << 0 << QRectF { 80, 35, 10, 10 } << QStringLiteral("t");
+    QTest::newRow("Landscape small rect B") << 1 << QRectF { 800, 30, 10, 10 } << QStringLiteral("L");
+    QTest::newRow("Landscape small rect E") << 1 << QRectF { 800, 90, 10, 10 } << QStringLiteral("e");
+    QTest::newRow("Upside down small rect B") << 2 << QRectF { 550, 800, 10, 10 } << QStringLiteral("U");
+    QTest::newRow("Upside down small rect E") << 2 << QRectF { 485, 800, 10, 10 } << QStringLiteral("n");
+    QTest::newRow("Seacape small rect B") << 3 << QRectF { 40, 550, 10, 10 } << QStringLiteral("S");
+    QTest::newRow("Seacape small rect E") << 3 << QRectF { 40, 510, 10, 10 } << QStringLiteral("p");
 }
 
 QTEST_GUILESS_MAIN(TestActualText)
