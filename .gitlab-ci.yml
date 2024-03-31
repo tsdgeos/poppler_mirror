@@ -97,12 +97,16 @@ build_mingw64_fedora40:
     - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -G Ninja ..
     - ninja
 
-build_clazy_clang16:
+build_clazy_fedora40:
   stage: build
+  image: fedora:40
+  before_script:
+    - dnf install -y 'dnf-command(builddep)'
+    - dnf builddep -y poppler
+    - dnf -y install clazy ninja-build glibc-langpack-en
   script:
-    - apt-get install --yes --no-install-recommends clazy clang-16
     - mkdir -p build && cd build
-    - CC=clang-16 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -DENABLE_GPGME=OFF -G Ninja ..
+    - CC=clang-18 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
 build_qt5_android:

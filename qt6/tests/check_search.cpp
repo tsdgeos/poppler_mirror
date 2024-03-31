@@ -357,8 +357,8 @@ void TestSearch::testAcrossLinesSearch()
     QCOMPARE(page0->search(across_block, l, t, r, b, direction, mode2W), true);
 
     // Now for completeness, we will match the full text of two lines
-    const QString full2lines = QString::fromUtf8(
-            "Las pruebas se practicarán en vista pública, si bien, excepcionalmente, el Tribunal podrá acordar, mediante providencia, que determinadas pruebas se celebren fuera del acto de juicio"); // clazy:exclude=qstring-allocations
+    const QString full2lines = QString::fromUtf8( // clazy:exclude=qstring-allocations
+            "Las pruebas se practicarán en vista pública, si bien, excepcionalmente, el Tribunal podrá acordar, mediante providencia, que determinadas pruebas se celebren fuera del acto de juicio");
     QCOMPARE(page->search(full2lines, l, t, r, b, direction, mode0), true);
     QCOMPARE(page->search(full2lines, l, t, r, b, direction, mode1), true);
     QCOMPARE(page->search(full2lines, l, t, r, b, direction, mode2), true);
