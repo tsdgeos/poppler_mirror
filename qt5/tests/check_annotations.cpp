@@ -2,7 +2,7 @@
 #include <memory>
 #include <sstream>
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 #include <QTemporaryFile>
 
 #include <poppler-qt5.h>

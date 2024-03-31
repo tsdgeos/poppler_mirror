@@ -1,0 +1,26 @@
+# Translation of pdfsig.po to Catalan
+# Copyright (C) 2024, Josep M. Ferrer <txemaq@gmail.com>
+# This file is distributed under the same license as the pdfsig package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pdfsig\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-02-12 14:44-0700\n"
+"PO-Revision-Date: 2024-03-04 23:01+0100\n"
+"Last-Translator: Josep M. Ferrer <txemaq@gmail.com>\n"
+"Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Lokalize 22.12.3\n"
+
+#: pdfsig.cc:544
+msgid "Digitally signed by {0:s}"
+msgstr "Signat digitalment per {0:s}"
+
+#: pdfsig.cc:544
+msgid "Date: {0:s}"
+msgstr "Data: {0:s}"

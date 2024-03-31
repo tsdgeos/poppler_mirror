@@ -9,7 +9,7 @@
 
 #include "CIDFontsWidthsBuilder.h"
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 class TestCIDFontsWidthsBuilder : public QObject
 {

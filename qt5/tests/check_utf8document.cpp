@@ -1,4 +1,4 @@
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include "PDFDoc.h"
 #include "GlobalParams.h"

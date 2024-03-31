@@ -1,4 +1,5 @@
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
+#include <QtCore/QTemporaryFile>
 
 #include "Outline.h"
 #include "PDFDoc.h"

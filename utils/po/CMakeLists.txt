@@ -1,6 +1,6 @@
 file(GLOB _files "${CMAKE_CURRENT_SOURCE_DIR}/*")
 foreach (_dir ${_files})
-  if (IS_DIRECTORY "${_dir}")
+  if (IS_DIRECTORY "${_dir}" AND EXISTS "${_dir}/CMakeLists.txt")
     add_subdirectory("${_dir}")
     get_filename_component(_lang ${_dir} NAME)
     list(APPEND _langs ${_lang})

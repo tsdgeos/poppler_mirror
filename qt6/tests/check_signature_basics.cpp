@@ -12,7 +12,7 @@
 // Note that this does not check the actual validity because
 // that will have an expiry date, and adding time bombs to unit tests is
 // probably not a good idea.
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 #include "PDFDoc.h"
 #include "GlobalParams.h"
 #include "SignatureInfo.h"

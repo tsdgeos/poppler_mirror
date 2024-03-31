@@ -1,4 +1,4 @@
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include <poppler-qt5.h>
 
@@ -350,6 +350,13 @@ void TestSearch::testAcrossLinesSearch()
     QCOMPARE(page0->search(str6, l, t, r, b, direction, mode1), true);
     QCOMPARE(page0->search(str6, l, t, r, b, direction, mode2), true);
     QCOMPARE(page0->search(str6, l, t, r, b, direction, mode2W), true);
+    // Check for the case when next line falls in next paragraph. Issue #1475
+    const QString across_block = QString::fromUtf8("emacs jose"); // clazy:exclude=qstring-allocations
+    QCOMPARE(page0->search(across_block, l, t, r, b, direction, empty), false);
+    QCOMPARE(page0->search(across_block, l, t, r, b, direction, mode0), false);
+    QCOMPARE(page0->search(across_block, l, t, r, b, direction, mode1), false);
+    QCOMPARE(page0->search(across_block, l, t, r, b, direction, mode2), true);
+    QCOMPARE(page0->search(across_block, l, t, r, b, direction, mode2W), true);
 
     // Now for completeness, we will match the full text of two lines
     const QString full2lines = QString::fromUtf8("Las pruebas se practicarán en vista pública, si bien, excepcionalmente, el Tribunal podrá acordar, mediante providencia, que determinadas pruebas se celebren fuera del acto de juicio");

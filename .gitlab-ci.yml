@@ -50,7 +50,7 @@ build_clang16_libcpp:
   stage: build
   script:
     - echo "We want to compile with C++23 here because it has some nice things like deleted std::string nullptr constructor"
-    - sed -i -e "s@CMAKE_CXX_STANDARD 17@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
+    - sed -i -e "s@CMAKE_CXX_STANDARD 20@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - apt-get install --yes --no-install-recommends libclang-16-dev llvm-16-dev libc++-16-dev libc++abi-16-dev clang-tidy-16 clang-16 libunwind-16-dev gperf jq
     - srcdir=`pwd` && mkdir -p /tmp/poppler_build && cd /tmp/poppler_build
@@ -85,9 +85,9 @@ build_ubuntu_20_04:
     - ninja
     - ctest --output-on-failure
 
-build_mingw64_fedora39:
+build_mingw64_fedora40:
   stage: build
-  image: fedora:39
+  image: fedora:40
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
@@ -97,12 +97,16 @@ build_mingw64_fedora39:
     - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -G Ninja ..
     - ninja
 
-build_clazy_clang16:
+build_clazy_fedora40:
   stage: build
+  image: fedora:40
+  before_script:
+    - dnf install -y 'dnf-command(builddep)'
+    - dnf builddep -y poppler
+    - dnf -y install clazy ninja-build glibc-langpack-en
   script:
-    - apt-get install --yes --no-install-recommends clazy clang-16
     - mkdir -p build && cd build
-    - CC=clang-16 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -DENABLE_GPGME=OFF -G Ninja ..
+    - CC=clang-18 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
 build_qt5_android:

@@ -1,6 +1,6 @@
 #include <memory>
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 #include <QtCore/QDebug>
 #include <QImage>
 
