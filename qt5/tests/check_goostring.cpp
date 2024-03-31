@@ -1,5 +1,5 @@
 #include <QtCore/QScopedPointer>
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include "goo/GooString.h"
 
