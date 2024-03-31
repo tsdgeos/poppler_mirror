@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
             std::filesystem::path filePath = basePath;
             filePath = filePath.append(filename).lexically_normal();
 
-            if (filePath.generic_string().find(basePath.generic_string()) != 0) {
+            if (!filePath.generic_string().starts_with(basePath.generic_string())) {
                 error(errIO, -1, "Preventing directory traversal");
                 return 3;
             }
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
             std::filesystem::path filePath = basePath;
             filePath = filePath.append(targetPath).lexically_normal();
 
-            if (filePath.generic_string().find(basePath.generic_string()) != 0) {
+            if (!filePath.generic_string().starts_with(basePath.generic_string())) {
                 error(errIO, -1, "Preventing directory traversal");
                 return 3;
             }
