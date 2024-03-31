@@ -50,7 +50,7 @@ build_clang16_libcpp:
   stage: build
   script:
     - echo "We want to compile with C++23 here because it has some nice things like deleted std::string nullptr constructor"
-    - sed -i -e "s@CMAKE_CXX_STANDARD 17@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
+    - sed -i -e "s@CMAKE_CXX_STANDARD 20@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - apt-get install --yes --no-install-recommends libclang-16-dev llvm-16-dev libc++-16-dev libc++abi-16-dev clang-tidy-16 clang-16 libunwind-16-dev gperf jq
     - srcdir=`pwd` && mkdir -p /tmp/poppler_build && cd /tmp/poppler_build
