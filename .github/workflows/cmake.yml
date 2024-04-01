@@ -22,7 +22,7 @@ jobs:
       run: |
         brew list
         brew list --cask
-        brew uninstall -f python@3.8 python@3.10 python@3.11 python@3.12 azure-cli pipx aws-sam-cli llvm cffi pycparser python-cryptography node@18 node mongodb-community@5.0 mongosh
+        brew uninstall -f python@3.8 python@3.10 python@3.11 azure-cli pipx aws-sam-cli llvm cffi pycparser python-cryptography node@18 node mongodb-community@5.0 mongosh
         brew update
         brew install ninja boost cmake pkg-config glib qt6 gpgme
         brew install poppler --only-dependencies
