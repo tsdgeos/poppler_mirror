@@ -84,6 +84,7 @@
 #include "SplashOutputDev.h"
 #include "PSOutputDev.h"
 #include "PDFDoc.h"
+#include "UTF.h"
 
 #ifdef USE_CMS
 #    include <lcms2.h>
@@ -1569,15 +1570,24 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
         writePS("%!PS-Adobe-3.0 Resource-Form\n");
         break;
     }
-    writePSFmt("%Produced by poppler pdftops version: {0:s} (http://poppler.freedesktop.org)\n", PACKAGE_VERSION);
     Object info = xref->getDocInfo();
+    std::unique_ptr<GooString> creator = GooString::format("poppler pdftops version: {0:s} (http://poppler.freedesktop.org)", PACKAGE_VERSION);
     if (info.isDict()) {
         Object obj1 = info.dictLookup("Creator");
         if (obj1.isString()) {
-            writePS("%%Creator: ");
-            writePSTextLine(obj1.getString());
+            const GooString *pdfCreator = obj1.getString();
+            if (pdfCreator && !pdfCreator->toStr().empty()) {
+                creator->append(". PDF Creator: ");
+                if (pdfCreator->hasUnicodeMarker()) {
+                    creator->append(TextStringToUtf8(pdfCreator->toStr()));
+                } else {
+                    creator->append(pdfCreator);
+                }
+            }
         }
     }
+    writePS("%%Creator: ");
+    writePSTextLine(creator.get());
     if (title) {
         char *sanitizedTitle = strdup(title);
         for (size_t i = 0; i < strlen(sanitizedTitle); ++i) {
