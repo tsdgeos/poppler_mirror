@@ -141,18 +141,6 @@ void TestActualText::checkFakeboldText()
     std::unique_ptr<Poppler::Page> page { doc->page(pageNr) };
     QVERIFY(page);
 
-    QEXPECT_FAIL("Upright line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
-    QEXPECT_FAIL("Upright line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
-    QEXPECT_FAIL("Upright line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
-    QEXPECT_FAIL("Rotated 90' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 90' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 90' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
-    QEXPECT_FAIL("Rotated 180' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 180' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 180' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
-    QEXPECT_FAIL("Rotated 270' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 270' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
-    QEXPECT_FAIL("Rotated 270' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
     QCOMPARE(page->text(area), text);
 }
 

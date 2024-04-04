@@ -1618,8 +1618,66 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
         while (word0) {
             double priDelta = dupMaxPriDelta * word0->fontSize;
             double secDelta = dupMaxSecDelta * word0->fontSize;
-            double xDelta = ((rot == 0) || (rot == 2)) ? priDelta : secDelta;
-            double yDelta = ((rot == 0) || (rot == 2)) ? secDelta : priDelta;
+
+            // Helper to determine if the second word "matches" the first one
+            // Finds identical words with almost identical positions, but also
+            // partially overlapping words.
+            auto keepSecond = [&priDelta, &secDelta](const TextWord &w0, const TextWord &w1) -> std::pair<size_t, size_t> {
+                auto equalText = [](const TextWord &iw0, const TextWord &iw1, size_t len, size_t offset = 0) -> bool { //
+                    return std::equal(iw0.chars.begin() + offset, iw0.chars.begin() + offset + len, iw1.chars.begin(), iw1.chars.begin() + len, //
+                                      [](auto c1, auto c2) { return c1.text == c2.text; });
+                };
+                auto matchEdges = [priDelta](const TextWord &iw0, const TextWord &iw1, size_t len, size_t offset = 0) -> bool { //
+                    return fabs(iw0.chars[offset].edge - iw1.chars[0].edge) < priDelta //
+                            && fabs(iw0.chars[offset + len - 1].edge - iw1.chars[len - 1].edge) < priDelta;
+                };
+                auto matchBaseTop = [secDelta](const TextWord &iw0, const TextWord &iw1) -> bool { //
+                    if ((iw0.rot == 0) || (iw0.rot == 2)) {
+                        return (fabs(iw0.yMin - iw1.yMin) < secDelta && fabs(iw0.yMax - iw1.yMax) < secDelta);
+                    } else {
+                        return (fabs(iw0.xMin - iw1.xMin) < secDelta && fabs(iw0.xMax - iw1.xMax) < secDelta);
+                    }
+                };
+
+                // Check if bounding boxes overlap, if not, keep both words
+                if (w0.xMin > w1.xMax || w0.xMax < w1.xMin || w0.yMin > w1.yMax || w0.yMax < w1.yMin) {
+                    return { 0, w1.len() };
+                }
+
+                if (w0.len() == w1.len() && equalText(w0, w1, w0.len())) {
+                    // Identical words
+                    if (matchEdges(w0, w1, w0.len()) && matchBaseTop(w0, w1)) {
+                        // Discard w1
+                        return { 0, 0 };
+                    } else {
+                        return { 0, w1.len() };
+                    }
+                } else if (w0.len() < w1.len() && equalText(w0, w1, w0.len())) {
+                    // w0 is the prefix of w1 (e.g. if the bold word ends with a non-bold colon)
+                    if (matchEdges(w0, w1, w0.len()) && matchBaseTop(w0, w1)) {
+                        return { w0.len(), w1.len() };
+                    }
+                } else if (w0.len() > w1.len() && equalText(w0, w1, w1.len())) {
+                    // w1 is the prefix of w0 (e.g. if the bold word ends with a non-bold colon)
+                    if (matchEdges(w0, w1, w1.len()) && matchBaseTop(w0, w1)) {
+                        return { 0, 0 };
+                    }
+                }
+
+                // Check if the tail of w0 is the head of w1, (e.g. a "quoted" bold word)
+                // e.g.: '"quoted' + 'quoted"' -> '"quoted" + '"'
+                for (size_t offset = 1; offset < w0.len(); offset++) {
+                    auto len = std::min(w0.len() - offset, w1.len());
+                    if (len == 0) {
+                        break;
+                    }
+                    if (equalText(w0, w1, len, offset) && matchEdges(w0, w1, len, offset)) {
+                        return { len, w1.len() };
+                    }
+                }
+
+                return { 0, w1.len() };
+            };
 
             int maxBaseIdx = pool->getBaseIdx(word0->base + secDelta);
 
@@ -1640,23 +1698,26 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                 }
                 TextWord *word1 = prevWord->next;
 
-                auto equalText = [](const TextWord &w1, const TextWord &w2) -> bool { //
-                    return std::equal(w1.chars.begin(), w1.chars.end(), w2.chars.begin(), w2.chars.end(), //
-                                      [](auto c1, auto c2) { return c1.text == c2.text; });
-                };
-                auto match = [&equalText, xDelta, yDelta](const TextWord &w1, const TextWord &w2) -> bool {
-                    if (!equalText(w1, w2)) {
-                        return false;
-                    }
-                    return fabs(w1.xMin - w2.xMin) < xDelta && fabs(w1.xMax - w2.xMax) < xDelta //
-                            && fabs(w1.yMin - w2.yMin) < yDelta && fabs(w1.yMax - w2.yMax) < yDelta;
-                };
-
                 while (word1) {
-                    if (match(*word0, *word1)) {
+                    if (auto keep = keepSecond(*word0, *word1); keep.first == keep.second) {
                         prevWord->next = word1->next;
                         delete word1;
                         word1 = prevWord->next;
+                    } else if (keep.first != 0) {
+                        // Discard first part of second word
+                        word1->chars.erase(word1->chars.begin(), word1->chars.begin() + keep.first);
+                        if (word1->rot == 0) {
+                            word1->xMin = word0->xMax;
+                        } else if (word1->rot == 2) {
+                            word1->xMax = word0->xMin;
+                        } else if (word1->rot == 1) {
+                            word1->yMin = word0->yMax;
+                        } else {
+                            word1->yMax = word0->yMin;
+                        }
+
+                        prevWord = word1;
+                        word1 = word1->next;
                     } else {
                         prevWord = word1;
                         word1 = word1->next;
@@ -1667,9 +1728,15 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                 if (idx0 != idx1) {
                     word1 = pool->getPool(idx1);
                 }
-                if (word1 && match(*word0, *word1)) {
+                if (!word1) {
+                    continue;
+                }
+                if (auto keep = keepSecond(*word0, *word1); keep.first == keep.second) {
                     pool->setPool(idx1, word1->next);
                     delete word1;
+                } else if (keep.first != 0) {
+                    word1->chars.erase(word1->chars.begin(), word1->chars.begin() + keep.first);
+                    word1->xMin = word0->xMax;
                 }
             }
 
