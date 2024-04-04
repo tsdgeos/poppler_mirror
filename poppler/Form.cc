@@ -2768,7 +2768,7 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
     const Dict *fontDict = fontDictObj.getDict();
     for (int i = 0; i < fontDict->getLength(); ++i) {
         const char *key = fontDict->getKey(i);
-        if (GooString::startsWith(key, kOurDictFontNamePrefix)) {
+        if (std::string_view(key).starts_with(kOurDictFontNamePrefix)) {
             const Object fontObj = fontDict->getVal(i);
             if (fontObj.isDict() && fontObj.dictIs("Font")) {
                 const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");
@@ -2799,7 +2799,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
 
 Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName)
 {
-    if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
+    if (!filepath.ends_with(".ttf") && !filepath.ends_with(".ttc") && !filepath.ends_with(".otf")) {
         error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
         return {};
     }

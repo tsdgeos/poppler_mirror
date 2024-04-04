@@ -625,13 +625,3 @@ void GooString::prependUnicodeMarker()
 {
     insert(0, "\xFE\xFF", 2);
 }
-
-bool GooString::startsWith(const char *prefix) const
-{
-    return startsWith(toStr(), prefix);
-}
-
-bool GooString::endsWith(const char *suffix) const
-{
-    return endsWith(toStr(), suffix);
-}
