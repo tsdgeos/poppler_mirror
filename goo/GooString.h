@@ -156,11 +156,7 @@ public:
     void setChar(int i, char c) { (*this)[i] = c; }
 
     // Clear string to zero length.
-    GooString *clear()
-    {
-        static_cast<std::string &>(*this).clear();
-        return this;
-    }
+    using std::string::clear;
 
     // Append a character or string.
     GooString *append(char c)
