@@ -18,9 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: pdfsig.cc:544
-msgid "Digitally signed by {0:s}"
+#, c++-format
+msgid "Date: {0:s}"
 msgstr ""
 
 #: pdfsig.cc:544
-msgid "Date: {0:s}"
+#, c++-format
+msgid "Digitally signed by {0:s}"
 msgstr ""

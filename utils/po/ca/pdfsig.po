@@ -18,9 +18,11 @@ msgstr ""
 "X-Generator: Lokalize 22.12.3\n"
 
 #: pdfsig.cc:544
-msgid "Digitally signed by {0:s}"
-msgstr "Signat digitalment per {0:s}"
-
-#: pdfsig.cc:544
+#, c++-format
 msgid "Date: {0:s}"
 msgstr "Data: {0:s}"
+
+#: pdfsig.cc:544
+#, c++-format
+msgid "Digitally signed by {0:s}"
+msgstr "Signat digitalment per {0:s}"
