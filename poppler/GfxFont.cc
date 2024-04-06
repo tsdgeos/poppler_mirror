@@ -1770,17 +1770,21 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
 
     // char collection
     obj1 = desFontDict->lookup("CIDSystemInfo");
-    if (!obj1.isDict()) {
+    if (obj1.isDict()) {
+        obj2 = obj1.dictLookup("Registry");
+        obj3 = obj1.dictLookup("Ordering");
+        if (!obj2.isString() || !obj3.isString()) {
+            error(errSyntaxError, -1, "Invalid CIDSystemInfo dictionary in Type 0 descendant font");
+            error(errSyntaxError, -1, "Assuming Adobe-Identity for character collection");
+            obj2 = Object(new GooString("Adobe"));
+            obj3 = Object(new GooString("Identity"));
+        }
+        collection = obj2.getString()->copy()->append('-')->append(obj3.getString());
+    } else {
         error(errSyntaxError, -1, "Missing CIDSystemInfo dictionary in Type 0 descendant font");
-        return;
+        error(errSyntaxError, -1, "Assuming Adobe-Identity for character collection");
+        collection = new GooString("Adobe-Identity");
     }
-    obj2 = obj1.dictLookup("Registry");
-    obj3 = obj1.dictLookup("Ordering");
-    if (!obj2.isString() || !obj3.isString()) {
-        error(errSyntaxError, -1, "Invalid CIDSystemInfo dictionary in Type 0 descendant font");
-        return;
-    }
-    collection = obj2.getString()->copy()->append('-')->append(obj3.getString());
 
     // look for a ToUnicode CMap
     if (!(ctu = readToUnicodeCMap(fontDict, 16, nullptr))) {
