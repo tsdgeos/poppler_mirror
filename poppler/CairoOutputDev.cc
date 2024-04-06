@@ -1902,11 +1902,16 @@ void CairoOutputDev::beginString(GfxState *state, const GooString *s)
 
 void CairoOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
 {
+    std::optional<int> glyphIndex;
+
     if (currentFont) {
-        glyphs[glyphCount].index = currentFont->getGlyph(code, u, uLen);
-        glyphs[glyphCount].x = x - originX;
-        glyphs[glyphCount].y = y - originY;
-        glyphCount++;
+        glyphIndex = currentFont->getGlyph(code, u, uLen);
+        if (glyphIndex) {
+            glyphs[glyphCount].index = *glyphIndex;
+            glyphs[glyphCount].x = x - originX;
+            glyphs[glyphCount].y = y - originY;
+            glyphCount++;
+        }
         if (use_show_text_glyphs) {
             const UnicodeMap *utf8Map = globalParams->getUtf8Map();
             if (utf8Max - utf8Count < uLen * 6) {
