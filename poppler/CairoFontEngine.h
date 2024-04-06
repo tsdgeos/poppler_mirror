@@ -55,7 +55,7 @@ public:
 
     virtual bool matches(Ref &other, bool printing);
     cairo_font_face_t *getFontFace();
-    unsigned long getGlyph(CharCode code, const Unicode *u, int uLen);
+    std::optional<unsigned long> getGlyph(CharCode code, const Unicode *u, int uLen);
     double getSubstitutionCorrection(const std::shared_ptr<GfxFont> &gfxFont);
 
     bool isSubstitute() { return substitute; }

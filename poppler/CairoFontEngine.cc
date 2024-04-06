@@ -61,6 +61,8 @@
 #include "Gfx.h"
 #include "Page.h"
 
+#define EMPTY_ARRAY (-1)
+
 //------------------------------------------------------------------------
 // CairoFont
 //------------------------------------------------------------------------
@@ -85,16 +87,19 @@ cairo_font_face_t *CairoFont::getFontFace()
     return cairo_font_face;
 }
 
-unsigned long CairoFont::getGlyph(CharCode code, const Unicode *u, int uLen)
+std::optional<unsigned long> CairoFont::getGlyph(CharCode code, const Unicode *u, int uLen)
 {
     FT_UInt gid;
 
     if (code < codeToGID.size()) {
+        if (codeToGID[code] == EMPTY_ARRAY) {
+            return std::nullopt;
+        }
         gid = (FT_UInt)codeToGID[code];
     } else {
         gid = (FT_UInt)code;
     }
-    return gid;
+    return { gid };
 }
 
 double CairoFont::getSubstitutionCorrection(const std::shared_ptr<GfxFont> &gfxFont)
@@ -433,11 +438,13 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
 
     charProcs = std::static_pointer_cast<Gfx8BitFont>(info->font)->getCharProcs();
     if (!charProcs) {
-        return CAIRO_STATUS_USER_FONT_ERROR;
+        // error already logged by Gfx8BitFont constructor
+        return CAIRO_STATUS_SUCCESS;
     }
 
-    if ((int)glyph >= charProcs->getLength()) {
-        return CAIRO_STATUS_USER_FONT_ERROR;
+    if (glyph >= (unsigned)charProcs->getLength()) {
+        error(errSyntaxError, -1, "Type3 character not in /CharProcs");
+        return CAIRO_STATUS_SUCCESS;
     }
 
     mat = info->font->getFontMatrix();
@@ -466,7 +473,8 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     output_dev->setType3RenderType(color ? CairoOutputDev::Type3RenderColor : CairoOutputDev::Type3RenderMask);
     charProc = charProcs->getVal(glyph);
     if (!charProc.isStream()) {
-        return CAIRO_STATUS_USER_FONT_ERROR;
+        error(errSyntaxError, -1, "Type3 character /{0:s} value not a stream", charProcs->getKey(glyph));
+        return CAIRO_STATUS_SUCCESS;
     }
     Object charProcResObject = charProc.streamGetDict()->lookup("Resources");
     if (charProcResObject.isDict()) {
@@ -553,7 +561,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     char **enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();
     codeToGID.resize(256);
     for (int i = 0; i < 256; ++i) {
-        codeToGID[i] = 0;
+        codeToGID[i] = EMPTY_ARRAY;
         if (charProcs && (name = enc[i])) {
             for (int j = 0; j < charProcs->getLength(); j++) {
                 if (strcmp(name, charProcs->getKey(j)) == 0) {
