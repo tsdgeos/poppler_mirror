@@ -742,11 +742,12 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     const double dx = std::get<0>(dxdy);
     const double dy = std::get<1>(dxdy);
     const double wMax = dx - 2 * borderWidth - 4;
+    const double hMax = dy - 2 * borderWidth;
     if (fontSize == 0) {
-        fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, dy);
+        fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
     }
     if (leftFontSize == 0) {
-        leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, dy);
+        leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
     }
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
     getField()->setDefaultAppearance(da.toAppearanceString());
