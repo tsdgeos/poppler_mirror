@@ -5288,7 +5288,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     if (centerVertically) {
         const double outTextHeight = textCommands.nLines * da.getFontPtSize();
         if (outTextHeight < height) {
-            yDelta -= (height - outTextHeight) / 2;
+            yDelta = height - (height - outTextHeight) / 2;
         }
     }
     appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", leftMargin + textmargin, yDelta);
