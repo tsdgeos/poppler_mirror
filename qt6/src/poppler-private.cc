@@ -7,7 +7,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2020, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
@@ -43,6 +43,7 @@
 #include <Outline.h>
 #include <PDFDocEncoding.h>
 #include <UnicodeMap.h>
+#include <UTF.h>
 
 #ifdef ANDROID
 #    include <QtCore/QString>
@@ -121,7 +122,7 @@ QString UnicodeParsedString(const std::string &s1)
         return QString();
     }
 
-    if (GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1)) {
+    if (hasUnicodeByteOrderMark(s1) || GooString::hasUnicodeMarkerLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const char16_t *>(s1.c_str()), s1.size() / 2);
     } else {
         int stringLength;

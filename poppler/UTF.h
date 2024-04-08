@@ -48,6 +48,12 @@ inline bool UnicodeIsValid(Unicode ucs4)
     return (ucs4 < 0x110000) && ((ucs4 & 0xfffff800) != 0xd800) && (ucs4 < 0xfdd0 || ucs4 > 0xfdef) && ((ucs4 & 0xfffe) != 0xfffe);
 }
 
+// check whether string starts with Big-Endian byte order mark
+inline bool hasUnicodeByteOrderMark(const std::string &s)
+{
+    return s.starts_with(unicodeByteOrderMark);
+}
+
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);
 

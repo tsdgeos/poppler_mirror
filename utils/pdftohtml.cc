@@ -28,7 +28,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -72,6 +72,7 @@
 #include "goo/gfile.h"
 #include "Win32Console.h"
 #include "InMemoryFile.h"
+#include "UTF.h"
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -409,7 +410,7 @@ static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
         rawString = obj.getString();
 
         // Convert rawString to unicode
-        if (rawString->hasUnicodeMarker()) {
+        if (hasUnicodeByteOrderMark(rawString->toStr())) {
             isUnicode = true;
             unicodeLength = (obj.getString()->getLength() - 2) / 2;
         } else {

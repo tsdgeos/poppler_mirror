@@ -118,7 +118,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
     const char *const str = label->c_str();
     const std::size_t strLen = label->getLength();
-    const bool strUnicode = label->hasUnicodeMarker();
+    const bool strUnicode = hasUnicodeByteOrderMark(label->toStr());
     int number;
     bool ok;
 
@@ -211,7 +211,7 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
 
     label->clear();
     label->append(matching_interval->prefix.c_str(), matching_interval->prefix.size());
-    if (label->hasUnicodeMarker()) {
+    if (hasUnicodeByteOrderMark(label->toStr())) {
         int i, len;
         char ucs2_char[2];
 

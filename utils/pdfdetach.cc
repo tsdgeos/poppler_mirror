@@ -18,7 +18,7 @@
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 <r.coeffier@bee-buzziness.com>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -43,6 +43,7 @@
 #include "UnicodeMap.h"
 #include "PDFDocEncoding.h"
 #include "Error.h"
+#include "UTF.h"
 #include "Win32Console.h"
 
 #include <filesystem>
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            if (s1->hasUnicodeMarker()) {
+            if (hasUnicodeByteOrderMark(s1->toStr())) {
                 isUnicode = true;
                 j = 2;
             } else {
@@ -208,7 +209,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            if (s1->hasUnicodeMarker()) {
+            if (hasUnicodeByteOrderMark(s1->toStr())) {
                 isUnicode = true;
                 j = 2;
             } else {
@@ -273,7 +274,7 @@ int main(int argc, char *argv[])
             if (!s1) {
                 return 3;
             }
-            if (s1->hasUnicodeMarker()) {
+            if (hasUnicodeByteOrderMark(s1->toStr())) {
                 isUnicode = true;
                 j = 2;
             } else {

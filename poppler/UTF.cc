@@ -23,7 +23,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
-// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -88,7 +88,7 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
         return {};
     }
 
-    if (GooString::hasUnicodeMarker(textStr)) {
+    if (hasUnicodeByteOrderMark(textStr)) {
         isUnicode = true;
         isUnicodeLE = false;
     } else if (GooString::hasUnicodeMarkerLE(textStr)) {
@@ -558,7 +558,7 @@ std::string TextStringToUtf8(const std::string &textStr)
 
     len = textStr.size();
     s = textStr.c_str();
-    if (GooString::hasUnicodeMarker(textStr)) {
+    if (hasUnicodeByteOrderMark(textStr)) {
         uint16_t *utf16;
         len = len / 2 - 1;
         utf16 = new uint16_t[len];

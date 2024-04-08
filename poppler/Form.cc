@@ -74,6 +74,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "CIDFontsWidthsBuilder.h"
+#include "UTF.h"
 
 #include "fofi/FoFiTrueType.h"
 #include "fofi/FoFiIdentifier.h"
@@ -1247,7 +1248,7 @@ GooString *FormField::getFullyQualifiedName()
 
             if (unicode_encoded) {
                 fullyQualifiedName->insert(0, "\0.", 2); // 2-byte unicode period
-                if (parent_name->hasUnicodeMarker()) {
+                if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
                 } else {
                     int tmp_length;
@@ -1257,7 +1258,7 @@ GooString *FormField::getFullyQualifiedName()
                 }
             } else {
                 fullyQualifiedName->insert(0, '.'); // 1-byte ascii period
-                if (parent_name->hasUnicodeMarker()) {
+                if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName);
                     fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
@@ -1275,7 +1276,7 @@ GooString *FormField::getFullyQualifiedName()
 
     if (partialName) {
         if (unicode_encoded) {
-            if (partialName->hasUnicodeMarker()) {
+            if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
                 int tmp_length;
@@ -1284,7 +1285,7 @@ GooString *FormField::getFullyQualifiedName()
                 delete[] tmp_str;
             }
         } else {
-            if (partialName->hasUnicodeMarker()) {
+            if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 unicode_encoded = true;
                 fullyQualifiedName = convertToUtf16(fullyQualifiedName);
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
@@ -1678,7 +1679,7 @@ void FormFieldText::fillContent(FillValueType fillType)
 
     obj1 = Form::fieldLookup(dict, fillType == fillDefaultValue ? "DV" : "V");
     if (obj1.isString()) {
-        if (obj1.getString()->hasUnicodeMarker()) {
+        if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
             if (obj1.getString()->getLength() > 2) {
                 if (fillType == fillDefaultValue) {
                     defaultContent = obj1.getString()->copy();
@@ -1716,7 +1717,7 @@ void FormFieldText::setContentCopy(const GooString *new_content)
         content = new_content->copy();
 
         // append the unicode marker <FE FF> if needed
-        if (!content->hasUnicodeMarker()) {
+        if (!hasUnicodeByteOrderMark(content->toStr())) {
             content->prependUnicodeMarker();
         }
         Form *form = doc->getCatalog()->getForm();
@@ -2165,7 +2166,7 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
         editedChoice = new_content->copy();
 
         // append the unicode marker <FE FF> if needed
-        if (!editedChoice->hasUnicodeMarker()) {
+        if (!hasUnicodeByteOrderMark(editedChoice->toStr())) {
             editedChoice->prependUnicodeMarker();
         }
     }
