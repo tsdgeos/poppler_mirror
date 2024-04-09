@@ -15,6 +15,8 @@ private slots:
     void checkActualText2_data();
     void checkAllOrientations();
     void checkAllOrientations_data();
+    void checkFakeboldText();
+    void checkFakeboldText_data();
 
 private:
     void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
@@ -124,6 +126,65 @@ void TestActualText::checkAllOrientations_data()
     QTest::newRow("Upside down small rect E") << 2 << QRectF { 485, 800, 10, 10 } << QStringLiteral("n");
     QTest::newRow("Seacape small rect B") << 3 << QRectF { 40, 550, 10, 10 } << QStringLiteral("S");
     QTest::newRow("Seacape small rect E") << 3 << QRectF { 40, 510, 10, 10 } << QStringLiteral("p");
+}
+
+void TestActualText::checkFakeboldText()
+{
+    QFETCH(int, pageNr);
+    QFETCH(QRectF, area);
+    QFETCH(QString, text);
+
+    QString path { TESTDATADIR "/unittestcases/fakebold.pdf" };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(path) };
+    QVERIFY(doc);
+
+    std::unique_ptr<Poppler::Page> page { doc->page(pageNr) };
+    QVERIFY(page);
+
+    QEXPECT_FAIL("Upright line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
+    QEXPECT_FAIL("Upright line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
+    QEXPECT_FAIL("Upright line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
+    QEXPECT_FAIL("Rotated 90' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 90' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 90' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
+    QEXPECT_FAIL("Rotated 180' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 180' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 180' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
+    QEXPECT_FAIL("Rotated 270' line 3", "Fakebold not matched when bold word is followed with non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 270' line 4", "Fakebold not matched when bold word follows non-bold glyph", Continue);
+    QEXPECT_FAIL("Rotated 270' line 5", "Fakebold not matched when bold word is enclosed by non-bold glyphs", Continue);
+    QCOMPARE(page->text(area), text);
+}
+
+void TestActualText::checkFakeboldText_data()
+{
+    QTest::addColumn<int>("pageNr");
+    QTest::addColumn<QRectF>("area");
+    QTest::addColumn<QString>("text");
+
+    QTest::newRow("Upright line 1") << 0 << QRectF { 0, 0, 595, 80 } << QStringLiteral("1 This is fakebold text.");
+    QTest::newRow("Upright line 2") << 0 << QRectF { 0, 80, 595, 80 } << QStringLiteral("2 This is a fakebold word.");
+    QTest::newRow("Upright line 3") << 0 << QRectF { 0, 140, 595, 80 } << QStringLiteral("3 The last word is in fakebold.");
+    QTest::newRow("Upright line 4") << 0 << QRectF { 0, 220, 595, 80 } << QStringLiteral("4 Hyphenated-fakebold word.");
+    QTest::newRow("Upright line 5") << 0 << QRectF { 0, 300, 595, 80 } << QStringLiteral("5 Quoted \"fakebold\" word.");
+
+    QTest::newRow("Rotated 90' line 1") << 1 << QRectF { 510, 0, 80, 842 } << QStringLiteral("1 This is fakebold text.");
+    QTest::newRow("Rotated 90' line 2") << 1 << QRectF { 430, 0, 80, 842 } << QStringLiteral("2 This is a fakebold word.");
+    QTest::newRow("Rotated 90' line 3") << 1 << QRectF { 350, 0, 80, 842 } << QStringLiteral("3 The last word is in fakebold.");
+    QTest::newRow("Rotated 90' line 4") << 1 << QRectF { 270, 0, 80, 842 } << QStringLiteral("4 Hyphenated-fakebold word.");
+    QTest::newRow("Rotated 90' line 5") << 1 << QRectF { 190, 0, 80, 842 } << QStringLiteral("5 Quoted \"fakebold\" word.");
+
+    QTest::newRow("Rotated 180' line 1") << 2 << QRectF { 0, 760, 595, 80 } << QStringLiteral("1 This is fakebold text.");
+    QTest::newRow("Rotated 180' line 2") << 2 << QRectF { 0, 680, 595, 80 } << QStringLiteral("2 This is a fakebold word.");
+    QTest::newRow("Rotated 180' line 3") << 2 << QRectF { 0, 600, 595, 80 } << QStringLiteral("3 The last word is in fakebold.");
+    QTest::newRow("Rotated 180' line 4") << 2 << QRectF { 0, 520, 595, 80 } << QStringLiteral("4 Hyphenated-fakebold word.");
+    QTest::newRow("Rotated 180' line 5") << 2 << QRectF { 0, 440, 595, 80 } << QStringLiteral("5 Quoted \"fakebold\" word.");
+
+    QTest::newRow("Rotated 270' line 1") << 3 << QRectF { 20, 0, 80, 842 } << QStringLiteral("1 This is fakebold text.");
+    QTest::newRow("Rotated 270' line 2") << 3 << QRectF { 100, 0, 80, 842 } << QStringLiteral("2 This is a fakebold word.");
+    QTest::newRow("Rotated 270' line 3") << 3 << QRectF { 160, 0, 80, 842 } << QStringLiteral("3 The last word is in fakebold.");
+    QTest::newRow("Rotated 270' line 4") << 3 << QRectF { 240, 0, 80, 842 } << QStringLiteral("4 Hyphenated-fakebold word.");
+    QTest::newRow("Rotated 270' line 5") << 3 << QRectF { 320, 0, 80, 842 } << QStringLiteral("5 Quoted \"fakebold\" word.");
 }
 
 QTEST_GUILESS_MAIN(TestActualText)
