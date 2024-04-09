@@ -394,7 +394,7 @@ bool TextFontInfo::matches(const TextFontInfo *fontInfo) const
 
 bool TextFontInfo::matches(const Ref *ref) const
 {
-    return (*(gfxFont->getID()) == *ref);
+    return gfxFont && (*(gfxFont->getID()) == *ref);
 }
 
 double TextFontInfo::getAscent() const
