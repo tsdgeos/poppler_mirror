@@ -4220,7 +4220,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     return false;
 }
 
-GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const
+GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const
 {
     const UnicodeMap *uMap;
     char space[8], eol[16];
@@ -4249,6 +4249,8 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
         }
         return s;
     }
+    // FIXME: physLayout == true is assumed hereafter, dumping the text "flows"
+    // is not supported, compare with TextPage::dump
 
     spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
     eolLen = 0; // make gcc happy
@@ -5932,7 +5934,7 @@ bool TextOutputDev::findText(const Unicode *s, int len, bool startAtTop, bool st
 
 GooString TextOutputDev::getText(double xMin, double yMin, double xMax, double yMax) const
 {
-    return text->getText(xMin, yMin, xMax, yMax, textEOL);
+    return text->getText(xMin, yMin, xMax, yMax, textEOL, physLayout);
 }
 
 void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)

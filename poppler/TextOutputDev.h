@@ -628,7 +628,7 @@ public:
                   double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
 
     // Get the text which is inside the specified rectangle.
-    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
+    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 

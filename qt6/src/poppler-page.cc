@@ -683,7 +683,8 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
     QString result;
 
     const bool rawOrder = textLayout == RawOrderLayout;
-    output_dev = new TextOutputDev(nullptr, false, 0, rawOrder, false);
+    const bool physLayout = textLayout == PhysicalLayout;
+    output_dev = new TextOutputDev(nullptr, physLayout, 0, rawOrder, false);
     m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72, 0, false, true, false, -1, -1, -1, -1, nullptr, nullptr, nullptr, nullptr, true);
     if (r.isNull()) {
         const PDFRectangle *rect = m_page->page->getCropBox();
