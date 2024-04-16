@@ -176,6 +176,8 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
         certificateInfo->setKeyLocation(KeyLocation::Computer);
     }
 
+    certificateInfo->setQualified(subkey.isQualified());
+
     return certificateInfo;
 }
 

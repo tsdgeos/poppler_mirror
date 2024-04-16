@@ -600,6 +600,13 @@ public:
     bool isSelfSigned() const;
 
     /**
+     * Can be used to do qualified electronic signatures (legally binding)
+     *
+     * https://en.wikipedia.org/wiki/Qualified_electronic_signature
+     */
+    bool isQualified() const;
+
+    /**
       The DER encoded certificate.
      */
     QByteArray certificateData() const;

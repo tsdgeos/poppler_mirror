@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
                 for (auto &cert : vCerts) {
                     const GooString &nick = cert->getNickName();
                     const auto location = locationToString(cert->getKeyLocation());
-                    printf("%s %s\n", nick.c_str(), location.c_str());
+                    printf("%s %s %s\n", nick.c_str(), (cert->isQualified() ? "(*)" : "   "), location.c_str());
                 }
             }
         }

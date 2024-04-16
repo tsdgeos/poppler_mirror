@@ -619,6 +619,7 @@ public:
     int version;
     bool is_self_signed;
     bool is_null;
+    bool is_qualified;
     CertificateInfo::KeyLocation keyLocation;
 };
 
@@ -658,6 +659,12 @@ QByteArray CertificateInfo::serialNumber() const
 {
     Q_D(const CertificateInfo);
     return d->serial_number;
+}
+
+bool CertificateInfo::isQualified() const
+{
+    Q_D(const CertificateInfo);
+    return d->is_qualified;
 }
 
 QString CertificateInfo::issuerInfo(EntityInfoKey key) const
@@ -1043,6 +1050,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
 
         certPriv->is_null = false;
+        certPriv->is_qualified = ci->isQualified();
     }
 
     return certPriv;
