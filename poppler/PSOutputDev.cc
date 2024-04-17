@@ -7328,8 +7328,8 @@ void PSOutputDev::writePSFmt(const char *fmt, ...)
     if (t3String) {
         t3String->appendfv((char *)fmt, args);
     } else {
-        const std::unique_ptr<GooString> buf = GooString::formatv((char *)fmt, args);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        const std::string buf = GooString::formatv((char *)fmt, args);
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }
     va_end(args);
 }
