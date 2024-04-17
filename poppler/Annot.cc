@@ -1504,7 +1504,7 @@ void Annot::setContents(std::unique_ptr<GooString> &&new_content)
         contents = std::move(new_content);
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(contents->toStr())) {
-            contents->prependUnicodeMarker();
+            prependUnicodeByteOrderMark(contents->toNonConstStr());
         }
     } else {
         contents = std::make_unique<GooString>();
@@ -2211,7 +2211,7 @@ void AnnotMarkup::setLabel(std::unique_ptr<GooString> &&new_label)
         label = std::move(new_label);
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(label->toStr())) {
-            label->prependUnicodeMarker();
+            prependUnicodeByteOrderMark(label->toNonConstStr());
         }
     } else {
         label = std::make_unique<GooString>();
@@ -2936,7 +2936,7 @@ void AnnotFreeText::setStyleString(GooString *new_string)
         styleString = std::make_unique<GooString>(new_string);
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(styleString->toStr())) {
-            styleString->prependUnicodeMarker();
+            prependUnicodeByteOrderMark(styleString->toNonConstStr());
         }
     } else {
         styleString = std::make_unique<GooString>();
@@ -3058,7 +3058,7 @@ public:
                     // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
                     GooString auxContents = GooString(text->toStr().substr(i, isUnicode ? 2 : 1));
                     if (isUnicode) {
-                        auxContents.prependUnicodeMarker();
+                        prependUnicodeByteOrderMark(auxContents.toNonConstStr());
                     }
                     int auxI = 0;
                     Annot::layoutText(&auxContents, &outputText, &auxI, *auxFont, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
@@ -3145,7 +3145,7 @@ double Annot::calculateFontSize(const Form *form, const GfxFont *font, const Goo
         while (i < text->getLength()) {
             GooString lineText(text->toStr().substr(i));
             if (!hasUnicodeByteOrderMark(lineText.toStr()) && isUnicode) {
-                lineText.prependUnicodeMarker();
+                prependUnicodeByteOrderMark(lineText.toNonConstStr());
             }
             const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
             y -= fontSize;
@@ -3181,7 +3181,7 @@ static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double a
     while (i < text.getLength()) {
         GooString lineText(text.toStr().substr(i));
         if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text.toStr())) {
-            lineText.prependUnicodeMarker();
+            prependUnicodeByteOrderMark(lineText.toNonConstStr());
         }
         const HorizontalTextLayouter textLayouter(&lineText, form, &font, availableTextWidthInFontPtSize, false);
 

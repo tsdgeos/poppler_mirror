@@ -620,8 +620,3 @@ std::string GooString::toLowerCase(const std::string &s)
     lowerCase(newString);
     return s;
 }
-
-void GooString::prependUnicodeMarker()
-{
-    insert(0, "\xFE\xFF", 2);
-}

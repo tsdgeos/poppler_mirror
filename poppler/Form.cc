@@ -1308,7 +1308,7 @@ GooString *FormField::getFullyQualifiedName()
     }
 
     if (unicode_encoded) {
-        fullyQualifiedName->prependUnicodeMarker();
+        prependUnicodeByteOrderMark(fullyQualifiedName->toNonConstStr());
     }
 
     return fullyQualifiedName;
@@ -1718,7 +1718,7 @@ void FormFieldText::setContentCopy(const GooString *new_content)
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(content->toStr())) {
-            content->prependUnicodeMarker();
+            prependUnicodeByteOrderMark(content->toNonConstStr());
         }
         Form *form = doc->getCatalog()->getForm();
         if (form) {
@@ -2167,7 +2167,7 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(editedChoice->toStr())) {
-            editedChoice->prependUnicodeMarker();
+            prependUnicodeByteOrderMark(editedChoice->toNonConstStr());
         }
     }
     updateSelection();

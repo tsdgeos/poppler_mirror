@@ -1140,7 +1140,7 @@ static GooString *_poppler_goo_string_from_utf8(const gchar *src)
     g_free(utf16);
 
     if (!hasUnicodeByteOrderMark(result->toStr())) {
-        result->prependUnicodeMarker();
+        prependUnicodeByteOrderMark(result->toNonConstStr());
     }
 
     return result;

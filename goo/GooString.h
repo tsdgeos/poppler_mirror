@@ -242,8 +242,6 @@ public:
 
     // Return true if string ends with suffix
     using std::string::ends_with;
-
-    POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
 };
 
 #endif

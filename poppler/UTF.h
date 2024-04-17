@@ -63,6 +63,12 @@ inline bool hasUnicodeByteOrderMarkLE(const std::string &s)
     return s.starts_with(unicodeByteOrderMarkLE);
 }
 
+// put big-endian unicode byte order mark at the beginning of a string
+inline void prependUnicodeByteOrderMark(std::string &s)
+{
+    s.insert(0, unicodeByteOrderMark);
+}
+
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);
 
