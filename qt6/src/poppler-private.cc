@@ -122,7 +122,7 @@ QString UnicodeParsedString(const std::string &s1)
         return QString();
     }
 
-    if (hasUnicodeByteOrderMark(s1) || GooString::hasUnicodeMarkerLE(s1)) {
+    if (hasUnicodeByteOrderMark(s1) || hasUnicodeByteOrderMarkLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const char16_t *>(s1.c_str()), s1.size() / 2);
     } else {
         int stringLength;

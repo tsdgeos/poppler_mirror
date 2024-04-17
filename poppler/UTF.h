@@ -27,8 +27,11 @@
 #include "CharTypes.h"
 #include "poppler_private_export.h"
 
-// Magic bytes that mark the byte order in a UTF-16 unicode string
+// Magic bytes that mark the byte order in a UTF-16 unicode string (big-endian case)
 constexpr std::string_view unicodeByteOrderMark = "\xFE\xFF";
+
+// Magic bytes that mark the byte order in a UTF-16 unicode string (little-endian case)
+constexpr std::string_view unicodeByteOrderMarkLE = "\xFF\xFE";
 
 // Convert a UTF-16 string to a UCS-4
 //   utf16      - utf16 bytes
@@ -52,6 +55,12 @@ inline bool UnicodeIsValid(Unicode ucs4)
 inline bool hasUnicodeByteOrderMark(const std::string &s)
 {
     return s.starts_with(unicodeByteOrderMark);
+}
+
+// check whether string starts with Little-Endian byte order mark
+inline bool hasUnicodeByteOrderMarkLE(const std::string &s)
+{
+    return s.starts_with(unicodeByteOrderMarkLE);
 }
 
 // is a unicode whitespace character

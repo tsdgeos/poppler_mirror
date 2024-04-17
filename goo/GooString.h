@@ -243,9 +243,6 @@ public:
     // Return true if string ends with suffix
     using std::string::ends_with;
 
-    bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
-    static bool hasUnicodeMarkerLE(const std::string &s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
-
     POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
 };
 

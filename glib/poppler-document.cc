@@ -1101,7 +1101,7 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
 
     if (hasUnicodeByteOrderMark(s->toStr())) {
         result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
-    } else if (s->hasUnicodeMarkerLE()) {
+    } else if (hasUnicodeByteOrderMarkLE(s->toStr())) {
         result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
     } else {
         int len;

@@ -65,7 +65,7 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
     const char *data = str->c_str();
     const int len = str->getLength();
 
-    const bool is_unicodeLE = str->hasUnicodeMarkerLE();
+    const bool is_unicodeLE = hasUnicodeByteOrderMarkLE(str->toStr());
     const bool is_unicode = hasUnicodeByteOrderMark(str->toStr()) || is_unicodeLE;
     int i = is_unicode ? 2 : 0;
     ustring::size_type ret_len = len - i;

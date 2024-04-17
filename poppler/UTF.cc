@@ -91,7 +91,7 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
     if (hasUnicodeByteOrderMark(textStr)) {
         isUnicode = true;
         isUnicodeLE = false;
-    } else if (GooString::hasUnicodeMarkerLE(textStr)) {
+    } else if (hasUnicodeByteOrderMarkLE(textStr)) {
         isUnicode = false;
         isUnicodeLE = true;
     } else {
