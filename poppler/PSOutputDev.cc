@@ -1578,7 +1578,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
             const GooString *pdfCreator = obj1.getString();
             if (pdfCreator && !pdfCreator->toStr().empty()) {
                 creator->append(". PDF Creator: ");
-                if (pdfCreator->hasUnicodeMarker()) {
+                if (hasUnicodeByteOrderMark(pdfCreator->toStr())) {
                     creator->append(TextStringToUtf8(pdfCreator->toStr()));
                 } else {
                     creator->append(pdfCreator);
