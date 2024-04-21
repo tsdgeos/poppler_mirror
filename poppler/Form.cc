@@ -575,9 +575,14 @@ const GooString *FormWidgetSignature::getSignature() const
     return static_cast<FormFieldSignature *>(field)->getSignature();
 }
 
-SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA)
+SignatureInfo *FormWidgetSignature::validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback)
 {
-    return static_cast<FormFieldSignature *>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime, ocspRevocationCheck, enableAIA);
+    return static_cast<FormFieldSignature *>(field)->validateSignatureAsync(doVerifyCert, forceRevalidation, validationTime, ocspRevocationCheck, enableAIA, doneCallback);
+}
+
+CertificateValidationStatus FormWidgetSignature::validateSignatureResult()
+{
+    return static_cast<FormFieldSignature *>(field)->validateSignatureResult();
 }
 
 // update hash with the specified range of data from the file
@@ -2388,37 +2393,52 @@ void FormWidgetSignature::setSignatureType(FormSignatureType fst)
     static_cast<FormFieldSignature *>(field)->setSignatureType(fst);
 }
 
-SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA)
+SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback)
 {
     auto backend = CryptoSign::Factory::createActive();
     if (!backend) {
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
     if (signature_info->getSignatureValStatus() != SIGNATURE_NOT_VERIFIED && !forceRevalidation) {
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
     if (signature == nullptr) {
         error(errSyntaxError, 0, "Invalid or missing Signature string");
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
     if (!byte_range.isArray()) {
         error(errSyntaxError, 0, "Invalid or missing ByteRange array");
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
     int arrayLen = byte_range.arrayGetLength();
     if (arrayLen < 2) {
         error(errSyntaxError, 0, "Too few elements in ByteRange array");
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
     const int signature_len = signature->getLength();
     std::vector<unsigned char> signatureData(signature_len);
     memcpy(signatureData.data(), signature->c_str(), signature_len);
-    auto signature_handler = backend->createVerificationHandler(std::move(signatureData));
+    signature_handler = backend->createVerificationHandler(std::move(signatureData));
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {
@@ -2427,6 +2447,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
         if (!offsetObj.isIntOrInt64() || !lenObj.isIntOrInt64()) {
             error(errSyntaxError, 0, "Illegal values in ByteRange array");
+            if (doneCallback) {
+                doneCallback();
+            }
             return signature_info;
         }
 
@@ -2435,6 +2458,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
         if (offset < 0 || offset >= fileLength || len < 0 || len > fileLength || offset + len > fileLength) {
             error(errSyntaxError, 0, "Illegal values in ByteRange array");
+            if (doneCallback) {
+                doneCallback();
+            }
             return signature_info;
         }
 
@@ -2444,6 +2470,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
     if (!signature_info->isSubfilterSupported()) {
         error(errUnimplemented, 0, "Unable to validate this type of signature");
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
     const SignatureValidationStatus sig_val_state = signature_handler->validateSignature();
@@ -2460,13 +2489,23 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     signature_info->setCertificateInfo(signature_handler->getCertificateInfo());
 
     if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
+        if (doneCallback) {
+            doneCallback();
+        }
         return signature_info;
     }
 
-    const CertificateValidationStatus cert_val_state = signature_handler->validateCertificate(std::chrono::system_clock::from_time_t(validationTime), ocspRevocationCheck, enableAIA);
-    signature_info->setCertificateValStatus(cert_val_state);
+    signature_handler->validateCertificateAsync(std::chrono::system_clock::from_time_t(validationTime), ocspRevocationCheck, enableAIA, doneCallback);
 
     return signature_info;
+}
+
+CertificateValidationStatus FormFieldSignature::validateSignatureResult()
+{
+    if (!signature_handler) {
+        return CERTIFICATE_GENERIC_ERROR;
+    }
+    return signature_handler->validateCertificateResult();
 }
 
 std::vector<Goffset> FormFieldSignature::getSignedRangeBounds() const

@@ -975,7 +975,9 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
 
 SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
 {
-    return validate(opt, QDateTime());
+    auto tempResult = validateAsync(opt);
+    tempResult.first.d_ptr->certificate_status = validateResult();
+    return tempResult.first;
 }
 
 static CertificateInfo::KeyLocation fromPopplerCore(KeyLocation location)
@@ -1037,12 +1039,29 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
     return certPriv;
 }
 
-SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+static SignatureValidationInfo::CertificateStatus fromInternal(CertificateValidationStatus status)
 {
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
-    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck), opt & ValidateUseAIACertFetch);
+    switch (status) {
+    case CERTIFICATE_TRUSTED:
+        return SignatureValidationInfo::CertificateTrusted;
+    case CERTIFICATE_UNTRUSTED_ISSUER:
+        return SignatureValidationInfo::CertificateUntrustedIssuer;
+    case CERTIFICATE_UNKNOWN_ISSUER:
+        return SignatureValidationInfo::CertificateUnknownIssuer;
+    case CERTIFICATE_REVOKED:
+        return SignatureValidationInfo::CertificateRevoked;
+    case CERTIFICATE_EXPIRED:
+        return SignatureValidationInfo::CertificateExpired;
+    default:
+    case CERTIFICATE_GENERIC_ERROR:
+        return SignatureValidationInfo::CertificateGenericError;
+    case CERTIFICATE_NOT_VERIFIED:
+        return SignatureValidationInfo::CertificateNotVerified;
+    }
+}
 
+static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignature *fws)
+{
     // get certificate info
     const X509CertificateInfo *ci = si->getCertificateInfo();
     CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(ci);
@@ -1072,30 +1091,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
         priv->signature_status = SignatureValidationInfo::SignatureNotVerified;
         break;
     }
-    switch (si->getCertificateValStatus()) {
-    case CERTIFICATE_TRUSTED:
-        priv->certificate_status = SignatureValidationInfo::CertificateTrusted;
-        break;
-    case CERTIFICATE_UNTRUSTED_ISSUER:
-        priv->certificate_status = SignatureValidationInfo::CertificateUntrustedIssuer;
-        break;
-    case CERTIFICATE_UNKNOWN_ISSUER:
-        priv->certificate_status = SignatureValidationInfo::CertificateUnknownIssuer;
-        break;
-    case CERTIFICATE_REVOKED:
-        priv->certificate_status = SignatureValidationInfo::CertificateRevoked;
-        break;
-    case CERTIFICATE_EXPIRED:
-        priv->certificate_status = SignatureValidationInfo::CertificateExpired;
-        break;
-    default:
-    case CERTIFICATE_GENERIC_ERROR:
-        priv->certificate_status = SignatureValidationInfo::CertificateGenericError;
-        break;
-    case CERTIFICATE_NOT_VERIFIED:
-        priv->certificate_status = SignatureValidationInfo::CertificateNotVerified;
-        break;
-    }
+    priv->certificate_status = SignatureValidationInfo::CertificateVerificationInProgress;
     priv->signer_name = QString::fromStdString(si->getSignerName());
     priv->signer_subject_dn = QString::fromStdString(si->getSubjectDN());
     priv->hash_algorithm = si->getHashAlgorithm();
@@ -1115,6 +1111,50 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     }
 
     return SignatureValidationInfo(priv);
+}
+
+SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+{
+    auto tempResult = validateAsync(static_cast<ValidateOptions>(opt), validationTime);
+    tempResult.first.d_ptr->certificate_status = validateResult();
+    return tempResult.first;
+}
+
+class AsyncObjectPrivate
+{ /*Currently unused. Created for abi future proofing*/
+};
+
+AsyncObject::AsyncObject() : QObject(nullptr), d {} { }
+
+AsyncObject::~AsyncObject() = default;
+
+std::pair<SignatureValidationInfo, std::shared_ptr<Poppler::AsyncObject>> FormFieldSignature::validateAsync(ValidateOptions opt, const QDateTime &validationTime) const
+{
+    auto object = std::make_shared<AsyncObject>();
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
+    SignatureInfo *si = fws->validateSignatureAsync(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck), opt & ValidateUseAIACertFetch,
+                                                    [obj = std::weak_ptr<AsyncObject>(object)]() {
+                                                        if (auto l = obj.lock()) {
+                                                            // We need to roundtrip over the eventloop
+                                                            // to ensure callers have a chance of connecting to AsyncObject::done
+                                                            QMetaObject::invokeMethod(
+                                                                    l.get(),
+                                                                    [innerObj = std::weak_ptr<AsyncObject>(l)]() {
+                                                                        if (auto innerLocked = innerObj.lock()) {
+                                                                            emit innerLocked->done();
+                                                                        }
+                                                                    },
+                                                                    Qt::QueuedConnection);
+                                                        }
+                                                    });
+
+    return { fromInternal(si, fws), object };
+}
+
+SignatureValidationInfo::CertificateStatus FormFieldSignature::validateResult() const
+{
+    return fromInternal(static_cast<FormWidgetSignature *>(m_formData->fm)->validateSignatureResult());
 }
 
 FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const

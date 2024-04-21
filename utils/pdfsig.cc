@@ -574,6 +574,16 @@ int main(int argc, char *argv[])
         printf("File '%s' does not contain any signatures\n", fileName->c_str());
         return 2;
     }
+    std::unordered_map<int, SignatureInfo *> signatureInfos;
+    for (unsigned int i = 0; i < sigCount; i++) {
+        // Let's start the signature check first for signatures.
+        // we can always wait for completion later
+        FormFieldSignature *ffs = signatures.at(i);
+        if (ffs->getSignatureType() == unsigned_signature_field) {
+            continue;
+        }
+        signatureInfos[i] = ffs->validateSignatureAsync(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch, {});
+    }
 
     for (unsigned int i = 0; i < sigCount; i++) {
         FormFieldSignature *ffs = signatures.at(i);
@@ -589,7 +599,8 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        const SignatureInfo *sig_info = ffs->validateSignature(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch);
+        const SignatureInfo *sig_info = signatureInfos[i];
+        CertificateValidationStatus certificateStatus = ffs->validateSignatureResult();
         printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName().c_str());
         printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN().c_str());
         printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
@@ -649,7 +660,7 @@ int main(int argc, char *argv[])
         if (sig_info->getSignatureValStatus() != SIGNATURE_VALID || dontVerifyCert) {
             continue;
         }
-        printf("  - Certificate Validation: %s\n", getReadableCertState(sig_info->getCertificateValStatus()));
+        printf("  - Certificate Validation: %s\n", getReadableCertState(certificateStatus));
     }
 
     return 0;

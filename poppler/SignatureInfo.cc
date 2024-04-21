@@ -36,11 +36,6 @@ SignatureValidationStatus SignatureInfo::getSignatureValStatus() const
     return sig_status;
 }
 
-CertificateValidationStatus SignatureInfo::getCertificateValStatus() const
-{
-    return cert_status;
-}
-
 std::string SignatureInfo::getSignerName() const
 {
     return signer_name;
@@ -81,11 +76,6 @@ const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
 void SignatureInfo::setSignatureValStatus(enum SignatureValidationStatus sig_val_status)
 {
     sig_status = sig_val_status;
-}
-
-void SignatureInfo::setCertificateValStatus(enum CertificateValidationStatus cert_val_status)
-{
-    cert_status = cert_val_status;
 }
 
 void SignatureInfo::setSignerName(const std::string &signerName)

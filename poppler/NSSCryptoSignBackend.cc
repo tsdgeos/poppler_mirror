@@ -966,12 +966,19 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
     }
 }
 
-CertificateValidationStatus NSSSignatureVerification::validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
+void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback)
 {
+    cachedValidationStatus.reset();
     CERTCertificate *cert;
 
     if (!CMSSignerInfo) {
-        return CERTIFICATE_GENERIC_ERROR;
+        validationStatus = std::async([doneCallback]() {
+            if (doneCallback) {
+                doneCallback();
+            }
+            return CERTIFICATE_GENERIC_ERROR;
+        });
+        return;
     }
 
     if ((cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
@@ -1001,25 +1008,49 @@ CertificateValidationStatus NSSSignatureVerification::validateCertificate(std::c
 
     CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr, CMSSignerInfo->cmsg->pwfn_arg);
 
-    switch (PORT_GetError()) {
-    // 0 not defined in SECErrorCodes, it means success for this purpose.
-    case 0:
-        return CERTIFICATE_TRUSTED;
+    // Here we are just faking the asynchronousness. It should
+    // somehow be the call to CERT_PXIXVerifyCert that would
+    // be put in the thread, but I'm not sure about all of the
+    // thread safety of nss.
 
-    case SEC_ERROR_UNKNOWN_ISSUER:
-        return CERTIFICATE_UNKNOWN_ISSUER;
+    validationStatus = std::async([result = PORT_GetError(), doneCallback]() {
+        if (doneCallback) {
+            doneCallback();
+        }
 
-    case SEC_ERROR_UNTRUSTED_ISSUER:
-        return CERTIFICATE_UNTRUSTED_ISSUER;
+        switch (result) {
+        // 0 not defined in SECErrorCodes, it means success for this purpose.
+        case 0:
+            return CERTIFICATE_TRUSTED;
 
-    case SEC_ERROR_REVOKED_CERTIFICATE:
-        return CERTIFICATE_REVOKED;
+        case SEC_ERROR_UNKNOWN_ISSUER:
+            return CERTIFICATE_UNKNOWN_ISSUER;
 
-    case SEC_ERROR_EXPIRED_CERTIFICATE:
-        return CERTIFICATE_EXPIRED;
+        case SEC_ERROR_UNTRUSTED_ISSUER:
+            return CERTIFICATE_UNTRUSTED_ISSUER;
+
+        case SEC_ERROR_REVOKED_CERTIFICATE:
+            return CERTIFICATE_REVOKED;
+
+        case SEC_ERROR_EXPIRED_CERTIFICATE:
+            return CERTIFICATE_EXPIRED;
+        }
+
+        return CERTIFICATE_GENERIC_ERROR;
+    });
+}
+
+CertificateValidationStatus NSSSignatureVerification::validateCertificateResult()
+{
+    if (cachedValidationStatus) {
+        return cachedValidationStatus.value();
     }
-
-    return CERTIFICATE_GENERIC_ERROR;
+    if (!validationStatus.valid()) {
+        return CERTIFICATE_NOT_VERIFIED;
+    }
+    validationStatus.wait();
+    cachedValidationStatus = validationStatus.get();
+    return cachedValidationStatus.value();
 }
 
 std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &password)

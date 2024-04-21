@@ -38,12 +38,14 @@
 #include "CharTypes.h"
 #include "Object.h"
 #include "poppler_private_export.h"
+#include "SignatureInfo.h"
 
 #include <ctime>
 
 #include <optional>
 #include <set>
 #include <vector>
+#include <functional>
 
 class GooString;
 class Array;
@@ -54,7 +56,6 @@ class Annots;
 class LinkAction;
 class GfxResources;
 class PDFDoc;
-class SignatureInfo;
 class X509CertificateInfo;
 namespace CryptoSign {
 class VerificationInterface;
@@ -297,7 +298,20 @@ public:
     void setSignatureType(FormSignatureType fst);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
+    // ocspRevocation and aiafetch might happen async in the Background
+    // doneCallback will be invoked once there is a result
+    // Note: Validation callback will likely happen from an auxillary
+    // thread and it is the caller of this method who is responsible
+    // for moving back to the main thread
+    // For synchronous code, don't provide validation callback
+    // and just call validateSignatureResult afterwards
+    // The returned SignatureInfo from this method does
+    // not have validated the certificate.
+    SignatureInfo *validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback);
+
+    /// Waits, if needed, on validation callback and
+    /// returns a signatureinfo with validated certificates
+    CertificateValidationStatus validateSignatureResult();
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset
@@ -605,7 +619,9 @@ public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
     // Use -1 for now as validationTime
-    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
+    SignatureInfo *validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback);
+
+    CertificateValidationStatus validateSignatureResult();
 
     // returns a list with the boundaries of the signed ranges
     // the elements of the list are of type Goffset
@@ -653,6 +669,7 @@ private:
     double customAppearanceLeftFontSize = 20;
     Ref imageResource = Ref::INVALID();
     std::unique_ptr<X509CertificateInfo> certificate_info;
+    std::unique_ptr<CryptoSign::VerificationInterface> signature_handler;
 
     void print(int indent) override;
 };

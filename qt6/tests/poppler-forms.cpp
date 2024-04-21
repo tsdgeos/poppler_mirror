@@ -123,6 +123,8 @@ static std::ostream &operator<<(std::ostream &out, Poppler::SignatureValidationI
     case Poppler::SignatureValidationInfo::CertificateNotVerified:
         out << "NotVerifiedYet";
         break;
+    case Poppler::SignatureValidationInfo::CertificateVerificationInProgress:
+        out << "InProgress";
     }
     return out;
 }
