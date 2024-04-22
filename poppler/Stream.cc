@@ -445,6 +445,11 @@ void FileOutStream::put(char c)
     fputc(c, f);
 }
 
+size_t FileOutStream::write(std::span<unsigned char> data)
+{
+    return fwrite(data.data(), sizeof(decltype(data)::element_type), data.size(), f);
+}
+
 void FileOutStream::printf(const char *format, ...)
 {
     va_list argptr;

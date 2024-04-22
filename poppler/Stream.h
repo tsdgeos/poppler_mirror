@@ -45,6 +45,7 @@
 #include <atomic>
 #include <cstdio>
 #include <vector>
+#include <span>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -294,6 +295,8 @@ public:
     // Put a char in the stream
     virtual void put(char c) = 0;
 
+    virtual size_t write(std::span<unsigned char> data) = 0;
+
     virtual void printf(const char *format, ...) GCC_PRINTF_FORMAT(2, 3) = 0;
 };
 
@@ -312,6 +315,8 @@ public:
     Goffset getPos() override;
 
     void put(char c) override;
+
+    size_t write(std::span<unsigned char> data) override;
 
     void printf(const char *format, ...) override GCC_PRINTF_FORMAT(2, 3);
 

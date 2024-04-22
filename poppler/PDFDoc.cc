@@ -1052,16 +1052,19 @@ int PDFDoc::saveWithoutChangesAs(const GooString &name)
 
 int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
 {
-    int c;
-
     if (file && file->modificationTimeChangedSinceOpen()) {
         return errFileChangedSinceOpen;
     }
 
     BaseStream *copyStr = str->copy();
     copyStr->reset();
-    while ((c = copyStr->getChar()) != EOF) {
-        outStr->put(c);
+    while (copyStr->lookChar() != EOF) {
+        std::array<unsigned char, 4096> array;
+        size_t size = copyStr->doGetChars(array.size(), array.data());
+        auto sizeWritten = outStr->write(std::span(array.data(), size));
+        if (size != sizeWritten) {
+            return errFileIO;
+        }
     }
     copyStr->close();
     delete copyStr;
@@ -1071,13 +1074,16 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
 
 void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
 {
-    XRef *uxref;
-    int c;
     // copy the original file
     BaseStream *copyStr = str->copy();
     copyStr->reset();
-    while ((c = copyStr->getChar()) != EOF) {
-        outStr->put(c);
+    while (copyStr->lookChar() != EOF) {
+        std::array<unsigned char, 4096> array;
+        size_t size = copyStr->doGetChars(array.size(), array.data());
+        auto sizeWritten = outStr->write(std::span(array.data(), size));
+        if (size != sizeWritten) {
+            // Write error of some sort
+        }
     }
     copyStr->close();
     delete copyStr;
@@ -1087,7 +1093,7 @@ void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
     int keyLength;
     xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
-    uxref = new XRef();
+    XRef *uxref = new XRef();
     uxref->add(0, 65535, 0, false);
     xref->lock();
     for (int i = 0; i < xref->getNumObjects(); i++) {

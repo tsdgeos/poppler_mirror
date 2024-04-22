@@ -43,6 +43,11 @@ void QIODeviceOutStream::put(char c)
     m_device->putChar(c);
 }
 
+size_t QIODeviceOutStream::write(std::span<unsigned char> data)
+{
+    return m_device->write(reinterpret_cast<const char *>(data.data()), data.size());
+}
+
 static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap) GCC_PRINTF_FORMAT(2, 0);
 
 static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap)
