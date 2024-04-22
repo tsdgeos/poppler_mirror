@@ -7,6 +7,7 @@
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -118,7 +119,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
     const char *const str = label->c_str();
     const std::size_t strLen = label->getLength();
-    const bool strUnicode = label->hasUnicodeMarker();
+    const bool strUnicode = hasUnicodeByteOrderMark(label->toStr());
     int number;
     bool ok;
 
@@ -211,7 +212,7 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
 
     label->clear();
     label->append(matching_interval->prefix.c_str(), matching_interval->prefix.size());
-    if (label->hasUnicodeMarker()) {
+    if (hasUnicodeByteOrderMark(label->toStr())) {
         int i, len;
         char ucs2_char[2];
 

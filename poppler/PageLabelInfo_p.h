@@ -7,7 +7,7 @@
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -23,11 +23,12 @@
 
 #include "goo/GooString.h"
 #include "Error.h"
+#include "UTF.h"
 
 static std::pair<int, bool> fromDecimal(const std::string &str, const bool unicode)
 {
     if (unicode && (str.size() % 2 == 0)) {
-        if (GooString::hasUnicodeMarker(str)) {
+        if (hasUnicodeByteOrderMark(str)) {
             // strip the marker if it is there
             return fromDecimal(str.substr(2), true /*unicode*/);
         }

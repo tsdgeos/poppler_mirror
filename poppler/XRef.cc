@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -1187,6 +1187,16 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
     Object obj1, obj2, obj3;
 
     xrefLocker();
+
+    const Ref ref = { num, gen };
+
+    if (!refsBeingFetched.insert(ref)) {
+        return Object(objNull);
+    }
+
+    // Will remove ref from refsBeingFetched once it's destroyed, i.e. the function returns
+    RefRecursionCheckerRemover remover(refsBeingFetched, ref);
+
     // check for bogus ref - this can happen in corrupted PDF files
     if (num < 0 || num >= size) {
         goto err;

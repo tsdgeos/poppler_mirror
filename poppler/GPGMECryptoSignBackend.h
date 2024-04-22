@@ -4,13 +4,15 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
+
 #include "CryptoSignBackend.h"
 
 #include <gpgme++/data.h>
 #include <gpgme++/context.h>
 #include <optional>
+#include <future>
 
 class GpgSignatureBackend : public CryptoSign::Backend
 {
@@ -46,7 +48,8 @@ public:
     std::string getSignerName() const final;
     std::string getSignerSubjectDN() const final;
     HashAlgorithm getHashAlgorithm() const final;
-    CertificateValidationStatus validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch) final;
+    CertificateValidationStatus validateCertificateResult() final;
+    void validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
 
 private:
@@ -54,4 +57,6 @@ private:
     GpgME::Data signatureData;
     GpgME::Data signedData;
     std::optional<GpgME::VerificationResult> gpgResult;
+    std::future<CertificateValidationStatus> validationStatus;
+    std::optional<CertificateValidationStatus> cachedValidationStatus;
 };

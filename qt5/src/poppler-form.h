@@ -13,7 +13,7 @@
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Theofilos Intzoglou <int.teo@gmail.com>
- * Copyright (C) 2023, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2023, 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -687,7 +687,8 @@ public:
         CertificateRevoked, ///< The certificate was revoked by the issuing certificate authority.
         CertificateExpired, ///< The signing time is outside the validity bounds of this certificate.
         CertificateGenericError, ///< The certificate could not be verified.
-        CertificateNotVerified ///< The certificate is not yet verified.
+        CertificateNotVerified, ///< The certificate is not yet verified.
+        CertificateVerificationInProgress ///< The certificate is not yet verified but is in progress in the background. See \ref validateAsync \since 24.05
     };
 
     /**
@@ -785,8 +786,30 @@ public:
 
 private:
     Q_DECLARE_PRIVATE(SignatureValidationInfo)
-
+    friend class FormFieldSignature;
     QSharedPointer<SignatureValidationInfoPrivate> d_ptr;
+};
+
+/**
+ * Object help waiting for some async event
+ *
+ * \since 24.05
+ */
+class AsyncObjectPrivate;
+class POPPLER_QT5_EXPORT AsyncObject : public QObject // clazy:exclude=ctor-missing-parent-argument
+{
+    Q_OBJECT
+public:
+    /* Constructor. On purpose not having a QObject parameter
+       It will be returned by shared_ptr or unique_ptr
+    */
+    AsyncObject();
+    ~AsyncObject() override;
+Q_SIGNALS:
+    void done();
+public Q_SLOTS:
+private:
+    std::unique_ptr<AsyncObjectPrivate> d;
 };
 
 /**
@@ -844,8 +867,10 @@ public:
       requiring network access, AIAFetch and OCSP,
       can be toggled individually. In case of the GPG backend, if either
       OCSP is used or AIAFetch is used, the other one is also used.
+
+      \deprecated Please rewrite to the async version, that allows the network traffic part of fetching to happen in the background
      */
-    SignatureValidationInfo validate(ValidateOptions opt) const;
+    POPPLER_QT5_DEPRECATED SignatureValidationInfo validate(ValidateOptions opt) const;
 
     /**
       Validate the signature with @p validationTime as validation time.
@@ -859,8 +884,38 @@ public:
       requiring network access, AIAFetch and OCSP,
       can be toggled individually. In case of the GPG backend, if either
       OCSP is used or AIAFetch is used, the other one is also used.
+
+      \deprecated Please rewrite to the async version, that allows the network traffic part of fetching to happen in the background
      */
-    SignatureValidationInfo validate(int opt, const QDateTime &validationTime) const;
+    POPPLER_QT5_DEPRECATED SignatureValidationInfo validate(int opt, const QDateTime &validationTime) const;
+
+    /**
+      Validate the signature with @p validationTime as validation time.
+
+      Reset signature validatation info of scoped instance.
+
+      \since 24.05
+
+      \note depending on the backend, some options are only
+      partially respected. In case of the NSS backend, the two options
+      requiring network access, AIAFetch and OCSP,
+      can be toggled individually. In case of the GPG backend, if either
+      OCSP is used or AIAFetch is used, the other one is also used.
+
+      \note certificate validation will have started when this function return. See \ref validateResult on how to get certifcate validation
+      \note connections to \ref AsyncObject must happen by the caller
+      before returning control to the event loop, else signals is not guaranteed to be delivered
+    */
+    std::pair<SignatureValidationInfo, std::shared_ptr<AsyncObject>> validateAsync(ValidateOptions opt, const QDateTime &validationTime = {}) const;
+
+    /**
+     * \return the updated signature validation info from validateAsync
+     * \note that this function will block if the result is not yet ready.
+     * Wait for the \ref AsyncObject::done signal to avoid this function blocking on an inconvenient time
+     *
+     * \since 24.05
+     */
+    SignatureValidationInfo::CertificateStatus validateResult() const;
 
     /**
      * \since 22.02

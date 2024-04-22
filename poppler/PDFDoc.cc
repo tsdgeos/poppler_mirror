@@ -46,7 +46,7 @@
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Adam Sampson <ats@offog.org>
-// Copyright (C) 2021-2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021-2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
@@ -1311,7 +1311,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     }
 
     // Write data
-    if (s->hasUnicodeMarker()) {
+    if (hasUnicodeByteOrderMark(s->toStr())) {
         // unicode string don't necessary end with \0
         const char *c = s->c_str();
         std::stringstream stream;

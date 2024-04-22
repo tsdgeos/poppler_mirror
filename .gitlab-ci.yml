@@ -68,16 +68,12 @@ build_clang16_libcpp:
     - cp "$srcdir/.clang-tidy" .
     - run-clang-tidy-16
 
-build_ubuntu_20_04:
+build_ubuntu_22_04:
   stage: build
-  image: ubuntu:20.04
+  image: ubuntu:22.04
   before_script:
     - apt-get update
-    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git
-    - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/" -A "6.2.0-0-*qtbase-Linux-RHEL_8_2-GCC-Linux-RHEL_8_2-X86_64.7z"
-    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/6.2.0-0-*qtbase-Linux-RHEL_8_2-GCC-Linux-RHEL_8_2-X86_64.7z
-    - wget -r -l1 -np "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/" -A "6.2.0-0-*icu-linux-Rhel7.2-x64.7z"
-    - 7z x download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_620/qt.qt6.620.gcc_64/6.2.0-0-*icu-linux-Rhel7.2-x64.7z
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
@@ -109,17 +105,17 @@ build_clazy_fedora40:
     - CC=clang-18 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
-build_qt5_android:
+build_qt5_android_qt515:
   stage: build
-  image: kdeorg/android-sdk
+  image: invent-registry.kde.org/sysadmin/ci-images/android-qt515
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
   script:
     - mkdir -p build && cd build
-    - 'ANDROID_ARCH_ABI=arm64-v8a cmake -G Ninja ..
+    - 'ANDROID_ARCH_ABI=armeabi-v7a cmake -G Ninja ..
                          -DCMAKE_ANDROID_API=28
-                         -DCMAKE_PREFIX_PATH="/opt/Qt/;/opt/kdeandroid-arm64/"
+                         -DCMAKE_PREFIX_PATH="/home/user/android-arm-clang"
                          -DCMAKE_BUILD_TYPE=debug
                          -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
                          -DENABLE_DCTDECODER=unmaintained
@@ -135,17 +131,17 @@ build_qt5_android:
                          -DCMAKE_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake'
     - ninja -j ${FDO_CI_CONCURRENT}
 
-build_qt5_android_generic:
+build_qt5_android_qt515_generic:
   stage: build
-  image: kdeorg/android-sdk
+  image: invent-registry.kde.org/sysadmin/ci-images/android-qt515
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
   script:
     - mkdir -p build && cd build
-    - 'ANDROID_ARCH_ABI=arm64-v8a cmake -G Ninja ..
+    - 'ANDROID_ARCH_ABI=armeabi-v7a cmake -G Ninja ..
                          -DCMAKE_ANDROID_API=28
-                         -DCMAKE_PREFIX_PATH="/opt/Qt/;/opt/kdeandroid-arm64/"
+                         -DCMAKE_PREFIX_PATH="/home/user/android-arm-clang"
                          -DCMAKE_BUILD_TYPE=debug
                          -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
                          -DENABLE_DCTDECODER=unmaintained

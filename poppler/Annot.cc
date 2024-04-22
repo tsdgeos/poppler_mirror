@@ -41,10 +41,10 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018-2020 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) 2018-2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018-2020, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
-// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2020, 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -89,6 +89,7 @@
 #include "FileSpec.h"
 #include "DateInfo.h"
 #include "Link.h"
+#include "UTF.h"
 #include <cstring>
 #include <algorithm>
 
@@ -1502,8 +1503,8 @@ void Annot::setContents(std::unique_ptr<GooString> &&new_content)
     if (new_content) {
         contents = std::move(new_content);
         // append the unicode marker <FE FF> if needed
-        if (!contents->hasUnicodeMarker()) {
-            contents->prependUnicodeMarker();
+        if (!hasUnicodeByteOrderMark(contents->toStr())) {
+            prependUnicodeByteOrderMark(contents->toNonConstStr());
         }
     } else {
         contents = std::make_unique<GooString>();
@@ -2209,8 +2210,8 @@ void AnnotMarkup::setLabel(std::unique_ptr<GooString> &&new_label)
     if (new_label) {
         label = std::move(new_label);
         // append the unicode marker <FE FF> if needed
-        if (!label->hasUnicodeMarker()) {
-            label->prependUnicodeMarker();
+        if (!hasUnicodeByteOrderMark(label->toStr())) {
+            prependUnicodeByteOrderMark(label->toNonConstStr());
         }
     } else {
         label = std::make_unique<GooString>();
@@ -2934,8 +2935,8 @@ void AnnotFreeText::setStyleString(GooString *new_string)
     if (new_string) {
         styleString = std::make_unique<GooString>(new_string);
         // append the unicode marker <FE FF> if needed
-        if (!styleString->hasUnicodeMarker()) {
-            styleString->prependUnicodeMarker();
+        if (!hasUnicodeByteOrderMark(styleString->toStr())) {
+            prependUnicodeByteOrderMark(styleString->toNonConstStr());
         }
     } else {
         styleString = std::make_unique<GooString>();
@@ -3027,7 +3028,7 @@ public:
         double blockWidth;
         bool newFontNeeded = false;
         GooString outputText;
-        const bool isUnicode = text->hasUnicodeMarker();
+        const bool isUnicode = hasUnicodeByteOrderMark(text->toStr());
         int charCount;
 
         Annot::layoutText(text, &outputText, &i, *font, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, noReencode, !noReencode ? &newFontNeeded : nullptr);
@@ -3057,7 +3058,7 @@ public:
                     // Here we just layout one char, we don't know if the one afterwards can be layouted with the original font
                     GooString auxContents = GooString(text->toStr().substr(i, isUnicode ? 2 : 1));
                     if (isUnicode) {
-                        auxContents.prependUnicodeMarker();
+                        prependUnicodeByteOrderMark(auxContents.toNonConstStr());
                     }
                     int auxI = 0;
                     Annot::layoutText(&auxContents, &outputText, &auxI, *auxFont, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
@@ -3134,7 +3135,7 @@ public:
 
 double Annot::calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, const bool forceZapfDingbats)
 {
-    const bool isUnicode = text->hasUnicodeMarker();
+    const bool isUnicode = hasUnicodeByteOrderMark(text->toStr());
     double fontSize;
 
     for (fontSize = 20; fontSize > 1; --fontSize) {
@@ -3143,8 +3144,8 @@ double Annot::calculateFontSize(const Form *form, const GfxFont *font, const Goo
         int i = 0;
         while (i < text->getLength()) {
             GooString lineText(text->toStr().substr(i));
-            if (!lineText.hasUnicodeMarker() && isUnicode) {
-                lineText.prependUnicodeMarker();
+            if (!hasUnicodeByteOrderMark(lineText.toStr()) && isUnicode) {
+                prependUnicodeByteOrderMark(lineText.toNonConstStr());
             }
             const HorizontalTextLayouter textLayouter(&lineText, form, font, availableWidthInFontSize, forceZapfDingbats);
             y -= fontSize;
@@ -3179,8 +3180,8 @@ static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double a
     const double availableTextWidthInFontPtSize = availableWidth / fontSize;
     while (i < text.getLength()) {
         GooString lineText(text.toStr().substr(i));
-        if (!lineText.hasUnicodeMarker() && text.hasUnicodeMarker()) {
-            lineText.prependUnicodeMarker();
+        if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text.toStr())) {
+            prependUnicodeByteOrderMark(lineText.toNonConstStr());
         }
         const HorizontalTextLayouter textLayouter(&lineText, form, &font, availableTextWidthInFontPtSize, false);
 
@@ -3233,7 +3234,7 @@ static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double a
         if (i == 0) {
             i += textLayouter.consumedText;
         } else {
-            i += textLayouter.consumedText - (text.hasUnicodeMarker() ? 2 : 0);
+            i += textLayouter.consumedText - (hasUnicodeByteOrderMark(text.toStr()) ? 2 : 0);
         }
     }
     return result;
@@ -4283,7 +4284,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     if (!text) {
         return;
     }
-    bool unicode = text->hasUnicodeMarker();
+    bool unicode = hasUnicodeByteOrderMark(text->toStr());
     bool spacePrev; // previous character was a space
 
     // State for backtracking when more text has been processed than fits within
@@ -4586,7 +4587,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     // for a password field, replace all characters with asterisks
     if (flags & TurnTextToStarsDrawTextFlag) {
         int len;
-        if (text->hasUnicodeMarker()) {
+        if (hasUnicodeByteOrderMark(text->toStr())) {
             len = (text->getLength() - 2) / 2;
         } else {
             len = text->getLength();
@@ -5288,7 +5289,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     if (centerVertically) {
         const double outTextHeight = textCommands.nLines * da.getFontPtSize();
         if (outTextHeight < height) {
-            yDelta -= (height - outTextHeight) / 2;
+            yDelta = height - (height - outTextHeight) / 2;
         }
     }
     appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", leftMargin + textmargin, yDelta);

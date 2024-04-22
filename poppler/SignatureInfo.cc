@@ -13,7 +13,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -34,11 +34,6 @@ SignatureInfo::~SignatureInfo() = default;
 SignatureValidationStatus SignatureInfo::getSignatureValStatus() const
 {
     return sig_status;
-}
-
-CertificateValidationStatus SignatureInfo::getCertificateValStatus() const
-{
-    return cert_status;
 }
 
 std::string SignatureInfo::getSignerName() const
@@ -81,11 +76,6 @@ const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
 void SignatureInfo::setSignatureValStatus(enum SignatureValidationStatus sig_val_status)
 {
     sig_status = sig_val_status;
-}
-
-void SignatureInfo::setCertificateValStatus(enum CertificateValidationStatus cert_val_status)
-{
-    cert_status = cert_val_status;
 }
 
 void SignatureInfo::setSignerName(const std::string &signerName)

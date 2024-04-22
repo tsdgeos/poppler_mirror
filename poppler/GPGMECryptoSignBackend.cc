@@ -4,8 +4,9 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
+
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
@@ -347,32 +348,77 @@ std::chrono::system_clock::time_point GpgSignatureVerification::getSigningTime()
     return std::chrono::system_clock::from_time_t(signature->creationTime());
 }
 
-CertificateValidationStatus GpgSignatureVerification::validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch)
+void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneFunction)
 {
+    cachedValidationStatus.reset();
     if (!gpgResult) {
-        return CERTIFICATE_NOT_VERIFIED;
+        validationStatus = std::async([doneFunction]() {
+            if (doneFunction) {
+                doneFunction();
+            }
+            return CERTIFICATE_NOT_VERIFIED;
+        });
+        return;
     }
     if (gpgResult->error()) {
-        return CERTIFICATE_GENERIC_ERROR;
+        validationStatus = std::async([doneFunction]() {
+            if (doneFunction) {
+                doneFunction();
+            }
+            return CERTIFICATE_GENERIC_ERROR;
+        });
+        return;
     }
     const auto signature = getSignature(gpgResult.value(), 0);
     if (!signature) {
-        return CERTIFICATE_GENERIC_ERROR;
+        validationStatus = std::async([doneFunction]() {
+            if (doneFunction) {
+                doneFunction();
+            }
+            return CERTIFICATE_GENERIC_ERROR;
+        });
+        return;
     }
-    const auto offline = gpgContext->offline();
-    gpgContext->setOffline((!ocspRevocationCheck) || useAIACertFetch);
-    const auto key = signature->key(true, true);
-    gpgContext->setOffline(offline);
-    if (key.isExpired()) {
-        return CERTIFICATE_EXPIRED;
+    std::string keyFP = fromCharPtr(signature->key().primaryFingerprint());
+    validationStatus = std::async([keyFP = std::move(keyFP), doneFunction, ocspRevocationCheck, useAIACertFetch]() {
+        auto context = GpgME::Context::create(GpgME::CMS);
+        context->setOffline((!ocspRevocationCheck) || useAIACertFetch);
+        context->setKeyListMode(GpgME::KeyListMode::Local | GpgME::KeyListMode::Validate);
+        GpgME::Error e;
+        const auto key = context->key(keyFP.c_str(), e, false);
+        if (doneFunction) {
+            doneFunction();
+        }
+        if (e.isCanceled()) {
+            return CERTIFICATE_NOT_VERIFIED;
+        }
+        if (e) {
+            return CERTIFICATE_GENERIC_ERROR;
+        }
+        if (key.isExpired()) {
+            return CERTIFICATE_EXPIRED;
+        }
+        if (key.isRevoked()) {
+            return CERTIFICATE_REVOKED;
+        }
+        if (key.isBad()) {
+            return CERTIFICATE_NOT_VERIFIED;
+        }
+        return CERTIFICATE_TRUSTED;
+    });
+}
+
+CertificateValidationStatus GpgSignatureVerification::validateCertificateResult()
+{
+    if (cachedValidationStatus) {
+        return cachedValidationStatus.value();
     }
-    if (key.isRevoked()) {
-        return CERTIFICATE_REVOKED;
-    }
-    if (key.isBad()) {
+    if (!validationStatus.valid()) {
         return CERTIFICATE_NOT_VERIFIED;
     }
-    return CERTIFICATE_TRUSTED;
+    validationStatus.wait();
+    cachedValidationStatus = validationStatus.get();
+    return cachedValidationStatus.value();
 }
 
 SignatureValidationStatus GpgSignatureVerification::validateSignature()

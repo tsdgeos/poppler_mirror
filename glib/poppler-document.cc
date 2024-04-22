@@ -4,7 +4,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
- * Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020, 2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -1099,9 +1099,9 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
 
     char *result;
 
-    if (s->hasUnicodeMarker()) {
+    if (hasUnicodeByteOrderMark(s->toStr())) {
         result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
-    } else if (s->hasUnicodeMarkerLE()) {
+    } else if (hasUnicodeByteOrderMarkLE(s->toStr())) {
         result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
     } else {
         int len;
@@ -1139,8 +1139,8 @@ static GooString *_poppler_goo_string_from_utf8(const gchar *src)
     GooString *result = new GooString(utf16, outlen);
     g_free(utf16);
 
-    if (!result->hasUnicodeMarker()) {
-        result->prependUnicodeMarker();
+    if (!hasUnicodeByteOrderMark(result->toStr())) {
+        prependUnicodeByteOrderMark(result->toNonConstStr());
     }
 
     return result;
@@ -3733,7 +3733,7 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
     gchar *date_string;
     gboolean retval;
 
-    if (date->hasUnicodeMarker()) {
+    if (hasUnicodeByteOrderMark(date->toStr())) {
         date_string = g_convert(date->c_str() + 2, date->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else {
         date_string = g_strndup(date->c_str(), date->getLength());

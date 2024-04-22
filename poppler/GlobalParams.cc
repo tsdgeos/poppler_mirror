@@ -40,7 +40,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Kai Pastor <dg0yt@darc.de>
 // Copyright (C) 2021, 2022 Stefan Löffler <st.loeffler@gmail.com>
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
@@ -903,7 +903,7 @@ GooString *GlobalParams::findFontFile(const std::string &fontName)
 
 static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int faceIndex)
 {
-    if (!GooString::endsWith(filepath, ".ttf") && !GooString::endsWith(filepath, ".ttc") && !GooString::endsWith(filepath, ".otf")) {
+    if (!std::string_view(filepath).ends_with(".ttf") && !std::string_view(filepath).ends_with(".ttc") && !std::string_view(filepath).ends_with(".otf")) {
         // for now we only support ttf, ttc, otf fonts
         return false;
     }
@@ -1248,9 +1248,9 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 
     // Set the type of font. Fonts returned by AFontMatcher are of
     // four possible types - ttf, otf, ttc, otc.
-    if (path->endsWith(".ttf") || path->endsWith(".otf")) {
+    if (path->ends_with(".ttf") || path->ends_with(".otf")) {
         *type = sysFontTTF;
-    } else if (path->endsWith(".ttc") || path->endsWith(".otc")) {
+    } else if (path->ends_with(".ttc") || path->ends_with(".otc")) {
         *type = sysFontTTC;
     }
 #    else

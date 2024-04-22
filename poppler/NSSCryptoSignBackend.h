@@ -14,7 +14,7 @@
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -30,6 +30,7 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <future>
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -78,7 +79,9 @@ public:
     std::string getSignerName() const final;
     std::string getSignerSubjectDN() const final;
     // Use -1 as validation_time for now
-    CertificateValidationStatus validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch) final;
+
+    CertificateValidationStatus validateCertificateResult() final;
+    void validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     void addData(unsigned char *data_block, int data_len) final;
     HashAlgorithm getHashAlgorithm() const final;
@@ -93,6 +96,8 @@ private:
     NSSCMSSignerInfo *CMSSignerInfo;
     SECItem CMSitem;
     std::unique_ptr<HashContext> hashContext;
+    std::future<CertificateValidationStatus> validationStatus;
+    std::optional<CertificateValidationStatus> cachedValidationStatus;
 };
 
 class NSSSignatureCreation final : public CryptoSign::SigningInterface

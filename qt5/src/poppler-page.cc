@@ -28,6 +28,7 @@
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
+ * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -654,7 +655,11 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
     m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72, 0, false, true, false, -1, -1, -1, -1, nullptr, nullptr, nullptr, nullptr, true);
     if (r.isNull()) {
         const PDFRectangle *rect = m_page->page->getCropBox();
-        s = output_dev->getText(rect->x1, rect->y1, rect->x2, rect->y2);
+        if (orientation() == Orientation::Portrait || orientation() == Orientation::UpsideDown) {
+            s = output_dev->getText(rect->x1, rect->y1, rect->x2, rect->y2);
+        } else {
+            s = output_dev->getText(rect->y1, rect->x1, rect->y2, rect->x2);
+        }
     } else {
         s = output_dev->getText(r.left(), r.top(), r.right(), r.bottom());
     }

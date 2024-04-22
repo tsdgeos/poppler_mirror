@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
-// Copyright (C) 2019, 2020, 2022, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020, 2022-2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
@@ -156,11 +156,7 @@ public:
     void setChar(int i, char c) { (*this)[i] = c; }
 
     // Clear string to zero length.
-    GooString *clear()
-    {
-        static_cast<std::string &>(*this).clear();
-        return this;
-    }
+    using std::string::clear;
 
     // Append a character or string.
     GooString *append(char c)
@@ -242,19 +238,10 @@ public:
     int cmpN(const char *sA, int n) const { return compare(0, n, sA); }
 
     // Return true if strings starts with prefix
-    POPPLER_PRIVATE_EXPORT bool startsWith(const char *prefix) const;
+    using std::string::starts_with;
+
     // Return true if string ends with suffix
-    POPPLER_PRIVATE_EXPORT bool endsWith(const char *suffix) const;
-
-    static bool startsWith(std::string_view str, std::string_view prefix) { return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix); }
-    static bool endsWith(std::string_view str, std::string_view suffix) { return str.size() >= suffix.size() && 0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix); }
-
-    bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
-    static bool hasUnicodeMarker(const std::string &s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
-    bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
-    static bool hasUnicodeMarkerLE(const std::string &s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
-
-    POPPLER_PRIVATE_EXPORT void prependUnicodeMarker();
+    using std::string::ends_with;
 };
 
 #endif

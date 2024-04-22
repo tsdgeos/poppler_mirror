@@ -43,7 +43,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2020, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
 // Copyright (C) 2021 Christopher Hasse <hasse.christopher@gmail.com>
 // Copyright (C) 2022 Brian Rosenfield <brosenfi@yahoo.com>
@@ -148,7 +148,7 @@ static std::unique_ptr<GooString> print_uni_str(const Unicode *u, const unsigned
     std::unique_ptr<GooString> gstr_buff0 = GooString::format("{0:c}", (*u < 0x7F ? *u & 0xFF : '?'));
     for (unsigned i = 1; i < uLen; i++) {
         if (u[i] < 0x7F) {
-            gstr_buff0->append(u[i] < 0x7F ? static_cast<char>(u[i]) & 0xFF : '?');
+            gstr_buff0->append(static_cast<char>(u[i]) & 0xFF);
         }
     }
 

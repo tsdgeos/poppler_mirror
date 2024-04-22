@@ -23,6 +23,7 @@
 #include <poppler-private.h>
 
 #include <GlobalParams.h>
+#include "UTF.h"
 
 Q_DECLARE_METATYPE(GooString *)
 Q_DECLARE_METATYPE(Unicode *)
@@ -194,7 +195,7 @@ void TestStrings::check_QStringToUnicodeGooString()
         QVERIFY(goo->toStr().empty());
         QCOMPARE(goo->getLength(), 0);
     } else {
-        QVERIFY(goo->hasUnicodeMarker());
+        QVERIFY(hasUnicodeByteOrderMark(goo->toStr()));
         QCOMPARE(goo->getLength(), string.length() * 2 + 2);
         QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
     }

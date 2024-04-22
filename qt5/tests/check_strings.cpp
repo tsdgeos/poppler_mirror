@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2010, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
+ * Copyright (C) 2024 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@
 #include <poppler-private.h>
 
 #include <GlobalParams.h>
+#include <UTF.h>
 
 Q_DECLARE_METATYPE(GooString *)
 Q_DECLARE_METATYPE(Unicode *)
@@ -194,7 +196,7 @@ void TestStrings::check_QStringToUnicodeGooString()
         QVERIFY(goo->toStr().empty());
         QCOMPARE(goo->getLength(), 0);
     } else {
-        QVERIFY(goo->hasUnicodeMarker());
+        QVERIFY(hasUnicodeByteOrderMark(goo->toStr()));
         QCOMPARE(goo->getLength(), string.length() * 2 + 2);
         QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
     }

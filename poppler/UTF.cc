@@ -16,14 +16,14 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
-// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -88,10 +88,10 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
         return {};
     }
 
-    if (GooString::hasUnicodeMarker(textStr)) {
+    if (hasUnicodeByteOrderMark(textStr)) {
         isUnicode = true;
         isUnicodeLE = false;
-    } else if (GooString::hasUnicodeMarkerLE(textStr)) {
+    } else if (hasUnicodeByteOrderMarkLE(textStr)) {
         isUnicode = false;
         isUnicodeLE = true;
     } else {
@@ -558,14 +558,15 @@ std::string TextStringToUtf8(const std::string &textStr)
 
     len = textStr.size();
     s = textStr.c_str();
-    if (GooString::hasUnicodeMarker(textStr)) {
+    if (hasUnicodeByteOrderMark(textStr)) {
         uint16_t *utf16;
         len = len / 2 - 1;
-        utf16 = new uint16_t[len];
+        utf16 = new uint16_t[len + 1];
         for (i = 0; i < len; i++) {
             utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
         }
-        utf8 = utf16ToUtf8(utf16, &len);
+        utf16[i] = 0;
+        utf8 = utf16ToUtf8(utf16);
         delete[] utf16;
     } else {
         utf8 = (char *)gmalloc(len + 1);

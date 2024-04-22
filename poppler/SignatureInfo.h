@@ -13,7 +13,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -62,7 +62,6 @@ public:
 
     /* GETTERS */
     SignatureValidationStatus getSignatureValStatus() const;
-    CertificateValidationStatus getCertificateValStatus() const;
     std::string getSignerName() const;
     std::string getSubjectDN() const;
     const GooString &getLocation() const;
@@ -74,7 +73,6 @@ public:
 
     /* SETTERS */
     void setSignatureValStatus(enum SignatureValidationStatus);
-    void setCertificateValStatus(enum CertificateValidationStatus);
     void setSignerName(const std::string &);
     void setSubjectDN(const std::string &);
     void setLocation(const GooString *);
@@ -86,7 +84,6 @@ public:
 
 private:
     SignatureValidationStatus sig_status = SIGNATURE_NOT_VERIFIED;
-    CertificateValidationStatus cert_status = CERTIFICATE_NOT_VERIFIED;
     std::unique_ptr<X509CertificateInfo> cert_info;
     std::string signer_name;
     std::string subject_dn;

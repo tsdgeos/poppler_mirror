@@ -12,7 +12,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
-// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -27,8 +27,11 @@
 #include "CharTypes.h"
 #include "poppler_private_export.h"
 
-// Magic bytes that mark the byte order in a UTF-16 unicode string
+// Magic bytes that mark the byte order in a UTF-16 unicode string (big-endian case)
 constexpr std::string_view unicodeByteOrderMark = "\xFE\xFF";
+
+// Magic bytes that mark the byte order in a UTF-16 unicode string (little-endian case)
+constexpr std::string_view unicodeByteOrderMarkLE = "\xFF\xFE";
 
 // Convert a UTF-16 string to a UCS-4
 //   utf16      - utf16 bytes
@@ -46,6 +49,24 @@ std::vector<Unicode> POPPLER_PRIVATE_EXPORT TextStringToUCS4(const std::string &
 inline bool UnicodeIsValid(Unicode ucs4)
 {
     return (ucs4 < 0x110000) && ((ucs4 & 0xfffff800) != 0xd800) && (ucs4 < 0xfdd0 || ucs4 > 0xfdef) && ((ucs4 & 0xfffe) != 0xfffe);
+}
+
+// check whether string starts with Big-Endian byte order mark
+inline bool hasUnicodeByteOrderMark(const std::string &s)
+{
+    return s.starts_with(unicodeByteOrderMark);
+}
+
+// check whether string starts with Little-Endian byte order mark
+inline bool hasUnicodeByteOrderMarkLE(const std::string &s)
+{
+    return s.starts_with(unicodeByteOrderMarkLE);
+}
+
+// put big-endian unicode byte order mark at the beginning of a string
+inline void prependUnicodeByteOrderMark(std::string &s)
+{
+    s.insert(0, unicodeByteOrderMark);
 }
 
 // is a unicode whitespace character

@@ -1,3 +1,19 @@
+Release 24.04.0:
+        core:
+         * Optimize page text extraction speed
+         * Fix clipping path handling in some files. Issue #739
+         * Fix regression in text selection
+         * Fix text search across lines between paragraphs
+
+        qt6:
+         * Fix crash in SoundObject::data
+
+        utils:
+         * pdfsig: Add Catalan translation
+
+        build system:
+         * Build code as C++20
+
 Release 24.03.0:
         core:
          * Fix opening some malformed files. Issue #1447

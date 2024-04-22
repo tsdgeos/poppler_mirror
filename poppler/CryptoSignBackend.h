@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
 
 #ifndef SIGNATUREBACKEND_H
@@ -14,6 +14,7 @@
 #include <memory>
 #include <chrono>
 #include <optional>
+#include <functional>
 #include "HashAlgorithm.h"
 #include "CertificateInfo.h"
 #include "SignatureInfo.h"
@@ -38,7 +39,10 @@ public:
     virtual std::string getSignerName() const = 0;
     virtual std::string getSignerSubjectDN() const = 0;
     virtual HashAlgorithm getHashAlgorithm() const = 0;
-    virtual CertificateValidationStatus validateCertificate(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch) = 0;
+
+    // Blocking if doneCallback to validateCertificateAsync has not yet been called
+    virtual CertificateValidationStatus validateCertificateResult() = 0;
+    virtual void validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback) = 0;
     virtual std::unique_ptr<X509CertificateInfo> getCertificateInfo() const = 0;
     virtual ~VerificationInterface();
     VerificationInterface() = default;

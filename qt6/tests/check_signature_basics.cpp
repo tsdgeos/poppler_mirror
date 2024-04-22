@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
 
 // Simple tests of reading signatures
@@ -110,7 +110,8 @@ void TestSignatureBasics::testSignerInfo()
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields[0]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature0_B_" });
     QCOMPARE(signatureFields[0]->getSignatureType(), ETSI_CAdES_detached);
-    auto siginfo0 = signatureFields[0]->validateSignature(false, false, -1 /* now */, false, false);
+    auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+    signatureFields[0]->validateSignatureResult();
 #ifdef ENABLE_SIGNATURES
     QCOMPARE(siginfo0->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo0->getHashAlgorithm(), HashAlgorithm::Sha256);
@@ -123,7 +124,8 @@ void TestSignatureBasics::testSignerInfo()
 
     QCOMPARE(signatureFields[1]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature1_B_" });
     QCOMPARE(signatureFields[1]->getSignatureType(), ETSI_CAdES_detached);
-    auto siginfo1 = signatureFields[1]->validateSignature(false, false, -1 /* now */, false, false);
+    auto siginfo1 = signatureFields[1]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+    signatureFields[1]->validateSignatureResult();
 #ifdef ENABLE_SIGNATURES
     QCOMPARE(siginfo1->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo1->getHashAlgorithm(), HashAlgorithm::Sha256);
