@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)
 
 project(poppler)
 
@@ -142,7 +142,7 @@ set(TEXTOUT_WORD_LIST ON)
 
 # setting the minimum required versions for some components
 set(CAIRO_VERSION "1.16.0")
-set(GLIB_REQUIRED "2.64")
+set(GLIB_REQUIRED "2.72")
 set(GTK_REQUIRED "3.24")
 set(GDK_PIXBUF_REQUIRED "2.40")
 set(FREETYPE_VERSION "2.10")
@@ -164,9 +164,9 @@ macro(find_soft_mandatory_package _enable_option _package_name _package_version)
   endif()
 endmacro()
 
-find_soft_mandatory_package(ENABLE_NSS3 NSS3 3.68)
+find_soft_mandatory_package(ENABLE_NSS3 NSS3 3.98)
 find_soft_mandatory_package(ENABLE_GPGME Gpgmepp 1.19)
-find_soft_mandatory_package(ENABLE_LIBTIFF TIFF 4.1)
+find_soft_mandatory_package(ENABLE_LIBTIFF TIFF 4.3)
 
 macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
@@ -208,7 +208,7 @@ else()
   message(FATAL_ERROR "Invalid ENABLE_DCTDECODER value.")
 endif()
 
-set(QT5_VERSION "5.12") # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when changing this
+set(QT5_VERSION "5.15")
 find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Gui ${QT5_VERSION})
 find_soft_mandatory_package(ENABLE_QT5 Qt5Xml ${QT5_VERSION})
@@ -225,7 +225,7 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-find_package(Boost 1.71.0)
+find_package(Boost 1.74.0)
 if(Boost_FOUND)
   set(USE_BOOST_HEADERS ON)
 elseif(ENABLE_BOOST)
@@ -247,7 +247,7 @@ if(CAIRO_FOUND)
   if(ENABLE_GLIB)
     if(ENABLE_GOBJECT_INTROSPECTION)
       # Check for introspection
-      macro_optional_find_package(GObjectIntrospection 1.64.0)
+      macro_optional_find_package(GObjectIntrospection 1.72.0)
       set(HAVE_INTROSPECTION ${INTROSPECTION_FOUND})
     endif()
     set(POPPLER_GLIB_DISABLE_DEPRECATED "${POPPLER_GLIB_DISABLE_DEPRECATED} -DG_DISABLE_DEPRECATED")
