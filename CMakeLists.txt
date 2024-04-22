@@ -692,6 +692,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/GfxState_helpers.h
     poppler/GlobalParams.h
     poppler/Hints.h
+    poppler/HashAlgorithm.h
     poppler/JArithmeticDecoder.h
     poppler/JBIG2Stream.h
     poppler/JSInfo.h
@@ -719,6 +720,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PSTokenizer.h
     poppler/Rendition.h
     poppler/CertificateInfo.h
+    poppler/SignatureInfo.h
     poppler/Stream-CCITT.h
     poppler/Stream.h
     poppler/StructElement.h
