@@ -23,6 +23,7 @@
 #include <climits>
 #include <string>
 #include <vector>
+#include <span>
 
 #include "CharTypes.h"
 #include "poppler_private_export.h"
@@ -37,7 +38,7 @@ constexpr std::string_view unicodeByteOrderMarkLE = "\xFF\xFE";
 //   utf16      - utf16 bytes
 //   utf16_len  - number of UTF-16 characters
 //   returns number of UCS-4 characters
-std::vector<Unicode> UTF16toUCS4(const Unicode *utf16, int utf16Len);
+std::vector<Unicode> UTF16toUCS4(std::span<Unicode> utf16);
 
 // Convert a PDF Text String to UCS-4
 //   s          - PDF text string
@@ -146,7 +147,7 @@ char POPPLER_PRIVATE_EXPORT *utf16ToUtf8(const uint16_t *utf16, int *len = nullp
 //              of length @out_len + 1, for each character in the ascii string giving the index
 //              of the corresponding character in the text of the line (thanks to this info
 //              being passed in @in_idx parameter).
-void POPPLER_PRIVATE_EXPORT unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices);
+void POPPLER_PRIVATE_EXPORT unicodeToAscii7(std::span<Unicode> in, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices);
 
 // Convert a PDF Text String to UTF-8
 //   textStr    - PDF text string

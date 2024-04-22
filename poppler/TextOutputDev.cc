@@ -3959,7 +3959,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
 
             if (ignoreDiacritics) {
                 if (!line->ascii_translation) {
-                    unicodeToAscii7(line->normalized, line->normalized_len, &line->ascii_translation, &line->ascii_len, line->normalized_idx, &line->ascii_idx);
+                    unicodeToAscii7(std::span(line->normalized, line->normalized_len), &line->ascii_translation, &line->ascii_len, line->normalized_idx, &line->ascii_idx);
                 }
                 if (line->ascii_len) {
                     m = line->ascii_len;
@@ -3968,7 +3968,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
                 }
 
                 if (matchAcrossLines && nextline && !nextline->ascii_translation) {
-                    unicodeToAscii7(nextline->normalized, nextline->normalized_len, &nextline->ascii_translation, &nextline->ascii_len, nextline->normalized_idx, &nextline->ascii_idx);
+                    unicodeToAscii7(std::span(nextline->normalized, nextline->normalized_len), &nextline->ascii_translation, &nextline->ascii_len, nextline->normalized_idx, &nextline->ascii_idx);
                 }
             }
             if (!caseSensitive) {

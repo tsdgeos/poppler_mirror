@@ -143,7 +143,7 @@ void TestUTFConversion::testUnicodeToAscii7()
     int out_len;
     int *out_ascii_idx;
 
-    unicodeToAscii7(in_norm, in_norm_len, &out, &out_len, in_norm_idx, &out_ascii_idx);
+    unicodeToAscii7(std::span(in_norm, in_norm_len), &out, &out_len, in_norm_idx, &out_ascii_idx);
 
     free(in_norm);
     free(in_norm_idx);

@@ -425,7 +425,7 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
             }
         }
         utf16[utf16Len - 1] += offset;
-        sMap.push_back({ code, UTF16toUCS4(utf16.data(), utf16.size()) });
+        sMap.push_back({ code, UTF16toUCS4(utf16) });
     }
 }
 
