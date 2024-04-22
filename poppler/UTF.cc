@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -561,11 +561,12 @@ std::string TextStringToUtf8(const std::string &textStr)
     if (hasUnicodeByteOrderMark(textStr)) {
         uint16_t *utf16;
         len = len / 2 - 1;
-        utf16 = new uint16_t[len];
+        utf16 = new uint16_t[len + 1];
         for (i = 0; i < len; i++) {
             utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
         }
-        utf8 = utf16ToUtf8(utf16, &len);
+        utf16[i] = 0;
+        utf8 = utf16ToUtf8(utf16);
         delete[] utf16;
     } else {
         utf8 = (char *)gmalloc(len + 1);
