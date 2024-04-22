@@ -1118,6 +1118,7 @@ void Catalog::setAcroFormModified()
     if (acroFormRef != Ref::INVALID()) {
         xref->setModifiedObject(&acroForm, acroFormRef);
     } else {
+        catDict.dictSet("AcroForm", acroForm.copy());
         xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
     }
 }

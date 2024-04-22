@@ -2220,6 +2220,8 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
     catalog->addFormToAcroForm(ref);
     // say that there a now signatures and that we should append only
     catalog->getAcroForm()->dictSet("SigFlags", Object(3));
+    catalog->setAcroFormModified();
+
     form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
     form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
