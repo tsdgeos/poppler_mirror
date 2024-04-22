@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -132,8 +132,24 @@ struct RefRecursionChecker
         return alreadySeenRefs.insert(ref.num).second;
     }
 
+    void remove(Ref ref) { alreadySeenRefs.erase(ref.num); }
+
 private:
     std::set<int> alreadySeenRefs;
+};
+
+struct RefRecursionCheckerRemover
+{
+    // Removes ref from c when this object is removed
+    RefRecursionCheckerRemover(RefRecursionChecker &c, Ref r) : checker(c), ref(r) { }
+    ~RefRecursionCheckerRemover() { checker.remove(ref); }
+
+    RefRecursionCheckerRemover(const RefRecursionCheckerRemover &) = delete;
+    RefRecursionCheckerRemover &operator=(const RefRecursionCheckerRemover &) = delete;
+
+private:
+    RefRecursionChecker &checker;
+    Ref ref;
 };
 
 namespace std {
