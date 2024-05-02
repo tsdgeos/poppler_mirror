@@ -33,6 +33,7 @@
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,6 +46,7 @@
 #include <atomic>
 #include <cstdio>
 #include <vector>
+#include <span>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -294,6 +296,8 @@ public:
     // Put a char in the stream
     virtual void put(char c) = 0;
 
+    virtual size_t write(std::span<unsigned char> data) = 0;
+
     virtual void printf(const char *format, ...) GCC_PRINTF_FORMAT(2, 3) = 0;
 };
 
@@ -312,6 +316,8 @@ public:
     Goffset getPos() override;
 
     void put(char c) override;
+
+    size_t write(std::span<unsigned char> data) override;
 
     void printf(const char *format, ...) override GCC_PRINTF_FORMAT(2, 3);
 

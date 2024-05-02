@@ -40,12 +40,12 @@
 
 #include <config.h>
 
-std::vector<Unicode> UTF16toUCS4(const Unicode *utf16, int utf16Len)
+std::vector<Unicode> UTF16toUCS4(std::span<Unicode> utf16)
 {
     // count characters
     int len = 0;
-    for (int i = 0; i < utf16Len; i++) {
-        if (utf16[i] >= 0xd800 && utf16[i] < 0xdc00 && i + 1 < utf16Len && utf16[i + 1] >= 0xdc00 && utf16[i + 1] < 0xe000) {
+    for (size_t i = 0; i < utf16.size(); i++) {
+        if (utf16[i] >= 0xd800 && utf16[i] < 0xdc00 && i + 1 < utf16.size() && utf16[i + 1] >= 0xdc00 && utf16[i + 1] < 0xe000) {
             i++; /* surrogate pair */
         }
         len++;
@@ -53,9 +53,9 @@ std::vector<Unicode> UTF16toUCS4(const Unicode *utf16, int utf16Len)
     std::vector<Unicode> u;
     u.reserve(len);
     // convert string
-    for (int i = 0; i < utf16Len; i++) {
+    for (size_t i = 0; i < utf16.size(); i++) {
         if (utf16[i] >= 0xd800 && utf16[i] < 0xdc00) { /* surrogate pair */
-            if (i + 1 < utf16Len && utf16[i + 1] >= 0xdc00 && utf16[i + 1] < 0xe000) {
+            if (i + 1 < utf16.size() && utf16[i + 1] >= 0xdc00 && utf16[i + 1] < 0xe000) {
                 /* next code is a low surrogate */
                 u.push_back((((utf16[i] & 0x3ff) << 10) | (utf16[i + 1] & 0x3ff)) + 0x10000);
                 ++i;
@@ -111,7 +111,7 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
                     utf16.push_back((s[3 + i * 2] & 0xff) << 8 | (s[2 + i * 2] & 0xff));
                 }
             }
-            return UTF16toUCS4(utf16.data(), utf16.size());
+            return UTF16toUCS4(utf16);
 
         } else {
             return {};
@@ -496,12 +496,12 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
     return utf8;
 }
 
-void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices)
+void unicodeToAscii7(std::span<Unicode> in, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices)
 {
     const UnicodeMap *uMap = globalParams->getUnicodeMap("ASCII7");
     int *idx = nullptr;
 
-    if (!len) {
+    if (in.empty()) {
         *ucs4_out = nullptr;
         *out_len = 0;
         return;
@@ -511,16 +511,17 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
         if (!in_idx) {
             indices = nullptr;
         } else {
-            idx = (int *)gmallocn(len * 8 + 1, sizeof(int));
+            idx = (int *)gmallocn(in.size() * 8 + 1, sizeof(int));
         }
     }
 
     std::string str;
 
     char buf[8]; // 8 is enough for mapping an unicode char to a string
-    int i, n, k;
+    size_t i;
+    int n, k;
 
-    for (i = k = 0; i < len; ++i) {
+    for (i = k = 0; i < in.size(); ++i) {
         n = uMap->mapUnicode(in[i], buf, sizeof(buf));
         if (!n) {
             // the Unicode char could not be converted to ascii7 counterpart
@@ -542,7 +543,7 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
     memcpy(*ucs4_out, ucs4.data(), ucs4.size() * sizeof(Unicode));
 
     if (indices) {
-        idx[k] = in_idx[len];
+        idx[k] = in_idx[in.size()];
         *indices = idx;
     }
 }

@@ -28,6 +28,7 @@
 /* Constructor & Destructor */
 
 SignatureInfo::~SignatureInfo() = default;
+SignatureInfo::SignatureInfo() = default;
 
 /* GETTERS */
 

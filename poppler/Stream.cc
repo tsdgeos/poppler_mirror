@@ -41,6 +41,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -443,6 +444,11 @@ Goffset FileOutStream::getPos()
 void FileOutStream::put(char c)
 {
     fputc(c, f);
+}
+
+size_t FileOutStream::write(std::span<unsigned char> data)
+{
+    return fwrite(data.data(), sizeof(decltype(data)::element_type), data.size(), f);
 }
 
 void FileOutStream::printf(const char *format, ...)

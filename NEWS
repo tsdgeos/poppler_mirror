@@ -1,3 +1,31 @@
+Release 24.05.0:
+        core:
+         * Fix signing not being totally correct in some kind of PDF files
+         * Assume "Adobe-Identity" for character collection. Issue #1465
+         * Small improvements in annotation font rendering
+         * Remove some GooString methods, use std::string ones instead
+         * Move some GooString methods to UTF.h
+         * Fix crash in broken files
+
+        cpp:
+         * cpp: Fix crash extracting text and font in some files. Issue #1477
+         * Change base class of ustring to char16_t
+
+        qt6:
+         * Add async API for certificate validation
+         * Fix text extraction for Landscape/Seascape pages
+
+        qt5:
+         * Add async API for certificate validation
+         * Fix text extraction for Landscape/Seascape pages
+
+        utils:
+         * pdfdetach: Small code improvements
+         * pdftops: Write compliant ps header
+
+        build system:
+         * Increase minimum supported base to that provided by Ubuntu 22.04
+
 Release 24.04.0:
         core:
          * Optimize page text extraction speed
