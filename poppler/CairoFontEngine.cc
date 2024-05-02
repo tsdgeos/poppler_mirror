@@ -513,6 +513,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         metrics->width = bbox[2] - bbox[0];
         metrics->height = bbox[3] - bbox[1];
     }
+    gfx->restoreState();
 
     status = CAIRO_STATUS_SUCCESS;
 
