@@ -54,7 +54,7 @@ class X509CertificateInfo;
 class POPPLER_PRIVATE_EXPORT SignatureInfo
 {
 public:
-    SignatureInfo() = default;
+    SignatureInfo();
     ~SignatureInfo();
 
     SignatureInfo(const SignatureInfo &) = delete;
