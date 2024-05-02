@@ -1,5 +1,5 @@
 version: '{build}-{branch}'
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 clone_depth: 1
 
@@ -30,4 +30,4 @@ test_script:
 environment:
     matrix:
     - TARGET: windows-mingw_64-gcc
-    - TARGET: windows-msvc2019_64-cl
+    - TARGET: windows-msvc2022_64-cl
