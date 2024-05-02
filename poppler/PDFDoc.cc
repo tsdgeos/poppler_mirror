@@ -64,6 +64,7 @@
 #include <config.h>
 #include <poppler-config.h>
 
+#include <array>
 #include <cctype>
 #include <clocale>
 #include <cstdio>
