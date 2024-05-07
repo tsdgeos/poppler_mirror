@@ -145,7 +145,7 @@ public:
     void AddLink(const HtmlLink &x) { links->AddLink(x); }
 
     // add an image to the current page
-    void addImage(std::unique_ptr<GooString> &&fname, GfxState *state);
+    void addImage(std::string &&fname, GfxState *state);
 
     // number of images on the current page
     int getNumImages() { return imgList.size(); }

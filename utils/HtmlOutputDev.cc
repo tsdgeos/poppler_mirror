@@ -86,7 +86,7 @@
 class HtmlImage
 {
 public:
-    HtmlImage(std::unique_ptr<GooString> &&_fName, GfxState *state) : fName(std::move(_fName))
+    HtmlImage(std::string &&_fName, GfxState *state) : fName(std::move(_fName))
     {
         state->transform(0, 0, &xMin, &yMax);
         state->transform(1, 1, &xMax, &yMin);
@@ -97,7 +97,7 @@ public:
 
     double xMin, xMax; // image x coordinates
     double yMin, yMax; // image y coordinates
-    std::unique_ptr<GooString> fName; // image file name
+    std::string fName; // image file name
 };
 
 // returns true if x is closer to y than x is to z
@@ -730,7 +730,7 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
             fprintf(f, "<image top=\"%f\" left=\"%f\" ", img->yMin, img->xMin);
             fprintf(f, "width=\"%f\" height=\"%f\" ", img->xMax - img->xMin, img->yMax - img->yMin);
         }
-        fprintf(f, "src=\"%s\"/>\n", img->fName->c_str());
+        fprintf(f, "src=\"%s\"/>\n", img->fName.c_str());
         delete img;
     }
     imgList.clear();
@@ -937,7 +937,7 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
                 style_index += 2; // yFlip
             }
 
-            fprintf(f, "<img%s src=\"%s\"/><br/>\n", styles[style_index], img->fName->c_str());
+            fprintf(f, "<img%s src=\"%s\"/><br/>\n", styles[style_index], img->fName.c_str());
             delete img;
         }
         imgList.clear();
@@ -985,7 +985,7 @@ void HtmlPage::setDocName(const char *fname)
     DocName = new GooString(fname);
 }
 
-void HtmlPage::addImage(std::unique_ptr<GooString> &&fname, GfxState *state)
+void HtmlPage::addImage(std::string &&fname, GfxState *state)
 {
     HtmlImage *img = new HtmlImage(std::move(fname), state);
     imgList.push_back(img);
@@ -1329,7 +1329,7 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
     if (dataUrls) {
         fName = std::make_unique<GooString>(std::string("data:image/jpeg;base64,") + gbase64Encode(ims.getBuffer()));
     }
-    pages->addImage(std::move(fName), state);
+    pages->addImage(std::move(fName->toNonConstStr()), state);
 }
 
 void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool isMask)
@@ -1450,7 +1450,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     if (dataUrls) {
         fName = std::make_unique<GooString>(std::string("data:image/png;base64,") + gbase64Encode(ims.getBuffer()));
     }
-    pages->addImage(std::move(fName), state);
+    pages->addImage(std::move(fName->toNonConstStr()), state);
 #else
     return;
 #endif
