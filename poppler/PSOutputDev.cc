@@ -1587,7 +1587,7 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
         }
     }
     writePS("%%Creator: ");
-    writePSTextLine(creator.get());
+    writePSTextLine(creator->toStr());
     if (title) {
         char *sanitizedTitle = strdup(title);
         for (size_t i = 0; i < strlen(sanitizedTitle); ++i) {
@@ -7469,9 +7469,10 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
 }
 
 // Write a DSC-compliant <textline>.
-void PSOutputDev::writePSTextLine(const GooString *s)
+void PSOutputDev::writePSTextLine(const std::string &s)
 {
-    int i, j, step;
+    std::size_t i;
+    int j, step;
     int c;
 
     // - DSC comments must be printable ASCII; control chars and
@@ -7481,15 +7482,15 @@ void PSOutputDev::writePSTextLine(const GooString *s)
     //   for the keyword, which was emitted by the caller)
     // - lines that start with a left paren are treated as <text>
     //   instead of <textline>, so we escape a leading paren
-    if (s->getLength() >= 2 && (s->getChar(0) & 0xff) == 0xfe && (s->getChar(1) & 0xff) == 0xff) {
+    if (s.starts_with(unicodeByteOrderMark)) {
         i = 3;
         step = 2;
     } else {
         i = 0;
         step = 1;
     }
-    for (j = 0; i < s->getLength() && j < 200; i += step) {
-        c = s->getChar(i) & 0xff;
+    for (j = 0; i < s.size() && j < 200; i += step) {
+        c = s[i] & 0xff;
         if (c == '\\') {
             writePS("\\\\");
             j += 2;
