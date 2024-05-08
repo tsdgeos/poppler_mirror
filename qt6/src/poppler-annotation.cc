@@ -13,7 +13,7 @@
  * Copyright (C) 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
- * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2020, 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -47,6 +47,7 @@
 #include "poppler-annotation-private.h"
 #include "poppler-page-private.h"
 #include "poppler-private.h"
+#include "poppler-form.h"
 
 // poppler includes
 #include <Page.h>
@@ -2904,6 +2905,206 @@ void StampAnnotation::setStampCustomImage(const QImage &image)
     AnnotStamp *stampann = static_cast<AnnotStamp *>(d->pdfAnnot);
     AnnotStampImageHelper *annotCustomImage = d->convertQImageToAnnotStampImageHelper(image);
     stampann->setCustomImage(annotCustomImage);
+}
+
+/** SignatureAnnotation [Annotation] */
+class SignatureAnnotationPrivate : public AnnotationPrivate
+{
+public:
+    SignatureAnnotationPrivate();
+    Annotation *makeAlias() override;
+    Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
+
+    // data fields
+    QString text;
+    QString leftText;
+    double fontSize = 10.0;
+    double leftFontSize = 20.0;
+    QColor fontColor = Qt::red;
+    QColor borderColor = Qt::red;
+    double borderWidth = 1.5;
+    QColor backgroundColor = QColor(240, 240, 240);
+    QString imagePath;
+    QString fieldPartialName;
+    std::unique_ptr<::FormFieldSignature> field = nullptr;
+};
+
+SignatureAnnotationPrivate::SignatureAnnotationPrivate() : AnnotationPrivate() { }
+
+Annotation *SignatureAnnotationPrivate::makeAlias()
+{
+    return new SignatureAnnotation(*this);
+}
+
+Annot *SignatureAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    SignatureAnnotation *q = static_cast<SignatureAnnotation *>(makeAlias());
+
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
+
+    GooString signatureText(text.toStdString());
+    GooString signatureTextLeft(leftText.toStdString());
+
+    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, signatureText, signatureTextLeft, fontSize, leftFontSize, convertQColor(fontColor), borderWidth,
+                                                                                   convertQColor(borderColor), convertQColor(backgroundColor), imagePath.toStdString());
+
+    if (!sig) {
+        return nullptr;
+    }
+
+    sig->formWidget->updateWidgetAppearance();
+    field = std::move(sig->field);
+
+    // Set properties
+    flushBaseAnnotationProperties();
+
+    pdfAnnot = sig->annotWidget;
+
+    delete q;
+
+    return pdfAnnot;
+}
+
+SignatureAnnotation::SignatureAnnotation() : Annotation(*new SignatureAnnotationPrivate()) { }
+
+SignatureAnnotation::SignatureAnnotation(SignatureAnnotationPrivate &dd) : Annotation(dd) { }
+
+SignatureAnnotation::~SignatureAnnotation() { }
+
+Annotation::SubType SignatureAnnotation::subType() const
+{
+    return AWidget;
+}
+
+void SignatureAnnotation::setText(const QString &text)
+{
+    Q_D(SignatureAnnotation);
+    d->text = text;
+}
+
+void SignatureAnnotation::setLeftText(const QString &text)
+{
+    Q_D(SignatureAnnotation);
+    d->leftText = text;
+}
+
+double SignatureAnnotation::fontSize() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->fontSize;
+}
+
+void SignatureAnnotation::setFontSize(double fontSize)
+{
+    Q_D(SignatureAnnotation);
+    d->fontSize = fontSize;
+}
+
+double SignatureAnnotation::leftFontSize() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->leftFontSize;
+}
+
+void SignatureAnnotation::setLeftFontSize(double fontSize)
+{
+    Q_D(SignatureAnnotation);
+    d->leftFontSize = fontSize;
+}
+
+QColor SignatureAnnotation::fontColor() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->fontColor;
+}
+
+void SignatureAnnotation::setFontColor(const QColor &color)
+{
+    Q_D(SignatureAnnotation);
+    d->fontColor = color;
+}
+
+QColor SignatureAnnotation::borderColor() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->borderColor;
+}
+
+void SignatureAnnotation::setBorderColor(const QColor &color)
+{
+    Q_D(SignatureAnnotation);
+    d->borderColor = color;
+}
+
+QColor SignatureAnnotation::backgroundColor() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->backgroundColor;
+}
+
+double SignatureAnnotation::borderWidth() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->borderWidth;
+}
+
+void SignatureAnnotation::setBorderWidth(double width)
+{
+    Q_D(SignatureAnnotation);
+    d->borderWidth = width;
+}
+
+void SignatureAnnotation::setBackgroundColor(const QColor &color)
+{
+    Q_D(SignatureAnnotation);
+    d->backgroundColor = color;
+}
+
+QString SignatureAnnotation::imagePath() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->imagePath;
+}
+
+void SignatureAnnotation::setImagePath(const QString &imagePath)
+{
+    Q_D(SignatureAnnotation);
+    d->imagePath = imagePath;
+}
+
+QString SignatureAnnotation::fieldPartialName() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->fieldPartialName;
+}
+
+void SignatureAnnotation::setFieldPartialName(const QString &fieldPartialName)
+{
+    Q_D(SignatureAnnotation);
+    d->fieldPartialName = fieldPartialName;
+}
+
+SignatureAnnotation::SigningResult SignatureAnnotation::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data)
+{
+    Q_D(SignatureAnnotation);
+    auto formField = std::make_unique<FormFieldSignature>(d->parentDoc, d->pdfPage, static_cast<::FormWidgetSignature *>(d->field->getCreateWidget()));
+
+    const auto result = formField->sign(outputFileName, data);
+
+    switch (result) {
+    case FormFieldSignature::SigningSuccess:
+        return SigningSuccess;
+    case FormFieldSignature::FieldAlreadySigned:
+        return FieldAlreadySigned;
+    case FormFieldSignature::GenericSigningError:
+        return GenericSigningError;
+    }
+    return GenericSigningError;
 }
 
 /** InkAnnotation [Annotation] */

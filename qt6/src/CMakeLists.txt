@@ -61,6 +61,7 @@ install(FILES
   poppler-optcontent.h
   poppler-page-transition.h
   poppler-media.h
+  poppler-converter.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/qt6)

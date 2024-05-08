@@ -40,6 +40,7 @@
 // Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 // Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -342,6 +343,17 @@ public:
     bool sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
               const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
               const GooString *reason = nullptr, const GooString *location = nullptr, const std::string &imagePath = "", const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
+
+    struct SignatureData
+    {
+        Ref ref;
+        AnnotWidget *annotWidget = nullptr;
+        FormWidget *formWidget = nullptr;
+        std::unique_ptr<::FormFieldSignature> field = nullptr;
+    };
+
+    std::optional<SignatureData> createSignature(::Page *destPage, GooString *partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
+                                                 std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath);
 
 private:
     // insert referenced objects in XRef
