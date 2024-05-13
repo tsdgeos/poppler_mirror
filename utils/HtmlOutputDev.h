@@ -25,7 +25,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
@@ -295,7 +295,7 @@ private:
     int getOutlinePageNum(OutlineItem *item);
     void drawJpegImage(GfxState *state, Stream *str);
     void drawPngImage(GfxState *state, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool isMask = false);
-    std::unique_ptr<GooString> createImageFileName(const char *ext);
+    std::string createImageFileName(const char *ext);
 
     FILE *fContentsFrame;
     FILE *page; // html file

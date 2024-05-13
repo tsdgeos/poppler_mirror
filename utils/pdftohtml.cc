@@ -354,10 +354,10 @@ int main(int argc, char *argv[])
             doc->displayPage(splashOut, pg, 72 * scale, 72 * scale, 0, true, false, false);
             SplashBitmap *bitmap = splashOut->getBitmap();
 
-            const std::unique_ptr<GooString> imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
-            auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName->c_str(), "wb");
+            const std::string imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
+            auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName.c_str(), "wb");
             if (!f1) {
-                fprintf(stderr, "Could not open %s\n", imgFileName->c_str());
+                fprintf(stderr, "Could not open %s\n", imgFileName.c_str());
                 continue;
             }
             bitmap->writeImgFile(format, f1, 72 * scale, 72 * scale);
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
             if (dataUrls) {
                 htmlOut->addBackgroundImage(std::string((format == splashFormatJpeg) ? "data:image/jpeg;base64," : "data:image/png;base64,") + gbase64Encode(imf.getBuffer()));
             } else {
-                htmlOut->addBackgroundImage(gbasename(imgFileName->c_str()));
+                htmlOut->addBackgroundImage(gbasename(imgFileName.c_str()));
             }
         }
 

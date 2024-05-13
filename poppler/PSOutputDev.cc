@@ -35,7 +35,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019, 2021-2023 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021-2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -1366,7 +1366,7 @@ void PSOutputDev::postInit()
                 media++;
             }
             if (name.empty()) {
-                name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72))->toStr();
+                name = GooString::format("{0:d}x{1:d}mm", int(w * 25.4 / 72), int(h * 25.4 / 72));
             }
             paperSizes.emplace_back(std::move(name), w, h);
         }
@@ -1571,23 +1571,23 @@ void PSOutputDev::writeHeader(int nPages, const PDFRectangle *mediaBox, const PD
         break;
     }
     Object info = xref->getDocInfo();
-    std::unique_ptr<GooString> creator = GooString::format("poppler pdftops version: {0:s} (http://poppler.freedesktop.org)", PACKAGE_VERSION);
+    std::string creator = GooString::format("poppler pdftops version: {0:s} (http://poppler.freedesktop.org)", PACKAGE_VERSION);
     if (info.isDict()) {
         Object obj1 = info.dictLookup("Creator");
         if (obj1.isString()) {
             const GooString *pdfCreator = obj1.getString();
             if (pdfCreator && !pdfCreator->toStr().empty()) {
-                creator->append(". PDF Creator: ");
+                creator.append(". PDF Creator: ");
                 if (hasUnicodeByteOrderMark(pdfCreator->toStr())) {
-                    creator->append(TextStringToUtf8(pdfCreator->toStr()));
+                    creator.append(TextStringToUtf8(pdfCreator->toStr()));
                 } else {
-                    creator->append(pdfCreator);
+                    creator.append(pdfCreator->toStr());
                 }
             }
         }
     }
     writePS("%%Creator: ");
-    writePSTextLine(creator->toStr());
+    writePSTextLine(creator);
     if (title) {
         char *sanitizedTitle = strdup(title);
         for (size_t i = 0; i < strlen(sanitizedTitle); ++i) {
@@ -1954,7 +1954,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     subst = false;
 
     if (font->getType() == fontType3) {
-        psName = GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen).release();
+        psName = new GooString(GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen));
         setupType3Font(font, psName, parentResDict);
     } else {
         std::optional<GfxFontLoc> fontLoc = font->locateFont(xref, this);
@@ -2726,13 +2726,13 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
             Object charProc = charProcs->getVal(i);
             gfx->display(&charProc);
             if (t3String) {
-                std::unique_ptr<GooString> buf;
+                std::string buf;
                 if (t3Cacheable) {
                     buf = GooString::format("{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g} setcachedevice\n", t3WX, t3WY, t3LLX, t3LLY, t3URX, t3URY);
                 } else {
                     buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
                 }
-                (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                (*outputFunc)(outputStream, buf.c_str(), buf.size());
                 (*outputFunc)(outputStream, t3String->c_str(), t3String->getLength());
                 delete t3String;
                 t3String = nullptr;
@@ -2771,7 +2771,7 @@ GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
             return new GooString(std::move(psName));
         }
     }
-    GooString *psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen).release();
+    GooString *psName = new GooString(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
         psName->append('_')->append(filteredName);
@@ -6608,25 +6608,25 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         Ref ref = iccBasedCS->getRef();
         const bool validref = ref != Ref::INVALID();
         int intent = state->getCmsRenderingIntent();
-        std::unique_ptr<GooString> name;
+        std::string name;
         if (validref) {
             name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
         } else {
             const unsigned long long hash = std::hash<GfxLCMSProfilePtr> {}(iccBasedCS->getProfile());
             name = GooString::format("ICCBased-hashed-{0:ullX}-{1:d}", hash, intent);
         }
-        const auto &it = iccEmitted.find(name->toStr());
+        const auto &it = iccEmitted.find(name);
         if (it != iccEmitted.end()) {
-            writePSFmt("{0:t}", name.get());
+            writePSFmt("{0:s}", name.c_str());
             if (genXform) {
                 writePS(" {}");
             }
         } else {
             char *csa = iccBasedCS->getPostScriptCSA();
             if (csa) {
-                writePSFmt("userdict /{0:t} {1:s} put\n", name.get(), csa);
-                iccEmitted.emplace(name->toStr());
-                writePSFmt("{0:t}", name.get());
+                writePSFmt("userdict /{0:s} {1:s} put\n", name.c_str(), csa);
+                iccEmitted.emplace(name);
+                writePSFmt("{0:s}", name.c_str());
                 if (genXform) {
                     writePS(" {}");
                 }
@@ -7454,8 +7454,8 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
         } else if (c == '(') {
             label2->append("\\(");
         } else if (c < 0x20 || c > 0x7e) {
-            std::unique_ptr<GooString> aux = GooString::format("\\{0:03o}", c);
-            label2->append(aux.get());
+            std::string aux = GooString::format("\\{0:03o}", c);
+            label2->append(aux);
             j += 4;
         } else {
             label2->append(c);

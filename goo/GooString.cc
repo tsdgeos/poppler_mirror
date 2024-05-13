@@ -125,16 +125,16 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec, bool tri
 
 //------------------------------------------------------------------------
 
-std::unique_ptr<GooString> GooString::format(const char *fmt, ...)
+std::string GooString::format(const char *fmt, ...)
 {
-    auto s = std::make_unique<GooString>();
+    GooString s;
 
     va_list argList;
     va_start(argList, fmt);
-    s->appendfv(fmt, argList);
+    s.appendfv(fmt, argList);
     va_end(argList);
 
-    return s;
+    return s.toStr();
 }
 
 std::string GooString::formatv(const char *fmt, va_list argList)

@@ -25,7 +25,7 @@
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
-// Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -740,8 +740,8 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, int *cod
 
     // write the header
     ok = true;
-    std::unique_ptr<GooString> buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
-    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
+    (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // begin the font dictionary
     (*outputFunc)(outputStream, "10 dict begin\n", 14);
@@ -751,7 +751,7 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, int *cod
     (*outputFunc)(outputStream, "/FontType 42 def\n", 17);
     (*outputFunc)(outputStream, "/FontMatrix [1 0 0 1 0 0] def\n", 30);
     buf = GooString::format("/FontBBox [{0:d} {1:d} {2:d} {3:d}] def\n", bbox[0], bbox[1], bbox[2], bbox[3]);
-    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+    (*outputFunc)(outputStream, buf.c_str(), buf.size());
     (*outputFunc)(outputStream, "/PaintType 0 def\n", 17);
 
     // write the guts of the dictionary
@@ -791,8 +791,8 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
 
     // write the header
     ok = true;
-    std::unique_ptr<GooString> buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
-    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+    std::string buf = GooString::format("%!PS-TrueTypeFont-{0:2g}\n", (double)getS32BE(0, &ok) / 65536.0);
+    (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // begin the font dictionary
     (*outputFunc)(outputStream, "20 dict begin\n", 14);
@@ -809,7 +809,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
     (*outputFunc)(outputStream, "/GDBytes 2 def\n", 15);
     if (cidMap) {
         buf = GooString::format("/CIDCount {0:d} def\n", nCIDs);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
         if (nCIDs > 32767) {
             (*outputFunc)(outputStream, "/CIDMap [", 9);
             for (i = 0; i < nCIDs; i += 32768 - 16) {
@@ -819,7 +819,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
                     for (k = 0; k < 16 && i + j + k < nCIDs; ++k) {
                         cid = cidMap[i + j + k];
                         buf = GooString::format("{0:02x}{1:02x}", (cid >> 8) & 0xff, cid & 0xff);
-                        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                        (*outputFunc)(outputStream, buf.c_str(), buf.size());
                     }
                     (*outputFunc)(outputStream, "\n", 1);
                 }
@@ -834,7 +834,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
                 for (j = 0; j < 16 && i + j < nCIDs; ++j) {
                     cid = cidMap[i + j];
                     buf = GooString::format("{0:02x}{1:02x}", (cid >> 8) & 0xff, cid & 0xff);
-                    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                    (*outputFunc)(outputStream, buf.c_str(), buf.size());
                 }
                 (*outputFunc)(outputStream, "\n", 1);
             }
@@ -843,27 +843,27 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
     } else {
         // direct mapping - just fill the string(s) with s[i]=i
         buf = GooString::format("/CIDCount {0:d} def\n", nGlyphs);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
         if (nGlyphs > 32767) {
             (*outputFunc)(outputStream, "/CIDMap [\n", 10);
             for (i = 0; i < nGlyphs; i += 32767) {
                 j = nGlyphs - i < 32767 ? nGlyphs - i : 32767;
                 buf = GooString::format("  {0:d} string 0 1 {1:d} {{\n", 2 * j, j - 1);
-                (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                (*outputFunc)(outputStream, buf.c_str(), buf.size());
                 buf = GooString::format("    2 copy dup 2 mul exch {0:d} add -8 bitshift put\n", i);
-                (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                (*outputFunc)(outputStream, buf.c_str(), buf.size());
                 buf = GooString::format("    1 index exch dup 2 mul 1 add exch {0:d} add"
                                         " 255 and put\n",
                                         i);
-                (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                (*outputFunc)(outputStream, buf.c_str(), buf.size());
                 (*outputFunc)(outputStream, "  } for\n", 8);
             }
             (*outputFunc)(outputStream, "] def\n", 6);
         } else {
             buf = GooString::format("/CIDMap {0:d} string\n", 2 * nGlyphs);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
             buf = GooString::format("  0 1 {0:d} {{\n", nGlyphs - 1);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
             (*outputFunc)(outputStream, "    2 copy dup 2 mul exch -8 bitshift put\n", 42);
             (*outputFunc)(outputStream, "    1 index exch dup 2 mul 1 add exch 255 and put\n", 50);
             (*outputFunc)(outputStream, "  } for\n", 8);
@@ -872,7 +872,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
     }
     (*outputFunc)(outputStream, "/FontMatrix [1 0 0 1 0 0] def\n", 30);
     buf = GooString::format("/FontBBox [{0:d} {1:d} {2:d} {3:d}] def\n", bbox[0], bbox[1], bbox[2], bbox[3]);
-    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+    (*outputFunc)(outputStream, buf.c_str(), buf.size());
     (*outputFunc)(outputStream, "/PaintType 0 def\n", 17);
     (*outputFunc)(outputStream, "/Encoding [] readonly def\n", 26);
     (*outputFunc)(outputStream, "/CharStrings 1 dict dup begin\n", 30);
@@ -952,12 +952,12 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
         (*outputFunc)(outputStream, "10 dict begin\n", 14);
         (*outputFunc)(outputStream, "/FontName /", 11);
         (*outputFunc)(outputStream, psName, strlen(psName));
-        std::unique_ptr<GooString> buf = GooString::format("_{0:02x} def\n", i >> 8);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        std::string buf = GooString::format("_{0:02x} def\n", i >> 8);
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
         (*outputFunc)(outputStream, "/FontType 42 def\n", 17);
         (*outputFunc)(outputStream, "/FontMatrix [1 0 0 1 0 0] def\n", 30);
         buf = GooString::format("/FontBBox [{0:d} {1:d} {2:d} {3:d}] def\n", bbox[0], bbox[1], bbox[2], bbox[3]);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
         (*outputFunc)(outputStream, "/PaintType 0 def\n", 17);
         (*outputFunc)(outputStream, "/sfnts ", 7);
         (*outputFunc)(outputStream, psName, strlen(psName));
@@ -965,14 +965,14 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
         (*outputFunc)(outputStream, "/Encoding 256 array\n", 20);
         for (j = 0; j < 256 && i + j < n; ++j) {
             buf = GooString::format("dup {0:d} /c{1:02x} put\n", j, j);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         (*outputFunc)(outputStream, "readonly def\n", 13);
         (*outputFunc)(outputStream, "/CharStrings 257 dict dup begin\n", 32);
         (*outputFunc)(outputStream, "/.notdef 0 def\n", 15);
         for (j = 0; j < 256 && i + j < n; ++j) {
             buf = GooString::format("/c{0:02x} {1:d} def\n", j, cidMap ? cidMap[i + j] : i + j);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         (*outputFunc)(outputStream, "end readonly def\n", 17);
         (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -988,16 +988,16 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
     (*outputFunc)(outputStream, "/FMapType 2 def\n", 16);
     (*outputFunc)(outputStream, "/Encoding [\n", 12);
     for (i = 0; i < n; i += 256) {
-        const std::unique_ptr<GooString> buf = GooString::format("{0:d}\n", i >> 8);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        const std::string buf = GooString::format("{0:d}\n", i >> 8);
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }
     (*outputFunc)(outputStream, "] def\n", 6);
     (*outputFunc)(outputStream, "/FDepVector [\n", 14);
     for (i = 0; i < n; i += 256) {
         (*outputFunc)(outputStream, "/", 1);
         (*outputFunc)(outputStream, psName, strlen(psName));
-        const std::unique_ptr<GooString> buf = GooString::format("_{0:02x} findfont\n", i >> 8);
-        (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+        const std::string buf = GooString::format("_{0:02x} findfont\n", i >> 8);
+        (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }
     (*outputFunc)(outputStream, "] def\n", 6);
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -1030,15 +1030,15 @@ void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void 
             if (!(name = encoding[i])) {
                 name = ".notdef";
             }
-            const std::unique_ptr<GooString> buf = GooString::format("dup {0:d} /", i);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            const std::string buf = GooString::format("dup {0:d} /", i);
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
             (*outputFunc)(outputStream, name, strlen(name));
             (*outputFunc)(outputStream, " put\n", 5);
         }
     } else {
         for (i = 0; i < 256; ++i) {
-            const std::unique_ptr<GooString> buf = GooString::format("dup {0:d} /c{1:02x} put\n", i, i);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            const std::string buf = GooString::format("dup {0:d} /c{1:02x} put\n", i, i);
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
     }
     (*outputFunc)(outputStream, "readonly def\n", 13);
@@ -1082,8 +1082,8 @@ void FoFiTrueType::cvtCharStrings(char **encoding, const int *codeToGID, FoFiOut
             if (k > 0 && k < nGlyphs) {
                 (*outputFunc)(outputStream, "/", 1);
                 (*outputFunc)(outputStream, name, strlen(name));
-                const std::unique_ptr<GooString> buf = GooString::format(" {0:d} def\n", k);
-                (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+                const std::string buf = GooString::format(" {0:d} def\n", k);
+                (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
         }
     }
@@ -1424,8 +1424,8 @@ void FoFiTrueType::dumpString(const unsigned char *s, int length, FoFiOutputFunc
     (*outputFunc)(outputStream, "<", 1);
     for (i = 0; i < length; i += 32) {
         for (j = 0; j < 32 && i + j < length; ++j) {
-            const std::unique_ptr<GooString> buf = GooString::format("{0:02x}", s[i + j] & 0xff);
-            (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
+            const std::string buf = GooString::format("{0:02x}", s[i + j] & 0xff);
+            (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         if (i % (65536 - 32) == 65536 - 64) {
             (*outputFunc)(outputStream, ">\n<", 3);

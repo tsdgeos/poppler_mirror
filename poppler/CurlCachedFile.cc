@@ -75,12 +75,12 @@ int CurlCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFileW
 
         fromByte = bRange.offset;
         toByte = fromByte + bRange.length - 1;
-        const std::unique_ptr<GooString> range = GooString::format("{0:ulld}-{1:ulld}", fromByte, toByte);
+        const std::string range = GooString::format("{0:ulld}-{1:ulld}", fromByte, toByte);
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, load_cb);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, writer);
-        curl_easy_setopt(curl, CURLOPT_RANGE, range->c_str());
+        curl_easy_setopt(curl, CURLOPT_RANGE, range.c_str());
         r = curl_easy_perform(curl);
         curl_easy_reset(curl);
 
