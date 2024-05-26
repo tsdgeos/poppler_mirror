@@ -346,9 +346,9 @@ bool Catalog::cachePageTree(int page)
 
 int Catalog::findPage(const Ref pageRef)
 {
-    int i;
+    const int count = getNumPages();
 
-    for (i = 0; i < getNumPages(); ++i) {
+    for (int i = 0; i < count; ++i) {
         Ref *ref = getPageRef(i + 1);
         if (ref != nullptr && *ref == pageRef) {
             return i + 1;
