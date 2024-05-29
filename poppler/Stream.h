@@ -673,7 +673,7 @@ public:
 
     int lookChar() override { return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; }
 
-    Goffset getPos() override { return (int)(bufPtr - buf); }
+    Goffset getPos() override { return bufPtr - buf; }
 
     void setPos(Goffset pos, int dir = 0) override
     {
