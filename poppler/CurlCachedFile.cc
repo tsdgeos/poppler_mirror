@@ -7,6 +7,7 @@
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
