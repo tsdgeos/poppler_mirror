@@ -34,6 +34,7 @@
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -673,7 +674,7 @@ public:
 
     int lookChar() override { return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; }
 
-    Goffset getPos() override { return (int)(bufPtr - buf); }
+    Goffset getPos() override { return bufPtr - buf; }
 
     void setPos(Goffset pos, int dir = 0) override
     {

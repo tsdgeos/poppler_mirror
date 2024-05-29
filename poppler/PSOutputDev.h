@@ -415,7 +415,7 @@ private:
     void writePSString(const std::string &s);
     void writePSName(const char *s);
     GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
-    void writePSTextLine(const GooString *s);
+    void writePSTextLine(const std::string &s);
 
     PSLevel level; // PostScript level (1, 2, separation)
     PSOutMode mode; // PostScript mode (PS, EPS, form)

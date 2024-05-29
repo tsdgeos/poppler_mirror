@@ -18,7 +18,7 @@
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2011-2017, 2022, 2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2009, 2011-2017, 2022-2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -124,11 +124,7 @@ public:
     // Does this device use functionShadedFill(), axialShadedFill(), and
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
     bool useShadedFills(int type) override { return type <= 7; }
-#else
-    bool useShadedFills(int type) override { return type > 1 && type < 4; }
-#endif
 
     // Does this device use FillColorStop()?
     bool useFillColorStop() override { return true; }
@@ -185,17 +181,13 @@ public:
     void eoFill(GfxState *state) override;
     void clipToStrokePath(GfxState *state) override;
     bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
     bool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
-#endif
     bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override;
     bool axialShadedSupportExtend(GfxState *state, GfxAxialShading *shading) override;
     bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double sMin, double sMax) override;
     bool radialShadedSupportExtend(GfxState *state, GfxRadialShading *shading) override;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
     bool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading) override;
     bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) override;
-#endif
 
     //----- path clipping
     void clip(GfxState *state) override;
@@ -220,7 +212,6 @@ public:
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
     void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix) override;
     void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
-    void drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
     void drawImageMaskRegular(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
 
     void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg) override;
@@ -297,12 +288,8 @@ protected:
     bool checkIfStructElementNeeded(const StructElement *element);
     void emitStructElement(const StructElement *elem);
     void startFirstPage(int pageNum, GfxState *state, XRef *xrefA);
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
     bool setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image);
-#endif
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
     bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
-#endif
     static void textStringToQuotedUtf8(const GooString *text, GooString *s);
     bool isPDF();
 
@@ -359,7 +346,6 @@ protected:
     bool t3_glyph_has_color;
     bool has_color;
     double t3_glyph_bbox[4];
-    bool prescaleImages;
     bool logicalStruct;
     bool firstPage;
     int pdfPageNum; // page number of the PDF file
@@ -444,11 +430,7 @@ public:
     // Does this device use functionShadedFill(), axialShadedFill(), and
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
     bool useShadedFills(int type) override { return type <= 7; }
-#else
-    bool useShadedFills(int type) override { return type < 4; }
-#endif
 
     // Does this device use FillColorStop()?
     bool useFillColorStop() override { return false; }

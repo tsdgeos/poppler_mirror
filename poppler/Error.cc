@@ -53,12 +53,11 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
         return;
     }
     va_start(args, msg);
-    const std::unique_ptr<GooString> s = GooString::formatv(msg, args);
+    const std::string s = GooString::formatv(msg, args);
     va_end(args);
 
     GooString sanitized;
-    for (int i = 0; i < s->getLength(); ++i) {
-        const char c = s->getChar(i);
+    for (const char c : s) {
         if (c < (char)0x20 || c >= (char)0x7f) {
             sanitized.appendf("<{0:02x}>", c & 0xff);
         } else {

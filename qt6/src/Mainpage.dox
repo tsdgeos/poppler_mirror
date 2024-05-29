@@ -57,12 +57,11 @@ A PDF document can then be loaded as follows:
 @code
 QString filename;
 
-Poppler::Document* document = Poppler::Document::load(filename);
+std::unique_ptr<Poppler::Document> document = Poppler::Document::load(filename);
 if (!document || document->isLocked()) {
 
   // ... error message ....
 
-  delete document;
   return;
 }
 @endcode
@@ -71,14 +70,14 @@ Pages can be rendered to QImages with the following commands:
 
 @code
 // Paranoid safety check
-if (document == 0) {
+if (!document) {
   // ... error message ...
   return;
 }
 
 // Access page of the PDF file
-Poppler::Page* pdfPage = document->page(pageNumber);  // Document starts at page 0
-if (pdfPage == 0) {
+std::unique_ptr<Poppler::Page> pdfPage = document->page(pageNumber);  // Document starts at page 0
+if (!pdfPage) {
   // ... error message ...
   return;
 }
@@ -93,7 +92,6 @@ if (image.isNull()) {
 // ... use image ...
 
 // after the usage, the page must be deleted
-delete pdfPage;
 @endcode
 
 Finally, don't forget to destroy the document:

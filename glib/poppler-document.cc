@@ -3801,7 +3801,7 @@ GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
 {
     int offset_min;
     gchar *date_str;
-    std::unique_ptr<GooString> out_str;
+    std::string out_str;
 
     offset_min = g_date_time_get_utc_offset(datetime) / 1000000 / 60;
     date_str = g_date_time_format(datetime, "D:%Y%m%d%H%M%S");
@@ -3815,7 +3815,7 @@ GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
     }
 
     g_free(date_str);
-    return out_str.release();
+    return new GooString(std::move(out_str));
 }
 
 static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable)

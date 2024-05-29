@@ -20,7 +20,7 @@
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
-// Copyright (C) 2008-2018, 2021-2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008-2018, 2021-2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
@@ -153,11 +153,6 @@ CairoOutputDev::CairoOutputDev()
     strokePathClip = nullptr;
     cairo = nullptr;
     currentFont = nullptr;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
-    prescaleImages = false;
-#else
-    prescaleImages = true;
-#endif
     printing = true;
     use_show_text_glyphs = false;
     inUncoloredPattern = false;
@@ -1527,7 +1522,6 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     return true;
 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
 bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading)
 {
     // Function shaded fills are subdivided to rectangles that are the
@@ -1615,7 +1609,6 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
 
     return true;
 }
-#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0) */
 
 bool CairoOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
 {
@@ -1686,7 +1679,6 @@ bool CairoOutputDev::radialShadedSupportExtend(GfxState *state, GfxRadialShading
     return (shading->getExtend0() == shading->getExtend1());
 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
 bool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
 {
     double x0, y0, x1, y1, x2, y2;
@@ -1814,7 +1806,6 @@ bool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *s
 
     return true;
 }
-#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0) */
 
 void CairoOutputDev::clip(GfxState *state)
 {
@@ -2548,17 +2539,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, in
     cairo_get_matrix(cairo, &matrix);
     // XXX: it is possible that we should only do sub pixel positioning if
     // we are rendering fonts */
-    if (!printing
-        && prescaleImages
-        /* not rotated */
-        && matrix.xy == 0
-        && matrix.yx == 0
-        /* axes not flipped / not 180 deg rotated */
-        && matrix.xx > 0 && (upsideDown() ? -1 : 1) * matrix.yy > 0) {
-        drawImageMaskPrescaled(state, ref, str, width, height, invert, interpolate, inlineImg);
-    } else {
-        drawImageMaskRegular(state, ref, str, width, height, invert, interpolate, inlineImg);
-    }
+    drawImageMaskRegular(state, ref, str, width, height, invert, interpolate, inlineImg);
 }
 
 void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
@@ -2601,11 +2582,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
         cairo_get_matrix(cairo, &matrix);
         // XXX: it is possible that we should only do sub pixel positioning if
         // we are rendering fonts */
-        if (!printing && prescaleImages && matrix.xy == 0.0 && matrix.yx == 0.0) {
-            drawImageMaskPrescaled(state, ref, str, width, height, invert, false, inlineImg);
-        } else {
-            drawImageMaskRegular(state, ref, str, width, height, invert, false, inlineImg);
-        }
+        drawImageMaskRegular(state, ref, str, width, height, invert, false, inlineImg);
 
         if (state->getFillColorSpace()->getMode() == csPattern) {
             cairo_set_source_rgb(cairo, 1, 1, 1);
@@ -2740,297 +2717,6 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     cairo_pattern_destroy(pattern);
 
 cleanup:
-    imgStr->close();
-    delete imgStr;
-}
-
-void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
-{
-    unsigned char *buffer;
-    cairo_surface_t *image;
-    cairo_pattern_t *pattern;
-    ImageStream *imgStr;
-    unsigned char *pix;
-    cairo_matrix_t matrix;
-    int invert_bit;
-    ptrdiff_t row_stride;
-
-    /* cairo does a very poor job of scaling down images so we scale them ourselves */
-
-    LOG(printf("drawImageMaskPrescaled %dx%d\n", width, height));
-
-    /* this scaling code is adopted from the splash image scaling code */
-    cairo_get_matrix(cairo, &matrix);
-#if 0
-  printf("[%f %f], [%f %f], %f %f\n", matrix.xx, matrix.xy, matrix.yx, matrix.yy, matrix.x0, matrix.y0);
-#endif
-    /* this whole computation should be factored out */
-    double xScale = matrix.xx;
-    double yScale = matrix.yy;
-    int tx, tx2, ty, ty2; /* the integer co-ordinates of the resulting image */
-    int scaledHeight;
-    int scaledWidth;
-    if (xScale >= 0) {
-        tx = splashRound(matrix.x0 - 0.01);
-        tx2 = splashRound(matrix.x0 + xScale + 0.01) - 1;
-    } else {
-        tx = splashRound(matrix.x0 + 0.01) - 1;
-        tx2 = splashRound(matrix.x0 + xScale - 0.01);
-    }
-    scaledWidth = abs(tx2 - tx) + 1;
-    // scaledWidth = splashRound(fabs(xScale));
-    if (scaledWidth == 0) {
-        // technically, this should draw nothing, but it generally seems
-        // better to draw a one-pixel-wide stripe rather than throwing it
-        // away
-        scaledWidth = 1;
-    }
-    if (yScale >= 0) {
-        ty = splashFloor(matrix.y0 + 0.01);
-        ty2 = splashCeil(matrix.y0 + yScale - 0.01);
-    } else {
-        ty = splashCeil(matrix.y0 - 0.01);
-        ty2 = splashFloor(matrix.y0 + yScale + 0.01);
-    }
-    scaledHeight = abs(ty2 - ty);
-    if (scaledHeight == 0) {
-        scaledHeight = 1;
-    }
-#if 0
-  printf("xscale: %g, yscale: %g\n", xScale, yScale);
-  printf("width: %d, height: %d\n", width, height);
-  printf("scaledWidth: %d, scaledHeight: %d\n", scaledWidth, scaledHeight);
-#endif
-
-    /* compute the required padding */
-    /* Padding is used to preserve the aspect ratio.
-       We compute total_pad to make (height+total_pad)/scaledHeight as close to height/yScale as possible */
-    int head_pad = 0;
-    int tail_pad = 0;
-    int total_pad = splashRound(height * (scaledHeight / fabs(yScale)) - height);
-
-    /* compute the two pieces of padding */
-    if (total_pad > 0) {
-        // XXX: i'm not positive fabs() is correct
-        float tail_error = fabs(matrix.y0 - ty);
-        float head_error = fabs(ty2 - (matrix.y0 + yScale));
-        float tail_fraction = tail_error / (tail_error + head_error);
-        tail_pad = splashRound(total_pad * tail_fraction);
-        head_pad = total_pad - tail_pad;
-    } else {
-        tail_pad = 0;
-        head_pad = 0;
-    }
-    int origHeight = height;
-    height += tail_pad;
-    height += head_pad;
-#if 0
-  printf("head_pad: %d tail_pad: %d\n", head_pad, tail_pad);
-  printf("origHeight: %d height: %d\n", origHeight, height);
-  printf("ty: %d, ty2: %d\n", ty, ty2);
-#endif
-
-    /* TODO: Do we want to cache these? */
-    imgStr = new ImageStream(str, width, 1, 1);
-    imgStr->reset();
-
-    invert_bit = invert ? 1 : 0;
-
-    image = cairo_image_surface_create(CAIRO_FORMAT_A8, scaledWidth, scaledHeight);
-    if (cairo_surface_status(image)) {
-        imgStr->close();
-        delete imgStr;
-        return;
-    }
-
-    buffer = cairo_image_surface_get_data(image);
-    row_stride = cairo_image_surface_get_stride(image);
-
-    int yp = height / scaledHeight;
-    int yq = height % scaledHeight;
-    int xp = width / scaledWidth;
-    int xq = width % scaledWidth;
-    int yt = 0;
-    int origHeight_c = origHeight;
-    /* use MIN() because yp might be > origHeight because of padding */
-    unsigned char *pixBuf = (unsigned char *)malloc(MIN(yp + 1, origHeight) * width);
-    int lastYStep = 1;
-    int total = 0;
-    for (int y = 0; y < scaledHeight; y++) {
-        // y scale Bresenham
-        int yStep = yp;
-        yt += yq;
-
-        if (yt >= scaledHeight) {
-            yt -= scaledHeight;
-            ++yStep;
-        }
-
-        // read row (s) from image ignoring the padding as appropriate
-        {
-            int n = (yp > 0) ? yStep : lastYStep;
-            total += n;
-            if (n > 0) {
-                unsigned char *p = pixBuf;
-                int head_pad_count = head_pad;
-                int origHeight_count = origHeight;
-                int tail_pad_count = tail_pad;
-                for (int i = 0; i < n; i++) {
-                    // get row
-                    if (head_pad_count) {
-                        head_pad_count--;
-                    } else if (origHeight_count) {
-                        pix = imgStr->getLine();
-                        for (int j = 0; j < width; j++) {
-                            if (pix[j] ^ invert_bit) {
-                                p[j] = 0;
-                            } else {
-                                p[j] = 255;
-                            }
-                        }
-                        origHeight_count--;
-                        p += width;
-                    } else if (tail_pad_count) {
-                        tail_pad_count--;
-                    } else {
-                        printf("%d %d\n", n, total);
-                        assert(0 && "over run\n");
-                    }
-                }
-            }
-        }
-
-        lastYStep = yStep;
-
-        int xt = 0;
-        int xSrc = 0;
-        int n = yStep > 0 ? yStep : 1;
-        int origN = n;
-
-        /* compute the size of padding and pixels that will be used for this row */
-        int head_pad_size = MIN(n, head_pad);
-        n -= head_pad_size;
-        head_pad -= MIN(head_pad_size, yStep);
-
-        int pix_size = MIN(n, origHeight);
-        n -= pix_size;
-        origHeight -= MIN(pix_size, yStep);
-
-        int tail_pad_size = MIN(n, tail_pad);
-        n -= tail_pad_size;
-        tail_pad -= MIN(tail_pad_size, yStep);
-        if (n != 0) {
-            printf("n = %d (%d %d %d)\n", n, head_pad_size, pix_size, tail_pad_size);
-            assert(n == 0);
-        }
-
-        for (int x = 0; x < scaledWidth; ++x) {
-            int xStep = xp;
-            xt += xq;
-            if (xt >= scaledWidth) {
-                xt -= scaledWidth;
-                ++xStep;
-            }
-            int m = xStep > 0 ? xStep : 1;
-            float pixAcc0 = 0;
-            /* could m * head_pad_size * tail_pad_size  overflow? */
-            if (invert_bit) {
-                pixAcc0 += m * head_pad_size * tail_pad_size * 255;
-            } else {
-                pixAcc0 += m * head_pad_size * tail_pad_size * 0;
-            }
-            /* Accumulate all of the source pixels for the destination pixel */
-            for (int i = 0; i < pix_size; ++i) {
-                for (int j = 0; j < m; ++j) {
-                    if (xSrc + i * width + j > MIN(yp + 1, origHeight_c) * width) {
-                        printf("%d > %d (%d %d %d %d) (%d %d %d)\n", xSrc + i * width + j, MIN(yp + 1, origHeight_c) * width, xSrc, i, width, j, yp, origHeight_c, width);
-                        printf("%d %d %d\n", head_pad_size, pix_size, tail_pad_size);
-                        assert(0 && "bad access\n");
-                    }
-                    pixAcc0 += pixBuf[xSrc + i * width + j];
-                }
-            }
-            buffer[y * row_stride + x] = splashFloor(pixAcc0 / (origN * m));
-            xSrc += xStep;
-        }
-    }
-    free(pixBuf);
-
-    cairo_surface_mark_dirty(image);
-    pattern = cairo_pattern_create_for_surface(image);
-    cairo_surface_destroy(image);
-    if (cairo_pattern_status(pattern)) {
-        imgStr->close();
-        delete imgStr;
-        return;
-    }
-
-    /* we should actually be using CAIRO_FILTER_NEAREST here. However,
-     * cairo doesn't yet do minifaction filtering causing scaled down
-     * images with CAIRO_FILTER_NEAREST to look really bad */
-    cairo_pattern_set_filter(pattern, interpolate ? CAIRO_FILTER_GOOD : CAIRO_FILTER_FAST);
-
-    if (state->getFillColorSpace()->getMode() == csPattern) {
-        cairo_matrix_init_translate(&matrix, 0, scaledHeight);
-        cairo_matrix_scale(&matrix, scaledWidth, -scaledHeight);
-        cairo_pattern_set_matrix(pattern, &matrix);
-        if (cairo_pattern_status(pattern)) {
-            cairo_pattern_destroy(pattern);
-            imgStr->close();
-            delete imgStr;
-            return;
-        }
-
-        mask = cairo_pattern_reference(pattern);
-        cairo_get_matrix(cairo, &mask_matrix);
-    } else {
-        cairo_save(cairo);
-
-        /* modify our current transformation so that the prescaled image
-         * goes where it is supposed to */
-        cairo_get_matrix(cairo, &matrix);
-        cairo_scale(cairo, 1.0 / matrix.xx, 1.0 / matrix.yy);
-        // get integer co-ords
-        cairo_translate(cairo, tx - matrix.x0, ty2 - matrix.y0);
-        if (yScale > 0) {
-            cairo_scale(cairo, 1, -1);
-        }
-
-        cairo_rectangle(cairo, 0., 0., scaledWidth, scaledHeight);
-        cairo_clip(cairo);
-        if (strokePathClip) {
-            cairo_push_group(cairo);
-            fillToStrokePathClip(state);
-            cairo_pop_group_to_source(cairo);
-        }
-        cairo_mask(cairo, pattern);
-
-        // cairo_get_matrix(cairo, &matrix);
-        // printf("mask at: [%f %f], [%f %f], %f %f\n\n", matrix.xx, matrix.xy, matrix.yx, matrix.yy, matrix.x0, matrix.y0);
-        cairo_restore(cairo);
-    }
-
-    if (cairo_shape) {
-        cairo_save(cairo_shape);
-
-        /* modify our current transformation so that the prescaled image
-         * goes where it is supposed to */
-        cairo_get_matrix(cairo_shape, &matrix);
-        cairo_scale(cairo_shape, 1.0 / matrix.xx, 1.0 / matrix.yy);
-        // get integer co-ords
-        cairo_translate(cairo_shape, tx - matrix.x0, ty2 - matrix.y0);
-        if (yScale > 0) {
-            cairo_scale(cairo_shape, 1, -1);
-        }
-
-        cairo_rectangle(cairo_shape, 0., 0., scaledWidth, scaledHeight);
-        cairo_fill(cairo_shape);
-
-        cairo_restore(cairo_shape);
-    }
-
-    cairo_pattern_destroy(pattern);
-
     imgStr->close();
     delete imgStr;
 }
@@ -3421,7 +3107,6 @@ static bool colorMapHasIdentityDecodeMap(GfxImageColorMap *colorMap)
     return true;
 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
 static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mime_type, const char *mime_id_prefix, Ref ref)
 {
     GooString *mime_id;
@@ -3444,9 +3129,7 @@ static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mim
     }
     return status;
 }
-#endif
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
 bool CairoOutputDev::setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image)
 {
     JBIG2Stream *jb2Str = static_cast<JBIG2Stream *>(str);
@@ -3474,9 +3157,7 @@ bool CairoOutputDev::setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *im
 
     return true;
 }
-#endif
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
 bool CairoOutputDev::setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height)
 {
     CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
@@ -3499,7 +3180,6 @@ bool CairoOutputDev::setMimeDataForCCITTParams(Stream *str, cairo_surface_t *ima
 
     return true;
 }
-#endif
 
 void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxImageColorMap *colorMap, cairo_surface_t *image, int height)
 {
@@ -3515,8 +3195,7 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
         return;
     }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    // Since 1.5.10 the cairo PS backend stores images with UNIQUE_ID in PS memory so the
+    // The cairo PS backend stores images with UNIQUE_ID in PS memory so the
     // image can be re-used multiple times. As we don't know how large the images are or
     // how many times they are used, there is no benefit in enabling this. Issue #106
     if (cairo_surface_get_type(cairo_get_target(cairo)) != CAIRO_SURFACE_TYPE_PS) {
@@ -3527,7 +3206,6 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
             }
         }
     }
-#endif
 
     switch (strKind) {
     case strDCT:
@@ -3536,16 +3214,12 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     case strJPX:
         mime_type = CAIRO_MIME_TYPE_JP2;
         break;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
     case strJBIG2:
         mime_type = CAIRO_MIME_TYPE_JBIG2;
         break;
-#endif
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
     case strCCITTFax:
         mime_type = CAIRO_MIME_TYPE_CCITT_FAX;
         break;
-#endif
     default:
         mime_type = nullptr;
         break;
@@ -3586,17 +3260,13 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
         return;
     }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
     if (strKind == strJBIG2 && !setMimeDataForJBIG2Globals(str, image)) {
         return;
     }
-#endif
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
     if (strKind == strCCITTFax && !setMimeDataForCCITTParams(str, image, height)) {
         return;
     }
-#endif
 
     if (mime_type) {
         if (getStreamData(str->getNextStream(), &strBuffer, &len)) {
@@ -3805,16 +3475,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
     }
 
     if (!inlineImg) { /* don't read stream twice if it is an inline image */
-        // cairo 1.15.10 allows mime image data to have different size to cairo image
-        // mime image size will be scaled to same size as cairo image
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
-        bool requireSameSize = false;
-#else
-        bool requireSameSize = true;
-#endif
-        if (!requireSameSize || (width == widthA && height == heightA)) {
-            setMimeData(state, str, ref, colorMap, image, heightA);
-        }
+        setMimeData(state, str, ref, colorMap, image, heightA);
     }
 
     pattern = cairo_pattern_create_for_surface(image);
