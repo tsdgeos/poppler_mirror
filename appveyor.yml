@@ -24,7 +24,7 @@ build_script:
 
 test_script:
 - ps: |
-   craft --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
+   $env:CRAFT_TEST_VERBOSITY="1"; craft --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
 
 
 environment:
