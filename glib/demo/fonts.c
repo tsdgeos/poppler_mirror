@@ -125,7 +125,8 @@ static gboolean pgd_fonts_fill_model(PgdFontsDemo *demo)
 
     font_info = poppler_font_info_new(demo->doc);
 
-    while (poppler_font_info_scan(font_info, 20, &fonts_iter)) {
+    while (scanned <= n_pages) {
+        poppler_font_info_scan(font_info, 20, &fonts_iter);
         pgd_fonts_update_progress(demo, n_pages, scanned);
 
         while (gtk_events_pending()) {

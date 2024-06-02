@@ -3148,7 +3148,10 @@ PopplerFontInfo *poppler_font_info_new(PopplerDocument *document)
  *
  * <informalexample><programlisting>
  * font_info = poppler_font_info_new (document);
- * while (poppler_font_info_scan (font_info, 20, &fonts_iter)) {
+ * scanned_pages = 0;
+ * while (scanned_pages <= poppler_document_get_n_pages(document)) {
+ *         poppler_font_info_scan (font_info, 20, &fonts_iter);
+ *         scanned_pages += 20;
  *         if (!fonts_iter)
  *                 continue; /<!-- -->* No fonts found in these 20 pages *<!-- -->/
  *         do {
@@ -3159,7 +3162,7 @@ PopplerFontInfo *poppler_font_info_new(PopplerDocument *document)
  * }
  * </programlisting></informalexample>
  *
- * Returns: %TRUE, if there are more fonts left to scan
+ * Returns: %TRUE, if fonts were found
  */
 gboolean poppler_font_info_scan(PopplerFontInfo *font_info, int n_pages, PopplerFontsIter **iter)
 {
