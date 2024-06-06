@@ -1866,7 +1866,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
                 ++i;
             }
         }
-        std::sort(widths.exceps.begin(), widths.exceps.end(), cmpWidthExcepFunctor());
+        std::ranges::sort(widths.exceps, cmpWidthExcepFunctor());
     }
 
     // default metrics for vertical font
@@ -1914,7 +1914,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
                 ++i;
             }
         }
-        std::sort(widths.excepsV.begin(), widths.excepsV.end(), cmpWidthExcepVFunctor());
+        std::ranges::sort(widths.excepsV, cmpWidthExcepVFunctor());
     }
 
     ok = true;
