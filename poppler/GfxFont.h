@@ -97,11 +97,8 @@ struct GfxFontCIDWidths
     double defWidth; // default char width
     double defHeight; // default char height
     double defVY; // default origin position
-    GfxFontCIDWidthExcep *exceps; // exceptions
-    int nExceps; // number of valid entries in exceps
-    GfxFontCIDWidthExcepV * // exceptions for vertical font
-            excepsV;
-    int nExcepsV; // number of valid entries in excepsV
+    std::vector<GfxFontCIDWidthExcep> exceps; // exceptions
+    std::vector<GfxFontCIDWidthExcepV> excepsV; // exceptions for vertical font
 };
 
 //------------------------------------------------------------------------
