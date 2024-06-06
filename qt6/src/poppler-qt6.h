@@ -1681,6 +1681,31 @@ QString subject = m_doc->info("Subject");
     QStringList scripts() const;
 
     /**
+      Describes the flags for additional document actions i.e.
+      for executing document scripts at different events.
+      This flag is used by additionalAction method to return the
+      particular Link.
+
+      \since 24.07
+    */
+    enum DocumentAdditionalActionsType
+    {
+        CloseDocument, ///< Performed before closing the document
+        SaveDocumentStart, ///< Performed before saving the document
+        SaveDocumentFinish, ///< Performed after saving the document
+        PrintDocumentStart, ///< Performed before printing the document
+        PrintDocumentFinish, ///< Performed after printing the document
+    };
+
+    /**
+      Returns the additional action of the given @p type for the document or
+      @c 0 if no action has been defined.
+
+      \since 24.07
+    */
+    std::unique_ptr<Link> additionalAction(DocumentAdditionalActionsType type) const;
+
+    /**
        The PDF identifiers.
 
        \param permanentId an optional pointer to a variable where store the

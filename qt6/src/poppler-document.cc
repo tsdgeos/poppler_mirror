@@ -756,6 +756,36 @@ QStringList Document::scripts() const
     return scripts;
 }
 
+std::unique_ptr<Link> Document::additionalAction(DocumentAdditionalActionsType type) const
+{
+    Catalog::DocumentAdditionalActionsType actionType;
+    switch (type) {
+    case CloseDocument:
+        actionType = Catalog::actionCloseDocument;
+        break;
+    case SaveDocumentStart:
+        actionType = Catalog::actionSaveDocumentStart;
+        break;
+    case SaveDocumentFinish:
+        actionType = Catalog::actionSaveDocumentFinish;
+        break;
+    case PrintDocumentStart:
+        actionType = Catalog::actionPrintDocumentStart;
+        break;
+    case PrintDocumentFinish:
+        actionType = Catalog::actionPrintDocumentFinish;
+        break;
+    default:
+        return {};
+    }
+
+    if (std::unique_ptr<::LinkAction> act = m_doc->doc->getCatalog()->getAdditionalAction(actionType)) {
+        return PageData::convertLinkActionToLink(act.get(), m_doc, QRectF());
+    }
+
+    return {};
+}
+
 bool Document::getPdfId(QByteArray *permanentId, QByteArray *updateId) const
 {
     GooString gooPermanentId;

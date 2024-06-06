@@ -770,6 +770,37 @@ OptContentModel *Document::optionalContentModel()
     return (OptContentModel *)m_doc->m_optContentModel;
 }
 
+Link *Document::additionalAction(DocumentAdditionalActionsType type) const
+{
+    Catalog::DocumentAdditionalActionsType actionType;
+    switch (type) {
+    case CloseDocument:
+        actionType = Catalog::actionCloseDocument;
+        break;
+    case SaveDocumentStart:
+        actionType = Catalog::actionSaveDocumentStart;
+        break;
+    case SaveDocumentFinish:
+        actionType = Catalog::actionSaveDocumentFinish;
+        break;
+    case PrintDocumentStart:
+        actionType = Catalog::actionPrintDocumentStart;
+        break;
+    case PrintDocumentFinish:
+        actionType = Catalog::actionPrintDocumentFinish;
+        break;
+    default:
+        return {};
+    }
+
+    Link *action = nullptr;
+    if (std::unique_ptr<::LinkAction> act = m_doc->doc->getCatalog()->getAdditionalAction(actionType)) {
+        action = PageData::convertLinkActionToLink(act.get(), m_doc, QRectF());
+    }
+
+    return action;
+}
+
 QStringList Document::scripts() const
 {
     Catalog *catalog = m_doc->doc->getCatalog();
