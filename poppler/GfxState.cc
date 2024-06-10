@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016, 2020, 2023 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -5738,58 +5738,6 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, GfxColorSpace *col
 
 err1:
     ok = false;
-}
-
-GfxImageColorMap::GfxImageColorMap(const GfxImageColorMap *colorMap)
-{
-    int n, i, k;
-
-    colorSpace = colorMap->colorSpace->copy();
-    bits = colorMap->bits;
-    nComps = colorMap->nComps;
-    nComps2 = colorMap->nComps2;
-    useMatte = colorMap->useMatte;
-    matteColor = colorMap->matteColor;
-    colorSpace2 = nullptr;
-    for (k = 0; k < gfxColorMaxComps; ++k) {
-        lookup[k] = nullptr;
-        lookup2[k] = nullptr;
-    }
-    byte_lookup = nullptr;
-    n = 1 << bits;
-    for (k = 0; k < nComps; ++k) {
-        lookup[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
-        memcpy(lookup[k], colorMap->lookup[k], n * sizeof(GfxColorComp));
-    }
-    if (colorSpace->getMode() == csIndexed) {
-        colorSpace2 = ((GfxIndexedColorSpace *)colorSpace)->getBase();
-        for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
-            memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
-        }
-    } else if (colorSpace->getMode() == csSeparation) {
-        colorSpace2 = ((GfxSeparationColorSpace *)colorSpace)->getAlt();
-        for (k = 0; k < nComps2; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
-            memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
-        }
-    } else {
-        for (k = 0; k < nComps; ++k) {
-            lookup2[k] = (GfxColorComp *)gmallocn(n, sizeof(GfxColorComp));
-            memcpy(lookup2[k], colorMap->lookup2[k], n * sizeof(GfxColorComp));
-        }
-    }
-    if (colorMap->byte_lookup) {
-        int nc = colorSpace2 ? nComps2 : nComps;
-
-        byte_lookup = (unsigned char *)gmallocn(n, nc);
-        memcpy(byte_lookup, colorMap->byte_lookup, n * nc);
-    }
-    for (i = 0; i < nComps; ++i) {
-        decodeLow[i] = colorMap->decodeLow[i];
-        decodeRange[i] = colorMap->decodeRange[i];
-    }
-    ok = true;
 }
 
 GfxImageColorMap::~GfxImageColorMap()
