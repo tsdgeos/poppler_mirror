@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2022, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -317,7 +317,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
             reference = lrn->getScreenAnnot();
         }
 
-        popplerLink = std::make_unique<LinkRendition>(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : nullptr, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
+        popplerLink = std::make_unique<LinkRendition>(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : std::unique_ptr<::MediaRendition> {}, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
     } break;
 
     case actionOCGState: {

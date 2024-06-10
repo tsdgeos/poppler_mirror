@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, 2022, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -32,6 +32,8 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QVector>
 #include "poppler-export.h"
+
+#include <memory>
 
 struct Ref;
 class MediaRendition;
@@ -488,7 +490,18 @@ public:
      * \param script the java script code
      * \param annotationReference the object reference of the screen annotation associated with this rendition action
      */
-    LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference);
+    [[deprecated]] LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference);
+
+    /**
+     * Create a new rendition link.
+     *
+     * \param linkArea the active area of the link
+     * \param rendition the media rendition object.
+     * \param operation the numeric operation (action) (@see ::LinkRendition::RenditionOperation)
+     * \param script the java script code
+     * \param annotationReference the object reference of the screen annotation associated with this rendition action
+     */
+    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, const Ref annotationReference);
 
     /**
      * Destructor.
