@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -1203,6 +1203,9 @@ public:
     GfxImageColorMap(const GfxImageColorMap &) = delete;
     GfxImageColorMap &operator=(const GfxImageColorMap &) = delete;
 
+    // Return a copy of this color map.
+    GfxImageColorMap *copy() const { return new GfxImageColorMap(this); }
+
     // Is color map valid?
     bool isOk() const { return ok; }
 
@@ -1243,6 +1246,8 @@ public:
     const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : nullptr; }
 
 private:
+    explicit GfxImageColorMap(const GfxImageColorMap *colorMap);
+
     GfxColorSpace *colorSpace; // the image color space
     int bits; // bits per component
     int nComps; // number of components in a pixel
