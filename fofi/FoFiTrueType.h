@@ -31,8 +31,10 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 #include <unordered_map>
 #include <string>
+#include <span>
 #include "FoFiBase.h"
 #include "poppler_private_export.h"
 
@@ -160,8 +162,8 @@ private:
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtCharStrings(char **encoding, const int *codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const;
-    void dumpString(const unsigned char *s, int length, FoFiOutputFunc outputFunc, void *outputStream) const;
-    unsigned int computeTableChecksum(const unsigned char *data, int length) const;
+    static void dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream);
+    static unsigned int computeTableChecksum(std::span<const unsigned char> data);
     void parse();
     void readPostTable();
     int seekTable(const char *tag) const;
@@ -171,10 +173,8 @@ private:
     unsigned int scanLookupSubTable(unsigned int subTable, unsigned int orgGID);
     int checkGIDInCoverage(unsigned int coverage, unsigned int orgGID);
 
-    TrueTypeTable *tables;
-    int nTables;
-    TrueTypeCmap *cmaps;
-    int nCmaps;
+    std::vector<TrueTypeTable> tables;
+    std::vector<TrueTypeCmap> cmaps;
     int nGlyphs;
     int locaFmt;
     int bbox[4];
