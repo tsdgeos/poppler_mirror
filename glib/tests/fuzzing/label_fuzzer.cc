@@ -19,6 +19,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     npages = poppler_document_get_n_pages(doc);
     if (npages < 1) {
+        g_object_unref(doc);
         return 0;
     }
 
@@ -34,5 +35,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         g_object_unref(page);
     }
     free(buf);
+    g_object_unref(doc);
     return 0;
 }
