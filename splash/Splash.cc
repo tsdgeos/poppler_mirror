@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -3705,11 +3705,19 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
 
     // compute the scale factors
     if (splashAbs(mat[0]) >= splashAbs(mat[1])) {
-        scaledWidth = xMax - xMin;
-        scaledHeight = yMax - yMin;
+        if (unlikely(checkedSubtraction(xMax, xMin, &scaledWidth))) {
+            return splashErrBadArg;
+        }
+        if (unlikely(checkedSubtraction(yMax, yMin, &scaledHeight))) {
+            return splashErrBadArg;
+        }
     } else {
-        scaledWidth = yMax - yMin;
-        scaledHeight = xMax - xMin;
+        if (unlikely(checkedSubtraction(yMax, yMin, &scaledWidth))) {
+            return splashErrBadArg;
+        }
+        if (unlikely(checkedSubtraction(xMax, xMin, &scaledHeight))) {
+            return splashErrBadArg;
+        }
     }
     if (scaledHeight <= 1 || scaledWidth <= 1 || tilingPattern) {
         if (mat[0] >= 0) {

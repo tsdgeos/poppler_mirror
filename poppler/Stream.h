@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -173,8 +173,15 @@ public:
             length += readChars;
             if (readChars == charsToRead) {
                 if (lookChar() != EOF) {
-                    size += sizeIncrement;
+                    if (unlikely(checkedAdd(size, sizeIncrement, &size))) {
+                        error(errInternal, -1, "toUnsignedChars size grew too much");
+                        return {};
+                    }
                     charsToRead = sizeIncrement;
+                    if (unlikely(static_cast<size_t>(size) > buf.max_size())) {
+                        error(errInternal, -1, "toUnsignedChars size grew too much");
+                        return {};
+                    }
                     buf.resize(size);
                 } else {
                     continueReading = false;
