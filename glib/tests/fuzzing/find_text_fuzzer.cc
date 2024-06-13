@@ -32,7 +32,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         if (!page) {
             continue;
         }
-        poppler_page_find_text(page, buf);
+        if (g_utf8_validate(buf, -1, NULL)) {
+            poppler_page_find_text(page, buf);
+        }
         g_object_unref(page);
     }
     free(buf);
