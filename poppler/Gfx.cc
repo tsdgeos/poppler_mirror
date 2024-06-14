@@ -401,22 +401,20 @@ std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, Output
     return {};
 }
 
-GfxShading *GfxResources::lookupShading(const char *name, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxShading> GfxResources::lookupShading(const char *name, OutputDev *out, GfxState *state)
 {
     GfxResources *resPtr;
-    GfxShading *shading;
 
     for (resPtr = this; resPtr; resPtr = resPtr->next) {
         if (resPtr->shadingDict.isDict()) {
             Object obj = resPtr->shadingDict.dictLookup(name);
             if (!obj.isNull()) {
-                shading = GfxShading::parse(resPtr, &obj, out, state);
-                return shading;
+                return GfxShading::parse(resPtr, &obj, out, state);
             }
         }
     }
     error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
-    return nullptr;
+    return {};
 }
 
 Object GfxResources::lookupGState(const char *name)
@@ -2332,7 +2330,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 
 void Gfx::opShFill(Object args[], int numArgs)
 {
-    GfxShading *shading;
+    std::unique_ptr<GfxShading> shading;
     GfxState *savedState;
     double xMin, yMin, xMax, yMax;
 
@@ -2374,21 +2372,21 @@ void Gfx::opShFill(Object args[], int numArgs)
     // do shading type-specific operations
     switch (shading->getType()) {
     case GfxShading::FunctionBasedShading:
-        doFunctionShFill((GfxFunctionShading *)shading);
+        doFunctionShFill((GfxFunctionShading *)shading.get());
         break;
     case GfxShading::AxialShading:
-        doAxialShFill((GfxAxialShading *)shading);
+        doAxialShFill((GfxAxialShading *)shading.get());
         break;
     case GfxShading::RadialShading:
-        doRadialShFill((GfxRadialShading *)shading);
+        doRadialShFill((GfxRadialShading *)shading.get());
         break;
     case GfxShading::FreeFormGouraudShadedTriangleMesh:
     case GfxShading::LatticeFormGouraudShadedTriangleMesh:
-        doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading);
+        doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading.get());
         break;
     case GfxShading::CoonsPatchMesh:
     case GfxShading::TensorProductPatchMesh:
-        doPatchMeshShFill((GfxPatchMeshShading *)shading);
+        doPatchMeshShFill((GfxPatchMeshShading *)shading.get());
         break;
     }
 
@@ -2400,8 +2398,6 @@ void Gfx::opShFill(Object args[], int numArgs)
 
     // restore graphics state
     restoreStateStack(savedState);
-
-    delete shading;
 }
 
 void Gfx::doFunctionShFill(GfxFunctionShading *shading)

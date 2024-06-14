@@ -3333,7 +3333,6 @@ std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum)
 {
     Dict *dict;
-    GfxShading *shadingA;
     double matrixA[6];
     Object obj1;
     int i;
@@ -3344,7 +3343,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
     dict = patObj->getDict();
 
     obj1 = dict->lookup("Shading");
-    shadingA = GfxShading::parse(res, &obj1, out, state);
+    std::unique_ptr<GfxShading> shadingA = GfxShading::parse(res, &obj1, out, state);
     if (!shadingA) {
         return {};
     }
@@ -3365,24 +3364,18 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
         }
     }
 
-    auto pattern = new GfxShadingPattern(shadingA, matrixA, patternRefNum);
+    auto pattern = new GfxShadingPattern(std::move(shadingA), matrixA, patternRefNum);
     return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
-GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA)
+GfxShadingPattern::GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA), shading(std::move(shadingA))
 {
-    int i;
-
-    shading = shadingA;
-    for (i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6; ++i) {
         matrix[i] = matrixA[i];
     }
 }
 
-GfxShadingPattern::~GfxShadingPattern()
-{
-    delete shading;
-}
+GfxShadingPattern::~GfxShadingPattern() = default;
 
 std::unique_ptr<GfxPattern> GfxShadingPattern::copy() const
 {
@@ -3418,9 +3411,8 @@ GfxShading::GfxShading(const GfxShading *shading)
 
 GfxShading::~GfxShading() = default;
 
-GfxShading *GfxShading::parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxShading> GfxShading::parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state)
 {
-    GfxShading *shading;
     Dict *dict;
     int typeA;
     Object obj1;
@@ -3430,67 +3422,58 @@ GfxShading *GfxShading::parse(GfxResources *res, Object *obj, OutputDev *out, Gf
     } else if (obj->isStream()) {
         dict = obj->streamGetDict();
     } else {
-        return nullptr;
+        return {};
     }
 
     obj1 = dict->lookup("ShadingType");
     if (!obj1.isInt()) {
         error(errSyntaxWarning, -1, "Invalid ShadingType in shading dictionary");
-        return nullptr;
+        return {};
     }
     typeA = obj1.getInt();
 
     switch (typeA) {
     case 1:
-        shading = GfxFunctionShading::parse(res, dict, out, state);
+        return GfxFunctionShading::parse(res, dict, out, state);
         break;
     case 2:
-        shading = GfxAxialShading::parse(res, dict, out, state);
+        return GfxAxialShading::parse(res, dict, out, state);
         break;
     case 3:
-        shading = GfxRadialShading::parse(res, dict, out, state);
+        return GfxRadialShading::parse(res, dict, out, state);
         break;
     case 4:
         if (obj->isStream()) {
-            shading = GfxGouraudTriangleShading::parse(res, 4, dict, obj->getStream(), out, state);
+            return GfxGouraudTriangleShading::parse(res, 4, dict, obj->getStream(), out, state);
         } else {
             error(errSyntaxWarning, -1, "Invalid Type 4 shading object");
-            goto err1;
         }
         break;
     case 5:
         if (obj->isStream()) {
-            shading = GfxGouraudTriangleShading::parse(res, 5, dict, obj->getStream(), out, state);
+            return GfxGouraudTriangleShading::parse(res, 5, dict, obj->getStream(), out, state);
         } else {
             error(errSyntaxWarning, -1, "Invalid Type 5 shading object");
-            goto err1;
         }
         break;
     case 6:
         if (obj->isStream()) {
-            shading = GfxPatchMeshShading::parse(res, 6, dict, obj->getStream(), out, state);
+            return GfxPatchMeshShading::parse(res, 6, dict, obj->getStream(), out, state);
         } else {
             error(errSyntaxWarning, -1, "Invalid Type 6 shading object");
-            goto err1;
         }
         break;
     case 7:
         if (obj->isStream()) {
-            shading = GfxPatchMeshShading::parse(res, 7, dict, obj->getStream(), out, state);
+            return GfxPatchMeshShading::parse(res, 7, dict, obj->getStream(), out, state);
         } else {
             error(errSyntaxWarning, -1, "Invalid Type 7 shading object");
-            goto err1;
         }
         break;
     default:
         error(errSyntaxWarning, -1, "Unimplemented shading type {0:d}", typeA);
-        goto err1;
     }
-
-    return shading;
-
-err1:
-    return nullptr;
+    return {};
 }
 
 bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
@@ -3576,9 +3559,8 @@ GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxS
 
 GfxFunctionShading::~GfxFunctionShading() { }
 
-GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
-    GfxFunctionShading *shading;
     double x0A, y0A, x1A, y1A;
     double matrixA[6];
     std::vector<std::unique_ptr<Function>> funcsA;
@@ -3597,7 +3579,7 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
 
         if (!decodeOk) {
             error(errSyntaxWarning, -1, "Invalid Domain array in function shading dictionary");
-            return nullptr;
+            return {};
         }
     }
 
@@ -3619,7 +3601,7 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
 
         if (!decodeOk) {
             error(errSyntaxWarning, -1, "Invalid Matrix array in function shading dictionary");
-            return nullptr;
+            return {};
         }
     }
 
@@ -3628,28 +3610,27 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
         const int nFuncsA = obj1.arrayGetLength();
         if (nFuncsA > gfxColorMaxComps || nFuncsA <= 0) {
             error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
-            return nullptr;
+            return {};
         }
         for (i = 0; i < nFuncsA; ++i) {
             Object obj2 = obj1.arrayGet(i);
             Function *f = Function::parse(&obj2);
             if (!f) {
-                return nullptr;
+                return {};
             }
             funcsA.emplace_back(f);
         }
     } else {
         Function *f = Function::parse(&obj1);
         if (!f) {
-            return nullptr;
+            return {};
         }
         funcsA.emplace_back(f);
     }
 
-    shading = new GfxFunctionShading(x0A, y0A, x1A, y1A, matrixA, std::move(funcsA));
+    auto shading = std::make_unique<GfxFunctionShading>(x0A, y0A, x1A, y1A, matrixA, std::move(funcsA));
     if (!shading->init(res, dict, out, state)) {
-        delete shading;
-        return nullptr;
+        return {};
     }
     return shading;
 }
@@ -3693,9 +3674,9 @@ bool GfxFunctionShading::init(GfxResources *res, Dict *dict, OutputDev *out, Gfx
     return true;
 }
 
-GfxShading *GfxFunctionShading::copy() const
+std::unique_ptr<GfxShading> GfxFunctionShading::copy() const
 {
-    return new GfxFunctionShading(this);
+    return std::make_unique<GfxFunctionShading>(this);
 }
 
 void GfxFunctionShading::getColor(double x, double y, GfxColor *color) const
@@ -3948,9 +3929,8 @@ GfxAxialShading::GfxAxialShading(const GfxAxialShading *shading) : GfxUnivariate
 
 GfxAxialShading::~GfxAxialShading() { }
 
-GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxAxialShading> GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
-    GfxAxialShading *shading;
     double x0A, y0A, x1A, y1A;
     double t0A, t1A;
     std::vector<std::unique_ptr<Function>> funcsA;
@@ -3966,7 +3946,7 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
         y1A = obj1.arrayGet(3).getNumWithDefaultValue(0);
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
-        return nullptr;
+        return {};
     }
 
     t0A = 0;
@@ -3982,20 +3962,20 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
         const int nFuncsA = obj1.arrayGetLength();
         if (nFuncsA > gfxColorMaxComps || nFuncsA == 0) {
             error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
-            return nullptr;
+            return {};
         }
         for (int i = 0; i < nFuncsA; ++i) {
             Object obj2 = obj1.arrayGet(i);
             Function *f = Function::parse(&obj2);
             if (!f) {
-                return nullptr;
+                return {};
             }
             funcsA.emplace_back(f);
         }
     } else {
         Function *f = Function::parse(&obj1);
         if (!f) {
-            return nullptr;
+            return {};
         }
         funcsA.emplace_back(f);
     }
@@ -4017,17 +3997,16 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
         }
     }
 
-    shading = new GfxAxialShading(x0A, y0A, x1A, y1A, t0A, t1A, std::move(funcsA), extend0A, extend1A);
+    auto shading = std::make_unique<GfxAxialShading>(x0A, y0A, x1A, y1A, t0A, t1A, std::move(funcsA), extend0A, extend1A);
     if (!shading->init(res, dict, out, state)) {
-        delete shading;
-        shading = nullptr;
+        return {};
     }
     return shading;
 }
 
-GfxShading *GfxAxialShading::copy() const
+std::unique_ptr<GfxShading> GfxAxialShading::copy() const
 {
-    return new GfxAxialShading(this);
+    return std::make_unique<GfxAxialShading>(this);
 }
 
 double GfxAxialShading::getDistance(double sMin, double sMax) const
@@ -4129,9 +4108,8 @@ GfxRadialShading::GfxRadialShading(const GfxRadialShading *shading) : GfxUnivari
 
 GfxRadialShading::~GfxRadialShading() { }
 
-GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxRadialShading> GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
-    GfxRadialShading *shading;
     double x0A, y0A, r0A, x1A, y1A, r1A;
     double t0A, t1A;
     std::vector<std::unique_ptr<Function>> funcsA;
@@ -4150,7 +4128,7 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
         r1A = obj1.arrayGet(5).getNumWithDefaultValue(0);
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
-        return nullptr;
+        return {};
     }
 
     t0A = 0;
@@ -4166,20 +4144,20 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
         const int nFuncsA = obj1.arrayGetLength();
         if (nFuncsA > gfxColorMaxComps) {
             error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
-            return nullptr;
+            return {};
         }
         for (i = 0; i < nFuncsA; ++i) {
             Object obj2 = obj1.arrayGet(i);
             Function *f = Function::parse(&obj2);
             if (!f) {
-                return nullptr;
+                return {};
             }
             funcsA.emplace_back(f);
         }
     } else {
         Function *f = Function::parse(&obj1);
         if (!f) {
-            return nullptr;
+            return {};
         }
         funcsA.emplace_back(f);
     }
@@ -4191,17 +4169,16 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
         extend1A = obj1.arrayGet(1).getBoolWithDefaultValue(false);
     }
 
-    shading = new GfxRadialShading(x0A, y0A, r0A, x1A, y1A, r1A, t0A, t1A, std::move(funcsA), extend0A, extend1A);
+    auto shading = std::make_unique<GfxRadialShading>(x0A, y0A, r0A, x1A, y1A, r1A, t0A, t1A, std::move(funcsA), extend0A, extend1A);
     if (!shading->init(res, dict, out, state)) {
-        delete shading;
-        return nullptr;
+        return {};
     }
     return shading;
 }
 
-GfxShading *GfxRadialShading::copy() const
+std::unique_ptr<GfxShading> GfxRadialShading::copy() const
 {
-    return new GfxRadialShading(this);
+    return std::make_unique<GfxRadialShading>(this);
 }
 
 double GfxRadialShading::getDistance(double sMin, double sMax) const
@@ -4613,9 +4590,8 @@ GfxGouraudTriangleShading::~GfxGouraudTriangleShading()
     gfree(triangles);
 }
 
-GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *gfxState)
+std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *gfxState)
 {
-    GfxGouraudTriangleShading *shading;
     std::vector<std::unique_ptr<Function>> funcsA;
     int coordBits, compBits, flagBits, vertsPerRow, nRows;
     double xMin, xMax, yMin, yMax;
@@ -4636,22 +4612,22 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
         coordBits = obj1.getInt();
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerCoordinate in shading dictionary");
-        return nullptr;
+        return {};
     }
     if (unlikely(coordBits <= 0)) {
         error(errSyntaxWarning, -1, "Invalid BitsPerCoordinate in shading dictionary");
-        return nullptr;
+        return {};
     }
     obj1 = dict->lookup("BitsPerComponent");
     if (obj1.isInt()) {
         compBits = obj1.getInt();
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
-        return nullptr;
+        return {};
     }
     if (unlikely(compBits <= 0 || compBits > 31)) {
         error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
-        return nullptr;
+        return {};
     }
     flagBits = vertsPerRow = 0; // make gcc happy
     if (typeA == 4) {
@@ -4660,7 +4636,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
             flagBits = obj1.getInt();
         } else {
             error(errSyntaxWarning, -1, "Missing or invalid BitsPerFlag in shading dictionary");
-            return nullptr;
+            return {};
         }
     } else {
         obj1 = dict->lookup("VerticesPerRow");
@@ -4668,7 +4644,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
             vertsPerRow = obj1.getInt();
         } else {
             error(errSyntaxWarning, -1, "Missing or invalid VerticesPerRow in shading dictionary");
-            return nullptr;
+            return {};
         }
     }
     obj1 = dict->lookup("Decode");
@@ -4689,11 +4665,11 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
 
         if (!decodeOk) {
             error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
-            return nullptr;
+            return {};
         }
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
-        return nullptr;
+        return {};
     }
 
     obj1 = dict->lookup("Function");
@@ -4702,20 +4678,20 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
             const int nFuncsA = obj1.arrayGetLength();
             if (nFuncsA > gfxColorMaxComps) {
                 error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
-                return nullptr;
+                return {};
             }
             for (i = 0; i < nFuncsA; ++i) {
                 Object obj2 = obj1.arrayGet(i);
                 Function *f = Function::parse(&obj2);
                 if (!f) {
-                    return nullptr;
+                    return {};
                 }
                 funcsA.emplace_back(f);
             }
         } else {
             Function *f = Function::parse(&obj1);
             if (!f) {
-                return nullptr;
+                return {};
             }
             funcsA.emplace_back(f);
         }
@@ -4816,10 +4792,9 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
         }
     }
 
-    shading = new GfxGouraudTriangleShading(typeA, verticesA, nVerticesA, trianglesA, nTrianglesA, std::move(funcsA));
+    auto shading = std::make_unique<GfxGouraudTriangleShading>(typeA, verticesA, nVerticesA, trianglesA, nTrianglesA, std::move(funcsA));
     if (!shading->init(res, dict, out, gfxState)) {
-        delete shading;
-        return nullptr;
+        return {};
     }
     return shading;
 }
@@ -4864,9 +4839,9 @@ bool GfxGouraudTriangleShading::init(GfxResources *res, Dict *dict, OutputDev *o
     return true;
 }
 
-GfxShading *GfxGouraudTriangleShading::copy() const
+std::unique_ptr<GfxShading> GfxGouraudTriangleShading::copy() const
 {
-    return new GfxGouraudTriangleShading(this);
+    return std::make_unique<GfxGouraudTriangleShading>(this);
 }
 
 void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2)
@@ -4952,9 +4927,8 @@ GfxPatchMeshShading::~GfxPatchMeshShading()
     gfree(patches);
 }
 
-GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state)
+std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state)
 {
-    GfxPatchMeshShading *shading;
     std::vector<std::unique_ptr<Function>> funcsA;
     int coordBits, compBits, flagBits;
     double xMin, xMax, yMin, yMax;
@@ -4976,29 +4950,29 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
         coordBits = obj1.getInt();
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerCoordinate in shading dictionary");
-        return nullptr;
+        return {};
     }
     if (unlikely(coordBits <= 0)) {
         error(errSyntaxWarning, -1, "Invalid BitsPerCoordinate in shading dictionary");
-        return nullptr;
+        return {};
     }
     obj1 = dict->lookup("BitsPerComponent");
     if (obj1.isInt()) {
         compBits = obj1.getInt();
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
-        return nullptr;
+        return {};
     }
     if (unlikely(compBits <= 0 || compBits > 31)) {
         error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
-        return nullptr;
+        return {};
     }
     obj1 = dict->lookup("BitsPerFlag");
     if (obj1.isInt()) {
         flagBits = obj1.getInt();
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid BitsPerFlag in shading dictionary");
-        return nullptr;
+        return {};
     }
     obj1 = dict->lookup("Decode");
     if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
@@ -5018,11 +4992,11 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 
         if (!decodeOk) {
             error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
-            return nullptr;
+            return {};
         }
     } else {
         error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
-        return nullptr;
+        return {};
     }
 
     obj1 = dict->lookup("Function");
@@ -5031,20 +5005,20 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             const int nFuncsA = obj1.arrayGetLength();
             if (nFuncsA > gfxColorMaxComps) {
                 error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
-                return nullptr;
+                return {};
             }
             for (i = 0; i < nFuncsA; ++i) {
                 Object obj2 = obj1.arrayGet(i);
                 Function *f = Function::parse(&obj2);
                 if (!f) {
-                    return nullptr;
+                    return {};
                 }
                 funcsA.emplace_back(f);
             }
         } else {
             Function *f = Function::parse(&obj1);
             if (!f) {
-                return nullptr;
+                return {};
             }
             funcsA.emplace_back(f);
         }
@@ -5121,7 +5095,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
             patchesA = (GfxPatch *)greallocn_checkoverflow(patchesA, patchesSize, sizeof(GfxPatch));
             if (unlikely(!patchesA)) {
-                return nullptr;
+                return {};
             }
             memset(patchesA + oldPatchesSize, 0, (patchesSize - oldPatchesSize) * sizeof(GfxPatch));
         }
@@ -5199,7 +5173,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             case 2:
                 if (nPatchesA == 0) {
                     gfree(patchesA);
-                    return nullptr;
+                    return {};
                 }
                 p->x[0][0] = patchesA[nPatchesA - 1].x[3][3];
                 p->y[0][0] = patchesA[nPatchesA - 1].y[3][3];
@@ -5235,7 +5209,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             case 3:
                 if (nPatchesA == 0) {
                     gfree(patchesA);
-                    return nullptr;
+                    return {};
                 }
                 p->x[0][0] = patchesA[nPatchesA - 1].x[3][0];
                 p->y[0][0] = patchesA[nPatchesA - 1].y[3][0];
@@ -5314,7 +5288,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             case 1:
                 if (nPatchesA == 0) {
                     gfree(patchesA);
-                    return nullptr;
+                    return {};
                 }
                 p->x[0][0] = patchesA[nPatchesA - 1].x[0][3];
                 p->y[0][0] = patchesA[nPatchesA - 1].y[0][3];
@@ -5358,7 +5332,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             case 2:
                 if (nPatchesA == 0) {
                     gfree(patchesA);
-                    return nullptr;
+                    return {};
                 }
                 p->x[0][0] = patchesA[nPatchesA - 1].x[3][3];
                 p->y[0][0] = patchesA[nPatchesA - 1].y[3][3];
@@ -5402,7 +5376,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
             case 3:
                 if (nPatchesA == 0) {
                     gfree(patchesA);
-                    return nullptr;
+                    return {};
                 }
                 p->x[0][0] = patchesA[nPatchesA - 1].x[3][0];
                 p->y[0][0] = patchesA[nPatchesA - 1].y[3][0];
@@ -5463,10 +5437,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
         }
     }
 
-    shading = new GfxPatchMeshShading(typeA, patchesA, nPatchesA, std::move(funcsA));
+    auto shading = std::make_unique<GfxPatchMeshShading>(typeA, patchesA, nPatchesA, std::move(funcsA));
     if (!shading->init(res, dict, out, state)) {
-        delete shading;
-        return nullptr;
+        return {};
     }
     return shading;
 }
@@ -5523,9 +5496,9 @@ void GfxPatchMeshShading::getParameterizedColor(double t, GfxColor *color) const
     }
 }
 
-GfxShading *GfxPatchMeshShading::copy() const
+std::unique_ptr<GfxShading> GfxPatchMeshShading::copy() const
 {
-    return new GfxPatchMeshShading(this);
+    return std::make_unique<GfxPatchMeshShading>(this);
 }
 
 //------------------------------------------------------------------------

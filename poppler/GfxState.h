@@ -845,13 +845,13 @@ public:
 
     std::unique_ptr<GfxPattern> copy() const override;
 
-    GfxShading *getShading() { return shading; }
+    GfxShading *getShading() { return shading.get(); }
     const double *getMatrix() const { return matrix; }
 
 private:
-    GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA);
+    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA);
 
-    GfxShading *shading;
+    std::unique_ptr<GfxShading> shading;
     double matrix[6];
 };
 
@@ -880,9 +880,9 @@ public:
     GfxShading(const GfxShading &) = delete;
     GfxShading &operator=(const GfxShading &other) = delete;
 
-    static GfxShading *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxShading> parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
 
-    virtual GfxShading *copy() const = 0;
+    virtual std::unique_ptr<GfxShading> copy() const = 0;
 
     ShadingType getType() const { return type; }
     GfxColorSpace *getColorSpace() { return colorSpace.get(); }
@@ -960,9 +960,9 @@ public:
     explicit GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
-    static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxFunctionShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getDomain(double *x0A, double *y0A, double *x1A, double *y1A) const
     {
@@ -996,9 +996,9 @@ public:
     explicit GfxAxialShading(const GfxAxialShading *shading);
     ~GfxAxialShading() override;
 
-    static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxAxialShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getCoords(double *x0A, double *y0A, double *x1A, double *y1A) const
     {
@@ -1027,9 +1027,9 @@ public:
     explicit GfxRadialShading(const GfxRadialShading *shading);
     ~GfxRadialShading() override;
 
-    static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxRadialShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getCoords(double *x0A, double *y0A, double *r0A, double *x1A, double *y1A, double *r1A) const
     {
@@ -1066,9 +1066,9 @@ public:
     explicit GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
     ~GfxGouraudTriangleShading() override;
 
-    static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxGouraudTriangleShading> parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     int getNTriangles() const { return nTriangles; }
 
@@ -1158,9 +1158,9 @@ public:
     explicit GfxPatchMeshShading(const GfxPatchMeshShading *shading);
     ~GfxPatchMeshShading() override;
 
-    static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxPatchMeshShading> parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     int getNPatches() const { return nPatches; }
     const GfxPatch *getPatch(int i) const { return &patches[i]; }

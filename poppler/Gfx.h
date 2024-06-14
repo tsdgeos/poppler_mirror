@@ -124,7 +124,7 @@ public:
     Object lookupMarkedContentNF(const char *name);
     Object lookupColorSpace(const char *name);
     std::unique_ptr<GfxPattern> lookupPattern(const char *name, OutputDev *out, GfxState *state);
-    GfxShading *lookupShading(const char *name, OutputDev *out, GfxState *state);
+    std::unique_ptr<GfxShading> lookupShading(const char *name, OutputDev *out, GfxState *state);
     Object lookupGState(const char *name);
     Object lookupGStateNF(const char *name);
 
