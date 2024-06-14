@@ -432,7 +432,7 @@ int utf16CountUtf8Bytes(const uint16_t *utf16)
         utf16++;
     }
     if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
-        count++; // replace with REPLACEMENT_CHAR
+        count += 3; // replace with REPLACEMENT_CHAR
     }
 
     return count;
