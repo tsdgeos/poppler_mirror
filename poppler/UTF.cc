@@ -487,12 +487,12 @@ int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
 // Allocate utf8 string and convert utf16 into it.
 char *utf16ToUtf8(const uint16_t *utf16, int *len)
 {
-    int n = utf16CountUtf8Bytes(utf16);
+    const int n = utf16CountUtf8Bytes(utf16);
     if (len) {
         *len = n;
     }
     char *utf8 = (char *)gmalloc(n + 1);
-    utf16ToUtf8(utf16, utf8);
+    utf16ToUtf8(utf16, utf8, n + 1, INT_MAX);
     return utf8;
 }
 

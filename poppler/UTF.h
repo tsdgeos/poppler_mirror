@@ -131,7 +131,7 @@ int POPPLER_PRIVATE_EXPORT utf16CountUtf8Bytes(const uint16_t *utf16);
 //  maxUtf16 - maximum number of UTF-16 code units to convert. Conversion stops when
 //            either this count is reached or a null is encountered.
 // Returns number of UTF-8 bytes written (excluding NULL).
-int POPPLER_PRIVATE_EXPORT utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8 = INT_MAX, int maxUtf16 = INT_MAX);
+int POPPLER_PRIVATE_EXPORT utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16);
 
 // Allocate utf8 string and convert utf16 into it.
 char POPPLER_PRIVATE_EXPORT *utf16ToUtf8(const uint16_t *utf16, int *len = nullptr);
