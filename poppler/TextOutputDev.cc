@@ -4692,7 +4692,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotati
     out->startPage(0, state, nullptr);
     out->setDefaultCTM(state->getCTM());
 
-    state->setFillColorSpace(new GfxDeviceRGBColorSpace());
+    state->setFillColorSpace(std::make_unique<GfxDeviceRGBColorSpace>());
     state->setFillColor(box_color);
     out->updateFillColor(state);
 }

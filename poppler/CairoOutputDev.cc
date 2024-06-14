@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -3188,7 +3188,6 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     char *strBuffer;
     int len;
     Object obj;
-    GfxColorSpace *colorSpace;
     StreamKind strKind = str->getKind();
     const char *mime_type;
     cairo_status_t status;
@@ -3228,7 +3227,7 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     }
 
     obj = str->getDict()->lookup("ColorSpace");
-    colorSpace = GfxColorSpace::parse(nullptr, &obj, this, state);
+    std::unique_ptr<GfxColorSpace> colorSpace = GfxColorSpace::parse(nullptr, &obj, this, state);
 
     // colorspace in stream dict may be different from colorspace in jpx
     // data
@@ -3239,7 +3238,6 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     // only embed mime data for gray, rgb, and cmyk colorspaces.
     if (colorSpace) {
         GfxColorSpaceMode mode = colorSpace->getMode();
-        delete colorSpace;
         switch (mode) {
         case csDeviceGray:
         case csCalGray:

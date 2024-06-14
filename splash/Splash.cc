@@ -5157,7 +5157,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
 
     if (src->getSeparationList()->size() > bitmap->getSeparationList()->size()) {
         for (x = bitmap->getSeparationList()->size(); x < (int)src->getSeparationList()->size(); x++) {
-            bitmap->getSeparationList()->push_back((GfxSeparationColorSpace *)((*src->getSeparationList())[x])->copy());
+            bitmap->getSeparationList()->push_back(((*src->getSeparationList())[x])->copyAsOwnType());
         }
     }
     if (src->alpha) {
