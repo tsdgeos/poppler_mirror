@@ -787,9 +787,9 @@ public:
     GfxPattern(const GfxPattern &) = delete;
     GfxPattern &operator=(const GfxPattern &other) = delete;
 
-    static GfxPattern *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum);
+    static std::unique_ptr<GfxPattern> parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum);
 
-    virtual GfxPattern *copy() const = 0;
+    virtual std::unique_ptr<GfxPattern> copy() const = 0;
 
     int getType() const { return type; }
 
@@ -807,10 +807,10 @@ private:
 class GfxTilingPattern : public GfxPattern
 {
 public:
-    static GfxTilingPattern *parse(Object *patObj, int patternRefNum);
+    static std::unique_ptr<GfxTilingPattern> parse(Object *patObj, int patternRefNum);
     ~GfxTilingPattern() override;
 
-    GfxPattern *copy() const override;
+    std::unique_ptr<GfxPattern> copy() const override;
 
     int getPaintType() const { return paintType; }
     int getTilingType() const { return tilingType; }
@@ -840,10 +840,10 @@ private:
 class GfxShadingPattern : public GfxPattern
 {
 public:
-    static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
+    static std::unique_ptr<GfxShadingPattern> parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
     ~GfxShadingPattern() override;
 
-    GfxPattern *copy() const override;
+    std::unique_ptr<GfxPattern> copy() const override;
 
     GfxShading *getShading() { return shading; }
     const double *getMatrix() const { return matrix; }
@@ -1506,8 +1506,8 @@ public:
     void getStrokeDeviceN(GfxColor *deviceN) { strokeColorSpace->getDeviceN(&strokeColor, deviceN); }
     GfxColorSpace *getFillColorSpace() { return fillColorSpace.get(); }
     GfxColorSpace *getStrokeColorSpace() { return strokeColorSpace.get(); }
-    GfxPattern *getFillPattern() { return fillPattern; }
-    GfxPattern *getStrokePattern() { return strokePattern; }
+    GfxPattern *getFillPattern() { return fillPattern.get(); }
+    GfxPattern *getStrokePattern() { return strokePattern.get(); }
     GfxBlendMode getBlendMode() const { return blendMode; }
     double getFillOpacity() const { return fillOpacity; }
     double getStrokeOpacity() const { return strokeOpacity; }
@@ -1591,8 +1591,8 @@ public:
     void setStrokeColorSpace(std::unique_ptr<GfxColorSpace> &&colorSpace);
     void setFillColor(const GfxColor *color) { fillColor = *color; }
     void setStrokeColor(const GfxColor *color) { strokeColor = *color; }
-    void setFillPattern(GfxPattern *pattern);
-    void setStrokePattern(GfxPattern *pattern);
+    void setFillPattern(std::unique_ptr<GfxPattern> &&pattern);
+    void setStrokePattern(std::unique_ptr<GfxPattern> &&pattern);
     void setBlendMode(GfxBlendMode mode) { blendMode = mode; }
     void setFillOpacity(double opac) { fillOpacity = opac; }
     void setStrokeOpacity(double opac) { strokeOpacity = opac; }
@@ -1719,8 +1719,8 @@ private:
     std::unique_ptr<GfxColorSpace> strokeColorSpace; // stroke color space
     GfxColor fillColor; // fill color
     GfxColor strokeColor; // stroke color
-    GfxPattern *fillPattern; // fill pattern
-    GfxPattern *strokePattern; // stroke pattern
+    std::unique_ptr<GfxPattern> fillPattern; // fill pattern
+    std::unique_ptr<GfxPattern> strokePattern; // stroke pattern
     GfxBlendMode blendMode; // transparency blend mode
     double fillOpacity; // fill opacity
     double strokeOpacity; // stroke opacity

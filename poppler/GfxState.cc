@@ -3196,9 +3196,8 @@ GfxPattern::GfxPattern(int typeA, int patternRefNumA) : type(typeA), patternRefN
 
 GfxPattern::~GfxPattern() { }
 
-GfxPattern *GfxPattern::parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum)
+std::unique_ptr<GfxPattern> GfxPattern::parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum)
 {
-    GfxPattern *pattern;
     Object obj1;
 
     if (obj->isDict()) {
@@ -3206,22 +3205,21 @@ GfxPattern *GfxPattern::parse(GfxResources *res, Object *obj, OutputDev *out, Gf
     } else if (obj->isStream()) {
         obj1 = obj->streamGetDict()->lookup("PatternType");
     } else {
-        return nullptr;
+        return {};
     }
-    pattern = nullptr;
     if (obj1.isInt() && obj1.getInt() == 1) {
-        pattern = GfxTilingPattern::parse(obj, patternRefNum);
+        return GfxTilingPattern::parse(obj, patternRefNum);
     } else if (obj1.isInt() && obj1.getInt() == 2) {
-        pattern = GfxShadingPattern::parse(res, obj, out, state, patternRefNum);
+        return GfxShadingPattern::parse(res, obj, out, state, patternRefNum);
     }
-    return pattern;
+    return {};
 }
 
 //------------------------------------------------------------------------
 // GfxTilingPattern
 //------------------------------------------------------------------------
 
-GfxTilingPattern *GfxTilingPattern::parse(Object *patObj, int patternRefNum)
+std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int patternRefNum)
 {
     Dict *dict;
     int paintTypeA, tilingTypeA;
@@ -3297,7 +3295,8 @@ GfxTilingPattern *GfxTilingPattern::parse(Object *patObj, int patternRefNum)
         }
     }
 
-    return new GfxTilingPattern(paintTypeA, tilingTypeA, bboxA, xStepA, yStepA, &resDictA, matrixA, patObj, patternRefNum);
+    auto pattern = new GfxTilingPattern(paintTypeA, tilingTypeA, bboxA, xStepA, yStepA, &resDictA, matrixA, patObj, patternRefNum);
+    return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
 GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const double *bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA)
@@ -3321,16 +3320,17 @@ GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const double
 
 GfxTilingPattern::~GfxTilingPattern() { }
 
-GfxPattern *GfxTilingPattern::copy() const
+std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 {
-    return new GfxTilingPattern(paintType, tilingType, bbox, xStep, yStep, &resDict, matrix, &contentStream, getPatternRefNum());
+    auto pattern = new GfxTilingPattern(paintType, tilingType, bbox, xStep, yStep, &resDict, matrix, &contentStream, getPatternRefNum());
+    return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
 //------------------------------------------------------------------------
 // GfxShadingPattern
 //------------------------------------------------------------------------
 
-GfxShadingPattern *GfxShadingPattern::parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum)
+std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum)
 {
     Dict *dict;
     GfxShading *shadingA;
@@ -3339,14 +3339,14 @@ GfxShadingPattern *GfxShadingPattern::parse(GfxResources *res, Object *patObj, O
     int i;
 
     if (!patObj->isDict()) {
-        return nullptr;
+        return {};
     }
     dict = patObj->getDict();
 
     obj1 = dict->lookup("Shading");
     shadingA = GfxShading::parse(res, &obj1, out, state);
     if (!shadingA) {
-        return nullptr;
+        return {};
     }
 
     matrixA[0] = 1;
@@ -3365,7 +3365,8 @@ GfxShadingPattern *GfxShadingPattern::parse(GfxResources *res, Object *patObj, O
         }
     }
 
-    return new GfxShadingPattern(shadingA, matrixA, patternRefNum);
+    auto pattern = new GfxShadingPattern(shadingA, matrixA, patternRefNum);
+    return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
 GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA)
@@ -3383,9 +3384,10 @@ GfxShadingPattern::~GfxShadingPattern()
     delete shading;
 }
 
-GfxPattern *GfxShadingPattern::copy() const
+std::unique_ptr<GfxPattern> GfxShadingPattern::copy() const
 {
-    return new GfxShadingPattern(shading->copy(), matrix, getPatternRefNum());
+    auto pattern = new GfxShadingPattern(shading->copy(), matrix, getPatternRefNum());
+    return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
 //------------------------------------------------------------------------
@@ -6562,12 +6564,10 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     fillColor = state->fillColor;
     strokeColor = state->strokeColor;
 
-    fillPattern = state->fillPattern;
-    if (fillPattern) {
+    if (state->fillPattern) {
         fillPattern = state->fillPattern->copy();
     }
-    strokePattern = state->strokePattern;
-    if (strokePattern) {
+    if (state->strokePattern) {
         strokePattern = state->strokePattern->copy();
     }
     blendMode = state->blendMode;
@@ -6865,20 +6865,14 @@ void GfxState::setStrokeColorSpace(std::unique_ptr<GfxColorSpace> &&colorSpace)
     strokeColorSpace = std::move(colorSpace);
 }
 
-void GfxState::setFillPattern(GfxPattern *pattern)
+void GfxState::setFillPattern(std::unique_ptr<GfxPattern> &&pattern)
 {
-    if (fillPattern) {
-        delete fillPattern;
-    }
-    fillPattern = pattern;
+    fillPattern = std::move(pattern);
 }
 
-void GfxState::setStrokePattern(GfxPattern *pattern)
+void GfxState::setStrokePattern(std::unique_ptr<GfxPattern> &&pattern)
 {
-    if (strokePattern) {
-        delete strokePattern;
-    }
-    strokePattern = pattern;
+    strokePattern = std::move(pattern);
 }
 
 void GfxState::setFont(std::shared_ptr<GfxFont> fontA, double fontSizeA)
