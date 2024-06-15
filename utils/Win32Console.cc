@@ -49,7 +49,7 @@ static void flush(bool all = false)
     }
 
     if (nchars > 0) {
-        DWORD wlen = utf8ToUtf16(buf, (uint16_t *)wbuf, BUF_SIZE, nchars);
+        DWORD wlen = utf8ToUtf16(buf, nchars, (uint16_t *)wbuf, BUF_SIZE);
         WriteConsoleW(consoleHandle, wbuf, wlen, &wlen, nullptr);
         if (nchars < bufLen) {
             memmove(buf, buf + nchars, bufLen - nchars);
