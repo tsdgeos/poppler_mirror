@@ -124,14 +124,15 @@ std::string POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
 int POPPLER_PRIVATE_EXPORT utf16CountUtf8Bytes(const uint16_t *utf16);
 
 // Convert UTF-16 to UTF-8
-//  utf16- UTF-16 string to convert. If not null terminated, set maxUtf16 to num
-//        code units to convert
-//  utf8 - output buffer to write UTF-8 to. Output will always be null terminated.
-//  maxUtf8 - maximum size of output buffer including space for null.
-//  maxUtf16 - maximum number of UTF-16 code units to convert. Conversion stops when
-//            either this count is reached or a null is encountered.
+//  utf16    - UTF-16 string to convert. If not null terminated, ensure
+//             maxUtf16 is set the the exact number of code units to convert.
+//  maxUtf16 - Maximum number of UTF-16 code units to convert. Conversion stops
+//             when either this count is reached or a null is encountered.
+//  utf8     - Output buffer to write the UTF-8 string to. Output will always be
+//             null terminated.
+//  maxUtf8  - Maximum size of the output buffer including space for null.
 // Returns number of UTF-8 bytes written (excluding NULL).
-int POPPLER_PRIVATE_EXPORT utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16);
+int POPPLER_PRIVATE_EXPORT utf16ToUtf8(const uint16_t *utf16, int maxUtf16, char *utf8, int maxUtf8);
 
 // Allocate utf8 string and convert utf16 into it.
 char POPPLER_PRIVATE_EXPORT *utf16ToUtf8(const uint16_t *utf16, int *len = nullptr);

@@ -113,7 +113,7 @@ void TestUTFConversion::testUTF()
     QCOMPARE(len, (int)strlen(str));
     Q_ASSERT(len < (int)sizeof(utf8Buf)); // if this fails, make utf8Buf larger
 
-    len = utf16ToUtf8(s.utf16(), utf8Buf, sizeof(utf8Buf), INT_MAX);
+    len = utf16ToUtf8(s.utf16(), INT_MAX, utf8Buf, sizeof(utf8Buf));
     QVERIFY(compare(utf8Buf, str));
     QCOMPARE(len, (int)strlen(str));
 

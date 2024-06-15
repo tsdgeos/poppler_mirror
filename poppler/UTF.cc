@@ -438,15 +438,7 @@ int utf16CountUtf8Bytes(const uint16_t *utf16)
     return count;
 }
 
-// Convert UTF-16 to UTF-8
-//  utf16- UTF-16 string to convert. If not null terminated, set maxUtf16 to num
-//        code units to convert
-//  utf8 - output buffer to write UTF-8 to. Output will always be null terminated.
-//  maxUtf8 - maximum size of output buffer including space for null.
-//  maxUtf16 - maximum number of UTF-16 code units to convert. Conversion stops when
-//            either this count is reached or a null is encountered.
-// Returns number of UTF-8 bytes written (excluding NULL).
-int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
+int utf16ToUtf8(const uint16_t *utf16, int maxUtf16, char *utf8, int maxUtf8)
 {
     uint32_t codepoint = 0;
     uint32_t state = 0;
@@ -492,7 +484,7 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
         *len = n;
     }
     char *utf8 = (char *)gmalloc(n + 1);
-    utf16ToUtf8(utf16, utf8, n + 1, INT_MAX);
+    utf16ToUtf8(utf16, INT_MAX, utf8, n + 1);
     return utf8;
 }
 
