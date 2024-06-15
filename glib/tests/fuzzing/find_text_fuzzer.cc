@@ -10,6 +10,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     PopplerPage *page;
     char *buf;
     int npages;
+    GList *matches;
 
     doc = poppler_document_new_from_data((char *)data, size, NULL, &err);
     if (doc == NULL) {
@@ -33,7 +34,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             continue;
         }
         if (g_utf8_validate(buf, -1, NULL)) {
-            poppler_page_find_text(page, buf);
+            matches = poppler_page_find_text(page, buf);
+            if (matches) {
+                g_list_free(matches);
+            }
         }
         g_object_unref(page);
     }
