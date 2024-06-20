@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021, 2023, 2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2016, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>

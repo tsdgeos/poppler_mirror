@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021, 2023, 2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
