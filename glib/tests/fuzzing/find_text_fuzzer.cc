@@ -36,7 +36,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         if (g_utf8_validate(buf, -1, NULL)) {
             matches = poppler_page_find_text(page, buf);
             if (matches) {
-                g_list_free(matches);
+                g_list_free_full(matches, (GDestroyNotify)poppler_rectangle_free);
             }
         }
         g_object_unref(page);
