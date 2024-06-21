@@ -251,7 +251,7 @@ public:
     virtual bool isEncoder() const { return false; }
 
     // Get image parameters which are defined by the stream contents.
-    virtual void getImageParams(int * /*bitsPerComponent*/, StreamColorSpaceMode * /*csMode*/) { }
+    virtual void getImageParams(int * /*bitsPerComponent*/, StreamColorSpaceMode * /*csMode*/, bool * /*hasAlpha*/) { }
 
     // Return the next stream in the "stack".
     virtual Stream *getNextStream() const { return nullptr; }

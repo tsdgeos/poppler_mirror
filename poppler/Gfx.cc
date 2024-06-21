@@ -4166,13 +4166,14 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     int maskWidth, maskHeight;
     bool maskInvert;
     bool maskInterpolate;
+    bool hasAlpha;
     Stream *maskStr;
     int i, n;
 
     // get info from the stream
     bits = 0;
     csMode = streamCSNone;
-    str->getImageParams(&bits, &csMode);
+    str->getImageParams(&bits, &csMode, &hasAlpha);
 
     // get stream dict
     dict = str->getDict();
@@ -4308,6 +4309,21 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         if (obj1.isNull()) {
             obj1 = dict->lookup("CS");
         }
+        bool haveColorSpace = !obj1.isNull();
+        bool haveRGBA = false;
+        if (str->getKind() == strJPX && (csMode == streamCSDeviceRGB || csMode == streamCSDeviceCMYK)) {
+            // Case of transparent JPX image, they may contain RGBA data
+            // when have no ColorSpace or when SMaskInData=1 · Issue #1486
+            if (!haveColorSpace) {
+                haveRGBA = hasAlpha;
+            } else {
+                Object smaskInData = dict->lookup("SMaskInData");
+                if (smaskInData.isInt() && smaskInData.getInt()) {
+                    haveRGBA = true;
+                }
+            }
+        }
+
         if (obj1.isName() && inlineImg) {
             Object obj2 = res->lookupColorSpace(obj1.getName());
             if (!obj2.isNull()) {
@@ -4316,7 +4332,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
         std::unique_ptr<GfxColorSpace> colorSpace;
 
-        if (!obj1.isNull()) {
+        if (!obj1.isNull() && !haveRGBA) {
             char *tempIntent = nullptr;
             Object objIntent = dict->lookup("Intent");
             if (objIntent.isName()) {
@@ -4339,18 +4355,26 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
             }
         } else if (csMode == streamCSDeviceRGB) {
-            Object objCS = res->lookupColorSpace("DefaultRGB");
-            if (objCS.isNull()) {
-                colorSpace = std::make_unique<GfxDeviceRGBColorSpace>();
+            if (haveRGBA) {
+                colorSpace = std::make_unique<GfxDeviceRGBAColorSpace>();
             } else {
-                colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                Object objCS = res->lookupColorSpace("DefaultRGB");
+                if (objCS.isNull()) {
+                    colorSpace = std::make_unique<GfxDeviceRGBColorSpace>();
+                } else {
+                    colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                }
             }
         } else if (csMode == streamCSDeviceCMYK) {
-            Object objCS = res->lookupColorSpace("DefaultCMYK");
-            if (objCS.isNull()) {
-                colorSpace = std::make_unique<GfxDeviceCMYKColorSpace>();
+            if (haveRGBA) {
+                colorSpace = std::make_unique<GfxDeviceRGBAColorSpace>();
             } else {
-                colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                Object objCS = res->lookupColorSpace("DefaultCMYK");
+                if (objCS.isNull()) {
+                    colorSpace = std::make_unique<GfxDeviceCMYKColorSpace>();
+                } else {
+                    colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                }
             }
         }
         if (!colorSpace) {

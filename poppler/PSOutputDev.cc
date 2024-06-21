@@ -6757,6 +6757,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         break;
 
     case csPattern:
+    case csDeviceRGBA:
         //~ unimplemented
         break;
     }

@@ -158,7 +158,7 @@ static const GfxBlendModeInfo gfxBlendModeNames[] = { { "Normal", gfxBlendNormal
 //
 // NB: This must match the GfxColorSpaceMode enum defined in
 // GfxState.h
-static const char *gfxColorSpaceModeNames[] = { "DeviceGray", "CalGray", "DeviceRGB", "CalRGB", "DeviceCMYK", "Lab", "ICCBased", "Indexed", "Separation", "DeviceN", "Pattern" };
+static const char *gfxColorSpaceModeNames[] = { "DeviceGray", "CalGray", "DeviceRGB", "CalRGB", "DeviceCMYK", "Lab", "ICCBased", "Indexed", "Separation", "DeviceN", "Pattern", "DeviceRGBA" };
 
 #define nGfxColorSpaceModes ((sizeof(gfxColorSpaceModeNames) / sizeof(char *)))
 
@@ -1016,6 +1016,32 @@ void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) const
     color->c[0] = 0;
     color->c[1] = 0;
     color->c[2] = 0;
+}
+
+//------------------------------------------------------------------------
+// GfxDeviceRGBAColorSpace
+//------------------------------------------------------------------------
+
+GfxDeviceRGBAColorSpace::GfxDeviceRGBAColorSpace() { }
+
+GfxDeviceRGBAColorSpace::~GfxDeviceRGBAColorSpace() { }
+
+std::unique_ptr<GfxColorSpace> GfxDeviceRGBAColorSpace::copy() const
+{
+    return std::make_unique<GfxDeviceRGBAColorSpace>();
+}
+
+void GfxDeviceRGBAColorSpace::getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length)
+{
+    unsigned char *p;
+    int i;
+
+    // Conversion from 'in' RGBA to 'out' ARGB32_PREMULTIPLIED (used by Cairo)
+    for (i = 0, p = in; i < length; i++, p += 4) {
+        // This applies alpha component p[3] to each RGB values (using bitwise division)
+        // so final result in out[i] is ARGB32 with premultiplied alpha.
+        out[i] = p[3] << 24 | (p[0] * p[3] >> 8) << 16 | (p[1] * p[3] >> 8) << 8 | (p[2] * p[3] >> 8) << 0;
+    }
 }
 
 //------------------------------------------------------------------------

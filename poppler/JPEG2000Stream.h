@@ -39,7 +39,7 @@ public:
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
-    void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
+    void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha) override;
 
     int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
 

@@ -143,22 +143,26 @@ bool JPXStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode)
+void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha)
 {
     if (unlikely(priv->inited == false)) {
         init();
     }
 
     *bitsPerComponent = 8;
+    *hasAlpha = false;
     int numComps = (priv->image) ? priv->image->numcomps : 1;
     if (priv->image) {
         if (priv->image->color_space == OPJ_CLRSPC_SRGB && numComps == 4) {
             numComps = 3;
+            *hasAlpha = true;
         } else if (priv->image->color_space == OPJ_CLRSPC_SYCC && numComps == 4) {
             numComps = 3;
+            *hasAlpha = true;
         } else if (numComps == 2) {
             numComps = 1;
         } else if (numComps > 4) {
+            *hasAlpha = true;
             numComps = 4;
         }
     }

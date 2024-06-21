@@ -481,7 +481,7 @@ bool JPXStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode)
+void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha)
 {
     unsigned int boxType, boxLen, dataLen, csEnum;
     unsigned int bpc1, dummy, i;
@@ -490,6 +490,7 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
     bool haveBPC, haveCSMode;
 
     csPrec = 0; // make gcc happy
+    *hasAlpha = false;
     haveBPC = haveCSMode = false;
     bufStr->reset();
     if (bufStr->lookChar() == 0xff) {
