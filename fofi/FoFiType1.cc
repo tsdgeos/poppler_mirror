@@ -197,9 +197,15 @@ public:
             pos = stringView.find_first_of(tokenSeparators, currentPos);
         }
         if (pos == std::string_view::npos) {
-            std::string_view token = stringView.substr(currentPos, length - currentPos);
-            currentPos = length;
-            return token;
+            const auto tokenLength = length - currentPos;
+            if (tokenLength > 0) {
+                std::string_view token = stringView.substr(currentPos, tokenLength);
+                currentPos = length;
+                return token;
+            } else {
+                currentPos = length;
+                return {};
+            }
         }
 
         std::string_view token = stringView.substr(currentPos, pos - currentPos);
