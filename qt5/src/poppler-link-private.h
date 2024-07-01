@@ -67,6 +67,16 @@ public:
     bool isShow;
 };
 
+class LinkResetFormPrivate : public LinkPrivate
+{
+public:
+    LinkResetFormPrivate(const QRectF &area, const QStringList &fields, const bool exclude) : LinkPrivate(area), m_fields(fields), m_exclude(exclude) { }
+    ~LinkResetFormPrivate() override;
+
+    QStringList m_fields;
+    bool m_exclude;
+};
+
 }
 
 #endif

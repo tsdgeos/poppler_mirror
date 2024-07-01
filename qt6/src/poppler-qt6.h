@@ -1673,6 +1673,13 @@ QString subject = m_doc->info("Subject");
     OptContentModel *optionalContentModel();
 
     /**
+       Resets the form with the details contained in the \p link.
+
+       \since 24.07
+    */
+    void applyResetFormsLink(const LinkResetForm &link);
+
+    /**
        Document-level JavaScript scripts.
 
        Returns the list of document level JavaScript scripts to be always

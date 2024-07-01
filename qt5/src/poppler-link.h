@@ -53,6 +53,7 @@ class LinkDestinationPrivate;
 class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
 class LinkHidePrivate;
+class LinkResetFormPrivate;
 class MediaRendition;
 class MovieAnnotation;
 class ScreenAnnotation;
@@ -203,6 +204,7 @@ public:
         JavaScript, ///< A JavaScript code to be interpreted \since 0.10
         OCGState, ///< An Optional Content Group state change \since 0.50
         Hide, ///< An action to hide a field \since 0.64
+        ResetForm, ///< An action to reset the form \since 24.07
     };
 
     /**
@@ -692,6 +694,32 @@ public:
 private:
     Q_DECLARE_PRIVATE(LinkHide)
     Q_DISABLE_COPY(LinkHide)
+};
+
+/**
+ * ResetForm: an action to reset form fields.
+ *
+ * \since 24.07
+ */
+class POPPLER_QT5_EXPORT LinkResetForm : public Link
+{
+    friend class Document;
+
+public:
+    /**
+     * Creates a new ResetForm link. This is only used by Poppler::Page
+     */
+    explicit LinkResetForm(LinkResetFormPrivate *lrfp);
+    /*
+     * Destructor
+     */
+    ~LinkResetForm() override;
+
+    LinkType linkType() const override;
+
+private:
+    Q_DECLARE_PRIVATE(LinkResetForm)
+    Q_DISABLE_COPY(LinkResetForm)
 };
 
 }

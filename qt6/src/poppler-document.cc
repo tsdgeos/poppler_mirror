@@ -56,6 +56,7 @@
 
 #include "poppler-form.h"
 #include "poppler-private.h"
+#include "poppler-link-private.h"
 #include "poppler-page-private.h"
 #include "poppler-outline-private.h"
 
@@ -739,6 +740,24 @@ OptContentModel *Document::optionalContentModel()
         m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
     }
     return (OptContentModel *)m_doc->m_optContentModel;
+}
+
+void Document::applyResetFormsLink(const LinkResetForm &link)
+{
+    const LinkResetFormPrivate *lrfp = link.d_func();
+    Catalog *catalog = m_doc->doc->getCatalog();
+    if (catalog && catalog->isOk()) {
+        Form *form = catalog->getForm();
+        if (form) {
+            std::vector<std::string> stdStringFields;
+            const QStringList fields = lrfp->m_fields;
+            stdStringFields.reserve(fields.size());
+            for (const auto &field : fields) {
+                stdStringFields.emplace_back(field.toStdString());
+            }
+            form->reset(stdStringFields, lrfp->m_exclude);
+        }
+    }
 }
 
 QStringList Document::scripts() const

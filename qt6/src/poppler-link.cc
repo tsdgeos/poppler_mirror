@@ -75,6 +75,8 @@ LinkOCGStatePrivate::~LinkOCGStatePrivate() = default;
 
 LinkHidePrivate::~LinkHidePrivate() = default;
 
+LinkResetFormPrivate::~LinkResetFormPrivate() = default;
+
 class LinkGotoPrivate : public LinkPrivate
 {
 public:
@@ -696,5 +698,15 @@ bool LinkHide::isShowAction() const
 {
     Q_D(const LinkHide);
     return d->isShow;
+}
+
+// LinkResetForm
+LinkResetForm::LinkResetForm(LinkResetFormPrivate *lrfp) : Link(*lrfp) { }
+
+LinkResetForm::~LinkResetForm() { }
+
+Link::LinkType LinkResetForm::linkType() const
+{
+    return ResetForm;
 }
 }

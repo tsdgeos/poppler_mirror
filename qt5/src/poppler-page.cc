@@ -335,9 +335,16 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
         popplerLink = new LinkHide(lhp);
     } break;
 
-    case actionResetForm:
-        // Not handled in Qt5 front-end yet
-        break;
+    case actionResetForm: {
+        ::LinkResetForm *lrf = (::LinkResetForm *)a;
+        std::vector<std::string> stdStringFields = lrf->getFields();
+        QStringList qStringFields;
+        for (const std::string &str : stdStringFields) {
+            qStringFields << QString::fromStdString(str);
+        }
+        LinkResetFormPrivate *lrfp = new LinkResetFormPrivate(linkArea, qStringFields, lrf->getExclude());
+        popplerLink = new LinkResetForm(lrfp);
+    } break;
 
     case actionUnknown:
         break;

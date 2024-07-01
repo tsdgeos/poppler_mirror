@@ -334,9 +334,16 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
         popplerLink = std::make_unique<LinkHide>(lhp);
     } break;
 
-    case actionResetForm:
-        // Not handled in Qt6 front-end yet
-        break;
+    case actionResetForm: {
+        ::LinkResetForm *lrf = (::LinkResetForm *)a;
+        std::vector<std::string> stdStringFields = lrf->getFields();
+        QStringList qStringFields;
+        for (const std::string &str : stdStringFields) {
+            qStringFields << QString::fromStdString(str);
+        }
+        LinkResetFormPrivate *lrfp = new LinkResetFormPrivate(linkArea, qStringFields, lrf->getExclude());
+        popplerLink = std::make_unique<LinkResetForm>(lrfp);
+    } break;
 
     case actionUnknown:
         break;
