@@ -1,3 +1,22 @@
+Release 24.07.0:
+        core:
+         * Fix crashes in broken files
+         * Internal code improvements
+
+        qt6:
+         * Add getters for document additional actions
+         * Implement reset forms link
+
+        qt5:
+         * Add getters for document additional actions
+         * Implement reset forms link
+
+        utils:
+         * pdfinfo: Fix crash in broken documents when using -dests
+
+        build system:
+         * Mark glib-mkenums as required
+
 Release 24.06.0:
         core:
          * Performance improvements in some files
