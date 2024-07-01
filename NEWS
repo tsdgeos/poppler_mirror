@@ -1,3 +1,18 @@
+Release 24.06.0:
+        core:
+         * Performance improvements in some files
+         * Fix some issues with files bigger than 2^31 bytes
+         * Remove all cairo include guards for cairo < 1.16
+         * Fix MSVC build
+         * Internal code improvements
+
+        qt6:
+         * Update Qt6 doc example
+         * Use the non deprecated version of QString::fromUcs4
+
+        glib:
+         * properly document return value from poppler_font_info_scan
+
 Release 24.05.0:
         core:
          * Fix signing not being totally correct in some kind of PDF files

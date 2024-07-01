@@ -25,6 +25,7 @@
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -97,11 +98,8 @@ struct GfxFontCIDWidths
     double defWidth; // default char width
     double defHeight; // default char height
     double defVY; // default origin position
-    GfxFontCIDWidthExcep *exceps; // exceptions
-    int nExceps; // number of valid entries in exceps
-    GfxFontCIDWidthExcepV * // exceptions for vertical font
-            excepsV;
-    int nExcepsV; // number of valid entries in excepsV
+    std::vector<GfxFontCIDWidthExcep> exceps; // exceptions
+    std::vector<GfxFontCIDWidthExcepV> excepsV; // exceptions for vertical font
 };
 
 //------------------------------------------------------------------------

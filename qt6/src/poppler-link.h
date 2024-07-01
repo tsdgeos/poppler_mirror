@@ -1,11 +1,12 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, 2022, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -33,6 +34,8 @@
 #include <QtCore/QVector>
 #include "poppler-export.h"
 
+#include <memory>
+
 struct Ref;
 class MediaRendition;
 
@@ -51,6 +54,7 @@ class LinkDestinationPrivate;
 class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
 class LinkHidePrivate;
+class LinkResetFormPrivate;
 class MediaRendition;
 class MovieAnnotation;
 class ScreenAnnotation;
@@ -199,6 +203,7 @@ public:
         JavaScript, ///< A JavaScript code to be interpreted
         OCGState, ///< An Optional Content Group state change
         Hide, ///< An action to hide a field
+        ResetForm, ///< An action to reset the form \since 24.07
     };
 
     /**
@@ -488,7 +493,18 @@ public:
      * \param script the java script code
      * \param annotationReference the object reference of the screen annotation associated with this rendition action
      */
-    LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference);
+    [[deprecated]] LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference);
+
+    /**
+     * Create a new rendition link.
+     *
+     * \param linkArea the active area of the link
+     * \param rendition the media rendition object.
+     * \param operation the numeric operation (action) (@see ::LinkRendition::RenditionOperation)
+     * \param script the java script code
+     * \param annotationReference the object reference of the screen annotation associated with this rendition action
+     */
+    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, const Ref annotationReference);
 
     /**
      * Destructor.
@@ -653,6 +669,32 @@ public:
 private:
     Q_DECLARE_PRIVATE(LinkHide)
     Q_DISABLE_COPY(LinkHide)
+};
+
+/**
+ * ResetForm: an action to reset form fields.
+ *
+ * \since 24.07
+ */
+class POPPLER_QT6_EXPORT LinkResetForm : public Link
+{
+    friend class Document;
+
+public:
+    /**
+     * Creates a new ResetForm link. This is only used by Poppler::Page
+     */
+    explicit LinkResetForm(LinkResetFormPrivate *lrfp);
+    /*
+     * Destructor
+     */
+    ~LinkResetForm() override;
+
+    LinkType linkType() const override;
+
+private:
+    Q_DECLARE_PRIVATE(LinkResetForm)
+    Q_DISABLE_COPY(LinkResetForm)
 };
 
 }

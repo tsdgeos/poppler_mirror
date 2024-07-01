@@ -92,7 +92,7 @@ void TestUTFConversion::testUTF()
     QCOMPARE(len, s.size()); // QString size() returns number of code units, not code points
     Q_ASSERT(len < (int)sizeof(utf16Buf)); // if this fails, make utf16Buf larger
 
-    len = utf8ToUtf16(str, utf16Buf, sizeof(utf16Buf), INT_MAX);
+    len = utf8ToUtf16(str, INT_MAX, utf16Buf, sizeof(utf16Buf));
     QVERIFY(compare(utf16Buf, s.utf16()));
     QCOMPARE(len, s.size());
 
@@ -111,7 +111,7 @@ void TestUTFConversion::testUTF()
     QCOMPARE(len, (int)strlen(str));
     Q_ASSERT(len < (int)sizeof(utf8Buf)); // if this fails, make utf8Buf larger
 
-    len = utf16ToUtf8(s.utf16(), utf8Buf);
+    len = utf16ToUtf8(s.utf16(), INT_MAX, utf8Buf, sizeof(utf8Buf));
     QVERIFY(compare(utf8Buf, str));
     QCOMPARE(len, (int)strlen(str));
 

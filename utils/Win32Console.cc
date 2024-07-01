@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2017, 2024 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,7 +49,7 @@ static void flush(bool all = false)
     }
 
     if (nchars > 0) {
-        DWORD wlen = utf8ToUtf16(buf, (uint16_t *)wbuf, BUF_SIZE, nchars);
+        DWORD wlen = utf8ToUtf16(buf, nchars, (uint16_t *)wbuf, BUF_SIZE);
         WriteConsoleW(consoleHandle, wbuf, wlen, &wlen, nullptr);
         if (nchars < bufLen) {
             memmove(buf, buf + nchars, bufLen - nchars);

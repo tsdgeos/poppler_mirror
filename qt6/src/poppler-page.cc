@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2022, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -28,6 +28,7 @@
  * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+ * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -317,7 +318,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
             reference = lrn->getScreenAnnot();
         }
 
-        popplerLink = std::make_unique<LinkRendition>(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : nullptr, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
+        popplerLink = std::make_unique<LinkRendition>(linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : std::unique_ptr<::MediaRendition> {}, lrn->getOperation(), UnicodeParsedString(lrn->getScript()), reference);
     } break;
 
     case actionOCGState: {
@@ -334,9 +335,16 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
         popplerLink = std::make_unique<LinkHide>(lhp);
     } break;
 
-    case actionResetForm:
-        // Not handled in Qt6 front-end yet
-        break;
+    case actionResetForm: {
+        ::LinkResetForm *lrf = (::LinkResetForm *)a;
+        std::vector<std::string> stdStringFields = lrf->getFields();
+        QStringList qStringFields;
+        for (const std::string &str : stdStringFields) {
+            qStringFields << QString::fromStdString(str);
+        }
+        LinkResetFormPrivate *lrfp = new LinkResetFormPrivate(linkArea, qStringFields, lrf->getExclude());
+        popplerLink = std::make_unique<LinkResetForm>(lrfp);
+    } break;
 
     case actionUnknown:
         break;

@@ -26,6 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -38,9 +39,9 @@
 #include <cstring>
 #include <climits>
 #include <algorithm>
-#include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "goo/GooString.h"
+#include "goo/GooCheckedOps.h"
 #include "FoFiType1C.h"
 #include "FoFiTrueType.h"
 #include "poppler/Error.h"
@@ -109,28 +110,28 @@
 
 struct TrueTypeTable
 {
-    unsigned int tag;
-    unsigned int checksum;
-    int offset;
-    int origOffset;
-    int len;
+    unsigned int tag = 0;
+    unsigned int checksum = 0;
+    int offset = 0;
+    int origOffset = 0;
+    int len = 0;
 };
 
 struct TrueTypeCmap
 {
-    int platform;
-    int encoding;
-    int offset;
-    int len;
-    int fmt;
+    int platform = 0;
+    int encoding = 0;
+    int offset = 0;
+    int len = 0;
+    int fmt = 0;
 };
 
 struct TrueTypeLoca
 {
-    int idx;
-    int origOffset;
-    int newOffset;
-    int len;
+    int idx = 0;
+    int origOffset = 0;
+    int newOffset = 0;
+    int len = 0;
 };
 
 #define cmapTag 0x636d6170
@@ -482,10 +483,6 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
 
 FoFiTrueType::FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
 {
-    tables = nullptr;
-    nTables = 0;
-    cmaps = nullptr;
-    nCmaps = 0;
     parsedOk = false;
     faceIndex = faceIndexA;
     gsubFeatureTable = 0;
@@ -494,15 +491,11 @@ FoFiTrueType::FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDa
     parse();
 }
 
-FoFiTrueType::~FoFiTrueType()
-{
-    gfree(tables);
-    gfree(cmaps);
-}
+FoFiTrueType::~FoFiTrueType() = default;
 
 int FoFiTrueType::getNumCmaps() const
 {
-    return nCmaps;
+    return cmaps.size();
 }
 
 int FoFiTrueType::getCmapPlatform(int i) const
@@ -517,9 +510,7 @@ int FoFiTrueType::getCmapEncoding(int i) const
 
 int FoFiTrueType::findCmap(int platform, int encoding) const
 {
-    int i;
-
-    for (i = 0; i < nCmaps; ++i) {
+    for (int i = 0; i < (int)cmaps.size(); ++i) {
         if (cmaps[i].platform == platform && cmaps[i].encoding == encoding) {
             return i;
         }
@@ -536,7 +527,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
     unsigned int high, low, idx;
     bool ok;
 
-    if (i < 0 || i >= nCmaps) {
+    if (i < 0 || i >= (int)cmaps.size()) {
         return 0;
     }
     ok = true;
@@ -655,12 +646,10 @@ int FoFiTrueType::mapNameToGID(const char *name) const
 
 bool FoFiTrueType::getCFFBlock(char **start, int *length) const
 {
-    int i;
-
-    if (!openTypeCFF || !tables) {
+    if (!openTypeCFF || tables.empty()) {
         return false;
     }
-    i = seekTable("CFF ");
+    int i = seekTable("CFF ");
     if (i < 0 || !checkRegion(tables[i].offset, tables[i].len)) {
         return false;
     }
@@ -1055,7 +1044,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding, const int *codeToGID, FoFiOut
     (*outputFunc)(outputStream, "/.notdef 0 def\n", 15);
 
     // if there's no 'cmap' table, punt
-    if (nCmaps == 0) {
+    if (cmaps.empty()) {
         goto err;
     }
 
@@ -1094,16 +1083,15 @@ err:
 
 void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const
 {
-    unsigned char headData[54];
-    TrueTypeLoca *locaTable;
-    unsigned char *locaData;
+    std::array<unsigned char, 54> headData;
+    std::vector<unsigned char> locaData;
     TrueTypeTable newTables[nT42Tables];
     unsigned char tableDir[12 + nT42Tables * 16];
     bool ok;
     unsigned int checksum;
     int nNewTables;
-    int glyfTableLen, length, pos, glyfPos, i, j, k, vmtxTabLength;
-    unsigned char vheaTab[36] = {
+    int glyfTableLen, length, glyfPos, j, k;
+    std::array<unsigned char, 36> vheaTab = {
         0, 1, 0, 0, // table version number
         0, 0, // ascent
         0, 0, // descent
@@ -1122,22 +1110,22 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
         0, 0, // metric data format
         0, 1 // number of advance heights in vmtx table
     };
-    unsigned char *vmtxTab;
+    std::vector<unsigned char> vmtxTab;
     bool needVhea, needVmtx;
     int advance;
 
     *maxUsedGlyph = -1;
 
     // construct the 'head' table, zero out the font checksum
-    i = seekTable("head");
-    if (i < 0 || i >= nTables) {
+    int i = seekTable("head");
+    if (i < 0 || i >= (int)tables.size()) {
         return;
     }
-    pos = tables[i].offset;
+    int pos = tables[i].offset;
     if (!checkRegion(pos, 54)) {
         return;
     }
-    memcpy(headData, file + pos, 54);
+    memcpy(headData.data(), file + pos, 54);
     headData[8] = headData[9] = headData[10] = headData[11] = (unsigned char)0;
 
     // check for a bogus loca format field in the 'head' table
@@ -1154,7 +1142,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     // table, cmpTrueTypeLocaOffset uses offset as its primary sort key,
     // and idx as its secondary key (ensuring that adjacent entries with
     // the same pos value remain in the same order)
-    locaTable = (TrueTypeLoca *)gmallocn(nGlyphs + 1, sizeof(TrueTypeLoca));
+    std::vector<TrueTypeLoca> locaTable { size_t(nGlyphs + 1) };
     i = seekTable("loca");
     pos = tables[i].offset;
     i = seekTable("glyf");
@@ -1171,12 +1159,12 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             locaTable[i].origOffset = glyfTableLen;
         }
     }
-    std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaOffsetFunctor());
+    std::sort(locaTable.begin(), locaTable.end(), cmpTrueTypeLocaOffsetFunctor());
     for (i = 0; i < nGlyphs; ++i) {
         locaTable[i].len = locaTable[i + 1].origOffset - locaTable[i].origOffset;
     }
     locaTable[nGlyphs].len = 0;
-    std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
+    std::sort(locaTable.begin(), locaTable.end(), cmpTrueTypeLocaIdxFunctor());
     pos = 0;
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].newOffset = pos;
@@ -1196,7 +1184,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     }
 
     // construct the new 'loca' table
-    locaData = (unsigned char *)gmallocn(nGlyphs + 1, (locaFmt ? 4 : 2));
+    locaData.resize((nGlyphs + 1) * (locaFmt ? 4 : 2));
     for (i = 0; i <= nGlyphs; ++i) {
         pos = locaTable[i].newOffset;
         if (locaFmt) {
@@ -1217,8 +1205,6 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             ++nNewTables;
         }
     }
-    vmtxTab = nullptr; // make gcc happy
-    vmtxTabLength = 0;
     advance = 0; // make gcc happy
     if (needVerticalMetrics) {
         needVhea = seekTable("vhea") < 0;
@@ -1244,10 +1230,10 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
         checksum = 0; // make gcc happy
         if (i == t42HeadTable) {
             length = 54;
-            checksum = computeTableChecksum(headData, 54);
+            checksum = computeTableChecksum(headData);
         } else if (i == t42LocaTable) {
             length = (nGlyphs + 1) * (locaFmt ? 4 : 2);
-            checksum = computeTableChecksum(locaData, length);
+            checksum = computeTableChecksum(locaData);
         } else if (i == t42GlyfTable) {
             length = 0;
             checksum = 0;
@@ -1258,31 +1244,26 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
                     length += 4 - (length & 3);
                 }
                 if (checkRegion(glyfPos + locaTable[j].origOffset, locaTable[j].len)) {
-                    checksum += computeTableChecksum(file + glyfPos + locaTable[j].origOffset, locaTable[j].len);
+                    checksum += computeTableChecksum(std::span(file + glyfPos + locaTable[j].origOffset, locaTable[j].len));
                 }
             }
         } else {
             if ((j = seekTable(t42Tables[i].tag)) >= 0) {
                 length = tables[j].len;
                 if (checkRegion(tables[j].offset, length)) {
-                    checksum = computeTableChecksum(file + tables[j].offset, length);
+                    checksum = computeTableChecksum(std::span(file + tables[j].offset, length));
                 }
             } else if (needVerticalMetrics && i == t42VheaTable) {
                 vheaTab[10] = advance / 256; // max advance height
                 vheaTab[11] = advance % 256;
-                length = sizeof(vheaTab);
-                checksum = computeTableChecksum(vheaTab, length);
+                length = vheaTab.size();
+                checksum = computeTableChecksum(vheaTab);
             } else if (needVerticalMetrics && i == t42VmtxTable) {
                 length = 4 + (nGlyphs - 1) * 2;
-                vmtxTabLength = length;
-                vmtxTab = (unsigned char *)gmalloc(length);
+                vmtxTab.resize(length, 0);
                 vmtxTab[0] = advance / 256;
                 vmtxTab[1] = advance % 256;
-                for (j = 2; j < length; j += 2) {
-                    vmtxTab[j] = 0;
-                    vmtxTab[j + 1] = 0;
-                }
-                checksum = computeTableChecksum(vmtxTab, length);
+                checksum = computeTableChecksum(vmtxTab);
             } else if (t42Tables[i].required) {
                 //~ error(-1, "Embedded TrueType font is missing a required table ('%s')",
                 //~       t42Tables[i].tag);
@@ -1347,7 +1328,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     }
 
     // compute the font checksum and store it in the head table
-    checksum = computeTableChecksum(tableDir, 12 + nNewTables * 16);
+    checksum = computeTableChecksum(std::span(tableDir, 12 + nNewTables * 16));
     for (i = 0; i < nNewTables; ++i) {
         checksum += newTables[i].checksum;
     }
@@ -1367,20 +1348,20 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     }
 
     // write the table directory
-    dumpString(tableDir, 12 + nNewTables * 16, outputFunc, outputStream);
+    dumpString(std::span(tableDir, 12 + nNewTables * 16), outputFunc, outputStream);
 
     // write the tables
     for (i = 0; i < nNewTables; ++i) {
         if (i == t42HeadTable) {
-            dumpString(headData, 54, outputFunc, outputStream);
+            dumpString(headData, outputFunc, outputStream);
         } else if (i == t42LocaTable) {
             length = (nGlyphs + 1) * (locaFmt ? 4 : 2);
-            dumpString(locaData, length, outputFunc, outputStream);
+            dumpString(locaData, outputFunc, outputStream);
         } else if (i == t42GlyfTable) {
             glyfPos = tables[seekTable("glyf")].offset;
             for (j = 0; j < nGlyphs; ++j) {
                 if (locaTable[j].len > 0 && checkRegion(glyfPos + locaTable[j].origOffset, locaTable[j].len)) {
-                    dumpString(file + glyfPos + locaTable[j].origOffset, locaTable[j].len, outputFunc, outputStream);
+                    dumpString(std::span(file + glyfPos + locaTable[j].origOffset, locaTable[j].len), outputFunc, outputStream);
                 }
             }
         } else {
@@ -1389,19 +1370,18 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             // headers
             if ((length = newTables[i].len) > 0) {
                 if ((j = seekTable(t42Tables[i].tag)) >= 0 && checkRegion(tables[j].offset, tables[j].len)) {
-                    dumpString(file + tables[j].offset, tables[j].len, outputFunc, outputStream);
+                    dumpString(std::span(file + tables[j].offset, tables[j].len), outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VheaTable) {
                     if (unlikely(length > (int)sizeof(vheaTab))) {
                         error(errSyntaxWarning, -1, "length bigger than vheaTab size");
                         length = sizeof(vheaTab);
                     }
-                    dumpString(vheaTab, length, outputFunc, outputStream);
+                    dumpString(vheaTab, outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VmtxTable) {
-                    if (unlikely(length > vmtxTabLength)) {
+                    if (unlikely(length > (int)vmtxTab.size())) {
                         error(errSyntaxWarning, -1, "length bigger than vmtxTab size");
-                        length = vmtxTabLength;
                     }
-                    dumpString(vmtxTab, length, outputFunc, outputStream);
+                    dumpString(vmtxTab, outputFunc, outputStream);
                 }
             }
         }
@@ -1409,33 +1389,25 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
 
     // end the sfnts array
     (*outputFunc)(outputStream, "] def\n", 6);
-
-    gfree(locaData);
-    gfree(locaTable);
-    if (vmtxTab) {
-        gfree(vmtxTab);
-    }
 }
 
-void FoFiTrueType::dumpString(const unsigned char *s, int length, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream)
 {
-    int pad, i, j;
-
     (*outputFunc)(outputStream, "<", 1);
-    for (i = 0; i < length; i += 32) {
-        for (j = 0; j < 32 && i + j < length; ++j) {
+    for (int i = 0; i < (int)s.size(); i += 32) {
+        for (int j = 0; j < 32 && i + j < (int)s.size(); ++j) {
             const std::string buf = GooString::format("{0:02x}", s[i + j] & 0xff);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         if (i % (65536 - 32) == 65536 - 64) {
             (*outputFunc)(outputStream, ">\n<", 3);
-        } else if (i + 32 < length) {
+        } else if (i + 32 < (int)s.size()) {
             (*outputFunc)(outputStream, "\n", 1);
         }
     }
-    if (length & 3) {
-        pad = 4 - (length & 3);
-        for (i = 0; i < pad; ++i) {
+    if (s.size() & 3) {
+        int pad = 4 - (s.size() & 3);
+        for (int i = 0; i < pad; ++i) {
             (*outputFunc)(outputStream, "00", 2);
         }
     }
@@ -1443,20 +1415,17 @@ void FoFiTrueType::dumpString(const unsigned char *s, int length, FoFiOutputFunc
     (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-unsigned int FoFiTrueType::computeTableChecksum(const unsigned char *data, int length) const
+unsigned int FoFiTrueType::computeTableChecksum(std::span<const unsigned char> data)
 {
-    unsigned int checksum, word;
-    int i;
-
-    checksum = 0;
-    for (i = 0; i + 3 < length; i += 4) {
-        word = ((data[i] & 0xff) << 24) + ((data[i + 1] & 0xff) << 16) + ((data[i + 2] & 0xff) << 8) + (data[i + 3] & 0xff);
+    unsigned checksum = 0;
+    for (size_t i = 0; i + 3 < data.size(); i += 4) {
+        unsigned int word = ((data[i] & 0xff) << 24) + ((data[i + 1] & 0xff) << 16) + ((data[i + 2] & 0xff) << 8) + (data[i + 3] & 0xff);
         checksum += word;
     }
-    if (length & 3) {
-        word = 0;
-        i = length & ~3;
-        switch (length & 3) {
+    if (data.size() & 3) {
+        unsigned int word = 0;
+        int i = data.size() & ~3;
+        switch (data.size() & 3) {
         case 3:
             word |= (data[i + 2] & 0xff) << 8;
             // fallthrough
@@ -1516,11 +1485,11 @@ void FoFiTrueType::parse()
     openTypeCFF = ver == 0x4f54544f; // 'OTTO'
 
     // read the table directory
-    nTables = getU16BE(pos + 4, &parsedOk);
+    int nTables = getU16BE(pos + 4, &parsedOk);
     if (!parsedOk) {
         return;
     }
-    tables = (TrueTypeTable *)gmallocn(nTables, sizeof(TrueTypeTable));
+    tables.resize(nTables);
     pos += 12;
     j = 0;
     for (i = 0; i < nTables; ++i) {
@@ -1537,9 +1506,9 @@ void FoFiTrueType::parse()
     }
     if (nTables != j) {
         nTables = j;
-        tables = (TrueTypeTable *)greallocn_checkoverflow(tables, nTables, sizeof(TrueTypeTable));
+        tables.resize(nTables);
     }
-    if (!parsedOk || tables == nullptr) {
+    if (!parsedOk || tables.empty()) {
         parsedOk = false;
         return;
     }
@@ -1554,12 +1523,12 @@ void FoFiTrueType::parse()
     // read the cmaps
     if ((i = seekTable("cmap")) >= 0) {
         pos = tables[i].offset + 2;
-        nCmaps = getU16BE(pos, &parsedOk);
+        int nCmaps = getU16BE(pos, &parsedOk);
         pos += 2;
         if (!parsedOk) {
             return;
         }
-        cmaps = (TrueTypeCmap *)gmallocn(nCmaps, sizeof(TrueTypeCmap));
+        cmaps.resize(nCmaps);
         for (j = 0; j < nCmaps; ++j) {
             cmaps[j].platform = getU16BE(pos, &parsedOk);
             cmaps[j].encoding = getU16BE(pos + 2, &parsedOk);
@@ -1569,10 +1538,11 @@ void FoFiTrueType::parse()
             cmaps[j].len = getU16BE(cmaps[j].offset + 2, &parsedOk);
         }
         if (!parsedOk) {
+            cmaps.clear();
             return;
         }
     } else {
-        nCmaps = 0;
+        cmaps.clear();
     }
 
     // get the number of glyphs from the maxp table
@@ -1676,10 +1646,9 @@ err:
 int FoFiTrueType::seekTable(const char *tag) const
 {
     unsigned int tagI;
-    int i;
 
     tagI = ((tag[0] & 0xff) << 24) | ((tag[1] & 0xff) << 16) | ((tag[2] & 0xff) << 8) | (tag[3] & 0xff);
-    for (i = 0; i < nTables; ++i) {
+    for (int i = 0; i < (int)tables.size(); ++i) {
         if (tables[i].tag == tagI) {
             return i;
         }

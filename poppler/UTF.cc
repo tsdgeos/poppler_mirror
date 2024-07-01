@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021, 2023, 2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2016, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
@@ -289,15 +289,7 @@ int utf8CountUtf16CodeUnits(const char *utf8)
     return count;
 }
 
-// Convert UTF-8 to UTF-16
-//  utf8- UTF-8 string to convert. If not null terminated, set maxUtf8 to num
-//        bytes to convert
-//  utf16 - output buffer to write UTF-16 to. Output will always be null terminated.
-//  maxUtf16 - maximum size of output buffer including space for null.
-//  maxUtf8 - maximum number of UTF-8 bytes to convert. Conversion stops when
-//            either this count is reached or a null is encountered.
-// Returns number of UTF-16 code units written (excluding NULL).
-int utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8)
+int utf8ToUtf16(const char *utf8, int maxUtf8, uint16_t *utf16, int maxUtf16)
 {
     uint16_t *p = utf16;
     uint32_t codepoint;
@@ -349,7 +341,7 @@ uint16_t *utf8ToUtf16(const char *utf8, int *len)
         *len = n;
     }
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
-    utf8ToUtf16(utf8, utf16, n + 1, INT_MAX);
+    utf8ToUtf16(utf8, INT_MAX, utf16, n + 1);
     return utf16;
 }
 
@@ -432,21 +424,13 @@ int utf16CountUtf8Bytes(const uint16_t *utf16)
         utf16++;
     }
     if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
-        count++; // replace with REPLACEMENT_CHAR
+        count += 3; // replace with REPLACEMENT_CHAR
     }
 
     return count;
 }
 
-// Convert UTF-16 to UTF-8
-//  utf16- UTF-16 string to convert. If not null terminated, set maxUtf16 to num
-//        code units to convert
-//  utf8 - output buffer to write UTF-8 to. Output will always be null terminated.
-//  maxUtf8 - maximum size of output buffer including space for null.
-//  maxUtf16 - maximum number of UTF-16 code units to convert. Conversion stops when
-//            either this count is reached or a null is encountered.
-// Returns number of UTF-8 bytes written (excluding NULL).
-int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
+int utf16ToUtf8(const uint16_t *utf16, int maxUtf16, char *utf8, int maxUtf8)
 {
     uint32_t codepoint = 0;
     uint32_t state = 0;
@@ -487,12 +471,12 @@ int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
 // Allocate utf8 string and convert utf16 into it.
 char *utf16ToUtf8(const uint16_t *utf16, int *len)
 {
-    int n = utf16CountUtf8Bytes(utf16);
+    const int n = utf16CountUtf8Bytes(utf16);
     if (len) {
         *len = n;
     }
     char *utf8 = (char *)gmalloc(n + 1);
-    utf16ToUtf8(utf16, utf8);
+    utf16ToUtf8(utf16, INT_MAX, utf8, n + 1);
     return utf8;
 }
 

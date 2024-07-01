@@ -257,6 +257,7 @@ XRef::XRef() : objStrs { 5 }
     permFlags = defPermFlags;
     ownerPasswordOk = false;
     rootNum = -1;
+    rootGen = -1;
     strOwner = false;
     xrefReconstructed = false;
     encAlgorithm = cryptNone;

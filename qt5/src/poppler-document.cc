@@ -20,6 +20,7 @@
  * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +57,7 @@
 
 #include "poppler-form.h"
 #include "poppler-private.h"
+#include "poppler-link-private.h"
 #include "poppler-page-private.h"
 #include "poppler-outline-private.h"
 
@@ -768,6 +770,55 @@ OptContentModel *Document::optionalContentModel()
         m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
     }
     return (OptContentModel *)m_doc->m_optContentModel;
+}
+
+Link *Document::additionalAction(DocumentAdditionalActionsType type) const
+{
+    Catalog::DocumentAdditionalActionsType actionType;
+    switch (type) {
+    case CloseDocument:
+        actionType = Catalog::actionCloseDocument;
+        break;
+    case SaveDocumentStart:
+        actionType = Catalog::actionSaveDocumentStart;
+        break;
+    case SaveDocumentFinish:
+        actionType = Catalog::actionSaveDocumentFinish;
+        break;
+    case PrintDocumentStart:
+        actionType = Catalog::actionPrintDocumentStart;
+        break;
+    case PrintDocumentFinish:
+        actionType = Catalog::actionPrintDocumentFinish;
+        break;
+    default:
+        return {};
+    }
+
+    Link *action = nullptr;
+    if (std::unique_ptr<::LinkAction> act = m_doc->doc->getCatalog()->getAdditionalAction(actionType)) {
+        action = PageData::convertLinkActionToLink(act.get(), m_doc, QRectF());
+    }
+
+    return action;
+}
+
+void Document::applyResetFormsLink(const LinkResetForm &link)
+{
+    const LinkResetFormPrivate *lrfp = link.d_func();
+    Catalog *catalog = m_doc->doc->getCatalog();
+    if (catalog && catalog->isOk()) {
+        Form *form = catalog->getForm();
+        if (form) {
+            std::vector<std::string> stdStringFields;
+            const QStringList fields = lrfp->m_fields;
+            stdStringFields.reserve(fields.size());
+            for (const auto &field : fields) {
+                stdStringFields.emplace_back(field.toStdString());
+            }
+            form->reset(stdStringFields, lrfp->m_exclude);
+        }
+    }
 }
 
 QStringList Document::scripts() const

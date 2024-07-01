@@ -38,6 +38,7 @@
 // Copyright (C) 2021, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2023 Khaled Hosny <khaled@aliftype.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1733,7 +1734,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     Object desFontDictObj;
     Object obj1, obj2, obj3, obj4, obj5, obj6;
     int c1, c2;
-    int excepsSize;
 
     ascent = 0.95;
     descent = -0.35;
@@ -1744,10 +1744,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     widths.defWidth = 1.0;
     widths.defHeight = -1.0;
     widths.defVY = 0.880;
-    widths.exceps = nullptr;
-    widths.nExceps = 0;
-    widths.excepsV = nullptr;
-    widths.nExcepsV = 0;
     cidToGID = nullptr;
     cidToGIDLen = 0;
 
@@ -1863,7 +1859,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     // char width exceptions
     obj1 = desFontDict->lookup("W");
     if (obj1.isArray()) {
-        excepsSize = 0;
         int i = 0;
         while (i + 1 < obj1.arrayGetLength()) {
             obj2 = obj1.arrayGet(i);
@@ -1871,33 +1866,21 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             if (obj2.isInt() && obj3.isInt() && i + 2 < obj1.arrayGetLength()) {
                 obj4 = obj1.arrayGet(i + 2);
                 if (obj4.isNum()) {
-                    if (widths.nExceps == excepsSize) {
-                        excepsSize += 16;
-                        widths.exceps = (GfxFontCIDWidthExcep *)greallocn(widths.exceps, excepsSize, sizeof(GfxFontCIDWidthExcep));
-                    }
-                    widths.exceps[widths.nExceps].first = obj2.getInt();
-                    widths.exceps[widths.nExceps].last = obj3.getInt();
-                    widths.exceps[widths.nExceps].width = obj4.getNum() * 0.001;
-                    ++widths.nExceps;
+                    GfxFontCIDWidthExcep excep { static_cast<CID>(obj2.getInt()), static_cast<CID>(obj3.getInt()), obj4.getNum() * 0.001 };
+                    widths.exceps.push_back(excep);
                 } else {
                     error(errSyntaxError, -1, "Bad widths array in Type 0 font");
                 }
                 i += 3;
             } else if (obj2.isInt() && obj3.isArray()) {
-                if (widths.nExceps + obj3.arrayGetLength() > excepsSize) {
-                    excepsSize = (widths.nExceps + obj3.arrayGetLength() + 15) & ~15;
-                    widths.exceps = (GfxFontCIDWidthExcep *)greallocn(widths.exceps, excepsSize, sizeof(GfxFontCIDWidthExcep));
-                }
                 int j = obj2.getInt();
                 if (likely(j < INT_MAX - obj3.arrayGetLength())) {
                     for (int k = 0; k < obj3.arrayGetLength(); ++k) {
                         obj4 = obj3.arrayGet(k);
                         if (obj4.isNum()) {
-                            widths.exceps[widths.nExceps].first = j;
-                            widths.exceps[widths.nExceps].last = j;
-                            widths.exceps[widths.nExceps].width = obj4.getNum() * 0.001;
+                            GfxFontCIDWidthExcep excep { static_cast<CID>(j), static_cast<CID>(j), obj4.getNum() * 0.001 };
+                            widths.exceps.push_back(excep);
                             ++j;
-                            ++widths.nExceps;
                         } else {
                             error(errSyntaxError, -1, "Bad widths array in Type 0 font");
                         }
@@ -1909,7 +1892,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
                 ++i;
             }
         }
-        std::sort(widths.exceps, widths.exceps + widths.nExceps, cmpWidthExcepFunctor());
+        std::sort(widths.exceps.begin(), widths.exceps.end(), cmpWidthExcepFunctor());
     }
 
     // default metrics for vertical font
@@ -1928,42 +1911,25 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     // char metric exceptions for vertical font
     obj1 = desFontDict->lookup("W2");
     if (obj1.isArray()) {
-        excepsSize = 0;
         int i = 0;
         while (i + 1 < obj1.arrayGetLength()) {
             obj2 = obj1.arrayGet(i);
             obj3 = obj1.arrayGet(i + 1);
             if (obj2.isInt() && obj3.isInt() && i + 4 < obj1.arrayGetLength()) {
                 if ((obj4 = obj1.arrayGet(i + 2), obj4.isNum()) && (obj5 = obj1.arrayGet(i + 3), obj5.isNum()) && (obj6 = obj1.arrayGet(i + 4), obj6.isNum())) {
-                    if (widths.nExcepsV == excepsSize) {
-                        excepsSize += 16;
-                        widths.excepsV = (GfxFontCIDWidthExcepV *)greallocn(widths.excepsV, excepsSize, sizeof(GfxFontCIDWidthExcepV));
-                    }
-                    widths.excepsV[widths.nExcepsV].first = obj2.getInt();
-                    widths.excepsV[widths.nExcepsV].last = obj3.getInt();
-                    widths.excepsV[widths.nExcepsV].height = obj4.getNum() * 0.001;
-                    widths.excepsV[widths.nExcepsV].vx = obj5.getNum() * 0.001;
-                    widths.excepsV[widths.nExcepsV].vy = obj6.getNum() * 0.001;
-                    ++widths.nExcepsV;
+                    GfxFontCIDWidthExcepV excepV { static_cast<CID>(obj2.getInt()), static_cast<CID>(obj3.getInt()), obj4.getNum() * 0.001, obj5.getNum() * 0.001, obj6.getNum() * 0.001 };
+                    widths.excepsV.push_back(excepV);
                 } else {
                     error(errSyntaxError, -1, "Bad widths (W2) array in Type 0 font");
                 }
                 i += 5;
             } else if (obj2.isInt() && obj3.isArray()) {
-                if (widths.nExcepsV + obj3.arrayGetLength() / 3 > excepsSize) {
-                    excepsSize = (widths.nExcepsV + obj3.arrayGetLength() / 3 + 15) & ~15;
-                    widths.excepsV = (GfxFontCIDWidthExcepV *)greallocn(widths.excepsV, excepsSize, sizeof(GfxFontCIDWidthExcepV));
-                }
                 int j = obj2.getInt();
                 for (int k = 0; k < obj3.arrayGetLength(); k += 3) {
                     if ((obj4 = obj3.arrayGet(k), obj4.isNum()) && (obj5 = obj3.arrayGet(k + 1), obj5.isNum()) && (obj6 = obj3.arrayGet(k + 2), obj6.isNum())) {
-                        widths.excepsV[widths.nExcepsV].first = j;
-                        widths.excepsV[widths.nExcepsV].last = j;
-                        widths.excepsV[widths.nExcepsV].height = obj4.getNum() * 0.001;
-                        widths.excepsV[widths.nExcepsV].vx = obj5.getNum() * 0.001;
-                        widths.excepsV[widths.nExcepsV].vy = obj6.getNum() * 0.001;
+                        GfxFontCIDWidthExcepV excepV { static_cast<CID>(j), static_cast<CID>(j), obj4.getNum() * 0.001, obj5.getNum() * 0.001, obj6.getNum() * 0.001 };
+                        widths.excepsV.push_back(excepV);
                         ++j;
-                        ++widths.nExcepsV;
                     } else {
                         error(errSyntaxError, -1, "Bad widths (W2) array in Type 0 font");
                     }
@@ -1974,7 +1940,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
                 ++i;
             }
         }
-        std::sort(widths.excepsV, widths.excepsV + widths.nExcepsV, cmpWidthExcepVFunctor());
+        std::sort(widths.excepsV.begin(), widths.excepsV.end(), cmpWidthExcepVFunctor());
     }
 
     ok = true;
@@ -1988,8 +1954,6 @@ GfxCIDFont::~GfxCIDFont()
     if (ctu) {
         ctu->decRefCnt();
     }
-    gfree(widths.exceps);
-    gfree(widths.excepsV);
     if (cidToGID) {
         gfree(cidToGID);
     }
@@ -2036,9 +2000,9 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
         h = widths.defHeight;
         vx = getWidth(cid) / 2;
         vy = widths.defVY;
-        if (widths.nExcepsV > 0 && cid >= widths.excepsV[0].first) {
+        if (widths.excepsV.size() > 0 && cid >= widths.excepsV[0].first) {
             a = 0;
-            b = widths.nExcepsV;
+            b = widths.excepsV.size();
             // invariant: widths.excepsV[a].first <= cid < widths.excepsV[b].first
             while (b - a > 1) {
                 m = (a + b) / 2;
@@ -2331,9 +2295,9 @@ double GfxCIDFont::getWidth(CID cid) const
     int a, b, m;
 
     w = widths.defWidth;
-    if (widths.nExceps > 0 && cid >= widths.exceps[0].first) {
+    if (widths.exceps.size() > 0 && cid >= widths.exceps[0].first) {
         a = 0;
-        b = widths.nExceps;
+        b = widths.exceps.size();
         // invariant: widths.exceps[a].first <= cid < widths.exceps[b].first
         while (b - a > 1) {
             m = (a + b) / 2;

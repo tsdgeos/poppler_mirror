@@ -38,7 +38,7 @@ set(poppler_glib_public_headers
   poppler-structure-element.h
 )
 
-find_program(GLIB2_MKENUMS glib-mkenums)
+find_program(GLIB2_MKENUMS glib-mkenums REQUIRED)
 find_program(GLIB2_MKENUMS_PYTHON NAMES python3 python)
 
 add_custom_command(

@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2021
+// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2021, 2024
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ public:
     // write embedded stream to file
     void outputToFile(FILE *);
 
-    MediaRendition *copy() const;
+    std::unique_ptr<MediaRendition> copy() const;
 
 private:
     bool ok;
