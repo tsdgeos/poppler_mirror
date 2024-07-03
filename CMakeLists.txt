@@ -225,7 +225,7 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-find_package(Boost 1.74.0)
+find_package(Boost 1.74.0 CONFIG)
 if(Boost_FOUND)
   set(USE_BOOST_HEADERS ON)
 elseif(ENABLE_BOOST)
