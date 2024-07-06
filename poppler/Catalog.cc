@@ -52,7 +52,6 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include "goo/gmem.h"
 #include "Object.h"
 #include "PDFDoc.h"
 #include "XRef.h"
@@ -640,23 +639,8 @@ Catalog::PageLayout Catalog::getPageLayout()
     return pageLayout;
 }
 
-NameTree::NameTree()
-{
-    size = 0;
-    length = 0;
-    entries = nullptr;
-}
-
-NameTree::~NameTree()
-{
-    int i;
-
-    for (i = 0; i < length; i++) {
-        delete entries[i];
-    }
-
-    gfree(entries);
-}
+NameTree::NameTree() = default;
+NameTree::~NameTree() = default;
 
 NameTree::Entry::Entry(Array *array, int index)
 {
@@ -673,36 +657,13 @@ NameTree::Entry::Entry(Array *array, int index)
 
 NameTree::Entry::~Entry() { }
 
-void NameTree::addEntry(Entry *entry)
-{
-    if (length == size) {
-        if (length == 0) {
-            size = 8;
-        } else {
-            size *= 2;
-        }
-        entries = (Entry **)grealloc(entries, sizeof(Entry *) * size);
-    }
-
-    entries[length] = entry;
-    ++length;
-}
-
-int NameTree::Entry::cmpEntry(const void *voidEntry, const void *voidOtherEntry)
-{
-    Entry *entry = *(NameTree::Entry **)voidEntry;
-    Entry *otherEntry = *(NameTree::Entry **)voidOtherEntry;
-
-    return entry->name.cmp(&otherEntry->name);
-}
-
 void NameTree::init(XRef *xrefA, Object *tree)
 {
     xref = xrefA;
     RefRecursionChecker seen;
     parse(tree, seen);
-    if (entries && length > 0) {
-        qsort(entries, length, sizeof(Entry *), Entry::cmpEntry);
+    if (!entries.empty()) {
+        std::sort(entries.begin(), entries.end(), [](const auto &first, const auto &second) { return first->name.cmp(&second->name) < 0; });
     }
 }
 
@@ -716,10 +677,8 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
     Object names = tree->dictLookup("Names");
     if (names.isArray()) {
         for (int i = 0; i < names.arrayGetLength(); i += 2) {
-            NameTree::Entry *entry;
-
-            entry = new Entry(names.getArray(), i);
-            addEntry(entry);
+            auto entry = std::make_unique<Entry>(names.getArray(), i);
+            entries.push_back(std::move(entry));
         }
     }
 
@@ -744,20 +703,11 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
     }
 }
 
-int NameTree::Entry::cmp(const void *voidKey, const void *voidEntry)
-{
-    GooString *key = (GooString *)voidKey;
-    Entry *entry = *(NameTree::Entry **)voidEntry;
-
-    return key->cmp(&entry->name);
-}
-
 Object NameTree::lookup(const GooString *name)
 {
-    Entry **entry;
+    auto entry = std::lower_bound(entries.begin(), entries.end(), name, [](const auto &element, const GooString *n) { return element->name.cmp(n) < 0; });
 
-    entry = (Entry **)bsearch(name, entries, length, sizeof(Entry *), Entry::cmp);
-    if (entry != nullptr) {
+    if (entry != entries.end() && (*entry)->name.cmp(name) == 0) {
         return (*entry)->value.fetch(xref);
     } else {
         error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
@@ -767,7 +717,7 @@ Object NameTree::lookup(const GooString *name)
 
 Object *NameTree::getValue(int index)
 {
-    if (index < length) {
+    if (size_t(index) < entries.size()) {
         return &entries[index]->value;
     } else {
         return nullptr;
@@ -776,7 +726,7 @@ Object *NameTree::getValue(int index)
 
 const GooString *NameTree::getName(int index) const
 {
-    if (index < length) {
+    if (size_t(index) < entries.size()) {
         return &entries[index]->name;
     } else {
         return nullptr;

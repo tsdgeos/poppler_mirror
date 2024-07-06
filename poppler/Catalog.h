@@ -78,7 +78,7 @@ public:
 
     void init(XRef *xref, Object *tree);
     Object lookup(const GooString *name);
-    int numEntries() { return length; };
+    int numEntries() { return entries.size(); };
     // iterator accessor, note it returns a pointer to the internal object, do not free nor delete it
     Object *getValue(int i);
     const GooString *getName(int i) const;
@@ -90,18 +90,12 @@ private:
         ~Entry();
         GooString name;
         Object value;
-        static int cmpEntry(const void *voidEntry, const void *voidOtherEntry);
-        static int cmp(const void *key, const void *entry);
     };
 
     void parse(const Object *tree, RefRecursionChecker &seen);
-    void addEntry(Entry *entry);
 
     XRef *xref;
-    Entry **entries;
-    int size, length; // size is the number of entries in
-                      // the array of Entry*
-                      // length is the number of real Entry
+    std::vector<std::unique_ptr<Entry>> entries;
 };
 
 //------------------------------------------------------------------------
