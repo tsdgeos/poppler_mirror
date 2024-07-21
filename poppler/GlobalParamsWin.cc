@@ -272,7 +272,7 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
     }
 
     // remove trailing ' Oblique'
-    if (n > 7 && !strncmp(name + n - 8, " Oblique", 8)) {
+    if (n > 8 && !strncmp(name + n - 8, " Oblique", 8)) {
         n -= 8;
         oblique = true;
     }
@@ -284,7 +284,7 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
     }
 
     // remove trailing ' Regular'
-    if (n > 5 && !strncmp(name + n - 8, " Regular", 8)) {
+    if (n > 8 && !strncmp(name + n - 8, " Regular", 8)) {
         n -= 8;
     }
 
