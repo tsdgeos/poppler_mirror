@@ -763,6 +763,7 @@ public:
     unsigned int getFlags() const { return flags; }
     Object getAppearance() const;
     void setNewAppearance(Object &&newAppearance);
+    void setNewAppearance(Object &&newAppearance, bool keepAppearState);
     AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
     const GooString *getAppearState() const { return appearState.get(); }
     AnnotBorder *getBorder() const { return border.get(); }

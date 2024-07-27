@@ -2057,12 +2057,18 @@ void Annot::draw(Gfx *gfx, bool printing)
 
 void Annot::setNewAppearance(Object &&newAppearance)
 {
+    setNewAppearance(std::move(newAppearance), false);
+}
+
+void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
+{
     if (newAppearance.isNull()) {
         return;
     }
 
     annotLocker();
     if (newAppearance.getType() == ObjType::objStream) {
+        Object oldAS = annotObj.dictLookup("AS");
         invalidateAppearance();
         appearance = std::move(newAppearance);
 
@@ -2071,10 +2077,15 @@ void Annot::setNewAppearance(Object &&newAppearance)
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
         update("AP", std::move(obj1));
-        update("AS", Object(objName, "N"));
-
         Object updatedAP = annotObj.dictLookup("AP");
         appearStreams = std::make_unique<AnnotAppearance>(doc, &updatedAP);
+
+        if (keepAppearState && !oldAS.isNull()) {
+            appearState = std::make_unique<GooString>(oldAS.getName());
+            update("AS", std::move(oldAS));
+        } else {
+            update("AS", Object(objName, "N"));
+        }
     } else {
         appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
         update("AP", std::move(newAppearance));
@@ -5442,7 +5453,9 @@ void AnnotWidget::generateFieldAppearance()
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
         // to set the AP and not let other renderers guess it from the contents
-        setNewAppearance(Object(appearStream));
+        // In addition, we keep the appearState of checkboxes to prevent them from being deselected
+        bool keepAppearState = field->getType() == formButton && static_cast<const FormFieldButton *>(field)->getButtonType() == formButtonCheck;
+        setNewAppearance(Object(appearStream), keepAppearState);
     } else {
         appearance = Object(appearStream);
     }
