@@ -515,6 +515,11 @@ void FormWidgetChoice::setEditChoice(const GooString *new_content)
     parent()->setEditChoice(new_content);
 }
 
+void FormWidgetChoice::setAppearanceChoiceContent(const GooString *new_content)
+{
+    parent()->setAppearanceChoiceContentCopy(new_content);
+}
+
 int FormWidgetChoice::getNumChoices() const
 {
     return parent()->getNumChoices();
@@ -1876,6 +1881,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     choices = nullptr;
     defaultChoices = nullptr;
     editedChoice = nullptr;
+    appearanceSelectedChoice = nullptr;
     topIdx = 0;
 
     Dict *dict = obj.getDict();
@@ -2054,6 +2060,7 @@ FormFieldChoice::~FormFieldChoice()
     delete[] choices;
     delete[] defaultChoices;
     delete editedChoice;
+    delete appearanceSelectedChoice;
 }
 
 void FormFieldChoice::print(int indent)
@@ -2176,6 +2183,22 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
         }
     }
     updateSelection();
+}
+
+void FormFieldChoice::setAppearanceChoiceContentCopy(const GooString *new_content)
+{
+    delete appearanceSelectedChoice;
+    appearanceSelectedChoice = nullptr;
+
+    if (new_content) {
+        appearanceSelectedChoice = new_content->copy();
+
+        // append the unicode marker <FE FF> if needed
+        if (!hasUnicodeByteOrderMark(appearanceSelectedChoice->toStr())) {
+            prependUnicodeByteOrderMark(appearanceSelectedChoice->toNonConstStr());
+        }
+    }
+    updateChildrenAppearance();
 }
 
 const GooString *FormFieldChoice::getEditChoice() const

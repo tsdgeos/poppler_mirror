@@ -5312,7 +5312,7 @@ bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
     }
 
     if (fieldChoice->isCombo()) {
-        selected = fieldChoice->getSelectedChoice();
+        selected = fieldChoice->getAppearanceSelectedChoice();
         if (selected) {
             return drawText(selected, form, da, resources, border, appearCharacs, rect, quadding, xref, resourcesDict, EmitMarkedContentDrawTextFlag);
             //~ Acrobat draws a popup icon on the right side

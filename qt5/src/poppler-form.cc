@@ -585,6 +585,14 @@ bool FormFieldChoice::canBeSpellChecked() const
     return !fwc->noSpellCheck();
 }
 
+void FormFieldChoice::setAppearanceChoiceText(const QString &text)
+{
+    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    GooString *goo = QStringToUnicodeGooString(text);
+    fwc->setAppearanceChoiceContent(goo);
+    delete goo;
+}
+
 class CertificateInfoPrivate
 {
 public:

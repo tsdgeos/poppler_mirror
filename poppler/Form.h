@@ -256,7 +256,7 @@ public:
     const GooString *getExportVal(int i) const;
     // select the i-th choice
     void select(int i);
-
+    void setAppearanceChoiceContent(const GooString *new_content);
     // toggle selection of the i-th choice
     void toggle(int i);
 
@@ -553,6 +553,9 @@ public:
     const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal : nullptr; }
     // For multi-select choices it returns the first one
     const GooString *getSelectedChoice() const;
+    const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice : getSelectedChoice(); }
+
+    void setAppearanceChoiceContentCopy(const GooString *new_content);
 
     // select the i-th choice
     void select(int i);
@@ -606,6 +609,7 @@ protected:
     ChoiceOpt *choices;
     bool *defaultChoices;
     GooString *editedChoice;
+    GooString *appearanceSelectedChoice;
     int topIdx; // TI
 };
 
