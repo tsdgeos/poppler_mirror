@@ -1,3 +1,19 @@
+Release 24.08.0:
+        core:
+         * Add support for modifying the appearance stream text in form field choice
+         * Fix buffer overflow in Windows specific font selection code
+         * Fix crashes in malformed files
+         * Internal code improvements
+
+        qt5:
+         * Add support for modifying the appearance stream text in form field choice
+
+        qt6:
+         * Add support for modifying the appearance stream text in form field choice
+
+        utils:
+         * pdfinfo: Fix crash in malformed documents
+
 Release 24.07.0:
         core:
          * Fix crashes in broken files
