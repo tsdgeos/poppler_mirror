@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2022, 2024 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
