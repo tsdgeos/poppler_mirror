@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017, 2020, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2020, 2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -138,6 +138,7 @@ void JSInfo::scan(int nPages)
     }
 
     // document actions
+    scanLinkAction(doc->getCatalog()->getOpenAction().get(), "Open Document Action");
     scanLinkAction(doc->getCatalog()->getAdditionalAction(Catalog::actionCloseDocument).get(), "Before Close Document");
     scanLinkAction(doc->getCatalog()->getAdditionalAction(Catalog::actionSaveDocumentStart).get(), "Before Save Document");
     scanLinkAction(doc->getCatalog()->getAdditionalAction(Catalog::actionSaveDocumentFinish).get(), "After Save Document");

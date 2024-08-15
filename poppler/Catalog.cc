@@ -1187,3 +1187,21 @@ std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActio
     }
     return nullptr;
 }
+
+std::unique_ptr<LinkAction> Catalog::getOpenAction() const
+{
+    catalogLocker();
+    const Object catDict = xref->getCatalog();
+    if (!catDict.isDict()) {
+        return {};
+    }
+
+    const Object openActionObj = catDict.dictLookup("OpenAction");
+    if (openActionObj.isArray()) {
+        return LinkAction::parseDest(&openActionObj);
+    }
+    if (openActionObj.isDict()) {
+        return LinkAction::parseAction(&openActionObj, baseURI);
+    }
+    return {};
+}
