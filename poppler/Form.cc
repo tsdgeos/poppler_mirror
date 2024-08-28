@@ -345,7 +345,7 @@ void FormWidgetButton::setState(bool astate)
         if (found_related) {
             FormFieldButton *ffb = static_cast<FormFieldButton *>(wid->getField());
             if (ffb == nullptr) {
-                error(errInternal, -1, "FormWidgetButton::setState : FormFieldButton expected\n");
+                error(errInternal, -1, "FormWidgetButton::setState : FormFieldButton expected");
                 continue;
             }
             ffb->setState((char *)"Off", true);
@@ -485,7 +485,7 @@ void FormWidgetChoice::deselectAll()
 const GooString *FormWidgetChoice::getEditChoice() const
 {
     if (!hasEdit()) {
-        error(errInternal, -1, "FormFieldChoice::getEditChoice called on a non-editable choice\n");
+        error(errInternal, -1, "FormFieldChoice::getEditChoice called on a non-editable choice");
         return nullptr;
     }
     return parent()->getEditChoice();
@@ -509,7 +509,7 @@ bool FormWidgetChoice::isSelected(int i) const
 void FormWidgetChoice::setEditChoice(const GooString *new_content)
 {
     if (!hasEdit()) {
-        error(errInternal, -1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice\n");
+        error(errInternal, -1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice");
         return;
     }
 
@@ -1030,7 +1030,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                     usedParentsAux.insert(childRef.num);
 
                     if (terminal) {
-                        error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
+                        error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids");
                         continue;
                     }
 
@@ -1042,7 +1042,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                     if (obj2.isName("Widget")) {
                         // Child is a widget annotation
                         if (!terminal && numChildren > 0) {
-                            error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
+                            error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids");
                             continue;
                         }
                         _createWidget(&childObj, childRef);
@@ -1280,7 +1280,7 @@ GooString *FormField::getFullyQualifiedName()
         }
         parentObj = parentObj.getDict()->lookup("Parent", &parentRef);
         if (parentRef != Ref::INVALID() && !parsedRefs.insert(parentRef.num).second) {
-            error(errSyntaxError, -1, "FormField: Loop while trying to look for Parents\n");
+            error(errSyntaxError, -1, "FormField: Loop while trying to look for Parents");
             return fullyQualifiedName;
         }
     }
@@ -1459,7 +1459,7 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&dictObj, const Ref refA,
             }
         }
         if (flags & 0x1000000) { // 26 -> radiosInUnison
-            error(errUnimplemented, -1, "FormFieldButton:: radiosInUnison flag unimplemented, please report a bug with a testcase\n");
+            error(errUnimplemented, -1, "FormFieldButton:: radiosInUnison flag unimplemented, please report a bug with a testcase");
         }
     }
 
@@ -1813,7 +1813,7 @@ void FormFieldText::setTextFontSize(int fontSize)
         std::vector<std::string> daToks;
         int idx = parseDA(&daToks);
         if (idx == -1) {
-            error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
+            error(errSyntaxError, -1, "FormFieldText:: invalid DA object");
             return;
         }
         if (defaultAppearance) {
@@ -1914,7 +1914,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     if (obj1.isInt()) {
         topIdx = obj1.getInt();
         if (topIdx < 0) {
-            error(errSyntaxError, -1, "FormFieldChoice:: invalid topIdx entry\n");
+            error(errSyntaxError, -1, "FormFieldChoice:: invalid topIdx entry");
             topIdx = 0;
         }
     }
@@ -1931,24 +1931,24 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
                 choices[i].optionName = obj2.getString()->copy();
             } else if (obj2.isArray()) { // [Export_value, Displayed_text]
                 if (obj2.arrayGetLength() < 2) {
-                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2\n");
+                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2");
                     continue;
                 }
                 Object obj3 = obj2.arrayGet(0);
                 if (obj3.isString()) {
                     choices[i].exportVal = obj3.getString()->copy();
                 } else {
-                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string\n");
+                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string");
                 }
 
                 obj3 = obj2.arrayGet(1);
                 if (obj3.isString()) {
                     choices[i].optionName = obj3.getString()->copy();
                 } else {
-                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string\n");
+                    error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string");
                 }
             } else {
-                error(errSyntaxError, -1, "FormWidgetChoice:: invalid {0:d} Opt entry\n", i);
+                error(errSyntaxError, -1, "FormWidgetChoice:: invalid {0:d} Opt entry", i);
             }
         }
     } else {
@@ -2734,7 +2734,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
             rootFields[numFields++] = createFieldFromDict(std::move(obj2), doc, oref.getRef(), nullptr, &usedParents);
         }
     } else {
-        error(errSyntaxError, -1, "Can't get Fields array\n");
+        error(errSyntaxError, -1, "Can't get Fields array");
     }
 
     obj1 = acroForm->dictLookup("CO");
@@ -3119,7 +3119,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
     f = resources->lookupFont(pdfFontNameToEmulate.c_str());
     const CharCodeToUnicode *ccToUnicode = f ? f->getToUnicode() : nullptr;
     if (!ccToUnicode) {
-        error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen\n");
+        error(errInternal, -1, "Form::ensureFontsForAllCharacters: No ccToUnicode, this should not happen");
         return {}; // will never happen with current code
     }
 
@@ -3269,7 +3269,7 @@ std::string Form::findPdfFontNameToUseForSigning()
         }
     }
 
-    error(errInternal, -1, "Form::findPdfFontNameToUseForSigning: No suitable font found'\n");
+    error(errInternal, -1, "Form::findPdfFontNameToUseForSigning: No suitable font found'");
 
     return {};
 }

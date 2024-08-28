@@ -220,7 +220,7 @@ void CairoOutputDev::setCairo(cairo_t *c)
     if (cairo != nullptr) {
         cairo_status_t status = cairo_status(cairo);
         if (status) {
-            error(errInternal, -1, "cairo context error: {0:s}\n", cairo_status_to_string(status));
+            error(errInternal, -1, "cairo context error: {0:s}", cairo_status_to_string(status));
         }
         cairo_destroy(cairo);
         assert(!cairo_shape);
@@ -885,7 +885,7 @@ void CairoOutputDev::updateCTM(GfxState *state, double m11, double m12, double m
      * instead of having to invert the matrix. */
     invert_matrix = matrix;
     if (cairo_matrix_invert(&invert_matrix)) {
-        error(errSyntaxWarning, -1, "matrix not invertible\n");
+        error(errSyntaxWarning, -1, "matrix not invertible");
         return;
     }
 
@@ -1545,7 +1545,7 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
     mat.x0 = matrix[4];
     mat.y0 = matrix[5];
     if (cairo_matrix_invert(&mat)) {
-        error(errSyntaxWarning, -1, "matrix not invertible\n");
+        error(errSyntaxWarning, -1, "matrix not invertible");
         return false;
     }
 

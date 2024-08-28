@@ -2209,7 +2209,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         if (getCollection()->cmp("Adobe-Identity") == 0) {
             error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:s}", name ? name->c_str() : "(null)");
         } else {
-            error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+            error(errSyntaxError, -1, "Unknown character collection {0:t}", getCollection());
         }
         if (ctu) {
             CharCode cid;

@@ -1524,7 +1524,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         outStr->printf("none\r\n");
         break;
     default:
-        error(errUnimplemented, -1, "Unhandled objType : {0:d}, please report a bug with a testcase\r\n", obj->getType());
+        error(errUnimplemented, -1, "Unhandled objType : {0:d}, please report a bug with a testcase", obj->getType());
         break;
     }
 }

@@ -1290,13 +1290,13 @@ err:
             }
         }
         if (xrefHasChanges) {
-            error(errInternal, -1, "xref num {0:d} not found but needed, document has changes, reconstruct aborted\n", num);
+            error(errInternal, -1, "xref num {0:d} not found but needed, document has changes, reconstruct aborted", num);
             // pretend we constructed the xref, otherwise we will do this check again and again
             xrefReconstructed = true;
             return Object(objNull);
         }
 
-        error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct\n", num);
+        error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct", num);
         rootNum = -1;
         constructXRef(&xrefReconstructed);
         return fetch(num, gen, ++recursion, endPos);
@@ -1449,12 +1449,12 @@ void XRef::setModifiedObject(const Object *o, Ref r)
 {
     xrefLocker();
     if (r.num < 0 || r.num >= size) {
-        error(errInternal, -1, "XRef::setModifiedObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
+        error(errInternal, -1, "XRef::setModifiedObject on unknown ref: {0:d}, {1:d}", r.num, r.gen);
         return;
     }
     XRefEntry *e = getEntry(r.num);
     if (unlikely(e->type == xrefEntryFree)) {
-        error(errInternal, -1, "XRef::setModifiedObject on ref: {0:d}, {1:d} that is marked as free. This will cause a memory leak\n", r.num, r.gen);
+        error(errInternal, -1, "XRef::setModifiedObject on ref: {0:d}, {1:d} that is marked as free. This will cause a memory leak", r.num, r.gen);
     }
     e->obj = o->copy();
     e->setFlag(XRefEntry::Updated, true);
@@ -1497,7 +1497,7 @@ void XRef::removeIndirectObject(Ref r)
 {
     xrefLocker();
     if (r.num < 0 || r.num >= size) {
-        error(errInternal, -1, "XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
+        error(errInternal, -1, "XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}", r.num, r.gen);
         return;
     }
     XRefEntry *e = getEntry(r.num);
@@ -1537,7 +1537,7 @@ void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)
 {
     // create free entries linked-list
     if (getEntry(0)->gen != 65535) {
-        error(errInternal, -1, "XRef::writeXRef, entry 0 of the XRef is invalid (gen != 65535)\n");
+        error(errInternal, -1, "XRef::writeXRef, entry 0 of the XRef is invalid (gen != 65535)");
     }
     int lastFreeEntry = 0;
     for (int i = 0; i < size; i++) {

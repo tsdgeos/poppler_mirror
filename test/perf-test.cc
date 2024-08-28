@@ -628,7 +628,7 @@ static void RenderPdfAsText(const char *fileName)
     GooTimer msTimer;
     pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!pdfDoc->isOk()) {
-        error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
+        error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}", fileName);
         goto Exit;
     }
 

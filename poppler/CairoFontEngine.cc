@@ -300,7 +300,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             ff = FoFiTrueType::load(fileName.c_str());
         }
         if (!ff) {
-            error(errSyntaxError, -1, "failed to load truetype font\n");
+            error(errSyntaxError, -1, "failed to load truetype font");
             goto err2;
         }
         /* This might be set already for the CIDType2 case */
@@ -312,7 +312,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         }
         font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create truetype face\n");
+            error(errSyntaxError, -1, "could not create truetype face");
             goto err2;
         }
         break;
@@ -336,7 +336,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
 
         font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create cid face\n");
+            error(errSyntaxError, -1, "could not create cid face");
             goto err2;
         }
         break;
@@ -371,7 +371,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         }
         font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create cid (OT) face\n");
+            error(errSyntaxError, -1, "could not create cid (OT) face");
             goto err2;
         }
         break;
