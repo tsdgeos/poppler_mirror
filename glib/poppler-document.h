@@ -423,7 +423,6 @@ GList *poppler_document_get_signature_fields(PopplerDocument *document);
 POPPLER_PUBLIC
 gint poppler_document_get_n_signatures(const PopplerDocument *document);
 
-/* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER (poppler_index_iter_get_type())
 POPPLER_PUBLIC
 GType poppler_index_iter_get_type(void) G_GNUC_CONST;
@@ -443,7 +442,6 @@ PopplerAction *poppler_index_iter_get_action(PopplerIndexIter *iter);
 POPPLER_PUBLIC
 gboolean poppler_index_iter_next(PopplerIndexIter *iter);
 
-/* Interface for getting the Fonts of a poppler_document */
 #define POPPLER_TYPE_FONT_INFO (poppler_font_info_get_type())
 #define POPPLER_FONT_INFO(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_FONT_INFO, PopplerFontInfo))
 #define POPPLER_IS_FONT_INFO(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_FONT_INFO))
@@ -482,7 +480,6 @@ gboolean poppler_fonts_iter_is_subset(PopplerFontsIter *iter);
 POPPLER_PUBLIC
 gboolean poppler_fonts_iter_next(PopplerFontsIter *iter);
 
-/* Interface for getting the Layers of a poppler_document */
 #define POPPLER_TYPE_LAYERS_ITER (poppler_layers_iter_get_type())
 POPPLER_PUBLIC
 GType poppler_layers_iter_get_type(void) G_GNUC_CONST;
@@ -502,7 +499,6 @@ PopplerLayer *poppler_layers_iter_get_layer(PopplerLayersIter *iter);
 POPPLER_PUBLIC
 gboolean poppler_layers_iter_next(PopplerLayersIter *iter);
 
-/* Export to ps */
 #define POPPLER_TYPE_PS_FILE (poppler_ps_file_get_type())
 #define POPPLER_PS_FILE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_PS_FILE, PopplerPSFile))
 #define POPPLER_IS_PS_FILE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_PS_FILE))

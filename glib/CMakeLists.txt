@@ -34,6 +34,7 @@ set(poppler_glib_public_headers
   poppler-layer.h
   poppler-movie.h
   poppler-media.h
+  poppler-autocleanups.h
   poppler.h
   poppler-structure-element.h
 )
