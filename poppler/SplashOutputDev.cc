@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -4054,7 +4054,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox
 
 void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
 {
-    SplashBitmap *softMask, *tBitmap;
+    SplashBitmap *tBitmap;
     Splash *tSplash;
     SplashTransparencyGroup *transpGroup;
     SplashColor color;
@@ -4116,7 +4116,11 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
         }
     }
 
-    softMask = new SplashBitmap(bitmap->getWidth(), bitmap->getHeight(), 1, splashModeMono8, false);
+    SplashBitmap *softMask = new SplashBitmap(bitmap->getWidth(), bitmap->getHeight(), 1, splashModeMono8, false);
+    if (!softMask->getDataPtr()) {
+        delete softMask;
+        softMask = new SplashBitmap(1, 1, 1, splashModeMono8, false);
+    }
     unsigned char fill = 0;
     if (transpGroupStack->blendingColorSpace) {
         transpGroupStack->blendingColorSpace->getGray(backdropColor, &gray);
@@ -4126,11 +4130,11 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
     p = softMask->getDataPtr() + ty * softMask->getRowSize() + tx;
     int xMax = tBitmap->getWidth();
     int yMax = tBitmap->getHeight();
-    if (xMax > bitmap->getWidth() - tx) {
-        xMax = bitmap->getWidth() - tx;
+    if (xMax > softMask->getWidth() - tx) {
+        xMax = softMask->getWidth() - tx;
     }
-    if (yMax > bitmap->getHeight() - ty) {
-        yMax = bitmap->getHeight() - ty;
+    if (yMax > softMask->getHeight() - ty) {
+        yMax = softMask->getHeight() - ty;
     }
     for (y = 0; y < yMax; ++y) {
         for (x = 0; x < xMax; ++x) {

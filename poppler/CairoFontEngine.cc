@@ -36,6 +36,7 @@
 // Copyright (C) 2023 Pablo Correa Gómez <ablocorrea@hotmail.com>
 // Copyright (C) 2023 Frederic Germain <frederic.germain@gmail.com>
 // Copyright (C) 2023 Ilia Kats <ilia-kats@gmx.net>
+// Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -166,7 +167,7 @@ CairoFreeTypeFont::CairoFreeTypeFont(Ref refA, cairo_font_face_t *cairo_font_fac
 CairoFreeTypeFont::~CairoFreeTypeFont() { }
 
 // Create a cairo_font_face_t for the given font filename OR font data.
-static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
+std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
 {
     FreeTypeFontResource *resource = new FreeTypeFontResource;
     FreeTypeFontFace font_face;
@@ -195,17 +196,6 @@ static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, co
 
     font_face.face = resource->face;
     return font_face;
-}
-
-// Create a cairo_font_face_t for the given font filename OR font data. First checks if external font
-// is in the cache.
-std::optional<FreeTypeFontFace> CairoFreeTypeFont::getFreeTypeFontFace(CairoFontEngine *fontEngine, FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
-{
-    if (font_data.empty()) {
-        return fontEngine->getExternalFontFace(lib, filename);
-    }
-
-    return createFreeTypeFontFace(lib, filename, std::move(font_data));
 }
 
 CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, CairoFontEngine *fontEngine, bool useCIDs)
@@ -250,7 +240,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontType1:
     case fontType1C:
     case fontType1COT:
-        font_face = getFreeTypeFontFace(fontEngine, lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
             error(errSyntaxError, -1, "could not create type1 face");
             goto err2;
@@ -311,7 +301,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             ff = FoFiTrueType::load(fileName.c_str());
         }
         if (!ff) {
-            error(errSyntaxError, -1, "failed to load truetype font\n");
+            error(errSyntaxError, -1, "failed to load truetype font");
             goto err2;
         }
         /* This might be set already for the CIDType2 case */
@@ -321,9 +311,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             codeToGID.insert(codeToGID.begin(), src, src + 256);
             gfree(src);
         }
-        font_face = getFreeTypeFontFace(fontEngine, lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create truetype face\n");
+            error(errSyntaxError, -1, "could not create truetype face");
             goto err2;
         }
         break;
@@ -345,9 +335,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             }
         }
 
-        font_face = getFreeTypeFontFace(fontEngine, lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create cid face\n");
+            error(errSyntaxError, -1, "could not create cid face");
             goto err2;
         }
         break;
@@ -380,9 +370,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 }
             }
         }
-        font_face = getFreeTypeFontFace(fontEngine, lib, fileName, std::move(font_data));
+        font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
-            error(errSyntaxError, -1, "could not create cid (OT) face\n");
+            error(errSyntaxError, -1, "could not create cid (OT) face");
             goto err2;
         }
         break;
@@ -601,9 +591,6 @@ bool CairoType3Font::matches(Ref &other, bool printingA)
 // CairoFontEngine
 //------------------------------------------------------------------------
 
-std::unordered_map<std::string, FreeTypeFontFace> CairoFontEngine::fontFileCache;
-std::recursive_mutex CairoFontEngine::fontFileCacheMutex;
-
 CairoFontEngine::CairoFontEngine(FT_Library libA)
 {
     lib = libA;
@@ -651,34 +638,4 @@ std::shared_ptr<CairoFont> CairoFontEngine::getFont(const std::shared_ptr<GfxFon
         fontCache.push_back(font);
     }
     return font;
-}
-
-std::optional<FreeTypeFontFace> CairoFontEngine::getExternalFontFace(FT_Library ftlib, const std::string &filename)
-{
-    std::scoped_lock lock(fontFileCacheMutex);
-
-    auto it = fontFileCache.find(filename);
-    if (it != fontFileCache.end()) {
-        FreeTypeFontFace font = it->second;
-        cairo_font_face_reference(font.cairo_font_face);
-        return font;
-    }
-
-    std::optional<FreeTypeFontFace> font_face = createFreeTypeFontFace(ftlib, filename, {});
-    if (font_face) {
-        cairo_font_face_reference(font_face->cairo_font_face);
-        fontFileCache[filename] = *font_face;
-    }
-
-    it = fontFileCache.begin();
-    while (it != fontFileCache.end()) {
-        if (cairo_font_face_get_reference_count(it->second.cairo_font_face) == 1) {
-            cairo_font_face_destroy(it->second.cairo_font_face);
-            it = fontFileCache.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
-    return font_face;
 }

@@ -39,6 +39,7 @@
 // Copyright (C) 2023 Khaled Hosny <khaled@aliftype.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2209,7 +2210,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         if (getCollection()->cmp("Adobe-Identity") == 0) {
             error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:s}", name ? name->c_str() : "(null)");
         } else {
-            error(errSyntaxError, -1, "Unknown character collection {0:t}\n", getCollection());
+            error(errSyntaxError, -1, "Unknown character collection {0:t}", getCollection());
         }
         if (ctu) {
             CharCode cid;

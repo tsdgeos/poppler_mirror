@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2022, 2024 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
@@ -556,6 +556,13 @@ int main(int argc, char *argv[])
     for (int i = 0; i < numThreads; i++) {
         threads[i].join();
     }
+
+#ifndef NDEBUG
+    // Clear the cairo font cache. If all references to font faces or
+    // scaled fonts have not been released this function will
+    // assert. If this occurs we have found a memory leak.
+    cairo_debug_reset_static_data();
+#endif
 
     return 0;
 }

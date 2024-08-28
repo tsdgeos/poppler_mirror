@@ -4,7 +4,7 @@
    // Copyright (C) 2010, 2012 Hib Eris <hib@hiberis.nl>
    // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
    // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
-   // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
+   // Copyright (C) 2012, 2017, 2024 Adrian Johnson <ajohnson@redneon.com>
    // Copyright (C) 2012 Mark Brand <mabrand@mabrand.nl>
    // Copyright (C) 2013, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>

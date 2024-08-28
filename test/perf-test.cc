@@ -3,6 +3,7 @@
    Copyright 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org> 2018
    Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    Copyright 2020 Adam Reichold <adam.reichold@t-online.de>
+   Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
    License: GPLv2 */
 /*
   A tool to stress-test poppler rendering and measure rendering times for
@@ -628,7 +629,7 @@ static void RenderPdfAsText(const char *fileName)
     GooTimer msTimer;
     pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!pdfDoc->isOk()) {
-        error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
+        error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}", fileName);
         goto Exit;
     }
 

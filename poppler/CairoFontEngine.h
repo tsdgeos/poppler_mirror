@@ -18,7 +18,7 @@
 // Copyright (C) 2005, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2017, 2022, 2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -89,7 +89,7 @@ public:
 private:
     CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face, std::vector<int> &&codeToGID, bool substitute);
 
-    static std::optional<FreeTypeFontFace> getFreeTypeFontFace(CairoFontEngine *fontEngine, FT_Library lib, const std::string &filename, std::vector<unsigned char> &&data);
+    static std::optional<FreeTypeFontFace> createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data);
 };
 
 //------------------------------------------------------------------------
@@ -123,8 +123,6 @@ public:
 
     std::shared_ptr<CairoFont> getFont(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, bool printing, XRef *xref);
 
-    static std::optional<FreeTypeFontFace> getExternalFontFace(FT_Library ftlib, const std::string &filename);
-
 private:
     FT_Library lib;
     bool useCIDs;
@@ -134,10 +132,6 @@ private:
     // Most recently used is at the end of the vector.
     static const size_t cairoFontCacheSize = 64;
     std::vector<std::shared_ptr<CairoFont>> fontCache;
-
-    // Global cache of cairo_font_face_t for external font files.
-    static std::unordered_map<std::string, FreeTypeFontFace> fontFileCache;
-    static std::recursive_mutex fontFileCacheMutex;
 };
 
 #endif

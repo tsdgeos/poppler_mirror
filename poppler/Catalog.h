@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -33,6 +33,7 @@
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024 Hubert Figuière <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,6 +50,7 @@
 
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <vector>
 
 class PDFDoc;
@@ -265,6 +267,8 @@ public:
 
     std::unique_ptr<LinkAction> getAdditionalAction(DocumentAdditionalActionsType type);
 
+    std::unique_ptr<LinkAction> getOpenAction() const;
+
 private:
     // Get page label info.
     PageLabelInfo *getPageLabelInfo();
@@ -272,6 +276,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
     std::vector<std::pair<std::unique_ptr<Page>, Ref>> pages;
+    std::unordered_map<Ref, std::size_t> refPageMap;
     std::vector<Object> *pagesList;
     std::vector<Ref> *pagesRefList;
     std::vector<PageAttrs *> *attrsList;
@@ -298,7 +303,10 @@ private:
     PageLayout pageLayout; // page layout
     Object additionalActions; // page additional actions
 
+    bool initPageList(); // init the page list. called by cachePageTree.
+    bool cacheSubTree(); // called by cachePageTree.
     bool cachePageTree(int page); // Cache first <page> pages.
+    std::size_t cachePageTreeForRef(const Ref pageRef); // Cache until <pageRef>.
     Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
     Object *getNames();
