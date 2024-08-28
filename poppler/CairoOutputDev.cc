@@ -39,6 +39,7 @@
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2023 Artemy Gordon <artemy.gordon@gmail.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
+// Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
