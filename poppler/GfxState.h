@@ -26,6 +26,7 @@
 // Copyright (C) 2017, 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

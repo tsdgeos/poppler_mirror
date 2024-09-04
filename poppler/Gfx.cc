@@ -48,6 +48,7 @@
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
