@@ -2304,21 +2304,21 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 
     // do shading type-specific operations
     switch (shading->getType()) {
-    case 1:
+    case GfxShading::FunctionBasedShading:
         doFunctionShFill((GfxFunctionShading *)shading);
         break;
-    case 2:
+    case GfxShading::AxialShading:
         doAxialShFill((GfxAxialShading *)shading);
         break;
-    case 3:
+    case GfxShading::RadialShading:
         doRadialShFill((GfxRadialShading *)shading);
         break;
-    case 4:
-    case 5:
+    case GfxShading::FreeFormGouraudShadedTriangleMesh:
+    case GfxShading::LatticeFormGouraudShadedTriangleMesh:
         doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading);
         break;
-    case 6:
-    case 7:
+    case GfxShading::CoonsPatchMesh:
+    case GfxShading::TensorProductPatchMesh:
         doPatchMeshShFill((GfxPatchMeshShading *)shading);
         break;
     }
@@ -2376,21 +2376,21 @@ void Gfx::opShFill(Object args[], int numArgs)
 
     // do shading type-specific operations
     switch (shading->getType()) {
-    case 1:
+    case GfxShading::FunctionBasedShading:
         doFunctionShFill((GfxFunctionShading *)shading);
         break;
-    case 2:
+    case GfxShading::AxialShading:
         doAxialShFill((GfxAxialShading *)shading);
         break;
-    case 3:
+    case GfxShading::RadialShading:
         doRadialShFill((GfxRadialShading *)shading);
         break;
-    case 4:
-    case 5:
+    case GfxShading::FreeFormGouraudShadedTriangleMesh:
+    case GfxShading::LatticeFormGouraudShadedTriangleMesh:
         doGouraudTriangleShFill((GfxGouraudTriangleShading *)shading);
         break;
-    case 6:
-    case 7:
+    case GfxShading::CoonsPatchMesh:
+    case GfxShading::TensorProductPatchMesh:
         doPatchMeshShFill((GfxPatchMeshShading *)shading);
         break;
     }

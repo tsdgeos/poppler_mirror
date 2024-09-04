@@ -857,6 +857,17 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxShading
 {
 public:
+    enum ShadingType
+    {
+        FunctionBasedShading = 1,
+        AxialShading,
+        RadialShading,
+        FreeFormGouraudShadedTriangleMesh,
+        LatticeFormGouraudShadedTriangleMesh,
+        CoonsPatchMesh,
+        TensorProductPatchMesh
+    };
+
     explicit GfxShading(int typeA);
     explicit GfxShading(const GfxShading *shading);
     virtual ~GfxShading();
@@ -868,7 +879,7 @@ public:
 
     virtual GfxShading *copy() const = 0;
 
-    int getType() const { return type; }
+    ShadingType getType() const { return type; }
     GfxColorSpace *getColorSpace() { return colorSpace; }
     const GfxColor *getBackground() const { return &background; }
     bool getHasBackground() const { return hasBackground; }
@@ -884,14 +895,7 @@ public:
 protected:
     virtual bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    // 1: Function-based shading
-    // 2: Axial shading
-    // 3: Radial shading
-    // 4: Free-form Gouraud-shaded triangle mesh
-    // 5: Lattice-form Gouraud-shaded triangle mesh
-    // 6: Coons patch mesh
-    // 7: Tensor-product patch mesh
-    int type;
+    ShadingType type;
     bool hasBackground;
     bool hasBBox;
     GfxColorSpace *colorSpace;
@@ -1446,6 +1450,19 @@ public:
         GfxSubpath *curSubPath;
     };
 
+    enum LineJoinStyle
+    {
+        LineJoinMitre,
+        LineJoinRound,
+        LineJoinBevel
+    };
+
+    enum LineCapStyle
+    {
+        LineCapButt,
+        LineCapRound,
+        LineCapProjecting
+    };
     // Construct a default GfxState, for a device with resolution <hDPI>
     // x <vDPI>, page box <pageBox>, page rotation <rotateA>, and
     // coordinate system specified by <upsideDown>.
@@ -1500,8 +1517,8 @@ public:
         return lineDash;
     }
     int getFlatness() const { return flatness; }
-    int getLineJoin() const { return lineJoin; }
-    int getLineCap() const { return lineCap; }
+    LineJoinStyle getLineJoin() const { return lineJoin; }
+    LineCapStyle getLineCap() const { return lineCap; }
     double getMiterLimit() const { return miterLimit; }
     bool getStrokeAdjust() const { return strokeAdjust; }
     bool getAlphaIsShape() const { return alphaIsShape; }
@@ -1581,8 +1598,8 @@ public:
     void setLineWidth(double width) { lineWidth = width; }
     void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
-    void setLineJoin(int lineJoin1) { lineJoin = lineJoin1; }
-    void setLineCap(int lineCap1) { lineCap = lineCap1; }
+    void setLineJoin(int lineJoin1) { lineJoin = static_cast<LineJoinStyle>(lineJoin1); }
+    void setLineCap(int lineCap1) { lineCap = static_cast<LineCapStyle>(lineCap1); }
     void setMiterLimit(double limit) { miterLimit = limit; }
     void setStrokeAdjust(bool sa) { strokeAdjust = sa; }
     void setAlphaIsShape(bool ais) { alphaIsShape = ais; }
@@ -1714,8 +1731,8 @@ private:
     std::vector<double> lineDash; // line dash
     double lineDashStart;
     int flatness; // curve flatness
-    int lineJoin; // line join style
-    int lineCap; // line cap style
+    LineJoinStyle lineJoin; // line join style
+    LineCapStyle lineCap; // line cap style
     double miterLimit; // line miter limit
     bool strokeAdjust; // stroke adjustment
     bool alphaIsShape; // alpha is shape

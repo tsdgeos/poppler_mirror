@@ -3427,7 +3427,7 @@ GfxPattern *GfxShadingPattern::copy() const
 
 GfxShading::GfxShading(int typeA)
 {
-    type = typeA;
+    type = static_cast<ShadingType>(typeA);
     colorSpace = nullptr;
 }
 
@@ -6506,8 +6506,8 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
     lineWidth = 1;
     lineDashStart = 0;
     flatness = 1;
-    lineJoin = 0;
-    lineCap = 0;
+    lineJoin = GfxState::LineJoinMitre;
+    lineCap = GfxState::LineCapButt;
     miterLimit = 10;
     strokeAdjust = false;
     alphaIsShape = false;

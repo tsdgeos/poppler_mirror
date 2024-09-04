@@ -919,13 +919,13 @@ void CairoOutputDev::updateFlatness(GfxState *state)
 void CairoOutputDev::updateLineJoin(GfxState *state)
 {
     switch (state->getLineJoin()) {
-    case 0:
+    case GfxState::LineJoinMitre:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
         break;
-    case 1:
+    case GfxState::LineJoinRound:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
         break;
-    case 2:
+    case GfxState::LineJoinBevel:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_BEVEL);
         break;
     }
@@ -937,13 +937,13 @@ void CairoOutputDev::updateLineJoin(GfxState *state)
 void CairoOutputDev::updateLineCap(GfxState *state)
 {
     switch (state->getLineCap()) {
-    case 0:
+    case GfxState::LineCapButt:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
         break;
-    case 1:
+    case GfxState::LineCapRound:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_ROUND);
         break;
-    case 2:
+    case GfxState::LineCapProjecting:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_SQUARE);
         break;
     }
