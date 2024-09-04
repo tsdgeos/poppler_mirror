@@ -1,3 +1,11 @@
+Release 24.09.0:
+        core:
+         * Catalog: map page by Ref to make findPage() faster
+         * Catalog: Add support for OpenAction
+         * CairoFontEngine: Fix cairo_font_face_t leak
+         * Splash: Fix crash when softMask fails to allocate
+         * Remove incorrect \n and \r characters at the end of error() strings
+
 Release 24.08.0:
         core:
          * Add support for modifying the appearance stream text in form field choice

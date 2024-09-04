@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "24")
-set(POPPLER_MINOR_VERSION_STRING "08")
+set(POPPLER_MINOR_VERSION_STRING "09")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -225,7 +225,7 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-find_package(Boost 1.74.0)
+find_package(Boost 1.74.0 CONFIG)
 if(Boost_FOUND)
   set(USE_BOOST_HEADERS ON)
 elseif(ENABLE_BOOST)
@@ -614,7 +614,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "140")
+set(POPPLER_SOVERSION_NUMBER "141")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(
