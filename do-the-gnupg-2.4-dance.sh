@@ -22,8 +22,8 @@ then
    exit 1
 fi
 
-GNUPG_VERSION=2.4.1
-GPGME_VERSION=1.19.0
+GNUPG_VERSION=2.4.4
+GPGME_VERSION=1.22.0
 
 WORKDIR=$(mktemp -d)
 
