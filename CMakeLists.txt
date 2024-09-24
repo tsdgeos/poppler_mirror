@@ -84,6 +84,7 @@ option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
 option(RUN_GPERF_IF_PRESENT "Run gperf if it is found" ON)
+option(INSTALL_GLIB_DEMO "Whether to install the poppler-glib-demo program." OFF)
 if(WIN32)
   option(ENABLE_RELOCATABLE "Do not hardcode the poppler library location (on Windows)." ON)
 else()
