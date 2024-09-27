@@ -4699,7 +4699,6 @@ TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotati
     state->getCTM(&ctm);
     ctm.invertTo(&ictm);
 
-    out->startPage(0, state, nullptr);
     out->setDefaultCTM(state->getCTM());
 
     state->setFillColorSpace(std::make_unique<GfxDeviceRGBColorSpace>());
