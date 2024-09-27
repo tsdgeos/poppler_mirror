@@ -36,6 +36,8 @@ typedef struct
     GtkWidget *fg_color_button;
     GtkWidget *bg_color_button;
     GtkWidget *copy_button;
+    GtkWidget *transparent_button;
+    GtkWidget *opacity_range;
 
     PopplerPage *page;
     cairo_surface_t *surface;
@@ -197,7 +199,12 @@ static gboolean pgd_selections_render_selections(PgdSelectionsDemo *demo)
     if (demo->scale != 1.0) {
         cairo_scale(cr, demo->scale, demo->scale);
     }
-    poppler_page_render_selection(demo->page, cr, &doc_area, &demo->doc_area, demo->style, &demo->glyph_color, &demo->background_color);
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(demo->transparent_button))) {
+        double opacity_val = gtk_range_get_value(GTK_RANGE(demo->opacity_range));
+        poppler_page_render_transparent_selection(demo->page, cr, &doc_area, &demo->doc_area, demo->style, &demo->background_color, opacity_val);
+    } else {
+        poppler_page_render_selection(demo->page, cr, &doc_area, &demo->doc_area, demo->style, &demo->glyph_color, &demo->background_color);
+    }
     cairo_destroy(cr);
 
     demo->doc_area = doc_area;
@@ -539,6 +546,18 @@ GtkWidget *pgd_selections_properties_selector_create(PgdSelectionsDemo *demo)
     g_signal_connect(demo->bg_color_button, "notify::color", G_CALLBACK(pgd_selections_bg_color_changed), (gpointer)demo);
     gtk_box_pack_start(GTK_BOX(color_hbox), demo->bg_color_button, TRUE, TRUE, 0);
     gtk_widget_show(demo->bg_color_button);
+
+    gtk_box_pack_start(GTK_BOX(hbox), color_hbox, FALSE, TRUE, 0);
+    gtk_widget_show(color_hbox);
+
+    demo->transparent_button = gtk_check_button_new_with_label("Transparent");
+    gtk_box_pack_start(GTK_BOX(hbox), demo->transparent_button, TRUE, TRUE, 0);
+    gtk_widget_show(demo->transparent_button);
+
+    demo->opacity_range = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0., 1., 0.1);
+    gtk_box_pack_start(GTK_BOX(hbox), demo->opacity_range, TRUE, TRUE, 0);
+    gtk_widget_show(demo->opacity_range);
+    g_object_bind_property(demo->transparent_button, "active", demo->opacity_range, "sensitive", G_BINDING_SYNC_CREATE);
 
     gtk_box_pack_start(GTK_BOX(hbox), color_hbox, FALSE, TRUE, 0);
     gtk_widget_show(color_hbox);
