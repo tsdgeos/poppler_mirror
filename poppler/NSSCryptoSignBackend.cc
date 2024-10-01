@@ -645,7 +645,6 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
         pkInfo.publicKeyStrength = SECKEY_PublicKeyStrengthInBits(pk);
         SECKEY_DestroyPublicKey(pk);
     } else {
-        pkInfo.publicKey = SECItemToGooString(cert->subjectPublicKeyInfo.subjectPublicKey);
         pkInfo.publicKeyType = OTHERKEY;
     }
     certInfo->setPublicKeyInfo(std::move(pkInfo));
