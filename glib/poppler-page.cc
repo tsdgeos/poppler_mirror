@@ -260,8 +260,7 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
         text_dev = new TextOutputDev(nullptr, true, 0, false, false);
         gfx = page->page->createGfx(text_dev, 72.0, 72.0, 0, false, /* useMediaBox */
                                     true, /* Crop */
-                                    -1, -1, -1, -1, false, /* printing */
-                                    nullptr, nullptr);
+                                    -1, -1, -1, -1, nullptr, nullptr);
         page->page->display(gfx);
         text_dev->endPage();
 
@@ -934,8 +933,7 @@ static CairoImageOutputDev *poppler_page_get_image_output_dev(PopplerPage *page,
 
     gfx = page->page->createGfx(image_dev, 72.0, 72.0, 0, false, /* useMediaBox */
                                 true, /* Crop */
-                                -1, -1, -1, -1, false, /* printing */
-                                nullptr, nullptr);
+                                -1, -1, -1, -1, nullptr, nullptr);
     page->page->display(gfx);
     delete gfx;
 

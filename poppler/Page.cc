@@ -539,7 +539,7 @@ void Page::display(OutputDev *out, double hDPI, double vDPI, int rotate, bool us
     displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, -1, -1, -1, -1, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
-Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
+Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
 {
     const PDFRectangle *mediaBox, *cropBox;
     PDFRectangle box;
@@ -585,7 +585,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         replaceXRef(localXRef);
     }
 
-    gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, localXRef);
+    gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, abortCheckCbk, abortCheckCbkData, localXRef);
 
     Object obj = contents.fetch(localXRef);
     if (!obj.isNull()) {
