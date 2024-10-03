@@ -2947,10 +2947,10 @@ Annot *SignatureAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentD
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
 
-    GooString signatureText(text.toStdString());
-    GooString signatureTextLeft(leftText.toStdString());
+    std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(text));
+    std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(leftText));
 
-    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, signatureText, signatureTextLeft, fontSize, leftFontSize, convertQColor(fontColor), borderWidth,
+    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, *gSignatureText, *gSignatureLeftText, fontSize, leftFontSize, convertQColor(fontColor), borderWidth,
                                                                                    convertQColor(borderColor), convertQColor(backgroundColor), imagePath.toStdString());
 
     if (!sig) {
