@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -3739,12 +3739,12 @@ bool DCTStream::readHeader()
 
 bool DCTStream::readBaselineSOF()
 {
-    int length;
     int prec;
     int i;
     int c;
 
-    length = read16();
+    // read the length
+    (void)read16();
     prec = str->getChar();
     height = read16();
     width = read16();
@@ -3779,12 +3779,12 @@ bool DCTStream::readBaselineSOF()
 
 bool DCTStream::readProgressiveSOF()
 {
-    int length;
     int prec;
     int i;
     int c;
 
-    length = read16();
+    // read the length
+    (void)read16();
     prec = str->getChar();
     height = read16();
     width = read16();

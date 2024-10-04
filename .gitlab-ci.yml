@@ -158,13 +158,28 @@ build_qt5_android_qt515_generic:
                          -DCMAKE_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake'
     - ninja -j ${FDO_CI_CONCURRENT}
 
-build_qt6_android:
+build_qt67_android:
   stage: build
-  image: invent-registry.kde.org/sysadmin/ci-images/android-qt65
+  image: invent-registry.kde.org/sysadmin/ci-images/android-qt67-ci
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
+    - sudo apt install --yes wget
   script:
+    - wget https://download.savannah.gnu.org/releases/freetype/freetype-2.13.3.tar.xz
+    - tar xvfh freetype-2.13.3.tar.xz
+    - cd freetype-2.13.3
+    - mkdir -p build && cd build
+    - 'ANDROID_ARCH_ABI=arm64-v8a cmake -G Ninja ..
+                         -DCMAKE_ANDROID_API=29
+                         -DCMAKE_BUILD_TYPE=debug
+                         -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+                         -DCMAKE_TOOLCHAIN_FILE=/home/user/android-arm-clang/lib/cmake/Qt6/qt.toolchain.cmake
+                         -DQT_CHAINLOAD_TOOLCHAIN_FILE=/opt/nativetooling/share/ECM/toolchain/Android.cmake
+                         -DCMAKE_INSTALL_PREFIX=/home/user/android-arm-clang
+                         -DBUILD_SHARED_LIBS=ON'
+    - ninja -j ${FDO_CI_CONCURRENT} install
+    - cd ../..
     - mkdir -p build && cd build
     - 'ANDROID_ARCH_ABI=arm64-v8a cmake -G Ninja ..
                          -DCMAKE_ANDROID_API=29

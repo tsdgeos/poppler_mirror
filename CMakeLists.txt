@@ -518,7 +518,7 @@ if(Androidlib)
   set(poppler_LIBS ${poppler_LIBS} ${Androidlib})
 endif()
 
-if(JPEG_FOUND)
+if(ENABLE_LIBJPEG)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
   )
