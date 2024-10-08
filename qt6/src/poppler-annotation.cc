@@ -2966,6 +2966,8 @@ Annot *SignatureAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentD
 
     pdfAnnot = sig->annotWidget;
 
+    pdfAnnot->incRefCnt();
+
     delete q;
 
     return pdfAnnot;
