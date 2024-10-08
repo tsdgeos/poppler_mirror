@@ -820,6 +820,10 @@ int Catalog::getNumPages()
 {
     catalogLocker();
     if (numPages == -1) {
+        if (!initPageList()) {
+            return 0;
+        }
+
         Object catDict = xref->getCatalog();
         if (!catDict.isDict()) {
             error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
