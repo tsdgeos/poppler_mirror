@@ -294,10 +294,6 @@ static bool poppler_print_annot_cb(Annot *annot, void *user_data)
 {
     PopplerPrintFlags user_print_flags = (PopplerPrintFlags)GPOINTER_TO_INT(user_data);
 
-    if (annot->getFlags() & Annot::flagHidden) {
-        return false;
-    }
-
     if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
         return (annot->getType() == Annot::typeStamp) ? (annot->getFlags() & Annot::flagPrint) : (annot->getType() == Annot::typeWidget);
     }
