@@ -586,8 +586,8 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormFiel
  * @field: a #PopplerFormField that represents a signature annotation
  * @flags: #PopplerSignatureValidationFlags flags influencing process of validation of the field signature
  * @cancellable: (nullable): optional #GCancellable object
- * @callback: (scope async): a #GAsyncReadyCallback to call when the signature is validated
- * @user_data: (closure): the data to pass to callback function
+ * @callback: (scope async) (closure user_data): a #GAsyncReadyCallback to call when the signature is validated
+ * @user_data: the data to pass to callback function
  *
  * Asynchronously validates the cryptographic signature contained in @signature_field.
  *
