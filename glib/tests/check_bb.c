@@ -22,7 +22,7 @@ int equal(double a, double b, double precision)
  */
 int main(int argc, char *argv[])
 {
-    GFile *infile;
+    g_autoptr(GFile) infile = NULL;
     PopplerDocument *doc;
     PopplerPage *page;
     int npages, n;
@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
 
         g_object_unref(page);
     }
+
+    g_object_unref(doc);
 
     return EXIT_SUCCESS;
 }
