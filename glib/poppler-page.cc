@@ -271,45 +271,41 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
     return page->text;
 }
 
-static gboolean annot_is_markup(Annot *annot)
+static bool annots_display_decide_cb(Annot *annot, void *user_data)
 {
-    switch (annot->getType()) {
-    case Annot::typeLink:
-    case Annot::typePopup:
-    case Annot::typeMovie:
-    case Annot::typeScreen:
-    case Annot::typePrinterMark:
-    case Annot::typeTrapNet:
-    case Annot::typeWatermark:
-    case Annot::type3D:
-    case Annot::typeWidget:
-        return FALSE;
-    default:
-        return TRUE;
-    }
-}
+    PopplerRenderAnnotsFlags flags = (PopplerRenderAnnotsFlags)GPOINTER_TO_UINT(user_data);
+    Annot::AnnotSubtype type = annot->getType();
+    int typeMask = 1 << MAX(0, (((int)type) - 1));
 
-static bool poppler_print_annot_cb(Annot *annot, void *user_data)
-{
-    PopplerPrintFlags user_print_flags = (PopplerPrintFlags)GPOINTER_TO_INT(user_data);
-
-    if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY && (annot->getType() == Annot::typeStamp)) {
+    if (flags & typeMask) {
         return true;
     }
-
-    if (user_print_flags & POPPLER_PRINT_MARKUP_ANNOTS && annot_is_markup(annot)) {
-        return true;
-    }
-
-    /* Form fields are always printed */
-    return (annot->getType() == Annot::typeWidget);
+    return false;
 }
 
-static void _poppler_page_render(PopplerPage *page, cairo_t *cairo, bool printing, PopplerPrintFlags print_flags)
+/**
+ * poppler_page_render_full:
+ * @page: the page to render from
+ * @cairo: cairo context to render to
+ * @printing: cairo context to render to
+ * @flags: flags which allow to select which annotations to render
+ *
+ * Render the page to the given cairo context, manually selecting which
+ * annotations should be displayed.
+ *
+ * The @printing parameter determines whether a page is rendered for printing
+ * or for displaying it on a screen. See the documentation for
+ * poppler_page_render_for_printing() for the differences between rendering to
+ * the screen and rendering to a printer.
+ *
+ * Since: 25.02
+ **/
+void poppler_page_render_full(PopplerPage *page, cairo_t *cairo, gboolean printing, PopplerRenderAnnotsFlags flags)
 {
     CairoOutputDev *output_dev;
 
     g_return_if_fail(POPPLER_IS_PAGE(page));
+    g_return_if_fail(cairo != nullptr);
 
     output_dev = page->document->output_dev;
     output_dev->setCairo(cairo);
@@ -319,12 +315,13 @@ static void _poppler_page_render(PopplerPage *page, cairo_t *cairo, bool printin
         page->text = new TextPage(false);
         output_dev->setTextPage(page->text);
     }
-    /* NOTE: instead of passing -1 we should/could use cairo_clip_extents()
-     * to get a bounding box */
+
     cairo_save(cairo);
     page->page->displaySlice(output_dev, 72.0, 72.0, 0, false, /* useMediaBox */
                              true, /* Crop */
-                             -1, -1, -1, -1, printing, nullptr, nullptr, printing ? poppler_print_annot_cb : nullptr, printing ? GINT_TO_POINTER((gint)print_flags) : nullptr);
+                             -1, -1, -1, -1, /* instead of passing -1 we could use cairo_clip_extents() to get a bounding box */
+
+                             printing, nullptr, nullptr, annots_display_decide_cb, GUINT_TO_POINTER((guint)flags));
     cairo_restore(cairo);
 
     output_dev->setCairo(nullptr);
@@ -345,9 +342,7 @@ static void _poppler_page_render(PopplerPage *page, cairo_t *cairo, bool printin
  **/
 void poppler_page_render(PopplerPage *page, cairo_t *cairo)
 {
-    g_return_if_fail(POPPLER_IS_PAGE(page));
-
-    _poppler_page_render(page, cairo, false, (PopplerPrintFlags)0);
+    poppler_page_render_full(page, cairo, false, POPPLER_RENDER_ANNOTS_ALL);
 }
 
 /**
@@ -363,13 +358,24 @@ void poppler_page_render(PopplerPage *page, cairo_t *cairo)
  * differences between rendering to the screen and rendering to a printer.
  *
  * Since: 0.16
+ *
+ * Deprecated: 25.02: Use poppler_page_render_full() instead.
  **/
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *cairo, PopplerPrintFlags options)
 {
-    g_return_if_fail(POPPLER_IS_PAGE(page));
+    int flags = (int)POPPLER_RENDER_ANNOTS_PRINT_DOCUMENT;
 
-    _poppler_page_render(page, cairo, true, options);
+    if (options & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
+        flags |= POPPLER_RENDER_ANNOTS_PRINT_STAMP;
+    }
+    if (options & POPPLER_PRINT_MARKUP_ANNOTS) {
+        flags |= POPPLER_RENDER_ANNOTS_PRINT_MARKUP;
+    }
+
+    poppler_page_render_full(page, cairo, true, (PopplerRenderAnnotsFlags)flags);
 }
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * poppler_page_render_for_printing:
@@ -378,7 +384,8 @@ void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *c
  *
  * Render the page to the given cairo context for printing with
  * #POPPLER_PRINT_ALL flags selected.  If you want a different set of flags,
- * use poppler_page_render_for_printing_with_options().
+ * use poppler_page_render_full() with printing #TRUE and the corresponding
+ * flags.
  *
  * The difference between poppler_page_render() and this function is that some
  * things get rendered differently between screens and printers:
@@ -409,9 +416,7 @@ void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *c
  **/
 void poppler_page_render_for_printing(PopplerPage *page, cairo_t *cairo)
 {
-    g_return_if_fail(POPPLER_IS_PAGE(page));
-
-    _poppler_page_render(page, cairo, true, POPPLER_PRINT_ALL);
+    poppler_page_render_full(page, cairo, true, POPPLER_RENDER_ANNOTS_PRINT_ALL);
 }
 
 static cairo_surface_t *create_surface_from_thumbnail_data(guchar *data, gint width, gint height, gint rowstride)

@@ -77,6 +77,7 @@ poppler_page_get_thumbnail_size
 poppler_page_get_transition
 poppler_page_remove_annot
 poppler_page_render
+poppler_page_render_full
 poppler_page_render_for_printing
 poppler_page_render_for_printing_with_options
 poppler_page_render_selection
