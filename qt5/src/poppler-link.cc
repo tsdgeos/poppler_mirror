@@ -81,6 +81,8 @@ LinkHidePrivate::~LinkHidePrivate() = default;
 
 LinkResetFormPrivate::~LinkResetFormPrivate() = default;
 
+LinkSubmitFormPrivate::~LinkSubmitFormPrivate() = default;
+
 class LinkGotoPrivate : public LinkPrivate
 {
 public:
@@ -706,5 +708,49 @@ LinkResetForm::~LinkResetForm() { }
 Link::LinkType LinkResetForm::linkType() const
 {
     return ResetForm;
+}
+
+// LinkSubmitForm
+// static assertions to ensure flags from Link.h match those from poppler-link.h
+static_assert(static_cast<int>(LinkSubmitForm::NoOpFlag) == static_cast<int>(::LinkSubmitForm::NoOpFlag), "NoOpFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::ExcludeFlag) == static_cast<int>(::LinkSubmitForm::ExcludeFlag), "ExcludeFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::IncludeNoValueFieldsFlag) == static_cast<int>(::LinkSubmitForm::IncludeNoValueFieldsFlag), "IncludeNoValueFieldsFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::ExportFormatFlag) == static_cast<int>(::LinkSubmitForm::ExportFormatFlag), "ExportFormatFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::GetMethodFlag) == static_cast<int>(::LinkSubmitForm::GetMethodFlag), "GetMethodFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::SubmitCoordinatesFlag) == static_cast<int>(::LinkSubmitForm::SubmitCoordinatesFlag), "SubmitCoordinatesFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::XFDFFlag) == static_cast<int>(::LinkSubmitForm::XFDFFlag), "XFDFFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::IncludeAppendSavesFlag) == static_cast<int>(::LinkSubmitForm::IncludeAppendSavesFlag), "IncludeAppendSavesFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::IncludeAnnotationsFlag) == static_cast<int>(::LinkSubmitForm::IncludeAnnotationsFlag), "IncludeAnnotationsFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::SubmitPDFFlag) == static_cast<int>(::LinkSubmitForm::SubmitPDFFlag), "SubmitPDFFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::CanonicalFormatFlag) == static_cast<int>(::LinkSubmitForm::CanonicalFormatFlag), "CanonicalFormatFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::ExclNonUserAnnotsFlag) == static_cast<int>(::LinkSubmitForm::ExclNonUserAnnotsFlag), "ExclNonUserAnnotsFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::ExclFKeyFlag) == static_cast<int>(::LinkSubmitForm::ExclFKeyFlag), "ExclFKeyFlag does not match");
+static_assert(static_cast<int>(LinkSubmitForm::EmbedFormFlag) == static_cast<int>(::LinkSubmitForm::EmbedFormFlag), "EmbedFormFlag does not match");
+
+LinkSubmitForm::LinkSubmitForm(LinkSubmitFormPrivate *lsfp) : Link(*lsfp) { }
+
+LinkSubmitForm::~LinkSubmitForm() { }
+
+Link::LinkType LinkSubmitForm::linkType() const
+{
+    return SubmitForm;
+}
+
+QVector<int> LinkSubmitForm::getFieldIds() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_fieldIds;
+}
+
+QString LinkSubmitForm::getUrl() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_url;
+}
+
+LinkSubmitForm::SubmitFormFlags LinkSubmitForm::getFlags() const
+{
+    Q_D(const LinkSubmitForm);
+    return d->m_flags;
 }
 }

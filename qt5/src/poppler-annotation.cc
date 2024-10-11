@@ -4088,6 +4088,9 @@ void LinkAnnotation::store(QDomNode &node, QDomDocument &document) const
             hyperlinkElement.setAttribute(QStringLiteral("type"), QStringLiteral("ResetForm"));
             break;
         }
+        case Poppler::Link::SubmitForm: {
+            hyperlinkElement.setAttribute(QStringLiteral("type"), QStringLiteral("SubmitForm"));
+        }
         case Poppler::Link::None:
             break;
         }

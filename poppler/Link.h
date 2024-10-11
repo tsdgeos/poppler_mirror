@@ -64,6 +64,7 @@ enum LinkActionKind
     actionOCGState, // Set-OCG-State action
     actionHide, // Hide action
     actionResetForm, // ResetForm action
+    actionSubmitForm, // SubmitForm action
     actionUnknown // anything else
 };
 
@@ -513,6 +514,50 @@ public:
 private:
     std::vector<std::string> fields;
     bool exclude;
+};
+
+//------------------------------------------------------------------------
+// LinkSubmitForm
+//------------------------------------------------------------------------
+
+class POPPLER_PRIVATE_EXPORT LinkSubmitForm : public LinkAction
+{
+public:
+    enum SubmitFormFlag
+    {
+        NoOpFlag = 0,
+        ExcludeFlag = 1,
+        IncludeNoValueFieldsFlag = 1 << 1,
+        ExportFormatFlag = 1 << 2,
+        GetMethodFlag = 1 << 3,
+        SubmitCoordinatesFlag = 1 << 4,
+        XFDFFlag = 1 << 5,
+        IncludeAppendSavesFlag = 1 << 6,
+        IncludeAnnotationsFlag = 1 << 7,
+        SubmitPDFFlag = 1 << 8,
+        CanonicalFormatFlag = 1 << 9,
+        ExclNonUserAnnotsFlag = 1 << 10,
+        ExclFKeyFlag = 1 << 11,
+        // 13th high bit flag is undefined
+        EmbedFormFlag = 1 << 13,
+    };
+
+    // Build a LinkSubmitForm
+    explicit LinkSubmitForm(const Object *submitObj);
+
+    ~LinkSubmitForm() override;
+
+    bool isOk() const override { return !url.empty(); }
+
+    LinkActionKind getKind() const override { return actionSubmitForm; }
+    const std::vector<std::string> &getFields() const { return fields; };
+    const std::string &getUrl() const { return url; };
+    uint32_t getFlags() const { return flags; };
+
+private:
+    std::vector<std::string> fields;
+    std::string url;
+    uint32_t flags = 0;
 };
 
 //------------------------------------------------------------------------

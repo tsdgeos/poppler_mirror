@@ -24,6 +24,7 @@
 
 #include <vector>
 
+#include "poppler-link.h"
 #include "Link.h"
 
 class LinkOCGState;
@@ -76,6 +77,17 @@ public:
 
     QStringList m_fields;
     bool m_exclude;
+};
+
+class LinkSubmitFormPrivate : public LinkPrivate
+{
+public:
+    LinkSubmitFormPrivate(const QRectF &area, const QVector<int> &fieldIds, const QString &url, LinkSubmitForm::SubmitFormFlags flags) : LinkPrivate(area), m_fieldIds(fieldIds), m_url(url), m_flags(flags) { }
+    ~LinkSubmitFormPrivate() override;
+
+    QVector<int> m_fieldIds;
+    QString m_url;
+    LinkSubmitForm::SubmitFormFlags m_flags;
 };
 
 }
