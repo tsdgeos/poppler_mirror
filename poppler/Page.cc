@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -33,6 +33,7 @@
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -539,7 +540,7 @@ void Page::display(OutputDev *out, double hDPI, double vDPI, int rotate, bool us
     displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, -1, -1, -1, -1, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
-Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
+Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
 {
     const PDFRectangle *mediaBox, *cropBox;
     PDFRectangle box;
@@ -585,7 +586,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         replaceXRef(localXRef);
     }
 
-    gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, localXRef);
+    gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, abortCheckCbk, abortCheckCbkData, localXRef);
 
     Object obj = contents.fetch(localXRef);
     if (!obj.isNull()) {
@@ -636,7 +637,6 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     int width, height, bits;
     Object obj1;
     Dict *dict;
-    GfxColorSpace *colorSpace;
     Stream *str;
     GfxImageColorMap *colorMap;
 
@@ -678,7 +678,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     // This will set a sRGB profile for ICC-based colorspaces.
     auto pdfrectangle = std::make_shared<PDFRectangle>();
     auto state = std::make_shared<GfxState>(72.0, 72.0, pdfrectangle.get(), 0, false);
-    colorSpace = GfxColorSpace::parse(nullptr, &obj1, nullptr, state.get());
+    std::unique_ptr<GfxColorSpace> colorSpace = GfxColorSpace::parse(nullptr, &obj1, nullptr, state.get());
     if (!colorSpace) {
         fprintf(stderr, "Error: Cannot parse color space\n");
         return false;
@@ -688,7 +688,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     if (obj1.isNull()) {
         obj1 = dict->lookup("D");
     }
-    colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
+    colorMap = new GfxImageColorMap(bits, &obj1, std::move(colorSpace));
     if (!colorMap->isOk()) {
         fprintf(stderr, "Error: invalid colormap\n");
         delete colorMap;

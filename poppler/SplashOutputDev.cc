@@ -3539,7 +3539,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         Object maskDecode(new Array((xref) ? xref : doc->getXRef()));
         maskDecode.arrayAdd(Object(maskInvert ? 0 : 1));
         maskDecode.arrayAdd(Object(maskInvert ? 1 : 0));
-        maskColorMap = new GfxImageColorMap(1, &maskDecode, new GfxDeviceGrayColorSpace());
+        maskColorMap = new GfxImageColorMap(1, &maskDecode, std::make_unique<GfxDeviceGrayColorSpace>());
         drawSoftMaskedImage(state, ref, str, width, height, colorMap, interpolate, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate);
         delete maskColorMap;
 

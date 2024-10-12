@@ -56,6 +56,7 @@
 // Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2185,26 +2186,26 @@ bool PDFDoc::hasJavascript()
     return jsInfo.containsJS();
 }
 
-bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
-                  const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                  std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
+std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, GooString *partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
+                                                             std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
+                                                             const std::string &imagePath)
 {
-    ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
-        return false;
+        return std::nullopt;
     }
+
     Ref imageResourceRef = Ref::INVALID();
     if (!imagePath.empty()) {
         imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
         if (imageResourceRef == Ref::INVALID()) {
-            return false;
+            return std::nullopt;
         }
     }
 
     Form *form = catalog->getCreateForm();
     const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
     if (pdfFontName.empty()) {
-        return false;
+        return std::nullopt;
     }
 
     const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
@@ -2226,8 +2227,6 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
-    // say that there a now signatures and that we should append only
-    catalog->getAcroForm()->dictSet("SigFlags", Object(3));
     catalog->setAcroFormModified();
 
     form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
@@ -2241,7 +2240,7 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
 
     Object refObj(ref);
     AnnotWidget *signatureAnnot = new AnnotWidget(this, field->getObj(), &refObj, field.get());
-    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
+    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | /*Annot::flagLocked | TODO */ Annot::flagNoRotate);
     Dict dummy(getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
     appearCharacs->setBorderColor(std::move(borderColor));
@@ -2254,25 +2253,49 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);
 
-    destPage->addAnnot(signatureAnnot);
-
     std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
     border->setWidth(borderWidth);
     signatureAnnot->setBorder(std::move(border));
 
-    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
+    return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
+}
+
+bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
+                  const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
+                  std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
+{
+    ::Page *destPage = getPage(page);
+    if (destPage == nullptr) {
+        return false;
+    }
+
+    std::optional<SignatureData> sig =
+            createSignature(destPage, partialFieldName, rect, signatureText, signatureTextLeft, fontSize, leftFontSize, std::move(fontColor), borderWidth, std::move(borderColor), std::move(backgroundColor), imagePath);
+
+    if (!sig) {
+        return false;
+    }
+
+    sig->annotWidget->setFlags(sig->annotWidget->getFlags() | Annot::flagLocked);
+
+    // say that there a now signatures and that we should append only
+    catalog->getAcroForm()->dictSet("SigFlags", Object(3));
+
+    destPage->addAnnot(sig->annotWidget);
+
+    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(sig->formWidget);
     if (fws) {
         const bool res = fws->signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
         // Now remove the signature stuff in case the user wants to continue editing stuff
         // So the document object is clean
-        const Object &vRefObj = field->getObj()->dictLookupNF("V");
+        const Object &vRefObj = sig->field->getObj()->dictLookupNF("V");
         if (vRefObj.isRef()) {
             getXRef()->removeIndirectObject(vRefObj.getRef());
         }
-        destPage->removeAnnot(signatureAnnot);
-        catalog->removeFormFromAcroForm(ref);
-        getXRef()->removeIndirectObject(ref);
+        destPage->removeAnnot(sig->annotWidget);
+        catalog->removeFormFromAcroForm(sig->ref);
+        getXRef()->removeIndirectObject(sig->ref);
 
         return res;
     }

@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2012, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2018, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
@@ -36,6 +36,7 @@
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,7 @@ public:
     // color mode <modeA>.  Rows will be padded out to a multiple of
     // <rowPad> bytes.  If <topDown> is false, the bitmap will be stored
     // upside-down, i.e., with the last row first in memory.
-    SplashBitmap(int widthA, int heightA, int rowPad, SplashColorMode modeA, bool alphaA, bool topDown = true, const std::vector<GfxSeparationColorSpace *> *separationList = nullptr);
+    SplashBitmap(int widthA, int heightA, int rowPad, SplashColorMode modeA, bool alphaA, bool topDown = true, const std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList = nullptr);
     static SplashBitmap *copy(const SplashBitmap *src);
 
     ~SplashBitmap();
@@ -69,10 +70,10 @@ public:
     SplashColorMode getMode() const { return mode; }
     SplashColorPtr getDataPtr() { return data; }
     unsigned char *getAlphaPtr() { return alpha; }
-    std::vector<GfxSeparationColorSpace *> *getSeparationList() { return separationList; }
+    std::vector<std::unique_ptr<GfxSeparationColorSpace>> *getSeparationList() { return separationList; }
     SplashColorConstPtr getDataPtr() const { return data; }
     const unsigned char *getAlphaPtr() const { return alpha; }
-    const std::vector<GfxSeparationColorSpace *> *getSeparationList() const { return separationList; }
+    const std::vector<std::unique_ptr<GfxSeparationColorSpace>> *getSeparationList() const { return separationList; }
 
     SplashError writePNMFile(char *fileName);
     SplashError writePNMFile(FILE *f);
@@ -119,7 +120,7 @@ private:
     SplashColorPtr data; // pointer to row zero of the color data
     unsigned char *alpha; // pointer to row zero of the alpha data
                           //   (always top-down)
-    std::vector<GfxSeparationColorSpace *> *separationList; // list of spot colorants and their mapping functions
+    std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList; // list of spot colorants and their mapping functions
 
     friend class Splash;
 

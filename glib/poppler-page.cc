@@ -260,8 +260,7 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
         text_dev = new TextOutputDev(nullptr, true, 0, false, false);
         gfx = page->page->createGfx(text_dev, 72.0, 72.0, 0, false, /* useMediaBox */
                                     true, /* Crop */
-                                    -1, -1, -1, -1, false, /* printing */
-                                    nullptr, nullptr);
+                                    -1, -1, -1, -1, nullptr, nullptr);
         page->page->display(gfx);
         text_dev->endPage();
 
@@ -295,19 +294,15 @@ static bool poppler_print_annot_cb(Annot *annot, void *user_data)
 {
     PopplerPrintFlags user_print_flags = (PopplerPrintFlags)GPOINTER_TO_INT(user_data);
 
-    if (annot->getFlags() & Annot::flagHidden) {
-        return false;
+    if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY && (annot->getType() == Annot::typeStamp)) {
+        return true;
     }
 
-    if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
-        return (annot->getType() == Annot::typeStamp) ? (annot->getFlags() & Annot::flagPrint) : (annot->getType() == Annot::typeWidget);
+    if (user_print_flags & POPPLER_PRINT_MARKUP_ANNOTS && annot_is_markup(annot)) {
+        return true;
     }
 
-    if (user_print_flags & POPPLER_PRINT_MARKUP_ANNOTS) {
-        return annot_is_markup(annot) ? (annot->getFlags() & Annot::flagPrint) : (annot->getType() == Annot::typeWidget);
-    }
-
-    /* Print document only, form fields are always printed */
+    /* Form fields are always printed */
     return (annot->getType() == Annot::typeWidget);
 }
 
@@ -934,8 +929,7 @@ static CairoImageOutputDev *poppler_page_get_image_output_dev(PopplerPage *page,
 
     gfx = page->page->createGfx(image_dev, 72.0, 72.0, 0, false, /* useMediaBox */
                                 true, /* Crop */
-                                -1, -1, -1, -1, false, /* printing */
-                                nullptr, nullptr);
+                                -1, -1, -1, -1, nullptr, nullptr);
     page->page->display(gfx);
     delete gfx;
 

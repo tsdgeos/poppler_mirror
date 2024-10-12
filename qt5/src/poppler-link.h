@@ -55,6 +55,7 @@ class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
 class LinkHidePrivate;
 class LinkResetFormPrivate;
+class LinkSubmitFormPrivate;
 class MediaRendition;
 class MovieAnnotation;
 class ScreenAnnotation;
@@ -206,6 +207,7 @@ public:
         OCGState, ///< An Optional Content Group state change \since 0.50
         Hide, ///< An action to hide a field \since 0.64
         ResetForm, ///< An action to reset the form \since 24.07
+        SubmitForm, ///< An action to submit a form \since 24.10
     };
 
     /**
@@ -723,6 +725,64 @@ private:
     Q_DISABLE_COPY(LinkResetForm)
 };
 
+/**
+ * SubmitForm : An action to submit a form.
+ *
+ * \since 24.10
+ */
+class POPPLER_QT5_EXPORT LinkSubmitForm : public Link
+{
+public:
+    enum SubmitFormFlag
+    {
+        NoOpFlag = 0,
+        ExcludeFlag = 1,
+        IncludeNoValueFieldsFlag = 1 << 1,
+        ExportFormatFlag = 1 << 2,
+        GetMethodFlag = 1 << 3,
+        SubmitCoordinatesFlag = 1 << 4,
+        XFDFFlag = 1 << 5,
+        IncludeAppendSavesFlag = 1 << 6,
+        IncludeAnnotationsFlag = 1 << 7,
+        SubmitPDFFlag = 1 << 8,
+        CanonicalFormatFlag = 1 << 9,
+        ExclNonUserAnnotsFlag = 1 << 10,
+        ExclFKeyFlag = 1 << 11,
+        // 13th high bit flag is undefined
+        EmbedFormFlag = 1 << 13,
+    };
+    Q_DECLARE_FLAGS(SubmitFormFlags, SubmitFormFlag)
+
+    /**
+     * Create a new SubmitFormLink.
+     */
+    explicit LinkSubmitForm(LinkSubmitFormPrivate *lsfp);
+    /**
+     * Destructor
+     */
+    ~LinkSubmitForm() override;
+
+    LinkType linkType() const override;
+
+    /**
+     * The ids of fields that are to be submitted.
+     */
+    QVector<int> getFieldIds() const;
+
+    /**
+     * The url to which the form is to be submitted.
+     */
+    QString getUrl() const;
+
+    /**
+     * The flags specifying how the form should be submitted.
+     */
+    SubmitFormFlags getFlags() const;
+
+private:
+    Q_DECLARE_PRIVATE(LinkSubmitForm)
+    Q_DISABLE_COPY(LinkSubmitForm)
+};
 }
 
 #endif

@@ -25,6 +25,7 @@
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -133,6 +134,10 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
         // ResetForm action
     } else if (obj2.isName("ResetForm")) {
         action = std::make_unique<LinkResetForm>(obj);
+
+        // SubmitForm action
+    } else if (obj2.isName("SubmitForm")) {
+        action = std::make_unique<LinkSubmitForm>(obj);
 
         // unknown action
     } else if (obj2.isName()) {
@@ -868,6 +873,55 @@ LinkResetForm::LinkResetForm(const Object *obj)
 }
 
 LinkResetForm::~LinkResetForm() = default;
+
+//------------------------------------------------------------------------
+// LinkSubmitForm
+//------------------------------------------------------------------------
+
+LinkSubmitForm::LinkSubmitForm(const Object *obj)
+{
+    if (!obj->isDict()) {
+        return;
+    }
+
+    const Object objFields = obj->dictLookup("Fields");
+    if (objFields.isArray()) {
+        fields.resize(objFields.arrayGetLength());
+        for (int i = 0; i < objFields.arrayGetLength(); ++i) {
+            const Object &objNF = objFields.arrayGetNF(i);
+            if (objNF.isName()) {
+                fields[i] = std::string(objNF.getName());
+            } else if (objNF.isString()) {
+                fields[i] = objNF.getString()->toStr();
+            } else if (objNF.isRef()) {
+                fields[i] = std::to_string(objNF.getRef().num);
+                fields[i].append(" ");
+                fields[i].append(std::to_string(objNF.getRef().gen));
+                fields[i].append(" R");
+            } else {
+                error(errSyntaxWarning, -1, "LinkSubmitForm: unexpected Field type");
+            }
+        }
+    }
+
+    Object objFileSpecification = obj->dictLookup("F");
+    if (objFileSpecification.isDict()) {
+        objFileSpecification = objFileSpecification.dictLookup("F");
+        if (objFileSpecification.isString()) {
+            url = objFileSpecification.getString()->toStr();
+        }
+    } else if (objFileSpecification.isString()) {
+        url = objFileSpecification.getString()->toStr();
+    }
+
+    const Object objFlags = obj->dictLookup("Flags");
+    if (objFlags.isInt()) {
+        flags = objFlags.getInt();
+    }
+    // It is the responsibility of the frontend to remove fields that have NoExport flag set.
+}
+
+LinkSubmitForm::~LinkSubmitForm() = default;
 
 //------------------------------------------------------------------------
 // LinkUnknown

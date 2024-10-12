@@ -123,6 +123,8 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
  *
  * A #PopplerRectangle is used to describe
  * locations on a page and bounding boxes
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerRectangle
 {
@@ -153,6 +155,8 @@ gboolean poppler_rectangle_find_get_ignored_hyphen(const PopplerRectangle *recta
  * @y: y coordinate
  *
  * A #PopplerPoint is used to describe a location point on a page
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerPoint
 {
@@ -187,6 +191,8 @@ void poppler_point_free(PopplerPoint *point);
  *  A #PopplerQuadrilateral is used to describe rectangle-like polygon
  *  with arbitrary inclination on a page.
  *
+ *  Since 24.10 this type supports g_autoptr
+ *
  *  Since: 0.26
  **/
 struct _PopplerQuadrilateral
@@ -217,6 +223,8 @@ void poppler_quadrilateral_free(PopplerQuadrilateral *quad);
  *
  * A #PopplerColor describes a RGB color. Color components
  * are values between 0 and 65535
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerColor
 {
@@ -248,6 +256,8 @@ void poppler_color_free(PopplerColor *color);
  * A #PopplerTextAttributes is used to describe text attributes of a range of text
  *
  * Since: 0.18
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerTextAttributes
 {
@@ -279,6 +289,8 @@ void poppler_text_attributes_free(PopplerTextAttributes *text_attrs);
  *
  * A #PopplerLinkMapping structure represents the location
  * of @action on the page
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerLinkMapping
 {
@@ -319,6 +331,8 @@ void poppler_link_mapping_free(PopplerLinkMapping *mapping);
  *
  * A #PopplerPageTransition structures describes a visual transition
  * to use when moving between pages during a presentation
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerPageTransition
 {
@@ -351,6 +365,8 @@ void poppler_page_transition_free(PopplerPageTransition *transition);
  *
  * A #PopplerImageMapping structure represents the location
  * of an image on the page
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerImageMapping
 {
@@ -377,6 +393,8 @@ void poppler_image_mapping_free(PopplerImageMapping *mapping);
  *
  * A #PopplerFormFieldMapping structure represents the location
  * of @field on the page
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerFormFieldMapping
 {
@@ -403,6 +421,8 @@ void poppler_form_field_mapping_free(PopplerFormFieldMapping *mapping);
  *
  * A #PopplerAnnotMapping structure represents the location
  * of @annot on the page
+ *
+ * Since 24.10 this type supports g_autoptr
  */
 struct _PopplerAnnotMapping
 {

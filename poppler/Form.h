@@ -402,6 +402,8 @@ public:
     FormField *findFieldByRef(Ref aref);
     FormField *findFieldByFullyQualifiedName(const std::string &name);
 
+    bool getNoExport() const { return noExport; }
+
 protected:
     void _createWidget(Object *obj, Ref aref);
     void createChildren(std::set<int> *usedParents);
@@ -419,6 +421,7 @@ protected:
     int numChildren;
     FormWidget **widgets;
     bool readOnly;
+    bool noExport;
 
     GooString *partialName; // T field
     GooString *alternateUiName; // TU field
@@ -743,6 +746,7 @@ public:
     FormWidget *findWidgetByRef(Ref aref);
     FormField *findFieldByRef(Ref aref) const;
     FormField *findFieldByFullyQualifiedName(const std::string &name) const;
+    FormField *findFieldByFullyQualifiedNameOrRef(const std::string &field) const;
 
     void postWidgetsLoad();
 

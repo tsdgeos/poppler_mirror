@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -26,6 +26,7 @@
 // Copyright (C) 2017, 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -254,11 +255,11 @@ public:
     GfxColorSpace(const GfxColorSpace &) = delete;
     GfxColorSpace &operator=(const GfxColorSpace &other) = delete;
 
-    virtual GfxColorSpace *copy() const = 0;
+    virtual std::unique_ptr<GfxColorSpace> copy() const = 0;
     virtual GfxColorSpaceMode getMode() const = 0;
 
     // Construct a color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(GfxResources *res, Object *csObj, OutputDev *out, GfxState *state, int recursion = 0);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Object *csObj, OutputDev *out, GfxState *state, int recursion = 0);
 
     // Convert to gray, RGB, or CMYK.
     virtual void getGray(const GfxColor *color, GfxGray *gray) const = 0;
@@ -273,7 +274,7 @@ public:
     virtual void getDeviceNLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
 
     // create mapping for spot colorants
-    virtual void createMapping(std::vector<GfxSeparationColorSpace *> *separationList, int maxSepComps);
+    virtual void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps);
     int *getMapping() const { return mapping; }
 
     // Does this ColorSpace support getRGBLine?
@@ -322,7 +323,7 @@ class POPPLER_PRIVATE_EXPORT GfxDeviceGrayColorSpace : public GfxColorSpace
 public:
     GfxDeviceGrayColorSpace();
     ~GfxDeviceGrayColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csDeviceGray; }
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -356,11 +357,11 @@ class GfxCalGrayColorSpace : public GfxColorSpace
 public:
     GfxCalGrayColorSpace();
     ~GfxCalGrayColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csCalGray; }
 
     // Construct a CalGray color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -398,7 +399,7 @@ class POPPLER_PRIVATE_EXPORT GfxDeviceRGBColorSpace : public GfxColorSpace
 public:
     GfxDeviceRGBColorSpace();
     ~GfxDeviceRGBColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csDeviceRGB; }
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -432,11 +433,11 @@ class GfxCalRGBColorSpace : public GfxColorSpace
 public:
     GfxCalRGBColorSpace();
     ~GfxCalRGBColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csCalRGB; }
 
     // Construct a CalRGB color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -478,7 +479,7 @@ class POPPLER_PRIVATE_EXPORT GfxDeviceCMYKColorSpace : public GfxColorSpace
 public:
     GfxDeviceCMYKColorSpace();
     ~GfxDeviceCMYKColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csDeviceCMYK; }
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -509,11 +510,11 @@ class GfxLabColorSpace : public GfxColorSpace
 public:
     GfxLabColorSpace();
     ~GfxLabColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csLab; }
 
     // Construct a Lab color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -554,13 +555,15 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxICCBasedColorSpace : public GfxColorSpace
 {
 public:
-    GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA, const Ref *iccProfileStreamA);
+    GfxICCBasedColorSpace(int nCompsA, std::unique_ptr<GfxColorSpace> &&altA, const Ref *iccProfileStreamA);
     ~GfxICCBasedColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csICCBased; }
 
+    std::unique_ptr<GfxICCBasedColorSpace> copyAsOwnType() const;
+
     // Construct an ICCBased color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -582,7 +585,7 @@ public:
     void getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const override;
 
     // ICCBased-specific access.
-    GfxColorSpace *getAlt() { return alt; }
+    GfxColorSpace *getAlt() { return alt.get(); }
     Ref getRef() { return iccProfileStream; }
 #ifdef USE_CMS
     char *getPostScriptCSA();
@@ -593,7 +596,7 @@ public:
 
 private:
     int nComps; // number of color components (1, 3, or 4)
-    GfxColorSpace *alt; // alternate color space
+    std::unique_ptr<GfxColorSpace> alt; // alternate color space
     double rangeMin[4]; // min values for each component
     double rangeMax[4]; // max values for each component
     Ref iccProfileStream; // the ICC profile
@@ -613,13 +616,13 @@ private:
 class GfxIndexedColorSpace : public GfxColorSpace
 {
 public:
-    GfxIndexedColorSpace(GfxColorSpace *baseA, int indexHighA);
+    GfxIndexedColorSpace(std::unique_ptr<GfxColorSpace> &&baseA, int indexHighA);
     ~GfxIndexedColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csIndexed; }
 
     // Construct an Indexed color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -641,15 +644,15 @@ public:
     void getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const override;
 
     // Indexed-specific access.
-    GfxColorSpace *getBase() { return base; }
+    GfxColorSpace *getBase() { return base.get(); }
     int getIndexHigh() const { return indexHigh; }
     unsigned char *getLookup() { return lookup; }
     GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
     unsigned int getOverprintMask() const { return base->getOverprintMask(); }
-    void createMapping(std::vector<GfxSeparationColorSpace *> *separationList, int maxSepComps) override { base->createMapping(separationList, maxSepComps); }
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override { base->createMapping(separationList, maxSepComps); }
 
 private:
-    GfxColorSpace *base; // base color space
+    std::unique_ptr<GfxColorSpace> base; // base color space
     int indexHigh; // max pixel value
     unsigned char *lookup; // lookup table
 };
@@ -661,20 +664,22 @@ private:
 class GfxSeparationColorSpace : public GfxColorSpace
 {
 public:
-    GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA, Function *funcA);
+    GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA);
     ~GfxSeparationColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csSeparation; }
 
+    std::unique_ptr<GfxSeparationColorSpace> copyAsOwnType() const;
+
     // Construct a Separation color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-    void createMapping(std::vector<GfxSeparationColorSpace *> *separationList, int maxSepComps) override;
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override;
 
     int getNComps() const override { return 1; }
     void getDefaultColor(GfxColor *color) const override;
@@ -683,14 +688,14 @@ public:
 
     // Separation-specific access.
     const GooString *getName() const { return name; }
-    GfxColorSpace *getAlt() { return alt; }
+    GfxColorSpace *getAlt() { return alt.get(); }
     const Function *getFunc() const { return func; }
 
 private:
-    GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA);
+    GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA);
 
     GooString *name; // colorant name
-    GfxColorSpace *alt; // alternate color space
+    std::unique_ptr<GfxColorSpace> alt; // alternate color space
     Function *func; // tint transform (into alternate color space)
     bool nonMarking;
 };
@@ -702,20 +707,20 @@ private:
 class GfxDeviceNColorSpace : public GfxColorSpace
 {
 public:
-    GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA, GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace *> *sepsCS);
+    GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA, std::unique_ptr<GfxColorSpace> &&alt, Function *func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCS);
     ~GfxDeviceNColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csDeviceN; }
 
     // Construct a DeviceN color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-    void createMapping(std::vector<GfxSeparationColorSpace *> *separationList, int maxSepComps) override;
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override;
 
     int getNComps() const override { return nComps; }
     void getDefaultColor(GfxColor *color) const override;
@@ -724,18 +729,19 @@ public:
 
     // DeviceN-specific access.
     const std::string &getColorantName(int i) const { return names[i]; }
-    GfxColorSpace *getAlt() { return alt; }
+    GfxColorSpace *getAlt() { return alt.get(); }
     const Function *getTintTransformFunc() const { return func; }
 
 private:
-    GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace *> *sepsCSA, int *mappingA, bool nonMarkingA, unsigned int overprintMaskA);
+    GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&alt, Function *func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCSA, int *mappingA, bool nonMarkingA,
+                         unsigned int overprintMaskA);
 
     const int nComps; // number of components
     const std::vector<std::string> names; // colorant names
-    GfxColorSpace *alt; // alternate color space
+    std::unique_ptr<GfxColorSpace> alt; // alternate color space
     Function *func; // tint transform (into alternate color space)
     bool nonMarking;
-    std::vector<GfxSeparationColorSpace *> *sepsCS; // list of separation cs for spot colorants;
+    std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCS; // list of separation cs for spot colorants;
 };
 
 //------------------------------------------------------------------------
@@ -745,13 +751,13 @@ private:
 class GfxPatternColorSpace : public GfxColorSpace
 {
 public:
-    explicit GfxPatternColorSpace(GfxColorSpace *underA);
+    explicit GfxPatternColorSpace(std::unique_ptr<GfxColorSpace> &&underA);
     ~GfxPatternColorSpace() override;
-    GfxColorSpace *copy() const override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csPattern; }
 
     // Construct a Pattern color space.  Returns nullptr if unsuccessful.
-    static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -762,11 +768,10 @@ public:
     void getDefaultColor(GfxColor *color) const override;
 
     // Pattern-specific access.
-    GfxColorSpace *getUnder() { return under; }
+    GfxColorSpace *getUnder() { return under.get(); }
 
 private:
-    GfxColorSpace *under; // underlying color space (for uncolored
-                          //   patterns)
+    std::unique_ptr<GfxColorSpace> under; // underlying color space (for uncolored patterns)
 };
 
 //------------------------------------------------------------------------
@@ -782,9 +787,9 @@ public:
     GfxPattern(const GfxPattern &) = delete;
     GfxPattern &operator=(const GfxPattern &other) = delete;
 
-    static GfxPattern *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum);
+    static std::unique_ptr<GfxPattern> parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum);
 
-    virtual GfxPattern *copy() const = 0;
+    virtual std::unique_ptr<GfxPattern> copy() const = 0;
 
     int getType() const { return type; }
 
@@ -802,10 +807,10 @@ private:
 class GfxTilingPattern : public GfxPattern
 {
 public:
-    static GfxTilingPattern *parse(Object *patObj, int patternRefNum);
+    static std::unique_ptr<GfxTilingPattern> parse(Object *patObj, int patternRefNum);
     ~GfxTilingPattern() override;
 
-    GfxPattern *copy() const override;
+    std::unique_ptr<GfxPattern> copy() const override;
 
     int getPaintType() const { return paintType; }
     int getTilingType() const { return tilingType; }
@@ -835,18 +840,18 @@ private:
 class GfxShadingPattern : public GfxPattern
 {
 public:
-    static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
+    static std::unique_ptr<GfxShadingPattern> parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
     ~GfxShadingPattern() override;
 
-    GfxPattern *copy() const override;
+    std::unique_ptr<GfxPattern> copy() const override;
 
-    GfxShading *getShading() { return shading; }
+    GfxShading *getShading() { return shading.get(); }
     const double *getMatrix() const { return matrix; }
 
 private:
-    GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA);
+    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA);
 
-    GfxShading *shading;
+    std::unique_ptr<GfxShading> shading;
     double matrix[6];
 };
 
@@ -857,6 +862,17 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxShading
 {
 public:
+    enum ShadingType
+    {
+        FunctionBasedShading = 1,
+        AxialShading,
+        RadialShading,
+        FreeFormGouraudShadedTriangleMesh,
+        LatticeFormGouraudShadedTriangleMesh,
+        CoonsPatchMesh,
+        TensorProductPatchMesh
+    };
+
     explicit GfxShading(int typeA);
     explicit GfxShading(const GfxShading *shading);
     virtual ~GfxShading();
@@ -864,12 +880,12 @@ public:
     GfxShading(const GfxShading &) = delete;
     GfxShading &operator=(const GfxShading &other) = delete;
 
-    static GfxShading *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxShading> parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
 
-    virtual GfxShading *copy() const = 0;
+    virtual std::unique_ptr<GfxShading> copy() const = 0;
 
-    int getType() const { return type; }
-    GfxColorSpace *getColorSpace() { return colorSpace; }
+    ShadingType getType() const { return type; }
+    GfxColorSpace *getColorSpace() { return colorSpace.get(); }
     const GfxColor *getBackground() const { return &background; }
     bool getHasBackground() const { return hasBackground; }
     void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const
@@ -884,17 +900,10 @@ public:
 protected:
     virtual bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    // 1: Function-based shading
-    // 2: Axial shading
-    // 3: Radial shading
-    // 4: Free-form Gouraud-shaded triangle mesh
-    // 5: Lattice-form Gouraud-shaded triangle mesh
-    // 6: Coons patch mesh
-    // 7: Tensor-product patch mesh
-    int type;
+    ShadingType type;
     bool hasBackground;
     bool hasBBox;
-    GfxColorSpace *colorSpace;
+    std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor background;
     double bbox_xMin, bbox_yMin, bbox_xMax, bbox_yMax;
 };
@@ -951,9 +960,9 @@ public:
     explicit GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
-    static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxFunctionShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getDomain(double *x0A, double *y0A, double *x1A, double *y1A) const
     {
@@ -987,9 +996,9 @@ public:
     explicit GfxAxialShading(const GfxAxialShading *shading);
     ~GfxAxialShading() override;
 
-    static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxAxialShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getCoords(double *x0A, double *y0A, double *x1A, double *y1A) const
     {
@@ -1018,9 +1027,9 @@ public:
     explicit GfxRadialShading(const GfxRadialShading *shading);
     ~GfxRadialShading() override;
 
-    static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxRadialShading> parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     void getCoords(double *x0A, double *y0A, double *r0A, double *x1A, double *y1A, double *r1A) const
     {
@@ -1057,9 +1066,9 @@ public:
     explicit GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
     ~GfxGouraudTriangleShading() override;
 
-    static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxGouraudTriangleShading> parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     int getNTriangles() const { return nTriangles; }
 
@@ -1149,9 +1158,9 @@ public:
     explicit GfxPatchMeshShading(const GfxPatchMeshShading *shading);
     ~GfxPatchMeshShading() override;
 
-    static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+    static std::unique_ptr<GfxPatchMeshShading> parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-    GfxShading *copy() const override;
+    std::unique_ptr<GfxShading> copy() const override;
 
     int getNPatches() const { return nPatches; }
     const GfxPatch *getPatch(int i) const { return &patches[i]; }
@@ -1195,7 +1204,7 @@ class POPPLER_PRIVATE_EXPORT GfxImageColorMap
 {
 public:
     // Constructor.
-    GfxImageColorMap(int bitsA, Object *decode, GfxColorSpace *colorSpaceA);
+    GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<GfxColorSpace> &&colorSpaceA);
 
     // Destructor.
     ~GfxImageColorMap();
@@ -1210,7 +1219,7 @@ public:
     bool isOk() const { return ok; }
 
     // Get the color space.
-    GfxColorSpace *getColorSpace() { return colorSpace; }
+    GfxColorSpace *getColorSpace() { return colorSpace.get(); }
 
     // Get stream decoding info.
     int getNumPixelComps() const { return nComps; }
@@ -1248,7 +1257,7 @@ public:
 private:
     explicit GfxImageColorMap(const GfxImageColorMap *colorMap);
 
-    GfxColorSpace *colorSpace; // the image color space
+    std::unique_ptr<GfxColorSpace> colorSpace; // the image color space
     int bits; // bits per component
     int nComps; // number of components in a pixel
     GfxColorSpace *colorSpace2; // secondary color space
@@ -1446,6 +1455,19 @@ public:
         GfxSubpath *curSubPath;
     };
 
+    enum LineJoinStyle
+    {
+        LineJoinMitre,
+        LineJoinRound,
+        LineJoinBevel
+    };
+
+    enum LineCapStyle
+    {
+        LineCapButt,
+        LineCapRound,
+        LineCapProjecting
+    };
     // Construct a default GfxState, for a device with resolution <hDPI>
     // x <vDPI>, page box <pageBox>, page rotation <rotateA>, and
     // coordinate system specified by <upsideDown>.
@@ -1482,10 +1504,10 @@ public:
     void getFillDeviceN(GfxColor *deviceN) { fillColorSpace->getDeviceN(&fillColor, deviceN); }
     void getStrokeCMYK(GfxCMYK *cmyk) { strokeColorSpace->getCMYK(&strokeColor, cmyk); }
     void getStrokeDeviceN(GfxColor *deviceN) { strokeColorSpace->getDeviceN(&strokeColor, deviceN); }
-    GfxColorSpace *getFillColorSpace() { return fillColorSpace; }
-    GfxColorSpace *getStrokeColorSpace() { return strokeColorSpace; }
-    GfxPattern *getFillPattern() { return fillPattern; }
-    GfxPattern *getStrokePattern() { return strokePattern; }
+    GfxColorSpace *getFillColorSpace() { return fillColorSpace.get(); }
+    GfxColorSpace *getStrokeColorSpace() { return strokeColorSpace.get(); }
+    GfxPattern *getFillPattern() { return fillPattern.get(); }
+    GfxPattern *getStrokePattern() { return strokePattern.get(); }
     GfxBlendMode getBlendMode() const { return blendMode; }
     double getFillOpacity() const { return fillOpacity; }
     double getStrokeOpacity() const { return strokeOpacity; }
@@ -1500,8 +1522,8 @@ public:
         return lineDash;
     }
     int getFlatness() const { return flatness; }
-    int getLineJoin() const { return lineJoin; }
-    int getLineCap() const { return lineCap; }
+    LineJoinStyle getLineJoin() const { return lineJoin; }
+    LineCapStyle getLineCap() const { return lineCap; }
     double getMiterLimit() const { return miterLimit; }
     bool getStrokeAdjust() const { return strokeAdjust; }
     bool getAlphaIsShape() const { return alphaIsShape; }
@@ -1565,12 +1587,12 @@ public:
     void setCTM(double a, double b, double c, double d, double e, double f);
     void concatCTM(double a, double b, double c, double d, double e, double f);
     void shiftCTMAndClip(double tx, double ty);
-    void setFillColorSpace(GfxColorSpace *colorSpace);
-    void setStrokeColorSpace(GfxColorSpace *colorSpace);
+    void setFillColorSpace(std::unique_ptr<GfxColorSpace> &&colorSpace);
+    void setStrokeColorSpace(std::unique_ptr<GfxColorSpace> &&colorSpace);
     void setFillColor(const GfxColor *color) { fillColor = *color; }
     void setStrokeColor(const GfxColor *color) { strokeColor = *color; }
-    void setFillPattern(GfxPattern *pattern);
-    void setStrokePattern(GfxPattern *pattern);
+    void setFillPattern(std::unique_ptr<GfxPattern> &&pattern);
+    void setStrokePattern(std::unique_ptr<GfxPattern> &&pattern);
     void setBlendMode(GfxBlendMode mode) { blendMode = mode; }
     void setFillOpacity(double opac) { fillOpacity = opac; }
     void setStrokeOpacity(double opac) { strokeOpacity = opac; }
@@ -1581,8 +1603,8 @@ public:
     void setLineWidth(double width) { lineWidth = width; }
     void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
-    void setLineJoin(int lineJoin1) { lineJoin = lineJoin1; }
-    void setLineCap(int lineCap1) { lineCap = lineCap1; }
+    void setLineJoin(int lineJoin1) { lineJoin = static_cast<LineJoinStyle>(lineJoin1); }
+    void setLineCap(int lineCap1) { lineCap = static_cast<LineCapStyle>(lineCap1); }
     void setMiterLimit(double limit) { miterLimit = limit; }
     void setStrokeAdjust(bool sa) { strokeAdjust = sa; }
     void setAlphaIsShape(bool ais) { alphaIsShape = ais; }
@@ -1613,34 +1635,34 @@ public:
     static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
-    void setDefaultGrayColorSpace(GfxColorSpace *cs) { defaultGrayColorSpace = cs; }
+    void setDefaultGrayColorSpace(std::unique_ptr<GfxColorSpace> &&cs) { defaultGrayColorSpace = std::move(cs); }
 
-    void setDefaultRGBColorSpace(GfxColorSpace *cs) { defaultRGBColorSpace = cs; }
+    void setDefaultRGBColorSpace(std::unique_ptr<GfxColorSpace> &&cs) { defaultRGBColorSpace = std::move(cs); }
 
-    void setDefaultCMYKColorSpace(GfxColorSpace *cs) { defaultCMYKColorSpace = cs; }
+    void setDefaultCMYKColorSpace(std::unique_ptr<GfxColorSpace> &&cs) { defaultCMYKColorSpace = std::move(cs); }
 
-    GfxColorSpace *copyDefaultGrayColorSpace()
+    std::unique_ptr<GfxColorSpace> copyDefaultGrayColorSpace()
     {
         if (defaultGrayColorSpace) {
             return defaultGrayColorSpace->copy();
         }
-        return new GfxDeviceGrayColorSpace();
+        return std::make_unique<GfxDeviceGrayColorSpace>();
     }
 
-    GfxColorSpace *copyDefaultRGBColorSpace()
+    std::unique_ptr<GfxColorSpace> copyDefaultRGBColorSpace()
     {
         if (defaultRGBColorSpace) {
             return defaultRGBColorSpace->copy();
         }
-        return new GfxDeviceRGBColorSpace();
+        return std::make_unique<GfxDeviceRGBColorSpace>();
     }
 
-    GfxColorSpace *copyDefaultCMYKColorSpace()
+    std::unique_ptr<GfxColorSpace> copyDefaultCMYKColorSpace()
     {
         if (defaultCMYKColorSpace) {
             return defaultCMYKColorSpace->copy();
         }
-        return new GfxDeviceCMYKColorSpace();
+        return std::make_unique<GfxDeviceCMYKColorSpace>();
     }
 
     // Add to path.
@@ -1693,12 +1715,12 @@ private:
     double pageWidth, pageHeight; // page size (pixels)
     int rotate; // page rotation angle
 
-    GfxColorSpace *fillColorSpace; // fill color space
-    GfxColorSpace *strokeColorSpace; // stroke color space
+    std::unique_ptr<GfxColorSpace> fillColorSpace; // fill color space
+    std::unique_ptr<GfxColorSpace> strokeColorSpace; // stroke color space
     GfxColor fillColor; // fill color
     GfxColor strokeColor; // stroke color
-    GfxPattern *fillPattern; // fill pattern
-    GfxPattern *strokePattern; // stroke pattern
+    std::unique_ptr<GfxPattern> fillPattern; // fill pattern
+    std::unique_ptr<GfxPattern> strokePattern; // stroke pattern
     GfxBlendMode blendMode; // transparency blend mode
     double fillOpacity; // fill opacity
     double strokeOpacity; // stroke opacity
@@ -1714,8 +1736,8 @@ private:
     std::vector<double> lineDash; // line dash
     double lineDashStart;
     int flatness; // curve flatness
-    int lineJoin; // line join style
-    int lineCap; // line cap style
+    LineJoinStyle lineJoin; // line join style
+    LineCapStyle lineCap; // line cap style
     double miterLimit; // line miter limit
     bool strokeAdjust; // stroke adjustment
     bool alphaIsShape; // alpha is shape
@@ -1752,9 +1774,9 @@ private:
     static GfxLCMSProfilePtr XYZProfile;
 #endif
 
-    GfxColorSpace *defaultGrayColorSpace;
-    GfxColorSpace *defaultRGBColorSpace;
-    GfxColorSpace *defaultCMYKColorSpace;
+    std::unique_ptr<GfxColorSpace> defaultGrayColorSpace;
+    std::unique_ptr<GfxColorSpace> defaultRGBColorSpace;
+    std::unique_ptr<GfxColorSpace> defaultCMYKColorSpace;
 };
 
 #endif

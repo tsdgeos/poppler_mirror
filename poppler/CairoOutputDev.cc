@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -40,6 +40,7 @@
 // Copyright (C) 2023 Artemy Gordon <artemy.gordon@gmail.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -919,13 +920,13 @@ void CairoOutputDev::updateFlatness(GfxState *state)
 void CairoOutputDev::updateLineJoin(GfxState *state)
 {
     switch (state->getLineJoin()) {
-    case 0:
+    case GfxState::LineJoinMitre:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
         break;
-    case 1:
+    case GfxState::LineJoinRound:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
         break;
-    case 2:
+    case GfxState::LineJoinBevel:
         cairo_set_line_join(cairo, CAIRO_LINE_JOIN_BEVEL);
         break;
     }
@@ -937,13 +938,13 @@ void CairoOutputDev::updateLineJoin(GfxState *state)
 void CairoOutputDev::updateLineCap(GfxState *state)
 {
     switch (state->getLineCap()) {
-    case 0:
+    case GfxState::LineCapButt:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
         break;
-    case 1:
+    case GfxState::LineCapRound:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_ROUND);
         break;
-    case 2:
+    case GfxState::LineCapProjecting:
         cairo_set_line_cap(cairo, CAIRO_LINE_CAP_SQUARE);
         break;
     }
@@ -3187,7 +3188,6 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     char *strBuffer;
     int len;
     Object obj;
-    GfxColorSpace *colorSpace;
     StreamKind strKind = str->getKind();
     const char *mime_type;
     cairo_status_t status;
@@ -3227,7 +3227,7 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     }
 
     obj = str->getDict()->lookup("ColorSpace");
-    colorSpace = GfxColorSpace::parse(nullptr, &obj, this, state);
+    std::unique_ptr<GfxColorSpace> colorSpace = GfxColorSpace::parse(nullptr, &obj, this, state);
 
     // colorspace in stream dict may be different from colorspace in jpx
     // data
@@ -3238,7 +3238,6 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
     // only embed mime data for gray, rgb, and cmyk colorspaces.
     if (colorSpace) {
         GfxColorSpaceMode mode = colorSpace->getMode();
-        delete colorSpace;
         switch (mode) {
         case csDeviceGray:
         case csCalGray:

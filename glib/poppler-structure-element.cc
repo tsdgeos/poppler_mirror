@@ -573,6 +573,11 @@ gchar *poppler_structure_element_get_text(PopplerStructureElement *poppler_struc
     return result;
 }
 
+/**
+ * PopplerStructureElementIter:
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerStructureElementIter
 {
     PopplerDocument *document;
@@ -761,6 +766,11 @@ PopplerStructureElementIter *poppler_structure_element_iter_get_child(PopplerStr
     return nullptr;
 }
 
+/**
+ * PopplerTextSpan:
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerTextSpan
 {
     gchar *text;

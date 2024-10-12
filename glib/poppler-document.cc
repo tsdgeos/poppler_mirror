@@ -2593,7 +2593,13 @@ static void poppler_document_class_init(PopplerDocumentClass *klass)
 
 static void poppler_document_init(PopplerDocument *document) { }
 
-/* PopplerIndexIter: For determining the index of a tree */
+/**
+ * PopplerIndexIter:
+ *
+ * Interface for getting the Index of a poppler_document
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerIndexIter
 {
     PopplerDocument *document;
@@ -2820,6 +2826,11 @@ void poppler_index_iter_free(PopplerIndexIter *iter)
     g_slice_free(PopplerIndexIter, iter);
 }
 
+/**
+ * PopplerFontsIter:
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerFontsIter
 {
     std::vector<FontInfo *> items;
@@ -3086,6 +3097,13 @@ struct _PopplerFontInfoClass
     GObjectClass parent_class;
 };
 
+/**
+ * PopplerFontInfo:
+ *
+ * Interface for getting the Fonts of a poppler_document
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 G_DEFINE_TYPE(PopplerFontInfo, poppler_font_info, G_TYPE_OBJECT)
 
 static void poppler_font_info_finalize(GObject *object);
@@ -3357,7 +3375,13 @@ static void poppler_document_layers_free(PopplerDocument *document)
     document->layers_rbgroups = nullptr;
 }
 
-/* PopplerLayersIter */
+/**
+ * PopplerLayersIter:
+ *
+ * Interface for getting the Layers of a poppler_document
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerLayersIter
 {
     PopplerDocument *document;
@@ -3545,6 +3569,13 @@ struct _PopplerPSFileClass
     GObjectClass parent_class;
 };
 
+/**
+ * PopplerPsFile:
+ *
+ * Interface for exporting to ps
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 G_DEFINE_TYPE(PopplerPSFile, poppler_ps_file, G_TYPE_OBJECT)
 
 static void poppler_ps_file_finalize(GObject *object);

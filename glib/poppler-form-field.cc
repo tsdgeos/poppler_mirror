@@ -399,6 +399,8 @@ gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
  *
  * PopplerCertificateInfo contains detailed info about a signing certificate.
  *
+ * Since 24.10 this type supports g_autoptr
+ *
  * Since: 23.07.0
  */
 struct _PopplerCertificateInfo
@@ -423,6 +425,8 @@ G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_ce
  *
  * PopplerSignatureInfo contains detailed info about a signature
  * contained in a form field.
+ *
+ * Since 24.10 this type supports g_autoptr
  *
  * Since: 21.12.0
  **/
@@ -582,8 +586,8 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormFiel
  * @field: a #PopplerFormField that represents a signature annotation
  * @flags: #PopplerSignatureValidationFlags flags influencing process of validation of the field signature
  * @cancellable: (nullable): optional #GCancellable object
- * @callback: (scope async): a #GAsyncReadyCallback to call when the signature is validated
- * @user_data: (closure): the data to pass to callback function
+ * @callback: (scope async) (closure user_data): a #GAsyncReadyCallback to call when the signature is validated
+ * @user_data: the data to pass to callback function
  *
  * Asynchronously validates the cryptographic signature contained in @signature_field.
  *
@@ -1103,8 +1107,11 @@ gchar *poppler_form_field_choice_get_text(PopplerFormField *field)
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }
 
-/* Signing Data */
-
+/**
+ * PopplerSigningData:
+ *
+ * Since 24.10 this type supports g_autoptr
+ */
 struct _PopplerSigningData
 {
     char *destination_filename;
