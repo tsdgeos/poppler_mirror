@@ -793,9 +793,13 @@ public:
      */
     enum SigningResult
     {
-        SigningSuccess,
+        SigningSuccess, ///< No error
         FieldAlreadySigned, ///< Trying to sign a field that is already signed
-        GenericSigningError,
+        GenericSigningError, ///< Unclassified error
+        InternalError, ///< Unexpected error, likely a bug in poppler \since 24.12
+        KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath) \since 24.12
+        WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 24.12
+        UserCancelled, ///< User cancelled the process \since 24.12
     };
 
     SignatureAnnotation();

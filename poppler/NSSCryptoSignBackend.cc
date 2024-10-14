@@ -25,6 +25,7 @@
 
 #include <config.h>
 
+#include "CryptoSignBackend.h"
 #include "NSSCryptoSignBackend.h"
 #include "goo/gdir.h"
 #include "goo/gmem.h"
@@ -1052,10 +1053,10 @@ CertificateValidationStatus NSSSignatureVerification::validateCertificateResult(
     return cachedValidationStatus.value();
 }
 
-std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &password)
+std::variant<GooString, CryptoSign::SigningError> NSSSignatureCreation::signDetached(const std::string &password)
 {
     if (!hashContext) {
-        return {};
+        return CryptoSign::SigningError::InternalError;
     }
     std::vector<unsigned char> digest_buffer = hashContext->endHash();
     SECItem digest;
@@ -1071,47 +1072,47 @@ std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &p
     };
     std::unique_ptr<NSSCMSMessage, NSSCMSMessageDestroyer> cms_msg { NSS_CMSMessage_Create(nullptr) };
     if (!cms_msg) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     NSSCMSSignedData *cms_sd = NSS_CMSSignedData_Create(cms_msg.get());
     if (!cms_sd) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(cms_msg.get());
 
     if (NSS_CMSContentInfo_SetContent_SignedData(cms_msg.get(), cms_cinfo, cms_sd) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
 
     // Attach NULL data as detached data
     if (NSS_CMSContentInfo_SetContent_Data(cms_msg.get(), cms_cinfo, nullptr, PR_TRUE) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     // hardcode SHA256 these days...
     NSSCMSSignerInfo *cms_signer = NSS_CMSSignerInfo_Create(cms_msg.get(), signing_cert, SEC_OID_SHA256);
     if (!cms_signer) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     if (NSS_CMSSignerInfo_IncludeCerts(cms_signer, NSSCMSCM_CertChain, certUsageEmailSigner) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     struct PLArenaFreeFalse
@@ -1178,7 +1179,7 @@ std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &p
      *   smime(16) id-aa(2) 47 }
      */
     if (my_SEC_StringToOID(arena.get(), &aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     aOidData.offset = SEC_OID_UNKNOWN;
@@ -1190,7 +1191,7 @@ std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &p
     aAttribute.encoded = PR_TRUE;
 
     if (my_NSS_CMSSignerInfo_AddAuthAttr(cms_signer, &aAttribute) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     SECItem cms_output;
@@ -1199,11 +1200,11 @@ std::optional<GooString> NSSSignatureCreation::signDetached(const std::string &p
 
     NSSCMSEncoderContext *cms_ecx = NSS_CMSEncoder_Start(cms_msg.get(), nullptr, nullptr, &cms_output, arena.get(), passwordCallback, password.empty() ? nullptr : const_cast<char *>(password.c_str()), nullptr, nullptr, nullptr, nullptr);
     if (!cms_ecx) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess) {
-        return {};
+        return CryptoSign::SigningError::GenericError;
     }
 
     auto signature = GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);

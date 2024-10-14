@@ -30,7 +30,7 @@ public:
     GpgSignatureCreation(const std::string &certId);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
-    std::optional<GooString> signDetached(const std::string &password) final;
+    std::variant<GooString, CryptoSign::SigningError> signDetached(const std::string &password) final;
 
 private:
     std::unique_ptr<GpgME::Context> gpgContext;

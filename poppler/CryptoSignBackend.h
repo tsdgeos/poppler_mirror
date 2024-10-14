@@ -13,8 +13,9 @@
 #include <vector>
 #include <memory>
 #include <chrono>
-#include <optional>
+#include <variant>
 #include <functional>
+#include <optional>
 #include "HashAlgorithm.h"
 #include "CertificateInfo.h"
 #include "SignatureInfo.h"
@@ -27,6 +28,16 @@ namespace CryptoSign {
 // what we have seen in the wild, and much larger than
 // what we have managed to get nss and gpgme to create.
 static const int maxSupportedSignatureSize = 10000;
+
+enum class SigningError
+{
+    GenericError /** Unclassified error*/,
+    InternalError /** Some sort of internal error. This is likely coming from an actual bug in the code*/,
+    WriteFailed /**Some sort of IO error, missing write permissions or ...*/,
+    UserCancelled /**User cancelled the action*/,
+    KeyMissing, /**The key/certificate not specified*/
+
+};
 
 // Classes to help manage signature backends
 
@@ -55,7 +66,7 @@ class SigningInterface
 public:
     virtual void addData(unsigned char *data_block, int data_len) = 0;
     virtual std::unique_ptr<X509CertificateInfo> getCertificateInfo() const = 0;
-    virtual std::optional<GooString> signDetached(const std::string &password) = 0;
+    virtual std::variant<GooString, SigningError> signDetached(const std::string &password) = 0;
     virtual ~SigningInterface();
     SigningInterface() = default;
     SigningInterface(const SigningInterface &other) = delete;

@@ -7,6 +7,7 @@
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
 
+#include "CryptoSignBackend.h"
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
@@ -228,16 +229,20 @@ void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
 {
     gpgData.write(dataBlock, dataLen);
 }
-std::optional<GooString> GpgSignatureCreation::signDetached(const std::string &password)
+std::variant<GooString, CryptoSign::SigningError> GpgSignatureCreation::signDetached(const std::string &password)
 {
     if (!key) {
-        return {};
+        return CryptoSign::SigningError::KeyMissing;
     }
     gpgData.rewind();
     GpgME::Data signatureData;
     const auto signingResult = gpgContext->sign(gpgData, signatureData, GpgME::SignatureMode::Detached);
     if (!isValidResult(signingResult)) {
-        return {};
+        if (signingResult.error().isCanceled()) {
+            return CryptoSign::SigningError::UserCancelled;
+        } else {
+            return CryptoSign::SigningError::GenericError;
+        }
     }
 
     const auto signatureString = signatureData.toString();
