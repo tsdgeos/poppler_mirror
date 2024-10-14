@@ -5,10 +5,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(CMAKE_C_VISIBILITY_PRESET hidden)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-
 configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h @ONLY)
 
 set(poppler_qt5_SRCS
