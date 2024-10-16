@@ -201,6 +201,7 @@ std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Lib
 CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, CairoFontEngine *fontEngine, bool useCIDs)
 {
     std::string fileName;
+    int faceIndex = 0;
     std::vector<unsigned char> font_data;
     int i, n;
     std::optional<GfxFontLoc> fontLoc;
@@ -233,6 +234,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     } else { // gfxFontLocExternal
         fileName = fontLoc->path;
         fontType = fontLoc->fontType;
+        faceIndex = fontLoc->fontNum;
         substitute = true;
     }
 
@@ -281,7 +283,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             if (!font_data.empty()) {
                 ff = FoFiTrueType::make(font_data.data(), font_data.size());
             } else {
-                ff = FoFiTrueType::load(fileName.c_str());
+                ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
             }
             if (!ff) {
                 goto err2;
@@ -298,7 +300,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         if (!font_data.empty()) {
             ff = FoFiTrueType::make(font_data.data(), font_data.size());
         } else {
-            ff = FoFiTrueType::load(fileName.c_str());
+            ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
         }
         if (!ff) {
             error(errSyntaxError, -1, "failed to load truetype font");
@@ -358,7 +360,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 if (!font_data.empty()) {
                     ff = FoFiTrueType::make(font_data.data(), font_data.size());
                 } else {
-                    ff = FoFiTrueType::load(fileName.c_str());
+                    ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
                 }
                 if (ff) {
                     if (ff->isOpenTypeCFF()) {
