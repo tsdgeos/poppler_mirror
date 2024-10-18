@@ -44,6 +44,7 @@ build:
     - mkdir -p build && cd build
     - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/gnupg ..
     - ninja -j ${FDO_CI_CONCURRENT}
+    - ninja -j ${FDO_CI_CONCURRENT} all_verify_interface_header_sets
     - ctest --output-on-failure
 
 build_clang16_libcpp:

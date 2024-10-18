@@ -455,4 +455,7 @@ guint8 *poppler_named_dest_to_bytestring(const char *name, gsize *length);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAction, poppler_action_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerDest, poppler_dest_free)
+
 #endif /* __POPPLER_GLIB_H__ */

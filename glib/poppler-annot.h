@@ -21,6 +21,7 @@
 #ifndef __POPPLER_ANNOT_H__
 #define __POPPLER_ANNOT_H__
 
+#include <cairo.h>
 #include <glib-object.h>
 #include "poppler.h"
 

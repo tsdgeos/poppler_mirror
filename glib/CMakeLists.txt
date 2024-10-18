@@ -34,7 +34,6 @@ set(poppler_glib_public_headers
   poppler-layer.h
   poppler-movie.h
   poppler-media.h
-  poppler-autocleanups.h
   poppler.h
   poppler-structure-element.h
 )
@@ -104,12 +103,24 @@ if (ENABLE_NSS3)
     target_include_directories(poppler-glib SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
 endif()
 
-install(FILES
+set(poppler_glib_all_install_headers
   ${poppler_glib_public_headers}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h
-  DESTINATION include/poppler/glib)
+)
+if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
+  install(FILES ${poppler_glib_all_install_headers} DESTINATION include/poppler/glib)
+else()
+  target_sources(poppler-glib
+    PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
+    FILES
+    ${poppler_glib_all_install_headers}
+  )
+  install(TARGETS poppler-glib FILE_SET HEADERS DESTINATION include/poppler/glib)
+endif()
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
   "${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c"

@@ -33,7 +33,7 @@ endif()
 target_link_libraries(poppler-cpp poppler Iconv::Iconv)
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES
+set(poppler_cpp_all_install_headers
   poppler-destination.h
   poppler-document.h
   poppler-embedded-file.h
@@ -48,5 +48,17 @@ install(FILES
   poppler-toc.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
-  DESTINATION include/poppler/cpp)
+)
 
+if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
+  install(FILES ${poppler_cpp_all_install_headers} DESTINATION include/poppler/cpp)
+else()
+  target_sources(poppler-cpp
+    PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
+    FILES
+    ${poppler_cpp_all_install_headers}
+  )
+  install(TARGETS poppler-cpp FILE_SET HEADERS DESTINATION include/poppler/cpp)
+endif()

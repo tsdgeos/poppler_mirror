@@ -259,6 +259,5 @@ G_END_DECLS
 #include "poppler-movie.h"
 #include "poppler-media.h"
 #include "poppler-structure-element.h"
-#include "poppler-autocleanups.h"
 
 #endif /* __POPPLER_GLIB_H__ */
