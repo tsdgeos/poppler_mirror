@@ -37,6 +37,7 @@
 // Copyright (C) 2023 Frederic Germain <frederic.germain@gmail.com>
 // Copyright (C) 2023 Ilia Kats <ilia-kats@gmx.net>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2024 Dmitry Shubin <dshubin@accusoft.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
