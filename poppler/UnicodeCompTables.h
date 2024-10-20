@@ -5,6 +5,8 @@
 // Can be regenerated from gen-unicode-tables.pl, also in GLib, with relevant
 // Unicode data tables from ftp.unicode.org.
 
+#include "UnicodeTypeTable.h"
+
 #define COMPOSE_FIRST_START 1
 #define COMPOSE_FIRST_SINGLE_START 147
 #define COMPOSE_SECOND_START 357

@@ -582,141 +582,16 @@ private:
 
 #include "Array.h"
 
-inline int Object::arrayGetLength() const
-{
-    OBJECT_TYPE_CHECK(objArray);
-    return array->getLength();
-}
-
-inline void Object::arrayAdd(Object &&elem)
-{
-    OBJECT_TYPE_CHECK(objArray);
-    array->add(std::move(elem));
-}
-
-inline void Object::arrayRemove(int i)
-{
-    OBJECT_TYPE_CHECK(objArray);
-    array->remove(i);
-}
-
-inline Object Object::arrayGet(int i, int recursion = 0) const
-{
-    OBJECT_TYPE_CHECK(objArray);
-    return array->get(i, recursion);
-}
-
-inline const Object &Object::arrayGetNF(int i) const
-{
-    OBJECT_TYPE_CHECK(objArray);
-    return array->getNF(i);
-}
-
 //------------------------------------------------------------------------
 // Dict accessors.
 //------------------------------------------------------------------------
 
 #include "Dict.h"
 
-inline int Object::dictGetLength() const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->getLength();
-}
-
-inline void Object::dictAdd(const char *key, Object &&val)
-{
-    OBJECT_TYPE_CHECK(objDict);
-    dict->add(key, std::move(val));
-}
-
-inline void Object::dictSet(const char *key, Object &&val)
-{
-    OBJECT_TYPE_CHECK(objDict);
-    dict->set(key, std::move(val));
-}
-
-inline void Object::dictRemove(const char *key)
-{
-    OBJECT_TYPE_CHECK(objDict);
-    dict->remove(key);
-}
-
-inline bool Object::dictIs(const char *dictType) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->is(dictType);
-}
-
-inline bool Object::isDict(const char *dictType) const
-{
-    return type == objDict && dictIs(dictType);
-}
-
-inline Object Object::dictLookup(const char *key, int recursion) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->lookup(key, recursion);
-}
-
-inline const Object &Object::dictLookupNF(const char *key) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->lookupNF(key);
-}
-
-inline const char *Object::dictGetKey(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->getKey(i);
-}
-
-inline Object Object::dictGetVal(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->getVal(i);
-}
-
-inline const Object &Object::dictGetValNF(int i) const
-{
-    OBJECT_TYPE_CHECK(objDict);
-    return dict->getValNF(i);
-}
-
 //------------------------------------------------------------------------
 // Stream accessors.
 //------------------------------------------------------------------------
 
 #include "Stream.h"
-
-inline void Object::streamReset()
-{
-    OBJECT_TYPE_CHECK(objStream);
-    stream->reset();
-}
-
-inline void Object::streamClose()
-{
-    OBJECT_TYPE_CHECK(objStream);
-    stream->close();
-}
-
-inline int Object::streamGetChar()
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return stream->getChar();
-}
-
-inline int Object::streamGetChars(int nChars, unsigned char *buffer)
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return stream->doGetChars(nChars, buffer);
-}
-
-inline Dict *Object::streamGetDict() const
-{
-    OBJECT_TYPE_CHECK(objStream);
-    return stream->getDict();
-}
 
 #endif

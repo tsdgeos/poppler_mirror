@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2017-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -88,5 +88,39 @@ private:
     std::atomic_int ref; // reference count
     mutable std::recursive_mutex mutex;
 };
+
+//------------------------------------------------------------------------
+// Object Array accessors.
+//------------------------------------------------------------------------
+
+inline int Object::arrayGetLength() const
+{
+    OBJECT_TYPE_CHECK(objArray);
+    return array->getLength();
+}
+
+inline void Object::arrayAdd(Object &&elem)
+{
+    OBJECT_TYPE_CHECK(objArray);
+    array->add(std::move(elem));
+}
+
+inline void Object::arrayRemove(int i)
+{
+    OBJECT_TYPE_CHECK(objArray);
+    array->remove(i);
+}
+
+inline Object Object::arrayGet(int i, int recursion = 0) const
+{
+    OBJECT_TYPE_CHECK(objArray);
+    return array->get(i, recursion);
+}
+
+inline const Object &Object::arrayGetNF(int i) const
+{
+    OBJECT_TYPE_CHECK(objArray);
+    return array->getNF(i);
+}
 
 #endif

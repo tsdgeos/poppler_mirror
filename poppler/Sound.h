@@ -1,6 +1,6 @@
 /* Sound.h - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2021, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,9 @@
 
 #include <memory>
 
-class Object;
-class Stream;
+#include "poppler_private_export.h"
+
+#include "Object.h"
 
 //------------------------------------------------------------------------
 

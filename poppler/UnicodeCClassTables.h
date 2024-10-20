@@ -5,6 +5,8 @@
 // Can be regenerated from gen-unicode-tables.pl, also in GLib, with relevant
 // Unicode data tables from ftp.unicode.org.
 
+#include "UnicodeTypeTable.h"
+
 static const Unicode cclass_data[][256] = {
     { /* page 3, index 0 */
       230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 230, 232, 220, 220, 220, 220, 232, 216, 220, 220, 220, 220, 220, 202, 202, 220, 220, 220, 220, 202, 202, 220, 220,
