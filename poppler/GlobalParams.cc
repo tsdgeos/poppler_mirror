@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -885,18 +885,16 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
 }
 #endif
 
-GooString *GlobalParams::findFontFile(const std::string &fontName)
+std::optional<std::string> GlobalParams::findFontFile(const std::string &fontName)
 {
-    GooString *path = nullptr;
-
     setupBaseFonts(POPPLER_FONTSDIR);
     globalParamsLocker();
     const auto fontFile = fontFiles.find(fontName);
     if (fontFile != fontFiles.end()) {
-        path = new GooString(fontFile->second);
+        return fontFile->second;
     }
 
-    return path;
+    return {};
 }
 
 #if defined(WITH_FONTCONFIGURATION_FONTCONFIG) || defined(WITH_FONTCONFIGURATION_WIN32)
@@ -943,7 +941,7 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 // not needed for fontconfig
 void GlobalParams::setupBaseFonts(const char *) { }
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
 {
     SysFontType type;
     int fontNum;
@@ -951,21 +949,21 @@ GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const G
     return findSystemFontFile(font, &type, &fontNum, substituteFontName, base14Name);
 }
 
-GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
 {
     const SysFontInfo *fi = nullptr;
     FcPattern *p = nullptr;
-    GooString *path = nullptr;
+    std::optional<std::string> path;
     const std::optional<std::string> &fontName = font->getName();
     GooString substituteName;
     if (!fontName) {
-        return nullptr;
+        return {};
     }
 
     globalParamsLocker();
 
     if ((fi = sysFonts->find(*fontName, font->isFixedWidth(), true))) {
-        path = fi->path->copy();
+        path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
         substituteName.Set(fi->substituteName->c_str());
@@ -1060,7 +1058,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
-                    path = new GooString((char *)s);
+                    path = std::string((char *)s);
                 } else if (!strncasecmp(ext, ".pfa", 4) || !strncasecmp(ext, ".pfb", 4)) {
                     int weight, slant;
                     bool bold = font->isBold();
@@ -1083,7 +1081,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
                     SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
-                    path = new GooString((char *)s);
+                    path = std::string((char *)s);
                 } else {
                     continue;
                 }
@@ -1099,8 +1097,8 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         }
         FcFontSetDestroy(set);
     }
-    if (path == nullptr && (fi = sysFonts->find(*fontName, font->isFixedWidth(), false))) {
-        path = fi->path->copy();
+    if (!path && (fi = sysFonts->find(*fontName, font->isFixedWidth(), false))) {
+        path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
     }
@@ -1190,7 +1188,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 #elif defined(WITH_FONTCONFIGURATION_ANDROID)
 // Uses the font file mapping created by GlobalParams::setupBaseFonts
 // to return the path to a base-14 font file
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1213,13 +1211,12 @@ struct AFontDestroyer
 
 #    endif
 
-GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
 {
-    GooString *path = nullptr;
     const std::optional<std::string> &fontName = font->getName();
 
     if (!fontName) {
-        return nullptr;
+        return {};
     }
 
     globalParamsLocker();
@@ -1244,13 +1241,13 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
 
     // Get font match and the font file's path
     std::unique_ptr<AFont, AFontDestroyer> afont { AFontMatcher_match(fontmatcher.get(), genericFontFamily.c_str(), (uint16_t *)u"A", 1, nullptr) };
-    path = new GooString(AFont_getFontFilePath(afont.get()));
+    std::string path = std::string(AFont_getFontFilePath(afont.get()));
 
     // Set the type of font. Fonts returned by AFontMatcher are of
     // four possible types - ttf, otf, ttc, otc.
-    if (path->ends_with(".ttf") || path->ends_with(".otf")) {
+    if (path.ends_with(".ttf") || path.ends_with(".otf")) {
         *type = sysFontTTF;
-    } else if (path->ends_with(".ttc") || path->ends_with(".otc")) {
+    } else if (path.ends_with(".ttc") || path.ends_with(".otc")) {
         *type = sysFontTTC;
     }
 #    else
@@ -1337,7 +1334,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 #elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1356,7 +1353,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     return {};
 }
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1419,20 +1416,19 @@ void GlobalParams::setupBaseFonts(const char *dir)
     }
 }
 
-GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString * /*substituteFontName*/, const GooString * /*base14Name*/)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString * /*substituteFontName*/, const GooString * /*base14Name*/)
 {
     const SysFontInfo *fi;
-    GooString *path;
+    std::optional<std::string> path;
 
     const std::optional<std::string> &fontName = font->getName();
     if (!fontName) {
-        return nullptr;
+        return {};
     }
 
-    path = nullptr;
     globalParamsLocker();
     if ((fi = sysFonts->find(*fontName, font->isFixedWidth(), false))) {
-        path = fi->path->copy();
+        path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
     }

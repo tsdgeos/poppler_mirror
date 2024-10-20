@@ -186,10 +186,9 @@ GfxFontLoc::GfxFontLoc(GfxFontLoc &&other) noexcept = default;
 
 GfxFontLoc &GfxFontLoc::operator=(GfxFontLoc &&other) noexcept = default;
 
-void GfxFontLoc::setPath(GooString *pathA)
+void GfxFontLoc::setPath(const std::string &pathA)
 {
-    path = pathA->toStr();
-    delete pathA;
+    path = pathA;
 }
 
 const GooString *GfxFontLoc::pathAsGooString() const
@@ -634,7 +633,8 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits, CharCod
 std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooString *substituteFontName)
 {
     SysFontType sysFontType;
-    GooString *path, *base14Name;
+    std::optional<std::string> path;
+    GooString *base14Name;
     int substIdx, fontNum;
     bool embed;
 
@@ -705,7 +705,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
 
     //----- external font file (fontFile, fontDir)
     if (name && (path = globalParams->findFontFile(*name))) {
-        if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, isCIDFont())) {
+        if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, isCIDFont())) {
             return fontLoc;
         }
     }
@@ -714,7 +714,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
     if (!ps && !isCIDFont() && ((Gfx8BitFont *)this)->base14) {
         base14Name = new GooString(((Gfx8BitFont *)this)->base14->base14Name);
         if ((path = globalParams->findBase14FontFile(base14Name, this, substituteFontName))) {
-            if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, false)) {
+            if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
                 delete base14Name;
                 return fontLoc;
             }
@@ -729,13 +729,13 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
                 GfxFontLoc fontLoc;
                 fontLoc.locType = gfxFontLocExternal;
                 fontLoc.fontType = fontCIDType2;
-                fontLoc.setPath(path);
+                fontLoc.setPath(*path);
                 fontLoc.fontNum = fontNum;
                 return fontLoc;
             }
         } else {
             GfxFontLoc fontLoc;
-            fontLoc.setPath(path);
+            fontLoc.setPath(*path);
             fontLoc.locType = gfxFontLocExternal;
             if (sysFontType == sysFontTTF || sysFontType == sysFontTTC) {
                 fontLoc.fontType = fontTrueType;
@@ -745,7 +745,6 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
             }
             return fontLoc;
         }
-        delete path;
     }
 
     if (!isCIDFont()) {
@@ -776,7 +775,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
         } else {
             path = globalParams->findFontFile(substName);
             if (path) {
-                if (std::optional<GfxFontLoc> fontLoc = getExternalFont(path, false)) {
+                if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
                     error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
                     name = base14SubstFonts[substIdx];
                     fontLoc->substIdx = substIdx;
@@ -793,12 +792,12 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
     return std::nullopt;
 }
 
-std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
+std::optional<GfxFontLoc> GfxFont::getExternalFont(const std::string &path, bool cid)
 {
     FoFiIdentifierType fft;
     GfxFontType fontType;
 
-    fft = FoFiIdentifier::identifyFile(path->c_str());
+    fft = FoFiIdentifier::identifyFile(path.c_str());
     switch (fft) {
     case fofiIdType1PFA:
     case fofiIdType1PFB:
@@ -827,7 +826,6 @@ std::optional<GfxFontLoc> GfxFont::getExternalFont(GooString *path, bool cid)
         break;
     }
     if (fontType == fontUnknownType || (cid ? (fontType < fontCIDType0) : (fontType >= fontCIDType0))) {
-        delete path;
         return std::nullopt;
     }
     GfxFontLoc fontLoc;
