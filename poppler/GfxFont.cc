@@ -186,16 +186,6 @@ GfxFontLoc::GfxFontLoc(GfxFontLoc &&other) noexcept = default;
 
 GfxFontLoc &GfxFontLoc::operator=(GfxFontLoc &&other) noexcept = default;
 
-void GfxFontLoc::setPath(const std::string &pathA)
-{
-    path = pathA;
-}
-
-const GooString *GfxFontLoc::pathAsGooString() const
-{
-    return (const GooString *)(&path);
-}
-
 //------------------------------------------------------------------------
 // GfxFont
 //------------------------------------------------------------------------
@@ -729,13 +719,13 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
                 GfxFontLoc fontLoc;
                 fontLoc.locType = gfxFontLocExternal;
                 fontLoc.fontType = fontCIDType2;
-                fontLoc.setPath(*path);
+                fontLoc.path = *path;
                 fontLoc.fontNum = fontNum;
                 return fontLoc;
             }
         } else {
             GfxFontLoc fontLoc;
-            fontLoc.setPath(*path);
+            fontLoc.path = *path;
             fontLoc.locType = gfxFontLocExternal;
             if (sysFontType == sysFontTTF || sysFontType == sysFontTTC) {
                 fontLoc.fontType = fontTrueType;
@@ -831,7 +821,7 @@ std::optional<GfxFontLoc> GfxFont::getExternalFont(const std::string &path, bool
     GfxFontLoc fontLoc;
     fontLoc.locType = gfxFontLocExternal;
     fontLoc.fontType = fontType;
-    fontLoc.setPath(path);
+    fontLoc.path = path;
     return fontLoc;
 }
 

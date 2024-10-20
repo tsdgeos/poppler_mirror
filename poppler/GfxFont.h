@@ -124,9 +124,6 @@ public:
     GfxFontLoc &operator=(const GfxFontLoc &) = delete;
     GfxFontLoc &operator=(GfxFontLoc &&other) noexcept;
 
-    void setPath(const std::string &pathA);
-    const GooString *pathAsGooString() const;
-
     GfxFontLocType locType;
     GfxFontType fontType;
     Ref embFontID; // embedded stream obj ID

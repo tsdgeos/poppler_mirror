@@ -2009,18 +2009,18 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                         //~ this won't work -- the PS font name won't match
                         psName = makePSFontName(font, font->getID());
                     }
-                    setupExternalType1Font(fontLoc->pathAsGooString(), psName);
+                    setupExternalType1Font(fontLoc->path, psName);
                     break;
                 case fontTrueType:
                 case fontTrueTypeOT:
                     psName = makePSFontName(font, font->getID());
-                    setupExternalTrueTypeFont(font, fontLoc->pathAsGooString(), psName);
+                    setupExternalTrueTypeFont(font, fontLoc->path, psName);
                     break;
                 case fontCIDType2:
                 case fontCIDType2OT:
                     psName = makePSFontName(font, font->getID());
                     //~ should check to see if font actually uses vertical mode
-                    setupExternalCIDTrueTypeFont(font, fontLoc->pathAsGooString(), psName, true);
+                    setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, true);
                     break;
                 default:
                     break;
@@ -2272,7 +2272,7 @@ err1:
     }
 }
 
-void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *psName)
+void PSOutputDev::setupExternalType1Font(const std::string &fileName, GooString *psName)
 {
     static const char hexChar[17] = "0123456789abcdef";
     FILE *fontFile;
@@ -2289,7 +2289,7 @@ void PSOutputDev::setupExternalType1Font(const GooString *fileName, GooString *p
     embFontList->append("\n");
 
     // copy the font file
-    if (!(fontFile = openFile(fileName->c_str(), "rb"))) {
+    if (!(fontFile = openFile(fileName.c_str(), "rb"))) {
         error(errIO, -1, "Couldn't open external font file");
         return;
     }
@@ -2457,7 +2457,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName)
+void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName)
 {
     int *codeToGID;
 
@@ -2468,7 +2468,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const GooString *file
     embFontList->append("\n");
 
     // convert it to a Type 42 font
-    if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName->c_str())) {
+    if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str())) {
         codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
         ffTT->convertToType42(psName->c_str(), ((Gfx8BitFont *)font)->getHasEncoding() ? ((Gfx8BitFont *)font)->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
         if (codeToGID) {
@@ -2496,7 +2496,7 @@ void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
     }
 }
 
-void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName, bool needVerticalMetrics)
+void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, bool needVerticalMetrics)
 {
     int *codeToGID;
     int codeToGIDLen;
@@ -2509,7 +2509,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *f
 
     // convert it to a Type 0 font
     //~ this should use fontNum to load the correct font
-    if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName->c_str())) {
+    if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str())) {
 
         // check for embedding permission
         if (ffTT->getEmbeddingRights() >= 1) {
