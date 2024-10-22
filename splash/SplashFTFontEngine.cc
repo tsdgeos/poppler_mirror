@@ -64,29 +64,29 @@ SplashFTFontEngine::~SplashFTFontEngine()
     FT_Done_FreeType(lib);
 }
 
-SplashFontFile *SplashFTFontEngine::loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFTFontEngine::loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
-    return SplashFTFontFile::loadType1Font(this, idA, src, enc);
+    return SplashFTFontFile::loadType1Font(this, idA, src, enc, faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFTFontEngine::loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
-    return SplashFTFontFile::loadType1Font(this, idA, src, enc);
+    return SplashFTFontFile::loadType1Font(this, idA, src, enc, faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
-    return SplashFTFontFile::loadType1Font(this, idA, src, enc);
+    return SplashFTFontFile::loadType1Font(this, idA, src, enc, faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src)
+SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src, int faceIndex)
 {
-    return SplashFTFontFile::loadCIDFont(this, idA, src, nullptr, 0);
+    return SplashFTFontFile::loadCIDFont(this, idA, src, nullptr, 0, faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen)
+SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
 {
-    return SplashFTFontFile::loadCIDFont(this, idA, src, codeToGID ? codeToGID : nullptr, codeToGID ? codeToGIDLen : 0);
+    return SplashFTFontFile::loadCIDFont(this, idA, src, codeToGID ? codeToGID : nullptr, codeToGID ? codeToGIDLen : 0, faceIndex);
 }
 
 SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)

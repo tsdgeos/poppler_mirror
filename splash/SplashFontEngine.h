@@ -61,12 +61,12 @@ public:
     SplashFontFile *getFontFile(SplashFontFileID *id);
 
     // Load fonts - these create new SplashFontFile objects.
-    SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-    SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-    SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc);
-    SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
-    SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen);
-    SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex = 0);
+    SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src, int faceIndex);
+    SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
+    SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
 
     // Get a font - this does a cache lookup first, and if not found,
     // creates a new SplashFont object and adds it to the cache.  The

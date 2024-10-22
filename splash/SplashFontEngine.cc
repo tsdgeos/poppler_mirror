@@ -84,12 +84,12 @@ SplashFontFile *SplashFontEngine::getFontFile(SplashFontFileID *id)
     return nullptr;
 }
 
-SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadType1Font(idA, src, enc);
+        fontFile = ftEngine->loadType1Font(idA, src, enc, faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link
@@ -103,12 +103,12 @@ SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA, SplashFon
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadType1CFont(idA, src, enc);
+        fontFile = ftEngine->loadType1CFont(idA, src, enc, faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link
@@ -122,12 +122,12 @@ SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA, SplashFo
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc)
+SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadOpenTypeT1CFont(idA, src, enc);
+        fontFile = ftEngine->loadOpenTypeT1CFont(idA, src, enc, faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link
@@ -141,12 +141,12 @@ SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA, Spl
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src)
+SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadCIDFont(idA, src);
+        fontFile = ftEngine->loadCIDFont(idA, src, faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link
@@ -160,12 +160,12 @@ SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA, SplashFontS
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen)
+SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadOpenTypeCFFFont(idA, src, codeToGID, codeToGIDLen);
+        fontFile = ftEngine->loadOpenTypeCFFFont(idA, src, codeToGID, codeToGIDLen, faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link

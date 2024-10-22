@@ -2994,7 +2994,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
 
         static const int basicMultilingualMaxCode = 65535;
 
-        const std::unique_ptr<FoFiTrueType> fft = FoFiTrueType::load(filepath.c_str());
+        const std::unique_ptr<FoFiTrueType> fft = FoFiTrueType::load(filepath.c_str(), faceIndex);
         if (fft) {
 
             // Look for the Unicode BMP cmaps, which are 0/3 or 3/1

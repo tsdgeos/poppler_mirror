@@ -1826,7 +1826,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashFontSrc *fontsrc = nullptr;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;
-    int faceIndex = 0;
     SplashCoord mat[4];
     bool recreateFont = false;
     bool doAdjustFontMatrix = false;
@@ -1897,7 +1896,7 @@ reload:
         // load the font file
         switch (fontType) {
         case fontType1:
-            if (!(fontFile = fontEngine->loadType1Font(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+            if (!(fontFile = fontEngine->loadType1Font(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1906,7 +1905,7 @@ reload:
             }
             break;
         case fontType1C:
-            if (!(fontFile = fontEngine->loadType1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+            if (!(fontFile = fontEngine->loadType1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1915,7 +1914,7 @@ reload:
             }
             break;
         case fontType1COT:
-            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1927,9 +1926,9 @@ reload:
         case fontTrueTypeOT: {
             std::unique_ptr<FoFiTrueType> ff;
             if (!fileName.empty()) {
-                ff = FoFiTrueType::load(fileName.c_str());
+                ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
             } else {
-                ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
+                ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size(), fontLoc->fontNum);
             }
             int *codeToGID;
             const int n = ff ? 256 : 0;
@@ -1948,7 +1947,7 @@ reload:
             } else {
                 codeToGID = nullptr;
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1959,7 +1958,7 @@ reload:
         }
         case fontCIDType0:
         case fontCIDType0C:
-            if (!(fontFile = fontEngine->loadCIDFont(id, fontsrc))) {
+            if (!(fontFile = fontEngine->loadCIDFont(id, fontsrc, fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1978,7 +1977,7 @@ reload:
                 codeToGID = nullptr;
                 n = 0;
             }
-            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(id, fontsrc, codeToGID, n))) {
+            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(id, fontsrc, codeToGID, n, fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 gfree(codeToGID);
                 if (gfxFont->invalidateEmbeddedFont()) {
@@ -2001,9 +2000,9 @@ reload:
             } else {
                 std::unique_ptr<FoFiTrueType> ff;
                 if (!fileName.empty()) {
-                    ff = FoFiTrueType::load(fileName.c_str());
+                    ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
                 } else {
-                    ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
+                    ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size(), fontLoc->fontNum);
                 }
                 if (!ff) {
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
@@ -2011,7 +2010,7 @@ reload:
                 }
                 codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, faceIndex))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;

@@ -51,10 +51,10 @@ class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
 public:
     // Create a FoFiTrueType object from a memory buffer.
-    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA);
 
     // Create a FoFiTrueType object from a file on disk.
-    static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA);
 
     ~FoFiTrueType() override;
 

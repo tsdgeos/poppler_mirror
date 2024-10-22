@@ -35,7 +35,7 @@
 // SplashFTFontFile
 //------------------------------------------------------------------------
 
-SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA)
+SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA, int faceIndexA)
 {
     FT_Face faceA;
     int *codeToGIDA;
@@ -43,11 +43,11 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, Spl
     int i;
 
     if (src->isFile) {
-        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
+        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
             return nullptr;
         }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), 0, &faceA)) {
+        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), faceIndexA, &faceA)) {
             return nullptr;
         }
     }
@@ -68,16 +68,16 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, Spl
     return new SplashFTFontFile(engineA, idA, src, faceA, codeToGIDA, 256, false, true);
 }
 
-SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA)
+SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA)
 {
     FT_Face faceA;
 
     if (src->isFile) {
-        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), 0, &faceA)) {
+        if (ft_new_face_from_file(engineA->lib, src->fileName.c_str(), faceIndexA, &faceA)) {
             return nullptr;
         }
     } else {
-        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), 0, &faceA)) {
+        if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf.data(), src->buf.size(), faceIndexA, &faceA)) {
             return nullptr;
         }
     }

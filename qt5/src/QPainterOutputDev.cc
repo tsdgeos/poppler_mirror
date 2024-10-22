@@ -547,16 +547,15 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontType1C:
         case fontType1COT: {
             // Load the font face using FreeType
-            const int faceIndex = 0; // We always load the zero-th face from a font
             FT_Face freeTypeFace;
 
             if (fontLoc->locType != gfxFontLocEmbedded) {
-                if (ft_new_face_from_file(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
+                if (ft_new_face_from_file(m_ftLibrary, fontLoc->path.c_str(), fontLoc->fontNum, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
             } else {
-                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer->data(), fontBuffer->size(), faceIndex, &freeTypeFace)) {
+                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer->data(), fontBuffer->size(), fontLoc->fontNum, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
@@ -586,7 +585,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
         }
         case fontTrueType:
         case fontTrueTypeOT: {
-            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
+            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size(), fontLoc->fontNum);
 
             m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : nullptr;
 
@@ -621,7 +620,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             int nCIDs = 0;
 
             if (!codeToGID && !m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size(), fontLoc->fontNum);
 
                 if (ff && ff->isOpenTypeCFF()) {
                     cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
@@ -643,7 +642,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
                     memcpy(codeToGID, ((GfxCIDFont *)gfxFont.get())->getCIDToGID(), codeToGIDLen * sizeof(int));
                 }
             } else {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size(), fontLoc->fontNum);
                 if (!ff) {
                     return;
                 }

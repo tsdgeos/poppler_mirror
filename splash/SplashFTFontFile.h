@@ -38,9 +38,9 @@ class SplashFTFontEngine;
 class SplashFTFontFile : public SplashFontFile
 {
 public:
-    static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA);
-    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA);
-    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA = 0);
+    static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, const char **encA, int faceIndexA);
+    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA);
+    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, SplashFontFileID *idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA);
 
     ~SplashFTFontFile() override;
 

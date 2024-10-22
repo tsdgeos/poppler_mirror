@@ -282,7 +282,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         } else {
             std::unique_ptr<FoFiTrueType> ff;
             if (!font_data.empty()) {
-                ff = FoFiTrueType::make(font_data.data(), font_data.size());
+                ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
             } else {
                 ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
             }
@@ -299,7 +299,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontTrueTypeOT: {
         std::unique_ptr<FoFiTrueType> ff;
         if (!font_data.empty()) {
-            ff = FoFiTrueType::make(font_data.data(), font_data.size());
+            ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
         } else {
             ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
         }
@@ -359,7 +359,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             if (!useCIDs) {
                 std::unique_ptr<FoFiTrueType> ff;
                 if (!font_data.empty()) {
-                    ff = FoFiTrueType::make(font_data.data(), font_data.size());
+                    ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
                 } else {
                     ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
                 }
