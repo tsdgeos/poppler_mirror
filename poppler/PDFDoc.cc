@@ -2247,15 +2247,15 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, G
     appearCharacs->setBackColor(std::move(backgroundColor));
     signatureAnnot->setAppearCharacs(std::move(appearCharacs));
 
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
+    border->setWidth(borderWidth);
+    signatureAnnot->setBorder(std::move(border));
+
     signatureAnnot->generateFieldAppearance();
     signatureAnnot->updateAppearanceStream();
 
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);
-
-    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(borderWidth);
-    signatureAnnot->setBorder(std::move(border));
 
     return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
 }
