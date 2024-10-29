@@ -244,8 +244,6 @@ static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB
 
 GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : gStateCache(2), xref(xrefA)
 {
-    Ref r;
-
     if (resDictA) {
 
         // build font dictionary
@@ -254,7 +252,7 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
         if (obj1.isRef()) {
             Object obj2 = obj1.fetch(xref);
             if (obj2.isDict()) {
-                r = obj1.getRef();
+                const Ref r = obj1.getRef();
                 fonts = std::make_unique<GfxFontDict>(xref, &r, obj2.getDict());
             }
         } else if (obj1.isDict()) {
