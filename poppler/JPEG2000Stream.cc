@@ -69,6 +69,7 @@ static inline int doGetChar(JPXStreamPrivate *priv)
 JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 {
     priv = new JPXStreamPrivate;
+    handleJPXtransparency = false;
 }
 
 JPXStream::~JPXStream()
@@ -276,7 +277,7 @@ void JPXStream::init()
         }
         priv->npixels = priv->image->comps[0].w * priv->image->comps[0].h;
         priv->ncomps = priv->image->numcomps;
-        if (alpha == 1 && smaskInData == 0) {
+        if (alpha == 1 && smaskInData == 0 && !supportJPXtransparency()) {
             priv->ncomps--;
         }
         for (int component = 0; component < priv->ncomps; component++) {

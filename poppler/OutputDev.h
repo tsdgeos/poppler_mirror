@@ -111,6 +111,9 @@ public:
     // box is the crop box?
     virtual bool needClipToCropBox() { return false; }
 
+    // Does this device supports transparency (alpha channel) in JPX streams?
+    virtual bool supportJPXtransparency() { return false; }
+
     //----- initialization and control
 
     // Set default transform matrix.

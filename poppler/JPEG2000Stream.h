@@ -41,10 +41,17 @@ public:
     bool isBinary(bool last = true) const override;
     void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha) override;
 
+    // Whether this JPX Stream should handle transparency (usually set when OutputDev also supports it)
+    void setSupportJPXtransparency(bool val) { handleJPXtransparency = val; }
+
+    // Does this JPX stream support transparency (alpha channel)?
+    bool supportJPXtransparency() { return handleJPXtransparency; }
+
     int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
 
 private:
     JPXStreamPrivate *priv;
+    bool handleJPXtransparency;
 
     void init();
     bool hasGetChars() override { return true; }

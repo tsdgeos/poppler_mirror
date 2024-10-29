@@ -85,6 +85,9 @@
 #include "ProfileData.h"
 #include "Catalog.h"
 #include "OptionalContent.h"
+#ifdef ENABLE_LIBOPENJPEG
+#    include "JPEG2000Stream.h"
+#endif
 
 // the MSVC math.h doesn't define this
 #ifndef M_PI
@@ -4173,6 +4176,12 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     // get info from the stream
     bits = 0;
     csMode = streamCSNone;
+#ifdef ENABLE_LIBOPENJPEG
+    if (str->getKind() == strJPX && out->supportJPXtransparency()) {
+        JPXStream *jpxStream = dynamic_cast<JPXStream *>(str);
+        jpxStream->setSupportJPXtransparency(true);
+    }
+#endif
     str->getImageParams(&bits, &csMode, &hasAlpha);
 
     // get stream dict
@@ -4311,7 +4320,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
         bool haveColorSpace = !obj1.isNull();
         bool haveRGBA = false;
-        if (str->getKind() == strJPX && (csMode == streamCSDeviceRGB || csMode == streamCSDeviceCMYK)) {
+        if (str->getKind() == strJPX && out->supportJPXtransparency() && (csMode == streamCSDeviceRGB || csMode == streamCSDeviceCMYK)) {
             // Case of transparent JPX image, they may contain RGBA data
             // when have no ColorSpace or when SMaskInData=1 · Issue #1486
             if (!haveColorSpace) {

@@ -220,6 +220,9 @@ public:
 
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
 
+    // Does this device supports transparency (alpha channel) in JPX streams?
+    bool supportJPXtransparency() override { return true; }
+
     //----- transparency groups and soft masks
     void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override;
     void endTransparencyGroup(GfxState * /*state*/) override;
