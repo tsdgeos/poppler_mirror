@@ -2309,7 +2309,7 @@ double GfxCIDFont::getWidth(char *s, int len) const
 // GfxFontDict
 //------------------------------------------------------------------------
 
-GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict)
+GfxFontDict::GfxFontDict(XRef *xref, const Ref *fontDictRef, Dict *fontDict)
 {
     Ref r;
 
