@@ -133,7 +133,7 @@ public:
 private:
     std::shared_ptr<GfxFont> doLookupFont(const char *name) const;
 
-    GfxFontDict *fonts;
+    std::unique_ptr<GfxFontDict> fonts;
     Object xObjDict;
     Object colorSpaceDict;
     Object patternDict;
