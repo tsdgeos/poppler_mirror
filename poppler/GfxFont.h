@@ -299,7 +299,7 @@ protected:
 
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
     void readFontDescriptor(XRef *xref, Dict *fontDict);
-    CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
+    [[nodiscard]] std::unique_ptr<CharCodeToUnicode> readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu);
     static std::optional<GfxFontLoc> getExternalFont(const std::string &path, bool cid);
 
     const std::string tag; // PDF font tag
@@ -372,7 +372,7 @@ private:
     char *enc[256]; // char code --> char name
     char encFree[256]; // boolean for each char name: if set,
                        //   the string is malloc'ed
-    CharCodeToUnicode *ctu; // char code --> Unicode
+    std::unique_ptr<CharCodeToUnicode> ctu; // char code --> Unicode
     bool hasEncoding;
     bool usesMacRomanEnc;
     double widths[256]; // character widths
@@ -421,7 +421,7 @@ private:
 
     GooString *collection; // collection name
     std::shared_ptr<CMap> cMap; // char code --> CID
-    CharCodeToUnicode *ctu; // CID --> Unicode
+    std::shared_ptr<CharCodeToUnicode> ctu; // CID --> Unicode
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;
                           //   false: ctu maps CID to Unicode
     GfxFontCIDWidths widths; // character widths

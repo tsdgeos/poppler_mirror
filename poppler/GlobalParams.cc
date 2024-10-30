@@ -435,8 +435,8 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
     profileCommands = false;
     errQuiet = false;
 
-    cidToUnicodeCache = new CharCodeToUnicodeCache(cidToUnicodeCacheSize);
-    unicodeToUnicodeCache = new CharCodeToUnicodeCache(unicodeToUnicodeCacheSize);
+    cidToUnicodeCache = std::make_unique<CharCodeToUnicodeCache>(cidToUnicodeCacheSize);
+    unicodeToUnicodeCache = std::make_unique<CharCodeToUnicodeCache>(unicodeToUnicodeCacheSize);
     unicodeMapCache = new UnicodeMapCache();
     cMapCache = new CMapCache();
 
@@ -582,8 +582,6 @@ GlobalParams::~GlobalParams()
     delete sysFonts;
     delete textEncoding;
 
-    delete cidToUnicodeCache;
-    delete unicodeToUnicodeCache;
     delete unicodeMapCache;
     delete cMapCache;
 }
@@ -1471,9 +1469,9 @@ bool GlobalParams::getErrQuiet()
     return errQuiet;
 }
 
-CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection)
+std::shared_ptr<CharCodeToUnicode> GlobalParams::getCIDToUnicode(const GooString *collection)
 {
-    CharCodeToUnicode *ctu;
+    std::shared_ptr<CharCodeToUnicode> ctu;
 
     globalParamsLocker();
     if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection))) {

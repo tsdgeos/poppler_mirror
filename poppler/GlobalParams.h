@@ -146,7 +146,7 @@ public:
     bool getProfileCommands();
     bool getErrQuiet();
 
-    CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
+    std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
     std::shared_ptr<CMap> getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
@@ -211,8 +211,8 @@ private:
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?
 
-    CharCodeToUnicodeCache *cidToUnicodeCache;
-    CharCodeToUnicodeCache *unicodeToUnicodeCache;
+    std::unique_ptr<CharCodeToUnicodeCache> cidToUnicodeCache;
+    std::unique_ptr<CharCodeToUnicodeCache> unicodeToUnicodeCache;
     UnicodeMapCache *unicodeMapCache;
     CMapCache *cMapCache;
 

@@ -599,24 +599,22 @@ void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
     }
 }
 
-CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu)
+std::unique_ptr<CharCodeToUnicode> GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu)
 {
-    GooString *buf;
 
     Object obj1 = fontDict->lookup("ToUnicode");
     if (!obj1.isStream()) {
-        return nullptr;
+        return ctu;
     }
-    buf = new GooString();
-    obj1.getStream()->fillGooString(buf);
+    auto buf = std::make_unique<GooString>();
+    obj1.getStream()->fillGooString(buf.get());
     obj1.streamClose();
     if (ctu) {
-        ctu->mergeCMap(buf, nBits);
+        ctu->mergeCMap(buf.get(), nBits);
     } else {
-        ctu = CharCodeToUnicode::parseCMap(buf, nBits);
+        ctu = CharCodeToUnicode::parseCMap(buf.get(), nBits);
     }
     hasToUnicode = true;
-    delete buf;
     return ctu;
 }
 
@@ -972,8 +970,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     Object obj1;
     int n, a, b, m;
 
-    ctu = nullptr;
-
     // do font name substitution for various aliases of the Base 14 font
     // names
     base14 = nullptr;
@@ -1314,7 +1310,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     // existing entries in ctu, i.e., the ToUnicode CMap takes
     // precedence, but the other encoding info is allowed to fill in any
     // holes
-    readToUnicodeCMap(fontDict, 16, ctu);
+    ctu = readToUnicodeCMap(fontDict, 16, std::move(ctu));
 
     //----- get the character widths -----
 
@@ -1414,7 +1410,6 @@ Gfx8BitFont::~Gfx8BitFont()
             gfree(enc[i]);
         }
     }
-    ctu->decRefCnt();
 }
 
 // This function is in part a derived work of the Adobe Glyph Mapping
@@ -1545,7 +1540,7 @@ int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code, Unicode con
 
 const CharCodeToUnicode *Gfx8BitFont::getToUnicode() const
 {
-    return ctu;
+    return ctu.get();
 }
 
 int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
@@ -1728,7 +1723,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     descent = -0.35;
     fontBBox[0] = fontBBox[1] = fontBBox[2] = fontBBox[3] = 0;
     collection = nullptr;
-    ctu = nullptr;
     ctuUsesCharCode = true;
     widths.defWidth = 1.0;
     widths.defHeight = -1.0;
@@ -1940,9 +1934,6 @@ GfxCIDFont::~GfxCIDFont()
     if (collection) {
         delete collection;
     }
-    if (ctu) {
-        ctu->decRefCnt();
-    }
     if (cidToGID) {
         gfree(cidToGID);
     }
@@ -2024,7 +2015,7 @@ int GfxCIDFont::getWMode() const
 
 const CharCodeToUnicode *GfxCIDFont::getToUnicode() const
 {
-    return ctu;
+    return ctu.get();
 }
 
 const GooString *GfxCIDFont::getCollection() const
@@ -2159,10 +2150,9 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
     humap = new Unicode[n * N_UCS_CANDIDATES];
     memset(humap, 0, sizeof(Unicode) * n * N_UCS_CANDIDATES);
     if (lp->collection != nullptr) {
-        CharCodeToUnicode *tctu;
         GooString tname(lp->toUnicodeMap);
 
-        if ((tctu = CharCodeToUnicode::parseCMapFromFile(&tname, 16)) != nullptr) {
+        if (std::unique_ptr<CharCodeToUnicode> tctu = CharCodeToUnicode::parseCMapFromFile(&tname, 16)) {
             tumap = new Unicode[n];
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
@@ -2177,7 +2167,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
                     tumap[cid] = 0;
                 }
             }
-            delete tctu;
         }
         vumap = new Unicode[n];
         memset(vumap, 0, sizeof(Unicode) * n);

@@ -32,10 +32,11 @@
 #ifndef CHARCODETOUNICODE_H
 #define CHARCODETOUNICODE_H
 
-#include <atomic>
 #include <optional>
 #include <string>
 #include <vector>
+#include <memory>
+#include <deque>
 
 #include "poppler-config.h"
 #include "CharTypes.h"
@@ -47,24 +48,32 @@ class GooString;
 class CharCodeToUnicode
 {
     friend class UnicodeToCharCode;
+    struct PrivateTag
+    {
+    };
+    struct CharCodeToUnicodeString
+    {
+        CharCode c;
+        std::vector<Unicode> u;
+    };
 
 public:
     // Create an identity mapping (Unicode = CharCode).
-    static CharCodeToUnicode *makeIdentityMapping();
+    static std::unique_ptr<CharCodeToUnicode> makeIdentityMapping();
 
     // Read the CID-to-Unicode mapping for <collection> from the file
     // specified by <fileName>.  Sets the initial reference count to 1.
     // Returns NULL on failure.
-    static CharCodeToUnicode *parseCIDToUnicode(const char *fileName, const GooString *collection);
+    static std::unique_ptr<CharCodeToUnicode> parseCIDToUnicode(const char *fileName, const GooString *collection);
 
     // Create the CharCode-to-Unicode mapping for an 8-bit font.
     // <toUnicode> is an array of 256 Unicode indexes.  Sets the initial
     // reference count to 1.
-    static CharCodeToUnicode *make8BitToUnicode(Unicode *toUnicode);
+    static std::unique_ptr<CharCodeToUnicode> make8BitToUnicode(Unicode *toUnicode);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font.
-    static CharCodeToUnicode *parseCMap(const GooString *buf, int nBits);
-    static CharCodeToUnicode *parseCMapFromFile(const GooString *fileName, int nBits);
+    static std::unique_ptr<CharCodeToUnicode> parseCMap(const GooString *buf, int nBits);
+    static std::unique_ptr<CharCodeToUnicode> parseCMapFromFile(const GooString *fileName, int nBits);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font, merging it into
     // <this>.
@@ -74,9 +83,6 @@ public:
 
     CharCodeToUnicode(const CharCodeToUnicode &) = delete;
     CharCodeToUnicode &operator=(const CharCodeToUnicode &) = delete;
-
-    void incRefCnt();
-    void decRefCnt();
 
     // Return true if this mapping matches the specified <tagA>.
     bool match(const GooString *tagA);
@@ -92,23 +98,18 @@ public:
     // Map a Unicode to CharCode.
     int mapToCharCode(const Unicode *u, CharCode *c, int usize) const;
 
+    explicit CharCodeToUnicode(PrivateTag t = {});
+    explicit CharCodeToUnicode(const std::optional<std::string> &tagA, PrivateTag t = {});
+    CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA, PrivateTag t = {});
+
 private:
-    struct CharCodeToUnicodeString
-    {
-        CharCode c;
-        std::vector<Unicode> u;
-    };
     bool parseCMap1(int (*getCharFunc)(void *), void *data, int nBits);
     void addMapping(CharCode code, char *uStr, int n, int offset);
     void addMappingInt(CharCode code, Unicode u);
-    CharCodeToUnicode();
-    explicit CharCodeToUnicode(const std::optional<std::string> &tagA);
-    CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA);
 
     const std::optional<std::string> tag;
     std::vector<Unicode> map;
     std::vector<CharCodeToUnicodeString> sMap;
-    std::atomic_int refCnt;
     bool isIdentity;
 };
 
@@ -123,17 +124,16 @@ public:
     CharCodeToUnicodeCache(const CharCodeToUnicodeCache &) = delete;
     CharCodeToUnicodeCache &operator=(const CharCodeToUnicodeCache &) = delete;
 
-    // Get the CharCodeToUnicode object for <tag>.  Increments its
-    // reference count; there will be one reference for the cache plus
-    // one for the caller of this function.  Returns NULL on failure.
-    CharCodeToUnicode *getCharCodeToUnicode(const GooString *tag);
+    // Get the CharCodeToUnicode object for <tag>.
+    // Returns NULL on failure.
+    std::shared_ptr<CharCodeToUnicode> getCharCodeToUnicode(const GooString *tag);
 
     // Insert <ctu> into the cache, in the most-recently-used position.
-    void add(CharCodeToUnicode *ctu);
+    void add(std::shared_ptr<CharCodeToUnicode> ctu);
 
 private:
-    CharCodeToUnicode **cache;
-    int size;
+    size_t size;
+    std::deque<std::shared_ptr<CharCodeToUnicode>> cache;
 };
 
 #endif
