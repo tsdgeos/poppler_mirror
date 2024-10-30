@@ -36,9 +36,9 @@
 // SplashFontFile
 //------------------------------------------------------------------------
 
-SplashFontFile::SplashFontFile(SplashFontFileID *idA, SplashFontSrc *srcA)
+SplashFontFile::SplashFontFile(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA)
 {
-    id = idA;
+    id = std::move(idA);
     src = srcA;
     src->ref();
     refCnt = 0;
@@ -48,7 +48,6 @@ SplashFontFile::SplashFontFile(SplashFontFileID *idA, SplashFontSrc *srcA)
 SplashFontFile::~SplashFontFile()
 {
     src->unref();
-    delete id;
 }
 
 void SplashFontFile::incRefCnt()

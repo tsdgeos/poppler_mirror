@@ -28,6 +28,7 @@
 #define SPLASHFONTENGINE_H
 
 #include <array>
+#include <memory>
 
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
@@ -58,15 +59,15 @@ public:
 
     // Get a font file from the cache.  Returns NULL if there is no
     // matching entry in the cache.
-    SplashFontFile *getFontFile(SplashFontFileID *id);
+    SplashFontFile *getFontFile(const SplashFontFileID &id);
 
     // Load fonts - these create new SplashFontFile objects.
-    SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
-    SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
-    SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src, const char **enc, int faceIndex);
-    SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src, int faceIndex);
-    SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
-    SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
+    SplashFontFile *loadType1Font(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadType1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
+    SplashFontFile *loadCIDFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int faceIndex);
+    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
+    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
 
     // Get a font - this does a cache lookup first, and if not found,
     // creates a new SplashFont object and adds it to the cache.  The
