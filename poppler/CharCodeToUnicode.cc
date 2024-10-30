@@ -157,7 +157,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCIDToUnicode(const ch
     fclose(f);
     mapA.resize(mapLenA);
 
-    return std::make_unique<CharCodeToUnicode>(std::make_optional(collection->toStr()), std::move(mapA), std::vector<CharCodeToUnicodeString> {}, PrivateTag {});
+    return std::make_unique<CharCodeToUnicode>(collection->toStr(), std::move(mapA), std::vector<CharCodeToUnicodeString> {});
 }
 
 std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode)
@@ -168,7 +168,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::make8BitToUnicode(Unicode 
 
 std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMap(const GooString *buf, int nBits)
 {
-    auto ctu = std::make_unique<CharCodeToUnicode>(std::optional<std::string>());
+    auto ctu = std::make_unique<CharCodeToUnicode>(std::optional<std::string> {});
     const char *p = buf->c_str();
     if (!ctu->parseCMap1(&getCharFromString, &p, nBits)) {
         return nullptr;
