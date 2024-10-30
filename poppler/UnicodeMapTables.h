@@ -14,11 +14,14 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2024 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
+
+#include "UnicodeMap.h"
 
 static const UnicodeMapRange latin1UnicodeMapRanges[] = {
     { 0x000a, 0x000a, 0x0a, 1 },     { 0x000c, 0x000d, 0x0c, 1 },     { 0x0020, 0x007e, 0x20, 1 },     { 0x00a0, 0x00a0, 0x20, 1 },  { 0x00a1, 0x00ac, 0xa1, 1 },   { 0x00ae, 0x00ff, 0xae, 1 },   { 0x010c, 0x010c, 0x43, 1 },

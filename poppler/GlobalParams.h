@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -49,6 +49,7 @@
 #include <string>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <vector>
 
 class GooString;
@@ -135,9 +136,9 @@ public:
     FILE *getUnicodeMapFile(const std::string &encodingName);
     FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
     FILE *findToUnicodeFile(const GooString *name);
-    GooString *findFontFile(const std::string &fontName);
-    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
-    GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
+    std::optional<std::string> findFontFile(const std::string &fontName);
+    std::optional<std::string> findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
+    std::optional<std::string> findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore = {});
     UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);
     std::string getTextEncodingName() const;
@@ -145,7 +146,7 @@ public:
     bool getProfileCommands();
     bool getErrQuiet();
 
-    CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
+    std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
     std::shared_ptr<CMap> getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
@@ -210,8 +211,8 @@ private:
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?
 
-    CharCodeToUnicodeCache *cidToUnicodeCache;
-    CharCodeToUnicodeCache *unicodeToUnicodeCache;
+    std::unique_ptr<CharCodeToUnicodeCache> cidToUnicodeCache;
+    std::unique_ptr<CharCodeToUnicodeCache> unicodeToUnicodeCache;
     UnicodeMapCache *unicodeMapCache;
     CMapCache *cMapCache;
 

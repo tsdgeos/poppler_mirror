@@ -41,6 +41,7 @@
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1531,6 +1532,10 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
     // in points.
     const int subdivide_pixels = 10;
 
+    // Set a minimum step to force upon {x|y}_step, to avoid approximate or reach
+    // infinite loop when {x|y}_step approximates to or equals zero - Issue #1520
+    const double minimum_step = 0.01;
+
     double x_begin, x_end, x1, x2;
     double y_begin, y_end, y1, y2;
     double x_step;
@@ -1554,6 +1559,13 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
     // get cell size in pattern space
     x_step = y_step = subdivide_pixels;
     cairo_matrix_transform_distance(&mat, &x_step, &y_step);
+
+    if (y_step < minimum_step) {
+        y_step = minimum_step;
+    }
+    if (x_step < minimum_step) {
+        x_step = minimum_step;
+    }
 
     cairo_pattern_destroy(fill_pattern);
     fill_pattern = cairo_pattern_create_mesh();

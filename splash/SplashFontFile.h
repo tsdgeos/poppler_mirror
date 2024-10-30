@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
@@ -74,7 +75,7 @@ public:
     virtual SplashFont *makeFont(SplashCoord *mat, const SplashCoord *textMat) = 0;
 
     // Get the font file ID.
-    SplashFontFileID *getID() { return id; }
+    const SplashFontFileID &getID() const { return *id; }
 
     // Increment the reference count.
     void incRefCnt();
@@ -86,9 +87,9 @@ public:
     bool doAdjustMatrix;
 
 protected:
-    SplashFontFile(SplashFontFileID *idA, SplashFontSrc *srcA);
+    SplashFontFile(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA);
 
-    SplashFontFileID *id;
+    std::unique_ptr<SplashFontFileID> id;
     SplashFontSrc *src;
     int refCnt;
 

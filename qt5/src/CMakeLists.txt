@@ -5,10 +5,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(CMAKE_C_VISIBILITY_PRESET hidden)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-
 configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h @ONLY)
 
 set(poppler_qt5_SRCS
@@ -38,7 +34,7 @@ set(poppler_qt5_SRCS
 )
 add_library(poppler-qt5 ${poppler_qt5_SRCS})
 generate_export_header(poppler-qt5 BASE_NAME poppler-qt5 EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h")
-set_target_properties(poppler-qt5 PROPERTIES VERSION 1.36.0 SOVERSION 1)
+set_target_properties(poppler-qt5 PROPERTIES VERSION 1.37.0 SOVERSION 1)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
     set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -53,7 +49,7 @@ if(USE_CMS)
 endif()
 install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES
+set(poppler_qt5_all_install_headers
   poppler-qt5.h
   poppler-link.h
   poppler-annotation.h
@@ -63,5 +59,15 @@ install(FILES
   poppler-media.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
-  DESTINATION include/poppler/qt5)
-
+)
+if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
+  install(FILES ${poppler_qt5_all_install_headers} DESTINATION include/poppler/qt5)
+else()
+  target_sources(poppler-qt5
+    PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
+    FILES ${poppler_qt5_all_install_headers}
+  )
+  install(TARGETS poppler-qt5 FILE_SET HEADERS DESTINATION include/poppler/qt5)
+endif()

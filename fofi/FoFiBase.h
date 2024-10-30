@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -23,6 +23,10 @@
 
 #ifndef FOFIBASE_H
 #define FOFIBASE_H
+
+#include "poppler_private_export.h"
+
+#include <cstddef>
 
 //------------------------------------------------------------------------
 

@@ -1514,4 +1514,38 @@ private:
     bool fillBuf();
 };
 
+//------------------------------------------------------------------------
+// Object Stream accessors.
+//------------------------------------------------------------------------
+
+inline void Object::streamReset()
+{
+    OBJECT_TYPE_CHECK(objStream);
+    stream->reset();
+}
+
+inline void Object::streamClose()
+{
+    OBJECT_TYPE_CHECK(objStream);
+    stream->close();
+}
+
+inline int Object::streamGetChar()
+{
+    OBJECT_TYPE_CHECK(objStream);
+    return stream->getChar();
+}
+
+inline int Object::streamGetChars(int nChars, unsigned char *buffer)
+{
+    OBJECT_TYPE_CHECK(objStream);
+    return stream->doGetChars(nChars, buffer);
+}
+
+inline Dict *Object::streamGetDict() const
+{
+    OBJECT_TYPE_CHECK(objStream);
+    return stream->getDict();
+}
+
 #endif

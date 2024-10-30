@@ -34,7 +34,7 @@ public:
     virtual ~SplashFontFileID();
     SplashFontFileID(const SplashFontFileID &) = delete;
     SplashFontFileID &operator=(const SplashFontFileID &) = delete;
-    virtual bool matches(SplashFontFileID *id) = 0;
+    virtual bool matches(const SplashFontFileID &id) const = 0;
 };
 
 #endif

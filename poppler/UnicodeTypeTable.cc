@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006, 2007 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2008, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
 // Copyright (C) 2019 Adriaan de Groot <groot@kde.org>
@@ -637,8 +637,6 @@ Unicode unicodeToUpper(Unicode c)
     return c;
 }
 
-#define UNICODE_LAST_CHAR 0x10FFFF
-#define UNICODE_MAX_TABLE_INDEX (UNICODE_LAST_CHAR / 256 + 1)
 // large empty block between U+2FA1D and U+E0001
 #define UNICODE_LAST_CHAR_PART1 0x2FAFF
 #define UNICODE_LAST_PAGE_PART1 (UNICODE_LAST_CHAR_PART1 / 256)

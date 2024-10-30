@@ -17,7 +17,7 @@
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
 // Copyright (C) 2019 Adriaan de Groot <groot@kde.org>
-// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2024 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -29,6 +29,9 @@
 
 #include "CharTypes.h"
 #include "poppler_private_export.h"
+
+#define UNICODE_LAST_CHAR 0x10FFFF
+#define UNICODE_MAX_TABLE_INDEX (UNICODE_LAST_CHAR / 256 + 1)
 
 extern bool unicodeTypeL(Unicode c);
 

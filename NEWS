@@ -1,3 +1,23 @@
+Release 24.10.0:
+        core:
+         * Add support for SubmitForms Links
+         * Internal code improvements
+         * Fix crash in malformed documents
+
+        qt6:
+         * Add support for SubmitForms Links
+         * Add API for creating signature field without signing immediately
+
+        glib:
+         * add auto_cleanup functions so that consumers can use g_auto*
+         * fix closure GI annotation
+
+        qt5:
+         * Add support for SubmitForms Links
+
+        build system:
+         * Use the boosts own cmake file as suggested by cmake itself
+
 Release 24.09.0:
         core:
          * Catalog: map page by Ref to make findPage() faster

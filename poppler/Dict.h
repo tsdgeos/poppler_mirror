@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -127,5 +127,74 @@ private:
     const DictEntry *find(const char *key) const;
     DictEntry *find(const char *key);
 };
+
+//------------------------------------------------------------------------
+// Object Dict accessors.
+//------------------------------------------------------------------------
+
+inline int Object::dictGetLength() const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->getLength();
+}
+
+inline void Object::dictAdd(const char *key, Object &&val)
+{
+    OBJECT_TYPE_CHECK(objDict);
+    dict->add(key, std::move(val));
+}
+
+inline void Object::dictSet(const char *key, Object &&val)
+{
+    OBJECT_TYPE_CHECK(objDict);
+    dict->set(key, std::move(val));
+}
+
+inline void Object::dictRemove(const char *key)
+{
+    OBJECT_TYPE_CHECK(objDict);
+    dict->remove(key);
+}
+
+inline bool Object::dictIs(const char *dictType) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->is(dictType);
+}
+
+inline bool Object::isDict(const char *dictType) const
+{
+    return type == objDict && dictIs(dictType);
+}
+
+inline Object Object::dictLookup(const char *key, int recursion) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->lookup(key, recursion);
+}
+
+inline const Object &Object::dictLookupNF(const char *key) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->lookupNF(key);
+}
+
+inline const char *Object::dictGetKey(int i) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->getKey(i);
+}
+
+inline Object Object::dictGetVal(int i) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->getVal(i);
+}
+
+inline const Object &Object::dictGetValNF(int i) const
+{
+    OBJECT_TYPE_CHECK(objDict);
+    return dict->getValNF(i);
+}
 
 #endif

@@ -381,4 +381,8 @@ void poppler_set_nss_password_callback(PopplerNssPasswordFunc func);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSignatureInfo, poppler_signature_info_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSigningData, poppler_signing_data_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerCertificateInfo, poppler_certificate_info_free)
+
 #endif /* __POPPLER_FORM_FIELD_H__ */

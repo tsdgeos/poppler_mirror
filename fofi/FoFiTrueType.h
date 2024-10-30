@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011, 2012, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2018-2020, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -51,10 +51,10 @@ class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
 public:
     // Create a FoFiTrueType object from a memory buffer.
-    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA);
 
     // Create a FoFiTrueType object from a file on disk.
-    static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA = 0);
+    static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA);
 
     ~FoFiTrueType() override;
 

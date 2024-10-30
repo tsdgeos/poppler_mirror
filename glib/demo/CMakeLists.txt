@@ -23,3 +23,6 @@ set(poppler_glib_demo_SRCS
 poppler_add_test(poppler-glib-demo BUILD_GTK_TESTS ${poppler_glib_demo_SRCS})
 
 target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib PkgConfig::GTK3)
+if (INSTALL_GLIB_DEMO)
+  install(TARGETS poppler-glib-demo DESTINATION bin)
+endif ()

@@ -441,4 +441,15 @@ void poppler_annot_mapping_free(PopplerAnnotMapping *mapping);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerRectangle, poppler_rectangle_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPoint, poppler_point_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerQuadrilateral, poppler_quadrilateral_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerColor, poppler_color_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerTextAttributes, poppler_text_attributes_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerLinkMapping, poppler_link_mapping_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPageTransition, poppler_page_transition_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerImageMapping, poppler_image_mapping_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFormFieldMapping, poppler_form_field_mapping_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotMapping, poppler_annot_mapping_free)
+
 #endif /* __POPPLER_PAGE_H__ */

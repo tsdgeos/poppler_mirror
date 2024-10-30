@@ -422,4 +422,7 @@ const gchar *poppler_text_span_get_font_name(PopplerTextSpan *poppler_text_span)
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerTextSpan, poppler_text_span_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerStructureElementIter, poppler_structure_element_iter_free)
+
 #endif /* !__POPPLER_STRUCTURE_ELEMENT_H__ */

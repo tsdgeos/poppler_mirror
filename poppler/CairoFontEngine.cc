@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017-2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
@@ -37,6 +37,7 @@
 // Copyright (C) 2023 Frederic Germain <frederic.germain@gmail.com>
 // Copyright (C) 2023 Ilia Kats <ilia-kats@gmx.net>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2024 Dmitry Shubin <dshubin@accusoft.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -201,6 +202,7 @@ std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Lib
 CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, CairoFontEngine *fontEngine, bool useCIDs)
 {
     std::string fileName;
+    int faceIndex = 0;
     std::vector<unsigned char> font_data;
     int i, n;
     std::optional<GfxFontLoc> fontLoc;
@@ -233,6 +235,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     } else { // gfxFontLocExternal
         fileName = fontLoc->path;
         fontType = fontLoc->fontType;
+        faceIndex = fontLoc->fontNum;
         substitute = true;
     }
 
@@ -279,9 +282,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         } else {
             std::unique_ptr<FoFiTrueType> ff;
             if (!font_data.empty()) {
-                ff = FoFiTrueType::make(font_data.data(), font_data.size());
+                ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
             } else {
-                ff = FoFiTrueType::load(fileName.c_str());
+                ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
             }
             if (!ff) {
                 goto err2;
@@ -296,9 +299,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontTrueTypeOT: {
         std::unique_ptr<FoFiTrueType> ff;
         if (!font_data.empty()) {
-            ff = FoFiTrueType::make(font_data.data(), font_data.size());
+            ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
         } else {
-            ff = FoFiTrueType::load(fileName.c_str());
+            ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
         }
         if (!ff) {
             error(errSyntaxError, -1, "failed to load truetype font");
@@ -356,9 +359,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             if (!useCIDs) {
                 std::unique_ptr<FoFiTrueType> ff;
                 if (!font_data.empty()) {
-                    ff = FoFiTrueType::make(font_data.data(), font_data.size());
+                    ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
                 } else {
-                    ff = FoFiTrueType::load(fileName.c_str());
+                    ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
                 }
                 if (ff) {
                     if (ff->isOpenTypeCFF()) {

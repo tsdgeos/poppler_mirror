@@ -9,7 +9,7 @@
    // Copyright (C) 2013, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
-   // Copyright (C) 2017, 2018, 2020-2023 Albert Astals Cid <aacid@kde.org>
+   // Copyright (C) 2017, 2018, 2020-2024 Albert Astals Cid <aacid@kde.org>
    // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
    // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
    // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -461,13 +461,13 @@ static const char *findSubstituteName(const GfxFont *font, const std::unordered_
 }
 
 /* Windows implementation of external font matching code */
-GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
 {
     const SysFontInfo *fi;
-    GooString *path = nullptr;
+    std::string path;
     const std::optional<std::string> &fontName = font->getName();
     if (!fontName)
-        return nullptr;
+        return {};
     const std::scoped_lock locker(mutex);
     setupBaseFonts(POPPLER_FONTSDIR);
 
@@ -476,7 +476,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
     // base14Name only for the creation of query pattern.
 
     if ((fi = sysFonts->find(*fontName, false, false))) {
-        path = fi->path->copy();
+        path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
         if (substituteFontName)
@@ -486,10 +486,10 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font, SysFontType *ty
         error(errSyntaxError, -1, "Couldn't find a font for '{0:s}', subst is '{1:t}'", fontName->c_str(), substFontName);
         const auto fontFile = fontFiles.find(substFontName->toStr());
         if (fontFile != fontFiles.end()) {
-            path = new GooString(fontFile->second.c_str());
+            path = fontFile->second;
             if (substituteFontName)
-                substituteFontName->Set(path->c_str());
-            if (!strcasecmp(path->c_str() + path->getLength() - 4, ".ttc")) {
+                substituteFontName->Set(path.c_str());
+            if (path.ends_with(".ttc")) {
                 *type = sysFontTTC;
             } else {
                 *type = sysFontTTF;

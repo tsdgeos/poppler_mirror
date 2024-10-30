@@ -43,6 +43,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
 // Copyright (C) 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
+// Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -763,6 +764,7 @@ public:
     unsigned int getFlags() const { return flags; }
     Object getAppearance() const;
     void setNewAppearance(Object &&newAppearance);
+    void setNewAppearance(Object &&newAppearance, bool keepAppearState);
     AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
     const GooString *getAppearState() const { return appearState.get(); }
     AnnotBorder *getBorder() const { return border.get(); }

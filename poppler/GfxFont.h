@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -123,11 +123,6 @@ public:
     GfxFontLoc(GfxFontLoc &&) noexcept;
     GfxFontLoc &operator=(const GfxFontLoc &) = delete;
     GfxFontLoc &operator=(GfxFontLoc &&other) noexcept;
-
-    // Set the 'path' string from a GooString on the heap.
-    // Ownership of the object is taken.
-    void setPath(GooString *pathA);
-    const GooString *pathAsGooString() const;
 
     GfxFontLocType locType;
     GfxFontType fontType;
@@ -304,8 +299,8 @@ protected:
 
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
     void readFontDescriptor(XRef *xref, Dict *fontDict);
-    CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits, CharCodeToUnicode *ctu);
-    static std::optional<GfxFontLoc> getExternalFont(GooString *path, bool cid);
+    [[nodiscard]] std::unique_ptr<CharCodeToUnicode> readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu);
+    static std::optional<GfxFontLoc> getExternalFont(const std::string &path, bool cid);
 
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)
@@ -377,7 +372,7 @@ private:
     char *enc[256]; // char code --> char name
     char encFree[256]; // boolean for each char name: if set,
                        //   the string is malloc'ed
-    CharCodeToUnicode *ctu; // char code --> Unicode
+    std::unique_ptr<CharCodeToUnicode> ctu; // char code --> Unicode
     bool hasEncoding;
     bool usesMacRomanEnc;
     double widths[256]; // character widths
@@ -426,7 +421,7 @@ private:
 
     GooString *collection; // collection name
     std::shared_ptr<CMap> cMap; // char code --> CID
-    CharCodeToUnicode *ctu; // CID --> Unicode
+    std::shared_ptr<CharCodeToUnicode> ctu; // CID --> Unicode
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;
                           //   false: ctu maps CID to Unicode
     GfxFontCIDWidths widths; // character widths

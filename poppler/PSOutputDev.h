@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -370,15 +370,15 @@ private:
     void setupFont(GfxFont *font, Dict *parentResDict);
     void setupEmbeddedType1Font(Ref *id, GooString *psName);
     void updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph);
-    void setupExternalType1Font(const GooString *fileName, GooString *psName);
+    void setupExternalType1Font(const std::string &fileName, GooString *psName);
     void setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName);
-    void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName);
-    void setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName);
-    void setupExternalTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName);
+    void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
+    void setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
+    void setupExternalTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, int faceIndex);
     void setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName);
-    void setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, bool needVerticalMetrics);
-    void setupExternalCIDTrueTypeFont(GfxFont *font, const GooString *fileName, GooString *psName, bool needVerticalMetrics);
-    void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
+    void setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, bool needVerticalMetrics, int faceIndex);
+    void setupExternalCIDTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, bool needVerticalMetrics, int faceIndex);
+    void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
     void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
     GooString *makePSFontName(GfxFont *font, const Ref *id);
     void setupImages(Dict *resDict);
