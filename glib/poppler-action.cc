@@ -408,7 +408,7 @@ static void build_goto_remote(PopplerAction *action, const LinkGoToR *link)
 static void build_launch(PopplerAction *action, const LinkLaunch *link)
 {
     if (link->getFileName()) {
-        action->launch.file_name = g_strdup(link->getFileName()->c_str());
+        action->launch.file_name = _poppler_goo_string_to_utf8(link->getFileName());
     }
     if (link->getParams()) {
         action->launch.params = g_strdup(link->getParams()->c_str());
