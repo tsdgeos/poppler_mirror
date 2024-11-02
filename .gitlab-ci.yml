@@ -82,9 +82,9 @@ build_ubuntu_22_04:
     - ninja
     - ctest --output-on-failure
 
-build_mingw64_fedora40:
+build_mingw64_fedora41:
   stage: build
-  image: fedora:40
+  image: fedora:41
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
