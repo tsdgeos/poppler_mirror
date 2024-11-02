@@ -229,7 +229,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     case actionLaunch: {
         LinkLaunch *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
-        popplerLink = new LinkExecute(linkArea, e->getFileName()->c_str(), p ? p->c_str() : nullptr);
+        popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? p->c_str() : nullptr);
     } break;
 
     case actionNamed: {

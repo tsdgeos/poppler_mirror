@@ -228,7 +228,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     case actionLaunch: {
         LinkLaunch *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
-        popplerLink = std::make_unique<LinkExecute>(linkArea, e->getFileName()->c_str(), p ? p->c_str() : nullptr);
+        popplerLink = std::make_unique<LinkExecute>(linkArea, UnicodeParsedString(e->getFileName()), p ? p->c_str() : nullptr);
     } break;
 
     case actionNamed: {
