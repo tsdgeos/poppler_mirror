@@ -45,8 +45,8 @@
 class CairoRescaleBox
 {
 public:
-    CairoRescaleBox() {};
-    virtual ~CairoRescaleBox() {};
+    CairoRescaleBox() { };
+    virtual ~CairoRescaleBox() { };
 
     CairoRescaleBox(const CairoRescaleBox &) = delete;
     CairoRescaleBox &operator=(const CairoRescaleBox &) = delete;

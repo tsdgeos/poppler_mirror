@@ -4428,7 +4428,7 @@ public:
     explicit TextSelectionDumper(TextPage *page);
     ~TextSelectionDumper() override;
 
-    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};
+    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override { };
     void visitLine(TextLine *line, TextWord *begin, TextWord *end, int edge_begin, int edge_end, const PDFRectangle *selection) override;
     void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override;
     void endPage();
@@ -4597,9 +4597,9 @@ public:
     TextSelectionSizer(TextPage *page, double scale);
     ~TextSelectionSizer() override { delete list; }
 
-    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};
+    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override { };
     void visitLine(TextLine *line, TextWord *begin, TextWord *end, int edge_begin, int edge_end, const PDFRectangle *selection) override;
-    void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override {};
+    void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override { };
 
     std::vector<PDFRectangle *> *takeRegion()
     {
@@ -4665,7 +4665,7 @@ public:
     TextSelectionPainter(TextPage *page, double scale, int rotation, OutputDev *out, const GfxColor *box_color, const GfxColor *glyph_color);
     ~TextSelectionPainter() override;
 
-    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override {};
+    void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override { };
     void visitLine(TextLine *line, TextWord *begin, TextWord *end, int edge_begin, int edge_end, const PDFRectangle *selection) override;
     void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override;
     void endPage();

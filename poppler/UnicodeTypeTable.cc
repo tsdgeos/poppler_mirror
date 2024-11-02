@@ -650,7 +650,7 @@ Unicode unicodeToUpper(Unicode c)
 
 #define CC_PART2(Page, Char) ((combining_class_table_part2[Page] >= UNICODE_MAX_TABLE_INDEX) ? (combining_class_table_part2[Page] - UNICODE_MAX_TABLE_INDEX) : (cclass_data[combining_class_table_part2[Page]][Char]))
 
-#define COMBINING_CLASS(u) (((u) <= UNICODE_LAST_CHAR_PART1) ? CC_PART1((u) / 256, (u) % 256) : (((u) >= UNICODE_PART2_START && (u) <= UNICODE_LAST_CHAR) ? CC_PART2(((u)-UNICODE_PART2_START) / 256, (u) % 256) : 0))
+#define COMBINING_CLASS(u) (((u) <= UNICODE_LAST_CHAR_PART1) ? CC_PART1((u) / 256, (u) % 256) : (((u) >= UNICODE_PART2_START && (u) <= UNICODE_LAST_CHAR) ? CC_PART2(((u) - UNICODE_PART2_START) / 256, (u) % 256) : 0))
 
 // Write the compatibility decomposition of @u into @buf, returning the number
 // of characters written. @buf may be NULL, in which case the length of the
@@ -752,10 +752,10 @@ static bool combine(Unicode base, Unicode add, Unicode *out)
 #define HANGUL_IS_V(u) (((u) >= HANGUL_V_BASE) && ((u) < HANGUL_V_BASE + HANGUL_V_COUNT))
 #define HANGUL_IS_T(u) (((u) >= HANGUL_T_BASE) && ((u) < HANGUL_T_BASE + HANGUL_T_COUNT))
 #define HANGUL_IS_SYLLABLE(u) (((u) >= HANGUL_S_BASE) && ((u) < HANGUL_S_BASE + HANGUL_S_COUNT))
-#define HANGUL_SYLLABLE_IS_LV(u) (((u)-HANGUL_S_BASE) % HANGUL_T_COUNT == 0)
+#define HANGUL_SYLLABLE_IS_LV(u) (((u) - HANGUL_S_BASE) % HANGUL_T_COUNT == 0)
 #define IS_HANGUL(u) (HANGUL_IS_L(u) || HANGUL_IS_V(u) || HANGUL_IS_T(u) || HANGUL_IS_SYLLABLE(u))
-#define HANGUL_COMPOSE_L_V(l, v) (HANGUL_S_BASE + (HANGUL_T_COUNT * (((v)-HANGUL_V_BASE) + (HANGUL_V_COUNT * ((l)-HANGUL_L_BASE)))))
-#define HANGUL_COMPOSE_LV_T(lv, t) ((lv) + ((t)-HANGUL_T_BASE))
+#define HANGUL_COMPOSE_L_V(l, v) (HANGUL_S_BASE + (HANGUL_T_COUNT * (((v) - HANGUL_V_BASE) + (HANGUL_V_COUNT * ((l) - HANGUL_L_BASE)))))
+#define HANGUL_COMPOSE_LV_T(lv, t) ((lv) + ((t) - HANGUL_T_BASE))
 
 // Converts Unicode string @in of length @len to its normalization in form
 // NFKC (compatibility decomposition + canonical composition). The length of

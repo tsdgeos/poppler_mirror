@@ -20,7 +20,7 @@ static void b64encodeTriplet(char output[4], unsigned char a, unsigned char b, u
     output[0] = base64table[((a >> 2) & 0x3f)]; // upper 6 of first byte
     output[1] = base64table[((a << 4) & 0x30) | ((b >> 4) & 0x0f)]; // lower 2 of first byte, upper 4 of second byte
     output[2] = base64table[((b << 2) & 0x3c) | ((c >> 6) & 0x03)]; // lower 4 of second byte, upper 2 of third byte
-    output[3] = base64table[((c)&0x3f)]; // lower 6 of third byte
+    output[3] = base64table[((c) & 0x3f)]; // lower 6 of third byte
 }
 
 std::string gbase64Encode(const void *input, size_t len)

@@ -178,7 +178,7 @@ static const unsigned int signContext[5][5][2] = {
 #define jpxFloorDivPow2(x, y) ((x) >> (y))
 
 // ceil(x / y)
-#define jpxCeilDiv(x, y) (((x) + (y)-1) / (y))
+#define jpxCeilDiv(x, y) (((x) + (y) - 1) / (y))
 
 // ceil(x / 2^y)
 #define jpxCeilDivPow2(x, y) (((x) + (1 << (y)) - 1) >> (y))
