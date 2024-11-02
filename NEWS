@@ -1,3 +1,27 @@
+Release 24.11.0:
+        core:
+         * Fix rendering of some buttons
+         * Fix selecting fonts in TTC font collections
+         * CairoOutputDev: prevent infinite loop in functionShadedFill()
+         * Fix some unstable headers not being usable on their own
+         * Fix some headers not being usable on their own
+
+        glib:
+         * Fix some headers not being usable on their own
+         * add INSTALL_GLIB_DEMO option to install poppler-glib-demo
+         * Fix Launch action with unicode encoded filenames
+
+         qt6:
+         * Fix memory handling issue on signature creation
+         * Fix Launch action with unicode encoded filenames
+
+        qt5:
+         * Fix Launch action with unicode encoded filenames
+
+        build system:
+         * Remove duplicate definitions
+         * cmake: Set CMAKE_C_STANDARD to 17
+
 Release 24.10.0:
         core:
          * Add support for SubmitForms Links
