@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     foreach (const QString &fileName, directory.entryList()) {
         if (fileName.endsWith(QStringLiteral("pdf"))) {
             qDebug() << "Doing" << fileName.toLatin1().data() << ":";
-            Poppler::Document *doc = Poppler::Document::load(directory.canonicalPath() + "/" + fileName);
+            Poppler::Document *doc = Poppler::Document::load(directory.canonicalPath() + '/' + fileName);
             if (!doc) {
                 qWarning() << "doc not loaded";
             } else if (doc->isLocked()) {

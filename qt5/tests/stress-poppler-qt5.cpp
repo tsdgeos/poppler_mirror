@@ -30,7 +30,7 @@ int main(int argc, char **argv)
         if (excludeSubDirs.contains(subdir)) {
             // then skip it
         } else {
-            QString path = "./pdfdb/" + subdir + "/data.pdf";
+            QString path = QStringLiteral("./pdfdb/") + subdir + QStringLiteral("/data.pdf");
             std::cout << "Doing " << path.toLatin1().data() << " :";
             Poppler::Document *doc = Poppler::Document::load(path);
             if (!doc) {

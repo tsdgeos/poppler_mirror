@@ -374,15 +374,15 @@ bool LinkDestination::isChangeZoom() const
 QString LinkDestination::toString() const
 {
     QString s = QString::number((qint8)d->kind);
-    s += ";" + QString::number(d->pageNum);
-    s += ";" + QString::number(d->left);
-    s += ";" + QString::number(d->bottom);
-    s += ";" + QString::number(d->right);
-    s += ";" + QString::number(d->top);
-    s += ";" + QString::number(d->zoom);
-    s += ";" + QString::number((qint8)d->changeLeft);
-    s += ";" + QString::number((qint8)d->changeTop);
-    s += ";" + QString::number((qint8)d->changeZoom);
+    s += ';' + QString::number(d->pageNum);
+    s += ';' + QString::number(d->left);
+    s += ';' + QString::number(d->bottom);
+    s += ';' + QString::number(d->right);
+    s += ';' + QString::number(d->top);
+    s += ';' + QString::number(d->zoom);
+    s += ';' + QString::number((qint8)d->changeLeft);
+    s += ';' + QString::number((qint8)d->changeTop);
+    s += ';' + QString::number((qint8)d->changeZoom);
     return s;
 }
 
