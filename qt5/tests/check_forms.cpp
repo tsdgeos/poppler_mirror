@@ -226,7 +226,7 @@ void TestForms::testSetAppearanceText()
 
         Poppler::FormFieldText *fft = static_cast<Poppler::FormFieldText *>(field);
 
-        const QString textToSet = "HOLA" + fft->name();
+        const QString textToSet = QStringLiteral("HOLA") + fft->name();
         fft->setAppearanceText(textToSet);
 
         Dict *dict = Poppler::FormFieldData::getFormWidget(fft)->getObj()->getDict();
