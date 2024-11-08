@@ -186,6 +186,7 @@ typedef struct _PopplerPoint PopplerPoint;
 typedef struct _PopplerRectangle PopplerRectangle;
 typedef struct _PopplerTextAttributes PopplerTextAttributes;
 typedef struct _PopplerColor PopplerColor;
+typedef struct _PopplerFontDescription PopplerFontDescription;
 typedef struct _PopplerLinkMapping PopplerLinkMapping;
 typedef struct _PopplerPageTransition PopplerPageTransition;
 typedef struct _PopplerImageMapping PopplerImageMapping;
