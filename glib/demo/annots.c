@@ -49,8 +49,8 @@ typedef struct
 } Annotations;
 
 static const Annotations supported_annots[] = {
-    { POPPLER_ANNOT_TEXT, "Text" },           { POPPLER_ANNOT_LINE, "Line" },         { POPPLER_ANNOT_SQUARE, "Square" },         { POPPLER_ANNOT_CIRCLE, "Circle" }, { POPPLER_ANNOT_HIGHLIGHT, "Highlight" },
-    { POPPLER_ANNOT_UNDERLINE, "Underline" }, { POPPLER_ANNOT_SQUIGGLY, "Squiggly" }, { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" }, { POPPLER_ANNOT_STAMP, "Stamp" },
+    { POPPLER_ANNOT_TEXT, "Text" },           { POPPLER_ANNOT_FREE_TEXT, "Free Text" }, { POPPLER_ANNOT_LINE, "Line" },         { POPPLER_ANNOT_SQUARE, "Square" },         { POPPLER_ANNOT_CIRCLE, "Circle" },
+    { POPPLER_ANNOT_HIGHLIGHT, "Highlight" }, { POPPLER_ANNOT_UNDERLINE, "Underline" }, { POPPLER_ANNOT_SQUIGGLY, "Squiggly" }, { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" }, { POPPLER_ANNOT_STAMP, "Stamp" },
 };
 
 static const char *stamp_types[] = { [POPPLER_ANNOT_STAMP_ICON_UNKNOWN] = "Unknown",
@@ -478,6 +478,27 @@ static void pgd_annot_view_set_annot_free_text(GtkWidget *table, PopplerAnnotFre
     text = get_free_text_callout_line(annot);
     pgd_table_add_property(GTK_GRID(table), "<b>Callout:</b>", text, row);
     g_free(text);
+
+    PopplerColor *color = poppler_annot_get_color(POPPLER_ANNOT(annot));
+
+    if (color) {
+        text = g_strdup_printf("(%d, %d, %d)", color->red, color->green, color->blue);
+    } else {
+        text = g_strdup("null");
+    }
+    pgd_table_add_property(GTK_GRID(table), "<b>Color:</b>", text, row);
+    g_free(text);
+
+    PopplerFontDescription *font_desc = poppler_annot_free_text_get_font_desc(annot);
+    PangoFontDescription *p = pango_font_description_new();
+    pango_font_description_set_family(p, font_desc->font_name);
+    pango_font_description_set_stretch(p, (PangoStretch)font_desc->stretch);
+    pango_font_description_set_weight(p, (PangoWeight)font_desc->weight);
+    pango_font_description_set_style(p, (PangoStyle)font_desc->style);
+    pango_font_description_set_size(p, font_desc->size_pt * PANGO_SCALE);
+    text = pango_font_description_to_string(p);
+    pgd_table_add_property(GTK_GRID(table), "<b>Font:</b>", text, row);
+    g_free(text);
 }
 
 static void pgd_annot_view_set_annot_stamp(GtkWidget *table, PopplerAnnotStamp *annot, gint *row)
@@ -614,6 +635,15 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
     poppler_annot_get_rectangle(annot, &rect);
     text = g_strdup_printf("(%.2f;%.2f) (%.2f;%.2f)", rect.x1, rect.y1, rect.x2, rect.y2);
     pgd_table_add_property(GTK_GRID(table), "<b>Coords:</b>", text, &row);
+    g_free(text);
+
+    double border_width;
+    if (poppler_annot_get_border_width(POPPLER_ANNOT(annot), &border_width)) {
+        text = g_strdup_printf("%f", border_width);
+    } else {
+        text = g_strdup("unset");
+    }
+    pgd_table_add_property(GTK_GRID(table), "<b>Border Width:</b>", text, &row);
     g_free(text);
 
     if (POPPLER_IS_ANNOT_MARKUP(annot)) {
@@ -859,6 +889,17 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
     case POPPLER_ANNOT_TEXT:
         annot = poppler_annot_text_new(demo->doc, &rect);
 
+        break;
+    case POPPLER_ANNOT_FREE_TEXT:
+        annot = poppler_annot_free_text_new(demo->doc, &rect);
+        poppler_annot_set_contents(annot, "Free Text");
+        PopplerFontDescription *font_desc = poppler_font_description_new("DejaVu Sans");
+        font_desc->size_pt = 17;
+        font_desc->style = POPPLER_STYLE_OBLIQUE;
+        font_desc->weight = POPPLER_WEIGHT_BOLD;
+        font_desc->stretch = POPPLER_STRETCH_CONDENSED;
+        poppler_annot_free_text_set_font_desc(POPPLER_ANNOT_FREE_TEXT(annot), font_desc);
+        poppler_font_description_free(font_desc);
         break;
     case POPPLER_ANNOT_LINE: {
         PopplerPoint start, end;

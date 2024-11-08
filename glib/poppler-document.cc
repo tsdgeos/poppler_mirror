@@ -3898,9 +3898,9 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     ret = document->doc->sign(poppler_signing_data_get_destination_filename(signing_data), poppler_certificate_info_get_id((PopplerCertificateInfo *)certificate_info),
                               poppler_signing_data_get_password(signing_data) ? poppler_signing_data_get_password(signing_data) : "", field_partial_name, poppler_signing_data_get_page(signing_data) + 1,
                               PDFRectangle(rect->x1, rect->y1, rect->x2, rect->y2), *signature_text, *signature_text_left, poppler_signing_data_get_font_size(signing_data), poppler_signing_data_get_left_font_size(signing_data),
-                              std::make_unique<AnnotColor>(font_color->red, font_color->green, font_color->blue), poppler_signing_data_get_border_width(signing_data),
-                              std::make_unique<AnnotColor>(border_color->red, border_color->green, border_color->blue), std::make_unique<AnnotColor>(background_color->red, background_color->green, background_color->blue), reason.get(),
-                              location.get(), poppler_signing_data_get_image_path(signing_data) ? poppler_signing_data_get_image_path(signing_data) : "", owner_pwd, user_pwd);
+                              _poppler_convert_poppler_color_to_annot_color(font_color), poppler_signing_data_get_border_width(signing_data), _poppler_convert_poppler_color_to_annot_color(border_color),
+                              _poppler_convert_poppler_color_to_annot_color(background_color), reason.get(), location.get(), poppler_signing_data_get_image_path(signing_data) ? poppler_signing_data_get_image_path(signing_data) : "",
+                              owner_pwd, user_pwd);
 
     g_task_return_boolean(task, ret);
 }

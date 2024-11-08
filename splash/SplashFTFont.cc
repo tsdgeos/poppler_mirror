@@ -310,10 +310,10 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
 {
     static const FT_Outline_Funcs outlineFuncs = {
 #if FREETYPE_MINOR <= 1
-        (int (*)(FT_Vector *, void *)) & glyphPathMoveTo,
-        (int (*)(FT_Vector *, void *)) & glyphPathLineTo,
-        (int (*)(FT_Vector *, FT_Vector *, void *)) & glyphPathConicTo,
-        (int (*)(FT_Vector *, FT_Vector *, FT_Vector *, void *)) & glyphPathCubicTo,
+        (int (*)(FT_Vector *, void *))&glyphPathMoveTo,
+        (int (*)(FT_Vector *, void *))&glyphPathLineTo,
+        (int (*)(FT_Vector *, FT_Vector *, void *))&glyphPathConicTo,
+        (int (*)(FT_Vector *, FT_Vector *, FT_Vector *, void *))&glyphPathCubicTo,
 #else
         &glyphPathMoveTo,
         &glyphPathLineTo,

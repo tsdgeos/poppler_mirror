@@ -67,7 +67,7 @@ public:
         opacity = x.opacity;
         return *this;
     }
-    ~HtmlFontColor() {};
+    ~HtmlFontColor() { };
     GooString *toString() const;
     double getOpacity() const { return opacity / 255.0; }
     bool isEqual(const HtmlFontColor &col) const { return ((r == col.r) && (g == col.g) && (b == col.b) && (opacity == col.opacity)); }

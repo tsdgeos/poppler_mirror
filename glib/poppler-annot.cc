@@ -85,6 +85,8 @@ struct _PopplerAnnotTextMarkupClass
 struct _PopplerAnnotFreeText
 {
     PopplerAnnotMarkup parent_instance;
+    PopplerFontDescription *font_desc;
+    PopplerColor font_color;
 };
 
 struct _PopplerAnnotFreeTextClass
@@ -420,13 +422,202 @@ PopplerAnnot *poppler_annot_text_markup_new_underline(PopplerDocument *doc, Popp
     return poppler_annot;
 }
 
+PopplerColor *_poppler_convert_annot_color_to_poppler_color(const AnnotColor *color)
+{
+    PopplerColor *poppler_color = nullptr;
+
+    if (color) {
+        const double *values = color->getValues();
+
+        switch (color->getSpace()) {
+        case AnnotColor::colorGray:
+            poppler_color = g_new(PopplerColor, 1);
+
+            poppler_color->red = CLAMP((guint16)(values[0] * 65535), 0, 65535);
+            poppler_color->green = poppler_color->red;
+            poppler_color->blue = poppler_color->red;
+
+            break;
+        case AnnotColor::colorRGB:
+            poppler_color = g_new(PopplerColor, 1);
+
+            poppler_color->red = CLAMP((guint16)(values[0] * 65535), 0, 65535);
+            poppler_color->green = CLAMP((guint16)(values[1] * 65535), 0, 65535);
+            poppler_color->blue = CLAMP((guint16)(values[2] * 65535), 0, 65535);
+
+            break;
+        case AnnotColor::colorCMYK:
+            g_warning("Unsupported Annot Color: colorCMYK");
+            break;
+        case AnnotColor::colorTransparent:
+            break;
+        }
+    }
+
+    return poppler_color;
+}
+
+std::unique_ptr<AnnotColor> _poppler_convert_poppler_color_to_annot_color(const PopplerColor *poppler_color)
+{
+    if (!poppler_color) {
+        return nullptr;
+    }
+
+    return std::make_unique<AnnotColor>(CLAMP((double)poppler_color->red / 65535, 0., 1.), CLAMP((double)poppler_color->green / 65535, 0., 1.), CLAMP((double)poppler_color->blue / 65535, 0., 1.));
+}
+
 static void poppler_annot_free_text_init(PopplerAnnotFreeText *poppler_annot) { }
 
 static void poppler_annot_free_text_class_init(PopplerAnnotFreeTextClass *klass) { }
 
+// Single map with string keys and enum values
+enum FontPropType
+{
+    TYPE_STYLE,
+    TYPE_WEIGHT,
+    TYPE_STRETCH,
+    TYPE_NORMAL
+};
+
+typedef std::map<std::string, std::pair<FontPropType, int>> FontstyleMap;
+
+static const FontstyleMap string_to_fontstyle = { { "UltraCondensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_ULTRA_CONDENSED) },
+                                                  { "ExtraCondensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_EXTRA_CONDENSED) },
+                                                  { "Condensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_CONDENSED) },
+                                                  { "SemiCondensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_SEMI_CONDENSED) },
+                                                  { "SemiExpanded", std::pair(TYPE_STRETCH, POPPLER_STRETCH_SEMI_EXPANDED) },
+                                                  { "Expanded", std::pair(TYPE_STRETCH, POPPLER_STRETCH_EXPANDED) },
+                                                  { "UltraExpanded", std::pair(TYPE_STRETCH, POPPLER_STRETCH_ULTRA_EXPANDED) },
+                                                  { "ExtraExpanded", std::pair(TYPE_STRETCH, POPPLER_STRETCH_EXTRA_EXPANDED) },
+                                                  { "Thin", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_THIN) },
+                                                  { "UltraLight", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_ULTRALIGHT) },
+                                                  { "Light", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_LIGHT) },
+                                                  { "Medium", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_MEDIUM) },
+                                                  { "SemiBold", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_SEMIBOLD) },
+                                                  { "Bold", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_BOLD) },
+                                                  { "UltraBold", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_ULTRABOLD) },
+                                                  { "Heavy", std::pair(TYPE_WEIGHT, POPPLER_WEIGHT_HEAVY) },
+                                                  { "Italic", std::pair(TYPE_STYLE, POPPLER_STYLE_ITALIC) },
+                                                  { "Oblique", std::pair(TYPE_STYLE, POPPLER_STYLE_OBLIQUE) },
+                                                  { "Regular", std::pair(TYPE_NORMAL, 0) },
+                                                  { "Normal", std::pair(TYPE_NORMAL, 0) } };
+
+static const char *stretch_to_str[] = { "UltraCondensed", "ExtraCondensed", "Condensed", "SemiCondensed", /* Normal */ "", "SemiExpanded", "Expanded", "ExtraExpanded", "UltraExpanded" };
+
+const std::map<std::string, std::string> fallback_fonts = {
+    { "/Helvetica", "Helvetica" }, /* iOS */
+    { "Helv", "Helvetica" } /* Firefox */
+};
+
+static bool update_font_desc_with_word(PopplerFontDescription &font_desc, std::string &word)
+{
+    FontstyleMap::const_iterator a = string_to_fontstyle.find(word);
+    if (a != string_to_fontstyle.end()) {
+        std::pair<FontPropType, int> elt = a->second;
+        switch (elt.first) {
+        case TYPE_STYLE:
+            font_desc.style = (PopplerStyle)elt.second;
+            return true;
+        case TYPE_WEIGHT:
+            font_desc.weight = (PopplerWeight)elt.second;
+            return true;
+        case TYPE_STRETCH:
+            font_desc.stretch = (PopplerStretch)elt.second;
+            return true;
+        case TYPE_NORMAL:
+            return true;
+        }
+    }
+    return false;
+}
+
+static void poppler_font_name_to_description(const std::string &name, PopplerFontDescription &font_desc)
+{
+    /* Last three words of the font name may be style indications */
+    size_t end = name.size();
+    size_t start;
+
+    for (int i = 3; i >= 1; --i) {
+        start = name.find_last_of(' ', end - 1);
+        if (start == std::string::npos) {
+            break;
+        }
+        std::string word = name.substr(start + 1, end - start - 1);
+
+        if (!update_font_desc_with_word(font_desc, word)) {
+            break;
+        }
+
+        end = start;
+    }
+    font_desc.font_name = g_strdup(name.substr(0, end).c_str());
+}
+
 PopplerAnnot *_poppler_annot_free_text_new(Annot *annot)
 {
-    return _poppler_create_annot(POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+    PopplerAnnot *poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
+    PopplerAnnotFreeText *ft_annot = POPPLER_ANNOT_FREE_TEXT(poppler_annot);
+    std::unique_ptr<DefaultAppearance> da = ((AnnotFreeText *)annot)->getDefaultAppearance();
+    PopplerFontDescription *desc = nullptr;
+    if (da->getFontName().isName()) {
+        desc = poppler_font_description_new(da->getFontName().getName());
+        desc->size_pt = da->getFontPtSize();
+
+        /* Attempt to resolve the actual font name. */
+        Form *form = annot->getDoc()->getCatalog()->getCreateForm();
+        if (form) {
+            GfxResources *res = form->getDefaultResources();
+            if (res) {
+                std::shared_ptr<GfxFont> font = res->lookupFont(desc->font_name);
+                if (font && font->getName()) {
+                    poppler_font_name_to_description(font->getName().value(), *desc);
+                }
+            }
+        }
+
+        std::map<std::string, std::string>::const_iterator fallback_font = fallback_fonts.find(std::string(desc->font_name));
+        if (fallback_font != fallback_fonts.end()) {
+            desc->font_name = g_strdup(fallback_font->second.c_str());
+        }
+    }
+
+    ft_annot->font_desc = desc;
+
+    const AnnotColor *ac = da->getFontColor();
+
+    if (ac) {
+        PopplerColor *font_color = _poppler_convert_annot_color_to_poppler_color(ac);
+        ft_annot->font_color = *font_color;
+        poppler_color_free(font_color);
+    }
+
+    return poppler_annot;
+}
+
+/**
+ * poppler_annot_free_text_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Free Text annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot(). It initially has no content. Font family, size and
+ * color are initially undefined and must be set, see
+ * poppler_annot_free_text_set_font_desc() and
+ * poppler_annot_free_text_set_font_color().
+ *
+ * Returns: (transfer full): A newly created #PopplerAnnotFreeText annotation
+ */
+PopplerAnnot *poppler_annot_free_text_new(PopplerDocument *doc, PopplerRectangle *rect)
+{
+    Annot *annot;
+    PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
+
+    annot = new AnnotFreeText(doc->doc, &pdf_rect);
+
+    PopplerAnnot *poppler_annot = _poppler_annot_free_text_new(annot);
+
+    return poppler_annot;
 }
 
 static void poppler_annot_file_attachment_init(PopplerAnnotFileAttachment *poppler_annot) { }
@@ -936,49 +1127,6 @@ void poppler_annot_set_flags(PopplerAnnot *poppler_annot, PopplerAnnotFlag flags
     poppler_annot->annot->setFlags((guint)flags);
 }
 
-static PopplerColor *create_poppler_color_from_annot_color(AnnotColor *color)
-{
-    PopplerColor *poppler_color = nullptr;
-
-    if (color) {
-        const double *values = color->getValues();
-
-        switch (color->getSpace()) {
-        case AnnotColor::colorGray:
-            poppler_color = g_new(PopplerColor, 1);
-
-            poppler_color->red = (guint16)(values[0] * 65535);
-            poppler_color->green = poppler_color->red;
-            poppler_color->blue = poppler_color->red;
-
-            break;
-        case AnnotColor::colorRGB:
-            poppler_color = g_new(PopplerColor, 1);
-
-            poppler_color->red = (guint16)(values[0] * 65535);
-            poppler_color->green = (guint16)(values[1] * 65535);
-            poppler_color->blue = (guint16)(values[2] * 65535);
-
-            break;
-        case AnnotColor::colorCMYK:
-            g_warning("Unsupported Annot Color: colorCMYK");
-        case AnnotColor::colorTransparent:
-            break;
-        }
-    }
-
-    return poppler_color;
-}
-
-static std::unique_ptr<AnnotColor> create_annot_color_from_poppler_color(PopplerColor *poppler_color)
-{
-    if (!poppler_color) {
-        return nullptr;
-    }
-
-    return std::make_unique<AnnotColor>((double)poppler_color->red / 65535, (double)poppler_color->green / 65535, (double)poppler_color->blue / 65535);
-}
-
 /**
  * poppler_annot_get_color:
  * @poppler_annot: a #PopplerAnnot
@@ -992,7 +1140,7 @@ PopplerColor *poppler_annot_get_color(PopplerAnnot *poppler_annot)
 {
     g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
 
-    return create_poppler_color_from_annot_color(poppler_annot->annot->getColor());
+    return _poppler_convert_annot_color_to_poppler_color(poppler_annot->annot->getColor());
 }
 
 /**
@@ -1006,7 +1154,7 @@ PopplerColor *poppler_annot_get_color(PopplerAnnot *poppler_annot)
  */
 void poppler_annot_set_color(PopplerAnnot *poppler_annot, PopplerColor *poppler_color)
 {
-    poppler_annot->annot->setColor(create_annot_color_from_poppler_color(poppler_color));
+    poppler_annot->annot->setColor(_poppler_convert_poppler_color_to_annot_color(poppler_color));
 }
 
 /**
@@ -1789,6 +1937,147 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
     return nullptr;
 }
 
+static std::string poppler_font_description_to_style(PopplerFontDescription *font_desc)
+{
+    std::string style = "";
+    std::function<void(const char *)> add_style = [&style](const char *a) {
+        if (strcmp(a, "") != 0) {
+            if (!style.empty()) {
+                style += " ";
+            }
+            style += a;
+        }
+    };
+
+    /* Stretch */
+    add_style(stretch_to_str[font_desc->stretch]);
+
+    /* Don't use a map so that intermediate pango weights are correctly mapped */
+    PopplerWeight w = font_desc->weight;
+    if (w <= POPPLER_WEIGHT_THIN) {
+        add_style("Thin");
+    } else if (w <= POPPLER_WEIGHT_ULTRALIGHT) {
+        add_style("UltraLight");
+    } else if (w <= POPPLER_WEIGHT_LIGHT) {
+        add_style("Light");
+    } else if (w <= POPPLER_WEIGHT_NORMAL) {
+        add_style("");
+    } else if (w <= POPPLER_WEIGHT_MEDIUM) {
+        add_style("Medium");
+    } else if (w <= POPPLER_WEIGHT_SEMIBOLD) {
+        add_style("SemiBold");
+    } else if (w <= POPPLER_WEIGHT_BOLD) {
+        add_style("Bold");
+    } else if (w <= POPPLER_WEIGHT_ULTRABOLD) {
+        add_style("UltraBold");
+    } else {
+        add_style("Heavy");
+    }
+
+    /* Style, i.e. italic, oblique or normal */
+    if (font_desc->style == POPPLER_STYLE_ITALIC) {
+        add_style("Italic");
+    } else if (font_desc->style == POPPLER_STYLE_OBLIQUE) {
+        add_style("Oblique");
+    }
+
+    return style;
+}
+
+static void poppler_annot_free_text_set_da_to_native(PopplerAnnotFreeText *poppler_annot)
+{
+    Annot *annot = POPPLER_ANNOT(poppler_annot)->annot;
+
+    std::string font_name = "Sans";
+    double size = 11.;
+
+    if (poppler_annot->font_desc) {
+        const char *family = poppler_annot->font_desc->font_name;
+        const std::string style = poppler_font_description_to_style(poppler_annot->font_desc);
+
+        Form *form = annot->getDoc()->getCatalog()->getCreateForm();
+        if (form) {
+            font_name = form->findFontInDefaultResources(family, style);
+            if (font_name.empty()) {
+                font_name = form->addFontToDefaultResources(family, style).fontName;
+            }
+
+            if (!font_name.empty()) {
+                form->ensureFontsForAllCharacters(annot->getContents(), font_name);
+            }
+        }
+        size = poppler_annot->font_desc->size_pt;
+    }
+
+    DefaultAppearance da { { objName, font_name.c_str() }, size, _poppler_convert_poppler_color_to_annot_color(&(poppler_annot->font_color)) };
+    ((AnnotFreeText *)annot)->setDefaultAppearance(da);
+}
+
+/**
+ * poppler_annot_free_text_set_font_desc:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @font_desc: a #PopplerFontDescription
+ *
+ * Sets the font description (i.e. font family name, style, weight, stretch and size).
+ *
+ * Since: 24.12.0
+ **/
+void poppler_annot_free_text_set_font_desc(PopplerAnnotFreeText *poppler_annot, PopplerFontDescription *font_desc)
+{
+    if (poppler_annot->font_desc) {
+        poppler_font_description_free(poppler_annot->font_desc);
+    }
+    poppler_annot->font_desc = poppler_font_description_copy(font_desc);
+    poppler_annot_free_text_set_da_to_native(poppler_annot);
+}
+
+/**
+ * poppler_annot_free_text_get_font_desc:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ *
+ * Gets the font description (i.e. font family name, style, weight, stretch and size).
+ *
+ * Returns: (transfer full): a copy of the annotation font description
+ *
+ * Since: 24.12.0
+ **/
+PopplerFontDescription *poppler_annot_free_text_get_font_desc(PopplerAnnotFreeText *poppler_annot)
+{
+    return poppler_font_description_copy(poppler_annot->font_desc);
+}
+
+/**
+ * poppler_annot_free_text_set_font_color:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ * @color: a #PopplerColor
+ *
+ * Sets the font color.
+ *
+ * Since: 24.12.0
+ **/
+void poppler_annot_free_text_set_font_color(PopplerAnnotFreeText *poppler_annot, PopplerColor *color)
+{
+    poppler_annot->font_color = *color;
+    poppler_annot_free_text_set_da_to_native(poppler_annot);
+}
+
+/**
+ * poppler_annot_free_text_get_font_color:
+ * @poppler_annot: a #PopplerAnnotFreeText
+ *
+ * Gets the font color.
+ *
+ * Returns: (transfer full): a copy of the font's #PopplerColor.
+ *
+ * Since: 24.12.0
+ **/
+PopplerColor *poppler_annot_free_text_get_font_color(PopplerAnnotFreeText *poppler_annot)
+{
+    PopplerColor *color = g_new(PopplerColor, 1);
+    *color = poppler_annot->font_color;
+    return color;
+}
+
 /* PopplerAnnotFileAttachment */
 /**
  * poppler_annot_file_attachment_get_attachment:
@@ -1976,7 +2265,7 @@ static PopplerColor *poppler_annot_geometry_get_interior_color(PopplerAnnot *pop
 
     annot = static_cast<AnnotGeometry *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    return create_poppler_color_from_annot_color(annot->getInteriorColor());
+    return _poppler_convert_annot_color_to_poppler_color(annot->getInteriorColor());
 }
 
 static void poppler_annot_geometry_set_interior_color(PopplerAnnot *poppler_annot, PopplerColor *poppler_color)
@@ -1985,7 +2274,7 @@ static void poppler_annot_geometry_set_interior_color(PopplerAnnot *poppler_anno
 
     annot = static_cast<AnnotGeometry *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    annot->setInteriorColor(create_annot_color_from_poppler_color(poppler_color));
+    annot->setInteriorColor(_poppler_convert_poppler_color_to_annot_color(poppler_color));
 }
 
 /* PopplerAnnotCircle */
@@ -2198,4 +2487,109 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
     annot->setCustomImage(annot_image_helper);
 
     return TRUE;
+}
+
+/**
+ * poppler_annot_get_border_width:
+ * @poppler_annot: a #PopplerAnnot
+ * @border_width: a valid pointer to a double
+ *
+ * Returns the border width of the annotation. Some PDF editors set a border
+ * width even if the border is not actually drawn.
+ *
+ * Returns: true and sets @border_width to the actual border width if a border
+ * is defined, otherwise returns false and sets @border_width to 0.
+ *
+ * Since: 24.12.0
+ */
+gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *border_width)
+{
+    Annot *annot = poppler_annot->annot;
+    AnnotBorder *b = annot->getBorder();
+    if (b) {
+        *border_width = b->getWidth();
+        return TRUE;
+    } else {
+        *border_width = 0.;
+        return FALSE;
+    }
+}
+/**
+ * poppler_annot_set_border_width:
+ * @poppler_annot: a #PopplerAnnot
+ * @border_width: the new border width
+ *
+ * Sets the border width of the annotation. Since there is currently no
+ * mechanism in the GLib binding to control the appearance of the border width,
+ * this should generally only be used to disable the border, although the
+ * API might be completed in the future.
+ *
+ * Since: 24.12.0
+ */
+void poppler_annot_set_border_width(PopplerAnnot *poppler_annot, double border_width)
+{
+    Annot *annot = poppler_annot->annot;
+    std::unique_ptr<AnnotBorderArray> border = std::make_unique<AnnotBorderArray>();
+    border->setWidth(border_width);
+    annot->setBorder(std::move(border));
+}
+
+/**
+ * SECTION:poppler-font-description
+ * @short_description: FontDescription
+ * @title: PopplerFontDescription
+ */
+
+/* PopplerFontDescription type */
+G_DEFINE_BOXED_TYPE(PopplerFontDescription, poppler_font_description, poppler_font_description_copy, poppler_font_description_free)
+
+/**
+ * poppler_font_description_new:
+ * @font_name: the family name of the font
+ *
+ * Creates a new #PopplerFontDescriptions
+ *
+ * Returns: a new #PopplerFontDescription, use poppler_font_description_free() to free it
+ */
+PopplerFontDescription *poppler_font_description_new(const char *font_name)
+{
+    PopplerFontDescription *font_desc = (PopplerFontDescription *)g_new0(PopplerFontDescription, 1);
+    font_desc->font_name = g_strdup(font_name);
+    font_desc->size_pt = 11.;
+    font_desc->stretch = POPPLER_STRETCH_NORMAL;
+    font_desc->style = POPPLER_STYLE_NORMAL;
+    font_desc->weight = POPPLER_WEIGHT_NORMAL;
+    return font_desc;
+}
+
+/**
+ * poppler_font_description_free:
+ * @font_desc: a #PopplerFontDescription
+ *
+ * Frees the given #PopplerFontDescription
+ */
+void poppler_font_description_free(PopplerFontDescription *font_desc)
+{
+    g_free(font_desc->font_name);
+    g_free(font_desc);
+}
+
+/**
+ * poppler_font_description_copy:
+ * @font_desc: a #PopplerFontDescription to copy
+ *
+ * Creates a copy of @font_desc
+ *
+ * Returns: a new allocated copy of @font_desc
+ */
+PopplerFontDescription *poppler_font_description_copy(PopplerFontDescription *font_desc)
+{
+    PopplerFontDescription *new_font_desc;
+
+    new_font_desc = g_new(PopplerFontDescription, 1);
+    *new_font_desc = *font_desc;
+
+    new_font_desc->font_name = g_strdup(font_desc->font_name);
+
+    return new_font_desc;
 }

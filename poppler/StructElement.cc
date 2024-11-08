@@ -193,7 +193,7 @@ struct AttributeMapEntry
 
 struct AttributeDefaults
 {
-    AttributeDefaults() {}; // needed to support old clang
+    AttributeDefaults() { }; // needed to support old clang
 
     Object Inline = Object(objName, "Inline");
     Object LrTb = Object(objName, "LrTb");
@@ -210,20 +210,11 @@ struct AttributeDefaults
 
 static const AttributeDefaults attributeDefaults;
 
-#define ATTR_LIST_END                                                                                                                                                                                                                          \
-    {                                                                                                                                                                                                                                          \
-        Attribute::Unknown, nullptr, nullptr, false, nullptr                                                                                                                                                                                   \
-    }
+#define ATTR_LIST_END { Attribute::Unknown, nullptr, nullptr, false, nullptr }
 
-#define ATTR_WITH_DEFAULT(name, inherit, check, defval)                                                                                                                                                                                        \
-    {                                                                                                                                                                                                                                          \
-        Attribute::name, #name, &attributeDefaults.defval, inherit, check                                                                                                                                                                      \
-    }
+#define ATTR_WITH_DEFAULT(name, inherit, check, defval) { Attribute::name, #name, &attributeDefaults.defval, inherit, check }
 
-#define ATTR(name, inherit, check)                                                                                                                                                                                                             \
-    {                                                                                                                                                                                                                                          \
-        Attribute::name, #name, nullptr, inherit, check                                                                                                                                                                                        \
-    }
+#define ATTR(name, inherit, check) { Attribute::name, #name, nullptr, inherit, check }
 
 static const AttributeMapEntry attributeMapCommonShared[] = { ATTR_WITH_DEFAULT(Placement, false, isPlacementName, Inline),
                                                               ATTR_WITH_DEFAULT(WritingMode, true, isWritingModeName, LrTb),
