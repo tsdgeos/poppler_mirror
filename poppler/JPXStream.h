@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
