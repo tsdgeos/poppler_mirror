@@ -142,7 +142,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 const bool isContents = !hasContentsEntry && key.isName("Contents");
                 hasContentsEntry = hasContentsEntry || isContents;
                 Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, /*strict*/ false, /*decryptString*/ !isContents);
-                if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
+                if (unlikely(recursion + 1 >= recursionLimit)) {
                     break;
                 }
                 obj.dictAdd(key.getName(), std::move(obj2));
