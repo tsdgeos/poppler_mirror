@@ -720,6 +720,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/UnicodeCClassTables.h
     poppler/UnicodeCompTables.h
     poppler/UnicodeDecompTables.h
+    poppler/ViewerPreferences.h
     poppler/XRef.h
     poppler/CharTypes.h
     poppler/ErrorCodes.h
