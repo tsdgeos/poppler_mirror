@@ -756,6 +756,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     splash/SplashBitmap.h
     splash/SplashClip.h
     splash/SplashErrorCodes.h
+    splash/SplashFont.h
     splash/SplashFontEngine.h
     splash/SplashFontFile.h
     splash/SplashFontFileID.h
