@@ -731,7 +731,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
-    ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
     poppler/SplashOutputDev.h
     )
   set(poppler_goo_installed_headers
@@ -792,6 +791,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     install(FILES
         ${poppler_poppler_installed_headers}
         ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
+        ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
         DESTINATION include/poppler)
     install(FILES ${poppler_goo_installed_headers} DESTINATION include/poppler/goo)
     install(FILES ${poppler_fofi_installed_headers} DESTINATION include/poppler/fofi)
@@ -800,7 +800,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     target_sources(poppler
       PUBLIC FILE_SET poppler_poppler
       TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/poppler;${CMAKE_CURRENT_BINARY_DIR}
+      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/poppler
       FILES ${poppler_poppler_installed_headers}
     )
     target_sources(poppler
@@ -808,6 +808,12 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
       TYPE HEADERS
       BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/poppler
       FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
+    )
+    target_sources(poppler
+      PUBLIC FILE_SET poppler_export
+      TYPE HEADERS
+      BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
+      FILES ${CMAKE_CURRENT_BINARY_DIR}/poppler_private_export.h
     )
     target_sources(poppler
       PUBLIC FILE_SET poppler_goo_fofi_splash
@@ -820,6 +826,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     )
     install(TARGETS poppler
         FILE_SET poppler_poppler DESTINATION include/poppler
+        FILE_SET poppler_export DESTINATION include/poppler
         FILE_SET poppler_poppler_config DESTINATION include/poppler
         FILE_SET poppler_goo_fofi_splash DESTINATION include/poppler
     )
