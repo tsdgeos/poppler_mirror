@@ -22,7 +22,7 @@
 class Dict;
 class PDFDoc;
 
-class StructTreeRoot
+class POPPLER_PRIVATE_EXPORT StructTreeRoot
 {
 public:
     StructTreeRoot(PDFDoc *docA, Dict *rootDict);
