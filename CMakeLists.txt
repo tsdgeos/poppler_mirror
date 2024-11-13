@@ -713,6 +713,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Stream-CCITT.h
     poppler/Stream.h
     poppler/StructElement.h
+    poppler/StructTreeRoot.h
     poppler/UnicodeMap.h
     poppler/UnicodeMapFuncs.h
     poppler/UnicodeMapTables.h
