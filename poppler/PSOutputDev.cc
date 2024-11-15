@@ -1905,28 +1905,15 @@ void PSOutputDev::setupResources(Dict *resDict)
 
 void PSOutputDev::setupFonts(Dict *resDict)
 {
-    Ref r;
-    GfxFontDict *gfxFontDict;
-    int i;
-
-    gfxFontDict = nullptr;
-    const Object &obj1 = resDict->lookupNF("Font");
-    if (obj1.isRef()) {
-        Object obj2 = obj1.fetch(xref);
-        if (obj2.isDict()) {
-            r = obj1.getRef();
-            gfxFontDict = new GfxFontDict(xref, &r, obj2.getDict());
-        }
-    } else if (obj1.isDict()) {
-        gfxFontDict = new GfxFontDict(xref, nullptr, obj1.getDict());
-    }
-    if (gfxFontDict) {
-        for (i = 0; i < gfxFontDict->getNumFonts(); ++i) {
-            if (const std::shared_ptr<GfxFont> &font = gfxFontDict->getFont(i)) {
+    Ref fontDictRef;
+    const Object &fontDictObj = resDict->lookup("Font", &fontDictRef);
+    if (fontDictObj.isDict()) {
+        GfxFontDict gfxFontDict(xref, fontDictRef, fontDictObj.getDict());
+        for (int i = 0; i < gfxFontDict.getNumFonts(); ++i) {
+            if (const std::shared_ptr<GfxFont> &font = gfxFontDict.getFont(i)) {
                 setupFont(font.get(), resDict);
             }
         }
-        delete gfxFontDict;
     }
 }
 

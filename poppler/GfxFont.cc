@@ -2309,7 +2309,7 @@ double GfxCIDFont::getWidth(char *s, int len) const
 // GfxFontDict
 //------------------------------------------------------------------------
 
-GfxFontDict::GfxFontDict(XRef *xref, const Ref *fontDictRef, Dict *fontDict)
+GfxFontDict::GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict)
 {
     Ref r;
 
@@ -2320,10 +2320,10 @@ GfxFontDict::GfxFontDict(XRef *xref, const Ref *fontDictRef, Dict *fontDict)
         if (obj2.isDict()) {
             if (obj1.isRef()) {
                 r = obj1.getRef();
-            } else if (fontDictRef) {
+            } else if (fontDictRef != Ref::INVALID()) {
                 // legal generation numbers are five digits, so we use a
                 // 6-digit number here
-                r.gen = 100000 + fontDictRef->num;
+                r.gen = 100000 + fontDictRef.num;
                 r.num = i;
             } else {
                 // no indirect reference for this font, or for the containing
