@@ -226,14 +226,11 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     typeA = getFontType(xref, fontDict, &embFontIDA);
 
     // create the font object
-    GfxFont *font;
     if (typeA < fontCIDType0) {
-        font = new Gfx8BitFont(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
+        return std::make_unique<Gfx8BitFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     } else {
-        font = new GfxCIDFont(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
+        return std::make_unique<GfxCIDFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     }
-
-    return std::unique_ptr<GfxFont>(font);
 }
 
 GfxFont::GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), name(std::move(nameA)), type(typeA)
@@ -247,13 +244,7 @@ GfxFont::GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, 
     hasToUnicode = false;
 }
 
-GfxFont::~GfxFont()
-{
-    delete family;
-    if (embFontName) {
-        delete embFontName;
-    }
-}
+GfxFont::~GfxFont() = default;
 
 bool GfxFont::isSubset() const
 {
@@ -485,13 +476,13 @@ void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
         // get name
         obj2 = obj1.dictLookup("FontName");
         if (obj2.isName()) {
-            embFontName = new GooString(obj2.getName());
+            embFontName = std::make_unique<GooString>(obj2.getName());
         }
         if (embFontName == nullptr) {
             // get name with typo
             obj2 = obj1.dictLookup("Fontname");
             if (obj2.isName()) {
-                embFontName = new GooString(obj2.getName());
+                embFontName = std::make_unique<GooString>(obj2.getName());
                 error(errSyntaxWarning, -1, "The file uses Fontname instead of FontName please notify the creator that the file is broken");
             }
         }
@@ -499,7 +490,7 @@ void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
         // get family
         obj2 = obj1.dictLookup("FontFamily");
         if (obj2.isString()) {
-            family = new GooString(obj2.getString());
+            family = std::make_unique<GooString>(obj2.getString());
         }
 
         // get stretch
@@ -1134,8 +1125,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
             if ((ffT1 = FoFiType1::make(buf->data(), buf->size()))) {
                 const std::string fontName = ffT1->getName();
                 if (!fontName.empty()) {
-                    delete embFontName;
-                    embFontName = new GooString(fontName);
+                    embFontName = std::make_unique<GooString>(fontName);
                 }
                 if (!baseEnc) {
                     baseEnc = (const char **)ffT1->getEncoding();
@@ -1148,10 +1138,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         if (buf) {
             if ((ffT1C = FoFiType1C::make(buf->data(), buf->size()))) {
                 if (ffT1C->getName()) {
-                    if (embFontName) {
-                        delete embFontName;
-                    }
-                    embFontName = new GooString(ffT1C->getName());
+                    embFontName = std::make_unique<GooString>(ffT1C->getName());
                 }
                 if (!baseEnc) {
                     baseEnc = (const char **)ffT1C->getEncoding();
@@ -1763,11 +1750,11 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             obj2 = Object(new GooString("Adobe"));
             obj3 = Object(new GooString("Identity"));
         }
-        collection = obj2.getString()->copy()->append('-')->append(obj3.getString());
+        collection.reset(obj2.getString()->copy()->append('-')->append(obj3.getString()));
     } else {
         error(errSyntaxError, -1, "Missing CIDSystemInfo dictionary in Type 0 descendant font");
         error(errSyntaxError, -1, "Assuming Adobe-Identity for character collection");
-        collection = new GooString("Adobe-Identity");
+        collection = std::make_unique<GooString>("Adobe-Identity");
     }
 
     // look for a ToUnicode CMap
@@ -1780,7 +1767,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             ctu = CharCodeToUnicode::makeIdentityMapping();
         } else {
             // look for a user-supplied .cidToUnicode file
-            if (!(ctu = globalParams->getCIDToUnicode(collection))) {
+            if (!(ctu = globalParams->getCIDToUnicode(collection.get()))) {
                 // I'm not completely sure that this is the best thing to do
                 // but it seems to produce better results when the .cidToUnicode
                 // files from the poppler-data package are missing. At least
@@ -1791,11 +1778,11 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
                 };
                 for (const char *knownCollection : knownCollections) {
                     if (collection->cmp(knownCollection) == 0) {
-                        error(errSyntaxError, -1, "Missing language pack for '{0:t}' mapping", collection);
+                        error(errSyntaxError, -1, "Missing language pack for '{0:t}' mapping", collection.get());
                         return;
                     }
                 }
-                error(errSyntaxError, -1, "Unknown character collection '{0:t}'", collection);
+                error(errSyntaxError, -1, "Unknown character collection '{0:t}'", collection.get());
                 // fall-through, assuming the Identity mapping -- this appears
                 // to match Adobe's behavior
             }
@@ -1808,7 +1795,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
         error(errSyntaxError, -1, "Missing Encoding entry in Type 0 font");
         return;
     }
-    if (!(cMap = CMap::parse(nullptr, collection, &obj1))) {
+    if (!(cMap = CMap::parse(nullptr, collection.get(), &obj1))) {
         return;
     }
     if (cMap->getCMapName()) {
@@ -1935,9 +1922,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
 
 GfxCIDFont::~GfxCIDFont()
 {
-    if (collection) {
-        delete collection;
-    }
     if (cidToGID) {
         gfree(cidToGID);
     }
