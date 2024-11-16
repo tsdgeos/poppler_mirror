@@ -16,6 +16,9 @@
 #include <gpgme++/gpgmepp_version.h>
 #include <gpgme++/signingresult.h>
 #include <gpgme++/engineinfo.h>
+#if DUMP_SIGNATURE_DATA
+#    include <fstream>
+#endif
 
 bool GpgSignatureBackend::hasSufficientVersion()
 {
@@ -261,11 +264,21 @@ GpgSignatureVerification::GpgSignatureVerification(const std::vector<unsigned ch
 {
     gpgContext->setOffline(true);
     signatureData.setEncoding(GpgME::Data::BinaryEncoding);
+#if DUMP_SIGNATURE_DATA
+    static int debugFileCounter = 0;
+    debugFileCounter++;
+    std::ofstream debugSignatureData("/tmp/popplerstuff/signatureData" + std::to_string(debugFileCounter) + ".sig", std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
+    debugSignedData = std::make_unique<std::ofstream>("/tmp/popplerstuff/signedData" + std::to_string(debugFileCounter) + ".data", std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
+    debugSignatureData.write(reinterpret_cast<const char *>(p7data.data()), p7data.size());
+#endif
 }
 
 void GpgSignatureVerification::addData(unsigned char *dataBlock, int dataLen)
 {
     signedData.write(dataBlock, dataLen);
+#if DUMP_SIGNATURE_DATA
+    debugSignedData->write(reinterpret_cast<char *>(dataBlock), dataLen);
+#endif
 }
 
 std::unique_ptr<X509CertificateInfo> GpgSignatureVerification::getCertificateInfo() const

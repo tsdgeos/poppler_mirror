@@ -14,6 +14,8 @@
 #include <optional>
 #include <future>
 
+#define DUMP_SIGNATURE_DATA 0
+
 class GpgSignatureBackend : public CryptoSign::Backend
 {
 public:
@@ -59,4 +61,7 @@ private:
     std::optional<GpgME::VerificationResult> gpgResult;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
+#if DUMP_SIGNATURE_DATA
+    std::unique_ptr<std::ofstream> debugSignedData;
+#endif
 };
