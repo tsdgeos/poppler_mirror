@@ -133,6 +133,9 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
     case GpgME::Subkey::AlgoELG_E:
     case GpgME::Subkey::AlgoMax:
     case GpgME::Subkey::AlgoUnknown:
+#if GPGMEPP_VERSION > ((1 << 16) | (24 << 8) | (0))
+    case GpgME::Subkey::AlgoKyber:
+#endif
         pkInfo.publicKeyType = OTHERKEY;
     }
     {
