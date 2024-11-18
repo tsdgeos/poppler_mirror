@@ -221,7 +221,8 @@ public:
 
     std::unique_ptr<LinkAction> getAdditionalAction(PageAdditionalActionsType type);
 
-    Gfx *createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA = nullptr);
+    std::unique_ptr<Gfx> createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
+                                   XRef *xrefA = nullptr);
 
     // Display a page.
     void display(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, bool printing, bool (*abortCheckCbk)(void *data) = nullptr, void *abortCheckCbkData = nullptr,

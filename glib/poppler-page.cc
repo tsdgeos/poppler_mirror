@@ -255,17 +255,16 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
 {
     if (page->text == nullptr) {
         TextOutputDev *text_dev;
-        Gfx *gfx;
 
         text_dev = new TextOutputDev(nullptr, true, 0, false, false);
-        gfx = page->page->createGfx(text_dev, 72.0, 72.0, 0, false, /* useMediaBox */
-                                    true, /* Crop */
-                                    -1, -1, -1, -1, nullptr, nullptr);
-        page->page->display(gfx);
+        std::unique_ptr<Gfx> gfx = page->page->createGfx(text_dev, 72.0, 72.0, 0, false, /* useMediaBox */
+                                                         true, /* Crop */
+                                                         -1, -1, -1, -1, nullptr, nullptr);
+        page->page->display(gfx.get());
         text_dev->endPage();
 
         page->text = text_dev->takeText();
-        delete gfx;
+        gfx.reset(); // deletion order here is important, gfx before text_dev
         delete text_dev;
     }
 
@@ -919,7 +918,6 @@ GList *poppler_page_find_text(PopplerPage *page, const char *text)
 static CairoImageOutputDev *poppler_page_get_image_output_dev(PopplerPage *page, bool (*imgDrawDeviceCbk)(int img_id, void *data), void *imgDrawCbkData)
 {
     CairoImageOutputDev *image_dev;
-    Gfx *gfx;
 
     image_dev = new CairoImageOutputDev();
 
@@ -927,11 +925,10 @@ static CairoImageOutputDev *poppler_page_get_image_output_dev(PopplerPage *page,
         image_dev->setImageDrawDecideCbk(imgDrawDeviceCbk, imgDrawCbkData);
     }
 
-    gfx = page->page->createGfx(image_dev, 72.0, 72.0, 0, false, /* useMediaBox */
-                                true, /* Crop */
-                                -1, -1, -1, -1, nullptr, nullptr);
-    page->page->display(gfx);
-    delete gfx;
+    std::unique_ptr<Gfx> gfx = page->page->createGfx(image_dev, 72.0, 72.0, 0, false, /* useMediaBox */
+                                                     true, /* Crop */
+                                                     -1, -1, -1, -1, nullptr, nullptr);
+    page->page->display(gfx.get());
 
     return image_dev;
 }
