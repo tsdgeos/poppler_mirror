@@ -345,14 +345,6 @@ double AnnotPath::getY(int coord) const
     return 0;
 }
 
-AnnotCoord *AnnotPath::getCoord(int coord)
-{
-    if (coord >= 0 && coord < getCoordsLength()) {
-        return &coords[coord];
-    }
-    return nullptr;
-}
-
 void AnnotPath::parsePathArray(Array *array)
 {
     if (array->getLength() % 2) {
@@ -2121,7 +2113,7 @@ AnnotPopup::AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj) : A
     initialize(docA, annotObj.getDict());
 }
 
-AnnotPopup::~AnnotPopup() { }
+AnnotPopup::~AnnotPopup() = default;
 
 void AnnotPopup::initialize(PDFDoc *docA, Dict *dict)
 {
@@ -4841,7 +4833,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect, const GooString *da, const GfxResources *resources, VariableTextQuadding quadding, XRef *xref,
                                          Dict *resourcesDict)
 {
-    std::vector<GooString *> daToks;
+    std::vector<std::unique_ptr<GooString>> daToks;
     GooString *tok;
     GooString convertedText;
     const GfxFont *font;
@@ -4865,7 +4857,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
                 for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
                     ;
                 }
-                daToks.push_back(new GooString(da, i, j - i));
+                daToks.push_back(std::make_unique<GooString>(da, i, j - i));
                 i = j;
             }
         }
@@ -4882,7 +4874,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     font = nullptr;
     fontSize = 0;
     if (tfPos >= 0) {
-        tok = daToks[tfPos];
+        tok = daToks[tfPos].get();
         if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
@@ -4900,15 +4892,12 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         } else {
             error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
         }
-        tok = daToks[tfPos + 1];
+        tok = daToks[tfPos + 1].get();
         fontSize = gatof(tok->c_str());
     } else {
         error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
     }
     if (!font) {
-        for (auto entry : daToks) {
-            delete entry;
-        }
         return false;
     }
 
@@ -4922,9 +4911,6 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
             j = 0;
             if (fieldChoice->getChoice(i) == nullptr) {
                 error(errSyntaxError, -1, "Invalid annotation listbox");
-                for (auto entry : daToks) {
-                    delete entry;
-                }
                 return false;
             }
             double w;
@@ -4940,7 +4926,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         }
         fontSize = floor(fontSize);
         if (tfPos >= 0) {
-            tok = daToks[tfPos + 1];
+            tok = daToks[tfPos + 1].get();
             tok->clear();
             tok->appendf("{0:.2f}", fontSize);
         }
@@ -4980,17 +4966,17 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // set the font matrix
         if (tmPos >= 0) {
-            tok = daToks[tmPos + 4];
+            tok = daToks[tmPos + 4].get();
             tok->clear();
             tok->appendf("{0:.2f}", x);
-            tok = daToks[tmPos + 5];
+            tok = daToks[tmPos + 5].get();
             tok->clear();
             tok->appendf("{0:.2f}", y);
         }
 
         // write the DA string
-        for (const GooString *daTok : daToks) {
-            appearBuf->append(daTok)->append(' ');
+        for (const std::unique_ptr<GooString> &daTok : daToks) {
+            appearBuf->append(daTok.get())->append(' ');
         }
 
         // write the font matrix (if not part of the DA string)
@@ -5013,10 +4999,6 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // next line
         y -= 1.1 * fontSize;
-    }
-
-    for (auto entry : daToks) {
-        delete entry;
     }
 
     return true;
@@ -5429,7 +5411,7 @@ void AnnotWidget::generateFieldAppearance()
     // And yet Acrobat Reader seems to be taking a field's DR into account.
     Object resourcesDictObj;
     const GfxResources *resources = nullptr;
-    GfxResources *resourcesToFree = nullptr;
+    std::unique_ptr<GfxResources> resourcesToFree = nullptr;
     if (field->getObj() && field->getObj()->isDict()) {
         // Let's use a field's resource dictionary.
         resourcesDictObj = field->getObj()->dictLookup("DR");
@@ -5438,8 +5420,8 @@ void AnnotWidget::generateFieldAppearance()
                 resourcesDictObj = resourcesDictObj.deepCopy();
                 recursiveMergeDicts(resourcesDictObj.getDict(), form->getDefaultResourcesObj()->getDict());
             }
-            resourcesToFree = new GfxResources(doc->getXRef(), resourcesDictObj.getDict(), nullptr);
-            resources = resourcesToFree;
+            resourcesToFree = std::make_unique<GfxResources>(doc->getXRef(), resourcesDictObj.getDict(), nullptr);
+            resources = resourcesToFree.get();
         }
     }
     if (!resourcesDictObj.isDict()) {
@@ -5486,10 +5468,6 @@ void AnnotWidget::generateFieldAppearance()
         setNewAppearance(Object(appearStream), keepAppearState);
     } else {
         appearance = Object(appearStream);
-    }
-
-    if (resourcesToFree) {
-        delete resourcesToFree;
     }
 }
 
@@ -6556,10 +6534,7 @@ AnnotInk::AnnotInk(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot
     initialize(docA, annotObj.getDict());
 }
 
-AnnotInk::~AnnotInk()
-{
-    freeInkList();
-}
+AnnotInk::~AnnotInk() = default;
 
 void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
 {
@@ -6569,8 +6544,6 @@ void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
     if (obj1.isArray()) {
         parseInkList(obj1.getArray());
     } else {
-        inkListLength = 0;
-        inkList = nullptr;
         error(errSyntaxError, -1, "Bad Annot Ink List");
 
         obj1 = dict->lookup("AP");
@@ -6590,10 +6563,9 @@ void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
     }
 }
 
-void AnnotInk::writeInkList(AnnotPath **paths, int n_paths, Array *dest_array)
+void AnnotInk::writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array)
 {
-    for (int i = 0; i < n_paths; ++i) {
-        AnnotPath *path = paths[i];
+    for (const auto &path : paths) {
         Array *a = new Array(doc->getXRef());
         for (int j = 0; j < path->getCoordsLength(); ++j) {
             a->add(Object(path->getX(j)));
@@ -6605,33 +6577,23 @@ void AnnotInk::writeInkList(AnnotPath **paths, int n_paths, Array *dest_array)
 
 void AnnotInk::parseInkList(Array *array)
 {
-    inkListLength = array->getLength();
-    inkList = (AnnotPath **)gmallocn((inkListLength), sizeof(AnnotPath *));
-    memset(inkList, 0, inkListLength * sizeof(AnnotPath *));
+    int inkListLength = array->getLength();
+    inkList.clear();
+    inkList.reserve(inkListLength);
     for (int i = 0; i < inkListLength; i++) {
         Object obj2 = array->get(i);
         if (obj2.isArray()) {
-            inkList[i] = new AnnotPath(obj2.getArray());
+            inkList.push_back(std::make_unique<AnnotPath>(obj2.getArray()));
+        } else {
+            inkList.emplace_back();
         }
     }
 }
 
-void AnnotInk::freeInkList()
+void AnnotInk::setInkList(std::vector<std::unique_ptr<AnnotPath>> &&paths)
 {
-    if (inkList) {
-        for (int i = 0; i < inkListLength; ++i) {
-            delete inkList[i];
-        }
-        gfree(inkList);
-    }
-}
-
-void AnnotInk::setInkList(AnnotPath **paths, int n_paths)
-{
-    freeInkList();
-
     Array *a = new Array(doc->getXRef());
-    writeInkList(paths, n_paths, a);
+    writeInkList(paths, a);
 
     parseInkList(a);
     annotObj.dictSet("InkList", Object(a));
@@ -6661,8 +6623,7 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
         appearBuilder.setLineStyleForBorder(border.get());
         appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
-        for (int i = 0; i < inkListLength; ++i) {
-            const AnnotPath *path = inkList[i];
+        for (const auto &path : inkList) {
             if (path && path->getCoordsLength() != 0) {
                 appearBuilder.appendf("{0:.2f} {1:.2f} m\n", path->getX(0) - rect->x1, path->getY(0) - rect->y1);
                 appearBBox->extendTo(path->getX(0) - rect->x1, path->getY(0) - rect->y1);
@@ -7275,32 +7236,26 @@ AnnotRichMedia::Content::Content(Dict *dict)
 {
     Object obj1 = dict->lookup("Configurations");
     if (obj1.isArray()) {
-        nConfigurations = obj1.arrayGetLength();
+        int numberOfConfigurations = obj1.arrayGetLength();
+        configurations.reserve(numberOfConfigurations);
 
-        configurations = (Configuration **)gmallocn(nConfigurations, sizeof(Configuration *));
-
-        for (int i = 0; i < nConfigurations; ++i) {
+        for (int i = 0; i < numberOfConfigurations; ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isDict()) {
-                configurations[i] = new AnnotRichMedia::Configuration(obj2.getDict());
+                configurations.push_back(std::make_unique<AnnotRichMedia::Configuration>(obj2.getDict()));
             } else {
-                configurations[i] = nullptr;
+                configurations.emplace_back();
             }
         }
-    } else {
-        nConfigurations = 0;
-        configurations = nullptr;
     }
 
-    nAssets = 0;
-    assets = nullptr;
     obj1 = dict->lookup("Assets");
     if (obj1.isDict()) {
         Object obj2 = obj1.getDict()->lookup("Names");
         if (obj2.isArray()) {
             const int length = obj2.arrayGetLength() / 2;
+            assets.reserve(length);
 
-            assets = (Asset **)gmallocn(length, sizeof(Asset *));
             for (int i = 0; i < length; ++i) {
                 Object objKey = obj2.arrayGet(2 * i);
                 Object objVal = obj2.arrayGet(2 * i + 1);
@@ -7310,58 +7265,45 @@ AnnotRichMedia::Content::Content(Dict *dict)
                     continue;
                 }
 
-                assets[nAssets] = new AnnotRichMedia::Asset;
-                assets[nAssets]->name = std::make_unique<GooString>(objKey.getString());
-                assets[nAssets]->fileSpec = std::move(objVal);
-                ++nAssets;
+                auto asset = std::make_unique<AnnotRichMedia::Asset>();
+
+                asset->name = std::make_unique<GooString>(objKey.getString());
+                asset->fileSpec = std::move(objVal);
+                assets.push_back(std::move(asset));
             }
         }
     }
+    assets.shrink_to_fit();
 }
 
-AnnotRichMedia::Content::~Content()
-{
-    if (configurations) {
-        for (int i = 0; i < nConfigurations; ++i) {
-            delete configurations[i];
-        }
-        gfree(configurations);
-    }
-
-    if (assets) {
-        for (int i = 0; i < nAssets; ++i) {
-            delete assets[i];
-        }
-        gfree(assets);
-    }
-}
+AnnotRichMedia::Content::~Content() = default;
 
 int AnnotRichMedia::Content::getConfigurationsCount() const
 {
-    return nConfigurations;
+    return configurations.size();
 }
 
 AnnotRichMedia::Configuration *AnnotRichMedia::Content::getConfiguration(int index) const
 {
-    if (index < 0 || index >= nConfigurations) {
+    if (index < 0 || index >= (int)configurations.size()) {
         return nullptr;
     }
 
-    return configurations[index];
+    return configurations[index].get();
 }
 
 int AnnotRichMedia::Content::getAssetsCount() const
 {
-    return nAssets;
+    return assets.size();
 }
 
 AnnotRichMedia::Asset *AnnotRichMedia::Content::getAsset(int index) const
 {
-    if (index < 0 || index >= nAssets) {
+    if (index < 0 || index >= (int)assets.size()) {
         return nullptr;
     }
 
-    return assets[index];
+    return assets[index].get();
 }
 
 AnnotRichMedia::Asset::Asset() = default;
@@ -7382,20 +7324,17 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 {
     Object obj1 = dict->lookup("Instances");
     if (obj1.isArray()) {
-        nInstances = obj1.arrayGetLength();
+        int numberOfInstances = obj1.arrayGetLength();
+        instances.reserve(numberOfInstances);
 
-        instances = (Instance **)gmallocn(nInstances, sizeof(Instance *));
-
-        for (int i = 0; i < nInstances; ++i) {
+        for (int i = 0; i < numberOfInstances; ++i) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isDict()) {
-                instances[i] = new AnnotRichMedia::Instance(obj2.getDict());
+                instances.push_back(std::make_unique<AnnotRichMedia::Instance>(obj2.getDict()));
             } else {
-                instances[i] = nullptr;
+                instances.emplace_back();
             }
         }
-    } else {
-        instances = nullptr;
     }
 
     obj1 = dict->lookup("Name");
@@ -7418,55 +7357,44 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
         } else {
             // determine from first non null instance
             type = typeFlash; // default in case all instances are null
-            if (instances && nInstances > 0) {
-                for (int i = 0; i < nInstances; ++i) {
-                    AnnotRichMedia::Instance *instance = instances[i];
-                    if (instance) {
-                        switch (instance->getType()) {
-                        case AnnotRichMedia::Instance::type3D:
-                            type = type3D;
-                            break;
-                        case AnnotRichMedia::Instance::typeFlash:
-                            type = typeFlash;
-                            break;
-                        case AnnotRichMedia::Instance::typeSound:
-                            type = typeSound;
-                            break;
-                        case AnnotRichMedia::Instance::typeVideo:
-                            type = typeVideo;
-                            break;
-                        }
-                        // break the loop since we found the first non null instance
+            for (auto &instance : instances) {
+                if (instance) {
+                    switch (instance->getType()) {
+                    case AnnotRichMedia::Instance::type3D:
+                        type = type3D;
+                        break;
+                    case AnnotRichMedia::Instance::typeFlash:
+                        type = typeFlash;
+                        break;
+                    case AnnotRichMedia::Instance::typeSound:
+                        type = typeSound;
+                        break;
+                    case AnnotRichMedia::Instance::typeVideo:
+                        type = typeVideo;
                         break;
                     }
+                    // break the loop since we found the first non null instance
+                    break;
                 }
             }
         }
     }
 }
 
-AnnotRichMedia::Configuration::~Configuration()
-{
-    if (instances) {
-        for (int i = 0; i < nInstances; ++i) {
-            delete instances[i];
-        }
-        gfree(instances);
-    }
-}
+AnnotRichMedia::Configuration::~Configuration() = default;
 
 int AnnotRichMedia::Configuration::getInstancesCount() const
 {
-    return nInstances;
+    return instances.size();
 }
 
 AnnotRichMedia::Instance *AnnotRichMedia::Configuration::getInstance(int index) const
 {
-    if (index < 0 || index >= nInstances) {
+    if (index < 0 || index >= (int)instances.size()) {
         return nullptr;
     }
 
-    return instances[index];
+    return instances[index].get();
 }
 
 const GooString *AnnotRichMedia::Configuration::getName() const

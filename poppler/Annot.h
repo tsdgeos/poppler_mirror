@@ -144,7 +144,6 @@ public:
 
     double getX(int coord) const;
     double getY(int coord) const;
-    AnnotCoord *getCoord(int coord);
     int getCoordsLength() const { return coords.size(); }
 
 protected:
@@ -1373,21 +1372,18 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void setInkList(AnnotPath **paths, int n_paths);
+    void setInkList(std::vector<std::unique_ptr<AnnotPath>> &&paths);
 
     // getters
-    AnnotPath **getInkList() const { return inkList; }
-    int getInkListLength() const { return inkListLength; }
+    const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
-    void writeInkList(AnnotPath **paths, int n_paths, Array *dest_array);
+    void writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array);
     void parseInkList(Array *src_array);
-    void freeInkList();
 
     // required
-    AnnotPath **inkList; // InkList
-    int inkListLength;
+    std::vector<std::unique_ptr<AnnotPath>> inkList; // InkList
 
     // optional
     // inherited from Annot
@@ -1639,8 +1635,7 @@ public:
         // optional
         Type type; // Subtype
         std::unique_ptr<GooString> name; // Name
-        Instance **instances; // Instances
-        int nInstances;
+        std::vector<std::unique_ptr<Instance>> instances; // Instances
     };
 
     class Content;
@@ -1681,11 +1676,9 @@ public:
 
     private:
         // optional
-        Configuration **configurations; // Configurations
-        int nConfigurations;
+        std::vector<std::unique_ptr<Configuration>> configurations; // Configurations
 
-        Asset **assets; // Assets
-        int nAssets;
+        std::vector<std::unique_ptr<Asset>> assets; // Assets
     };
 
     class POPPLER_PRIVATE_EXPORT Activation

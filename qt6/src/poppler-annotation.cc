@@ -341,7 +341,7 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
     return Poppler::boundaryToPdfRectangle(pdfPage, r, rFlags);
 }
 
-AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
+std::unique_ptr<AnnotPath> AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
 {
     const int count = list.size();
     std::vector<AnnotCoord> ac;
@@ -356,7 +356,7 @@ AnnotPath *AnnotationPrivate::toAnnotPath(const QVector<QPointF> &list) const
         ac.emplace_back(x, y);
     }
 
-    return new AnnotPath(std::move(ac));
+    return std::make_unique<AnnotPath>(std::move(ac));
 }
 
 std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
@@ -2108,9 +2108,8 @@ void LineAnnotation::setLinePoints(const QVector<QPointF> &points)
         lineann->setVertices(x1, y1, x2, y2);
     } else {
         AnnotPolygon *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot);
-        AnnotPath *p = d->toAnnotPath(points);
-        polyann->setVertices(p);
-        delete p;
+        std::unique_ptr<AnnotPath> p = d->toAnnotPath(points);
+        polyann->setVertices(p.get());
     }
 }
 
@@ -3130,7 +3129,7 @@ public:
     QList<QVector<QPointF>> inkPaths;
 
     // helper
-    AnnotPath **toAnnotPaths(const QList<QVector<QPointF>> &paths);
+    std::vector<std::unique_ptr<AnnotPath>> toAnnotPaths(const QList<QVector<QPointF>> &paths);
 };
 
 InkAnnotationPrivate::InkAnnotationPrivate() : AnnotationPrivate() { }
@@ -3141,12 +3140,12 @@ Annotation *InkAnnotationPrivate::makeAlias()
 }
 
 // Note: Caller is required to delete array elements and the array itself after use
-AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList<QVector<QPointF>> &paths)
+std::vector<std::unique_ptr<AnnotPath>> InkAnnotationPrivate::toAnnotPaths(const QList<QVector<QPointF>> &paths)
 {
-    const int pathsNumber = paths.size();
-    AnnotPath **res = new AnnotPath *[pathsNumber];
-    for (int i = 0; i < pathsNumber; ++i) {
-        res[i] = toAnnotPath(paths[i]);
+    std::vector<std::unique_ptr<AnnotPath>> res;
+    res.reserve(paths.size());
+    for (const auto &path : paths) {
+        res.push_back(toAnnotPath(path));
     }
     return res;
 }
@@ -3196,21 +3195,19 @@ QList<QVector<QPointF>> InkAnnotation::inkPaths() const
 
     const AnnotInk *inkann = static_cast<const AnnotInk *>(d->pdfAnnot);
 
-    const AnnotPath *const *paths = inkann->getInkList();
-    if (!paths || !inkann->getInkListLength()) {
+    const std::vector<std::unique_ptr<AnnotPath>> &paths = inkann->getInkList();
+    if (paths.empty()) {
         return {};
     }
 
     double MTX[6];
     d->fillTransformationMTX(MTX);
 
-    const int pathsNumber = inkann->getInkListLength();
     QList<QVector<QPointF>> inkPaths;
-    inkPaths.reserve(pathsNumber);
-    for (int m = 0; m < pathsNumber; ++m) {
+    inkPaths.reserve(paths.size());
+    for (const auto &path : paths) {
         // transform each path in a list of normalized points ..
         QVector<QPointF> localList;
-        const AnnotPath *path = paths[m];
         const int pointsNumber = path ? path->getCoordsLength() : 0;
         for (int n = 0; n < pointsNumber; ++n) {
             QPointF point;
@@ -3220,6 +3217,7 @@ QList<QVector<QPointF>> InkAnnotation::inkPaths() const
         // ..and add it to the annotation
         inkPaths.append(localList);
     }
+    inkPaths.shrink_to_fit();
     return inkPaths;
 }
 
@@ -3233,14 +3231,8 @@ void InkAnnotation::setInkPaths(const QList<QVector<QPointF>> &paths)
     }
 
     AnnotInk *inkann = static_cast<AnnotInk *>(d->pdfAnnot);
-    AnnotPath **annotpaths = d->toAnnotPaths(paths);
-    const int pathsNumber = paths.size();
-    inkann->setInkList(annotpaths, pathsNumber);
-
-    for (int i = 0; i < pathsNumber; ++i) {
-        delete annotpaths[i];
-    }
-    delete[] annotpaths;
+    std::vector<std::unique_ptr<AnnotPath>> annotpaths = d->toAnnotPaths(paths);
+    inkann->setInkList(std::move(annotpaths));
 }
 
 /** LinkAnnotation [Annotation] */
