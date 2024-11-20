@@ -675,6 +675,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Array.h
     poppler/CachedFile.h
     poppler/Catalog.h
+    poppler/CryptoSignBackend.h
     poppler/DateInfo.h
     poppler/Dict.h
     poppler/Error.h
