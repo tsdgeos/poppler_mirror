@@ -54,6 +54,7 @@
 #include <cstdio>
 #include <mutex>
 
+#include "CryptoSignBackend.h"
 #include "poppler-config.h"
 
 #include "poppler_private_export.h"
@@ -340,9 +341,10 @@ public:
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Argument imagePath is a background image (a path to a file).
     // sign() takes ownership of partialFieldName.
-    bool sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
-              const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
-              const GooString *reason = nullptr, const GooString *location = nullptr, const std::string &imagePath = "", const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
+    std::optional<CryptoSign::SigningError> sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
+                                                 const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
+                                                 std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr, const std::string &imagePath = "",
+                                                 const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
 
     struct SignatureData
     {

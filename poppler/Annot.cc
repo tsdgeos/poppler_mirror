@@ -5254,14 +5254,40 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
     if (leftText.toStr().empty()) {
         drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
-        DefaultAppearance daLeft(_da);
-        daLeft.setFontPtSize(field->getCustomAppearanceLeftFontSize());
         const double halfWidth = (rect->x2 - rect->x1) / 2;
+
+        double borderWidth = 0;
+
+        if (border) {
+            borderWidth = border->getWidth();
+        }
+
+        const double wMax = (rect->x2 - rect->x1) - 2 * borderWidth - 4;
+        const double hMax = (rect->y2 - rect->y1) - 2 * borderWidth;
+
+        DefaultAppearance daLeft(_da);
+
+        double leftFontSize = field->getCustomAppearanceLeftFontSize();
+        if (leftFontSize == 0) {
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().getName());
+            leftFontSize = Annot::calculateFontSize(form, font.get(), &leftText, wMax / 2.0, hMax);
+        }
+        daLeft.setFontPtSize(leftFontSize);
+
         PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
         drawSignatureFieldText(leftText, form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
 
+        DefaultAppearance daRight(_da);
+
+        double fontSize = daRight.getFontPtSize();
+        if (fontSize == 0) {
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().getName());
+            fontSize = Annot::calculateFontSize(form, font.get(), &contents, wMax / 2.0, hMax);
+        }
+        daRight.setFontPtSize(fontSize);
+
         PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
-        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents, form, daRight, border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
     }
 
     return true;

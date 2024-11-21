@@ -3254,6 +3254,7 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, GfxI
         case csDeviceGray:
         case csCalGray:
         case csDeviceRGB:
+        case csDeviceRGBA:
         case csCalRGB:
         case csDeviceCMYK:
         case csICCBased:
@@ -3301,6 +3302,7 @@ private:
     const int *maskColors;
     int current_row;
     bool imageError;
+    bool fromRGBA;
 
 public:
     ~RescaleDrawImage() override;
@@ -3315,6 +3317,7 @@ public:
         width = widthA;
         current_row = -1;
         imageError = false;
+        fromRGBA = colorMap->getColorSpace()->getMode() == csDeviceRGBA;
 
         /* TODO: Do we want to cache these? */
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
@@ -3371,7 +3374,8 @@ public:
             unsigned char *buffer;
             ptrdiff_t stride;
 
-            image = cairo_image_surface_create(maskColors ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, width, height);
+            image = cairo_image_surface_create(maskColors || fromRGBA ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, width, height);
+
             if (cairo_surface_status(image)) {
                 goto cleanup;
             }
@@ -3390,7 +3394,7 @@ public:
             // to create an image the size of the source image which may
             // exceed cairo's 32767x32767 image size limit (and also saves a
             // lot of memory).
-            image = cairo_image_surface_create(maskColors ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, scaledWidth, scaledHeight);
+            image = cairo_image_surface_create(maskColors || fromRGBA ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, scaledWidth, scaledHeight);
             if (cairo_surface_status(image)) {
                 goto cleanup;
             }
@@ -3433,6 +3437,15 @@ public:
                 rgb = lookup[*p];
                 row_data[i] = ((int)colToByte(rgb.r) << 16) | ((int)colToByte(rgb.g) << 8) | ((int)colToByte(rgb.b) << 0);
                 p++;
+            }
+        } else if (fromRGBA) {
+            // Case of transparent JPX images, they contain RGBA data · Issue #1486
+            GfxDeviceRGBAColorSpace *rgbaCS = dynamic_cast<GfxDeviceRGBAColorSpace *>(colorMap->getColorSpace());
+            if (rgbaCS) {
+                rgbaCS->getARGBPremultipliedLine(pix, row_data, width);
+            } else {
+                error(errSyntaxWarning, -1, "CairoOutputDev: Unexpected fallback from RGBA to RGB");
+                colorMap->getRGBLine(pix, row_data, width);
             }
         } else {
             colorMap->getRGBLine(pix, row_data, width);

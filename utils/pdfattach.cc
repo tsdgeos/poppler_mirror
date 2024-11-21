@@ -14,7 +14,7 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include "gbasename.h"
+#include "goo/gbasename.h"
 #include "parseargs.h"
 #include "GlobalParams.h"
 #include "PDFDoc.h"

@@ -28,6 +28,7 @@
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -219,6 +220,9 @@ public:
                              bool maskInterpolate) override;
 
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
+
+    // Does this device supports transparency (alpha channel) in JPX streams?
+    bool supportJPXtransparency() override { return true; }
 
     //----- transparency groups and soft masks
     void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override;

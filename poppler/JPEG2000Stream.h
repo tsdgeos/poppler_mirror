@@ -8,6 +8,7 @@
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -39,12 +40,19 @@ public:
     int lookChar() override;
     GooString *getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
-    void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
+    void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha) override;
+
+    // Whether this JPX Stream should handle transparency (usually set when OutputDev also supports it)
+    void setSupportJPXtransparency(bool val) { handleJPXtransparency = val; }
+
+    // Does this JPX stream support transparency (alpha channel)?
+    bool supportJPXtransparency() { return handleJPXtransparency; }
 
     int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
 
 private:
     JPXStreamPrivate *priv;
+    bool handleJPXtransparency;
 
     void init();
     bool hasGetChars() override { return true; }

@@ -29,17 +29,17 @@
 #include "poppler-image-private.h"
 
 #include <config.h>
-#include "ImgWriter.h"
+#include "goo/ImgWriter.h"
 #if defined(ENABLE_LIBPNG)
-#    include "PNGWriter.h"
+#    include "goo/PNGWriter.h"
 #endif
 #if defined(ENABLE_LIBJPEG)
-#    include "JpegWriter.h"
+#    include "goo/JpegWriter.h"
 #endif
 #if defined(ENABLE_LIBTIFF)
-#    include "TiffWriter.h"
+#    include "goo/TiffWriter.h"
 #endif
-#include "NetPBMWriter.h"
+#include "goo/NetPBMWriter.h"
 
 #include <cstdlib>
 #include <cstring>

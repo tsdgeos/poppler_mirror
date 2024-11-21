@@ -6,12 +6,14 @@
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2019 Marek Kasik <mkasik@redhat.com>
-// Copyright 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #ifndef VIEWERPREFERENCES_H
 #define VIEWERPREFERENCES_H
+
+#include "poppler_private_export.h"
 
 #include <vector>
 
@@ -21,7 +23,7 @@ class Dict;
 // ViewerPreferences
 //------------------------------------------------------------------------
 
-class ViewerPreferences
+class POPPLER_PRIVATE_EXPORT ViewerPreferences
 {
 public:
     enum NonFullScreenPageMode

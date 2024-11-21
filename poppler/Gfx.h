@@ -24,7 +24,7 @@
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -133,7 +133,7 @@ public:
 private:
     std::shared_ptr<GfxFont> doLookupFont(const char *name) const;
 
-    GfxFontDict *fonts;
+    std::unique_ptr<GfxFontDict> fonts;
     Object xObjDict;
     Object colorSpaceDict;
     Object patternDict;

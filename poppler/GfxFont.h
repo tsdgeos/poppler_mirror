@@ -24,7 +24,7 @@
 // Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2021, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
@@ -199,7 +199,7 @@ public:
     bool matches(const char *tagA) const { return tag == tagA; }
 
     // Get font family name.
-    GooString *getFamily() const { return family; }
+    const GooString *getFamily() const { return family.get(); }
 
     // Get font stretch.
     Stretch getStretch() const { return stretch; }
@@ -241,7 +241,7 @@ public:
 
     // Get the PostScript font name for the embedded font.  Returns
     // NULL if there is no embedded font.
-    const GooString *getEmbeddedFontName() const { return embFontName; }
+    const GooString *getEmbeddedFontName() const { return embFontName.get(); }
 
     // Get font descriptor flags.
     int getFlags() const { return flags; }
@@ -305,12 +305,12 @@ protected:
     const std::string tag; // PDF font tag
     const Ref id; // reference (used as unique ID)
     std::optional<std::string> name; // font name
-    GooString *family; // font family
+    std::unique_ptr<GooString> family; // font family
     Stretch stretch; // font stretch
     Weight weight; // font weight
     const GfxFontType type; // type of font
     int flags; // font descriptor flags
-    GooString *embFontName; // name of embedded font
+    std::unique_ptr<GooString> embFontName; // name of embedded font
     Ref embFontID; // ref to embedded font file stream
     double fontMat[6]; // font matrix (Type 3 only)
     double fontBBox[4]; // font bounding box (Type 3 only)
@@ -365,9 +365,9 @@ public:
     // Return the Type 3 Resources dictionary, or NULL if none.
     Dict *getResources();
 
-private:
     ~Gfx8BitFont() override;
 
+private:
     const Base14FontMapEntry *base14; // for Base-14 fonts only; NULL otherwise
     char *enc[256]; // char code --> char name
     char encFree[256]; // boolean for each char name: if set,
@@ -413,13 +413,13 @@ public:
 
     double getWidth(char *s, int len) const;
 
-private:
     ~GfxCIDFont() override;
 
+private:
     int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool wmode);
     double getWidth(CID cid) const; // Get width of a character.
 
-    GooString *collection; // collection name
+    std::unique_ptr<GooString> collection; // collection name
     std::shared_ptr<CMap> cMap; // char code --> CID
     std::shared_ptr<CharCodeToUnicode> ctu; // CID --> Unicode
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;
@@ -438,7 +438,7 @@ class GfxFontDict
 {
 public:
     // Build the font dictionary, given the PDF font dictionary.
-    GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict);
+    GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict);
 
     GfxFontDict(const GfxFontDict &) = delete;
     GfxFontDict &operator=(const GfxFontDict &) = delete;

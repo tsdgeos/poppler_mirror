@@ -72,7 +72,7 @@
 #include "GfxState.h"
 #include "Page.h"
 #include "Annot.h"
-#include "PNGWriter.h"
+#include "goo/PNGWriter.h"
 #include "GlobalParams.h"
 #include "HtmlOutputDev.h"
 #include "HtmlFonts.h"

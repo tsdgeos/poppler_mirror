@@ -14,6 +14,8 @@
 #include <optional>
 #include <future>
 
+#define DUMP_SIGNATURE_DATA 0
+
 class GpgSignatureBackend : public CryptoSign::Backend
 {
 public:
@@ -30,7 +32,7 @@ public:
     GpgSignatureCreation(const std::string &certId);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
-    std::optional<GooString> signDetached(const std::string &password) final;
+    std::variant<GooString, CryptoSign::SigningError> signDetached(const std::string &password) final;
 
 private:
     std::unique_ptr<GpgME::Context> gpgContext;
@@ -59,4 +61,7 @@ private:
     std::optional<GpgME::VerificationResult> gpgResult;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
+#if DUMP_SIGNATURE_DATA
+    std::unique_ptr<std::ofstream> debugSignedData;
+#endif
 };

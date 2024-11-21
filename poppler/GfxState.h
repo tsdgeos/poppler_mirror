@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -212,7 +213,8 @@ enum GfxColorSpaceMode
     csIndexed,
     csSeparation,
     csDeviceN,
-    csPattern
+    csPattern,
+    csDeviceRGBA // used for transparent JPX images, they contain RGBA data · Issue #1486
 };
 
 // This shall hold a cmsHPROFILE handle.
@@ -420,6 +422,26 @@ public:
 
     int getNComps() const override { return 3; }
     void getDefaultColor(GfxColor *color) const override;
+
+private:
+};
+
+//------------------------------------------------------------------------
+// GfxDeviceRGBAColorSpace
+//------------------------------------------------------------------------
+
+class POPPLER_PRIVATE_EXPORT GfxDeviceRGBAColorSpace : public GfxDeviceRGBColorSpace
+{
+public:
+    GfxDeviceRGBAColorSpace();
+    ~GfxDeviceRGBAColorSpace() override;
+    std::unique_ptr<GfxColorSpace> copy() const override;
+    GfxColorSpaceMode getMode() const override { return csDeviceRGBA; }
+
+    int getNComps() const override { return 4; }
+
+    // GfxDeviceRGBAColorSpace-specific access
+    void getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length);
 
 private:
 };

@@ -3106,6 +3106,14 @@ SignatureAnnotation::SigningResult SignatureAnnotation::sign(const QString &outp
         return FieldAlreadySigned;
     case FormFieldSignature::GenericSigningError:
         return GenericSigningError;
+    case FormFieldSignature::InternalError:
+        return InternalError;
+    case FormFieldSignature::KeyMissing:
+        return KeyMissing;
+    case FormFieldSignature::WriteFailed:
+        return WriteFailed;
+    case FormFieldSignature::UserCancelled:
+        return UserCancelled;
     }
     return GenericSigningError;
 }

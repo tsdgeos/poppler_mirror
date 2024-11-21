@@ -7,6 +7,7 @@
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
 
+#include "CryptoSignBackend.h"
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
@@ -15,6 +16,9 @@
 #include <gpgme++/gpgmepp_version.h>
 #include <gpgme++/signingresult.h>
 #include <gpgme++/engineinfo.h>
+#if DUMP_SIGNATURE_DATA
+#    include <fstream>
+#endif
 
 bool GpgSignatureBackend::hasSufficientVersion()
 {
@@ -133,6 +137,9 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
     case GpgME::Subkey::AlgoELG_E:
     case GpgME::Subkey::AlgoMax:
     case GpgME::Subkey::AlgoUnknown:
+#if GPGMEPP_VERSION > ((1 << 16) | (24 << 8) | (0))
+    case GpgME::Subkey::AlgoKyber:
+#endif
         pkInfo.publicKeyType = OTHERKEY;
     }
     {
@@ -225,16 +232,20 @@ void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
 {
     gpgData.write(dataBlock, dataLen);
 }
-std::optional<GooString> GpgSignatureCreation::signDetached(const std::string &password)
+std::variant<GooString, CryptoSign::SigningError> GpgSignatureCreation::signDetached(const std::string &password)
 {
     if (!key) {
-        return {};
+        return CryptoSign::SigningError::KeyMissing;
     }
     gpgData.rewind();
     GpgME::Data signatureData;
     const auto signingResult = gpgContext->sign(gpgData, signatureData, GpgME::SignatureMode::Detached);
     if (!isValidResult(signingResult)) {
-        return {};
+        if (signingResult.error().isCanceled()) {
+            return CryptoSign::SigningError::UserCancelled;
+        } else {
+            return CryptoSign::SigningError::GenericError;
+        }
     }
 
     const auto signatureString = signatureData.toString();
@@ -253,11 +264,21 @@ GpgSignatureVerification::GpgSignatureVerification(const std::vector<unsigned ch
 {
     gpgContext->setOffline(true);
     signatureData.setEncoding(GpgME::Data::BinaryEncoding);
+#if DUMP_SIGNATURE_DATA
+    static int debugFileCounter = 0;
+    debugFileCounter++;
+    std::ofstream debugSignatureData("/tmp/popplerstuff/signatureData" + std::to_string(debugFileCounter) + ".sig", std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
+    debugSignedData = std::make_unique<std::ofstream>("/tmp/popplerstuff/signedData" + std::to_string(debugFileCounter) + ".data", std::ofstream::out | std::ofstream::trunc | std::ofstream::binary);
+    debugSignatureData.write(reinterpret_cast<const char *>(p7data.data()), p7data.size());
+#endif
 }
 
 void GpgSignatureVerification::addData(unsigned char *dataBlock, int dataLen)
 {
     signedData.write(dataBlock, dataLen);
+#if DUMP_SIGNATURE_DATA
+    debugSignedData->write(reinterpret_cast<char *>(dataBlock), dataLen);
+#endif
 }
 
 std::unique_ptr<X509CertificateInfo> GpgSignatureVerification::getCertificateInfo() const

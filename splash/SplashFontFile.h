@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2018, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -63,7 +63,7 @@ private:
     int refcnt;
 };
 
-class SplashFontFile
+class POPPLER_PRIVATE_EXPORT SplashFontFile
 {
 public:
     virtual ~SplashFontFile();

@@ -11,6 +11,7 @@
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2015 Jakub Wilk <jwilk@jwilk.net>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -69,6 +70,7 @@ static inline int doGetChar(JPXStreamPrivate *priv)
 JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 {
     priv = new JPXStreamPrivate;
+    handleJPXtransparency = false;
 }
 
 JPXStream::~JPXStream()
@@ -143,22 +145,26 @@ bool JPXStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode)
+void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha)
 {
     if (unlikely(priv->inited == false)) {
         init();
     }
 
     *bitsPerComponent = 8;
+    *hasAlpha = false;
     int numComps = (priv->image) ? priv->image->numcomps : 1;
     if (priv->image) {
         if (priv->image->color_space == OPJ_CLRSPC_SRGB && numComps == 4) {
             numComps = 3;
+            *hasAlpha = true;
         } else if (priv->image->color_space == OPJ_CLRSPC_SYCC && numComps == 4) {
             numComps = 3;
+            *hasAlpha = true;
         } else if (numComps == 2) {
             numComps = 1;
         } else if (numComps > 4) {
+            *hasAlpha = true;
             numComps = 4;
         }
     }
@@ -272,7 +278,7 @@ void JPXStream::init()
         }
         priv->npixels = priv->image->comps[0].w * priv->image->comps[0].h;
         priv->ncomps = priv->image->numcomps;
-        if (alpha == 1 && smaskInData == 0) {
+        if (alpha == 1 && smaskInData == 0 && !supportJPXtransparency()) {
             priv->ncomps--;
         }
         for (int component = 0; component < priv->ncomps; component++) {

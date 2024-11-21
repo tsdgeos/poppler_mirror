@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019-2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Steve Rosenhamer <srosenhamer@me.com>
@@ -85,6 +85,9 @@
 #include "ProfileData.h"
 #include "Catalog.h"
 #include "OptionalContent.h"
+#ifdef ENABLE_LIBOPENJPEG
+#    include "JPEG2000Stream.h"
+#endif
 
 // the MSVC math.h doesn't define this
 #ifndef M_PI
@@ -241,22 +244,14 @@ static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB
 
 GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : gStateCache(2), xref(xrefA)
 {
-    Ref r;
-
     if (resDictA) {
 
         // build font dictionary
         Dict *resDict = resDictA->copy(xref);
-        fonts = nullptr;
-        const Object &obj1 = resDict->lookupNF("Font");
-        if (obj1.isRef()) {
-            Object obj2 = obj1.fetch(xref);
-            if (obj2.isDict()) {
-                r = obj1.getRef();
-                fonts = new GfxFontDict(xref, &r, obj2.getDict());
-            }
-        } else if (obj1.isDict()) {
-            fonts = new GfxFontDict(xref, nullptr, obj1.getDict());
+        Ref fontDictRef;
+        const Object &fontDictObj = resDict->lookup("Font", &fontDictRef);
+        if (fontDictObj.isDict()) {
+            fonts = std::make_unique<GfxFontDict>(xref, fontDictRef, fontDictObj.getDict());
         }
 
         // get XObject dictionary
@@ -291,10 +286,7 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) : g
     next = nextA;
 }
 
-GfxResources::~GfxResources()
-{
-    delete fonts;
-}
+GfxResources::~GfxResources() = default;
 
 std::shared_ptr<GfxFont> GfxResources::doLookupFont(const char *name) const
 {
@@ -4166,13 +4158,20 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     int maskWidth, maskHeight;
     bool maskInvert;
     bool maskInterpolate;
+    bool hasAlpha;
     Stream *maskStr;
     int i, n;
 
     // get info from the stream
     bits = 0;
     csMode = streamCSNone;
-    str->getImageParams(&bits, &csMode);
+#ifdef ENABLE_LIBOPENJPEG
+    if (str->getKind() == strJPX && out->supportJPXtransparency()) {
+        JPXStream *jpxStream = dynamic_cast<JPXStream *>(str);
+        jpxStream->setSupportJPXtransparency(true);
+    }
+#endif
+    str->getImageParams(&bits, &csMode, &hasAlpha);
 
     // get stream dict
     dict = str->getDict();
@@ -4308,6 +4307,21 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         if (obj1.isNull()) {
             obj1 = dict->lookup("CS");
         }
+        bool haveColorSpace = !obj1.isNull();
+        bool haveRGBA = false;
+        if (str->getKind() == strJPX && out->supportJPXtransparency() && (csMode == streamCSDeviceRGB || csMode == streamCSDeviceCMYK)) {
+            // Case of transparent JPX image, they may contain RGBA data
+            // when have no ColorSpace or when SMaskInData=1 · Issue #1486
+            if (!haveColorSpace) {
+                haveRGBA = hasAlpha;
+            } else {
+                Object smaskInData = dict->lookup("SMaskInData");
+                if (smaskInData.isInt() && smaskInData.getInt()) {
+                    haveRGBA = true;
+                }
+            }
+        }
+
         if (obj1.isName() && inlineImg) {
             Object obj2 = res->lookupColorSpace(obj1.getName());
             if (!obj2.isNull()) {
@@ -4316,7 +4330,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
         std::unique_ptr<GfxColorSpace> colorSpace;
 
-        if (!obj1.isNull()) {
+        if (!obj1.isNull() && !haveRGBA) {
             char *tempIntent = nullptr;
             Object objIntent = dict->lookup("Intent");
             if (objIntent.isName()) {
@@ -4339,18 +4353,26 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
                 colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
             }
         } else if (csMode == streamCSDeviceRGB) {
-            Object objCS = res->lookupColorSpace("DefaultRGB");
-            if (objCS.isNull()) {
-                colorSpace = std::make_unique<GfxDeviceRGBColorSpace>();
+            if (haveRGBA) {
+                colorSpace = std::make_unique<GfxDeviceRGBAColorSpace>();
             } else {
-                colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                Object objCS = res->lookupColorSpace("DefaultRGB");
+                if (objCS.isNull()) {
+                    colorSpace = std::make_unique<GfxDeviceRGBColorSpace>();
+                } else {
+                    colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                }
             }
         } else if (csMode == streamCSDeviceCMYK) {
-            Object objCS = res->lookupColorSpace("DefaultCMYK");
-            if (objCS.isNull()) {
-                colorSpace = std::make_unique<GfxDeviceCMYKColorSpace>();
+            if (haveRGBA) {
+                colorSpace = std::make_unique<GfxDeviceRGBAColorSpace>();
             } else {
-                colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                Object objCS = res->lookupColorSpace("DefaultCMYK");
+                if (objCS.isNull()) {
+                    colorSpace = std::make_unique<GfxDeviceCMYKColorSpace>();
+                } else {
+                    colorSpace = GfxColorSpace::parse(res, &objCS, out, state);
+                }
             }
         }
         if (!colorSpace) {

@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -110,6 +111,9 @@ public:
     // Does this device need to clip pages to the crop box even when the
     // box is the crop box?
     virtual bool needClipToCropBox() { return false; }
+
+    // Does this device supports transparency (alpha channel) in JPX streams?
+    virtual bool supportJPXtransparency() { return false; }
 
     //----- initialization and control
 

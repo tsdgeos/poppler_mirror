@@ -35,6 +35,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -251,7 +252,7 @@ public:
     virtual bool isEncoder() const { return false; }
 
     // Get image parameters which are defined by the stream contents.
-    virtual void getImageParams(int * /*bitsPerComponent*/, StreamColorSpaceMode * /*csMode*/) { }
+    virtual void getImageParams(int * /*bitsPerComponent*/, StreamColorSpaceMode * /*csMode*/, bool * /*hasAlpha*/) { }
 
     // Return the next stream in the "stack".
     virtual Stream *getNextStream() const { return nullptr; }

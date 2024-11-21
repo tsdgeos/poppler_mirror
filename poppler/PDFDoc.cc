@@ -80,6 +80,7 @@
 #include <regex>
 #include <sstream>
 #include <sys/stat.h>
+#include "CryptoSignBackend.h"
 #include "goo/glibc.h"
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
@@ -2247,33 +2248,34 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, G
     appearCharacs->setBackColor(std::move(backgroundColor));
     signatureAnnot->setAppearCharacs(std::move(appearCharacs));
 
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
+    border->setWidth(borderWidth);
+    signatureAnnot->setBorder(std::move(border));
+
     signatureAnnot->generateFieldAppearance();
     signatureAnnot->updateAppearanceStream();
 
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);
 
-    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
-    border->setWidth(borderWidth);
-    signatureAnnot->setBorder(std::move(border));
-
     return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
 }
 
-bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
-                  const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                  std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
+std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect,
+                                                     const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                     std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath,
+                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
 
     std::optional<SignatureData> sig =
             createSignature(destPage, partialFieldName, rect, signatureText, signatureTextLeft, fontSize, leftFontSize, std::move(fontColor), borderWidth, std::move(borderColor), std::move(backgroundColor), imagePath);
 
     if (!sig) {
-        return false;
+        return CryptoSign::SigningError::GenericError; /*This should probably be expanded with error handling from createSignature*/
     }
 
     sig->annotWidget->setFlags(sig->annotWidget->getFlags() | Annot::flagLocked);
@@ -2285,7 +2287,7 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(sig->formWidget);
     if (fws) {
-        const bool res = fws->signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
+        const auto res = fws->signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
         // Now remove the signature stuff in case the user wants to continue editing stuff
         // So the document object is clean
@@ -2300,5 +2302,5 @@ bool PDFDoc::sign(const std::string &saveFilename, const std::string &certNickna
         return res;
     }
 
-    return false;
+    return CryptoSign::SigningError::InternalError;
 }

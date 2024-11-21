@@ -82,6 +82,7 @@
 #include "fofi/FoFiIdentifier.h"
 
 #include <ft2build.h>
+#include <variant>
 #include FT_FREETYPE_H
 #include <unordered_set>
 
@@ -622,16 +623,16 @@ static bool hashFileRange(FILE *f, CryptoSign::SigningInterface *handler, Goffse
     return true;
 }
 
-bool FormWidgetSignature::signDocument(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location, const std::optional<GooString> &ownerPassword,
-                                       const std::optional<GooString> &userPassword)
+std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
+                                                                          const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     auto backend = CryptoSign::Factory::createActive();
     if (!backend) {
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
     if (certNickname.empty()) {
         fprintf(stderr, "signDocument: Empty nickname\n");
-        return false;
+        return CryptoSign::SigningError::KeyMissing;
     }
 
     auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
@@ -640,7 +641,7 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
         fprintf(stderr, "signDocument: error getting signature info\n");
-        return false;
+        return CryptoSign::SigningError::KeyMissing;
     }
     const std::string signerName = certInfo->getSubjectInfo().commonName;
     signatureField->setCertificateInfo(certInfo);
@@ -649,21 +650,21 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(vObj);
     if (!createSignature(vObj, vref, GooString(signerName), CryptoSign::maxSupportedSignatureSize, reason, location)) {
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
 
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
         fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename.c_str());
-        return false;
+        return CryptoSign::SigningError::WriteFailed;
     }
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
 
     // Update byte range of signature in the saved PDF
@@ -672,46 +673,46 @@ bool FormWidgetSignature::signDocument(const std::string &saveFilename, const st
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
         fprintf(stderr, "signDocument: unable update byte range\n");
         fclose(file);
-        return false;
+        return CryptoSign::SigningError::WriteFailed;
     }
 
     // compute hash of byte ranges
     if (!hashFileRange(file, sigHandler.get(), 0LL, sigStart)) {
         fclose(file);
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
     if (!hashFileRange(file, sigHandler.get(), sigEnd, fileSize)) {
         fclose(file);
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
 
     // and sign it
     auto signature = sigHandler->signDetached(password);
-    if (!signature) {
+    if (std::holds_alternative<CryptoSign::SigningError>(signature)) {
         fclose(file);
-        return false;
+        return std::get<CryptoSign::SigningError>(signature);
     }
 
-    if (signature->getLength() > CryptoSign::maxSupportedSignatureSize) {
+    if (std::get<GooString>(signature).getLength() > CryptoSign::maxSupportedSignatureSize) {
+        error(errInternal, -1, "signature too large\n");
         fclose(file);
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
 
     // pad with zeroes to placeholder length
-    auto length = signature->getLength();
-    signature->append(std::string(CryptoSign::maxSupportedSignatureSize - length, '\0'));
+    auto length = std::get<GooString>(signature).getLength();
+    std::get<GooString>(signature).append(std::string(CryptoSign::maxSupportedSignatureSize - length, '\0'));
 
     // write signature to saved file
-    if (!updateSignature(file, sigStart, sigEnd, signature.value())) {
+    if (!updateSignature(file, sigStart, sigEnd, std::get<GooString>(signature))) {
         fprintf(stderr, "signDocument: unable update signature\n");
-        fclose(file);
-        return false;
+        return CryptoSign::SigningError::WriteFailed;
     }
-    signatureField->setSignature(*signature);
+    signatureField->setSignature(std::get<GooString>(std::move(signature)));
 
     fclose(file);
 
-    return true;
+    return {};
 }
 
 static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle *rect)
@@ -731,9 +732,10 @@ static std::tuple<double, double> calculateDxDy(int rot, const PDFRectangle *rec
     }
 }
 
-bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
-                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                     double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
+std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFilename, const std::string &certNickname, const std::string &password, const GooString *reason, const GooString *location,
+                                                                                        const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const GooString &signatureText,
+                                                                                        const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                                                        std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -742,7 +744,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     Form *form = doc->getCatalog()->getCreateForm();
     const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
     if (pdfFontName.empty()) {
-        return false;
+        return CryptoSign::SigningError::InternalError;
     }
     std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
 
@@ -789,7 +791,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     // say that there a now signatures and that we should append only
     doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));
 
-    const bool success = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
+    auto signingResult = signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 
     // Now bring back the annotation appearance back to what it was
     ffs->setDefaultAppearance(originalDefaultAppearance);
@@ -800,7 +802,7 @@ bool FormWidgetSignature::signDocumentWithAppearance(const std::string &saveFile
     getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
 
-    return success;
+    return signingResult;
 }
 
 // Get start and end file position of objNum in the PDF named filename.

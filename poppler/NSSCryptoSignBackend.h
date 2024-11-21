@@ -107,7 +107,7 @@ public:
     ~NSSSignatureCreation() final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     void addData(unsigned char *data_block, int data_len) final;
-    std::optional<GooString> signDetached(const std::string &password) final;
+    std::variant<GooString, CryptoSign::SigningError> signDetached(const std::string &password) final;
 
     NSSSignatureCreation(const NSSSignatureCreation &) = delete;
     NSSSignatureCreation &operator=(const NSSSignatureCreation &) = delete;

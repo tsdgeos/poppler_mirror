@@ -540,11 +540,10 @@ void Page::display(OutputDev *out, double hDPI, double vDPI, int rotate, bool us
     displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, -1, -1, -1, -1, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
-Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
+std::unique_ptr<Gfx> Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData, XRef *xrefA)
 {
     const PDFRectangle *mediaBox, *cropBox;
     PDFRectangle box;
-    Gfx *gfx;
 
     rotate += getRotate();
     if (rotate >= 360) {
@@ -566,15 +565,12 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI, int rotate, bool 
     if (!crop) {
         crop = (box == *cropBox) && out->needClipToCropBox();
     }
-    gfx = new Gfx(doc, out, num, attrs->getResourceDict(), hDPI, vDPI, &box, crop ? cropBox : nullptr, rotate, abortCheckCbk, abortCheckCbkData, xrefA);
-
-    return gfx;
+    return std::make_unique<Gfx>(doc, out, num, attrs->getResourceDict(), hDPI, vDPI, &box, crop ? cropBox : nullptr, rotate, abortCheckCbk, abortCheckCbkData, xrefA);
 }
 
 void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data), void *abortCheckCbkData,
                         bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data), void *annotDisplayDecideCbkData, bool copyXRef)
 {
-    Gfx *gfx;
     Annots *annotList;
 
     if (!out->checkPageSlice(this, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, printing, abortCheckCbk, abortCheckCbkData, annotDisplayDecideCbk, annotDisplayDecideCbkData)) {
@@ -586,7 +582,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         replaceXRef(localXRef);
     }
 
-    gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, abortCheckCbk, abortCheckCbkData, localXRef);
+    std::unique_ptr<Gfx> gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop, sliceX, sliceY, sliceW, sliceH, abortCheckCbk, abortCheckCbkData, localXRef);
 
     Object obj = contents.fetch(localXRef);
     if (!obj.isNull()) {
@@ -608,13 +604,12 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         }
         for (Annot *annot : annots->getAnnots()) {
             if ((annotDisplayDecideCbk && (*annotDisplayDecideCbk)(annot, annotDisplayDecideCbkData)) || !annotDisplayDecideCbk) {
-                annot->draw(gfx, printing);
+                annot->draw(gfx.get(), printing);
             }
         }
         out->dump();
     }
 
-    delete gfx;
     if (copyXRef) {
         replaceXRef(doc->getXRef());
         delete localXRef;

@@ -17,6 +17,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
+// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -26,7 +27,7 @@
 #include <config.h>
 
 #include <climits>
-#include "gmem.h"
+#include "goo/gmem.h"
 #include "Error.h"
 #include "JArithmeticDecoder.h"
 #include "JPXStream.h"
@@ -481,7 +482,7 @@ bool JPXStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode)
+void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha)
 {
     unsigned int boxType, boxLen, dataLen, csEnum;
     unsigned int bpc1, dummy, i;
@@ -490,6 +491,7 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
     bool haveBPC, haveCSMode;
 
     csPrec = 0; // make gcc happy
+    *hasAlpha = false;
     haveBPC = haveCSMode = false;
     bufStr->reset();
     if (bufStr->lookChar() == 0xff) {

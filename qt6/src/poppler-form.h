@@ -880,9 +880,13 @@ public:
      */
     enum SigningResult
     {
-        FieldAlreadySigned, ///< Trying to sign a field that is already signed
-        GenericSigningError,
-        SigningSuccess
+        FieldAlreadySigned, ///< Trying to sign a field that is already signed \since 24.10
+        GenericSigningError, ///< Unclassified error \since 24.10
+        SigningSuccess, ///< No error \since 24.10
+        InternalError, ///< Unexpected error, likely a bug in poppler \since 24.12
+        KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath \since 24.12)
+        WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 24.12
+        UserCancelled, ///< User cancelled the process \since 24.12
     };
 
     /**

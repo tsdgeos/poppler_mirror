@@ -25,7 +25,7 @@
 
 #include "poppler-private.h"
 
-#include "GooString.h"
+#include "goo/GooString.h"
 #include "Page.h"
 #include "UTF.h"
 
