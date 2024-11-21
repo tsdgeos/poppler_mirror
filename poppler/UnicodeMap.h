@@ -36,15 +36,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <variant>
+#include <span>
 
 //------------------------------------------------------------------------
-
-enum UnicodeMapKind
-{
-    unicodeMapUser, // read from a file
-    unicodeMapResident, // static list of ranges
-    unicodeMapFunc // function pointer
-};
 
 typedef int (*UnicodeMapFunc)(Unicode u, char *buf, int bufSize);
 
@@ -54,7 +49,11 @@ struct UnicodeMapRange
     unsigned int code, nBytes; // first output code
 };
 
-struct UnicodeMapExt;
+struct UnicodeMapExt
+{
+    Unicode u; // Unicode char
+    std::vector<char> code;
+};
 
 //------------------------------------------------------------------------
 
@@ -66,7 +65,7 @@ public:
     static std::unique_ptr<UnicodeMap> parse(const std::string &encodingNameA);
 
     // Create a resident UnicodeMap.
-    UnicodeMap(const char *encodingNameA, bool unicodeOutA, const UnicodeMapRange *rangesA, int lenA);
+    UnicodeMap(const char *encodingNameA, bool unicodeOutA, std::span<const UnicodeMapRange> rangesA);
 
     // Create a resident UnicodeMap that uses a function instead of a
     // list of ranges.
@@ -100,15 +99,9 @@ private:
     explicit UnicodeMap(const std::string &encodingNameA);
 
     std::string encodingName;
-    UnicodeMapKind kind;
     bool unicodeOut;
-    union {
-        const UnicodeMapRange *ranges; // (user, resident)
-        UnicodeMapFunc func; // (func)
-    };
-    int len; // (user, resident)
-    UnicodeMapExt *eMaps; // (user)
-    int eMapsLen; // (user)
+    std::variant<std::vector<UnicodeMapRange>, std::span<const UnicodeMapRange>, UnicodeMapFunc> data;
+    std::vector<UnicodeMapExt> eMaps; // (user)
 };
 
 //------------------------------------------------------------------------
