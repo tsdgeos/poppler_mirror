@@ -25,7 +25,7 @@
 
 #include <config.h>
 
-#include "GooString.h"
+#include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "Decrypt.h"
 #include "Error.h"

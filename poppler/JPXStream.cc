@@ -27,7 +27,7 @@
 #include <config.h>
 
 #include <climits>
-#include "gmem.h"
+#include "goo/gmem.h"
 #include "Error.h"
 #include "JArithmeticDecoder.h"
 #include "JPXStream.h"

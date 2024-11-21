@@ -33,7 +33,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <cstdarg>
-#include "GooString.h"
+#include "goo/GooString.h"
 #include "GlobalParams.h"
 #include "Error.h"
 

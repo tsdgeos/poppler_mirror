@@ -338,14 +338,6 @@ if(WITH_FONTCONFIGURATION_WIN32)
     add_definitions(-D_WIN32_IE=0x0500)
   endif()
 endif()
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/fofi
-  ${CMAKE_CURRENT_SOURCE_DIR}/goo
-  ${CMAKE_CURRENT_SOURCE_DIR}/poppler
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/poppler
-)
 
 if(PNG_FOUND)
   set(ENABLE_LIBPNG ON)
@@ -627,6 +619,7 @@ if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 add_library(poppler ${poppler_SRCS} ${LINKER_SCRIPT})
+target_include_directories(poppler PUBLIC poppler ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/poppler)
 if (OpenJPEG_FOUND)
   # check if we can remove this when we depend on newer openjpeg versions, 2.5 seems fixed
   # target openjp2 may lack interface include directories
@@ -832,6 +825,36 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
         FILE_SET poppler_goo_fofi_splash DESTINATION include/poppler
     )
   endif()
+endif()
+function(VERIFY_PUBLIC_HEADERS target subfolder)
+  set(_gen_source_files "")
+  foreach(header_file ${ARGN})
+    get_filename_component(_name ${header_file} NAME_WLE)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/public_if_test/${target}/${_name}.cpp"
+         "#include \"${header_file}\"")
+    file(COPY "${header_file}"
+         DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/public_if_test/${subfolder}/${target}/")
+    list(APPEND _gen_source_files
+       "${CMAKE_CURRENT_BINARY_DIR}/public_if_test/${target}/${_name}.cpp")
+  endforeach()
+  add_library(test_public_interface_${target} MODULE ${_gen_source_files})
+  target_include_directories(test_public_interface_${target} PRIVATE 
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CMAKE_CURRENT_BINARY_DIR}/poppler
+      ${CMAKE_CURRENT_BINARY_DIR}/public_if_test/goo
+      ${CMAKE_CURRENT_BINARY_DIR}/public_if_test/fofi
+      ${CMAKE_CURRENT_BINARY_DIR}/public_if_test/splash
+      ${CMAKE_CURRENT_BINARY_DIR}/public_if_test/poppler/poppler
+  )
+  add_dependencies(poppler test_public_interface_${target})
+endfunction()
+
+# Create a build target to check if the '*_public.h' files are self contained
+if(UNIX AND VERIFY_PUBLIC_PRIVATE_HEADERS) 
+  VERIFY_PUBLIC_HEADERS(goo goo ${poppler_goo_installed_headers})
+  VERIFY_PUBLIC_HEADERS(fofi fofi ${poppler_fofi_installed_headers})
+  VERIFY_PUBLIC_HEADERS(splash splash ${poppler_splash_installed_headers})
+  VERIFY_PUBLIC_HEADERS(poppler poppler ${poppler_poppler_installed_headers})
 endif()
 
 if(ENABLE_UTILS)
