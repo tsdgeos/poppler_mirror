@@ -15,7 +15,8 @@ Channels of contact
 Poppler has three main channels of contact:
  * The poppler mailing list http://lists.freedesktop.org/mailman/listinfo/poppler
  * The poppler gitlab instance https://gitlab.freedesktop.org/poppler/poppler/
- * The #poppler channel at the IRC freenode network
+ * The #poppler channel at the IRC libera.chat network, which is also bridged
+   to [Matrix](https://matrix.to/#/#poppler:kde.org)
 Do not hesitate to drop by talk to people there.
 
 clang-format
