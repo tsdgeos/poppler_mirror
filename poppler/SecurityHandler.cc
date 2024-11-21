@@ -17,6 +17,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

@@ -34,6 +34,7 @@
 // Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

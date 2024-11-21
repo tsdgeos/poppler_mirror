@@ -5,6 +5,7 @@
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
