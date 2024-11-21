@@ -448,13 +448,13 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
 
     // set up the residentUnicodeMaps table
     residentUnicodeMaps.reserve(6);
-    UnicodeMap map = { "Latin1", false, latin1UnicodeMapRanges, latin1UnicodeMapLen };
+    UnicodeMap map = { "Latin1", false, std::span(latin1UnicodeMapRanges, latin1UnicodeMapLen) };
     residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
-    map = { "ASCII7", false, ascii7UnicodeMapRanges, ascii7UnicodeMapLen };
+    map = { "ASCII7", false, std::span(ascii7UnicodeMapRanges, ascii7UnicodeMapLen) };
     residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
-    map = { "Symbol", false, symbolUnicodeMapRanges, symbolUnicodeMapLen };
+    map = { "Symbol", false, std::span(symbolUnicodeMapRanges, symbolUnicodeMapLen) };
     residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
-    map = { "ZapfDingbats", false, zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen };
+    map = { "ZapfDingbats", false, std::span(zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen) };
     residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
     map = { "UTF-8", true, &mapUTF8 };
     residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
