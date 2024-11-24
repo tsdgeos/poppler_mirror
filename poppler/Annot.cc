@@ -5798,6 +5798,35 @@ void AnnotStamp::generateStampCustomAppearance()
     const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const GooString *appearBuf = appearBuilder.buffer();
     appearance = createForm(appearBuf, bboxArray, false, resDict);
+
+    if (updatedAppearanceStream == Ref::INVALID()) {
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
+    } else {
+        Object obj1 = appearance.fetch(doc->getXRef());
+        doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);
+    }
+
+    Object obj1 = Object(new Dict(doc->getXRef()));
+    obj1.dictAdd("N", Object(updatedAppearanceStream));
+    update("AP", std::move(obj1));
+}
+
+void AnnotStamp::updateAppearanceResDict()
+{
+    if (appearance.isNull()) {
+        if (stampImageHelper != nullptr) {
+            generateStampCustomAppearance();
+        } else {
+            generateStampDefaultAppearance();
+        }
+    }
+}
+
+Object AnnotStamp::getAppearanceResDict()
+{
+    updateAppearanceResDict();
+
+    return Annot::getAppearanceResDict();
 }
 
 void AnnotStamp::generateStampDefaultAppearance()
@@ -5904,13 +5933,9 @@ void AnnotStamp::draw(Gfx *gfx, bool printing)
     }
 
     annotLocker();
-    if (appearance.isNull()) {
-        if (stampImageHelper != nullptr) {
-            generateStampCustomAppearance();
-        } else {
-            generateStampDefaultAppearance();
-        }
-    }
+
+    // generate the appearance stream
+    updateAppearanceResDict();
 
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
@@ -5943,18 +5968,10 @@ void AnnotStamp::setCustomImage(AnnotStampImageHelper *stampImageHelperA)
     clearCustomImage();
 
     stampImageHelper = stampImageHelperA;
-    generateStampCustomAppearance();
 
-    if (updatedAppearanceStream == Ref::INVALID()) {
-        updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
-    } else {
-        Object obj1 = appearance.fetch(doc->getXRef());
-        doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);
-    }
-
-    Object obj1 = Object(new Dict(doc->getXRef()));
-    obj1.dictAdd("N", Object(updatedAppearanceStream));
-    update("AP", std::move(obj1));
+    // Regenerate appearance stream
+    invalidateAppearance();
+    updateAppearanceResDict();
 }
 
 void AnnotStamp::clearCustomImage()

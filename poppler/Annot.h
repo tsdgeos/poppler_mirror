@@ -1236,10 +1236,13 @@ public:
     // getters
     const GooString *getIcon() const { return icon.get(); }
 
+    Object getAppearanceResDict() override;
+
 private:
     void initialize(PDFDoc *docA, Dict *dict);
     void generateStampDefaultAppearance();
     void generateStampCustomAppearance();
+    void updateAppearanceResDict();
 
     std::unique_ptr<GooString> icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;
