@@ -191,9 +191,18 @@ std::unique_ptr<CryptoSign::SigningInterface> GpgSignatureBackend::createSigning
     return std::make_unique<GpgSignatureCreation>(certID);
 }
 
-std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7)
+std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type)
 {
-    return std::make_unique<GpgSignatureVerification>(std::move(pkcs7));
+    switch (type) {
+    case CryptoSign::SignatureType::unknown_signature_type:
+    case CryptoSign::SignatureType::unsigned_signature_field:
+        return {};
+    case CryptoSign::SignatureType::ETSI_CAdES_detached:
+    case CryptoSign::SignatureType::adbe_pkcs7_detached:
+    case CryptoSign::SignatureType::adbe_pkcs7_sha1:
+        return std::make_unique<GpgSignatureVerification>(std::move(pkcs7));
+    }
+    return {};
 }
 
 std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvailableSigningCertificates()
@@ -250,6 +259,11 @@ std::variant<GooString, CryptoSign::SigningError> GpgSignatureCreation::signDeta
 
     const auto signatureString = signatureData.toString();
     return GooString(std::move(signatureString));
+}
+
+CryptoSign::SignatureType GpgSignatureCreation::signatureType() const
+{
+    return CryptoSign::SignatureType::adbe_pkcs7_detached;
 }
 
 std::unique_ptr<X509CertificateInfo> GpgSignatureCreation::getCertificateInfo() const

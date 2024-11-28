@@ -17,6 +17,35 @@
 
 namespace CryptoSign {
 
+SignatureType signatureTypeFromString(std::string_view data)
+{
+    if (data == std::string_view("ETSI.CAdES.detached")) {
+        return CryptoSign::SignatureType::ETSI_CAdES_detached;
+    } else if (data == std::string_view("adbe.pkcs7.detached")) {
+        return CryptoSign::SignatureType::adbe_pkcs7_detached;
+    } else if (data == std::string_view("adbe.pkcs7.sha1")) {
+        return CryptoSign::SignatureType::adbe_pkcs7_sha1;
+    }
+    return CryptoSign::SignatureType::unknown_signature_type;
+}
+
+std::string toStdString(SignatureType type)
+{
+    switch (type) {
+    case CryptoSign::SignatureType::unsigned_signature_field:
+        return "Unsigned";
+    case CryptoSign::SignatureType::unknown_signature_type:
+        return "Unknown";
+    case CryptoSign::SignatureType::ETSI_CAdES_detached:
+        return "ETSI.CAdES.detached";
+    case CryptoSign::SignatureType::adbe_pkcs7_detached:
+        return "adbe.pkcs7.detached";
+    case CryptoSign::SignatureType::adbe_pkcs7_sha1:
+        return "adbe.pkcs7.sha1";
+    }
+    return "Unhandled";
+}
+
 void Factory::setPreferredBackend(CryptoSign::Backend::Type backend)
 {
     preferredBackend = backend;

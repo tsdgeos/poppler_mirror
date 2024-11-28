@@ -20,7 +20,7 @@ class GpgSignatureBackend : public CryptoSign::Backend
 {
 public:
     GpgSignatureBackend();
-    std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) final;
+    std::unique_ptr<CryptoSign::VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type) final;
     std::unique_ptr<CryptoSign::SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) final;
     std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() final;
     static bool hasSufficientVersion();
@@ -33,6 +33,7 @@ public:
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     std::variant<GooString, CryptoSign::SigningError> signDetached(const std::string &password) final;
+    CryptoSign::SignatureType signatureType() const final;
 
 private:
     std::unique_ptr<GpgME::Context> gpgContext;

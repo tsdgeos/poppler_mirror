@@ -40,6 +40,7 @@
 #include "CryptoSignBackend.h"
 #include "Object.h"
 #include "poppler_private_export.h"
+#include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 
 #include <ctime>
@@ -77,15 +78,6 @@ enum FormButtonType
     formButtonCheck,
     formButtonPush,
     formButtonRadio
-};
-
-enum FormSignatureType
-{
-    adbe_pkcs7_sha1,
-    adbe_pkcs7_detached,
-    ETSI_CAdES_detached,
-    unknown_signature_type,
-    unsigned_signature_field
 };
 
 enum FillValueType
@@ -296,8 +288,8 @@ public:
     FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
     void updateWidgetAppearance() override;
 
-    FormSignatureType signatureType() const;
-    void setSignatureType(FormSignatureType fst);
+    CryptoSign::SignatureType signatureType() const;
+    void setSignatureType(CryptoSign::SignatureType fst);
 
     // Use -1 for now as validationTime
     // ocspRevocation and aiafetch might happen async in the Background
@@ -343,7 +335,7 @@ public:
     const GooString *getSignature() const;
 
 private:
-    bool createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason = nullptr, const GooString *location = nullptr);
+    bool createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType);
     bool getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
@@ -646,8 +638,8 @@ public:
     Object *getByteRange() { return &byte_range; }
     const GooString *getSignature() const { return signature; }
     void setSignature(const GooString &sig);
-    FormSignatureType getSignatureType() const { return signature_type; }
-    void setSignatureType(FormSignatureType t) { signature_type = t; }
+    CryptoSign::SignatureType getSignatureType() const { return signature_type; }
+    void setSignatureType(CryptoSign::SignatureType t) { signature_type = t; }
 
     const GooString &getCustomAppearanceContent() const;
     void setCustomAppearanceContent(const GooString &s);
@@ -670,7 +662,7 @@ private:
     void parseInfo();
     void hashSignedDataBlock(CryptoSign::VerificationInterface *handler, Goffset block_len);
 
-    FormSignatureType signature_type;
+    CryptoSign::SignatureType signature_type;
     Object byte_range;
     GooString *signature;
     SignatureInfo *signature_info;

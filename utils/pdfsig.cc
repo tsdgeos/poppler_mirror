@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
             return 2;
         }
         if (etsiCAdESdetached) {
-            ffs->setSignatureType(ETSI_CAdES_detached);
+            ffs->setSignatureType(CryptoSign::SignatureType::ETSI_CAdES_detached);
         }
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : std::make_unique<GooString>(utf8ToUtf16WithBom(reason.toStr())));
         if (ffs->getNumWidgets() != 1) {
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
         // Let's start the signature check first for signatures.
         // we can always wait for completion later
         FormFieldSignature *ffs = signatures.at(i);
-        if (ffs->getSignatureType() == unsigned_signature_field) {
+        if (ffs->getSignatureType() == CryptoSign::SignatureType::unsigned_signature_field) {
             continue;
         }
         signatureInfos[i] = ffs->validateSignatureAsync(!dontVerifyCert, false, -1 /* now */, !noOCSPRevocationCheck, useAIACertFetch, {});
@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
             printf("  - Signature Field Name: %s\n", name.c_str());
         }
 
-        if (ffs->getSignatureType() == unsigned_signature_field) {
+        if (ffs->getSignatureType() == CryptoSign::SignatureType::unsigned_signature_field) {
             printf("  The signature form field is not signed.\n");
             continue;
         }
@@ -632,16 +632,17 @@ int main(int argc, char *argv[])
         }
         printf("  - Signature Type: ");
         switch (ffs->getSignatureType()) {
-        case adbe_pkcs7_sha1:
+        case CryptoSign::SignatureType::adbe_pkcs7_sha1:
             printf("adbe.pkcs7.sha1\n");
             break;
-        case adbe_pkcs7_detached:
+        case CryptoSign::SignatureType::adbe_pkcs7_detached:
             printf("adbe.pkcs7.detached\n");
             break;
-        case ETSI_CAdES_detached:
+        case CryptoSign::SignatureType::ETSI_CAdES_detached:
             printf("ETSI.CAdES.detached\n");
             break;
-        default:
+        case CryptoSign::SignatureType::unknown_signature_type:
+        case CryptoSign::SignatureType::unsigned_signature_field: /*shouldn't happen*/
             printf("unknown\n");
         }
         const std::vector<Goffset> ranges = ffs->getSignedRangeBounds();
