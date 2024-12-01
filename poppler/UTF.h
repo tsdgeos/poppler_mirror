@@ -70,6 +70,12 @@ inline void prependUnicodeByteOrderMark(std::string &s)
     s.insert(0, unicodeByteOrderMark);
 }
 
+// check whether string starts with Big-Endian byte order mark and string length is even
+inline bool hasUnicodeByteOrderMarkAndLengthIsEven(const std::string &s)
+{
+    return s.starts_with(unicodeByteOrderMark) && s.length() % 2 == 0;
+}
+
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);
 
