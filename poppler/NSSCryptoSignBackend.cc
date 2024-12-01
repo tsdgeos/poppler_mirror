@@ -1223,9 +1223,18 @@ static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*
     return nullptr;
 }
 
-std::unique_ptr<CryptoSign::VerificationInterface> NSSCryptoSignBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7)
+std::unique_ptr<CryptoSign::VerificationInterface> NSSCryptoSignBackend::createVerificationHandler(std::vector<unsigned char> &&pkcs7, CryptoSign::SignatureType type)
 {
-    return std::make_unique<NSSSignatureVerification>(std::move(pkcs7));
+    switch (type) {
+    case CryptoSign::SignatureType::unknown_signature_type:
+    case CryptoSign::SignatureType::unsigned_signature_field:
+        return {};
+    case CryptoSign::SignatureType::ETSI_CAdES_detached:
+    case CryptoSign::SignatureType::adbe_pkcs7_detached:
+    case CryptoSign::SignatureType::adbe_pkcs7_sha1:
+        return std::make_unique<NSSSignatureVerification>(std::move(pkcs7));
+    }
+    return {};
 }
 
 std::unique_ptr<CryptoSign::SigningInterface> NSSCryptoSignBackend::createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag)

@@ -117,6 +117,8 @@ public:
     unsigned int getKeyUsageExtensions() const;
     const GooString &getCertificateDER() const;
     bool getIsSelfSigned() const;
+    bool isQualified() const;
+    void setQualified(bool qualified);
     KeyLocation getKeyLocation() const;
 
     /* SETTERS */
@@ -142,6 +144,7 @@ private:
     GooString cert_nick;
     unsigned int ku_extensions;
     int cert_version;
+    bool is_qualified;
     bool is_self_signed;
     KeyLocation keyLocation;
 };

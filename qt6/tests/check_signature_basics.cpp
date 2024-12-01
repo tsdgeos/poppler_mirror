@@ -109,7 +109,7 @@ void TestSignatureBasics::testSignerInfo()
 {
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields[0]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature0_B_" });
-    QCOMPARE(signatureFields[0]->getSignatureType(), ETSI_CAdES_detached);
+    QCOMPARE(signatureFields[0]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
     auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[0]->validateSignatureResult();
 #ifdef ENABLE_SIGNATURES
@@ -123,7 +123,7 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(siginfo0->getSigningTime(), time_t(1677570911));
 
     QCOMPARE(signatureFields[1]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature1_B_" });
-    QCOMPARE(signatureFields[1]->getSignatureType(), ETSI_CAdES_detached);
+    QCOMPARE(signatureFields[1]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
     auto siginfo1 = signatureFields[1]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[1]->validateSignatureResult();
 #ifdef ENABLE_SIGNATURES
@@ -143,9 +143,9 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(siginfo1->getSigningTime(), time_t(1677840601));
 
     QCOMPARE(signatureFields[2]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature2_B_" });
-    QCOMPARE(signatureFields[2]->getSignatureType(), unsigned_signature_field);
+    QCOMPARE(signatureFields[2]->getSignatureType(), CryptoSign::SignatureType::unsigned_signature_field);
     QCOMPARE(signatureFields[3]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature3_B_" });
-    QCOMPARE(signatureFields[3]->getSignatureType(), unsigned_signature_field);
+    QCOMPARE(signatureFields[3]->getSignatureType(), CryptoSign::SignatureType::unsigned_signature_field);
 }
 
 void TestSignatureBasics::testSignedRanges()

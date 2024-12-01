@@ -17,7 +17,7 @@
 #include <cstring>
 #include <cstdlib>
 
-X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_self_signed(false), keyLocation(KeyLocation::Unknown) { }
+X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_qualified(false), is_self_signed(false), keyLocation(KeyLocation::Unknown) { }
 
 X509CertificateInfo::~X509CertificateInfo() = default;
 
@@ -128,4 +128,14 @@ KeyLocation X509CertificateInfo::getKeyLocation() const
 void X509CertificateInfo::setKeyLocation(KeyLocation location)
 {
     keyLocation = location;
+}
+
+bool X509CertificateInfo::isQualified() const
+{
+    return is_qualified;
+}
+
+void X509CertificateInfo::setQualified(bool qualified)
+{
+    is_qualified = qualified;
 }

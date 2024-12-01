@@ -24,6 +24,19 @@
 
 namespace CryptoSign {
 
+enum class SignatureType
+{
+    adbe_pkcs7_sha1,
+    adbe_pkcs7_detached,
+    ETSI_CAdES_detached,
+    unknown_signature_type,
+    unsigned_signature_field
+};
+
+SignatureType signatureTypeFromString(std::string_view data);
+
+std::string toStdString(SignatureType type);
+
 // experiments seems to say that this is a bit above
 // what we have seen in the wild, and much larger than
 // what we have managed to get nss and gpgme to create.
@@ -65,6 +78,7 @@ class SigningInterface
 {
 public:
     virtual void addData(unsigned char *data_block, int data_len) = 0;
+    virtual SignatureType signatureType() const = 0;
     virtual std::unique_ptr<X509CertificateInfo> getCertificateInfo() const = 0;
     virtual std::variant<GooString, SigningError> signDetached(const std::string &password) = 0;
     virtual ~SigningInterface();
@@ -81,7 +95,7 @@ public:
         NSS3,
         GPGME
     };
-    virtual std::unique_ptr<VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7) = 0;
+    virtual std::unique_ptr<VerificationInterface> createVerificationHandler(std::vector<unsigned char> &&pkcs7, SignatureType type) = 0;
     virtual std::unique_ptr<SigningInterface> createSigningHandler(const std::string &certID, HashAlgorithm digestAlgTag) = 0;
     virtual std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates() = 0;
     virtual ~Backend();

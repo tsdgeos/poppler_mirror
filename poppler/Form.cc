@@ -649,7 +649,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
 
     Object vObj(new Dict(xref));
     Ref vref = xref->addIndirectObject(vObj);
-    if (!createSignature(vObj, vref, GooString(signerName), CryptoSign::maxSupportedSignatureSize, reason, location)) {
+    if (!createSignature(vObj, vref, GooString(signerName), CryptoSign::maxSupportedSignatureSize, reason, location, sigHandler->signatureType())) {
         return CryptoSign::SigningError::InternalError;
     }
 
@@ -936,11 +936,11 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     return true;
 }
 
-bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location)
+bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
     vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
-    vObj.dictAdd("SubFilter", Object(objName, "adbe.pkcs7.detached"));
+    vObj.dictAdd("SubFilter", Object(objName, toStdString(signatureType).c_str()));
     vObj.dictAdd("Name", Object(name.copy()));
     GooString *date = timeToDateString(nullptr);
     vObj.dictAdd("M", Object(date));
@@ -2261,7 +2261,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unsigned_signature_field), signature(nullptr)
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field), signature(nullptr)
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -2374,17 +2374,18 @@ void FormFieldSignature::parseInfo()
 
     // check if subfilter is supported for signature validation, only detached signatures work for now
     Object subfilterName = sig_dict.dictLookup("SubFilter");
-    if (subfilterName.isName("adbe.pkcs7.sha1")) {
-        signature_type = adbe_pkcs7_sha1;
-        signature_info->setSubFilterSupport(true);
-    } else if (subfilterName.isName("adbe.pkcs7.detached")) {
-        signature_type = adbe_pkcs7_detached;
-        signature_info->setSubFilterSupport(true);
-    } else if (subfilterName.isName("ETSI.CAdES.detached")) {
-        signature_type = ETSI_CAdES_detached;
-        signature_info->setSubFilterSupport(true);
-    } else {
-        signature_type = unknown_signature_type;
+    if (subfilterName.getType() == objName && subfilterName.getName()) {
+        signature_type = CryptoSign::signatureTypeFromString(subfilterName.getName());
+        switch (signature_type) {
+        case CryptoSign::SignatureType::adbe_pkcs7_sha1:
+        case CryptoSign::SignatureType::adbe_pkcs7_detached:
+        case CryptoSign::SignatureType::ETSI_CAdES_detached:
+            signature_info->setSubFilterSupport(true);
+            break;
+        case CryptoSign::SignatureType::unknown_signature_type:
+        case CryptoSign::SignatureType::unsigned_signature_field:
+            break;
+        }
     }
 }
 
@@ -2411,12 +2412,12 @@ void FormFieldSignature::hashSignedDataBlock(CryptoSign::VerificationInterface *
     }
 }
 
-FormSignatureType FormWidgetSignature::signatureType() const
+CryptoSign::SignatureType FormWidgetSignature::signatureType() const
 {
     return static_cast<FormFieldSignature *>(field)->getSignatureType();
 }
 
-void FormWidgetSignature::setSignatureType(FormSignatureType fst)
+void FormWidgetSignature::setSignatureType(CryptoSign::SignatureType fst)
 {
     static_cast<FormFieldSignature *>(field)->setSignatureType(fst);
 }
@@ -2466,7 +2467,7 @@ SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, boo
     const int signature_len = signature->getLength();
     std::vector<unsigned char> signatureData(signature_len);
     memcpy(signatureData.data(), signature->c_str(), signature_len);
-    signature_handler = backend->createVerificationHandler(std::move(signatureData));
+    signature_handler = backend->createVerificationHandler(std::move(signatureData), signature_type);
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {

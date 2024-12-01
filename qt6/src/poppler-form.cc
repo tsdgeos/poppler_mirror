@@ -619,6 +619,7 @@ public:
     int version;
     bool is_self_signed;
     bool is_null;
+    bool is_qualified;
     CertificateInfo::KeyLocation keyLocation;
 };
 
@@ -658,6 +659,12 @@ QByteArray CertificateInfo::serialNumber() const
 {
     Q_D(const CertificateInfo);
     return d->serial_number;
+}
+
+bool CertificateInfo::isQualified() const
+{
+    Q_D(const CertificateInfo);
+    return d->is_qualified;
 }
 
 QString CertificateInfo::issuerInfo(EntityInfoKey key) const
@@ -963,19 +970,19 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     SignatureType sigType = AdbePkcs7detached;
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     switch (fws->signatureType()) {
-    case adbe_pkcs7_sha1:
+    case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         sigType = AdbePkcs7sha1;
         break;
-    case adbe_pkcs7_detached:
+    case CryptoSign::SignatureType::adbe_pkcs7_detached:
         sigType = AdbePkcs7detached;
         break;
-    case ETSI_CAdES_detached:
+    case CryptoSign::SignatureType::ETSI_CAdES_detached:
         sigType = EtsiCAdESdetached;
         break;
-    case unknown_signature_type:
+    case CryptoSign::SignatureType::unknown_signature_type:
         sigType = UnknownSignatureType;
         break;
-    case unsigned_signature_field:
+    case CryptoSign::SignatureType::unsigned_signature_field:
         sigType = UnsignedSignature;
         break;
     }
@@ -1043,6 +1050,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
 
         certPriv->is_null = false;
+        certPriv->is_qualified = ci->isQualified();
     }
 
     return certPriv;
@@ -1169,7 +1177,7 @@ SignatureValidationInfo::CertificateStatus FormFieldSignature::validateResult() 
 FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const
 {
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    if (fws->signatureType() != unsigned_signature_field) {
+    if (fws->signatureType() != CryptoSign::SignatureType::unsigned_signature_field) {
         return FieldAlreadySigned;
     }
 
