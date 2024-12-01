@@ -44,6 +44,7 @@
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
 // Copyright (C) 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
+// Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
