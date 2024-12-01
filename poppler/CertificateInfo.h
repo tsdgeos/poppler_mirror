@@ -8,7 +8,7 @@
 // Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
