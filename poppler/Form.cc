@@ -706,6 +706,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, std::get<GooString>(signature))) {
         fprintf(stderr, "signDocument: unable update signature\n");
+        fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }
     signatureField->setSignature(std::get<GooString>(std::move(signature)));
