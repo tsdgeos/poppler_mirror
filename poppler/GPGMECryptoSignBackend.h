@@ -8,6 +8,7 @@
 //========================================================================
 
 #include "CryptoSignBackend.h"
+#include "poppler_private_export.h"
 
 #include <gpgme++/data.h>
 #include <gpgme++/context.h>
@@ -39,12 +40,13 @@ private:
     std::unique_ptr<GpgME::Context> gpgContext;
     GpgME::Data gpgData;
     std::optional<GpgME::Key> key;
+    GpgME::Protocol protocol;
 };
 
 class GpgSignatureVerification : public CryptoSign::VerificationInterface
 {
 public:
-    explicit GpgSignatureVerification(const std::vector<unsigned char> &pkcs7data);
+    explicit GpgSignatureVerification(const std::vector<unsigned char> &pkcs7data, GpgME::Protocol protocol);
     SignatureValidationStatus validateSignature() final;
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::chrono::system_clock::time_point getSigningTime() const final;
@@ -62,7 +64,20 @@ private:
     std::optional<GpgME::VerificationResult> gpgResult;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
+    GpgME::Protocol protocol;
 #if DUMP_SIGNATURE_DATA
     std::unique_ptr<std::ofstream> debugSignedData;
 #endif
+};
+
+class POPPLER_PRIVATE_EXPORT GpgSignatureConfiguration
+{
+public:
+    static bool arePgpSignaturesAllowed();
+    static void setPgpSignaturesAllowed(bool allowed);
+    static std::vector<GpgME::Protocol> allowedTypes();
+    GpgSignatureConfiguration() = delete;
+
+private:
+    static bool allowPgp;
 };

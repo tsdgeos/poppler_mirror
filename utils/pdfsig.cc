@@ -641,6 +641,9 @@ int main(int argc, char *argv[])
         case CryptoSign::SignatureType::ETSI_CAdES_detached:
             printf("ETSI.CAdES.detached\n");
             break;
+        case CryptoSign::SignatureType::g10c_pgp_signature_detached:
+            printf("g10c.pgp.signature.detached\n");
+            break;
         case CryptoSign::SignatureType::unknown_signature_type:
         case CryptoSign::SignatureType::unsigned_signature_field: /*shouldn't happen*/
             printf("unknown\n");

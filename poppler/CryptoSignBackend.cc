@@ -26,6 +26,8 @@ SignatureType signatureTypeFromString(std::string_view data)
         return CryptoSign::SignatureType::adbe_pkcs7_detached;
     } else if (data == std::string_view("adbe.pkcs7.sha1")) {
         return CryptoSign::SignatureType::adbe_pkcs7_sha1;
+    } else if (data == std::string_view("g10c.pgp.signature.detached")) {
+        return CryptoSign::SignatureType::g10c_pgp_signature_detached;
     }
     return CryptoSign::SignatureType::unknown_signature_type;
 }
@@ -43,6 +45,8 @@ std::string toStdString(SignatureType type)
         return "adbe.pkcs7.detached";
     case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         return "adbe.pkcs7.sha1";
+    case CryptoSign::SignatureType::g10c_pgp_signature_detached:
+        return "g10c.pgp.signature.detached";
     }
     return "Unhandled";
 }

@@ -534,6 +534,17 @@ public:
     Q_DECLARE_FLAGS(KeyUsageExtensions, KeyUsageExtension)
 
     /**
+     * The type of the certificate
+     *
+     * \since 25.03
+     */
+    enum class CertificateType
+    {
+        X509,
+        PGP
+    };
+
+    /**
       Predefined keys for elements in an entity's distinguished name.
      */
     enum EntityInfoKey
@@ -632,6 +643,13 @@ public:
       Returns true if certificate is self-signed otherwise returns false.
      */
     bool isSelfSigned() const;
+
+    /**
+     * \return certificate type
+     *
+     * \since 25.03
+     */
+    CertificateType certificateType() const;
 
     /**
       The DER encoded certificate.
@@ -839,7 +857,8 @@ public:
         AdbePkcs7detached,
         EtsiCAdESdetached,
         UnknownSignatureType, ///< \since 0.90
-        UnsignedSignature ///< \since 22.02
+        UnsignedSignature, ///< \since 22.02
+        G10cPgpSignatureDetached, ///< non standard signature type \since 25.01
     };
 
     /**
@@ -1035,6 +1054,23 @@ void POPPLER_QT5_EXPORT setNSSDir(const QString &pathURL);
   \since 21.01
 */
 void POPPLER_QT5_EXPORT setNSSPasswordCallback(const std::function<char *(const char *)> &f);
+
+/**
+ * Allow pgp signatures in pdf files (standard-extension, experimental)
+ * Not supported for NSS backend
+ *
+ * \param allowed new value for pgp signatures allowed
+ *
+ * \since 25.03
+ */
+void POPPLER_QT5_EXPORT setPgpSignaturesAllowed(bool allowed);
+
+/**
+ * \returns if pgp signatures are allowed.
+ *
+ * \since 25.03
+ */
+bool POPPLER_QT5_EXPORT arePgpSignaturesAllowed();
 }
 
 #endif

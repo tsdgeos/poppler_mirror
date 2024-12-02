@@ -52,6 +52,9 @@
 #ifdef ENABLE_NSS3
 #    include <NSSCryptoSignBackend.h>
 #endif
+#ifdef ENABLE_GPGME
+#    include <GPGMECryptoSignBackend.h>
+#endif
 
 #include "poppler-page-private.h"
 #include "poppler-private.h"
@@ -617,6 +620,7 @@ public:
     bool is_self_signed;
     bool is_null;
     CertificateInfo::KeyLocation keyLocation;
+    CertificateInfo::CertificateType certificateType;
 };
 
 CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
@@ -655,6 +659,12 @@ QByteArray CertificateInfo::serialNumber() const
 {
     Q_D(const CertificateInfo);
     return d->serial_number;
+}
+
+CertificateInfo::CertificateType CertificateInfo::certificateType() const
+{
+    Q_D(const CertificateInfo);
+    return d->certificateType;
 }
 
 QString CertificateInfo::issuerInfo(EntityInfoKey key) const
@@ -975,6 +985,9 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     case CryptoSign::SignatureType::unsigned_signature_field:
         sigType = UnsignedSignature;
         break;
+    case CryptoSign::SignatureType::g10c_pgp_signature_detached:
+        sigType = G10cPgpSignatureDetached;
+        break;
     }
     return sigType;
 }
@@ -1001,6 +1014,17 @@ static CertificateInfo::KeyLocation fromPopplerCore(KeyLocation location)
     return CertificateInfo::KeyLocation::Unknown;
 }
 
+static CertificateInfo::CertificateType fromPopplerCore(CertificateType type)
+{
+    switch (type) {
+    case CertificateType::PGP:
+        return CertificateInfo::CertificateType::PGP;
+    case CertificateType::X509:
+        return CertificateInfo::CertificateType::X509;
+    }
+    return CertificateInfo::CertificateType::X509; // fallback
+}
+
 static CertificateInfoPrivate *createCertificateInfoPrivate(const X509CertificateInfo *ci)
 {
     CertificateInfoPrivate *certPriv = new CertificateInfoPrivate;
@@ -1009,6 +1033,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->version = ci->getVersion();
         certPriv->ku_extensions = ci->getKeyUsageExtensions();
         certPriv->keyLocation = fromPopplerCore(ci->getKeyLocation());
+        certPriv->certificateType = fromPopplerCore(ci->getCertificateType());
 
         const GooString &certSerial = ci->getSerialNumber();
         certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
@@ -1342,4 +1367,22 @@ void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 #endif
 }
 
+void setPgpSignaturesAllowed(bool allowed)
+{
+#ifdef ENABLE_GPGME
+    GpgSignatureConfiguration::setPgpSignaturesAllowed(allowed);
+#else
+    qWarning() << "Trying to enable pgp signatures, but pgp not enabled in this build";
+    (void)allowed;
+#endif
+}
+
+bool arePgpSignaturesAllowed()
+{
+#ifdef ENABLE_GPGME
+    return GpgSignatureConfiguration::arePgpSignaturesAllowed();
+#else
+    return false;
+#endif
+}
 }

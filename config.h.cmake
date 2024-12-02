@@ -27,6 +27,9 @@
 /* Build against libgpgme for digital signature validation */
 #cmakedefine ENABLE_GPGME 1
 
+/* Enable pgp signatures in GPG backend by default */
+#cmakedefine ENABLE_PGP_SIGNATURES 1
+
 /* Signatures enabled */
 #cmakedefine ENABLE_SIGNATURES 1
 
