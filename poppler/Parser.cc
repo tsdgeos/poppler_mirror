@@ -202,7 +202,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         // string
     } else if (decryptString && buf1.isString() && fileKey) {
         std::unique_ptr<GooString> s2 = decryptedString(buf1.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
-        obj = Object(s2.release());
+        obj = Object(std::move(s2));
         shift();
 
         // simple object

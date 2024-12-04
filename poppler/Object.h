@@ -231,6 +231,12 @@ public:
         type = objString;
         string = stringA;
     }
+    explicit Object(std::unique_ptr<GooString> stringA)
+    {
+        assert(stringA);
+        type = objString;
+        string = stringA.release();
+    }
     explicit Object(std::string &&stringA)
     {
         type = objString;
