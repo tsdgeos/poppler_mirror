@@ -372,7 +372,7 @@ public:
     bool hasTextQuadding() const { return hasQuadding; }
     VariableTextQuadding getTextQuadding() const { return quadding; }
 
-    const GooString *getPartialName() const { return partialName; }
+    const GooString *getPartialName() const { return partialName.get(); }
     void setPartialName(const GooString &name);
     const GooString *getAlternateUiName() const { return alternateUiName; }
     const GooString *getMappingName() const { return mappingName; }
@@ -417,7 +417,7 @@ protected:
     bool readOnly;
     bool noExport;
 
-    GooString *partialName; // T field
+    std::unique_ptr<GooString> partialName; // T field
     GooString *alternateUiName; // TU field
     GooString *mappingName; // TM field
     GooString *fullyQualifiedName;
