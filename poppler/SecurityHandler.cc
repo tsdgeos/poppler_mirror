@@ -93,27 +93,15 @@ bool SecurityHandler::checkEncryption(const std::optional<GooString> &ownerPassw
 class StandardAuthData
 {
 public:
-    StandardAuthData(GooString *ownerPasswordA, GooString *userPasswordA)
-    {
-        ownerPassword = ownerPasswordA;
-        userPassword = userPasswordA;
-    }
+    StandardAuthData(std::unique_ptr<GooString> &&ownerPasswordA, std::unique_ptr<GooString> &&userPasswordA) : ownerPassword(std::move(ownerPasswordA)), userPassword(std::move(userPasswordA)) { }
 
-    ~StandardAuthData()
-    {
-        if (ownerPassword) {
-            delete ownerPassword;
-        }
-        if (userPassword) {
-            delete userPassword;
-        }
-    }
+    ~StandardAuthData() = default;
 
     StandardAuthData(const StandardAuthData &) = delete;
     StandardAuthData &operator=(const StandardAuthData &) = delete;
 
-    GooString *ownerPassword;
-    GooString *userPassword;
+    const std::unique_ptr<GooString> ownerPassword;
+    const std::unique_ptr<GooString> userPassword;
 };
 
 StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA) : SecurityHandler(docA)
@@ -271,7 +259,7 @@ bool StandardSecurityHandler::isUnencrypted() const
 
 void *StandardSecurityHandler::makeAuthData(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
-    return new StandardAuthData(ownerPassword ? ownerPassword->copy() : nullptr, userPassword ? userPassword->copy() : nullptr);
+    return new StandardAuthData(ownerPassword ? ownerPassword->copyUniquePtr() : std::make_unique<GooString>(), userPassword ? userPassword->copyUniquePtr() : std::make_unique<GooString>());
 }
 
 void StandardSecurityHandler::freeAuthData(void *authData)
@@ -287,8 +275,8 @@ bool StandardSecurityHandler::authorize(void *authData)
         return false;
     }
     if (authData) {
-        ownerPassword = ((StandardAuthData *)authData)->ownerPassword;
-        userPassword = ((StandardAuthData *)authData)->userPassword;
+        ownerPassword = ((StandardAuthData *)authData)->ownerPassword.get();
+        userPassword = ((StandardAuthData *)authData)->userPassword.get();
     } else {
         ownerPassword = nullptr;
         userPassword = nullptr;
