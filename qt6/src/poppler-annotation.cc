@@ -1313,7 +1313,7 @@ void Annotation::setBoundary(const QRectF &boundary)
     if (rect == d->pdfAnnot->getRect()) {
         return;
     }
-    d->pdfAnnot->setRect(&rect);
+    d->pdfAnnot->setRect(rect);
 }
 
 Annotation::Style Annotation::style() const

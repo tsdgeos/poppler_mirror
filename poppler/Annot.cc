@@ -1436,9 +1436,9 @@ void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const
     *y2 = rect->y2;
 }
 
-void Annot::setRect(const PDFRectangle *rectA)
+void Annot::setRect(const PDFRectangle &rectA)
 {
-    setRect(rectA->x1, rectA->y1, rectA->x2, rectA->y2);
+    setRect(rectA.x1, rectA.y1, rectA.x2, rectA.y2);
 }
 
 void Annot::setRect(double x1, double y1, double x2, double y2)

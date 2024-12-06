@@ -735,7 +735,7 @@ public:
     double getXMax();
     double getYMax();
 
-    void setRect(const PDFRectangle *rect);
+    void setRect(const PDFRectangle &rect);
     void setRect(double x1, double y1, double x2, double y2);
 
     // Sets the annot contents to new_content
