@@ -1631,7 +1631,6 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
 {
     Dict *dict = obj.getDict();
     Object obj1;
-    internalContent = nullptr;
     multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
     maxLen = 0;
 
@@ -1750,19 +1749,15 @@ void FormFieldText::setContentCopy(const GooString *new_content)
 
 void FormFieldText::setAppearanceContentCopy(const GooString *new_content)
 {
-    delete internalContent;
-    internalContent = nullptr;
+    internalContent.reset();
 
     if (new_content) {
-        internalContent = new_content->copy();
+        internalContent = new_content->copyUniquePtr();
     }
     updateChildrenAppearance();
 }
 
-FormFieldText::~FormFieldText()
-{
-    delete internalContent;
-}
+FormFieldText::~FormFieldText() = default;
 
 void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 {
