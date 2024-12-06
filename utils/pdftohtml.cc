@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<GooString> keywords;
     std::unique_ptr<GooString> subject;
     GooString *date = nullptr;
-    GooString *htmlFileName = nullptr;
+    std::unique_ptr<GooString> htmlFileName;
     HtmlOutputDev *htmlOut = nullptr;
     SplashOutputDev *splashOut = nullptr;
     bool doOutline;
@@ -246,19 +246,19 @@ int main(int argc, char *argv[])
             if (tmp->getLength() >= 5) {
                 const char *p = tmp->c_str() + tmp->getLength() - 5;
                 if (!strcmp(p, ".html") || !strcmp(p, ".HTML")) {
-                    htmlFileName = new GooString(tmp->c_str(), tmp->getLength() - 5);
+                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->getLength() - 5);
                 }
             }
         } else {
             if (tmp->getLength() >= 4) {
                 const char *p = tmp->c_str() + tmp->getLength() - 4;
                 if (!strcmp(p, ".xml") || !strcmp(p, ".XML")) {
-                    htmlFileName = new GooString(tmp->c_str(), tmp->getLength() - 4);
+                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->getLength() - 4);
                 }
             }
         }
         if (!htmlFileName) {
-            htmlFileName = new GooString(tmp);
+            htmlFileName = std::make_unique<GooString>(tmp);
         }
         delete tmp;
     } else if (fileName->cmp("fd://0") == 0) {
@@ -267,9 +267,9 @@ int main(int argc, char *argv[])
     } else {
         const char *p = fileName->c_str() + fileName->getLength() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            htmlFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
+            htmlFileName = std::make_unique<GooString>(fileName->c_str(), fileName->getLength() - 4);
         } else {
-            htmlFileName = fileName->copy();
+            htmlFileName = fileName->copyUniquePtr();
         }
         //   htmlFileName->append(".html");
     }
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
         }
     }
     if (!docTitle) {
-        docTitle = std::make_unique<GooString>(htmlFileName);
+        docTitle = htmlFileName->copyUniquePtr();
     }
 
     if (!singleHtml) {
@@ -384,10 +384,6 @@ int main(int argc, char *argv[])
     // clean up
 error:
     delete fileName;
-
-    if (htmlFileName) {
-        delete htmlFileName;
-    }
 
     return exit_status;
 }
