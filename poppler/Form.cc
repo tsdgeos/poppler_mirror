@@ -1091,9 +1091,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = dict->lookup("T");
     if (obj1.isString()) {
-        partialName = obj1.getString()->copy();
-    } else {
-        partialName = nullptr;
+        partialName = obj1.getString()->copyUniquePtr();
     }
 
     obj1 = dict->lookup("TU");
@@ -1118,8 +1116,7 @@ void FormField::setDefaultAppearance(const std::string &appearance)
 
 void FormField::setPartialName(const GooString &name)
 {
-    delete partialName;
-    partialName = name.copy();
+    partialName = name.copyUniquePtr();
 
     obj.getDict()->set("T", Object(name.copy()));
     xref->setModifiedObject(&obj, ref);
@@ -1141,7 +1138,6 @@ FormField::~FormField()
         gfree(widgets);
     }
 
-    delete partialName;
     delete alternateUiName;
     delete mappingName;
     delete fullyQualifiedName;
@@ -1300,7 +1296,7 @@ GooString *FormField::getFullyQualifiedName()
                 fullyQualifiedName = convertToUtf16(fullyQualifiedName);
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
-                fullyQualifiedName->append(partialName);
+                fullyQualifiedName->append(partialName.get());
             }
         }
     } else {
