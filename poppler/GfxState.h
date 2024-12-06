@@ -1728,7 +1728,7 @@ public:
     // Misc
     bool parseBlendMode(Object *obj, GfxBlendMode *mode);
 
-    ReusablePathIterator *getReusablePath() { return new ReusablePathIterator(path); }
+    std::unique_ptr<ReusablePathIterator> getReusablePath() { return std::make_unique<ReusablePathIterator>(path); }
 
 private:
     double hDPI, vDPI; // resolution

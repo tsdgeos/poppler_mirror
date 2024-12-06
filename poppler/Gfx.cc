@@ -3238,7 +3238,7 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
     state->lineTo(0., 1.);
     state->closePath();
 
-    GfxState::ReusablePathIterator *reusablePath = state->getReusablePath();
+    const std::unique_ptr<GfxState::ReusablePathIterator> reusablePath = state->getReusablePath();
 
     if (shading->isParameterized()) {
         // work with parameterized values:
@@ -3247,7 +3247,7 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
         const double refineColorThreshold = gouraudParameterizedColorDelta * (shading->getParameterDomainMax() - shading->getParameterDomainMin());
         for (i = 0; i < shading->getNTriangles(); ++i) {
             shading->getTriangle(i, &x0, &y0, &color0, &x1, &y1, &color1, &x2, &y2, &color2);
-            gouraudFillTriangle(x0, y0, color0, x1, y1, color1, x2, y2, color2, refineColorThreshold, 0, shading, reusablePath);
+            gouraudFillTriangle(x0, y0, color0, x1, y1, color1, x2, y2, color2, refineColorThreshold, 0, shading, reusablePath.get());
         }
 
     } else {
@@ -3260,11 +3260,9 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
         GfxColor color0, color1, color2;
         for (i = 0; i < shading->getNTriangles(); ++i) {
             shading->getTriangle(i, &x0, &y0, &color0, &x1, &y1, &color1, &x2, &y2, &color2);
-            gouraudFillTriangle(x0, y0, &color0, x1, y1, &color1, x2, y2, &color2, shading->getColorSpace()->getNComps(), 0, reusablePath);
+            gouraudFillTriangle(x0, y0, &color0, x1, y1, &color1, x2, y2, &color2, shading->getColorSpace()->getNComps(), 0, reusablePath.get());
         }
     }
-
-    delete reusablePath;
 }
 
 static inline void checkTrue(bool b, const char *message)
