@@ -2546,7 +2546,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
         bboxIntersections[1] = ((xMin - x0) * dx + (yMax - y0) * dy) * mul;
         bboxIntersections[2] = ((xMax - x0) * dx + (yMin - y0) * dy) * mul;
         bboxIntersections[3] = ((xMax - x0) * dx + (yMax - y0) * dy) * mul;
-        std::sort(std::begin(bboxIntersections), std::end(bboxIntersections));
+        std::ranges::sort(bboxIntersections);
         tMin = bboxIntersections[0];
         tMax = bboxIntersections[3];
         if (tMin < 0 && !shading->getExtend0()) {
@@ -2647,7 +2647,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
         s[1] = (yMax - ty) / dx;
         s[2] = (xMin - tx) / -dy;
         s[3] = (xMax - tx) / -dy;
-        std::sort(std::begin(s), std::end(s));
+        std::ranges::sort(s);
         sMin = s[1];
         sMax = s[2];
     }
@@ -2788,7 +2788,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading)
             s[1] = (yMax - ty) / dx;
             s[2] = (xMin - tx) / -dy;
             s[3] = (xMax - tx) / -dy;
-            std::sort(std::begin(s), std::end(s));
+            std::ranges::sort(s);
             sMin = s[1];
             sMax = s[2];
         }

@@ -1160,12 +1160,12 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             locaTable[i].origOffset = glyfTableLen;
         }
     }
-    std::sort(locaTable.begin(), locaTable.end(), cmpTrueTypeLocaOffsetFunctor());
+    std::ranges::sort(locaTable, cmpTrueTypeLocaOffsetFunctor());
     for (i = 0; i < nGlyphs; ++i) {
         locaTable[i].len = locaTable[i + 1].origOffset - locaTable[i].origOffset;
     }
     locaTable[nGlyphs].len = 0;
-    std::sort(locaTable.begin(), locaTable.end(), cmpTrueTypeLocaIdxFunctor());
+    std::ranges::sort(locaTable, cmpTrueTypeLocaIdxFunctor());
     pos = 0;
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].newOffset = pos;

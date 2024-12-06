@@ -705,7 +705,7 @@ void NameTree::init(XRef *xrefA, Object *tree)
     RefRecursionChecker seen;
     parse(tree, seen);
     if (!entries.empty()) {
-        std::sort(entries.begin(), entries.end(), [](const auto &first, const auto &second) { return first->name.cmp(&second->name) < 0; });
+        std::ranges::sort(entries, [](const auto &first, const auto &second) { return first->name.cmp(&second->name) < 0; });
     }
 }
 
