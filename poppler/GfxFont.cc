@@ -1750,7 +1750,9 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             obj2 = Object(new GooString("Adobe"));
             obj3 = Object(new GooString("Identity"));
         }
-        collection.reset(obj2.getString()->copy()->append('-')->append(obj3.getString()));
+        collection = obj2.getString()->copy();
+        collection->append('-');
+        collection->append(obj3.getString());
     } else {
         error(errSyntaxError, -1, "Missing CIDSystemInfo dictionary in Type 0 descendant font");
         error(errSyntaxError, -1, "Assuming Adobe-Identity for character collection");

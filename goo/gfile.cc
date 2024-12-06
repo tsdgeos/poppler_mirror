@@ -19,7 +19,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017, 2018, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -474,12 +474,9 @@ GDir::GDir(const char *name, bool doStatA)
     path = new GooString(name);
     doStat = doStatA;
 #ifdef _WIN32
-    GooString *tmp;
-
-    tmp = path->copy();
+    std::unique_ptr<GooString> tmp = path->copy();
     tmp->append("/*.*");
     hnd = FindFirstFileA(tmp->c_str(), &ffd);
-    delete tmp;
 #else
     dir = opendir(name);
 #endif
@@ -529,14 +526,11 @@ std::unique_ptr<GDirEntry> GDir::getNextEntry()
 void GDir::rewind()
 {
 #ifdef _WIN32
-    GooString *tmp;
-
     if (hnd != INVALID_HANDLE_VALUE)
         FindClose(hnd);
-    tmp = path->copy();
+    std::unique_ptr<GooString> tmp = path->copy();
     tmp->append("/*.*");
     hnd = FindFirstFileA(tmp->c_str(), &ffd);
-    delete tmp;
 #else
     if (dir) {
         rewinddir(dir);

@@ -2644,7 +2644,7 @@ std::unique_ptr<GfxSeparationColorSpace> GfxSeparationColorSpace::copyAsOwnType(
         mappingA = (int *)gmalloc(sizeof(int));
         *mappingA = *mapping;
     }
-    auto cs = new GfxSeparationColorSpace(name->copyUniquePtr(), alt->copy(), func->copy(), nonMarking, overprintMask, mappingA);
+    auto cs = new GfxSeparationColorSpace(name->copy(), alt->copy(), func->copy(), nonMarking, overprintMask, mappingA);
     return std::unique_ptr<GfxSeparationColorSpace>(cs);
 }
 

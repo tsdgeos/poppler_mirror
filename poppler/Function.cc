@@ -1162,7 +1162,7 @@ PostScriptFunction::PostScriptFunction(const PostScriptFunction *func) : Functio
     code = (PSObject *)gmallocn(codeSize, sizeof(PSObject));
     memcpy(code, func->code, codeSize * sizeof(PSObject));
 
-    codeString.reset(func->codeString->copy());
+    codeString = func->codeString->copy();
 
     memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
     memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));

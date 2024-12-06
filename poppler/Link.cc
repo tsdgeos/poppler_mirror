@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -423,7 +423,7 @@ LinkGoTo::LinkGoTo(const Object *destObj)
     if (destObj->isName()) {
         namedDest = std::make_unique<GooString>(destObj->getName());
     } else if (destObj->isString()) {
-        namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
+        namedDest = destObj->getString()->copy();
 
         // destination dictionary
     } else if (destObj->isArray()) {
@@ -449,14 +449,14 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj)
     // get file name
     Object obj1 = getFileSpecNameForPlatform(fileSpecObj);
     if (obj1.isString()) {
-        fileName = std::unique_ptr<GooString>(obj1.getString()->copy());
+        fileName = obj1.getString()->copy();
     }
 
     // named destination
     if (destObj->isName()) {
         namedDest = std::make_unique<GooString>(destObj->getName());
     } else if (destObj->isString()) {
-        namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
+        namedDest = destObj->getString()->copy();
 
         // destination dictionary
     } else if (destObj->isArray()) {
@@ -485,7 +485,7 @@ LinkLaunch::LinkLaunch(const Object *actionObj)
         if (!obj1.isNull()) {
             Object obj3 = getFileSpecNameForPlatform(&obj1);
             if (obj3.isString()) {
-                fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
+                fileName = obj3.getString()->copy();
             }
         } else {
 #ifdef _WIN32
@@ -499,11 +499,11 @@ LinkLaunch::LinkLaunch(const Object *actionObj)
                 Object obj2 = obj1.dictLookup("F");
                 Object obj3 = getFileSpecNameForPlatform(&obj2);
                 if (obj3.isString()) {
-                    fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
+                    fileName = obj3.getString()->copy();
                 }
                 obj2 = obj1.dictLookup("P");
                 if (obj2.isString()) {
-                    params = std::unique_ptr<GooString>(obj2.getString()->copy());
+                    params = obj2.getString()->copy();
                 }
             } else {
                 error(errSyntaxWarning, -1, "Bad launch-type link action");

@@ -808,7 +808,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithApp
 // Get start and end file position of objNum in the PDF named filename.
 bool FormWidgetSignature::getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
-    PDFDoc newDoc(std::unique_ptr<GooString>(filename.copy()), ownerPassword, userPassword);
+    PDFDoc newDoc(filename.copy(), ownerPassword, userPassword);
     if (!newDoc.isOk()) {
         return false;
     }
@@ -1077,7 +1077,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copyUniquePtr();
+        defaultAppearance = obj1.getString()->copy();
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
@@ -1091,17 +1091,17 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = dict->lookup("T");
     if (obj1.isString()) {
-        partialName = obj1.getString()->copyUniquePtr();
+        partialName = obj1.getString()->copy();
     }
 
     obj1 = dict->lookup("TU");
     if (obj1.isString()) {
-        alternateUiName = obj1.getString()->copyUniquePtr();
+        alternateUiName = obj1.getString()->copy();
     }
 
     obj1 = dict->lookup("TM");
     if (obj1.isString()) {
-        mappingName = obj1.getString()->copyUniquePtr();
+        mappingName = obj1.getString()->copy();
     }
 }
 
@@ -1112,7 +1112,7 @@ void FormField::setDefaultAppearance(const std::string &appearance)
 
 void FormField::setPartialName(const GooString &name)
 {
-    partialName = name.copyUniquePtr();
+    partialName = name.copy();
 
     obj.getDict()->set("T", Object(name.copy()));
     xref->setModifiedObject(&obj, ref);
@@ -1679,9 +1679,9 @@ void FormFieldText::fillContent(FillValueType fillType)
         if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
             if (obj1.getString()->getLength() > 2) {
                 if (fillType == fillDefaultValue) {
-                    defaultContent = obj1.getString()->copyUniquePtr();
+                    defaultContent = obj1.getString()->copy();
                 } else {
-                    content = obj1.getString()->copyUniquePtr();
+                    content = obj1.getString()->copy();
                 }
             }
         } else if (obj1.getString()->getLength() > 0) {
@@ -1710,7 +1710,7 @@ void FormFieldText::setContentCopy(const GooString *new_content)
     content.reset();
 
     if (new_content) {
-        content = new_content->copyUniquePtr();
+        content = new_content->copy();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(content->toStr())) {
@@ -1742,7 +1742,7 @@ void FormFieldText::setContentCopy(const GooString *new_content)
         }
     }
 
-    obj.getDict()->set("V", Object(content ? content->copy() : new GooString("")));
+    obj.getDict()->set("V", Object(content ? content->copy() : std::make_unique<GooString>("")));
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();
 }
@@ -1752,7 +1752,7 @@ void FormFieldText::setAppearanceContentCopy(const GooString *new_content)
     internalContent.reset();
 
     if (new_content) {
-        internalContent = new_content->copyUniquePtr();
+        internalContent = new_content->copy();
     }
     updateChildrenAppearance();
 }
@@ -1903,7 +1903,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
         for (int i = 0; i < numChoices; i++) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isString()) {
-                choices[i].optionName = obj2.getString()->copyUniquePtr();
+                choices[i].optionName = obj2.getString()->copy();
             } else if (obj2.isArray()) { // [Export_value, Displayed_text]
                 if (obj2.arrayGetLength() < 2) {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2");
@@ -1911,14 +1911,14 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
                 }
                 Object obj3 = obj2.arrayGet(0);
                 if (obj3.isString()) {
-                    choices[i].exportVal = obj3.getString()->copyUniquePtr();
+                    choices[i].exportVal = obj3.getString()->copy();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string");
                 }
 
                 obj3 = obj2.arrayGet(1);
                 if (obj3.isString()) {
-                    choices[i].optionName = obj3.getString()->copyUniquePtr();
+                    choices[i].optionName = obj3.getString()->copy();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string");
                 }
@@ -1990,7 +1990,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             // Set custom value if /V doesn't refer to any predefined option and the field is user-editable
             if (fillType == fillValue && !optionFound && edit) {
-                editedChoice = obj1.getString()->copyUniquePtr();
+                editedChoice = obj1.getString()->copy();
             }
         } else if (obj1.isArray()) {
             for (int i = 0; i < numChoices; i++) {
@@ -2141,7 +2141,7 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
     unselectAll();
 
     if (new_content) {
-        editedChoice = new_content->copyUniquePtr();
+        editedChoice = new_content->copy();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(editedChoice->toStr())) {
@@ -2156,7 +2156,7 @@ void FormFieldChoice::setAppearanceChoiceContentCopy(const GooString *new_conten
     appearanceSelectedChoice.reset();
 
     if (new_content) {
-        appearanceSelectedChoice = new_content->copyUniquePtr();
+        appearanceSelectedChoice = new_content->copy();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(appearanceSelectedChoice->toStr())) {
@@ -2639,7 +2639,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copyUniquePtr();
+        defaultAppearance = obj1.getString()->copy();
     }
 
     obj1 = acroForm->dictLookup("Q");

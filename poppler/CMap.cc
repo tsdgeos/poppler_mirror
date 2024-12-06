@@ -93,17 +93,17 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
 
         // Check for an identity CMap.
         if (!cMapNameA.cmp("Identity") || !cMapNameA.cmp("Identity-H")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copyUniquePtr(), cMapNameA.copyUniquePtr(), 0));
+            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 0));
         }
         if (!cMapNameA.cmp("Identity-V")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copyUniquePtr(), cMapNameA.copyUniquePtr(), 1));
+            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 1));
         }
 
         error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection", &cMapNameA, &collectionA);
         return {};
     }
 
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copyUniquePtr(), cMapNameA.copyUniquePtr()));
+    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy()));
     cMap->parse2(cache, &getCharFromFile, f);
 
     fclose(f);
@@ -113,7 +113,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
 
 std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, Stream *str)
 {
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copyUniquePtr(), nullptr));
+    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), nullptr));
     Object obj1 = str->getDict()->lookup("UseCMap");
     if (!obj1.isNull()) {
         cMap->useCMap(cache, &obj1);

@@ -1665,10 +1665,9 @@ bool HtmlOutputDev::dumpDocOutline(PDFDoc *doc)
             output = page;
             fputs("<hr/>\n", output);
         } else {
-            GooString *str = Docname->copy();
+            std::unique_ptr<GooString> str = Docname->copy();
             str->append("-outline.html");
             output = fopen(str->c_str(), "w");
-            delete str;
             if (output == nullptr) {
                 return false;
             }

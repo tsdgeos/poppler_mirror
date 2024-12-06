@@ -295,7 +295,7 @@ MediaRendition::MediaRendition(Object *obj)
                 if (obj1.isDict()) {
                     Object obj2 = obj1.dictLookup("F");
                     if (obj2.isString()) {
-                        fileName = obj2.getString()->copyUniquePtr();
+                        fileName = obj2.getString()->copy();
                     }
                     obj2 = obj1.dictLookup("EF");
                     if (obj2.isDict()) {
@@ -315,7 +315,7 @@ MediaRendition::MediaRendition(Object *obj)
                 // FIXME: ignore CT if D is a form XObject
                 obj1 = tmp2.dictLookup("CT");
                 if (obj1.isString()) {
-                    contentType = obj1.getString()->copyUniquePtr();
+                    contentType = obj1.getString()->copy();
                 }
             } else if (!strcmp(tmp.getName(), "MCS")) { // media clip data
                 // TODO
@@ -371,11 +371,11 @@ MediaRendition::MediaRendition(const MediaRendition &other)
     embeddedStreamObject = other.embeddedStreamObject.copy();
 
     if (other.contentType) {
-        contentType = other.contentType->copyUniquePtr();
+        contentType = other.contentType->copy();
     }
 
     if (other.fileName) {
-        fileName = other.fileName->copyUniquePtr();
+        fileName = other.fileName->copy();
     }
 }
 
