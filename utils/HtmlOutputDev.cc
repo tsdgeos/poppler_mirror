@@ -1510,16 +1510,15 @@ void HtmlOutputDev::doProcessLink(AnnotLink *link)
 
     cvtUserToDev(_x2, _y2, &x2, &y2);
 
-    GooString *_dest = getLinkDest(link);
-    HtmlLink t((double)x1, (double)y2, (double)x2, (double)y1, _dest);
+    const std::unique_ptr<GooString> _dest = getLinkDest(link);
+    HtmlLink t((double)x1, (double)y2, (double)x2, (double)y1, _dest.get());
     pages->AddLink(t);
-    delete _dest;
 }
 
-GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
+std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
 {
     if (!link->getAction()) {
-        return new GooString();
+        return std::make_unique<GooString>();
     }
     switch (link->getAction()->getKind()) {
     case actionGoTo: {
@@ -1533,7 +1532,7 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
         }
 
         if (dest) {
-            GooString *file = new GooString(gbasename(Docname->c_str()));
+            std::unique_ptr<GooString> file = std::make_unique<GooString>(gbasename(Docname->c_str()));
 
             if (dest->isPageRef()) {
                 const Ref pageref = dest->getPageRef();
@@ -1565,17 +1564,16 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
             }
             return file;
         } else {
-            return new GooString();
+            return std::make_unique<GooString>();
         }
     }
     case actionGoToR: {
         LinkGoToR *ha = (LinkGoToR *)link->getAction();
         LinkDest *dest = nullptr;
         int destPage = 1;
-        GooString *file = new GooString();
+        std::unique_ptr<GooString> file = std::make_unique<GooString>();
         if (ha->getFileName()) {
-            delete file;
-            file = new GooString(ha->getFileName()->c_str());
+            file = std::make_unique<GooString>(ha->getFileName()->c_str());
         }
         if (ha->getDest() != nullptr) {
             dest = new LinkDest(*ha->getDest());
@@ -1606,14 +1604,13 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
     }
     case actionURI: {
         LinkURI *ha = (LinkURI *)link->getAction();
-        GooString *file = new GooString(ha->getURI());
-        // printf("uri : %s\n",file->c_str());
-        return file;
+        // printf("uri : %s\n",ha->getURI()->c_str());
+        return std::make_unique<GooString>(ha->getURI());
     }
     case actionLaunch:
         if (printHtml) {
             LinkLaunch *ha = (LinkLaunch *)link->getAction();
-            GooString *file = new GooString(ha->getFileName()->c_str());
+            std::unique_ptr<GooString> file = std::make_unique<GooString>(ha->getFileName()->c_str());
             const char *p = file->c_str() + file->getLength() - 4;
             if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
                 file->del(file->getLength() - 4, 4);
@@ -1627,7 +1624,7 @@ GooString *HtmlOutputDev::getLinkDest(AnnotLink *link)
         }
         // fallthrough
     default:
-        return new GooString();
+        return std::make_unique<GooString>();
     }
 }
 
