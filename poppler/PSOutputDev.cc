@@ -905,8 +905,8 @@ static const PSSubstFont psBase14SubstFonts[14] = { { "Courier", 0.600 },
 struct PST1FontName
 {
     Ref fontFileID;
-    GooString *psName; // PostScript font name used for this
-                       //   embedded font file
+    std::unique_ptr<GooString> psName; // PostScript font name used for this
+                                       //   embedded font file
 };
 
 // Info for 8-bit fonts
@@ -1518,9 +1518,6 @@ PSOutputDev::~PSOutputDev()
     }
     if (embFontList) {
         delete embFontList;
-    }
-    for (PST1FontName &it : t1FontNames) {
-        delete it.psName;
     }
     if (font8Info) {
         for (i = 0; i < font8InfoLen; ++i) {
@@ -2329,11 +2326,11 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName);
+            psName->insert(0, it.psName.get());
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copy());
+    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2360,11 +2357,11 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName);
+            psName->insert(0, it.psName.get());
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copy());
+    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2514,11 +2511,11 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName);
+            psName->insert(0, it.psName.get());
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copy());
+    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2579,11 +2576,11 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName);
+            psName->insert(0, it.psName.get());
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copy());
+    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
