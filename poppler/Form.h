@@ -492,8 +492,8 @@ class FormFieldText : public FormField
 public:
     FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-    const GooString *getContent() const { return content; }
-    const GooString *getAppearanceContent() const { return internalContent ? internalContent : content; }
+    const GooString *getContent() const { return content.get(); }
+    const GooString *getAppearanceContent() const { return internalContent ? internalContent : content.get(); }
     void setContentCopy(const GooString *new_content);
     void setAppearanceContentCopy(const GooString *new_content);
     ~FormFieldText() override;
@@ -522,7 +522,7 @@ protected:
     int parseDA(std::vector<std::string> *daToks);
     void fillContent(FillValueType fillType);
 
-    GooString *content;
+    std::unique_ptr<GooString> content;
     GooString *internalContent;
     GooString *defaultContent;
     bool multiline;

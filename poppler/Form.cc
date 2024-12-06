@@ -1631,7 +1631,6 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
 {
     Dict *dict = obj.getDict();
     Object obj1;
-    content = nullptr;
     internalContent = nullptr;
     defaultContent = nullptr;
     multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
@@ -1684,7 +1683,7 @@ void FormFieldText::fillContent(FillValueType fillType)
                 if (fillType == fillDefaultValue) {
                     defaultContent = obj1.getString()->copy();
                 } else {
-                    content = obj1.getString()->copy();
+                    content = obj1.getString()->copyUniquePtr();
                 }
             }
         } else if (obj1.getString()->getLength() > 0) {
@@ -1695,7 +1694,7 @@ void FormFieldText::fillContent(FillValueType fillType)
             if (fillType == fillDefaultValue) {
                 defaultContent = new GooString(tmp_str, tmp_length);
             } else {
-                content = new GooString(tmp_str, tmp_length);
+                content = std::make_unique<GooString>(tmp_str, tmp_length);
             }
 
             delete[] tmp_str;
@@ -1710,11 +1709,10 @@ void FormFieldText::print(int indent)
 
 void FormFieldText::setContentCopy(const GooString *new_content)
 {
-    delete content;
-    content = nullptr;
+    content.reset();
 
     if (new_content) {
-        content = new_content->copy();
+        content = new_content->copyUniquePtr();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(content->toStr())) {
@@ -1730,14 +1728,14 @@ void FormFieldText::setContentCopy(const GooString *new_content)
                     Object fieldResourcesDictObj = obj.dictLookup("DR");
                     if (fieldResourcesDictObj.isDict()) {
                         GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content, fontName, &fieldResources);
+                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
                         // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                         // to the field DR dictionary
                         for (const Form::AddFontResult &afr : newFonts) {
                             fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
                         }
                     } else {
-                        form->ensureFontsForAllCharacters(content, fontName);
+                        form->ensureFontsForAllCharacters(content.get(), fontName);
                     }
                 }
             } else {
@@ -1764,7 +1762,6 @@ void FormFieldText::setAppearanceContentCopy(const GooString *new_content)
 
 FormFieldText::~FormFieldText()
 {
-    delete content;
     delete internalContent;
     delete defaultContent;
 }
