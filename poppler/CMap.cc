@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -95,17 +95,17 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString *collectionA
 
         // Check for an identity CMap.
         if (!cMapNameA->cmp("Identity") || !cMapNameA->cmp("Identity-H")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA->copy(), cMapNameA->copy(), 0));
+            return std::shared_ptr<CMap>(new CMap(collectionA->copyUniquePtr(), cMapNameA->copyUniquePtr(), 0));
         }
         if (!cMapNameA->cmp("Identity-V")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA->copy(), cMapNameA->copy(), 1));
+            return std::shared_ptr<CMap>(new CMap(collectionA->copyUniquePtr(), cMapNameA->copyUniquePtr(), 1));
         }
 
         error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection", cMapNameA, collectionA);
         return {};
     }
 
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA->copy(), cMapNameA->copy()));
+    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA->copyUniquePtr(), cMapNameA->copyUniquePtr()));
     cMap->parse2(cache, &getCharFromFile, f);
 
     fclose(f);
@@ -115,7 +115,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString *collectionA
 
 std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString *collectionA, Stream *str)
 {
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA->copy(), nullptr));
+    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA->copyUniquePtr(), nullptr));
     Object obj1 = str->getDict()->lookup("UseCMap");
     if (!obj1.isNull()) {
         cMap->useCMap(cache, &obj1);
@@ -192,25 +192,19 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
     delete pst;
 }
 
-CMap::CMap(GooString *collectionA, GooString *cMapNameA)
+CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA) : collection(std::move(collectionA)), cMapName(std::move(cMapNameA))
 {
-    int i;
-
-    collection = collectionA;
-    cMapName = cMapNameA;
     isIdent = false;
     wMode = 0;
     vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
-    for (i = 0; i < 256; ++i) {
+    for (int i = 0; i < 256; ++i) {
         vector[i].isVector = false;
         vector[i].cid = 0;
     }
 }
 
-CMap::CMap(GooString *collectionA, GooString *cMapNameA, int wModeA)
+CMap::CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA) : collection(std::move(collectionA)), cMapName(std::move(cMapNameA))
 {
-    collection = collectionA;
-    cMapName = cMapNameA;
     isIdent = true;
     wMode = wModeA;
     vector = nullptr;
@@ -227,9 +221,9 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     // GlobalParams::getCMap() in order to acqure the lock need to use
     // GlobalParams::getCMap
     if (cache) {
-        subCMap = cache->getCMap(collection, useNameStr);
+        subCMap = cache->getCMap(collection.get(), useNameStr);
     } else {
-        subCMap = globalParams->getCMap(collection, useNameStr);
+        subCMap = globalParams->getCMap(collection.get(), useNameStr);
     }
     delete useNameStr;
     if (!subCMap) {
@@ -243,7 +237,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
 
 void CMap::useCMap(CMapCache *cache, Object *obj)
 {
-    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection, obj);
+    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection.get(), obj);
     if (!subCMap) {
         return;
     }
@@ -315,8 +309,6 @@ void CMap::addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CI
 
 CMap::~CMap()
 {
-    delete collection;
-    delete cMapName;
     if (vector) {
         freeCMapVector(vector);
     }
