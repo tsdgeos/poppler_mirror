@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
@@ -119,11 +119,6 @@ public:
 StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA) : SecurityHandler(docA)
 {
     ok = false;
-    fileID = nullptr;
-    ownerKey = nullptr;
-    userKey = nullptr;
-    ownerEnc = nullptr;
-    userEnc = nullptr;
     fileKeyLength = 0;
     encAlgorithm = cryptNone;
 
@@ -210,28 +205,28 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 }
             }
             permFlags = permObj.getInt();
-            ownerKey = ownerKeyObj.getString()->copy();
-            userKey = userKeyObj.getString()->copy();
+            ownerKey = ownerKeyObj.getString()->copyUniquePtr();
+            userKey = userKeyObj.getString()->copyUniquePtr();
             if (encVersion >= 1 && encVersion <= 2 && encRevision >= 2 && encRevision <= 3) {
                 if (fileIDObj.isArray()) {
                     Object fileIDObj1 = fileIDObj.arrayGet(0);
                     if (fileIDObj1.isString()) {
-                        fileID = fileIDObj1.getString()->copy();
+                        fileID = fileIDObj1.getString()->copyUniquePtr();
                     } else {
-                        fileID = new GooString();
+                        fileID = std::make_unique<GooString>();
                     }
                 } else {
-                    fileID = new GooString();
+                    fileID = std::make_unique<GooString>();
                 }
                 if (fileKeyLength > 16 || fileKeyLength < 0) {
                     fileKeyLength = 16;
                 }
                 ok = true;
             } else if (encVersion == 5 && (encRevision == 5 || encRevision == 6)) {
-                fileID = new GooString(); // unused for V=R=5
+                fileID = std::make_unique<GooString>(); // unused for V=R=5
                 if (ownerEncObj.isString() && userEncObj.isString()) {
-                    ownerEnc = ownerEncObj.getString()->copy();
-                    userEnc = userEncObj.getString()->copy();
+                    ownerEnc = ownerEncObj.getString()->copyUniquePtr();
+                    userEnc = userEncObj.getString()->copyUniquePtr();
                     if (fileKeyLength > 32 || fileKeyLength < 0) {
                         fileKeyLength = 32;
                     }
@@ -264,24 +259,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
     }
 }
 
-StandardSecurityHandler::~StandardSecurityHandler()
-{
-    if (fileID) {
-        delete fileID;
-    }
-    if (ownerKey) {
-        delete ownerKey;
-    }
-    if (userKey) {
-        delete userKey;
-    }
-    if (ownerEnc) {
-        delete ownerEnc;
-    }
-    if (userEnc) {
-        delete userEnc;
-    }
-}
+StandardSecurityHandler::~StandardSecurityHandler() = default;
 
 bool StandardSecurityHandler::isUnencrypted() const
 {
@@ -315,7 +293,7 @@ bool StandardSecurityHandler::authorize(void *authData)
         ownerPassword = nullptr;
         userPassword = nullptr;
     }
-    if (!Decrypt::makeFileKey(encVersion, encRevision, fileKeyLength, ownerKey, userKey, ownerEnc, userEnc, permFlags, fileID, ownerPassword, userPassword, fileKey, encryptMetadata, &ownerPasswordOk)) {
+    if (!Decrypt::makeFileKey(encVersion, encRevision, fileKeyLength, ownerKey.get(), userKey.get(), ownerEnc.get(), userEnc.get(), permFlags, fileID.get(), ownerPassword, userPassword, fileKey, encryptMetadata, &ownerPasswordOk)) {
         return false;
     }
     return true;
