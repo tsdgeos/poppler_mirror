@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2017-2019, 2021, 2022
+// Albert Astals Cid <aacid@kde.org> (c) 2017-2019, 2021, 2022, 2024
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ public:
     bool isOk() const { return ok; }
     const MovieActivationParameters *getActivationParameters() const { return &MA; }
 
-    const GooString *getFileName() const { return fileName; }
+    const GooString *getFileName() const { return fileName.get(); }
 
     unsigned short getRotationAngle() const { return rotationAngle; }
     void getAspect(int *widthA, int *heightA) const
@@ -115,7 +115,7 @@ private:
     Object poster;
     bool showPoster;
 
-    GooString *fileName;
+    std::unique_ptr<GooString> fileName;
 
     MovieActivationParameters MA;
 };
