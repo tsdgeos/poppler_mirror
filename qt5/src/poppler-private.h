@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017-2022 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017-2022, 2024 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -84,7 +84,7 @@ POPPLER_QT5_EXPORT QString UnicodeParsedString(const std::string &s1);
 // The caller owns the returned pointer.
 POPPLER_QT5_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
-POPPLER_QT5_EXPORT GooString *QStringToGooString(const QString &s);
+POPPLER_QT5_EXPORT std::unique_ptr<GooString> QStringToGooString(const QString &s);
 
 GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
 

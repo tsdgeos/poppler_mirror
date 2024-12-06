@@ -220,10 +220,8 @@ void TestStrings::check_QStringToGooString()
     QFETCH(QString, string);
     QFETCH(GooString *, result);
 
-    GooString *goo = Poppler::QStringToGooString(string);
+    const std::unique_ptr<GooString> goo = Poppler::QStringToGooString(string);
     QCOMPARE(goo->c_str(), result->c_str());
-
-    delete goo;
 }
 
 GooString *TestStrings::newGooString(const char *s)

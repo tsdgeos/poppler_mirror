@@ -1,6 +1,6 @@
 /* poppler-private.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2006, 2011, 2015, 2017-2020 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2011, 2015, 2017-2020, 2024 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2010, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 by Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -151,14 +151,14 @@ GooString *QStringToUnicodeGooString(const QString &s)
     return ret;
 }
 
-GooString *QStringToGooString(const QString &s)
+std::unique_ptr<GooString> QStringToGooString(const QString &s)
 {
     int len = s.length();
     char *cstring = (char *)gmallocn(s.length(), sizeof(char));
     for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
     }
-    GooString *ret = new GooString(cstring, len);
+    std::unique_ptr<GooString> ret = std::make_unique<GooString>(cstring, len);
     gfree(cstring);
     return ret;
 }

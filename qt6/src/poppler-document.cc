@@ -596,10 +596,9 @@ QVector<OutlineItem> Document::outline() const
 
 std::unique_ptr<LinkDestination> Document::linkDestination(const QString &name)
 {
-    GooString *namedDest = QStringToGooString(name);
-    LinkDestinationData ldd(nullptr, namedDest, m_doc, false);
+    const std::unique_ptr<GooString> namedDest = QStringToGooString(name);
+    LinkDestinationData ldd(nullptr, namedDest.get(), m_doc, false);
     auto ld = std::make_unique<LinkDestination>(ldd);
-    delete namedDest;
     return ld;
 }
 

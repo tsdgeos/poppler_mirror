@@ -151,14 +151,14 @@ GooString *QStringToUnicodeGooString(const QString &s)
     return ret;
 }
 
-GooString *QStringToGooString(const QString &s)
+std::unique_ptr<GooString> QStringToGooString(const QString &s)
 {
     int len = s.length();
     char *cstring = (char *)gmallocn(s.length(), sizeof(char));
     for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
     }
-    GooString *ret = new GooString(cstring, len);
+    std::unique_ptr<GooString> ret = std::make_unique<GooString>(cstring, len);
     gfree(cstring);
     return ret;
 }
