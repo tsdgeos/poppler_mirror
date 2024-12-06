@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
-// Copyright (C) 2010, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
@@ -36,10 +36,10 @@ HtmlLink::HtmlLink(const HtmlLink &x)
     Ymin = x.Ymin;
     Xmax = x.Xmax;
     Ymax = x.Ymax;
-    dest = new GooString(x.dest);
+    dest = std::make_unique<GooString>(x.dest.get());
 }
 
-HtmlLink::HtmlLink(double xmin, double ymin, double xmax, double ymax, GooString *_dest)
+HtmlLink::HtmlLink(double xmin, double ymin, double xmax, double ymax, std::unique_ptr<GooString> &&_dest) : dest(std::move(_dest))
 {
     if (xmin < xmax) {
         Xmin = xmin;
@@ -55,13 +55,9 @@ HtmlLink::HtmlLink(double xmin, double ymin, double xmax, double ymax, GooString
         Ymin = ymax;
         Ymax = ymin;
     }
-    dest = new GooString(_dest);
 }
 
-HtmlLink::~HtmlLink()
-{
-    delete dest;
-}
+HtmlLink::~HtmlLink() = default;
 
 bool HtmlLink::isEqualDest(const HtmlLink &x) const
 {
@@ -113,12 +109,12 @@ static GooString *EscapeSpecialChars(GooString *s)
     return tmp ? tmp : s;
 }
 
-GooString *HtmlLink::getLinkStart() const
+std::unique_ptr<GooString> HtmlLink::getLinkStart() const
 {
-    GooString *res = new GooString("<a href=\"");
-    GooString *d = xml ? EscapeSpecialChars(dest) : dest;
+    std::unique_ptr<GooString> res = std::make_unique<GooString>("<a href=\"");
+    GooString *d = xml ? EscapeSpecialChars(dest.get()) : dest.get();
     res->append(d);
-    if (d != dest) {
+    if (d != dest.get()) {
         delete d;
     }
     res->append("\">");

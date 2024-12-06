@@ -802,8 +802,8 @@ bool CertificateInfo::checkPassword(const QString &password) const
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler->addData(buffer, 5);
-    std::variant<GooString, CryptoSign::SigningError> tmpSignature = sigHandler->signDetached(password.toStdString());
-    return std::holds_alternative<GooString>(tmpSignature);
+    std::variant<std::vector<unsigned char>, CryptoSign::SigningError> tmpSignature = sigHandler->signDetached(password.toStdString());
+    return std::holds_alternative<std::vector<unsigned char>>(tmpSignature);
 #else
     return false;
 #endif

@@ -4485,7 +4485,7 @@ void TextSelectionDumper::finishLine()
     if (words && words->size() > 0) {
         // Reverse word order for RTL text. Fixes #53 for glib backend (Evince)
         if (!page->primaryLR) {
-            std::reverse(words->begin(), words->end());
+            std::ranges::reverse(*words);
         }
 
         lines[nLines++] = words;

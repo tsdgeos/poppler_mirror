@@ -6,6 +6,7 @@
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2021, Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +100,7 @@ public:
     void fillTransformationMTX(double MTX[6]) const;
     QRectF fromPdfRectangle(const PDFRectangle &r) const;
     PDFRectangle boundaryToPdfRectangle(const QRectF &r, int flags) const;
-    AnnotPath *toAnnotPath(const QVector<QPointF> &l) const;
+    std::unique_ptr<AnnotPath> toAnnotPath(const QVector<QPointF> &l) const;
 
     /* Scan page for annotations, parentId=0 searches for root annotations, subtypes empty means all subtypes */
     static std::vector<std::unique_ptr<Annotation>> findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentId = -1);

@@ -1053,7 +1053,7 @@ CertificateValidationStatus NSSSignatureVerification::validateCertificateResult(
     return cachedValidationStatus.value();
 }
 
-std::variant<GooString, CryptoSign::SigningError> NSSSignatureCreation::signDetached(const std::string &password)
+std::variant<std::vector<unsigned char>, CryptoSign::SigningError> NSSSignatureCreation::signDetached(const std::string &password)
 {
     if (!hashContext) {
         return CryptoSign::SigningError::InternalError;
@@ -1207,7 +1207,7 @@ std::variant<GooString, CryptoSign::SigningError> NSSSignatureCreation::signDeta
         return CryptoSign::SigningError::GenericError;
     }
 
-    auto signature = GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
+    auto signature = std::vector<unsigned char>(cms_output.data, cms_output.data + cms_output.len);
 
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
 

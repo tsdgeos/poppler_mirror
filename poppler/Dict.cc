@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010, 2013, 2014, 2017, 2019, 2020, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013, 2014, 2017, 2019, 2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -112,7 +112,7 @@ inline const Dict::DictEntry *Dict::find(const char *key) const
             if (!sorted) {
                 Dict *that = const_cast<Dict *>(this);
 
-                std::sort(that->entries.begin(), that->entries.end(), CmpDictEntry {});
+                std::ranges::sort(that->entries, CmpDictEntry {});
                 that->sorted = true;
             }
         }

@@ -1,3 +1,26 @@
+Release 24.12.0:
+        core:
+         * cairo: Fix rendering of JPX images with transparency
+         * cairo: Fix JPX transparency regression
+         * Override encoding for Zapf Dingbats
+         * Improve Signature appearance generation code
+         * Improve Stamp appearance generation code
+         * Mark certificates that can do qualified signing
+         * Internal code improvements
+
+        qt6:
+         * Mark certificates that can do qualified signing
+
+        glib:
+         * Add free text annotations support
+
+        utils:
+         * pdfsig: Improve man page
+
+        build system:
+         * Install some more internal headers
+         * Fix build with in-tree build
+
 Release 24.11.0:
         core:
          * Fix rendering of some buttons
@@ -11,7 +34,7 @@ Release 24.11.0:
          * add INSTALL_GLIB_DEMO option to install poppler-glib-demo
          * Fix Launch action with unicode encoded filenames
 
-         qt6:
+        qt6:
          * Fix memory handling issue on signature creation
          * Fix Launch action with unicode encoded filenames
 

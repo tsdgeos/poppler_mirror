@@ -243,7 +243,7 @@ void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
 {
     gpgData.write(dataBlock, dataLen);
 }
-std::variant<GooString, CryptoSign::SigningError> GpgSignatureCreation::signDetached(const std::string &password)
+std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureCreation::signDetached(const std::string &password)
 {
     if (!key) {
         return CryptoSign::SigningError::KeyMissing;
@@ -259,8 +259,8 @@ std::variant<GooString, CryptoSign::SigningError> GpgSignatureCreation::signDeta
         }
     }
 
-    const auto signatureString = signatureData.toString();
-    return GooString(std::move(signatureString));
+    auto signatureString = signatureData.toString();
+    return std::vector<unsigned char>(signatureString.begin(), signatureString.end());
 }
 
 CryptoSign::SignatureType GpgSignatureCreation::signatureType() const

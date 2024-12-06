@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -45,6 +45,7 @@
 // Copyright (C) 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
+// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -144,7 +145,6 @@ public:
 
     double getX(int coord) const;
     double getY(int coord) const;
-    AnnotCoord *getCoord(int coord);
     int getCoordsLength() const { return coords.size(); }
 
 protected:
@@ -238,14 +238,14 @@ public:
     AnnotQuadrilaterals(const AnnotQuadrilaterals &) = delete;
     AnnotQuadrilaterals &operator=(const AnnotQuadrilaterals &other) = delete;
 
-    double getX1(int quadrilateral);
-    double getY1(int quadrilateral);
-    double getX2(int quadrilateral);
-    double getY2(int quadrilateral);
-    double getX3(int quadrilateral);
-    double getY3(int quadrilateral);
-    double getX4(int quadrilateral);
-    double getY4(int quadrilateral);
+    double getX1(int quadrilateral) const;
+    double getY1(int quadrilateral) const;
+    double getX2(int quadrilateral) const;
+    double getY2(int quadrilateral) const;
+    double getX3(int quadrilateral) const;
+    double getY3(int quadrilateral) const;
+    double getX4(int quadrilateral) const;
+    double getY4(int quadrilateral) const;
     int getQuadrilateralsLength() const { return quadrilateralsLength; }
 
 protected:
@@ -580,8 +580,8 @@ public:
     AnnotAppearanceBuilder(const AnnotAppearanceBuilder &) = delete;
     AnnotAppearanceBuilder &operator=(const AnnotAppearanceBuilder &) = delete;
 
-    void setDrawColor(const AnnotColor *color, bool fill);
-    void setLineStyleForBorder(const AnnotBorder *border);
+    void setDrawColor(const AnnotColor &color, bool fill);
+    void setLineStyleForBorder(const AnnotBorder &border);
     void setTextFont(const Object &fontName, double fontSize);
     void drawCircle(double cx, double cy, double r, bool fill);
     void drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke);
@@ -735,7 +735,7 @@ public:
     double getXMax();
     double getYMax();
 
-    void setRect(const PDFRectangle *rect);
+    void setRect(const PDFRectangle &rect);
     void setRect(double x1, double y1, double x2, double y2);
 
     // Sets the annot contents to new_content
@@ -1202,7 +1202,7 @@ public:
     // typeHighlight, typeUnderline, typeSquiggly or typeStrikeOut
     void setType(AnnotSubtype new_type);
 
-    void setQuadrilaterals(AnnotQuadrilaterals *quadPoints);
+    void setQuadrilaterals(const AnnotQuadrilaterals &quadPoints);
 
     AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
@@ -1300,7 +1300,7 @@ public:
     void draw(Gfx *gfx, bool printing) override;
     void generatePolyLineAppearance(AnnotAppearanceBuilder *appearBuilder);
     void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
-    void setVertices(AnnotPath *path);
+    void setVertices(const AnnotPath &path);
     void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
     void setInteriorColor(std::unique_ptr<AnnotColor> &&new_color);
     void setIntent(AnnotPolygonIntent new_intent);
@@ -1373,21 +1373,18 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void setInkList(AnnotPath **paths, int n_paths);
+    void setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths);
 
     // getters
-    AnnotPath **getInkList() const { return inkList; }
-    int getInkListLength() const { return inkListLength; }
+    const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
-    void writeInkList(AnnotPath **paths, int n_paths, Array *dest_array);
+    void writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array);
     void parseInkList(Array *src_array);
-    void freeInkList();
 
     // required
-    AnnotPath **inkList; // InkList
-    int inkListLength;
+    std::vector<std::unique_ptr<AnnotPath>> inkList; // InkList
 
     // optional
     // inherited from Annot
@@ -1639,8 +1636,7 @@ public:
         // optional
         Type type; // Subtype
         std::unique_ptr<GooString> name; // Name
-        Instance **instances; // Instances
-        int nInstances;
+        std::vector<std::unique_ptr<Instance>> instances; // Instances
     };
 
     class Content;
@@ -1681,11 +1677,9 @@ public:
 
     private:
         // optional
-        Configuration **configurations; // Configurations
-        int nConfigurations;
+        std::vector<std::unique_ptr<Configuration>> configurations; // Configurations
 
-        Asset **assets; // Assets
-        int nAssets;
+        std::vector<std::unique_ptr<Asset>> assets; // Assets
     };
 
     class POPPLER_PRIVATE_EXPORT Activation

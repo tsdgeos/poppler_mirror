@@ -107,7 +107,7 @@ public:
     ~NSSSignatureCreation() final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     void addData(unsigned char *data_block, int data_len) final;
-    std::variant<GooString, CryptoSign::SigningError> signDetached(const std::string &password) final;
+    std::variant<std::vector<unsigned char>, CryptoSign::SigningError> signDetached(const std::string &password) final;
     CryptoSign::SignatureType signatureType() const final { return CryptoSign::SignatureType::adbe_pkcs7_detached; }
 
     NSSSignatureCreation(const NSSSignatureCreation &) = delete;

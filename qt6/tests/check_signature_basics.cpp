@@ -60,14 +60,14 @@ void TestSignatureBasics::initTestCase_data()
     const auto availableBackends = CryptoSign::Factory::getAvailable();
 
 #    ifdef ENABLE_NSS3
-    if (std::find(availableBackends.begin(), availableBackends.end(), CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
+    if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
         QTest::newRow("nss") << CryptoSign::Backend::Type::NSS3;
     } else {
         QWARN("Compiled with NSS3, but NSS not functional");
     }
 #    endif
 #    ifdef ENABLE_GPGME
-    if (std::find(availableBackends.begin(), availableBackends.end(), CryptoSign::Backend::Type::GPGME) != availableBackends.end()) {
+    if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::GPGME) != availableBackends.end()) {
         QTest::newRow("gpg") << CryptoSign::Backend::Type::GPGME;
     } else {
         QWARN("Compiled with GPGME, but GPGME not functional");
@@ -87,10 +87,10 @@ void TestSignatureBasics::testSignatureCount()
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields.size(), 4);
     // count active signatures
-    QVERIFY(signatureFields[0]->getSignature());
-    QVERIFY(signatureFields[1]->getSignature());
-    QVERIFY(!signatureFields[2]->getSignature());
-    QVERIFY(!signatureFields[3]->getSignature());
+    QVERIFY(signatureFields[0]->getSignature().size());
+    QVERIFY(signatureFields[1]->getSignature().size());
+    QVERIFY(signatureFields[2]->getSignature().empty());
+    QVERIFY(signatureFields[3]->getSignature().empty());
 }
 
 void TestSignatureBasics::testSignatureSizes()
@@ -101,8 +101,8 @@ void TestSignatureBasics::testSignatureSizes()
     // a padded field. At least the pdf specification suggest to pad
     // the field.
     // Poppler before 23.04 did not have a padded field, later versions do.
-    QCOMPARE(signatureFields[0]->getSignature()->getLength(), 10230); // Signature data size is 2340
-    QCOMPARE(signatureFields[1]->getSignature()->getLength(), 10196); // Signature data size is 2340
+    QCOMPARE(signatureFields[0]->getSignature().size(), 10230); // Signature data size is 2340
+    QCOMPARE(signatureFields[1]->getSignature().size(), 10196); // Signature data size is 2340
 }
 
 void TestSignatureBasics::testSignerInfo()

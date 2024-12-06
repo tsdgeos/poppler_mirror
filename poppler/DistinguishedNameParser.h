@@ -8,6 +8,7 @@
 // Copyright 2004 Klarälvdalens Datakonsult AB
 // Copyright 2021 g10 Code GmbH
 // Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2024 Albert Astals Cid <aacid@kde.org>
 //
 // Derived from libkleopatra (KDE key management library) dn.cpp
 //
@@ -311,7 +312,7 @@ static Result parseString(std::string_view string)
 /// or nullopt if key is not available
 inline std::optional<std::string> FindFirstValue(const Result &dn, std::string_view key)
 {
-    auto first = std::find_if(dn.begin(), dn.end(), [&key](const auto &it) { return it.first == key; });
+    auto first = std::ranges::find_if(dn, [&key](const auto &it) { return it.first == key; });
     if (first == dn.end()) {
         return {};
     }

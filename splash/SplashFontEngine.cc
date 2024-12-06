@@ -232,7 +232,7 @@ SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile, const SplashCoor
     }
 
     // Try to find the font in the cache
-    auto fontIt = std::find_if(fontCache.begin(), fontCache.end(), [&](const SplashFont *font) { return font && font->matches(fontFile, mat, textMat); });
+    auto fontIt = std::ranges::find_if(fontCache, [&](const SplashFont *font) { return font && font->matches(fontFile, mat, textMat); });
 
     // The requested font has been found in the cache
     if (fontIt != fontCache.end()) {
