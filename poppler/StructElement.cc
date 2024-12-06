@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017-2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017-2019, 2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
@@ -690,11 +690,6 @@ StructElement::StructData::StructData() : altText(nullptr), actualText(nullptr),
 
 StructElement::StructData::~StructData()
 {
-    delete altText;
-    delete actualText;
-    delete id;
-    delete title;
-    delete language;
     for (StructElement *element : elements) {
         delete element;
     }
@@ -954,7 +949,7 @@ void StructElement::parse(Dict *element)
     // Object ID (optional), to be looked at the IDTree in the tree root.
     obj = element->lookup("ID");
     if (obj.isString()) {
-        s->id = obj.getString()->copy();
+        s->id = obj.getString()->copyUniquePtr();
     }
 
     // Page reference (optional) in which at least one of the child items
@@ -972,31 +967,31 @@ void StructElement::parse(Dict *element)
     // Element title (optional).
     obj = element->lookup("T");
     if (obj.isString()) {
-        s->title = obj.getString()->copy();
+        s->title = obj.getString()->copyUniquePtr();
     }
 
     // Language (optional).
     obj = element->lookup("Lang");
     if (obj.isString()) {
-        s->language = obj.getString()->copy();
+        s->language = obj.getString()->copyUniquePtr();
     }
 
     // Alternative text (optional).
     obj = element->lookup("Alt");
     if (obj.isString()) {
-        s->altText = obj.getString()->copy();
+        s->altText = obj.getString()->copyUniquePtr();
     }
 
     // Expanded form of an abbreviation (optional).
     obj = element->lookup("E");
     if (obj.isString()) {
-        s->expandedAbbr = obj.getString()->copy();
+        s->expandedAbbr = obj.getString()->copyUniquePtr();
     }
 
     // Actual text (optional).
     obj = element->lookup("ActualText");
     if (obj.isString()) {
-        s->actualText = obj.getString()->copy();
+        s->actualText = obj.getString()->copyUniquePtr();
     }
 
     // Attributes directly attached to the element (optional).
