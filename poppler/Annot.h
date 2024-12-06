@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -1299,7 +1299,7 @@ public:
     void draw(Gfx *gfx, bool printing) override;
     void generatePolyLineAppearance(AnnotAppearanceBuilder *appearBuilder);
     void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
-    void setVertices(AnnotPath *path);
+    void setVertices(const AnnotPath &path);
     void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
     void setInteriorColor(std::unique_ptr<AnnotColor> &&new_color);
     void setIntent(AnnotPolygonIntent new_intent);

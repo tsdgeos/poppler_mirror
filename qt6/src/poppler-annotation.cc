@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2022 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -2108,8 +2108,8 @@ void LineAnnotation::setLinePoints(const QVector<QPointF> &points)
         lineann->setVertices(x1, y1, x2, y2);
     } else {
         AnnotPolygon *polyann = static_cast<AnnotPolygon *>(d->pdfAnnot);
-        std::unique_ptr<AnnotPath> p = d->toAnnotPath(points);
-        polyann->setVertices(p.get());
+        const std::unique_ptr<AnnotPath> p = d->toAnnotPath(points);
+        polyann->setVertices(*p);
     }
 }
 

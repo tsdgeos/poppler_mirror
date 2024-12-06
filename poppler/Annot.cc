@@ -6256,12 +6256,12 @@ void AnnotPolygon::setType(AnnotSubtype new_type)
     invalidateAppearance();
 }
 
-void AnnotPolygon::setVertices(AnnotPath *path)
+void AnnotPolygon::setVertices(const AnnotPath &path)
 {
     Array *a = new Array(doc->getXRef());
-    for (int i = 0; i < path->getCoordsLength(); i++) {
-        a->add(Object(path->getX(i)));
-        a->add(Object(path->getY(i)));
+    for (int i = 0; i < path.getCoordsLength(); i++) {
+        a->add(Object(path.getX(i)));
+        a->add(Object(path.getY(i)));
     }
 
     vertices = std::make_unique<AnnotPath>(a);
