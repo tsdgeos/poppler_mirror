@@ -1990,7 +1990,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             // Set custom value if /V doesn't refer to any predefined option and the field is user-editable
             if (fillType == fillValue && !optionFound && edit) {
-                editedChoice = obj1.getString()->copy();
+                editedChoice = obj1.getString()->copyUniquePtr();
             }
         } else if (obj1.isArray()) {
             for (int i = 0; i < numChoices; i++) {
@@ -2031,8 +2031,6 @@ FormFieldChoice::~FormFieldChoice()
 {
     delete[] choices;
     delete[] defaultChoices;
-    delete editedChoice;
-    delete appearanceSelectedChoice;
 }
 
 void FormFieldChoice::print(int indent)
@@ -2110,8 +2108,7 @@ void FormFieldChoice::unselectAll()
 
 void FormFieldChoice::deselectAll()
 {
-    delete editedChoice;
-    editedChoice = nullptr;
+    editedChoice.reset();
 
     unselectAll();
     updateSelection();
@@ -2119,8 +2116,7 @@ void FormFieldChoice::deselectAll()
 
 void FormFieldChoice::toggle(int i)
 {
-    delete editedChoice;
-    editedChoice = nullptr;
+    editedChoice.reset();
 
     choices[i].selected = !choices[i].selected;
     updateSelection();
@@ -2128,8 +2124,7 @@ void FormFieldChoice::toggle(int i)
 
 void FormFieldChoice::select(int i)
 {
-    delete editedChoice;
-    editedChoice = nullptr;
+    editedChoice.reset();
 
     if (!multiselect) {
         unselectAll();
@@ -2141,13 +2136,12 @@ void FormFieldChoice::select(int i)
 
 void FormFieldChoice::setEditChoice(const GooString *new_content)
 {
-    delete editedChoice;
-    editedChoice = nullptr;
+    editedChoice.reset();
 
     unselectAll();
 
     if (new_content) {
-        editedChoice = new_content->copy();
+        editedChoice = new_content->copyUniquePtr();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(editedChoice->toStr())) {
@@ -2159,11 +2153,10 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
 
 void FormFieldChoice::setAppearanceChoiceContentCopy(const GooString *new_content)
 {
-    delete appearanceSelectedChoice;
-    appearanceSelectedChoice = nullptr;
+    appearanceSelectedChoice.reset();
 
     if (new_content) {
-        appearanceSelectedChoice = new_content->copy();
+        appearanceSelectedChoice = new_content->copyUniquePtr();
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(appearanceSelectedChoice->toStr())) {
@@ -2175,7 +2168,7 @@ void FormFieldChoice::setAppearanceChoiceContentCopy(const GooString *new_conten
 
 const GooString *FormFieldChoice::getEditChoice() const
 {
-    return editedChoice;
+    return editedChoice.get();
 }
 
 int FormFieldChoice::getNumSelected()
@@ -2192,7 +2185,7 @@ int FormFieldChoice::getNumSelected()
 const GooString *FormFieldChoice::getSelectedChoice() const
 {
     if (edit && editedChoice) {
-        return editedChoice;
+        return editedChoice.get();
     }
 
     for (int i = 0; i < numChoices; i++) {
@@ -2207,8 +2200,7 @@ const GooString *FormFieldChoice::getSelectedChoice() const
 void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 {
     if (!isAmongExcludedFields(excludedFields)) {
-        delete editedChoice;
-        editedChoice = nullptr;
+        editedChoice.reset();
 
         if (defaultChoices) {
             for (int i = 0; i < numChoices; i++) {
