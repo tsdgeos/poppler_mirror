@@ -940,31 +940,27 @@ struct PSFont16Enc
 class PSOutCustomColor
 {
 public:
-    PSOutCustomColor(double cA, double mA, double yA, double kA, GooString *nameA);
+    PSOutCustomColor(double cA, double mA, double yA, double kA, std::unique_ptr<GooString> &&nameA);
     ~PSOutCustomColor();
 
     PSOutCustomColor(const PSOutCustomColor &) = delete;
     PSOutCustomColor &operator=(const PSOutCustomColor &) = delete;
 
     double c, m, y, k;
-    GooString *name;
+    const std::unique_ptr<GooString> name;
     PSOutCustomColor *next;
 };
 
-PSOutCustomColor::PSOutCustomColor(double cA, double mA, double yA, double kA, GooString *nameA)
+PSOutCustomColor::PSOutCustomColor(double cA, double mA, double yA, double kA, std::unique_ptr<GooString> &&nameA) : name(std::move(nameA))
 {
     c = cA;
     m = mA;
     y = yA;
     k = kA;
-    name = nameA;
     next = nullptr;
 }
 
-PSOutCustomColor::~PSOutCustomColor()
-{
-    delete name;
-}
+PSOutCustomColor::~PSOutCustomColor() = default;
 
 //------------------------------------------------------------------------
 
@@ -4088,7 +4084,7 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
     }
     color.c[0] = gfxColorComp1;
     sepCS->getCMYK(&color, &cmyk);
-    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName()->copy());
+    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName()->copyUniquePtr());
     cc->next = customColors;
     customColors = cc;
 }
