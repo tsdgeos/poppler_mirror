@@ -197,17 +197,17 @@ static const char *get_poppler_fontsdir(void)
 class SysFontInfo
 {
 public:
-    GooString *name;
+    const std::unique_ptr<GooString> name;
     bool bold;
     bool italic;
     bool oblique;
     bool fixedWidth;
-    GooString *path;
+    const std::unique_ptr<GooString> path;
     SysFontType type;
     int fontNum; // for TrueType collections
-    GooString *substituteName;
+    const std::unique_ptr<GooString> substituteName;
 
-    SysFontInfo(GooString *nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA, GooString *pathA, SysFontType typeA, int fontNumA, GooString *substituteNameA);
+    SysFontInfo(std::unique_ptr<GooString> &&nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA, std::unique_ptr<GooString> &&pathA, SysFontType typeA, int fontNumA, std::unique_ptr<GooString> &&substituteNameA);
     ~SysFontInfo();
     SysFontInfo(const SysFontInfo &) = delete;
     SysFontInfo &operator=(const SysFontInfo &) = delete;
@@ -216,25 +216,18 @@ public:
     bool match(const GooString *nameA, bool boldA, bool italicA) const;
 };
 
-SysFontInfo::SysFontInfo(GooString *nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA, GooString *pathA, SysFontType typeA, int fontNumA, GooString *substituteNameA)
+SysFontInfo::SysFontInfo(std::unique_ptr<GooString> &&nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA, std::unique_ptr<GooString> &&pathA, SysFontType typeA, int fontNumA, std::unique_ptr<GooString> &&substituteNameA)
+    : name(std::move(nameA)), path(std::move(pathA)), substituteName(std::move(substituteNameA))
 {
-    name = nameA;
     bold = boldA;
     italic = italicA;
     oblique = obliqueA;
     fixedWidth = fixedWidthA;
-    path = pathA;
     type = typeA;
     fontNum = fontNumA;
-    substituteName = substituteNameA;
 }
 
-SysFontInfo::~SysFontInfo()
-{
-    delete name;
-    delete path;
-    delete substituteName;
-}
+SysFontInfo::~SysFontInfo() = default;
 
 bool SysFontInfo::match(const SysFontInfo *fi) const
 {
@@ -1050,7 +1043,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
+                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copyUniquePtr());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = std::string((char *)s);
@@ -1073,7 +1066,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(new GooString(*fontName), bold, italic, oblique, font->isFixedWidth(), new GooString((char *)s), *type, *fontNum, substituteName.copy());
+                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copyUniquePtr());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = std::string((char *)s);
