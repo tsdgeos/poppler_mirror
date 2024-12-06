@@ -2187,8 +2187,8 @@ bool PDFDoc::hasJavascript()
     return jsInfo.containsJS();
 }
 
-std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, GooString *partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
-                                                             std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
+std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, std::unique_ptr<GooString> &&partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+                                                             double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
                                                              const std::string &imagePath)
 {
     if (destPage == nullptr) {
@@ -2215,7 +2215,7 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, G
     annotObj.dictSet("Type", Object(objName, "Annot"));
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
     annotObj.dictSet("FT", Object(objName, "Sig"));
-    annotObj.dictSet("T", Object(partialFieldName));
+    annotObj.dictSet("T", Object(std::move(partialFieldName)));
     Array *rectArray = new Array(getXRef());
     rectArray->add(Object(rect.x1));
     rectArray->add(Object(rect.y1));
@@ -2261,7 +2261,7 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, G
     return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
 }
 
-std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect,
+std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, std::unique_ptr<GooString> &&partialFieldName, int page, const PDFRectangle &rect,
                                                      const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
                                                      std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath,
                                                      const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
@@ -2272,7 +2272,7 @@ std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFile
     }
 
     std::optional<SignatureData> sig =
-            createSignature(destPage, partialFieldName, rect, signatureText, signatureTextLeft, fontSize, leftFontSize, std::move(fontColor), borderWidth, std::move(borderColor), std::move(backgroundColor), imagePath);
+            createSignature(destPage, std::move(partialFieldName), rect, signatureText, signatureTextLeft, fontSize, leftFontSize, std::move(fontColor), borderWidth, std::move(borderColor), std::move(backgroundColor), imagePath);
 
     if (!sig) {
         return CryptoSign::SigningError::GenericError; /*This should probably be expanded with error handling from createSignature*/

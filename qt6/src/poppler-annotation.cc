@@ -2950,8 +2950,8 @@ Annot *SignatureAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentD
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(text));
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(leftText));
 
-    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, *gSignatureText, *gSignatureLeftText, fontSize, leftFontSize, convertQColor(fontColor), borderWidth,
-                                                                                   convertQColor(borderColor), convertQColor(backgroundColor), imagePath.toStdString());
+    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, std::unique_ptr<GooString>(QStringToGooString(fieldPartialName)), rect, *gSignatureText, *gSignatureLeftText, fontSize, leftFontSize,
+                                                                                   convertQColor(fontColor), borderWidth, convertQColor(borderColor), convertQColor(backgroundColor), imagePath.toStdString());
 
     if (!sig) {
         return nullptr;
