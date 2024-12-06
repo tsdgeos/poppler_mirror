@@ -1899,12 +1899,11 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     if (obj1.isArray()) {
         numChoices = obj1.arrayGetLength();
         choices = new ChoiceOpt[numChoices];
-        memset(choices, 0, sizeof(ChoiceOpt) * numChoices);
 
         for (int i = 0; i < numChoices; i++) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isString()) {
-                choices[i].optionName = obj2.getString()->copy();
+                choices[i].optionName = obj2.getString()->copyUniquePtr();
             } else if (obj2.isArray()) { // [Export_value, Displayed_text]
                 if (obj2.arrayGetLength() < 2) {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2");
@@ -1912,14 +1911,14 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
                 }
                 Object obj3 = obj2.arrayGet(0);
                 if (obj3.isString()) {
-                    choices[i].exportVal = obj3.getString()->copy();
+                    choices[i].exportVal = obj3.getString()->copyUniquePtr();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string");
                 }
 
                 obj3 = obj2.arrayGet(1);
                 if (obj3.isString()) {
-                    choices[i].optionName = obj3.getString()->copy();
+                    choices[i].optionName = obj3.getString()->copyUniquePtr();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string");
                 }
@@ -2030,10 +2029,6 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
 FormFieldChoice::~FormFieldChoice()
 {
-    for (int i = 0; i < numChoices; i++) {
-        delete choices[i].exportVal;
-        delete choices[i].optionName;
-    }
     delete[] choices;
     delete[] defaultChoices;
     delete editedChoice;
@@ -2202,7 +2197,7 @@ const GooString *FormFieldChoice::getSelectedChoice() const
 
     for (int i = 0; i < numChoices; i++) {
         if (choices[i].optionName && choices[i].selected) {
-            return choices[i].optionName;
+            return choices[i].optionName.get();
         }
     }
 
