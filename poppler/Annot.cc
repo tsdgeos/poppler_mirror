@@ -7499,7 +7499,7 @@ void Annots::appendAnnot(Annot *annot)
 
 bool Annots::removeAnnot(Annot *annot)
 {
-    auto idx = std::find(annots.begin(), annots.end(), annot);
+    auto idx = std::ranges::find(annots, annot);
 
     if (idx == annots.end()) {
         return false;

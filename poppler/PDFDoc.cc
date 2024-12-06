@@ -597,7 +597,7 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
                 if (fw->getType() == formSignature) {
                     assert(fw->getField()->getType() == formSignature);
                     FormFieldSignature *ffs = static_cast<FormFieldSignature *>(fw->getField());
-                    if (std::find(res.begin(), res.end(), ffs) == res.end()) {
+                    if (std::ranges::find(res, ffs) == res.end()) {
                         res.push_back(ffs);
                     }
                 }

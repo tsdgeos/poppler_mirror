@@ -373,7 +373,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     for (const SysFontInfo *f : fonts) {
         fi = f;
         if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
-            if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+            if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                 break;
             }
         }
@@ -384,7 +384,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, italic)) {
-                if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+                if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
             }
@@ -396,7 +396,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         for (const SysFontInfo *f : fonts) {
             fi = f;
             if (fi->match(name2, false, false)) {
-                if (std::find(filesToIgnore.begin(), filesToIgnore.end(), fi->path->toStr()) == filesToIgnore.end()) {
+                if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
             }
@@ -1130,7 +1130,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
                     FcPatternGetInteger(fontSet->fonts[i], FC_INDEX, 0, &faceIndex);
 
                     const std::string sFilePath = reinterpret_cast<char *>(fcFilePath);
-                    if (std::find(filesToIgnore.begin(), filesToIgnore.end(), sFilePath) == filesToIgnore.end()) {
+                    if (std::ranges::find(filesToIgnore, sFilePath) == filesToIgnore.end()) {
                         return FamilyStyleFontSearchResult(sFilePath, faceIndex);
                     }
                 }
