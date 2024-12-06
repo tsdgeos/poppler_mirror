@@ -7,7 +7,7 @@
 //
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017-2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -118,10 +118,7 @@ bool EmbFile::save2(FILE *f)
 FileSpec::FileSpec(const Object *fileSpecA)
 {
     ok = true;
-    fileName = nullptr;
-    platformFileName = nullptr;
     embFile = nullptr;
-    desc = nullptr;
     fileSpec = fileSpecA->copy();
 
     Object obj1 = getFileSpecName(fileSpecA);
@@ -131,7 +128,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
         return;
     }
 
-    fileName = obj1.getString()->copy();
+    fileName.reset(obj1.getString()->copy());
 
     if (fileSpec.isDict()) {
         obj1 = fileSpec.dictLookup("EF");
@@ -147,17 +144,14 @@ FileSpec::FileSpec(const Object *fileSpecA)
 
         obj1 = fileSpec.dictLookup("Desc");
         if (obj1.isString()) {
-            desc = obj1.getString()->copy();
+            desc.reset(obj1.getString()->copy());
         }
     }
 }
 
 FileSpec::~FileSpec()
 {
-    delete fileName;
-    delete platformFileName;
     delete embFile;
-    delete desc;
 }
 
 EmbFile *FileSpec::getEmbeddedFile()
@@ -205,15 +199,15 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
 GooString *FileSpec::getFileNameForPlatform()
 {
     if (platformFileName) {
-        return platformFileName;
+        return platformFileName.get();
     }
 
     Object obj1 = getFileSpecNameForPlatform(&fileSpec);
     if (obj1.isString()) {
-        platformFileName = obj1.getString()->copy();
+        platformFileName.reset(obj1.getString()->copy());
     }
 
-    return platformFileName;
+    return platformFileName.get();
 }
 
 Object getFileSpecName(const Object *fileSpec)
