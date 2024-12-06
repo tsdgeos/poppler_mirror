@@ -508,7 +508,7 @@ void GlobalParams::scanEncodingDirs()
     dir = new GDir(dataPathBuffer, false);
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addCMapDir(entry->getName(), entry->getFullPath());
-        toUnicodeDirs.push_back(entry->getFullPath()->copy());
+        toUnicodeDirs.push_back(entry->getFullPath()->copyUniquePtr());
     }
     delete dir;
 
@@ -576,9 +576,6 @@ GlobalParams::~GlobalParams()
 
     delete nameToUnicodeZapfDingbats;
     delete nameToUnicodeText;
-    for (auto entry : toUnicodeDirs) {
-        delete entry;
-    }
     delete sysFonts;
     delete textEncoding;
 
@@ -663,7 +660,7 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name)
     FILE *f;
 
     globalParamsLocker();
-    for (const GooString *dir : toUnicodeDirs) {
+    for (const std::unique_ptr<GooString> &dir : toUnicodeDirs) {
         fileName = appendToPath(dir->copy(), name->c_str());
         f = openFile(fileName->c_str(), "r");
         delete fileName;
