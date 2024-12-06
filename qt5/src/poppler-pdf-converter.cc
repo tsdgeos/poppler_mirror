@@ -1,6 +1,6 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2009, 2020-2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2009, 2020-2022, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
@@ -141,7 +141,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
     const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
     const auto ownerPwd = std::optional<GooString>(data.documentOwnerPassword().constData());
     const auto userPwd = std::optional<GooString>(data.documentUserPassword().constData());
-    return !doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
+    return !doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), std::unique_ptr<GooString>(QStringToGooString(data.fieldPartialName())), data.page() + 1,
                       boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(),
                       convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd, userPwd)
                     .has_value();

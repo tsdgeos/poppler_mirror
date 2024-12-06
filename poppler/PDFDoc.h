@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -341,10 +341,10 @@ public:
     // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
     // Argument imagePath is a background image (a path to a file).
     // sign() takes ownership of partialFieldName.
-    std::optional<CryptoSign::SigningError> sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText,
-                                                 const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                                                 std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr, const std::string &imagePath = "",
-                                                 const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
+    std::optional<CryptoSign::SigningError> sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, std::unique_ptr<GooString> &&partialFieldName, int page, const PDFRectangle &rect,
+                                                 const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                 std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr,
+                                                 const std::string &imagePath = "", const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {});
 
     struct SignatureData
     {
@@ -354,8 +354,9 @@ public:
         std::unique_ptr<::FormFieldSignature> field = nullptr;
     };
 
-    std::optional<SignatureData> createSignature(::Page *destPage, GooString *partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
-                                                 std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath);
+    std::optional<SignatureData> createSignature(::Page *destPage, std::unique_ptr<GooString> &&partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+                                                 double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
+                                                 const std::string &imagePath);
 
 private:
     // insert referenced objects in XRef

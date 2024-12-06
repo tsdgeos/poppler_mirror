@@ -3888,7 +3888,7 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
 
     std::unique_ptr<GooString> signature_text = std::make_unique<GooString>(utf8ToUtf16WithBom(signing_data_signature_text));
     std::unique_ptr<GooString> signature_text_left = std::make_unique<GooString>(utf8ToUtf16WithBom(poppler_signing_data_get_signature_text_left(signing_data)));
-    const auto field_partial_name = new GooString(poppler_signing_data_get_field_partial_name(signing_data), strlen(poppler_signing_data_get_field_partial_name(signing_data)));
+    auto field_partial_name = std::make_unique<GooString>(poppler_signing_data_get_field_partial_name(signing_data), strlen(poppler_signing_data_get_field_partial_name(signing_data)));
     const auto owner_pwd = std::optional<GooString>(poppler_signing_data_get_document_owner_password(signing_data));
     const auto user_pwd = std::optional<GooString>(poppler_signing_data_get_document_user_password(signing_data));
     const auto reason = std::unique_ptr<GooString>(poppler_signing_data_get_reason(signing_data) ? new GooString(poppler_signing_data_get_reason(signing_data), strlen(poppler_signing_data_get_reason(signing_data))) : nullptr);
@@ -3897,7 +3897,7 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
 
     ret = !document->doc
                    ->sign(poppler_signing_data_get_destination_filename(signing_data), poppler_certificate_info_get_id((PopplerCertificateInfo *)certificate_info),
-                          poppler_signing_data_get_password(signing_data) ? poppler_signing_data_get_password(signing_data) : "", field_partial_name, poppler_signing_data_get_page(signing_data) + 1,
+                          poppler_signing_data_get_password(signing_data) ? poppler_signing_data_get_password(signing_data) : "", std::move(field_partial_name), poppler_signing_data_get_page(signing_data) + 1,
                           PDFRectangle(rect->x1, rect->y1, rect->x2, rect->y2), *signature_text, *signature_text_left, poppler_signing_data_get_font_size(signing_data), poppler_signing_data_get_left_font_size(signing_data),
                           _poppler_convert_poppler_color_to_annot_color(font_color), poppler_signing_data_get_border_width(signing_data), _poppler_convert_poppler_color_to_annot_color(border_color),
                           _poppler_convert_poppler_color_to_annot_color(background_color), reason.get(), location.get(), poppler_signing_data_get_image_path(signing_data) ? poppler_signing_data_get_image_path(signing_data) : "", owner_pwd,
