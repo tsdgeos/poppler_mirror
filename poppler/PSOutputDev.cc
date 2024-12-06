@@ -1919,7 +1919,7 @@ void PSOutputDev::setupFonts(Dict *resDict)
 
 void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
 {
-    GooString *psName;
+    std::unique_ptr<GooString> psName;
     char buf[16];
     bool subst;
     const char *charName;
@@ -1937,13 +1937,12 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
 
     fontIDs.push_back(*font->getID());
 
-    psName = nullptr;
     xs = ys = 1;
     subst = false;
 
     if (font->getType() == fontType3) {
-        psName = new GooString(GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen));
-        setupType3Font(font, psName, parentResDict);
+        psName = std::make_unique<GooString>(GooString::format("T3_{0:d}_{1:d}", font->getID()->num, font->getID()->gen));
+        setupType3Font(font, psName.get(), parentResDict);
     } else {
         std::optional<GfxFontLoc> fontLoc = font->locateFont(xref, this);
         if (fontLoc) {
@@ -1952,35 +1951,35 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 switch (fontLoc->fontType) {
                 case fontType1:
                     // this assumes that the PS font name matches the PDF font name
-                    psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copy() : new GooString();
-                    setupEmbeddedType1Font(&fontLoc->embFontID, psName);
+                    psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copyUniquePtr() : std::make_unique<GooString>();
+                    setupEmbeddedType1Font(&fontLoc->embFontID, psName.get());
                     break;
                 case fontType1C:
                     psName = makePSFontName(font, &fontLoc->embFontID);
-                    setupEmbeddedType1CFont(font, &fontLoc->embFontID, psName);
+                    setupEmbeddedType1CFont(font, &fontLoc->embFontID, psName.get());
                     break;
                 case fontType1COT:
                     psName = makePSFontName(font, &fontLoc->embFontID);
-                    setupEmbeddedOpenTypeT1CFont(font, &fontLoc->embFontID, psName, fontLoc->fontNum);
+                    setupEmbeddedOpenTypeT1CFont(font, &fontLoc->embFontID, psName.get(), fontLoc->fontNum);
                     break;
                 case fontTrueType:
                 case fontTrueTypeOT:
                     psName = makePSFontName(font, font->getID());
-                    setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName, fontLoc->fontNum);
+                    setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName.get(), fontLoc->fontNum);
                     break;
                 case fontCIDType0C:
                     psName = makePSFontName(font, &fontLoc->embFontID);
-                    setupEmbeddedCIDType0Font(font, &fontLoc->embFontID, psName);
+                    setupEmbeddedCIDType0Font(font, &fontLoc->embFontID, psName.get());
                     break;
                 case fontCIDType2:
                 case fontCIDType2OT:
                     psName = makePSFontName(font, font->getID());
                     //~ should check to see if font actually uses vertical mode
-                    setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName, true, fontLoc->fontNum);
+                    setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName.get(), true, fontLoc->fontNum);
                     break;
                 case fontCIDType0COT:
                     psName = makePSFontName(font, &fontLoc->embFontID);
-                    setupEmbeddedOpenTypeCFFFont(font, &fontLoc->embFontID, psName, fontLoc->fontNum);
+                    setupEmbeddedOpenTypeCFFFont(font, &fontLoc->embFontID, psName.get(), fontLoc->fontNum);
                     break;
                 default:
                     break;
@@ -1992,30 +1991,30 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 case fontType1:
                     if (font->getEmbeddedFontName()) {
                         // this assumes that the PS font name matches the PDF font name
-                        psName = font->getEmbeddedFontName()->copy();
+                        psName = font->getEmbeddedFontName()->copyUniquePtr();
                     } else {
                         //~ this won't work -- the PS font name won't match
                         psName = makePSFontName(font, font->getID());
                     }
-                    setupExternalType1Font(fontLoc->path, psName);
+                    setupExternalType1Font(fontLoc->path, psName.get());
                     break;
                 case fontTrueType:
                 case fontTrueTypeOT:
                     psName = makePSFontName(font, font->getID());
-                    setupExternalTrueTypeFont(font, fontLoc->path, psName, fontLoc->fontNum);
+                    setupExternalTrueTypeFont(font, fontLoc->path, psName.get(), fontLoc->fontNum);
                     break;
                 case fontCIDType2:
                 case fontCIDType2OT:
                     psName = makePSFontName(font, font->getID());
                     //~ should check to see if font actually uses vertical mode
-                    setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, true, fontLoc->fontNum);
+                    setupExternalCIDTrueTypeFont(font, fontLoc->path, psName.get(), true, fontLoc->fontNum);
                     break;
                 default:
                     break;
                 }
                 break;
             case gfxFontLocResident:
-                psName = new GooString(fontLoc->path);
+                psName = std::make_unique<GooString>(fontLoc->path);
                 break;
             }
         }
@@ -2061,12 +2060,12 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
     // generate PostScript code to set up the font
     if (font->isCIDFont()) {
         if (level == psLevel3 || level == psLevel3Sep) {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName, font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
         } else {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName, font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
         }
     } else {
-        writePSFmt("/F{0:d}_{1:d} /{2:t} {3:.6g} {4:.6g}\n", font->getID()->num, font->getID()->gen, psName, xs, ys);
+        writePSFmt("/F{0:d}_{1:d} /{2:t} {3:.6g} {4:.6g}\n", font->getID()->num, font->getID()->gen, psName.get(), xs, ys);
         for (i = 0; i < 256; i += 8) {
             writePS((char *)((i == 0) ? "[ " : "  "));
             for (j = 0; j < 8; ++j) {
@@ -2089,8 +2088,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
         }
         writePS("pdfMakeFont\n");
     }
-
-    delete psName;
 }
 
 void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
@@ -2743,23 +2740,23 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
 
 // Make a unique PS font name, based on the names given in the PDF
 // font object, and an object ID (font file object for
-GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
+std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref *id)
 {
     const GooString *s;
 
     if ((s = font->getEmbeddedFontName())) {
         std::string psName = filterPSName(s->toStr());
         if (fontNames.emplace(psName).second) {
-            return new GooString(std::move(psName));
+            return std::make_unique<GooString>(std::move(psName));
         }
     }
     if (font->getName()) {
         std::string psName = filterPSName(*font->getName());
         if (fontNames.emplace(psName).second) {
-            return new GooString(std::move(psName));
+            return std::make_unique<GooString>(std::move(psName));
         }
     }
-    GooString *psName = new GooString(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
+    std::unique_ptr<GooString> psName = std::make_unique<GooString>(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
         psName->append('_')->append(filteredName);
