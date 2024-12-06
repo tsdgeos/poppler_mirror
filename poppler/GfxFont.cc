@@ -1238,7 +1238,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
             } else {
                 toUnicode[code] = globalParams->mapNameToUnicodeText(charName);
             }
-            if (!toUnicode[code] && strcmp(charName, ".notdef")) {
+            if (!toUnicode[code] && (strcmp(charName, ".notdef") != 0)) {
                 // if it wasn't in the name-to-Unicode table, check for a
                 // name that looks like 'Axx' or 'xx', where 'A' is any letter
                 // and 'xx' is two hex digits
@@ -1279,7 +1279,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     if (missing) {
         for (int code = 0; code < 256; ++code) {
             if (!toUnicode[code]) {
-                if ((charName = enc[code]) && strcmp(charName, ".notdef")
+                if ((charName = enc[code]) && (strcmp(charName, ".notdef") != 0)
                     && (n = parseCharName(charName, uBuf, sizeof(uBuf) / sizeof(*uBuf),
                                           false, // don't check simple names (pass 1)
                                           true, // do check ligatures

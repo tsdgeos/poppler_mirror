@@ -3008,7 +3008,7 @@ static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParent
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));
     fontDict->add("Subtype", Object(objName, "Type1"));
-    if (strcmp(fontname, "ZapfDingbats") && strcmp(fontname, "Symbol")) {
+    if ((strcmp(fontname, "ZapfDingbats") != 0) && (strcmp(fontname, "Symbol") != 0)) {
         fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
     }
 

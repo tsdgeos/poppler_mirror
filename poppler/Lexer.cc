@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006-2010, 2012-2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2017-2019, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -612,7 +612,7 @@ Object Lexer::getObj(const char *cmdA, int objNum)
     comment = false;
     const char *cmd1 = tokBuf;
     *tokBuf = 0;
-    while (strcmp(cmdA, cmd1) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
+    while ((strcmp(cmdA, cmd1) != 0) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
         while (true) {
             if ((c = getChar()) == EOF) {
                 return Object(objEOF);
