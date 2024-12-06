@@ -128,7 +128,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
         return;
     }
 
-    fileName.reset(obj1.getString()->copy());
+    fileName = obj1.getString()->copy();
 
     if (fileSpec.isDict()) {
         obj1 = fileSpec.dictLookup("EF");
@@ -144,7 +144,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
 
         obj1 = fileSpec.dictLookup("Desc");
         if (obj1.isString()) {
-            desc.reset(obj1.getString()->copy());
+            desc = obj1.getString()->copy();
         }
     }
 }
@@ -204,7 +204,7 @@ GooString *FileSpec::getFileNameForPlatform()
 
     Object obj1 = getFileSpecNameForPlatform(&fileSpec);
     if (obj1.isString()) {
-        platformFileName.reset(obj1.getString()->copy());
+        platformFileName = obj1.getString()->copy();
     }
 
     return platformFileName.get();
@@ -273,7 +273,7 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
     // system-dependent path manipulation
 #ifdef _WIN32
     int i, j;
-    GooString *name = fileName.getString()->copy();
+    std::unique_ptr<GooString> name = fileName.getString()->copy();
     // "//...."             --> "\...."
     // "/x/...."            --> "x:\...."
     // "/server/share/...." --> "\\server\share\...."
@@ -307,7 +307,7 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
             name->del(i);
         }
     }
-    fileName = Object(name);
+    fileName = Object(std::move(name));
 #endif /* _WIN32 */
 
     return fileName;

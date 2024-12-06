@@ -1935,7 +1935,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 switch (fontLoc->fontType) {
                 case fontType1:
                     // this assumes that the PS font name matches the PDF font name
-                    psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copyUniquePtr() : std::make_unique<GooString>();
+                    psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copy() : std::make_unique<GooString>();
                     setupEmbeddedType1Font(&fontLoc->embFontID, psName.get());
                     break;
                 case fontType1C:
@@ -1975,7 +1975,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 case fontType1:
                     if (font->getEmbeddedFontName()) {
                         // this assumes that the PS font name matches the PDF font name
-                        psName = font->getEmbeddedFontName()->copyUniquePtr();
+                        psName = font->getEmbeddedFontName()->copy();
                     } else {
                         //~ this won't work -- the PS font name won't match
                         psName = makePSFontName(font, font->getID());
@@ -2326,7 +2326,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2357,7 +2357,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2511,7 +2511,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2576,7 +2576,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
             return;
         }
     }
-    t1FontNames.emplace_back(*id, psName->copyUniquePtr());
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -4084,7 +4084,7 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
     }
     color.c[0] = gfxColorComp1;
     sepCS->getCMYK(&color, &cmyk);
-    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName()->copyUniquePtr());
+    cc = new PSOutCustomColor(colToDbl(cmyk.c), colToDbl(cmyk.m), colToDbl(cmyk.y), colToDbl(cmyk.k), sepCS->getName()->copy());
     cc->next = customColors;
     customColors = cc;
 }

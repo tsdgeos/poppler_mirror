@@ -103,8 +103,7 @@ public:
 
     // Copy a string.
     explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string &>(*str) : std::string {}) { }
-    GooString *copy() const { return new GooString(this); }
-    std::unique_ptr<GooString> copyUniquePtr() const { return std::make_unique<GooString>(this); }
+    std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this); }
 
     // Concatenate two strings.
     GooString(const GooString *str1, const GooString *str2)

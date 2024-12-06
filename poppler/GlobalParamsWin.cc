@@ -312,7 +312,7 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
         type = sysFontTTF;
     }
 
-    return new SysFontInfo(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copyUniquePtr());
+    return new SysFontInfo(std::move(s), bold, italic, oblique, fixedWidth, std::make_unique<GooString>(path), type, fontNum, substituteName.copy());
 }
 
 static GooString *replaceSuffix(GooString *path, const char *suffixA, const char *suffixB)

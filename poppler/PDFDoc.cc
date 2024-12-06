@@ -212,7 +212,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
 PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback) : guiData(guiDataA)
 {
     if (strA->getFileName()) {
-        fileName.reset(strA->getFileName()->copy());
+        fileName = strA->getFileName()->copy();
 #ifdef _WIN32
         const int n = fileName->getLength();
         fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
@@ -761,7 +761,7 @@ std::unique_ptr<GooString> PDFDoc::getDocInfoStringEntry(const char *key)
         return {};
     }
 
-    return std::unique_ptr<GooString>(entryObj.getString()->copy());
+    return entryObj.getString()->copy();
 }
 
 static bool get_id(const GooString *encodedidstring, GooString *id)

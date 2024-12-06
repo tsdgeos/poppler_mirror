@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
         }
 
         // We don't provide a way to customize the UI from pdfsig for now
-        const auto failure = doc->sign(std::string { argv[2] }, std::string { certNickname }, std::string { password }, newSignatureFieldName.copyUniquePtr(), /*page*/ 1,
+        const auto failure = doc->sign(std::string { argv[2] }, std::string { certNickname }, std::string { password }, newSignatureFieldName.copy(), /*page*/ 1,
                                        /*rect */ { 0, 0, 0, 0 }, /*signatureText*/ {}, /*signatureTextLeft*/ {}, /*fontSize */ 0, /*leftFontSize*/ 0,
                                        /*fontColor*/ {}, /*borderWidth*/ 0, /*borderColor*/ {}, /*backgroundColor*/ {}, rs.get(), /* location */ nullptr, /* image path */ "", ownerPW, userPW);
         return !failure.has_value() ? 0 : 3;

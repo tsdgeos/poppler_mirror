@@ -501,7 +501,7 @@ void GlobalParams::scanEncodingDirs()
     dir = new GDir(dataPathBuffer, false);
     while (entry = dir->getNextEntry(), entry != nullptr) {
         addCMapDir(entry->getName(), entry->getFullPath());
-        toUnicodeDirs.push_back(entry->getFullPath()->copyUniquePtr());
+        toUnicodeDirs.push_back(entry->getFullPath()->copy());
     }
     delete dir;
 
@@ -654,7 +654,7 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name)
 
     globalParamsLocker();
     for (const std::unique_ptr<GooString> &dir : toUnicodeDirs) {
-        fileName = appendToPath(dir->copy(), name->c_str());
+        fileName = appendToPath(dir->copy().release(), name->c_str());
         f = openFile(fileName->c_str(), "r");
         delete fileName;
         if (f) {
@@ -1043,7 +1043,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".ttc", 4)) ? sysFontTTC : sysFontTTF;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copyUniquePtr());
+                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = std::string((char *)s);
@@ -1066,7 +1066,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
                     *fontNum = 0;
                     *type = (!strncasecmp(ext, ".pfa", 4)) ? sysFontPFA : sysFontPFB;
                     FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copyUniquePtr());
+                    SysFontInfo *sfi = new SysFontInfo(std::make_unique<GooString>(*fontName), bold, italic, oblique, font->isFixedWidth(), std::make_unique<GooString>((char *)s), *type, *fontNum, substituteName.copy());
                     sysFonts->addFcFont(sfi);
                     fi = sfi;
                     path = std::string((char *)s);

@@ -193,13 +193,13 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 }
             }
             permFlags = permObj.getInt();
-            ownerKey = ownerKeyObj.getString()->copyUniquePtr();
-            userKey = userKeyObj.getString()->copyUniquePtr();
+            ownerKey = ownerKeyObj.getString()->copy();
+            userKey = userKeyObj.getString()->copy();
             if (encVersion >= 1 && encVersion <= 2 && encRevision >= 2 && encRevision <= 3) {
                 if (fileIDObj.isArray()) {
                     Object fileIDObj1 = fileIDObj.arrayGet(0);
                     if (fileIDObj1.isString()) {
-                        fileID = fileIDObj1.getString()->copyUniquePtr();
+                        fileID = fileIDObj1.getString()->copy();
                     } else {
                         fileID = std::make_unique<GooString>();
                     }
@@ -213,8 +213,8 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
             } else if (encVersion == 5 && (encRevision == 5 || encRevision == 6)) {
                 fileID = std::make_unique<GooString>(); // unused for V=R=5
                 if (ownerEncObj.isString() && userEncObj.isString()) {
-                    ownerEnc = ownerEncObj.getString()->copyUniquePtr();
-                    userEnc = userEncObj.getString()->copyUniquePtr();
+                    ownerEnc = ownerEncObj.getString()->copy();
+                    userEnc = userEncObj.getString()->copy();
                     if (fileKeyLength > 32 || fileKeyLength < 0) {
                         fileKeyLength = 32;
                     }
@@ -259,7 +259,7 @@ bool StandardSecurityHandler::isUnencrypted() const
 
 void *StandardSecurityHandler::makeAuthData(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
-    return new StandardAuthData(ownerPassword ? ownerPassword->copyUniquePtr() : std::make_unique<GooString>(), userPassword ? userPassword->copyUniquePtr() : std::make_unique<GooString>());
+    return new StandardAuthData(ownerPassword ? ownerPassword->copy() : std::make_unique<GooString>(), userPassword ? userPassword->copy() : std::make_unique<GooString>());
 }
 
 void StandardSecurityHandler::freeAuthData(void *authData)
