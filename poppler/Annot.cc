@@ -875,7 +875,7 @@ std::string DefaultAppearance::toAppearanceString() const
 {
     AnnotAppearanceBuilder appearBuilder;
     if (fontColor) {
-        appearBuilder.setDrawColor(fontColor.get(), true);
+        appearBuilder.setDrawColor(*fontColor, true);
     }
     appearBuilder.setTextFont(fontName, fontPtSize);
     return appearBuilder.buffer()->toStr();
@@ -1681,11 +1681,11 @@ void Annot::decRefCnt()
 
 Annot::~Annot() { }
 
-void AnnotAppearanceBuilder::setDrawColor(const AnnotColor *drawColor, bool fill)
+void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill)
 {
-    const double *values = drawColor->getValues();
+    const double *values = drawColor.getValues();
 
-    switch (drawColor->getSpace()) {
+    switch (drawColor.getSpace()) {
     case AnnotColor::colorCMYK:
         appearBuf->appendf("{0:.5f} {1:.5f} {2:.5f} {3:.5f} {4:c}\n", values[0], values[1], values[2], values[3], fill ? 'k' : 'K');
         break;
@@ -2672,7 +2672,7 @@ void AnnotText::draw(Gfx *gfx, bool printing)
 
         appearBuilder.append("q\n");
         if (color) {
-            appearBuilder.setDrawColor(color.get(), true);
+            appearBuilder.setDrawColor(*color, true);
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
@@ -3284,11 +3284,11 @@ void AnnotFreeText::generateFreeTextAppearance()
     bool doStroke = (borderWidth != 0);
     if (doFill || doStroke) {
         if (doStroke) {
-            appearBuilder.setDrawColor(da.getFontColor(), false); // Border color: same as font color
+            appearBuilder.setDrawColor(*da.getFontColor(), false); // Border color: same as font color
         }
         appearBuilder.appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re\n", borderWidth / 2, width - borderWidth, height - borderWidth);
         if (doFill) {
-            appearBuilder.setDrawColor(color.get(), true);
+            appearBuilder.setDrawColor(*color, true);
             appearBuilder.append(doStroke ? "B\n" : "f\n");
         } else {
             appearBuilder.append("S\n");
@@ -3335,7 +3335,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     }
 
     // Set font state
-    appearBuilder.setDrawColor(da.getFontColor(), true);
+    appearBuilder.setDrawColor(*da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin);
     const DrawMultiLineTextResult textCommands = drawMultiLineText(*contents, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
     appearBuilder.append(textCommands.text.c_str());
@@ -3620,10 +3620,10 @@ void AnnotLine::generateLineAppearance()
     AnnotAppearanceBuilder appearBuilder;
     appearBuilder.append("q\n");
     if (color) {
-        appearBuilder.setDrawColor(color.get(), false);
+        appearBuilder.setDrawColor(*color, false);
     }
     if (interiorColor) {
-        appearBuilder.setDrawColor(interiorColor.get(), true);
+        appearBuilder.setDrawColor(*interiorColor, true);
         fill = true;
     }
     appearBuilder.setLineStyleForBorder(*border);
@@ -3996,7 +3996,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         switch (type) {
         case typeUnderline:
             if (color) {
-                appearBuilder.setDrawColor(color.get(), false);
+                appearBuilder.setDrawColor(*color, false);
             }
             appearBuilder.append("[] 0 d 1 w\n");
             // use a borderwidth, which is consistent with the line width
@@ -4017,7 +4017,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
             break;
         case typeStrikeOut:
             if (color) {
-                appearBuilder.setDrawColor(color.get(), false);
+                appearBuilder.setDrawColor(*color, false);
             }
             blendMultiply = false;
             appearBuilder.append("[] 0 d 1 w\n");
@@ -4043,7 +4043,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
             break;
         case typeSquiggly:
             if (color) {
-                appearBuilder.setDrawColor(color.get(), false);
+                appearBuilder.setDrawColor(*color, false);
             }
             appearBuilder.append("[] 0 d 1 w\n");
 
@@ -4070,7 +4070,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         default:
         case typeHighlight:
             if (color) {
-                appearBuilder.setDrawColor(color.get(), true);
+                appearBuilder.setDrawColor(*color, true);
             }
 
             double biggestBorder = 0;
@@ -5035,21 +5035,21 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
         case AnnotBorder::borderSolid:
         case AnnotBorder::borderUnderlined:
             appearBuf->appendf("{0:.2f} w\n", w);
-            setDrawColor(aColor, false);
+            setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, false);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
             appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
-            setDrawColor(aColor, false);
+            setDrawColor(*aColor, false);
             drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, false);
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-            setDrawColor(&adjustedColor, false);
+            setDrawColor(adjustedColor, false);
             drawCircleTopLeft(0.5 * dx, 0.5 * dy, r - 0.75 * w);
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-            setDrawColor(&adjustedColor, false);
+            setDrawColor(adjustedColor, false);
             drawCircleBottomRight(0.5 * dx, 0.5 * dy, r - 0.75 * w);
             break;
         }
@@ -5064,14 +5064,14 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             // fallthrough
         case AnnotBorder::borderSolid:
             appearBuf->appendf("{0:.2f} w\n", w);
-            setDrawColor(aColor, false);
+            setDrawColor(*aColor, false);
             appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n", 0.5 * w, dx - w, dy - w);
             break;
         case AnnotBorder::borderBeveled:
         case AnnotBorder::borderInset:
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-            setDrawColor(&adjustedColor, true);
+            setDrawColor(adjustedColor, true);
             appearBuf->append("0 0 m\n");
             appearBuf->appendf("0 {0:.2f} l\n", dy);
             appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
@@ -5081,7 +5081,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             appearBuf->append("f\n");
             adjustedColor = AnnotColor(*aColor);
             adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-            setDrawColor(&adjustedColor, true);
+            setDrawColor(adjustedColor, true);
             appearBuf->append("0 0 m\n");
             appearBuf->appendf("{0:.2f} 0 l\n", dx);
             appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
@@ -5092,7 +5092,7 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
             break;
         case AnnotBorder::borderUnderlined:
             appearBuf->appendf("{0:.2f} w\n", w);
-            setDrawColor(aColor, false);
+            setDrawColor(*aColor, false);
             appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
             break;
         }
@@ -5145,7 +5145,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
                 if (aColor) {
                     const double dx = rect->x2 - rect->x1;
                     const double dy = rect->y2 - rect->y1;
-                    setDrawColor(aColor, true);
+                    setDrawColor(*aColor, true);
                     drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), true);
                 }
                 return true;
@@ -5303,7 +5303,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
 
     // Setup text clipping
     appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re W n\n", leftMargin + textmargin, textmargin, textwidth, height - 2 * textmargin);
-    setDrawColor(da.getFontColor(), true);
+    setDrawColor(*da.getFontColor(), true);
     const DrawMultiLineTextResult textCommands =
             drawMultiLineText(text, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified, 0 /*borderWidth*/);
 
@@ -5388,7 +5388,7 @@ void AnnotWidget::generateFieldAppearance()
     if (appearCharacs) {
         const AnnotColor *aColor = appearCharacs->getBackColor();
         if (aColor) {
-            appearBuilder.setDrawColor(aColor, true);
+            appearBuilder.setDrawColor(*aColor, true);
             appearBuilder.appendf("0 0 {0:.2f} {1:.2f} re f\n", rect->x2 - rect->x1, rect->y2 - rect->y1);
         }
     }
@@ -6077,14 +6077,14 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
         AnnotAppearanceBuilder appearBuilder;
         appearBuilder.append("q\n");
         if (color) {
-            appearBuilder.setDrawColor(color.get(), false);
+            appearBuilder.setDrawColor(*color, false);
         }
 
         double borderWidth = border->getWidth();
         appearBuilder.setLineStyleForBorder(*border);
 
         if (interiorColor) {
-            appearBuilder.setDrawColor(interiorColor.get(), true);
+            appearBuilder.setDrawColor(*interiorColor, true);
         }
 
         if (type == typeSquare) {
@@ -6403,14 +6403,14 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
         appearBuilder.append("q\n");
 
         if (color) {
-            appearBuilder.setDrawColor(color.get(), false);
+            appearBuilder.setDrawColor(*color, false);
         }
 
         appearBuilder.setLineStyleForBorder(*border);
         appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
         if (interiorColor) {
-            appearBuilder.setDrawColor(interiorColor.get(), true);
+            appearBuilder.setDrawColor(*interiorColor, true);
         }
 
         if (type == typePolyLine) {
@@ -6617,7 +6617,7 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
         appearBuilder.append("q\n");
 
         if (color) {
-            appearBuilder.setDrawColor(color.get(), false);
+            appearBuilder.setDrawColor(*color, false);
         }
 
         appearBuilder.setLineStyleForBorder(*border);
@@ -6828,7 +6828,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
 
         appearBuilder.append("q\n");
         if (color) {
-            appearBuilder.setDrawColor(color.get(), true);
+            appearBuilder.setDrawColor(*color, true);
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
@@ -6981,7 +6981,7 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
 
         appearBuilder.append("q\n");
         if (color) {
-            appearBuilder.setDrawColor(color.get(), true);
+            appearBuilder.setDrawColor(*color, true);
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
