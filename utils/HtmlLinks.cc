@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
-// Copyright (C) 2010, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
@@ -113,9 +113,9 @@ static GooString *EscapeSpecialChars(GooString *s)
     return tmp ? tmp : s;
 }
 
-GooString *HtmlLink::getLinkStart() const
+std::unique_ptr<GooString> HtmlLink::getLinkStart() const
 {
-    GooString *res = new GooString("<a href=\"");
+    std::unique_ptr<GooString> res = std::make_unique<GooString>("<a href=\"");
     GooString *d = xml ? EscapeSpecialChars(dest) : dest;
     res->append(d);
     if (d != dest) {

@@ -53,7 +53,7 @@ public:
     double getY1() const { return Ymin; }
     double getY2() const { return Ymax; }
     bool inLink(double xmin, double ymin, double xmax, double ymax) const;
-    GooString *getLinkStart() const;
+    std::unique_ptr<GooString> getLinkStart() const;
 };
 
 class HtmlLinks

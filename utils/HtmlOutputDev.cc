@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -550,9 +550,8 @@ void HtmlPage::coalesce()
         str1->htext->insert(0, "<i>", 3);
     }
     if (str1->getLink() != nullptr) {
-        GooString *ls = str1->getLink()->getLinkStart();
-        str1->htext->insert(0, ls);
-        delete ls;
+        const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
+        str1->htext->insert(0, ls.get());
     }
     curX = str1->xMin;
     curY = str1->yMin;
@@ -642,9 +641,8 @@ void HtmlPage::coalesce()
             bool finish_bold = hfont1->isBold() && (!hfont2->isBold() || finish_a || finish_italic);
             CloseTags(str1->htext.get(), finish_a, finish_italic, finish_bold);
             if (switch_links && hlink2 != nullptr) {
-                GooString *ls = hlink2->getLinkStart();
-                str1->htext->append(ls);
-                delete ls;
+                const std::unique_ptr<GooString> ls = hlink2->getLinkStart();
+                str1->htext->append(ls.get());
             }
             if ((!hfont1->isItalic() || finish_italic) && hfont2->isItalic()) {
                 str1->htext->append("<i>", 3);
@@ -685,9 +683,8 @@ void HtmlPage::coalesce()
                 str1->htext->insert(0, "<i>", 3);
             }
             if (str1->getLink() != nullptr) {
-                GooString *ls = str1->getLink()->getLinkStart();
-                str1->htext->insert(0, ls);
-                delete ls;
+                const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
+                str1->htext->insert(0, ls.get());
             }
         }
     }
