@@ -273,19 +273,13 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 }
 
-MediaRendition::~MediaRendition()
-{
-    delete fileName;
-    delete contentType;
-}
+MediaRendition::~MediaRendition() = default;
 
 MediaRendition::MediaRendition(Object *obj)
 {
     bool hasClip = false;
 
     ok = true;
-    fileName = nullptr;
-    contentType = nullptr;
     isEmbedded = false;
 
     //
@@ -301,7 +295,7 @@ MediaRendition::MediaRendition(Object *obj)
                 if (obj1.isDict()) {
                     Object obj2 = obj1.dictLookup("F");
                     if (obj2.isString()) {
-                        fileName = obj2.getString()->copy();
+                        fileName = obj2.getString()->copyUniquePtr();
                     }
                     obj2 = obj1.dictLookup("EF");
                     if (obj2.isDict()) {
@@ -321,7 +315,7 @@ MediaRendition::MediaRendition(Object *obj)
                 // FIXME: ignore CT if D is a form XObject
                 obj1 = tmp2.dictLookup("CT");
                 if (obj1.isString()) {
-                    contentType = obj1.getString()->copy();
+                    contentType = obj1.getString()->copyUniquePtr();
                 }
             } else if (!strcmp(tmp.getName(), "MCS")) { // media clip data
                 // TODO
@@ -377,15 +371,11 @@ MediaRendition::MediaRendition(const MediaRendition &other)
     embeddedStreamObject = other.embeddedStreamObject.copy();
 
     if (other.contentType) {
-        contentType = other.contentType->copy();
-    } else {
-        contentType = nullptr;
+        contentType = other.contentType->copyUniquePtr();
     }
 
     if (other.fileName) {
-        fileName = other.fileName->copy();
-    } else {
-        fileName = nullptr;
+        fileName = other.fileName->copyUniquePtr();
     }
 }
 

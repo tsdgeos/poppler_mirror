@@ -131,8 +131,8 @@ public:
     const MediaParameters *getMHParameters() const { return &MH; }
     const MediaParameters *getBEParameters() const { return &BE; }
 
-    const GooString *getContentType() const { return contentType; }
-    const GooString *getFileName() const { return fileName; }
+    const GooString *getContentType() const { return contentType.get(); }
+    const GooString *getFileName() const { return fileName.get(); }
 
     bool getIsEmbedded() const { return isEmbedded; }
     Stream *getEmbbededStream() const { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
@@ -152,13 +152,13 @@ private:
 
     bool isEmbedded;
 
-    GooString *contentType;
+    std::unique_ptr<GooString> contentType;
 
     // if it's embedded
     Object embeddedStreamObject;
 
     // if it's not embedded
-    GooString *fileName;
+    std::unique_ptr<GooString> fileName;
 };
 
 #endif /* _RENDITION_H_ */
