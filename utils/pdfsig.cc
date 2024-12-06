@@ -119,8 +119,8 @@ static char *getReadableTime(time_t unix_time)
 
 static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, const char *filename)
 {
-    const GooString *signature = s->getSignature();
-    if (!signature) {
+    const std::vector<unsigned char> &signature = s->getSignature();
+    if (signature.empty()) {
         printf("Cannot dump signature #%d\n", sig_num);
         return false;
     }
@@ -131,9 +131,9 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
     // we don't want it to be replaced
     const std::string format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
     const std::string path = GooString::format(format.c_str(), gbasename(filename).c_str(), sig_num);
-    printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), path.c_str());
+    printf("Signature #%d (%lu bytes) => %s\n", sig_num, signature.size(), path.c_str());
     std::ofstream outfile(path.c_str(), std::ofstream::binary);
-    outfile.write(signature->c_str(), signature->getLength());
+    outfile.write(reinterpret_cast<const char *>(signature.data()), signature.size());
     outfile.close();
 
     return true;

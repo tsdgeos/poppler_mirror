@@ -19,7 +19,6 @@
 #include "HashAlgorithm.h"
 #include "CertificateInfo.h"
 #include "SignatureInfo.h"
-#include "goo/GooString.h"
 #include "poppler_private_export.h"
 
 namespace CryptoSign {
@@ -80,7 +79,7 @@ public:
     virtual void addData(unsigned char *data_block, int data_len) = 0;
     virtual SignatureType signatureType() const = 0;
     virtual std::unique_ptr<X509CertificateInfo> getCertificateInfo() const = 0;
-    virtual std::variant<GooString, SigningError> signDetached(const std::string &password) = 0;
+    virtual std::variant<std::vector<unsigned char>, SigningError> signDetached(const std::string &password) = 0;
     virtual ~SigningInterface();
     SigningInterface() = default;
     SigningInterface(const SigningInterface &other) = delete;

@@ -89,10 +89,10 @@ void TestSignatureBasics::testSignatureCount()
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields.size(), 4);
     // count active signatures
-    QVERIFY(signatureFields[0]->getSignature());
-    QVERIFY(signatureFields[1]->getSignature());
-    QVERIFY(!signatureFields[2]->getSignature());
-    QVERIFY(!signatureFields[3]->getSignature());
+    QVERIFY(signatureFields[0]->getSignature().size());
+    QVERIFY(signatureFields[1]->getSignature().size());
+    QVERIFY(signatureFields[2]->getSignature().empty());
+    QVERIFY(signatureFields[3]->getSignature().empty());
 }
 
 void TestSignatureBasics::testSignatureSizes()
@@ -103,8 +103,8 @@ void TestSignatureBasics::testSignatureSizes()
     // a padded field. At least the pdf specification suggest to pad
     // the field.
     // Poppler before 23.04 did not have a padded field, later versions do.
-    QCOMPARE(signatureFields[0]->getSignature()->getLength(), 10230); // Signature data size is 2340
-    QCOMPARE(signatureFields[1]->getSignature()->getLength(), 10196); // Signature data size is 2340
+    QCOMPARE(signatureFields[0]->getSignature().size(), 10230); // Signature data size is 2340
+    QCOMPARE(signatureFields[1]->getSignature().size(), 10196); // Signature data size is 2340
 }
 
 void TestSignatureBasics::testSignerInfo()

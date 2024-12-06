@@ -332,14 +332,14 @@ public:
     // otherwise a nullptr is returned
     std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
 
-    const GooString *getSignature() const;
+    const std::vector<unsigned char> &getSignature() const;
 
 private:
     bool createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType);
     bool getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
-    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString &signature);
+    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const std::vector<unsigned char> &signature);
 };
 
 //------------------------------------------------------------------------
@@ -636,8 +636,8 @@ public:
 
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }
-    const GooString *getSignature() const { return signature; }
-    void setSignature(const GooString &sig);
+    const std::vector<unsigned char> &getSignature() const { return signature; }
+    void setSignature(std::vector<unsigned char> &&sig);
     CryptoSign::SignatureType getSignatureType() const { return signature_type; }
     void setSignatureType(CryptoSign::SignatureType t) { signature_type = t; }
 
@@ -664,7 +664,7 @@ private:
 
     CryptoSign::SignatureType signature_type;
     Object byte_range;
-    GooString *signature;
+    std::vector<unsigned char> signature;
     SignatureInfo *signature_info;
     GooString customAppearanceContent;
     GooString customAppearanceLeftContent;

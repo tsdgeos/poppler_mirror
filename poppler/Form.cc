@@ -578,7 +578,7 @@ FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned
     type = formSignature;
 }
 
-const GooString *FormWidgetSignature::getSignature() const
+const std::vector<unsigned char> &FormWidgetSignature::getSignature() const
 {
     return static_cast<FormFieldSignature *>(field)->getSignature();
 }
@@ -693,23 +693,22 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
         return std::get<CryptoSign::SigningError>(signature);
     }
 
-    if (std::get<GooString>(signature).getLength() > CryptoSign::maxSupportedSignatureSize) {
+    if (std::get<std::vector<unsigned char>>(signature).size() > CryptoSign::maxSupportedSignatureSize) {
         error(errInternal, -1, "signature too large\n");
         fclose(file);
         return CryptoSign::SigningError::InternalError;
     }
 
     // pad with zeroes to placeholder length
-    auto length = std::get<GooString>(signature).getLength();
-    std::get<GooString>(signature).append(std::string(CryptoSign::maxSupportedSignatureSize - length, '\0'));
+    std::get<std::vector<unsigned char>>(signature).resize(CryptoSign::maxSupportedSignatureSize, '\0');
 
     // write signature to saved file
-    if (!updateSignature(file, sigStart, sigEnd, std::get<GooString>(signature))) {
+    if (!updateSignature(file, sigStart, sigEnd, std::get<std::vector<unsigned char>>(signature))) {
         fprintf(stderr, "signDocument: unable update signature\n");
         fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }
-    signatureField->setSignature(std::get<GooString>(std::move(signature)));
+    signatureField->setSignature(std::get<std::vector<unsigned char>>(std::move(signature)));
 
     fclose(file);
 
@@ -918,19 +917,17 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
 }
 
 // Overwrite signature string in the file with new signature
-bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString &signature)
+bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const std::vector<unsigned char> &signature)
 {
-    if (signature.getLength() * 2 + 2 != sigEnd - sigStart) {
+    if (signature.size() * 2 + 2 != size_t(sigEnd - sigStart)) {
         return false;
     }
 
     if (Gfseek(f, sigStart, SEEK_SET) != 0) {
         return false;
     }
-    const char *c = signature.c_str();
     fprintf(f, "<");
-    for (int i = 0; i < signature.getLength(); i++) {
-        unsigned char value = *(c + i) & 0x000000ff;
+    for (unsigned char value : signature) {
         fprintf(f, "%2.2x", value);
     }
     fprintf(f, "> ");
@@ -2262,7 +2259,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field), signature(nullptr)
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field), signature {}
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -2271,13 +2268,11 @@ FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref re
 FormFieldSignature::~FormFieldSignature()
 {
     delete signature_info;
-    delete signature;
 }
 
-void FormFieldSignature::setSignature(const GooString &sig)
+void FormFieldSignature::setSignature(std::vector<unsigned char> &&sig)
 {
-    delete signature;
-    signature = sig.copy();
+    signature = sig;
 }
 
 const GooString &FormFieldSignature::getCustomAppearanceContent() const
@@ -2351,7 +2346,8 @@ void FormFieldSignature::parseInfo()
 
     Object contents_obj = sig_dict.dictLookup("Contents");
     if (contents_obj.isString()) {
-        signature = contents_obj.getString()->copy();
+        auto signatureString = contents_obj.getString();
+        signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->getLength());
     }
 
     byte_range = sig_dict.dictLookup("ByteRange");
@@ -2440,7 +2436,7 @@ SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, boo
         return signature_info;
     }
 
-    if (signature == nullptr) {
+    if (signature.empty()) {
         error(errSyntaxError, 0, "Invalid or missing Signature string");
         if (doneCallback) {
             doneCallback();
@@ -2465,10 +2461,7 @@ SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, boo
         return signature_info;
     }
 
-    const int signature_len = signature->getLength();
-    std::vector<unsigned char> signatureData(signature_len);
-    memcpy(signatureData.data(), signature->c_str(), signature_len);
-    signature_handler = backend->createVerificationHandler(std::move(signatureData), signature_type);
+    signature_handler = backend->createVerificationHandler(std::vector(signature), signature_type);
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {
