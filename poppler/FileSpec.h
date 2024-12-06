@@ -6,7 +6,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2017-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
@@ -61,9 +61,9 @@ public:
 
     bool isOk() const { return ok; }
 
-    const GooString *getFileName() const { return fileName; }
+    const GooString *getFileName() const { return fileName.get(); }
     GooString *getFileNameForPlatform();
-    const GooString *getDescription() const { return desc; }
+    const GooString *getDescription() const { return desc.get(); }
     EmbFile *getEmbeddedFile();
 
     static Object newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName);
@@ -73,11 +73,11 @@ private:
 
     Object fileSpec;
 
-    GooString *fileName; // F, UF, DOS, Mac, Unix
-    GooString *platformFileName;
+    std::unique_ptr<GooString> fileName; // F, UF, DOS, Mac, Unix
+    std::unique_ptr<GooString> platformFileName;
     Object fileStream; // Ref to F entry in UF
     EmbFile *embFile;
-    GooString *desc; // Desc
+    std::unique_ptr<GooString> desc; // Desc
 };
 
 Object getFileSpecName(const Object *fileSpec);
