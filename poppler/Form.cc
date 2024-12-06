@@ -1101,9 +1101,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = dict->lookup("TM");
     if (obj1.isString()) {
-        mappingName = obj1.getString()->copy();
-    } else {
-        mappingName = nullptr;
+        mappingName = obj1.getString()->copyUniquePtr();
     }
 }
 
@@ -1136,7 +1134,6 @@ FormField::~FormField()
         gfree(widgets);
     }
 
-    delete mappingName;
     delete fullyQualifiedName;
 }
 
