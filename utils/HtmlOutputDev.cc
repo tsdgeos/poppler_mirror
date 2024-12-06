@@ -1510,8 +1510,8 @@ void HtmlOutputDev::doProcessLink(AnnotLink *link)
 
     cvtUserToDev(_x2, _y2, &x2, &y2);
 
-    const std::unique_ptr<GooString> _dest = getLinkDest(link);
-    HtmlLink t((double)x1, (double)y2, (double)x2, (double)y1, _dest.get());
+    std::unique_ptr<GooString> _dest = getLinkDest(link);
+    HtmlLink t((double)x1, (double)y2, (double)x2, (double)y1, std::move(_dest));
     pages->AddLink(t);
 }
 

@@ -40,11 +40,11 @@ private:
     double Ymin;
     double Xmax;
     double Ymax;
-    GooString *dest;
+    std::unique_ptr<GooString> dest;
 
 public:
     HtmlLink(const HtmlLink &x);
-    HtmlLink(double xmin, double ymin, double xmax, double ymax, GooString *_dest);
+    HtmlLink(double xmin, double ymin, double xmax, double ymax, std::unique_ptr<GooString> &&_dest);
     ~HtmlLink();
     HtmlLink &operator=(const HtmlLink &) = delete;
     bool isEqualDest(const HtmlLink &x) const;
