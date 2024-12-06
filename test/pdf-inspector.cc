@@ -27,7 +27,7 @@
 #include <gtk/gtk.h>
 
 // Mapping
-#include "pdf-operators.c"
+#include "pdf-operators.h"
 
 enum
 {
