@@ -90,7 +90,7 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
     int i;
 
     // copy everything up to the encoding
-    for (line = (char *)file; line && strncmp(line, "/Encoding", 9); line = getNextLine(line)) {
+    for (line = (char *)file; line && (strncmp(line, "/Encoding", 9) != 0); line = getNextLine(line)) {
         ;
     }
     if (!line) {
@@ -131,7 +131,7 @@ void FoFiType1::writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc
     // some fonts have two /Encoding entries in their dictionary, so we
     // check for a second one here
     if (line) {
-        for (line2 = line, i = 0; i < 20 && line2 && strncmp(line2, "/Encoding", 9); line2 = getNextLine(line2), ++i) {
+        for (line2 = line, i = 0; i < 20 && line2 && (strncmp(line2, "/Encoding", 9) != 0); line2 = getNextLine(line2), ++i) {
             ;
         }
         if (i < 20 && line2) {

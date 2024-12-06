@@ -1063,7 +1063,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding, const int *codeToGID, FoFiOut
             sprintf(buf2, "c%02x", i);
             name = buf2;
         }
-        if (name && strcmp(name, ".notdef")) {
+        if (name && (strcmp(name, ".notdef") != 0)) {
             k = codeToGID[i];
             // note: Distiller (maybe Adobe's PS interpreter in general)
             // doesn't like TrueType fonts that have CharStrings entries

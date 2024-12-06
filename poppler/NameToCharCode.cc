@@ -90,7 +90,7 @@ void NameToCharCode::add(const char *name, CharCode c)
 
     // add the new name
     h = hash(name);
-    while (tab[h].name && strcmp(tab[h].name, name)) {
+    while (tab[h].name && (strcmp(tab[h].name, name) != 0)) {
         if (++h == size) {
             h = 0;
         }

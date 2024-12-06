@@ -592,7 +592,7 @@ GooString *Catalog::getJS(int i)
     if (!obj2.isName()) {
         return nullptr;
     }
-    if (strcmp(obj2.getName(), "JavaScript")) {
+    if (strcmp(obj2.getName(), "JavaScript") != 0) {
         return nullptr;
     }
     obj2 = obj.dictLookup("JS");
