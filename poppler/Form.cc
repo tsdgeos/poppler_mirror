@@ -1096,9 +1096,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = dict->lookup("TU");
     if (obj1.isString()) {
-        alternateUiName = obj1.getString()->copy();
-    } else {
-        alternateUiName = nullptr;
+        alternateUiName = obj1.getString()->copyUniquePtr();
     }
 
     obj1 = dict->lookup("TM");
@@ -1138,7 +1136,6 @@ FormField::~FormField()
         gfree(widgets);
     }
 
-    delete alternateUiName;
     delete mappingName;
     delete fullyQualifiedName;
 }

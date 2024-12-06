@@ -374,7 +374,7 @@ public:
 
     const GooString *getPartialName() const { return partialName.get(); }
     void setPartialName(const GooString &name);
-    const GooString *getAlternateUiName() const { return alternateUiName; }
+    const GooString *getAlternateUiName() const { return alternateUiName.get(); }
     const GooString *getMappingName() const { return mappingName; }
     GooString *getFullyQualifiedName();
 
@@ -418,7 +418,7 @@ protected:
     bool noExport;
 
     std::unique_ptr<GooString> partialName; // T field
-    GooString *alternateUiName; // TU field
+    std::unique_ptr<GooString> alternateUiName; // TU field
     GooString *mappingName; // TM field
     GooString *fullyQualifiedName;
 
