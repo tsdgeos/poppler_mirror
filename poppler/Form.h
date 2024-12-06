@@ -375,7 +375,7 @@ public:
     const GooString *getPartialName() const { return partialName.get(); }
     void setPartialName(const GooString &name);
     const GooString *getAlternateUiName() const { return alternateUiName.get(); }
-    const GooString *getMappingName() const { return mappingName; }
+    const GooString *getMappingName() const { return mappingName.get(); }
     GooString *getFullyQualifiedName();
 
     FormWidget *findWidgetByRef(Ref aref);
@@ -419,7 +419,7 @@ protected:
 
     std::unique_ptr<GooString> partialName; // T field
     std::unique_ptr<GooString> alternateUiName; // TU field
-    GooString *mappingName; // TM field
+    std::unique_ptr<GooString> mappingName; // TM field
     GooString *fullyQualifiedName;
 
     // Variable Text
