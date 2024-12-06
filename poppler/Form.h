@@ -547,8 +547,8 @@ public:
     ~FormFieldChoice() override;
 
     int getNumChoices() const { return numChoices; }
-    const GooString *getChoice(int i) const { return choices ? choices[i].optionName : nullptr; }
-    const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal : nullptr; }
+    const GooString *getChoice(int i) const { return choices ? choices[i].optionName.get() : nullptr; }
+    const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal.get() : nullptr; }
     // For multi-select choices it returns the first one
     const GooString *getSelectedChoice() const;
     const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice : getSelectedChoice(); }
@@ -598,9 +598,9 @@ protected:
 
     struct ChoiceOpt
     {
-        GooString *exportVal; // the export value ("internal" name)
-        GooString *optionName; // displayed name
-        bool selected; // if this choice is selected
+        std::unique_ptr<GooString> exportVal; // the export value ("internal" name)
+        std::unique_ptr<GooString> optionName; // displayed name
+        bool selected = false; // if this choice is selected
     };
 
     int numChoices;
