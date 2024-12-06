@@ -1081,7 +1081,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
@@ -1138,7 +1137,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
@@ -1176,7 +1174,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    t1FontNames = nullptr;
     font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
@@ -1394,9 +1391,6 @@ void PSOutputDev::postInit()
     for (i = 0; i < 14; ++i) {
         fontNames.emplace(psBase14SubstFonts[i].psName);
     }
-    t1FontNameSize = 64;
-    t1FontNameLen = 0;
-    t1FontNames = (PST1FontName *)gmallocn(t1FontNameSize, sizeof(PST1FontName));
     font8InfoLen = 0;
     font8InfoSize = 0;
     font16EncLen = 0;
@@ -1525,11 +1519,8 @@ PSOutputDev::~PSOutputDev()
     if (embFontList) {
         delete embFontList;
     }
-    if (t1FontNames) {
-        for (i = 0; i < t1FontNameLen; ++i) {
-            delete t1FontNames[i].psName;
-        }
-        gfree(t1FontNames);
+    for (PST1FontName &it : t1FontNames) {
+        delete it.psName;
     }
     if (font8Info) {
         for (i = 0; i < font8InfoLen; ++i) {
@@ -2333,23 +2324,16 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, GooString 
 void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName)
 {
     FoFiType1C *ffT1C;
-    int i;
 
     // check if font is already embedded
-    for (i = 0; i < t1FontNameLen; ++i) {
-        if (t1FontNames[i].fontFileID == *id) {
+    for (PST1FontName &it : t1FontNames) {
+        if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, t1FontNames[i].psName);
+            psName->insert(0, it.psName);
             return;
         }
     }
-    if (t1FontNameLen == t1FontNameSize) {
-        t1FontNameSize *= 2;
-        t1FontNames = (PST1FontName *)greallocn(t1FontNames, t1FontNameSize, sizeof(PST1FontName));
-    }
-    t1FontNames[t1FontNameLen].fontFileID = *id;
-    t1FontNames[t1FontNameLen].psName = psName->copy();
-    ++t1FontNameLen;
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2372,23 +2356,15 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
 
 void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
 {
-    int i;
-
     // check if font is already embedded
-    for (i = 0; i < t1FontNameLen; ++i) {
-        if (t1FontNames[i].fontFileID == *id) {
+    for (PST1FontName &it : t1FontNames) {
+        if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, t1FontNames[i].psName);
+            psName->insert(0, it.psName);
             return;
         }
     }
-    if (t1FontNameLen == t1FontNameSize) {
-        t1FontNameSize *= 2;
-        t1FontNames = (PST1FontName *)greallocn(t1FontNames, t1FontNameSize, sizeof(PST1FontName));
-    }
-    t1FontNames[t1FontNameLen].fontFileID = *id;
-    t1FontNames[t1FontNameLen].psName = psName->copy();
-    ++t1FontNameLen;
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2533,23 +2509,16 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
 void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName)
 {
     FoFiType1C *ffT1C;
-    int i;
 
     // check if font is already embedded
-    for (i = 0; i < t1FontNameLen; ++i) {
-        if (t1FontNames[i].fontFileID == *id) {
+    for (PST1FontName &it : t1FontNames) {
+        if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, t1FontNames[i].psName);
+            psName->insert(0, it.psName);
             return;
         }
     }
-    if (t1FontNameLen == t1FontNameSize) {
-        t1FontNameSize *= 2;
-        t1FontNames = (PST1FontName *)greallocn(t1FontNames, t1FontNameSize, sizeof(PST1FontName));
-    }
-    t1FontNames[t1FontNameLen].fontFileID = *id;
-    t1FontNames[t1FontNameLen].psName = psName->copy();
-    ++t1FontNameLen;
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2606,23 +2575,15 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
 
 void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
 {
-    int i;
-
     // check if font is already embedded
-    for (i = 0; i < t1FontNameLen; ++i) {
-        if (t1FontNames[i].fontFileID == *id) {
+    for (PST1FontName &it : t1FontNames) {
+        if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, t1FontNames[i].psName);
+            psName->insert(0, it.psName);
             return;
         }
     }
-    if (t1FontNameLen == t1FontNameSize) {
-        t1FontNameSize *= 2;
-        t1FontNames = (PST1FontName *)greallocn(t1FontNames, t1FontNameSize, sizeof(PST1FontName));
-    }
-    t1FontNames[t1FontNameLen].fontFileID = *id;
-    t1FontNames[t1FontNameLen].psName = psName->copy();
-    ++t1FontNameLen;
+    t1FontNames.emplace_back(*id, psName->copy());
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
