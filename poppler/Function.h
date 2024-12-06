@@ -234,7 +234,7 @@ public:
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
 
-    const GooString *getCodeString() const { return codeString; }
+    const GooString *getCodeString() const { return codeString.get(); }
 
 private:
     explicit PostScriptFunction(const PostScriptFunction *func);
@@ -243,7 +243,7 @@ private:
     void resizeCode(int newSize);
     void exec(PSStack *stack, int codePtr) const;
 
-    GooString *codeString;
+    std::unique_ptr<GooString> codeString;
     PSObject *code;
     int codeSize;
     mutable double cacheIn[funcMaxInputs];

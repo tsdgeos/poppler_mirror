@@ -1108,7 +1108,6 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
     int i;
 
     code = nullptr;
-    codeString = nullptr;
     codeSize = 0;
     ok = false;
 
@@ -1129,7 +1128,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
     str = funcObj->getStream();
 
     //----- parse the function
-    codeString = new GooString();
+    codeString = std::make_unique<GooString>();
     str->reset();
     if (getToken(str)->cmp("{") != 0) {
         error(errSyntaxError, -1, "Expected '{{' at start of PostScript function");
@@ -1163,7 +1162,7 @@ PostScriptFunction::PostScriptFunction(const PostScriptFunction *func) : Functio
     code = (PSObject *)gmallocn(codeSize, sizeof(PSObject));
     memcpy(code, func->code, codeSize * sizeof(PSObject));
 
-    codeString = func->codeString->copy();
+    codeString.reset(func->codeString->copy());
 
     memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
     memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));
@@ -1174,7 +1173,6 @@ PostScriptFunction::PostScriptFunction(const PostScriptFunction *func) : Functio
 PostScriptFunction::~PostScriptFunction()
 {
     gfree(code);
-    delete codeString;
 }
 
 void PostScriptFunction::transform(const double *in, double *out) const
