@@ -6590,7 +6590,7 @@ void AnnotInk::parseInkList(Array *array)
     }
 }
 
-void AnnotInk::setInkList(std::vector<std::unique_ptr<AnnotPath>> &&paths)
+void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
 {
     Array *a = new Array(doc->getXRef());
     writeInkList(paths, a);

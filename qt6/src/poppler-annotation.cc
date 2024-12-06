@@ -3231,8 +3231,8 @@ void InkAnnotation::setInkPaths(const QList<QVector<QPointF>> &paths)
     }
 
     AnnotInk *inkann = static_cast<AnnotInk *>(d->pdfAnnot);
-    std::vector<std::unique_ptr<AnnotPath>> annotpaths = d->toAnnotPaths(paths);
-    inkann->setInkList(std::move(annotpaths));
+    const std::vector<std::unique_ptr<AnnotPath>> annotpaths = d->toAnnotPaths(paths);
+    inkann->setInkList(annotpaths);
 }
 
 /** LinkAnnotation [Annotation] */

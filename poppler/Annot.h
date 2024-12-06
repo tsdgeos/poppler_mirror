@@ -1372,7 +1372,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void setInkList(std::vector<std::unique_ptr<AnnotPath>> &&paths);
+    void setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths);
 
     // getters
     const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }
