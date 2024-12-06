@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2024 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 #include "CryptoSignBackend.h"
 #include "config.h"
@@ -75,15 +76,15 @@ std::optional<CryptoSign::Backend::Type> Factory::typeFromString(std::string_vie
 std::optional<CryptoSign::Backend::Type> Factory::getActive()
 {
     if (preferredBackend) {
-        return *preferredBackend;
+        return preferredBackend;
     }
     static auto backendFromEnvironment = typeFromString(toStringView(getenv("POPPLER_SIGNATURE_BACKEND")));
     if (backendFromEnvironment) {
-        return *backendFromEnvironment;
+        return backendFromEnvironment;
     }
     static auto backendFromCompiledDefault = typeFromString(toStringView(DEFAULT_SIGNATURE_BACKEND));
     if (backendFromCompiledDefault) {
-        return *backendFromCompiledDefault;
+        return backendFromCompiledDefault;
     }
 
     return std::nullopt;
