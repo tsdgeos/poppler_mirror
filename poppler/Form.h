@@ -551,7 +551,7 @@ public:
     const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal.get() : nullptr; }
     // For multi-select choices it returns the first one
     const GooString *getSelectedChoice() const;
-    const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice : getSelectedChoice(); }
+    const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice.get() : getSelectedChoice(); }
 
     void setAppearanceChoiceContentCopy(const GooString *new_content);
 
@@ -606,8 +606,8 @@ protected:
     int numChoices;
     ChoiceOpt *choices;
     bool *defaultChoices;
-    GooString *editedChoice;
-    GooString *appearanceSelectedChoice;
+    std::unique_ptr<GooString> editedChoice;
+    std::unique_ptr<GooString> appearanceSelectedChoice;
     int topIdx; // TI
 };
 
