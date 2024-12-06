@@ -686,7 +686,7 @@ private:
 class GfxSeparationColorSpace : public GfxColorSpace
 {
 public:
-    GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA);
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA);
     ~GfxSeparationColorSpace() override;
     std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csSeparation; }
@@ -709,15 +709,15 @@ public:
     bool isNonMarking() const override { return nonMarking; }
 
     // Separation-specific access.
-    const GooString *getName() const { return name; }
+    const GooString *getName() const { return name.get(); }
     GfxColorSpace *getAlt() { return alt.get(); }
     const Function *getFunc() const { return func; }
 
 private:
-    GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA);
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA);
 
-    GooString *name; // colorant name
-    std::unique_ptr<GfxColorSpace> alt; // alternate color space
+    const std::unique_ptr<GooString> name; // colorant name
+    const std::unique_ptr<GfxColorSpace> alt; // alternate color space
     Function *func; // tint transform (into alternate color space)
     bool nonMarking;
 };

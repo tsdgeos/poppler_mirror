@@ -2598,9 +2598,8 @@ void GfxIndexedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRan
 // GfxSeparationColorSpace
 //------------------------------------------------------------------------
 
-GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA) : alt(std::move(altA))
+GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA) : name(std::move(nameA)), alt(std::move(altA))
 {
-    name = nameA;
     func = funcA;
     nonMarking = !name->cmp("None");
     if (!name->cmp("Cyan")) {
@@ -2616,9 +2615,9 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA, std::unique_p
     }
 }
 
-GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA) : alt(std::move(altA))
+GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA)
+    : name(std::move(nameA)), alt(std::move(altA))
 {
-    name = nameA;
     func = funcA;
     nonMarking = nonMarkingA;
     overprintMask = overprintMaskA;
@@ -2627,7 +2626,6 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA, std::unique_p
 
 GfxSeparationColorSpace::~GfxSeparationColorSpace()
 {
-    delete name;
     delete func;
     if (mapping != nullptr) {
         gfree(mapping);
@@ -2646,50 +2644,46 @@ std::unique_ptr<GfxSeparationColorSpace> GfxSeparationColorSpace::copyAsOwnType(
         mappingA = (int *)gmalloc(sizeof(int));
         *mappingA = *mapping;
     }
-    auto cs = new GfxSeparationColorSpace(name->copy(), alt->copy(), func->copy(), nonMarking, overprintMask, mappingA);
+    auto cs = new GfxSeparationColorSpace(name->copyUniquePtr(), alt->copy(), func->copy(), nonMarking, overprintMask, mappingA);
     return std::unique_ptr<GfxSeparationColorSpace>(cs);
 }
 
 //~ handle the 'All' and 'None' colorants
 std::unique_ptr<GfxColorSpace> GfxSeparationColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
 {
-    GooString *nameA;
     std::unique_ptr<GfxColorSpace> altA;
     Function *funcA;
     Object obj1;
 
     if (arr->getLength() != 4) {
         error(errSyntaxWarning, -1, "Bad Separation color space");
-        goto err1;
+        return {};
     }
     obj1 = arr->get(1);
     if (!obj1.isName()) {
         error(errSyntaxWarning, -1, "Bad Separation color space (name)");
-        goto err1;
+        return {};
     }
-    nameA = new GooString(obj1.getName());
+    std::unique_ptr<GooString> nameA = std::make_unique<GooString>(obj1.getName());
     obj1 = arr->get(2);
     if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
         error(errSyntaxWarning, -1, "Bad Separation color space (alternate color space)");
-        goto err3;
+        return {};
     }
     obj1 = arr->get(3);
     if (!(funcA = Function::parse(&obj1))) {
-        goto err3;
+        return {};
     }
     if (funcA->getInputSize() != 1) {
         error(errSyntaxWarning, -1, "Bad SeparationColorSpace function");
         goto err5;
     }
     if (altA->getNComps() <= funcA->getOutputSize()) {
-        return std::make_unique<GfxSeparationColorSpace>(nameA, std::move(altA), funcA);
+        return std::make_unique<GfxSeparationColorSpace>(std::move(nameA), std::move(altA), funcA);
     }
 
 err5:
     delete funcA;
-err3:
-    delete nameA;
-err1:
     return {};
 }
 
@@ -2815,9 +2809,9 @@ void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSepar
         unsigned int newOverprintMask = 0x10;
         for (std::size_t i = 0; i < separationList->size(); i++) {
             const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-            if (!sepCS->getName()->cmp(name)) {
+            if (!sepCS->getName()->cmp(name.get())) {
                 if (sepCS->getFunc()->hasDifferentResultSet(func)) {
-                    error(errSyntaxWarning, -1, "Different functions found for '{0:t}', convert immediately", name);
+                    error(errSyntaxWarning, -1, "Different functions found for '{0:t}', convert immediately", name.get());
                     gfree(mapping);
                     mapping = nullptr;
                     return;
@@ -2829,7 +2823,7 @@ void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSepar
             newOverprintMask <<= 1;
         }
         if ((int)separationList->size() == maxSepComps) {
-            error(errSyntaxWarning, -1, "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, name);
+            error(errSyntaxWarning, -1, "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, name.get());
             gfree(mapping);
             mapping = nullptr;
             return;
@@ -3133,7 +3127,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 mapping[i] = separationList->size() + 4;
                 newOverprintMask |= startOverprintMask;
                 if (nComps == 1) {
-                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(new GooString(names[i]), alt->copy(), func->copy()));
+                    separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(names[i]), alt->copy(), func->copy()));
                 } else {
                     for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : *sepsCS) {
                         if (!sepCS->getName()->cmp(names[i])) {
