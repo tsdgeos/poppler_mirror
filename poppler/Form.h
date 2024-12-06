@@ -524,7 +524,7 @@ protected:
 
     std::unique_ptr<GooString> content;
     GooString *internalContent;
-    GooString *defaultContent;
+    std::unique_ptr<GooString> defaultContent;
     bool multiline;
     bool password;
     bool fileSelect;

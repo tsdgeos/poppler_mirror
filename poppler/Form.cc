@@ -1632,7 +1632,6 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
     Dict *dict = obj.getDict();
     Object obj1;
     internalContent = nullptr;
-    defaultContent = nullptr;
     multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
     maxLen = 0;
 
@@ -1681,7 +1680,7 @@ void FormFieldText::fillContent(FillValueType fillType)
         if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
             if (obj1.getString()->getLength() > 2) {
                 if (fillType == fillDefaultValue) {
-                    defaultContent = obj1.getString()->copy();
+                    defaultContent = obj1.getString()->copyUniquePtr();
                 } else {
                     content = obj1.getString()->copyUniquePtr();
                 }
@@ -1692,7 +1691,7 @@ void FormFieldText::fillContent(FillValueType fillType)
             char *tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr(), &tmp_length);
 
             if (fillType == fillDefaultValue) {
-                defaultContent = new GooString(tmp_str, tmp_length);
+                defaultContent = std::make_unique<GooString>(tmp_str, tmp_length);
             } else {
                 content = std::make_unique<GooString>(tmp_str, tmp_length);
             }
@@ -1763,13 +1762,12 @@ void FormFieldText::setAppearanceContentCopy(const GooString *new_content)
 FormFieldText::~FormFieldText()
 {
     delete internalContent;
-    delete defaultContent;
 }
 
 void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 {
     if (!isAmongExcludedFields(excludedFields)) {
-        setContentCopy(defaultContent);
+        setContentCopy(defaultContent.get());
         if (defaultContent == nullptr) {
             obj.getDict()->remove("V");
         }
