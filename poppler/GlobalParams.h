@@ -135,7 +135,7 @@ public:
 
     UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
     FILE *getUnicodeMapFile(const std::string &encodingName);
-    FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
+    FILE *findCMapFile(const GooString &collection, const GooString &cMapName);
     FILE *findToUnicodeFile(const GooString *name);
     std::optional<std::string> findFontFile(const std::string &fontName);
     std::optional<std::string> findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
@@ -149,7 +149,7 @@ public:
 
     std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    std::shared_ptr<CMap> getCMap(const GooString *collection, const GooString *cMapName);
+    std::shared_ptr<CMap> getCMap(const GooString &collection, const GooString &cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();

@@ -1795,7 +1795,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
         error(errSyntaxError, -1, "Missing Encoding entry in Type 0 font");
         return;
     }
-    if (!(cMap = CMap::parse(nullptr, collection.get(), &obj1))) {
+    if (!(cMap = CMap::parse(nullptr, *collection, &obj1))) {
         return;
     }
     if (cMap->getCMapName()) {
@@ -2159,10 +2159,10 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         vumap = new Unicode[n];
         memset(vumap, 0, sizeof(Unicode) * n);
         for (cmapName = lp->CMaps; *cmapName != nullptr; cmapName++) {
-            GooString cname(*cmapName);
+            const GooString cname(*cmapName);
 
             std::shared_ptr<CMap> cnameCMap;
-            if ((cnameCMap = globalParams->getCMap(getCollection(), &cname)) != nullptr) {
+            if ((cnameCMap = globalParams->getCMap(*getCollection(), cname)) != nullptr) {
                 if (cnameCMap->getWMode()) {
                     cnameCMap->setReverseMap(vumap, n, 1);
                 } else {

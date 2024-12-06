@@ -638,15 +638,15 @@ FILE *GlobalParams::getUnicodeMapFile(const std::string &encodingName)
     return file;
 }
 
-FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *cMapName)
+FILE *GlobalParams::findCMapFile(const GooString &collection, const GooString &cMapName)
 {
     FILE *file = nullptr;
 
     globalParamsLocker();
-    const auto collectionCMapDirs = cMapDirs.equal_range(collection->toStr());
+    const auto collectionCMapDirs = cMapDirs.equal_range(collection.toStr());
     for (auto cMapDir = collectionCMapDirs.first; cMapDir != collectionCMapDirs.second; ++cMapDir) {
         auto *const path = new GooString(cMapDir->second);
-        appendToPath(path, cMapName->c_str());
+        appendToPath(path, cMapName.c_str());
         file = openFile(path->c_str(), "r");
         delete path;
         if (file) {
@@ -1498,7 +1498,7 @@ const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName)
     return map;
 }
 
-std::shared_ptr<CMap> GlobalParams::getCMap(const GooString *collection, const GooString *cMapName)
+std::shared_ptr<CMap> GlobalParams::getCMap(const GooString &collection, const GooString &cMapName)
 {
     cMapCacheLocker();
     return cMapCache->getCMap(collection, cMapName);
