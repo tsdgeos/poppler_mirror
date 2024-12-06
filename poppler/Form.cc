@@ -997,7 +997,6 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     terminal = false;
     widgets = nullptr;
     readOnly = false;
-    defaultAppearance = nullptr;
     fullyQualifiedName = nullptr;
     quadding = VariableTextQuadding::leftJustified;
     hasQuadding = false;
@@ -1078,7 +1077,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copy();
+        defaultAppearance = obj1.getString()->copyUniquePtr();
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
@@ -1114,8 +1113,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
 void FormField::setDefaultAppearance(const std::string &appearance)
 {
-    delete defaultAppearance;
-    defaultAppearance = new GooString(appearance);
+    defaultAppearance = std::make_unique<GooString>(appearance);
 }
 
 void FormField::setPartialName(const GooString &name)
@@ -1143,7 +1141,6 @@ FormField::~FormField()
         gfree(widgets);
     }
 
-    delete defaultAppearance;
     delete partialName;
     delete alternateUiName;
     delete mappingName;
@@ -1735,7 +1732,7 @@ void FormFieldText::setContentCopy(const GooString *new_content)
         }
         Form *form = doc->getCatalog()->getForm();
         if (form) {
-            DefaultAppearance da(defaultAppearance);
+            DefaultAppearance da(defaultAppearance.get());
             if (da.getFontName().isName()) {
                 const std::string fontName = da.getFontName().getName();
                 if (!fontName.empty()) {
@@ -1818,10 +1815,7 @@ void FormFieldText::setTextFontSize(int fontSize)
             error(errSyntaxError, -1, "FormFieldText:: invalid DA object");
             return;
         }
-        if (defaultAppearance) {
-            delete defaultAppearance;
-        }
-        defaultAppearance = new GooString;
+        defaultAppearance = std::make_unique<GooString>();
         for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0) {
                 defaultAppearance->append(' ');
@@ -2670,7 +2664,6 @@ Form::Form(PDFDoc *docA) : doc(docA)
     numFields = 0;
     rootFields = nullptr;
     quadding = VariableTextQuadding::leftJustified;
-    defaultAppearance = nullptr;
     defaultResources = nullptr;
 
     Object *acroForm = doc->getCatalog()->getAcroForm();
@@ -2679,7 +2672,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copy();
+        defaultAppearance = obj1.getString()->copyUniquePtr();
     }
 
     obj1 = acroForm->dictLookup("Q");
@@ -2761,7 +2754,6 @@ Form::~Form()
         delete rootFields[i];
     }
     gfree(rootFields);
-    delete defaultAppearance;
     delete defaultResources;
 }
 

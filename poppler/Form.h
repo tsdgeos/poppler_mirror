@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -366,7 +366,7 @@ public:
     void setStandAlone(bool value) { standAlone = value; }
     bool isStandAlone() const { return standAlone; }
 
-    GooString *getDefaultAppearance() const { return defaultAppearance; }
+    GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
     void setDefaultAppearance(const std::string &appearance);
 
     bool hasTextQuadding() const { return hasQuadding; }
@@ -423,7 +423,7 @@ protected:
     GooString *fullyQualifiedName;
 
     // Variable Text
-    GooString *defaultAppearance;
+    std::unique_ptr<GooString> defaultAppearance;
     bool hasQuadding;
     VariableTextQuadding quadding;
 
@@ -732,7 +732,7 @@ public:
     bool getNeedAppearances() const { return needAppearances; }
     int getNumFields() const { return numFields; }
     FormField *getRootField(int i) const { return rootFields[i]; }
-    const GooString *getDefaultAppearance() const { return defaultAppearance; }
+    const GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
     VariableTextQuadding getTextQuadding() const { return quadding; }
     GfxResources *getDefaultResources() const { return defaultResources; }
     Object *getDefaultResourcesObj() { return &resDict; }
@@ -766,7 +766,7 @@ private:
     std::vector<Ref> calculateOrder;
 
     // Variable Text
-    GooString *defaultAppearance;
+    std::unique_ptr<GooString> defaultAppearance;
     VariableTextQuadding quadding;
 };
 
