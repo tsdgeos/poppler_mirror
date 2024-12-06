@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018-2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -62,9 +62,9 @@ public:
     CMap &operator=(const CMap &) = delete;
 
     // Return collection name (<registry>-<ordering>).
-    const GooString *getCollection() const { return collection; }
+    const GooString *getCollection() const { return collection.get(); }
 
-    const GooString *getCMapName() const { return cMapName; }
+    const GooString *getCMapName() const { return cMapName.get(); }
 
     // Return true if this CMap matches the specified <collectionA>, and
     // <cMapNameA>.
@@ -82,8 +82,8 @@ public:
 
 private:
     void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
-    CMap(GooString *collectionA, GooString *cMapNameA);
-    CMap(GooString *collectionA, GooString *cMapNameA, int wModeA);
+    CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA);
+    CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA);
     void useCMap(CMapCache *cache, const char *useName);
     void useCMap(CMapCache *cache, Object *obj);
     void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
@@ -91,8 +91,8 @@ private:
     void freeCMapVector(CMapVectorEntry *vec);
     void setReverseMapVector(unsigned int startCode, CMapVectorEntry *vec, unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
-    GooString *collection;
-    GooString *cMapName;
+    const std::unique_ptr<GooString> collection;
+    const std::unique_ptr<GooString> cMapName;
     bool isIdent; // true if this CMap is an identity mapping,
                   //   or is based on one (via usecmap)
     int wMode; // writing mode (0=horizontal, 1=vertical)

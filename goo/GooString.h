@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -104,6 +104,7 @@ public:
     // Copy a string.
     explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string &>(*str) : std::string {}) { }
     GooString *copy() const { return new GooString(this); }
+    std::unique_ptr<GooString> copyUniquePtr() const { return std::make_unique<GooString>(this); }
 
     // Concatenate two strings.
     GooString(const GooString *str1, const GooString *str2)
