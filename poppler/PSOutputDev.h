@@ -380,7 +380,7 @@ private:
     void setupExternalCIDTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, bool needVerticalMetrics, int faceIndex);
     void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex);
     void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
-    GooString *makePSFontName(GfxFont *font, const Ref *id);
+    std::unique_ptr<GooString> makePSFontName(GfxFont *font, const Ref *id);
     void setupImages(Dict *resDict);
     void setupImage(Ref id, Stream *str, bool mask);
     void setupForms(Dict *resDict);
