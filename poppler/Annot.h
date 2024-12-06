@@ -1201,7 +1201,7 @@ public:
     // typeHighlight, typeUnderline, typeSquiggly or typeStrikeOut
     void setType(AnnotSubtype new_type);
 
-    void setQuadrilaterals(AnnotQuadrilaterals *quadPoints);
+    void setQuadrilaterals(const AnnotQuadrilaterals &quadPoints);
 
     AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 

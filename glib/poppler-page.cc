@@ -1570,22 +1570,24 @@ void poppler_page_add_annot(PopplerPage *page, PopplerAnnot *annot)
 
     AnnotTextMarkup *annot_markup = dynamic_cast<AnnotTextMarkup *>(annot->annot);
     if (annot_markup) {
-        AnnotQuadrilaterals *quads;
         crop_box = _poppler_annot_get_cropbox(annot);
         if (crop_box) {
             /* Handle hypothetical case of annot being added is already existing on a prior page, so
              * first remove cropbox of the prior page before adding cropbox of the new page later */
-            quads = new_quads_from_offset_cropbox(crop_box, annot_markup->getQuadrilaterals(), FALSE);
-            annot_markup->setQuadrilaterals(quads);
+            AnnotQuadrilaterals *quads = new_quads_from_offset_cropbox(crop_box, annot_markup->getQuadrilaterals(), FALSE);
+            annot_markup->setQuadrilaterals(*quads);
+            delete quads;
         }
         if (page_is_rotated) {
             /* Quadrilateral's coords need to be saved un-rotated (same as rect coords) */
-            quads = _page_new_quads_unrotated(page->page, annot_markup->getQuadrilaterals());
-            annot_markup->setQuadrilaterals(quads);
+            AnnotQuadrilaterals *quads = _page_new_quads_unrotated(page->page, annot_markup->getQuadrilaterals());
+            annot_markup->setQuadrilaterals(*quads);
+            delete quads;
         }
         /* Add to annot's quadrilaterals the offset for the cropbox of the new page */
-        quads = new_quads_from_offset_cropbox(page_crop_box, annot_markup->getQuadrilaterals(), TRUE);
-        annot_markup->setQuadrilaterals(quads);
+        AnnotQuadrilaterals *quads = new_quads_from_offset_cropbox(page_crop_box, annot_markup->getQuadrilaterals(), TRUE);
+        annot_markup->setQuadrilaterals(*quads);
+        delete quads;
     }
 
     page->page->addAnnot(annot->annot);

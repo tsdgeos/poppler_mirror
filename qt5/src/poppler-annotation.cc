@@ -3397,7 +3397,7 @@ void HighlightAnnotation::setHighlightQuads(const QList<HighlightAnnotation::Qua
 
     AnnotTextMarkup *hlann = static_cast<AnnotTextMarkup *>(d->pdfAnnot);
     AnnotQuadrilaterals *quadrilaterals = d->toQuadrilaterals(quads);
-    hlann->setQuadrilaterals(quadrilaterals);
+    hlann->setQuadrilaterals(*quadrilaterals);
     delete quadrilaterals;
 }
 

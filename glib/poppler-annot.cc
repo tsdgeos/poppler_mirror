@@ -1833,7 +1833,7 @@ void poppler_annot_text_markup_set_quadrilaterals(PopplerAnnotTextMarkup *popple
         delete quads_temp;
     }
 
-    annot->setQuadrilaterals(quads);
+    annot->setQuadrilaterals(*quads);
     delete quads;
 }
 

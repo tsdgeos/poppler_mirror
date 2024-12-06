@@ -3919,19 +3919,19 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type)
     invalidateAppearance();
 }
 
-void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints)
+void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
 {
     Array *a = new Array(doc->getXRef());
 
-    for (int i = 0; i < quadPoints->getQuadrilateralsLength(); ++i) {
-        a->add(Object(quadPoints->getX1(i)));
-        a->add(Object(quadPoints->getY1(i)));
-        a->add(Object(quadPoints->getX2(i)));
-        a->add(Object(quadPoints->getY2(i)));
-        a->add(Object(quadPoints->getX3(i)));
-        a->add(Object(quadPoints->getY3(i)));
-        a->add(Object(quadPoints->getX4(i)));
-        a->add(Object(quadPoints->getY4(i)));
+    for (int i = 0; i < quadPoints.getQuadrilateralsLength(); ++i) {
+        a->add(Object(quadPoints.getX1(i)));
+        a->add(Object(quadPoints.getY1(i)));
+        a->add(Object(quadPoints.getX2(i)));
+        a->add(Object(quadPoints.getY2(i)));
+        a->add(Object(quadPoints.getX3(i)));
+        a->add(Object(quadPoints.getY3(i)));
+        a->add(Object(quadPoints.getX4(i)));
+        a->add(Object(quadPoints.getY4(i)));
     }
 
     quadrilaterals = std::make_unique<AnnotQuadrilaterals>(a, rect.get());
