@@ -237,14 +237,14 @@ public:
     AnnotQuadrilaterals(const AnnotQuadrilaterals &) = delete;
     AnnotQuadrilaterals &operator=(const AnnotQuadrilaterals &other) = delete;
 
-    double getX1(int quadrilateral);
-    double getY1(int quadrilateral);
-    double getX2(int quadrilateral);
-    double getY2(int quadrilateral);
-    double getX3(int quadrilateral);
-    double getY3(int quadrilateral);
-    double getX4(int quadrilateral);
-    double getY4(int quadrilateral);
+    double getX1(int quadrilateral) const;
+    double getY1(int quadrilateral) const;
+    double getX2(int quadrilateral) const;
+    double getY2(int quadrilateral) const;
+    double getX3(int quadrilateral) const;
+    double getY3(int quadrilateral) const;
+    double getX4(int quadrilateral) const;
+    double getY4(int quadrilateral) const;
     int getQuadrilateralsLength() const { return quadrilateralsLength; }
 
 protected:

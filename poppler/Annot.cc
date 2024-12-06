@@ -439,7 +439,7 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(std::unique_ptr<AnnotQuadrilateral[]> &
 
 AnnotQuadrilaterals::~AnnotQuadrilaterals() = default;
 
-double AnnotQuadrilaterals::getX1(int quadrilateral)
+double AnnotQuadrilaterals::getX1(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord1.getX();
@@ -447,7 +447,7 @@ double AnnotQuadrilaterals::getX1(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getY1(int quadrilateral)
+double AnnotQuadrilaterals::getY1(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord1.getY();
@@ -455,7 +455,7 @@ double AnnotQuadrilaterals::getY1(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getX2(int quadrilateral)
+double AnnotQuadrilaterals::getX2(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord2.getX();
@@ -463,7 +463,7 @@ double AnnotQuadrilaterals::getX2(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getY2(int quadrilateral)
+double AnnotQuadrilaterals::getY2(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord2.getY();
@@ -471,7 +471,7 @@ double AnnotQuadrilaterals::getY2(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getX3(int quadrilateral)
+double AnnotQuadrilaterals::getX3(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord3.getX();
@@ -479,7 +479,7 @@ double AnnotQuadrilaterals::getX3(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getY3(int quadrilateral)
+double AnnotQuadrilaterals::getY3(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord3.getY();
@@ -487,7 +487,7 @@ double AnnotQuadrilaterals::getY3(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getX4(int quadrilateral)
+double AnnotQuadrilaterals::getX4(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord4.getX();
@@ -495,7 +495,7 @@ double AnnotQuadrilaterals::getX4(int quadrilateral)
     return 0;
 }
 
-double AnnotQuadrilaterals::getY4(int quadrilateral)
+double AnnotQuadrilaterals::getY4(int quadrilateral) const
 {
     if (quadrilateral >= 0 && quadrilateral < quadrilateralsLength) {
         return quadrilaterals[quadrilateral].coord4.getY();
