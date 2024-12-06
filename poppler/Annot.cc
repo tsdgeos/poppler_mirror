@@ -1708,12 +1708,12 @@ void AnnotAppearanceBuilder::setTextFont(const Object &fontName, double fontSize
     }
 }
 
-void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
+void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder &border)
 {
-    switch (border->getStyle()) {
+    switch (border.getStyle()) {
     case AnnotBorder::borderDashed:
         appearBuf->append("[");
-        for (double dash : border->getDash()) {
+        for (double dash : border.getDash()) {
             appearBuf->appendf(" {0:.2f}", dash);
         }
         appearBuf->append(" ] 0 d\n");
@@ -1722,7 +1722,7 @@ void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border)
         appearBuf->append("[] 0 d\n");
         break;
     }
-    appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+    appearBuf->appendf("{0:.2f} w\n", border.getWidth());
 }
 
 // Draw an (approximate) circle of radius <r> centered at (<cx>, <cy>).
@@ -3255,7 +3255,7 @@ void AnnotFreeText::generateFreeTextAppearance()
 
     borderWidth = border->getWidth();
     if (borderWidth > 0) {
-        appearBuilder.setLineStyleForBorder(border.get());
+        appearBuilder.setLineStyleForBorder(*border);
     }
 
     // Box size
@@ -3626,7 +3626,7 @@ void AnnotLine::generateLineAppearance()
         appearBuilder.setDrawColor(interiorColor.get(), true);
         fill = true;
     }
-    appearBuilder.setLineStyleForBorder(border.get());
+    appearBuilder.setLineStyleForBorder(*border);
     borderWidth = border->getWidth();
     appearBBox->setBorderWidth(std::max(1., borderWidth));
 
@@ -5285,7 +5285,7 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const
     if (border) {
         borderWidth = border->getWidth();
         if (borderWidth > 0) {
-            setLineStyleForBorder(border);
+            setLineStyleForBorder(*border);
         }
     }
 
@@ -6081,7 +6081,7 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
         }
 
         double borderWidth = border->getWidth();
-        appearBuilder.setLineStyleForBorder(border.get());
+        appearBuilder.setLineStyleForBorder(*border);
 
         if (interiorColor) {
             appearBuilder.setDrawColor(interiorColor.get(), true);
@@ -6406,7 +6406,7 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
             appearBuilder.setDrawColor(color.get(), false);
         }
 
-        appearBuilder.setLineStyleForBorder(border.get());
+        appearBuilder.setLineStyleForBorder(*border);
         appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
         if (interiorColor) {
@@ -6620,7 +6620,7 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
             appearBuilder.setDrawColor(color.get(), false);
         }
 
-        appearBuilder.setLineStyleForBorder(border.get());
+        appearBuilder.setLineStyleForBorder(*border);
         appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
         for (const auto &path : inkList) {

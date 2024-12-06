@@ -581,7 +581,7 @@ public:
     AnnotAppearanceBuilder &operator=(const AnnotAppearanceBuilder &) = delete;
 
     void setDrawColor(const AnnotColor *color, bool fill);
-    void setLineStyleForBorder(const AnnotBorder *border);
+    void setLineStyleForBorder(const AnnotBorder &border);
     void setTextFont(const Object &fontName, double fontSize);
     void drawCircle(double cx, double cy, double r, bool fill);
     void drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke);
