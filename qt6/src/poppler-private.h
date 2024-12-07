@@ -196,14 +196,17 @@ public:
 
     explicit FontInfoData(::FontInfo *fi)
     {
-        if (fi->getName()) {
-            fontName = fi->getName()->c_str();
+        const std::optional<std::string> &fiName = fi->getName();
+        if (fiName) {
+            fontName = fiName->c_str();
         }
-        if (fi->getFile()) {
-            fontFile = fi->getFile()->c_str();
+        const std::optional<std::string> &fiFile = fi->getFile();
+        if (fiFile) {
+            fontFile = fiFile->c_str();
         }
-        if (fi->getSubstituteName()) {
-            fontSubstituteName = fi->getSubstituteName()->c_str();
+        const std::optional<std::string> &fiSubstituteName = fi->getSubstituteName();
+        if (fiSubstituteName) {
+            fontSubstituteName = fiSubstituteName->c_str();
         }
         isEmbedded = fi->getEmbedded();
         isSubset = fi->getSubset();

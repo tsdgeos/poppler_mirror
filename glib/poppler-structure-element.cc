@@ -806,11 +806,14 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
         const GooString *font_name = span.getFont()->getFamily();
         if (font_name) {
             new_span->font_name = _poppler_goo_string_to_utf8(font_name);
-        } else if (span.getFont()->getName()) {
-            const GooString aux(*span.getFont()->getName());
-            new_span->font_name = _poppler_goo_string_to_utf8(&aux);
         } else {
-            new_span->font_name = nullptr;
+            const std::optional<std::string> &fontName = span.getFont()->getName();
+            if (fontName) {
+                const GooString aux(*fontName);
+                new_span->font_name = _poppler_goo_string_to_utf8(&aux);
+            } else {
+                new_span->font_name = nullptr;
+            }
         }
 
         if (span.getFont()->isFixedWidth()) {

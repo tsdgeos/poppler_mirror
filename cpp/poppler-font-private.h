@@ -35,11 +35,13 @@ public:
     font_info_private() : type(font_info::unknown), is_embedded(false), is_subset(false) { }
     explicit font_info_private(FontInfo *fi) : type((font_info::type_enum)fi->getType()), is_embedded(fi->getEmbedded()), is_subset(fi->getSubset())
     {
-        if (fi->getName()) {
-            font_name = *fi->getName();
+        const std::optional<std::string> &fiName = fi->getName();
+        if (fiName) {
+            font_name = *fiName;
         }
-        if (fi->getFile()) {
-            font_file = *fi->getFile();
+        const std::optional<std::string> &fiFile = fi->getFile();
+        if (fiFile) {
+            font_file = *fiFile;
         }
 
         ref = fi->getRef();

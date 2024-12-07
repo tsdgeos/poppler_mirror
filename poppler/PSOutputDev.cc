@@ -2415,8 +2415,9 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
 
 void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
 {
-    if (maxValidGlyph >= 0 && font->getName()) {
-        auto &fontMaxValidGlyph = perFontMaxValidGlyph[*font->getName()];
+    const std::optional<std::string> &fontName = font->getName();
+    if (maxValidGlyph >= 0 && fontName) {
+        auto &fontMaxValidGlyph = perFontMaxValidGlyph[*fontName];
         if (fontMaxValidGlyph < maxValidGlyph) {
             fontMaxValidGlyph = maxValidGlyph;
         }
@@ -2456,7 +2457,8 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
                 updateFontMaxValidGlyph(font, maxValidGlyph);
             }
         } else {
-            error(errSyntaxError, -1, "TrueType font '{0:s}' does not allow embedding", font->getName() ? font->getName()->c_str() : "(unnamed)");
+            const std::optional<std::string> &fontName = font->getName();
+            error(errSyntaxError, -1, "TrueType font '{0:s}' does not allow embedding", fontName ? fontName->c_str() : "(unnamed)");
         }
     }
 
@@ -2669,8 +2671,9 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
             return std::make_unique<GooString>(std::move(psName));
         }
     }
-    if (font->getName()) {
-        std::string psName = filterPSName(*font->getName());
+    const std::optional<std::string> &fontName = font->getName();
+    if (fontName) {
+        std::string psName = filterPSName(*fontName);
         if (fontNames.emplace(psName).second) {
             return std::make_unique<GooString>(std::move(psName));
         }
@@ -2679,8 +2682,8 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
         psName->append('_')->append(filteredName);
-    } else if (font->getName()) {
-        std::string filteredName = filterPSName(*font->getName());
+    } else if (fontName) {
+        std::string filteredName = filterPSName(*fontName);
         psName->append('_')->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
@@ -4913,7 +4916,8 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     if (!(font = state->getFont())) {
         return;
     }
-    maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[*font->getName()] : 0);
+    const std::optional<std::string> &fontName = font->getName();
+    maxGlyphInt = (fontName ? perFontMaxValidGlyph[*fontName] : 0);
     if (maxGlyphInt < 0) {
         maxGlyphInt = 0;
     }

@@ -569,8 +569,11 @@ PopplerAnnot *_poppler_annot_free_text_new(Annot *annot)
             GfxResources *res = form->getDefaultResources();
             if (res) {
                 std::shared_ptr<GfxFont> font = res->lookupFont(desc->font_name);
-                if (font && font->getName()) {
-                    poppler_font_name_to_description(font->getName().value(), *desc);
+                if (font) {
+                    const std::optional<std::string> &fontName = font->getName();
+                    if (fontName) {
+                        poppler_font_name_to_description(fontName.value(), *desc);
+                    }
                 }
             }
         }

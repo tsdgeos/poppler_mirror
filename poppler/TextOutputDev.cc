@@ -369,7 +369,16 @@ TextFontInfo::TextFontInfo(const GfxState *state)
 {
     gfxFont = state->getFont();
 #ifdef TEXTOUT_WORD_LIST
-    fontName = (gfxFont && gfxFont->getName()) ? new GooString(*gfxFont->getName()) : nullptr;
+    if (gfxFont) {
+        const std::optional<std::string> &gfxFontName = gfxFont->getName();
+        if (gfxFontName) {
+            fontName = new GooString(*gfxFontName);
+        } else {
+            fontName = nullptr;
+        }
+    } else {
+        fontName = nullptr;
+    }
     flags = gfxFont ? gfxFont->getFlags() : 0;
 #endif
 }

@@ -225,7 +225,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     GfxFontType fontType = gfxFont->getType();
 
     if (!(fontLoc = gfxFont->locateFont(xref, nullptr))) {
-        error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
+        const std::optional<std::string> &fontName = gfxFont->getName();
+        error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", fontName ? fontName->c_str() : "(unnamed)");
         goto err2;
     }
 
