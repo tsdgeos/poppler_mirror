@@ -369,7 +369,7 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     else if (fmt == "pnm") {
         w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
-    if (!w.get()) {
+    if (!w) {
         return false;
     }
     FILE *f = fopen(file_name.c_str(), "wb");

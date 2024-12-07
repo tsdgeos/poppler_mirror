@@ -295,7 +295,7 @@ ustring document::info_key(const std::string &key) const
     }
 
     std::unique_ptr<GooString> goo_value(d->doc->getDocInfoStringEntry(key.c_str()));
-    if (!goo_value.get()) {
+    if (!goo_value) {
         return ustring();
     }
 
@@ -340,7 +340,7 @@ time_type document::info_date(const std::string &key) const
     }
 
     std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
-    if (!goo_date.get()) {
+    if (!goo_date) {
         return time_type(-1);
     }
 
@@ -361,7 +361,7 @@ time_t document::info_date_t(const std::string &key) const
     }
 
     std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
-    if (!goo_date.get()) {
+    if (!goo_date) {
         return time_t(-1);
     }
 
@@ -432,7 +432,7 @@ ustring document::get_title() const
     }
 
     std::unique_ptr<GooString> goo_title(d->doc->getDocInfoTitle());
-    if (!goo_title.get()) {
+    if (!goo_title) {
         return ustring();
     }
 
@@ -476,7 +476,7 @@ ustring document::get_author() const
     }
 
     std::unique_ptr<GooString> goo_author(d->doc->getDocInfoAuthor());
-    if (!goo_author.get()) {
+    if (!goo_author) {
         return ustring();
     }
 
@@ -520,7 +520,7 @@ ustring document::get_subject() const
     }
 
     std::unique_ptr<GooString> goo_subject(d->doc->getDocInfoSubject());
-    if (!goo_subject.get()) {
+    if (!goo_subject) {
         return ustring();
     }
 
@@ -564,7 +564,7 @@ ustring document::get_keywords() const
     }
 
     std::unique_ptr<GooString> goo_keywords(d->doc->getDocInfoKeywords());
-    if (!goo_keywords.get()) {
+    if (!goo_keywords) {
         return ustring();
     }
 
@@ -608,7 +608,7 @@ ustring document::get_creator() const
     }
 
     std::unique_ptr<GooString> goo_creator(d->doc->getDocInfoCreator());
-    if (!goo_creator.get()) {
+    if (!goo_creator) {
         return ustring();
     }
 
@@ -652,7 +652,7 @@ ustring document::get_producer() const
     }
 
     std::unique_ptr<GooString> goo_producer(d->doc->getDocInfoProducer());
-    if (!goo_producer.get()) {
+    if (!goo_producer) {
         return ustring();
     }
 
@@ -696,7 +696,7 @@ time_type document::get_creation_date() const
     }
 
     std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
-    if (!goo_creation_date.get()) {
+    if (!goo_creation_date) {
         return time_type(-1);
     }
 
@@ -716,7 +716,7 @@ time_t document::get_creation_date_t() const
     }
 
     std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
-    if (!goo_creation_date.get()) {
+    if (!goo_creation_date) {
         return time_t(-1);
     }
 
@@ -785,7 +785,7 @@ time_type document::get_modification_date() const
     }
 
     std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
-    if (!goo_modification_date.get()) {
+    if (!goo_modification_date) {
         return time_type(-1);
     }
 
@@ -805,7 +805,7 @@ time_t document::get_modification_date_t() const
     }
 
     std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
-    if (!goo_modification_date.get()) {
+    if (!goo_modification_date) {
         return time_t(-1);
     }
 
@@ -928,7 +928,7 @@ bool document::has_permission(permission_enum which) const
 ustring document::metadata() const
 {
     std::unique_ptr<GooString> md(d->doc->getCatalog()->readMetadata());
-    if (md.get()) {
+    if (md) {
         return detail::unicode_GooString_to_ustring(md.get());
     }
     return ustring();

@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
     std::string file_name(argv[1]);
 
     std::unique_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
-    if (!doc.get()) {
+    if (!doc) {
         error("loading error");
     }
     if (doc->is_locked()) {
