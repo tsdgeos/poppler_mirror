@@ -57,7 +57,7 @@ void PreScanOutputDev::stroke(GfxState *state)
 
     check(state->getStrokeColorSpace(), state->getStrokeColor(), state->getStrokeOpacity(), state->getBlendMode());
     const std::vector<double> &dash = state->getLineDash(&dashStart);
-    if (dash.size() != 0) {
+    if (!dash.empty()) {
         gdi = false;
     }
 }

@@ -165,7 +165,7 @@ bool document::unlock(const std::string &owner_password, const std::string &user
 {
     if (d->is_locked) {
         document_private *newdoc = nullptr;
-        if (d->doc_data.size() > 0) {
+        if (!d->doc_data.empty()) {
             newdoc = new document_private(&d->doc_data, owner_password, user_password);
         } else if (d->raw_doc_data) {
             newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);

@@ -1219,7 +1219,7 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
             }
 
             // If no segments were found use marks/spaces (old format)
-            if (dashArray.size() == 0) {
+            if (dashArray.empty()) {
                 dashArray.append(ee.attribute(QStringLiteral("marks")).toDouble());
                 dashArray.append(ee.attribute(QStringLiteral("spaces")).toDouble());
             }
@@ -1345,7 +1345,7 @@ void Annotation::storeBaseAnnotationProperties(QDomNode &annNode, QDomDocument &
         psE.setAttribute(QStringLiteral("ycr"), QString::number(s.yCorners()));
 
         int marks = 3, spaces = 0; // Do not break code relying on marks/spaces
-        if (dashArray.size() != 0) {
+        if (!dashArray.empty()) {
             marks = (int)dashArray[0];
         }
         if (dashArray.size() > 1) {

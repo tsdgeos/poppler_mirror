@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018-2021, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -112,7 +112,7 @@ public:
 
 private:
     void endSpan();
-    bool inMarkedContent() const { return mcidStack.size() > 0; }
+    bool inMarkedContent() const { return !mcidStack.empty(); }
     bool contentStreamMatch();
     bool needFontChange(const std::shared_ptr<const GfxFont> &font) const;
 

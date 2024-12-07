@@ -4482,7 +4482,7 @@ void TextSelectionDumper::finishLine()
         lines = (std::vector<TextWordSelection *> **)grealloc(lines, linesSize * sizeof(std::vector<TextWordSelection *> *));
     }
 
-    if (words && words->size() > 0) {
+    if (words && !words->empty()) {
         // Reverse word order for RTL text. Fixes #53 for glib backend (Evince)
         if (!page->primaryLR) {
             std::ranges::reverse(*words);
@@ -4778,7 +4778,7 @@ void TextSelectionPainter::visitWord(TextWord *word, int begin, int end, const P
 
 bool TextSelectionPainter::hasGlyphLessFont()
 {
-    if (selectionList && selectionList->size()) {
+    if (selectionList && !selectionList->empty()) {
         TextWordSelection *sel = (*selectionList)[0];
         return sel->word->invisible;
     }

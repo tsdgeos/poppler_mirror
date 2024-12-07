@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2024 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 #ifndef CIDFontsWidthsBuilder_H
@@ -77,7 +78,7 @@ public:
 private:
     void finish()
     {
-        while (m_currentSegment.m_values.size()) {
+        while (!m_currentSegment.m_values.empty()) {
             segmentDone();
         }
         m_currentSegment = {};
@@ -150,7 +151,7 @@ private:
                     if (std::distance(m_values.rbegin(), lastDifferent) >= 3) {
                         savedValues.push_back(m_values.back());
                         m_values.pop_back();
-                        while (m_values.size() && m_values.back() == savedValues.back()) {
+                        while (!m_values.empty() && m_values.back() == savedValues.back()) {
                             savedValues.push_back(m_values.back());
                             m_values.pop_back();
                         }

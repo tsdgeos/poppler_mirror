@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2024, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
@@ -42,7 +42,7 @@ toc *toc_private::load_from_outline(Outline *outline)
     }
 
     const std::vector<OutlineItem *> *items = outline->getItems();
-    if (!items || items->size() < 1) {
+    if (!items || items->empty()) {
         return nullptr;
     }
 

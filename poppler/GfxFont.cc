@@ -1970,7 +1970,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
         h = widths.defHeight;
         vx = getWidth(cid) / 2;
         vy = widths.defVY;
-        if (widths.excepsV.size() > 0 && cid >= widths.excepsV[0].first) {
+        if (!widths.excepsV.empty() && cid >= widths.excepsV[0].first) {
             a = 0;
             b = widths.excepsV.size();
             // invariant: widths.excepsV[a].first <= cid < widths.excepsV[b].first
@@ -2263,7 +2263,7 @@ double GfxCIDFont::getWidth(CID cid) const
     int a, b, m;
 
     w = widths.defWidth;
-    if (widths.exceps.size() > 0 && cid >= widths.exceps[0].first) {
+    if (!widths.exceps.empty() && cid >= widths.exceps[0].first) {
         a = 0;
         b = widths.exceps.size();
         // invariant: widths.exceps[a].first <= cid < widths.exceps[b].first

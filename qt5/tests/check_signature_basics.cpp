@@ -89,8 +89,8 @@ void TestSignatureBasics::testSignatureCount()
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields.size(), 4);
     // count active signatures
-    QVERIFY(signatureFields[0]->getSignature().size());
-    QVERIFY(signatureFields[1]->getSignature().size());
+    QVERIFY(!signatureFields[0]->getSignature().empty());
+    QVERIFY(!signatureFields[1]->getSignature().empty());
     QVERIFY(signatureFields[2]->getSignature().empty());
     QVERIFY(signatureFields[3]->getSignature().empty());
 }

@@ -220,7 +220,7 @@ ustring::~ustring() { }
 
 byte_array ustring::to_utf8() const
 {
-    if (!size()) {
+    if (empty()) {
         return byte_array();
     }
 
@@ -254,7 +254,7 @@ byte_array ustring::to_utf8() const
 
 std::string ustring::to_latin1() const
 {
-    if (!size()) {
+    if (empty()) {
         return std::string();
     }
 
