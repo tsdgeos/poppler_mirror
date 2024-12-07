@@ -44,7 +44,7 @@ Q_SIGNALS:
     void zoomChanged(qreal value); // NOLINT(readability-inconsistent-declaration-parameter-name)
     void rotationChanged(int rotation); // NOLINT(readability-inconsistent-declaration-parameter-name)
 
-private Q_SLOTS:
+private:
     void slotGoFirst();
     void slotGoPrev();
     void slotGoNext();
@@ -53,7 +53,6 @@ private Q_SLOTS:
     void slotZoomComboChanged(const QString &text);
     void slotRotationComboChanged(int idx);
 
-private:
     QAction *m_firstAct;
     QAction *m_prevAct;
     QComboBox *m_pageCombo;

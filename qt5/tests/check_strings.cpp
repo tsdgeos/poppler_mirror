@@ -36,6 +36,11 @@ class TestStrings : public QObject
 public:
     explicit TestStrings(QObject *parent = nullptr) : QObject(parent) { }
 
+    GooString *newGooString(const char *s);
+    GooString *newGooString(const char *s, int l);
+
+    QVector<GooString *> m_gooStrings;
+
 private slots:
     void initTestCase();
     void cleanupTestCase();
@@ -47,12 +52,6 @@ private slots:
     void check_QStringToUnicodeGooString();
     void check_QStringToGooString_data();
     void check_QStringToGooString();
-
-private:
-    GooString *newGooString(const char *s);
-    GooString *newGooString(const char *s, int l);
-
-    QVector<GooString *> m_gooStrings;
 };
 
 void TestStrings::initTestCase()

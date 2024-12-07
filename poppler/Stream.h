@@ -586,7 +586,6 @@ private:
         return n;
     }
 
-private:
     GooFile *file;
     Goffset offset;
     Goffset start;

@@ -39,10 +39,9 @@ public:
 protected:
     void fillInfo() override;
 
-private Q_SLOTS:
+private:
     void slotItemActivated(QListWidgetItem *item);
 
-private:
     QListWidget *m_list;
 };
 

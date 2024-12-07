@@ -9,6 +9,9 @@ class TestActualText : public QObject
     Q_OBJECT
 public:
     explicit TestActualText(QObject *parent = nullptr) : QObject(parent) { }
+
+    void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
+
 private slots:
     void checkActualText1();
     void checkActualText2();
@@ -17,9 +20,6 @@ private slots:
     void checkAllOrientations_data();
     void checkFakeboldText();
     void checkFakeboldText_data();
-
-private:
-    void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
 };
 
 void TestActualText::checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text)
