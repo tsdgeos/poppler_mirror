@@ -526,7 +526,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
             if (namedDest) {
                 GooString name;
                 textStringToQuotedUtf8(namedDest, &name);
-                if (emittedDestinations.count(name.toStr()) == 0) {
+                if (!emittedDestinations.contains(name.toStr())) {
                     return false;
                 }
                 attrib.appendf("dest={0:t} ", &name);
@@ -545,7 +545,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
         if (namedDest) {
             GooString name;
             textStringToQuotedUtf8(namedDest, &name);
-            if (emittedDestinations.count(name.toStr()) == 0) {
+            if (!emittedDestinations.contains(name.toStr())) {
                 return false;
             }
             attrib.appendf("dest={0:t} ", &name);
@@ -646,7 +646,7 @@ bool CairoOutputDev::checkIfStructElementNeeded(const StructElement *element)
     if (element->isContent() && !element->isObjectRef()) {
         int structParents = getContentElementStructParents(element);
         int mcid = element->getMCID();
-        if (mcidEmitted.count(std::pair(structParents, mcid)) > 0) {
+        if (mcidEmitted.contains(std::pair(structParents, mcid))) {
             structElementNeeded.insert(element);
             return true;
         }
@@ -667,7 +667,7 @@ bool CairoOutputDev::checkIfStructElementNeeded(const StructElement *element)
 
 void CairoOutputDev::emitStructElement(const StructElement *element)
 {
-    if (structElementNeeded.count(element) == 0) {
+    if (!structElementNeeded.contains(element)) {
         return;
     }
 
