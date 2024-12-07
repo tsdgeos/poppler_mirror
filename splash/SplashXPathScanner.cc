@@ -429,7 +429,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int
     *x1 = (xxMax - 1) / splashAASize;
 }
 
-void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y) const
+void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const int *x1, int y) const
 {
     int xx0, xx1, xx, yy, yyMin, yyMax, interCount;
     size_t interIdx;

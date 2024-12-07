@@ -78,7 +78,7 @@ public:
     void sort();
 
 protected:
-    void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
+    void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
     void grow(int nSegs);
     void addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness, bool first, bool last, bool end0, bool end1);

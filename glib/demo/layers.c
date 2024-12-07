@@ -261,7 +261,7 @@ static gboolean update_kids(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter 
     return FALSE;
 }
 
-static gboolean clear_rb_group(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gint *rb_group)
+static gboolean clear_rb_group(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, const gint *rb_group)
 {
     gint group;
 

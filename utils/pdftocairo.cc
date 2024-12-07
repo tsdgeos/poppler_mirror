@@ -632,7 +632,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
     }
 }
 
-static void beginPage(double *w, double *h)
+static void beginPage(double *w, double *h) // NOLINT(readability-non-const-parameter) On the windows codepath can't be const
 {
     if (printing) {
         if (ps) {

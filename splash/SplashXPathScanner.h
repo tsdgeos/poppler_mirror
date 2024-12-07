@@ -91,7 +91,7 @@ public:
     // Clips an anti-aliased line by setting pixels to zero.  On entry,
     // all non-zero pixels are between <x0> and <x1>.  This function
     // will update <x0> and <x1>.
-    void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y) const;
+    void clipAALine(SplashBitmap *aaBuf, const int *x0, const int *x1, int y) const;
 
 private:
     void computeIntersections(const SplashXPath &xPath);
