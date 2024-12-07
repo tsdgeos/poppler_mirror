@@ -652,13 +652,13 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
 
         printf("    Title:         %s\n", typeExp->c_str());
         printf("    Abbreviation:  %s\n", abbr->c_str());
-        if (part.get()) {
+        if (part) {
             printf("    Subtitle:      Part %d: %s\n", subpart, part->c_str());
         } else {
             printf("    Subtitle:      Part %d\n", subpart);
         }
         printf("    Standard:      %s-%d\n", typeExp->toStr().substr(0, 9).c_str(), subpart);
-        if (confExp.get()) {
+        if (confExp) {
             printf("    Conformance:   %s\n", confExp->c_str());
         }
     }
