@@ -339,7 +339,6 @@ static void sleep_milliseconds(int milliseconds)
             return;
         }
     }
-    return;
 #endif
 }
 

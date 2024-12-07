@@ -122,10 +122,7 @@ void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *s
     drawImageMask(state, ref, str, width, height, invert, false, inlineImg);
 }
 
-void OutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
-{
-    return;
-}
+void OutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) { }
 
 void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {

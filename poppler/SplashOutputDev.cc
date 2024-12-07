@@ -2085,7 +2085,6 @@ err:
     if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
     }
-    return;
 }
 
 void SplashOutputDev::stroke(GfxState *state)

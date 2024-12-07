@@ -656,7 +656,6 @@ void ExponentialFunction::transform(const double *in, double *out) const
             }
         }
     }
-    return;
 }
 
 //------------------------------------------------------------------------
@@ -762,7 +761,6 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
 
     n = funcs[0]->getOutputSize();
     ok = true;
-    return;
 }
 
 StitchingFunction::StitchingFunction(const StitchingFunction *func) : Function(func)
