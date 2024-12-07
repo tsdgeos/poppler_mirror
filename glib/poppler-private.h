@@ -21,7 +21,7 @@
 #    include <SignatureInfo.h>
 #endif
 
-#define SUPPORTED_ROTATION(r) (r == 90 || r == 180 || r == 270)
+#define SUPPORTED_ROTATION(r) ((r) == 90 || (r) == 180 || (r) == 270)
 
 struct _PopplerDocument
 {

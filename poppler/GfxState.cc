@@ -168,7 +168,7 @@ static const char *gfxColorSpaceModeNames[] = { "DeviceGray", "CalGray", "Device
 static const std::map<unsigned int, unsigned int>::size_type CMSCACHE_LIMIT = 2048;
 
 #    include <lcms2.h>
-#    define LCMS_FLAGS cmsFLAGS_NOOPTIMIZE | cmsFLAGS_BLACKPOINTCOMPENSATION
+#    define LCMS_FLAGS (cmsFLAGS_NOOPTIMIZE | cmsFLAGS_BLACKPOINTCOMPENSATION)
 
 static void lcmsprofiledeleter(void *profile)
 {

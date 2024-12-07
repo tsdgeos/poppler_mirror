@@ -27,8 +27,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#define ascii_isspace(c) (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')
-#define ascii_isdigit(c) (c >= '0' && c <= '9')
+#define ascii_isspace(c) ((c) == ' ' || (c) == '\f' || (c) == '\n' || (c) == '\r' || (c) == '\t' || (c) == '\v')
+#define ascii_isdigit(c) ((c) >= '0' && (c) <= '9')
 
 double gatof(const char *nptr)
 {

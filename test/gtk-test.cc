@@ -90,7 +90,7 @@ typedef struct
 // Constants and macros
 //------------------------------------------------------------------------
 
-#define xoutRound(x) ((int)(x + 0.5))
+#define xoutRound(x) ((int)((x) + 0.5))
 
 //------------------------------------------------------------------------
 // GDKSplashOutputDev

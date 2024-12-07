@@ -23,7 +23,7 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
-#define ZERO_CROPBOX(c) (!(c && (c->x1 > 0.01 || c->y1 > 0.01)))
+#define ZERO_CROPBOX(c) (!((c) && ((c)->x1 > 0.01 || (c)->y1 > 0.01)))
 
 const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_annot, Page **page_out);
 AnnotStampImageHelper *_poppler_convert_cairo_image_to_stamp_image_helper(cairo_surface_t *image, PDFDoc *doc, GError **error);
