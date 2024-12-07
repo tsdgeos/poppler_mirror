@@ -677,7 +677,7 @@ static void poppler_document_finalize(GObject *object)
     poppler_document_layers_free(document);
     delete document->output_dev;
     delete document->doc;
-    delete document->initer.release();
+    document->initer.reset();
 
     G_OBJECT_CLASS(poppler_document_parent_class)->finalize(object);
 }
