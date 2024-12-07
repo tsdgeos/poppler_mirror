@@ -2582,7 +2582,7 @@ void TextPage::beginWord(const GfxState *state)
 
     // compute the rotation
     state->getFontTransMat(&m[0], &m[1], &m[2], &m[3]);
-    std::shared_ptr<GfxFont> gfxFont = state->getFont();
+    const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
     if (gfxFont && gfxFont->getType() == fontType3) {
         fontm = state->getFont()->getFontMatrix();
         m2[0] = fontm[0] * m[0] + fontm[1] * m[2];
