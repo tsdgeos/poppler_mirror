@@ -1939,7 +1939,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
 
 static std::string poppler_font_description_to_style(PopplerFontDescription *font_desc)
 {
-    std::string style = "";
+    std::string style;
     std::function<void(const char *)> add_style = [&style](const char *a) {
         if (strcmp(a, "") != 0) {
             if (!style.empty()) {
