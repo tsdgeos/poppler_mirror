@@ -44,7 +44,7 @@ Object Object::copy() const
     CHECK_NOT_DEAD;
 
     Object obj;
-    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object));
+    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
 
     switch (type) {
     case objString:
@@ -76,7 +76,7 @@ Object Object::deepCopy() const
     CHECK_NOT_DEAD;
 
     Object obj;
-    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object));
+    std::memcpy(reinterpret_cast<void *>(&obj), this, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
 
     switch (type) {
     case objString:
