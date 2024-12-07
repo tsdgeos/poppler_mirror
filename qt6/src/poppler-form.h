@@ -778,7 +778,7 @@ public:
     ~AsyncObject() override;
 Q_SIGNALS:
     void done();
-public Q_SLOTS:
+
 private:
     std::unique_ptr<AsyncObjectPrivate> d;
 };

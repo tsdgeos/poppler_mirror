@@ -46,7 +46,7 @@ public:
     void loadDocument(const QString &file);
     void closeDocument();
 
-private Q_SLOTS:
+private:
     void slotOpenFile();
     void slotSaveCopy();
     void slotAbout();
@@ -55,7 +55,6 @@ private Q_SLOTS:
     void slotToggleGfxAA(bool value);
     void slotRenderBackend(QAction *act);
 
-private:
     void setPage(int page);
     int page() const;
     void xrefReconstructedHandler(Poppler::Document *doc);

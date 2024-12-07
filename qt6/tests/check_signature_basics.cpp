@@ -25,8 +25,8 @@ class TestSignatureBasics : public QObject
 public:
     explicit TestSignatureBasics(QObject *parent = nullptr) : QObject(parent) { }
 
-private:
     std::unique_ptr<PDFDoc> doc;
+
 private Q_SLOTS:
     void init();
     void initTestCase_data();

@@ -39,7 +39,6 @@ public:
 private:
     void parse(const Object *tree, RefRecursionChecker &parsedRefs);
 
-private:
     struct Interval
     {
         Interval(Object *dict, int baseA);

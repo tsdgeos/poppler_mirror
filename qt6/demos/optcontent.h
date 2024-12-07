@@ -38,10 +38,9 @@ public:
 protected:
     void fillInfo() override;
 
-private Q_SLOTS:
+private:
     void reloadImage();
 
-private:
     QTreeView *m_view;
 };
 
