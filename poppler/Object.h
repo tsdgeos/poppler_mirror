@@ -291,7 +291,7 @@ public:
 
     Object(Object &&other) noexcept
     {
-        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object));
+        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
         other.type = objDead;
     }
 
@@ -299,7 +299,7 @@ public:
     {
         free();
 
-        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object));
+        std::memcpy(reinterpret_cast<void *>(this), &other, sizeof(Object)); // NOLINT(bugprone-undefined-memory-manipulation)
         other.type = objDead;
 
         return *this;
