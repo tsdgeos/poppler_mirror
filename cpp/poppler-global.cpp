@@ -58,7 +58,10 @@ struct MiniIconv
     }
     MiniIconv(const MiniIconv &) = delete;
     MiniIconv &operator=(const MiniIconv &) = delete;
-    bool is_valid() const { return i_ != (iconv_t)-1; }
+    bool is_valid() const
+    {
+        return i_ != (iconv_t)-1; // NOLINT(performance-no-int-to-ptr)
+    }
     explicit operator iconv_t() const { return i_; }
     iconv_t i_;
 };
