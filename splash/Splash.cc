@@ -196,7 +196,7 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaBlend[] = { splashPipeResu
 
 //------------------------------------------------------------------------
 
-static void blendXor(SplashColorPtr src, SplashColorPtr dest, SplashColorPtr blend, SplashColorMode cm)
+static void blendXor(SplashColorPtr src, SplashColorPtr dest, SplashColorPtr blend, SplashColorMode cm) // NOLINT(readability-non-const-parameter) Needs to be of type SplashBlendFunc
 {
     int i;
 
