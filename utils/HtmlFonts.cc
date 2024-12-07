@@ -157,7 +157,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
             italic = true;
         }
 
-        familyName = fontname->c_str();
+        familyName = *fontname;
         removeStyleSuffix(familyName);
     } else {
         FontName = new GooString(defaultFamilyName);
