@@ -61,7 +61,7 @@ static Poppler::Page *loadRandomPage(Poppler::Document *document)
     return loadPage(document, qrand() % document->numPages());
 }
 
-SillyThread::SillyThread(Poppler::Document *document, QObject *parent) : QThread(parent), m_document(document), m_pages()
+SillyThread::SillyThread(Poppler::Document *document, QObject *parent) : QThread(parent), m_document(document)
 {
     m_pages.reserve(m_document->numPages());
 

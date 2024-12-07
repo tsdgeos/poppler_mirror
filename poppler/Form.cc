@@ -2220,7 +2220,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field), signature {}
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field)
 {
     signature_info = new SignatureInfo();
     parseInfo();

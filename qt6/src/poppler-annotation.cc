@@ -1568,7 +1568,7 @@ void Annotation::setAnnotationAppearance(const AnnotationAppearance &annotationA
 // END Annotation implementation
 
 /** TextAnnotation [Annotation] */
-TextAnnotationPrivate::TextAnnotationPrivate() : AnnotationPrivate(), textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(TextAnnotation::InplaceAlignLeft), inplaceIntent(TextAnnotation::Unknown) { }
+TextAnnotationPrivate::TextAnnotationPrivate() : textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(TextAnnotation::InplaceAlignLeft), inplaceIntent(TextAnnotation::Unknown) { }
 
 Annotation *TextAnnotationPrivate::makeAlias()
 {
@@ -1970,7 +1970,7 @@ public:
 };
 
 LineAnnotationPrivate::LineAnnotationPrivate()
-    : AnnotationPrivate(), lineStartStyle(LineAnnotation::None), lineEndStyle(LineAnnotation::None), lineClosed(false), lineShowCaption(false), lineLeadingFwdPt(0), lineLeadingBackPt(0), lineIntent(LineAnnotation::Unknown)
+    : lineStartStyle(LineAnnotation::None), lineEndStyle(LineAnnotation::None), lineClosed(false), lineShowCaption(false), lineLeadingFwdPt(0), lineLeadingBackPt(0), lineIntent(LineAnnotation::Unknown)
 {
 }
 
@@ -2420,7 +2420,7 @@ public:
     QColor geomInnerColor;
 };
 
-GeomAnnotationPrivate::GeomAnnotationPrivate() : AnnotationPrivate(), geomType(GeomAnnotation::InscribedSquare) { }
+GeomAnnotationPrivate::GeomAnnotationPrivate() : geomType(GeomAnnotation::InscribedSquare) { }
 
 Annotation *GeomAnnotationPrivate::makeAlias()
 {
@@ -2541,7 +2541,7 @@ public:
     AnnotQuadrilaterals *toQuadrilaterals(const QList<HighlightAnnotation::Quad> &quads) const;
 };
 
-HighlightAnnotationPrivate::HighlightAnnotationPrivate() : AnnotationPrivate(), highlightType(HighlightAnnotation::Highlight) { }
+HighlightAnnotationPrivate::HighlightAnnotationPrivate() : highlightType(HighlightAnnotation::Highlight) { }
 
 Annotation *HighlightAnnotationPrivate::makeAlias()
 {
@@ -2729,7 +2729,7 @@ public:
     QImage stampCustomImage;
 };
 
-StampAnnotationPrivate::StampAnnotationPrivate() : AnnotationPrivate(), stampIconName(QStringLiteral("Draft")) { }
+StampAnnotationPrivate::StampAnnotationPrivate() : stampIconName(QStringLiteral("Draft")) { }
 
 Annotation *StampAnnotationPrivate::makeAlias()
 {
@@ -2929,7 +2929,7 @@ public:
     std::unique_ptr<::FormFieldSignature> field = nullptr;
 };
 
-SignatureAnnotationPrivate::SignatureAnnotationPrivate() : AnnotationPrivate() { }
+SignatureAnnotationPrivate::SignatureAnnotationPrivate() { }
 
 Annotation *SignatureAnnotationPrivate::makeAlias()
 {
@@ -3132,7 +3132,7 @@ public:
     std::vector<std::unique_ptr<AnnotPath>> toAnnotPaths(const QList<QVector<QPointF>> &paths);
 };
 
-InkAnnotationPrivate::InkAnnotationPrivate() : AnnotationPrivate() { }
+InkAnnotationPrivate::InkAnnotationPrivate() { }
 
 Annotation *InkAnnotationPrivate::makeAlias()
 {
@@ -3250,7 +3250,7 @@ public:
     QPointF linkRegion[4];
 };
 
-LinkAnnotationPrivate::LinkAnnotationPrivate() : AnnotationPrivate(), linkHLMode(LinkAnnotation::Invert) { }
+LinkAnnotationPrivate::LinkAnnotationPrivate() : linkHLMode(LinkAnnotation::Invert) { }
 
 LinkAnnotationPrivate::~LinkAnnotationPrivate() { }
 
@@ -3331,7 +3331,7 @@ public:
     CaretAnnotation::CaretSymbol symbol;
 };
 
-CaretAnnotationPrivate::CaretAnnotationPrivate() : AnnotationPrivate(), symbol(CaretAnnotation::None) { }
+CaretAnnotationPrivate::CaretAnnotationPrivate() : symbol(CaretAnnotation::None) { }
 
 Annotation *CaretAnnotationPrivate::makeAlias()
 {
@@ -3409,7 +3409,7 @@ public:
     EmbeddedFile *embfile;
 };
 
-FileAttachmentAnnotationPrivate::FileAttachmentAnnotationPrivate() : AnnotationPrivate(), icon(QStringLiteral("PushPin")), embfile(nullptr) { }
+FileAttachmentAnnotationPrivate::FileAttachmentAnnotationPrivate() : icon(QStringLiteral("PushPin")), embfile(nullptr) { }
 
 FileAttachmentAnnotationPrivate::~FileAttachmentAnnotationPrivate()
 {
@@ -3475,7 +3475,7 @@ public:
     SoundObject *sound;
 };
 
-SoundAnnotationPrivate::SoundAnnotationPrivate() : AnnotationPrivate(), icon(QStringLiteral("Speaker")), sound(nullptr) { }
+SoundAnnotationPrivate::SoundAnnotationPrivate() : icon(QStringLiteral("Speaker")), sound(nullptr) { }
 
 SoundAnnotationPrivate::~SoundAnnotationPrivate()
 {
@@ -3541,7 +3541,7 @@ public:
     QString title;
 };
 
-MovieAnnotationPrivate::MovieAnnotationPrivate() : AnnotationPrivate(), movie(nullptr) { }
+MovieAnnotationPrivate::MovieAnnotationPrivate() : movie(nullptr) { }
 
 MovieAnnotationPrivate::~MovieAnnotationPrivate()
 {
@@ -3607,7 +3607,7 @@ public:
     QString title;
 };
 
-ScreenAnnotationPrivate::ScreenAnnotationPrivate() : AnnotationPrivate(), action(nullptr) { }
+ScreenAnnotationPrivate::ScreenAnnotationPrivate() : action(nullptr) { }
 
 ScreenAnnotationPrivate::~ScreenAnnotationPrivate()
 {
