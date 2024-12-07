@@ -5,7 +5,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, 2024 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@
 class GooString;
 class PDFRectangle;
 
-#define PSTR(str) const_cast<char *>(str)
+#define PSTR(str) (const_cast<char *>(str))
 
 namespace poppler {
 

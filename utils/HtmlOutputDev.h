@@ -46,7 +46,7 @@
 #include "Catalog.h"
 #include "UnicodeMap.h"
 
-#define xoutRound(x) ((int)(x + 0.5))
+#define xoutRound(x) ((int)((x) + 0.5))
 
 #define DOCTYPE "<!DOCTYPE html>"
 

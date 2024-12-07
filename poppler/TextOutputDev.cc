@@ -138,7 +138,7 @@ double TextOutputDev::minColSpacing1_default = 0.7;
 
 // Minimum spacing between characters within a word, as a fraction of
 // the font size.
-#define minCharSpacing -0.5
+#define minCharSpacing (-0.5)
 
 // Maximum spacing between characters within a word, as a fraction of
 // the font size, when there is no obvious extra-wide character
@@ -164,7 +164,7 @@ double TextOutputDev::minColSpacing1_default = 0.7;
 
 // Min distance between baseline and underline (in points).
 //~ this should be font-size-dependent
-#define minUnderlineGap -2
+#define minUnderlineGap (-2)
 
 // Max distance between baseline and underline (in points).
 //~ this should be font-size-dependent

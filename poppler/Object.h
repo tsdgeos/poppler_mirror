@@ -48,7 +48,7 @@
 #include "poppler_private_export.h"
 
 #define OBJECT_TYPE_CHECK(wanted_type)                                                                                                                                                                                                         \
-    if (unlikely(type != wanted_type)) {                                                                                                                                                                                                       \
+    if (unlikely(type != (wanted_type))) {                                                                                                                                                                                                     \
         error(errInternal, 0,                                                                                                                                                                                                                  \
               "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
               "not the expected type {1:d}",                                                                                                                                                                                                   \
@@ -57,7 +57,7 @@
     }
 
 #define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2)                                                                                                                                                                                        \
-    if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2)) {                                                                                                                                                                    \
+    if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2))) {                                                                                                                                                                \
         error(errInternal, 0,                                                                                                                                                                                                                  \
               "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
               "not the expected type {1:d} or {2:d}",                                                                                                                                                                                          \
@@ -66,7 +66,7 @@
     }
 
 #define OBJECT_3TYPES_CHECK(wanted_type1, wanted_type2, wanted_type3)                                                                                                                                                                          \
-    if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2) && unlikely(type != wanted_type3)) {                                                                                                                                  \
+    if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2)) && unlikely(type != (wanted_type3))) {                                                                                                                            \
         error(errInternal, 0,                                                                                                                                                                                                                  \
               "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
               "not the expected type {1:d}, {2:d} or {3:d}",                                                                                                                                                                                   \

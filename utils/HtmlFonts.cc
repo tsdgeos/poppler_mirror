@@ -67,7 +67,7 @@ void removeStyleSuffix(std::string &familyName)
 
 }
 
-#define xoutRound(x) ((int)(x + 0.5))
+#define xoutRound(x) ((int)((x) + 0.5))
 extern bool xml;
 extern bool fontFullName;
 

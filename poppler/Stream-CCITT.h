@@ -31,7 +31,7 @@ struct CCITTCode
     short n;
 };
 
-#define ccittEOL -2
+#define ccittEOL (-2)
 
 //------------------------------------------------------------------------
 // 2D codes
