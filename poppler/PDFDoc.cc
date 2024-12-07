@@ -85,7 +85,6 @@
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"
-#include "poppler-config.h"
 #include "GlobalParams.h"
 #include "Page.h"
 #include "Catalog.h"

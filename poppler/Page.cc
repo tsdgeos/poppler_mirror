@@ -61,7 +61,6 @@
 #include "Error.h"
 #include "Page.h"
 #include "Catalog.h"
-#include "Form.h"
 
 //------------------------------------------------------------------------
 // PDFRectangle

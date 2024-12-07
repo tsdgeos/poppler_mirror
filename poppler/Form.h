@@ -40,7 +40,6 @@
 #include "CryptoSignBackend.h"
 #include "Object.h"
 #include "poppler_private_export.h"
-#include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 
 #include <ctime>
