@@ -1958,7 +1958,6 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned in
             getXRef()->setModifiedObject(&acroform, afObj->getRef());
         }
     }
-    return;
 }
 
 unsigned int PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, unsigned int numOffset, bool combine)

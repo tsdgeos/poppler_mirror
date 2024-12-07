@@ -63,7 +63,6 @@ void page_private::init_font_info_cache()
     }
 
     font_info_cache_initialized = true;
-    return;
 }
 
 /**

@@ -366,10 +366,7 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
     return {};
 }
 
-void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps)
-{
-    return;
-}
+void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) { }
 
 void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const
 {

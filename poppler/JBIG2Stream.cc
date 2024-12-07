@@ -2224,7 +2224,6 @@ codeTableError:
 
 eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
-    return;
 }
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,

@@ -4881,8 +4881,6 @@ void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const doubl
     } else if (transpGroup) {
         out->paintTransparencyGroup(state, bbox);
     }
-
-    return;
 }
 
 //------------------------------------------------------------------------
