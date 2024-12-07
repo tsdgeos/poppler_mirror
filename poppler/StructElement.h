@@ -332,7 +332,7 @@ public:
     //
     GooString *getText(bool recursive = true) const { return appendSubTreeText(nullptr, recursive); }
 
-    const TextSpanArray getTextSpans() const
+    TextSpanArray getTextSpans() const
     {
         if (!isContent()) {
             return TextSpanArray();
