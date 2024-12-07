@@ -37,7 +37,7 @@
 
 struct PopplerAttachmentPrivate
 {
-    Object obj_stream {};
+    Object obj_stream;
     GDateTime *mtime;
     GDateTime *ctime;
 };

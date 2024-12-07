@@ -51,7 +51,7 @@ public:
     PDFConverter::PDFOptions opts;
 };
 
-PDFConverterPrivate::PDFConverterPrivate() : BaseConverterPrivate(), opts(nullptr) { }
+PDFConverterPrivate::PDFConverterPrivate() : opts(nullptr) { }
 
 PDFConverterPrivate::~PDFConverterPrivate() = default;
 

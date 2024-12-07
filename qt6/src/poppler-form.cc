@@ -1140,7 +1140,7 @@ class AsyncObjectPrivate
 { /*Currently unused. Created for abi future proofing*/
 };
 
-AsyncObject::AsyncObject() : QObject(nullptr), d {} { }
+AsyncObject::AsyncObject() : QObject(nullptr) { }
 
 AsyncObject::~AsyncObject() = default;
 

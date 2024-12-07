@@ -538,7 +538,7 @@ static StructElement::Type nameToType(const char *name)
 // Attribute
 //------------------------------------------------------------------------
 
-Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), value(), hidden(false), formatted(nullptr)
+Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), hidden(false), formatted(nullptr)
 {
     assert(valueA);
     value = valueA->copy();
@@ -548,8 +548,6 @@ Attribute::Attribute(Type typeA, Object *valueA)
     : type(typeA),
       owner(UserProperties), // TODO: Determine corresponding owner from Type
       revision(0),
-      name(),
-      value(),
       hidden(false),
       formatted(nullptr)
 {

@@ -61,19 +61,7 @@ public:
 };
 
 PSConverterPrivate::PSConverterPrivate()
-    : BaseConverterPrivate(),
-      hDPI(72),
-      vDPI(72),
-      rotate(0),
-      paperWidth(-1),
-      paperHeight(-1),
-      marginRight(0),
-      marginBottom(0),
-      marginLeft(0),
-      marginTop(0),
-      opts(PSConverter::Printing),
-      pageConvertedCallback(nullptr),
-      pageConvertedPayload(nullptr)
+    : hDPI(72), vDPI(72), rotate(0), paperWidth(-1), paperHeight(-1), marginRight(0), marginBottom(0), marginLeft(0), marginTop(0), opts(PSConverter::Printing), pageConvertedCallback(nullptr), pageConvertedPayload(nullptr)
 {
 }
 
