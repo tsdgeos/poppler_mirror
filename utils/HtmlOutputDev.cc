@@ -1202,9 +1202,7 @@ HtmlOutputDev::~HtmlOutputDev()
             fclose(page);
         }
     }
-    if (pages) {
-        delete pages;
-    }
+    delete pages;
 }
 
 void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)

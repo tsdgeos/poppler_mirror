@@ -2245,15 +2245,9 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         codeToGID[code] = gid;
     }
     *codeToGIDLen = n;
-    if (humap != nullptr) {
-        delete[] humap;
-    }
-    if (tumap != nullptr) {
-        delete[] tumap;
-    }
-    if (vumap != nullptr) {
-        delete[] vumap;
-    }
+    delete[] humap;
+    delete[] tumap;
+    delete[] vumap;
     return codeToGID;
 }
 

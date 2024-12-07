@@ -6524,10 +6524,7 @@ GfxState::~GfxState()
             delete transfer[i];
         }
     }
-    if (path) {
-        // this gets set to NULL by restore()
-        delete path;
-    }
+    delete path;
 }
 
 // Used for copy();

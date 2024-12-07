@@ -405,7 +405,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
 
             standaloneFields.push_back(field);
 
-        } else if (field) {
+        } else {
             delete field;
         }
     }

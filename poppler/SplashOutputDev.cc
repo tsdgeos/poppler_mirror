@@ -1287,15 +1287,9 @@ SplashOutputDev::~SplashOutputDev()
     for (i = 0; i < nT3Fonts; ++i) {
         delete t3FontCache[i];
     }
-    if (fontEngine) {
-        delete fontEngine;
-    }
-    if (splash) {
-        delete splash;
-    }
-    if (bitmap) {
-        delete bitmap;
-    }
+    delete fontEngine;
+    delete splash;
+    delete bitmap;
     delete textClipPath;
 }
 
@@ -1304,9 +1298,7 @@ void SplashOutputDev::startDoc(PDFDoc *docA)
     int i;
 
     doc = docA;
-    if (fontEngine) {
-        delete fontEngine;
-    }
+    delete fontEngine;
     fontEngine = new SplashFontEngine(enableFreeType, enableFreeTypeHinting, enableSlightHinting, getFontAntialias() && colorMode != splashModeMono1);
     for (i = 0; i < nT3Fonts; ++i) {
         delete t3FontCache[i];
@@ -2263,9 +2255,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
         splash->setStrokeAdjust(strokeAdjust);
     }
 
-    if (path) {
-        delete path;
-    }
+    delete path;
 }
 
 bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen)

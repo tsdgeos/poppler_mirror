@@ -1013,9 +1013,7 @@ DeviceNRecoder::DeviceNRecoder(Stream *strA, int widthA, int heightA, GfxImageCo
 
 DeviceNRecoder::~DeviceNRecoder()
 {
-    if (imgStr) {
-        delete imgStr;
-    }
+    delete imgStr;
     if (str->isEncoder()) {
         delete str;
     }
@@ -1512,9 +1510,7 @@ PSOutputDev::~PSOutputDev()
         }
 #endif
     }
-    if (embFontList) {
-        delete embFontList;
-    }
+    delete embFontList;
     if (font8Info) {
         for (i = 0; i < font8InfoLen; ++i) {
             gfree(font8Info[i].codeToGID);
@@ -1523,9 +1519,7 @@ PSOutputDev::~PSOutputDev()
     }
     if (font16Enc) {
         for (i = 0; i < font16EncLen; ++i) {
-            if (font16Enc[i].enc) {
-                delete font16Enc[i].enc;
-            }
+            delete font16Enc[i].enc;
         }
         gfree(font16Enc);
     }
@@ -5928,9 +5922,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
     if (useCompressed) {
         writePS(s->c_str());
     }
-    if (s) {
-        delete s;
-    }
+    delete s;
 
     if (mode == psModeForm || inType3Char || preloadImagesForms) {
 
@@ -6099,9 +6091,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         if (maskUseCompressed) {
             maskFilters->append(s);
         }
-        if (s) {
-            delete s;
-        }
+        delete s;
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n", ref->getRefNum(), ref->getRefGen());
         } else {
@@ -6320,9 +6310,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     if (useCompressed) {
         writePS(s->c_str());
     }
-    if (s) {
-        delete s;
-    }
+    delete s;
 
     // end of image (data) dictionary
     writePS(">>\n");

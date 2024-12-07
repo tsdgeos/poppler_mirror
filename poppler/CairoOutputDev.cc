@@ -213,9 +213,7 @@ CairoOutputDev::~CairoOutputDev()
     if (textPage) {
         textPage->decRefCnt();
     }
-    if (actualText) {
-        delete actualText;
-    }
+    delete actualText;
 }
 
 void CairoOutputDev::setCairo(cairo_t *c)
@@ -252,9 +250,7 @@ void CairoOutputDev::setTextPage(TextPage *text)
     if (textPage) {
         textPage->decRefCnt();
     }
-    if (actualText) {
-        delete actualText;
-    }
+    delete actualText;
     if (text) {
         textPage = text;
         textPage->incRefCnt();
@@ -281,9 +277,7 @@ void CairoOutputDev::startDoc(PDFDoc *docA, CairoFontEngine *parentFontEngine)
     if (parentFontEngine) {
         fontEngine = parentFontEngine;
     } else {
-        if (fontEngine) {
-            delete fontEngine;
-        }
+        delete fontEngine;
         fontEngine = new CairoFontEngine(ft_lib);
         fontEngine_owner = true;
     }
