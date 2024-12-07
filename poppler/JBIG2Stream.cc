@@ -1014,7 +1014,7 @@ JBIG2SymbolDict::~JBIG2SymbolDict()
     for (i = 0; i < size; ++i) {
         delete bitmaps[i];
     }
-    gfree(bitmaps);
+    gfree(static_cast<void *>(bitmaps));
     delete genericRegionStats;
     delete refinementRegionStats;
 }
@@ -1061,7 +1061,7 @@ JBIG2PatternDict::~JBIG2PatternDict()
     for (i = 0; i < size; ++i) {
         delete bitmaps[i];
     }
-    gfree(bitmaps);
+    gfree(static_cast<void *>(bitmaps));
 }
 
 //------------------------------------------------------------------------
@@ -1862,7 +1862,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     for (i = 0; i < numNewSyms; ++i) {
         delete bitmaps[numInputSyms + i];
     }
-    gfree(bitmaps);
+    gfree(static_cast<void *>(bitmaps));
     if (symWidths) {
         gfree(symWidths);
     }
@@ -1889,7 +1889,7 @@ syntaxError:
             delete bitmaps[numInputSyms + i];
         }
     }
-    gfree(bitmaps);
+    gfree(static_cast<void *>(bitmaps));
     if (symWidths) {
         gfree(symWidths);
     }
@@ -2134,7 +2134,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     if (huff) {
         symCodeTab = (JBIG2HuffmanTable *)gmallocn_checkoverflow(numSyms + 1, sizeof(JBIG2HuffmanTable));
         if (!symCodeTab) {
-            gfree(syms);
+            gfree(static_cast<void *>(syms));
             return;
         }
         for (i = 0; i < numSyms; ++i) {
@@ -2175,7 +2175,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
 
     if (!huff) {
         if (!resetIntStats(symCodeLen)) {
-            gfree(syms);
+            gfree(static_cast<void *>(syms));
             return;
         }
         arithDecoder->start();
@@ -2187,7 +2187,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     bitmap = readTextRegion(huff, refine, w, h, numInstances, logStrips, numSyms, symCodeTab, symCodeLen, syms, defPixel, combOp, transposed, refCorner, sOffset, huffFSTable, huffDSTable, huffDTTable, huffRDWTable, huffRDHTable,
                             huffRDXTable, huffRDYTable, huffRSizeTable, templ, atx, aty);
 
-    gfree(syms);
+    gfree(static_cast<void *>(syms));
 
     if (bitmap) {
         // combine the region bitmap into the page bitmap
@@ -2215,7 +2215,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
 
 codeTableError:
     error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-    gfree(syms);
+    gfree(static_cast<void *>(syms));
     return;
 
 eofError:

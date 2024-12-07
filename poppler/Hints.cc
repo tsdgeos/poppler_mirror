@@ -161,7 +161,7 @@ Hints::~Hints()
             gfree(sharedObjectId[i]);
         }
     }
-    gfree(sharedObjectId);
+    gfree(static_cast<void *>(sharedObjectId));
     gfree(numSharedObject);
 
     gfree(groupLength);

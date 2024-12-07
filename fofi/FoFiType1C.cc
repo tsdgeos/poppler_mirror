@@ -92,7 +92,7 @@ FoFiType1C::~FoFiType1C()
         for (i = 0; i < 256; ++i) {
             gfree(encoding[i]);
         }
-        gfree(encoding);
+        gfree(static_cast<void *>(encoding));
     }
     if (privateDicts) {
         gfree(privateDicts);

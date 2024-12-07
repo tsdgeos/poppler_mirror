@@ -307,7 +307,7 @@ PDFDoc::~PDFDoc()
                 delete pageCache[i];
             }
         }
-        gfree(pageCache);
+        gfree(static_cast<void *>(pageCache));
     }
     delete secHdlr;
     delete outline;

@@ -6245,7 +6245,7 @@ GfxPath::~GfxPath()
     for (i = 0; i < n; ++i) {
         delete subpaths[i];
     }
-    gfree(subpaths);
+    gfree(static_cast<void *>(subpaths));
 }
 
 // Used for copy().
@@ -6276,7 +6276,7 @@ void GfxPath::lineTo(double x, double y)
     if (justMoved || (n > 0 && subpaths[n - 1]->isClosed())) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(subpaths, size, sizeof(GfxSubpath *));
+            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
         }
         if (justMoved) {
             subpaths[n] = new GfxSubpath(firstX, firstY);
@@ -6294,7 +6294,7 @@ void GfxPath::curveTo(double x1, double y1, double x2, double y2, double x3, dou
     if (justMoved || (n > 0 && subpaths[n - 1]->isClosed())) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(subpaths, size, sizeof(GfxSubpath *));
+            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
         }
         if (justMoved) {
             subpaths[n] = new GfxSubpath(firstX, firstY);
@@ -6314,7 +6314,7 @@ void GfxPath::close()
     if (justMoved) {
         if (n >= size) {
             size *= 2;
-            subpaths = (GfxSubpath **)greallocn(subpaths, size, sizeof(GfxSubpath *));
+            subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
         }
         subpaths[n] = new GfxSubpath(firstX, firstY);
         ++n;
@@ -6329,7 +6329,7 @@ void GfxPath::append(GfxPath *path)
 
     if (n + path->n > size) {
         size = n + path->n;
-        subpaths = (GfxSubpath **)greallocn(subpaths, size, sizeof(GfxSubpath *));
+        subpaths = (GfxSubpath **)greallocn(static_cast<void *>(subpaths), size, sizeof(GfxSubpath *));
     }
     for (i = 0; i < path->n; ++i) {
         subpaths[n++] = path->subpaths[i]->copy();

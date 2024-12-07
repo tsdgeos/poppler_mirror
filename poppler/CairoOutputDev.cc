@@ -3636,14 +3636,14 @@ CairoImageOutputDev::~CairoImageOutputDev()
     for (i = 0; i < numImages; i++) {
         delete images[i];
     }
-    gfree(images);
+    gfree(static_cast<void *>(images));
 }
 
 void CairoImageOutputDev::saveImage(CairoImage *image)
 {
     if (numImages >= size) {
         size += 16;
-        images = (CairoImage **)greallocn(images, size, sizeof(CairoImage *));
+        images = (CairoImage **)greallocn(static_cast<void *>(images), size, sizeof(CairoImage *));
     }
     images[numImages++] = image;
 }

@@ -2410,7 +2410,7 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
         delete line_words;
     }
 
-    gfree(word_list);
+    gfree(static_cast<void *>(word_list));
 
     return TRUE;
 }
@@ -2561,7 +2561,7 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
         delete line_words;
     }
 
-    gfree(word_list);
+    gfree(static_cast<void *>(word_list));
 
     return g_list_reverse(attributes);
 }
