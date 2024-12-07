@@ -1527,9 +1527,7 @@ LZWStream::LZWStream(Stream *strA, int predictor, int columns, int colors, int b
 
 LZWStream::~LZWStream()
 {
-    if (pred) {
-        delete pred;
-    }
+    delete pred;
     delete str;
 }
 
@@ -4177,9 +4175,7 @@ FlateStream::~FlateStream()
     if (distCodeTab.codes != fixedDistCodeTab.codes) {
         gfree(const_cast<FlateCode *>(distCodeTab.codes));
     }
-    if (pred) {
-        delete pred;
-    }
+    delete pred;
     delete str;
 }
 

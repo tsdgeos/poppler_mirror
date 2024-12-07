@@ -1277,18 +1277,10 @@ int main(int argc, char *argv[])
 
     // clean up
     delete cairoOut;
-    if (fileName) {
-        delete fileName;
-    }
-    if (outputName) {
-        delete outputName;
-    }
-    if (outputFileName) {
-        delete outputFileName;
-    }
-    if (imageFileName) {
-        delete imageFileName;
-    }
+    delete fileName;
+    delete outputName;
+    delete outputFileName;
+    delete imageFileName;
 
 #ifdef USE_CMS
     if (icc_data) {

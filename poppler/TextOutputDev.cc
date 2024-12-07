@@ -376,9 +376,7 @@ TextFontInfo::TextFontInfo(const GfxState *state)
 TextFontInfo::~TextFontInfo()
 {
 #ifdef TEXTOUT_WORD_LIST
-    if (fontName) {
-        delete fontName;
-    }
+    delete fontName;
 #endif
 }
 
@@ -4489,7 +4487,7 @@ void TextSelectionDumper::finishLine()
         }
 
         lines[nLines++] = words;
-    } else if (words) {
+    } else {
         delete words;
     }
     words = nullptr;
@@ -5628,9 +5626,7 @@ ActualText::ActualText(TextPage *out)
 
 ActualText::~ActualText()
 {
-    if (actualText) {
-        delete actualText;
-    }
+    delete actualText;
     text->decRefCnt();
 }
 
@@ -5653,9 +5649,7 @@ void ActualText::addChar(const GfxState *state, double x, double y, double dx, d
 
 void ActualText::begin(const GfxState *state, const GooString *t)
 {
-    if (actualText) {
-        delete actualText;
-    }
+    delete actualText;
     actualText = new GooString(t);
     actualTextNBytes = 0;
 }

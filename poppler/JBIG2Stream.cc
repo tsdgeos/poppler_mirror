@@ -1015,12 +1015,8 @@ JBIG2SymbolDict::~JBIG2SymbolDict()
         delete bitmaps[i];
     }
     gfree(bitmaps);
-    if (genericRegionStats) {
-        delete genericRegionStats;
-    }
-    if (refinementRegionStats) {
-        delete refinementRegionStats;
-    }
+    delete genericRegionStats;
+    delete refinementRegionStats;
 }
 
 //------------------------------------------------------------------------

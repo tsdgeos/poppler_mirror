@@ -87,9 +87,7 @@ FoFiType1C::~FoFiType1C()
 {
     int i;
 
-    if (name) {
-        delete name;
-    }
+    delete name;
     if (encoding && encoding != fofiType1StandardEncoding && encoding != fofiType1ExpertEncoding) {
         for (i = 0; i < 256; ++i) {
             gfree(encoding[i]);

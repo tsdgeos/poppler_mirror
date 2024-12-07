@@ -67,9 +67,7 @@ SplashFontEngine::~SplashFontEngine()
         delete font;
     }
 
-    if (ftEngine) {
-        delete ftEngine;
-    }
+    delete ftEngine;
 }
 
 SplashFontFile *SplashFontEngine::getFontFile(const SplashFontFileID &id)

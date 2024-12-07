@@ -335,9 +335,7 @@ int main(int argc, char *argv[])
     // write text file
     htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->c_str(), docTitle->c_str(), author ? author->c_str() : nullptr, keywords ? keywords->c_str() : nullptr, subject ? subject->c_str() : nullptr, date ? date->c_str() : nullptr,
                                 rawOrder, firstPage, doOutline);
-    if (date) {
-        delete date;
-    }
+    delete date;
 
     if ((complexMode || singleHtml) && !xml && !ignore) {
         // White paper color
