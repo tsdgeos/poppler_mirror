@@ -79,7 +79,6 @@
 #include "GfxState.h"
 #include "OutputDev.h"
 #include "Page.h"
-#include "Annot.h"
 #include "Error.h"
 #include "Gfx.h"
 #include "ProfileData.h"

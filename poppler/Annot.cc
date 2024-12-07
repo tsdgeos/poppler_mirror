@@ -84,7 +84,6 @@
 #include "CharCodeToUnicode.h"
 #include "PDFDocEncoding.h"
 #include "Form.h"
-#include "Error.h"
 #include "XRef.h"
 #include "Movie.h"
 #include "OptionalContent.h"
