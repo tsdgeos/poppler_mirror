@@ -124,8 +124,8 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
 
     int chunk = 0;
     while (chunk < numChunks) {
-        while (!chunkNeeded[chunk] && (++chunk != numChunks)) {
-            ;
+        while (chunk < numChunks && !chunkNeeded[chunk]) {
+            chunk++;
         }
         if (chunk == numChunks) {
             break;
@@ -133,8 +133,10 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
         startChunk = chunk;
         loadChunks.push_back(chunk);
 
-        while ((++chunk != numChunks) && chunkNeeded[chunk]) {
+        chunk++;
+        while (chunk < numChunks && chunkNeeded[chunk]) {
             loadChunks.push_back(chunk);
+            chunk++;
         }
         endChunk = chunk - 1;
 
