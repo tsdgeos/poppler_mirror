@@ -374,7 +374,7 @@ static SECStatus my_NSS_CMSArray_Add(PLArenaPool *poolp, void ***array, void *ob
         while (*p++) {
             n++;
         }
-        dest = static_cast<void **>(PORT_ArenaGrow(poolp, *array, (n + 1) * sizeof(void *), (n + 2) * sizeof(void *)));
+        dest = static_cast<void **>(PORT_ArenaGrow(poolp, static_cast<void *>(*array), (n + 1) * sizeof(void *), (n + 2) * sizeof(void *)));
     }
 
     if (dest == nullptr) {
@@ -839,7 +839,7 @@ NSSSignatureVerification::~NSSSignatureVerification()
             toFree = CMSSignedData->tempCerts;
         }
         NSS_CMSMessage_Destroy(CMSMessage);
-        free(toFree);
+        free(static_cast<void *>(toFree));
     }
 }
 
@@ -881,7 +881,7 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
 
         // tempCerts field needs to be filled for complete memory release by NSSCMSSignedData_Destroy
         signedData->tempCerts = (CERTCertificate **)gmallocn(i + 1, sizeof(CERTCertificate *));
-        memset(signedData->tempCerts, 0, (i + 1) * sizeof(CERTCertificate *));
+        memset(static_cast<void *>(signedData->tempCerts), 0, (i + 1) * sizeof(CERTCertificate *));
         // store the addresses of these temporary certificates for future release
         for (i = 0; signedData->rawCerts[i]; ++i) {
             signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);

@@ -795,7 +795,7 @@ StitchingFunction::~StitchingFunction()
             }
         }
     }
-    gfree(funcs);
+    gfree(static_cast<void *>(funcs));
     gfree(bounds);
     gfree(encode);
     gfree(scale);

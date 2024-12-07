@@ -1036,7 +1036,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                     }
 
                     numChildren++;
-                    children = (FormField **)greallocn(children, numChildren, sizeof(FormField *));
+                    children = (FormField **)greallocn(static_cast<void *>(children), numChildren, sizeof(FormField *));
                     children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, childRef, this, &usedParentsAux);
                 } else {
                     Object obj2 = childObj.dictLookup("Subtype");
@@ -1125,13 +1125,13 @@ FormField::~FormField()
             for (int i = 0; i < numChildren; i++) {
                 delete children[i];
             }
-            gfree(children);
+            gfree(static_cast<void *>(children));
         }
     } else {
         for (int i = 0; i < numChildren; ++i) {
             delete widgets[i];
         }
-        gfree(widgets);
+        gfree(static_cast<void *>(widgets));
     }
 
     delete fullyQualifiedName;
@@ -1183,7 +1183,7 @@ void FormField::_createWidget(Object *objA, Ref aref)
 {
     terminal = true;
     numChildren++;
-    widgets = (FormWidget **)greallocn(widgets, numChildren, sizeof(FormWidget *));
+    widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), numChildren, sizeof(FormWidget *));
     // ID = index in "widgets" table
     switch (type) {
     case formButton:
@@ -1486,7 +1486,7 @@ void FormFieldButton::print(int indent)
 void FormFieldButton::setNumSiblings(int num)
 {
     numSiblings = num;
-    siblings = (FormFieldButton **)greallocn(siblings, numSiblings, sizeof(FormFieldButton *));
+    siblings = (FormFieldButton **)greallocn(static_cast<void *>(siblings), numSiblings, sizeof(FormFieldButton *));
 }
 
 void FormFieldButton::fillChildrenSiblingsID()
@@ -1601,7 +1601,7 @@ void FormFieldButton::updateState(const char *state)
 FormFieldButton::~FormFieldButton()
 {
     if (siblings) {
-        gfree(siblings);
+        gfree(static_cast<void *>(siblings));
     }
 }
 
@@ -2686,7 +2686,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
             if (numFields >= size) {
                 size += 16;
-                rootFields = (FormField **)greallocn(rootFields, size, sizeof(FormField *));
+                rootFields = (FormField **)greallocn(static_cast<void *>(rootFields), size, sizeof(FormField *));
             }
 
             std::set<int> usedParents;
@@ -2720,7 +2720,7 @@ Form::~Form()
     for (i = 0; i < numFields; ++i) {
         delete rootFields[i];
     }
-    gfree(rootFields);
+    gfree(static_cast<void *>(rootFields));
     delete defaultResources;
 }
 
@@ -3254,7 +3254,7 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
 
     if (annots && !annots->getAnnots().empty() && form) {
         size = annots->getAnnots().size();
-        widgets = (FormWidget **)greallocn(widgets, size, sizeof(FormWidget *));
+        widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), size, sizeof(FormWidget *));
 
         /* For each entry in the page 'Annots' dict, try to find
            a matching form field */
@@ -3292,7 +3292,7 @@ void FormPageWidgets::addWidgets(const std::vector<FormField *> &addedWidgets, u
     }
 
     size += addedWidgets.size();
-    widgets = (FormWidget **)greallocn(widgets, size, sizeof(FormWidget *));
+    widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), size, sizeof(FormWidget *));
 
     for (auto frmField : addedWidgets) {
         FormWidget *frmWidget = frmField->getWidget(0);
@@ -3303,5 +3303,5 @@ void FormPageWidgets::addWidgets(const std::vector<FormField *> &addedWidgets, u
 
 FormPageWidgets::~FormPageWidgets()
 {
-    gfree(widgets);
+    gfree(static_cast<void *>(widgets));
 }

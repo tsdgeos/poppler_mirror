@@ -31,7 +31,7 @@ static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &c
 #ifndef G_OS_WIN32
                                         { "fd", 'f', 0, G_OPTION_ARG_NONE, &args_are_fds, "File descriptors", nullptr },
 #endif
-                                        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
+                                        { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, static_cast<void *>(&file_arguments), nullptr, "PDF-FILES…" },
                                         {} };
 
 static GList *view_list = nullptr;

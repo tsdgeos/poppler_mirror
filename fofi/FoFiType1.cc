@@ -63,7 +63,7 @@ FoFiType1::~FoFiType1()
         for (int i = 0; i < 256; ++i) {
             gfree(encoding[i]);
         }
-        gfree(encoding);
+        gfree(static_cast<void *>(encoding));
     }
 }
 

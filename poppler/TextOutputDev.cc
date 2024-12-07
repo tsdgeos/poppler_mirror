@@ -897,7 +897,7 @@ TextPool::~TextPool()
             delete word;
         }
     }
-    gfree(pool);
+    gfree(static_cast<void *>(pool));
 }
 
 int TextPool::getBaseIdx(double base) const
@@ -942,13 +942,13 @@ void TextPool::addWord(TextWord *word)
         for (baseIdx = newMinBaseIdx; baseIdx < minBaseIdx; ++baseIdx) {
             newPool[baseIdx - newMinBaseIdx] = nullptr;
         }
-        memcpy(&newPool[minBaseIdx - newMinBaseIdx], pool, (maxBaseIdx - minBaseIdx + 1) * sizeof(TextWord *));
-        gfree(pool);
+        memcpy(static_cast<void *>(&newPool[minBaseIdx - newMinBaseIdx]), static_cast<void *>(pool), (maxBaseIdx - minBaseIdx + 1) * sizeof(TextWord *));
+        gfree(static_cast<void *>(pool));
         pool = newPool;
         minBaseIdx = newMinBaseIdx;
     } else if (wordBaseIdx > maxBaseIdx) {
         newMaxBaseIdx = wordBaseIdx + 128;
-        TextWord **reallocatedPool = (TextWord **)greallocn(pool, newMaxBaseIdx - minBaseIdx + 1, sizeof(TextWord *), true /*checkoverflow*/, false /*free_pool*/);
+        TextWord **reallocatedPool = (TextWord **)greallocn(static_cast<void *>(pool), newMaxBaseIdx - minBaseIdx + 1, sizeof(TextWord *), true /*checkoverflow*/, false /*free_pool*/);
         if (!reallocatedPool) {
             error(errSyntaxWarning, -1, "new pool size would overflow");
             delete word;
@@ -1801,7 +1801,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
     for (line = lines, i = 0; line; line = line->next, ++i) {
         lineArray[i] = line;
     }
-    qsort(lineArray, nLines, sizeof(TextLine *), &TextLine::cmpXY);
+    qsort(static_cast<void *>(lineArray), nLines, sizeof(TextLine *), &TextLine::cmpXY);
 
     // column assignment
     nColumns = 0;
@@ -1876,7 +1876,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
             }
         }
     }
-    gfree(lineArray);
+    gfree(static_cast<void *>(lineArray));
 }
 
 void TextBlock::updatePriMinMax(const TextBlock *blk)
@@ -2354,11 +2354,11 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
                 }
             }
         }
-        qsort(wordArray, nWords, sizeof(TextWord *), &TextWord::cmpYX);
+        qsort(static_cast<void *>(wordArray), nWords, sizeof(TextWord *), &TextWord::cmpYX);
         for (i = 0; i < nWords; ++i) {
             words.push_back(wordArray[i]);
         }
-        gfree(wordArray);
+        gfree(static_cast<void *>(wordArray));
 
     } else {
         for (flow = text->flows; flow; flow = flow->next) {
@@ -2483,7 +2483,7 @@ void TextPage::clear()
             flows = flows->next;
             delete flow;
         }
-        gfree(blocks);
+        gfree(static_cast<void *>(blocks));
     }
     fonts.clear();
     underlines.clear();
@@ -3296,7 +3296,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
 
     // sort blocks into xy order for column assignment
     if (blocks) {
-        gfree(blocks);
+        gfree(static_cast<void *>(blocks));
     }
     if (physLayout && fixedPitch) {
 
@@ -3336,7 +3336,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
             blocks[i] = blk;
         }
         if (blocks) {
-            qsort(blocks, nBlocks, sizeof(TextBlock *), &TextBlock::cmpXYPrimaryRot);
+            qsort(static_cast<void *>(blocks), nBlocks, sizeof(TextBlock *), &TextBlock::cmpXYPrimaryRot);
         }
 
         // column assignment
@@ -4464,7 +4464,7 @@ TextSelectionDumper::~TextSelectionDumper()
         }
         delete lines[i];
     }
-    gfree(lines);
+    gfree(static_cast<void *>(lines));
 }
 
 void TextSelectionDumper::startLine()
@@ -4477,7 +4477,7 @@ void TextSelectionDumper::finishLine()
 {
     if (nLines == linesSize) {
         linesSize *= 2;
-        lines = (std::vector<TextWordSelection *> **)grealloc(lines, linesSize * sizeof(std::vector<TextWordSelection *> *));
+        lines = (std::vector<TextWordSelection *> **)grealloc(static_cast<void *>(lines), linesSize * sizeof(std::vector<TextWordSelection *> *));
     }
 
     if (words && !words->empty()) {
