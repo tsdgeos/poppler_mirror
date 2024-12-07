@@ -595,7 +595,7 @@ void Gfx::initDisplayProfile()
 
 Gfx::~Gfx()
 {
-    while (stateGuards.size()) {
+    while (!stateGuards.empty()) {
         popStateGuard();
     }
     if (!subPage) {
@@ -5334,7 +5334,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         state->setLineWidth(border->getWidth());
         out->updateLineWidth(state);
         const std::vector<double> &dash = border->getDash();
-        if (border->getStyle() == AnnotBorder::borderDashed && dash.size() > 0) {
+        if (border->getStyle() == AnnotBorder::borderDashed && !dash.empty()) {
             std::vector<double> dash2 = dash;
             state->setLineDash(std::move(dash2), 0);
             out->updateLineDash(state);

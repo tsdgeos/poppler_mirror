@@ -286,7 +286,7 @@ static Result parseString(std::string_view string)
         }
 
         string = partResult.value();
-        if (dnPair.first.size() && dnPair.second.size()) {
+        if (!dnPair.first.empty() && !dnPair.second.empty()) {
             result.emplace_back(std::move(dnPair));
         }
 

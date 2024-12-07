@@ -3612,7 +3612,7 @@ void CairoOutputDev::endMarkedContent(GfxState *state)
         return;
     }
 
-    if (markedContentStack.size() == 0) {
+    if (markedContentStack.empty()) {
         return;
     }
 

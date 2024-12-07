@@ -597,14 +597,12 @@ QDomDocument *Document::toc() const
     }
 
     const std::vector<::OutlineItem *> *items = outline->getItems();
-    if (!items || items->size() < 1) {
+    if (!items || items->empty()) {
         return nullptr;
     }
 
     QDomDocument *toc = new QDomDocument();
-    if (items->size() > 0) {
-        m_doc->addTocChildren(toc, toc, items);
-    }
+    m_doc->addTocChildren(toc, toc, items);
 
     return toc;
 }

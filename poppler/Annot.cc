@@ -620,7 +620,7 @@ Object AnnotBorderArray::writeToObject(XRef *xref) const
     borderArray->add(Object(verticalCorner));
     borderArray->add(Object(width));
 
-    if (dash.size() > 0) {
+    if (!dash.empty()) {
         Array *a = new Array(xref);
 
         for (double d : dash) {
@@ -709,7 +709,7 @@ Object AnnotBorderBS::writeToObject(XRef *xref) const
     Dict *dict = new Dict(xref);
     dict->set("W", Object(width));
     dict->set("S", Object(objName, getStyleName()));
-    if (style == borderDashed && dash.size() > 0) {
+    if (style == borderDashed && !dash.empty()) {
         Array *a = new Array(xref);
 
         for (double d : dash) {
@@ -4556,7 +4556,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                 tok = "/ZaDb";
             }
         }
-        if (tok.size() >= 1 && tok[0] == '/') {
+        if (!tok.empty() && tok[0] == '/') {
             if (!resources || !(font = resources->lookupFont(tok.c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok, forceZapfDingbats ? "ZapfDingbats" : "Helvetica");

@@ -535,7 +535,7 @@ LinkURI::LinkURI(const Object *uriObj, const std::optional<std::string> &baseURI
             // relative URI
             if (baseURI) {
                 uri = *baseURI;
-                if (uri.size() > 0) {
+                if (!uri.empty()) {
                     char c = uri.back();
                     if (c != '/' && c != '?') {
                         uri += '/';
@@ -719,7 +719,7 @@ LinkRendition::LinkRendition(const Object *obj)
                 operation = PlayRendition;
                 break;
             }
-        } else if (js == "") {
+        } else if (js.empty()) {
             error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");
         }
     }
