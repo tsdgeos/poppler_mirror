@@ -125,7 +125,7 @@ int main(int argc, char **argv)
     test.setWindowTitle(QStringLiteral("Poppler-Qt5 Test"));
     test.show(); // show it
 
-    return a.exec(); // start event loop
+    return QApplication::exec(); // start event loop
 }
 
 #include "test-password-qt5.moc"

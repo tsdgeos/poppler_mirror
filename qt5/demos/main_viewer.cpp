@@ -29,5 +29,5 @@ int main(int argc, char *argv[])
     if (args.count() > 1) {
         viewer->loadDocument(args.at(1));
     }
-    return app.exec();
+    return QApplication::exec();
 }

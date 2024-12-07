@@ -264,7 +264,7 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     SplashColorMode colorMode;
     SplashThinLineMode lineMode;
 
-    if (!d->conv_color_mode(d->image_format, colorMode) || !d->conv_line_mode(d->line_mode, lineMode)) {
+    if (!poppler::page_renderer_private::conv_color_mode(d->image_format, colorMode) || !poppler::page_renderer_private::conv_line_mode(d->line_mode, lineMode)) {
         return image();
     }
 

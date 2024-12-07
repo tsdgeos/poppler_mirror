@@ -203,7 +203,7 @@ int main(int argc, char **argv)
         test.display();
         test.show(); // show it
 
-        return a.exec(); // start event loop
+        return QApplication::exec(); // start event loop
     } else {
         Poppler::Page *page = doc->page(0);
 
@@ -211,7 +211,7 @@ int main(int argc, char **argv)
         l->show();
         delete page;
         delete doc;
-        return a.exec();
+        return QApplication::exec();
     }
 }
 
