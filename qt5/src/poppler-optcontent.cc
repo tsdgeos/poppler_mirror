@@ -350,7 +350,7 @@ bool OptContentModel::setData(const QModelIndex &index, const QVariant &value, i
             Q_FOREACH (OptContentItem *item, changedItems) {
                 indexes.append(d->indexFromItem(item, 0));
             }
-            std::stable_sort(indexes.begin(), indexes.end());
+            std::stable_sort(indexes.begin(), indexes.end()); // NOLINT(modernize-use-ranges) QModelIndexList doesn't support ranges requirements
             Q_FOREACH (const QModelIndex &changedIndex, indexes) {
                 emit dataChanged(changedIndex, changedIndex);
             }
@@ -411,7 +411,7 @@ void OptContentModel::applyLink(LinkOCGState *link)
         Q_FOREACH (OptContentItem *item, changedItems) {
             indexes.append(d->indexFromItem(item, 0));
         }
-        std::stable_sort(indexes.begin(), indexes.end());
+        std::stable_sort(indexes.begin(), indexes.end()); // NOLINT(modernize-use-ranges) Qt5 QModelIndexList doesn't support ranges requirements
         Q_FOREACH (const QModelIndex &changedIndex, indexes) {
             emit dataChanged(changedIndex, changedIndex);
         }

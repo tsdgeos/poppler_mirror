@@ -52,7 +52,7 @@
 
 SplashFontEngine::SplashFontEngine(bool enableFreeType, bool enableFreeTypeHinting, bool enableSlightHinting, bool aa)
 {
-    std::fill(fontCache.begin(), fontCache.end(), nullptr);
+    std::ranges::fill(fontCache, nullptr);
 
     if (enableFreeType) {
         ftEngine = SplashFTFontEngine::init(aa, enableFreeTypeHinting, enableSlightHinting);
@@ -243,7 +243,7 @@ SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile, const SplashCoor
     if (fontCache.back()) {
         delete fontCache.back();
     }
-    std::rotate(fontCache.begin(), fontCache.end() - 1, fontCache.end());
+    std::ranges::rotate(fontCache, fontCache.end() - 1);
 
     fontCache[0] = newFont;
     return fontCache[0];

@@ -745,9 +745,16 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
     }
 }
 
+struct EntryGooStringComparer
+{
+    static constexpr const GooString *get(const GooString *string) { return string; };
+    static constexpr const GooString *get(const auto &entry) { return &entry->name; }
+    auto operator()(const auto &lhs, const auto &rhs) { return get(lhs)->cmp(get(rhs)) < 0; }
+};
+
 Object NameTree::lookup(const GooString *name)
 {
-    auto entry = std::lower_bound(entries.begin(), entries.end(), name, [](const auto &element, const GooString *n) { return element->name.cmp(n) < 0; });
+    auto entry = std::ranges::lower_bound(entries, name, EntryGooStringComparer {});
 
     if (entry != entries.end() && (*entry)->name.cmp(name) == 0) {
         return (*entry)->value.fetch(xref);

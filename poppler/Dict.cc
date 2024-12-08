@@ -32,6 +32,7 @@
 #include <config.h>
 
 #include <algorithm>
+#include <ranges>
 
 #include "XRef.h"
 #include "Dict.h"
@@ -119,12 +120,12 @@ inline const Dict::DictEntry *Dict::find(const char *key) const
     }
 
     if (sorted) {
-        const auto pos = std::lower_bound(entries.begin(), entries.end(), key, CmpDictEntry {});
+        const auto pos = std::ranges::lower_bound(entries, key, std::less<> {}, &DictEntry::first);
         if (pos != entries.end() && pos->first == key) {
             return &*pos;
         }
     } else {
-        const auto pos = std::find_if(entries.rbegin(), entries.rend(), [key](const DictEntry &entry) { return entry.first == key; });
+        const auto pos = std::ranges::find_if(std::ranges::reverse_view(entries), [key](const DictEntry &entry) { return entry.first == key; });
         if (pos != entries.rend()) {
             return &*pos;
         }

@@ -345,7 +345,7 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     }
 
     std::string fmt = out_format;
-    std::transform(fmt.begin(), fmt.end(), fmt.begin(), tolower);
+    std::ranges::transform(fmt, fmt.begin(), tolower);
 
     std::unique_ptr<ImgWriter> w;
     const int actual_dpi = dpi == -1 ? 75 : dpi;
