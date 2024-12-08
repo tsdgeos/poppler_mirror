@@ -62,6 +62,7 @@
 #include <cfloat>
 #include <cctype>
 #include <algorithm>
+#include <functional>
 #if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
 #    include <io.h> // for _setmode
@@ -881,23 +882,14 @@ TextPool::TextPool()
 {
     minBaseIdx = 0;
     maxBaseIdx = -1;
-    pool = nullptr;
-    cursor = nullptr;
-    cursorBaseIdx = -1;
 }
 
 TextPool::~TextPool()
 {
-    int baseIdx;
-    TextWord *word, *word2;
-
-    for (baseIdx = minBaseIdx; baseIdx <= maxBaseIdx; ++baseIdx) {
-        for (word = pool[baseIdx - minBaseIdx]; word; word = word2) {
-            word2 = word->next;
-            delete word;
-        }
+    for (auto &wordList : pool) {
+        delete wordList.head;
     }
-    gfree(static_cast<void *>(pool));
+    pool.resize(0);
 }
 
 int TextPool::getBaseIdx(double base) const
@@ -912,74 +904,119 @@ int TextPool::getBaseIdx(double base) const
     return (int)baseIdxDouble;
 }
 
+void TextPool::sort()
+{
+    const auto SplitWordList = [](TextWord *list) -> TextWord * {
+        auto slow = list;
+        auto fast = list->next;
+
+        // fast is advanced twice as often as slow, so when
+        // fast reaches the end slow points to the midpoint.
+        while (fast) {
+            fast = fast->next;
+            if (fast) {
+                slow = slow->next;
+                fast = fast->next;
+            }
+        }
+        auto back = slow->next;
+        slow->next = nullptr;
+        return back;
+    };
+
+    const auto SortedMerge = [](TextWord *a, TextWord *b) {
+        if (!a) {
+            return b;
+        } else if (!b) {
+            return a;
+        }
+
+        TextWord *head = nullptr;
+        TextWord *cursor = nullptr;
+
+        if (a->primaryCmp(b) <= 0) {
+            head = cursor = a;
+            a = a->next;
+        } else {
+            head = cursor = b;
+            b = b->next;
+        }
+
+        while (a && b) {
+            if (a->primaryCmp(b) <= 0) {
+                cursor->next = a;
+                cursor = cursor->next;
+                a = a->next;
+            } else {
+                cursor->next = b;
+                cursor = cursor->next;
+                b = b->next;
+            }
+        }
+
+        if (a) {
+            cursor->next = a;
+        } else {
+            cursor->next = b;
+        }
+
+        return head;
+    };
+
+    const std::function<void(TextWord **)> SortWordList = [&](TextWord **list) -> void {
+        if ((*list == nullptr) || ((*list)->next == nullptr)) {
+            return;
+        }
+
+        TextWord *second = SplitWordList(*list);
+
+        SortWordList(list);
+        SortWordList(&second);
+
+        *list = SortedMerge(*list, second);
+    };
+
+    for (WordList &list : pool) {
+        if (!list.head) {
+            continue;
+        }
+        SortWordList(&list.head);
+    }
+}
+
 void TextPool::addWord(TextWord *word)
 {
-    int wordBaseIdx, newMinBaseIdx, newMaxBaseIdx, baseIdx;
-    TextWord *w0, *w1;
-
     // expand the array if needed
-    wordBaseIdx = (int)(word->base / textPoolStep);
+    int wordBaseIdx = (int)(word->base / textPoolStep);
+
     if (unlikely(wordBaseIdx <= INT_MIN + 128 || wordBaseIdx >= INT_MAX - 128)) {
         error(errSyntaxWarning, -1, "wordBaseIdx out of range");
         delete word;
         return;
     }
-    if (minBaseIdx > maxBaseIdx) {
+
+    if (pool.empty()) {
         minBaseIdx = wordBaseIdx - 128;
         maxBaseIdx = wordBaseIdx + 128;
-        pool = (TextWord **)gmallocn(maxBaseIdx - minBaseIdx + 1, sizeof(TextWord *));
-        for (baseIdx = minBaseIdx; baseIdx <= maxBaseIdx; ++baseIdx) {
-            pool[baseIdx - minBaseIdx] = nullptr;
-        }
-    } else if (wordBaseIdx < minBaseIdx) {
-        newMinBaseIdx = wordBaseIdx - 128;
-        TextWord **newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1, sizeof(TextWord *));
-        if (unlikely(!newPool)) {
-            error(errSyntaxWarning, -1, "newPool would overflow");
-            delete word;
-            return;
-        }
-        for (baseIdx = newMinBaseIdx; baseIdx < minBaseIdx; ++baseIdx) {
-            newPool[baseIdx - newMinBaseIdx] = nullptr;
-        }
-        memcpy(static_cast<void *>(&newPool[minBaseIdx - newMinBaseIdx]), static_cast<void *>(pool), (maxBaseIdx - minBaseIdx + 1) * sizeof(TextWord *));
-        gfree(static_cast<void *>(pool));
-        pool = newPool;
-        minBaseIdx = newMinBaseIdx;
-    } else if (wordBaseIdx > maxBaseIdx) {
-        newMaxBaseIdx = wordBaseIdx + 128;
-        TextWord **reallocatedPool = (TextWord **)greallocn(static_cast<void *>(pool), newMaxBaseIdx - minBaseIdx + 1, sizeof(TextWord *), true /*checkoverflow*/, false /*free_pool*/);
-        if (!reallocatedPool) {
-            error(errSyntaxWarning, -1, "new pool size would overflow");
-            delete word;
-            return;
-        }
-        pool = reallocatedPool;
-        for (baseIdx = maxBaseIdx + 1; baseIdx <= newMaxBaseIdx; ++baseIdx) {
-            pool[baseIdx - minBaseIdx] = nullptr;
-        }
-        maxBaseIdx = newMaxBaseIdx;
+        pool.resize(257);
+    }
+    while (wordBaseIdx < minBaseIdx) {
+        pool.insert(pool.begin(), 128, {});
+        minBaseIdx -= 128;
+    }
+    while (wordBaseIdx > maxBaseIdx) {
+        pool.insert(pool.end(), 128, {});
+        maxBaseIdx += 128;
     }
 
-    // insert the new word
-    if (cursor && wordBaseIdx == cursorBaseIdx && word->primaryCmp(cursor) >= 0) {
-        w0 = cursor;
-        w1 = cursor->next;
+    // append the new word
+    auto &wordList = pool[wordBaseIdx - minBaseIdx];
+    if (wordList.tail) {
+        wordList.tail->next = word;
     } else {
-        w0 = nullptr;
-        w1 = pool[wordBaseIdx - minBaseIdx];
+        wordList.head = word;
     }
-    for (; w1 && word->primaryCmp(w1) > 0; w0 = w1, w1 = w1->next) {
-        ;
-    }
-    word->next = w1;
-    if (w0) {
-        w0->next = word;
-    } else {
-        pool[wordBaseIdx - minBaseIdx] = word;
-    }
-    cursor = word;
-    cursorBaseIdx = wordBaseIdx;
+    wordList.tail = word;
 }
 
 //------------------------------------------------------------------------
@@ -1610,6 +1647,9 @@ void TextBlock::addWord(TextWord *word)
 
 void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
 {
+    // Sort words topologically before coalescing
+    pool->sort();
+
     // discard duplicated text (fake boldface, drop shadows)
     for (int idx0 = pool->minBaseIdx; idx0 <= pool->maxBaseIdx; ++idx0) {
         // Get the first LHS word from the pool
@@ -2522,6 +2562,11 @@ void TextPage::endPage()
 {
     if (curWord) {
         endWord();
+    }
+    for (std::unique_ptr<TextPool> &pool : pools) {
+        if (pool) {
+            pool->sort();
+        }
     }
 }
 

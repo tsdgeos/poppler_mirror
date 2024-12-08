@@ -272,20 +272,23 @@ public:
     TextPool(const TextPool &) = delete;
     TextPool &operator=(const TextPool &) = delete;
 
-    TextWord *getPool(int baseIdx) { return pool[baseIdx - minBaseIdx]; }
-    void setPool(int baseIdx, TextWord *p) { pool[baseIdx - minBaseIdx] = p; }
+    TextWord *getPool(int baseIdx) { return pool[baseIdx - minBaseIdx].head; }
+    void setPool(int baseIdx, TextWord *p) { pool[baseIdx - minBaseIdx].head = p; }
 
     int getBaseIdx(double base) const;
 
     void addWord(TextWord *word);
+    void sort();
 
 private:
     int minBaseIdx; // min baseline bucket index
     int maxBaseIdx; // max baseline bucket index
-    TextWord **pool; // array of linked lists, one for each
-                     //   baseline value (multiple of 4 pts)
-    TextWord *cursor; // pointer to last-accessed word
-    int cursorBaseIdx; // baseline bucket index of last-accessed word
+    struct WordList
+    {
+        TextWord *head = nullptr;
+        TextWord *tail = nullptr;
+    };
+    std::vector<WordList> pool;
 
     friend class TextBlock;
     friend class TextPage;
