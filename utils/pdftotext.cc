@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
                 return 2;
             }
         }
-        fputs("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">", f);
+        fputs(R"(<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">)", f);
         fputs("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n", f);
         fputs("<head>\n", f);
         info = doc->getDocInfo();
@@ -312,13 +312,13 @@ int main(int argc, char *argv[])
             } else {
                 fputs("<title></title>\n", f);
             }
-            printInfoString(f, info.getDict(), "Subject", "<meta name=\"Subject\" content=\"", "\"/>\n", uMap);
-            printInfoString(f, info.getDict(), "Keywords", "<meta name=\"Keywords\" content=\"", "\"/>\n", uMap);
-            printInfoString(f, info.getDict(), "Author", "<meta name=\"Author\" content=\"", "\"/>\n", uMap);
-            printInfoString(f, info.getDict(), "Creator", "<meta name=\"Creator\" content=\"", "\"/>\n", uMap);
-            printInfoString(f, info.getDict(), "Producer", "<meta name=\"Producer\" content=\"", "\"/>\n", uMap);
-            printInfoDate(f, info.getDict(), "CreationDate", "<meta name=\"CreationDate\" content=\"", "\"/>\n");
-            printInfoDate(f, info.getDict(), "ModDate", "<meta name=\"ModDate\" content=\"", "\"/>\n");
+            printInfoString(f, info.getDict(), "Subject", R"(<meta name="Subject" content=")", "\"/>\n", uMap);
+            printInfoString(f, info.getDict(), "Keywords", R"(<meta name="Keywords" content=")", "\"/>\n", uMap);
+            printInfoString(f, info.getDict(), "Author", R"(<meta name="Author" content=")", "\"/>\n", uMap);
+            printInfoString(f, info.getDict(), "Creator", R"(<meta name="Creator" content=")", "\"/>\n", uMap);
+            printInfoString(f, info.getDict(), "Producer", R"(<meta name="Producer" content=")", "\"/>\n", uMap);
+            printInfoDate(f, info.getDict(), "CreationDate", R"(<meta name="CreationDate" content=")", "\"/>\n");
+            printInfoDate(f, info.getDict(), "ModDate", R"(<meta name="ModDate" content=")", "\"/>\n");
         }
         fputs("</head>\n", f);
         fputs("<body>\n", f);
