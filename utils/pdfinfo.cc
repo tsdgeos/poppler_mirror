@@ -44,6 +44,7 @@
 #include <ctime>
 #include <cmath>
 #include <map>
+#include <numbers>
 #include <set>
 #include "parseargs.h"
 #include "printencodings.h"
@@ -842,8 +843,8 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
         if ((fabs(w - 612) < 1 && fabs(h - 792) < 1) || (fabs(w - 792) < 1 && fabs(h - 612) < 1)) {
             printf(" (letter)");
         } else {
-            hISO = sqrt(sqrt(2.0)) * 7200 / 2.54;
-            wISO = hISO / sqrt(2.0);
+            hISO = sqrt(std::numbers::sqrt2) * 7200 / 2.54;
+            wISO = hISO / std::numbers::sqrt2;
             isoThreshold = hISO * 0.003; ///< allow for 0.3% error when guessing conformance to ISO 216, A series
             for (i = 0; i <= 6; ++i) {
                 if ((fabs(w - wISO) < isoThreshold && fabs(h - hISO) < isoThreshold) || (fabs(w - hISO) < isoThreshold && fabs(h - wISO) < isoThreshold)) {
@@ -851,8 +852,8 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
                     break;
                 }
                 hISO = wISO;
-                wISO /= sqrt(2.0);
-                isoThreshold /= sqrt(2.0);
+                wISO /= std::numbers::sqrt2;
+                isoThreshold /= std::numbers::sqrt2;
             }
         }
         printf("\n");
