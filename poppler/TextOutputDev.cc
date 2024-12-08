@@ -5445,7 +5445,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         for (word = rawWords; word; word = word->next) {
             s.clear();
             uText.resize(word->len());
-            std::transform(word->chars.begin(), word->chars.end(), uText.begin(), [](auto &c) { return c.text; });
+            std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
             dumpFragment(uText.data(), uText.size(), uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.getLength());
 

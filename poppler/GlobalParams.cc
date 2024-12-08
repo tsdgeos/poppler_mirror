@@ -737,7 +737,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
 
     // remove the - from the names, for some reason, Fontconfig does not
     // understand "MS-Mincho" but does with "MS Mincho"
-    std::replace(fontName.begin(), fontName.end(), '-', ' ');
+    std::ranges::replace(fontName, '-', ' ');
 
     size_t start = std::string::npos;
     findModifier(fontName, modStart, "Regular", start);

@@ -1028,7 +1028,7 @@ std::vector<font_info> document::fonts() const
     font_iterator it(0, d);
     while (it.has_next()) {
         const std::vector<font_info> l = it.next();
-        std::copy(l.begin(), l.end(), std::back_inserter(result));
+        std::ranges::copy(l, std::back_inserter(result));
     }
     return result;
 }

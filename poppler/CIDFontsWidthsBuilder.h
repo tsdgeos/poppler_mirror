@@ -15,6 +15,7 @@
 #include <vector>
 #include <variant>
 #include <algorithm>
+#include <ranges>
 #include <cassert>
 
 /** Class to help build the widths array as defined in
@@ -88,7 +89,7 @@ private:
         // How many elements at the end has this
         int uniqueElementsFromEnd(int value)
         {
-            auto lastDifferent = std::find_if(m_values.rbegin(), m_values.rend(), [value](auto &&element) { return element != value; });
+            auto lastDifferent = std::ranges::find_if(std::ranges::reverse_view(m_values), [value](auto &&element) { return element != value; });
             return std::distance(m_values.rbegin(), lastDifferent);
         }
 
@@ -147,7 +148,7 @@ private:
             if (differentValues || m_values.size() < 4) {
                 std::vector<int> savedValues;
                 if (m_values.size() >= 4) {
-                    auto lastDifferent = std::find_if(m_values.rbegin(), m_values.rend(), [value = m_values.back()](auto &&element) { return element != value; });
+                    auto lastDifferent = std::ranges::find_if(std::ranges::reverse_view(m_values), [value = m_values.back()](auto &&element) { return element != value; });
                     if (std::distance(m_values.rbegin(), lastDifferent) >= 3) {
                         savedValues.push_back(m_values.back());
                         m_values.pop_back();
