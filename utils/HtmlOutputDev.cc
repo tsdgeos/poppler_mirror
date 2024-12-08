@@ -708,7 +708,7 @@ void HtmlPage::coalesce()
 
 void HtmlPage::dumpAsXML(FILE *f, int page)
 {
-    fprintf(f, "<page number=\"%d\" position=\"absolute\"", page);
+    fprintf(f, R"(<page number="%d" position="absolute")", page);
     fprintf(f, " top=\"0\" left=\"0\" height=\"%d\" width=\"%d\">\n", pageHeight, pageWidth);
 
     for (int i = fontsPageMarker; i < fonts->size(); i++) {
@@ -720,11 +720,11 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
     for (auto ptr : imgList) {
         auto img = static_cast<HtmlImage *>(ptr);
         if (!noRoundedCoordinates) {
-            fprintf(f, "<image top=\"%d\" left=\"%d\" ", xoutRound(img->yMin), xoutRound(img->xMin));
-            fprintf(f, "width=\"%d\" height=\"%d\" ", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
+            fprintf(f, R"(<image top="%d" left="%d" )", xoutRound(img->yMin), xoutRound(img->xMin));
+            fprintf(f, R"(width="%d" height="%d" )", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
         } else {
-            fprintf(f, "<image top=\"%f\" left=\"%f\" ", img->yMin, img->xMin);
-            fprintf(f, "width=\"%f\" height=\"%f\" ", img->xMax - img->xMin, img->yMax - img->yMin);
+            fprintf(f, R"(<image top="%f" left="%f" )", img->yMin, img->xMin);
+            fprintf(f, R"(width="%f" height="%f" )", img->xMax - img->xMin, img->yMax - img->yMin);
         }
         fprintf(f, "src=\"%s\"/>\n", img->fName.c_str());
         delete img;
@@ -734,11 +734,11 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
     for (HtmlString *tmp = yxStrings; tmp; tmp = tmp->yxNext) {
         if (tmp->htext) {
             if (!noRoundedCoordinates) {
-                fprintf(f, "<text top=\"%d\" left=\"%d\" ", xoutRound(tmp->yMin), xoutRound(tmp->xMin));
-                fprintf(f, "width=\"%d\" height=\"%d\" ", xoutRound(tmp->xMax - tmp->xMin), xoutRound(tmp->yMax - tmp->yMin));
+                fprintf(f, R"(<text top="%d" left="%d" )", xoutRound(tmp->yMin), xoutRound(tmp->xMin));
+                fprintf(f, R"(width="%d" height="%d" )", xoutRound(tmp->xMax - tmp->xMin), xoutRound(tmp->yMax - tmp->yMin));
             } else {
-                fprintf(f, "<text top=\"%f\" left=\"%f\" ", tmp->yMin, tmp->xMin);
-                fprintf(f, "width=\"%f\" height=\"%f\" ", tmp->xMax - tmp->xMin, tmp->yMax - tmp->yMin);
+                fprintf(f, R"(<text top="%f" left="%f" )", tmp->yMin, tmp->xMin);
+                fprintf(f, R"(width="%f" height="%f" )", tmp->xMax - tmp->xMin, tmp->yMax - tmp->yMin);
             }
             fprintf(f, "font=\"%d\">", tmp->fontpos);
             fputs(tmp->htext->c_str(), f);
@@ -888,7 +888,7 @@ void HtmlPage::dumpComplex(FILE *file, int page, const std::vector<std::string> 
 
     for (HtmlString *tmp1 = yxStrings; tmp1; tmp1 = tmp1->yxNext) {
         if (tmp1->htext) {
-            fprintf(pageFile, "<p style=\"position:absolute;top:%dpx;left:%dpx;white-space:nowrap\" class=\"ft", xoutRound(tmp1->yMin), xoutRound(tmp1->xMin));
+            fprintf(pageFile, R"(<p style="position:absolute;top:%dpx;left:%dpx;white-space:nowrap" class="ft)", xoutRound(tmp1->yMin), xoutRound(tmp1->xMin));
             if (!singleHtml) {
                 fputc('0', pageFile);
             } else {
@@ -1121,7 +1121,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
             fputs("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title></title>\n</head>\n<body>\n", fContentsFrame);
 
             if (doOutline) {
-                fprintf(fContentsFrame, "<a href=\"%s%s\" target=\"contents\">Outline</a><br/>", gbasename(Docname->c_str()).c_str(), complexMode ? "-outline.html" : "s.html#outline");
+                fprintf(fContentsFrame, R"(<a href="%s%s" target=\"contents\">Outline</a><br/>)", gbasename(Docname->c_str()).c_str(), complexMode ? "-outline.html" : "s.html#outline");
             }
         }
         if (!complexMode) { /* not in complex mode */

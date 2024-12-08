@@ -62,14 +62,14 @@ void TestDistinguishedNameParser::testParser_data()
     QTest::newRow("Escaped trailing space") << std::string { "CN=Trailing space\\ " } << DN::Result { { "CN", "Trailing space " } };
     QTest::newRow("Escaped quote") << std::string { "CN=Quotation \\\" Mark" } << DN::Result { { "CN", "Quotation \" Mark" } };
 
-    QTest::newRow("CN=Simple with escaping") << std::string { "CN=S\\69mpl\\65\\7A" } << DN::Result { { "CN", "Simplez" } };
-    QTest::newRow("SN=Lu\\C4\\8Di\\C4\\87") << std::string { "SN=Lu\\C4\\8Di\\C4\\87" } << DN::Result { { "SN", "Lučić" } };
+    QTest::newRow("CN=Simple with escaping") << std::string { R"(CN=S\69mpl\65\7A)" } << DN::Result { { "CN", "Simplez" } };
+    QTest::newRow(R"(SN=Lu\C4\8Di\C4\87)") << std::string { R"(SN=Lu\C4\8Di\C4\87)" } << DN::Result { { "SN", "Lučić" } };
     QTest::newRow("CN=\"Quoted name\"") << std::string { "CN=\"Quoted name\"" } << DN::Result { { "CN", "Quoted name" } };
     QTest::newRow("CN=\" Leading and trailing spacees \"") << std::string { "CN=\" Leading and trailing spaces \"" } << DN::Result { { "CN", " Leading and trailing spaces " } };
     QTest::newRow("Comma in quotes") << std::string { "CN=\"Comma, inside\"" } << DN::Result { { "CN", "Comma, inside" } };
-    QTest::newRow("forbidden chars in quotes") << std::string { "CN=\"Forbidden !@#$%&*()<>[]{},.?/\\| chars\"" } << DN::Result { { "CN", "Forbidden !@#$%&*()<>[]{},.?/\\| chars" } };
-    QTest::newRow("Quoted quotation") << std::string { "CN=\"Quotation \\\" Mark\"" } << DN::Result { { "CN", "Quotation \" Mark" } };
-    QTest::newRow("Quoted quotation") << std::string { "CN=\"Quotation \\\" Mark\\\" Multiples\"" } << DN::Result { { "CN", "Quotation \" Mark\" Multiples" } };
+    QTest::newRow("forbidden chars in quotes") << std::string { R"(CN="Forbidden !@#$%&*()<>[]{},.?/\| chars")" } << DN::Result { { "CN", "Forbidden !@#$%&*()<>[]{},.?/\\| chars" } };
+    QTest::newRow("Quoted quotation") << std::string { R"(CN="Quotation \" Mark")" } << DN::Result { { "CN", "Quotation \" Mark" } };
+    QTest::newRow("Quoted quotation") << std::string { R"(CN="Quotation \" Mark\" Multiples")" } << DN::Result { { "CN", "Quotation \" Mark\" Multiples" } };
 
     QTest::newRow("frompdf1") << std::string { "2.5.4.97=#5553742D49644E722E20444520313233343735323233,CN=TeleSec PKS eIDAS QES CA 5,O=Deutsche Telekom AG,C=DE" }
                               << DN::Result { { "2.5.4.97", "USt-IdNr. DE 123475223" }, { "CN", "TeleSec PKS eIDAS QES CA 5" }, { "O", "Deutsche Telekom AG" }, { "C", "DE" } };
@@ -95,7 +95,7 @@ void TestDistinguishedNameParser::testParser_data()
     QTest::newRow("=Simple") << std::string { "=Simple" } << DN::Result {};
     QTest::newRow("CN=\"Simple") << std::string { "CN=\"Simple" } << DN::Result {};
     QTest::newRow("CN=\"Simple") << std::string { "CN=\"Simple\\" } << DN::Result {};
-    QTest::newRow("unquoted quotation in quotation") << std::string { "CN=\"Quotation \" Mark\"" } << DN::Result {};
+    QTest::newRow("unquoted quotation in quotation") << std::string { R"("CN="Quotation " Mark")" } << DN::Result {};
 }
 
 void TestDistinguishedNameParser::testRemoveLeadingSpaces()
