@@ -70,6 +70,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cassert>
+#include <numbers>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Error.h"
@@ -1761,7 +1762,7 @@ void AnnotAppearanceBuilder::drawCircleTopLeft(double cx, double cy, double r)
 {
     double r2;
 
-    r2 = r / sqrt(2.0);
+    r2 = r / std::numbers::sqrt2;
     appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx + r2, cy + r2);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - (1 - bezierCircle) * r2, cy + (1 + bezierCircle) * r2, cx - r2, cy + r2);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx - (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx - r2, cy - r2);
@@ -1774,7 +1775,7 @@ void AnnotAppearanceBuilder::drawCircleBottomRight(double cx, double cy, double 
 {
     double r2;
 
-    r2 = r / sqrt(2.0);
+    r2 = r / std::numbers::sqrt2;
     appearBuf->appendf("{0:.2f} {1:.2f} m\n", cx - r2, cy - r2);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx - (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + (1 - bezierCircle) * r2, cy - (1 + bezierCircle) * r2, cx + r2, cy - r2);
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n", cx + (1 + bezierCircle) * r2, cy - (1 - bezierCircle) * r2, cx + (1 + bezierCircle) * r2, cy + (1 - bezierCircle) * r2, cx + r2, cy + r2);
