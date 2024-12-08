@@ -567,7 +567,7 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormFiel
     PopplerSignatureInfo *signature_info;
     GTask *task;
 
-    g_return_val_if_fail(error == NULL || *error == NULL, NULL);
+    g_return_val_if_fail(error == nullptr || *error == nullptr, NULL);
 
     task = g_task_new(field, cancellable, nullptr, nullptr);
     g_task_set_task_data(task, GINT_TO_POINTER(flags), nullptr);
@@ -643,7 +643,7 @@ PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *si
 {
     PopplerSignatureInfo *new_info;
 
-    g_return_val_if_fail(siginfo != NULL, NULL);
+    g_return_val_if_fail(siginfo != nullptr, NULL);
 
     new_info = g_new(PopplerSignatureInfo, 1);
     new_info->sig_status = siginfo->sig_status;
@@ -687,7 +687,7 @@ void poppler_signature_info_free(PopplerSignatureInfo *siginfo)
  **/
 PopplerSignatureStatus poppler_signature_info_get_signature_status(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != NULL, POPPLER_SIGNATURE_GENERIC_ERROR);
+    g_return_val_if_fail(siginfo != nullptr, POPPLER_SIGNATURE_GENERIC_ERROR);
 
     return siginfo->sig_status;
 }
@@ -704,7 +704,7 @@ PopplerSignatureStatus poppler_signature_info_get_signature_status(const Poppler
  **/
 PopplerCertificateInfo *poppler_signature_info_get_certificate_info(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != NULL, NULL);
+    g_return_val_if_fail(siginfo != nullptr, NULL);
 
     return siginfo->certificate_info;
 }
@@ -721,7 +721,7 @@ PopplerCertificateInfo *poppler_signature_info_get_certificate_info(const Popple
  **/
 PopplerCertificateStatus poppler_signature_info_get_certificate_status(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != NULL, POPPLER_CERTIFICATE_GENERIC_ERROR);
+    g_return_val_if_fail(siginfo != nullptr, POPPLER_CERTIFICATE_GENERIC_ERROR);
 
     return siginfo->cert_status;
 }
@@ -738,7 +738,7 @@ PopplerCertificateStatus poppler_signature_info_get_certificate_status(const Pop
  **/
 const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != NULL, NULL);
+    g_return_val_if_fail(siginfo != nullptr, NULL);
 
     return siginfo->signer_name;
 }
@@ -759,7 +759,7 @@ const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *
  **/
 GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != NULL, NULL);
+    g_return_val_if_fail(siginfo != nullptr, NULL);
 
     return siginfo->local_signing_time;
 }
