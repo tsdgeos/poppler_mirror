@@ -354,7 +354,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
         Form *form = parentDoc->doc->getCatalog()->getForm();
         for (const std::string &fieldStr : stdStringFields) {
             ::FormField *field = form->findFieldByFullyQualifiedNameOrRef(fieldStr);
-            if (!field->getNoExport()) {
+            if (field && !field->getNoExport()) {
                 int numWidgets = field->getNumWidgets();
                 for (int i = 0; i < numWidgets; i++) {
                     ::FormWidget *widget = field->getWidget(i);
