@@ -18,7 +18,8 @@ public:
     using QObject::QObject;
 private Q_SLOTS:
     void testEmpty();
-    void testSingle();
+    void testSingleList();
+    void testSingleRange();
     void testSimpleSequence();
 };
 
@@ -48,13 +49,27 @@ static bool compare(const CIDFontsWidthsBuilder::Segment &segment1, const CIDFon
             segment1, segment2);
 }
 
-void TestCIDFontsWidthsBuilder::testSingle()
+void TestCIDFontsWidthsBuilder::testSingleList()
 {
     CIDFontsWidthsBuilder b;
     b.addWidth(0, 10);
     auto segments = b.takeSegments();
     QCOMPARE(segments.size(), 1);
     auto segment0 = CIDFontsWidthsBuilder::ListSegment { 0, { 10 } };
+    QVERIFY(compare(segments[0], segment0));
+}
+
+void TestCIDFontsWidthsBuilder::testSingleRange()
+{
+    CIDFontsWidthsBuilder b;
+    b.addWidth(0, 10);
+    b.addWidth(1, 10);
+    b.addWidth(2, 10);
+    b.addWidth(3, 10);
+    b.addWidth(4, 10);
+    auto segments = b.takeSegments();
+    QCOMPARE(segments.size(), 1);
+    auto segment0 = CIDFontsWidthsBuilder::RangeSegment { 0, 4, 10 };
     QVERIFY(compare(segments[0], segment0));
 }
 
