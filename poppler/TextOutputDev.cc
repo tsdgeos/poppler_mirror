@@ -810,17 +810,15 @@ double TextWord::primaryDelta(const TextWord *word) const
     return delta;
 }
 
-int TextWord::cmpYX(const void *p1, const void *p2)
+bool TextWord::cmpYX(const TextWord *const word1, const TextWord *const word2)
 {
-    TextWord *word1 = *(TextWord **)p1;
-    TextWord *word2 = *(TextWord **)p2;
     double cmp;
 
     cmp = word1->yMin - word2->yMin;
     if (cmp == 0) {
         cmp = word1->xMin - word2->xMin;
     }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+    return cmp < 0;
 }
 
 #ifdef TEXTOUT_WORD_LIST
@@ -1169,16 +1167,14 @@ int TextLine::cmpYX(const TextLine *line) const
     return primaryCmp(line);
 }
 
-int TextLine::cmpXY(const void *p1, const void *p2)
+bool TextLine::cmpXY(const TextLine *const line1, const TextLine *const line2)
 {
-    TextLine *line1 = *(TextLine **)p1;
-    TextLine *line2 = *(TextLine **)p2;
     int cmp;
 
     if ((cmp = line1->primaryCmp(line2))) {
-        return cmp;
+        return cmp < 0;
     }
-    return line1->secondaryCmp(line2);
+    return line1->secondaryCmp(line2) < 0;
 }
 
 void TextLine::coalesce(const UnicodeMap *uMap)
@@ -1297,11 +1293,11 @@ public:
     void init(TextLine *lineA, int startA, int lenA);
     void computeCoords(bool oneRot);
 
-    static int cmpYXPrimaryRot(const void *p1, const void *p2);
-    static int cmpYXLineRot(const void *p1, const void *p2);
-    static int cmpXYLineRot(const void *p1, const void *p2);
-    static int cmpXYColumnPrimaryRot(const void *p1, const void *p2);
-    static int cmpXYColumnLineRot(const void *p1, const void *p2);
+    static bool cmpYXPrimaryRot(const TextLineFrag &frag1, const TextLineFrag &frag2);
+    static bool cmpYXLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2);
+    static bool cmpXYLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2);
+    static bool cmpXYColumnPrimaryRot(const TextLineFrag &frag1, const TextLineFrag &frag2);
+    static bool cmpXYColumnLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2);
 };
 
 void TextLineFrag::init(TextLine *lineA, int startA, int lenA)
@@ -1441,160 +1437,150 @@ void TextLineFrag::computeCoords(bool oneRot)
     }
 }
 
-int TextLineFrag::cmpYXPrimaryRot(const void *p1, const void *p2)
+bool TextLineFrag::cmpYXPrimaryRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    TextLineFrag *frag1 = (TextLineFrag *)p1;
-    TextLineFrag *frag2 = (TextLineFrag *)p2;
     double cmp;
 
     cmp = 0; // make gcc happy
-    switch (frag1->line->blk->page->primaryRot) {
+    switch (frag1.line->blk->page->primaryRot) {
     case 0:
-        if (fabs(cmp = frag1->yMin - frag2->yMin) < 0.01) {
-            cmp = frag1->xMin - frag2->xMin;
+        if (fabs(cmp = frag1.yMin - frag2.yMin) < 0.01) {
+            cmp = frag1.xMin - frag2.xMin;
         }
         break;
     case 1:
-        if (fabs(cmp = frag2->xMax - frag1->xMax) < 0.01) {
-            cmp = frag1->yMin - frag2->yMin;
+        if (fabs(cmp = frag2.xMax - frag1.xMax) < 0.01) {
+            cmp = frag1.yMin - frag2.yMin;
         }
         break;
     case 2:
-        if (fabs(cmp = frag2->yMin - frag1->yMin) < 0.01) {
-            cmp = frag2->xMax - frag1->xMax;
+        if (fabs(cmp = frag2.yMin - frag1.yMin) < 0.01) {
+            cmp = frag2.xMax - frag1.xMax;
         }
         break;
     case 3:
-        if (fabs(cmp = frag1->xMax - frag2->xMax) < 0.01) {
-            cmp = frag2->yMax - frag1->yMax;
+        if (fabs(cmp = frag1.xMax - frag2.xMax) < 0.01) {
+            cmp = frag2.yMax - frag1.yMax;
         }
         break;
     }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+    return cmp < 0;
 }
 
-int TextLineFrag::cmpYXLineRot(const void *p1, const void *p2)
+bool TextLineFrag::cmpYXLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    TextLineFrag *frag1 = (TextLineFrag *)p1;
-    TextLineFrag *frag2 = (TextLineFrag *)p2;
     double cmp;
 
     cmp = 0; // make gcc happy
-    switch (frag1->line->rot) {
+    switch (frag1.line->rot) {
     case 0:
-        if ((cmp = frag1->yMin - frag2->yMin) == 0) {
-            cmp = frag1->xMin - frag2->xMin;
+        if ((cmp = frag1.yMin - frag2.yMin) == 0) {
+            cmp = frag1.xMin - frag2.xMin;
         }
         break;
     case 1:
-        if ((cmp = frag2->xMax - frag1->xMax) == 0) {
-            cmp = frag1->yMin - frag2->yMin;
+        if ((cmp = frag2.xMax - frag1.xMax) == 0) {
+            cmp = frag1.yMin - frag2.yMin;
         }
         break;
     case 2:
-        if ((cmp = frag2->yMin - frag1->yMin) == 0) {
-            cmp = frag2->xMax - frag1->xMax;
+        if ((cmp = frag2.yMin - frag1.yMin) == 0) {
+            cmp = frag2.xMax - frag1.xMax;
         }
         break;
     case 3:
-        if ((cmp = frag1->xMax - frag2->xMax) == 0) {
-            cmp = frag2->yMax - frag1->yMax;
+        if ((cmp = frag1.xMax - frag2.xMax) == 0) {
+            cmp = frag2.yMax - frag1.yMax;
         }
         break;
     }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+    return cmp < 0;
 }
 
-int TextLineFrag::cmpXYLineRot(const void *p1, const void *p2)
+bool TextLineFrag::cmpXYLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    TextLineFrag *frag1 = (TextLineFrag *)p1;
-    TextLineFrag *frag2 = (TextLineFrag *)p2;
     double cmp;
 
     cmp = 0; // make gcc happy
-    switch (frag1->line->rot) {
+    switch (frag1.line->rot) {
     case 0:
-        if ((cmp = frag1->xMin - frag2->xMin) == 0) {
-            cmp = frag1->yMin - frag2->yMin;
+        if ((cmp = frag1.xMin - frag2.xMin) == 0) {
+            cmp = frag1.yMin - frag2.yMin;
         }
         break;
     case 1:
-        if ((cmp = frag1->yMin - frag2->yMin) == 0) {
-            cmp = frag2->xMax - frag1->xMax;
+        if ((cmp = frag1.yMin - frag2.yMin) == 0) {
+            cmp = frag2.xMax - frag1.xMax;
         }
         break;
     case 2:
-        if ((cmp = frag2->xMax - frag1->xMax) == 0) {
-            cmp = frag2->yMin - frag1->yMin;
+        if ((cmp = frag2.xMax - frag1.xMax) == 0) {
+            cmp = frag2.yMin - frag1.yMin;
         }
         break;
     case 3:
-        if ((cmp = frag2->yMax - frag1->yMax) == 0) {
-            cmp = frag1->xMax - frag2->xMax;
+        if ((cmp = frag2.yMax - frag1.yMax) == 0) {
+            cmp = frag1.xMax - frag2.xMax;
         }
         break;
     }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+    return cmp < 0;
 }
 
-int TextLineFrag::cmpXYColumnPrimaryRot(const void *p1, const void *p2)
+bool TextLineFrag::cmpXYColumnPrimaryRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    TextLineFrag *frag1 = (TextLineFrag *)p1;
-    TextLineFrag *frag2 = (TextLineFrag *)p2;
     double cmp;
 
     // if columns overlap, compare y values
-    if (frag1->col < frag2->col + (frag2->line->col[frag2->start + frag2->len] - frag2->line->col[frag2->start]) && frag2->col < frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start])) {
+    if (frag1.col < frag2.col + (frag2.line->col[frag2.start + frag2.len] - frag2.line->col[frag2.start]) && frag2.col < frag1.col + (frag1.line->col[frag1.start + frag1.len] - frag1.line->col[frag1.start])) {
         cmp = 0; // make gcc happy
-        switch (frag1->line->blk->page->primaryRot) {
+        switch (frag1.line->blk->page->primaryRot) {
         case 0:
-            cmp = frag1->yMin - frag2->yMin;
+            cmp = frag1.yMin - frag2.yMin;
             break;
         case 1:
-            cmp = frag2->xMax - frag1->xMax;
+            cmp = frag2.xMax - frag1.xMax;
             break;
         case 2:
-            cmp = frag2->yMin - frag1->yMin;
+            cmp = frag2.yMin - frag1.yMin;
             break;
         case 3:
-            cmp = frag1->xMax - frag2->xMax;
+            cmp = frag1.xMax - frag2.xMax;
             break;
         }
-        return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+        return cmp < 0;
     }
 
     // otherwise, compare starting column
-    return frag1->col - frag2->col;
+    return frag1.col - frag2.col < 0;
 }
 
-int TextLineFrag::cmpXYColumnLineRot(const void *p1, const void *p2)
+bool TextLineFrag::cmpXYColumnLineRot(const TextLineFrag &frag1, const TextLineFrag &frag2)
 {
-    TextLineFrag *frag1 = (TextLineFrag *)p1;
-    TextLineFrag *frag2 = (TextLineFrag *)p2;
     double cmp;
 
     // if columns overlap, compare y values
-    if (frag1->col < frag2->col + (frag2->line->col[frag2->start + frag2->len] - frag2->line->col[frag2->start]) && frag2->col < frag1->col + (frag1->line->col[frag1->start + frag1->len] - frag1->line->col[frag1->start])) {
+    if (frag1.col < frag2.col + (frag2.line->col[frag2.start + frag2.len] - frag2.line->col[frag2.start]) && frag2.col < frag1.col + (frag1.line->col[frag1.start + frag1.len] - frag1.line->col[frag1.start])) {
         cmp = 0; // make gcc happy
-        switch (frag1->line->rot) {
+        switch (frag1.line->rot) {
         case 0:
-            cmp = frag1->yMin - frag2->yMin;
+            cmp = frag1.yMin - frag2.yMin;
             break;
         case 1:
-            cmp = frag2->xMax - frag1->xMax;
+            cmp = frag2.xMax - frag1.xMax;
             break;
         case 2:
-            cmp = frag2->yMin - frag1->yMin;
+            cmp = frag2.yMin - frag1.yMin;
             break;
         case 3:
-            cmp = frag1->xMax - frag2->xMax;
+            cmp = frag1.xMax - frag2.xMax;
             break;
         }
-        return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+        return cmp < 0;
     }
 
     // otherwise, compare starting column
-    return frag1->col - frag2->col;
+    return frag1.col - frag2.col < 0;
 }
 
 //------------------------------------------------------------------------
@@ -1917,7 +1903,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
     for (line = lines, i = 0; line; line = line->next, ++i) {
         lineArray[i] = line;
     }
-    qsort(static_cast<void *>(lineArray), nLines, sizeof(TextLine *), &TextLine::cmpXY);
+    std::sort(lineArray, lineArray + nLines, &TextLine::cmpXY);
 
     // column assignment
     nColumns = 0;
@@ -2048,10 +2034,8 @@ void TextBlock::updatePriMinMax(const TextBlock *blk)
     }
 }
 
-int TextBlock::cmpXYPrimaryRot(const void *p1, const void *p2)
+bool TextBlock::cmpXYPrimaryRot(const TextBlock *const blk1, const TextBlock *const blk2)
 {
-    TextBlock *blk1 = *(TextBlock **)p1;
-    TextBlock *blk2 = *(TextBlock **)p2;
     double cmp;
 
     cmp = 0; // make gcc happy
@@ -2077,39 +2061,7 @@ int TextBlock::cmpXYPrimaryRot(const void *p1, const void *p2)
         }
         break;
     }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
-}
-
-int TextBlock::cmpYXPrimaryRot(const void *p1, const void *p2)
-{
-    TextBlock *blk1 = *(TextBlock **)p1;
-    TextBlock *blk2 = *(TextBlock **)p2;
-    double cmp;
-
-    cmp = 0; // make gcc happy
-    switch (blk1->page->primaryRot) {
-    case 0:
-        if ((cmp = blk1->yMin - blk2->yMin) == 0) {
-            cmp = blk1->xMin - blk2->xMin;
-        }
-        break;
-    case 1:
-        if ((cmp = blk2->xMax - blk1->xMax) == 0) {
-            cmp = blk1->yMin - blk2->yMin;
-        }
-        break;
-    case 2:
-        if ((cmp = blk2->yMin - blk1->yMin) == 0) {
-            cmp = blk2->xMax - blk1->xMax;
-        }
-        break;
-    case 3:
-        if ((cmp = blk1->xMax - blk2->xMax) == 0) {
-            cmp = blk2->yMax - blk1->yMax;
-        }
-        break;
-    }
-    return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
+    return cmp < 0;
 }
 
 int TextBlock::primaryCmp(const TextBlock *blk) const
@@ -2438,8 +2390,6 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
     TextBlock *blk;
     TextLine *line;
     TextWord *word;
-    TextWord **wordArray;
-    int nWords, i;
 
     if (text->rawOrder) {
         for (word = text->rawWords; word; word = word->next) {
@@ -2449,7 +2399,7 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
     } else if (physLayout) {
         // this is inefficient, but it's also the least useful of these
         // three cases
-        nWords = 0;
+        int nWords = 0;
         for (flow = text->flows; flow; flow = flow->next) {
             for (blk = flow->blocks; blk; blk = blk->next) {
                 for (line = blk->lines; line; line = line->next) {
@@ -2459,22 +2409,17 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
                 }
             }
         }
-        wordArray = (TextWord **)gmallocn(nWords, sizeof(TextWord *));
-        i = 0;
+        words.reserve(nWords);
         for (flow = text->flows; flow; flow = flow->next) {
             for (blk = flow->blocks; blk; blk = blk->next) {
                 for (line = blk->lines; line; line = line->next) {
                     for (word = line->words; word; word = word->next) {
-                        wordArray[i++] = word;
+                        words.push_back(word);
                     }
                 }
             }
         }
-        qsort(static_cast<void *>(wordArray), nWords, sizeof(TextWord *), &TextWord::cmpYX);
-        for (i = 0; i < nWords; ++i) {
-            words.push_back(wordArray[i]);
-        }
-        gfree(static_cast<void *>(wordArray));
+        std::ranges::sort(words, &TextWord::cmpYX);
 
     } else {
         for (flow = text->flows; flow; flow = flow->next) {
@@ -3456,9 +3401,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
             blocks[i] = blk;
         }
-        if (blocks) {
-            qsort(static_cast<void *>(blocks), nBlocks, sizeof(TextBlock *), &TextBlock::cmpXYPrimaryRot);
-        }
+        std::sort(blocks, blocks + nBlocks, &TextBlock::cmpXYPrimaryRot);
 
         // column assignment
         for (i = 0; i < nBlocks; ++i) {
@@ -4305,7 +4248,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     int spaceLen, eolLen;
     int lastRot;
     double x, y, delta;
-    int col, idx0, idx1, i, j;
+    int col, idx0, idx1, i;
     bool multiLine, oneRot;
 
     GooString s;
@@ -4321,7 +4264,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
         int mbc_len;
 
         for (word = rawWords; word && word <= rawLastWord; word = word->next) {
-            for (j = 0; j < word->getLength(); ++j) {
+            for (int j = 0; j < word->getLength(); ++j) {
                 double gXMin, gXMax, gYMin, gYMax;
                 word->getCharBBox(j, &gXMin, &gYMin, &gXMax, &gYMax);
                 if (xMin <= gXMin && gXMax <= xMax && yMin <= gYMin && gYMax <= yMax) {
@@ -4366,7 +4309,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                     case 0:
                         y = 0.5 * (line->yMin + line->yMax);
                         if (yMin < y && y < yMax) {
-                            j = 0;
+                            int j = 0;
                             while (j < line->len) {
                                 if (0.5 * (line->edge[j] + line->edge[j + 1]) > xMin) {
                                     idx0 = j;
@@ -4387,7 +4330,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                     case 1:
                         x = 0.5 * (line->xMin + line->xMax);
                         if (xMin < x && x < xMax) {
-                            j = 0;
+                            int j = 0;
                             while (j < line->len) {
                                 if (0.5 * (line->edge[j] + line->edge[j + 1]) > yMin) {
                                     idx0 = j;
@@ -4408,7 +4351,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                     case 2:
                         y = 0.5 * (line->yMin + line->yMax);
                         if (yMin < y && y < yMax) {
-                            j = 0;
+                            int j = 0;
                             while (j < line->len) {
                                 if (0.5 * (line->edge[j] + line->edge[j + 1]) < xMax) {
                                     idx0 = j;
@@ -4429,7 +4372,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                     case 3:
                         x = 0.5 * (line->xMin + line->xMax);
                         if (xMin < x && x < xMax) {
-                            j = 0;
+                            int j = 0;
                             while (j < line->len) {
                                 if (0.5 * (line->edge[j] + line->edge[j + 1]) < yMax) {
                                     idx0 = j;
@@ -4476,17 +4419,18 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
         // if all lines in the region have the same rotation, use it;
         // otherwise, use the page's primary rotation
         if (oneRot) {
-            qsort(frags, nFrags, sizeof(TextLineFrag), &TextLineFrag::cmpYXLineRot);
+            std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXLineRot);
         } else {
-            qsort(frags, nFrags, sizeof(TextLineFrag), &TextLineFrag::cmpYXPrimaryRot);
+            std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXPrimaryRot);
         }
         i = 0;
         while (i < nFrags) {
             delta = maxIntraLineDelta * frags[i].line->words->fontSize;
+            int j;
             for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
                 ;
             }
-            qsort(frags + i, j - i, sizeof(TextLineFrag), oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
+            std::sort(frags + i, frags + j, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
             i = j;
         }
 
@@ -5432,7 +5376,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
     char space[8], eol[16], eop[8];
     int spaceLen, eolLen, eopLen;
     double delta;
-    int col, i, j, d, n;
+    int col, i, d, n;
 
     // get the output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
@@ -5497,14 +5441,15 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
                 ++nFrags;
             }
         }
-        qsort(frags, nFrags, sizeof(TextLineFrag), &TextLineFrag::cmpYXPrimaryRot);
+        std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXPrimaryRot);
         i = 0;
         while (i < nFrags) {
+            int j;
             delta = maxIntraLineDelta * frags[i].line->words->fontSize;
             for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
                 ;
             }
-            qsort(frags + i, j - i, sizeof(TextLineFrag), &TextLineFrag::cmpXYColumnPrimaryRot);
+            std::sort(frags + i, frags + j, &TextLineFrag::cmpXYColumnPrimaryRot);
             i = j;
         }
 
@@ -5594,7 +5539,7 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
     // all text in the region has the same rotation -- recompute the
     // column numbers based only on the text in the region
     if (oneRot) {
-        qsort(frags, nFrags, sizeof(TextLineFrag), &TextLineFrag::cmpXYLineRot);
+        std::sort(frags, frags + nFrags, &TextLineFrag::cmpXYLineRot);
         rot = frags[0].line->rot;
         for (i = 0; i < nFrags; ++i) {
             frag0 = &frags[i];

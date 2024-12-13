@@ -168,7 +168,7 @@ public:
     // <word>.
     double primaryDelta(const TextWord *word) const;
 
-    static int cmpYX(const void *p1, const void *p2);
+    static bool cmpYX(const TextWord *const word1, const TextWord *const word2);
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -327,7 +327,7 @@ public:
 
     int cmpYX(const TextLine *line) const;
 
-    static int cmpXY(const void *p1, const void *p2);
+    static bool cmpXY(const TextLine *const line1, const TextLine *const line2);
 
     void coalesce(const UnicodeMap *uMap);
 
@@ -397,9 +397,7 @@ public:
     // Update this block's priMin and priMax values, looking at <blk>.
     void updatePriMinMax(const TextBlock *blk);
 
-    static int cmpXYPrimaryRot(const void *p1, const void *p2);
-
-    static int cmpYXPrimaryRot(const void *p1, const void *p2);
+    static bool cmpXYPrimaryRot(const TextBlock *const blk1, const TextBlock *const blk2);
 
     int primaryCmp(const TextBlock *blk) const;
 
