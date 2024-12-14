@@ -117,7 +117,7 @@ inline bool operator<(const Ref lhs, const Ref rhs) noexcept
 
 struct RefRecursionChecker
 {
-    RefRecursionChecker() { }
+    RefRecursionChecker() = default;
 
     RefRecursionChecker(const RefRecursionChecker &) = delete;
     RefRecursionChecker &operator=(const RefRecursionChecker &) = delete;

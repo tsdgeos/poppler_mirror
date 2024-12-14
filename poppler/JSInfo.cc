@@ -35,8 +35,6 @@ JSInfo::JSInfo(PDFDoc *docA, int firstPage)
     currentPage = firstPage + 1;
 }
 
-JSInfo::~JSInfo() { }
-
 void JSInfo::printJS(const GooString *js)
 {
     char buf[8];

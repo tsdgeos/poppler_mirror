@@ -867,7 +867,7 @@ public:
 
 Annotation::Style::Style() : d(new Private) { }
 
-Annotation::Style::Style(const Style &other) : d(other.d) { }
+Annotation::Style::Style(const Style &other) = default;
 
 Annotation::Style &Annotation::Style::operator=(const Style &other)
 {
@@ -878,7 +878,7 @@ Annotation::Style &Annotation::Style::operator=(const Style &other)
     return *this;
 }
 
-Annotation::Style::~Style() { }
+Annotation::Style::~Style() = default;
 
 QColor Annotation::Style::color() const
 {
@@ -984,7 +984,7 @@ public:
 
 Annotation::Popup::Popup() : d(new Private) { }
 
-Annotation::Popup::Popup(const Popup &other) : d(other.d) { }
+Annotation::Popup::Popup(const Popup &other) = default;
 
 Annotation::Popup &Annotation::Popup::operator=(const Popup &other)
 {
@@ -995,7 +995,7 @@ Annotation::Popup &Annotation::Popup::operator=(const Popup &other)
     return *this;
 }
 
-Annotation::Popup::~Popup() { }
+Annotation::Popup::~Popup() = default;
 
 int Annotation::Popup::flags() const
 {
@@ -1049,7 +1049,7 @@ void Annotation::Popup::setText(const QString &text)
 
 Annotation::Annotation(AnnotationPrivate &dd) : d_ptr(&dd) { }
 
-Annotation::~Annotation() { }
+Annotation::~Annotation() = default;
 
 QString Annotation::author() const
 {
@@ -1658,7 +1658,7 @@ TextAnnotation::TextAnnotation(TextAnnotation::TextType type) : Annotation(*new 
 
 TextAnnotation::TextAnnotation(TextAnnotationPrivate &dd) : Annotation(dd) { }
 
-TextAnnotation::~TextAnnotation() { }
+TextAnnotation::~TextAnnotation() = default;
 
 Annotation::SubType TextAnnotation::subType() const
 {
@@ -2021,7 +2021,7 @@ LineAnnotation::LineAnnotation(LineAnnotation::LineType type) : Annotation(*new 
 
 LineAnnotation::LineAnnotation(LineAnnotationPrivate &dd) : Annotation(dd) { }
 
-LineAnnotation::~LineAnnotation() { }
+LineAnnotation::~LineAnnotation() = default;
 
 Annotation::SubType LineAnnotation::subType() const
 {
@@ -2459,7 +2459,7 @@ GeomAnnotation::GeomAnnotation() : Annotation(*new GeomAnnotationPrivate()) { }
 
 GeomAnnotation::GeomAnnotation(GeomAnnotationPrivate &dd) : Annotation(dd) { }
 
-GeomAnnotation::~GeomAnnotation() { }
+GeomAnnotation::~GeomAnnotation() = default;
 
 Annotation::SubType GeomAnnotation::subType() const
 {
@@ -2646,7 +2646,7 @@ HighlightAnnotation::HighlightAnnotation() : Annotation(*new HighlightAnnotation
 
 HighlightAnnotation::HighlightAnnotation(HighlightAnnotationPrivate &dd) : Annotation(dd) { }
 
-HighlightAnnotation::~HighlightAnnotation() { }
+HighlightAnnotation::~HighlightAnnotation() = default;
 
 Annotation::SubType HighlightAnnotation::subType() const
 {
@@ -2855,7 +2855,7 @@ StampAnnotation::StampAnnotation() : Annotation(*new StampAnnotationPrivate()) {
 
 StampAnnotation::StampAnnotation(StampAnnotationPrivate &dd) : Annotation(dd) { }
 
-StampAnnotation::~StampAnnotation() { }
+StampAnnotation::~StampAnnotation() = default;
 
 Annotation::SubType StampAnnotation::subType() const
 {
@@ -2929,7 +2929,7 @@ public:
     std::unique_ptr<::FormFieldSignature> field = nullptr;
 };
 
-SignatureAnnotationPrivate::SignatureAnnotationPrivate() { }
+SignatureAnnotationPrivate::SignatureAnnotationPrivate() = default;
 
 Annotation *SignatureAnnotationPrivate::makeAlias()
 {
@@ -2976,7 +2976,7 @@ SignatureAnnotation::SignatureAnnotation() : Annotation(*new SignatureAnnotation
 
 SignatureAnnotation::SignatureAnnotation(SignatureAnnotationPrivate &dd) : Annotation(dd) { }
 
-SignatureAnnotation::~SignatureAnnotation() { }
+SignatureAnnotation::~SignatureAnnotation() = default;
 
 Annotation::SubType SignatureAnnotation::subType() const
 {
@@ -3132,7 +3132,7 @@ public:
     std::vector<std::unique_ptr<AnnotPath>> toAnnotPaths(const QList<QVector<QPointF>> &paths);
 };
 
-InkAnnotationPrivate::InkAnnotationPrivate() { }
+InkAnnotationPrivate::InkAnnotationPrivate() = default;
 
 Annotation *InkAnnotationPrivate::makeAlias()
 {
@@ -3178,7 +3178,7 @@ InkAnnotation::InkAnnotation() : Annotation(*new InkAnnotationPrivate()) { }
 
 InkAnnotation::InkAnnotation(InkAnnotationPrivate &dd) : Annotation(dd) { }
 
-InkAnnotation::~InkAnnotation() { }
+InkAnnotation::~InkAnnotation() = default;
 
 Annotation::SubType InkAnnotation::subType() const
 {
@@ -3252,7 +3252,7 @@ public:
 
 LinkAnnotationPrivate::LinkAnnotationPrivate() : linkHLMode(LinkAnnotation::Invert) { }
 
-LinkAnnotationPrivate::~LinkAnnotationPrivate() { }
+LinkAnnotationPrivate::~LinkAnnotationPrivate() = default;
 
 Annotation *LinkAnnotationPrivate::makeAlias()
 {
@@ -3268,7 +3268,7 @@ LinkAnnotation::LinkAnnotation() : Annotation(*new LinkAnnotationPrivate()) { }
 
 LinkAnnotation::LinkAnnotation(LinkAnnotationPrivate &dd) : Annotation(dd) { }
 
-LinkAnnotation::~LinkAnnotation() { }
+LinkAnnotation::~LinkAnnotation() = default;
 
 Annotation::SubType LinkAnnotation::subType() const
 {
@@ -3363,7 +3363,7 @@ CaretAnnotation::CaretAnnotation() : Annotation(*new CaretAnnotationPrivate()) {
 
 CaretAnnotation::CaretAnnotation(CaretAnnotationPrivate &dd) : Annotation(dd) { }
 
-CaretAnnotation::~CaretAnnotation() { }
+CaretAnnotation::~CaretAnnotation() = default;
 
 Annotation::SubType CaretAnnotation::subType() const
 {
@@ -3430,7 +3430,7 @@ FileAttachmentAnnotation::FileAttachmentAnnotation() : Annotation(*new FileAttac
 
 FileAttachmentAnnotation::FileAttachmentAnnotation(FileAttachmentAnnotationPrivate &dd) : Annotation(dd) { }
 
-FileAttachmentAnnotation::~FileAttachmentAnnotation() { }
+FileAttachmentAnnotation::~FileAttachmentAnnotation() = default;
 
 Annotation::SubType FileAttachmentAnnotation::subType() const
 {
@@ -3496,7 +3496,7 @@ SoundAnnotation::SoundAnnotation() : Annotation(*new SoundAnnotationPrivate()) {
 
 SoundAnnotation::SoundAnnotation(SoundAnnotationPrivate &dd) : Annotation(dd) { }
 
-SoundAnnotation::~SoundAnnotation() { }
+SoundAnnotation::~SoundAnnotation() = default;
 
 Annotation::SubType SoundAnnotation::subType() const
 {
@@ -3562,7 +3562,7 @@ MovieAnnotation::MovieAnnotation() : Annotation(*new MovieAnnotationPrivate()) {
 
 MovieAnnotation::MovieAnnotation(MovieAnnotationPrivate &dd) : Annotation(dd) { }
 
-MovieAnnotation::~MovieAnnotation() { }
+MovieAnnotation::~MovieAnnotation() = default;
 
 Annotation::SubType MovieAnnotation::subType() const
 {
@@ -3628,7 +3628,7 @@ Annot *ScreenAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
 
 ScreenAnnotation::ScreenAnnotation() : Annotation(*new ScreenAnnotationPrivate()) { }
 
-ScreenAnnotation::~ScreenAnnotation() { }
+ScreenAnnotation::~ScreenAnnotation() = default;
 
 Annotation::SubType ScreenAnnotation::subType() const
 {
@@ -3687,7 +3687,7 @@ WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd) : Annotation(dd)
 
 WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
 
-WidgetAnnotation::~WidgetAnnotation() { }
+WidgetAnnotation::~WidgetAnnotation() = default;
 
 Annotation::SubType WidgetAnnotation::subType() const
 {
@@ -3704,14 +3704,14 @@ std::unique_ptr<Link> WidgetAnnotation::additionalAction(AdditionalActionType ty
 class RichMediaAnnotation::Params::Private
 {
 public:
-    Private() { }
+    Private() = default;
 
     QString flashVars;
 };
 
 RichMediaAnnotation::Params::Params() : d(new Private) { }
 
-RichMediaAnnotation::Params::~Params() { }
+RichMediaAnnotation::Params::~Params() = default;
 
 void RichMediaAnnotation::Params::setFlashVars(const QString &flashVars)
 {
@@ -3739,7 +3739,7 @@ public:
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
 
-RichMediaAnnotation::Instance::~Instance() { }
+RichMediaAnnotation::Instance::~Instance() = default;
 
 void RichMediaAnnotation::Instance::setType(Type type)
 {
@@ -3765,7 +3765,7 @@ RichMediaAnnotation::Params *RichMediaAnnotation::Instance::params() const
 class RichMediaAnnotation::Configuration::Private
 {
 public:
-    Private() { }
+    Private() = default;
     ~Private()
     {
         qDeleteAll(instances);
@@ -3782,7 +3782,7 @@ public:
 
 RichMediaAnnotation::Configuration::Configuration() : d(new Private) { }
 
-RichMediaAnnotation::Configuration::~Configuration() { }
+RichMediaAnnotation::Configuration::~Configuration() = default;
 
 void RichMediaAnnotation::Configuration::setType(Type type)
 {
@@ -3833,7 +3833,7 @@ public:
 
 RichMediaAnnotation::Asset::Asset() : d(new Private) { }
 
-RichMediaAnnotation::Asset::~Asset() { }
+RichMediaAnnotation::Asset::~Asset() = default;
 
 void RichMediaAnnotation::Asset::setName(const QString &name)
 {
@@ -3859,7 +3859,7 @@ EmbeddedFile *RichMediaAnnotation::Asset::embeddedFile() const
 class RichMediaAnnotation::Content::Private
 {
 public:
-    Private() { }
+    Private() = default;
     ~Private()
     {
         qDeleteAll(configurations);
@@ -3878,7 +3878,7 @@ public:
 
 RichMediaAnnotation::Content::Content() : d(new Private) { }
 
-RichMediaAnnotation::Content::~Content() { }
+RichMediaAnnotation::Content::~Content() = default;
 
 void RichMediaAnnotation::Content::setConfigurations(const QList<RichMediaAnnotation::Configuration *> &configurations)
 {
@@ -3916,7 +3916,7 @@ public:
 
 RichMediaAnnotation::Activation::Activation() : d(new Private) { }
 
-RichMediaAnnotation::Activation::~Activation() { }
+RichMediaAnnotation::Activation::~Activation() = default;
 
 void RichMediaAnnotation::Activation::setCondition(Condition condition)
 {
@@ -3938,7 +3938,7 @@ public:
 
 RichMediaAnnotation::Deactivation::Deactivation() : d(new Private) { }
 
-RichMediaAnnotation::Deactivation::~Deactivation() { }
+RichMediaAnnotation::Deactivation::~Deactivation() = default;
 
 void RichMediaAnnotation::Deactivation::setCondition(Condition condition)
 {
@@ -3961,7 +3961,7 @@ public:
 
 RichMediaAnnotation::Settings::Settings() : d(new Private) { }
 
-RichMediaAnnotation::Settings::~Settings() { }
+RichMediaAnnotation::Settings::~Settings() = default;
 
 void RichMediaAnnotation::Settings::setActivation(RichMediaAnnotation::Activation *activation)
 {
@@ -4016,7 +4016,7 @@ RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotation
 
 RichMediaAnnotation::RichMediaAnnotation(RichMediaAnnotationPrivate &dd) : Annotation(dd) { }
 
-RichMediaAnnotation::~RichMediaAnnotation() { }
+RichMediaAnnotation::~RichMediaAnnotation() = default;
 
 Annotation::SubType RichMediaAnnotation::subType() const
 {

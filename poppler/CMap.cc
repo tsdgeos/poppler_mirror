@@ -395,7 +395,7 @@ void CMap::setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int
 
 //------------------------------------------------------------------------
 
-CMapCache::CMapCache() { }
+CMapCache::CMapCache() = default;
 
 std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooString &cMapName)
 {

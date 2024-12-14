@@ -81,7 +81,7 @@ void PDFDisplay::display()
     }
 }
 
-PDFDisplay::~PDFDisplay() { }
+PDFDisplay::~PDFDisplay() = default;
 
 void PDFDisplay::paintEvent(QPaintEvent *e)
 {

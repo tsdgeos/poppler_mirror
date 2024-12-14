@@ -279,9 +279,9 @@ std::unique_ptr<GooString> HtmlFont::HtmlFilter(const Unicode *u, int uLen)
     return tmp;
 }
 
-HtmlFontAccu::HtmlFontAccu() { }
+HtmlFontAccu::HtmlFontAccu() = default;
 
-HtmlFontAccu::~HtmlFontAccu() { }
+HtmlFontAccu::~HtmlFontAccu() = default;
 
 int HtmlFontAccu::AddFont(const HtmlFont &font)
 {

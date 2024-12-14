@@ -637,7 +637,7 @@ Object AnnotBorderArray::writeToObject(XRef *xref) const
 // AnnotBorderBS
 //------------------------------------------------------------------------
 
-AnnotBorderBS::AnnotBorderBS() { }
+AnnotBorderBS::AnnotBorderBS() = default;
 
 AnnotBorderBS::AnnotBorderBS(Dict *dict)
 {
@@ -950,7 +950,7 @@ AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict)
     appearDict = dict->copy();
 }
 
-AnnotAppearance::~AnnotAppearance() { }
+AnnotAppearance::~AnnotAppearance() = default;
 
 Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state)
 {
@@ -1679,7 +1679,7 @@ void Annot::decRefCnt()
     }
 }
 
-Annot::~Annot() { }
+Annot::~Annot() = default;
 
 void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill)
 {

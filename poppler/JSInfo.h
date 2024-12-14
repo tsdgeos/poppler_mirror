@@ -34,7 +34,7 @@ public:
     explicit JSInfo(PDFDoc *doc, int firstPage = 0);
 
     // Destructor.
-    ~JSInfo();
+    ~JSInfo() = default;
 
     // scan for JS in the PDF
     void scanJS(int nPages);

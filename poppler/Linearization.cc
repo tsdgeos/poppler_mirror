@@ -41,7 +41,7 @@ Linearization::Linearization(BaseStream *str)
     delete parser;
 }
 
-Linearization::~Linearization() { }
+Linearization::~Linearization() = default;
 
 unsigned int Linearization::getLength() const
 {

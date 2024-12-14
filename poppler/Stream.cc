@@ -416,9 +416,9 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
 //------------------------------------------------------------------------
 // OutStream
 //------------------------------------------------------------------------
-OutStream::OutStream() { }
+OutStream::OutStream() = default;
 
-OutStream::~OutStream() { }
+OutStream::~OutStream() = default;
 
 //------------------------------------------------------------------------
 // FileOutStream
@@ -469,7 +469,7 @@ BaseStream::BaseStream(Object &&dictA, Goffset lengthA)
     length = lengthA;
 }
 
-BaseStream::~BaseStream() { }
+BaseStream::~BaseStream() = default;
 
 //------------------------------------------------------------------------
 // BaseStream
@@ -480,7 +480,7 @@ BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset 
 {
 }
 
-BaseSeekInputStream::~BaseSeekInputStream() { }
+BaseSeekInputStream::~BaseSeekInputStream() = default;
 
 void BaseSeekInputStream::reset()
 {
@@ -579,7 +579,7 @@ FilterStream::FilterStream(Stream *strA)
     str = strA;
 }
 
-FilterStream::~FilterStream() { }
+FilterStream::~FilterStream() = default;
 
 void FilterStream::close()
 {
@@ -5273,7 +5273,7 @@ SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap
     curLine = height - 1;
 }
 
-SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() { }
+SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() = default;
 
 void SplashBitmapCMYKEncoder::reset()
 {

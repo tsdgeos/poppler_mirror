@@ -39,7 +39,7 @@ class POPPLER_PRIVATE_EXPORT AnnotStampImageHelper
 public:
     AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength);
     AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength, Ref softMaskRef);
-    ~AnnotStampImageHelper() { }
+    ~AnnotStampImageHelper() = default;
 
     // Returns the ref to the created Image XObject
     Ref getRef() const { return ref; }

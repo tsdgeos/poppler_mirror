@@ -65,7 +65,7 @@ public:
     explicit PageTransition(Object *trans);
 
     // Destructor.
-    ~PageTransition();
+    ~PageTransition() = default;
 
     // Was the Page Transition created successfully?
     bool isOk() const { return ok; }

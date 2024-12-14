@@ -147,7 +147,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA, const
     isOk = true;
 }
 
-SplashFTFont::~SplashFTFont() { }
+SplashFTFont::~SplashFTFont() = default;
 
 bool SplashFTFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
 {

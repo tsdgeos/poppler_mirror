@@ -23,7 +23,7 @@ AbstractInfoDock::AbstractInfoDock(QWidget *parent) : QDockWidget(parent), m_fil
     connect(this, &AbstractInfoDock::visibilityChanged, this, &AbstractInfoDock::slotVisibilityChanged);
 }
 
-AbstractInfoDock::~AbstractInfoDock() { }
+AbstractInfoDock::~AbstractInfoDock() = default;
 
 void AbstractInfoDock::documentLoaded()
 {

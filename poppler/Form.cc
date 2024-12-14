@@ -452,7 +452,7 @@ FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, 
     type = formChoice;
 }
 
-FormWidgetChoice::~FormWidgetChoice() { }
+FormWidgetChoice::~FormWidgetChoice() = default;
 
 bool FormWidgetChoice::_checkRange(int i) const
 {

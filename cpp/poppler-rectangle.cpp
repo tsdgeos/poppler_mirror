@@ -43,7 +43,7 @@ using namespace poppler;
  A rectangle with float (double) dimensions and coordinates.
  */
 
-std::ostream &poppler::operator<<(std::ostream &stream, const rect &r)
+std::ostream &poppler::operator<<(std::ostream &stream, const rect &r) // clazy:exclude=function-args-by-value
 {
     stream << "[" << r.x() << "," << r.y() << " " << r.width() << "+" << r.height() << "]";
     return stream;

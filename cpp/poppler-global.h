@@ -46,7 +46,7 @@ public:
 
 protected:
     noncopyable();
-    ~noncopyable();
+    ~noncopyable() = default;
     noncopyable &operator=(noncopyable &&other) noexcept;
 };
 

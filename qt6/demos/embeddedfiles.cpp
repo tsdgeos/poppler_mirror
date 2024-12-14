@@ -32,7 +32,7 @@ EmbeddedFilesDock::EmbeddedFilesDock(QWidget *parent) : AbstractInfoDock(parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-EmbeddedFilesDock::~EmbeddedFilesDock() { }
+EmbeddedFilesDock::~EmbeddedFilesDock() = default;
 
 void EmbeddedFilesDock::fillInfo()
 {

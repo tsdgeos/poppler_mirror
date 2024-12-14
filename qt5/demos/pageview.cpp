@@ -36,7 +36,7 @@ PageView::PageView(QWidget *parent) : QScrollArea(parent), m_zoom(1.0), m_rotati
     setWidget(m_imageLabel);
 }
 
-PageView::~PageView() { }
+PageView::~PageView() = default;
 
 void PageView::documentLoaded() { }
 

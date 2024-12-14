@@ -104,7 +104,7 @@ public:
     // The caller is responsible for deleting the cachedFile and chunksA.
     CachedFileWriter(CachedFile *cachedFile, std::vector<int> *chunksA);
 
-    ~CachedFileWriter();
+    ~CachedFileWriter() = default;
 
     // Writes size bytes from ptr to cachedFile, returns number of bytes written.
     size_t write(const char *ptr, size_t size);

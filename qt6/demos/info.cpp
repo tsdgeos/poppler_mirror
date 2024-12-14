@@ -32,7 +32,7 @@ InfoDock::InfoDock(QWidget *parent) : AbstractInfoDock(parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-InfoDock::~InfoDock() { }
+InfoDock::~InfoDock() = default;
 
 void InfoDock::fillInfo()
 {

@@ -37,7 +37,7 @@ FontsDock::FontsDock(QWidget *parent) : AbstractInfoDock(parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-FontsDock::~FontsDock() { }
+FontsDock::~FontsDock() = default;
 
 void FontsDock::fillInfo()
 {

@@ -697,7 +697,7 @@ NameTree::Entry::Entry(Array *array, int index)
     value = array->getNF(index + 1).copy();
 }
 
-NameTree::Entry::~Entry() { }
+NameTree::Entry::~Entry() = default;
 
 void NameTree::init(XRef *xrefA, Object *tree)
 {

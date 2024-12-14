@@ -30,7 +30,7 @@ namespace Poppler {
 
 QIODeviceOutStream::QIODeviceOutStream(QIODevice *device) : m_device(device) { }
 
-QIODeviceOutStream::~QIODeviceOutStream() { }
+QIODeviceOutStream::~QIODeviceOutStream() = default;
 
 void QIODeviceOutStream::close() { }
 

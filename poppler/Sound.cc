@@ -101,7 +101,7 @@ Sound::Sound(const Object *obj, bool readAttrs)
     }
 }
 
-Sound::~Sound() { }
+Sound::~Sound() = default;
 
 Stream *Sound::getStream()
 {

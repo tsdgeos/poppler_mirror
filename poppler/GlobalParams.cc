@@ -273,7 +273,7 @@ private:
     std::vector<SysFontInfo *> fonts;
 };
 
-SysFontList::SysFontList() { }
+SysFontList::SysFontList() = default;
 
 SysFontList::~SysFontList()
 {

@@ -22,7 +22,7 @@
 
 DocumentObserver::DocumentObserver() : m_viewer(nullptr) { }
 
-DocumentObserver::~DocumentObserver() { }
+DocumentObserver::~DocumentObserver() = default;
 
 Poppler::Document *DocumentObserver::document() const
 {

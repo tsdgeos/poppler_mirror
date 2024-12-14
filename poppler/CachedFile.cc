@@ -215,8 +215,6 @@ CachedFileWriter::CachedFileWriter(CachedFile *cachedFileA, std::vector<int> *ch
     }
 }
 
-CachedFileWriter::~CachedFileWriter() { }
-
 size_t CachedFileWriter::write(const char *ptr, size_t size)
 {
     const char *cp = ptr;

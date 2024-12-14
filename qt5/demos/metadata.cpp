@@ -31,7 +31,7 @@ MetadataDock::MetadataDock(QWidget *parent) : AbstractInfoDock(parent)
     m_edit->setReadOnly(true);
 }
 
-MetadataDock::~MetadataDock() { }
+MetadataDock::~MetadataDock() = default;
 
 void MetadataDock::fillInfo()
 {

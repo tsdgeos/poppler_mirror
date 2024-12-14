@@ -67,7 +67,7 @@ NavigationToolBar::NavigationToolBar(QWidget *parent) : QToolBar(parent)
     documentClosed();
 }
 
-NavigationToolBar::~NavigationToolBar() { }
+NavigationToolBar::~NavigationToolBar() = default;
 
 void NavigationToolBar::documentLoaded()
 {

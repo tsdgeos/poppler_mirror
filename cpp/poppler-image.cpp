@@ -308,7 +308,7 @@ const char *image::const_data() const
 
  \returns a new image representing the specified part of the current image
  */
-image image::copy(const rect &r) const
+image image::copy(const rect &r) const // clazy:exclude=function-args-by-value
 {
     if (r.is_empty()) {
         image img(*this);

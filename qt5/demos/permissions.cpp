@@ -30,7 +30,7 @@ PermissionsDock::PermissionsDock(QWidget *parent) : AbstractInfoDock(parent)
     m_table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-PermissionsDock::~PermissionsDock() { }
+PermissionsDock::~PermissionsDock() = default;
 
 void PermissionsDock::fillInfo()
 {

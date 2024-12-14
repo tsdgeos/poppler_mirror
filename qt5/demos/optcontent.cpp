@@ -30,7 +30,7 @@ OptContentDock::OptContentDock(QWidget *parent) : AbstractInfoDock(parent)
     m_view->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-OptContentDock::~OptContentDock() { }
+OptContentDock::~OptContentDock() = default;
 
 void OptContentDock::documentLoaded()
 {

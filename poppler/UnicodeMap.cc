@@ -206,7 +206,7 @@ int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const
 
 //------------------------------------------------------------------------
 
-UnicodeMapCache::UnicodeMapCache() { }
+UnicodeMapCache::UnicodeMapCache() = default;
 
 const UnicodeMap *UnicodeMapCache::getUnicodeMap(const std::string &encodingName)
 {

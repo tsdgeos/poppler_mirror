@@ -180,7 +180,7 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict)
     }
 }
 
-PageAttrs::~PageAttrs() { }
+PageAttrs::~PageAttrs() = default;
 
 void PageAttrs::clipBoxes()
 {

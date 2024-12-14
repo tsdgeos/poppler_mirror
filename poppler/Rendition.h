@@ -31,7 +31,7 @@ struct MediaWindowParameters
 {
 
     MediaWindowParameters();
-    ~MediaWindowParameters();
+    ~MediaWindowParameters() = default;
 
     // parse from a floating window parameters dictionary
     void parseFWParams(Object *obj);
@@ -72,7 +72,7 @@ struct MediaParameters
 {
 
     MediaParameters();
-    ~MediaParameters();
+    ~MediaParameters() = default;
 
     // parse from a "Media Play Parameters" dictionary
     void parseMediaPlayParameters(Object *playObj);

@@ -45,8 +45,6 @@ MovieActivationParameters::MovieActivationParameters()
     zdenum = 1;
 }
 
-MovieActivationParameters::~MovieActivationParameters() { }
-
 void MovieActivationParameters::parseMovieActivation(const Object *aDict)
 {
     Object obj1 = aDict->dictLookup("Start");

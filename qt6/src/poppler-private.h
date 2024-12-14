@@ -228,7 +228,7 @@ class FontIteratorData
 public:
     FontIteratorData(int startPage, DocumentData *dd) : fontInfoScanner(dd->doc, startPage), totalPages(dd->doc->getNumPages()), currentPage(qMax(startPage, 0) - 1) { }
 
-    ~FontIteratorData() { }
+    ~FontIteratorData() = default;
 
     FontInfoScanner fontInfoScanner;
     int totalPages;

@@ -60,8 +60,6 @@ PSTokenizer::PSTokenizer(int (*getCharFuncA)(void *), void *dataA)
     charBuf = -1;
 }
 
-PSTokenizer::~PSTokenizer() { }
-
 bool PSTokenizer::getToken(char *buf, int size, int *length)
 {
     bool comment, backslash;

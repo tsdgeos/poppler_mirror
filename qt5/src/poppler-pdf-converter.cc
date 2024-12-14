@@ -61,7 +61,7 @@ PDFConverter::PDFConverter(DocumentData *document) : BaseConverter(*new PDFConve
     d->document = document;
 }
 
-PDFConverter::~PDFConverter() { }
+PDFConverter::~PDFConverter() = default;
 
 void PDFConverter::setPDFOptions(PDFConverter::PDFOptions options)
 {
