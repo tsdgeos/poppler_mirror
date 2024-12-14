@@ -4239,17 +4239,8 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
 GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const
 {
     const UnicodeMap *uMap;
-    TextBlock *blk;
-    TextLine *line;
-    TextLineFrag *frags;
-    int nFrags, fragsSize;
-    TextLineFrag *frag;
     char space[8], eol[16];
     int spaceLen, eolLen;
-    int lastRot;
-    double x, y, delta;
-    int col, idx0, idx1, i;
-    bool multiLine, oneRot;
 
     GooString s;
 
@@ -4259,11 +4250,10 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     }
 
     if (rawOrder) {
-        TextWord *word;
         char mbc[16];
         int mbc_len;
 
-        for (word = rawWords; word && word <= rawLastWord; word = word->next) {
+        for (TextWord *word = rawWords; word && word <= rawLastWord; word = word->next) {
             for (int j = 0; j < word->getLength(); ++j) {
                 double gXMin, gXMax, gYMin, gYMax;
                 word->getCharBBox(j, &gXMin, &gYMin, &gXMax, &gYMax);
@@ -4294,20 +4284,21 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     //~ writing mode (horiz/vert)
 
     // collect the line fragments that are in the rectangle
-    fragsSize = 256;
-    frags = (TextLineFrag *)gmallocn(fragsSize, sizeof(TextLineFrag));
-    nFrags = 0;
-    lastRot = -1;
-    oneRot = true;
-    for (i = 0; i < nBlocks; ++i) {
-        blk = blocks[i];
+    std::vector<TextLineFrag> frags;
+    frags.reserve(256);
+    int lastRot = -1;
+    bool oneRot = true;
+    for (int i = 0; i < nBlocks; ++i) {
+        TextBlock *blk = blocks[i];
         if (xMin < blk->xMax && blk->xMin < xMax && yMin < blk->yMax && blk->yMin < yMax) {
-            for (line = blk->lines; line; line = line->next) {
+            for (TextLine *line = blk->lines; line; line = line->next) {
                 if (xMin < line->xMax && line->xMin < xMax && yMin < line->yMax && line->yMin < yMax) {
+                    double y = 0.5 * (line->yMin + line->yMax);
+                    double x = 0.5 * (line->xMin + line->xMax);
+                    int idx0, idx1;
                     idx0 = idx1 = -1;
                     switch (line->rot) {
                     case 0:
-                        y = 0.5 * (line->yMin + line->yMax);
                         if (yMin < y && y < yMax) {
                             int j = 0;
                             while (j < line->len) {
@@ -4328,7 +4319,6 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                         }
                         break;
                     case 1:
-                        x = 0.5 * (line->xMin + line->xMax);
                         if (xMin < x && x < xMax) {
                             int j = 0;
                             while (j < line->len) {
@@ -4349,7 +4339,6 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                         }
                         break;
                     case 2:
-                        y = 0.5 * (line->yMin + line->yMax);
                         if (yMin < y && y < yMax) {
                             int j = 0;
                             while (j < line->len) {
@@ -4370,7 +4359,6 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                         }
                         break;
                     case 3:
-                        x = 0.5 * (line->xMin + line->xMax);
                         if (xMin < x && x < xMax) {
                             int j = 0;
                             while (j < line->len) {
@@ -4392,12 +4380,8 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
                         break;
                     }
                     if (idx0 >= 0 && idx1 >= 0) {
-                        if (nFrags == fragsSize) {
-                            fragsSize *= 2;
-                            frags = (TextLineFrag *)greallocn(frags, fragsSize, sizeof(TextLineFrag));
-                        }
-                        frags[nFrags].init(line, idx0, idx1 - idx0 + 1);
-                        ++nFrags;
+                        frags.push_back({});
+                        frags.back().init(line, idx0, idx1 - idx0 + 1);
                         if (lastRot >= 0 && line->rot != lastRot) {
                             oneRot = false;
                         }
@@ -4409,35 +4393,34 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     }
 
     // sort the fragments and generate the string
-    if (nFrags > 0) {
-
-        for (i = 0; i < nFrags; ++i) {
-            frags[i].computeCoords(oneRot);
+    if (!frags.empty()) {
+        for (auto &frag : frags) {
+            frag.computeCoords(oneRot);
         }
-        assignColumns(frags, nFrags, oneRot);
+        assignColumns(frags.data(), frags.size(), oneRot);
 
         // if all lines in the region have the same rotation, use it;
         // otherwise, use the page's primary rotation
         if (oneRot) {
-            std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXLineRot);
+            std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
         } else {
-            std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXPrimaryRot);
+            std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
         }
-        i = 0;
-        while (i < nFrags) {
-            delta = maxIntraLineDelta * frags[i].line->words->fontSize;
-            int j;
-            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
-                ;
-            }
-            std::sort(frags + i, frags + j, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
-            i = j;
+        for (auto it = frags.begin(); it != frags.end();) {
+            double delta = maxIntraLineDelta * it->line->words->fontSize;
+            double base = it->base;
+
+            auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
+                return fabs(frag.base - base) >= delta;
+            });
+            std::sort(it, end, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
+            it = end;
         }
 
-        col = 0;
-        multiLine = false;
-        for (i = 0; i < nFrags; ++i) {
-            frag = &frags[i];
+        int col = 0;
+        bool multiLine = false;
+        for (size_t i = 0; i < frags.size(); ++i) {
+            TextLineFrag *frag = &frags[i];
 
             // insert a return
             if (frag->col < col || (i > 0 && fabs(frag->base - frags[i - 1].base) > maxIntraLineDelta * frags[i - 1].line->words->fontSize)) {
@@ -4459,8 +4442,6 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
             s.append(eol, eolLen);
         }
     }
-
-    gfree(frags);
 
     return s;
 }
@@ -5366,17 +5347,8 @@ bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, do
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks)
 {
     const UnicodeMap *uMap;
-    TextFlow *flow;
-    TextBlock *blk;
-    TextLine *line;
-    TextLineFrag *frags;
-    TextWord *word;
-    int nFrags, fragsSize;
-    TextLineFrag *frag;
     char space[8], eol[16], eop[8];
     int spaceLen, eolLen, eopLen;
-    double delta;
-    int col, i, d, n;
 
     // get the output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
@@ -5406,7 +5378,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         GooString s;
         std::vector<Unicode> uText;
 
-        for (word = rawWords; word; word = word->next) {
+        for (TextWord *word = rawWords; word; word = word->next) {
             s.clear();
             uText.resize(word->len());
             std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
@@ -5426,41 +5398,35 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
     } else if (physLayout) {
 
         // collect the line fragments for the page and sort them
-        fragsSize = 256;
-        frags = (TextLineFrag *)gmallocn(fragsSize, sizeof(TextLineFrag));
-        nFrags = 0;
-        for (i = 0; i < nBlocks; ++i) {
-            blk = blocks[i];
-            for (line = blk->lines; line; line = line->next) {
-                if (nFrags == fragsSize) {
-                    fragsSize *= 2;
-                    frags = (TextLineFrag *)greallocn(frags, fragsSize, sizeof(TextLineFrag));
-                }
-                frags[nFrags].init(line, 0, line->len);
-                frags[nFrags].computeCoords(true);
-                ++nFrags;
+        std::vector<TextLineFrag> frags;
+        frags.reserve(256);
+        for (int i = 0; i < nBlocks; ++i) {
+            TextBlock *blk = blocks[i];
+            for (TextLine *line = blk->lines; line; line = line->next) {
+                frags.push_back({});
+                frags.back().init(line, 0, line->len);
+                frags.back().computeCoords(true);
             }
         }
-        std::sort(frags, frags + nFrags, &TextLineFrag::cmpYXPrimaryRot);
-        i = 0;
-        while (i < nFrags) {
-            int j;
-            delta = maxIntraLineDelta * frags[i].line->words->fontSize;
-            for (j = i + 1; j < nFrags && fabs(frags[j].base - frags[i].base) < delta; ++j) {
-                ;
-            }
-            std::sort(frags + i, frags + j, &TextLineFrag::cmpXYColumnPrimaryRot);
-            i = j;
+        std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
+        for (auto it = frags.begin(); it != frags.end();) {
+            double delta = maxIntraLineDelta * it->line->words->fontSize;
+            double base = it->base;
+
+            auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
+                return fabs(frag.base - base) >= delta;
+            });
+            std::sort(it, end, &TextLineFrag::cmpXYColumnPrimaryRot);
+            it = end;
         }
 
 #if 0 // for debugging
     printf("*** line fragments ***\n");
-    for (i = 0; i < nFrags; ++i) {
-      frag = &frags[i];
+    for (const auto& frag : frags) {
       printf("frag: x=%.2f..%.2f y=%.2f..%.2f base=%.2f '",
-	     frag->xMin, frag->xMax, frag->yMin, frag->yMax, frag->base);
-      for (n = 0; n < frag->len; ++n) {
-	fputc(frag->line->text[frag->start + n] & 0xff, stdout);
+	     frag.xMin, frag.xMax, frag.yMin, frag.yMax, frag.base);
+      for (int n = 0; n < frag.len; ++n) {
+	fputc(frag.line->text[frag.start + n] & 0xff, stdout);
       }
       printf("'\n");
     }
@@ -5469,25 +5435,25 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 
         GooString s;
         // generate output
-        col = 0;
-        for (i = 0; i < nFrags; ++i) {
-            frag = &frags[i];
+        int col = 0;
+        for (size_t i = 0; i < frags.size(); ++i) {
+            const auto &frag = frags[i];
 
             // column alignment
-            for (; col < frag->col; ++col) {
+            for (; col < frag.col; ++col) {
                 (*outputFunc)(outputStream, space, spaceLen);
             }
 
             // print the line
             s.clear();
-            col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, &s);
+            col += dumpFragment(frag.line->text + frag.start, frag.len, uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.getLength());
 
             // print one or more returns if necessary
-            if (i == nFrags - 1) {
+            if (i == frags.size() - 1) {
                 (*outputFunc)(outputStream, eol, eolLen);
-            } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag->base) > maxIntraLineDelta * frag->line->words->fontSize) {
-                d = (int)((frags[i + 1].base - frag->base) / frag->line->words->fontSize);
+            } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag.base) > maxIntraLineDelta * frag.line->words->fontSize) {
+                int d = (int)((frags[i + 1].base - frag.base) / frag.line->words->fontSize);
                 d = std::clamp(d, 1, 5);
                 for (; d > 0; --d) {
                     (*outputFunc)(outputStream, eol, eolLen);
@@ -5496,18 +5462,17 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             }
         }
 
-        gfree(frags);
-
         // output the page, "undoing" the layout
     } else {
-        for (flow = flows; flow; flow = flow->next) {
-            for (blk = flow->blocks; blk; blk = blk->next) {
-                for (line = blk->lines; line; line = line->next) {
-                    n = line->len;
+        GooString s;
+        for (TextFlow *flow = flows; flow; flow = flow->next) {
+            for (TextBlock *blk = flow->blocks; blk; blk = blk->next) {
+                for (TextLine *line = blk->lines; line; line = line->next) {
+                    int n = line->len;
                     if (line->hyphenated && (line->next || blk->next)) {
                         --n;
                     }
-                    GooString s;
+                    s.clear();
                     dumpFragment(line->text, n, uMap, &s);
                     (*outputFunc)(outputStream, s.c_str(), s.getLength());
                     // output a newline when a hyphen is not suppressed
