@@ -42,8 +42,6 @@ MediaWindowParameters::MediaWindowParameters()
     isResizeable = true;
 }
 
-MediaWindowParameters::~MediaWindowParameters() { }
-
 void MediaWindowParameters::parseFWParams(Object *obj)
 {
     Object tmp = obj->dictLookup("D");
@@ -149,8 +147,6 @@ MediaParameters::MediaParameters()
     showControls = false;
     duration = 0;
 }
-
-MediaParameters::~MediaParameters() { }
 
 void MediaParameters::parseMediaPlayParameters(Object *obj)
 {

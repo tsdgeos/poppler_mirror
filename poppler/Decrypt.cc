@@ -400,7 +400,7 @@ EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
     }
 }
 
-EncryptStream::~EncryptStream() { }
+EncryptStream::~EncryptStream() = default;
 
 void EncryptStream::reset()
 {
@@ -479,7 +479,7 @@ int EncryptStream::lookChar()
 
 DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(strA, fileKey, algoA, keyLength, refA) { }
 
-DecryptStream::~DecryptStream() { }
+DecryptStream::~DecryptStream() = default;
 
 void DecryptStream::reset()
 {

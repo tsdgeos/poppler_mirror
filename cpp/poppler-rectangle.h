@@ -29,7 +29,7 @@ class rectangle
 public:
     rectangle() : x1(), y1(), x2(), y2() { }
     rectangle(T _x, T _y, T w, T h) : x1(_x), y1(_y), x2(x1 + w), y2(y1 + h) { }
-    ~rectangle() { }
+    ~rectangle() = default;
 
     bool is_empty() const { return (x1 == x2) && (y1 == y2); }
 

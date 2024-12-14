@@ -61,7 +61,7 @@ SecurityHandler::SecurityHandler(PDFDoc *docA)
     doc = docA;
 }
 
-SecurityHandler::~SecurityHandler() { }
+SecurityHandler::~SecurityHandler() = default;
 
 bool SecurityHandler::checkEncryption(const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {

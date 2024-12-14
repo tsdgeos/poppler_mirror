@@ -27,7 +27,7 @@ namespace Poppler {
 
 BaseConverterPrivate::BaseConverterPrivate() : document(nullptr), iodev(nullptr), ownIodev(true) { }
 
-BaseConverterPrivate::~BaseConverterPrivate() { }
+BaseConverterPrivate::~BaseConverterPrivate() = default;
 
 QIODevice *BaseConverterPrivate::openDevice()
 {

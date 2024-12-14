@@ -132,9 +132,9 @@ std::unique_ptr<GooString> HtmlLink::getLinkStart() const
   return tmp;
   }*/
 
-HtmlLinks::HtmlLinks() { }
+HtmlLinks::HtmlLinks() = default;
 
-HtmlLinks::~HtmlLinks() { }
+HtmlLinks::~HtmlLinks() = default;
 
 bool HtmlLinks::inLink(double xmin, double ymin, double xmax, double ymax, size_t &p) const
 {

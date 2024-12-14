@@ -44,7 +44,7 @@ LinkExtractorOutputDev::LinkExtractorOutputDev(PageData *data) : m_data(data)
     setDefaultCTM(gfxState.getCTM());
 }
 
-LinkExtractorOutputDev::~LinkExtractorOutputDev() { }
+LinkExtractorOutputDev::~LinkExtractorOutputDev() = default;
 
 void LinkExtractorOutputDev::processLink(::AnnotLink *link)
 {

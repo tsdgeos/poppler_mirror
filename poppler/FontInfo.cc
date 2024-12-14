@@ -51,7 +51,7 @@ FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage)
     currentPage = firstPage + 1;
 }
 
-FontInfoScanner::~FontInfoScanner() { }
+FontInfoScanner::~FontInfoScanner() = default;
 
 std::vector<FontInfo *> FontInfoScanner::scan(int nPages)
 {

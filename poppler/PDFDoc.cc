@@ -135,7 +135,7 @@ struct FILECloser
 
 #define pdfdocLocker() const std::scoped_lock locker(mutex)
 
-PDFDoc::PDFDoc() { }
+PDFDoc::PDFDoc() = default;
 
 PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
     : fileName(std::move(fileNameA)), guiData(guiDataA)

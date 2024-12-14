@@ -50,7 +50,7 @@
 
 Function::Function() : domain {} { }
 
-Function::~Function() { }
+Function::~Function() = default;
 
 Function *Function::parse(Object *funcObj)
 {
@@ -193,7 +193,7 @@ IdentityFunction::IdentityFunction()
     hasRange = false;
 }
 
-IdentityFunction::~IdentityFunction() { }
+IdentityFunction::~IdentityFunction() = default;
 
 void IdentityFunction::transform(const double *in, double *out) const
 {
@@ -622,7 +622,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict)
     ok = true;
 }
 
-ExponentialFunction::~ExponentialFunction() { }
+ExponentialFunction::~ExponentialFunction() = default;
 
 ExponentialFunction::ExponentialFunction(const ExponentialFunction *func) : Function(func)
 {

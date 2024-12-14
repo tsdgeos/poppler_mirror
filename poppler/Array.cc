@@ -44,7 +44,7 @@ Array::Array(XRef *xrefA)
     ref = 1;
 }
 
-Array::~Array() { }
+Array::~Array() = default;
 
 Array *Array::copy(XRef *xrefA) const
 {

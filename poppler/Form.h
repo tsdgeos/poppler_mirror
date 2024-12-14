@@ -430,7 +430,7 @@ protected:
     bool standAlone;
 
 private:
-    FormField() { }
+    FormField() = default;
 };
 
 //------------------------------------------------------------------------

@@ -111,4 +111,4 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     }
 }
 
-ViewerPreferences::~ViewerPreferences() { }
+ViewerPreferences::~ViewerPreferences() = default;

@@ -165,7 +165,7 @@ static void _ft_done_face(void *closure)
 
 CairoFreeTypeFont::CairoFreeTypeFont(Ref refA, cairo_font_face_t *cairo_font_faceA, std::vector<int> &&codeToGIDA, bool substituteA) : CairoFont(refA, cairo_font_faceA, std::move(codeToGIDA), substituteA, true) { }
 
-CairoFreeTypeFont::~CairoFreeTypeFont() { }
+CairoFreeTypeFont::~CairoFreeTypeFont() = default;
 
 // Create a cairo_font_face_t for the given font filename OR font data.
 std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
@@ -583,7 +583,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
 
 CairoType3Font::CairoType3Font(Ref refA, cairo_font_face_t *cairo_font_faceA, std::vector<int> &&codeToGIDA, bool printingA, XRef *xref) : CairoFont(refA, cairo_font_faceA, std::move(codeToGIDA), false, printingA) { }
 
-CairoType3Font::~CairoType3Font() { }
+CairoType3Font::~CairoType3Font() = default;
 
 bool CairoType3Font::matches(Ref &other, bool printingA)
 {
@@ -605,7 +605,7 @@ CairoFontEngine::CairoFontEngine(FT_Library libA)
     useCIDs = major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
-CairoFontEngine::~CairoFontEngine() { }
+CairoFontEngine::~CairoFontEngine() = default;
 
 std::shared_ptr<CairoFont> CairoFontEngine::getFont(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, bool printing, XRef *xref)
 {

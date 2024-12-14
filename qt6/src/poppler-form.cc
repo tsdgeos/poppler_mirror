@@ -282,7 +282,7 @@ std::unique_ptr<Link> FormField::additionalAction(Annotation::AdditionalActionTy
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
 
-FormFieldButton::~FormFieldButton() { }
+FormFieldButton::~FormFieldButton() = default;
 
 FormFieldButton::FormType FormFieldButton::type() const
 {
@@ -391,7 +391,7 @@ QList<int> FormFieldButton::siblings() const
 
 FormFieldText::FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
 
-FormFieldText::~FormFieldText() { }
+FormFieldText::~FormFieldText() = default;
 
 FormField::FormType FormFieldText::type() const
 {
@@ -475,7 +475,7 @@ void FormFieldText::setFontSize(int fontSize)
 
 FormFieldChoice::FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
 
-FormFieldChoice::~FormFieldChoice() { }
+FormFieldChoice::~FormFieldChoice() = default;
 
 FormFieldChoice::FormType FormFieldChoice::type() const
 {
@@ -629,7 +629,7 @@ CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
 
 CertificateInfo::CertificateInfo(CertificateInfoPrivate *priv) : d_ptr(priv) { }
 
-CertificateInfo::CertificateInfo(const CertificateInfo &other) : d_ptr(other.d_ptr) { }
+CertificateInfo::CertificateInfo(const CertificateInfo &other) = default;
 
 CertificateInfo::~CertificateInfo() = default;
 
@@ -837,9 +837,9 @@ public:
 
 SignatureValidationInfo::SignatureValidationInfo(SignatureValidationInfoPrivate *priv) : d_ptr(priv) { }
 
-SignatureValidationInfo::SignatureValidationInfo(const SignatureValidationInfo &other) : d_ptr(other.d_ptr) { }
+SignatureValidationInfo::SignatureValidationInfo(const SignatureValidationInfo &other) = default;
 
-SignatureValidationInfo::~SignatureValidationInfo() { }
+SignatureValidationInfo::~SignatureValidationInfo() = default;
 
 SignatureValidationInfo::SignatureStatus SignatureValidationInfo::signatureStatus() const
 {
@@ -957,7 +957,7 @@ SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValid
 
 FormFieldSignature::FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
 
-FormFieldSignature::~FormFieldSignature() { }
+FormFieldSignature::~FormFieldSignature() = default;
 
 FormField::FormType FormFieldSignature::type() const
 {

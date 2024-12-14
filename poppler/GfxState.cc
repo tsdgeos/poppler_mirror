@@ -218,7 +218,7 @@ GfxColorSpace::GfxColorSpace()
     mapping = nullptr;
 }
 
-GfxColorSpace::~GfxColorSpace() { }
+GfxColorSpace::~GfxColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev *out, GfxState *state, int recursion)
 {
@@ -519,9 +519,9 @@ unsigned int getCMSNChannels(cmsColorSpaceSignature cs)
 // GfxDeviceGrayColorSpace
 //------------------------------------------------------------------------
 
-GfxDeviceGrayColorSpace::GfxDeviceGrayColorSpace() { }
+GfxDeviceGrayColorSpace::GfxDeviceGrayColorSpace() = default;
 
-GfxDeviceGrayColorSpace::~GfxDeviceGrayColorSpace() { }
+GfxDeviceGrayColorSpace::~GfxDeviceGrayColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxDeviceGrayColorSpace::copy() const
 {
@@ -620,7 +620,7 @@ GfxCalGrayColorSpace::GfxCalGrayColorSpace()
     gamma = 1;
 }
 
-GfxCalGrayColorSpace::~GfxCalGrayColorSpace() { }
+GfxCalGrayColorSpace::~GfxCalGrayColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::copy() const
 {
@@ -871,9 +871,9 @@ void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) const
 // GfxDeviceRGBColorSpace
 //------------------------------------------------------------------------
 
-GfxDeviceRGBColorSpace::GfxDeviceRGBColorSpace() { }
+GfxDeviceRGBColorSpace::GfxDeviceRGBColorSpace() = default;
 
-GfxDeviceRGBColorSpace::~GfxDeviceRGBColorSpace() { }
+GfxDeviceRGBColorSpace::~GfxDeviceRGBColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxDeviceRGBColorSpace::copy() const
 {
@@ -1020,9 +1020,9 @@ void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) const
 // GfxDeviceRGBAColorSpace
 //------------------------------------------------------------------------
 
-GfxDeviceRGBAColorSpace::GfxDeviceRGBAColorSpace() { }
+GfxDeviceRGBAColorSpace::GfxDeviceRGBAColorSpace() = default;
 
-GfxDeviceRGBAColorSpace::~GfxDeviceRGBAColorSpace() { }
+GfxDeviceRGBAColorSpace::~GfxDeviceRGBAColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxDeviceRGBAColorSpace::copy() const
 {
@@ -1062,7 +1062,7 @@ GfxCalRGBColorSpace::GfxCalRGBColorSpace()
     mat[8] = 1;
 }
 
-GfxCalRGBColorSpace::~GfxCalRGBColorSpace() { }
+GfxCalRGBColorSpace::~GfxCalRGBColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
 {
@@ -1265,9 +1265,9 @@ void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) const
 // GfxDeviceCMYKColorSpace
 //------------------------------------------------------------------------
 
-GfxDeviceCMYKColorSpace::GfxDeviceCMYKColorSpace() { }
+GfxDeviceCMYKColorSpace::GfxDeviceCMYKColorSpace() = default;
 
-GfxDeviceCMYKColorSpace::~GfxDeviceCMYKColorSpace() { }
+GfxDeviceCMYKColorSpace::~GfxDeviceCMYKColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxDeviceCMYKColorSpace::copy() const
 {
@@ -1407,7 +1407,7 @@ GfxLabColorSpace::GfxLabColorSpace()
     aMax = bMax = 100;
 }
 
-GfxLabColorSpace::~GfxLabColorSpace() { }
+GfxLabColorSpace::~GfxLabColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxLabColorSpace::copy() const
 {
@@ -3153,7 +3153,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
 
 GfxPatternColorSpace::GfxPatternColorSpace(std::unique_ptr<GfxColorSpace> &&underA) : under(std::move(underA)) { }
 
-GfxPatternColorSpace::~GfxPatternColorSpace() { }
+GfxPatternColorSpace::~GfxPatternColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::copy() const
 {
@@ -3212,7 +3212,7 @@ void GfxPatternColorSpace::getDefaultColor(GfxColor *color) const
 
 GfxPattern::GfxPattern(int typeA, int patternRefNumA) : type(typeA), patternRefNum(patternRefNumA) { }
 
-GfxPattern::~GfxPattern() { }
+GfxPattern::~GfxPattern() = default;
 
 std::unique_ptr<GfxPattern> GfxPattern::parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum)
 {
@@ -3336,7 +3336,7 @@ GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const double
     contentStream = contentStreamA->copy();
 }
 
-GfxTilingPattern::~GfxTilingPattern() { }
+GfxTilingPattern::~GfxTilingPattern() = default;
 
 std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 {
@@ -3575,7 +3575,7 @@ GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxS
     }
 }
 
-GfxFunctionShading::~GfxFunctionShading() { }
+GfxFunctionShading::~GfxFunctionShading() = default;
 
 std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
@@ -3945,7 +3945,7 @@ GfxAxialShading::GfxAxialShading(const GfxAxialShading *shading) : GfxUnivariate
     y1 = shading->y1;
 }
 
-GfxAxialShading::~GfxAxialShading() { }
+GfxAxialShading::~GfxAxialShading() = default;
 
 std::unique_ptr<GfxAxialShading> GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
@@ -4124,7 +4124,7 @@ GfxRadialShading::GfxRadialShading(const GfxRadialShading *shading) : GfxUnivari
     r1 = shading->r1;
 }
 
-GfxRadialShading::~GfxRadialShading() { }
+GfxRadialShading::~GfxRadialShading() = default;
 
 std::unique_ptr<GfxRadialShading> GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {

@@ -185,7 +185,7 @@ class JBIG2HuffmanDecoder
 {
 public:
     JBIG2HuffmanDecoder();
-    ~JBIG2HuffmanDecoder();
+    ~JBIG2HuffmanDecoder() = default;
     void setStream(Stream *strA) { str = strA; }
 
     void reset();
@@ -215,8 +215,6 @@ JBIG2HuffmanDecoder::JBIG2HuffmanDecoder()
     byteCounter = 0;
     reset();
 }
-
-JBIG2HuffmanDecoder::~JBIG2HuffmanDecoder() { }
 
 void JBIG2HuffmanDecoder::reset()
 {
@@ -352,7 +350,7 @@ class JBIG2MMRDecoder
 {
 public:
     JBIG2MMRDecoder();
-    ~JBIG2MMRDecoder();
+    ~JBIG2MMRDecoder() = default;
     void setStream(Stream *strA) { str = strA; }
     void reset();
     int get2DCode();
@@ -377,8 +375,6 @@ JBIG2MMRDecoder::JBIG2MMRDecoder()
     byteCounter = 0;
     reset();
 }
-
-JBIG2MMRDecoder::~JBIG2MMRDecoder() { }
 
 void JBIG2MMRDecoder::reset()
 {

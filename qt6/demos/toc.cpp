@@ -127,7 +127,7 @@ TocDock::TocDock(QWidget *parent) : AbstractInfoDock(parent)
     m_tree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 }
 
-TocDock::~TocDock() { }
+TocDock::~TocDock() = default;
 
 void TocDock::expandItemModels(const QModelIndex &parent)
 {

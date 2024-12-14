@@ -34,7 +34,7 @@ struct MovieActivationParameters
 {
 
     MovieActivationParameters();
-    ~MovieActivationParameters();
+    ~MovieActivationParameters() = default;
 
     // parse from a "Movie Activation" dictionary
     void parseMovieActivation(const Object *aDict);

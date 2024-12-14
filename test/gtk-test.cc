@@ -102,7 +102,7 @@ GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen *screen, void (*redrawCbkA)(voi
     redrawCbkData = redrawCbkDataA;
 }
 
-GDKSplashOutputDev::~GDKSplashOutputDev() { }
+GDKSplashOutputDev::~GDKSplashOutputDev() = default;
 
 void GDKSplashOutputDev::clear()
 {

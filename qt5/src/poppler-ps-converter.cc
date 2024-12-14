@@ -73,7 +73,7 @@ PSConverter::PSConverter(DocumentData *document) : BaseConverter(*new PSConverte
     d->document = document;
 }
 
-PSConverter::~PSConverter() { }
+PSConverter::~PSConverter() = default;
 
 void PSConverter::setPageList(const QList<int> &pageList)
 {

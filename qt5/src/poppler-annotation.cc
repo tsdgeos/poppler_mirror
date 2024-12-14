@@ -947,7 +947,7 @@ public:
 
 Annotation::Style::Style() : d(new Private) { }
 
-Annotation::Style::Style(const Style &other) : d(other.d) { }
+Annotation::Style::Style(const Style &other) = default;
 
 Annotation::Style &Annotation::Style::operator=(const Style &other)
 {
@@ -958,7 +958,7 @@ Annotation::Style &Annotation::Style::operator=(const Style &other)
     return *this;
 }
 
-Annotation::Style::~Style() { }
+Annotation::Style::~Style() = default;
 
 QColor Annotation::Style::color() const
 {
@@ -1064,7 +1064,7 @@ public:
 
 Annotation::Popup::Popup() : d(new Private) { }
 
-Annotation::Popup::Popup(const Popup &other) : d(other.d) { }
+Annotation::Popup::Popup(const Popup &other) = default;
 
 Annotation::Popup &Annotation::Popup::operator=(const Popup &other)
 {
@@ -1075,7 +1075,7 @@ Annotation::Popup &Annotation::Popup::operator=(const Popup &other)
     return *this;
 }
 
-Annotation::Popup::~Popup() { }
+Annotation::Popup::~Popup() = default;
 
 int Annotation::Popup::flags() const
 {
@@ -1129,7 +1129,7 @@ void Annotation::Popup::setText(const QString &text)
 
 Annotation::Annotation(AnnotationPrivate &dd) : d_ptr(&dd) { }
 
-Annotation::~Annotation() { }
+Annotation::~Annotation() = default;
 
 Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&dd)
 {
@@ -2080,7 +2080,7 @@ TextAnnotation::TextAnnotation(const QDomNode &node) : Annotation(*new TextAnnot
     }
 }
 
-TextAnnotation::~TextAnnotation() { }
+TextAnnotation::~TextAnnotation() = default;
 
 void TextAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -2529,7 +2529,7 @@ LineAnnotation::LineAnnotation(const QDomNode &node) : Annotation(*new LineAnnot
     }
 }
 
-LineAnnotation::~LineAnnotation() { }
+LineAnnotation::~LineAnnotation() = default;
 
 void LineAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -3041,7 +3041,7 @@ GeomAnnotation::GeomAnnotation(const QDomNode &node) : Annotation(*new GeomAnnot
     }
 }
 
-GeomAnnotation::~GeomAnnotation() { }
+GeomAnnotation::~GeomAnnotation() = default;
 
 void GeomAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -3292,7 +3292,7 @@ HighlightAnnotation::HighlightAnnotation(const QDomNode &node) : Annotation(*new
     }
 }
 
-HighlightAnnotation::~HighlightAnnotation() { }
+HighlightAnnotation::~HighlightAnnotation() = default;
 
 void HighlightAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -3566,7 +3566,7 @@ StampAnnotation::StampAnnotation(const QDomNode &node) : Annotation(*new StampAn
     }
 }
 
-StampAnnotation::~StampAnnotation() { }
+StampAnnotation::~StampAnnotation() = default;
 
 void StampAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -3648,7 +3648,7 @@ public:
     std::vector<std::unique_ptr<AnnotPath>> toAnnotPaths(const QList<QLinkedList<QPointF>> &paths);
 };
 
-InkAnnotationPrivate::InkAnnotationPrivate() { }
+InkAnnotationPrivate::InkAnnotationPrivate() = default;
 
 Annotation *InkAnnotationPrivate::makeAlias()
 {
@@ -3743,7 +3743,7 @@ InkAnnotation::InkAnnotation(const QDomNode &node) : Annotation(*new InkAnnotati
     }
 }
 
-InkAnnotation::~InkAnnotation() { }
+InkAnnotation::~InkAnnotation() = default;
 
 void InkAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -3949,7 +3949,7 @@ LinkAnnotation::LinkAnnotation(const QDomNode &node) : Annotation(*new LinkAnnot
     }
 }
 
-LinkAnnotation::~LinkAnnotation() { }
+LinkAnnotation::~LinkAnnotation() = default;
 
 void LinkAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4225,7 +4225,7 @@ CaretAnnotation::CaretAnnotation(const QDomNode &node) : Annotation(*new CaretAn
     }
 }
 
-CaretAnnotation::~CaretAnnotation() { }
+CaretAnnotation::~CaretAnnotation() = default;
 
 void CaretAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4323,7 +4323,7 @@ FileAttachmentAnnotation::FileAttachmentAnnotation(const QDomNode &node) : Annot
     }
 }
 
-FileAttachmentAnnotation::~FileAttachmentAnnotation() { }
+FileAttachmentAnnotation::~FileAttachmentAnnotation() = default;
 
 void FileAttachmentAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4415,7 +4415,7 @@ SoundAnnotation::SoundAnnotation(const QDomNode &node) : Annotation(*new SoundAn
     }
 }
 
-SoundAnnotation::~SoundAnnotation() { }
+SoundAnnotation::~SoundAnnotation() = default;
 
 void SoundAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4507,7 +4507,7 @@ MovieAnnotation::MovieAnnotation(const QDomNode &node) : Annotation(*new MovieAn
     }
 }
 
-MovieAnnotation::~MovieAnnotation() { }
+MovieAnnotation::~MovieAnnotation() = default;
 
 void MovieAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4583,7 +4583,7 @@ Annot *ScreenAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
 
 ScreenAnnotation::ScreenAnnotation() : Annotation(*new ScreenAnnotationPrivate()) { }
 
-ScreenAnnotation::~ScreenAnnotation() { }
+ScreenAnnotation::~ScreenAnnotation() = default;
 
 void ScreenAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4652,7 +4652,7 @@ WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd) : Annotation(dd)
 
 WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
 
-WidgetAnnotation::~WidgetAnnotation() { }
+WidgetAnnotation::~WidgetAnnotation() = default;
 
 void WidgetAnnotation::store(QDomNode &node, QDomDocument &document) const
 {
@@ -4679,14 +4679,14 @@ Link *WidgetAnnotation::additionalAction(AdditionalActionType type) const
 class RichMediaAnnotation::Params::Private
 {
 public:
-    Private() { }
+    Private() = default;
 
     QString flashVars;
 };
 
 RichMediaAnnotation::Params::Params() : d(new Private) { }
 
-RichMediaAnnotation::Params::~Params() { }
+RichMediaAnnotation::Params::~Params() = default;
 
 void RichMediaAnnotation::Params::setFlashVars(const QString &flashVars)
 {
@@ -4714,7 +4714,7 @@ public:
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
 
-RichMediaAnnotation::Instance::~Instance() { }
+RichMediaAnnotation::Instance::~Instance() = default;
 
 void RichMediaAnnotation::Instance::setType(Type type)
 {
@@ -4740,7 +4740,7 @@ RichMediaAnnotation::Params *RichMediaAnnotation::Instance::params() const
 class RichMediaAnnotation::Configuration::Private
 {
 public:
-    Private() { }
+    Private() = default;
     ~Private()
     {
         qDeleteAll(instances);
@@ -4757,7 +4757,7 @@ public:
 
 RichMediaAnnotation::Configuration::Configuration() : d(new Private) { }
 
-RichMediaAnnotation::Configuration::~Configuration() { }
+RichMediaAnnotation::Configuration::~Configuration() = default;
 
 void RichMediaAnnotation::Configuration::setType(Type type)
 {
@@ -4808,7 +4808,7 @@ public:
 
 RichMediaAnnotation::Asset::Asset() : d(new Private) { }
 
-RichMediaAnnotation::Asset::~Asset() { }
+RichMediaAnnotation::Asset::~Asset() = default;
 
 void RichMediaAnnotation::Asset::setName(const QString &name)
 {
@@ -4834,7 +4834,7 @@ EmbeddedFile *RichMediaAnnotation::Asset::embeddedFile() const
 class RichMediaAnnotation::Content::Private
 {
 public:
-    Private() { }
+    Private() = default;
     ~Private()
     {
         qDeleteAll(configurations);
@@ -4853,7 +4853,7 @@ public:
 
 RichMediaAnnotation::Content::Content() : d(new Private) { }
 
-RichMediaAnnotation::Content::~Content() { }
+RichMediaAnnotation::Content::~Content() = default;
 
 void RichMediaAnnotation::Content::setConfigurations(const QList<RichMediaAnnotation::Configuration *> &configurations)
 {
@@ -4891,7 +4891,7 @@ public:
 
 RichMediaAnnotation::Activation::Activation() : d(new Private) { }
 
-RichMediaAnnotation::Activation::~Activation() { }
+RichMediaAnnotation::Activation::~Activation() = default;
 
 void RichMediaAnnotation::Activation::setCondition(Condition condition)
 {
@@ -4913,7 +4913,7 @@ public:
 
 RichMediaAnnotation::Deactivation::Deactivation() : d(new Private) { }
 
-RichMediaAnnotation::Deactivation::~Deactivation() { }
+RichMediaAnnotation::Deactivation::~Deactivation() = default;
 
 void RichMediaAnnotation::Deactivation::setCondition(Condition condition)
 {
@@ -4936,7 +4936,7 @@ public:
 
 RichMediaAnnotation::Settings::Settings() : d(new Private) { }
 
-RichMediaAnnotation::Settings::~Settings() { }
+RichMediaAnnotation::Settings::~Settings() = default;
 
 void RichMediaAnnotation::Settings::setActivation(RichMediaAnnotation::Activation *activation)
 {
@@ -5007,7 +5007,7 @@ RichMediaAnnotation::RichMediaAnnotation(const QDomNode &node) : Annotation(*new
     }
 }
 
-RichMediaAnnotation::~RichMediaAnnotation() { }
+RichMediaAnnotation::~RichMediaAnnotation() = default;
 
 void RichMediaAnnotation::store(QDomNode &node, QDomDocument &document) const
 {

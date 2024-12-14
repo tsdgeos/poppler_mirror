@@ -184,7 +184,7 @@ SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA, GfxSta
     gfxMode = shadingA->getColorSpace()->getMode();
 }
 
-SplashGouraudPattern::~SplashGouraudPattern() { }
+SplashGouraudPattern::~SplashGouraudPattern() = default;
 
 void SplashGouraudPattern::getNonParametrizedTriangle(int i, SplashColorMode mode, double *x0, double *y0, SplashColorPtr color0, double *x1, double *y1, SplashColorPtr color1, double *x2, double *y2, SplashColorPtr color2)
 {
@@ -249,7 +249,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
     convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
 }
 
-SplashFunctionPattern::~SplashFunctionPattern() { }
+SplashFunctionPattern::~SplashFunctionPattern() = default;
 
 bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c)
 {
@@ -291,7 +291,7 @@ SplashUnivariatePattern::SplashUnivariatePattern(SplashColorMode colorModeA, Gfx
     gfxMode = shadingA->getColorSpace()->getMode();
 }
 
-SplashUnivariatePattern::~SplashUnivariatePattern() { }
+SplashUnivariatePattern::~SplashUnivariatePattern() = default;
 
 bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
 {
@@ -346,7 +346,7 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
     convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
 }
 
-SplashRadialPattern::~SplashRadialPattern() { }
+SplashRadialPattern::~SplashRadialPattern() = default;
 
 bool SplashRadialPattern::getParameter(double xs, double ys, double *t)
 {
@@ -458,7 +458,7 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
     convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
 }
 
-SplashAxialPattern::~SplashAxialPattern() { }
+SplashAxialPattern::~SplashAxialPattern() = default;
 
 bool SplashAxialPattern::getParameter(double xc, double yc, double *t)
 {

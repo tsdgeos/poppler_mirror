@@ -29,7 +29,7 @@ class PSTokenizer
 {
 public:
     PSTokenizer(int (*getCharFuncA)(void *), void *dataA);
-    ~PSTokenizer();
+    ~PSTokenizer() = default;
 
     // Get the next PostScript token.  Returns false at end-of-stream.
     bool getToken(char *buf, int size, int *length);

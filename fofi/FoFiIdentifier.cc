@@ -41,7 +41,7 @@ public:
     Reader(const Reader &) = delete;
     Reader &operator=(const Reader &other) = delete;
 
-    virtual ~Reader() { }
+    virtual ~Reader() = default;
 
     // Read one byte.  Returns -1 if past EOF.
     virtual int getByte(int pos) = 0;
@@ -98,7 +98,7 @@ MemReader::MemReader(const char *bufA, int lenA)
     len = lenA;
 }
 
-MemReader::~MemReader() { }
+MemReader::~MemReader() = default;
 
 int MemReader::getByte(int pos)
 {
@@ -323,7 +323,7 @@ StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA)
     bufLen = 0;
 }
 
-StreamReader::~StreamReader() { }
+StreamReader::~StreamReader() = default;
 
 int StreamReader::getByte(int pos)
 {

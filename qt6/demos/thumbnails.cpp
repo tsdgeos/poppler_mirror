@@ -38,7 +38,7 @@ ThumbnailsDock::ThumbnailsDock(QWidget *parent) : AbstractInfoDock(parent)
     connect(m_list, &QListWidget::itemActivated, this, &ThumbnailsDock::slotItemActivated);
 }
 
-ThumbnailsDock::~ThumbnailsDock() { }
+ThumbnailsDock::~ThumbnailsDock() = default;
 
 void ThumbnailsDock::fillInfo()
 {

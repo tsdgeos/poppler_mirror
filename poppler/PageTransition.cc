@@ -129,5 +129,3 @@ PageTransition::PageTransition(Object *trans)
     // get rectangular
     rectangular = dict->lookup("B").getBoolWithDefaultValue(false);
 }
-
-PageTransition::~PageTransition() { }

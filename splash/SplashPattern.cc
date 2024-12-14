@@ -29,9 +29,9 @@
 // SplashPattern
 //------------------------------------------------------------------------
 
-SplashPattern::SplashPattern() { }
+SplashPattern::SplashPattern() = default;
 
-SplashPattern::~SplashPattern() { }
+SplashPattern::~SplashPattern() = default;
 
 //------------------------------------------------------------------------
 // SplashSolidColor
@@ -42,7 +42,7 @@ SplashSolidColor::SplashSolidColor(SplashColorConstPtr colorA)
     splashColorCopy(color, colorA);
 }
 
-SplashSolidColor::~SplashSolidColor() { }
+SplashSolidColor::~SplashSolidColor() = default;
 
 bool SplashSolidColor::getColor(int x, int y, SplashColorPtr c)
 {

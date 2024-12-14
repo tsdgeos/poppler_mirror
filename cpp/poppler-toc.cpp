@@ -31,9 +31,9 @@
 
 using namespace poppler;
 
-toc_private::toc_private() { }
+toc_private::toc_private() = default;
 
-toc_private::~toc_private() { }
+toc_private::~toc_private() = default;
 
 toc *toc_private::load_from_outline(Outline *outline)
 {

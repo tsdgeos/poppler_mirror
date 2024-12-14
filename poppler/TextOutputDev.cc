@@ -334,7 +334,7 @@ public:
         y1 = y1A;
         horiz = y0 == y1;
     }
-    ~TextUnderline() { }
+    ~TextUnderline() = default;
 
     double x0, y0, x1, y1;
     bool horiz;
@@ -355,7 +355,7 @@ public:
         yMax = yMaxA;
         link = linkA;
     }
-    ~TextLink() { }
+    ~TextLink() = default;
 
     int xMin, yMin, xMax, yMax;
     AnnotLink *link;
@@ -440,7 +440,7 @@ TextWord::TextWord(const GfxState *state, int rotA, double fontSizeA)
     link = nullptr;
 }
 
-TextWord::~TextWord() { }
+TextWord::~TextWord() = default;
 
 void TextWord::addChar(const GfxState *state, TextFontInfo *fontA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA)
 {
@@ -2480,7 +2480,7 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
     }
 }
 
-TextWordList::~TextWordList() { }
+TextWordList::~TextWordList() = default;
 
 int TextWordList::getLength() const
 {

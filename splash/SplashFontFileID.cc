@@ -12,6 +12,6 @@
 // SplashFontFileID
 //------------------------------------------------------------------------
 
-SplashFontFileID::SplashFontFileID() { }
+SplashFontFileID::SplashFontFileID() = default;
 
-SplashFontFileID::~SplashFontFileID() { }
+SplashFontFileID::~SplashFontFileID() = default;

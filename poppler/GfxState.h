@@ -241,7 +241,7 @@ public:
     int getTransformPixelType() const { return transformPixelType; }
 
 private:
-    GfxColorTransform() { }
+    GfxColorTransform() = default;
     void *transform;
     int cmsIntent;
     unsigned int inputPixelType;

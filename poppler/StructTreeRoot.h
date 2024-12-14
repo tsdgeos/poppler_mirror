@@ -63,13 +63,8 @@ private:
     // object references and pointers to StructElement objects.
     struct Parent
     {
-        Ref ref;
-        StructElement *element;
-
-        Parent() : element(nullptr) { ref = Ref::INVALID(); }
-        Parent(const Parent &p) = default;
-        Parent &operator=(const Parent &) = default;
-        ~Parent() { }
+        Ref ref = Ref::INVALID();
+        StructElement *element = nullptr;
     };
 
     PDFDoc *doc;

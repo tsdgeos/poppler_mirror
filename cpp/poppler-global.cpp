@@ -206,17 +206,15 @@ using namespace poppler;
  The case sensitivity.
 */
 
-noncopyable::noncopyable() { }
-
-noncopyable::~noncopyable() { }
+noncopyable::noncopyable() = default;
 
 noncopyable &noncopyable::operator=(noncopyable &&other) noexcept = default;
 
-ustring::ustring() { }
+ustring::ustring() = default;
 
 ustring::ustring(size_type len, value_type ch) : std::basic_string<value_type>(len, ch) { }
 
-ustring::~ustring() { }
+ustring::~ustring() = default;
 
 byte_array ustring::to_utf8() const
 {

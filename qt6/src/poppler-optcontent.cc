@@ -54,7 +54,7 @@ RadioButtonGroup::RadioButtonGroup(OptContentModelPrivate *ocModel, Array *rbarr
     }
 }
 
-RadioButtonGroup::~RadioButtonGroup() { }
+RadioButtonGroup::~RadioButtonGroup() = default;
 
 QSet<OptContentItem *> RadioButtonGroup::setItemOn(OptContentItem *itemToSetOn)
 {
@@ -95,7 +95,7 @@ OptContentItem::OptContentItem(const QString &label)
 
 OptContentItem::OptContentItem() : m_parent(nullptr), m_enabled(true) { }
 
-OptContentItem::~OptContentItem() { }
+OptContentItem::~OptContentItem() = default;
 
 void OptContentItem::appendRBGroup(RadioButtonGroup *rbgroup)
 {

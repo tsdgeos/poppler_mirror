@@ -45,7 +45,7 @@ PreScanOutputDev::PreScanOutputDev(PSLevel levelA) : level(levelA)
     clearStats();
 }
 
-PreScanOutputDev::~PreScanOutputDev() { }
+PreScanOutputDev::~PreScanOutputDev() = default;
 
 void PreScanOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef * /*xref*/) { }
 
