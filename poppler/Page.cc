@@ -332,9 +332,6 @@ Page::~Page()
 {
     delete attrs;
     delete annots;
-    for (auto frmField : standaloneFields) {
-        delete frmField;
-    }
 }
 
 Dict *Page::getResourceDict()
@@ -390,11 +387,11 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
         }
 
         std::set<int> parents;
-        FormField *field = Form::createFieldFromDict(annot->getAnnotObj().copy(), annot->getDoc(), r, nullptr, &parents);
+        std::unique_ptr<FormField> field = Form::createFieldFromDict(annot->getAnnotObj().copy(), annot->getDoc(), r, nullptr, &parents);
 
         if (field && field->getNumWidgets() == 1) {
 
-            static_cast<AnnotWidget *>(annot)->setField(field);
+            static_cast<AnnotWidget *>(annot)->setField(field.get());
 
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);
@@ -403,10 +400,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
                 formWidget->createWidgetAnnotation();
             }
 
-            standaloneFields.push_back(field);
-
-        } else {
-            delete field;
+            standaloneFields.push_back(std::move(field));
         }
     }
 }
