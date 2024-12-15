@@ -378,10 +378,10 @@ public:
     GooString *getFullyQualifiedName();
 
     FormWidget *findWidgetByRef(Ref aref);
-    int getNumWidgets() const { return terminal ? numChildren : 0; }
-    FormWidget *getWidget(int i) const { return terminal ? widgets[i] : nullptr; }
-    int getNumChildren() const { return !terminal ? numChildren : 0; }
-    FormField *getChildren(int i) const { return children[i]; }
+    int getNumWidgets() const { return terminal ? widgets.size() : 0; }
+    FormWidget *getWidget(int i) const { return terminal ? widgets[i].get() : nullptr; }
+    int getNumChildren() const { return !terminal ? children.size() : 0; }
+    FormField *getChildren(int i) const { return !terminal ? children[i].get() : nullptr; }
 
     // only implemented in FormFieldButton
     virtual void fillChildrenSiblingsID();
@@ -409,10 +409,9 @@ protected:
     Object obj;
     PDFDoc *doc;
     XRef *xref;
-    FormField **children;
+    std::vector<std::unique_ptr<FormField>> children;
     FormField *parent;
-    int numChildren;
-    FormWidget **widgets;
+    std::vector<std::unique_ptr<FormWidget>> widgets;
     bool readOnly;
     bool noExport;
 
@@ -697,7 +696,7 @@ public:
     /* Creates a new Field of the type specified in obj's dict.
        used in Form::Form , FormField::FormField and
        Page::loadStandaloneFields */
-    static FormField *createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
+    static std::unique_ptr<FormField> createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves
@@ -729,8 +728,8 @@ public:
     std::vector<AddFontResult> ensureFontsForAllCharacters(const GooString *unicodeText, const std::string &pdfFontNameToEmulate, GfxResources *fieldResources = nullptr);
 
     bool getNeedAppearances() const { return needAppearances; }
-    int getNumFields() const { return numFields; }
-    FormField *getRootField(int i) const { return rootFields[i]; }
+    int getNumFields() const { return rootFields.size(); }
+    FormField *getRootField(int i) const { return rootFields[i].get(); }
     const GooString *getDefaultAppearance() const { return defaultAppearance.get(); }
     VariableTextQuadding getTextQuadding() const { return quadding; }
     GfxResources *getDefaultResources() const { return defaultResources; }
@@ -755,9 +754,7 @@ private:
 
     AddFontResult doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 
-    FormField **rootFields;
-    int numFields;
-    int size;
+    std::vector<std::unique_ptr<FormField>> rootFields;
     PDFDoc *const doc;
     bool needAppearances;
     GfxResources *defaultResources;
@@ -782,14 +779,12 @@ public:
     FormPageWidgets(const FormPageWidgets &) = delete;
     FormPageWidgets &operator=(const FormPageWidgets &) = delete;
 
-    int getNumWidgets() const { return numWidgets; }
+    int getNumWidgets() const { return widgets.size(); }
     FormWidget *getWidget(int i) const { return widgets[i]; }
-    void addWidgets(const std::vector<FormField *> &addedWidgets, unsigned int page);
+    void addWidgets(const std::vector<std::unique_ptr<FormField>> &addedWidgets, unsigned int page);
 
 private:
-    FormWidget **widgets;
-    int numWidgets;
-    int size;
+    std::vector<FormWidget *> widgets;
 };
 
 #endif

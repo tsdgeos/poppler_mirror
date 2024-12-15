@@ -273,7 +273,7 @@ private:
     // i.e. the PDF document does not have a FormField associated with them. We
     // create standalone FormFields to contain those special FormWidgets, as
     // they are 'de facto' being used to implement tooltips. See #34
-    std::vector<FormField *> standaloneFields;
+    std::vector<std::unique_ptr<FormField>> standaloneFields;
     void loadStandaloneFields(Annots *annotations, Form *form);
 };
 

@@ -992,10 +992,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     ref = aref;
     type = ty;
     parent = parentA;
-    numChildren = 0;
-    children = nullptr;
     terminal = false;
-    widgets = nullptr;
     readOnly = false;
     fullyQualifiedName = nullptr;
     quadding = VariableTextQuadding::leftJustified;
@@ -1035,14 +1032,12 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                         continue;
                     }
 
-                    numChildren++;
-                    children = (FormField **)greallocn(static_cast<void *>(children), numChildren, sizeof(FormField *));
-                    children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, childRef, this, &usedParentsAux);
+                    children.push_back(Form::createFieldFromDict(std::move(childObj), doc, childRef, this, &usedParentsAux));
                 } else {
                     Object obj2 = childObj.dictLookup("Subtype");
                     if (obj2.isName("Widget")) {
                         // Child is a widget annotation
-                        if (!terminal && numChildren > 0) {
+                        if (!terminal && !children.empty()) {
                             error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids");
                             continue;
                         }
@@ -1103,6 +1098,8 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     if (obj1.isString()) {
         mappingName = obj1.getString()->copy();
     }
+    widgets.shrink_to_fit();
+    children.shrink_to_fit();
 }
 
 void FormField::setDefaultAppearance(const std::string &appearance)
@@ -1120,38 +1117,25 @@ void FormField::setPartialName(const GooString &name)
 
 FormField::~FormField()
 {
-    if (!terminal) {
-        if (children) {
-            for (int i = 0; i < numChildren; i++) {
-                delete children[i];
-            }
-            gfree(static_cast<void *>(children));
-        }
-    } else {
-        for (int i = 0; i < numChildren; ++i) {
-            delete widgets[i];
-        }
-        gfree(static_cast<void *>(widgets));
-    }
 
     delete fullyQualifiedName;
 }
 
 void FormField::print(int indent)
 {
-    printf("%*s- (%d %d): [container] terminal: %s children: %d\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", numChildren);
+    printf("%*s- (%d %d): [container] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
 void FormField::printTree(int indent)
 {
     print(indent);
     if (terminal) {
-        for (int i = 0; i < numChildren; i++) {
-            widgets[i]->print(indent + 4);
+        for (const auto &widget : widgets) {
+            widget->print(indent + 4);
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            children[i]->printTree(indent + 4);
+        for (const auto &child : children) {
+            child->printTree(indent + 4);
         }
     }
 }
@@ -1161,20 +1145,20 @@ void FormField::fillChildrenSiblingsID()
     if (terminal) {
         return;
     }
-    for (int i = 0; i < numChildren; i++) {
-        children[i]->fillChildrenSiblingsID();
+    for (const auto &child : children) {
+        child->fillChildrenSiblingsID();
     }
 }
 
 void FormField::createWidgetAnnotations()
 {
     if (terminal) {
-        for (int i = 0; i < numChildren; i++) {
-            widgets[i]->createWidgetAnnotation();
+        for (auto &widget : widgets) {
+            widget->createWidgetAnnotation();
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            children[i]->createWidgetAnnotations();
+        for (auto &child : children) {
+            child->createWidgetAnnotations();
         }
     }
 }
@@ -1182,39 +1166,36 @@ void FormField::createWidgetAnnotations()
 void FormField::_createWidget(Object *objA, Ref aref)
 {
     terminal = true;
-    numChildren++;
-    widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), numChildren, sizeof(FormWidget *));
     // ID = index in "widgets" table
     switch (type) {
     case formButton:
-        widgets[numChildren - 1] = new FormWidgetButton(doc, objA, numChildren - 1, aref, this);
+        widgets.push_back(std::make_unique<FormWidgetButton>(doc, objA, widgets.size(), aref, this));
         break;
     case formText:
-        widgets[numChildren - 1] = new FormWidgetText(doc, objA, numChildren - 1, aref, this);
+        widgets.push_back(std::make_unique<FormWidgetText>(doc, objA, widgets.size(), aref, this));
         break;
     case formChoice:
-        widgets[numChildren - 1] = new FormWidgetChoice(doc, objA, numChildren - 1, aref, this);
+        widgets.push_back(std::make_unique<FormWidgetChoice>(doc, objA, widgets.size(), aref, this));
         break;
     case formSignature:
-        widgets[numChildren - 1] = new FormWidgetSignature(doc, objA, numChildren - 1, aref, this);
+        widgets.push_back(std::make_unique<FormWidgetSignature>(doc, objA, widgets.size(), aref, this));
         break;
     default:
         error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
-        numChildren--;
     }
 }
 
 FormWidget *FormField::findWidgetByRef(Ref aref)
 {
     if (terminal) {
-        for (int i = 0; i < numChildren; i++) {
-            if (widgets[i]->getRef() == aref) {
-                return widgets[i];
+        for (auto &widget : widgets) {
+            if (widget->getRef() == aref) {
+                return widget.get();
             }
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            FormWidget *result = children[i]->findWidgetByRef(aref);
+        for (auto &child : children) {
+            FormWidget *result = child->findWidgetByRef(aref);
             if (result) {
                 return result;
             }
@@ -1318,12 +1299,12 @@ void FormField::updateChildrenAppearance()
 {
     // Recursively update each child's appearance
     if (terminal) {
-        for (int i = 0; i < numChildren; i++) {
-            widgets[i]->updateWidgetAppearance();
+        for (auto &widget : widgets) {
+            widget->updateWidgetAppearance();
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            children[i]->updateChildrenAppearance();
+        for (auto &child : children) {
+            child->updateChildrenAppearance();
         }
     }
 }
@@ -1362,8 +1343,8 @@ void FormField::reset(const std::vector<std::string> &excludedFields)
 void FormField::resetChildren(const std::vector<std::string> &excludedFields)
 {
     if (!terminal) {
-        for (int i = 0; i < numChildren; i++) {
-            children[i]->reset(excludedFields);
+        for (auto &child : children) {
+            child->reset(excludedFields);
         }
     }
 }
@@ -1394,8 +1375,8 @@ FormField *FormField::findFieldByRef(Ref aref)
             return this;
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            FormField *result = children[i]->findFieldByRef(aref);
+        for (auto &child : children) {
+            FormField *result = child->findFieldByRef(aref);
             if (result) {
                 return result;
             }
@@ -1411,8 +1392,8 @@ FormField *FormField::findFieldByFullyQualifiedName(const std::string &name)
             return this;
         }
     } else {
-        for (int i = 0; i < numChildren; i++) {
-            FormField *result = children[i]->findFieldByFullyQualifiedName(name);
+        for (auto &child : children) {
+            FormField *result = child->findFieldByFullyQualifiedName(name);
             if (result) {
                 return result;
             }
@@ -1480,7 +1461,7 @@ static const char *_getButtonType(FormButtonType type)
 
 void FormFieldButton::print(int indent)
 {
-    printf("%*s- (%d %d): [%s] terminal: %s children: %d\n", indent, "", ref.num, ref.gen, _getButtonType(btype), terminal ? "Yes" : "No", numChildren);
+    printf("%*s- (%d %d): [%s] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, _getButtonType(btype), terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
 void FormFieldButton::setNumSiblings(int num)
@@ -1492,13 +1473,14 @@ void FormFieldButton::setNumSiblings(int num)
 void FormFieldButton::fillChildrenSiblingsID()
 {
     if (!terminal) {
+        int numChildren = int(children.size());
         for (int i = 0; i < numChildren; i++) {
-            FormFieldButton *child = dynamic_cast<FormFieldButton *>(children[i]);
+            FormFieldButton *child = dynamic_cast<FormFieldButton *>(children[i].get());
             if (child != nullptr) {
                 // Fill the siblings of this node childs
                 child->setNumSiblings(numChildren - 1);
                 for (int j = 0, counter = 0; j < numChildren; j++) {
-                    FormFieldButton *otherChild = dynamic_cast<FormFieldButton *>(children[j]);
+                    FormFieldButton *otherChild = dynamic_cast<FormFieldButton *>(children[j].get());
                     if (i == j) {
                         continue;
                     }
@@ -1542,14 +1524,14 @@ bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
     const char *current = getAppearanceState();
     bool currentFound = false, newFound = false;
 
-    for (int i = 0; i < numChildren; i++) {
+    for (int i = 0; i < int(terminal ? widgets.size() : children.size()); i++) {
         FormWidgetButton *widget;
 
         // If radio button is a terminal field we want the widget at i, but
         // if it's not terminal, the child widget is a composed dict, so
         // we want the ony child widget of the children at i
         if (terminal) {
-            widget = static_cast<FormWidgetButton *>(widgets[i]);
+            widget = static_cast<FormWidgetButton *>(widgets[i].get());
         } else {
             widget = static_cast<FormWidgetButton *>(children[i]->getWidget(0));
         }
@@ -1702,7 +1684,7 @@ void FormFieldText::fillContent(FillValueType fillType)
 
 void FormFieldText::print(int indent)
 {
-    printf("%*s- (%d %d): [text] terminal: %s children: %d\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", numChildren);
+    printf("%*s- (%d %d): [text] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
 void FormFieldText::setContentCopy(const GooString *new_content)
@@ -2035,7 +2017,7 @@ FormFieldChoice::~FormFieldChoice()
 
 void FormFieldChoice::print(int indent)
 {
-    printf("%*s- (%d %d): [choice] terminal: %s children: %d\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", numChildren);
+    printf("%*s- (%d %d): [choice] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
 void FormFieldChoice::updateSelection()
@@ -2614,7 +2596,7 @@ std::optional<GooString> FormFieldSignature::getCheckedSignature(Goffset *checke
 
 void FormFieldSignature::print(int indent)
 {
-    printf("%*s- (%d %d): [signature] terminal: %s children: %d\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", numChildren);
+    printf("%*s- (%d %d): [signature] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
 //------------------------------------------------------------------------
@@ -2627,9 +2609,6 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     XRef *xref = doc->getXRef();
 
-    size = 0;
-    numFields = 0;
-    rootFields = nullptr;
     quadding = VariableTextQuadding::leftJustified;
     defaultResources = nullptr;
 
@@ -2684,13 +2663,8 @@ Form::Form(PDFDoc *docA) : doc(docA)
             }
             alreadyReadRefs.insert(oref.getRef());
 
-            if (numFields >= size) {
-                size += 16;
-                rootFields = (FormField **)greallocn(static_cast<void *>(rootFields), size, sizeof(FormField *));
-            }
-
             std::set<int> usedParents;
-            rootFields[numFields++] = createFieldFromDict(std::move(obj2), doc, oref.getRef(), nullptr, &usedParents);
+            rootFields.push_back(createFieldFromDict(std::move(obj2), doc, oref.getRef(), nullptr, &usedParents));
         }
     } else {
         error(errSyntaxError, -1, "Can't get Fields array");
@@ -2716,11 +2690,6 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
 Form::~Form()
 {
-    int i;
-    for (i = 0; i < numFields; ++i) {
-        delete rootFields[i];
-    }
-    gfree(static_cast<void *>(rootFields));
     delete defaultResources;
 }
 
@@ -2755,24 +2724,22 @@ Object Form::fieldLookup(Dict *field, const char *key)
     return ::fieldLookup(field, key, &usedParents);
 }
 
-FormField *Form::createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents)
+std::unique_ptr<FormField> Form::createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents)
 {
-    FormField *field;
-
     const Object obj2 = Form::fieldLookup(obj.getDict(), "FT");
     if (obj2.isName("Btn")) {
-        field = new FormFieldButton(docA, std::move(obj), aref, parent, usedParents);
+        return std::make_unique<FormFieldButton>(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-        field = new FormFieldText(docA, std::move(obj), aref, parent, usedParents);
+        return std::make_unique<FormFieldText>(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-        field = new FormFieldChoice(docA, std::move(obj), aref, parent, usedParents);
+        return std::make_unique<FormFieldChoice>(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-        field = new FormFieldSignature(docA, std::move(obj), aref, parent, usedParents);
+        return std::make_unique<FormFieldSignature>(docA, std::move(obj), aref, parent, usedParents);
     } else { // we don't have an FT entry => non-terminal field
-        field = new FormField(docA, std::move(obj), aref, parent, usedParents);
+        return std::make_unique<FormField>(docA, std::move(obj), aref, parent, usedParents);
     }
 
-    return field;
+    return {};
 }
 
 static const std::string kOurDictFontNamePrefix = "popplerfont";
@@ -3141,16 +3108,16 @@ void Form::postWidgetsLoad()
     // every form widget here, because the AnnotWidget constructor
     // needs the form object that gets from the catalog. When constructing
     // a FormWidget the Catalog is still creating the form object
-    for (int i = 0; i < numFields; i++) {
-        rootFields[i]->fillChildrenSiblingsID();
-        rootFields[i]->createWidgetAnnotations();
+    for (auto &rootField : rootFields) {
+        rootField->fillChildrenSiblingsID();
+        rootField->createWidgetAnnotations();
     }
 }
 
 FormWidget *Form::findWidgetByRef(Ref aref)
 {
-    for (int i = 0; i < numFields; i++) {
-        FormWidget *result = rootFields[i]->findWidgetByRef(aref);
+    for (auto &rootField : rootFields) {
+        FormWidget *result = rootField->findWidgetByRef(aref);
         if (result) {
             return result;
         }
@@ -3160,8 +3127,8 @@ FormWidget *Form::findWidgetByRef(Ref aref)
 
 FormField *Form::findFieldByRef(Ref aref) const
 {
-    for (int i = 0; i < numFields; i++) {
-        FormField *result = rootFields[i]->findFieldByRef(aref);
+    for (auto &rootField : rootFields) {
+        FormField *result = rootField->findFieldByRef(aref);
         if (result) {
             return result;
         }
@@ -3171,8 +3138,8 @@ FormField *Form::findFieldByRef(Ref aref) const
 
 FormField *Form::findFieldByFullyQualifiedName(const std::string &name) const
 {
-    for (int i = 0; i < numFields; i++) {
-        FormField *result = rootFields[i]->findFieldByFullyQualifiedName(name);
+    for (auto &rootField : rootFields) {
+        FormField *result = rootField->findFieldByFullyQualifiedName(name);
         if (result) {
             return result;
         }
@@ -3192,15 +3159,15 @@ FormField *Form::findFieldByFullyQualifiedNameOrRef(const std::string &field) co
 
 void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
 {
-    FormField *foundField;
     const bool resetAllFields = fields.empty();
 
     if (resetAllFields) {
-        for (int i = 0; i < numFields; i++) {
-            rootFields[i]->reset(std::vector<std::string>());
+        for (auto &rootField : rootFields) {
+            rootField->reset(std::vector<std::string>());
         }
     } else {
         if (!excludeFields) {
+            FormField *foundField;
             for (const std::string &field : fields) {
                 Ref fieldRef;
 
@@ -3215,8 +3182,8 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
                 }
             }
         } else {
-            for (int i = 0; i < numFields; i++) {
-                rootFields[i]->reset(fields);
+            for (auto &rootField : rootFields) {
+                rootField->reset(fields);
             }
         }
     }
@@ -3248,13 +3215,7 @@ std::string Form::findPdfFontNameToUseForSigning()
 
 FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
 {
-    numWidgets = 0;
-    widgets = nullptr;
-    size = 0;
-
     if (annots && !annots->getAnnots().empty() && form) {
-        size = annots->getAnnots().size();
-        widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), size, sizeof(FormWidget *));
 
         /* For each entry in the page 'Annots' dict, try to find
            a matching form field */
@@ -3278,30 +3239,24 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
             FormWidget *tmp = form->findWidgetByRef(r);
             if (tmp) {
                 // We've found a corresponding form field, link it
-                tmp->setID(FormWidget::encodeID(page, numWidgets));
-                widgets[numWidgets++] = tmp;
+                tmp->setID(FormWidget::encodeID(page, widgets.size()));
+                widgets.push_back(tmp);
             }
         }
     }
 }
 
-void FormPageWidgets::addWidgets(const std::vector<FormField *> &addedWidgets, unsigned int page)
+void FormPageWidgets::addWidgets(const std::vector<std::unique_ptr<FormField>> &addedWidgets, unsigned int page)
 {
     if (addedWidgets.empty()) {
         return;
     }
 
-    size += addedWidgets.size();
-    widgets = (FormWidget **)greallocn(static_cast<void *>(widgets), size, sizeof(FormWidget *));
-
-    for (auto frmField : addedWidgets) {
+    for (auto &frmField : addedWidgets) {
         FormWidget *frmWidget = frmField->getWidget(0);
-        frmWidget->setID(FormWidget::encodeID(page, numWidgets));
-        widgets[numWidgets++] = frmWidget;
+        frmWidget->setID(FormWidget::encodeID(page, widgets.size()));
+        widgets.push_back(frmWidget);
     }
 }
 
-FormPageWidgets::~FormPageWidgets()
-{
-    gfree(static_cast<void *>(widgets));
-}
+FormPageWidgets::~FormPageWidgets() = default;
