@@ -3799,15 +3799,11 @@ GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
             gchar *identifier;
 
             identifier = g_strdup_printf("%c%02u:%02u", tz, tzHours, tzMins);
-#if GLIB_CHECK_VERSION(2, 68, 0)
             time_zone = g_time_zone_new_identifier(identifier);
             if (!time_zone) {
                 g_debug("Failed to create time zone for identifier \"%s\"", identifier);
                 time_zone = g_time_zone_new_utc();
             }
-#else
-            time_zone = g_time_zone_new(identifier);
-#endif
             g_free(identifier);
         } else if (tz == '\0' || tz == 'Z') {
             time_zone = g_time_zone_new_utc();
