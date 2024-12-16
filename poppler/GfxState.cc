@@ -2328,17 +2328,6 @@ char *GfxICCBasedColorSpace::getPostScriptCSA()
     cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, getIntent(), 0, psCSA, size);
     psCSA[size] = 0;
 
-    // TODO REMOVE-ME-IN-THE-FUTURE
-    // until we can depend on https://github.com/mm2/Little-CMS/issues/223 being fixed
-    // lcms returns ps code with , instead of . for some locales. The lcms author says
-    // that there's no room for any , in the rest of the ps code, so replacing all the , with .
-    // is an "acceptable" workaround
-    for (int i = 0; i < size; ++i) {
-        if (psCSA[i] == ',') {
-            psCSA[i] = '.';
-        }
-    }
-
     return psCSA;
 #    else
     return nullptr;
