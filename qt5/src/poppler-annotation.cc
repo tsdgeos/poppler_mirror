@@ -172,11 +172,7 @@ void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data
         break;
     case 8:
     case 24:
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         data->append((const char *)qimg.bits(), static_cast<int>(qimg.sizeInBytes()));
-#else
-        data->append((const char *)qimg.bits(), qimg.byteCount());
-#endif
         break;
     case 32:
         for (int line = 0; line < height; line++) {
@@ -1705,11 +1701,7 @@ Annotation::Style Annotation::style() const
         s.setLineStyle((Annotation::LineStyle)(1 << border->getStyle()));
 
         const std::vector<double> &dashArray = border->getDash();
-#if QT_VERSION <= QT_VERSION_CHECK(5, 14, 0)
-        s.setDashArray(QVector<double>::fromStdVector(dashArray));
-#else
         s.setDashArray(QVector<double>(dashArray.begin(), dashArray.end()));
-#endif
     }
 
     AnnotBorderEffect *border_effect;
@@ -3499,14 +3491,12 @@ AnnotStampImageHelper *StampAnnotationPrivate::convertQImageToAnnotStampImageHel
     case QImage::Format_Grayscale8:
         bitsPerComponent = 8;
         break;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
     case QImage::Format_Grayscale16:
         convertedQImage = convertedQImage.convertToFormat(QImage::Format_Grayscale8);
 
         colorSpace = ColorSpace::DeviceGray;
         bitsPerComponent = 8;
         break;
-#endif
     case QImage::Format_RGB16:
     case QImage::Format_RGB666:
     case QImage::Format_RGB555:
