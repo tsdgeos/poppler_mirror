@@ -301,23 +301,15 @@ const char *image::const_data() const
 }
 
 /**
- Copy of a slice of the image.
+ Copies the image (i.e. \em detaches)
 
- \param r the sub-area of this image to copy; if empty, the whole image is
-          copied
-
- \returns a new image representing the specified part of the current image
+ \returns a new image copied from the current image
  */
-image image::copy(const rect &r) const // clazy:exclude=function-args-by-value
+image image::copy() const
 {
-    if (r.is_empty()) {
-        image img(*this);
-        img.detach();
-        return img;
-    }
-
-    // ### FIXME
-    return *this;
+    image img(*this);
+    img.detach();
+    return img;
 }
 
 /**
