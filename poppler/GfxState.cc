@@ -2296,7 +2296,6 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRa
 #ifdef USE_CMS
 char *GfxICCBasedColorSpace::getPostScriptCSA()
 {
-#    if LCMS_VERSION >= 2070
     // The runtime version check of lcms2 is only available from release 2.7 upwards.
     // The generation of the CSA code only works reliably for version 2.10 and upwards.
     // Cf. the explanation in the corresponding lcms2 merge request [1], and the original mail thread [2].
@@ -2329,9 +2328,6 @@ char *GfxICCBasedColorSpace::getPostScriptCSA()
     psCSA[size] = 0;
 
     return psCSA;
-#    else
-    return nullptr;
-#    endif
 }
 #endif
 
