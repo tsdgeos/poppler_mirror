@@ -39,6 +39,7 @@
 #include <config.h>
 
 #include <QtCore/QSizeF>
+#include <QTimeZone>
 #include <QUrl>
 
 #include <Form.h>
@@ -1030,8 +1031,8 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->nick_name = ci->getNickName().c_str();
 
         X509CertificateInfo::Validity certValidity = ci->getValidity();
-        certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, Qt::UTC);
-        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, Qt::UTC);
+        certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, QTimeZone::utc());
+        certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, QTimeZone::utc());
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
         certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
