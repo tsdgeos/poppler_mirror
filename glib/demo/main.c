@@ -189,12 +189,8 @@ static GtkDialog *pgd_demo_get_auth_dialog(GFile *uri_file)
     gtk_widget_show(main_vbox);
 
     label = gtk_label_new(NULL);
-#if GTK_CHECK_VERSION(3, 15, 0)
     gtk_label_set_xalign(GTK_LABEL(label), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label), 0.5);
-#else
-    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-#endif
     gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
     file_name = g_file_get_basename(uri_file);
     format = g_strdup_printf("<span size=\"larger\" weight=\"bold\">%s</span>\n\n%s", "Password required", "The document “%s” is locked and requires a password before it can be opened.");
@@ -218,12 +214,8 @@ static GtkDialog *pgd_demo_get_auth_dialog(GFile *uri_file)
     gtk_widget_show(table);
 
     label = gtk_label_new_with_mnemonic("_Password:");
-#if GTK_CHECK_VERSION(3, 15, 0)
     gtk_label_set_xalign(GTK_LABEL(label), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label), 0.5);
-#else
-    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-#endif
 
     password_entry = gtk_entry_new();
     gtk_entry_set_visibility(GTK_ENTRY(password_entry), FALSE);

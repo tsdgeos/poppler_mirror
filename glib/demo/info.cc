@@ -168,13 +168,8 @@ GtkWidget *pgd_info_create_widget(PopplerDocument *document)
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
     gtk_widget_set_margin_bottom(table, 5);
-#if GTK_CHECK_VERSION(3, 12, 0)
     gtk_widget_set_margin_start(table, 12);
     gtk_widget_set_margin_end(table, 5);
-#else
-    gtk_widget_set_margin_left(table, 12);
-    gtk_widget_set_margin_right(table, 5);
-#endif
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 

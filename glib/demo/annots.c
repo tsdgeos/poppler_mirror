@@ -606,13 +606,8 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
     gtk_widget_set_margin_bottom(table, 5);
-#if GTK_CHECK_VERSION(3, 12, 0)
     gtk_widget_set_margin_start(table, 8);
     gtk_widget_set_margin_end(table, 5);
-#else
-    gtk_widget_set_margin_left(table, 8);
-    gtk_widget_set_margin_right(table, 5);
-#endif
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 
@@ -1471,11 +1466,7 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     g_signal_connect(demo->darea, "button_release_event", G_CALLBACK(pgd_annots_drawing_area_button_release), (gpointer)demo);
 
     swindow = gtk_scrolled_window_new(NULL, NULL);
-#if GTK_CHECK_VERSION(3, 7, 8)
     gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
-#else
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), demo->darea);
-#endif
     gtk_widget_show(demo->darea);
 
     gtk_paned_add2(GTK_PANED(hpaned), swindow);

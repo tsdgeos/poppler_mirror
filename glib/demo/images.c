@@ -89,11 +89,7 @@ static GtkWidget *pgd_image_view_new()
     darea = gtk_drawing_area_new();
     g_signal_connect(G_OBJECT(darea), "draw", G_CALLBACK(pgd_image_view_drawing_area_draw), (gpointer)swindow);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-#if GTK_CHECK_VERSION(3, 7, 8)
     gtk_container_add(GTK_CONTAINER(swindow), darea);
-#else
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), darea);
-#endif
     gtk_widget_show(darea);
 
     return swindow;
