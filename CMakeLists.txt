@@ -322,10 +322,10 @@ else()
 endif()
 set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
 
-find_soft_mandatory_package(ENABLE_LCMS LCMS2 2.9)
+find_soft_mandatory_package(ENABLE_LCMS LCMS2 2.12)
 set(USE_CMS ${ENABLE_LCMS})
 
-find_soft_mandatory_package(ENABLE_LIBCURL CURL 7.68)
+find_soft_mandatory_package(ENABLE_LIBCURL CURL 7.81)
 set(POPPLER_HAS_CURL_SUPPORT ${ENABLE_LIBCURL})
 
 if(MINGW)
