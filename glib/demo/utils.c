@@ -138,13 +138,8 @@ static void pgd_action_view_add_destination(GtkWidget *action_view, GtkGrid *tab
                 new_table = gtk_grid_new();
                 gtk_widget_set_margin_top(new_table, 5);
                 gtk_widget_set_margin_bottom(new_table, 5);
-#if GTK_CHECK_VERSION(3, 12, 0)
                 gtk_widget_set_margin_start(new_table, 12);
                 gtk_widget_set_margin_end(new_table, 5);
-#else
-                gtk_widget_set_margin_left(new_table, 12);
-                gtk_widget_set_margin_right(new_table, 5);
-#endif
                 gtk_grid_set_column_spacing(GTK_GRID(new_table), 6);
                 gtk_grid_set_row_spacing(GTK_GRID(new_table), 6);
 
@@ -237,14 +232,10 @@ static void pgd_action_view_play_rendition(GtkWidget *button, PopplerMedia *medi
         uri = g_file_get_uri(file);
         g_object_unref(file);
         if (uri) {
-#if GTK_CHECK_VERSION(3, 22, 0)
             GtkWidget *toplevel;
 
             toplevel = gtk_widget_get_toplevel(button);
             gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : NULL, uri, GDK_CURRENT_TIME, NULL);
-#else
-            gtk_show_uri(gtk_widget_get_screen(button), uri, GDK_CURRENT_TIME, NULL);
-#endif
             g_free(uri);
         }
     }
@@ -296,13 +287,8 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
     gtk_widget_set_margin_bottom(table, 5);
-#if GTK_CHECK_VERSION(3, 12, 0)
     gtk_widget_set_margin_start(table, 12);
     gtk_widget_set_margin_end(table, 5);
-#else
-    gtk_widget_set_margin_left(table, 12);
-    gtk_widget_set_margin_right(table, 5);
-#endif
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 
@@ -494,14 +480,10 @@ static void pgd_movie_view_play_movie(GtkWidget *button, PopplerMovie *movie)
     uri = g_file_get_uri(file);
     g_object_unref(file);
     if (uri) {
-#if GTK_CHECK_VERSION(3, 22, 0)
         GtkWidget *toplevel;
 
         toplevel = gtk_widget_get_toplevel(button);
         gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : NULL, uri, GDK_CURRENT_TIME, NULL);
-#else
-        gtk_show_uri(gtk_widget_get_screen(button), uri, GDK_CURRENT_TIME, NULL);
-#endif
         g_free(uri);
     }
 }
@@ -526,13 +508,8 @@ void pgd_movie_view_set_movie(GtkWidget *movie_view, PopplerMovie *movie)
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
     gtk_widget_set_margin_bottom(table, 5);
-#if GTK_CHECK_VERSION(3, 12, 0)
     gtk_widget_set_margin_start(table, 12);
     gtk_widget_set_margin_end(table, 5);
-#else
-    gtk_widget_set_margin_left(table, 12);
-    gtk_widget_set_margin_right(table, 5);
-#endif
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 

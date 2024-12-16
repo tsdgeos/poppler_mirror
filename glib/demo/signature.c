@@ -419,11 +419,7 @@ GtkWidget *pgd_signature_create_widget(PopplerDocument *document)
     g_signal_connect(demo->darea, "button_release_event", G_CALLBACK(pgd_signature_drawing_area_button_release), (gpointer)demo);
 
     swindow = gtk_scrolled_window_new(NULL, NULL);
-#if GTK_CHECK_VERSION(3, 7, 8)
     gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
-#else
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), demo->darea);
-#endif
     gtk_widget_show(demo->darea);
 
     gtk_widget_show(swindow);
