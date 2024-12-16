@@ -54,6 +54,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QFile>
 #include <QtCore/QByteArray>
+#include <QTimeZone>
 
 #include "poppler-form.h"
 #include "poppler-private.h"
@@ -920,22 +921,22 @@ QDateTime convertDate(const char *dateString)
         QDate d(year, mon, day);
         QTime t(hour, min, sec);
         if (d.isValid() && t.isValid()) {
-            QDateTime dt(d, t, Qt::UTC);
+            int tzSecs = 0;
             if (tz) {
                 // then we have some form of timezone
                 if ('Z' == tz) {
                     // We are already at UTC
                 } else if ('+' == tz) {
                     // local time is ahead of UTC
-                    dt = dt.addSecs(-1 * ((tzHours * 60) + tzMins) * 60);
+                    tzSecs = (tzHours * 3600) + (tzMins * 60);
                 } else if ('-' == tz) {
                     // local time is behind UTC
-                    dt = dt.addSecs(((tzHours * 60) + tzMins) * 60);
+                    tzSecs = (tzHours * -3600) + (tzMins * -60);
                 } else {
                     qWarning("unexpected tz val");
                 }
             }
-            return dt;
+            return QDateTime(d, t, QTimeZone(tzSecs));
         }
     }
     return QDateTime();
