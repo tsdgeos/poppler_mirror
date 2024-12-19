@@ -608,7 +608,6 @@ static bool ShowPreview()
 static void RenderPdfAsText(const char *fileName)
 {
     PDFDoc *pdfDoc = nullptr;
-    GooString *txt = nullptr;
     int pageCount;
     double timeInMs;
 
@@ -650,15 +649,13 @@ static void RenderPdfAsText(const char *fileName)
         bool crop = true;
         bool doLinks = false;
         pdfDoc->displayPage(textOut, curPage, 72, 72, rotate, useMediaBox, crop, doLinks);
-        txt = textOut->getText(0.0, 0.0, 10000.0, 10000.0);
+        GooString txt = textOut->getText(0.0, 0.0, 10000.0, 10000.0);
         msTimer.stop();
         timeInMs = msTimer.getElapsed();
         if (gfTimings) {
             LogInfo("page %d: %.2f ms\n", curPage, timeInMs);
         }
-        printf("%s\n", txt->c_str());
-        delete txt;
-        txt = nullptr;
+        printf("%s\n", txt.c_str());
     }
 
 Exit:

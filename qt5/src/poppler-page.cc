@@ -678,7 +678,7 @@ QImage Page::thumbnail() const
 QString Page::text(const QRectF &r, TextLayout textLayout) const
 {
     TextOutputDev *output_dev;
-    GooString *s;
+    GooString s;
     QString result;
 
     const bool rawOrder = textLayout == RawOrderLayout;
@@ -695,10 +695,9 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
         s = output_dev->getText(r.left(), r.top(), r.right(), r.bottom());
     }
 
-    result = QString::fromStdString(s->toStr());
+    result = QString::fromStdString(s.toStr());
 
     delete output_dev;
-    delete s;
     return result;
 }
 
