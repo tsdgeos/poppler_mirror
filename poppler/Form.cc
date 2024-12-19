@@ -51,7 +51,6 @@
 #include <cstring>
 #include <cctype>
 #include "goo/ft_utils.h"
-#include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"
 #include "Error.h"
@@ -1410,8 +1409,6 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&dictObj, const Ref refA,
     Dict *dict = obj.getDict();
     active_child = -1;
     noAllOff = false;
-    siblings = nullptr;
-    numSiblings = 0;
     appearanceState.setToNull();
     defaultAppearanceState.setToNull();
 
@@ -1466,8 +1463,7 @@ void FormFieldButton::print(int indent)
 
 void FormFieldButton::setNumSiblings(int num)
 {
-    numSiblings = num;
-    siblings = (FormFieldButton **)greallocn(static_cast<void *>(siblings), numSiblings, sizeof(FormFieldButton *));
+    siblings.resize(num, nullptr);
 }
 
 void FormFieldButton::fillChildrenSiblingsID()
@@ -1580,12 +1576,7 @@ void FormFieldButton::updateState(const char *state)
     xref->setModifiedObject(&obj, ref);
 }
 
-FormFieldButton::~FormFieldButton()
-{
-    if (siblings) {
-        gfree(static_cast<void *>(siblings));
-    }
-}
+FormFieldButton::~FormFieldButton() = default;
 
 void FormFieldButton::reset(const std::vector<std::string> &excludedFields)
 {
