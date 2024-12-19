@@ -637,7 +637,7 @@ public:
                   double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
 
     // Get the text which is inside the specified rectangle.
-    GooString *getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
+    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -645,9 +645,9 @@ public:
 
     std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
 
-    GooString *getSelectionText(const PDFRectangle *selection, SelectionStyle style);
+    GooString getSelectionText(const PDFRectangle *selection, SelectionStyle style);
 
-    std::vector<TextWordSelection *> **getSelectionWords(const PDFRectangle *selection, SelectionStyle style, int *nLines);
+    [[nodiscard]] std::vector<std::vector<std::unique_ptr<TextWordSelection>>> getSelectionWords(const PDFRectangle *selection, SelectionStyle style);
 
     // Find a string by character position and length.  If found, sets
     // the text bounding rectangle and returns true; otherwise returns
@@ -850,7 +850,7 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Get the text which is inside the specified rectangle.
-    GooString *getText(double xMin, double yMin, double xMax, double yMax) const;
+    GooString getText(double xMin, double yMin, double xMax, double yMax) const;
 
     // Find a string by character position and length.  If found, sets
     // the text bounding rectangle and returns true; otherwise returns
@@ -861,7 +861,7 @@ public:
 
     std::vector<PDFRectangle *> *getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale);
 
-    GooString *getSelectionText(const PDFRectangle *selection, SelectionStyle style);
+    GooString getSelectionText(const PDFRectangle *selection, SelectionStyle style);
 
     // If true, will combine characters when a base and combining
     // character are drawn on eachother.

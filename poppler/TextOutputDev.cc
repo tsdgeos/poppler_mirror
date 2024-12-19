@@ -4284,9 +4284,8 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     return false;
 }
 
-GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const
+GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const
 {
-    GooString *s;
     const UnicodeMap *uMap;
     TextBlock *blk;
     TextLine *line;
@@ -4300,7 +4299,7 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
     int col, idx0, idx1, i, j;
     bool multiLine, oneRot;
 
-    s = new GooString();
+    GooString s;
 
     // get the output encoding
     if (!(uMap = globalParams->getTextEncoding())) {
@@ -4318,7 +4317,7 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
                 word->getCharBBox(j, &gXMin, &gYMin, &gXMax, &gYMax);
                 if (xMin <= gXMin && gXMax <= xMax && yMin <= gYMin && gYMax <= yMax) {
                     mbc_len = uMap->mapUnicode(*(word->getChar(j)), mbc, sizeof(mbc));
-                    s->append(mbc, mbc_len);
+                    s.append(mbc, mbc_len);
                 }
             }
         }
@@ -4489,22 +4488,22 @@ GooString *TextPage::getText(double xMin, double yMin, double xMax, double yMax,
 
             // insert a return
             if (frag->col < col || (i > 0 && fabs(frag->base - frags[i - 1].base) > maxIntraLineDelta * frags[i - 1].line->words->fontSize)) {
-                s->append(eol, eolLen);
+                s.append(eol, eolLen);
                 col = 0;
                 multiLine = true;
             }
 
             // column alignment
             for (; col < frag->col; ++col) {
-                s->append(space, spaceLen);
+                s.append(space, spaceLen);
             }
 
             // get the fragment text
-            col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, s);
+            col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, &s);
         }
 
         if (multiLine) {
-            s->append(eol, eolLen);
+            s.append(eol, eolLen);
         }
     }
 
@@ -4543,66 +4542,44 @@ public:
     void visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection) override;
     void endPage();
 
-    GooString *getText();
-    std::vector<TextWordSelection *> **takeWordList(int *nLines);
+    GooString getText();
+    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> takeWordList();
 
 private:
     void startLine();
     void finishLine();
 
-    std::vector<TextWordSelection *> **lines;
-    int nLines, linesSize;
-    std::vector<TextWordSelection *> *words;
+    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> lines;
+    std::vector<std::unique_ptr<TextWordSelection>> words;
     int tableId;
     TextBlock *currentBlock;
 };
 
 TextSelectionDumper::TextSelectionDumper(TextPage *p) : TextSelectionVisitor(p)
 {
-    linesSize = 256;
-    lines = (std::vector<TextWordSelection *> **)gmallocn(linesSize, sizeof(std::vector<TextWordSelection *> *));
-    nLines = 0;
-
     tableId = -1;
     currentBlock = nullptr;
-    words = nullptr;
 }
 
-TextSelectionDumper::~TextSelectionDumper()
-{
-    for (int i = 0; i < nLines; i++) {
-        for (auto entry : *(lines[i])) {
-            delete entry;
-        }
-        delete lines[i];
-    }
-    gfree(static_cast<void *>(lines));
-}
+TextSelectionDumper::~TextSelectionDumper() = default;
 
 void TextSelectionDumper::startLine()
 {
     finishLine();
-    words = new std::vector<TextWordSelection *>();
+    words.clear();
 }
 
 void TextSelectionDumper::finishLine()
 {
-    if (nLines == linesSize) {
-        linesSize *= 2;
-        lines = (std::vector<TextWordSelection *> **)grealloc(static_cast<void *>(lines), linesSize * sizeof(std::vector<TextWordSelection *> *));
-    }
-
-    if (words && !words->empty()) {
+    if (!words.empty()) {
         // Reverse word order for RTL text. Fixes #53 for glib backend (Evince)
         if (!page->primaryLR) {
-            std::ranges::reverse(*words);
+            std::ranges::reverse(words);
         }
 
-        lines[nLines++] = words;
-    } else {
-        delete words;
+        lines.push_back(std::move(words));
     }
-    words = nullptr;
+    words.clear();
 }
 
 void TextSelectionDumper::visitLine(TextLine *line, TextWord *begin, TextWord *end, int edge_begin, int edge_end, const PDFRectangle *selection)
@@ -4639,7 +4616,7 @@ void TextSelectionDumper::visitLine(TextLine *line, TextWord *begin, TextWord *e
 
 void TextSelectionDumper::visitWord(TextWord *word, int begin, int end, const PDFRectangle *selection)
 {
-    words->push_back(new TextWordSelection(word, begin, end));
+    words.push_back(std::make_unique<TextWordSelection>(word, begin, end));
 }
 
 void TextSelectionDumper::endPage()
@@ -4647,15 +4624,12 @@ void TextSelectionDumper::endPage()
     finishLine();
 }
 
-GooString *TextSelectionDumper::getText()
+GooString TextSelectionDumper::getText()
 {
-    GooString *text;
-    int i;
+    GooString text;
     const UnicodeMap *uMap;
     char space[8], eol[16];
     int spaceLen, eolLen;
-
-    text = new GooString();
 
     if (!(uMap = globalParams->getTextEncoding())) {
         return text;
@@ -4665,39 +4639,31 @@ GooString *TextSelectionDumper::getText()
     eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
 
     std::vector<Unicode> uText;
-    for (i = 0; i < nLines; i++) {
-        std::vector<TextWordSelection *> *lineWords = lines[i];
-        for (std::size_t j = 0; j < lineWords->size(); j++) {
-            TextWordSelection *sel = (*lineWords)[j];
+    for (size_t i = 0; i < lines.size(); i++) {
+        const auto &line = lines[i];
+        for (size_t j = 0; j < line.size(); j++) {
+            const auto &sel = line[j];
 
             uText.resize(sel->end - sel->begin);
             std::transform(sel->word->chars.begin() + sel->begin, sel->word->chars.begin() + sel->end, uText.begin(), [](auto &c) { return c.text; });
-            page->dumpFragment(uText.data(), uText.size(), uMap, text);
+            page->dumpFragment(uText.data(), uText.size(), uMap, &text);
 
-            if (j < lineWords->size() - 1 && sel->word->spaceAfter) {
-                text->append(space, spaceLen);
+            if (j < line.size() - 1 && sel->word->spaceAfter) {
+                text.append(space, spaceLen);
             }
         }
-        if (i < nLines - 1) {
-            text->append(eol, eolLen);
+        if (i < lines.size() - 1) {
+            text.append(eol, eolLen);
         }
     }
 
     return text;
 }
 
-std::vector<TextWordSelection *> **TextSelectionDumper::takeWordList(int *nLinesOut)
+std::vector<std::vector<std::unique_ptr<TextWordSelection>>> TextSelectionDumper::takeWordList()
 {
-    std::vector<TextWordSelection *> **returnValue = lines;
-
-    *nLinesOut = nLines;
-    if (nLines == 0) {
-        return nullptr;
-    }
-
-    nLines = 0;
-    lines = nullptr;
-
+    std::vector<std::vector<std::unique_ptr<TextWordSelection>>> returnValue;
+    std::swap(lines, returnValue);
     return returnValue;
 }
 
@@ -5338,7 +5304,7 @@ std::vector<PDFRectangle *> *TextPage::getSelectionRegion(const PDFRectangle *se
     return sizer.takeRegion();
 }
 
-GooString *TextPage::getSelectionText(const PDFRectangle *selection, SelectionStyle style)
+GooString TextPage::getSelectionText(const PDFRectangle *selection, SelectionStyle style)
 {
     TextSelectionDumper dumper(this);
 
@@ -5348,14 +5314,14 @@ GooString *TextPage::getSelectionText(const PDFRectangle *selection, SelectionSt
     return dumper.getText();
 }
 
-std::vector<TextWordSelection *> **TextPage::getSelectionWords(const PDFRectangle *selection, SelectionStyle style, int *nLines)
+std::vector<std::vector<std::unique_ptr<TextWordSelection>>> TextPage::getSelectionWords(const PDFRectangle *selection, SelectionStyle style)
 {
     TextSelectionDumper dumper(this);
 
     visitSelection(&dumper, selection, style);
     dumper.endPage();
 
-    return dumper.takeWordList(nLines);
+    return dumper.takeWordList();
 }
 
 bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const
@@ -6060,7 +6026,7 @@ bool TextOutputDev::findText(const Unicode *s, int len, bool startAtTop, bool st
     return text->findText(s, len, startAtTop, stopAtBottom, startAtLast, stopAtLast, caseSensitive, backward, wholeWord, xMin, yMin, xMax, yMax);
 }
 
-GooString *TextOutputDev::getText(double xMin, double yMin, double xMax, double yMax) const
+GooString TextOutputDev::getText(double xMin, double yMin, double xMax, double yMax) const
 {
     return text->getText(xMin, yMin, xMax, yMax, textEOL);
 }
@@ -6075,7 +6041,7 @@ std::vector<PDFRectangle *> *TextOutputDev::getSelectionRegion(const PDFRectangl
     return text->getSelectionRegion(selection, style, scale);
 }
 
-GooString *TextOutputDev::getSelectionText(const PDFRectangle *selection, SelectionStyle style)
+GooString TextOutputDev::getSelectionText(const PDFRectangle *selection, SelectionStyle style)
 {
     return text->getSelectionText(selection, style);
 }
