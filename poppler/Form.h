@@ -459,7 +459,7 @@ public:
 
     // For radio buttons, return the fields of the other radio buttons in the same group
     FormFieldButton *getSibling(int i) const { return siblings[i]; }
-    int getNumSiblings() const { return numSiblings; }
+    int getNumSiblings() const { return int(siblings.size()); }
 
     void print(int indent) override;
     void reset(const std::vector<std::string> &excludedFields) override;
@@ -469,10 +469,8 @@ public:
 protected:
     void updateState(const char *state);
 
-    FormFieldButton **siblings; // IDs of dependent buttons (each button of a radio field has all the others buttons
-                                // of the same field in this array)
-    int numSiblings;
-
+    std::vector<FormFieldButton *> siblings; // IDs of dependent buttons (each button of a radio field has all the others buttons
+                                             // of the same field in this array)
     FormButtonType btype;
     int size;
     int active_child; // only used for combo box
