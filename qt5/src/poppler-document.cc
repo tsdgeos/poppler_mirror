@@ -21,6 +21,7 @@
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
+ * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

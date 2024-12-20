@@ -18,6 +18,7 @@
  * Copyright (C) 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
  * Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
+ * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
