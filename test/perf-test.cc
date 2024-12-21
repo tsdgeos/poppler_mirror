@@ -4,6 +4,7 @@
    Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    Copyright 2020 Adam Reichold <adam.reichold@t-online.de>
    Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
+   Copyright 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
    License: GPLv2 */
 /*
   A tool to stress-test poppler rendering and measure rendering times for
