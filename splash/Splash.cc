@@ -5490,8 +5490,36 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
 
             // this here is det( T ) == 0
             // where T is the matrix to map to barycentric coordinates.
-            if ((x[0] - x[2]) * (y[1] - y[2]) - (x[1] - x[2]) * (y[0] - y[2]) == 0) {
-                continue; // degenerate triangle.
+            {
+                int x02diff;
+                if (checkedSubtraction(x[0], x[2], &x02diff)) {
+                    continue;
+                }
+                int y12diff;
+                if (checkedSubtraction(y[1], y[2], &y12diff)) {
+                    continue;
+                }
+                int x12diff;
+                if (checkedSubtraction(x[1], x[2], &x12diff)) {
+                    continue;
+                }
+                int y02diff;
+                if (checkedSubtraction(y[0], y[2], &y02diff)) {
+                    continue;
+                }
+
+                int x02diffY12diff;
+                if (checkedMultiply(x02diff, y12diff, &x02diffY12diff)) {
+                    continue;
+                }
+                int x12diffY02diff;
+                if (checkedMultiply(x12diff, y02diff, &x12diffY02diff)) {
+                    continue;
+                }
+
+                if (x02diffY12diff - x12diffY02diff == 0) {
+                    continue; // degenerate triangle.
+                }
             }
 
             // this here initialises the scanline generation.
