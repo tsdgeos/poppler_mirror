@@ -720,8 +720,9 @@ cairo_region_t *poppler_page_get_selected_region(PopplerPage *page, gdouble scal
  *
  * Retrieves the contents of the specified @selection as text.
  *
- * Return value: a pointer to the contents of the @selection
- *               as a string
+ * Returns: (transfer full): a pointer to the contents of the
+ * @selection as a string
+ *
  * Since: 0.16
  **/
 char *poppler_page_get_selected_text(PopplerPage *page, PopplerSelectionStyle style, PopplerRectangle *selection)
