@@ -2492,7 +2492,7 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
 /**
  * poppler_annot_get_border_width:
  * @poppler_annot: a #PopplerAnnot
- * @border_width: a valid pointer to a double
+ * @width: a valid pointer to a double
  *
  * Returns the border width of the annotation. Some PDF editors set a border
  * width even if the border is not actually drawn.
@@ -2502,22 +2502,22 @@ gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, 
  *
  * Since: 24.12.0
  */
-gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *border_width)
+gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *width)
 {
     Annot *annot = poppler_annot->annot;
     AnnotBorder *b = annot->getBorder();
     if (b) {
-        *border_width = b->getWidth();
+        *width = b->getWidth();
         return TRUE;
     } else {
-        *border_width = 0.;
+        *width = 0.;
         return FALSE;
     }
 }
 /**
  * poppler_annot_set_border_width:
  * @poppler_annot: a #PopplerAnnot
- * @border_width: the new border width
+ * @width: the new border width
  *
  * Sets the border width of the annotation. Since there is currently no
  * mechanism in the GLib binding to control the appearance of the border width,
@@ -2526,11 +2526,11 @@ gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *bor
  *
  * Since: 24.12.0
  */
-void poppler_annot_set_border_width(PopplerAnnot *poppler_annot, double border_width)
+void poppler_annot_set_border_width(PopplerAnnot *poppler_annot, double width)
 {
     Annot *annot = poppler_annot->annot;
     std::unique_ptr<AnnotBorderArray> border = std::make_unique<AnnotBorderArray>();
-    border->setWidth(border_width);
+    border->setWidth(width);
     annot->setBorder(std::move(border));
 }
 
