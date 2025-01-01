@@ -2206,7 +2206,7 @@ FormFieldSignature::~FormFieldSignature()
 
 void FormFieldSignature::setSignature(std::vector<unsigned char> &&sig)
 {
-    signature = sig;
+    signature = std::move(sig);
 }
 
 const GooString &FormFieldSignature::getCustomAppearanceContent() const
