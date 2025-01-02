@@ -907,6 +907,9 @@ struct PST1FontName
     Ref fontFileID;
     std::unique_ptr<GooString> psName; // PostScript font name used for this
                                        //   embedded font file
+
+    // TODO Remove when we decide that not compiling with clang 15 (macos 14) is acceptable
+    PST1FontName(Ref id, std::unique_ptr<GooString> &&name) : fontFileID(id), psName(std::move(name)) { }
 };
 
 // Info for 8-bit fonts
