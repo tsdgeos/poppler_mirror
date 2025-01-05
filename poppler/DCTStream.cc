@@ -13,6 +13,7 @@
 // Copyright 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
+// Copyright 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 //========================================================================
 

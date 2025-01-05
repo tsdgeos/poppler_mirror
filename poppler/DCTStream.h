@@ -11,6 +11,7 @@
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
+// Copyright 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 //========================================================================
 

@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
