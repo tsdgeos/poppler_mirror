@@ -982,7 +982,7 @@ public:
     DeviceNRecoder(Stream *strA, int widthA, int heightA, GfxImageColorMap *colorMapA);
     ~DeviceNRecoder() override;
     StreamKind getKind() const override { return strWeird; }
-    void reset() override;
+    bool reset() override;
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
@@ -1022,10 +1022,10 @@ DeviceNRecoder::~DeviceNRecoder()
     }
 }
 
-void DeviceNRecoder::reset()
+bool DeviceNRecoder::reset()
 {
     imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    return imgStr->reset();
 }
 
 bool DeviceNRecoder::fillBuf()

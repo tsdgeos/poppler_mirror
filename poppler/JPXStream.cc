@@ -271,18 +271,22 @@ JPXStream::~JPXStream()
     delete bufStr;
 }
 
-void JPXStream::reset()
+bool JPXStream::reset()
 {
+    bool ret = true;
     bufStr->reset();
     if (readBoxes()) {
         curY = img.yOffset;
     } else {
         // readBoxes reported an error, so we go immediately to EOF
         curY = img.ySize;
+        ret = false;
     }
     curX = img.xOffset;
     curComp = 0;
     readBufLen = 0;
+
+    return ret;
 }
 
 void JPXStream::close()

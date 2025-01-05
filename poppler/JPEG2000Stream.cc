@@ -80,10 +80,12 @@ JPXStream::~JPXStream()
     delete priv;
 }
 
-void JPXStream::reset()
+bool JPXStream::reset()
 {
     priv->counter = 0;
     priv->ccounter = 0;
+
+    return true;
 }
 
 void JPXStream::close()

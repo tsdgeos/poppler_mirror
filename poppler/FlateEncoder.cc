@@ -55,7 +55,7 @@ FlateEncoder::~FlateEncoder()
     }
 }
 
-void FlateEncoder::reset()
+bool FlateEncoder::reset()
 {
     int zlib_status;
 
@@ -71,10 +71,13 @@ void FlateEncoder::reset()
     if (zlib_status != Z_OK) {
         inBufEof = outBufEof = true;
         error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::reset()");
+        return false;
     }
 
     zlib_stream.next_out = outBufEnd;
     zlib_stream.avail_out = 1; /* anything but 0 to trigger a read */
+
+    return true;
 }
 
 bool FlateEncoder::fillBuf()

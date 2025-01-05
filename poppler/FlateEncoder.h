@@ -43,7 +43,7 @@ public:
     explicit FlateEncoder(Stream *strA);
     ~FlateEncoder() override;
     StreamKind getKind() const override { return strWeird; }
-    void reset() override;
+    bool reset() override;
     int getChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
     int lookChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }

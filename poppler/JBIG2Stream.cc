@@ -1153,7 +1153,7 @@ JBIG2Stream::~JBIG2Stream()
     delete str;
 }
 
-void JBIG2Stream::reset()
+bool JBIG2Stream::reset()
 {
     segments.resize(0);
     globalSegments.resize(0);
@@ -1185,6 +1185,8 @@ void JBIG2Stream::reset()
     } else {
         dataPtr = dataEnd = nullptr;
     }
+
+    return true;
 }
 
 void JBIG2Stream::close()

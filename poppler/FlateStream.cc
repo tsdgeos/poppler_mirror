@@ -42,7 +42,7 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-void FlateStream::reset()
+bool FlateStream::reset()
 {
     // FIXME: what are the semantics of reset?
     // i.e. how much initialization has to happen in the constructor?
@@ -57,6 +57,8 @@ void FlateStream::reset()
     status = Z_OK;
     out_pos = 0;
     out_buf_len = 0;
+
+    return true;
 }
 
 int FlateStream::getRawChar()

@@ -1401,6 +1401,11 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     //----- get the annotation appearance
     if (appearStreams) {
         appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        Object obj = appearance.fetch(doc->getXRef());
+        if (obj.isStream() && !obj.getStream()->reset()) {
+            // appearance stream is invalid as reset() returned false - Issue #1557
+            appearance.setToNull();
+        }
     }
 
     //----- parse the border style
