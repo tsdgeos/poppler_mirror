@@ -1921,8 +1921,7 @@ reload:
             } else {
                 ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size(), fontLoc->fontNum);
             }
-            int *codeToGID;
-            const int n = ff ? 256 : 0;
+            std::vector<int> codeToGID;
             if (ff) {
                 codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
                 // if we're substituting for a non-TrueType font, we need to mark
@@ -1935,10 +1934,8 @@ reload:
                         }
                     }
                 }
-            } else {
-                codeToGID = nullptr;
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, codeToGID, n, fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
@@ -1958,19 +1955,13 @@ reload:
             }
             break;
         case fontCIDType0COT: {
-            int *codeToGID;
-            int n;
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
-                codeToGID = (int *)gmallocn(n, sizeof(int));
-                memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
+            std::vector<int> codeToGID;
+            if (((GfxCIDFont *)gfxFont)->getCIDToGIDLen() > 0) {
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCIDToGID();
             } else {
-                codeToGID = nullptr;
-                n = 0;
             }
-            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(std::move(id), fontsrc, codeToGID, n, fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                gfree(codeToGID);
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
@@ -1980,14 +1971,9 @@ reload:
         }
         case fontCIDType2:
         case fontCIDType2OT: {
-            int *codeToGID = nullptr;
-            int n = 0;
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
-                if (n) {
-                    codeToGID = (int *)gmallocn(n, sizeof(int));
-                    memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
-                }
+            std::vector<int> codeToGID;
+            if (((GfxCIDFont *)gfxFont)->getCIDToGIDLen() > 0) {
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCIDToGID();
             } else {
                 std::unique_ptr<FoFiTrueType> ff;
                 if (!fileName.empty()) {
@@ -1999,9 +1985,9 @@ reload:
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     goto err;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get());
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, codeToGID, n, fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;

@@ -25,6 +25,8 @@
 #ifndef SPLASHFTFONTFILE_H
 #define SPLASHFTFONTFILE_H
 
+#include <vector>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "SplashFontFile.h"
@@ -40,8 +42,8 @@ class SplashFTFontFile : public SplashFontFile
 {
 public:
     static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **encA, int faceIndexA);
-    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA);
-    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA);
+    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGIDA, int faceIndexA);
+    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGIDA, int faceIndexA);
 
     ~SplashFTFontFile() override;
 
@@ -50,12 +52,11 @@ public:
     SplashFont *makeFont(SplashCoord *mat, const SplashCoord *textMat) override;
 
 private:
-    SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, FT_Face faceA, int *codeToGIDA, int codeToGIDLenA, bool trueTypeA, bool type1A);
+    SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A);
 
     SplashFTFontEngine *engine;
     FT_Face face;
-    int *codeToGID;
-    int codeToGIDLen;
+    std::vector<int> codeToGID;
     bool trueType;
     bool type1;
 

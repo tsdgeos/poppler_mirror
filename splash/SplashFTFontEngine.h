@@ -30,6 +30,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <memory>
+#include <vector>
 
 class SplashFontFile;
 class SplashFontFileID;
@@ -54,8 +55,8 @@ public:
     SplashFontFile *loadType1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
     SplashFontFile *loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
     SplashFontFile *loadCIDFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int faceIndex);
-    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
-    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
+    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex);
+    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex);
     bool getAA() { return aa; }
     void setAA(bool aaA) { aa = aaA; }
 

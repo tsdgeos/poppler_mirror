@@ -353,7 +353,7 @@ public:
 
     // Return a char code-to-GID mapping for the provided font file.
     // (This is only useful for TrueType fonts.)
-    int *getCodeToGIDMap(FoFiTrueType *ff);
+    std::vector<int> getCodeToGIDMap(FoFiTrueType *ff);
 
     // Return the Type 3 CharProc dictionary, or NULL if none.
     Dict *getCharProcs();
@@ -406,10 +406,10 @@ public:
 
     // Return the CID-to-GID mapping table.  These should only be called
     // if type is fontCIDType2.
-    int *getCIDToGID() const { return cidToGID; }
-    unsigned int getCIDToGIDLen() const { return cidToGIDLen; }
+    const std::vector<int> &getCIDToGID() const { return cidToGID; }
+    unsigned int getCIDToGIDLen() const { return cidToGID.size(); }
 
-    int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
+    std::vector<int> getCodeToGIDMap(FoFiTrueType *ff);
 
     double getWidth(char *s, int len) const;
 
@@ -425,9 +425,8 @@ private:
     bool ctuUsesCharCode; // true: ctu maps char code to Unicode;
                           //   false: ctu maps CID to Unicode
     GfxFontCIDWidths widths; // character widths
-    int *cidToGID; // CID --> GID mapping (for embedded
-                   //   TrueType fonts)
-    unsigned int cidToGIDLen;
+    std::vector<int> cidToGID; // CID --> GID mapping (for embedded
+                               //   TrueType fonts)
 };
 
 //------------------------------------------------------------------------

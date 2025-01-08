@@ -30,6 +30,7 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 #include "SplashTypes.h"
 #include "poppler_private_export.h"
@@ -67,8 +68,8 @@ public:
     SplashFontFile *loadType1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
     SplashFontFile *loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex);
     SplashFontFile *loadCIDFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int faceIndex);
-    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
-    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex);
+    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex);
+    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex);
 
     // Get a font - this does a cache lookup first, and if not found,
     // creates a new SplashFont object and adds it to the cache.  The
