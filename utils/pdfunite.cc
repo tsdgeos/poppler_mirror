@@ -48,7 +48,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                     const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
                     if (mkey.isString() && mvalue.isRef()) {
                         if (mkey.getString()->cmp(key.getString()) < 0) {
-                            newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
+                            newNameArray->add(Object(mkey.getString()->copy()));
                             newNameArray->add(Object(Ref { mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
                             j += 2;
                         } else if (mkey.getString()->cmp(key.getString()) == 0) {
@@ -60,7 +60,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                         j += 2;
                     }
                 }
-                newNameArray->add(Object(new GooString(key.getString()->c_str())));
+                newNameArray->add(Object(key.getString()->copy()));
                 newNameArray->add(Object(value.getRef()));
             }
         }
@@ -68,7 +68,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &mkey = mergeNameArray.arrayGetNF(j);
             const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
             if (mkey.isString() && mvalue.isRef()) {
-                newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
+                newNameArray->add(Object(mkey.getString()->copy()));
                 newNameArray->add(Object(Ref { mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
             }
             j += 2;
@@ -81,7 +81,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             const Object &key = mergeNameArray.arrayGetNF(i);
             const Object &value = mergeNameArray.arrayGetNF(i + 1);
             if (key.isString() && value.isRef()) {
-                newNameArray->add(Object(new GooString(key.getString()->c_str())));
+                newNameArray->add(Object(key.getString()->copy()));
                 newNameArray->add(Object(Ref { value.getRef().num + numOffset, value.getRef().gen }));
             }
         }

@@ -131,11 +131,9 @@ void TestUTFConversion::testUnicodeToAscii7()
     // Test string is one 'Registered' and twenty 'Copyright' chars
     // so it's long enough to reproduce the bug given that glibc
     // malloc() always returns 8-byte aligned memory addresses.
-    GooString *goo = Poppler::QStringToUnicodeGooString(QString::fromUtf8("®©©©©©©©©©©©©©©©©©©©©")); // clazy:exclude=qstring-allocations
+    std::unique_ptr<GooString> goo = Poppler::QStringToUnicodeGooString(QString::fromUtf8("®©©©©©©©©©©©©©©©©©©©©")); // clazy:exclude=qstring-allocations
 
     const std::vector<Unicode> in = TextStringToUCS4(goo->toStr());
-
-    delete goo;
 
     int in_norm_len;
     int *in_norm_idx;

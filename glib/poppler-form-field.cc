@@ -820,17 +820,15 @@ gchar *poppler_form_field_text_get_text(PopplerFormField *field)
  **/
 void poppler_form_field_text_set_text(PopplerFormField *field, const gchar *text)
 {
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
     g_return_if_fail(field->widget->getType() == formText);
 
     tmp = text ? g_convert(text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    std::unique_ptr<GooString> goo_tmp = std::make_unique<GooString>(tmp, length);
     g_free(tmp);
-    static_cast<FormWidgetText *>(field->widget)->setContent(goo_tmp);
-    delete goo_tmp;
+    static_cast<FormWidgetText *>(field->widget)->setContent(std::move(goo_tmp));
 }
 
 /**
@@ -1076,17 +1074,15 @@ void poppler_form_field_choice_toggle_item(PopplerFormField *field, gint index)
  **/
 void poppler_form_field_choice_set_text(PopplerFormField *field, const gchar *text)
 {
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
     g_return_if_fail(field->widget->getType() == formChoice);
 
     tmp = text ? g_convert(text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    std::unique_ptr<GooString> goo_tmp = std::make_unique<GooString>(tmp, length);
     g_free(tmp);
-    static_cast<FormWidgetChoice *>(field->widget)->setEditChoice(goo_tmp);
-    delete goo_tmp;
+    static_cast<FormWidgetChoice *>(field->widget)->setEditChoice(std::move(goo_tmp));
 }
 
 /**

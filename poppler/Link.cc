@@ -754,7 +754,7 @@ Object LinkJavaScript::createObject(XRef *xref, const std::string &js)
 {
     Dict *linkDict = new Dict(xref);
     linkDict->add("S", Object(objName, "JavaScript"));
-    linkDict->add("JS", Object(new GooString(js)));
+    linkDict->add("JS", Object(std::make_unique<GooString>(js)));
 
     return Object(linkDict);
 }

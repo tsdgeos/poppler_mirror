@@ -125,9 +125,9 @@ std::string timeToStringWithFormat(const time_t *timeA, const char *format)
     return buf;
 }
 
-GooString *timeToDateString(const time_t *timeA)
+std::unique_ptr<GooString> timeToDateString(const time_t *timeA)
 {
-    return new GooString(timeToStringWithFormat(timeA, "D:%Y%m%d%H%M%S%z"));
+    return std::make_unique<GooString>(timeToStringWithFormat(timeA, "D:%Y%m%d%H%M%S%z"));
 }
 
 // Convert PDF date string to time. Returns -1 if conversion fails.

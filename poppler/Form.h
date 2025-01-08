@@ -210,9 +210,9 @@ public:
     const GooString *getContent() const;
 
     // expects a UTF16BE string
-    void setContent(const GooString *new_content);
+    void setContent(std::unique_ptr<GooString> new_content);
     // sets the text inside the field appearance stream
-    void setAppearanceContent(const GooString *new_content);
+    void setAppearanceContent(std::unique_ptr<GooString> new_content);
 
     void updateWidgetAppearance() override;
 
@@ -249,7 +249,7 @@ public:
     const GooString *getExportVal(int i) const;
     // select the i-th choice
     void select(int i);
-    void setAppearanceChoiceContent(const GooString *new_content);
+    void setAppearanceChoiceContent(std::unique_ptr<GooString> new_content);
     // toggle selection of the i-th choice
     void toggle(int i);
 
@@ -258,7 +258,7 @@ public:
 
     // except a UTF16BE string
     // only work for editable combo box, set the user-entered text as the current choice
-    void setEditChoice(const GooString *new_content);
+    void setEditChoice(std::unique_ptr<GooString> new_content);
 
     const GooString *getEditChoice() const;
 
@@ -490,8 +490,8 @@ public:
 
     const GooString *getContent() const { return content.get(); }
     const GooString *getAppearanceContent() const { return internalContent ? internalContent.get() : content.get(); }
-    void setContentCopy(const GooString *new_content);
-    void setAppearanceContentCopy(const GooString *new_content);
+    void setContent(std::unique_ptr<GooString> new_content);
+    void setAppearanceContent(std::unique_ptr<GooString> new_content);
     ~FormFieldText() override;
 
     bool isMultiline() const { return multiline; }
@@ -549,7 +549,7 @@ public:
     const GooString *getSelectedChoice() const;
     const GooString *getAppearanceSelectedChoice() const { return appearanceSelectedChoice ? appearanceSelectedChoice.get() : getSelectedChoice(); }
 
-    void setAppearanceChoiceContentCopy(const GooString *new_content);
+    void setAppearanceChoiceContent(std::unique_ptr<GooString> new_content);
 
     // select the i-th choice
     void select(int i);
@@ -561,7 +561,7 @@ public:
     void deselectAll();
 
     // only work for editable combo box, set the user-entered text as the current choice
-    void setEditChoice(const GooString *new_content);
+    void setEditChoice(std::unique_ptr<GooString> new_content);
 
     const GooString *getEditChoice() const;
 

@@ -431,14 +431,14 @@ void FormWidgetText::setTextFontSize(int fontSize)
     parent()->setTextFontSize(fontSize);
 }
 
-void FormWidgetText::setContent(const GooString *new_content)
+void FormWidgetText::setContent(std::unique_ptr<GooString> new_content)
 {
-    parent()->setContentCopy(new_content);
+    parent()->setContent(std::move(new_content));
 }
 
-void FormWidgetText::setAppearanceContent(const GooString *new_content)
+void FormWidgetText::setAppearanceContent(std::unique_ptr<GooString> new_content)
 {
-    parent()->setAppearanceContentCopy(new_content);
+    parent()->setAppearanceContent(std::move(new_content));
 }
 
 FormFieldText *FormWidgetText::parent() const
@@ -507,19 +507,19 @@ bool FormWidgetChoice::isSelected(int i) const
     return parent()->isSelected(i);
 }
 
-void FormWidgetChoice::setEditChoice(const GooString *new_content)
+void FormWidgetChoice::setEditChoice(std::unique_ptr<GooString> new_content)
 {
     if (!hasEdit()) {
         error(errInternal, -1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice");
         return;
     }
 
-    parent()->setEditChoice(new_content);
+    parent()->setEditChoice(std::move(new_content));
 }
 
-void FormWidgetChoice::setAppearanceChoiceContent(const GooString *new_content)
+void FormWidgetChoice::setAppearanceChoiceContent(std::unique_ptr<GooString> new_content)
 {
-    parent()->setAppearanceChoiceContentCopy(new_content);
+    parent()->setAppearanceChoiceContent(std::move(new_content));
 }
 
 int FormWidgetChoice::getNumChoices() const
@@ -939,8 +939,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
     vObj.dictAdd("SubFilter", Object(objName, toStdString(signatureType).c_str()));
     vObj.dictAdd("Name", Object(name.copy()));
-    GooString *date = timeToDateString(nullptr);
-    vObj.dictAdd("M", Object(date));
+    vObj.dictAdd("M", Object(timeToDateString(nullptr)));
     if (reason && (reason->getLength() > 0)) {
         vObj.dictAdd("Reason", Object(reason->copy()));
     }
@@ -1678,12 +1677,12 @@ void FormFieldText::print(int indent)
     printf("%*s- (%d %d): [text] terminal: %s children: %zu\n", indent, "", ref.num, ref.gen, terminal ? "Yes" : "No", terminal ? widgets.size() : children.size());
 }
 
-void FormFieldText::setContentCopy(const GooString *new_content)
+void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
 {
     content.reset();
 
     if (new_content) {
-        content = new_content->copy();
+        content = std::move(new_content);
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(content->toStr())) {
@@ -1720,12 +1719,12 @@ void FormFieldText::setContentCopy(const GooString *new_content)
     updateChildrenAppearance();
 }
 
-void FormFieldText::setAppearanceContentCopy(const GooString *new_content)
+void FormFieldText::setAppearanceContent(std::unique_ptr<GooString> new_content)
 {
     internalContent.reset();
 
     if (new_content) {
-        internalContent = new_content->copy();
+        internalContent = std::move(new_content);
     }
     updateChildrenAppearance();
 }
@@ -1735,7 +1734,7 @@ FormFieldText::~FormFieldText() = default;
 void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 {
     if (!isAmongExcludedFields(excludedFields)) {
-        setContentCopy(defaultContent.get());
+        setContent(defaultContent ? defaultContent->copy() : nullptr);
         if (defaultContent == nullptr) {
             obj.getDict()->remove("V");
         }
@@ -2029,7 +2028,7 @@ void FormFieldChoice::updateSelection()
 
         if (numSelected == 0) {
             // No options are selected
-            objV = Object(new GooString(""));
+            objV = Object(std::make_unique<GooString>(""));
         } else if (numSelected == 1) {
             // Only one option is selected
             for (int i = 0; i < numChoices; i++) {
@@ -2107,14 +2106,14 @@ void FormFieldChoice::select(int i)
     updateSelection();
 }
 
-void FormFieldChoice::setEditChoice(const GooString *new_content)
+void FormFieldChoice::setEditChoice(std::unique_ptr<GooString> new_content)
 {
     editedChoice.reset();
 
     unselectAll();
 
     if (new_content) {
-        editedChoice = new_content->copy();
+        editedChoice = std::move(new_content);
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(editedChoice->toStr())) {
@@ -2124,12 +2123,12 @@ void FormFieldChoice::setEditChoice(const GooString *new_content)
     updateSelection();
 }
 
-void FormFieldChoice::setAppearanceChoiceContentCopy(const GooString *new_content)
+void FormFieldChoice::setAppearanceChoiceContent(std::unique_ptr<GooString> new_content)
 {
     appearanceSelectedChoice.reset();
 
     if (new_content) {
-        appearanceSelectedChoice = new_content->copy();
+        appearanceSelectedChoice = std::move(new_content);
 
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(appearanceSelectedChoice->toStr())) {
@@ -2818,8 +2817,8 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         {
             // We only support fonts with identity cmaps for now
             Dict *cidSystemInfo = new Dict(xref);
-            cidSystemInfo->set("Registry", Object(new GooString("Adobe")));
-            cidSystemInfo->set("Ordering", Object(new GooString("Identity")));
+            cidSystemInfo->set("Registry", Object(std::make_unique<GooString>("Adobe")));
+            cidSystemInfo->set("Ordering", Object(std::make_unique<GooString>("Identity")));
             cidSystemInfo->set("Supplement", Object(0));
             descendantFont->set("CIDSystemInfo", Object(cidSystemInfo));
         }
