@@ -54,7 +54,7 @@
 // Copyright (C) 2022 Felix Jung <fxjung@posteo.de>
 // Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 // Copyright (C) 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
-// Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 //
