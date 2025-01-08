@@ -917,6 +917,9 @@ struct PSFont8Info
 {
     Ref fontID;
     std::vector<int> codeToGID; // code-to-GID mapping for TrueType fonts
+
+    // TODO Remove when we decide that not compiling with clang 15 (macos 14) is acceptable
+    PSFont8Info(Ref id, std::vector<int> &&ctg) : fontID(id), codeToGID(std::move(ctg)) { }
 };
 
 // Encoding info for substitute 16-bit font
