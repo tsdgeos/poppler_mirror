@@ -1123,7 +1123,7 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
     return result;
 }
 
-static GooString *_poppler_goo_string_from_utf8(const gchar *src)
+static std::unique_ptr<GooString> _poppler_goo_string_from_utf8(const gchar *src)
 {
     if (src == nullptr) {
         return nullptr;
@@ -1136,7 +1136,7 @@ static GooString *_poppler_goo_string_from_utf8(const gchar *src)
         return nullptr;
     }
 
-    GooString *result = new GooString(utf16, outlen);
+    std::unique_ptr<GooString> result = std::make_unique<GooString>(utf16, outlen);
     g_free(utf16);
 
     if (!hasUnicodeByteOrderMark(result->toStr())) {
@@ -1337,16 +1337,14 @@ void poppler_document_set_title(PopplerDocument *document, const gchar *title)
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_title;
-    if (!title) {
-        goo_title = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_title;
+    if (title) {
         goo_title = _poppler_goo_string_from_utf8(title);
         if (!goo_title) {
             return;
         }
     }
-    document->doc->setDocInfoTitle(goo_title);
+    document->doc->setDocInfoTitle(std::move(goo_title));
 }
 
 /**
@@ -1382,16 +1380,14 @@ void poppler_document_set_author(PopplerDocument *document, const gchar *author)
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_author;
-    if (!author) {
-        goo_author = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_author;
+    if (author) {
         goo_author = _poppler_goo_string_from_utf8(author);
         if (!goo_author) {
             return;
         }
     }
-    document->doc->setDocInfoAuthor(goo_author);
+    document->doc->setDocInfoAuthor(std::move(goo_author));
 }
 
 /**
@@ -1427,16 +1423,14 @@ void poppler_document_set_subject(PopplerDocument *document, const gchar *subjec
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_subject;
-    if (!subject) {
-        goo_subject = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_subject;
+    if (subject) {
         goo_subject = _poppler_goo_string_from_utf8(subject);
         if (!goo_subject) {
             return;
         }
     }
-    document->doc->setDocInfoSubject(goo_subject);
+    document->doc->setDocInfoSubject(std::move(goo_subject));
 }
 
 /**
@@ -1472,16 +1466,14 @@ void poppler_document_set_keywords(PopplerDocument *document, const gchar *keywo
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_keywords;
-    if (!keywords) {
-        goo_keywords = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_keywords;
+    if (keywords) {
         goo_keywords = _poppler_goo_string_from_utf8(keywords);
         if (!goo_keywords) {
             return;
         }
     }
-    document->doc->setDocInfoKeywords(goo_keywords);
+    document->doc->setDocInfoKeywords(std::move(goo_keywords));
 }
 
 /**
@@ -1519,16 +1511,14 @@ void poppler_document_set_creator(PopplerDocument *document, const gchar *creato
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_creator;
-    if (!creator) {
-        goo_creator = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_creator;
+    if (creator) {
         goo_creator = _poppler_goo_string_from_utf8(creator);
         if (!goo_creator) {
             return;
         }
     }
-    document->doc->setDocInfoCreator(goo_creator);
+    document->doc->setDocInfoCreator(std::move(goo_creator));
 }
 
 /**
@@ -1566,16 +1556,14 @@ void poppler_document_set_producer(PopplerDocument *document, const gchar *produ
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *goo_producer;
-    if (!producer) {
-        goo_producer = nullptr;
-    } else {
+    std::unique_ptr<GooString> goo_producer;
+    if (producer) {
         goo_producer = _poppler_goo_string_from_utf8(producer);
         if (!goo_producer) {
             return;
         }
     }
-    document->doc->setDocInfoProducer(goo_producer);
+    document->doc->setDocInfoProducer(std::move(goo_producer));
 }
 
 /**
@@ -1617,8 +1605,8 @@ void poppler_document_set_creation_date(PopplerDocument *document, time_t creati
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *str = creation_date == (time_t)-1 ? nullptr : timeToDateString(&creation_date);
-    document->doc->setDocInfoCreatDate(str);
+    std::unique_ptr<GooString> str = creation_date == (time_t)-1 ? nullptr : timeToDateString(&creation_date);
+    document->doc->setDocInfoCreatDate(std::move(str));
 }
 
 /**
@@ -1658,13 +1646,13 @@ void poppler_document_set_creation_date_time(PopplerDocument *document, GDateTim
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *str = nullptr;
+    std::unique_ptr<GooString> str = nullptr;
 
     if (creation_datetime) {
         str = _poppler_convert_date_time_to_pdf_date(creation_datetime);
     }
 
-    document->doc->setDocInfoCreatDate(str);
+    document->doc->setDocInfoCreatDate(std::move(str));
 }
 
 /**
@@ -1706,8 +1694,8 @@ void poppler_document_set_modification_date(PopplerDocument *document, time_t mo
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *str = modification_date == (time_t)-1 ? nullptr : timeToDateString(&modification_date);
-    document->doc->setDocInfoModDate(str);
+    std::unique_ptr<GooString> str = modification_date == (time_t)-1 ? nullptr : timeToDateString(&modification_date);
+    document->doc->setDocInfoModDate(std::move(str));
 }
 
 /**
@@ -1747,13 +1735,13 @@ void poppler_document_set_modification_date_time(PopplerDocument *document, GDat
 {
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
 
-    GooString *str = nullptr;
+    std::unique_ptr<GooString> str = nullptr;
 
     if (modification_datetime) {
         str = _poppler_convert_date_time_to_pdf_date(modification_datetime);
     }
 
-    document->doc->setDocInfoModDate(str);
+    document->doc->setDocInfoModDate(std::move(str));
 }
 
 /**
@@ -3827,7 +3815,7 @@ GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
  *
  * Returns: The converted date
  **/
-GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
+std::unique_ptr<GooString> _poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
 {
     int offset_min;
     gchar *date_str;
@@ -3845,7 +3833,7 @@ GooString *_poppler_convert_date_time_to_pdf_date(GDateTime *datetime)
     }
 
     g_free(date_str);
-    return new GooString(std::move(out_str));
+    return std::make_unique<GooString>(std::move(out_str));
 }
 
 static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable)

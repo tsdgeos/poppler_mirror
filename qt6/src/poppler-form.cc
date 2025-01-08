@@ -420,17 +420,15 @@ QString FormFieldText::text() const
 void FormFieldText::setText(const QString &text)
 {
     FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
-    GooString *goo = QStringToUnicodeGooString(text);
-    fwt->setContent(goo);
-    delete goo;
+    std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
+    fwt->setContent(std::move(goo));
 }
 
 void FormFieldText::setAppearanceText(const QString &text)
 {
     FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
-    GooString *goo = QStringToUnicodeGooString(text);
-    fwt->setAppearanceContent(goo);
-    delete goo;
+    std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
+    fwt->setAppearanceContent(std::move(goo));
 }
 
 bool FormFieldText::isPassword() const
@@ -570,9 +568,8 @@ void FormFieldChoice::setEditChoice(const QString &text)
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
 
     if (fwc->isCombo() && fwc->hasEdit()) {
-        GooString *goo = QStringToUnicodeGooString(text);
-        fwc->setEditChoice(goo);
-        delete goo;
+        std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
+        fwc->setEditChoice(std::move(goo));
     }
 }
 
@@ -590,9 +587,8 @@ bool FormFieldChoice::canBeSpellChecked() const
 void FormFieldChoice::setAppearanceChoiceText(const QString &text)
 {
     FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
-    GooString *goo = QStringToUnicodeGooString(text);
-    fwc->setAppearanceChoiceContent(goo);
-    delete goo;
+    std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
+    fwc->setAppearanceChoiceContent(std::move(goo));
 }
 
 class CertificateInfoPrivate

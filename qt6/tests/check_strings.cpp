@@ -189,7 +189,7 @@ void TestStrings::check_QStringToUnicodeGooString()
     QFETCH(QString, string);
     QFETCH(QByteArray, result);
 
-    GooString *goo = Poppler::QStringToUnicodeGooString(string);
+    std::unique_ptr<GooString> goo = Poppler::QStringToUnicodeGooString(string);
     if (string.isEmpty()) {
         QVERIFY(goo->toStr().empty());
         QCOMPARE(goo->getLength(), 0);
@@ -198,8 +198,6 @@ void TestStrings::check_QStringToUnicodeGooString()
         QCOMPARE(goo->getLength(), string.length() * 2 + 2);
         QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
     }
-
-    delete goo;
 }
 
 void TestStrings::check_QStringToGooString_data()

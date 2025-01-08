@@ -542,7 +542,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
         const bool addFile = !fileAlreadyAdded && (sameFileName || fileName < efNameI->toStr());
         if (addFile) {
             // If the new name is smaller lexicographically than an existing file add it in its correct position
-            embeddedFilesNamesArray->add(Object(new GooString(fileName)));
+            embeddedFilesNamesArray->add(Object(std::make_unique<GooString>(fileName)));
             embeddedFilesNamesArray->add(Object(fileSpecRef));
             fileAlreadyAdded = true;
         }
@@ -556,7 +556,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
 
     if (!fileAlreadyAdded) {
         // The new file is bigger lexicographically than the existing ones
-        embeddedFilesNamesArray->add(Object(new GooString(fileName)));
+        embeddedFilesNamesArray->add(Object(std::make_unique<GooString>(fileName)));
         embeddedFilesNamesArray->add(Object(fileSpecRef));
     }
 

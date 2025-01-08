@@ -1158,9 +1158,8 @@ void Annotation::setModificationDate(const QDateTime &date)
     if (d->pdfAnnot) {
         if (date.isValid()) {
             const time_t t = date.toSecsSinceEpoch();
-            GooString *s = timeToDateString(&t);
-            d->pdfAnnot->setModified(s);
-            delete s;
+            std::unique_ptr<GooString> s = timeToDateString(&t);
+            d->pdfAnnot->setModified(std::move(s));
         } else {
             d->pdfAnnot->setModified(nullptr);
         }
@@ -1197,9 +1196,8 @@ void Annotation::setCreationDate(const QDateTime &date)
     if (markupann) {
         if (date.isValid()) {
             const time_t t = date.toSecsSinceEpoch();
-            GooString *s = timeToDateString(&t);
-            markupann->setDate(s);
-            delete s;
+            std::unique_ptr<GooString> s = timeToDateString(&t);
+            markupann->setDate(std::move(s));
         } else {
             markupann->setDate(nullptr);
         }

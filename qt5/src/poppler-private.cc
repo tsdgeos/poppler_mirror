@@ -133,22 +133,21 @@ QString UnicodeParsedString(const std::string &s1)
     }
 }
 
-GooString *QStringToUnicodeGooString(const QString &s)
+std::unique_ptr<GooString> QStringToUnicodeGooString(const QString &s)
 {
     if (s.isEmpty()) {
-        return new GooString();
+        return std::make_unique<GooString>();
     }
     int len = s.length() * 2 + 2;
-    char *cstring = (char *)gmallocn(len, sizeof(char));
-    cstring[0] = (char)0xfe;
-    cstring[1] = (char)0xff;
-    for (int i = 0; i < s.length(); ++i) {
-        cstring[2 + i * 2] = s.at(i).row();
-        cstring[3 + i * 2] = s.at(i).cell();
+    std::string string;
+    string.reserve(len);
+    string.push_back((char)0xfe);
+    string.push_back((char)0xff);
+    for (auto element : s) {
+        string.push_back(element.row());
+        string.push_back(element.cell());
     }
-    GooString *ret = new GooString(cstring, len);
-    gfree(cstring);
-    return ret;
+    return std::make_unique<GooString>(std::move(string));
 }
 
 std::unique_ptr<GooString> QStringToGooString(const QString &s)
@@ -163,7 +162,7 @@ std::unique_ptr<GooString> QStringToGooString(const QString &s)
     return ret;
 }
 
-GooString *QDateTimeToUnicodeGooString(const QDateTime &dt)
+std::unique_ptr<GooString> QDateTimeToUnicodeGooString(const QDateTime &dt)
 {
     if (!dt.isValid()) {
         return nullptr;

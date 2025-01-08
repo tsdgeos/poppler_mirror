@@ -742,7 +742,7 @@ public:
     // new_content should never be NULL
     virtual void setContents(std::unique_ptr<GooString> &&new_content);
     void setName(GooString *new_name);
-    void setModified(GooString *new_modified);
+    void setModified(std::unique_ptr<GooString> new_modified);
     void setFlags(unsigned int new_flags);
 
     void setBorder(std::unique_ptr<AnnotBorder> &&new_border);
@@ -893,7 +893,7 @@ public:
     void setPopup(std::unique_ptr<AnnotPopup> &&new_popup);
     void setLabel(std::unique_ptr<GooString> &&new_label);
     void setOpacity(double opacityA);
-    void setDate(GooString *new_date);
+    void setDate(std::unique_ptr<GooString> new_date);
 
 protected:
     void removeReferencedObjects() override;

@@ -719,12 +719,9 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
     }
 }
 
-void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
+void PDFDoc::setDocInfoStringEntry(const char *key, std::unique_ptr<GooString> value)
 {
     bool removeEntry = !value || value->getLength() == 0 || (value->toStr() == unicodeByteOrderMark);
-    if (removeEntry) {
-        delete value;
-    }
 
     Object infoObj = getDocInfo();
     if (infoObj.isNull() && removeEntry) {
@@ -737,7 +734,7 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
     if (removeEntry) {
         infoObj.dictSet(key, Object(objNull));
     } else {
-        infoObj.dictSet(key, Object(value));
+        infoObj.dictSet(key, Object(std::move(value)));
     }
 
     if (infoObj.dictGetLength() == 0) {
@@ -1597,14 +1594,14 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
             Array *array = new Array(xRef);
             // Get the first part of the ID
             array->add(obj4.arrayGet(0));
-            array->add(Object(new GooString((const char *)digest, 16)));
+            array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
             trailerDict->set("ID", Object(array));
         }
     } else {
         // new file => same values for the two identifiers
         Array *array = new Array(xRef);
-        array->add(Object(new GooString((const char *)digest, 16)));
-        array->add(Object(new GooString((const char *)digest, 16)));
+        array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
+        array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
         trailerDict->set("ID", Object(array));
     }
 
@@ -2222,7 +2219,7 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     annotObj.dictSet("Rect", Object(rectArray));
 
     const std::string daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(new GooString(daStr)));
+    annotObj.dictSet("DA", Object(std::make_unique<GooString>(daStr)));
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);

@@ -1484,7 +1484,7 @@ void Annot::update(const char *key, Object &&value)
     annotLocker();
     /* Set M to current time, unless we are updating M itself */
     if (strcmp(key, "M") != 0) {
-        modified.reset(timeToDateString(nullptr));
+        modified = timeToDateString(nullptr);
 
         annotObj.dictSet("M", Object(modified->copy()));
     }
@@ -1526,12 +1526,12 @@ void Annot::setName(GooString *new_name)
     update("NM", Object(name->copy()));
 }
 
-void Annot::setModified(GooString *new_modified)
+void Annot::setModified(std::unique_ptr<GooString> new_modified)
 {
     annotLocker();
 
     if (new_modified) {
-        modified = std::make_unique<GooString>(new_modified);
+        modified = std::move(new_modified);
         update("M", Object(modified->copy()));
     } else {
         modified.reset(nullptr);
@@ -2271,10 +2271,10 @@ void AnnotMarkup::setOpacity(double opacityA)
     invalidateAppearance();
 }
 
-void AnnotMarkup::setDate(GooString *new_date)
+void AnnotMarkup::setDate(std::unique_ptr<GooString> new_date)
 {
     if (new_date) {
-        date = std::make_unique<GooString>(new_date);
+        date = std::move(new_date);
         update("CreationDate", Object(date->copy()));
     } else {
         date.reset(nullptr);
@@ -2824,7 +2824,7 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(do
     type = typeFreeText;
 
     annotObj.dictSet("Subtype", Object(objName, "FreeText"));
-    annotObj.dictSet("DA", Object(new GooString()));
+    annotObj.dictSet("DA", Object(std::make_unique<GooString>()));
 
     initialize(docA, annotObj.getDict());
 }

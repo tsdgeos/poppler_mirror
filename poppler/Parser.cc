@@ -163,7 +163,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
                 const Object &contentsObj = dict->lookupNF("Contents");
                 if (contentsObj.isString()) {
                     std::unique_ptr<GooString> s = decryptedString(contentsObj.getString(), fileKey, encAlgorithm, keyLength, objNum, objGen);
-                    dict->set("Contents", Object(s.release()));
+                    dict->set("Contents", Object(std::move(s)));
                 }
             }
         }

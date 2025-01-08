@@ -257,19 +257,18 @@ public:
 
     // Set doc info string entry. nullptr or empty value will cause a removal.
     // Takes ownership of value.
-    void setDocInfoStringEntry(const char *key, GooString *value);
+    void setDocInfoStringEntry(const char *key, std::unique_ptr<GooString> value);
 
     // Set document's properties in document's Info dictionary.
     // nullptr or empty value will cause a removal.
-    // Takes ownership of value.
-    void setDocInfoTitle(GooString *title) { setDocInfoStringEntry("Title", title); }
-    void setDocInfoAuthor(GooString *author) { setDocInfoStringEntry("Author", author); }
-    void setDocInfoSubject(GooString *subject) { setDocInfoStringEntry("Subject", subject); }
-    void setDocInfoKeywords(GooString *keywords) { setDocInfoStringEntry("Keywords", keywords); }
-    void setDocInfoCreator(GooString *creator) { setDocInfoStringEntry("Creator", creator); }
-    void setDocInfoProducer(GooString *producer) { setDocInfoStringEntry("Producer", producer); }
-    void setDocInfoCreatDate(GooString *creatDate) { setDocInfoStringEntry("CreationDate", creatDate); }
-    void setDocInfoModDate(GooString *modDate) { setDocInfoStringEntry("ModDate", modDate); }
+    void setDocInfoTitle(std::unique_ptr<GooString> title) { setDocInfoStringEntry("Title", std::move(title)); }
+    void setDocInfoAuthor(std::unique_ptr<GooString> author) { setDocInfoStringEntry("Author", std::move(author)); }
+    void setDocInfoSubject(std::unique_ptr<GooString> subject) { setDocInfoStringEntry("Subject", std::move(subject)); }
+    void setDocInfoKeywords(std::unique_ptr<GooString> keywords) { setDocInfoStringEntry("Keywords", std::move(keywords)); }
+    void setDocInfoCreator(std::unique_ptr<GooString> creator) { setDocInfoStringEntry("Creator", std::move(creator)); }
+    void setDocInfoProducer(std::unique_ptr<GooString> producer) { setDocInfoStringEntry("Producer", std::move(producer)); }
+    void setDocInfoCreatDate(std::unique_ptr<GooString> creatDate) { setDocInfoStringEntry("CreationDate", std::move(creatDate)); }
+    void setDocInfoModDate(std::unique_ptr<GooString> modDate) { setDocInfoStringEntry("ModDate", std::move(modDate)); }
 
     // Get document's properties from document's Info dictionary.
     // Returns nullptr on fail.

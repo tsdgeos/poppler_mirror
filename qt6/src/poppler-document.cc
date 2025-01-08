@@ -276,8 +276,8 @@ bool Document::setInfo(const QString &key, const QString &val)
         return false;
     }
 
-    GooString *goo = QStringToUnicodeGooString(val);
-    m_doc->doc->setDocInfoStringEntry(key.toLatin1().constData(), goo);
+    std::unique_ptr<GooString> goo = QStringToUnicodeGooString(val);
+    m_doc->doc->setDocInfoStringEntry(key.toLatin1().constData(), std::move(goo));
     return true;
 }
 

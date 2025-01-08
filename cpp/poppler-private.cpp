@@ -104,7 +104,7 @@ ustring detail::unicode_to_ustring(const Unicode *u, int length)
     return str;
 }
 
-GooString *detail::ustring_to_unicode_GooString(const ustring &str)
+std::unique_ptr<GooString> detail::ustring_to_unicode_GooString(const ustring &str)
 {
     const size_t len = str.size() * 2 + 2;
     const ustring::value_type *me = str.data();
@@ -115,6 +115,5 @@ GooString *detail::ustring_to_unicode_GooString(const ustring &str)
         ba[i * 2 + 2] = ((*me >> 8) & 0xff);
         ba[i * 2 + 3] = (*me & 0xff);
     }
-    GooString *goo = new GooString(&ba[0], len);
-    return goo;
+    return std::make_unique<GooString>(&ba[0], len);
 }

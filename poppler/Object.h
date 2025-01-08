@@ -226,12 +226,6 @@ public:
         type = objReal;
         real = realA;
     }
-    explicit Object(GooString *stringA)
-    {
-        assert(stringA);
-        type = objString;
-        string = stringA;
-    }
     explicit Object(std::unique_ptr<GooString> stringA)
     {
         assert(stringA);

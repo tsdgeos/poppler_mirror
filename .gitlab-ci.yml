@@ -74,11 +74,15 @@ build_ubuntu_22_04:
   image: ubuntu:22.04
   before_script:
     - apt-get update
-    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev clang-15 libc++-15-dev libc++abi-15-dev
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/../6.2.0/gcc_64/lib/cmake ..
+    - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data ..
+    - ninja
+    - ctest --output-on-failure
+    - cd .. && mkdir -p build_clang && cd build_clang
+    - CC=clang-15 CXX=clang++-15 cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fexperimental-library" -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data ..
     - ninja
     - ctest --output-on-failure
 
