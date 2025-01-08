@@ -78,7 +78,7 @@ build_ubuntu_22_04:
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/../6.2.0/gcc_64/lib/cmake ..
+    - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data ..
     - ninja
     - ctest --output-on-failure
 
