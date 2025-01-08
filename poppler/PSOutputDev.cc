@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -39,7 +39,7 @@
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -916,7 +916,7 @@ struct PST1FontName
 struct PSFont8Info
 {
     Ref fontID;
-    int *codeToGID; // code-to-GID mapping for TrueType fonts
+    std::vector<int> codeToGID; // code-to-GID mapping for TrueType fonts
 };
 
 // Encoding info for substitute 16-bit font
@@ -982,7 +982,7 @@ public:
     DeviceNRecoder(Stream *strA, int widthA, int heightA, GfxImageColorMap *colorMapA);
     ~DeviceNRecoder() override;
     StreamKind getKind() const override { return strWeird; }
-    void reset() override;
+    bool reset() override;
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
@@ -1022,10 +1022,10 @@ DeviceNRecoder::~DeviceNRecoder()
     }
 }
 
-void DeviceNRecoder::reset()
+bool DeviceNRecoder::reset()
 {
     imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    return imgStr->reset();
 }
 
 bool DeviceNRecoder::fillBuf()
@@ -1078,7 +1078,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
@@ -1134,7 +1133,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
@@ -1171,7 +1169,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
     customCodeCbk = customCodeCbkA;
     customCodeCbkData = customCodeCbkDataA;
 
-    font8Info = nullptr;
     font16Enc = nullptr;
     imgIDs = nullptr;
     formIDs = nullptr;
@@ -1388,8 +1385,6 @@ void PSOutputDev::postInit()
     for (i = 0; i < 14; ++i) {
         fontNames.emplace(psBase14SubstFonts[i].psName);
     }
-    font8InfoLen = 0;
-    font8InfoSize = 0;
     font16EncLen = 0;
     font16EncSize = 0;
     imgIDLen = 0;
@@ -1514,12 +1509,6 @@ PSOutputDev::~PSOutputDev()
 #endif
     }
     delete embFontList;
-    if (font8Info) {
-        for (i = 0; i < font8InfoLen; ++i) {
-            gfree(font8Info[i].codeToGID);
-        }
-        gfree(font8Info);
-    }
     if (font16Enc) {
         for (i = 0; i < font16EncLen; ++i) {
             delete font16Enc[i].enc;
@@ -2378,8 +2367,6 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
 
 void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
 {
-    int *codeToGID;
-
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList->append("%%+ font ");
@@ -2390,16 +2377,10 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
     const std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
     if (fontBuf) {
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size(), faceIndex)) {
-            codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
+            std::vector<int> codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
             ffTT->convertToType42(psName->c_str(), ((Gfx8BitFont *)font)->getHasEncoding() ? ((Gfx8BitFont *)font)->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
-            if (codeToGID) {
-                if (font8InfoLen >= font8InfoSize) {
-                    font8InfoSize += 16;
-                    font8Info = (PSFont8Info *)greallocn(font8Info, font8InfoSize, sizeof(PSFont8Info));
-                }
-                font8Info[font8InfoLen].fontID = *font->getID();
-                font8Info[font8InfoLen].codeToGID = codeToGID;
-                ++font8InfoLen;
+            if (!codeToGID.empty()) {
+                font8Info.emplace_back(*font->getID(), std::move(codeToGID));
             }
         }
     }
@@ -2410,8 +2391,6 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *p
 
 void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, int faceIndex)
 {
-    int *codeToGID;
-
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
     embFontList->append("%%+ font ");
@@ -2420,16 +2399,10 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
 
     // convert it to a Type 42 font
     if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str(), faceIndex)) {
-        codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
+        std::vector<int> codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT.get());
         ffTT->convertToType42(psName->c_str(), ((Gfx8BitFont *)font)->getHasEncoding() ? ((Gfx8BitFont *)font)->getEncoding() : nullptr, codeToGID, outputFunc, outputStream);
-        if (codeToGID) {
-            if (font8InfoLen >= font8InfoSize) {
-                font8InfoSize += 16;
-                font8Info = (PSFont8Info *)greallocn(font8Info, font8InfoSize, sizeof(PSFont8Info));
-            }
-            font8Info[font8InfoLen].fontID = *font->getID();
-            font8Info[font8InfoLen].codeToGID = codeToGID;
-            ++font8InfoLen;
+        if (!codeToGID.empty()) {
+            font8Info.emplace_back(*font->getID(), std::move(codeToGID));
         }
     }
 
@@ -2449,8 +2422,7 @@ void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph)
 
 void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string &fileName, GooString *psName, bool needVerticalMetrics, int faceIndex)
 {
-    int *codeToGID;
-    int codeToGIDLen;
+    std::vector<int> codeToGID;
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2464,29 +2436,22 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
 
         // check for embedding permission
         if (ffTT->getEmbeddingRights() >= 1) {
-            codeToGID = nullptr;
-            codeToGIDLen = 0;
-            if (((GfxCIDFont *)font)->getCIDToGID()) {
-                codeToGIDLen = ((GfxCIDFont *)font)->getCIDToGIDLen();
-                if (codeToGIDLen) {
-                    codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-                    memcpy(codeToGID, ((GfxCIDFont *)font)->getCIDToGID(), codeToGIDLen * sizeof(int));
-                }
+            if (((GfxCIDFont *)font)->getCIDToGIDLen() > 0) {
+                codeToGID = ((GfxCIDFont *)font)->getCIDToGID();
             } else {
-                codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT.get(), &codeToGIDLen);
+                codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT.get());
             }
             if (ffTT->isOpenTypeCFF()) {
-                ffTT->convertToCIDType0(psName->c_str(), codeToGID, codeToGIDLen, outputFunc, outputStream);
+                ffTT->convertToCIDType0(psName->c_str(), codeToGID, outputFunc, outputStream);
             } else if (level >= psLevel3) {
                 // Level 3: use a CID font
-                ffTT->convertToCIDType2(psName->c_str(), codeToGID, codeToGIDLen, needVerticalMetrics, outputFunc, outputStream);
+                ffTT->convertToCIDType2(psName->c_str(), codeToGID, needVerticalMetrics, outputFunc, outputStream);
             } else {
                 // otherwise: use a non-CID composite font
                 int maxValidGlyph = -1;
-                ffTT->convertToType0(psName->c_str(), codeToGID, codeToGIDLen, needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
+                ffTT->convertToType0(psName->c_str(), codeToGID, needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
                 updateFontMaxValidGlyph(font, maxValidGlyph);
             }
-            gfree(codeToGID);
         } else {
             error(errSyntaxError, -1, "TrueType font '{0:s}' does not allow embedding", font->getName() ? font->getName()->c_str() : "(unnamed)");
         }
@@ -2522,10 +2487,10 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
         if ((ffT1C = FoFiType1C::make(fontBuf->data(), fontBuf->size()))) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
-                ffT1C->convertToCIDType0(psName->c_str(), nullptr, 0, outputFunc, outputStream);
+                ffT1C->convertToCIDType0(psName->c_str(), {}, outputFunc, outputStream);
             } else {
                 // otherwise: use a non-CID composite font
-                ffT1C->convertToType0(psName->c_str(), nullptr, 0, outputFunc, outputStream);
+                ffT1C->convertToType0(psName->c_str(), {}, outputFunc, outputStream);
             }
             delete ffT1C;
         }
@@ -2549,11 +2514,11 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString
         if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::make(fontBuf->data(), fontBuf->size(), faceIndex)) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
-                ffTT->convertToCIDType2(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), needVerticalMetrics, outputFunc, outputStream);
+                ffTT->convertToCIDType2(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), needVerticalMetrics, outputFunc, outputStream);
             } else {
                 // otherwise: use a non-CID composite font
                 int maxValidGlyph = -1;
-                ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
+                ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
                 updateFontMaxValidGlyph(font, maxValidGlyph);
             }
         }
@@ -2588,10 +2553,10 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
             if (ffTT->isOpenTypeCFF()) {
                 if (level >= psLevel3) {
                     // Level 3: use a CID font
-                    ffTT->convertToCIDType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), outputFunc, outputStream);
+                    ffTT->convertToCIDType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
                 } else {
                     // otherwise: use a non-CID composite font
-                    ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), ((GfxCIDFont *)font)->getCIDToGIDLen(), outputFunc, outputStream);
+                    ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
                 }
             }
         }
@@ -4913,7 +4878,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
 {
     std::shared_ptr<GfxFont> font;
     int wMode;
-    int *codeToGID;
+    std::vector<int> codeToGID;
     GooString *s2;
     double dx, dy, originX, originY;
     const char *p;
@@ -4954,7 +4919,6 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
 
     // check for a subtitute 16-bit font
     uMap = nullptr;
-    codeToGID = nullptr;
     if (font->isCIDFont()) {
         for (i = 0; i < font16EncLen; ++i) {
             if (*font->getID() == font16Enc[i].fontID) {
@@ -4969,9 +4933,9 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
 
         // check for a code-to-GID map
     } else {
-        for (i = 0; i < font8InfoLen; ++i) {
-            if (*font->getID() == font8Info[i].fontID) {
-                codeToGID = font8Info[i].codeToGID;
+        for (const auto &font8 : font8Info) {
+            if (*font->getID() == font8.fontID) {
+                codeToGID = font8.codeToGID;
                 break;
             }
         }
@@ -5040,7 +5004,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
                 ++nChars;
             }
         } else {
-            if (!codeToGID || codeToGID[code] >= 0) {
+            if (codeToGID.empty() || codeToGID[code] >= 0) {
                 s2->append((char)code);
                 dxdy[2 * nChars] = dx;
                 dxdy[2 * nChars + 1] = dy;

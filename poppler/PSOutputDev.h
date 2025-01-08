@@ -454,9 +454,7 @@ private:
     std::unordered_set<std::string> fontNames; // all used font names
     std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font
     std::vector<PST1FontName> t1FontNames; // font names for Type 1/1C fonts
-    PSFont8Info *font8Info; // info for 8-bit fonts
-    int font8InfoLen; // number of entries in font8Info array
-    int font8InfoSize; // size of font8Info array
+    std::vector<PSFont8Info> font8Info; // info for 8-bit fonts
     PSFont16Enc *font16Enc; // encodings for substitute 16-bit fonts
     int font16EncLen; // number of entries in font16Enc array
     int font16EncSize; // size of font16Enc array

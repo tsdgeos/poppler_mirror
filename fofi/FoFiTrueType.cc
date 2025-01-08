@@ -659,21 +659,19 @@ bool FoFiTrueType::getCFFBlock(char **start, int *length) const
     return true;
 }
 
-int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) const
+std::vector<int> FoFiTrueType::getCIDToGIDMap() const
 {
     char *start;
     int length;
     FoFiType1C *ff;
-    int *map;
 
-    *nCIDs = 0;
     if (!getCFFBlock(&start, &length)) {
-        return nullptr;
+        return {};
     }
     if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
-        return nullptr;
+        return {};
     }
-    map = ff->getCIDToGIDMap(nCIDs);
+    std::vector<int> map = ff->getCIDToGIDMap();
     delete ff;
     return map;
 }
@@ -719,7 +717,7 @@ void FoFiTrueType::getFontMatrix(double *mat) const
     delete ff;
 }
 
-void FoFiTrueType::convertToType42(const char *psName, char **encoding, int *codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType42(const char *psName, char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     int maxUsedGlyph;
     bool ok;
@@ -769,7 +767,7 @@ void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, 
     delete ff;
 }
 
-void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int nCIDs, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     int cid, maxUsedGlyph;
     bool ok;
@@ -797,16 +795,16 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
     (*outputFunc)(outputStream, "  /Supplement 0 def\n", 20);
     (*outputFunc)(outputStream, "  end def\n", 10);
     (*outputFunc)(outputStream, "/GDBytes 2 def\n", 15);
-    if (cidMap) {
-        buf = GooString::format("/CIDCount {0:d} def\n", nCIDs);
+    if (!cidMap.empty()) {
+        buf = GooString::format("/CIDCount {0:d} def\n", int(cidMap.size()));
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
-        if (nCIDs > 32767) {
+        if (cidMap.size() > 32767) {
             (*outputFunc)(outputStream, "/CIDMap [", 9);
-            for (i = 0; i < nCIDs; i += 32768 - 16) {
+            for (i = 0; i < int(cidMap.size()); i += 32768 - 16) {
                 (*outputFunc)(outputStream, "<\n", 2);
-                for (j = 0; j < 32768 - 16 && i + j < nCIDs; j += 16) {
+                for (j = 0; j < 32768 - 16 && i + j < int(cidMap.size()); j += 16) {
                     (*outputFunc)(outputStream, "  ", 2);
-                    for (k = 0; k < 16 && i + j + k < nCIDs; ++k) {
+                    for (k = 0; k < 16 && i + j + k < int(cidMap.size()); ++k) {
                         cid = cidMap[i + j + k];
                         buf = GooString::format("{0:02x}{1:02x}", (cid >> 8) & 0xff, cid & 0xff);
                         (*outputFunc)(outputStream, buf.c_str(), buf.size());
@@ -819,9 +817,9 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
             (*outputFunc)(outputStream, "] def\n", 6);
         } else {
             (*outputFunc)(outputStream, "/CIDMap <\n", 10);
-            for (i = 0; i < nCIDs; i += 16) {
+            for (i = 0; i < int(cidMap.size()); i += 16) {
                 (*outputFunc)(outputStream, "  ", 2);
-                for (j = 0; j < 16 && i + j < nCIDs; ++j) {
+                for (j = 0; j < 16 && i + j < int(cidMap.size()); ++j) {
                     cid = cidMap[i + j];
                     buf = GooString::format("{0:02x}{1:02x}", (cid >> 8) & 0xff, cid & 0xff);
                     (*outputFunc)(outputStream, buf.c_str(), buf.size());
@@ -876,7 +874,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const int *cidMap, int 
     (*outputFunc)(outputStream, "CIDFontName currentdict end /CIDFont defineresource pop\n", 56);
 }
 
-void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToCIDType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     char *start;
     int length;
@@ -888,11 +886,11 @@ void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
     if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
-    ff->convertToCIDType0(psName, cidMap, nCIDs, outputFunc, outputStream);
+    ff->convertToCIDType0(psName, cidMap, outputFunc, outputStream);
     delete ff;
 }
 
-void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     GooString *sfntsName;
     int maxUsedGlyph, n, i, j;
@@ -926,8 +924,8 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
     // referencing zero-length glyphs that we trimmed.
     // This allows pdftops to avoid writing huge files while still
     // handling the rare PDF that uses a zero-length glyph.
-    if (cidMap) {
-        n = nCIDs;
+    if (!cidMap.empty()) {
+        n = cidMap.size();
     } else if (nGlyphs > maxUsedGlyph + 256) {
         if (maxUsedGlyph <= 255) {
             n = 256;
@@ -961,7 +959,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
         (*outputFunc)(outputStream, "/CharStrings 257 dict dup begin\n", 32);
         (*outputFunc)(outputStream, "/.notdef 0 def\n", 15);
         for (j = 0; j < 256 && i + j < n; ++j) {
-            buf = GooString::format("/c{0:02x} {1:d} def\n", j, cidMap ? cidMap[i + j] : i + j);
+            buf = GooString::format("/c{0:02x} {1:d} def\n", j, !cidMap.empty() ? cidMap[i + j] : i + j);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         (*outputFunc)(outputStream, "end readonly def\n", 17);
@@ -993,7 +991,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, bo
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     char *start;
     int length;
@@ -1005,7 +1003,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs, Fo
     if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
         return;
     }
-    ff->convertToType0(psName, cidMap, nCIDs, outputFunc, outputStream);
+    ff->convertToType0(psName, cidMap, outputFunc, outputStream);
     delete ff;
 }
 
@@ -1034,7 +1032,7 @@ void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void 
     (*outputFunc)(outputStream, "readonly def\n", 13);
 }
 
-void FoFiTrueType::cvtCharStrings(char **encoding, const int *codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     const char *name;
     char buf2[16];

@@ -22,6 +22,7 @@
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
 // Copyright (C) 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -347,11 +348,11 @@ BaseCryptStream::~BaseCryptStream()
     }
 }
 
-void BaseCryptStream::reset()
+bool BaseCryptStream::reset()
 {
     charactersRead = 0;
     nextCharBuff = EOF;
-    str->reset();
+    return str->reset();
 }
 
 Goffset BaseCryptStream::getPos()
@@ -402,7 +403,7 @@ EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 EncryptStream::~EncryptStream() = default;
 
-void EncryptStream::reset()
+bool EncryptStream::reset()
 {
     BaseCryptStream::reset();
 
@@ -426,6 +427,8 @@ void EncryptStream::reset()
     case cryptNone:
         break;
     }
+
+    return true;
 }
 
 int EncryptStream::lookChar()
@@ -481,7 +484,7 @@ DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 DecryptStream::~DecryptStream() = default;
 
-void DecryptStream::reset()
+bool DecryptStream::reset()
 {
     int i;
     BaseCryptStream::reset();
@@ -508,6 +511,8 @@ void DecryptStream::reset()
     case cryptNone:
         break;
     }
+
+    return true;
 }
 
 int DecryptStream::lookChar()

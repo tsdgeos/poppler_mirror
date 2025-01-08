@@ -159,12 +159,12 @@ SplashFontFile *SplashFontEngine::loadCIDFont(std::unique_ptr<SplashFontFileID> 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
+SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadOpenTypeCFFFont(std::move(idA), src, codeToGID, codeToGIDLen, faceIndex);
+        fontFile = ftEngine->loadOpenTypeCFFFont(std::move(idA), src, std::move(codeToGID), faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link
@@ -178,16 +178,12 @@ SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFont
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
+SplashFontFile *SplashFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadTrueTypeFont(std::move(idA), src, codeToGID, codeToGIDLen, faceIndex);
-    }
-
-    if (!fontFile) {
-        gfree(codeToGID);
+        fontFile = ftEngine->loadTrueTypeFont(std::move(idA), src, std::move(codeToGID), faceIndex);
     }
 
     // delete the (temporary) font file -- with Unix hard link

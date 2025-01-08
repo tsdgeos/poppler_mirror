@@ -6,6 +6,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -55,7 +56,7 @@ FlateEncoder::~FlateEncoder()
     }
 }
 
-void FlateEncoder::reset()
+bool FlateEncoder::reset()
 {
     int zlib_status;
 
@@ -71,10 +72,13 @@ void FlateEncoder::reset()
     if (zlib_status != Z_OK) {
         inBufEof = outBufEof = true;
         error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::reset()");
+        return false;
     }
 
     zlib_stream.next_out = outBufEnd;
     zlib_stream.avail_out = 1; /* anything but 0 to trigger a read */
+
+    return true;
 }
 
 bool FlateEncoder::fillBuf()

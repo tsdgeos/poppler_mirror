@@ -47,7 +47,7 @@
 // Copyright (C) 2020, 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
-// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
 // Copyright (C) 2021 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
@@ -1401,6 +1401,11 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     //----- get the annotation appearance
     if (appearStreams) {
         appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+        Object obj = appearance.fetch(doc->getXRef());
+        if (obj.isStream() && !obj.getStream()->reset()) {
+            // appearance stream is invalid as reset() returned false - Issue #1557
+            appearance.setToNull();
+        }
     }
 
     //----- parse the border style

@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -43,7 +44,7 @@ public:
     explicit FlateEncoder(Stream *strA);
     ~FlateEncoder() override;
     StreamKind getKind() const override { return strWeird; }
-    void reset() override;
+    bool reset() override;
     int getChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
     int lookChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
     GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }

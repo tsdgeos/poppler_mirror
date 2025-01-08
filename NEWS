@@ -1,3 +1,28 @@
+Release 25.01.0:
+        core:
+         * TextOutputDev: Better detect fakebold words
+         * TextOutputDev: Faster sorting algorithm
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        cpp:
+         * Remove rect parameter from image::copy, it was never implemented
+
+        qt6:
+         * Fix crash in Submit Forms if document links to non existing field
+
+        qt5:
+         * Fix crash in Submit Forms if document links to non existing field
+
+        glib:
+         * mark transfer of poppler_page_get_selected_region
+
+        utils:
+         * pdfdetach: Make -savefile work with Unicode strings. Issue #1540
+
+        build system:
+         * Don't update pdfsig.pot when POT-Creation-date is the only change
+
 Release 24.12.0:
         core:
          * cairo: Fix rendering of JPX images with transparency

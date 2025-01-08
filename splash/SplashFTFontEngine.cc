@@ -83,17 +83,17 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFo
 
 SplashFontFile *SplashFTFontEngine::loadCIDFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int faceIndex)
 {
-    return SplashFTFontFile::loadCIDFont(this, std::move(idA), src, nullptr, 0, faceIndex);
+    return SplashFTFontFile::loadCIDFont(this, std::move(idA), src, {}, faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
+SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
 {
-    return SplashFTFontFile::loadCIDFont(this, std::move(idA), src, codeToGID ? codeToGID : nullptr, codeToGID ? codeToGIDLen : 0, faceIndex);
+    return SplashFTFontFile::loadCIDFont(this, std::move(idA), src, std::move(codeToGID), faceIndex);
 }
 
-SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGID, int codeToGIDLen, int faceIndex)
+SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
 {
     SplashFontFile *ret;
-    ret = SplashFTFontFile::loadTrueTypeFont(this, std::move(idA), src, codeToGID, codeToGIDLen, faceIndex);
+    ret = SplashFTFontFile::loadTrueTypeFont(this, std::move(idA), src, std::move(codeToGID), faceIndex);
     return ret;
 }

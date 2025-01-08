@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -288,7 +288,7 @@ public:
     JPXStream(Stream *strA);
     virtual ~JPXStream();
     StreamKind getKind() const override { return strJPX; }
-    void reset() override;
+    bool reset() override;
     void close() override;
     int getChar() override;
     int lookChar() override;

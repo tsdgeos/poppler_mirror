@@ -28,7 +28,7 @@
 // Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019-2021 Even Rouault <even.rouault@spatialys.com>
-// Copyright (C) 2014 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1153,7 +1153,7 @@ JBIG2Stream::~JBIG2Stream()
     delete str;
 }
 
-void JBIG2Stream::reset()
+bool JBIG2Stream::reset()
 {
     segments.resize(0);
     globalSegments.resize(0);
@@ -1185,6 +1185,8 @@ void JBIG2Stream::reset()
     } else {
         dataPtr = dataEnd = nullptr;
     }
+
+    return true;
 }
 
 void JBIG2Stream::close()

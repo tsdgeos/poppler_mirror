@@ -192,11 +192,11 @@ private:
     using QPainterFontID = std::pair<Ref, double>;
     std::map<QPainterFontID, std::unique_ptr<QRawFont>> m_rawFontCache;
     std::map<QPainterFontID, std::unique_ptr<QPainterOutputDevType3Font>> m_type3FontCache;
-    std::map<Ref, const int *> m_codeToGIDCache;
+    std::map<Ref, std::vector<int>> m_codeToGIDCache;
 
     // The table that maps character codes to glyph indexes
-    const int *m_codeToGID;
-    std::stack<const int *> m_codeToGIDStack;
+    const std::vector<int> *m_codeToGID;
+    std::stack<const std::vector<int> *> m_codeToGIDStack;
 
     FT_Library m_ftLibrary;
     // as of FT 2.1.8, CID fonts are indexed by CID instead of GID

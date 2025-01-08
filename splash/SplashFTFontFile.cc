@@ -40,7 +40,6 @@
 SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **encA, int faceIndexA)
 {
     FT_Face faceA;
-    int *codeToGIDA;
     const char *name;
     int i;
 
@@ -53,9 +52,9 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, std
             return nullptr;
         }
     }
-    codeToGIDA = (int *)gmallocn(256, sizeof(int));
+    std::vector<int> codeToGIDA;
+    codeToGIDA.resize(256, 0);
     for (i = 0; i < 256; ++i) {
-        codeToGIDA[i] = 0;
         if ((name = encA[i])) {
             codeToGIDA[i] = (int)FT_Get_Name_Index(faceA, (char *)name);
             if (codeToGIDA[i] == 0) {
@@ -67,10 +66,10 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA, std
         }
     }
 
-    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, codeToGIDA, 256, false, true);
+    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, std::move(codeToGIDA), false, true);
 }
 
-SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA)
+SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGIDA, int faceIndexA)
 {
     FT_Face faceA;
 
@@ -84,10 +83,10 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA, std::
         }
     }
 
-    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, codeToGIDA, codeToGIDLenA, false, false);
+    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, std::move(codeToGIDA), false, false);
 }
 
-SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int *codeToGIDA, int codeToGIDLenA, int faceIndexA)
+SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGIDA, int faceIndexA)
 {
     FT_Face faceA;
 
@@ -101,16 +100,14 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA, 
         }
     }
 
-    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, codeToGIDA, codeToGIDLenA, true, false);
+    return new SplashFTFontFile(engineA, std::move(idA), src, faceA, std::move(codeToGIDA), true, false);
 }
 
-SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA, FT_Face faceA, int *codeToGIDA, int codeToGIDLenA, bool trueTypeA, bool type1A)
-    : SplashFontFile(std::move(idA), srcA)
+SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A) : SplashFontFile(std::move(idA), srcA)
 {
     engine = engineA;
     face = faceA;
-    codeToGID = codeToGIDA;
-    codeToGIDLen = codeToGIDLenA;
+    codeToGID = std::move(codeToGIDA);
     trueType = trueTypeA;
     type1 = type1A;
 }
@@ -119,9 +116,6 @@ SplashFTFontFile::~SplashFTFontFile()
 {
     if (face) {
         FT_Done_Face(face);
-    }
-    if (codeToGID) {
-        gfree(codeToGID);
     }
 }
 

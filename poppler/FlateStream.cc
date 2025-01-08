@@ -6,6 +6,7 @@
 // Copyright (C) 2010, 2021, Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -42,7 +43,7 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-void FlateStream::reset()
+bool FlateStream::reset()
 {
     // FIXME: what are the semantics of reset?
     // i.e. how much initialization has to happen in the constructor?
@@ -57,6 +58,8 @@ void FlateStream::reset()
     status = Z_OK;
     out_pos = 0;
     out_buf_len = 0;
+
+    return true;
 }
 
 int FlateStream::getRawChar()

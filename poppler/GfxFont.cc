@@ -1534,9 +1534,9 @@ const CharCodeToUnicode *Gfx8BitFont::getToUnicode() const
     return ctu.get();
 }
 
-int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
+std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
 {
-    int *map;
+    std::vector<int> map;
     int cmapPlatform, cmapEncoding;
     int unicodeCmap, macRomanCmap, msSymbolCmap, cmap;
     bool useMacRoman, useUnicode;
@@ -1544,10 +1544,7 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
     Unicode u;
     int code, i, n;
 
-    map = (int *)gmallocn(256, sizeof(int));
-    for (i = 0; i < 256; ++i) {
-        map[i] = 0;
-    }
+    map.resize(256, 0);
 
     // To match up with the Adobe-defined behaviour, we choose a cmap
     // like this:
@@ -1718,8 +1715,6 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     widths.defWidth = 1.0;
     widths.defHeight = -1.0;
     widths.defVY = 0.880;
-    cidToGID = nullptr;
-    cidToGIDLen = 0;
 
     // get the descendant font
     obj1 = fontDict->lookup("DescendantFonts");
@@ -1809,16 +1804,9 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     // CIDToGIDMap (for embedded TrueType fonts)
     obj1 = desFontDict->lookup("CIDToGIDMap");
     if (obj1.isStream()) {
-        cidToGIDLen = 0;
-        unsigned int i = 64;
-        cidToGID = (int *)gmallocn(i, sizeof(int));
         obj1.streamReset();
         while ((c1 = obj1.streamGetChar()) != EOF && (c2 = obj1.streamGetChar()) != EOF) {
-            if (cidToGIDLen == i) {
-                i *= 2;
-                cidToGID = (int *)greallocn(cidToGID, i, sizeof(int));
-            }
-            cidToGID[cidToGIDLen++] = (c1 << 8) + c2;
+            cidToGID.push_back((c1 << 8) + c2);
         }
     } else if (!obj1.isName("Identity") && !obj1.isNull()) {
         error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
@@ -1922,12 +1910,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     ok = true;
 }
 
-GfxCIDFont::~GfxCIDFont()
-{
-    if (cidToGID) {
-        gfree(cidToGID);
-    }
-}
+GfxCIDFont::~GfxCIDFont() = default;
 
 int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const
 {
@@ -2025,7 +2008,7 @@ int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool 
     return gid;
 }
 
-int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
+std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
 {
 #define N_UCS_CANDIDATES 2
     /* space characters */
@@ -2081,7 +2064,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
     Unicode *humap = nullptr;
     Unicode *vumap = nullptr;
     Unicode *tumap = nullptr;
-    int *codeToGID = nullptr;
     int i;
     unsigned long code;
     int wmode;
@@ -2091,21 +2073,19 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
     int cmapPlatform, cmapEncoding;
     Ref embID;
 
-    *codeToGIDLen = 0;
     if (!ctu || !getCollection()) {
-        return nullptr;
+        return {};
     }
 
     if (getEmbeddedFontID(&embID)) {
         if (getCollection()->cmp("Adobe-Identity") == 0) {
-            return nullptr;
+            return {};
         }
 
         /* if this font is embedded font,
          * CIDToGIDMap should be embedded in PDF file
          * and already set. So return it.
          */
-        *codeToGIDLen = getCIDToGIDLen();
         return getCIDToGID();
     }
 
@@ -2127,7 +2107,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
     }
     if (cmap < 0) {
-        return nullptr;
+        return {};
     }
 
     wmode = getWMode();
@@ -2196,7 +2176,8 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
     }
     // map CID -> Unicode -> GID
-    codeToGID = (int *)gmallocn(n, sizeof(int));
+    std::vector<int> codeToGID;
+    codeToGID.resize(n, 0);
     for (code = 0; code < n; ++code) {
         Unicode unicode;
         unsigned long gid;
@@ -2244,7 +2225,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen)
         }
         codeToGID[code] = gid;
     }
-    *codeToGIDLen = n;
     delete[] humap;
     delete[] tumap;
     delete[] vumap;

@@ -11,7 +11,7 @@
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2015 Jakub Wilk <jwilk@jwilk.net>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -80,10 +80,12 @@ JPXStream::~JPXStream()
     delete priv;
 }
 
-void JPXStream::reset()
+bool JPXStream::reset()
 {
     priv->counter = 0;
     priv->ccounter = 0;
+
+    return true;
 }
 
 void JPXStream::close()

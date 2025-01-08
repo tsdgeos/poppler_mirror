@@ -204,7 +204,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     std::string fileName;
     int faceIndex = 0;
     std::vector<unsigned char> font_data;
-    int i, n;
+    int i;
     std::optional<GfxFontLoc> fontLoc;
     char **enc;
     const char *name;
@@ -272,13 +272,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         break;
     case fontCIDType2:
     case fontCIDType2OT:
-        if (std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID()) {
-            n = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGIDLen();
-            if (n) {
-                const int *src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID();
-                codeToGID.reserve(n);
-                codeToGID.insert(codeToGID.begin(), src, src + n);
-            }
+        if (std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGIDLen() > 0) {
+            std::vector<int> src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID();
+            codeToGID = std::move(src);
         } else {
             std::unique_ptr<FoFiTrueType> ff;
             if (!font_data.empty()) {
@@ -289,10 +285,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             if (!ff) {
                 goto err2;
             }
-            int *src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCodeToGIDMap(ff.get(), &n);
-            codeToGID.reserve(n);
-            codeToGID.insert(codeToGID.begin(), src, src + n);
-            gfree(src);
+            std::vector<int> src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCodeToGIDMap(ff.get());
+            codeToGID = std::move(src);
         }
         /* Fall through */
     case fontTrueType:
@@ -309,10 +303,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         }
         /* This might be set already for the CIDType2 case */
         if (fontType == fontTrueType || fontType == fontTrueTypeOT) {
-            int *src = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getCodeToGIDMap(ff.get());
-            codeToGID.reserve(256);
-            codeToGID.insert(codeToGID.begin(), src, src + 256);
-            gfree(src);
+            std::vector<int> src = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getCodeToGIDMap(ff.get());
+            codeToGID = std::move(src);
         }
         font_face = createFreeTypeFontFace(lib, fileName, std::move(font_data));
         if (!font_face) {
@@ -330,10 +322,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 ff1c = FoFiType1C::load(fileName.c_str());
             }
             if (ff1c) {
-                int *src = ff1c->getCIDToGIDMap(&n);
-                codeToGID.reserve(n);
-                codeToGID.insert(codeToGID.begin(), src, src + n);
-                gfree(src);
+                std::vector<int> src = ff1c->getCIDToGIDMap();
+                codeToGID = std::move(src);
                 delete ff1c;
             }
         }
@@ -346,13 +336,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         break;
 
     case fontCIDType0COT:
-        if (std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID()) {
-            n = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGIDLen();
-            if (n) {
-                const int *src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID();
-                codeToGID.reserve(n);
-                codeToGID.insert(codeToGID.begin(), src, src + n);
-            }
+        if (std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGIDLen() > 0) {
+            std::vector<int> src = std::static_pointer_cast<GfxCIDFont>(gfxFont)->getCIDToGID();
+            codeToGID = std::move(src);
         }
 
         if (codeToGID.empty()) {
@@ -365,10 +351,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
                 }
                 if (ff) {
                     if (ff->isOpenTypeCFF()) {
-                        int *src = ff->getCIDToGIDMap(&n);
-                        codeToGID.reserve(n);
-                        codeToGID.insert(codeToGID.begin(), src, src + n);
-                        gfree(src);
+                        std::vector<int> src = ff->getCIDToGIDMap();
+                        codeToGID = std::move(src);
                     }
                 }
             }

@@ -31,6 +31,7 @@
 #include "poppler_private_export.h"
 
 #include <set>
+#include <vector>
 
 class GooString;
 
@@ -175,7 +176,7 @@ public:
 
     // Return the mapping from CIDs to GIDs, and return the number of
     // CIDs in *<nCIDs>.  This is only useful for CID fonts.
-    int *getCIDToGIDMap(int *nCIDs) const;
+    std::vector<int> getCIDToGIDMap() const;
 
     // Return the font matrix as an array of six numbers.
     void getFontMatrix(double *mat) const;
@@ -196,7 +197,7 @@ public:
     //     font's internal CID-to-GID mapping is used
     // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
     //     the identity CID-to-GID mapping is used
-    void convertToCIDType0(const char *psName, const int *codeMap, int nCodes, FoFiOutputFunc outputFunc, void *outputStream);
+    void convertToCIDType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream);
 
     // Convert to a Type 0 (but non-CID) composite font, suitable for
     // embedding in a PostScript file.  <psName> will be used as the
@@ -207,7 +208,7 @@ public:
     //     font's internal CID-to-GID mapping is used
     // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
     //     the identity CID-to-GID mapping is used
-    void convertToType0(const char *psName, const int *codeMap, int nCodes, FoFiOutputFunc outputFunc, void *outputStream);
+    void convertToType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream);
 
 private:
     FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA);
