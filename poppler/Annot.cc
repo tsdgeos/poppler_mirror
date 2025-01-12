@@ -978,6 +978,11 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     if (apData.isDict() && state) {
         return apData.dictLookupNF(state).copy();
     } else if (apData.isRef()) {
+        // Ref can point to 1)Stream or 2)dictionary with named streams - Issue #1558
+        Object obj = apData.fetch(doc->getXRef());
+        if (obj.isDict() && state) {
+            return obj.dictLookupNF(state).copy();
+        }
         return apData;
     }
 
