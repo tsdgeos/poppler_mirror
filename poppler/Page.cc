@@ -389,13 +389,14 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
 
         if (field && field->getNumWidgets() == 1) {
 
-            static_cast<AnnotWidget *>(annot)->setField(field.get());
+            AnnotWidget *aw = static_cast<AnnotWidget *>(annot);
+            aw->setField(field.get());
 
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);
 
             if (!formWidget->getWidgetAnnotation()) {
-                formWidget->createWidgetAnnotation();
+                formWidget->setWidgetAnnotation(aw);
             }
 
             standaloneFields.push_back(std::move(field));
