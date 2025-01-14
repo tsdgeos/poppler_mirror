@@ -4543,6 +4543,15 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     //~ and only replace the marked content portion of it
     //~ (this is only relevant for Tx fields)
 
+    // Checkbox fields may come without a DA entry, spec requires it
+    // for all fields containing variable text but it seems Checkbox
+    // fields are de-facto not considered as such - Issue #1055
+    GooString daStackString;
+    if (!da && forceZapfDingbats) {
+        daStackString = GooString("/ZaDb 0 Tf 0 g");
+        da = &daStackString;
+    }
+
     // parse the default appearance string
     tfPos = tmPos = -1;
     if (da) {
