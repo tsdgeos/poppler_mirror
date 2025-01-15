@@ -97,13 +97,13 @@ private:
 class OptContentModelPrivate
 {
 public:
-    OptContentModelPrivate(OptContentModel *qq, OCGs *optContent);
+    OptContentModelPrivate(OptContentModel *qq, const OCGs *optContent);
     ~OptContentModelPrivate();
 
     OptContentModelPrivate(const OptContentModelPrivate &) = delete;
     OptContentModelPrivate &operator=(const OptContentModelPrivate &) = delete;
 
-    void parseRBGroupsArray(Array *rBGroupArray);
+    void parseRBGroupsArray(const Array *rBGroupArray);
     OptContentItem *nodeFromIndex(const QModelIndex &index, bool canBeNull = false) const;
     QModelIndex indexFromItem(OptContentItem *node, int column) const;
 
@@ -126,7 +126,7 @@ public:
 
 private:
     void addChild(OptContentItem *parent, OptContentItem *child);
-    void parseOrderArray(OptContentItem *parentNode, Array *orderArray);
+    void parseOrderArray(OptContentItem *parentNode, const Array *orderArray);
 };
 }
 

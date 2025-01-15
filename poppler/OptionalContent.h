@@ -31,7 +31,7 @@ class OptionalContentGroup;
 class POPPLER_PRIVATE_EXPORT OCGs
 {
 public:
-    OCGs(Object *ocgObject, XRef *xref);
+    OCGs(const Object &ocgObject, XRef *xref);
 
     OCGs(const OCGs &) = delete;
     OCGs &operator=(const OCGs &) = delete;
@@ -42,21 +42,21 @@ public:
     bool hasOCGs() const;
     const std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> &getOCGs() const { return optionalContentGroups; }
 
-    OptionalContentGroup *findOcgByRef(const Ref ref);
+    OptionalContentGroup *findOcgByRef(const Ref ref) const;
 
-    Array *getOrderArray() { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
-    Array *getRBGroupsArray() { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
+    const Array *getOrderArray() const { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
+    const Array *getRBGroupsArray() const { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
 
-    bool optContentIsVisible(const Object *dictRef);
+    bool optContentIsVisible(const Object *dictRef) const;
 
 private:
     bool ok;
 
-    bool evalOCVisibilityExpr(const Object *expr, int recursion);
-    bool allOn(Array *ocgArray);
-    bool allOff(Array *ocgArray);
-    bool anyOn(Array *ocgArray);
-    bool anyOff(Array *ocgArray);
+    bool evalOCVisibilityExpr(const Object *expr, int recursion) const;
+    bool allOn(Array *ocgArray) const;
+    bool allOff(Array *ocgArray) const;
+    bool anyOn(Array *ocgArray) const;
+    bool anyOff(Array *ocgArray) const;
 
     std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> optionalContentGroups;
 
@@ -86,8 +86,6 @@ public:
 
     explicit OptionalContentGroup(Dict *dict);
 
-    explicit OptionalContentGroup(GooString *label);
-
     ~OptionalContentGroup();
 
     OptionalContentGroup(const OptionalContentGroup &) = delete;
@@ -105,7 +103,7 @@ public:
     UsageState getPrintState() const { return printState; }
 
 private:
-    GooString *m_name;
+    std::unique_ptr<GooString> m_name;
     Ref m_ref;
     State m_state;
     UsageState viewState; // suggested state when viewing

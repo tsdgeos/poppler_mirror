@@ -152,7 +152,7 @@ QSet<OptContentItem *> OptContentItem::recurseListChildren(bool includeMe) const
     return ret;
 }
 
-OptContentModelPrivate::OptContentModelPrivate(OptContentModel *qq, OCGs *optContent) : q(qq)
+OptContentModelPrivate::OptContentModelPrivate(OptContentModel *qq, const OCGs *optContent) : q(qq)
 {
     m_rootNode = new OptContentItem();
     const auto &ocgs = optContent->getOCGs();
@@ -184,7 +184,7 @@ OptContentModelPrivate::~OptContentModelPrivate()
     delete m_rootNode;
 }
 
-void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, Array *orderArray)
+void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, const Array *orderArray)
 {
     OptContentItem *lastItem = parentNode;
     for (int i = 0; i < orderArray->getLength(); ++i) {
@@ -215,7 +215,7 @@ void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, Array *
     }
 }
 
-void OptContentModelPrivate::parseRBGroupsArray(Array *rBGroupArray)
+void OptContentModelPrivate::parseRBGroupsArray(const Array *rBGroupArray)
 {
     if (!rBGroupArray) {
         return;
@@ -233,7 +233,7 @@ void OptContentModelPrivate::parseRBGroupsArray(Array *rBGroupArray)
     }
 }
 
-OptContentModel::OptContentModel(OCGs *optContent, QObject *parent) : QAbstractItemModel(parent)
+OptContentModel::OptContentModel(const OCGs *optContent, QObject *parent) : QAbstractItemModel(parent)
 {
     d = new OptContentModelPrivate(this, optContent);
 }

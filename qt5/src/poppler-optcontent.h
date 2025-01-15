@@ -74,7 +74,7 @@ public:
     void applyLink(LinkOCGState *link);
 
 private:
-    explicit OptContentModel(OCGs *optContent, QObject *parent = nullptr);
+    explicit OptContentModel(const OCGs *optContent, QObject *parent = nullptr);
 
     friend class OptContentModelPrivate;
     OptContentModelPrivate *d;

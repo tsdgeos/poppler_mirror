@@ -211,7 +211,7 @@ public:
     void removeFormFromAcroForm(const Ref formRef);
     void setAcroFormModified();
 
-    OCGs *getOptContentConfig() { return optContent; }
+    const OCGs *getOptContentConfig() { return optContent.get(); }
 
     int getPDFMajorVersion() const { return catalogPdfMajorVersion; }
     int getPDFMinorVersion() const { return catalogPdfMinorVersion; }
@@ -296,7 +296,7 @@ private:
     Object outline; // outline dictionary
     Object acroForm; // AcroForm dictionary
     Object viewerPreferences; // ViewerPreference dictionary
-    OCGs *optContent; // Optional Content groups
+    std::unique_ptr<OCGs> optContent; // Optional Content groups
     bool ok; // true if catalog is valid
     PageLabelInfo *pageLabelInfo; // info about page labels
     PageMode pageMode; // page mode

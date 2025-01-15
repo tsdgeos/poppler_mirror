@@ -50,7 +50,7 @@ EmbFile::EmbFile(Object &&efStream)
         // subtype is normally the mimetype
         Object subtypeName = dataDict->lookup("Subtype");
         if (subtypeName.isName()) {
-            m_mimetype = new GooString(subtypeName.getName());
+            m_mimetype = std::make_unique<GooString>(subtypeName.getName());
         }
 
         // paramDict corresponds to Table 3.42 in the PDF1.6 spec
@@ -58,12 +58,12 @@ EmbFile::EmbFile(Object &&efStream)
         if (paramDict.isDict()) {
             Object paramObj = paramDict.dictLookup("ModDate");
             if (paramObj.isString()) {
-                m_modDate = new GooString(paramObj.getString());
+                m_modDate = paramObj.getString()->copy();
             }
 
             paramObj = paramDict.dictLookup("CreationDate");
             if (paramObj.isString()) {
-                m_createDate = new GooString(paramObj.getString());
+                m_createDate = paramObj.getString()->copy();
             }
 
             paramObj = paramDict.dictLookup("Size");
@@ -73,19 +73,13 @@ EmbFile::EmbFile(Object &&efStream)
 
             paramObj = paramDict.dictLookup("CheckSum");
             if (paramObj.isString()) {
-                m_checksum = new GooString(paramObj.getString());
+                m_checksum = paramObj.getString()->copy();
             }
         }
     }
 }
 
-EmbFile::~EmbFile()
-{
-    delete m_createDate;
-    delete m_modDate;
-    delete m_checksum;
-    delete m_mimetype;
-}
+EmbFile::~EmbFile() = default;
 
 bool EmbFile::save(const std::string &path)
 {
@@ -149,10 +143,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
     }
 }
 
-FileSpec::~FileSpec()
-{
-    delete embFile;
-}
+FileSpec::~FileSpec() = default;
 
 EmbFile *FileSpec::getEmbeddedFile()
 {
@@ -161,13 +152,13 @@ EmbFile *FileSpec::getEmbeddedFile()
     }
 
     if (embFile) {
-        return embFile;
+        return embFile.get();
     }
 
     XRef *xref = fileSpec.getDict()->getXRef();
-    embFile = new EmbFile(fileStream.fetch(xref));
+    embFile = std::make_unique<EmbFile>(fileStream.fetch(xref));
 
-    return embFile;
+    return embFile.get();
 }
 
 Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName)

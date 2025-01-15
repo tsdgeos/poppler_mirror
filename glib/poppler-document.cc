@@ -3222,12 +3222,11 @@ static void layer_free(Layer *layer)
     g_slice_free(Layer, layer);
 }
 
-static GList *get_optional_content_rbgroups(OCGs *ocg)
+static GList *get_optional_content_rbgroups(const OCGs *ocg)
 {
-    Array *rb;
     GList *groups = nullptr;
 
-    rb = ocg->getRBGroupsArray();
+    const Array *rb = ocg->getRBGroupsArray();
 
     if (rb) {
         int i, j;
@@ -3276,7 +3275,7 @@ GList *_poppler_document_get_layer_rbgroup(PopplerDocument *document, Layer *lay
     return nullptr;
 }
 
-static GList *get_optional_content_items_sorted(OCGs *ocg, Layer *parent, Array *order)
+static GList *get_optional_content_items_sorted(const OCGs *ocg, Layer *parent, const Array *order)
 {
     GList *items = nullptr;
     Layer *last_item = parent;
@@ -3309,12 +3308,11 @@ static GList *get_optional_content_items_sorted(OCGs *ocg, Layer *parent, Array 
     return g_list_reverse(items);
 }
 
-static GList *get_optional_content_items(OCGs *ocg)
+static GList *get_optional_content_items(const OCGs *ocg)
 {
-    Array *order;
     GList *items = nullptr;
 
-    order = ocg->getOrderArray();
+    const Array *order = ocg->getOrderArray();
 
     if (order) {
         items = get_optional_content_items_sorted(ocg, nullptr, order);
@@ -3337,7 +3335,7 @@ GList *_poppler_document_get_layers(PopplerDocument *document)
 {
     if (!document->layers) {
         Catalog *catalog = document->doc->getCatalog();
-        OCGs *ocg = catalog->getOptContentConfig();
+        const OCGs *ocg = catalog->getOptContentConfig();
 
         if (!ocg) {
             return nullptr;

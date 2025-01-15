@@ -30,10 +30,10 @@ public:
     EmbFile &operator=(const EmbFile &) = delete;
 
     int size() const { return m_size; }
-    const GooString *modDate() const { return m_modDate; }
-    const GooString *createDate() const { return m_createDate; }
-    const GooString *checksum() const { return m_checksum; }
-    const GooString *mimeType() const { return m_mimetype; }
+    const GooString *modDate() const { return m_modDate.get(); }
+    const GooString *createDate() const { return m_createDate.get(); }
+    const GooString *checksum() const { return m_checksum.get(); }
+    const GooString *mimeType() const { return m_mimetype.get(); }
     Object *streamObject() { return &m_objStr; }
     Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
     bool isOk() const { return m_objStr.isStream(); }
@@ -43,10 +43,10 @@ private:
     bool save2(FILE *f);
 
     int m_size;
-    GooString *m_createDate;
-    GooString *m_modDate;
-    GooString *m_checksum;
-    GooString *m_mimetype;
+    std::unique_ptr<GooString> m_createDate;
+    std::unique_ptr<GooString> m_modDate;
+    std::unique_ptr<GooString> m_checksum;
+    std::unique_ptr<GooString> m_mimetype;
     Object m_objStr;
 };
 
@@ -76,7 +76,7 @@ private:
     std::unique_ptr<GooString> fileName; // F, UF, DOS, Mac, Unix
     std::unique_ptr<GooString> platformFileName;
     Object fileStream; // Ref to F entry in UF
-    EmbFile *embFile;
+    std::unique_ptr<EmbFile> embFile;
     std::unique_ptr<GooString> desc; // Desc
 };
 
