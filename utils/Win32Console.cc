@@ -120,7 +120,8 @@ Win32Console::Win32Console(int *argc, char **argv[])
         argList = new char *[numArgs];
         privateArgList = new char *[numArgs];
         for (int i = 0; i < numArgs; i++) {
-            argList[i] = utf16ToUtf8((uint16_t *)(wargv[i]));
+            std::string arg = utf16ToUtf8((uint16_t *)(wargv[i]));
+            argList[i] = strdup(arg.c_str());
             // parseArgs will rearrange the argv list so we keep our own copy
             // to use for freeing all the strings
             privateArgList[i] = argList[i];
@@ -155,7 +156,7 @@ Win32Console::~Win32Console()
     flush(true);
     if (argList) {
         for (int i = 0; i < numArgs; i++)
-            gfree(privateArgList[i]);
+            free(privateArgList[i]);
         delete[] argList;
         delete[] privateArgList;
     }
