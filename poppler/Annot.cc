@@ -2020,7 +2020,7 @@ bool Annot::isVisible(bool printing)
     }
 
     // check the OC
-    OCGs *optContentConfig = doc->getCatalog()->getOptContentConfig();
+    const OCGs *optContentConfig = doc->getCatalog()->getOptContentConfig();
     if (optContentConfig) {
         if (!optContentConfig->optContentIsVisible(&oc)) {
             return false;

@@ -118,10 +118,9 @@ Catalog::Catalog(PDFDoc *docA)
     // get the Optional Content dictionary
     Object optContentProps = catDict.dictLookup("OCProperties");
     if (optContentProps.isDict()) {
-        optContent = new OCGs(&optContentProps, xref);
+        optContent = std::make_unique<OCGs>(optContentProps, xref);
         if (!optContent->isOk()) {
-            delete optContent;
-            optContent = nullptr;
+            optContent.reset();
         }
     }
 
@@ -151,7 +150,6 @@ Catalog::~Catalog()
     delete jsNameTree;
     delete pageLabelInfo;
     delete form;
-    delete optContent;
     delete viewerPrefs;
     delete structTreeRoot;
 }

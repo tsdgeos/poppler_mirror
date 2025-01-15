@@ -5038,7 +5038,7 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs)
     // push a new stack entry
     pushMarkedContent();
 
-    OCGs *contentConfig = catalog->getOptContentConfig();
+    const OCGs *contentConfig = catalog->getOptContentConfig();
     const char *name0 = args[0].getName();
     if (strncmp(name0, "OC", 2) == 0 && contentConfig) {
         if (numArgs >= 2) {

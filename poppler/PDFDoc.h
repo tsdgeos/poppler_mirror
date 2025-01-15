@@ -174,7 +174,7 @@ public:
     Catalog *getCatalog() const { return catalog; }
 
     // Get optional content configuration
-    OCGs *getOptContentConfig() const { return catalog->getOptContentConfig(); }
+    const OCGs *getOptContentConfig() const { return catalog->getOptContentConfig(); }
 
     // Get base stream.
     BaseStream *getBaseStream() const { return str; }

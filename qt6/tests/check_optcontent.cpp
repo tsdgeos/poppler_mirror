@@ -83,7 +83,7 @@ void TestOptionalContent::checkIsVisible()
     PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
     QVERIFY(doc);
 
-    OCGs *ocgs = doc->getOptContentConfig();
+    const OCGs *ocgs = doc->getOptContentConfig();
     QVERIFY(ocgs);
 
     XRef *xref = doc->getXRef();
@@ -155,7 +155,7 @@ void TestOptionalContent::checkVisibilitySetting()
     PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
     QVERIFY(doc);
 
-    OCGs *ocgs = doc->getOptContentConfig();
+    const OCGs *ocgs = doc->getOptContentConfig();
     QVERIFY(ocgs);
 
     XRef *xref = doc->getXRef();
