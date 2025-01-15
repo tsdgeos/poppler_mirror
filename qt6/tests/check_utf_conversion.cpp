@@ -77,14 +77,13 @@ void TestUTFConversion::testUTF_data()
 
 void TestUTFConversion::testUTF()
 {
-    char utf8Buf[1000];
-    char *utf8String;
+    std::string utf8String;
     uint16_t utf16Buf[1000];
     uint16_t *utf16String;
     int len;
 
     QFETCH(QString, s);
-    char *str = strdup(s.toUtf8().constData());
+    QByteArray str = s.toUtf8().constData();
 
     // UTF-8 to UTF-16
 
@@ -109,17 +108,13 @@ void TestUTFConversion::testUTF()
 
     len = utf16CountUtf8Bytes(s.utf16());
     QCOMPARE(len, (int)strlen(str));
-    Q_ASSERT(len < (int)sizeof(utf8Buf)); // if this fails, make utf8Buf larger
 
-    len = utf16ToUtf8(s.utf16(), INT_MAX, utf8Buf, sizeof(utf8Buf));
-    QVERIFY(compare(utf8Buf, str));
+    utf8String = utf16ToUtf8(s.utf16(), INT_MAX);
+    QVERIFY(compare(utf8String.c_str(), str));
     QCOMPARE(len, (int)strlen(str));
 
     utf8String = utf16ToUtf8(s.utf16());
-    QVERIFY(compare(utf8String, str));
-    free(utf8String);
-
-    free(str);
+    QVERIFY(compare(utf8String.c_str(), str));
 }
 
 void TestUTFConversion::testUnicodeToAscii7()

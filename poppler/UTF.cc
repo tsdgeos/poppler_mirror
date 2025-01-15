@@ -430,14 +430,14 @@ int utf16CountUtf8Bytes(const uint16_t *utf16)
     return count;
 }
 
-int utf16ToUtf8(const uint16_t *utf16, int maxUtf16, char *utf8, int maxUtf8)
+std::string utf16ToUtf8(const uint16_t *utf16, int maxUtf16)
 {
     uint32_t codepoint = 0;
     uint32_t state = 0;
     int nIn = 0;
-    int nOut = 0;
-    char *p = utf8;
-    while (*utf16 && nIn < maxUtf16 && nOut < maxUtf8 - 1) {
+    char p[4];
+    std::string utf8;
+    while (*utf16 && nIn < maxUtf16) {
         decodeUtf16(&state, &codepoint, *utf16);
         if (state == UTF16_ACCEPT || state == UTF16_REJECT) {
             if (state == UTF16_REJECT || codepoint > UCS4_MAX) {
@@ -445,38 +445,17 @@ int utf16ToUtf8(const uint16_t *utf16, int maxUtf16, char *utf8, int maxUtf8)
                 state = 0;
             }
 
-            int bufSize = maxUtf8 - nOut;
-            int count = mapUTF8(codepoint, p, bufSize);
-            p += count;
-            nOut += count;
+            int count = mapUTF8(codepoint, p, 4);
+            utf8.append(std::string_view(p, count));
         }
         utf16++;
         nIn++;
     }
     // replace any trailing bytes too short for a valid UTF-8 with a replacement char
-    if (state != UTF16_ACCEPT && state != UTF16_REJECT && nOut < maxUtf8 - 1) {
-        int bufSize = maxUtf8 - nOut;
-        int count = mapUTF8(REPLACEMENT_CHAR, p, bufSize);
-        p += count;
-        nOut += count;
-        nOut++;
+    if (state != UTF16_ACCEPT && state != UTF16_REJECT) {
+        int count = mapUTF8(REPLACEMENT_CHAR, p, 4);
+        utf8.append(std::string_view(p, count));
     }
-    if (nOut > maxUtf8 - 1) {
-        nOut = maxUtf8 - 1;
-    }
-    utf8[nOut] = 0;
-    return nOut;
-}
-
-// Allocate utf8 string and convert utf16 into it.
-char *utf16ToUtf8(const uint16_t *utf16, int *len)
-{
-    const int n = utf16CountUtf8Bytes(utf16);
-    if (len) {
-        *len = n;
-    }
-    char *utf8 = (char *)gmalloc(n + 1);
-    utf16ToUtf8(utf16, INT_MAX, utf8, n + 1);
     return utf8;
 }
 
@@ -539,28 +518,25 @@ std::string TextStringToUtf8(const std::string &textStr)
 {
     int i, len;
     const char *s;
-    char *utf8;
+    std::string utf8;
 
     len = textStr.size();
     s = textStr.c_str();
     if (hasUnicodeByteOrderMark(textStr)) {
-        uint16_t *utf16;
+        std::vector<uint16_t> utf16;
         len = len / 2 - 1;
-        utf16 = new uint16_t[len + 1];
+        utf16.resize(len + 1);
         for (i = 0; i < len; i++) {
             utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
         }
         utf16[i] = 0;
-        utf8 = utf16ToUtf8(utf16);
-        delete[] utf16;
+        utf8 = utf16ToUtf8(utf16.data(), utf16.size());
     } else {
-        utf8 = (char *)gmalloc(len + 1);
+        utf8.resize(len + 1);
         for (i = 0; i < len; i++) {
             utf8[i] = pdfDocEncoding[s[i] & 0xff];
         }
         utf8[i] = 0;
     }
-    std::string utf8_string(utf8);
-    gfree(utf8);
-    return utf8_string;
+    return utf8;
 }
