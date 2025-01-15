@@ -54,12 +54,12 @@ PDFDocFactory::~PDFDocFactory()
     }
 }
 
-std::unique_ptr<PDFDoc> PDFDocFactory::createPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> PDFDocFactory::createPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     for (int i = builders->size() - 1; i >= 0; i--) {
         PDFDocBuilder *builder = (*builders)[i];
         if (builder->supports(uri)) {
-            return builder->buildPDFDoc(uri, ownerPassword, userPassword, guiDataA);
+            return builder->buildPDFDoc(uri, ownerPassword, userPassword);
         }
     }
 

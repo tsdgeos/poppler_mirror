@@ -18,14 +18,14 @@
 // LocalPDFDocBuilder
 //------------------------------------------------------------------------
 
-std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     if (uri.cmpN("file://", 7) == 0) {
         std::unique_ptr<GooString> fileName = uri.copy();
         fileName->del(0, 7);
-        return std::make_unique<PDFDoc>(std::move(fileName), ownerPassword, userPassword, guiDataA);
+        return std::make_unique<PDFDoc>(std::move(fileName), ownerPassword, userPassword);
     } else {
-        return std::make_unique<PDFDoc>(uri.copy(), ownerPassword, userPassword, guiDataA);
+        return std::make_unique<PDFDoc>(uri.copy(), ownerPassword, userPassword);
     }
 }
 

@@ -25,7 +25,7 @@ class LocalPDFDocBuilder : public PDFDocBuilder
 {
 
 public:
-    std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, void *guiDataA = nullptr) override;
+    std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}) override;
     bool supports(const GooString &uri) override;
 };
 

@@ -37,8 +37,7 @@ public:
 
     // Builds a new PDFDoc. Returns a PDFDoc. You should check this PDFDoc
     // with PDFDoc::isOk() for failures.
-    // The caller is responsible for deleting ownerPassword, userPassWord and guiData.
-    virtual std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, void *guiDataA = nullptr) = 0;
+    virtual std::unique_ptr<PDFDoc> buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}) = 0;
 
     // Returns true if the builder supports building a PDFDoc from the URI.
     virtual bool supports(const GooString &uri) = 0;
