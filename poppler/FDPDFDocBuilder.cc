@@ -34,7 +34,7 @@ int FileDescriptorPDFDocBuilder::parseFdFromUri(const GooString &uri)
     return fd;
 }
 
-std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     const auto fd = parseFdFromUri(uri);
     if (fd == -1) {

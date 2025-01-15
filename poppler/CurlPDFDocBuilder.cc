@@ -22,7 +22,7 @@
 // CurlPDFDocBuilder
 //------------------------------------------------------------------------
 
-std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, void *guiDataA)
+std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     CachedFile *cachedFile = new CachedFile(new CurlCachedFileLoader(uri.toStr()));
 
@@ -33,7 +33,7 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
 
     BaseStream *str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
 
-    return std::make_unique<PDFDoc>(str, ownerPassword, userPassword, guiDataA);
+    return std::make_unique<PDFDoc>(str, ownerPassword, userPassword);
 }
 
 bool CurlPDFDocBuilder::supports(const GooString &uri)
