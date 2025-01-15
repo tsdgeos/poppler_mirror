@@ -377,7 +377,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
         sysFonts->scanWindowsFonts(winFontDir);
     }
 
-    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
+    std::string dataRoot = !popplerDataDir.empty() ? popplerDataDir : std::string { POPPLER_DATADIR };
     const std::string fileName = std::string(dataRoot).append("/cidfmap");
 
     // try to open file

@@ -27,11 +27,11 @@
 
 #include "CryptoSignBackend.h"
 #include "NSSCryptoSignBackend.h"
-#include "goo/gdir.h"
 #include "goo/gmem.h"
 
 #include <optional>
 #include <vector>
+#include <filesystem>
 
 #include <Error.h>
 
@@ -693,11 +693,10 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
     const std::string firefoxPath = std::string(env) + "/.mozilla/firefox/";
 #endif
 
-    GDir firefoxDir(firefoxPath.c_str());
-    std::unique_ptr<GDirEntry> entry;
-    while (entry = firefoxDir.getNextEntry(), entry != nullptr) {
-        if (entry->isDir() && entry->getName()->toStr().find("default") != std::string::npos) {
-            return entry->getFullPath()->toStr();
+    std::error_code ec; // ensures directory_iterator doesn't throw exceptions
+    for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
+        if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
+            return entry.path().string();
         }
     }
     return {};

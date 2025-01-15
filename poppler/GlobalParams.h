@@ -52,6 +52,7 @@
 #include <mutex>
 #include <optional>
 #include <vector>
+#include <filesystem>
 
 class GooString;
 class NameToCharCode;
@@ -112,7 +113,7 @@ class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
     // Initialize the global parameters
-    explicit GlobalParams(const char *customPopplerDataDir = nullptr);
+    explicit GlobalParams(const std::string &customPopplerDataDir = {});
 
     ~GlobalParams();
 
@@ -168,12 +169,12 @@ public:
     static bool parseYesNo2(const char *token, bool *flag);
 
 private:
-    void parseNameToUnicode(const GooString *name);
+    void parseNameToUnicode(const std::filesystem::path &name);
 
     void scanEncodingDirs();
-    void addCIDToUnicode(const GooString *collection, const GooString *fileName);
-    void addUnicodeMap(const GooString *encodingName, const GooString *fileName);
-    void addCMapDir(const GooString *collection, const GooString *dir);
+    void addCIDToUnicode(std::string &&collection, std::string &&fileName);
+    void addUnicodeMap(std::string &&encodingName, std::string &&fileName);
+    void addCMapDir(std::string &&collection, std::string &&dir);
 
     //----- static tables
 
@@ -197,7 +198,7 @@ private:
     std::unordered_map<std::string, std::string> unicodeMaps;
     // list of CMap dirs, indexed by collection
     std::unordered_multimap<std::string, std::string> cMapDirs;
-    std::vector<std::unique_ptr<GooString>> toUnicodeDirs; // list of ToUnicode CMap dirs
+    std::vector<std::string> toUnicodeDirs; // list of ToUnicode CMap dirs
     bool baseFontsInitialized;
 #ifdef _WIN32
     // windows font substitutes (for CID fonts)
@@ -223,7 +224,7 @@ private:
     mutable std::recursive_mutex unicodeMapCacheMutex;
     mutable std::recursive_mutex cMapCacheMutex;
 
-    const char *popplerDataDir;
+    std::string popplerDataDir;
 };
 
 class POPPLER_PRIVATE_EXPORT GlobalParamsIniter
