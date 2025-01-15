@@ -279,7 +279,7 @@ private:
     std::unordered_map<Ref, std::size_t> refPageMap;
     std::vector<Object> *pagesList;
     std::vector<Ref> *pagesRefList;
-    std::vector<PageAttrs *> *attrsList;
+    std::vector<std::unique_ptr<PageAttrs>> attrsList;
     std::vector<int> *kidsIdxList;
     Form *form;
     ViewerPreferences *viewerPrefs;

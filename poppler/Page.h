@@ -89,7 +89,7 @@ public:
     // Construct a new PageAttrs object by merging a dictionary
     // (of type Pages or Page) into another PageAttrs object.  If
     // <attrs> is nullptr, uses defaults.
-    PageAttrs(PageAttrs *attrs, Dict *dict);
+    PageAttrs(const PageAttrs *attrs, Dict *dict);
 
     // Destructor.
     ~PageAttrs();
@@ -142,7 +142,7 @@ class POPPLER_PRIVATE_EXPORT Page
 {
 public:
     // Constructor.
-    Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form);
+    Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA, Form *form);
 
     // Destructor.
     ~Page();
@@ -257,7 +257,7 @@ private:
     Object pageObj; // page dictionary
     const Ref pageRef; // page reference
     int num; // page number
-    PageAttrs *attrs; // page attributes
+    std::unique_ptr<PageAttrs> attrs; // page attributes
     Annots *annots; // annotations
     Object annotsObj; // annotations array
     Object contents; // page contents
