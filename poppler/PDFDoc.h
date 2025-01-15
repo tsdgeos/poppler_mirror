@@ -196,7 +196,7 @@ public:
     // Return the structure tree root object.
     const StructTreeRoot *getStructTreeRoot() const { return catalog->getStructTreeRoot(); }
 
-    // Get page.
+    // Get page. First page is page 1.
     Page *getPage(int page);
 
     // Display a page.
@@ -380,7 +380,7 @@ private:
     void saveIncrementalUpdate(OutStream *outStr);
     void saveCompleteRewrite(OutStream *outStr);
 
-    Page *parsePage(int page);
+    std::unique_ptr<Page> parsePage(int page);
 
     // Get hints.
     Hints *getHints();
@@ -420,7 +420,7 @@ private:
     Catalog *catalog = nullptr;
     Hints *hints = nullptr;
     Outline *outline = nullptr;
-    Page **pageCache = nullptr;
+    std::vector<std::unique_ptr<Page>> pageCache;
 
     bool ok = false;
     int errCode = errNone;

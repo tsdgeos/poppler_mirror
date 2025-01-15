@@ -94,7 +94,6 @@ Catalog::Catalog(PDFDoc *docA)
 
     pagesList = nullptr;
     pagesRefList = nullptr;
-    attrsList = nullptr;
     kidsIdxList = nullptr;
     markInfo = markInfoNull;
 
@@ -145,13 +144,6 @@ Catalog::Catalog(PDFDoc *docA)
 Catalog::~Catalog()
 {
     delete kidsIdxList;
-    if (attrsList) {
-        std::vector<PageAttrs *>::iterator it;
-        for (it = attrsList->begin(); it != attrsList->end(); ++it) {
-            delete *it;
-        }
-        delete attrsList;
-    }
     delete pagesRefList;
     delete pagesList;
     delete destNameTree;
@@ -257,8 +249,7 @@ bool Catalog::initPageList()
 
     pages.clear();
     refPageMap.clear();
-    attrsList = new std::vector<PageAttrs *>();
-    attrsList->push_back(new PageAttrs(nullptr, obj.getDict()));
+    attrsList.push_back(std::make_unique<PageAttrs>(nullptr, obj.getDict()));
     pagesList = new std::vector<Object>();
     pagesList->push_back(std::move(obj));
     pagesRefList = new std::vector<Ref>();
@@ -328,8 +319,7 @@ bool Catalog::cacheSubTree()
     if (kidsIdx >= kids.arrayGetLength()) {
         pagesList->pop_back();
         pagesRefList->pop_back();
-        delete attrsList->back();
-        attrsList->pop_back();
+        attrsList.pop_back();
         kidsIdxList->pop_back();
         if (!kidsIdxList->empty()) {
             kidsIdxList->back()++;
@@ -359,8 +349,8 @@ bool Catalog::cacheSubTree()
 
     Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
-        PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
-        auto p = std::make_unique<Page>(doc, pages.size() + 1, std::move(kid), kidRef.getRef(), attrs, form);
+        auto attrs = std::make_unique<PageAttrs>(attrsList.back().get(), kid.getDict());
+        auto p = std::make_unique<Page>(doc, pages.size() + 1, std::move(kid), kidRef.getRef(), std::move(attrs), form);
         if (!p->isOk()) {
             error(errSyntaxError, -1, "Failed to create page (page {0:uld})", pages.size() + 1);
             return false;
@@ -380,7 +370,7 @@ bool Catalog::cacheSubTree()
         // This should really be isDict("Pages"), but I've seen at least one
         // PDF file where the /Type entry is missing.
     } else if (kid.isDict()) {
-        attrsList->push_back(new PageAttrs(attrsList->back(), kid.getDict()));
+        attrsList.push_back(std::make_unique<PageAttrs>(attrsList.back().get(), kid.getDict()));
         pagesRefList->push_back(kidRef.getRef());
         pagesList->push_back(std::move(kid));
         kidsIdxList->push_back(0);
@@ -856,7 +846,7 @@ int Catalog::getNumPages()
                 Dict *pageDict = pagesDict.getDict();
                 if (pageRootRef.isRef()) {
                     const Ref pageRef = pageRootRef.getRef();
-                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, new PageAttrs(nullptr, pageDict), form);
+                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict), form);
                     if (p->isOk()) {
                         pages.emplace_back(std::move(p), pageRef);
                         refPageMap.emplace(pageRef, pages.size());

@@ -300,14 +300,6 @@ bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::opt
 
 PDFDoc::~PDFDoc()
 {
-    if (pageCache) {
-        for (int i = 0; i < getNumPages(); i++) {
-            if (pageCache[i]) {
-                delete pageCache[i];
-            }
-        }
-        gfree(static_cast<void *>(pageCache));
-    }
     delete secHdlr;
     delete outline;
     delete catalog;
@@ -2120,7 +2112,7 @@ int PDFDoc::getNumPages()
     return catalog->getNumPages();
 }
 
-Page *PDFDoc::parsePage(int page)
+std::unique_ptr<Page> PDFDoc::parsePage(int page)
 {
     Ref pageRef;
 
@@ -2144,7 +2136,7 @@ Page *PDFDoc::parsePage(int page)
     }
     Dict *pageDict = obj.getDict();
 
-    return new Page(this, page, std::move(obj), pageRef, new PageAttrs(nullptr, pageDict), catalog->getForm());
+    return std::make_unique<Page>(this, page, std::move(obj), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict), catalog->getForm());
 }
 
 Page *PDFDoc::getPage(int page)
@@ -2155,17 +2147,14 @@ Page *PDFDoc::getPage(int page)
 
     if (isLinearized() && checkLinearization()) {
         pdfdocLocker();
-        if (!pageCache) {
-            pageCache = (Page **)gmallocn(getNumPages(), sizeof(Page *));
-            for (int i = 0; i < getNumPages(); i++) {
-                pageCache[i] = nullptr;
-            }
+        if (pageCache.empty()) {
+            pageCache.resize(getNumPages());
         }
         if (!pageCache[page - 1]) {
             pageCache[page - 1] = parsePage(page);
         }
         if (pageCache[page - 1]) {
-            return pageCache[page - 1];
+            return pageCache[page - 1].get();
         } else {
             error(errSyntaxWarning, -1, "Failed parsing page {0:d} using hint tables", page);
         }

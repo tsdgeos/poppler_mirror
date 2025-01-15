@@ -94,7 +94,7 @@ void PDFRectangle::clipTo(PDFRectangle *rect)
 // PageAttrs
 //------------------------------------------------------------------------
 
-PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict)
+PageAttrs::PageAttrs(const PageAttrs *attrs, Dict *dict)
 {
     Object obj1;
     PDFRectangle mBox;
@@ -252,7 +252,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 
 #define pageLocker() const std::scoped_lock locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) : pageRef(pageRefA)
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA, Form *form) : pageRef(pageRefA), attrs(std::move(attrsA))
 {
     ok = true;
     doc = docA;
@@ -265,7 +265,6 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
     pageObj = std::move(pageDict);
 
     // get attributes
-    attrs = attrsA;
     attrs->clipBoxes();
 
     // transtion
@@ -330,7 +329,6 @@ err1:
 
 Page::~Page()
 {
-    delete attrs;
     delete annots;
 }
 
