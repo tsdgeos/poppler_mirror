@@ -21,21 +21,6 @@ private slots:
     void testUnicodeLittleEndian();
 };
 
-static bool compare(const char *a, const char *b)
-{
-    return strcmp(a, b) == 0;
-}
-
-static bool compare(const uint16_t *a, const uint16_t *b)
-{
-    while (*a && *b) {
-        if (*a++ != *b++) {
-            return false;
-        }
-    }
-    return *a == *b;
-}
-
 static bool compare(const Unicode *a, const char *b, int len)
 {
     for (int i = 0; i < len; i++) {
@@ -78,43 +63,35 @@ void TestUTFConversion::testUTF_data()
 void TestUTFConversion::testUTF()
 {
     std::string utf8String;
-    uint16_t utf16Buf[1000];
-    uint16_t *utf16String;
     int len;
 
     QFETCH(QString, s);
-    QByteArray str = s.toUtf8().constData();
+    const std::string str = s.toStdString();
 
     // UTF-8 to UTF-16
 
     len = utf8CountUtf16CodeUnits(str);
     QCOMPARE(len, s.size()); // QString size() returns number of code units, not code points
-    Q_ASSERT(len < (int)sizeof(utf16Buf)); // if this fails, make utf16Buf larger
 
-    len = utf8ToUtf16(str, INT_MAX, utf16Buf, sizeof(utf16Buf));
-    QVERIFY(compare(utf16Buf, s.utf16()));
+    std::u16string utf16String = utf8ToUtf16(str);
+    QCOMPARE(utf16String, s.toStdU16String());
     QCOMPARE(len, s.size());
 
-    utf16String = utf8ToUtf16(str);
-    QVERIFY(compare(utf16String, s.utf16()));
-    free(utf16String);
-
-    std::string sUtf8(str);
-    std::string gsUtf16_a(utf8ToUtf16WithBom(sUtf8));
+    std::string gsUtf16_a(utf8ToUtf16WithBom(str));
     std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
     QCOMPARE(gsUtf16_b->cmp(gsUtf16_a), 0);
 
     // UTF-16 to UTF-8
 
     len = utf16CountUtf8Bytes(s.utf16());
-    QCOMPARE(len, (int)strlen(str));
+    QCOMPARE(len, str.size());
 
     utf8String = utf16ToUtf8(s.utf16(), INT_MAX);
-    QVERIFY(compare(utf8String.c_str(), str));
-    QCOMPARE(len, (int)strlen(str));
+    QCOMPARE(utf8String, str);
+    QCOMPARE(len, str.size());
 
     utf8String = utf16ToUtf8(s.utf16());
-    QVERIFY(compare(utf8String.c_str(), str));
+    QCOMPARE(utf8String, str);
 }
 
 void TestUTFConversion::testUnicodeToAscii7()

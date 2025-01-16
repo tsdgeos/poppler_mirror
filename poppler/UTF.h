@@ -93,20 +93,13 @@ int POPPLER_PRIVATE_EXPORT utf8ToUCS4(const char *utf8, Unicode **ucs4_out);
 // (excluding terminating NULL). Each invalid byte is counted as a
 // code point since the UTF-8 conversion functions will replace it with
 // REPLACEMENT_CHAR.
-int POPPLER_PRIVATE_EXPORT utf8CountUtf16CodeUnits(const char *utf8);
+int POPPLER_PRIVATE_EXPORT utf8CountUtf16CodeUnits(std::string_view utf8);
 
 // Convert UTF-8 to UTF-16
 //  utf8     - UTF-8 string to convert. If not null terminated, ensure
 //             maxUtf8 is set the the exact number of bytes to convert.
-//  maxUtf8  - Maximum number of UTF-8 bytes to convert. Conversion stops when
-//             either this count is reached or a null is encountered.
-//  utf16    - Output buffer to write UTF-16 to. Output will always be null terminated.
-//  maxUtf16 - Maximum size of output buffer including space for null.
-// Returns number of UTF-16 code units written (excluding NULL).
-int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, int maxUtf8, uint16_t *utf16, int maxUtf16);
-
-// Allocate utf16 string and convert utf8 into it.
-uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
+// Returns utf16 string
+std::u16string POPPLER_PRIVATE_EXPORT utf8ToUtf16(std::string_view utf8);
 
 inline bool isUtf8WithBom(std::string_view str)
 {
@@ -123,7 +116,7 @@ inline bool isUtf8WithBom(std::string_view str)
 // The caller owns the returned pointer.
 //  utf8 - UTF-8 string to convert. An empty string is acceptable.
 // Returns a big endian UTF-16 string with BOM or an empty string without BOM.
-std::string POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
+std::string POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(std::string_view utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).

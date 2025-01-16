@@ -260,14 +260,14 @@ int utf8ToUCS4(const char *utf8, Unicode **ucs4_out)
 // (excluding terminating NULL). Each invalid byte is counted as a
 // code point since the UTF-8 conversion functions will replace it with
 // REPLACEMENT_CHAR.
-int utf8CountUtf16CodeUnits(const char *utf8)
+int utf8CountUtf16CodeUnits(std::string_view utf8)
 {
     uint32_t codepoint;
     uint32_t state = 0;
     int count = 0;
 
-    while (*utf8) {
-        decodeUtf8(&state, &codepoint, *utf8);
+    for (auto c : utf8) {
+        decodeUtf8(&state, &codepoint, c);
         if (state == UTF8_ACCEPT) {
             if (codepoint < 0x10000) {
                 count++;
@@ -280,7 +280,6 @@ int utf8CountUtf16CodeUnits(const char *utf8)
             count++; // replace with REPLACEMENT_CHAR
             state = 0;
         }
-        utf8++;
     }
     if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
         count++; // replace with REPLACEMENT_CHAR
@@ -289,78 +288,52 @@ int utf8CountUtf16CodeUnits(const char *utf8)
     return count;
 }
 
-int utf8ToUtf16(const char *utf8, int maxUtf8, uint16_t *utf16, int maxUtf16)
+std::u16string utf8ToUtf16(std::string_view utf8)
 {
-    uint16_t *p = utf16;
     uint32_t codepoint;
     uint32_t state = 0;
-    int nIn = 0;
-    int nOut = 0;
-    while (*utf8 && nIn < maxUtf8 && nOut < maxUtf16 - 1) {
-        decodeUtf8(&state, &codepoint, *utf8);
+    if (isUtf8WithBom(utf8)) {
+        utf8 = utf8.substr(3);
+    }
+    std::u16string utf16;
+    for (auto c : utf8) {
+        decodeUtf8(&state, &codepoint, c);
         if (state == UTF8_ACCEPT) {
             if (codepoint < 0x10000) {
-                *p++ = (uint16_t)codepoint;
-                nOut++;
+                utf16.push_back((uint16_t)codepoint);
             } else if (codepoint <= UCS4_MAX) {
-                *p++ = (uint16_t)(0xD7C0 + (codepoint >> 10));
-                *p++ = (uint16_t)(0xDC00 + (codepoint & 0x3FF));
-                nOut += 2;
+                utf16.push_back((uint16_t)(0xD7C0 + (codepoint >> 10)));
+                utf16.push_back((uint16_t)(0xDC00 + (codepoint & 0x3FF)));
             } else {
-                *p++ = REPLACEMENT_CHAR;
-                nOut++;
+                utf16.push_back(REPLACEMENT_CHAR);
                 state = 0;
             }
         } else if (state == UTF8_REJECT) {
-            *p++ = REPLACEMENT_CHAR; // invalid byte for this position
-            nOut++;
+            utf16.push_back(REPLACEMENT_CHAR); // invalid byte for this position
         }
-        utf8++;
-        nIn++;
     }
     // replace any trailing bytes too short for a valid UTF-8 with a replacement char
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT && nOut < maxUtf16 - 1) {
-        *p++ = REPLACEMENT_CHAR;
-        nOut++;
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
+        utf16.push_back(REPLACEMENT_CHAR);
     }
-    if (nOut > maxUtf16 - 1) {
-        nOut = maxUtf16 - 1;
-    }
-    utf16[nOut] = 0;
-    return nOut;
-}
-
-// Allocate utf16 string and convert utf8 into it.
-uint16_t *utf8ToUtf16(const char *utf8, int *len)
-{
-    if (isUtf8WithBom(utf8)) {
-        utf8 += 3;
-    }
-    int n = utf8CountUtf16CodeUnits(utf8);
-    if (len) {
-        *len = n;
-    }
-    uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
-    utf8ToUtf16(utf8, INT_MAX, utf16, n + 1);
     return utf16;
 }
 
-std::string utf8ToUtf16WithBom(const std::string &utf8)
+std::string utf8ToUtf16WithBom(std::string_view utf8)
 {
     if (utf8.empty()) {
         return {};
     }
-    int tmp_length; // Number of UTF-16 symbols.
-    char *tmp_str = (char *)utf8ToUtf16(utf8.c_str(), &tmp_length);
+    std::u16string utf16 = utf8ToUtf16(utf8);
+    char *tmp_str = (char *)utf16.data();
 #ifndef WORDS_BIGENDIAN
-    for (int i = 0; i < tmp_length; i++) {
+    for (size_t i = 0; i < utf16.size(); i++) {
         std::swap(tmp_str[i * 2], tmp_str[i * 2 + 1]);
     }
 #endif
 
     std::string result(unicodeByteOrderMark);
-    result.append(tmp_str, tmp_length * 2);
-    gfree(tmp_str);
+    result.append(tmp_str, utf16.size() * 2);
     return result;
 }
 
