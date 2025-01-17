@@ -2037,13 +2037,17 @@ void poppler_annot_free_text_set_font_desc(PopplerAnnotFreeText *poppler_annot, 
  *
  * Gets the font description (i.e. font family name, style, weight, stretch and size).
  *
- * Returns: (transfer full): a copy of the annotation font description
+ * Returns: (nullable) (transfer full): a copy of the annotation font description, or NULL if there is
+ * no font description set.
  *
  * Since: 24.12.0
  **/
 PopplerFontDescription *poppler_annot_free_text_get_font_desc(PopplerAnnotFreeText *poppler_annot)
 {
-    return poppler_font_description_copy(poppler_annot->font_desc);
+    if (poppler_annot->font_desc) {
+        return poppler_font_description_copy(poppler_annot->font_desc);
+    }
+    return nullptr;
 }
 
 /**
