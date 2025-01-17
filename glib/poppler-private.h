@@ -88,6 +88,12 @@ struct _PopplerAnnot
     Annot *annot;
 };
 
+struct _PopplerPath
+{
+    PopplerPoint *points;
+    gsize n_points;
+};
+
 typedef struct _Layer
 {
     /*< private >*/
@@ -137,6 +143,8 @@ GList *_poppler_document_get_layers(PopplerDocument *document);
 GList *_poppler_document_get_layer_rbgroup(PopplerDocument *document, Layer *layer);
 PopplerPage *_poppler_page_new(PopplerDocument *document, Page *page, int index);
 void _unrotate_rect_for_annot_and_page(Page *page, Annot *annot, double *x1, double *y1, double *x2, double *y2);
+void _page_unrotate_xy(Page *page, double *x, double *y);
+void _page_rotate_xy(Page *page, double *x, double *y);
 AnnotQuadrilaterals *_page_new_quads_unrotated(Page *page, AnnotQuadrilaterals *quads);
 AnnotQuadrilaterals *new_quads_from_offset_cropbox(const PDFRectangle *crop_box, AnnotQuadrilaterals *quads, gboolean add);
 PopplerAction *_poppler_action_new(PopplerDocument *document, const LinkAction *link, const gchar *title);
@@ -157,6 +165,7 @@ PopplerAnnot *_poppler_annot_line_new(Annot *annot);
 PopplerAnnot *_poppler_annot_circle_new(Annot *annot);
 PopplerAnnot *_poppler_annot_square_new(Annot *annot);
 PopplerAnnot *_poppler_annot_stamp_new(Annot *annot);
+PopplerAnnot *_poppler_annot_ink_new(Annot *annot);
 
 const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 

@@ -48,10 +48,17 @@ typedef struct
     const gchar *label;
 } Annotations;
 
-static const Annotations supported_annots[] = {
-    { POPPLER_ANNOT_TEXT, "Text" },           { POPPLER_ANNOT_FREE_TEXT, "Free Text" }, { POPPLER_ANNOT_LINE, "Line" },         { POPPLER_ANNOT_SQUARE, "Square" },         { POPPLER_ANNOT_CIRCLE, "Circle" },
-    { POPPLER_ANNOT_HIGHLIGHT, "Highlight" }, { POPPLER_ANNOT_UNDERLINE, "Underline" }, { POPPLER_ANNOT_SQUIGGLY, "Squiggly" }, { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" }, { POPPLER_ANNOT_STAMP, "Stamp" },
-};
+static const Annotations supported_annots[] = { { POPPLER_ANNOT_TEXT, "Text" },
+                                                { POPPLER_ANNOT_FREE_TEXT, "Free Text" },
+                                                { POPPLER_ANNOT_LINE, "Line" },
+                                                { POPPLER_ANNOT_SQUARE, "Square" },
+                                                { POPPLER_ANNOT_CIRCLE, "Circle" },
+                                                { POPPLER_ANNOT_HIGHLIGHT, "Highlight" },
+                                                { POPPLER_ANNOT_UNDERLINE, "Underline" },
+                                                { POPPLER_ANNOT_SQUIGGLY, "Squiggly" },
+                                                { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" },
+                                                { POPPLER_ANNOT_STAMP, "Stamp" },
+                                                { POPPLER_ANNOT_INK, "Ink" } };
 
 static const char *stamp_types[] = { [POPPLER_ANNOT_STAMP_ICON_UNKNOWN] = "Unknown",
                                      [POPPLER_ANNOT_STAMP_ICON_APPROVED] = "APPROVED",
@@ -355,6 +362,11 @@ static void pgd_annots_update_cursor(PgdAnnotsDemo *demo, GdkCursorType cursor_t
     }
 }
 
+static void pgd_annots_save(GtkWidget *button, PgdAnnotsDemo *demo)
+{
+    poppler_document_save(demo->doc, "file:///tmp/tmp_save.pdf", NULL);
+}
+
 static void pgd_annots_start_add_annot(GtkWidget *button, PgdAnnotsDemo *demo)
 {
     GtkTreeModel *model;
@@ -507,6 +519,38 @@ static void pgd_annot_view_set_annot_stamp(GtkWidget *table, PopplerAnnotStamp *
 
     icon = poppler_annot_stamp_get_icon(annot);
     pgd_table_add_property(GTK_GRID(table), "<b>Icon Name:</b>", stamp_types[icon], row);
+}
+
+static void pgd_annot_view_set_annot_ink(GtkWidget *table, PopplerAnnotInk *ink_annot, gint *row)
+{
+    gchar *text;
+    PopplerRectangle rect;
+    g_autofree PopplerPath **ink_list;
+    gsize ink_list_size;
+    GString *ink_list_str;
+
+    poppler_annot_get_rectangle(POPPLER_ANNOT(ink_annot), &rect);
+    text = g_strdup_printf("X1: %.2f, Y1: %.2f, X2: %.2f, Y2: %.2f", rect.x1, rect.y1, rect.x2, rect.y2);
+    pgd_table_add_property(GTK_GRID(table), "<b>Bounding Box:</b>", text, row);
+    g_free(text);
+
+    ink_list = poppler_annot_ink_get_ink_list(ink_annot, &ink_list_size);
+
+    // Convert the ink list to a string representation
+    ink_list_str = g_string_new(NULL);
+    for (gsize i = 0; i < ink_list_size; i++) {
+        gsize n_points;
+        PopplerPoint *d = poppler_path_get_points(ink_list[i], &n_points);
+        for (int j = 0; j < n_points; j++) {
+            PopplerPoint *di = d + j;
+            g_string_append_printf(ink_list_str, "(%.2f, %.2f) ", di->x, di->y);
+        }
+        g_string_append(ink_list_str, "\n");
+        poppler_path_free(ink_list[i]);
+    }
+
+    pgd_table_add_property(GTK_GRID(table), "<b>Ink List:</b>", ink_list_str->str, row);
+    g_string_free(ink_list_str, TRUE);
 }
 
 static void pgd_annots_file_attachment_save_dialog_response(GtkFileChooser *file_chooser, gint response, PopplerAttachment *attachment)
@@ -669,6 +713,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
         break;
     case POPPLER_ANNOT_STAMP:
         pgd_annot_view_set_annot_stamp(table, POPPLER_ANNOT_STAMP(annot), &row);
+        break;
+    case POPPLER_ANNOT_INK:
+        pgd_annot_view_set_annot_ink(table, POPPLER_ANNOT_INK(annot), &row);
         break;
     default:
         break;
@@ -865,11 +912,11 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
     PopplerRectangle rect;
     PopplerColor color;
     PopplerAnnot *annot;
-    gdouble height;
+    gdouble height, width;
 
     g_assert(demo->mode == MODE_ADD);
 
-    poppler_page_get_size(demo->page, NULL, &height);
+    poppler_page_get_size(demo->page, &width, &height);
 
     rect.x1 = demo->start.x;
     rect.y1 = height - demo->start.y;
@@ -940,6 +987,24 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
         annot = poppler_annot_text_markup_new_strikeout(demo->doc, &rect, quads_array);
         g_array_free(quads_array, TRUE);
     } break;
+    case POPPLER_ANNOT_INK: {
+        g_autofree PopplerPath **ink_list = g_new(PopplerPath *, 2);
+        PopplerPoint *ink_path = g_new0(PopplerPoint, 2);
+        annot = poppler_annot_ink_new(demo->doc, &rect);
+
+        ink_path[1].x = width;
+        ink_path[1].y = height;
+        ink_list[0] = poppler_path_new_from_array(ink_path, 2);
+        ink_path = g_new0(PopplerPoint, 2);
+        ink_path[1].y = height;
+        ink_path[0].x = width;
+        ink_list[1] = poppler_path_new_from_array(ink_path, 2);
+        poppler_annot_set_border_width(annot, 10.);
+        poppler_page_add_annot(demo->page, annot);
+        poppler_annot_ink_set_ink_list(POPPLER_ANNOT_INK(annot), ink_list, 2);
+        poppler_path_free(ink_list[0]);
+        poppler_path_free(ink_list[1]);
+    } break;
     case POPPLER_ANNOT_STAMP: {
         annot = poppler_annot_stamp_new(demo->doc, &rect);
         gchar *stamp_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(demo->stamp_selector));
@@ -969,7 +1034,9 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
     if (demo->annot_type != POPPLER_ANNOT_STAMP) {
         poppler_annot_set_color(annot, &color);
     }
-    poppler_page_add_annot(demo->page, annot);
+    if (demo->annot_type != POPPLER_ANNOT_INK) {
+        poppler_page_add_annot(demo->page, annot);
+    }
     pgd_annots_add_annot_to_model(demo, annot, rect, TRUE);
     g_object_unref(annot);
 }
@@ -1387,6 +1454,11 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     demo->annot_color.alpha = 1.0;
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(button), &demo->annot_color);
     g_signal_connect(button, "notify::color", G_CALLBACK(pgd_annot_color_changed), (gpointer)demo);
+    gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);
+    gtk_widget_show(button);
+
+    button = gtk_button_new_with_label("Save to /tmp");
+    g_signal_connect(button, "clicked", G_CALLBACK(pgd_annots_save), (gpointer)demo);
     gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);
     gtk_widget_show(button);
 
