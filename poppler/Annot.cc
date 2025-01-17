@@ -6551,57 +6551,68 @@ void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
     parseInkList(*a);
     annotObj.dictSet("InkList", Object(a));
     invalidateAppearance();
+    generateInkAppearance();
+}
+
+void AnnotInk::generateInkAppearance()
+{
+    Object newAppearance;
+
+    appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
+
+    AnnotAppearanceBuilder appearBuilder;
+    appearBuilder.append("q\n");
+
+    if (color) {
+        appearBuilder.setDrawColor(*color, false);
+    }
+
+    if (border) {
+        appearBuilder.setLineStyleForBorder(*border);
+        appearBBox->setBorderWidth(std::max(1.0, border->getWidth()));
+    }
+
+    for (const auto &path : inkList) {
+        if (path && path->getCoordsLength() != 0) {
+            appearBuilder.appendf("{0:.2f} {1:.2f} m\n", path->getX(0) - rect->x1, path->getY(0) - rect->y1);
+            appearBBox->extendTo(path->getX(0) - rect->x1, path->getY(0) - rect->y1);
+
+            for (int j = 1; j < path->getCoordsLength(); ++j) {
+                appearBuilder.appendf("{0:.2f} {1:.2f} l\n", path->getX(j) - rect->x1, path->getY(j) - rect->y1);
+                appearBBox->extendTo(path->getX(j) - rect->x1, path->getY(j) - rect->y1);
+            }
+
+            appearBuilder.append("S\n");
+        }
+    }
+
+    appearBuilder.append("Q\n");
+
+    const std::array<double, 4> bbox = appearBBox->getBBoxRect();
+
+    if (opacity == 1) {
+        newAppearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
+    } else {
+        Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
+
+        GooString appearBuf("/GS0 gs\n/Fm0 Do");
+
+        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, nullptr);
+        newAppearance = createForm(&appearBuf, bbox, false, resDict);
+    }
+
+    appearance = std::move (newAppearance);
 }
 
 void AnnotInk::draw(Gfx *gfx, bool printing)
 {
-    double ca = 1;
-
     if (!isVisible(printing)) {
         return;
     }
 
     annotLocker();
     if (appearance.isNull()) {
-        appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
-        ca = opacity;
-
-        AnnotAppearanceBuilder appearBuilder;
-        appearBuilder.append("q\n");
-
-        if (color) {
-            appearBuilder.setDrawColor(*color, false);
-        }
-
-        appearBuilder.setLineStyleForBorder(*border);
-        appearBBox->setBorderWidth(std::max(1., border->getWidth()));
-
-        for (const auto &path : inkList) {
-            if (path && path->getCoordsLength() != 0) {
-                appearBuilder.appendf("{0:.2f} {1:.2f} m\n", path->getX(0) - rect->x1, path->getY(0) - rect->y1);
-                appearBBox->extendTo(path->getX(0) - rect->x1, path->getY(0) - rect->y1);
-
-                for (int j = 1; j < path->getCoordsLength(); ++j) {
-                    appearBuilder.appendf("{0:.2f} {1:.2f} l\n", path->getX(j) - rect->x1, path->getY(j) - rect->y1);
-                    appearBBox->extendTo(path->getX(j) - rect->x1, path->getY(j) - rect->y1);
-                }
-
-                appearBuilder.append("S\n");
-            }
-        }
-
-        appearBuilder.append("Q\n");
-
-        const std::array<double, 4> bbox = appearBBox->getBBoxRect();
-        if (ca == 1) {
-            appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
-        } else {
-            Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
-
-            GooString appearBuf("/GS0 gs\n/Fm0 Do");
-            Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);
-            appearance = createForm(&appearBuf, bbox, false, resDict);
-        }
+        generateInkAppearance();
     }
 
     // draw the appearance stream

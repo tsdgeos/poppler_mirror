@@ -1375,6 +1375,7 @@ public:
     const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }
 
 private:
+    void generateInkAppearance();
     void initialize(PDFDoc *docA, Dict *dict);
     void writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array);
     void parseInkList(const Array &array);
