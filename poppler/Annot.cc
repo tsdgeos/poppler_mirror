@@ -6478,6 +6478,8 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
     inkListArray->add(Object(vList));
     annotObj.dictSet("InkList", Object(inkListArray));
 
+    drawBelow = false;
+
     initialize(docA, annotObj.getDict());
 }
 
@@ -6505,6 +6507,18 @@ void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
         // when that happens
         if (!obj1.isDict()) {
             ok = false;
+        }
+    }
+
+    drawBelow = false;
+
+    obj1 = getAppearanceResDict();
+    if (obj1.isDict()) {
+        if (obj1.dictLookup("ExtGState").isDict()) {
+            obj1 = obj1.dictLookup("ExtGState").dictGetVal(0);
+            if (obj1.isDict() && obj1.dictLookup("BM").isName("Multiply")) {
+                drawBelow = true;
+            }
         }
     }
 
@@ -6554,6 +6568,18 @@ void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
     generateInkAppearance();
 }
 
+void AnnotInk::setDrawBelow(bool drawBelow_)
+{
+    drawBelow = drawBelow_;
+    invalidateAppearance();
+    generateInkAppearance();
+}
+
+bool AnnotInk::getDrawBelow()
+{
+    return drawBelow;
+}
+
 void AnnotInk::generateInkAppearance()
 {
     Object newAppearance;
@@ -6569,7 +6595,18 @@ void AnnotInk::generateInkAppearance()
 
     if (border) {
         appearBuilder.setLineStyleForBorder(*border);
-        appearBBox->setBorderWidth(std::max(1.0, border->getWidth()));
+        /* It is easier to have the appearance bbox equal the annotation rect
+        (especially when the appearance stream is saved to the file), so we
+        don't add a border width to the bbox. This is not necessary as the
+        border is never drawn and applications are responsible for setting a
+        rect big enough in the first place.
+        However, this border width was set before the drawBelow property was
+        introduced and apps may rely on that behavior. Therefore, we set it in
+        the case that appearance streams are not saved (i.e. when drawBelow is
+        false) as it does not introduce bugs. */
+        if (!drawBelow) {
+            appearBBox->setBorderWidth(std::max(1.0, border->getWidth()));
+        }
     }
 
     for (const auto &path : inkList) {
@@ -6590,18 +6627,24 @@ void AnnotInk::generateInkAppearance()
 
     const std::array<double, 4> bbox = appearBBox->getBBoxRect();
 
-    if (opacity == 1) {
+    if (opacity == 1 && !drawBelow) {
         newAppearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
     } else {
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
 
-        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, nullptr);
+        Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", opacity, drawBelow ? "Multiply" : nullptr);
         newAppearance = createForm(&appearBuf, bbox, false, resDict);
     }
 
-    appearance = std::move (newAppearance);
+    /* If the annotation is drawn below (highlighting), we must save the
+    appearance stream so the multiply blend mode can be saved */
+    if (drawBelow) {
+        setNewAppearance(std::move(newAppearance));
+    } else {
+        appearance = std::move(newAppearance);
+    }
 }
 
 void AnnotInk::draw(Gfx *gfx, bool printing)

@@ -2793,6 +2793,37 @@ PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_pa
 }
 
 /**
+ * poppler_annot_ink_set_draw_below:
+ * @annot: a #PopplerAnnotInk
+ * @draw_below: whether the annotation should be drawn below the document content
+ *
+ * This is typically used for highlight annotations. Technically, this implies that the
+ * annotation is drawn using a multiply blend mode.
+ *
+ * Since: 25.10.0
+ */
+void poppler_annot_ink_set_draw_below(PopplerAnnotInk *annot, gboolean draw_below)
+{
+    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+
+    ink_annot->setDrawBelow(draw_below);
+}
+
+/**
+ * poppler_annot_ink_get_draw_below:
+ * @annot: a #PopplerAnnotInk
+ *
+ * Returns whether the annotation is drawn below the page content or not.
+ *
+ * Since: 25.10.0
+ */
+gboolean poppler_annot_ink_get_draw_below(PopplerAnnotInk *annot)
+{
+    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+    return ink_annot->getDrawBelow();
+}
+
+/**
  * poppler_annot_ink_new:
  * @doc: a #PopplerDocument
  * @rect: a #PopplerRectangle
