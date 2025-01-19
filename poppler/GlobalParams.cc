@@ -46,7 +46,7 @@
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
-// Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
 // Copyright (C) 2024 Keyu Tao <me@taoky.moe>
 //
