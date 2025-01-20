@@ -362,11 +362,9 @@ gchar *poppler_form_field_get_mapping_name(PopplerFormField *field)
  **/
 gchar *poppler_form_field_get_name(PopplerFormField *field)
 {
-    GooString *tmp;
-
     g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
 
-    tmp = field->widget->getFullyQualifiedName();
+    const GooString *tmp = field->widget->getFullyQualifiedName();
 
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
 }

@@ -129,11 +129,11 @@ static void printTextString(const GooString *s, const UnicodeMap *uMap)
     printStdTextString(s->toStr(), uMap);
 }
 
-static void printUCS4String(const Unicode *u, int len, const UnicodeMap *uMap)
+static void printUCS4String(const std::vector<Unicode> &u, const UnicodeMap *uMap)
 {
     char buf[8];
-    for (int i = 0; i < len; i++) {
-        int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+    for (auto i : u) {
+        int n = uMap->mapUnicode(i, buf, sizeof(buf));
         fwrite(buf, 1, n, stdout);
     }
 }
@@ -701,15 +701,12 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                 Object obj = dict->lookup(key.c_str());
                 if (obj.isString()) {
                     // print key
-                    Unicode *u;
-                    int len = utf8ToUCS4(key.c_str(), &u);
-                    printUCS4String(u, len, uMap);
+                    std::vector<Unicode> u = utf8ToUCS4(key);
+                    printUCS4String(u, uMap);
                     fputs(":", stdout);
-                    while (len < 16) {
+                    for (size_t i = u.size(); i < 16; i++) {
                         fputs(" ", stdout);
-                        len++;
                     }
-                    gfree(u);
 
                     // print value
                     GooString val_str(obj.getString());

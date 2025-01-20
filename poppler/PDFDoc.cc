@@ -147,9 +147,9 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
     }
     fileNameU[n] = L'\0';
 
-    wchar_t *wFileName = (wchar_t *)utf8ToUtf16(fileName->c_str());
+    std::u16string u16fileName = utf8ToUtf16(fileName->toStr());
+    wchar_t *wFileName = (wchar_t *)u16fileName.data();
     file = GooFile::open(wFileName);
-    gfree(wFileName);
 #else
     file = GooFile::open(fileName->toStr());
 #endif

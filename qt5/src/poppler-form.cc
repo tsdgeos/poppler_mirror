@@ -167,7 +167,7 @@ void FormField::setName(const QString &name) const
 QString FormField::fullyQualifiedName() const
 {
     QString name;
-    if (GooString *goo = m_formData->fm->getFullyQualifiedName()) {
+    if (const GooString *goo = m_formData->fm->getFullyQualifiedName()) {
         name = UnicodeParsedString(goo);
     }
     return name;

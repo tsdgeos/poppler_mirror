@@ -46,7 +46,7 @@
 // Copyright (C) 2021 sunderme <sunderme@gmx.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
-// Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
 // Copyright (C) 2024 Keyu Tao <me@taoky.moe>
 //
@@ -61,6 +61,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cctype>
+#include <filesystem>
 #ifdef _WIN32
 #    include <shlobj.h>
 #    include <mbstring.h>
@@ -71,10 +72,8 @@
 #    include <android/system_fonts.h>
 #endif
 #include "goo/glibc.h"
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"
-#include "goo/gdir.h"
 #include "Error.h"
 #include "NameToCharCode.h"
 #include "CharCodeToUnicode.h"
@@ -409,7 +408,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 // parsing
 //------------------------------------------------------------------------
 
-GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(customPopplerDataDir)
+GlobalParams::GlobalParams(const std::string &customPopplerDataDir) : popplerDataDir(customPopplerDataDir)
 {
     // scan the encoding in reverse because we want the lowest-numbered
     // index for each char name ('space' is encoded twice)
@@ -466,49 +465,30 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir) : popplerDataDir(cu
 
 void GlobalParams::scanEncodingDirs()
 {
-    GDir *dir;
-    std::unique_ptr<GDirEntry> entry;
-    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
+    std::string dataRoot = !popplerDataDir.empty() ? popplerDataDir : std::string { POPPLER_DATADIR };
 
-    // allocate buffer large enough to append "/nameToUnicode"
-    size_t bufSize = strlen(dataRoot) + strlen("/nameToUnicode") + 1;
-    char *dataPathBuffer = new char[bufSize];
-
-    snprintf(dataPathBuffer, bufSize, "%s/nameToUnicode", dataRoot);
-    dir = new GDir(dataPathBuffer, true);
-    while (entry = dir->getNextEntry(), entry != nullptr) {
-        if (!entry->isDir()) {
-            parseNameToUnicode(entry->getFullPath());
+    std::error_code ec; // if ec is set, we also get the end iterator, so that's kind of okay.  If not creating with a error code, we get an exception if poppler data is missing
+    for (const auto &entry : std::filesystem::directory_iterator { dataRoot + "/nameToUnicode", ec }) {
+        if (entry.is_regular_file()) {
+            parseNameToUnicode(entry.path());
         }
     }
-    delete dir;
 
-    snprintf(dataPathBuffer, bufSize, "%s/cidToUnicode", dataRoot);
-    dir = new GDir(dataPathBuffer, false);
-    while (entry = dir->getNextEntry(), entry != nullptr) {
-        addCIDToUnicode(entry->getName(), entry->getFullPath());
+    for (const auto &entry : std::filesystem::directory_iterator { dataRoot + "/cidToUnicode", ec }) {
+        addCIDToUnicode(entry.path().filename().string(), entry.path().string());
     }
-    delete dir;
 
-    snprintf(dataPathBuffer, bufSize, "%s/unicodeMap", dataRoot);
-    dir = new GDir(dataPathBuffer, false);
-    while (entry = dir->getNextEntry(), entry != nullptr) {
-        addUnicodeMap(entry->getName(), entry->getFullPath());
+    for (const auto &entry : std::filesystem::directory_iterator { dataRoot + "/unicodeMap", ec }) {
+        addUnicodeMap(entry.path().filename().string(), entry.path().string());
     }
-    delete dir;
 
-    snprintf(dataPathBuffer, bufSize, "%s/cMap", dataRoot);
-    dir = new GDir(dataPathBuffer, false);
-    while (entry = dir->getNextEntry(), entry != nullptr) {
-        addCMapDir(entry->getName(), entry->getFullPath());
-        toUnicodeDirs.push_back(entry->getFullPath()->copy());
+    for (const auto &entry : std::filesystem::directory_iterator { dataRoot + "/cMap", ec }) {
+        addCMapDir(entry.path().filename().string(), entry.path().string());
+        toUnicodeDirs.push_back(entry.path().string());
     }
-    delete dir;
-
-    delete[] dataPathBuffer;
 }
 
-void GlobalParams::parseNameToUnicode(const GooString *name)
+void GlobalParams::parseNameToUnicode(const std::filesystem::path &name)
 {
     char *tok1, *tok2;
     FILE *f;
@@ -517,8 +497,8 @@ void GlobalParams::parseNameToUnicode(const GooString *name)
     Unicode u;
     char *tokptr;
 
-    if (!(f = openFile(name->c_str(), "r"))) {
-        error(errIO, -1, "Couldn't open 'nameToUnicode' file '{0:t}'", name);
+    if (!(f = openFile(name.string().c_str(), "r"))) {
+        error(errIO, -1, "Couldn't open 'nameToUnicode' file '{0:s}'", name.string().c_str());
         return;
     }
     line = 1;
@@ -529,26 +509,26 @@ void GlobalParams::parseNameToUnicode(const GooString *name)
             sscanf(tok1, "%x", &u);
             nameToUnicodeText->add(tok2, u);
         } else {
-            error(errConfig, -1, "Bad line in 'nameToUnicode' file ({0:t}:{1:d})", name, line);
+            error(errConfig, -1, "Bad line in 'nameToUnicode' file ({0:s}:{1:d})", name.string().c_str(), line);
         }
         ++line;
     }
     fclose(f);
 }
 
-void GlobalParams::addCIDToUnicode(const GooString *collection, const GooString *fileName)
+void GlobalParams::addCIDToUnicode(std::string &&collection, std::string &&fileName)
 {
-    cidToUnicodes[collection->toStr()] = fileName->toStr();
+    cidToUnicodes[collection] = fileName;
 }
 
-void GlobalParams::addUnicodeMap(const GooString *encodingName, const GooString *fileName)
+void GlobalParams::addUnicodeMap(std::string &&encodingName, std::string &&fileName)
 {
-    unicodeMaps[encodingName->toStr()] = fileName->toStr();
+    unicodeMaps[encodingName] = fileName;
 }
 
-void GlobalParams::addCMapDir(const GooString *collection, const GooString *dir)
+void GlobalParams::addCMapDir(std::string &&collection, std::string &&dir)
 {
-    cMapDirs.emplace(collection->toStr(), dir->toStr());
+    cMapDirs.emplace(collection, dir);
 }
 
 bool GlobalParams::parseYesNo2(const char *token, bool *flag)
@@ -653,8 +633,8 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name)
     FILE *f;
 
     globalParamsLocker();
-    for (const std::unique_ptr<GooString> &dir : toUnicodeDirs) {
-        fileName = appendToPath(dir->copy().release(), name->c_str());
+    for (const std::string &dir : toUnicodeDirs) {
+        fileName = appendToPath(new GooString(dir), name->c_str());
         f = openFile(fileName->c_str(), "r");
         delete fileName;
         if (f) {
@@ -1561,7 +1541,7 @@ GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback)
     const std::scoped_lock lock { mutex };
 
     if (count == 0) {
-        globalParams = std::make_unique<GlobalParams>(!customDataDir.empty() ? customDataDir.c_str() : nullptr);
+        globalParams = std::make_unique<GlobalParams>(customDataDir);
 
         setErrorCallback(errorCallback);
     }

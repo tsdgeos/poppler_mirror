@@ -33,6 +33,7 @@ typedef struct
     gint rotate;
     GdkRectangle slice;
     gboolean printing;
+    gboolean highlight;
 
     GtkWidget *swindow;
     GtkWidget *darea;
@@ -139,8 +140,10 @@ static void pgd_render_start(GtkButton *button, PgdRenderDemo *demo)
 
     if (demo->printing) {
         poppler_page_render_for_printing(page, cr);
-    } else {
+    } else if (demo->highlight) {
         poppler_page_render(page, cr);
+    } else {
+        poppler_page_render_full(page, cr, FALSE, POPPLER_RENDER_ANNOTS_ALL & (~POPPLER_RENDER_ANNOTS_HIGHLIGHT));
     }
     cairo_restore(cr);
 
@@ -209,6 +212,11 @@ static void pgd_render_printing_selector_changed(GtkToggleButton *tooglebutton, 
     demo->printing = gtk_toggle_button_get_active(tooglebutton);
 }
 
+static void pgd_render_highlight_selector_changed(GtkToggleButton *tooglebutton, PgdRenderDemo *demo)
+{
+    demo->highlight = gtk_toggle_button_get_active(tooglebutton);
+}
+
 static void pgd_render_slice_selector_value_changed(GtkSpinButton *spinbutton, PgdRenderDemo *demo)
 {
     demo->slice.x = (gint)gtk_spin_button_get_value(GTK_SPIN_BUTTON(demo->slice_x));
@@ -224,7 +232,7 @@ GtkWidget *pgd_render_properties_selector_create(PgdRenderDemo *demo)
     GtkWidget *page_hbox, *page_selector;
     GtkWidget *scale_hbox, *scale_selector;
     GtkWidget *rotate_hbox, *rotate_selector;
-    GtkWidget *printing_selector;
+    GtkWidget *selector;
     GtkWidget *slice_hbox;
     GtkWidget *button;
     gint n_pages;
@@ -292,10 +300,15 @@ GtkWidget *pgd_render_properties_selector_create(PgdRenderDemo *demo)
     gtk_box_pack_start(GTK_BOX(hbox), rotate_hbox, FALSE, TRUE, 0);
     gtk_widget_show(rotate_hbox);
 
-    printing_selector = gtk_check_button_new_with_label("Printing");
-    g_signal_connect(printing_selector, "toggled", G_CALLBACK(pgd_render_printing_selector_changed), (gpointer)demo);
-    gtk_box_pack_start(GTK_BOX(hbox), printing_selector, FALSE, TRUE, 0);
-    gtk_widget_show(printing_selector);
+    selector = gtk_check_button_new_with_label("Printing");
+    g_signal_connect(selector, "toggled", G_CALLBACK(pgd_render_printing_selector_changed), (gpointer)demo);
+    gtk_box_pack_start(GTK_BOX(hbox), selector, FALSE, TRUE, 0);
+    gtk_widget_show(selector);
+
+    selector = gtk_check_button_new_with_label("Render highlight annots");
+    g_signal_connect(selector, "toggled", G_CALLBACK(pgd_render_highlight_selector_changed), (gpointer)demo);
+    gtk_box_pack_start(GTK_BOX(hbox), selector, FALSE, TRUE, 0);
+    gtk_widget_show(selector);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
     gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);

@@ -10,6 +10,7 @@
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 

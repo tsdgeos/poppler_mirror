@@ -132,6 +132,91 @@ typedef enum
 } PopplerSelectionStyle;
 
 /**
+ * PopplerRenderFlags:
+ * @POPPLER_RENDER_ANNOTS_NONE: do not render annotations
+ * @POPPLER_RENDER_ANNOTS_TEXT: render text annotations
+ * @POPPLER_RENDER_ANNOTS_LINK: render link annotations
+ * @POPPLER_RENDER_ANNOTS_FREETEXT: render freetext annotations,
+ * @POPPLER_RENDER_ANNOTS_LINE: render line annotations,
+ * @POPPLER_RENDER_ANNOTS_SQUARE: render square annotations,
+ * @POPPLER_RENDER_ANNOTS_CIRCLE: render circle annotations,
+ * @POPPLER_RENDER_ANNOTS_POLYGON: render polygon annotations,
+ * @POPPLER_RENDER_ANNOTS_POLYLINE: render polyline annotations,
+ * @POPPLER_RENDER_ANNOTS_HIGHLIGHT: render highlight annotations,
+ * @POPPLER_RENDER_ANNOTS_UNDERLINE: render underline annotations,
+ * @POPPLER_RENDER_ANNOTS_SQUIGGLY: render squiggly annotations,
+ * @POPPLER_RENDER_ANNOTS_STRIKEOUT: render strikeout annotations,
+ * @POPPLER_RENDER_ANNOTS_STAMP: render stamp annotations,
+ * @POPPLER_RENDER_ANNOTS_CARET: render caret annotations,
+ * @POPPLER_RENDER_ANNOTS_INK: render ink annotations,
+ * @POPPLER_RENDER_ANNOTS_POPUP: render popup annotations,
+ * @POPPLER_RENDER_ANNOTS_FILEATTACHMENT: render fileattachment annotations,
+ * @POPPLER_RENDER_ANNOTS_SOUND: render sound annotations,
+ * @POPPLER_RENDER_ANNOTS_MOVIE: render movie annotations,
+ * @POPPLER_RENDER_ANNOTS_WIDGET: render widget annotations,
+ * @POPPLER_RENDER_ANNOTS_SCREEN: render screen annotations,
+ * @POPPLER_RENDER_ANNOTS_PRINTERMARK: render printermark annotations,
+ * @POPPLER_RENDER_ANNOTS_TRAPNET: render trapnet annotations,
+ * @POPPLER_RENDER_ANNOTS_WATERMARK: render watermark annotations,
+ * @POPPLER_RENDER_ANNOTS_3D: render 3D annotations,
+ * @POPPLER_RENDER_ANNOTS_RICHMEDIA: render richmedia annotations,
+ * @POPPLER_RENDER_ANNOTS_PRINT_DOCUMENT: render the default annotations used for printing
+ * @POPPLER_RENDER_ANNOTS_PRINT_MARKUP: render markup annotations and default annotations used for printing
+ * @POPPLER_RENDER_ANNOTS_PRINT_STAMP: render stamp annotations and default annotations used for printing
+ * @POPPLER_RENDER_ANNOTS_PRINT_ALL: render all possible annotations used for printing
+ * @POPPLER_RENDER_ANNOTS_ALL: render all annotations
+ *
+ * Flags to select which annotations to render. If the flag corresponding to a
+ * certain annotation type is on, then such annotation type will be rendered,
+ * when appropriate (e.g: won't be renderer if the annotation is not visible).
+ * This allows to combine multiple flags, like
+ * `POPPLER_RENDER_ANNOTS_LINK | POPPLER_RENDER_ANNOTS_TEXT`, or disable some
+ * specific annotations like
+ * `POPPLER_RENDER_ANNOTS_ALL & (~POPPLER_RENDER_ANNOTS_TEXT)`
+ *
+ * Since: 25.02
+ */
+typedef enum /*< flags >*/
+{
+    POPPLER_RENDER_ANNOTS_NONE = 0,
+    POPPLER_RENDER_ANNOTS_TEXT = 1 << 0,
+    POPPLER_RENDER_ANNOTS_LINK = 1 << 1,
+    POPPLER_RENDER_ANNOTS_FREETEXT = 1 << 2,
+    POPPLER_RENDER_ANNOTS_LINE = 1 << 3,
+    POPPLER_RENDER_ANNOTS_SQUARE = 1 << 4,
+    POPPLER_RENDER_ANNOTS_CIRCLE = 1 << 5,
+    POPPLER_RENDER_ANNOTS_POLYGON = 1 << 6,
+    POPPLER_RENDER_ANNOTS_POLYLINE = 1 << 7,
+    POPPLER_RENDER_ANNOTS_HIGHLIGHT = 1 << 8,
+    POPPLER_RENDER_ANNOTS_UNDERLINE = 1 << 9,
+    POPPLER_RENDER_ANNOTS_SQUIGGLY = 1 << 10,
+    POPPLER_RENDER_ANNOTS_STRIKEOUT = 1 << 11,
+    POPPLER_RENDER_ANNOTS_STAMP = 1 << 12,
+    POPPLER_RENDER_ANNOTS_CARET = 1 << 13,
+    POPPLER_RENDER_ANNOTS_INK = 1 << 14,
+    POPPLER_RENDER_ANNOTS_POPUP = 1 << 15,
+    POPPLER_RENDER_ANNOTS_FILEATTACHMENT = 1 << 16,
+    POPPLER_RENDER_ANNOTS_SOUND = 1 << 17,
+    POPPLER_RENDER_ANNOTS_MOVIE = 1 << 18,
+    POPPLER_RENDER_ANNOTS_WIDGET = 1 << 19,
+    POPPLER_RENDER_ANNOTS_SCREEN = 1 << 20,
+    POPPLER_RENDER_ANNOTS_PRINTERMARK = 1 << 21,
+    POPPLER_RENDER_ANNOTS_TRAPNET = 1 << 22,
+    POPPLER_RENDER_ANNOTS_WATERMARK = 1 << 23,
+    POPPLER_RENDER_ANNOTS_3D = 1 << 24,
+    POPPLER_RENDER_ANNOTS_RICHMEDIA = 1 << 25,
+
+    /* Everything below are special flags to combine them all */
+    POPPLER_RENDER_ANNOTS_PRINT_DOCUMENT = POPPLER_RENDER_ANNOTS_WIDGET,
+    POPPLER_RENDER_ANNOTS_PRINT_MARKUP = ~(POPPLER_RENDER_ANNOTS_LINK | POPPLER_RENDER_ANNOTS_POPUP | POPPLER_RENDER_ANNOTS_MOVIE | POPPLER_RENDER_ANNOTS_SCREEN | POPPLER_RENDER_ANNOTS_PRINTERMARK | POPPLER_RENDER_ANNOTS_TRAPNET
+                                           | POPPLER_RENDER_ANNOTS_WATERMARK | POPPLER_RENDER_ANNOTS_3D),
+    POPPLER_RENDER_ANNOTS_PRINT_STAMP = POPPLER_RENDER_ANNOTS_WIDGET | POPPLER_RENDER_ANNOTS_STAMP,
+    POPPLER_RENDER_ANNOTS_PRINT_ALL = POPPLER_RENDER_ANNOTS_PRINT_MARKUP,
+    /* Enable all flags, by shifting and substracting the last one */
+    POPPLER_RENDER_ANNOTS_ALL = (POPPLER_RENDER_ANNOTS_RICHMEDIA << 1) - 1
+} PopplerRenderAnnotsFlags;
+
+/**
  * PopplerPrintFlags:
  * @POPPLER_PRINT_DOCUMENT: print main document contents
  * @POPPLER_PRINT_MARKUP_ANNOTS: print document and markup annotations
@@ -139,6 +224,9 @@ typedef enum
  * @POPPLER_PRINT_ALL: print main document contents and all markup annotations
  *
  * Printing flags
+ *
+ * Deprecated: 25.02: Use poppler_page_render_full() and
+ * #PopplerRenderAnnotsFlags instead.
  *
  * Since: 0.16
  */
@@ -148,7 +236,7 @@ typedef enum /*< flags >*/
     POPPLER_PRINT_MARKUP_ANNOTS = 1 << 0,
     POPPLER_PRINT_STAMP_ANNOTS_ONLY = 1 << 1,
     POPPLER_PRINT_ALL = POPPLER_PRINT_MARKUP_ANNOTS
-} PopplerPrintFlags;
+} PopplerPrintFlags G_GNUC_DEPRECATED_FOR(PopplerRenderAnnotsFlags);
 
 /**
  * PopplerFindFlags:

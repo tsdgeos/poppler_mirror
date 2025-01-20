@@ -125,10 +125,8 @@ QString UnicodeParsedString(const std::string &s1)
     if (hasUnicodeByteOrderMark(s1) || hasUnicodeByteOrderMarkLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const char16_t *>(s1.c_str()), s1.size() / 2);
     } else {
-        int stringLength;
-        const char *cString = pdfDocEncodingToUTF16(s1, &stringLength);
-        auto result = QString::fromUtf16(reinterpret_cast<const char16_t *>(cString), stringLength / 2);
-        delete[] cString;
+        std::string cString = pdfDocEncodingToUTF16(s1);
+        auto result = QString::fromUtf16(reinterpret_cast<const char16_t *>(cString.c_str()), cString.size() / 2);
         return result;
     }
 }

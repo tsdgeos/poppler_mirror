@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2017, 2024 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -25,7 +26,6 @@
 static const int BUF_SIZE = 4096;
 static int bufLen = 0;
 static char buf[BUF_SIZE];
-static wchar_t wbuf[BUF_SIZE];
 static bool stdoutIsConsole = true;
 static bool stderrIsConsole = true;
 static HANDLE consoleHandle = nullptr;
@@ -49,8 +49,8 @@ static void flush(bool all = false)
     }
 
     if (nchars > 0) {
-        DWORD wlen = utf8ToUtf16(buf, nchars, (uint16_t *)wbuf, BUF_SIZE);
-        WriteConsoleW(consoleHandle, wbuf, wlen, &wlen, nullptr);
+        std::u16string u16string = utf8ToUtf16(std::string_view { buf, nchars });
+        WriteConsoleW(consoleHandle, u16string.data(), u16string.size(), nullptr, nullptr);
         if (nchars < bufLen) {
             memmove(buf, buf + nchars, bufLen - nchars);
             bufLen -= nchars;
@@ -133,7 +133,6 @@ Win32Console::Win32Console(int *argc, char **argv[])
 
     bufLen = 0;
     buf[0] = 0;
-    wbuf[0] = 0;
 
     // check if stdout or stderr redirected
     // GetFileType() returns CHAR for console and special devices COMx, PRN, CON, NUL etc

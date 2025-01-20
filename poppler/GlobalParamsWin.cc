@@ -15,6 +15,7 @@
    // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    // Copyright (C) 2021 Stefan Löffler <st.loeffler@gmail.com>
    // Copyright (C) 2021 sunderme <sunderme@gmx.de>
+   // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -377,7 +378,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
         sysFonts->scanWindowsFonts(winFontDir);
     }
 
-    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
+    std::string dataRoot = !popplerDataDir.empty() ? popplerDataDir : std::string { POPPLER_DATADIR };
     const std::string fileName = std::string(dataRoot).append("/cidfmap");
 
     // try to open file

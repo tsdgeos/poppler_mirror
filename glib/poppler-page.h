@@ -37,9 +37,13 @@ GType poppler_page_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 void poppler_page_render(PopplerPage *page, cairo_t *cairo);
 POPPLER_PUBLIC
-void poppler_page_render_for_printing(PopplerPage *page, cairo_t *cairo);
+void poppler_page_render_full(PopplerPage *page, cairo_t *cairo, gboolean printing, PopplerRenderAnnotsFlags flags);
 POPPLER_PUBLIC
-void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *cairo, PopplerPrintFlags options);
+void poppler_page_render_for_printing(PopplerPage *page, cairo_t *cairo);
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+POPPLER_PUBLIC
+void poppler_page_render_for_printing_with_options(PopplerPage *page, cairo_t *cairo, PopplerPrintFlags options) G_GNUC_DEPRECATED_FOR(poppler_page_render_full);
+G_GNUC_END_IGNORE_DEPRECATIONS
 POPPLER_PUBLIC
 cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page);
 POPPLER_PUBLIC
