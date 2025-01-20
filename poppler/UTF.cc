@@ -207,53 +207,28 @@ inline uint32_t decodeUtf8(uint32_t *state, uint32_t *codep, char byte)
     return *state;
 }
 
-int utf8CountUCS4(const char *utf8)
+std::vector<Unicode> utf8ToUCS4(std::string_view utf8)
 {
     uint32_t codepoint;
     uint32_t state = 0;
-    int count = 0;
 
-    while (*utf8) {
-        decodeUtf8(&state, &codepoint, *utf8);
+    std::vector<Unicode> u;
+
+    for (auto c : utf8) {
+        decodeUtf8(&state, &codepoint, c);
         if (state == UTF8_ACCEPT) {
-            count++;
+            u.push_back(codepoint);
         } else if (state == UTF8_REJECT) {
-            count++; // replace with REPLACEMENT_CHAR
+            u.push_back(REPLACEMENT_CHAR); // invalid byte for this position
             state = 0;
         }
-        utf8++;
     }
     if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
-        count++; // replace with REPLACEMENT_CHAR
+        u.push_back(REPLACEMENT_CHAR); // invalid byte for this position
     }
+    u.shrink_to_fit();
 
-    return count;
-}
-
-int utf8ToUCS4(const char *utf8, Unicode **ucs4_out)
-{
-    int len = utf8CountUCS4(utf8);
-    Unicode *u = (Unicode *)gmallocn(len, sizeof(Unicode));
-    int n = 0;
-    uint32_t codepoint;
-    uint32_t state = 0;
-
-    while (*utf8 && n < len) {
-        decodeUtf8(&state, &codepoint, *utf8);
-        if (state == UTF8_ACCEPT) {
-            u[n++] = codepoint;
-        } else if (state == UTF8_REJECT) {
-            u[n++] = REPLACEMENT_CHAR; // invalid byte for this position
-            state = 0;
-        }
-        utf8++;
-    }
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
-        u[n] = REPLACEMENT_CHAR; // invalid byte for this position
-    }
-
-    *ucs4_out = u;
-    return len;
+    return u;
 }
 
 // Count number of UTF-16 code units required to convert a UTF-8 string

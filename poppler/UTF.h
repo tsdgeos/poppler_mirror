@@ -79,15 +79,11 @@ inline bool hasUnicodeByteOrderMarkAndLengthIsEven(const std::string &s)
 // is a unicode whitespace character
 bool UnicodeIsWhitespace(Unicode ucs4);
 
-// Count number of UCS-4 characters required to convert a UTF-8 string to
-// UCS-4 (excluding terminating NULL).
-int POPPLER_PRIVATE_EXPORT utf8CountUCS4(const char *utf8);
-
 // Convert a UTF-8 string to a UCS-4
 //   utf8      - utf8 bytes
 //   ucs4_out   - if not NULL, allocates and returns UCS-4 string. Free with gfree.
 //   returns number of UCS-4 characters
-int POPPLER_PRIVATE_EXPORT utf8ToUCS4(const char *utf8, Unicode **ucs4_out);
+std::vector<Unicode> POPPLER_PRIVATE_EXPORT utf8ToUCS4(std::string_view utf8);
 
 // Count number of UTF-16 code units required to convert a UTF-8 string
 // (excluding terminating NULL). Each invalid byte is counted as a
