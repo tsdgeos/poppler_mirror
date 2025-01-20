@@ -91,32 +91,28 @@ template<class>
 inline constexpr bool always_false_v = false;
 
 // return a newly allocated char* containing an UTF16BE string of size length
-char *pdfDocEncodingToUTF16(const std::string &orig, int *length)
+std::string pdfDocEncodingToUTF16(const std::string &orig)
 {
     // double size, a unicode char takes 2 char, add 2 for the unicode marker
-    *length = 2 + 2 * orig.size();
-    char *result = new char[(*length)];
-    const char *cstring = orig.c_str();
+    int length = 2 + 2 * orig.size();
+    std::string result;
+    result.reserve(length);
     // unicode marker
-    result[0] = '\xfe';
-    result[1] = '\xff';
+    result.push_back('\xfe');
+    result.push_back('\xff');
     // convert to utf16
-    for (int i = 2, j = 0; i < (*length); i += 2, j++) {
-        Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)cstring[j])] & 0xffff;
-        result[i] = (u >> 8) & 0xff;
-        result[i + 1] = u & 0xff;
+    for (int i = 2, j = 0; i < (length); i += 2, j++) {
+        Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)orig[j])] & 0xffff;
+        result.push_back((u >> 8) & 0xff);
+        result.push_back(u & 0xff);
     }
     return result;
 }
 
-static GooString *convertToUtf16(GooString *pdfDocEncodingString)
+static std::unique_ptr<GooString> convertToUtf16(GooString *pdfDocEncodingString)
 {
-    int tmp_length;
-    char *tmp_str = pdfDocEncodingToUTF16(pdfDocEncodingString->toStr(), &tmp_length);
-    delete pdfDocEncodingString;
-    pdfDocEncodingString = new GooString(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
-    delete[] tmp_str;
-    return pdfDocEncodingString;
+    std::string tmpStr = pdfDocEncodingToUTF16(pdfDocEncodingString->toStr());
+    return std::make_unique<GooString>(tmpStr.c_str() + 2, tmpStr.size() - 2); // Remove the unicode BOM
 }
 
 FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA)
@@ -207,7 +203,7 @@ const GooString *FormWidget::getMappingName() const
     return field->getMappingName();
 }
 
-GooString *FormWidget::getFullyQualifiedName()
+const GooString *FormWidget::getFullyQualifiedName()
 {
     return field->getFullyQualifiedName();
 }
@@ -1113,11 +1109,7 @@ void FormField::setPartialName(const GooString &name)
     xref->setModifiedObject(&obj, ref);
 }
 
-FormField::~FormField()
-{
-
-    delete fullyQualifiedName;
-}
+FormField::~FormField() = default;
 
 void FormField::print(int indent)
 {
@@ -1202,17 +1194,17 @@ FormWidget *FormField::findWidgetByRef(Ref aref)
     return nullptr;
 }
 
-GooString *FormField::getFullyQualifiedName()
+const GooString *FormField::getFullyQualifiedName() const
 {
     Object parentObj;
     const GooString *parent_name;
     bool unicode_encoded = false;
 
     if (fullyQualifiedName) {
-        return fullyQualifiedName;
+        return fullyQualifiedName.get();
     }
 
-    fullyQualifiedName = new GooString();
+    fullyQualifiedName = std::make_unique<GooString>();
 
     std::set<int> parsedRefs;
     Ref parentRef;
@@ -1230,16 +1222,14 @@ GooString *FormField::getFullyQualifiedName()
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
                 } else {
-                    int tmp_length;
-                    char *tmp_str = pdfDocEncodingToUTF16(parent_name->toStr(), &tmp_length);
-                    fullyQualifiedName->insert(0, tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
-                    delete[] tmp_str;
+                    std::string tmp_str = pdfDocEncodingToUTF16(parent_name->toStr());
+                    fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
                 }
             } else {
                 fullyQualifiedName->insert(0, '.'); // 1-byte ascii period
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
-                    fullyQualifiedName = convertToUtf16(fullyQualifiedName);
+                    fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
                     fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
                 } else {
                     fullyQualifiedName->insert(0, parent_name);
@@ -1249,7 +1239,7 @@ GooString *FormField::getFullyQualifiedName()
         parentObj = parentObj.getDict()->lookup("Parent", &parentRef);
         if (parentRef != Ref::INVALID() && !parsedRefs.insert(parentRef.num).second) {
             error(errSyntaxError, -1, "FormField: Loop while trying to look for Parents");
-            return fullyQualifiedName;
+            return fullyQualifiedName.get();
         }
     }
 
@@ -1258,15 +1248,13 @@ GooString *FormField::getFullyQualifiedName()
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
-                int tmp_length;
-                char *tmp_str = pdfDocEncodingToUTF16(partialName->toStr(), &tmp_length);
-                fullyQualifiedName->append(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
-                delete[] tmp_str;
+                std::string tmp_str = pdfDocEncodingToUTF16(partialName->toStr());
+                fullyQualifiedName->append(tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
             }
         } else {
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 unicode_encoded = true;
-                fullyQualifiedName = convertToUtf16(fullyQualifiedName);
+                fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
             } else {
                 fullyQualifiedName->append(partialName.get());
@@ -1290,7 +1278,7 @@ GooString *FormField::getFullyQualifiedName()
         prependUnicodeByteOrderMark(fullyQualifiedName->toNonConstStr());
     }
 
-    return fullyQualifiedName;
+    return fullyQualifiedName.get();
 }
 
 void FormField::updateChildrenAppearance()
@@ -1658,16 +1646,13 @@ void FormFieldText::fillContent(FillValueType fillType)
             }
         } else if (obj1.getString()->getLength() > 0) {
             // non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
-            int tmp_length;
-            char *tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr(), &tmp_length);
+            std::string tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr());
 
             if (fillType == fillDefaultValue) {
-                defaultContent = std::make_unique<GooString>(tmp_str, tmp_length);
+                defaultContent = std::make_unique<GooString>(std::move(tmp_str));
             } else {
-                content = std::make_unique<GooString>(tmp_str, tmp_length);
+                content = std::make_unique<GooString>(std::move(tmp_str));
             }
-
-            delete[] tmp_str;
         }
     }
 }

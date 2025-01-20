@@ -125,7 +125,7 @@ public:
     void setPartialName(const GooString &name);
     const GooString *getAlternateUiName() const;
     const GooString *getMappingName() const;
-    GooString *getFullyQualifiedName();
+    const GooString *getFullyQualifiedName();
 
     bool isModified() const;
 
@@ -375,7 +375,7 @@ public:
     void setPartialName(const GooString &name);
     const GooString *getAlternateUiName() const { return alternateUiName.get(); }
     const GooString *getMappingName() const { return mappingName.get(); }
-    GooString *getFullyQualifiedName();
+    const GooString *getFullyQualifiedName() const;
 
     FormWidget *findWidgetByRef(Ref aref);
     int getNumWidgets() const { return terminal ? widgets.size() : 0; }
@@ -418,7 +418,7 @@ protected:
     std::unique_ptr<GooString> partialName; // T field
     std::unique_ptr<GooString> alternateUiName; // TU field
     std::unique_ptr<GooString> mappingName; // TM field
-    GooString *fullyQualifiedName;
+    mutable std::unique_ptr<GooString> fullyQualifiedName;
 
     // Variable Text
     std::unique_ptr<GooString> defaultAppearance;

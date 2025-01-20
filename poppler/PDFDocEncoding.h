@@ -34,6 +34,6 @@ class GooString;
 
 extern const Unicode POPPLER_PRIVATE_EXPORT pdfDocEncoding[256];
 
-char POPPLER_PRIVATE_EXPORT *pdfDocEncodingToUTF16(const std::string &orig, int *length);
+std::string POPPLER_PRIVATE_EXPORT pdfDocEncodingToUTF16(const std::string &orig);
 
 #endif
