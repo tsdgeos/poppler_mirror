@@ -2926,6 +2926,17 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     cairo_filter_t maskFilter;
     GfxRGB matteColorRgb;
 
+    // Clamp heights to what Cairo can handle - Issue #991
+    if (height >= MAX_CAIRO_IMAGE_SIZE) {
+        error(errInternal, -1, "Reducing image height from {0:d} to {1:d} because of Cairo limits", height, MAX_CAIRO_IMAGE_SIZE - 1);
+        height = MAX_CAIRO_IMAGE_SIZE - 1;
+    }
+
+    if (maskHeight >= MAX_CAIRO_IMAGE_SIZE) {
+        error(errInternal, -1, "Reducing maskImage height from {0:d} to {1:d} because of Cairo limits", maskHeight, MAX_CAIRO_IMAGE_SIZE - 1);
+        maskHeight = MAX_CAIRO_IMAGE_SIZE - 1;
+    }
+
     const GfxColor *matteColor = maskColorMap->getMatteColor();
     if (matteColor != nullptr) {
         getMatteColorRgb(colorMap, matteColor, &matteColorRgb);
