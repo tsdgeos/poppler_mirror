@@ -45,6 +45,7 @@
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"
+#include "PDFRectangle.h"
 
 class GooString;
 class Gfx;
@@ -325,6 +326,7 @@ public:
     void coalesce(const UnicodeMap *uMap);
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
 
     // Get the head of the linked list of TextWords.
     const TextWord *getWords() const { return words; }
@@ -336,6 +338,8 @@ public:
     bool isHyphenated() const { return hyphenated; }
 
 private:
+    std::pair<int, int> getLineBounds(const PDFRectangle &area) const;
+
     TextBlock *blk; // parent block
     int rot; // text rotation
     double xMin, xMax; // bounding box x coordinates

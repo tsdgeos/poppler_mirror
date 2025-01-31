@@ -43,6 +43,7 @@ public:
         y2 = y2A;
     }
     constexpr bool isValid() const { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
+    constexpr bool isEmpty() const { return x1 == x2 && y1 == y2; }
     constexpr bool contains(double x, double y) const { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
     constexpr void clipTo(const PDFRectangle *rect);
 

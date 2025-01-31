@@ -4275,102 +4275,15 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     for (int i = 0; i < nBlocks; ++i) {
         TextBlock *blk = blocks[i];
         if (xMin < blk->xMax && blk->xMin < xMax && yMin < blk->yMax && blk->yMin < yMax) {
-            for (TextLine *line = blk->lines; line; line = line->next) {
-                if (xMin < line->xMax && line->xMin < xMax && yMin < line->yMax && line->yMin < yMax) {
-                    double y = 0.5 * (line->yMin + line->yMax);
-                    double x = 0.5 * (line->xMin + line->xMax);
-                    int idx0, idx1;
-                    idx0 = idx1 = -1;
-                    switch (line->rot) {
-                    case 0:
-                        if (yMin < y && y < yMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > xMin) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < xMax) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 1:
-                        if (xMin < x && x < xMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > yMin) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < yMax) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 2:
-                        if (yMin < y && y < yMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < xMax) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > xMin) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 3:
-                        if (xMin < x && x < xMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < yMax) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > yMin) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
+            for (auto line = blk->lines; line; line = line->next) {
+                auto [start, len] = line->getLineBounds(PDFRectangle{xMin, yMin, xMax, yMax});
+                if (len) {
+                    frags.push_back({});
+                    frags.back().init(line, start, len);
+                    if (lastRot >= 0 && line->rot != lastRot) {
+                        oneRot = false;
                     }
-                    if (idx0 >= 0 && idx1 >= 0) {
-                        frags.push_back({});
-                        frags.back().init(line, idx0, idx1 - idx0 + 1);
-                        if (lastRot >= 0 && line->rot != lastRot) {
-                            oneRot = false;
-                        }
-                        lastRot = line->rot;
-                    }
+                    lastRot = line->rot;
                 }
             }
         }
@@ -5335,6 +5248,59 @@ bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, do
         return true;
     }
     return false;
+}
+
+std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
+{
+    const auto bBox = getBBox();
+    auto clipped { bBox };
+    clipped.clipTo(&area);
+
+    if (clipped.isEmpty()) {
+        return { 0, 0 };
+    } else if (bBox == clipped) {
+        return { 0, len };
+    }
+
+    if (rot == 0 || rot == 2) {
+        auto centerY = (bBox.y1 + bBox.y2) * 0.5;
+        if (centerY < area.y1 || centerY > area.y2) {
+            return { 0, 0 };
+        }
+    } else {
+        auto centerX = (bBox.x1 + bBox.x2) * 0.5;
+        if (centerX < area.x1 || centerX > area.x2) {
+            return { 0, 0 };
+        }
+    }
+
+    using Cmp = bool (*)(double, double);
+    auto findEdge = [this](int start, double wantedEdge, Cmp cmp) -> int {
+        for (int i = start; i < len; i++) {
+            if (cmp(edge[i + 1], wantedEdge)) {
+                auto center = (edge[i] + edge[i + 1]) * 0.5;
+                if (cmp(center, wantedEdge)) {
+                    return i;
+                }
+                return i + 1;
+            }
+        }
+        return len;
+    };
+
+    if (rot == 0 || rot == 1) {
+        auto edge1 = (rot == 0) ? clipped.x1 : clipped.y1;
+        auto edge2 = (rot == 0) ? clipped.x2 : clipped.y2;
+        int l = findEdge(0, edge1, [](double a, double b) { return a > b; });
+        int u = findEdge(l, edge2, [](double a, double b) { return a > b; });
+        return { l, u - l };
+    } else {
+        auto edge1 = (rot == 2) ? clipped.x2 : clipped.y2;
+        auto edge2 = (rot == 2) ? clipped.x1 : clipped.y1;
+        int l = findEdge(0, edge1, [](double a, double b) { return a < b; });
+        int u = findEdge(l, edge2, [](double a, double b) { return a < b; });
+        return { l, u - l };
+    }
 }
 
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks)
