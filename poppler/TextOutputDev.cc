@@ -5303,7 +5303,7 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
     }
 }
 
-void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks)
+void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, const PDFRectangle *area) const
 {
     const UnicodeMap *uMap;
     char space[8], eol[16], eop[8];
@@ -5329,6 +5329,11 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
     }
     eopLen = uMap->mapUnicode(0x0c, eop, sizeof(eop));
 
+    if (area && area->x1 <= 0.0 && area->y1 <= 0.0 //
+        && area->x2 >= pageWidth && area->y2 >= pageHeight) {
+        area = nullptr;
+    }
+
     //~ writing mode (horiz/vert)
 
     // output the page in raw (content stream) order
@@ -5338,6 +5343,12 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         std::vector<Unicode> uText;
 
         for (TextWord *word = rawWords; word; word = word->next) {
+            if (area) {
+                auto bBox = word->getBBox();
+                if (!area->contains(bBox.x1, bBox.y1) && !area->contains(bBox.x2, bBox.y2)) {
+                    continue;
+                }
+            }
             s.clear();
             uText.resize(word->len());
             std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
@@ -5356,19 +5367,42 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 
         // output the page, maintaining the original physical layout
     } else if (physLayout) {
+        int rotations = 0;
 
         // collect the line fragments for the page and sort them
         std::vector<TextLineFrag> frags;
         frags.reserve(256);
         for (int i = 0; i < nBlocks; ++i) {
             TextBlock *blk = blocks[i];
+            if (area) {
+                auto bBox = blk->getBBox();
+                bBox.clipTo(area);
+                if (bBox.isEmpty()) {
+                    continue;
+                }
+            }
             for (TextLine *line = blk->lines; line; line = line->next) {
-                frags.push_back({});
-                frags.back().init(line, 0, line->len);
-                frags.back().computeCoords(true);
+                const auto [start, len] = area ? line->getLineBounds(*area) : std::pair { 0, line->len };
+                if (len) {
+                    rotations |= 1 << line->rot;
+                    frags.push_back({});
+                    frags.back().init(line, start, len);
+                }
             }
         }
-        std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
+
+        bool oneRot = (rotations == 1) || (rotations == 2) || (rotations == 4) || (rotations == 8);
+        for (auto &frag : frags) {
+            frag.computeCoords(oneRot);
+        }
+        if (!frags.empty() && area) {
+            assignColumns(&frags[0], frags.size(), true);
+        }
+        if (oneRot) {
+            std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
+        } else {
+            std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
+        }
         for (auto it = frags.begin(); it != frags.end();) {
             double delta = maxIntraLineDelta * it->line->words->fontSize;
             double base = it->base;
@@ -5376,7 +5410,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
                 return fabs(frag.base - base) >= delta;
             });
-            std::sort(it, end, &TextLineFrag::cmpXYColumnPrimaryRot);
+            std::sort(it, end, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
             it = end;
         }
 
@@ -5411,7 +5445,9 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 
             // print one or more returns if necessary
             if (i == frags.size() - 1) {
-                (*outputFunc)(outputStream, eol, eolLen);
+                if (!suppressLastEol) {
+                    (*outputFunc)(outputStream, eol, eolLen);
+                }
             } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag.base) > maxIntraLineDelta * frag.line->words->fontSize) {
                 int d = (int)((frags[i + 1].base - frag.base) / frag.line->words->fontSize);
                 d = std::clamp(d, 1, 5);

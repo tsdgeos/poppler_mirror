@@ -193,6 +193,8 @@ public:
         *xMaxA = xMax;
         *yMaxA = yMax;
     }
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
+
     void getCharBBox(int charIdx, double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const;
     double getFontSize() const { return fontSize; }
     int getRotation() const { return rot; }
@@ -419,6 +421,7 @@ public:
         *xMaxA = xMax;
         *yMaxA = yMax;
     }
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
 
     int getLineCount() const { return nLines; }
 
@@ -643,7 +646,7 @@ public:
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Dump contents of page to a file.
-    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks);
+    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol = false, const PDFRectangle *area = nullptr) const;
 
     // Get the head of the linked list of TextFlows.
     const TextFlow *getFlows() const { return flows; }
