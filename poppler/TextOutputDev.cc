@@ -5378,12 +5378,13 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             dumpFragment(uText.data(), uText.size(), uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.size());
 
-            if (word->next && fabs(word->next->base - word->base) < maxIntraLineDelta * word->fontSize && word->next->xMin > word->xMax - minDupBreakOverlap * word->fontSize) {
-                if (word->next->xMin > word->xMax + minWordSpacing * word->fontSize) {
-                    (*outputFunc)(outputStream, space, spaceLen);
-                }
-            } else {
+            if (!word->next) {
+                continue;
+            }
+            if (fabs(word->next->base - word->base) >= maxIntraLineDelta * word->fontSize) {
                 (*outputFunc)(outputStream, eol, eolLen);
+            } else if (fabs(word->next->xMin - word->xMax) > minDupBreakOverlap * word->fontSize) {
+                (*outputFunc)(outputStream, space, spaceLen);
             }
         }
 
