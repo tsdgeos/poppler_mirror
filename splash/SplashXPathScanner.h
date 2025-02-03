@@ -95,7 +95,7 @@ public:
 
 private:
     void computeIntersections(const SplashXPath &xPath);
-    bool addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
+    void addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
 
     bool eo;
     int xMin, yMin, xMax, yMax;

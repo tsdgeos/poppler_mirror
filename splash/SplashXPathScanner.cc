@@ -250,9 +250,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
         if (seg->flags & splashXPathHoriz) {
             y = splashFloor(seg->y0);
             if (y >= yMin && y <= yMax) {
-                if (!addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0)) {
-                    break;
-                }
+                addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0);
             }
         } else if (seg->flags & splashXPathVert) {
             y0 = splashFloor(segYMin);
@@ -266,9 +264,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             x = splashFloor(seg->x0);
             int count = eo || (seg->flags & splashXPathFlip) ? 1 : -1;
             for (y = y0; y <= y1; ++y) {
-                if (!addIntersection(segYMin, segYMax, y, x, x, count)) {
-                    break;
-                }
+                addIntersection(segYMin, segYMax, y, x, x, count);
             }
         } else {
             if (seg->x0 < seg->x1) {
@@ -308,9 +304,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                     xx1 = segXMax;
                 }
                 int x1 = splashFloor(xx1);
-                if (!addIntersection(segYMin, segYMax, y, x0, x1, count)) {
-                    break;
-                }
+                addIntersection(segYMin, segYMax, y, x0, x1, count);
 
                 xx0 = xx1;
                 x0 = x1;
@@ -322,7 +316,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
     }
 }
 
-inline bool SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
+inline void SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
 {
     SplashIntersect intersect;
     intersect.y = y;
@@ -346,8 +340,6 @@ inline bool SplashXPathScanner::addIntersection(double segYMin, double segYMax, 
     }
 #endif
     line.push_back(intersect);
-
-    return true;
 }
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine) const
