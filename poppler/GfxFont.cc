@@ -408,8 +408,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
     if (*embID != Ref::INVALID()) {
         Object obj3(*embID);
         Object obj4 = obj3.fetch(xref);
-        if (obj4.isStream()) {
-            obj4.streamReset();
+        if (obj4.isStream() && obj4.streamReset()) {
             fft = FoFiIdentifier::identifyStream(&readFromStream, obj4.getStream());
             obj4.streamClose();
             switch (fft) {
@@ -1803,8 +1802,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
 
     // CIDToGIDMap (for embedded TrueType fonts)
     obj1 = desFontDict->lookup("CIDToGIDMap");
-    if (obj1.isStream()) {
-        obj1.streamReset();
+    if (obj1.isStream() && obj1.streamReset()) {
         while ((c1 = obj1.streamGetChar()) != EOF && (c2 = obj1.streamGetChar()) != EOF) {
             cidToGID.push_back((c1 << 8) + c2);
         }

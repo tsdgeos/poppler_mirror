@@ -119,7 +119,7 @@ bool DCTStream::reset()
 {
     int row_stride;
 
-    str->reset();
+    bool success = str->reset();
 
     if (row_buffer) {
         jpeg_destroy_decompress(&cinfo);
@@ -189,7 +189,7 @@ bool DCTStream::reset()
         }
     }
 
-    return true;
+    return success;
 }
 
 bool DCTStream::readLine()

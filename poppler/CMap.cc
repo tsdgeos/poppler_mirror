@@ -119,8 +119,9 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
         cMap->useCMap(cache, &obj1);
     }
 
-    str->reset();
-    cMap->parse2(cache, &getCharFromStream, str);
+    if (str->reset()) {
+        cMap->parse2(cache, &getCharFromStream, str);
+    }
     str->close();
     return cMap;
 }

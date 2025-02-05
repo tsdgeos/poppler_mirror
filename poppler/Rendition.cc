@@ -381,7 +381,9 @@ void MediaRendition::outputToFile(FILE *fp)
         return;
     }
 
-    embeddedStreamObject.streamReset();
+    if (!embeddedStreamObject.streamReset()) {
+        return;
+    }
 
     while (true) {
         int c = embeddedStreamObject.streamGetChar();

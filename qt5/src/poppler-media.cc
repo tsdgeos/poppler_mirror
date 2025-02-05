@@ -88,12 +88,13 @@ QByteArray MediaRendition::data() const
         return QByteArray();
     }
 
+    if (!s->reset()) {
+        return QByteArray();
+    }
     QBuffer buffer;
     unsigned char data[BUFFER_MAX];
     int bread;
-
     buffer.open(QIODevice::WriteOnly);
-    s->reset();
     while ((bread = s->doGetChars(BUFFER_MAX, data)) != 0) {
         buffer.write(reinterpret_cast<const char *>(data), bread);
     }

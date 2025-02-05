@@ -102,7 +102,9 @@ bool EmbFile::save2(FILE *f)
         return false;
     }
 
-    m_objStr.streamReset();
+    if (!m_objStr.streamReset()) {
+        return false;
+    }
     while ((c = m_objStr.streamGetChar()) != EOF) {
         fputc(c, f);
     }

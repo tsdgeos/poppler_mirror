@@ -2518,15 +2518,17 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, in
 
     /* work around a cairo bug when scaling 1x1 surfaces */
     if (width == 1 && height == 1) {
-        ImageStream *imgStr;
         unsigned char pix;
         int invert_bit;
 
-        imgStr = new ImageStream(str, width, 1, 1);
-        imgStr->reset();
-        imgStr->getPixel(&pix);
-        imgStr->close();
-        delete imgStr;
+        {
+            ImageStream imgStr(str, width, 1, 1);
+            if (!imgStr.reset()) {
+                return;
+            }
+            imgStr.getPixel(&pix);
+            imgStr.close();
+        }
 
         invert_bit = invert ? 1 : 0;
         if (pix ^ invert_bit) {
@@ -2563,15 +2565,18 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
 
     /* work around a cairo bug when scaling 1x1 surfaces */
     if (width == 1 && height == 1) {
-        ImageStream *imgStr;
         unsigned char pix;
         int invert_bit;
 
-        imgStr = new ImageStream(str, width, 1, 1);
-        imgStr->reset();
-        imgStr->getPixel(&pix);
-        imgStr->close();
-        delete imgStr;
+        {
+            ImageStream imgStr(str, width, 1, 1);
+            if (imgStr.reset()) {
+                imgStr.getPixel(&pix);
+            } else {
+                pix = 0;
+            }
+            imgStr.close();
+        }
 
         invert_bit = invert ? 1 : 0;
         if (!(pix ^ invert_bit)) {
@@ -2631,7 +2636,6 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     cairo_surface_t *image;
     cairo_pattern_t *pattern;
     int x, y, i, bit;
-    ImageStream *imgStr;
     unsigned char *pix;
     cairo_matrix_t matrix;
     int invert_bit;
@@ -2639,8 +2643,10 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     cairo_filter_t filter;
 
     /* TODO: Do we want to cache these? */
-    imgStr = new ImageStream(str, width, 1, 1);
-    imgStr->reset();
+    ImageStream imgStr(str, width, 1, 1);
+    if (!imgStr.reset()) {
+        return;
+    }
 
     image = cairo_image_surface_create(CAIRO_FORMAT_A1, width, height);
     if (cairo_surface_status(image)) {
@@ -2653,7 +2659,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     invert_bit = invert ? 1 : 0;
 
     for (y = 0; y < height; y++) {
-        pix = imgStr->getLine();
+        pix = imgStr.getLine();
         dest = buffer + y * row_stride;
         i = 0;
         bit = 0;
@@ -2730,13 +2736,11 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     cairo_pattern_destroy(pattern);
 
 cleanup:
-    imgStr->close();
-    delete imgStr;
+    imgStr.close();
 }
 
 void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
 {
-    ImageStream *maskImgStr, *imgStr;
     ptrdiff_t row_stride;
     unsigned char *maskBuffer, *buffer;
     unsigned char *maskDest;
@@ -2751,13 +2755,14 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
     cairo_filter_t filter;
     cairo_filter_t maskFilter;
 
-    maskImgStr = new ImageStream(maskStr, maskWidth, 1, 1);
-    maskImgStr->reset();
+    ImageStream maskImgStr(maskStr, maskWidth, 1, 1);
+    if (!maskImgStr.reset()) {
+        return;
+    }
 
     maskImage = cairo_image_surface_create(CAIRO_FORMAT_A8, maskWidth, maskHeight);
     if (cairo_surface_status(maskImage)) {
-        maskImgStr->close();
-        delete maskImgStr;
+        maskImgStr.close();
         return;
     }
 
@@ -2767,7 +2772,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
     invert_bit = maskInvert ? 1 : 0;
 
     for (y = 0; y < maskHeight; y++) {
-        pix = maskImgStr->getLine();
+        pix = maskImgStr.getLine();
         maskDest = maskBuffer + y * row_stride;
         for (x = 0; x < maskWidth; x++) {
             if (pix[x] ^ invert_bit) {
@@ -2778,8 +2783,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
         }
     }
 
-    maskImgStr->close();
-    delete maskImgStr;
+    maskImgStr.close();
 
     maskFilter = getFilterForSurface(maskImage, maskInterpolate);
 
@@ -2800,8 +2804,10 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
 #endif
 
     /* TODO: Do we want to cache these? */
-    imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
+    if (!imgStr.reset()) {
+        return;
+    }
 
     image = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
     if (cairo_surface_status(image)) {
@@ -2812,7 +2818,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
     row_stride = cairo_image_surface_get_stride(image);
     for (y = 0; y < height; y++) {
         dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
-        pix = imgStr->getLine();
+        pix = imgStr.getLine();
         colorMap->getRGBLine(pix, dest, width);
     }
 
@@ -2881,8 +2887,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, 
     cairo_pattern_destroy(pattern);
 
 cleanup:
-    imgStr->close();
-    delete imgStr;
+    imgStr.close();
 }
 
 static inline void getMatteColorRgb(GfxImageColorMap *colorMap, const GfxColor *matteColorIn, GfxRGB *matteColorRgb)
@@ -2912,7 +2917,6 @@ static inline void applyMask(unsigned int *imagePointer, int length, GfxRGB matt
 void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                          bool maskInterpolate)
 {
-    ImageStream *maskImgStr, *imgStr;
     ptrdiff_t row_stride, mask_row_stride;
     unsigned char *maskBuffer, *buffer;
     unsigned char *maskDest;
@@ -2942,13 +2946,14 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
         getMatteColorRgb(colorMap, matteColor, &matteColorRgb);
     }
 
-    maskImgStr = new ImageStream(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-    maskImgStr->reset();
+    ImageStream maskImgStr(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
+    if (!maskImgStr.reset()) {
+        return;
+    }
 
     maskImage = cairo_image_surface_create(CAIRO_FORMAT_A8, maskWidth, maskHeight);
     if (cairo_surface_status(maskImage)) {
-        maskImgStr->close();
-        delete maskImgStr;
+        maskImgStr.close();
         return;
     }
 
@@ -2956,14 +2961,13 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     mask_row_stride = cairo_image_surface_get_stride(maskImage);
     for (y = 0; y < maskHeight; y++) {
         maskDest = (unsigned char *)(maskBuffer + y * mask_row_stride);
-        pix = maskImgStr->getLine();
+        pix = maskImgStr.getLine();
         if (likely(pix != nullptr)) {
             maskColorMap->getGrayLine(pix, maskDest, maskWidth);
         }
     }
 
-    maskImgStr->close();
-    delete maskImgStr;
+    maskImgStr.close();
 
     maskFilter = getFilterForSurface(maskImage, maskInterpolate);
 
@@ -2984,8 +2988,10 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 #endif
 
     /* TODO: Do we want to cache these? */
-    imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
+    if (!imgStr.reset()) {
+        return;
+    }
 
     image = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
     if (cairo_surface_status(image)) {
@@ -2996,7 +3002,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     row_stride = cairo_image_surface_get_stride(image);
     for (y = 0; y < height; y++) {
         dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
-        pix = imgStr->getLine();
+        pix = imgStr.getLine();
         if (likely(pix != nullptr)) {
             colorMap->getRGBLine(pix, dest, width);
             if (matteColor != nullptr) {
@@ -3088,8 +3094,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     cairo_pattern_destroy(pattern);
 
 cleanup:
-    imgStr->close();
-    delete imgStr;
+    imgStr.close();
 }
 
 bool CairoOutputDev::getStreamData(Stream *str, char **buffer, int *length)
@@ -3099,18 +3104,22 @@ bool CairoOutputDev::getStreamData(Stream *str, char **buffer, int *length)
 
     len = 0;
     str->close();
-    str->reset();
+    if (!str->reset()) {
+        return false;
+    }
     while (str->getChar() != EOF) {
         len++;
     }
     if (len == 0) {
         return false;
     }
+    str->close();
+    if (!str->reset()) {
+        return false;
+    }
 
     strBuffer = (char *)gmalloc(len);
 
-    str->close();
-    str->reset();
     for (i = 0; i < len; ++i) {
         strBuffer[i] = str->getChar();
     }
@@ -3331,7 +3340,10 @@ public:
 
         /* TODO: Do we want to cache these? */
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        imgStr->reset();
+        if (!imgStr->reset()) {
+            delete imgStr;
+            return image;
+        }
 
 #if 0
     /* ICCBased color space doesn't do any color correction

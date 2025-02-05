@@ -24,7 +24,7 @@ Linearization::Linearization(BaseStream *str)
 {
     Parser *parser;
 
-    str->reset();
+    (void)str->reset();
     parser = new Parser(nullptr, str->makeSubStream(str->getStart(), false, 0, Object(objNull)), false);
     Object obj1 = parser->getObj();
     Object obj2 = parser->getObj();

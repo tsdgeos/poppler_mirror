@@ -303,16 +303,20 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
     long len;
 
     if (colorMap) {
-        ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        imgStr->reset();
+        ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
+        if (!imgStr.reset()) {
+            imgStr.close();
+            return 0;
+        }
         for (int y = 0; y < height; y++) {
-            imgStr->getLine();
+            imgStr.getLine();
         }
 
-        imgStr->close();
-        delete imgStr;
+        imgStr.close();
     } else {
-        str->reset();
+        if (!str->reset()) {
+            return 0;
+        }
         for (int y = 0; y < height; y++) {
             int size = (width + 7) / 8;
             for (int x = 0; x < size; x++) {
@@ -349,7 +353,11 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext)
 
     // initialize stream
     str = str->getNextStream();
-    str->reset();
+    if (!str->reset()) {
+        error(errIO, -1, "Couldn't reset stream");
+        errorCode = 2;
+        return;
+    }
 
     // copy the stream
     while ((c = str->getChar()) != EOF) {
@@ -404,10 +412,18 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
     if (format != imgMonochrome) {
         // initialize stream
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        imgStr->reset();
+        if (!imgStr->reset()) {
+            error(errIO, -1, "Stream reset failed");
+            errorCode = 3;
+            return;
+        }
     } else {
         // initialize stream
-        str->reset();
+        if (!str->reset()) {
+            errorCode = 3;
+            error(errIO, -1, "Stream reset failed");
+            return;
+        }
     }
 
     // PDF masks use 0 = draw current color, 1 = leave unchanged.
@@ -569,11 +585,12 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
                 errorCode = 2;
                 return;
             }
-            globalsStr->reset();
-            while ((c = globalsStr->getChar()) != EOF) {
-                fputc(c, f);
+            if (globalsStr->reset()) {
+                while ((c = globalsStr->getChar()) != EOF) {
+                    fputc(c, f);
+                }
+                globalsStr->close();
             }
-            globalsStr->close();
             fclose(f);
         }
 

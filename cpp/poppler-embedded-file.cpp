@@ -183,7 +183,9 @@ byte_array embedded_file::data() const
         return byte_array();
     }
 
-    stream->reset();
+    if (!stream->reset()) {
+        return byte_array {};
+    }
     byte_array ret(1024);
     size_t data_len = 0;
     int i;

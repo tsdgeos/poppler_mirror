@@ -4281,7 +4281,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText()) {
-            str->reset();
+            if (!str->reset()) {
+                goto err1;
+            }
             n = height * ((width + 7) / 8);
             for (i = 0; i < n; ++i) {
                 str->getChar();
@@ -4591,7 +4593,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText() || singular_matrix) {
-            str->reset();
+            if (!str->reset()) {
+                goto err1;
+            }
             n = height * ((width * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8);
             for (i = 0; i < n; ++i) {
                 str->getChar();

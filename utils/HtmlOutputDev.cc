@@ -1311,7 +1311,11 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 
     // initialize stream
     str = str->getNextStream();
-    str->reset();
+    if (!str->reset()) {
+        fclose(f1);
+        error(errIO, -1, "Couldn't reset stream");
+        return;
+    }
 
     // copy the stream
     while ((c = str->getChar()) != EOF) {
@@ -1329,7 +1333,7 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool isMask)
 {
 #ifdef ENABLE_LIBPNG
-    FILE *f1;
+    std::unique_ptr<FILE, decltype(&fclose)> f1 { nullptr, &fclose };
     InMemoryFile ims;
 
     if (!colorMap && !isMask) {
@@ -1339,42 +1343,40 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
     // open the image file
     std::string fName = createImageFileName("png");
-    f1 = dataUrls ? ims.open("wb") : fopen(fName.c_str(), "wb");
+    f1.reset(dataUrls ? ims.open("wb") : fopen(fName.c_str(), "wb"));
     if (!f1) {
         error(errIO, -1, "Couldn't open image file '{0:s}'", fName.c_str());
         return;
     }
 
-    PNGWriter *writer = new PNGWriter(isMask ? PNGWriter::MONOCHROME : PNGWriter::RGB);
+    PNGWriter writer { isMask ? PNGWriter::MONOCHROME : PNGWriter::RGB };
     // TODO can we calculate the resolution of the image?
-    if (!writer->init(f1, width, height, 72, 72)) {
+    if (!writer.init(f1.get(), width, height, 72, 72)) {
         error(errInternal, -1, "Can't init PNG for image '{0:s}'", fName.c_str());
-        delete writer;
-        fclose(f1);
         return;
     }
 
     if (!isMask) {
         unsigned char *p;
         GfxRGB rgb;
+        ImageStream imgStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
+        if (!imgStr.reset()) {
+            error(errInternal, -1, "Can't reset image stream");
+            return;
+        }
         unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
         unsigned char **row_pointer = &row;
 
         // Initialize the image stream
-        ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        imgStr->reset();
 
         // For each line...
         for (int y = 0; y < height; y++) {
 
             // Convert into a PNG row
-            p = imgStr->getLine();
+            p = imgStr.getLine();
             if (!p) {
                 error(errIO, -1, "Failed to read PNG. '{0:s}' will be incorrect", fName.c_str());
                 gfree(row);
-                delete writer;
-                delete imgStr;
-                fclose(f1);
                 return;
             }
             for (int x = 0; x < width; x++) {
@@ -1386,17 +1388,14 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
                 p += colorMap->getNumPixelComps();
             }
 
-            if (!writer->writeRow(row_pointer)) {
+            if (!writer.writeRow(row_pointer)) {
                 error(errIO, -1, "Failed to write into PNG '{0:s}'", fName.c_str());
-                delete writer;
-                delete imgStr;
-                fclose(f1);
+                gfree(row);
                 return;
             }
         }
         gfree(row);
-        imgStr->close();
-        delete imgStr;
+        imgStr.close();
     } else { // isMask == true
         int size = (width + 7) / 8;
 
@@ -1415,7 +1414,10 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             }
         }
 
-        str->reset();
+        if (!str->reset()) {
+            error(errInternal, -1, "failed to reset stream");
+            return;
+        }
         unsigned char *png_row = (unsigned char *)gmalloc(size);
 
         for (int ri = 0; ri < height; ++ri) {
@@ -1423,10 +1425,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
                 png_row[i] = str->getChar() ^ invert_bits;
             }
 
-            if (!writer->writeRow(&png_row)) {
+            if (!writer.writeRow(&png_row)) {
                 error(errIO, -1, "Failed to write into PNG '{0:s}'", fName.c_str());
-                delete writer;
-                fclose(f1);
                 gfree(png_row);
                 return;
             }
@@ -1437,9 +1437,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
     str->close();
 
-    writer->close();
-    delete writer;
-    fclose(f1);
+    writer.close();
 
     if (dataUrls) {
         fName = std::string("data:image/png;base64,") + gbase64Encode(ims.getBuffer());
