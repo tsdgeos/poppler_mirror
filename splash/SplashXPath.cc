@@ -169,6 +169,9 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
     adj0 = adj1 = 0; // make gcc happy
     curSubpath = 0;
     i = 0;
+    // reserve space for segments, rough estimate
+    grow(path->length * 2);
+
     while (i < path->length) {
 
         // first point in subpath - skip it
