@@ -2048,6 +2048,9 @@ SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoo
     int i;
 
     fPath = new SplashPath();
+    // Estimate size, reserve
+    fPath->reserve(path->length * 2 + 2);
+
     flatness2 = flatness * flatness;
     i = 0;
     while (i < path->length) {
@@ -6052,6 +6055,9 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
     for (i1 = i0; !(pathIn->flags[i1] & splashPathLast) && i1 + 1 < pathIn->length && pathIn->pts[i1 + 1].x == pathIn->pts[i1].x && pathIn->pts[i1 + 1].y == pathIn->pts[i1].y; ++i1) {
         ;
     }
+
+    // Estimate size, reserve
+    pathOut->reserve(pathIn->length * 4 + 4);
 
     while (i1 < pathIn->length) {
         if ((first = pathIn->flags[i0] & splashPathFirst)) {
