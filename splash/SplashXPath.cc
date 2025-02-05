@@ -270,9 +270,14 @@ void SplashXPath::grow(int nSegs)
 
 void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness, bool first, bool last, bool end0, bool end1)
 {
-    SplashCoord *cx = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
-    SplashCoord *cy = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
-    int *cNext = new int[splashMaxCurveSplits + 1];
+    if (!curveData) {
+        // allocate on first use
+        curveData = std::make_unique<CurveData>();
+    }
+    SplashCoord *cx = curveData->cx.data();
+    SplashCoord *cy = curveData->cy.data();
+    int *cNext = curveData->cNext.data();
+
     SplashCoord xl0, xl1, xl2, xr0, xr1, xr2, xr3, xx1, xx2, xh;
     SplashCoord yl0, yl1, yl2, yr0, yr1, yr2, yr3, yy1, yy2, yh;
     SplashCoord dx, dy, mx, my, d1, d2, flatness2;
@@ -367,10 +372,6 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, Splas
             *(cNext + p3) = p2;
         }
     }
-
-    delete[] cx;
-    delete[] cy;
-    delete[] cNext;
 }
 
 void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)

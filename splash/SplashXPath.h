@@ -23,6 +23,8 @@
 #define SPLASHXPATH_H
 
 #include "SplashTypes.h"
+#include <memory>
+#include <array>
 
 class SplashPath;
 struct SplashXPathAdjust;
@@ -86,6 +88,14 @@ protected:
 
     SplashXPathSeg *segs;
     int length, size; // length and size of segs array
+
+    struct CurveData
+    {
+        std::array<SplashCoord, (splashMaxCurveSplits + 1) * 3> cx;
+        std::array<SplashCoord, (splashMaxCurveSplits + 1) * 3> cy;
+        std::array<int, splashMaxCurveSplits + 1> cNext;
+    };
+    std::unique_ptr<CurveData> curveData;
 
     friend class SplashXPathScanner;
     friend class SplashClip;
