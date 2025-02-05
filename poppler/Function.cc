@@ -363,10 +363,13 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         error(errSyntaxError, -1, "Function has invalid number of samples");
         return;
     }
+    if (!str->reset()) {
+        error(errSyntaxError, -1, "Stream reset error");
+        return;
+    }
     buf = 0;
     bits = 0;
     bitMask = (1 << sampleBits) - 1;
-    str->reset();
     for (i = 0; i < nSamples; ++i) {
         if (sampleBits == 8) {
             s = str->getChar();
@@ -1124,10 +1127,13 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
         goto err1;
     }
     str = funcObj->getStream();
+    if (!str->reset()) {
+        error(errSyntaxError, -1, "Stream reset error");
+        goto err1;
+    }
 
     //----- parse the function
     codeString = std::make_unique<GooString>();
-    str->reset();
     if (getToken(str)->cmp("{") != 0) {
         error(errSyntaxError, -1, "Expected '{{' at start of PostScript function");
         goto err1;

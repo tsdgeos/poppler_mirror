@@ -968,7 +968,10 @@ void QPainterOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
                                                 1, // numPixelComps
                                                 1 // getBits
     );
-    imgStr->reset();
+    if (!imgStr->reset()) {
+        imgStr->close();
+        return;
+    }
 
     // TODO: Would using QImage::Format_Mono be more efficient here?
     QImage image(width, height, QImage::Format_ARGB32);
@@ -1011,7 +1014,10 @@ void QPainterOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int
 
     /* TODO: Do we want to cache these? */
     auto imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    if (!imgStr->reset()) {
+        imgStr->close();
+        return;
+    }
 
     image = QImage(width, height, QImage::Format_ARGB32);
     data = reinterpret_cast<unsigned int *>(image.bits());
@@ -1068,10 +1074,14 @@ void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream
 
     /* TODO: Do we want to cache these? */
     auto imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
+    if (!imgStr->reset()) {
+        return;
+    }
 
     auto maskImageStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-    maskImageStr->reset();
+    if (!maskImageStr->reset()) {
+        return;
+    }
 
     QImage image(width, height, QImage::Format_ARGB32);
     unsigned int *data = reinterpret_cast<unsigned int *>(image.bits());

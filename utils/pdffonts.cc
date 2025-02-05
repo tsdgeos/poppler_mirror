@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2018, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -132,15 +132,18 @@ int main(int argc, char *argv[])
             printf("name                                 object ID substitute font                      substitute font file\n");
             printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
             for (const FontInfo *font : fonts) {
-                if (font->getFile()) {
-                    printf("%-36s", font->getName() ? font->getName()->c_str() : "[none]");
+                const std::optional<std::string> &fontFile = font->getFile();
+                if (fontFile) {
+                    const std::optional<std::string> &fontName = font->getName();
+                    printf("%-36s", fontName ? fontName->c_str() : "[none]");
                     const Ref fontRef = font->getRef();
                     if (fontRef.gen >= 100000) {
                         printf(" [none]");
                     } else {
                         printf(" %6d %2d", fontRef.num, fontRef.gen);
                     }
-                    printf(" %-36s %s\n", font->getSubstituteName() ? font->getSubstituteName()->c_str() : "[none]", font->getFile()->c_str());
+                    const std::optional<std::string> &fontSubstituteName = font->getSubstituteName();
+                    printf(" %-36s %s\n", fontSubstituteName ? fontSubstituteName->c_str() : "[none]", fontFile->c_str());
                 }
                 delete font;
             }
@@ -149,8 +152,9 @@ int main(int argc, char *argv[])
             printf("name                                 type              encoding         emb sub uni object ID\n");
             printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
             for (const FontInfo *font : fonts) {
-                printf("%-36s %-17s %-16s %-3s %-3s %-3s", font->getName() ? font->getName()->c_str() : "[none]", fontTypeNames[font->getType()], font->getEncoding().c_str(), font->getEmbedded() ? "yes" : "no",
-                       font->getSubset() ? "yes" : "no", font->getToUnicode() ? "yes" : "no");
+                const std::optional<std::string> &fontName = font->getName();
+                printf("%-36s %-17s %-16s %-3s %-3s %-3s", fontName ? fontName->c_str() : "[none]", fontTypeNames[font->getType()], font->getEncoding().c_str(), font->getEmbedded() ? "yes" : "no", font->getSubset() ? "yes" : "no",
+                       font->getToUnicode() ? "yes" : "no");
                 const Ref fontRef = font->getRef();
                 if (fontRef.gen >= 100000) {
                     printf(" [none]\n");

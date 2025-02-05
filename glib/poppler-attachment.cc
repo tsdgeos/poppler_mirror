@@ -358,7 +358,9 @@ gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, Popp
     priv = GET_PRIVATE(attachment);
 
     stream = priv->obj_stream.getStream();
-    stream->reset();
+    if (!stream->reset()) {
+        return FALSE;
+    }
 
     do {
         int data;

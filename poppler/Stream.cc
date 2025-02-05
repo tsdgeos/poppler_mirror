@@ -239,12 +239,12 @@ public:
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
-    bool reset() override { return str->getBaseStream()->reset(); }
+    [[nodiscard]] bool reset() override { return str->getBaseStream()->reset(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
     bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
-    void unfilteredReset() override { str->getBaseStream()->unfilteredReset(); }
+    [[nodiscard]] bool unfilteredReset() override { return str->getBaseStream()->unfilteredReset(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
     void setPos(Goffset pos, int dir) override { str->getBaseStream()->setPos(pos, dir); }
     BaseStream *getBaseStream() override { return str->getBaseStream()->getBaseStream(); }
@@ -1181,8 +1181,9 @@ EmbedStream::~EmbedStream()
 
 bool EmbedStream::reset()
 {
+    bool success = true;
     if (str->getPos() != start) {
-        str->reset();
+        success = str->reset();
         // Might be a FilterStream that does not support str->setPos(start)
         while (str->getPos() < start) {
             if (str->getChar() == EOF) {
@@ -1191,13 +1192,14 @@ bool EmbedStream::reset()
         }
         if (str->getPos() != start) {
             error(errInternal, -1, "Failed to reset EmbedStream");
+            success = false;
         }
     }
     record = false;
     replay = false;
     bufPos = 0;
 
-    return true;
+    return success;
 }
 
 BaseStream *EmbedStream::copy()
@@ -1344,11 +1346,10 @@ ASCIIHexStream::~ASCIIHexStream()
 
 bool ASCIIHexStream::reset()
 {
-    str->reset();
     buf = EOF;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 int ASCIIHexStream::lookChar()
@@ -1442,11 +1443,10 @@ ASCII85Stream::~ASCII85Stream()
 
 bool ASCII85Stream::reset()
 {
-    str->reset();
     index = n = 0;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 int ASCII85Stream::lookChar()
@@ -1618,12 +1618,12 @@ int LZWStream::getChars(int nChars, unsigned char *buffer)
 
 bool LZWStream::reset()
 {
-    str->reset();
+    bool success = str->reset();
     eof = false;
     inputBits = 0;
     clearTable();
 
-    return true;
+    return success;
 }
 
 bool LZWStream::processNextCode()
@@ -1761,11 +1761,10 @@ RunLengthStream::~RunLengthStream()
 
 bool RunLengthStream::reset()
 {
-    str->reset();
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 int RunLengthStream::getChars(int nChars, unsigned char *buffer)
@@ -1887,32 +1886,32 @@ CCITTFaxStream::~CCITTFaxStream()
     gfree(codingLine);
 }
 
-void CCITTFaxStream::ccittReset(bool unfiltered)
+bool CCITTFaxStream::ccittReset(bool unfiltered)
 {
-    if (unfiltered) {
-        str->unfilteredReset();
-    } else {
-        str->reset();
-    }
-
     row = 0;
     nextLine2D = encoding < 0;
     inputBits = 0;
     a0i = 0;
     outputBits = 0;
     buf = EOF;
+
+    if (unfiltered) {
+        return str->unfilteredReset();
+    } else {
+        return str->reset();
+    }
 }
 
-void CCITTFaxStream::unfilteredReset()
+bool CCITTFaxStream::unfilteredReset()
 {
-    ccittReset(true);
+    return ccittReset(true);
 }
 
 bool CCITTFaxStream::reset()
 {
     int code1;
 
-    ccittReset(false);
+    bool resetSuccess = ccittReset(false);
 
     if (codingLine != nullptr && refLine != nullptr) {
         eof = false;
@@ -1935,7 +1934,7 @@ bool CCITTFaxStream::reset()
         eatBits(1);
     }
 
-    return true;
+    return resetSuccess;
 }
 
 inline void CCITTFaxStream::addPixels(int a1, int blackPixels)
@@ -2706,13 +2705,8 @@ DCTStream::~DCTStream()
     delete str;
 }
 
-void DCTStream::dctReset(bool unfiltered)
+bool DCTStream::dctReset(bool unfiltered)
 {
-    if (unfiltered)
-        str->unfilteredReset();
-    else
-        str->reset();
-
     progressive = interleaved = false;
     width = height = 0;
     numComps = 0;
@@ -2722,18 +2716,22 @@ void DCTStream::dctReset(bool unfiltered)
     gotJFIFMarker = false;
     gotAdobeMarker = false;
     restartInterval = 0;
+    if (unfiltered)
+        return str->unfilteredReset();
+    else
+        return str->reset();
 }
 
-void DCTStream::unfilteredReset()
+bool DCTStream::unfilteredReset()
 {
-    dctReset(true);
+    return dctReset(true);
 }
 
 bool DCTStream::reset()
 {
     int i, j;
 
-    dctReset(false);
+    bool resetResult = dctReset(false);
 
     if (!readHeader()) {
         y = height;
@@ -2822,7 +2820,7 @@ bool DCTStream::reset()
         restart();
     }
 
-    return true;
+    return resetResult;
 }
 
 void DCTStream::close()
@@ -4200,14 +4198,8 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-void FlateStream::flateReset(bool unfiltered)
+bool FlateStream::flateReset(bool unfiltered)
 {
-    if (unfiltered) {
-        str->unfilteredReset();
-    } else {
-        str->reset();
-    }
-
     index = 0;
     remain = 0;
     codeBuf = 0;
@@ -4215,18 +4207,23 @@ void FlateStream::flateReset(bool unfiltered)
     compressedBlock = false;
     endOfBlock = true;
     eof = true;
+    if (unfiltered) {
+        return str->unfilteredReset();
+    } else {
+        return str->reset();
+    }
 }
 
-void FlateStream::unfilteredReset()
+bool FlateStream::unfilteredReset()
 {
-    flateReset(true);
+    return flateReset(true);
 }
 
 bool FlateStream::reset()
 {
     int cmf, flg;
 
-    flateReset(false);
+    bool internalResetResult = flateReset(false);
 
     // read header
     //~ need to look at window size?
@@ -4251,7 +4248,7 @@ bool FlateStream::reset()
 
     eof = false;
 
-    return true;
+    return internalResetResult;
 }
 
 int FlateStream::getChar()
@@ -4701,12 +4698,12 @@ bool BufStream::reset()
 {
     int i;
 
-    str->reset();
+    bool success = str->reset();
     for (i = 0; i < bufSize; ++i) {
         buf[i] = str->getChar();
     }
 
-    return true;
+    return success;
 }
 
 int BufStream::getChar()
@@ -4755,10 +4752,9 @@ FixedLengthEncoder::~FixedLengthEncoder()
 
 bool FixedLengthEncoder::reset()
 {
-    str->reset();
     count = 0;
 
-    return true;
+    return str->reset();
 }
 
 int FixedLengthEncoder::getChar()
@@ -4803,12 +4799,11 @@ ASCIIHexEncoder::~ASCIIHexEncoder()
 
 bool ASCIIHexEncoder::reset()
 {
-    str->reset();
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 bool ASCIIHexEncoder::fillBuf()
@@ -4855,12 +4850,11 @@ ASCII85Encoder::~ASCII85Encoder()
 
 bool ASCII85Encoder::reset()
 {
-    str->reset();
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 bool ASCII85Encoder::fillBuf()
@@ -4952,11 +4946,10 @@ RunLengthEncoder::~RunLengthEncoder()
 
 bool RunLengthEncoder::reset()
 {
-    str->reset();
     bufPtr = bufEnd = nextEnd = buf;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 //
@@ -5068,7 +5061,7 @@ bool LZWEncoder::reset()
 {
     int i;
 
-    str->reset();
+    bool success = str->reset();
 
     // initialize code table
     for (i = 0; i < 256; ++i) {
@@ -5087,7 +5080,7 @@ bool LZWEncoder::reset()
     outBufLen = 9;
     needEOD = false;
 
-    return true;
+    return success;
 }
 
 int LZWEncoder::getChar()
@@ -5217,11 +5210,10 @@ CMYKGrayEncoder::~CMYKGrayEncoder()
 
 bool CMYKGrayEncoder::reset()
 {
-    str->reset();
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 bool CMYKGrayEncoder::fillBuf()
@@ -5268,11 +5260,10 @@ RGBGrayEncoder::~RGBGrayEncoder()
 
 bool RGBGrayEncoder::reset()
 {
-    str->reset();
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return true;
+    return str->reset();
 }
 
 bool RGBGrayEncoder::fillBuf()

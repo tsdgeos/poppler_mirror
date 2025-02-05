@@ -625,7 +625,6 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     Object obj1;
     Dict *dict;
     Stream *str;
-    GfxImageColorMap *colorMap;
 
     /* Get stream dict */
     pageLocker();
@@ -675,25 +674,26 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     if (obj1.isNull()) {
         obj1 = dict->lookup("D");
     }
-    colorMap = new GfxImageColorMap(bits, &obj1, std::move(colorSpace));
-    if (!colorMap->isOk()) {
+    GfxImageColorMap colorMap(bits, &obj1, std::move(colorSpace));
+    if (!colorMap.isOk()) {
         fprintf(stderr, "Error: invalid colormap\n");
-        delete colorMap;
         return false;
     }
 
     if (data_out) {
         unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
         unsigned char *p = pixbufdata;
-        ImageStream *imgstr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        imgstr->reset();
+        ImageStream imgstr { str, width, colorMap.getNumPixelComps(), colorMap.getBits() };
+        if (!imgstr.reset()) {
+            return false;
+        }
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {
                 unsigned char pix[gfxColorMaxComps];
                 GfxRGB rgb;
 
-                imgstr->getPixel(pix);
-                colorMap->getRGB(pix, &rgb);
+                imgstr.getPixel(pix);
+                colorMap.getRGB(pix, &rgb);
 
                 *p++ = colToByte(rgb.r);
                 *p++ = colToByte(rgb.g);
@@ -701,8 +701,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
             }
         }
         *data_out = pixbufdata;
-        imgstr->close();
-        delete imgstr;
+        imgstr.close();
     }
 
     if (width_out) {
@@ -714,9 +713,6 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     if (rowstride_out) {
         *rowstride_out = width * 3;
     }
-
-    delete colorMap;
-
     return true;
 }
 

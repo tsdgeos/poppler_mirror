@@ -241,7 +241,11 @@ bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::opt
         return false;
     }
 
-    str->reset();
+    if (!str->reset()) {
+        error(errSyntaxError, -1, "Document base stream reset failure");
+        errCode = errFileIO;
+        return false;
+    }
 
     // check footer
     // Adobe does not seem to enforce %%EOF, so we do the same
@@ -1047,8 +1051,10 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
         return errFileChangedSinceOpen;
     }
 
-    BaseStream *copyStr = str->copy();
-    copyStr->reset();
+    std::unique_ptr<BaseStream> copyStr { str->copy() };
+    if (!copyStr->reset()) {
+        return errFileIO;
+    }
     while (copyStr->lookChar() != EOF) {
         std::array<unsigned char, 4096> array;
         size_t size = copyStr->doGetChars(array.size(), array.data());
@@ -1058,7 +1064,6 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
         }
     }
     copyStr->close();
-    delete copyStr;
 
     return errNone;
 }
@@ -1066,8 +1071,10 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
 void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
 {
     // copy the original file
-    BaseStream *copyStr = str->copy();
-    copyStr->reset();
+    std::unique_ptr<BaseStream> copyStr { str->copy() };
+    if (!copyStr->reset()) {
+        // some err;
+    }
     while (copyStr->lookChar() != EOF) {
         std::array<unsigned char, 4096> array;
         size_t size = copyStr->doGetChars(array.size(), array.data());
@@ -1077,7 +1084,6 @@ void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
         }
     }
     copyStr->close();
-    delete copyStr;
 
     unsigned char *fileKey;
     CryptAlgorithm encAlgorithm;
@@ -1253,8 +1259,10 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
 
 void PDFDoc::writeStream(Stream *str, OutStream *outStr)
 {
+    if (!str->reset()) {
+        return;
+    }
     outStr->printf("stream\r\n");
-    str->reset();
     for (int c = str->getChar(); c != EOF; c = str->getChar()) {
         outStr->printf("%c", c);
     }
@@ -1277,7 +1285,10 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
     }
 
     outStr->printf("stream\r\n");
-    str->unfilteredReset();
+    if (!str->unfilteredReset()) {
+        error(errSyntaxError, -1, "PDFDoc::writeRawStream, reset failed");
+        return;
+    }
     for (Goffset i = 0; i < length; i++) {
         int c = str->getUnfilteredChar();
         if (unlikely(c == EOF)) {
@@ -1286,25 +1297,27 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
         }
         outStr->printf("%c", c);
     }
-    str->reset();
+    (void)str->reset();
     outStr->printf("\r\nendstream\r\n");
 }
 
 void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref)
 {
     // Encrypt string if encryption is enabled
-    GooString *sEnc = nullptr;
+    std::unique_ptr<GooString> sEnc = nullptr;
     if (fileKey) {
         EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)), fileKey, encAlgorithm, keyLength, ref);
-        sEnc = new GooString();
+        sEnc = std::make_unique<GooString>();
         int c;
-        enc->reset();
+        if (!enc->reset()) {
+            return;
+        }
         while ((c = enc->getChar()) != EOF) {
             sEnc->append((char)c);
         }
 
         delete enc;
-        s = sEnc;
+        s = sEnc.get();
     }
 
     // Write data
@@ -1338,8 +1351,6 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
         }
         outStr->printf(") ");
     }
-
-    delete sEnc;
 }
 
 Goffset PDFDoc::writeObjectHeader(Ref *ref, OutStream *outStr)
@@ -1454,7 +1465,9 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                 stream = encStream.get();
             }
 
-            stream->reset();
+            if (!stream->reset()) {
+                break;
+            }
             // recalculate stream length
             Goffset tmp = 0;
             for (int c = stream->getChar(); c != EOF; c = stream->getChar()) {
@@ -1647,7 +1660,9 @@ void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeA
     // file size (doesn't include the trailer)
     unsigned int fileSize = 0;
     int c;
-    str->reset();
+    if (!str->reset()) {
+        return;
+    }
     while ((c = str->getChar()) != EOF) {
         fileSize++;
     }

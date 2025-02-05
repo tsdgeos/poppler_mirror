@@ -273,8 +273,7 @@ JPXStream::~JPXStream()
 
 bool JPXStream::reset()
 {
-    bool ret = true;
-    bufStr->reset();
+    bool ret = bufStr->reset();
     if (readBoxes()) {
         curY = img.yOffset;
     } else {
@@ -498,7 +497,7 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
     csPrec = 0; // make gcc happy
     *hasAlpha = false;
     haveBPC = haveCSMode = false;
-    bufStr->reset();
+    (void)bufStr->reset();
     if (bufStr->lookChar() == 0xff) {
         getImageParams2(bitsPerComponent, csMode);
     } else {

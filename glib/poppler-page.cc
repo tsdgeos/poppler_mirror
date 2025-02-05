@@ -2333,7 +2333,7 @@ gboolean poppler_page_get_text_layout_for_area(PopplerPage *page, PopplerRectang
     PDFRectangle selection;
     guint offset = 0;
     guint n_rects = 0;
-    gdouble x1, y1, x2, y2;
+    gdouble x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     gdouble x3, y3, x4, y4;
 
     g_return_val_if_fail(POPPLER_IS_PAGE(page), FALSE);

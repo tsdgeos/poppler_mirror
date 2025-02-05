@@ -203,8 +203,8 @@ static bool compareObjects(const Object *objA, const Object *objB)
                 return false;
             } else {
                 int c;
-                streamA->reset();
-                streamB->reset();
+                (void)streamA->reset();
+                (void)streamB->reset();
                 do {
                     c = streamA->getChar();
                     if (c != streamB->getChar()) {

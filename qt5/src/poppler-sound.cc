@@ -81,7 +81,9 @@ QByteArray SoundObject::data() const
     }
 
     Stream *stream = m_soundData->m_soundObj->getStream();
-    stream->reset();
+    if (!stream->reset()) {
+        return QByteArray {};
+    }
     int dataLen = 0;
     QByteArray fileArray;
     int i;

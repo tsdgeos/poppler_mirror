@@ -356,7 +356,9 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
     g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
     stream = poppler_media->stream.getStream();
-    stream->reset();
+    if (!stream->reset()) {
+        return FALSE;
+    }
 
     do {
         int data;

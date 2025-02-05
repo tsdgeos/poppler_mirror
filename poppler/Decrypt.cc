@@ -405,7 +405,7 @@ EncryptStream::~EncryptStream() = default;
 
 bool EncryptStream::reset()
 {
-    BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::reset();
 
     switch (algo) {
     case cryptRC4:
@@ -428,7 +428,7 @@ bool EncryptStream::reset()
         break;
     }
 
-    return true;
+    return baseResult;
 }
 
 int EncryptStream::lookChar()
@@ -487,7 +487,7 @@ DecryptStream::~DecryptStream() = default;
 bool DecryptStream::reset()
 {
     int i;
-    BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::reset();
 
     switch (algo) {
     case cryptRC4:
@@ -512,7 +512,7 @@ bool DecryptStream::reset()
         break;
     }
 
-    return true;
+    return baseResult;
 }
 
 int DecryptStream::lookChar()

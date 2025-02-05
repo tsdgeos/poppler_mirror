@@ -60,7 +60,7 @@ bool FlateEncoder::reset()
 {
     int zlib_status;
 
-    str->reset();
+    bool innerReset = str->reset();
 
     outBufPtr = outBufEnd = outBuf;
     inBufEof = outBufEof = false;
@@ -78,7 +78,7 @@ bool FlateEncoder::reset()
     zlib_stream.next_out = outBufEnd;
     zlib_stream.avail_out = 1; /* anything but 0 to trigger a read */
 
-    return true;
+    return innerReset;
 }
 
 bool FlateEncoder::fillBuf()

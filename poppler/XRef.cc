@@ -162,12 +162,14 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         error(errSyntaxError, -1, "Too many objects in an object stream");
         return;
     }
+    if (!objStr.streamReset()) {
+        return;
+    }
     objs = new Object[nObjects];
     objNums = (int *)gmallocn(nObjects, sizeof(int));
     offsets = (Goffset *)gmallocn(nObjects, sizeof(Goffset));
 
     // parse the header: object numbers and offsets
-    objStr.streamReset();
     str = new EmbedStream(objStr.getStream(), Object(objNull), true, first);
     parser = new Parser(xref, str, false);
     for (i = 0; i < nObjects; ++i) {
@@ -748,7 +750,10 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
         return false;
     }
 
-    xrefStr->reset();
+    if (!xrefStr->reset()) {
+        return false;
+    }
+
     const Object &idx = dict->lookupNF("Index");
     if (idx.isArray()) {
         for (int i = 0; i + 1 < idx.arrayGetLength(); i += 2) {
@@ -907,7 +912,9 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
         xrefReconstructedCb();
     }
 
-    str->reset();
+    if (!str->reset()) {
+        return false;
+    }
     while (true) {
         pos = str->getPos();
         if (!str->getLine(buf, 256)) {

@@ -104,7 +104,9 @@ QByteArray EmbeddedFile::data()
         return QByteArray();
     }
 
-    stream->reset();
+    if (!stream->reset()) {
+        return QByteArray();
+    }
     auto data = stream->toUnsignedChars();
     return QByteArray(reinterpret_cast<const char *>(data.data()), data.size());
 }

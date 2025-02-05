@@ -108,7 +108,9 @@ void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int wid
     int i, j;
 
     if (inlineImg) {
-        str->reset();
+        if (!str->reset()) {
+            return;
+        }
         j = height * ((width + 7) / 8);
         for (i = 0; i < j; ++i) {
             str->getChar();
@@ -129,7 +131,9 @@ void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, 
     int i, j;
 
     if (inlineImg) {
-        str->reset();
+        if (!str->reset()) {
+            return;
+        }
         j = height * ((width * colorMap->getNumPixelComps() * colorMap->getBits() + 7) / 8);
         for (i = 0; i < j; ++i) {
             str->getChar();

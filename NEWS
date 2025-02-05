@@ -1,3 +1,13 @@
+Release 25.02.0:
+        core:
+         * cairo: fix issue for images reaching MAX_CAIRO_IMAGE_SIZE
+         * Improve rendering in some malformed documents
+         * Internal code improvements
+
+        glib:
+         * add new api to allow selecting annotations to render
+         * fix a crash when getting a font description for a free text annotation if it was not set
+
 Release 25.01.0:
         core:
          * TextOutputDev: Better detect fakebold words

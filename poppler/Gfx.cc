@@ -3604,7 +3604,8 @@ void Gfx::opSetFont(Object args[], int numArgs)
         return;
     }
     if (printCommands) {
-        printf("  font: tag=%s name='%s' %g\n", font->getTag().c_str(), font->getName() ? font->getName()->c_str() : "???", args[1].getNum());
+        const std::optional<std::string> &fontName = font->getName();
+        printf("  font: tag=%s name='%s' %g\n", font->getTag().c_str(), fontName ? fontName->c_str() : "???", args[1].getNum());
         fflush(stdout);
     }
 
@@ -4280,7 +4281,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText()) {
-            str->reset();
+            if (!str->reset()) {
+                goto err1;
+            }
             n = height * ((width + 7) / 8);
             for (i = 0; i < n; ++i) {
                 str->getChar();
@@ -4590,7 +4593,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
 
         // if drawing is disabled, skip over inline image data
         if (!ocState || !out->needNonText() || singular_matrix) {
-            str->reset();
+            if (!str->reset()) {
+                goto err1;
+            }
             n = height * ((width * colorMap.getNumPixelComps() * colorMap.getBits() + 7) / 8);
             for (i = 0; i < n; ++i) {
                 str->getChar();

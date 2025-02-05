@@ -537,7 +537,7 @@ public:
     const Object &dictGetValNF(int i) const;
 
     // Stream accessors.
-    void streamReset();
+    [[nodiscard]] bool streamReset();
     void streamClose();
     int streamGetChar();
     int streamGetChars(int nChars, unsigned char *buffer);

@@ -156,7 +156,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
     // font name
     const std::optional<std::string> &origName = font->getName();
     if (origName) {
-        name = *font->getName();
+        name = *origName;
     }
 
     // font type
