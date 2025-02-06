@@ -317,7 +317,6 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
 inline void SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
 {
     SplashIntersect intersect;
-    intersect.y = y;
     if (x0 < x1) {
         intersect.x0 = x0;
         intersect.x1 = x1;

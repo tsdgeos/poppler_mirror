@@ -38,7 +38,6 @@ class SplashBitmap;
 
 struct SplashIntersect
 {
-    int y;
     int x0, x1; // intersection of segment with [y, y+1)
     int count; // EO/NZWN counter increment
 };
