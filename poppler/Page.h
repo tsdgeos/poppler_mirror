@@ -175,6 +175,9 @@ public:
     PDFDoc *getDoc() { return doc; }
     Ref getRef() { return pageRef; }
 
+    // Keep in API. This is used by GDAL
+    const Object &getPageObj() const { return pageObj; }
+
     // Get resource dictionary.
     Dict *getResourceDict();
     Object *getResourceDictObject();
