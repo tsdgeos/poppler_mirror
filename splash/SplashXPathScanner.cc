@@ -245,7 +245,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                 y1 = yMax;
             }
             int x = splashFloor(seg->x0);
-            int count = eo || (seg->flags & splashXPathFlipped) ? 1 : -1;
+            int count = (seg->flags & splashXPathFlipped) ? 1 : -1;
             for (int y = y0; y <= y1; ++y) {
                 addIntersection(segYMin, segYMax, y, x, x, count);
             }
@@ -265,7 +265,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             if (y1 > yMax) {
                 y1 = yMax;
             }
-            int count = eo || (seg->flags & splashXPathFlipped) ? 1 : -1;
+            int count = (seg->flags & splashXPathFlipped) ? 1 : -1;
             // Calculate the projected intersection of the segment with the
             // X-Axis.
             SplashCoord xbase = seg->x0 - (seg->y0 * seg->dxdy);
