@@ -230,17 +230,22 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
         seg = &xPath.segs[i];
         segYMin = seg->y0;
         segYMax = seg->y1;
-        if (seg->flags & splashXPathHoriz) {
-            int y = splashFloor(seg->y0);
-            if (y >= yMin && y <= yMax) {
-                addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0);
-            }
+        int y1 = splashFloor(segYMax);
+        if (y1 < yMin) {
+            continue;
+        }
+
+        int y0 = (seg->flags & splashXPathHoriz) ? y1 : splashFloor(segYMin);
+        if (y0 > yMax) {
+            break;
+        }
+
+        if (y1 == y0) {
+            addIntersection(segYMin, segYMax, y1, splashFloor(seg->x0), splashFloor(seg->x1), 0);
         } else if (seg->flags & splashXPathVert) {
-            int y0 = splashFloor(segYMin);
             if (y0 < yMin) {
                 y0 = yMin;
             }
-            int y1 = splashFloor(segYMax);
             if (y1 > yMax) {
                 y1 = yMax;
             }
@@ -257,11 +262,9 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                 segXMin = seg->x1;
                 segXMax = seg->x0;
             }
-            int y0 = splashFloor(segYMin);
             if (y0 < yMin) {
                 y0 = yMin;
             }
-            int y1 = splashFloor(segYMax);
             if (y1 > yMax) {
                 y1 = yMax;
             }
