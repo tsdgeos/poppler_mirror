@@ -308,7 +308,7 @@ inline void SplashXPathScanner::addIntersection(double segYMin, double segYMax, 
         intersect.x0 = x1;
         intersect.x1 = x0;
     }
-    if (segYMin <= y && (SplashCoord)y < segYMax) {
+    if (segYMin < y) {
         intersect.count = count;
     } else {
         intersect.count = 0;
