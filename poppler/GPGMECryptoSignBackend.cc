@@ -477,16 +477,15 @@ SignatureValidationStatus GpgSignatureVerification::validateSignature()
     if (!signature) {
         return SIGNATURE_DECODING_ERROR;
     }
-    // Ensure key is actually available
-    signature->key(true, true);
-    const auto summary = signature->summary();
-
-    using Summary = GpgME::Signature::Summary;
-    if (summary & Summary::Red) {
-        return SIGNATURE_INVALID;
-    }
-    if (summary & Summary::Green || summary & Summary::Valid) {
+    switch (signature->status().code()) {
+    case GPG_ERR_NO_ERROR:
+    case GPG_ERR_CERT_EXPIRED: // was valid
+    case GPG_ERR_SIG_EXPIRED: // was valid
+    case GPG_ERR_CERT_REVOKED: // was valid
         return SIGNATURE_VALID;
+    case GPG_ERR_BAD_SIGNATURE:
+        return SIGNATURE_INVALID;
+    default:
+        return SIGNATURE_GENERIC_ERROR;
     }
-    return SIGNATURE_GENERIC_ERROR;
 }
