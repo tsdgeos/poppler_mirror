@@ -255,6 +255,12 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
         if (signingResult.error().isCanceled()) {
             return CryptoSign::SigningError::UserCancelled;
         } else {
+            switch (signingResult.error().code()) {
+            case GPG_ERR_NO_PASSPHRASE: // this is likely the user pressing enter. Let's treat it as cancelled for now
+                return CryptoSign::SigningError::UserCancelled;
+            case GPG_ERR_BAD_PASSPHRASE:
+                return CryptoSign::SigningError::BadPassphrase;
+            }
             return CryptoSign::SigningError::GenericError;
         }
     }

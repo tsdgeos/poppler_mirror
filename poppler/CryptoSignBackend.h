@@ -48,6 +48,7 @@ enum class SigningError
     WriteFailed /**Some sort of IO error, missing write permissions or ...*/,
     UserCancelled /**User cancelled the action*/,
     KeyMissing, /**The key/certificate not specified*/
+    BadPassphrase, /** Bad passphrase */
 
 };
 

@@ -801,6 +801,7 @@ public:
         KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath) \since 24.12
         WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 24.12
         UserCancelled, ///< User cancelled the process \since 24.12
+        BadPassphrase, ///< User entered bad passphrase \since 25.03
     };
 
     SignatureAnnotation();

@@ -883,6 +883,9 @@ public:
     SignatureValidationInfo::CertificateStatus validateResult() const;
 
     /**
+     * For consumers, this enum will be extended. Unknown numbers should probably be
+     * treated as GenericSigningError
+     *
      * \since 22.02
      */
     enum SigningResult
@@ -894,6 +897,7 @@ public:
         KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath \since 24.12)
         WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 24.12
         UserCancelled, ///< User cancelled the process \since 24.12
+        BadPassphrase, ///< Passphrase didn't work \since 25.03
     };
 
     /**

@@ -1206,6 +1206,8 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
             return UserCancelled;
         case CryptoSign::SigningError::WriteFailed:
             return WriteFailed;
+        case CryptoSign::SigningError::BadPassphrase:
+            return BadPassphrase;
         }
     }
     return SigningSuccess;
