@@ -38,6 +38,7 @@
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 //========================================================================
 
@@ -733,11 +734,6 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithApp
     std::string originalDefaultAppearance = aux ? aux->toStr() : std::string();
 
     Form *form = doc->getCatalog()->getCreateForm();
-    const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
-    if (pdfFontName.empty()) {
-        return CryptoSign::SigningError::InternalError;
-    }
-    std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
 
     double x1, y1, x2, y2;
     getRect(&x1, &y1, &x2, &y2);
@@ -749,30 +745,37 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithApp
     const double dy = std::get<1>(dxdy);
     const double wMax = dx - 2 * borderWidth - 4;
     const double hMax = dy - 2 * borderWidth;
-    if (fontSize == 0) {
-        fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
-    }
-    if (leftFontSize == 0) {
-        leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
-    }
-    const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
-    getField()->setDefaultAppearance(da.toAppearanceString());
-
-    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
-    appearCharacs->setBorderColor(std::move(borderColor));
-    appearCharacs->setBackColor(std::move(backgroundColor));
-    getWidgetAnnotation()->setAppearCharacs(std::move(appearCharacs));
 
     std::unique_ptr<AnnotBorder> origBorderCopy = getWidgetAnnotation()->getBorder() ? getWidgetAnnotation()->getBorder()->copy() : nullptr;
     std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
     border->setWidth(borderWidth);
     getWidgetAnnotation()->setBorder(std::move(border));
 
+    if (signatureText.getLength() || signatureTextLeft.getLength()) {
+        const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
+        if (pdfFontName.empty()) {
+            return CryptoSign::SigningError::InternalError;
+        }
+        std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(pdfFontName.c_str());
+
+        if (fontSize == 0) {
+            fontSize = Annot::calculateFontSize(form, font.get(), &signatureText, wMax / 2.0, hMax);
+        }
+        if (leftFontSize == 0) {
+            leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
+        }
+        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        getField()->setDefaultAppearance(da.toAppearanceString());
+        form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
+        form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
+    }
+    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
+    appearCharacs->setBorderColor(std::move(borderColor));
+    appearCharacs->setBackColor(std::move(backgroundColor));
+    getWidgetAnnotation()->setAppearCharacs(std::move(appearCharacs));
+
     getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
-
-    form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
-    form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
     ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
     ffs->setCustomAppearanceContent(signatureText);

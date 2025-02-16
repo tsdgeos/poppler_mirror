@@ -57,6 +57,7 @@
 // Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2205,12 +2206,6 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     }
 
     Form *form = catalog->getCreateForm();
-    const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
-    if (pdfFontName.empty()) {
-        return std::nullopt;
-    }
-
-    const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
 
     Object annotObj = Object(new Dict(getXRef()));
     annotObj.dictSet("Type", Object(objName, "Annot"));
@@ -2224,15 +2219,23 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     rectArray->add(Object(rect.y2));
     annotObj.dictSet("Rect", Object(rectArray));
 
-    const std::string daStr = da.toAppearanceString();
-    annotObj.dictSet("DA", Object(std::make_unique<GooString>(daStr)));
+    if (signatureText.getLength() || signatureTextLeft.getLength()) {
+        const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
+        if (pdfFontName.empty()) {
+            return std::nullopt;
+        }
+
+        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        const std::string daStr = da.toAppearanceString();
+        annotObj.dictSet("DA", Object(std::make_unique<GooString>(daStr)));
+
+        form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
+        form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
+    }
 
     const Ref ref = getXRef()->addIndirectObject(annotObj);
     catalog->addFormToAcroForm(ref);
     catalog->setAcroFormModified();
-
-    form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
-    form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
 
     std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, std::move(annotObj), ref, nullptr, nullptr);
     field->setCustomAppearanceContent(signatureText);
