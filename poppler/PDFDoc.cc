@@ -2256,9 +2256,6 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     border->setWidth(borderWidth);
     signatureAnnot->setBorder(std::move(border));
 
-    signatureAnnot->generateFieldAppearance();
-    signatureAnnot->updateAppearanceStream();
-
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);
 

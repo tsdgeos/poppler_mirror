@@ -46,6 +46,7 @@
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -835,6 +836,7 @@ protected:
     mutable std::recursive_mutex mutex;
 
     bool hasBeenUpdated = false;
+    Ref updatedAppearanceStream = Ref::INVALID(); // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------
@@ -1247,7 +1249,6 @@ private:
 
     std::unique_ptr<GooString> icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;
-    Ref updatedAppearanceStream;
 };
 
 //------------------------------------------------------------------------
@@ -1465,7 +1466,6 @@ public:
     ~AnnotWidget() override;
 
     void draw(Gfx *gfx, bool printing) override;
-    void invalidateAppearance() override;
 
     void generateFieldAppearance();
     void updateAppearanceStream();
@@ -1494,7 +1494,6 @@ private:
     // inherited  from Annot
     // AnnotBorderBS border;                // BS
     Dict *parent; // Parent
-    Ref updatedAppearanceStream; // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------

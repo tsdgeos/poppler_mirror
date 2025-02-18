@@ -1621,6 +1621,7 @@ void Annot::setAppearanceState(const char *state)
 void Annot::invalidateAppearance()
 {
     annotLocker();
+    updatedAppearanceStream = Ref::INVALID();
     if (appearStreams) { // Remove existing appearance streams
         appearStreams->removeAllStreams();
     }
@@ -2077,7 +2078,7 @@ void Annot::setNewAppearance(Object &&newAppearance, bool keepAppearState)
         invalidateAppearance();
         appearance = std::move(newAppearance);
 
-        Ref updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
+        updatedAppearanceStream = doc->getXRef()->addIndirectObject(appearance);
 
         Object obj1 = Object(new Dict(doc->getXRef()));
         obj1.dictAdd("N", Object(updatedAppearanceStream));
@@ -5553,12 +5554,6 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
     gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
-}
-
-void AnnotWidget::invalidateAppearance()
-{
-    updatedAppearanceStream = Ref::INVALID();
-    Annot::invalidateAppearance();
 }
 
 //------------------------------------------------------------------------

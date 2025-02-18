@@ -793,7 +793,6 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithApp
     ffs->setCustomAppearanceLeftContent({});
     getWidgetAnnotation()->setAppearCharacs(std::move(origAppearCharacs));
     getWidgetAnnotation()->setBorder(std::move(origBorderCopy));
-    getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
 
     return signingResult;
