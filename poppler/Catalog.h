@@ -196,7 +196,7 @@ public:
     const GooString *getJSName(int i) { return getJSNameTree()->getName(i); }
 
     // Get the i'th JavaScript script (at the Document level) in the document
-    GooString *getJS(int i);
+    std::string getJS(int i);
 
     // Convert between page indices and page labels.
     bool labelToIndex(GooString *label, int *index);

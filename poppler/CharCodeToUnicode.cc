@@ -205,7 +205,6 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     int n1, n2, n3;
     CharCode i;
     CharCode maxCode, code1, code2;
-    GooString *name;
     FILE *f;
 
     bool ok = false;
@@ -215,16 +214,15 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     while (pst->getToken(tok2, sizeof(tok2), &n2)) {
         if (!strcmp(tok2, "usecmap")) {
             if (tok1[0] == '/') {
-                name = new GooString(tok1 + 1);
-                if ((f = globalParams->findToUnicodeFile(name))) {
+                GooString name { tok1 + 1 };
+                if ((f = globalParams->findToUnicodeFile(&name))) {
                     if (parseCMap1(&getCharFromFile, f, nBits)) {
                         ok = true;
                     }
                     fclose(f);
                 } else {
-                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:t}'", name);
+                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", name.c_str());
                 }
-                delete name;
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok2, "beginbfchar")) {

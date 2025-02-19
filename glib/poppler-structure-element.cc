@@ -792,7 +792,7 @@ enum
 static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
     PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
-    if (GooString *text = span.getText()) {
+    if (const GooString *text = span.getText()) {
         new_span->text = _poppler_goo_string_to_utf8(text);
     }
 

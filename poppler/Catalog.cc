@@ -587,7 +587,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     embeddedFileNameTree = nullptr;
 }
 
-GooString *Catalog::getJS(int i)
+std::string Catalog::getJS(int i)
 {
     Object obj;
     // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
@@ -599,23 +599,22 @@ GooString *Catalog::getJS(int i)
     }
 
     if (!obj.isDict()) {
-        return nullptr;
+        return {};
     }
     Object obj2 = obj.dictLookup("S");
     if (!obj2.isName()) {
-        return nullptr;
+        return {};
     }
     if (strcmp(obj2.getName(), "JavaScript") != 0) {
-        return nullptr;
+        return {};
     }
     obj2 = obj.dictLookup("JS");
-    GooString *js = nullptr;
+    std::string js;
     if (obj2.isString()) {
-        js = new GooString(obj2.getString());
+        js = obj2.getString()->toStr();
     } else if (obj2.isStream()) {
         Stream *stream = obj2.getStream();
-        js = new GooString();
-        stream->fillGooString(js);
+        stream->fillString(js);
     }
     return js;
 }

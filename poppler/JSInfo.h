@@ -59,7 +59,7 @@ private:
 
     void scan(int nPages);
     void scanLinkAction(LinkAction *link, const char *action);
-    void printJS(const GooString *js);
+    void printJS(std::string_view js);
 };
 
 #endif

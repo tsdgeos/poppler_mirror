@@ -78,12 +78,11 @@ std::vector<Unicode> UTF16toUCS4(std::span<Unicode> utf16)
     return u;
 }
 
-std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
+std::vector<Unicode> TextStringToUCS4(std::string_view textStr)
 {
     bool isUnicode, isUnicodeLE;
 
     int len = textStr.size();
-    const std::string &s = textStr;
     if (len == 0) {
         return {};
     }
@@ -106,9 +105,9 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
             utf16.reserve(len);
             for (int i = 0; i < len; i++) {
                 if (isUnicode) {
-                    utf16.push_back((s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff));
+                    utf16.push_back((textStr[2 + i * 2] & 0xff) << 8 | (textStr[3 + i * 2] & 0xff));
                 } else { // UnicodeLE
-                    utf16.push_back((s[3 + i * 2] & 0xff) << 8 | (s[2 + i * 2] & 0xff));
+                    utf16.push_back((textStr[3 + i * 2] & 0xff) << 8 | (textStr[2 + i * 2] & 0xff));
                 }
             }
             return UTF16toUCS4(utf16);
@@ -120,7 +119,7 @@ std::vector<Unicode> TextStringToUCS4(const std::string &textStr)
         std::vector<Unicode> u;
         u.reserve(len);
         for (int i = 0; i < len; i++) {
-            u.push_back(pdfDocEncoding[s[i] & 0xff]);
+            u.push_back(pdfDocEncoding[textStr[i] & 0xff]);
         }
         return u;
     }
