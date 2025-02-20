@@ -1136,10 +1136,7 @@ void CachedFileStream::moveStart(Goffset delta)
 
 MemStream::~MemStream() = default;
 
-AutoFreeMemStream::~AutoFreeMemStream()
-{
-    gfree(buf);
-}
+AutoFreeMemStream::~AutoFreeMemStream() = default;
 
 bool AutoFreeMemStream::isFilterRemovalForbidden() const
 {

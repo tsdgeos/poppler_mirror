@@ -2878,21 +2878,21 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     error(errIO, -1, "Font size is too big {0:s}", filepath.c_str());
                     return {};
                 }
-                char *dataPtr = static_cast<char *>(gmalloc(fileSize));
-                const Goffset bytesRead = file->read(dataPtr, static_cast<int>(fileSize), 0);
+                std::vector<char> data;
+                data.resize(fileSize);
+                const Goffset bytesRead = file->read(data.data(), static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
                     error(errIO, -1, "Failed to read contents of {0:s}", filepath.c_str());
-                    gfree(dataPtr);
                     return {};
                 }
 
                 if (isTrueType) {
-                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), dataPtr, fileSize, StreamCompression::Compress);
+                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
                     Dict *fontFileStreamDict = new Dict(xref);
                     fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
-                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, dataPtr, fileSize, StreamCompression::Compress);
+                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }
             }
@@ -2950,15 +2950,15 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
             }
             descendantFont->set("W", Object(widths));
 
-            char *dataPtr = static_cast<char *>(gmalloc(2 * (basicMultilingualMaxCode + 1)));
-            int i = 0;
+            std::vector<char> data;
+            data.reserve(2 * basicMultilingualMaxCode);
 
             for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
                 const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
-                dataPtr[i++] = (unsigned char)(glyph >> 8);
-                dataPtr[i++] = (unsigned char)(glyph & 0xff);
+                data.push_back((char)(glyph >> 8));
+                data.push_back((char)(glyph & 0xff));
             }
-            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), dataPtr, basicMultilingualMaxCode * 2, StreamCompression::Compress);
+            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
             descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
         }
 

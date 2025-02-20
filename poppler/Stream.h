@@ -761,14 +761,15 @@ public:
     ~MemStream() override;
 };
 
-class AutoFreeMemStream : public BaseMemStream<char>
+class AutoFreeMemStream final : public BaseMemStream<const char>
 {
     bool filterRemovalForbidden = false;
+    std::vector<char> m_data;
 
 public:
     // AutoFreeMemStream takes ownership over the buffer.
     // The buffer should be created using gmalloc().
-    AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
+    AutoFreeMemStream(std::vector<char> &&data, Object &&dictA) : BaseMemStream(data.data(), 0, data.size(), std::move(dictA)), m_data(std::move(data)) { }
     ~AutoFreeMemStream() override;
 
     // A hack to deal with the strange behaviour of PDFDoc::writeObject().

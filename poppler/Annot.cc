@@ -1970,7 +1970,8 @@ Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool tr
         appearDict->set("Resources", std::move(resDictObject));
     }
 
-    Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    Stream *mStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
     return Object(mStream);
 }
 
@@ -5459,7 +5460,8 @@ void AnnotWidget::generateFieldAppearance()
     }
 
     // build the appearance stream
-    Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    Stream *appearStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
@@ -5639,7 +5641,8 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Matrix", Object(matrix));
             formDict->set("Resources", Object(resDict));
 
-            Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(formDict));
+            std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+            Stream *mStream = new AutoFreeMemStream(std::move(data), Object(formDict));
 
             Dict *dict = new Dict(gfx->getXRef());
             dict->set("FRM", Object(mStream));
