@@ -4090,22 +4090,19 @@ void PSOutputDev::updateOverprintMode(GfxState *state)
 
 void PSOutputDev::updateTransfer(GfxState *state)
 {
-    Function **funcs;
-    int i;
-
-    funcs = state->getTransfer();
-    if (funcs[0] && funcs[1] && funcs[2] && funcs[3]) {
+    const std::vector<std::unique_ptr<Function>> &funcs = state->getTransfer();
+    if (funcs.size() == 4) {
         if (level >= psLevel2) {
-            for (i = 0; i < 4; ++i) {
-                cvtFunction(funcs[i]);
+            for (int i = 0; i < 4; ++i) {
+                cvtFunction(funcs[i].get());
             }
             writePS("setcolortransfer\n");
         } else {
-            cvtFunction(funcs[3]);
+            cvtFunction(funcs[3].get());
             writePS("settransfer\n");
         }
-    } else if (funcs[0]) {
-        cvtFunction(funcs[0]);
+    } else if (!funcs.empty()) {
+        cvtFunction(funcs[0].get());
         writePS("settransfer\n");
     } else {
         writePS("{} settransfer\n");

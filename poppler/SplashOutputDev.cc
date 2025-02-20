@@ -1772,14 +1772,13 @@ void SplashOutputDev::updateOverprintMode(GfxState *state)
 
 void SplashOutputDev::updateTransfer(GfxState *state)
 {
-    Function **transfer;
     unsigned char red[256], green[256], blue[256], gray[256];
     double x, y;
     int i;
 
-    transfer = state->getTransfer();
-    if (transfer[0] && transfer[0]->getInputSize() == 1 && transfer[0]->getOutputSize() == 1) {
-        if (transfer[1] && transfer[1]->getInputSize() == 1 && transfer[1]->getOutputSize() == 1 && transfer[2] && transfer[2]->getInputSize() == 1 && transfer[2]->getOutputSize() == 1 && transfer[3] && transfer[3]->getInputSize() == 1
+    const std::vector<std::unique_ptr<Function>> &transfer = state->getTransfer();
+    if (!transfer.empty() && transfer[0]->getInputSize() == 1 && transfer[0]->getOutputSize() == 1) {
+        if (transfer.size() == 4 && transfer[1]->getInputSize() == 1 && transfer[1]->getOutputSize() == 1 && transfer[2]->getInputSize() == 1 && transfer[2]->getOutputSize() == 1 && transfer[3]->getInputSize() == 1
             && transfer[3]->getOutputSize() == 1) {
             for (i = 0; i < 256; ++i) {
                 x = i / 255.0;
