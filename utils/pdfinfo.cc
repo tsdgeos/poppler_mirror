@@ -239,8 +239,8 @@ static void printAttribute(const Attribute *attribute, unsigned indent)
     printIndent(indent);
     printf(" /%s ", attribute->getTypeName());
     if (attribute->getType() == Attribute::UserProperty) {
-        std::unique_ptr<GooString> name = attribute->getName();
-        printf("(%s) ", name->c_str());
+        const char *name = attribute->getName();
+        printf("(%s) ", name);
     }
     attribute->getValue()->print(stdout);
     if (attribute->getFormattedValue()) {

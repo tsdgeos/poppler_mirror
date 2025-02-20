@@ -988,7 +988,7 @@ public:
     bool reset() override;
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
-    GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
     bool isBinary(bool last = true) const override { return true; }
     bool isEncoder() const override { return true; }
 
@@ -2751,7 +2751,6 @@ void PSOutputDev::setupImages(Dict *resDict)
 void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
 {
     bool useFlate, useLZW, useRLE, useCompressed, doUseASCIIHex;
-    GooString *s;
     int c;
     int size, line, col, i;
     int outerSize, outer;
@@ -2770,10 +2769,9 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
         if (uncompressPreloadedImages) {
             /* nothing to do */;
         } else {
-            s = str->getPSFilter(level < psLevel3 ? 2 : 3, "");
+            std::optional<std::string> s = str->getPSFilter(level < psLevel3 ? 2 : 3, "");
             if (s) {
                 useCompressed = true;
-                delete s;
             } else {
                 if (level >= psLevel3 && getEnableFlate()) {
                     useFlate = true;
@@ -5590,7 +5588,6 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
     PSOutImgClipRect *rects0, *rects1, *rectsTmp, *rectsOut;
     int rects0Len, rects1Len, rectsSize, rectsOutLen, rectsOutSize;
     bool emitRect, addRect, extendRect;
-    GooString *s;
     int n, numComps;
     bool useLZW, useRLE, useASCII, useCompressed;
     GfxSeparationColorSpace *sepCS;
@@ -5879,9 +5876,9 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         writePS("  /DataSource currentfile\n");
     }
 
+    std::optional<std::string> s;
     // filters
     if ((mode == psModeForm || inType3Char || preloadImagesForms) && uncompressPreloadedImages) {
-        s = nullptr;
         useLZW = useRLE = false;
         useCompressed = false;
         useASCII = false;
@@ -5914,7 +5911,6 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
     if (useCompressed) {
         writePS(s->c_str());
     }
-    delete s;
 
     if (mode == psModeForm || inType3Char || preloadImagesForms) {
 
@@ -6034,7 +6030,6 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
                             bool maskInvert)
 {
     Stream *str2;
-    GooString *s;
     int n, numComps;
     bool useFlate, useLZW, useRLE, useASCII, useCompressed;
     bool maskUseFlate, maskUseLZW, maskUseRLE, maskUseASCII, maskUseCompressed;
@@ -6052,9 +6047,10 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     // explicit masking
     if (maskStr) {
 
+        std::optional<std::string> s;
         // mask data source
         if ((mode == psModeForm || inType3Char || preloadImagesForms) && uncompressPreloadedImages) {
-            s = nullptr;
+            s = {};
         } else {
             s = maskStr->getPSFilter(3, "  ");
             if (!s) {
@@ -6082,10 +6078,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         } else if (maskUseRLE) {
             maskFilters->append("  /RunLengthDecode filter\n");
         }
-        if (maskUseCompressed) {
-            maskFilters->append(s);
+        if (maskUseCompressed && s.has_value()) {
+            maskFilters->append(s.value());
         }
-        delete s;
         if (mode == psModeForm || inType3Char || preloadImagesForms) {
             writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n", ref->getRefNum(), ref->getRefGen());
         } else {
@@ -6273,8 +6268,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     useCompressed = false;
     useASCII = false;
 
+    std::optional<std::string> s;
     if ((mode == psModeForm || inType3Char || preloadImagesForms) && uncompressPreloadedImages) {
-        s = nullptr;
+        s = {};
     } else {
         s = str->getPSFilter(level < psLevel2 ? 1 : level < psLevel3 ? 2 : 3, "    ");
         if ((colorMap && colorMap->getColorSpace()->getMode() == csDeviceN) || inlineImg || !s) {
@@ -6301,10 +6297,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
     } else if (useRLE) {
         writePS("    /RunLengthDecode filter\n");
     }
-    if (useCompressed) {
+    if (useCompressed && s.has_value()) {
         writePS(s->c_str());
     }
-    delete s;
 
     // end of image (data) dictionary
     writePS(">>\n");

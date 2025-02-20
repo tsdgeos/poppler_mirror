@@ -293,7 +293,7 @@ public:
     void close() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
     void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha) override;
 

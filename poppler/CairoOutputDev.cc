@@ -3143,21 +3143,18 @@ static bool colorMapHasIdentityDecodeMap(GfxImageColorMap *colorMap)
 
 static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mime_type, const char *mime_id_prefix, Ref ref)
 {
-    GooString *mime_id;
+    GooString mime_id;
     char *idBuffer;
     cairo_status_t status;
 
-    mime_id = new GooString;
-
     if (mime_id_prefix) {
-        mime_id->append(mime_id_prefix);
+        mime_id.append(mime_id_prefix);
     }
 
-    mime_id->appendf("{0:d}-{1:d}", ref.gen, ref.num);
+    mime_id.appendf("{0:d}-{1:d}", ref.gen, ref.num);
 
-    idBuffer = copyString(mime_id->c_str());
-    status = cairo_surface_set_mime_data(surface, mime_type, (const unsigned char *)idBuffer, mime_id->getLength(), gfree, idBuffer);
-    delete mime_id;
+    idBuffer = copyString(mime_id.c_str());
+    status = cairo_surface_set_mime_data(surface, mime_type, (const unsigned char *)idBuffer, mime_id.getLength(), gfree, idBuffer);
     if (status) {
         gfree(idBuffer);
     }

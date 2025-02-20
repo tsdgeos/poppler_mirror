@@ -141,11 +141,9 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
 {
 #ifdef _WIN32
     const int n = fileName->getLength();
-    fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
     for (int i = 0; i < n; ++i) {
-        fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+        fileNameU.push_back((wchar_t)(fileName->getChar(i) & 0xff));
     }
-    fileNameU[n] = L'\0';
 
     std::u16string u16fileName = utf8ToUtf16(fileName->toStr());
     wchar_t *wFileName = (wchar_t *)u16fileName.data();
@@ -176,21 +174,19 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     OSVERSIONINFO version;
 
     // save both Unicode and 8-bit copies of the file name
-    GooString *fileNameG = new GooString();
-    fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
+    std::unique_ptr<GooString> fileNameG = std::make_unique<GooString>();
     for (int i = 0; i < fileNameLen; ++i) {
         fileNameG->append((char)fileNameA[i]);
-        fileNameU[i] = fileNameA[i];
+        fileNameU.push_back(fileNameA[i]);
     }
-    fileName.reset(fileNameG);
-    fileNameU[fileNameLen] = L'\0';
+    fileName = std::move(fileNameG);
 
     // try to open file
     // NB: _wfopen is only available in NT
     version.dwOSVersionInfoSize = sizeof(version);
     GetVersionEx(&version);
     if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-        file = GooFile::open(fileNameU);
+        file = GooFile::open(fileNameU.c_str());
     } else {
         file = GooFile::open(fileName->toStr());
     }
@@ -213,11 +209,9 @@ PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, 
         fileName = strA->getFileName()->copy();
 #ifdef _WIN32
         const int n = fileName->getLength();
-        fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
         for (int i = 0; i < n; ++i) {
-            fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+            fileNameU.push_back((wchar_t)(fileName->getChar(i) & 0xff));
         }
-        fileNameU[n] = L'\0';
 #endif
     }
     str = strA;
@@ -311,9 +305,6 @@ PDFDoc::~PDFDoc()
     delete hints;
     delete linearization;
     delete str;
-#ifdef _WIN32
-    gfree(fileNameU);
-#endif
 }
 
 // Check for a %%EOF at the end of this stream
@@ -525,7 +516,7 @@ static PDFSubtypeConformance pdfConformanceFromString(const std::string &pdfsubv
             /**/
             break;
         }
-        error(errSyntaxWarning, -1, "Unexpected pdf subtype", conf.c_str());
+        error(errSyntaxWarning, -1, "Unexpected pdf subtype {0:s}", conf.c_str());
     }
 
     return subtypeConfNone;

@@ -630,7 +630,7 @@ private:
                   const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
-    GooString *appearBuf;
+    std::unique_ptr<GooString> appearBuf;
 };
 
 //------------------------------------------------------------------------

@@ -1245,9 +1245,9 @@ int JBIG2Stream::getChars(int nChars, unsigned char *buffer)
     return n;
 }
 
-GooString *JBIG2Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JBIG2Stream::getPSFilter(int psLevel, const char *indent)
 {
-    return nullptr;
+    return {};
 }
 
 bool JBIG2Stream::isBinary(bool last) const

@@ -230,7 +230,6 @@ bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const s
 FormWidgetButton::FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref refA, FormField *p) : FormWidget(docA, dictObj, num, refA, p)
 {
     type = formButton;
-    onStr = nullptr;
 
     // Find the name of the ON state in the AP dictionary
     // The reference say the Off state, if it exists, _must_ be stored in the AP dict under the name /Off
@@ -242,7 +241,7 @@ FormWidgetButton::FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, 
             for (int i = 0; i < obj2.dictGetLength(); i++) {
                 const char *key = obj2.dictGetKey(i);
                 if (strcmp(key, "Off") != 0) {
-                    onStr = new GooString(key);
+                    onStr = std::make_unique<GooString>(key);
                     break;
                 }
             }
@@ -261,10 +260,7 @@ const char *FormWidgetButton::getOnStr() const
     return parent()->getButtonType() == formButtonCheck ? "Yes" : nullptr;
 }
 
-FormWidgetButton::~FormWidgetButton()
-{
-    delete onStr;
-}
+FormWidgetButton::~FormWidgetButton() = default;
 
 FormButtonType FormWidgetButton::getButtonType() const
 {
@@ -943,7 +939,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
         vObj.dictAdd("Location", Object(location->copy()));
     }
 
-    vObj.dictAdd("Contents", Object(objHexString, new GooString(std::string(placeholderLength, '\0'))));
+    vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(static_cast<long long>(0LL)));

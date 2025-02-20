@@ -538,7 +538,7 @@ static StructElement::Type nameToType(const char *name)
 // Attribute
 //------------------------------------------------------------------------
 
-Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), hidden(false), formatted(nullptr)
+Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), hidden(false)
 {
     assert(valueA);
     value = valueA->copy();
@@ -548,8 +548,7 @@ Attribute::Attribute(Type typeA, Object *valueA)
     : type(typeA),
       owner(UserProperties), // TODO: Determine corresponding owner from Type
       revision(0),
-      hidden(false),
-      formatted(nullptr)
+      hidden(false)
 {
     assert(valueA);
 
@@ -560,10 +559,7 @@ Attribute::Attribute(Type typeA, Object *valueA)
     }
 }
 
-Attribute::~Attribute()
-{
-    delete formatted;
-}
+Attribute::~Attribute() = default;
 
 const char *Attribute::getTypeName() const
 {
@@ -596,11 +592,10 @@ void Attribute::setFormattedValue(const char *formattedA)
         if (formatted) {
             formatted->Set(formattedA);
         } else {
-            formatted = new GooString(formattedA);
+            formatted = GooString(formattedA);
         }
     } else {
-        delete formatted;
-        formatted = nullptr;
+        formatted = {};
     }
 }
 

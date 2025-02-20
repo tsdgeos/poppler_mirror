@@ -4530,7 +4530,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     const GfxFont *font;
     double fontSize;
     int tfPos, tmPos;
-    bool freeText = false; // true if text should be freed before return
+    std::unique_ptr<GooString> textToFree;
     std::unique_ptr<const GfxFont> fontToFree = nullptr;
 
     //~ if there is no MK entry, this should use the existing content stream,
@@ -4604,12 +4604,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             len = text->getLength();
         }
 
-        GooString *newText = new GooString;
+        textToFree = std::make_unique<GooString>();
         for (int i = 0; i < len; ++i) {
-            newText->append('*');
+            textToFree->append('*');
         }
-        text = newText;
-        freeText = true;
+        text = textToFree.get();
     }
 
     // setup
@@ -4826,9 +4825,6 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     appearBuf->append("Q\n");
     if (flags & EmitMarkedContentDrawTextFlag) {
         appearBuf->append("EMC\n");
-    }
-    if (freeText) {
-        delete text;
     }
 
     return true;
@@ -7625,12 +7621,9 @@ Annots::~Annots()
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
 
-AnnotAppearanceBuilder::AnnotAppearanceBuilder() : appearBuf(new GooString()) { }
+AnnotAppearanceBuilder::AnnotAppearanceBuilder() : appearBuf { std::make_unique<GooString>() } { }
 
-AnnotAppearanceBuilder::~AnnotAppearanceBuilder()
-{
-    delete appearBuf;
-}
+AnnotAppearanceBuilder::~AnnotAppearanceBuilder() = default;
 
 void AnnotAppearanceBuilder::append(const char *text)
 {
@@ -7648,5 +7641,5 @@ void AnnotAppearanceBuilder::appendf(const char *fmt, ...) GOOSTRING_FORMAT
 
 const GooString *AnnotAppearanceBuilder::buffer() const
 {
-    return appearBuf;
+    return appearBuf.get();
 }

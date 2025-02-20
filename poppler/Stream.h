@@ -49,6 +49,7 @@
 #include <cstdio>
 #include <vector>
 #include <span>
+#include <optional>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -237,7 +238,7 @@ public:
     virtual void setPos(Goffset pos, int dir = 0) = 0;
 
     // Get PostScript command for the filter(s).
-    virtual GooString *getPSFilter(int psLevel, const char *indent);
+    virtual std::optional<std::string> getPSFilter(int psLevel, const char *indent);
 
     // Does this stream type potentially contain non-printable chars?
     virtual bool isBinary(bool last = true) const = 0;
@@ -841,7 +842,7 @@ public:
         return c;
     }
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
 private:
@@ -867,7 +868,7 @@ public:
         return ch;
     }
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
 private:
@@ -892,7 +893,7 @@ public:
     int lookChar() override;
     int getRawChar() override;
     void getRawChars(int nChars, int *buffer) override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
 private:
@@ -950,7 +951,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
 private:
@@ -985,7 +986,7 @@ public:
         return c;
     }
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
     [[nodiscard]] bool unfilteredReset() override;
@@ -1078,7 +1079,7 @@ public:
     void close() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
 
     [[nodiscard]] bool unfilteredReset() override;
@@ -1183,7 +1184,7 @@ public:
     int lookChar() override;
     int getRawChar() override;
     void getRawChars(int nChars, int *buffer) override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
     [[nodiscard]] bool unfilteredReset() override;
 
@@ -1257,7 +1258,7 @@ public:
     [[nodiscard]] bool reset() override { return true; }
     int getChar() override { return EOF; }
     int lookChar() override { return EOF; }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return false; }
 };
 
@@ -1274,7 +1275,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
     bool isBinary(bool last = true) const override;
 
     int lookChar(int idx);
@@ -1297,7 +1298,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override;
     bool isEncoder() const override { return true; }
 
@@ -1319,7 +1320,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return false; }
     bool isEncoder() const override { return true; }
 
@@ -1346,7 +1347,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return false; }
     bool isEncoder() const override { return true; }
 
@@ -1373,7 +1374,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return true; }
     bool isEncoder() const override { return true; }
 
@@ -1407,7 +1408,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
     bool isBinary(bool last = true) const override { return true; }
     bool isEncoder() const override { return true; }
 
@@ -1437,7 +1438,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return false; }
     bool isEncoder() const override { return true; }
 
@@ -1463,7 +1464,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
     int lookChar() override { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return false; }
     bool isEncoder() const override { return true; }
 
@@ -1492,7 +1493,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool /*last = true*/) const override { return true; }
 
     // Although we are an encoder, we return false here, since we do not want do be auto-deleted by
