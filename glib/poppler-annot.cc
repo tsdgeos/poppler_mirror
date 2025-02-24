@@ -160,11 +160,11 @@ struct _PopplerAnnotSquareClass
 };
 struct _PopplerAnnotStamp
 {
-    PopplerAnnot parent_instance;
+    PopplerAnnotMarkup parent_instance;
 };
 struct _PopplerAnnotStampClass
 {
-    PopplerAnnotClass parent_class;
+    PopplerAnnotMarkupClass parent_class;
 };
 
 G_DEFINE_TYPE(PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
@@ -178,7 +178,7 @@ G_DEFINE_TYPE(PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE(PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
-G_DEFINE_TYPE(PopplerAnnotStamp, poppler_annot_stamp, POPPLER_TYPE_ANNOT)
+G_DEFINE_TYPE(PopplerAnnotStamp, poppler_annot_stamp, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *_poppler_create_annot(GType annot_type, Annot *annot)
 {
