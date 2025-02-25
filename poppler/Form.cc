@@ -1693,8 +1693,17 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                         const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
                         // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                         // to the field DR dictionary
-                        for (const Form::AddFontResult &afr : newFonts) {
-                            fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                        if (!newFonts.empty()) {
+                            for (const Form::AddFontResult &afr : newFonts) {
+                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                                // This is not fully correct, it changes the entire font to the last added font
+                                // but it is much better than not doing anything, because we know that one of
+                                // the fonts have characters we need, so there is a bit of hope involved here
+                                // It is likely that we only have added one font, and it is likely that it is
+                                // a non-subset version of a subset or a reduced type1 font or similar.
+                                da.setFontName(Object(objName, afr.fontName.c_str()));
+                            }
+                            setDefaultAppearance(da.toAppearanceString());
                         }
                     } else {
                         form->ensureFontsForAllCharacters(content.get(), fontName);
