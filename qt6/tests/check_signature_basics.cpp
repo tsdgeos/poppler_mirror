@@ -273,8 +273,10 @@ void TestSignatureBasics::testSignedRanges()
 
 void TestSignatureBasics::testPgp()
 {
-    QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
+    std::optional<CryptoSign::Backend::Type> usedBackend;
 #ifdef ENABLE_GPGME
+    QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
+    usedBackend = backend;
     if (backend == CryptoSign::Backend::Type::GPGME) {
         GpgSignatureConfiguration::setPgpSignaturesAllowed(true);
 
@@ -305,7 +307,7 @@ void TestSignatureBasics::testPgp()
 
     auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[0]->validateSignatureResult();
-    if (backend == CryptoSign::Backend::Type::GPGME) {
+    if (usedBackend == CryptoSign::Backend::Type::GPGME) {
         QCOMPARE(siginfo0->getSignerName(), std::string { "Sune Vuorela" });
         QCOMPARE(siginfo0->getHashAlgorithm(), HashAlgorithm::Sha256);
         QCOMPARE(siginfo0->getCertificateInfo()->getPublicKeyInfo().publicKeyStrength, 4096);
