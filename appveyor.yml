@@ -23,8 +23,11 @@ build_script:
     craft --no-cache --src-dir $env:APPVEYOR_BUILD_FOLDER poppler
 
 test_script:
+  environment:
+    - GPGME_DEBUG: 8
 - ps: |
    craft -v --src-dir $env:APPVEYOR_BUILD_FOLDER --test poppler
+   cd $env:APPVEYOR_BUILD_FOLDER qt6/tests/check_qt6_signature_basics.exe
 
 
 environment:
