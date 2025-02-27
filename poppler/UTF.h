@@ -44,7 +44,7 @@ std::vector<Unicode> UTF16toUCS4(std::span<Unicode> utf16);
 //   s          - PDF text string
 //   returns UCS-4 characters
 // Convert a PDF text string to UCS-4
-std::vector<Unicode> POPPLER_PRIVATE_EXPORT TextStringToUCS4(const std::string &textStr);
+std::vector<Unicode> POPPLER_PRIVATE_EXPORT TextStringToUCS4(std::string_view textStr);
 
 // check if UCS-4 character is valid
 inline bool UnicodeIsValid(Unicode ucs4)
@@ -53,13 +53,13 @@ inline bool UnicodeIsValid(Unicode ucs4)
 }
 
 // check whether string starts with Big-Endian byte order mark
-inline bool hasUnicodeByteOrderMark(const std::string &s)
+inline bool hasUnicodeByteOrderMark(std::string_view s)
 {
     return s.starts_with(unicodeByteOrderMark);
 }
 
 // check whether string starts with Little-Endian byte order mark
-inline bool hasUnicodeByteOrderMarkLE(const std::string &s)
+inline bool hasUnicodeByteOrderMarkLE(std::string_view s)
 {
     return s.starts_with(unicodeByteOrderMarkLE);
 }
@@ -71,7 +71,7 @@ inline void prependUnicodeByteOrderMark(std::string &s)
 }
 
 // check whether string starts with Big-Endian byte order mark and string length is even
-inline bool hasUnicodeByteOrderMarkAndLengthIsEven(const std::string &s)
+inline bool hasUnicodeByteOrderMarkAndLengthIsEven(std::string_view s)
 {
     return s.starts_with(unicodeByteOrderMark) && s.length() % 2 == 0;
 }

@@ -1,7 +1,8 @@
 /* poppler-structure.cc: glib interface to poppler
  *
  * Copyright (C) 2013 Igalia S.L.
- * Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -792,7 +793,7 @@ enum
 static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
     PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
-    if (GooString *text = span.getText()) {
+    if (const GooString *text = span.getText()) {
         new_span->text = _poppler_goo_string_to_utf8(text);
     }
 

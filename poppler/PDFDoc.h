@@ -160,7 +160,7 @@ public:
     // Get file name.
     const GooString *getFileName() const { return fileName.get(); }
 #ifdef _WIN32
-    wchar_t *getFileNameU() { return fileNameU; }
+    std::wstring getFileNameU() { return fileNameU; }
 #endif
 
     // Get the linearization table.
@@ -401,7 +401,7 @@ private:
 
     std::unique_ptr<GooString> fileName;
 #ifdef _WIN32
-    wchar_t *fileNameU = nullptr;
+    std::wstring fileNameU = nullptr;
 #endif
     std::unique_ptr<GooFile> file;
     BaseStream *str = nullptr;

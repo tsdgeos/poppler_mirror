@@ -9,6 +9,7 @@
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // Licensed under GPLv2 or later
 //
@@ -38,7 +39,7 @@ public:
     Goffset getPos() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
     void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode, bool *hasAlpha) override;
 

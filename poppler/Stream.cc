@@ -41,7 +41,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -167,9 +167,9 @@ unsigned int Stream::discardChars(unsigned int n)
     return count;
 }
 
-GooString *Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> Stream::getPSFilter(int psLevel, const char *indent)
 {
-    return new GooString();
+    return std::string {};
 }
 
 static Stream *wrapEOFStream(Stream *str)
@@ -1407,17 +1407,17 @@ int ASCIIHexStream::lookChar()
     return buf;
 }
 
-GooString *ASCIIHexStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> ASCIIHexStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("/ASCIIHexDecode filter\n");
+    s->append(indent).append("/ASCIIHexDecode filter\n");
     return s;
 }
 
@@ -1498,17 +1498,17 @@ int ASCII85Stream::lookChar()
     return b[index];
 }
 
-GooString *ASCII85Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> ASCII85Stream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("/ASCII85Decode filter\n");
+    s->append(indent).append("/ASCII85Decode filter\n");
     return s;
 }
 
@@ -1721,17 +1721,17 @@ int LZWStream::getCode()
     return code;
 }
 
-GooString *LZWStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> LZWStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2 || pred) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("<< ");
+    s->append(indent).append("<< ");
     if (!early) {
         s->append("/EarlyChange 0 ");
     }
@@ -1789,17 +1789,17 @@ int RunLengthStream::getChars(int nChars, unsigned char *buffer)
     return n;
 }
 
-GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> RunLengthStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("/RunLengthDecode filter\n");
+    s->append(indent).append("/RunLengthDecode filter\n");
     return s;
 }
 
@@ -2595,18 +2595,18 @@ short CCITTFaxStream::lookBits(int n)
     return (inputBuf >> (inputBits - n)) & (0xffffffff >> (32 - n));
 }
 
-GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> CCITTFaxStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
     char s1[50];
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("<< ");
+    s->append(indent).append("<< ");
     if (encoding != 0) {
         sprintf(s1, "/K %d ", encoding);
         s->append(s1);
@@ -4088,17 +4088,17 @@ int DCTStream::read16()
     return (c1 << 8) + c2;
 }
 
-GooString *DCTStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> DCTStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("<< >> /DCTDecode filter\n");
+    s->append(indent).append("<< >> /DCTDecode filter\n");
     return s;
 }
 
@@ -4305,17 +4305,17 @@ int FlateStream::getRawChar()
     return doGetRawChar();
 }
 
-GooString *FlateStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 3 || pred) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("<< >> /FlateDecode filter\n");
+    s->append(indent).append("<< >> /FlateDecode filter\n");
     return s;
 }
 

@@ -14,6 +14,7 @@
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 // Copyright 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -249,17 +250,17 @@ int DCTStream::lookChar()
     return *current;
 }
 
-GooString *DCTStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> DCTStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
+    std::optional<std::string> s;
 
     if (psLevel < 2) {
-        return nullptr;
+        return {};
     }
     if (!(s = str->getPSFilter(psLevel, indent))) {
-        return nullptr;
+        return {};
     }
-    s->append(indent)->append("<< >> /DCTDecode filter\n");
+    s->append(indent).append("<< >> /DCTDecode filter\n");
     return s;
 }
 

@@ -21,6 +21,7 @@
 // Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -54,7 +55,7 @@ public:
     Goffset getPos() override;
     int getChar() override;
     int lookChar() override;
-    GooString *getPSFilter(int psLevel, const char *indent) override;
+    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;
     bool isBinary(bool last = true) const override;
     virtual Object *getGlobalsStream() { return &globalsStream; }
     virtual Ref getGlobalsStreamRef() { return globalsStreamRef; }

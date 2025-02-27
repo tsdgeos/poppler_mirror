@@ -9,6 +9,7 @@
 // Copyright 2014, 2018, 2019, 2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -128,8 +129,7 @@ public:
     const Object *getValue() const { return &value; }
     static Object *getDefaultValue(Type type);
 
-    // The caller gets the ownership of the return GooString and is responsible of deleting it
-    std::unique_ptr<GooString> getName() const { return std::make_unique<GooString>(type == UserProperty ? name.c_str() : getTypeName()); }
+    const char *getName() const { return (type == UserProperty ? name.c_str() : getTypeName()); }
 
     // The revision is optional, and defaults to zero.
     unsigned int getRevision() const { return revision; }
@@ -153,7 +153,7 @@ private:
     GooString name;
     Object value;
     bool hidden;
-    GooString *formatted;
+    std::optional<GooString> formatted;
 
     bool checkType(StructElement *element = nullptr);
     static Type getTypeForName(const char *name, StructElement *element = nullptr);

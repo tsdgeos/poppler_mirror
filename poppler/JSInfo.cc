@@ -9,7 +9,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,15 +35,15 @@ JSInfo::JSInfo(PDFDoc *docA, int firstPage)
     currentPage = firstPage + 1;
 }
 
-void JSInfo::printJS(const GooString *js)
+void JSInfo::printJS(std::string_view js)
 {
     char buf[8];
 
-    if (!js || !js->c_str()) {
+    if (js.empty()) {
         return;
     }
 
-    std::vector<Unicode> u = TextStringToUCS4(js->toStr());
+    std::vector<Unicode> u = TextStringToUCS4(js);
     for (auto &c : u) {
         int n = uniMap->mapUnicode(c, buf, sizeof(buf));
         fwrite(buf, 1, n, file);
@@ -63,8 +63,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
             if (linkjs->isOk()) {
                 const std::string &s = linkjs->getScript();
                 fprintf(file, "%s:\n", action);
-                GooString gooS = GooString(s);
-                printJS(&gooS);
+                printJS(s);
                 fputs("\n\n", file);
             }
         }
@@ -76,8 +75,8 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
             hasJS = true;
             if (print) {
                 fprintf(file, "%s (Rendition):\n", action);
-                const GooString s(linkr->getScript());
-                printJS(&s);
+                const std::string &s(linkr->getScript());
+                printJS(s);
                 fputs("\n\n", file);
             }
         }
@@ -127,9 +126,8 @@ void JSInfo::scan(int nPages)
         if (print) {
             for (int i = 0; i < numNames; i++) {
                 fprintf(file, "Name Dictionary \"%s\":\n", doc->getCatalog()->getJSName(i)->c_str());
-                GooString *js = doc->getCatalog()->getJS(i);
+                std::string js = doc->getCatalog()->getJS(i);
                 printJS(js);
-                delete js;
                 fputs("\n\n", file);
             }
         }

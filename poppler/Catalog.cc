@@ -43,6 +43,7 @@
 // Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
 // Copyright (C) 2024 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Aaron Nguyen <aaron.nguyen@veeva.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -243,6 +244,30 @@ bool Catalog::initPageList()
     if (!obj.isDict()) {
         error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", obj.getTypeName());
         return false;
+    }
+
+    // If the current Pages object lacks a Kids array but has a Parent dictionary, traverse up the hierarchy
+    // until the root Pages object (one without a Parent) is found
+    if (!obj.dictLookup("Kids").isArray() && obj.dictLookup("Parent").isDict()) {
+        RefRecursionChecker seen;
+        while (obj.isDict() && obj.dictLookup("Parent").isDict()) {
+            Object parentDictObj = obj.dictLookup("Parent");
+
+            if (!seen.insert(pagesRef)) {
+                error(errSyntaxError, -1, "Loop detected in Pages tree (numObj: {0:d})", pagesRef.num);
+                break;
+            }
+
+            if (parentDictObj.isDict()) {
+                const Object &parentRefObj = obj.dictLookupNF("Parent");
+                if (parentRefObj.isRef()) {
+                    pagesRef = parentRefObj.getRef();
+                }
+                obj = std::move(parentDictObj);
+            } else {
+                break;
+            }
+        }
     }
 
     pages.clear();
@@ -562,7 +587,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     embeddedFileNameTree = nullptr;
 }
 
-GooString *Catalog::getJS(int i)
+std::string Catalog::getJS(int i)
 {
     Object obj;
     // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
@@ -574,23 +599,22 @@ GooString *Catalog::getJS(int i)
     }
 
     if (!obj.isDict()) {
-        return nullptr;
+        return {};
     }
     Object obj2 = obj.dictLookup("S");
     if (!obj2.isName()) {
-        return nullptr;
+        return {};
     }
     if (strcmp(obj2.getName(), "JavaScript") != 0) {
-        return nullptr;
+        return {};
     }
     obj2 = obj.dictLookup("JS");
-    GooString *js = nullptr;
+    std::string js;
     if (obj2.isString()) {
-        js = new GooString(obj2.getString());
+        js = obj2.getString()->toStr();
     } else if (obj2.isStream()) {
         Stream *stream = obj2.getStream();
-        js = new GooString();
-        stream->fillGooString(js);
+        stream->fillString(js);
     }
     return js;
 }

@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2007 Inigo Martinez <inigomartinez@gmail.com>
  * Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2025 Markus Göllnitz <camelcasenick@bewares.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +49,7 @@ G_BEGIN_DECLS
 #define POPPLER_IS_ANNOT_FREE_TEXT(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_FREE_TEXT))
 
 #define POPPLER_TYPE_ANNOT_FILE_ATTACHMENT (poppler_annot_file_attachment_get_type())
-#define POPPLER_ANNOT_FILE_ATTACHMENT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_MARKUP, PopplerAnnotFileAttachment))
+#define POPPLER_ANNOT_FILE_ATTACHMENT(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_FILE_ATTACHMENT, PopplerAnnotFileAttachment))
 #define POPPLER_IS_ANNOT_FILE_ATTACHMENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_FILE_ATTACHMENT))
 
 #define POPPLER_TYPE_ANNOT_MOVIE (poppler_annot_movie_get_type())

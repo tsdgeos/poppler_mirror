@@ -28,7 +28,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 <corentinf@free.fr>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -205,7 +205,6 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     int n1, n2, n3;
     CharCode i;
     CharCode maxCode, code1, code2;
-    GooString *name;
     FILE *f;
 
     bool ok = false;
@@ -215,16 +214,15 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     while (pst->getToken(tok2, sizeof(tok2), &n2)) {
         if (!strcmp(tok2, "usecmap")) {
             if (tok1[0] == '/') {
-                name = new GooString(tok1 + 1);
-                if ((f = globalParams->findToUnicodeFile(name))) {
+                GooString name { tok1 + 1 };
+                if ((f = globalParams->findToUnicodeFile(&name))) {
                     if (parseCMap1(&getCharFromFile, f, nBits)) {
                         ok = true;
                     }
                     fclose(f);
                 } else {
-                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:t}'", name);
+                    error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", name.c_str());
                 }
-                delete name;
             }
             pst->getToken(tok1, sizeof(tok1), &n1);
         } else if (!strcmp(tok2, "beginbfchar")) {

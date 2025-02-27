@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2024, 2025 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 #ifndef CIDFontsWidthsBuilder_H

@@ -20,6 +20,7 @@
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2023 Ingo Klöcker <kloecker@kde.org>
+// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 //========================================================================
 
@@ -29,6 +30,7 @@
 #include "NSSCryptoSignBackend.h"
 #include "goo/gmem.h"
 
+#include <array>
 #include <optional>
 #include <vector>
 #include <filesystem>
@@ -215,106 +217,29 @@ static void shutdownNss()
     }
 }
 
-// SEC_StringToOID() and NSS_CMSSignerInfo_AddUnauthAttr() are
-// not exported from libsmime, so copy them here. Sigh.
-
-static SECStatus my_SEC_StringToOID(PLArenaPool *arena, SECItem *to, const char *from, PRUint32 len)
-{
-    PRUint32 decimal_numbers = 0;
-    PRUint32 result_bytes = 0;
-    SECStatus rv;
-    PRUint8 result[1024];
-
-    static const PRUint32 max_decimal = 0xffffffff / 10;
-    static const char OIDstring[] = { "OID." };
-
-    if (!from || !to) {
-        PORT_SetError(SEC_ERROR_INVALID_ARGS);
-        return SECFailure;
-    }
-    if (!len) {
-        len = PL_strlen(from);
-    }
-    if (len >= 4 && !PL_strncasecmp(from, OIDstring, 4)) {
-        from += 4; /* skip leading "OID." if present */
-        len -= 4;
-    }
-    if (!len) {
-    bad_data:
-        PORT_SetError(SEC_ERROR_BAD_DATA);
-        return SECFailure;
-    }
-    do {
-        PRUint32 decimal = 0;
-        while (len > 0 && (*from >= '0' && *from <= '9')) {
-            PRUint32 addend = *from++ - '0';
-            --len;
-            if (decimal > max_decimal) { /* overflow */
-                goto bad_data;
-            }
-            decimal = (decimal * 10) + addend;
-            if (decimal < addend) { /* overflow */
-                goto bad_data;
-            }
-        }
-        if (len != 0 && *from != '.') {
-            goto bad_data;
-        }
-        if (decimal_numbers == 0) {
-            if (decimal > 2) {
-                goto bad_data;
-            }
-            result[0] = decimal * 40;
-            result_bytes = 1;
-        } else if (decimal_numbers == 1) {
-            if (decimal > 40) {
-                goto bad_data;
-            }
-            result[0] += decimal;
-        } else {
-            /* encode the decimal number,  */
-            PRUint8 *rp;
-            PRUint32 num_bytes = 0;
-            PRUint32 tmp = decimal;
-            while (tmp) {
-                num_bytes++;
-                tmp >>= 7;
-            }
-            if (!num_bytes) {
-                ++num_bytes; /* use one byte for a zero value */
-            }
-            if (num_bytes + result_bytes > sizeof result) {
-                goto bad_data;
-            }
-            tmp = num_bytes;
-            rp = result + result_bytes - 1;
-            rp[tmp] = static_cast<PRUint8>(decimal & 0x7f);
-            decimal >>= 7;
-            while (--tmp > 0) {
-                rp[tmp] = static_cast<PRUint8>(decimal | 0x80);
-                decimal >>= 7;
-            }
-            result_bytes += num_bytes;
-        }
-        ++decimal_numbers;
-        if (len > 0) { /* skip trailing '.' */
-            ++from;
-            --len;
-        }
-    } while (len > 0);
-    /* now result contains result_bytes of data */
-    if (to->data && to->len >= result_bytes) {
-        to->len = result_bytes;
-        PORT_Memcpy(to->data, result, to->len);
-        rv = SECSuccess;
-    } else {
-        SECItem result_item = { siBuffer, nullptr, 0 };
-        result_item.data = result;
-        result_item.len = result_bytes;
-        rv = SECITEM_CopyItem(arena, to, &result_item);
-    }
-    return rv;
-}
+// An ASN.1 object identifier (OID) is typically written as a dot-separated sequence of integers
+// and encoded as a sequence of bytes. Because we only ever need to handle BER encoded OIDs, keep
+// them encoded from the beginning to avoid conversions at run time.
+//
+// The mapping from the sequence of integers to an array of bytes follows ITU-T X.690 clause 8.19.
+// The first two components are encoded in a single output byte: out[0] = 40 * in[0] + in[1]
+//
+// EXAMPLE: 1.2 -> 40 * 1 + 2 = 0x2a
+//
+// From the third component onwards:
+//     1. interpret the integer in base 128
+//     2. map the 7-bit digits to bytes
+//     3. set the most significant bit in all but the least signigicant byte to 1
+//     4. output the bytes from left to right
+//
+// EXAMPLE: 840 = 110 1001000 -> 10000110 01001000 = 0x86 0x48
+//          113549 = 110 1110111 0001101 -> 10000110 11110111 00001101 = 0x86 0xf7 0x0d
+//
+// As a consequence, a component that fits within 7 bits can be output unchanged as a single byte.
+// EXAMPLE: .1.9.16.2.47 -> ... 0x01 0x09 0x10 0x02 0x2f
+//
+// 1.2.840.113549.1.9.16.2.47
+constexpr unsigned char OID_SIGNINGCERTIFICATEV2[] { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x02, 0x2f };
 
 static NSSCMSAttribute *my_NSS_CMSAttributeArray_FindAttrByOidTag(NSSCMSAttribute **attrs, SECOidTag oidtag, PRBool only)
 {
@@ -1177,9 +1102,9 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> NSSSignatureC
      * { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs9(9)
      *   smime(16) id-aa(2) 47 }
      */
-    if (my_SEC_StringToOID(arena.get(), &aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess) {
-        return CryptoSign::SigningError::GenericError;
-    }
+    auto cert_oid_buffer = std::to_array(OID_SIGNINGCERTIFICATEV2);
+    aOidData.oid.data = cert_oid_buffer.data();
+    aOidData.oid.len = cert_oid_buffer.size();
 
     aOidData.offset = SEC_OID_UNKNOWN;
     aOidData.desc = "id-aa-signingCertificateV2";

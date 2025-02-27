@@ -11,6 +11,7 @@
 // Copyright 2018, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -538,7 +539,7 @@ static StructElement::Type nameToType(const char *name)
 // Attribute
 //------------------------------------------------------------------------
 
-Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), hidden(false), formatted(nullptr)
+Attribute::Attribute(GooString &&nameA, Object *valueA) : type(UserProperty), owner(UserProperties), revision(0), name(std::move(nameA)), hidden(false)
 {
     assert(valueA);
     value = valueA->copy();
@@ -548,8 +549,7 @@ Attribute::Attribute(Type typeA, Object *valueA)
     : type(typeA),
       owner(UserProperties), // TODO: Determine corresponding owner from Type
       revision(0),
-      hidden(false),
-      formatted(nullptr)
+      hidden(false)
 {
     assert(valueA);
 
@@ -560,10 +560,7 @@ Attribute::Attribute(Type typeA, Object *valueA)
     }
 }
 
-Attribute::~Attribute()
-{
-    delete formatted;
-}
+Attribute::~Attribute() = default;
 
 const char *Attribute::getTypeName() const
 {
@@ -596,11 +593,10 @@ void Attribute::setFormattedValue(const char *formattedA)
         if (formatted) {
             formatted->Set(formattedA);
         } else {
-            formatted = new GooString(formattedA);
+            formatted = GooString(formattedA);
         }
     } else {
-        delete formatted;
-        formatted = nullptr;
+        formatted = {};
     }
 }
 

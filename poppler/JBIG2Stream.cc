@@ -29,6 +29,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019-2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1244,9 +1245,9 @@ int JBIG2Stream::getChars(int nChars, unsigned char *buffer)
     return n;
 }
 
-GooString *JBIG2Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JBIG2Stream::getPSFilter(int psLevel, const char *indent)
 {
-    return nullptr;
+    return {};
 }
 
 bool JBIG2Stream::isBinary(bool last) const

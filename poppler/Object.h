@@ -237,12 +237,11 @@ public:
         type = objString;
         string = new GooString(stringA);
     }
-    Object(ObjType typeA, GooString *stringA)
+    Object(ObjType typeA, std::string &&stringA)
     {
         assert(typeA == objHexString);
-        assert(stringA);
         type = typeA;
-        string = stringA;
+        string = new GooString(stringA);
     }
     Object(ObjType typeA, const char *stringA)
     {

@@ -6,6 +6,7 @@
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1160,21 +1161,21 @@ PopplerSigningData *poppler_signing_data_new(void)
 
     /* Grey background */
     auto background_color = PopplerColor();
-    background_color.red = 0xEF;
-    background_color.green = 0xEF;
-    background_color.blue = 0xEF;
+    background_color.red = 0xEF00;
+    background_color.green = 0xEF00;
+    background_color.blue = 0xEF00;
     poppler_signing_data_set_background_color(data, &background_color);
 
     /* Red border color */
     auto border_color = PopplerColor();
-    border_color.red = 0xFF;
+    border_color.red = 0xFFFF;
     border_color.green = 0x00;
     border_color.blue = 0x00;
     poppler_signing_data_set_border_color(data, &border_color);
 
     /* Red font color */
     auto font_color = PopplerColor();
-    font_color.red = 0xFF;
+    font_color.red = 0xFFFF;
     font_color.green = 0x00;
     border_color.blue = 0x00;
     poppler_signing_data_set_font_color(data, &font_color);

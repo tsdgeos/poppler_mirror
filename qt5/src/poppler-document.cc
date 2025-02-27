@@ -826,10 +826,9 @@ QStringList Document::scripts() const
     const int numScripts = catalog->numJS();
     QStringList scripts;
     for (int i = 0; i < numScripts; ++i) {
-        GooString *s = catalog->getJS(i);
-        if (s) {
+        std::string s = catalog->getJS(i);
+        if (!s.empty()) {
             scripts.append(UnicodeParsedString(s));
-            delete s;
         }
     }
     return scripts;

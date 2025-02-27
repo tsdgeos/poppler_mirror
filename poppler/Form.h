@@ -195,7 +195,7 @@ public:
 
 protected:
     FormFieldButton *parent() const;
-    GooString *onStr;
+    std::unique_ptr<GooString> onStr;
 };
 
 //------------------------------------------------------------------------

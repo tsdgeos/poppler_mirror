@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
 
 #include "CryptoSignBackend.h"
@@ -255,6 +255,12 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
         if (signingResult.error().isCanceled()) {
             return CryptoSign::SigningError::UserCancelled;
         } else {
+            switch (signingResult.error().code()) {
+            case GPG_ERR_NO_PASSPHRASE: // this is likely the user pressing enter. Let's treat it as cancelled for now
+                return CryptoSign::SigningError::UserCancelled;
+            case GPG_ERR_BAD_PASSPHRASE:
+                return CryptoSign::SigningError::BadPassphrase;
+            }
             return CryptoSign::SigningError::GenericError;
         }
     }
@@ -471,16 +477,15 @@ SignatureValidationStatus GpgSignatureVerification::validateSignature()
     if (!signature) {
         return SIGNATURE_DECODING_ERROR;
     }
-    // Ensure key is actually available
-    signature->key(true, true);
-    const auto summary = signature->summary();
-
-    using Summary = GpgME::Signature::Summary;
-    if (summary & Summary::Red) {
-        return SIGNATURE_INVALID;
-    }
-    if (summary & Summary::Green || summary & Summary::Valid) {
+    switch (signature->status().code()) {
+    case GPG_ERR_NO_ERROR:
+    case GPG_ERR_CERT_EXPIRED: // was valid
+    case GPG_ERR_SIG_EXPIRED: // was valid
+    case GPG_ERR_CERT_REVOKED: // was valid
         return SIGNATURE_VALID;
+    case GPG_ERR_BAD_SIGNATURE:
+        return SIGNATURE_INVALID;
+    default:
+        return SIGNATURE_GENERIC_ERROR;
     }
-    return SIGNATURE_GENERIC_ERROR;
 }

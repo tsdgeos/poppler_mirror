@@ -18,7 +18,7 @@
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -476,9 +476,9 @@ void JPXStream::fillReadBuf()
     } while (readBufLen < 8);
 }
 
-GooString *JPXStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JPXStream::getPSFilter(int psLevel, const char *indent)
 {
-    return nullptr;
+    return {};
 }
 
 bool JPXStream::isBinary(bool last) const
