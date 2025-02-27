@@ -3,4 +3,4 @@ freebsd_instance:
 
 task:
     install_script: pkg install -y cmake ninja freetype2 fontconfig pkgconf lcms2 nspr png tiff nss openjpeg cairo qt5-widgets qt5-xml qt5-qmake qt5-buildtools qt5-testlib qt6-base gpgme gpgme-cpp
-    script: cmake . -G Ninja -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations -Wno-c11-extensions" && ninja
+    script: cmake . -G Ninja -DCMAKE_CXX_FLAGS="-Werror -Wno-deprecated-declarations -Wno-c11-extensions -Wno-error=unused-command-line-argument" && ninja
