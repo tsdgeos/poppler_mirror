@@ -11,6 +11,7 @@
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
+#include <array>
 #include <gpgme.h>
 #include <gpgme++/key.h>
 #include <gpgme++/gpgmepp_version.h>
