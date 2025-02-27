@@ -2294,6 +2294,7 @@ void FormFieldSignature::parseInfo()
         case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         case CryptoSign::SignatureType::adbe_pkcs7_detached:
         case CryptoSign::SignatureType::ETSI_CAdES_detached:
+        case CryptoSign::SignatureType::g10c_pgp_signature_detached:
             signature_info->setSubFilterSupport(true);
             break;
         case CryptoSign::SignatureType::unknown_signature_type:
@@ -2379,6 +2380,12 @@ SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, boo
     }
 
     signature_handler = backend->createVerificationHandler(std::vector(signature), signature_type);
+    if (!signature_handler) {
+        if (doneCallback) {
+            doneCallback();
+        }
+        return signature_info;
+    }
 
     Goffset fileLength = doc->getBaseStream()->getLength();
     for (int i = 0; i < arrayLen / 2; i++) {
@@ -2505,62 +2512,67 @@ std::optional<GooString> FormFieldSignature::getCheckedSignature(Goffset *checke
                 }
                 gstr.append(static_cast<char>(c1));
             } while (++pos < len);
-            if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0') {
-                if (gstr.getChar(2) == '8' && gstr.getChar(3) == '0') {
-                    // ASN1 DER indefinite length encoding:
-                    // We only check that all characters up to the enclosing '>'
-                    // are hex characters and that there are two hex encoded 0 bytes
-                    // just before the enclosing '>' marking the end of the indefinite
-                    // length encoding.
-                    int paddingCount = 0;
-                    while (gstr.getChar(len - 1) == '0' && gstr.getChar(len - 2) == '0') {
-                        ++paddingCount;
-                        len -= 2;
-                    }
-                    if (paddingCount < 2 || len % 2 == 1) {
-                        len = 0;
-                    }
-                } else if (gstr.getChar(2) == '8') {
-                    // ASN1 DER definite length encoding:
-                    // We calculate the length of the following bytes from the length bytes and
-                    // check that after the length bytes and the following calculated number of
-                    // bytes all bytes up to the enclosing '>' character are hex encoded 0 bytes.
-                    int lenBytes = gstr.getChar(3) - '0';
-                    if (lenBytes > 0 && lenBytes <= 4) {
-                        int sigLen = 0;
-                        for (int i = 0; i < 2 * lenBytes; ++i) {
-                            sigLen <<= 4;
-                            char c = gstr.getChar(i + 4);
-                            if (isdigit(c)) {
-                                sigLen += c - '0';
-                            } else if (isxdigit(c) && c >= 'a') {
-                                sigLen += c - 'a' + 10;
-                            } else if (isxdigit(c) && c >= 'A') {
-                                sigLen += c - 'A' + 10;
-                            } else {
-                                len = 0;
-                                break;
-                            }
+            if (signature_type == CryptoSign::SignatureType::g10c_pgp_signature_detached) {
+                // Padding here is done as pgp packets, so keep no need to try to unmangle it
+                return gstr;
+            } else {
+                if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0') {
+                    if (gstr.getChar(2) == '8' && gstr.getChar(3) == '0') {
+                        // ASN1 DER indefinite length encoding:
+                        // We only check that all characters up to the enclosing '>'
+                        // are hex characters and that there are two hex encoded 0 bytes
+                        // just before the enclosing '>' marking the end of the indefinite
+                        // length encoding.
+                        int paddingCount = 0;
+                        while (gstr.getChar(len - 1) == '0' && gstr.getChar(len - 2) == '0') {
+                            ++paddingCount;
+                            len -= 2;
                         }
-                        if (sigLen > 0 && 2 * (sigLen + lenBytes) <= len - 4) {
-                            for (Goffset i = 2 * (sigLen + lenBytes) + 4; i < len; ++i) {
-                                if (gstr.getChar(i) != '0') {
+                        if (paddingCount < 2 || len % 2 == 1) {
+                            len = 0;
+                        }
+                    } else if (gstr.getChar(2) == '8') {
+                        // ASN1 DER definite length encoding:
+                        // We calculate the length of the following bytes from the length bytes and
+                        // check that after the length bytes and the following calculated number of
+                        // bytes all bytes up to the enclosing '>' character are hex encoded 0 bytes.
+                        int lenBytes = gstr.getChar(3) - '0';
+                        if (lenBytes > 0 && lenBytes <= 4) {
+                            int sigLen = 0;
+                            for (int i = 0; i < 2 * lenBytes; ++i) {
+                                sigLen <<= 4;
+                                char c = gstr.getChar(i + 4);
+                                if (isdigit(c)) {
+                                    sigLen += c - '0';
+                                } else if (isxdigit(c) && c >= 'a') {
+                                    sigLen += c - 'a' + 10;
+                                } else if (isxdigit(c) && c >= 'A') {
+                                    sigLen += c - 'A' + 10;
+                                } else {
                                     len = 0;
                                     break;
                                 }
                             }
-                        } else {
+                            if (sigLen > 0 && 2 * (sigLen + lenBytes) <= len - 4) {
+                                for (Goffset i = 2 * (sigLen + lenBytes) + 4; i < len; ++i) {
+                                    if (gstr.getChar(i) != '0') {
+                                        len = 0;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                len = 0;
+                            }
+                        }
+                    }
+                    for (const char c : gstr.toStr()) {
+                        if (!isxdigit(c)) {
                             len = 0;
                         }
                     }
-                }
-                for (const char c : gstr.toStr()) {
-                    if (!isxdigit(c)) {
-                        len = 0;
+                    if (len > 0) {
+                        return GooString(&gstr, 0, len);
                     }
-                }
-                if (len > 0) {
-                    return GooString(&gstr, 0, len);
                 }
             }
         }

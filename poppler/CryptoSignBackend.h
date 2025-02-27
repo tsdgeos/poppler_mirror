@@ -28,6 +28,7 @@ enum class SignatureType
     adbe_pkcs7_sha1,
     adbe_pkcs7_detached,
     ETSI_CAdES_detached,
+    g10c_pgp_signature_detached,
     unknown_signature_type,
     unsigned_signature_field
 };

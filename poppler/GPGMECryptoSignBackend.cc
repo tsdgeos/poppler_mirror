@@ -89,7 +89,11 @@ static X509CertificateInfo::Validity getValidityFromSubkey(const GpgME::Subkey &
 {
     X509CertificateInfo::Validity validity;
     validity.notBefore = key.creationTime();
-    validity.notAfter = key.expirationTime();
+    if (key.neverExpires()) {
+        validity.notAfter = std::numeric_limits<time_t>::max();
+    } else {
+        validity.notAfter = key.expirationTime();
+    }
     return validity;
 }
 
@@ -104,17 +108,26 @@ static X509CertificateInfo::EntityInfo getEntityInfoFromKey(std::string_view dnS
     return info;
 }
 
-static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgME::Key &key)
+static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgME::Key &key, GpgME::Protocol protocol)
 {
     auto certificateInfo = std::make_unique<X509CertificateInfo>();
-    certificateInfo->setIssuerInfo(getEntityInfoFromKey(fromCharPtr(key.issuerName())));
-    certificateInfo->setSerialNumber(GooString { DN::detail::parseHexString(fromCharPtr(key.issuerSerial())).value_or("") });
-    auto subjectInfo = getEntityInfoFromKey(fromCharPtr(key.userID(0).id()));
-    if (subjectInfo.email.empty()) {
-        subjectInfo.email = fromCharPtr(key.userID(1).email());
+    if (protocol == GpgME::CMS) {
+        certificateInfo->setIssuerInfo(getEntityInfoFromKey(fromCharPtr(key.issuerName())));
+        auto subjectInfo = getEntityInfoFromKey(fromCharPtr(key.userID(0).id()));
+        if (subjectInfo.email.empty()) {
+            subjectInfo.email = fromCharPtr(key.userID(1).email());
+        }
+        certificateInfo->setSubjectInfo(std::move(subjectInfo));
+    } else if (protocol == GpgME::OpenPGP) {
+        X509CertificateInfo::EntityInfo info;
+        info.email = fromCharPtr(key.userID(0).email());
+        info.commonName = fromCharPtr(key.userID(0).name());
+        info.distinguishedName = fromCharPtr(key.userID(0).id());
+        certificateInfo->setSubjectInfo(std::move(info));
+        certificateInfo->setCertificateType(CertificateType::PGP);
     }
-    certificateInfo->setSubjectInfo(std::move(subjectInfo));
     certificateInfo->setValidity(getValidityFromSubkey(key.subkey(0)));
+    certificateInfo->setSerialNumber(GooString { DN::detail::parseHexString(fromCharPtr(key.issuerSerial())).value_or("") });
     certificateInfo->setNickName(GooString(fromCharPtr(key.primaryFingerprint())));
     X509CertificateInfo::PublicKeyInfo pkInfo;
     pkInfo.publicKeyStrength = key.subkey(0).length();
@@ -143,7 +156,7 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromKey(const GpgM
         pkInfo.publicKeyType = OTHERKEY;
     }
     {
-        auto ctx = GpgME::Context::create(GpgME::CMS);
+        auto ctx = GpgME::Context::create(protocol);
         GpgME::Data pubkeydata;
         const auto err = ctx->exportPublicKeys(key.primaryFingerprint(), pubkeydata);
         if (isSuccess(err)) {
@@ -202,7 +215,9 @@ std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVe
     case CryptoSign::SignatureType::ETSI_CAdES_detached:
     case CryptoSign::SignatureType::adbe_pkcs7_detached:
     case CryptoSign::SignatureType::adbe_pkcs7_sha1:
-        return std::make_unique<GpgSignatureVerification>(std::move(pkcs7));
+        return std::make_unique<GpgSignatureVerification>(std::move(pkcs7), GpgME::CMS);
+    case CryptoSign::SignatureType::g10c_pgp_signature_detached:
+        return std::make_unique<GpgSignatureVerification>(std::move(pkcs7), GpgME::OpenPGP);
     }
     return {};
 }
@@ -210,32 +225,40 @@ std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVe
 std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvailableSigningCertificates()
 {
     std::vector<std::unique_ptr<X509CertificateInfo>> certificates;
-    const auto context = GpgME::Context::create(GpgME::CMS);
-    auto err = context->startKeyListing(static_cast<const char *>(nullptr), true /*secretOnly*/);
-    while (isSuccess(err)) {
-        const auto key = context->nextKey(err);
-        if (!key.isNull() && isSuccess(err)) {
-            if (key.isBad()) {
-                continue;
+    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+        const auto context = GpgME::Context::create(type);
+        auto err = context->startKeyListing(static_cast<const char *>(nullptr), true /*secretOnly*/);
+        while (isSuccess(err)) {
+            const auto key = context->nextKey(err);
+            if (!key.isNull() && isSuccess(err)) {
+                if (key.isBad()) {
+                    continue;
+                }
+                if (!key.canSign()) {
+                    continue;
+                }
+                certificates.push_back(getCertificateInfoFromKey(key, type));
+            } else {
+                break;
             }
-            if (!key.canSign()) {
-                continue;
-            }
-            certificates.push_back(getCertificateInfoFromKey(key));
-        } else {
-            break;
         }
     }
     return certificates;
 }
 
-GpgSignatureCreation::GpgSignatureCreation(const std::string &certId) : gpgContext { GpgME::Context::create(GpgME::CMS) }
+GpgSignatureCreation::GpgSignatureCreation(const std::string &certId)
 {
-    GpgME::Error error;
-    const auto signingKey = gpgContext->key(certId.c_str(), error, true);
-    if (isSuccess(error)) {
-        gpgContext->addSigningKey(signingKey);
-        key = signingKey;
+    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+        GpgME::Error error;
+        auto context = GpgME::Context::create(type);
+        const auto signingKey = context->key(certId.c_str(), error, true);
+        if (isSuccess(error)) {
+            context->addSigningKey(signingKey);
+            key = signingKey;
+            gpgContext = std::move(context);
+            protocol = type;
+            break;
+        }
     }
 }
 
@@ -266,12 +289,40 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
     }
 
     auto signatureString = signatureData.toString();
+    if (protocol == GpgME::OpenPGP) {
+        // We need to prepare for padding PGP doesn't like padding as such
+        // so we disguise it as a comment packet.
+        // the size of the comment packet prefix and size is the first 6 bytes.
+        static const int prefixandsize = 6;
+        std::string prefix { std::initializer_list<char> {
+                (char)0xfd,
+                (char)0xff,
+        } };
+
+        if (CryptoSign::maxSupportedSignatureSize - prefixandsize <= signatureString.size()) {
+            return CryptoSign::SigningError::InternalError;
+        }
+        std::array<unsigned char, 4> bytes;
+        int n = CryptoSign::maxSupportedSignatureSize - prefixandsize - signatureString.size();
+
+        bytes[0] = (n >> 24) & 0xFF;
+        bytes[1] = (n >> 16) & 0xFF;
+        bytes[2] = (n >> 8) & 0xFF;
+        bytes[3] = n & 0xFF;
+
+        prefix.append(std::begin(bytes), std::end(bytes));
+        signatureString.append(prefix);
+    }
     return std::vector<unsigned char>(signatureString.begin(), signatureString.end());
 }
-
 CryptoSign::SignatureType GpgSignatureCreation::signatureType() const
 {
-    return CryptoSign::SignatureType::adbe_pkcs7_detached;
+    if (protocol == GpgME::CMS) {
+        return CryptoSign::SignatureType::adbe_pkcs7_detached;
+    } else if (protocol == GpgME::OpenPGP) {
+        return CryptoSign::SignatureType::g10c_pgp_signature_detached;
+    }
+    return CryptoSign::SignatureType::unknown_signature_type;
 }
 
 std::unique_ptr<X509CertificateInfo> GpgSignatureCreation::getCertificateInfo() const
@@ -279,10 +330,11 @@ std::unique_ptr<X509CertificateInfo> GpgSignatureCreation::getCertificateInfo() 
     if (!key) {
         return nullptr;
     }
-    return getCertificateInfoFromKey(*key);
+    return getCertificateInfoFromKey(*key, protocol);
 }
 
-GpgSignatureVerification::GpgSignatureVerification(const std::vector<unsigned char> &p7data) : gpgContext { GpgME::Context::create(GpgME::CMS) }, signatureData(reinterpret_cast<const char *>(p7data.data()), p7data.size())
+GpgSignatureVerification::GpgSignatureVerification(const std::vector<unsigned char> &p7data, GpgME::Protocol protocol_)
+    : gpgContext { GpgME::Context::create(protocol_) }, signatureData(reinterpret_cast<const char *>(p7data.data()), p7data.size()), protocol { protocol_ }
 {
     gpgContext->setOffline(true);
     signatureData.setEncoding(GpgME::Data::BinaryEncoding);
@@ -312,7 +364,7 @@ std::unique_ptr<X509CertificateInfo> GpgSignatureVerification::getCertificateInf
     if (!signature) {
         return nullptr;
     }
-    auto gpgInfo = getCertificateInfoFromKey(signature->key(true, false));
+    auto gpgInfo = getCertificateInfoFromKey(signature->key(true, false), protocol);
     return gpgInfo;
 }
 
@@ -363,8 +415,14 @@ std::string GpgSignatureVerification::getSignerName() const
     if (!signature) {
         return {};
     }
-    const auto dn = DN::parseString(fromCharPtr(signature->key(true, false).userID(0).id()));
-    return DN::FindFirstValue(dn, "CN").value_or("");
+    if (protocol == GpgME::CMS) {
+        const auto dn = DN::parseString(fromCharPtr(signature->key(true, false).userID(0).id()));
+        return DN::FindFirstValue(dn, "CN").value_or("");
+    } else if (protocol == GpgME::OpenPGP) {
+        return fromCharPtr(signature->key(true, false).userID(0).name());
+    }
+
+    return {};
 }
 
 std::string GpgSignatureVerification::getSignerSubjectDN() const
@@ -423,8 +481,8 @@ void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
         return;
     }
     std::string keyFP = fromCharPtr(signature->key().primaryFingerprint());
-    validationStatus = std::async([keyFP = std::move(keyFP), doneFunction, ocspRevocationCheck, useAIACertFetch]() {
-        auto context = GpgME::Context::create(GpgME::CMS);
+    validationStatus = std::async([keyFP = std::move(keyFP), protocol = protocol, doneFunction, ocspRevocationCheck, useAIACertFetch]() {
+        auto context = GpgME::Context::create(protocol);
         context->setOffline((!ocspRevocationCheck) || useAIACertFetch);
         context->setKeyListMode(GpgME::KeyListMode::Local | GpgME::KeyListMode::Validate);
         GpgME::Error e;
@@ -488,4 +546,29 @@ SignatureValidationStatus GpgSignatureVerification::validateSignature()
     default:
         return SIGNATURE_GENERIC_ERROR;
     }
+}
+
+#ifdef ENABLE_PGP_SIGNATURES
+bool GpgSignatureConfiguration::allowPgp = true;
+#else
+bool GpgSignatureConfiguration::allowPgp = false;
+#endif
+bool GpgSignatureConfiguration::arePgpSignaturesAllowed()
+{
+    return allowPgp;
+}
+
+void GpgSignatureConfiguration::setPgpSignaturesAllowed(bool allow)
+{
+    allowPgp = allow;
+}
+
+std::vector<GpgME::Protocol> GpgSignatureConfiguration::allowedTypes()
+{
+    std::vector<GpgME::Protocol> allowedTypes;
+    allowedTypes.push_back(GpgME::CMS);
+    if (allowPgp) {
+        allowedTypes.push_back(GpgME::OpenPGP);
+    }
+    return allowedTypes;
 }

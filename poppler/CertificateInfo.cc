@@ -139,3 +139,13 @@ void X509CertificateInfo::setQualified(bool qualified)
 {
     is_qualified = qualified;
 }
+
+CertificateType X509CertificateInfo::getCertificateType() const
+{
+    return certificate_type;
+}
+
+void X509CertificateInfo::setCertificateType(CertificateType type)
+{
+    certificate_type = type;
+}

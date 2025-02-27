@@ -57,7 +57,13 @@ enum class KeyLocation
     HardwareToken /** The key is on a dedicated hardware token, either a smartcard or a dedicated usb token (e.g. gnuk, nitrokey or yubikey) */
 };
 
-class POPPLER_PRIVATE_EXPORT X509CertificateInfo
+enum class CertificateType
+{
+    X509,
+    PGP
+};
+
+class POPPLER_PRIVATE_EXPORT X509CertificateInfo // TODO consider rename to just CertificateInfo
 {
 public:
     X509CertificateInfo();
@@ -120,6 +126,7 @@ public:
     bool isQualified() const;
     void setQualified(bool qualified);
     KeyLocation getKeyLocation() const;
+    CertificateType getCertificateType() const;
 
     /* SETTERS */
     void setVersion(int);
@@ -133,6 +140,7 @@ public:
     void setCertificateDER(const GooString &);
     void setIsSelfSigned(bool);
     void setKeyLocation(KeyLocation location);
+    void setCertificateType(CertificateType type);
 
 private:
     EntityInfo issuer_info;
@@ -147,6 +155,7 @@ private:
     bool is_qualified;
     bool is_self_signed;
     KeyLocation keyLocation;
+    CertificateType certificate_type = CertificateType::X509;
 };
 
 #endif

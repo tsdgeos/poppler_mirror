@@ -510,6 +510,17 @@ public:
         Organization,
     };
 
+    /**
+     * The type of the certificate
+     *
+     * \since 25.03
+     */
+    enum class CertificateType
+    {
+        X509,
+        PGP
+    };
+
     /** A signing key can be located in different places
      sometimes. For the user, it might be easier to pick
      the key located on a card if it has some visual
@@ -605,6 +616,13 @@ public:
      * https://en.wikipedia.org/wiki/Qualified_electronic_signature
      */
     bool isQualified() const;
+
+    /**
+     * \return certificate type
+     *
+     * \since 25.03
+     */
+    CertificateType certificateType() const;
 
     /**
       The DER encoded certificate.
@@ -798,7 +816,8 @@ public:
         AdbePkcs7sha1,
         AdbePkcs7detached,
         EtsiCAdESdetached,
-        UnsignedSignature ///< \since 22.02
+        UnsignedSignature, ///< \since 22.02
+        G10cPgpSignatureDetached, ///< nonstandardized signature type \since 25.01
     };
 
     /**
@@ -998,6 +1017,23 @@ void POPPLER_QT6_EXPORT setNSSDir(const QString &pathURL);
   \since 21.01
 */
 void POPPLER_QT6_EXPORT setNSSPasswordCallback(const std::function<char *(const char *)> &f);
+
+/**
+ * Allow pgp signatures in pdf files (standard-extension, experimental)
+ * Not supported for NSS backend
+ *
+ * \param allowed new value for pgp signatures allowed
+ *
+ * \since 25.03
+ */
+void POPPLER_QT6_EXPORT setPgpSignaturesAllowed(bool allowed);
+
+/**
+ * \returns if pgp signatures are allowed.
+ *
+ * \since 25.03
+ */
+bool POPPLER_QT6_EXPORT arePgpSignaturesAllowed();
 }
 
 #endif

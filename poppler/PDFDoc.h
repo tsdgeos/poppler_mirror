@@ -401,7 +401,7 @@ private:
 
     std::unique_ptr<GooString> fileName;
 #ifdef _WIN32
-    std::wstring fileNameU = nullptr;
+    std::wstring fileNameU;
 #endif
     std::unique_ptr<GooFile> file;
     BaseStream *str = nullptr;

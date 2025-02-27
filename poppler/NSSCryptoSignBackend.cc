@@ -1152,6 +1152,7 @@ std::unique_ptr<CryptoSign::VerificationInterface> NSSCryptoSignBackend::createV
     switch (type) {
     case CryptoSign::SignatureType::unknown_signature_type:
     case CryptoSign::SignatureType::unsigned_signature_field:
+    case CryptoSign::SignatureType::g10c_pgp_signature_detached:
         return {};
     case CryptoSign::SignatureType::ETSI_CAdES_detached:
     case CryptoSign::SignatureType::adbe_pkcs7_detached:
