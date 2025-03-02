@@ -5298,7 +5298,6 @@ end:
 
 void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
 {
-    unsigned char *lineBuf;
     unsigned char pixBuf[gfxColorMaxComps];
     GfxCMYK cmyk;
     int x, y, i, comp;
@@ -5311,9 +5310,6 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
     if (maskStr && !(maskColors && colorMap)) {
         maskToClippingPath(maskStr, maskWidth, maskHeight, maskInvert);
     }
-
-    // allocate a line buffer
-    lineBuf = (unsigned char *)gmallocn(width, 4);
 
     // scan for all gray
     if (getOptimizeColorSpace()) {
@@ -5388,6 +5384,9 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
             }
         }
     } else {
+        // allocate a line buffer
+        unsigned char *lineBuf = (unsigned char *)gmallocn(width, 4);
+
         for (y = 0; y < height; ++y) {
 
             // read the line
@@ -5442,6 +5441,7 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
                 }
             }
         }
+        gfree(lineBuf);
     }
 
     if (i != 0) {
@@ -5452,7 +5452,6 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
     }
 
     str->close();
-    gfree(lineBuf);
 
     if (maskStr && !(maskColors && colorMap)) {
         writePS("pdfImClipEnd\n");

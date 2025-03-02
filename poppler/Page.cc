@@ -681,12 +681,12 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     }
 
     if (data_out) {
-        unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
-        unsigned char *p = pixbufdata;
         ImageStream imgstr { str, width, colorMap.getNumPixelComps(), colorMap.getBits() };
         if (!imgstr.reset()) {
             return false;
         }
+        unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
+        unsigned char *p = pixbufdata;
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {
                 unsigned char pix[gfxColorMaxComps];
