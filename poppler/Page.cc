@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -681,12 +681,12 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     }
 
     if (data_out) {
-        unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
-        unsigned char *p = pixbufdata;
         ImageStream imgstr { str, width, colorMap.getNumPixelComps(), colorMap.getBits() };
         if (!imgstr.reset()) {
             return false;
         }
+        unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
+        unsigned char *p = pixbufdata;
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {
                 unsigned char pix[gfxColorMaxComps];

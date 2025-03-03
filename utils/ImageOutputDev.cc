@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -355,6 +355,7 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext)
     // initialize stream
     str = str->getNextStream();
     if (!str->reset()) {
+        fclose(f);
         error(errIO, -1, "Couldn't reset stream");
         errorCode = 2;
         return;
@@ -373,7 +374,6 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 {
     FILE *f = nullptr; /* squelch bogus compiler warning */
     ImageStream *imgStr = nullptr;
-    unsigned char *row;
     unsigned char *rowp;
     unsigned char *p;
     GfxRGB rgb;
@@ -403,13 +403,6 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         pixelSize = 2 * sizeof(unsigned int);
     }
 
-    row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
-    if (!row) {
-        error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
-        errorCode = 99;
-        return;
-    }
-
     if (format != imgMonochrome) {
         // initialize stream
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
@@ -425,6 +418,13 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
             error(errIO, -1, "Stream reset failed");
             return;
         }
+    }
+
+    unsigned char *row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
+    if (!row) {
+        error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
+        errorCode = 99;
+        return;
     }
 
     // PDF masks use 0 = draw current color, 1 = leave unchanged.

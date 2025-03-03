@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018, 2019, 2021-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019, 2021-2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -1096,13 +1096,13 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> NSSSignatureC
     aAttribute.values = pAttributeValues;
 
     SECOidData aOidData;
-    aOidData.oid.data = nullptr;
     /*
      * id-aa-signingCertificateV2 OBJECT IDENTIFIER ::=
      * { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs9(9)
      *   smime(16) id-aa(2) 47 }
      */
     auto cert_oid_buffer = std::to_array(OID_SIGNINGCERTIFICATEV2);
+    aOidData.oid.type = siBuffer;
     aOidData.oid.data = cert_oid_buffer.data();
     aOidData.oid.len = cert_oid_buffer.size();
 
