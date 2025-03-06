@@ -69,6 +69,12 @@ public:
     // Create a string from a C string.
     explicit GooString(const char *sA) : std::string(sA ? sA : "") { }
 
+    // disallow explicit creation from nullptr
+    // (c++23 also disallows it for std::string)
+    // note, this only prevents GooString(nullptr),
+    // not const char*s = nullptr; GooString(s).
+    explicit GooString(std::nullptr_t) = delete;
+
     // Zero-cost conversion from and to std::string
     explicit GooString(const std::string &str) : std::string(str) { }
     explicit GooString(std::string &&str) : std::string(std::move(str)) { }
