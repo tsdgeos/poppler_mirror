@@ -623,6 +623,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
 #ifdef CAIRO_HAS_SVG_SURFACE
             surface = cairo_svg_surface_create_for_stream(writeStream, output_file, w, h);
             cairo_svg_surface_restrict_to_version(surface, CAIRO_SVG_VERSION_1_2);
+            cairo_svg_surface_set_document_unit(surface, CAIRO_SVG_UNIT_PT);
 #endif
         }
 #ifdef CAIRO_HAS_WIN32_SURFACE
