@@ -89,9 +89,9 @@ build_ubuntu_22_04:
     - cmake -G Ninja -DENABLE_LIBOPENJPEG=unmaintained -DENABLE_DCTDECODER=unmaintained -DENABLE_LCMS=OFF -DENABLE_LIBCURL=OFF -DENABLE_LIBTIFF=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_ZLIB_UNCOMPRESS=ON -DUSE_FLOAT=ON -DTESTDATADIR=$PWD/../test-data ..
     - ninja
 
-build_mingw64_fedora41:
+build_mingw64_fedora42:
   stage: build
-  image: fedora:41
+  image: fedora:42
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
@@ -101,16 +101,16 @@ build_mingw64_fedora41:
     - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -G Ninja ..
     - ninja
 
-build_clazy_fedora41:
+build_clazy_fedora42:
   stage: build
-  image: fedora:41
+  image: fedora:42
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
     - dnf -y install clazy ninja-build glibc-langpack-en
   script:
     - mkdir -p build && cd build
-    - CC=clang-19 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
+    - CC=clang-20 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
 build_qt68_android:
