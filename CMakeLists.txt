@@ -269,10 +269,9 @@ if(ENABLE_GTK_DOC)
   if(NOT GtkDoc_FOUND)
     message(FATAL_ERROR "Install the gtk-doc package to generate GTK API documentation, or set ENABLE_GTK_DOC to Off.")
   endif()
-  # NOTE: The FindPythonInterp module is deprecated, but the newer FindPython3 module requires CMake >=3.12
-  find_package(PythonInterp 3)
+  find_package(Python3)
   # Also bail out with an error if Python3 is missing
-  if(NOT PYTHONINTERP_FOUND)
+  if(NOT Python3_FOUND)
     message(FATAL_ERROR "Install python3 in order to generate GTK API documentation, or set ENABLE_GTK_DOC to Off.")
   endif()
 endif()
