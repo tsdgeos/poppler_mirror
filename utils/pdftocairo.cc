@@ -41,6 +41,7 @@
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
+// Copyright (C) 2025 Masamichi Hosoda <trueroad@trueroad.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
