@@ -75,8 +75,8 @@ public:
     void setSignatureValStatus(enum SignatureValidationStatus);
     void setSignerName(const std::string &);
     void setSubjectDN(const std::string &);
-    void setLocation(const GooString *);
-    void setReason(const GooString *);
+    void setLocation(std::unique_ptr<GooString> &&);
+    void setReason(std::unique_ptr<GooString> &&);
     void setHashAlgorithm(HashAlgorithm);
     void setSigningTime(time_t);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }

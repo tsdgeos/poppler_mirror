@@ -89,14 +89,14 @@ void SignatureInfo::setSubjectDN(const std::string &subjectDN)
     subject_dn = subjectDN;
 }
 
-void SignatureInfo::setLocation(const GooString *loc)
+void SignatureInfo::setLocation(std::unique_ptr<GooString> &&loc)
 {
-    location = GooString(loc);
+    location = std::move(*loc);
 }
 
-void SignatureInfo::setReason(const GooString *signingReason)
+void SignatureInfo::setReason(std::unique_ptr<GooString> &&signingReason)
 {
-    reason = GooString(signingReason);
+    reason = std::move(*signingReason);
 }
 
 void SignatureInfo::setHashAlgorithm(HashAlgorithm type)

@@ -463,6 +463,15 @@ public:
         OBJECT_TYPE_CHECK(objString);
         return string;
     }
+    std::unique_ptr<GooString> takeString()
+    {
+        OBJECT_TYPE_CHECK(objString);
+        std::unique_ptr<GooString> str(string);
+        string = nullptr;
+        type = objNull;
+        return str;
+    }
+
     const GooString *getHexString() const
     {
         OBJECT_TYPE_CHECK(objHexString);

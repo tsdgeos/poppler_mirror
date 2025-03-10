@@ -2286,14 +2286,14 @@ void FormFieldSignature::parseInfo()
 
     byte_range = sig_dict.dictLookup("ByteRange");
 
-    const Object location_obj = sig_dict.dictLookup("Location");
+    Object location_obj = sig_dict.dictLookup("Location");
     if (location_obj.isString()) {
-        signature_info->setLocation(location_obj.getString());
+        signature_info->setLocation(location_obj.takeString());
     }
 
-    const Object reason_obj = sig_dict.dictLookup("Reason");
+    Object reason_obj = sig_dict.dictLookup("Reason");
     if (reason_obj.isString()) {
-        signature_info->setReason(reason_obj.getString());
+        signature_info->setReason(reason_obj.takeString());
     }
 
     // retrieve SigningTime
