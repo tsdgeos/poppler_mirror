@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
     // construct text file name
     if (argc == 3) {
-        GooString *tmp = new GooString(argv[2]);
+        auto tmp = std::make_unique<GooString>(argv[2]);
         if (!xml) {
             if (tmp->getLength() >= 5) {
                 const char *p = tmp->c_str() + tmp->getLength() - 5;
@@ -258,9 +258,8 @@ int main(int argc, char *argv[])
             }
         }
         if (!htmlFileName) {
-            htmlFileName = std::make_unique<GooString>(tmp);
+            htmlFileName = std::move(tmp);
         }
-        delete tmp;
     } else if (fileName->cmp("fd://0") == 0) {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto error;

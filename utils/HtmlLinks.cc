@@ -36,7 +36,7 @@ HtmlLink::HtmlLink(const HtmlLink &x)
     Ymin = x.Ymin;
     Xmax = x.Xmax;
     Ymax = x.Ymax;
-    dest = std::make_unique<GooString>(x.dest.get());
+    dest = x.dest->copy();
 }
 
 HtmlLink::HtmlLink(double xmin, double ymin, double xmax, double ymax, std::unique_ptr<GooString> &&_dest) : dest(std::move(_dest))
@@ -73,9 +73,10 @@ bool HtmlLink::inLink(double xmin, double ymin, double xmax, double ymax) const
     return (y > Ymin) && (xmin < Xmax) && (xmax > Xmin);
 }
 
-static GooString *EscapeSpecialChars(GooString *s)
+// returns nullptr if same as input string (to avoid copying)
+static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
 {
-    GooString *tmp = nullptr;
+    std::unique_ptr<GooString> tmp;
     for (int i = 0, j = 0; i < s->getLength(); i++, j++) {
         const char *replace = nullptr;
         switch (s->getChar(i)) {
@@ -96,7 +97,7 @@ static GooString *EscapeSpecialChars(GooString *s)
         }
         if (replace) {
             if (!tmp) {
-                tmp = new GooString(s);
+                tmp = s->copy();
             }
             if (tmp) {
                 tmp->del(j, 1);
@@ -106,17 +107,14 @@ static GooString *EscapeSpecialChars(GooString *s)
             }
         }
     }
-    return tmp ? tmp : s;
+    return tmp;
 }
 
 std::unique_ptr<GooString> HtmlLink::getLinkStart() const
 {
     std::unique_ptr<GooString> res = std::make_unique<GooString>("<a href=\"");
-    GooString *d = xml ? EscapeSpecialChars(dest.get()) : dest.get();
-    res->append(d);
-    if (d != dest.get()) {
-        delete d;
-    }
+    std::unique_ptr<GooString> d = xml ? EscapeSpecialChars(dest.get()) : nullptr;
+    res->append(d ? d.get() : dest.get());
     res->append("\">");
     return res;
 }

@@ -176,11 +176,11 @@ private:
 
     // marks the position of the fonts that belong to current page (for noframes)
     int fontsPageMarker;
-    HtmlFontAccu *fonts;
-    HtmlLinks *links;
-    std::vector<HtmlImage *> imgList;
+    std::unique_ptr<HtmlFontAccu> fonts;
+    std::unique_ptr<HtmlLinks> links;
+    std::vector<std::unique_ptr<HtmlImage>> imgList;
 
-    GooString *DocName;
+    std::unique_ptr<GooString> DocName;
     int pageWidth;
     int pageHeight;
     int firstPage; // used to begin the numeration of pages
@@ -200,11 +200,11 @@ public:
     HtmlMetaVar(const HtmlMetaVar &) = delete;
     HtmlMetaVar &operator=(const HtmlMetaVar &) = delete;
 
-    GooString *toString() const;
+    std::unique_ptr<GooString> toString() const;
 
 private:
-    GooString *name;
-    GooString *content;
+    std::unique_ptr<GooString> name;
+    std::unique_ptr<GooString> content;
 };
 
 //------------------------------------------------------------------------
@@ -302,7 +302,7 @@ private:
     // FILE *tin;                    // image log file
     // bool write;
     bool needClose; // need to close the file?
-    HtmlPage *pages; // text for the current page
+    std::unique_ptr<HtmlPage> pages; // text for the current page
     bool rawOrder; // keep text in content stream order
     bool doOutline; // output document outline
     bool ok; // set up ok?
@@ -310,9 +310,9 @@ private:
     int pageNum;
     int maxPageWidth;
     int maxPageHeight;
-    GooString *Docname;
-    GooString *docTitle;
-    std::vector<HtmlMetaVar *> glMetaVars;
+    std::unique_ptr<GooString> Docname;
+    std::unique_ptr<GooString> docTitle;
+    std::vector<std::unique_ptr<HtmlMetaVar>> glMetaVars;
     Catalog *catalog;
     Page *docPage;
     std::vector<std::string> backgroundImages;
