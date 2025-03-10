@@ -112,14 +112,6 @@ public:
     explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string &>(*str) : std::string {}) { }
     std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this); }
 
-    // Concatenate two strings.
-    GooString(const GooString *str1, const GooString *str2)
-    {
-        reserve(str1->size() + str2->size());
-        static_cast<std::string &>(*this).append(*str1);
-        static_cast<std::string &>(*this).append(*str2);
-    }
-
     // Create a formatted string.  Similar to printf, but without the
     // string overflow issues.  Formatting elements consist of:
     //     {<arg>:[<width>][.<precision>]<type>}
