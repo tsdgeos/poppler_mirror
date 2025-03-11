@@ -751,12 +751,12 @@ std::unique_ptr<GooString> PDFDoc::getDocInfoStringEntry(const char *key)
         return {};
     }
 
-    const Object entryObj = infoObj.dictLookup(key);
+    Object entryObj = infoObj.dictLookup(key);
     if (!entryObj.isString()) {
         return {};
     }
 
-    return entryObj.getString()->copy();
+    return entryObj.takeString();
 }
 
 static bool get_id(const GooString *encodedidstring, GooString *id)

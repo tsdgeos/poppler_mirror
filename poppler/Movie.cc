@@ -179,7 +179,7 @@ void Movie::parseMovie(const Object *movieDict)
     Object obj1 = movieDict->dictLookup("F");
     Object obj2 = getFileSpecNameForPlatform(&obj1);
     if (obj2.isString()) {
-        fileName = obj2.getString()->copy();
+        fileName = obj2.takeString();
     } else {
         error(errSyntaxError, -1, "Invalid Movie");
         ok = false;

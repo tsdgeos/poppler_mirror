@@ -2832,7 +2832,7 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("DA");
     if (obj1.isString()) {
-        appearanceString = obj1.getString()->copy();
+        appearanceString = obj1.takeString();
     } else {
         appearanceString = std::make_unique<GooString>();
         error(errSyntaxWarning, -1, "Bad appearance for annotation");
@@ -7286,7 +7286,7 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 
     obj1 = dict->lookup("Name");
     if (obj1.isString()) {
-        name = std::make_unique<GooString>(obj1.getString());
+        name = obj1.takeString();
     }
 
     obj1 = dict->lookup("Subtype");
@@ -7393,7 +7393,7 @@ AnnotRichMedia::Params::Params(Dict *dict)
 {
     Object obj1 = dict->lookup("FlashVars");
     if (obj1.isString()) {
-        flashVars = std::make_unique<GooString>(obj1.getString());
+        flashVars = obj1.takeString();
     }
 }
 
