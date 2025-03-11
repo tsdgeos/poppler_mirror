@@ -709,8 +709,8 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                     }
 
                     // print value
-                    GooString val_str(obj.getString());
-                    printTextString(&val_str, uMap);
+                    auto val_str = obj.getString();
+                    printTextString(val_str, uMap);
                     fputc('\n', stdout);
                 }
             }
