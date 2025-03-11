@@ -749,7 +749,7 @@ public:
 private:
     TextPage *text;
 
-    GooString *actualText; // replacement text for the span
+    std::unique_ptr<GooString> actualText; // replacement text for the span
     double actualTextX0;
     double actualTextY0;
     double actualTextX1;

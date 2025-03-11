@@ -1518,7 +1518,7 @@ void Annot::setName(GooString *new_name)
     annotLocker();
 
     if (new_name) {
-        name = std::make_unique<GooString>(new_name);
+        name = new_name->copy();
     } else {
         name = std::make_unique<GooString>();
     }
@@ -2408,7 +2408,7 @@ void AnnotText::setIcon(GooString *new_icon)
     }
 
     if (new_icon) {
-        icon = std::make_unique<GooString>(new_icon);
+        icon = new_icon->copy();
     } else {
         icon = std::make_unique<GooString>("Note");
     }
@@ -2944,7 +2944,7 @@ void AnnotFreeText::setQuadding(VariableTextQuadding new_quadding)
 void AnnotFreeText::setStyleString(GooString *new_string)
 {
     if (new_string) {
-        styleString = std::make_unique<GooString>(new_string);
+        styleString = new_string->copy();
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(styleString->toStr())) {
             prependUnicodeByteOrderMark(styleString->toNonConstStr());
@@ -5929,7 +5929,7 @@ void AnnotStamp::draw(Gfx *gfx, bool printing)
 void AnnotStamp::setIcon(GooString *new_icon)
 {
     if (new_icon) {
-        icon = std::make_unique<GooString>(new_icon);
+        icon = new_icon->copy();
     } else {
         icon = std::make_unique<GooString>();
     }

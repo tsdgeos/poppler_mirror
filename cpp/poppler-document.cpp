@@ -171,7 +171,7 @@ bool document::unlock(const std::string &owner_password, const std::string &user
         } else if (d->raw_doc_data) {
             newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);
         } else {
-            newdoc = new document_private(std::make_unique<GooString>(d->doc->getFileName()), owner_password, user_password);
+            newdoc = new document_private(d->doc->getFileName()->copy(), owner_password, user_password);
         }
         if (!newdoc->doc->isOk()) {
             d->doc_data.swap(newdoc->doc_data);
