@@ -623,7 +623,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
         return CryptoSign::SigningError::InternalError;
     }
     if (certNickname.empty()) {
-        fprintf(stderr, "signDocument: Empty nickname\n");
+        error(errInternal, -1, "signDocument: Empty nickname");
         return CryptoSign::SigningError::KeyMissing;
     }
 
@@ -632,7 +632,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
-        fprintf(stderr, "signDocument: error getting signature info\n");
+        error(errInternal, -1, "signDocument: error getting signature info");
         return CryptoSign::SigningError::KeyMissing;
     }
     const std::string signerName = certInfo->getSubjectInfo().commonName;
@@ -648,14 +648,14 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
-        fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename.c_str());
+        error(errIO, -1, "signDocument: error saving to file \"%s\"", saveFilename.c_str());
         return CryptoSign::SigningError::WriteFailed;
     }
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
-        fprintf(stderr, "signDocument: unable to get signature object offsets\n");
+        error(errIO, -1, "signDocument: unable to get signature object offsets");
         return CryptoSign::SigningError::InternalError;
     }
 
@@ -663,7 +663,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     Goffset sigStart, sigEnd, fileSize;
     FILE *file = openFile(saveFilename.c_str(), "r+b");
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
-        fprintf(stderr, "signDocument: unable update byte range\n");
+        error(errIO, -1, "signDocument: unable update byte range");
         fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }
@@ -686,7 +686,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     }
 
     if (std::get<std::vector<unsigned char>>(signature).size() > CryptoSign::maxSupportedSignatureSize) {
-        error(errInternal, -1, "signature too large\n");
+        error(errInternal, -1, "signature too large");
         fclose(file);
         return CryptoSign::SigningError::InternalError;
     }
@@ -696,7 +696,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, std::get<std::vector<unsigned char>>(signature))) {
-        fprintf(stderr, "signDocument: unable update signature\n");
+        error(errIO, -1, "signDocument: unable update signature");
         fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }

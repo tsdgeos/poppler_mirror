@@ -11,6 +11,7 @@
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
 #include "DistinguishedNameParser.h"
+#include "Error.h"
 #include <array>
 #include <gpgme.h>
 #include <gpgme++/key.h>
@@ -67,6 +68,15 @@ template<typename Result>
 static bool isValidResult(const Result &result)
 {
     return isSuccess(result.error());
+}
+
+static std::string errorString(const GpgME::Error &err)
+{
+#if GPGMEPP_VERSION < ((1 << 16) | (24 << 8) | (0))
+    return fromCharPtr(err.asString());
+#else
+    return err.asStdString();
+#endif
 }
 
 template<typename Result>
@@ -285,6 +295,7 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
             case GPG_ERR_BAD_PASSPHRASE:
                 return CryptoSign::SigningError::BadPassphrase;
             }
+            error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
             return CryptoSign::SigningError::GenericError;
         }
     }
