@@ -1218,11 +1218,12 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
     } else if (path.ends_with(".ttc") || path.ends_with(".otc")) {
         *type = sysFontTTC;
     }
-#    else
-#        pragma message("Compiling without AFontMatcher API due to Android API version being lower than 29.")
-#    endif
 
     return path;
+#    else
+#        pragma message("Compiling without AFontMatcher API due to Android API version being lower than 29.")
+    return {};
+#    endif
 }
 
 static struct
