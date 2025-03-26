@@ -44,7 +44,6 @@ enum FoFiIdentifierType
 class FoFiIdentifier
 {
 public:
-    static FoFiIdentifierType identifyMem(const char *file, int len);
     static FoFiIdentifierType identifyFile(const char *fileName);
     static FoFiIdentifierType identifyStream(int (*getChar)(void *data), void *data);
 };
