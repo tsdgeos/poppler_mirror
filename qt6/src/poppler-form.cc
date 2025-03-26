@@ -53,7 +53,7 @@
 #    include <NSSCryptoSignBackend.h>
 #endif
 #ifdef ENABLE_GPGME
-#    include <GPGMECryptoSignBackend.h>
+#    include <GPGMECryptoSignBackendConfiguration.h>
 #endif
 
 #include "poppler-page-private.h"

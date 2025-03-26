@@ -10,6 +10,7 @@
 #include "CryptoSignBackend.h"
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
+#include "GPGMECryptoSignBackendConfiguration.h"
 #include "DistinguishedNameParser.h"
 #include "Error.h"
 #include <array>
@@ -21,6 +22,7 @@
 #if DUMP_SIGNATURE_DATA
 #    include <fstream>
 #endif
+static std::vector<GpgME::Protocol> allowedTypes();
 
 bool GpgSignatureBackend::hasSufficientVersion()
 {
@@ -236,7 +238,7 @@ std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVe
 std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvailableSigningCertificates()
 {
     std::vector<std::unique_ptr<X509CertificateInfo>> certificates;
-    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+    for (auto type : allowedTypes()) {
         const auto context = GpgME::Context::create(type);
         auto err = context->startKeyListing(static_cast<const char *>(nullptr), true /*secretOnly*/);
         while (isSuccess(err)) {
@@ -259,7 +261,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvaila
 
 GpgSignatureCreation::GpgSignatureCreation(const std::string &certId)
 {
-    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+    for (auto type : allowedTypes()) {
         GpgME::Error error;
         auto context = GpgME::Context::create(type);
         const auto signingKey = context->key(certId.c_str(), error, true);
@@ -575,11 +577,11 @@ void GpgSignatureConfiguration::setPgpSignaturesAllowed(bool allow)
     allowPgp = allow;
 }
 
-std::vector<GpgME::Protocol> GpgSignatureConfiguration::allowedTypes()
+static std::vector<GpgME::Protocol> allowedTypes()
 {
     std::vector<GpgME::Protocol> allowedTypes;
     allowedTypes.push_back(GpgME::CMS);
-    if (allowPgp) {
+    if (GpgSignatureConfiguration::arePgpSignaturesAllowed()) {
         allowedTypes.push_back(GpgME::OpenPGP);
     }
     return allowedTypes;
