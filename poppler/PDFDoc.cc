@@ -508,7 +508,7 @@ static PDFSubtypeConformance pdfConformanceFromString(const std::string &pdfsubv
             break;
         }
         case 2: {
-            if (conf == std::string_view("pq")) {
+            if (conf == std::string_view("pg")) {
                 return subtypeConfPG;
                 break;
             }
