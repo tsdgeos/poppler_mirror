@@ -1110,8 +1110,13 @@ void CachedFileStream::setPos(Goffset pos, int dir)
     unsigned int size;
 
     if (dir >= 0) {
-        cc->seek(pos, SEEK_SET);
-        bufPos = pos;
+        if (cc->seek(pos, SEEK_SET) == 0) {
+            bufPos = pos;
+        } else {
+            cc->seek(0, SEEK_END);
+            bufPos = pos = (unsigned int)cc->tell();
+            error(errInternal, pos, "CachedFileStream: Seek beyond end attempted, capped to file size");
+        }
     } else {
         cc->seek(0, SEEK_END);
         size = (unsigned int)cc->tell();
