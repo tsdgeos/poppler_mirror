@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016-2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2019, 2021, 2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -412,6 +412,17 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
     if (obj1.isString()) {
         const GooString *s = obj1.getString();
         title = TextStringToUCS4(s->toStr());
+        // All downstream users treats empty titles
+        // as this item (and children) doesn't exist
+        // but there exists documents in the wild
+        // where outline is empty.
+        // In order to don't break downstreams, do
+        // like firefox's pdf component and replace
+        // with a dash.
+        if (title.empty()) {
+            static const std::vector<Unicode> zeroWidthSpace { 0x200B };
+            title = UTF16toUCS4(zeroWidthSpace);
+        }
     }
 
     obj1 = dict->lookup("Dest");
