@@ -1,7 +1,7 @@
 /* poppler-qiodevicestream-private.h: Qt5 interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021, Even Rouault <even.rouault@spatialys.com>
  * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
@@ -39,7 +39,7 @@ public:
     void close() override;
     Goffset getPos() override;
     void put(char c) override;
-    size_t write(std::span<unsigned char> data) override;
+    size_t write(std::span<const unsigned char> data) override;
     void printf(const char *format, ...) override GCC_PRINTF_FORMAT(2, 3);
 
 private:

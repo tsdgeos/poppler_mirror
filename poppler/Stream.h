@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -311,7 +311,7 @@ public:
     // Put a char in the stream
     virtual void put(char c) = 0;
 
-    virtual size_t write(std::span<unsigned char> data) = 0;
+    virtual size_t write(std::span<const unsigned char> data) = 0;
 
     virtual void printf(const char *format, ...) GCC_PRINTF_FORMAT(2, 3) = 0;
 };
@@ -332,7 +332,7 @@ public:
 
     void put(char c) override;
 
-    size_t write(std::span<unsigned char> data) override;
+    size_t write(std::span<const unsigned char> data) override;
 
     void printf(const char *format, ...) override GCC_PRINTF_FORMAT(2, 3);
 

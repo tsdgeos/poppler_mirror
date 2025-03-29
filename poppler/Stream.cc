@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -447,7 +447,7 @@ void FileOutStream::put(char c)
     fputc(c, f);
 }
 
-size_t FileOutStream::write(std::span<unsigned char> data)
+size_t FileOutStream::write(std::span<const unsigned char> data)
 {
     return fwrite(data.data(), sizeof(decltype(data)::element_type), data.size(), f);
 }
