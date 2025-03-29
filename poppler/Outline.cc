@@ -417,8 +417,7 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
         // but there exists documents in the wild
         // where outline is empty.
         // In order to don't break downstreams, do
-        // like firefox's pdf component and replace
-        // with a dash.
+        // replace it with a zero width space.
         if (title.empty()) {
             static const std::vector<Unicode> zeroWidthSpace { 0x200B };
             title = UTF16toUCS4(zeroWidthSpace);
