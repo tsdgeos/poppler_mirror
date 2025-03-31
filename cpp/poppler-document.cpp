@@ -6,6 +6,7 @@
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Nathanael d. Noblet <nathanael@noblet.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,7 +172,7 @@ bool document::unlock(const std::string &owner_password, const std::string &user
         } else if (d->raw_doc_data) {
             newdoc = new document_private(d->raw_doc_data, d->raw_doc_data_length, owner_password, user_password);
         } else {
-            newdoc = new document_private(std::make_unique<GooString>(d->doc->getFileName()), owner_password, user_password);
+            newdoc = new document_private(d->doc->getFileName()->copy(), owner_password, user_password);
         }
         if (!newdoc->doc->isOk()) {
             d->doc_data.swap(newdoc->doc_data);
@@ -865,6 +866,32 @@ bool document::is_encrypted() const
 bool document::is_linearized() const
 {
     return d->doc->isLinearized();
+}
+
+/**
+ \returns the form type within the document
+ \since 25.04
+ */
+enum document::form_type document::form_type() const
+{
+    switch (d->doc->getCatalog()->getFormType()) {
+    case Catalog::AcroForm:
+        return form_type::acro;
+    case Catalog::XfaForm:
+        return form_type::xfa;
+    case Catalog::NoForm:
+    default:
+        return form_type::none;
+    }
+}
+
+/**
+ \returns true if the document contains javascript
+ \since 25.04
+ */
+bool document::has_javascript() const
+{
+    return d->doc->getCatalog()->numJS() > 0;
 }
 
 /**

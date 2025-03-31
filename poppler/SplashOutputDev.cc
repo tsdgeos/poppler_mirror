@@ -3686,14 +3686,15 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         if (!maskStr->reset()) {
             return;
         }
-        unsigned char *data = (unsigned char *)gmalloc(maskChars);
-        const int readChars = maskStr->doGetChars(maskChars, data);
+        std::vector<char> data;
+        data.resize(maskChars);
+        const int readChars = maskStr->doGetChars(maskChars, (unsigned char *)data.data());
         if (unlikely(readChars < maskChars)) {
             memset(&data[readChars], 0, maskChars - readChars);
         }
         maskStr->close();
 
-        ownedMaskStr = std::make_unique<AutoFreeMemStream>((char *)data, 0, maskChars, maskStr->getDictObject()->copy());
+        ownedMaskStr = std::make_unique<AutoFreeMemStream>(std::move(data), maskStr->getDictObject()->copy());
         maskStr = ownedMaskStr.get();
     }
     imgMaskData.imgStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());

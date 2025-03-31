@@ -45,7 +45,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
 // Copyright (C) 2024 Adam Sampson <ats@offog.org>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -5617,7 +5617,6 @@ ActualText::ActualText(TextPage *out)
 
 ActualText::~ActualText()
 {
-    delete actualText;
     text->decRefCnt();
 }
 
@@ -5640,8 +5639,7 @@ void ActualText::addChar(const GfxState *state, double x, double y, double dx, d
 
 void ActualText::begin(const GfxState *state, const GooString *t)
 {
-    delete actualText;
-    actualText = new GooString(t);
+    actualText = t->copy();
     actualTextNBytes = 0;
 }
 
@@ -5658,8 +5656,7 @@ void ActualText::end(const GfxState *state)
         text->addChar(state, actualTextX0, actualTextY0, actualTextX1 - actualTextX0, actualTextY1 - actualTextY0, 0, actualTextNBytes, uni.data(), uni.size());
     }
 
-    delete actualText;
-    actualText = nullptr;
+    actualText.reset();
     actualTextNBytes = 0;
 }
 

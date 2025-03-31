@@ -623,7 +623,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
         return CryptoSign::SigningError::InternalError;
     }
     if (certNickname.empty()) {
-        fprintf(stderr, "signDocument: Empty nickname\n");
+        error(errInternal, -1, "signDocument: Empty nickname");
         return CryptoSign::SigningError::KeyMissing;
     }
 
@@ -632,7 +632,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
-        fprintf(stderr, "signDocument: error getting signature info\n");
+        error(errInternal, -1, "signDocument: error getting signature info");
         return CryptoSign::SigningError::KeyMissing;
     }
     const std::string signerName = certInfo->getSubjectInfo().commonName;
@@ -648,14 +648,14 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
-        fprintf(stderr, "signDocument: error saving to file \"%s\"\n", saveFilename.c_str());
+        error(errIO, -1, "signDocument: error saving to file \"%s\"", saveFilename.c_str());
         return CryptoSign::SigningError::WriteFailed;
     }
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
-        fprintf(stderr, "signDocument: unable to get signature object offsets\n");
+        error(errIO, -1, "signDocument: unable to get signature object offsets");
         return CryptoSign::SigningError::InternalError;
     }
 
@@ -663,7 +663,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     Goffset sigStart, sigEnd, fileSize;
     FILE *file = openFile(saveFilename.c_str(), "r+b");
     if (!updateOffsets(file, objStart, objEnd, &sigStart, &sigEnd, &fileSize)) {
-        fprintf(stderr, "signDocument: unable update byte range\n");
+        error(errIO, -1, "signDocument: unable update byte range");
         fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }
@@ -686,7 +686,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
     }
 
     if (std::get<std::vector<unsigned char>>(signature).size() > CryptoSign::maxSupportedSignatureSize) {
-        error(errInternal, -1, "signature too large\n");
+        error(errInternal, -1, "signature too large");
         fclose(file);
         return CryptoSign::SigningError::InternalError;
     }
@@ -696,7 +696,7 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocument(const 
 
     // write signature to saved file
     if (!updateSignature(file, sigStart, sigEnd, std::get<std::vector<unsigned char>>(signature))) {
-        fprintf(stderr, "signDocument: unable update signature\n");
+        error(errIO, -1, "signDocument: unable update signature");
         fclose(file);
         return CryptoSign::SigningError::WriteFailed;
     }
@@ -2878,21 +2878,21 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     error(errIO, -1, "Font size is too big {0:s}", filepath.c_str());
                     return {};
                 }
-                char *dataPtr = static_cast<char *>(gmalloc(fileSize));
-                const Goffset bytesRead = file->read(dataPtr, static_cast<int>(fileSize), 0);
+                std::vector<char> data;
+                data.resize(fileSize);
+                const Goffset bytesRead = file->read(data.data(), static_cast<int>(fileSize), 0);
                 if (bytesRead != fileSize) {
                     error(errIO, -1, "Failed to read contents of {0:s}", filepath.c_str());
-                    gfree(dataPtr);
                     return {};
                 }
 
                 if (isTrueType) {
-                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), dataPtr, fileSize, StreamCompression::Compress);
+                    const Ref fontFile2Ref = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile2", Object(fontFile2Ref));
                 } else {
                     Dict *fontFileStreamDict = new Dict(xref);
                     fontFileStreamDict->set("Subtype", Object(objName, "OpenType"));
-                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, dataPtr, fileSize, StreamCompression::Compress);
+                    const Ref fontFile3Ref = xref->addStreamObject(fontFileStreamDict, std::move(data), StreamCompression::Compress);
                     fontDescriptor->set("FontFile3", Object(fontFile3Ref));
                 }
             }
@@ -2950,15 +2950,15 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
             }
             descendantFont->set("W", Object(widths));
 
-            char *dataPtr = static_cast<char *>(gmalloc(2 * (basicMultilingualMaxCode + 1)));
-            int i = 0;
+            std::vector<char> data;
+            data.reserve(2 * basicMultilingualMaxCode);
 
             for (int code = 0; code <= basicMultilingualMaxCode; ++code) {
                 const int glyph = fft->mapCodeToGID(unicodeBMPCMap, code);
-                dataPtr[i++] = (unsigned char)(glyph >> 8);
-                dataPtr[i++] = (unsigned char)(glyph & 0xff);
+                data.push_back((char)(glyph >> 8));
+                data.push_back((char)(glyph & 0xff));
             }
-            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), dataPtr, basicMultilingualMaxCode * 2, StreamCompression::Compress);
+            const Ref cidToGidMapStream = xref->addStreamObject(new Dict(xref), std::move(data), StreamCompression::Compress);
             descendantFont->set("CIDToGIDMap", Object(cidToGidMapStream));
         }
 

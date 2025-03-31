@@ -27,7 +27,7 @@
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -223,8 +223,7 @@ public:
     // For stream compression, if the data is already compressed
     // don't compress again. If it is not compressed, use compress (Flate / zlib)
     // Returns ref to a new object.
-    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression);
-    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression);
+    Ref addStreamObject(Dict *dict, std::vector<char> buffer, StreamCompression compression);
 
     // Output XRef table to stream
     void writeTableToFile(OutStream *outStr, bool writeAllEntries);

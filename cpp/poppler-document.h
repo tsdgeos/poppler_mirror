@@ -3,6 +3,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2021, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025 Nathanael d. Noblet <nathanael@noblet.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +60,13 @@ public:
         two_page_right
     };
 
+    enum class form_type
+    {
+        none,
+        acro,
+        xfa
+    };
+
     ~document();
 
     bool is_locked() const;
@@ -102,6 +110,9 @@ public:
 
     bool is_encrypted() const;
     bool is_linearized() const;
+    form_type form_type() const;
+    bool has_javascript() const;
+
     bool has_permission(permission_enum which) const;
     ustring metadata() const;
     bool get_pdf_id(std::string *permanent_id, std::string *update_id) const;

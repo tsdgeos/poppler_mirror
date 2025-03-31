@@ -6,9 +6,10 @@
 //
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //========================================================================
+#ifndef GPGME_CRYPTO_SIGN_BACKEND_H
+#define GPGME_CRYPTO_SIGN_BACKEND_H
 
 #include "CryptoSignBackend.h"
-#include "poppler_private_export.h"
 
 #include <gpgme++/data.h>
 #include <gpgme++/context.h>
@@ -70,14 +71,4 @@ private:
 #endif
 };
 
-class POPPLER_PRIVATE_EXPORT GpgSignatureConfiguration
-{
-public:
-    static bool arePgpSignaturesAllowed();
-    static void setPgpSignaturesAllowed(bool allowed);
-    static std::vector<GpgME::Protocol> allowedTypes();
-    GpgSignatureConfiguration() = delete;
-
-private:
-    static bool allowPgp;
-};
+#endif // GPGME_CRYPTO_SIGN_BACKEND_H

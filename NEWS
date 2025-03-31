@@ -1,3 +1,16 @@
+Release 25.03.0:
+        core:
+         * Fix opening some slightly malformed files
+         * Signing: Support custom PGP signing
+         * Signing: Do not embed fonts in the case of signatures without appearance
+         * Signing: Improve error handling on bad passphrase
+         * Signing-GPGME: more correct validation handling
+         * Internal code improvements
+
+        glib:
+         * Fix default signature colors
+         * Check file attachment annotation for this class before casting
+
 Release 25.02.0:
         core:
          * cairo: fix issue for images reaching MAX_CAIRO_IMAGE_SIZE

@@ -7,7 +7,7 @@
 // Copyright 2002 g10 Code GmbH
 // Copyright 2004 Klarälvdalens Datakonsult AB
 // Copyright 2021 g10 Code GmbH
-// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Albert Astals Cid <aacid@kde.org>
 //
 // Derived from libkleopatra (KDE key management library) dn.cpp
@@ -52,7 +52,7 @@ inline unsigned char xtoi(unsigned char c)
     if (c <= 'F') {
         return c - 'A' + 10;
     }
-    return c < 'a' + 10;
+    return c - 'a' + 10;
 }
 
 inline unsigned char xtoi(unsigned char first, unsigned char second)

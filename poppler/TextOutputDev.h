@@ -28,7 +28,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -749,7 +749,7 @@ public:
 private:
     TextPage *text;
 
-    GooString *actualText; // replacement text for the span
+    std::unique_ptr<GooString> actualText; // replacement text for the span
     double actualTextX0;
     double actualTextY0;
     double actualTextX1;

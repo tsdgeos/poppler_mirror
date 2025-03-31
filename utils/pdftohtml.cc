@@ -30,7 +30,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
     // construct text file name
     if (argc == 3) {
-        GooString *tmp = new GooString(argv[2]);
+        auto tmp = std::make_unique<GooString>(argv[2]);
         if (!xml) {
             if (tmp->getLength() >= 5) {
                 const char *p = tmp->c_str() + tmp->getLength() - 5;
@@ -258,9 +258,8 @@ int main(int argc, char *argv[])
             }
         }
         if (!htmlFileName) {
-            htmlFileName = std::make_unique<GooString>(tmp);
+            htmlFileName = std::move(tmp);
         }
-        delete tmp;
     } else if (fileName->cmp("fd://0") == 0) {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto error;

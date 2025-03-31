@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017, 2021, 2023, 2024 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
@@ -40,7 +40,7 @@
 
 #include <config.h>
 
-std::vector<Unicode> UTF16toUCS4(std::span<Unicode> utf16)
+std::vector<Unicode> UTF16toUCS4(std::span<const Unicode> utf16)
 {
     // count characters
     int len = 0;
@@ -406,7 +406,7 @@ std::string utf16ToUtf8(const uint16_t *utf16, int maxUtf16)
     return utf8;
 }
 
-void unicodeToAscii7(std::span<Unicode> in, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices)
+void unicodeToAscii7(std::span<const Unicode> in, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices)
 {
     const UnicodeMap *uMap = globalParams->getUnicodeMap("ASCII7");
     int *idx = nullptr;

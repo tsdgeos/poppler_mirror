@@ -32,7 +32,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -88,9 +88,9 @@ HtmlFontColor::HtmlFontColor(GfxRGB rgb, double opacity_)
     }
 }
 
-GooString *HtmlFontColor::convtoX(unsigned int xcol) const
+std::unique_ptr<GooString> HtmlFontColor::convtoX(unsigned int xcol) const
 {
-    GooString *xret = new GooString();
+    auto xret = std::make_unique<GooString>();
     char tmp;
     unsigned int k;
     k = (xcol / 16);
@@ -110,18 +110,12 @@ GooString *HtmlFontColor::convtoX(unsigned int xcol) const
     return xret;
 }
 
-GooString *HtmlFontColor::toString() const
+std::unique_ptr<GooString> HtmlFontColor::toString() const
 {
-    GooString *tmp = new GooString("#");
-    GooString *tmpr = convtoX(r);
-    GooString *tmpg = convtoX(g);
-    GooString *tmpb = convtoX(b);
-    tmp->append(tmpr);
-    tmp->append(tmpg);
-    tmp->append(tmpb);
-    delete tmpr;
-    delete tmpg;
-    delete tmpb;
+    auto tmp = std::make_unique<GooString>("#");
+    tmp->append(convtoX(r).get());
+    tmp->append(convtoX(g).get());
+    tmp->append(convtoX(b).get());
     return tmp;
 }
 
@@ -144,7 +138,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
     }
 
     if (const std::optional<std::string> &fontname = font.getName()) {
-        FontName = new GooString(*fontname);
+        FontName = std::make_unique<GooString>(*fontname);
 
         GooString fontnameLower(*fontname);
         fontnameLower.lowerCase();
@@ -160,7 +154,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
         familyName = *fontname;
         removeStyleSuffix(familyName);
     } else {
-        FontName = new GooString(defaultFamilyName);
+        FontName = std::make_unique<GooString>(defaultFamilyName);
         familyName = defaultFamilyName;
     }
 
@@ -175,15 +169,12 @@ HtmlFont::HtmlFont(const HtmlFont &x)
     bold = x.bold;
     familyName = x.familyName;
     color = x.color;
-    FontName = new GooString(x.FontName);
+    FontName = x.FontName->copy();
     rotOrSkewed = x.rotOrSkewed;
     memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
 }
 
-HtmlFont::~HtmlFont()
-{
-    delete FontName;
-}
+HtmlFont::~HtmlFont() = default;
 
 HtmlFont &HtmlFont::operator=(const HtmlFont &x)
 {
@@ -196,8 +187,7 @@ HtmlFont &HtmlFont::operator=(const HtmlFont &x)
     bold = x.bold;
     familyName = x.familyName;
     color = x.color;
-    delete FontName;
-    FontName = new GooString(x.FontName);
+    FontName = x.FontName->copy();
     return *this;
 }
 
@@ -207,7 +197,7 @@ HtmlFont &HtmlFont::operator=(const HtmlFont &x)
 */
 bool HtmlFont::isEqual(const HtmlFont &x) const
 {
-    return (size == x.size) && (lineSize == x.lineSize) && (FontName->cmp(x.FontName) == 0) && (bold == x.bold) && (italic == x.italic) && (color.isEqual(x.getColor())) && isRotOrSkewed() == x.isRotOrSkewed()
+    return (size == x.size) && (lineSize == x.lineSize) && (FontName->cmp(x.FontName.get()) == 0) && (bold == x.bold) && (italic == x.italic) && (color.isEqual(x.getColor())) && isRotOrSkewed() == x.isRotOrSkewed()
             && (!isRotOrSkewed() || rot_matrices_equal(getRotMat(), x.getRotMat()));
 }
 
@@ -220,14 +210,14 @@ bool HtmlFont::isEqualIgnoreBold(const HtmlFont &x) const
     return ((size == x.size) && (familyName == x.familyName) && (color.isEqual(x.getColor())));
 }
 
-GooString *HtmlFont::getFontName()
+std::unique_ptr<GooString> HtmlFont::getFontName()
 {
-    return new GooString(familyName);
+    return std::make_unique<GooString>(familyName);
 }
 
-GooString *HtmlFont::getFullName()
+std::unique_ptr<GooString> HtmlFont::getFullName()
 {
-    return new GooString(FontName);
+    return FontName->copy();
 }
 
 // this method if plain wrong todo
@@ -297,15 +287,15 @@ int HtmlFontAccu::AddFont(const HtmlFont &font)
 }
 
 // get CSS font definition for font #i
-GooString *HtmlFontAccu::CSStyle(int i, int j)
+std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
 {
-    GooString *tmp = new GooString();
+    auto tmp = std::make_unique<GooString>();
 
     std::vector<HtmlFont>::iterator g = accu.begin();
     g += i;
     HtmlFont font = *g;
-    GooString *colorStr = font.getColor().toString();
-    GooString *fontName = (fontFullName ? font.getFullName() : font.getFontName());
+    std::unique_ptr<GooString> colorStr = font.getColor().toString();
+    std::unique_ptr<GooString> fontName = (fontFullName ? font.getFullName() : font.getFontName());
 
     if (!xml) {
         tmp->append(".ft");
@@ -318,9 +308,9 @@ GooString *HtmlFontAccu::CSStyle(int i, int j)
             tmp->append(std::to_string(font.getLineSize()));
         }
         tmp->append("px;font-family:");
-        tmp->append(fontName); // font.getFontName());
+        tmp->append(fontName.get()); // font.getFontName());
         tmp->append(";color:");
-        tmp->append(colorStr);
+        tmp->append(colorStr.get());
         if (font.getColor().getOpacity() != 1.0) {
             tmp->append(";opacity:");
             tmp->append(std::to_string(font.getColor().getOpacity()));
@@ -355,9 +345,9 @@ GooString *HtmlFontAccu::CSStyle(int i, int j)
         tmp->append("\" size=\"");
         tmp->append(std::to_string(font.getSize()));
         tmp->append("\" family=\"");
-        tmp->append(fontName);
+        tmp->append(fontName.get());
         tmp->append("\" color=\"");
-        tmp->append(colorStr);
+        tmp->append(colorStr.get());
         if (font.getColor().getOpacity() != 1.0) {
             tmp->append("\" opacity=\"");
             tmp->append(std::to_string(font.getColor().getOpacity()));
@@ -365,7 +355,5 @@ GooString *HtmlFontAccu::CSStyle(int i, int j)
         tmp->append("\"/>");
     }
 
-    delete fontName;
-    delete colorStr;
     return tmp;
 }

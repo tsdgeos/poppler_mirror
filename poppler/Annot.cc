@@ -1518,7 +1518,7 @@ void Annot::setName(GooString *new_name)
     annotLocker();
 
     if (new_name) {
-        name = std::make_unique<GooString>(new_name);
+        name = new_name->copy();
     } else {
         name = std::make_unique<GooString>();
     }
@@ -1970,7 +1970,8 @@ Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool tr
         appearDict->set("Resources", std::move(resDictObject));
     }
 
-    Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    Stream *mStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
     return Object(mStream);
 }
 
@@ -2408,7 +2409,7 @@ void AnnotText::setIcon(GooString *new_icon)
     }
 
     if (new_icon) {
-        icon = std::make_unique<GooString>(new_icon);
+        icon = new_icon->copy();
     } else {
         icon = std::make_unique<GooString>("Note");
     }
@@ -2944,7 +2945,7 @@ void AnnotFreeText::setQuadding(VariableTextQuadding new_quadding)
 void AnnotFreeText::setStyleString(GooString *new_string)
 {
     if (new_string) {
-        styleString = std::make_unique<GooString>(new_string);
+        styleString = new_string->copy();
         // append the unicode marker <FE FF> if needed
         if (!hasUnicodeByteOrderMark(styleString->toStr())) {
             prependUnicodeByteOrderMark(styleString->toNonConstStr());
@@ -5459,7 +5460,8 @@ void AnnotWidget::generateFieldAppearance()
     }
 
     // build the appearance stream
-    Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(appearDict));
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    Stream *appearStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
@@ -5639,7 +5641,8 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Matrix", Object(matrix));
             formDict->set("Resources", Object(resDict));
 
-            Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0, appearBuf->getLength(), Object(formDict));
+            std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+            Stream *mStream = new AutoFreeMemStream(std::move(data), Object(formDict));
 
             Dict *dict = new Dict(gfx->getXRef());
             dict->set("FRM", Object(mStream));
@@ -5929,7 +5932,7 @@ void AnnotStamp::draw(Gfx *gfx, bool printing)
 void AnnotStamp::setIcon(GooString *new_icon)
 {
     if (new_icon) {
-        icon = std::make_unique<GooString>(new_icon);
+        icon = new_icon->copy();
     } else {
         icon = std::make_unique<GooString>();
     }

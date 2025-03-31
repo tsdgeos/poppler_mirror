@@ -1,7 +1,7 @@
 /* poppler-qiodevicestream.cc: Qt6 interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2020, 2021 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, 2021, 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021, Even Rouault <even.rouault@spatialys.com>
  * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
@@ -44,7 +44,7 @@ void QIODeviceOutStream::put(char c)
     m_device->putChar(c);
 }
 
-size_t QIODeviceOutStream::write(std::span<unsigned char> data)
+size_t QIODeviceOutStream::write(std::span<const unsigned char> data)
 {
     return m_device->write(reinterpret_cast<const char *>(data.data()), data.size());
 }

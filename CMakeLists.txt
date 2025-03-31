@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "25")
-set(POPPLER_MINOR_VERSION_STRING "02")
+set(POPPLER_MINOR_VERSION_STRING "03")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -269,10 +269,9 @@ if(ENABLE_GTK_DOC)
   if(NOT GtkDoc_FOUND)
     message(FATAL_ERROR "Install the gtk-doc package to generate GTK API documentation, or set ENABLE_GTK_DOC to Off.")
   endif()
-  # NOTE: The FindPythonInterp module is deprecated, but the newer FindPython3 module requires CMake >=3.12
-  find_package(PythonInterp 3)
+  find_package(Python3)
   # Also bail out with an error if Python3 is missing
-  if(NOT PYTHONINTERP_FOUND)
+  if(NOT Python3_FOUND)
     message(FATAL_ERROR "Install python3 in order to generate GTK API documentation, or set ENABLE_GTK_DOC to Off.")
   endif()
 endif()
@@ -609,7 +608,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "146")
+set(POPPLER_SOVERSION_NUMBER "147")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(

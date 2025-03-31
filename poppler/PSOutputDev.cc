@@ -7185,7 +7185,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
     case Function::Type::PostScript:
         func4 = (const PostScriptFunction *)func;
         if (invertPSFunction) {
-            GooString *codeString = new GooString(func4->getCodeString());
+            std::unique_ptr<GooString> codeString = func4->getCodeString()->copy();
             for (i = codeString->getLength() - 1; i > 0; i--) {
                 if (codeString->getChar(i) == '}') {
                     codeString->del(i);
@@ -7194,7 +7194,6 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
             }
             writePS(codeString->c_str());
             writePS("\n");
-            delete codeString;
             n = func4->getOutputSize();
             for (i = 0; i < n; ++i) {
                 writePSFmt("{0:d} -1 roll ", n);

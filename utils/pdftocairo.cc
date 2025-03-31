@@ -41,6 +41,8 @@
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
+// Copyright (C) 2025 Masamichi Hosoda <trueroad@trueroad.jp>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -623,6 +625,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
 #ifdef CAIRO_HAS_SVG_SURFACE
             surface = cairo_svg_surface_create_for_stream(writeStream, output_file, w, h);
             cairo_svg_surface_restrict_to_version(surface, CAIRO_SVG_VERSION_1_2);
+            cairo_svg_surface_set_document_unit(surface, CAIRO_SVG_UNIT_PT);
 #endif
         }
 #ifdef CAIRO_HAS_WIN32_SURFACE
@@ -810,10 +813,10 @@ static bool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight)
     return true;
 }
 
-static GooString *getImageFileName(GooString *outputFileName, int numDigits, int page)
+static std::unique_ptr<GooString> getImageFileName(const GooString *outputFileName, int numDigits, int page)
 {
     char buf[10];
-    GooString *imageName = new GooString(outputFileName);
+    std::unique_ptr<GooString> imageName = outputFileName->copy();
     if (!singleFile) {
         snprintf(buf, sizeof(buf), "-%0*d", numDigits, page);
         imageName->append(buf);
@@ -833,9 +836,9 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
 
 // If (printing || singleFile) the output file name includes the
 // extension. Otherwise it is the file name base.
-static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
+static std::unique_ptr<GooString> getOutputFileName(GooString *fileName, GooString *outputName)
 {
-    GooString *name;
+    std::unique_ptr<GooString> name;
 
     if (outputName) {
         if (outputName->cmp("-") == 0) {
@@ -843,9 +846,9 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
                 fprintf(stderr, "Error: stdout may only be used with the ps, eps, pdf, svg output options or if -singlefile is used.\n");
                 exit(99);
             }
-            return new GooString("fd://0");
+            return std::make_unique<GooString>("fd://0");
         }
-        return new GooString(outputName);
+        return outputName->copy();
     }
 
     if (printToWin32) {
@@ -872,17 +875,15 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
             fprintf(stderr, "Error: invalid output filename.\n");
             exit(99);
         }
-        name = new GooString(p);
+        name = std::make_unique<GooString>(p);
     } else {
-        name = new GooString(s);
+        name = std::make_unique<GooString>(s);
     }
 
     // remove .pdf extension
     p = strrchr(name->c_str(), '.');
     if (p && strcasecmp(p, ".pdf") == 0) {
-        GooString *name2 = new GooString(name->c_str(), name->getLength() - 4);
-        delete name;
-        name = name2;
+        name = std::make_unique<GooString>(name->c_str(), name->getLength() - 4);
     }
 
     // append new extension
@@ -919,8 +920,8 @@ int main(int argc, char *argv[])
 {
     GooString *fileName = nullptr;
     GooString *outputName = nullptr;
-    GooString *outputFileName = nullptr;
-    GooString *imageFileName = nullptr;
+    std::unique_ptr<GooString> outputFileName = nullptr;
+    std::unique_ptr<GooString> imageFileName = nullptr;
     std::optional<GooString> ownerPW, userPW;
     CairoOutputDev *cairoOut;
     int pg, pg_num_len;
@@ -1258,20 +1259,19 @@ int main(int argc, char *argv[])
             }
         }
         if (imageFileName) {
-            delete imageFileName;
-            imageFileName = nullptr;
+            imageFileName.reset();
         }
         if (!printing) {
-            imageFileName = getImageFileName(outputFileName, pg_num_len, pg);
+            imageFileName = getImageFileName(outputFileName.get(), pg_num_len, pg);
         }
         getOutputSize(pg_w, pg_h, &output_w, &output_h);
 
         if (pg == firstPage) {
-            beginDocument(fileName, outputFileName, output_w, output_h);
+            beginDocument(fileName, outputFileName.get(), output_w, output_h);
         }
         beginPage(&output_w, &output_h);
         renderPage(doc.get(), cairoOut, pg, pg_w, pg_h, output_w, output_h);
-        endPage(imageFileName, cairoOut, pg == lastPage);
+        endPage(imageFileName.get(), cairoOut, pg == lastPage);
     }
     endDocument();
 
@@ -1279,8 +1279,6 @@ int main(int argc, char *argv[])
     delete cairoOut;
     delete fileName;
     delete outputName;
-    delete outputFileName;
-    delete imageFileName;
 
 #ifdef USE_CMS
     if (icc_data) {

@@ -20,8 +20,10 @@
 #include "CryptoSignBackend.h"
 #include "config.h"
 #ifdef ENABLE_GPGME
-#    include "GPGMECryptoSignBackend.h"
+#    include "GPGMECryptoSignBackendConfiguration.h"
 #    include <gpgme++/importresult.h>
+#    include <gpgme++/context.h>
+#    include <gpgme++/data.h>
 #endif
 
 #ifdef ENABLE_GPGME

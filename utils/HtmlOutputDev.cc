@@ -273,8 +273,8 @@ HtmlPage::HtmlPage(bool rawOrderA)
     yxStrings = nullptr;
     xyStrings = nullptr;
     yxCur1 = yxCur2 = nullptr;
-    fonts = new HtmlFontAccu();
-    links = new HtmlLinks();
+    fonts = std::make_unique<HtmlFontAccu>();
+    links = std::make_unique<HtmlLinks>();
     pageWidth = 0;
     pageHeight = 0;
     fontsPageMarker = 0;
@@ -285,12 +285,6 @@ HtmlPage::HtmlPage(bool rawOrderA)
 HtmlPage::~HtmlPage()
 {
     clear();
-    delete DocName;
-    delete fonts;
-    delete links;
-    for (auto entry : imgList) {
-        delete entry;
-    }
 }
 
 void HtmlPage::updateFont(GfxState *state)
@@ -338,7 +332,7 @@ void HtmlPage::updateFont(GfxState *state)
 
 void HtmlPage::beginString(GfxState *state, const GooString *s)
 {
-    curStr = new HtmlString(state, fontSize, fonts);
+    curStr = new HtmlString(state, fontSize, fonts.get());
 }
 
 void HtmlPage::conv()
@@ -615,10 +609,9 @@ void HtmlPage::coalesce()
                 int fontLineSize = hfont1->getLineSize();
                 int curLineSize = (int)(vertSpace + space);
                 if (curLineSize != fontLineSize) {
-                    HtmlFont *newfnt = new HtmlFont(*hfont1);
-                    newfnt->setLineSize(curLineSize);
-                    str1->fontpos = fonts->AddFont(*newfnt);
-                    delete newfnt;
+                    HtmlFont newfnt(*hfont1);
+                    newfnt.setLineSize(curLineSize);
+                    str1->fontpos = fonts->AddFont(newfnt);
                     hfont1 = getFont(str1);
                     // we have to reget hfont2 because it's location could have
                     // changed on resize
@@ -712,13 +705,12 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
     fprintf(f, " top=\"0\" left=\"0\" height=\"%d\" width=\"%d\">\n", pageHeight, pageWidth);
 
     for (int i = fontsPageMarker; i < fonts->size(); i++) {
-        GooString *fontCSStyle = fonts->CSStyle(i);
+        std::unique_ptr<GooString> fontCSStyle = fonts->CSStyle(i);
         fprintf(f, "\t%s\n", fontCSStyle->c_str());
-        delete fontCSStyle;
     }
 
-    for (auto ptr : imgList) {
-        auto img = static_cast<HtmlImage *>(ptr);
+    for (auto &ptr : imgList) {
+        auto img = static_cast<HtmlImage *>(ptr.get());
         if (!noRoundedCoordinates) {
             fprintf(f, R"(<image top="%d" left="%d" )", xoutRound(img->yMin), xoutRound(img->xMin));
             fprintf(f, R"(width="%d" height="%d" )", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
@@ -727,7 +719,6 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
             fprintf(f, R"(width="%f" height="%f" )", img->xMax - img->xMin, img->yMax - img->yMin);
         }
         fprintf(f, "src=\"%s\"/>\n", img->fName.c_str());
-        delete img;
     }
     imgList.clear();
 
@@ -864,14 +855,13 @@ void HtmlPage::dumpComplex(FILE *file, int page, const std::vector<std::string> 
     fputs("<style type=\"text/css\">\n<!--\n", pageFile);
     fputs("\tp {margin: 0; padding: 0;}", pageFile);
     for (int i = fontsPageMarker; i != fonts->size(); i++) {
-        GooString *fontCSStyle;
+        std::unique_ptr<GooString> fontCSStyle;
         if (!singleHtml) {
             fontCSStyle = fonts->CSStyle(i);
         } else {
             fontCSStyle = fonts->CSStyle(i, page);
         }
         fprintf(pageFile, "\t%s\n", fontCSStyle->c_str());
-        delete fontCSStyle;
     }
 
     fputs("-->\n</style>\n", pageFile);
@@ -920,8 +910,8 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
     } else {
         fprintf(f, "<a name=%d></a>", pageNum);
         // Loop over the list of image names on this page
-        for (auto ptr : imgList) {
-            auto img = static_cast<HtmlImage *>(ptr);
+        for (auto &ptr : imgList) {
+            auto img = static_cast<HtmlImage *>(ptr.get());
 
             // see printCSS() for class names
             const char *styles[4] = { "", " class=\"xflip\"", " class=\"yflip\"", " class=\"xyflip\"" };
@@ -934,7 +924,6 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
             }
 
             fprintf(f, "<img%s src=\"%s\"/><br/>\n", styles[style_index], img->fName.c_str());
-            delete img;
         }
         imgList.clear();
 
@@ -965,26 +954,24 @@ void HtmlPage::clear()
     yxCur1 = yxCur2 = nullptr;
 
     if (!noframes) {
-        delete fonts;
-        fonts = new HtmlFontAccu();
+        fonts = std::make_unique<HtmlFontAccu>();
         fontsPageMarker = 0;
     } else {
         fontsPageMarker = fonts->size();
     }
 
-    delete links;
-    links = new HtmlLinks();
+    links = std::make_unique<HtmlLinks>();
 }
 
 void HtmlPage::setDocName(const char *fname)
 {
-    DocName = new GooString(fname);
+    DocName = std::make_unique<GooString>(fname);
 }
 
 void HtmlPage::addImage(std::string &&fname, GfxState *state)
 {
-    HtmlImage *img = new HtmlImage(std::move(fname), state);
-    imgList.push_back(img);
+    auto img = std::make_unique<HtmlImage>(std::move(fname), state);
+    imgList.push_back(std::move(img));
 }
 
 //------------------------------------------------------------------------
@@ -993,22 +980,18 @@ void HtmlPage::addImage(std::string &&fname, GfxState *state)
 
 HtmlMetaVar::HtmlMetaVar(const char *_name, const char *_content)
 {
-    name = new GooString(_name);
-    content = new GooString(_content);
+    name = std::make_unique<GooString>(_name);
+    content = std::make_unique<GooString>(_content);
 }
 
-HtmlMetaVar::~HtmlMetaVar()
-{
-    delete name;
-    delete content;
-}
+HtmlMetaVar::~HtmlMetaVar() = default;
 
-GooString *HtmlMetaVar::toString() const
+std::unique_ptr<GooString> HtmlMetaVar::toString() const
 {
-    GooString *result = new GooString("<meta name=\"");
-    result->append(name);
+    auto result = std::make_unique<GooString>("<meta name=\"");
+    result->append(name.get());
     result->append("\" content=\"");
-    result->append(content);
+    result->append(content.get());
     result->append("\"/>");
     return result;
 }
@@ -1031,16 +1014,13 @@ std::string HtmlOutputDev::mapEncodingToHtml(const std::string &encoding)
 
 void HtmlOutputDev::doFrame(int firstPage)
 {
-    GooString *fName = new GooString(Docname);
+    std::unique_ptr<GooString> fName = Docname->copy();
     fName->append(".html");
 
     if (!(fContentsFrame = fopen(fName->c_str(), "w"))) {
-        error(errIO, -1, "Couldn't open html file '{0:t}'", fName);
-        delete fName;
+        error(errIO, -1, "Couldn't open html file '{0:t}'", fName.get());
         return;
     }
-
-    delete fName;
 
     const std::string baseName = gbasename(Docname->c_str());
     fputs(DOCTYPE, fContentsFrame);
@@ -1070,7 +1050,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
     catalog = catalogA;
     fContentsFrame = nullptr;
     page = nullptr;
-    docTitle = new GooString(title);
+    docTitle = std::make_unique<GooString>(title);
     pages = nullptr;
     dumpJPEG = true;
     // write = true;
@@ -1081,42 +1061,40 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
     // pageNum=firstPage;
     // open file
     needClose = false;
-    pages = new HtmlPage(rawOrder);
+    pages = std::make_unique<HtmlPage>(rawOrder);
 
-    glMetaVars.push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
+    glMetaVars.push_back(std::make_unique<HtmlMetaVar>("generator", "pdftohtml 0.36"));
     if (author) {
-        glMetaVars.push_back(new HtmlMetaVar("author", author));
+        glMetaVars.push_back(std::make_unique<HtmlMetaVar>("author", author));
     }
     if (keywords) {
-        glMetaVars.push_back(new HtmlMetaVar("keywords", keywords));
+        glMetaVars.push_back(std::make_unique<HtmlMetaVar>("keywords", keywords));
     }
     if (date) {
-        glMetaVars.push_back(new HtmlMetaVar("date", date));
+        glMetaVars.push_back(std::make_unique<HtmlMetaVar>("date", date));
     }
     if (subject) {
-        glMetaVars.push_back(new HtmlMetaVar("subject", subject));
+        glMetaVars.push_back(std::make_unique<HtmlMetaVar>("subject", subject));
     }
 
     maxPageWidth = 0;
     maxPageHeight = 0;
 
     pages->setDocName(fileName);
-    Docname = new GooString(fileName);
+    Docname = std::make_unique<GooString>(fileName);
 
     // for non-xml output (complex or simple) with frames generate the left frame
     if (!xml && !noframes) {
         if (!singleHtml) {
-            GooString *left = new GooString(fileName);
+            auto left = std::make_unique<GooString>(fileName);
             left->append("_ind.html");
 
             doFrame(firstPage);
 
             if (!(fContentsFrame = fopen(left->c_str(), "w"))) {
-                error(errIO, -1, "Couldn't open html file '{0:t}'", left);
-                delete left;
+                error(errIO, -1, "Couldn't open html file '{0:t}'", left.get());
                 return;
             }
-            delete left;
             fputs(DOCTYPE, fContentsFrame);
             fputs("<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title></title>\n</head>\n<body>\n", fContentsFrame);
 
@@ -1126,15 +1104,13 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
         }
         if (!complexMode) { /* not in complex mode */
 
-            GooString *right = new GooString(fileName);
+            auto right = std::make_unique<GooString>(fileName);
             right->append("s.html");
 
             if (!(page = fopen(right->c_str(), "w"))) {
-                error(errIO, -1, "Couldn't open html file '{0:t}'", right);
-                delete right;
+                error(errIO, -1, "Couldn't open html file '{0:t}'", right.get());
                 return;
             }
-            delete right;
             fputs(DOCTYPE, page);
             fputs("<html>\n<head>\n<title></title>\n", page);
             printCSS(page);
@@ -1146,7 +1122,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
         if (stout) {
             page = stdout;
         } else {
-            GooString *right = new GooString(fileName);
+            auto right = std::make_unique<GooString>(fileName);
             if (!xml) {
                 right->append(".html");
             }
@@ -1154,11 +1130,9 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
                 right->append(".xml");
             }
             if (!(page = fopen(right->c_str(), "w"))) {
-                error(errIO, -1, "Couldn't open html file '{0:t}'", right);
-                delete right;
+                error(errIO, -1, "Couldn't open html file '{0:t}'", right.get());
                 return;
             }
-            delete right;
         }
 
         const std::string htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName());
@@ -1182,13 +1156,6 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 
 HtmlOutputDev::~HtmlOutputDev()
 {
-    delete Docname;
-    delete docTitle;
-
-    for (auto entry : glMetaVars) {
-        delete entry;
-    }
-
     if (fContentsFrame) {
         fputs("</body>\n</html>\n", fContentsFrame);
         fclose(fContentsFrame);
@@ -1202,7 +1169,6 @@ HtmlOutputDev::~HtmlOutputDev()
             fclose(page);
         }
     }
-    delete pages;
 }
 
 void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
@@ -1625,12 +1591,10 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
 
 void HtmlOutputDev::dumpMetaVars(FILE *file)
 {
-    GooString *var;
 
-    for (const HtmlMetaVar *t : glMetaVars) {
-        var = t->toString();
+    for (const auto &t : glMetaVars) {
+        auto var = t->toString();
         fprintf(file, "%s\n", var->c_str());
-        delete var;
     }
 }
 

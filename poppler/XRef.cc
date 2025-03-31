@@ -1521,10 +1521,10 @@ void XRef::removeIndirectObject(Ref r)
     setModified();
 }
 
-Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression)
+Ref XRef::addStreamObject(Dict *dict, std::vector<char> buffer, StreamCompression compression)
 {
-    dict->add("Length", Object((int)bufferSize));
-    AutoFreeMemStream *stream = new AutoFreeMemStream(buffer, 0, bufferSize, Object(dict));
+    dict->add("Length", Object((int)buffer.size()));
+    AutoFreeMemStream *stream = new AutoFreeMemStream(std::move(buffer), Object(dict));
     stream->setFilterRemovalForbidden(true);
     switch (compression) {
     case StreamCompression::None:;
@@ -1534,11 +1534,6 @@ Ref XRef::addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, St
         break;
     }
     return addIndirectObject(Object((Stream *)stream));
-}
-
-Ref XRef::addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression)
-{
-    return addStreamObject(dict, (char *)buffer, bufferSize, compression);
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)

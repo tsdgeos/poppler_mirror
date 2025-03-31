@@ -25,7 +25,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,12 +47,12 @@ private:
     unsigned int b;
     unsigned int opacity;
     bool Ok(unsigned int xcol) { return xcol <= 255; }
-    GooString *convtoX(unsigned int xcol) const;
+    std::unique_ptr<GooString> convtoX(unsigned int xcol) const;
 
 public:
     HtmlFontColor() : r(0), g(0), b(0), opacity(255) { }
     HtmlFontColor(GfxRGB rgb, double opacity);
-    GooString *toString() const;
+    std::unique_ptr<GooString> toString() const;
     double getOpacity() const { return opacity / 255.0; }
     bool isEqual(HtmlFontColor col) const { return ((r == col.r) && (g == col.g) && (b == col.b) && (opacity == col.opacity)); }
 };
@@ -66,7 +66,7 @@ private:
     bool bold;
     bool rotOrSkewed;
     std::string familyName;
-    GooString *FontName;
+    std::unique_ptr<GooString> FontName;
     HtmlFontColor color;
     double rotSkewMat[4]; // only four values needed for rotation and skew
 public:
@@ -75,7 +75,7 @@ public:
     HtmlFont &operator=(const HtmlFont &x);
     HtmlFontColor getColor() const { return color; }
     ~HtmlFont();
-    GooString *getFullName();
+    std::unique_ptr<GooString> getFullName();
     bool isItalic() const { return italic; }
     bool isBold() const { return bold; }
     bool isRotOrSkewed() const { return rotOrSkewed; }
@@ -88,7 +88,7 @@ public:
         memcpy(rotSkewMat, mat, sizeof(rotSkewMat));
     }
     const double *getRotMat() const { return rotSkewMat; }
-    GooString *getFontName();
+    std::unique_ptr<GooString> getFontName();
     static std::unique_ptr<GooString> HtmlFilter(const Unicode *u, int uLen); // char* s);
     bool isEqual(const HtmlFont &x) const;
     bool isEqualIgnoreBold(const HtmlFont &x) const;
@@ -107,7 +107,7 @@ public:
     HtmlFontAccu &operator=(const HtmlFontAccu &) = delete;
     int AddFont(const HtmlFont &font);
     const HtmlFont *Get(int i) const { return &accu[i]; }
-    GooString *CSStyle(int i, int j = 0);
+    std::unique_ptr<GooString> CSStyle(int i, int j = 0);
     int size() const { return accu.size(); }
 };
 #endif

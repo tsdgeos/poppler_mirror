@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -43,6 +43,7 @@
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 Martin Emrich <dev@martinemrich.me>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -447,7 +448,7 @@ void FileOutStream::put(char c)
     fputc(c, f);
 }
 
-size_t FileOutStream::write(std::span<unsigned char> data)
+size_t FileOutStream::write(std::span<const unsigned char> data)
 {
     return fwrite(data.data(), sizeof(decltype(data)::element_type), data.size(), f);
 }
@@ -1110,8 +1111,13 @@ void CachedFileStream::setPos(Goffset pos, int dir)
     unsigned int size;
 
     if (dir >= 0) {
-        cc->seek(pos, SEEK_SET);
-        bufPos = pos;
+        if (cc->seek(pos, SEEK_SET) == 0) {
+            bufPos = pos;
+        } else {
+            cc->seek(0, SEEK_END);
+            bufPos = pos = (unsigned int)cc->tell();
+            error(errInternal, pos, "CachedFileStream: Seek beyond end attempted, capped to file size");
+        }
     } else {
         cc->seek(0, SEEK_END);
         size = (unsigned int)cc->tell();
@@ -1136,10 +1142,7 @@ void CachedFileStream::moveStart(Goffset delta)
 
 MemStream::~MemStream() = default;
 
-AutoFreeMemStream::~AutoFreeMemStream()
-{
-    gfree(buf);
-}
+AutoFreeMemStream::~AutoFreeMemStream() = default;
 
 bool AutoFreeMemStream::isFilterRemovalForbidden() const
 {

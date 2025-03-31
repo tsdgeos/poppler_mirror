@@ -17,6 +17,7 @@
 // Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -68,104 +69,14 @@ public:
 
 //------------------------------------------------------------------------
 
-class MemReader : public Reader
-{
-public:
-    static MemReader *make(const char *bufA, int lenA);
-    ~MemReader() override;
-    int getByte(int pos) override;
-    bool getU16BE(int pos, int *val) override;
-    bool getU32BE(int pos, unsigned int *val) override;
-    bool getU32LE(int pos, unsigned int *val) override;
-    bool getUVarBE(int pos, int size, unsigned int *val) override;
-    bool cmp(int pos, const char *s) override;
-
-private:
-    MemReader(const char *bufA, int lenA);
-
-    const char *buf;
-    int len;
-};
-
-MemReader *MemReader::make(const char *bufA, int lenA)
-{
-    return new MemReader(bufA, lenA);
-}
-
-MemReader::MemReader(const char *bufA, int lenA)
-{
-    buf = bufA;
-    len = lenA;
-}
-
-MemReader::~MemReader() = default;
-
-int MemReader::getByte(int pos)
-{
-    if (pos < 0 || pos >= len) {
-        return -1;
-    }
-    return buf[pos] & 0xff;
-}
-
-bool MemReader::getU16BE(int pos, int *val)
-{
-    if (pos < 0 || pos > len - 2) {
-        return false;
-    }
-    *val = ((buf[pos] & 0xff) << 8) + (buf[pos + 1] & 0xff);
-    return true;
-}
-
-bool MemReader::getU32BE(int pos, unsigned int *val)
-{
-    if (pos < 0 || pos > len - 4) {
-        return false;
-    }
-    *val = ((buf[pos] & 0xff) << 24) + ((buf[pos + 1] & 0xff) << 16) + ((buf[pos + 2] & 0xff) << 8) + (buf[pos + 3] & 0xff);
-    return true;
-}
-
-bool MemReader::getU32LE(int pos, unsigned int *val)
-{
-    if (pos < 0 || pos > len - 4) {
-        return false;
-    }
-    *val = (buf[pos] & 0xff) + ((buf[pos + 1] & 0xff) << 8) + ((buf[pos + 2] & 0xff) << 16) + ((buf[pos + 3] & 0xff) << 24);
-    return true;
-}
-
-bool MemReader::getUVarBE(int pos, int size, unsigned int *val)
-{
-    int i;
-
-    if (size < 1 || size > 4 || pos < 0 || pos > len - size) {
-        return false;
-    }
-    *val = 0;
-    for (i = 0; i < size; ++i) {
-        *val = (*val << 8) + (buf[pos + i] & 0xff);
-    }
-    return true;
-}
-
-bool MemReader::cmp(int pos, const char *s)
-{
-    int n;
-
-    n = (int)strlen(s);
-    if (pos < 0 || len < n || pos > len - n) {
-        return false;
-    }
-    return !memcmp(buf + pos, s, n);
-}
-
-//------------------------------------------------------------------------
-
 class FileReader : public Reader
 {
+    class PrivateTag
+    {
+    };
+
 public:
-    static FileReader *make(const char *fileName);
+    static std::unique_ptr<FileReader> make(const char *fileName);
     ~FileReader() override;
     int getByte(int pos) override;
     bool getU16BE(int pos, int *val) override;
@@ -174,8 +85,9 @@ public:
     bool getUVarBE(int pos, int size, unsigned int *val) override;
     bool cmp(int pos, const char *s) override;
 
-private:
     explicit FileReader(FILE *fA);
+
+private:
     bool fillBuf(int pos, int len);
 
     FILE *f;
@@ -183,14 +95,14 @@ private:
     int bufPos, bufLen;
 };
 
-FileReader *FileReader::make(const char *fileName)
+std::unique_ptr<FileReader> FileReader::make(const char *fileName)
 {
     FILE *fA;
 
     if (!(fA = openFile(fileName, "rb"))) {
         return nullptr;
     }
-    return new FileReader(fA);
+    return std::make_unique<FileReader>(fA);
 }
 
 FileReader::FileReader(FILE *fA)
@@ -288,8 +200,12 @@ bool FileReader::fillBuf(int pos, int len)
 
 class StreamReader : public Reader
 {
+    class PrivateTag
+    {
+    };
+
 public:
-    static StreamReader *make(int (*getCharA)(void *data), void *dataA);
+    static std::unique_ptr<StreamReader> make(int (*getCharA)(void *data), void *dataA);
     ~StreamReader() override;
     int getByte(int pos) override;
     bool getU16BE(int pos, int *val) override;
@@ -298,8 +214,9 @@ public:
     bool getUVarBE(int pos, int size, unsigned int *val) override;
     bool cmp(int pos, const char *s) override;
 
+    StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag = {});
+
 private:
-    StreamReader(int (*getCharA)(void *data), void *dataA);
     bool fillBuf(int pos, int len);
 
     int (*getChar)(void *data);
@@ -309,12 +226,12 @@ private:
     int bufPos, bufLen;
 };
 
-StreamReader *StreamReader::make(int (*getCharA)(void *data), void *dataA)
+std::unique_ptr<StreamReader> StreamReader::make(int (*getCharA)(void *data), void *dataA)
 {
-    return new StreamReader(getCharA, dataA);
+    return std::make_unique<StreamReader>(getCharA, dataA);
 }
 
-StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA)
+StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag)
 {
     getChar = getCharA;
     data = dataA;
@@ -438,43 +355,24 @@ static FoFiIdentifierType identify(Reader *reader);
 static FoFiIdentifierType identifyOpenType(Reader *reader);
 static FoFiIdentifierType identifyCFF(Reader *reader, int start);
 
-FoFiIdentifierType FoFiIdentifier::identifyMem(const char *file, int len)
-{
-    MemReader *reader;
-    FoFiIdentifierType type;
-
-    if (!(reader = MemReader::make(file, len))) {
-        return fofiIdError;
-    }
-    type = identify(reader);
-    delete reader;
-    return type;
-}
-
 FoFiIdentifierType FoFiIdentifier::identifyFile(const char *fileName)
 {
-    FileReader *reader;
-    FoFiIdentifierType type;
 
-    if (!(reader = FileReader::make(fileName))) {
+    std::unique_ptr<FileReader> reader = FileReader::make(fileName);
+    if (!reader) {
         return fofiIdError;
     }
-    type = identify(reader);
-    delete reader;
-    return type;
+    return identify(reader.get());
 }
 
 FoFiIdentifierType FoFiIdentifier::identifyStream(int (*getChar)(void *data), void *data)
 {
-    StreamReader *reader;
-    FoFiIdentifierType type;
+    std::unique_ptr<StreamReader> reader = StreamReader::make(getChar, data);
 
-    if (!(reader = StreamReader::make(getChar, data))) {
+    if (!reader) {
         return fofiIdError;
     }
-    type = identify(reader);
-    delete reader;
-    return type;
+    return identify(reader.get());
 }
 
 static FoFiIdentifierType identify(Reader *reader)

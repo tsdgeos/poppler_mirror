@@ -30,6 +30,7 @@
 // Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -69,6 +70,12 @@ public:
     // Create a string from a C string.
     explicit GooString(const char *sA) : std::string(sA ? sA : "") { }
 
+    // disallow explicit creation from nullptr
+    // (c++23 also disallows it for std::string)
+    // note, this only prevents GooString(nullptr),
+    // not const char*s = nullptr; GooString(s).
+    explicit GooString(std::nullptr_t) = delete;
+
     // Zero-cost conversion from and to std::string
     explicit GooString(const std::string &str) : std::string(str) { }
     explicit GooString(std::string &&str) : std::string(std::move(str)) { }
@@ -104,14 +111,6 @@ public:
     // Copy a string.
     explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string &>(*str) : std::string {}) { }
     std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this); }
-
-    // Concatenate two strings.
-    GooString(const GooString *str1, const GooString *str2)
-    {
-        reserve(str1->size() + str2->size());
-        static_cast<std::string &>(*this).append(*str1);
-        static_cast<std::string &>(*this).append(*str2);
-    }
 
     // Create a formatted string.  Similar to printf, but without the
     // string overflow issues.  Formatting elements consist of:

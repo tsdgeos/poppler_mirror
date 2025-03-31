@@ -877,13 +877,18 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
           This means it's not a detached type signature
           so the digest is contained in SignedData->contentInfo
         */
-        if (digest.len == content_info_data->len && memcmp(digest.data, content_info_data->data, digest.len) == 0) {
-            return SIGNATURE_VALID;
-        } else {
+        if (digest.len != content_info_data->len || memcmp(digest.data, content_info_data->data, digest.len) != 0) {
             return SIGNATURE_DIGEST_MISMATCH;
         }
 
-    } else if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, nullptr) != SECSuccess) {
+        auto innerHashContext = HashContext::create(hashContext->getHashAlgorithm());
+        innerHashContext->updateHash(content_info_data->data, content_info_data->len);
+        digest_buffer = innerHashContext->endHash();
+        digest.data = digest_buffer.data();
+        digest.len = digest_buffer.size();
+    }
+
+    if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, nullptr) != SECSuccess) {
         return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
     } else {
         return SIGNATURE_VALID;

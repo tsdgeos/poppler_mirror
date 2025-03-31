@@ -10,7 +10,9 @@
 #include "CryptoSignBackend.h"
 #include "config.h"
 #include "GPGMECryptoSignBackend.h"
+#include "GPGMECryptoSignBackendConfiguration.h"
 #include "DistinguishedNameParser.h"
+#include "Error.h"
 #include <array>
 #include <gpgme.h>
 #include <gpgme++/key.h>
@@ -20,6 +22,7 @@
 #if DUMP_SIGNATURE_DATA
 #    include <fstream>
 #endif
+static std::vector<GpgME::Protocol> allowedTypes();
 
 bool GpgSignatureBackend::hasSufficientVersion()
 {
@@ -67,6 +70,15 @@ template<typename Result>
 static bool isValidResult(const Result &result)
 {
     return isSuccess(result.error());
+}
+
+static std::string errorString(const GpgME::Error &err)
+{
+#if GPGMEPP_VERSION < ((1 << 16) | (24 << 8) | (0))
+    return fromCharPtr(err.asString());
+#else
+    return err.asStdString();
+#endif
 }
 
 template<typename Result>
@@ -226,7 +238,7 @@ std::unique_ptr<CryptoSign::VerificationInterface> GpgSignatureBackend::createVe
 std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvailableSigningCertificates()
 {
     std::vector<std::unique_ptr<X509CertificateInfo>> certificates;
-    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+    for (auto type : allowedTypes()) {
         const auto context = GpgME::Context::create(type);
         auto err = context->startKeyListing(static_cast<const char *>(nullptr), true /*secretOnly*/);
         while (isSuccess(err)) {
@@ -249,7 +261,7 @@ std::vector<std::unique_ptr<X509CertificateInfo>> GpgSignatureBackend::getAvaila
 
 GpgSignatureCreation::GpgSignatureCreation(const std::string &certId)
 {
-    for (auto type : GpgSignatureConfiguration::allowedTypes()) {
+    for (auto type : allowedTypes()) {
         GpgME::Error error;
         auto context = GpgME::Context::create(type);
         const auto signingKey = context->key(certId.c_str(), error, true);
@@ -285,6 +297,7 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
             case GPG_ERR_BAD_PASSPHRASE:
                 return CryptoSign::SigningError::BadPassphrase;
             }
+            error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
             return CryptoSign::SigningError::GenericError;
         }
     }
@@ -564,11 +577,11 @@ void GpgSignatureConfiguration::setPgpSignaturesAllowed(bool allow)
     allowPgp = allow;
 }
 
-std::vector<GpgME::Protocol> GpgSignatureConfiguration::allowedTypes()
+static std::vector<GpgME::Protocol> allowedTypes()
 {
     std::vector<GpgME::Protocol> allowedTypes;
     allowedTypes.push_back(GpgME::CMS);
-    if (allowPgp) {
+    if (GpgSignatureConfiguration::arePgpSignaturesAllowed()) {
         allowedTypes.push_back(GpgME::OpenPGP);
     }
     return allowedTypes;
