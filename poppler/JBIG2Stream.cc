@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -768,6 +768,9 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
     unsigned int src0, src1, src, dest, s1, s2, m1, m2, m3;
     bool oneByte;
 
+    if (unlikely(!isOk())) {
+        return;
+    }
     // check for the pathological case where y = -2^31
     if (y < -0x7fffffff) {
         return;
@@ -2198,9 +2201,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
             if (pageH == 0xffffffff && y + h > curPageH) {
                 pageBitmap->expand(y + h, pageDefPixel);
             }
-            if (pageBitmap->isOk()) {
-                pageBitmap->combine(bitmap.get(), x, y, extCombOp);
-            }
+            pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
             // store the region bitmap
         } else {
