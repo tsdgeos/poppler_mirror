@@ -355,7 +355,7 @@ protected:
     int pdfPageNum; // page number of the PDF file
     int cairoPageNum; // page number in cairo output
     std::vector<std::string> markedContentStack;
-    std::vector<Annot *> annotations;
+    std::vector<std::shared_ptr<Annot>> annotations;
     std::set<std::string> emittedDestinations;
     std::map<int, int> pdfPageToCairoPageMap;
 

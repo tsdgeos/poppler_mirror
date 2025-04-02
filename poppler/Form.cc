@@ -129,12 +129,7 @@ FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormF
     widget = nullptr;
 }
 
-FormWidget::~FormWidget()
-{
-    if (widget) {
-        widget->decRefCnt();
-    }
-}
+FormWidget::~FormWidget() = default;
 
 void FormWidget::print(int indent)
 {
@@ -148,7 +143,7 @@ void FormWidget::createWidgetAnnotation()
     }
 
     Object obj1(ref);
-    widget = new AnnotWidget(doc, &obj, &obj1, field);
+    widget = std::make_shared<AnnotWidget>(doc, &obj, &obj1, field);
 }
 
 bool FormWidget::inRect(double x, double y) const
@@ -3204,7 +3199,7 @@ FormPageWidgets::FormPageWidgets(Annots *annots, unsigned int page, Form *form)
 
         /* For each entry in the page 'Annots' dict, try to find
            a matching form field */
-        for (Annot *annot : annots->getAnnots()) {
+        for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
 
             if (annot->getType() != Annot::typeWidget) {
                 continue;

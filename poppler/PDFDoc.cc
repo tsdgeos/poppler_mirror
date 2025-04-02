@@ -2244,7 +2244,7 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     field->setImageResource(imageResourceRef);
 
     Object refObj(ref);
-    AnnotWidget *signatureAnnot = new AnnotWidget(this, field->getObj(), &refObj, field.get());
+    auto signatureAnnot = std::make_shared<AnnotWidget>(this, field->getObj(), &refObj, field.get());
     signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | /*Annot::flagLocked | TODO */ Annot::flagNoRotate);
     Dict dummy(getXRef());
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);

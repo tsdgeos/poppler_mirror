@@ -85,7 +85,7 @@ struct _PopplerFormField
 struct _PopplerAnnot
 {
     GObject parent_instance;
-    Annot *annot;
+    std::shared_ptr<Annot> annot;
 };
 
 struct _PopplerPath
@@ -154,18 +154,18 @@ PopplerFormField *_poppler_form_field_new(PopplerDocument *document, FormWidget 
 PopplerAttachment *_poppler_attachment_new(FileSpec *file);
 PopplerMovie *_poppler_movie_new(const Movie *movie);
 PopplerMedia *_poppler_media_new(const MediaRendition *media);
-PopplerAnnot *_poppler_annot_new(Annot *annot);
-PopplerAnnot *_poppler_annot_text_new(Annot *annot);
-PopplerAnnot *_poppler_annot_free_text_new(Annot *annot);
-PopplerAnnot *_poppler_annot_text_markup_new(Annot *annot);
-PopplerAnnot *_poppler_annot_file_attachment_new(Annot *annot);
-PopplerAnnot *_poppler_annot_movie_new(Annot *annot);
-PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, Annot *annot);
-PopplerAnnot *_poppler_annot_line_new(Annot *annot);
-PopplerAnnot *_poppler_annot_circle_new(Annot *annot);
-PopplerAnnot *_poppler_annot_square_new(Annot *annot);
-PopplerAnnot *_poppler_annot_stamp_new(Annot *annot);
-PopplerAnnot *_poppler_annot_ink_new(Annot *annot);
+PopplerAnnot *_poppler_annot_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_text_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_free_text_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_text_markup_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_file_attachment_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_movie_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_line_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_circle_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_square_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_stamp_new(const std::shared_ptr<Annot> &annot);
+PopplerAnnot *_poppler_annot_ink_new(const std::shared_ptr<Annot> &annot);
 
 const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 

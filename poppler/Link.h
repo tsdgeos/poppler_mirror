@@ -601,10 +601,10 @@ public:
     Links(const Links &) = delete;
     Links &operator=(const Links &) = delete;
 
-    const std::vector<AnnotLink *> &getLinks() const { return links; }
+    const std::vector<std::shared_ptr<AnnotLink>> &getLinks() const { return links; }
 
 private:
-    std::vector<AnnotLink *> links;
+    std::vector<std::shared_ptr<AnnotLink>> links;
 };
 
 #endif

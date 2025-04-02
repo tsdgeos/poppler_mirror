@@ -1126,7 +1126,7 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
 
     poppler_page_get_size(page, &width, &height);
 
-    for (AnnotLink *link : links->getLinks()) {
+    for (const std::shared_ptr<AnnotLink> &link : links->getLinks()) {
         PopplerLinkMapping *mapping;
         PopplerRectangle rect;
         LinkAction *link_action;
@@ -1289,7 +1289,7 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
     poppler_page_get_size(page, &width, &height);
     crop_box = page->page->getCropBox();
 
-    for (Annot *annot : annots->getAnnots()) {
+    for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
         PopplerAnnotMapping *mapping;
         PopplerRectangle rect;
         gboolean flag_no_rotate;
@@ -1598,12 +1598,12 @@ void poppler_page_add_annot(PopplerPage *page, PopplerAnnot *annot)
     if (page_is_rotated) {
         /* annot is inside a rotated page, as core poppler rect must be saved
          * un-rotated, let's proceed to un-rotate rect before saving */
-        _unrotate_rect_for_annot_and_page(page->page, annot->annot, &x1, &y1, &x2, &y2);
+        _unrotate_rect_for_annot_and_page(page->page, annot->annot.get(), &x1, &y1, &x2, &y2);
     }
 
     annot->annot->setRect(x1 + page_crop_box->x1, y1 + page_crop_box->y1, x2 + page_crop_box->x1, y2 + page_crop_box->y1);
 
-    AnnotTextMarkup *annot_markup = dynamic_cast<AnnotTextMarkup *>(annot->annot);
+    AnnotTextMarkup *annot_markup = dynamic_cast<AnnotTextMarkup *>(annot->annot.get());
     if (annot_markup) {
         crop_box = _poppler_annot_get_cropbox(annot);
         if (crop_box) {

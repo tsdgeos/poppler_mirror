@@ -142,8 +142,8 @@ public:
     static void decodeID(unsigned id, unsigned *pageNum, unsigned *fieldNum);
 
     void createWidgetAnnotation();
-    AnnotWidget *getWidgetAnnotation() const { return widget; }
-    void setWidgetAnnotation(AnnotWidget *_widget) { widget = _widget; }
+    std::shared_ptr<AnnotWidget> getWidgetAnnotation() const { return widget; }
+    void setWidgetAnnotation(std::shared_ptr<AnnotWidget> _widget) { widget = std::move(_widget); }
 
     virtual void updateWidgetAppearance() = 0;
 
@@ -152,7 +152,7 @@ public:
 protected:
     FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
 
-    AnnotWidget *widget;
+    std::shared_ptr<AnnotWidget> widget;
     FormField *field;
     FormFieldType type;
     Object obj;

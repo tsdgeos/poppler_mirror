@@ -417,7 +417,7 @@ static void printUrlList(PDFDoc *doc)
         Page *page = doc->getPage(pg);
         if (page) {
             std::unique_ptr<Links> links = page->getLinks();
-            for (AnnotLink *annot : links->getLinks()) {
+            for (const std::shared_ptr<AnnotLink> &annot : links->getLinks()) {
                 LinkAction *action = annot->getAction();
                 if (action && action->getKind() == actionURI) {
                     LinkURI *linkUri = dynamic_cast<LinkURI *>(action);

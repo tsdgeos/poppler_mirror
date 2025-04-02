@@ -344,7 +344,7 @@ public:
     struct SignatureData
     {
         Ref ref;
-        AnnotWidget *annotWidget = nullptr;
+        std::shared_ptr<AnnotWidget> annotWidget = nullptr;
         FormWidget *formWidget = nullptr;
         std::unique_ptr<::FormFieldSignature> field = nullptr;
     };

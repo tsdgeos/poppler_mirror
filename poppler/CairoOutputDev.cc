@@ -364,9 +364,8 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
         Object obj = doc->getPage(pageNum)->getAnnotsObject(xref);
         Annots *annots = new Annots(doc, pageNum, &obj);
 
-        for (Annot *annot : annots->getAnnots()) {
+        for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
             if (annot->getType() == Annot::typeLink) {
-                annot->incRefCnt();
                 annotations.push_back(annot);
             }
         }
@@ -575,9 +574,9 @@ AnnotLink *CairoOutputDev::findLinkObject(const StructElement *elem)
 {
     if (elem->isObjectRef()) {
         Ref ref = elem->getObjectRef();
-        for (Annot *annot : annotations) {
+        for (const std::shared_ptr<Annot> &annot : annotations) {
             if (annot->getType() == Annot::typeLink && annot->match(&ref)) {
-                return static_cast<AnnotLink *>(annot);
+                return static_cast<AnnotLink *>(annot.get());
             }
         }
     }

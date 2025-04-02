@@ -1213,8 +1213,8 @@ void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
 void HtmlOutputDev::endPage()
 {
     std::unique_ptr<Links> linksList = docPage->getLinks();
-    for (AnnotLink *link : linksList->getLinks()) {
-        doProcessLink(link);
+    for (const std::shared_ptr<AnnotLink> &link : linksList->getLinks()) {
+        doProcessLink(link.get());
     }
 
     pages->conv();

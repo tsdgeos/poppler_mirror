@@ -1697,7 +1697,7 @@ void PSOutputDev::writeDocSetup(Catalog *catalog, const std::vector<int> &pageLi
             setupResources(resDict);
         }
         annots = page->getAnnots();
-        for (Annot *annot : annots->getAnnots()) {
+        for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
             Object obj1 = annot->getAppearanceResDict();
             if (obj1.isDict()) {
                 setupResources(obj1.getDict());
