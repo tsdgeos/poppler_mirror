@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -1204,7 +1204,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
     }
 
     // Will remove ref from refsBeingFetched once it's destroyed, i.e. the function returns
-    RefRecursionCheckerRemover remover(refsBeingFetched, ref);
+    auto remover = std::make_unique<RefRecursionCheckerRemover>(refsBeingFetched, ref);
 
     // check for bogus ref - this can happen in corrupted PDF files
     if (num < 0 || num >= size) {
@@ -1307,6 +1307,7 @@ err:
         error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct", num);
         rootNum = -1;
         constructXRef(&xrefReconstructed);
+        remover.reset(); // Manually delete the remover since we're calling ourselves so recursion for this one is valid
         return fetch(num, gen, ++recursion, endPos);
     }
     if (endPos) {
