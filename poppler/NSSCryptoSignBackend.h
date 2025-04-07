@@ -72,7 +72,7 @@ private:
 class NSSSignatureVerification final : public CryptoSign::VerificationInterface
 {
 public:
-    explicit NSSSignatureVerification(std::vector<unsigned char> &&p7data);
+    explicit NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType);
     ~NSSSignatureVerification() final;
     SignatureValidationStatus validateSignature() final;
     std::chrono::system_clock::time_point getSigningTime() const final;
@@ -91,11 +91,13 @@ public:
 
 private:
     std::vector<unsigned char> p7;
+    CryptoSign::SignatureType type;
     NSSCMSMessage *CMSMessage;
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;
     SECItem CMSitem;
     std::unique_ptr<HashContext> hashContext;
+    HashAlgorithm innerHashAlgorithm;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
 };

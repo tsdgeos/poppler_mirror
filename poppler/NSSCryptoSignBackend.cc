@@ -691,7 +691,7 @@ void NSSSignatureConfiguration::setNSSPasswordCallback(const std::function<char 
     PasswordFunction = f;
 }
 
-NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data) : p7(std::move(p7data)), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
+NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter) : p7(std::move(p7data)), type(subfilter), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
 {
     NSSSignatureConfiguration::setNSSDir({});
     CMSitem.data = p7.data();
@@ -705,7 +705,9 @@ NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&
             SECItem usedAlgorithm = (*algs)->algorithm;
             auto hashAlgorithm = SECOID_FindOIDTag(&usedAlgorithm);
             HASH_HashType hashType = HASH_GetHashTypeByOidTag(hashAlgorithm);
-            hashContext = HashContext::create(ConvertHashTypeFromNss(hashType));
+            innerHashAlgorithm = ConvertHashTypeFromNss(hashType);
+            auto outerHashAlgorithm = (type == CryptoSign::SignatureType::adbe_pkcs7_sha1) ? HashAlgorithm::Sha1 : innerHashAlgorithm;
+            hashContext = HashContext::create(outerHashAlgorithm);
 
             if (hashContext) {
                 break;
@@ -872,7 +874,11 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
     }
 
     SECItem *content_info_data = CMSSignedData->contentInfo.content.data;
-    if (content_info_data != nullptr && content_info_data->data != nullptr) {
+    if ((content_info_data && content_info_data->data) != (type == CryptoSign::SignatureType::adbe_pkcs7_sha1)) {
+        return SIGNATURE_INVALID;
+    }
+
+    if (type == CryptoSign::SignatureType::adbe_pkcs7_sha1) {
         /*
           This means it's not a detached type signature
           so the digest is contained in SignedData->contentInfo
@@ -881,7 +887,7 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
             return SIGNATURE_DIGEST_MISMATCH;
         }
 
-        auto innerHashContext = HashContext::create(hashContext->getHashAlgorithm());
+        auto innerHashContext = HashContext::create(innerHashAlgorithm);
         innerHashContext->updateHash(content_info_data->data, content_info_data->len);
         digest_buffer = innerHashContext->endHash();
         digest.data = digest_buffer.data();
@@ -1158,7 +1164,7 @@ std::unique_ptr<CryptoSign::VerificationInterface> NSSCryptoSignBackend::createV
     case CryptoSign::SignatureType::ETSI_CAdES_detached:
     case CryptoSign::SignatureType::adbe_pkcs7_detached:
     case CryptoSign::SignatureType::adbe_pkcs7_sha1:
-        return std::make_unique<NSSSignatureVerification>(std::move(pkcs7));
+        return std::make_unique<NSSSignatureVerification>(std::move(pkcs7), type);
     }
     return {};
 }
