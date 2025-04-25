@@ -220,8 +220,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     bool substitute = false;
 
     Ref ref = *gfxFont->getID();
-    Ref embFontID = Ref::INVALID();
-    gfxFont->getEmbeddedFontID(&embFontID);
     GfxFontType fontType = gfxFont->getType();
 
     if (!(fontLoc = gfxFont->locateFont(xref, nullptr))) {
