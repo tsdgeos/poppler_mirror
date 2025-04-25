@@ -262,7 +262,7 @@ PopplerDocument *poppler_document_new_from_data(char *data, int length, const ch
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new MemStream(data, 0, length, Object(objNull));
+    str = new MemStream(data, 0, length, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
@@ -327,7 +327,7 @@ PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *pass
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new BytesStream(bytes, Object(objNull));
+    str = new BytesStream(bytes, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
@@ -387,10 +387,10 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
             }
             length = g_seekable_tell(G_SEEKABLE(stream));
         }
-        str = new PopplerInputStream(stream, cancellable, 0, false, length, Object(objNull));
+        str = new PopplerInputStream(stream, cancellable, 0, false, length, Object::null());
     } else {
         CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length));
-        str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+        str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
@@ -512,9 +512,9 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         }
 
         CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file));
-        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     } else {
-        stream = new OwningFileStream(GooFile::open(fd), Object(objNull));
+        stream = new OwningFileStream(GooFile::open(fd), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);

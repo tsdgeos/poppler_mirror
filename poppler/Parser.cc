@@ -71,7 +71,7 @@ Object Parser::getObj(int recursion)
 
 static std::unique_ptr<GooString> decryptedString(const GooString *s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
-    DecryptStream decrypt(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)), fileKey, encAlgorithm, keyLength, { objNum, objGen });
+    DecryptStream decrypt(new MemStream(s->c_str(), 0, s->getLength(), Object::null()), fileKey, encAlgorithm, keyLength, { objNum, objGen });
     if (!decrypt.reset()) {
         return {};
     }
@@ -96,7 +96,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
     }
 
     if (unlikely(recursion >= recursionLimit)) {
-        return Object(objError);
+        return Object::error();
     }
 
     // array
@@ -175,7 +175,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
             if (allowStreams && (str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict))) {
                 return Object(str);
             } else {
-                return Object(objError);
+                return Object::error();
             }
         } else {
             shift();
@@ -220,7 +220,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
     return obj;
 
 err:
-    return Object(objError);
+    return Object::error();
 }
 
 Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict)

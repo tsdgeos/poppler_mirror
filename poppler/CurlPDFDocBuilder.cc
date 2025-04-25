@@ -32,7 +32,7 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
         return PDFDoc::ErrorPDFDoc(errOpenFile, uri.copy());
     }
 
-    BaseStream *str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+    BaseStream *str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
 
     return std::make_unique<PDFDoc>(str, ownerPassword, userPassword);
 }

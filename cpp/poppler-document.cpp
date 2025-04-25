@@ -60,7 +60,7 @@ document_private::document_private(std::unique_ptr<GooString> &&file_path, const
 document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     file_data->swap(doc_data);
-    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
+    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object::null());
     doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
@@ -68,7 +68,7 @@ document_private::document_private(const char *file_data, int file_data_length, 
 {
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
-    MemStream *memstr = new MemStream(raw_doc_data, 0, raw_doc_data_length, Object(objNull));
+    MemStream *memstr = new MemStream(raw_doc_data, 0, raw_doc_data_length, Object::null());
     doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 

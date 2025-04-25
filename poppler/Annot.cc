@@ -806,7 +806,7 @@ void AnnotColor::adjustColor(int adjust)
 Object AnnotColor::writeToObject(XRef *xref) const
 {
     if (length == 0) {
-        return Object(objNull); // Transparent (no color)
+        return Object::null(); // Transparent (no color)
     } else {
         Array *a = new Array(xref);
         for (int i = 0; i < length; ++i) {
@@ -1535,7 +1535,7 @@ void Annot::setModified(std::unique_ptr<GooString> new_modified)
         update("M", Object(modified->copy()));
     } else {
         modified.reset(nullptr);
-        update("M", Object(objNull));
+        update("M", Object::null());
     }
 }
 
@@ -1578,7 +1578,7 @@ void Annot::setPage(int pageIndex, bool updateP)
 {
     annotLocker();
     Page *pageobj = doc->getPage(pageIndex);
-    Object obj1(objNull);
+    Object obj1 = Object::null();
 
     if (pageobj) {
         const Ref pageRef = pageobj->getRef();
@@ -1626,12 +1626,12 @@ void Annot::invalidateAppearance()
 
     Object obj2 = annotObj.dictLookup("AP");
     if (!obj2.isNull()) {
-        update("AP", Object(objNull)); // Remove AP
+        update("AP", Object::null()); // Remove AP
     }
 
     obj2 = annotObj.dictLookup("AS");
     if (!obj2.isNull()) {
-        update("AS", Object(objNull)); // Remove AS
+        update("AS", Object::null()); // Remove AS
     }
 }
 
@@ -2010,7 +2010,7 @@ Object Annot::getAppearanceResDict()
         }
     }
 
-    return Object(objNull);
+    return Object::null();
 }
 
 bool Annot::isVisible(bool printing)
@@ -2279,7 +2279,7 @@ void AnnotMarkup::setDate(std::unique_ptr<GooString> new_date)
         update("CreationDate", Object(date->copy()));
     } else {
         date.reset(nullptr);
-        update("CreationDate", Object(objNull));
+        update("CreationDate", Object::null());
     }
 }
 
@@ -6060,7 +6060,7 @@ void AnnotGeometry::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
-        update("IC", Object(objNull));
+        update("IC", Object::null());
     }
     invalidateAppearance();
 }
@@ -6295,7 +6295,7 @@ void AnnotPolygon::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
-        update("IC", Object(objNull));
+        update("IC", Object::null());
     }
     invalidateAppearance();
 }

@@ -170,7 +170,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
     offsets = (Goffset *)gmallocn(nObjects, sizeof(Goffset));
 
     // parse the header: object numbers and offsets
-    str = new EmbedStream(objStr.getStream(), Object(objNull), true, first);
+    str = new EmbedStream(objStr.getStream(), Object::null(), true, first);
     parser = new Parser(xref, str, false);
     for (i = 0; i < nObjects; ++i) {
         obj1 = parser->getObj();
@@ -207,9 +207,9 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
     // parse the objects
     for (i = 0; i < nObjects; ++i) {
         if (i == nObjects - 1) {
-            str = new EmbedStream(objStr.getStream(), Object(objNull), false, 0);
+            str = new EmbedStream(objStr.getStream(), Object::null(), false, 0);
         } else {
-            str = new EmbedStream(objStr.getStream(), Object(objNull), true, offsets[i + 1] - offsets[i]);
+            str = new EmbedStream(objStr.getStream(), Object::null(), true, offsets[i + 1] - offsets[i]);
         }
         parser = new Parser(xref, str, false);
         objs[i] = parser->getObj();
@@ -232,7 +232,7 @@ ObjectStream::~ObjectStream()
 Object ObjectStream::getObject(int objIdx, int objNum)
 {
     if (objIdx < 0 || objIdx >= nObjects || objNum != objNums[objIdx]) {
-        return Object(objNull);
+        return Object::null();
     }
     return objs[objIdx].copy();
 }
@@ -401,7 +401,8 @@ XRef *XRef::copy() const
         xref->entries[i].offset = entries[i].offset;
         xref->entries[i].type = entries[i].type;
         // set the object to null, it will be fetched from the stream when needed
-        new (&xref->entries[i].obj) Object(objNull);
+        new (&xref->entries[i].obj) Object();
+        xref->entries[i].obj = Object::null();
         xref->entries[i].flags = entries[i].flags;
         xref->entries[i].gen = entries[i].gen;
 
@@ -468,7 +469,8 @@ int XRef::resize(int newSize)
         for (int i = size; i < newSize; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryNone;
-            new (&entries[i].obj) Object(objNull);
+            new (&entries[i].obj) Object();
+            entries[i].obj = Object::null();
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
@@ -513,7 +515,7 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
     }
 
     // start up a parser, parse one token
-    parser = new Parser(nullptr, str->makeSubStream(parsePos, false, 0, Object(objNull)), true);
+    parser = new Parser(nullptr, str->makeSubStream(parsePos, false, 0, Object::null()), true);
     obj = parser->getObj(true);
 
     // parse an old-style xref table
@@ -941,7 +943,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
 
             // got trailer dictionary
             if (!strncmp(p, "trailer", 7)) {
-                parser = new Parser(nullptr, str->makeSubStream(pos + 7, false, 0, Object(objNull)), false);
+                parser = new Parser(nullptr, str->makeSubStream(pos + 7, false, 0, Object::null()), false);
                 Object newTrailerDict = parser->getObj();
                 if (newTrailerDict.isDict()) {
                     const Object &obj = newTrailerDict.dictLookupNF("Root");
@@ -1200,7 +1202,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
     const Ref ref = { num, gen };
 
     if (!refsBeingFetched.insert(ref)) {
-        return Object(objNull);
+        return Object::null();
     }
 
     // Will remove ref from refsBeingFetched once it's destroyed, i.e. the function returns
@@ -1222,7 +1224,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
         if (e->gen != gen || e->offset < 0) {
             goto err;
         }
-        Parser parser { this, str->makeSubStream(start + e->offset, false, 0, Object(objNull)), true };
+        Parser parser { this, str->makeSubStream(start + e->offset, false, 0, Object::null()), true };
         obj1 = parser.getObj(recursion);
         obj2 = parser.getObj(recursion);
         obj3 = parser.getObj(recursion);
@@ -1301,7 +1303,7 @@ err:
             error(errInternal, -1, "xref num {0:d} not found but needed, document has changes, reconstruct aborted", num);
             // pretend we constructed the xref, otherwise we will do this check again and again
             xrefReconstructed = true;
-            return Object(objNull);
+            return Object::null();
         }
 
         error(errInternal, -1, "xref num {0:d} not found but needed, try to reconstruct", num);
@@ -1313,7 +1315,7 @@ err:
     if (endPos) {
         *endPos = -1;
     }
-    return Object(objNull);
+    return Object::null();
 }
 
 void XRef::lock()
@@ -1434,7 +1436,8 @@ bool XRef::add(int num, int gen, Goffset offs, bool used)
         for (int i = size; i < num + 1; ++i) {
             entries[i].offset = -1;
             entries[i].type = xrefEntryFree;
-            new (&entries[i].obj) Object(objNull);
+            new (&entries[i].obj) Object();
+            entries[i].obj = Object::null();
             entries[i].flags = 0;
             entries[i].gen = 0;
         }
@@ -1681,7 +1684,7 @@ bool XRef::parseEntry(Goffset offset, XRefEntry *entry)
         return false;
     }
 
-    Parser parser(nullptr, str->makeSubStream(offset, false, 20, Object(objNull)), true);
+    Parser parser(nullptr, str->makeSubStream(offset, false, 20, Object::null()), true);
 
     Object obj1, obj2, obj3;
     if (((obj1 = parser.getObj(), obj1.isInt()) || obj1.isInt64()) && (obj2 = parser.getObj(), obj2.isInt()) && (obj3 = parser.getObj(), obj3.isCmd("n") || obj3.isCmd("f"))) {
@@ -1755,7 +1758,7 @@ struct DummyXRefEntry : XRefEntry
         gen = 0;
         type = xrefEntryNone;
         flags = 0;
-        obj = Object(objNull);
+        obj = Object::null();
     }
 };
 

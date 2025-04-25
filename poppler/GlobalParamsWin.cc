@@ -386,7 +386,7 @@ void GlobalParams::setupBaseFonts(const char *dir)
 
     if (file) {
         Parser *parser;
-        parser = new Parser(nullptr, new FileStream(file.get(), 0, false, file->size(), Object(objNull)), true);
+        parser = new Parser(nullptr, new FileStream(file.get(), 0, false, file->size(), Object::null()), true);
         Object obj1 = parser->getObj();
         while (!obj1.isEOF()) {
             Object obj2 = parser->getObj();

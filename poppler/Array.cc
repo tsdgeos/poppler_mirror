@@ -87,7 +87,7 @@ void Array::remove(int i)
 Object Array::get(int i, int recursion) const
 {
     if (i < 0 || std::size_t(i) >= elems.size()) {
-        return Object(objNull);
+        return Object::null();
     }
     return elems[i].fetch(xref, recursion);
 }
@@ -96,7 +96,7 @@ Object Array::get(int i, Ref *returnRef, int recursion) const
 {
     if (i < 0 || std::size_t(i) >= elems.size()) {
         *returnRef = Ref::INVALID();
-        return Object(objNull);
+        return Object::null();
     }
     if (elems[i].getType() == objRef) {
         *returnRef = elems[i].getRef();
@@ -109,7 +109,7 @@ Object Array::get(int i, Ref *returnRef, int recursion) const
 const Object &Array::getNF(int i) const
 {
     if (i < 0 || std::size_t(i) >= elems.size()) {
-        static Object nullObj(objNull);
+        static Object nullObj = Object::null();
         return nullObj;
     }
     return elems[i];

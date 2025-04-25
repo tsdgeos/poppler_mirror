@@ -772,7 +772,7 @@ Object NameTree::lookup(const GooString *name)
         return (*entry)->value.fetch(xref);
     } else {
         error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
-        return Object(objNull);
+        return Object::null();
     }
 }
 
