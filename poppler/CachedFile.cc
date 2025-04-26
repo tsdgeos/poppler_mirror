@@ -18,16 +18,13 @@
 // CachedFile
 //------------------------------------------------------------------------
 
-CachedFile::CachedFile(CachedFileLoader *cacheLoader)
+CachedFile::CachedFile(std::unique_ptr<CachedFileLoader> &&cacheLoader) : loader(std::move(cacheLoader))
 {
-    loader = cacheLoader;
-
     streamPos = 0;
     chunks = new std::vector<Chunk>();
     length = 0;
 
     length = loader->init(this);
-    refCnt = 1;
 
     if (length != ((size_t)-1)) {
         chunks->resize(length / CachedFileChunkSize + 1);
@@ -39,20 +36,7 @@ CachedFile::CachedFile(CachedFileLoader *cacheLoader)
 
 CachedFile::~CachedFile()
 {
-    delete loader;
     delete chunks;
-}
-
-void CachedFile::incRefCnt()
-{
-    refCnt++;
-}
-
-void CachedFile::decRefCnt()
-{
-    if (--refCnt == 0) {
-        delete this;
-    }
 }
 
 long int CachedFile::tell()

@@ -1034,9 +1034,9 @@ void FileStream::moveStart(Goffset delta)
 // CachedFileStream
 //------------------------------------------------------------------------
 
-CachedFileStream::CachedFileStream(CachedFile *ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA)
+CachedFileStream::CachedFileStream(std::shared_ptr<CachedFile> ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA)
 {
-    cc = ccA;
+    cc = std::move(ccA);
     start = startA;
     limited = limitedA;
     length = lengthA;
@@ -1049,18 +1049,15 @@ CachedFileStream::CachedFileStream(CachedFile *ccA, Goffset startA, bool limited
 CachedFileStream::~CachedFileStream()
 {
     close();
-    cc->decRefCnt();
 }
 
 BaseStream *CachedFileStream::copy()
 {
-    cc->incRefCnt();
     return new CachedFileStream(cc, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
-    cc->incRefCnt();
     return std::make_unique<CachedFileStream>(cc, startA, limitedA, lengthA, std::move(dictA));
 }
 

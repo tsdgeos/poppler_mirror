@@ -45,7 +45,7 @@ class POPPLER_PRIVATE_EXPORT CachedFile
     friend class CachedFileWriter;
 
 public:
-    explicit CachedFile(CachedFileLoader *cacheLoader);
+    explicit CachedFile(std::unique_ptr<CachedFileLoader> &&cacheLoader);
 
     CachedFile(const CachedFile &) = delete;
     CachedFile &operator=(const CachedFile &) = delete;
@@ -57,13 +57,9 @@ public:
     size_t write(const char *ptr, size_t size, size_t fromByte);
     int cache(const std::vector<ByteRange> &ranges);
 
-    // Reference counting.
-    void incRefCnt();
-    void decRefCnt();
-
-private:
     ~CachedFile();
 
+private:
     enum ChunkState
     {
         chunkStateNew = 0,
@@ -78,14 +74,12 @@ private:
 
     int cache(size_t offset, size_t length);
 
-    CachedFileLoader *loader;
+    std::unique_ptr<CachedFileLoader> loader;
 
     size_t length;
     size_t streamPos;
 
     std::vector<Chunk> *chunks;
-
-    int refCnt; // reference count
 };
 
 //------------------------------------------------------------------------

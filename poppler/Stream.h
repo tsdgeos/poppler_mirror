@@ -615,7 +615,7 @@ private:
 class POPPLER_PRIVATE_EXPORT CachedFileStream : public BaseStream
 {
 public:
-    CachedFileStream(CachedFile *ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
+    CachedFileStream(std::shared_ptr<CachedFile> ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~CachedFileStream() override;
     BaseStream *copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
@@ -635,7 +635,7 @@ public:
 private:
     bool fillBuf();
 
-    CachedFile *cc;
+    std::shared_ptr<CachedFile> cc;
     Goffset start;
     bool limited;
     char buf[cachedStreamBufSize];
