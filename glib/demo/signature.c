@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022-2023 Jan-Michael Brummer <jan.brummer@tabos.org>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
