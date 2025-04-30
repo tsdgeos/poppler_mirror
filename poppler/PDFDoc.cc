@@ -1647,9 +1647,9 @@ void PDFDoc::writeXRefStreamTrailer(Object &&trailerDict, XRef *uxref, Ref *uxre
     uxref->writeStreamToBuffer(&stmData, trailerDict.getDict(), xRef);
 
     // Create XRef stream object and write it
-    MemStream *mStream = new MemStream(stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict));
+    auto mStream = std::make_unique<MemStream>(stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict));
     writeObjectHeader(uxrefStreamRef, outStr);
-    Object obj1(static_cast<Stream *>(mStream));
+    Object obj1(std::move(mStream));
     writeObject(&obj1, outStr, xRef, 0, nullptr, cryptRC4, 0, 0, 0);
     writeObjectFooter(outStr);
 

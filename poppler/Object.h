@@ -269,11 +269,13 @@ public:
         type = objDict;
         dict = dictA;
     }
-    explicit Object(Stream *streamA)
+    template<typename StreamType>
+        requires(std::is_base_of_v<Stream, StreamType>)
+    explicit Object(std::unique_ptr<StreamType> &&streamA)
     {
         assert(streamA);
         type = objStream;
-        stream = streamA;
+        stream = streamA.release();
     }
     explicit Object(const Ref r)
     {

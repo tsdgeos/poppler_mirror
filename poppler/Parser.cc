@@ -46,7 +46,7 @@
 // lots of nested arrays that made us consume all the stack
 #define recursionLimit 500
 
-Parser::Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA) : lexer { xrefA, streamA }
+Parser::Parser(XRef *xrefA, std::unique_ptr<Stream> &&streamA, bool allowStreamsA) : lexer { xrefA, std::move(streamA) }
 {
     allowStreams = allowStreamsA;
     buf1 = lexer.getObj();
@@ -173,7 +173,7 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         // object streams
         if (buf2.isCmd("stream")) {
             if (allowStreams && (str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict))) {
-                return Object(str);
+                return Object(std::unique_ptr<Stream>(str));
             } else {
                 return Object::error();
             }
@@ -316,7 +316,7 @@ Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlg
     }
 
     // make base stream
-    str = baseStr->makeSubStream(pos, true, length, std::move(dict));
+    str = baseStr->makeSubStream(pos, true, length, std::move(dict)).release();
 
     // handle decryption
     if (fileKey) {

@@ -69,12 +69,12 @@ static const long long LongLongSafeLimit = (LLONG_MAX - 9) / 10;
 // Lexer
 //------------------------------------------------------------------------
 
-Lexer::Lexer(XRef *xrefA, Stream *str)
+Lexer::Lexer(XRef *xrefA, std::unique_ptr<Stream> &&str)
 {
     lookCharLastValueCached = LOOK_VALUE_NOT_CACHED;
     xref = xrefA;
 
-    curStr = Object(str);
+    curStr = Object(std::move(str));
     streams = new Array(xref);
     streams->add(curStr.copy());
     strPtr = 0;

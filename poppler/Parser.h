@@ -37,7 +37,7 @@ class POPPLER_PRIVATE_EXPORT Parser
 {
 public:
     // Constructor.
-    Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA);
+    Parser(XRef *xrefA, std::unique_ptr<Stream> &&streamA, bool allowStreamsA);
     Parser(XRef *xrefA, Object *objectA, bool allowStreamsA);
 
     // Destructor.

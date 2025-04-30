@@ -956,9 +956,9 @@ BaseStream *FileStream::copy()
     return new FileStream(file, start, limited, length, dict.copy());
 }
 
-Stream *FileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> FileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
-    return new FileStream(file, startA, limitedA, lengthA, std::move(dictA));
+    return std::make_unique<FileStream>(file, startA, limitedA, lengthA, std::move(dictA));
 }
 
 bool FileStream::reset()
@@ -1058,10 +1058,10 @@ BaseStream *CachedFileStream::copy()
     return new CachedFileStream(cc, start, limited, length, dict.copy());
 }
 
-Stream *CachedFileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
     cc->incRefCnt();
-    return new CachedFileStream(cc, startA, limitedA, lengthA, std::move(dictA));
+    return std::make_unique<CachedFileStream>(cc, startA, limitedA, lengthA, std::move(dictA));
 }
 
 bool CachedFileStream::reset()
@@ -1211,7 +1211,7 @@ BaseStream *EmbedStream::copy()
     return nullptr;
 }
 
-Stream *EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;

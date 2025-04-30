@@ -1976,8 +1976,8 @@ Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool tr
     }
 
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-    Stream *mStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
-    return Object(mStream);
+    auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
+    return Object(std::move(mStream));
 }
 
 Dict *Annot::createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode)
@@ -5475,16 +5475,16 @@ void AnnotWidget::generateFieldAppearance()
 
     // build the appearance stream
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-    Stream *appearStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
+    auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
         // to set the AP and not let other renderers guess it from the contents
         // In addition, we keep the appearState of checkboxes to prevent them from being deselected
         bool keepAppearState = field->getType() == formButton && static_cast<const FormFieldButton *>(field)->getButtonType() == formButtonCheck;
-        setNewAppearance(Object(appearStream), keepAppearState);
+        setNewAppearance(Object(std::move(appearStream)), keepAppearState);
     } else {
-        appearance = Object(appearStream);
+        appearance = Object(std::move(appearStream));
     }
 }
 
@@ -5656,10 +5656,10 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Resources", Object(resDict));
 
             std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-            Stream *mStream = new AutoFreeMemStream(std::move(data), Object(formDict));
+            auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(formDict));
 
             Dict *dict = new Dict(gfx->getXRef());
-            dict->set("FRM", Object(mStream));
+            dict->set("FRM", Object(std::move(mStream)));
 
             Dict *resDict2 = new Dict(gfx->getXRef());
             resDict2->set("XObject", Object(dict));

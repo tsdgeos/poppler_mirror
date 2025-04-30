@@ -173,10 +173,9 @@ Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string 
     streamDict.dictSet("Length", Object(file->size()));
     streamDict.dictSet("Params", std::move(paramsDict));
 
-    FileStream *fStream = new FileStream(file, 0, false, file->size(), std::move(streamDict));
+    auto fStream = std::make_unique<FileStream>(file, 0, false, file->size(), std::move(streamDict));
     fStream->setNeedsEncryptionOnSave(true);
-    Stream *stream = fStream;
-    const Ref streamRef = xref->addIndirectObject(Object(stream));
+    const Ref streamRef = xref->addIndirectObject(Object(std::move(fStream)));
 
     Dict *efDict = new Dict(xref);
     efDict->set("F", Object(streamRef));

@@ -115,7 +115,6 @@ private:
 
 ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
 {
-    Stream *str;
     Parser *parser;
     Goffset *offsets;
     Object objStr, obj1;
@@ -170,8 +169,8 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
     offsets = (Goffset *)gmallocn(nObjects, sizeof(Goffset));
 
     // parse the header: object numbers and offsets
-    str = new EmbedStream(objStr.getStream(), Object::null(), true, first);
-    parser = new Parser(xref, str, false);
+    auto embedStr = std::make_unique<EmbedStream>(objStr.getStream(), Object::null(), true, first);
+    parser = new Parser(xref, std::move(embedStr), false);
     for (i = 0; i < nObjects; ++i) {
         obj1 = parser->getObj();
         Object obj2 = parser->getObj();
@@ -192,8 +191,11 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
             return;
         }
     }
-    while (str->getChar() != EOF) {
-        ;
+    {
+        auto str = parser->getStream();
+        while (str && str->getChar() != EOF) {
+            ;
+        }
     }
     delete parser;
 
@@ -206,14 +208,16 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
 
     // parse the objects
     for (i = 0; i < nObjects; ++i) {
+        std::unique_ptr<Stream> strPtr;
         if (i == nObjects - 1) {
-            str = new EmbedStream(objStr.getStream(), Object::null(), false, 0);
+            strPtr = std::make_unique<EmbedStream>(objStr.getStream(), Object::null(), false, 0);
         } else {
-            str = new EmbedStream(objStr.getStream(), Object::null(), true, offsets[i + 1] - offsets[i]);
+            strPtr = std::make_unique<EmbedStream>(objStr.getStream(), Object::null(), true, offsets[i + 1] - offsets[i]);
         }
-        parser = new Parser(xref, str, false);
+        parser = new Parser(xref, std::move(strPtr), false);
         objs[i] = parser->getObj();
-        while (str->getChar() != EOF) {
+        auto str = parser->getStream();
+        while (str && str->getChar() != EOF) {
             ;
         }
         delete parser;
@@ -1528,7 +1532,7 @@ void XRef::removeIndirectObject(Ref r)
 Ref XRef::addStreamObject(Dict *dict, std::vector<char> buffer, StreamCompression compression)
 {
     dict->add("Length", Object((int)buffer.size()));
-    AutoFreeMemStream *stream = new AutoFreeMemStream(std::move(buffer), Object(dict));
+    auto stream = std::make_unique<AutoFreeMemStream>(std::move(buffer), Object(dict));
     stream->setFilterRemovalForbidden(true);
     switch (compression) {
     case StreamCompression::None:;
@@ -1537,7 +1541,7 @@ Ref XRef::addStreamObject(Dict *dict, std::vector<char> buffer, StreamCompressio
         stream->getDict()->add("Filter", Object(objName, "FlateDecode"));
         break;
     }
-    return addIndirectObject(Object((Stream *)stream));
+    return addIndirectObject(Object(std::move(stream)));
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, bool writeAllEntries)

@@ -32,7 +32,7 @@ public:
     PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~PopplerInputStream() override;
     BaseStream *copy() override;
-    Stream *makeSubStream(Goffset start, bool limited, Goffset lengthA, Object &&dictA) override;
+    std::unique_ptr<Stream> makeSubStream(Goffset start, bool limited, Goffset lengthA, Object &&dictA) override;
 
 private:
     Goffset currentPos() const override;

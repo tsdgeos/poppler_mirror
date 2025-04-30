@@ -40,9 +40,9 @@ BaseStream *PopplerInputStream::copy()
     return new PopplerInputStream(inputStream, cancellable, start, limited, length, dict.copy());
 }
 
-Stream *PopplerInputStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> PopplerInputStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
-    return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
+    return std::make_unique<PopplerInputStream>(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
 }
 
 Goffset PopplerInputStream::currentPos() const

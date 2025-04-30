@@ -43,7 +43,7 @@ class POPPLER_PRIVATE_EXPORT Lexer
 public:
     // Construct a lexer for a single stream.  Deletes the stream when
     // lexer is deleted.
-    Lexer(XRef *xrefA, Stream *str);
+    Lexer(XRef *xrefA, std::unique_ptr<Stream> &&str);
 
     // Construct a lexer for a stream or array of streams (assumes obj
     // is either a stream or array of streams).
