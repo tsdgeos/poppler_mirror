@@ -336,6 +336,7 @@ static gboolean pgd_signature_drawing_area_button_release(GtkWidget *area, GdkEv
         g_free(signature_left);
 
         poppler_document_sign(demo->doc, data, NULL, on_signing_done, NULL);
+        poppler_signing_data_free(data);
     }
 
     return TRUE;

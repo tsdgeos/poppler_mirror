@@ -3929,7 +3929,7 @@ void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *
     g_return_if_fail(signing_data != nullptr);
 
     task = g_task_new(document, cancellable, callback, user_data);
-    g_task_set_task_data(task, (void *)signing_data, nullptr);
+    g_task_set_task_data(task, poppler_signing_data_copy(signing_data), (GDestroyNotify)poppler_signing_data_free);
 
     g_task_run_in_thread(task, (GTaskThreadFunc)_poppler_sign_document_thread);
     g_object_unref(task);
