@@ -1,5 +1,6 @@
 /* poppler-qiodeviceinstream-private.h: Qt6 interface to poppler
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+ * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
