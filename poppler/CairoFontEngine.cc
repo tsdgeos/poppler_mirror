@@ -220,8 +220,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     bool substitute = false;
 
     Ref ref = *gfxFont->getID();
-    Ref embFontID = Ref::INVALID();
-    gfxFont->getEmbeddedFontID(&embFontID);
     GfxFontType fontType = gfxFont->getType();
 
     if (!(fontLoc = gfxFont->locateFont(xref, nullptr))) {
@@ -380,6 +378,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     return new CairoFreeTypeFont(ref, font_face->cairo_font_face, std::move(codeToGID), substitute);
 
 err2:
+    if (fontLoc && fontLoc->locType == gfxFontLocEmbedded) {
+        gfxFont->invalidateEmbeddedFont();
+    }
     fprintf(stderr, "some font thing failed\n");
     return nullptr;
 }

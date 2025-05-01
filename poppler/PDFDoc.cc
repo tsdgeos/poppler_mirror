@@ -164,7 +164,7 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
     }
 
     // create stream
-    str = new FileStream(file.get(), 0, false, file->size(), Object(objNull));
+    str = new FileStream(file.get(), 0, false, file->size(), Object::null());
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
@@ -198,7 +198,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     }
 
     // create stream
-    str = new FileStream(file.get(), 0, false, file->size(), Object(objNull));
+    str = new FileStream(file.get(), 0, false, file->size(), Object::null());
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
@@ -731,7 +731,7 @@ void PDFDoc::setDocInfoStringEntry(const char *key, std::unique_ptr<GooString> v
     Ref infoObjRef;
     infoObj = xref->createDocInfoIfNeeded(&infoObjRef);
     if (removeEntry) {
-        infoObj.dictSet(key, Object(objNull));
+        infoObj.dictSet(key, Object::null());
     } else {
         infoObj.dictSet(key, Object(std::move(value)));
     }
@@ -1310,7 +1310,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     // Encrypt string if encryption is enabled
     std::unique_ptr<GooString> sEnc = nullptr;
     if (fileKey) {
-        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)), fileKey, encAlgorithm, keyLength, ref);
+        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
         sEnc = std::make_unique<GooString>();
         int c;
         if (!enc->reset()) {
@@ -1647,9 +1647,9 @@ void PDFDoc::writeXRefStreamTrailer(Object &&trailerDict, XRef *uxref, Ref *uxre
     uxref->writeStreamToBuffer(&stmData, trailerDict.getDict(), xRef);
 
     // Create XRef stream object and write it
-    MemStream *mStream = new MemStream(stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict));
+    auto mStream = std::make_unique<MemStream>(stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict));
     writeObjectHeader(uxrefStreamRef, outStr);
-    Object obj1(static_cast<Stream *>(mStream));
+    Object obj1(std::move(mStream));
     writeObject(&obj1, outStr, xRef, 0, nullptr, cryptRC4, 0, 0, 0);
     writeObjectFooter(outStr);
 

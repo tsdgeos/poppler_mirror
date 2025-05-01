@@ -353,7 +353,7 @@ public:
     BaseStream(Object &&dictA, Goffset lengthA);
     ~BaseStream() override;
     virtual BaseStream *copy() = 0;
-    virtual Stream *makeSubStream(Goffset start, bool limited, Goffset length, Object &&dict) = 0;
+    virtual std::unique_ptr<Stream> makeSubStream(Goffset start, bool limited, Goffset length, Object &&dict) = 0;
     void setPos(Goffset pos, int dir = 0) override = 0;
     bool isBinary(bool last = true) const override { return last; }
     BaseStream *getBaseStream() override { return this; }
@@ -549,7 +549,7 @@ public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~FileStream() override;
     BaseStream *copy() override;
-    Stream *makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
+    std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return strFile; }
     [[nodiscard]] bool reset() override;
     void close() override;
@@ -618,7 +618,7 @@ public:
     CachedFileStream(CachedFile *ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~CachedFileStream() override;
     BaseStream *copy() override;
-    Stream *makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
+    std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return strCachedFile; }
     [[nodiscard]] bool reset() override;
     void close() override;
@@ -665,7 +665,7 @@ public:
 
     BaseStream *copy() override { return new BaseMemStream(buf, start, length, dict.copy()); }
 
-    Stream *makeSubStream(Goffset startA, bool limited, Goffset lengthA, Object &&dictA) override
+    std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limited, Goffset lengthA, Object &&dictA) override
     {
         Goffset newLength;
 
@@ -674,7 +674,7 @@ public:
         } else {
             newLength = lengthA;
         }
-        return new BaseMemStream(buf, startA, newLength, std::move(dictA));
+        return std::make_unique<BaseMemStream>(buf, startA, newLength, std::move(dictA));
     }
 
     StreamKind getKind() const override { return strWeird; }
@@ -793,7 +793,7 @@ public:
     EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA = false);
     ~EmbedStream() override;
     BaseStream *copy() override;
-    Stream *makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA) override;
+    std::unique_ptr<Stream> makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return str->getKind(); }
     [[nodiscard]] bool reset() override;
     int getChar() override;

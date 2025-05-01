@@ -3361,7 +3361,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             if (processColorFormat == splashModeCMYK8 && internalColorFormat != splashModeCMYK8) {
                 str0 = new SplashBitmapCMYKEncoder(bitmap);
             } else {
-                str0 = new MemStream((char *)p, 0, w * h * numComps, Object(objNull));
+                str0 = new MemStream((char *)p, 0, w * h * numComps, Object::null());
             }
             // Check for a color image that uses only gray
             if (!getOptimizeColorSpace()) {

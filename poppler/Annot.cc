@@ -806,7 +806,7 @@ void AnnotColor::adjustColor(int adjust)
 Object AnnotColor::writeToObject(XRef *xref) const
 {
     if (length == 0) {
-        return Object(objNull); // Transparent (no color)
+        return Object::null(); // Transparent (no color)
     } else {
         Array *a = new Array(xref);
         for (int i = 0; i < length; ++i) {
@@ -978,6 +978,11 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     if (apData.isDict() && state) {
         return apData.dictLookupNF(state).copy();
     } else if (apData.isRef()) {
+        // Ref can point to 1)Stream or 2)dictionary with named streams - Issue #1558
+        Object obj = apData.fetch(doc->getXRef());
+        if (obj.isDict() && state) {
+            return obj.dictLookupNF(state).copy();
+        }
         return apData;
     }
 
@@ -1535,7 +1540,7 @@ void Annot::setModified(std::unique_ptr<GooString> new_modified)
         update("M", Object(modified->copy()));
     } else {
         modified.reset(nullptr);
-        update("M", Object(objNull));
+        update("M", Object::null());
     }
 }
 
@@ -1578,7 +1583,7 @@ void Annot::setPage(int pageIndex, bool updateP)
 {
     annotLocker();
     Page *pageobj = doc->getPage(pageIndex);
-    Object obj1(objNull);
+    Object obj1 = Object::null();
 
     if (pageobj) {
         const Ref pageRef = pageobj->getRef();
@@ -1626,12 +1631,12 @@ void Annot::invalidateAppearance()
 
     Object obj2 = annotObj.dictLookup("AP");
     if (!obj2.isNull()) {
-        update("AP", Object(objNull)); // Remove AP
+        update("AP", Object::null()); // Remove AP
     }
 
     obj2 = annotObj.dictLookup("AS");
     if (!obj2.isNull()) {
-        update("AS", Object(objNull)); // Remove AS
+        update("AS", Object::null()); // Remove AS
     }
 }
 
@@ -1971,8 +1976,8 @@ Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool tr
     }
 
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-    Stream *mStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
-    return Object(mStream);
+    auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
+    return Object(std::move(mStream));
 }
 
 Dict *Annot::createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode)
@@ -2010,7 +2015,7 @@ Object Annot::getAppearanceResDict()
         }
     }
 
-    return Object(objNull);
+    return Object::null();
 }
 
 bool Annot::isVisible(bool printing)
@@ -2279,7 +2284,7 @@ void AnnotMarkup::setDate(std::unique_ptr<GooString> new_date)
         update("CreationDate", Object(date->copy()));
     } else {
         date.reset(nullptr);
-        update("CreationDate", Object(objNull));
+        update("CreationDate", Object::null());
     }
 }
 
@@ -4538,6 +4543,15 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     //~ and only replace the marked content portion of it
     //~ (this is only relevant for Tx fields)
 
+    // Checkbox fields may come without a DA entry, spec requires it
+    // for all fields containing variable text but it seems Checkbox
+    // fields are de-facto not considered as such - Issue #1055
+    GooString daStackString;
+    if (!da && forceZapfDingbats) {
+        daStackString = GooString("/ZaDb 0 Tf 0 g");
+        da = &daStackString;
+    }
+
     // parse the default appearance string
     tfPos = tmPos = -1;
     if (da) {
@@ -5461,16 +5475,16 @@ void AnnotWidget::generateFieldAppearance()
 
     // build the appearance stream
     std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-    Stream *appearStream = new AutoFreeMemStream(std::move(data), Object(appearDict));
+    auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
         // forms are particularly special since we're potentially embeddeing a font so we really need
         // to set the AP and not let other renderers guess it from the contents
         // In addition, we keep the appearState of checkboxes to prevent them from being deselected
         bool keepAppearState = field->getType() == formButton && static_cast<const FormFieldButton *>(field)->getButtonType() == formButtonCheck;
-        setNewAppearance(Object(appearStream), keepAppearState);
+        setNewAppearance(Object(std::move(appearStream)), keepAppearState);
     } else {
-        appearance = Object(appearStream);
+        appearance = Object(std::move(appearStream));
     }
 }
 
@@ -5642,10 +5656,10 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Resources", Object(resDict));
 
             std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
-            Stream *mStream = new AutoFreeMemStream(std::move(data), Object(formDict));
+            auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(formDict));
 
             Dict *dict = new Dict(gfx->getXRef());
-            dict->set("FRM", Object(mStream));
+            dict->set("FRM", Object(std::move(mStream)));
 
             Dict *resDict2 = new Dict(gfx->getXRef());
             resDict2->set("XObject", Object(dict));
@@ -6060,7 +6074,7 @@ void AnnotGeometry::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
-        update("IC", Object(objNull));
+        update("IC", Object::null());
     }
     invalidateAppearance();
 }
@@ -6295,7 +6309,7 @@ void AnnotPolygon::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color)
         interiorColor = std::move(new_color);
     } else {
         interiorColor = nullptr;
-        update("IC", Object(objNull));
+        update("IC", Object::null());
     }
     invalidateAppearance();
 }

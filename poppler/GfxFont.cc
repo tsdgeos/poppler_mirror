@@ -1667,7 +1667,7 @@ Object Gfx8BitFont::getCharProc(int code)
     if (enc[code] && charProcs.isDict()) {
         return charProcs.dictLookup(enc[code]);
     } else {
-        return Object(objNull);
+        return Object::null();
     }
 }
 
@@ -1676,7 +1676,7 @@ Object Gfx8BitFont::getCharProcNF(int code)
     if (enc[code] && charProcs.isDict()) {
         return charProcs.dictLookupNF(enc[code]).copy();
     } else {
-        return Object(objNull);
+        return Object::null();
     }
 }
 

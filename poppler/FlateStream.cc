@@ -3,7 +3,7 @@
 // FlateStream.cc
 //
 // Copyright (C) 2005, Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2010, 2021, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2025, Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
@@ -133,17 +133,18 @@ int FlateStream::fill_buffer()
     return 0;
 }
 
-GooString *FlateStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *indent)
 {
-    GooString *s;
-
     if (psLevel < 3 || pred) {
-        return NULL;
+        return std::nullopt;
     }
-    if (!(s = str->getPSFilter(psLevel, indent))) {
-        return NULL;
+
+    std::optional<std::string> s = str->getPSFilter(psLevel, indent);
+    if (!s.has_value()) {
+        return std::nullopt;
     }
-    s->append(indent)->append("<< >> /FlateDecode filter\n");
+    s->append(indent).append("<< >> /FlateDecode filter\n");
+
     return s;
 }
 

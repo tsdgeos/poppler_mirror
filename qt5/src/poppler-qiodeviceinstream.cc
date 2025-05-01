@@ -1,5 +1,6 @@
 /* poppler-qiodeviceinstream.cc: Qt5 interface to poppler
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+ * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +37,9 @@ BaseStream *QIODeviceInStream::copy()
     return new QIODeviceInStream(m_device, start, limited, length, dict.copy());
 }
 
-Stream *QIODeviceInStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> QIODeviceInStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
-    return new QIODeviceInStream(m_device, startA, limitedA, lengthA, std::move(dictA));
+    return std::make_unique<QIODeviceInStream>(m_device, startA, limitedA, lengthA, std::move(dictA));
 }
 
 Goffset QIODeviceInStream::currentPos() const

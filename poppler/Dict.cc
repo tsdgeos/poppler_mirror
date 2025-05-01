@@ -23,6 +23,7 @@
 // Copyright (C) 2014 Scott West <scott.gregory.west@gmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -179,7 +180,7 @@ Object Dict::lookup(const char *key, int recursion) const
     if (const auto *entry = find(key)) {
         return entry->second.fetch(xref, recursion);
     }
-    return Object(objNull);
+    return Object::null();
 }
 
 Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
@@ -193,19 +194,19 @@ Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
         return entry->second.fetch(xref, recursion);
     }
     *returnRef = Ref::INVALID();
-    return Object(objNull);
+    return Object::null();
 }
 
 Object Dict::lookupEnsureEncryptedIfNeeded(const char *key) const
 {
     const auto *entry = find(key);
     if (!entry) {
-        return Object(objNull);
+        return Object::null();
     }
 
     if (entry->second.getType() == objRef && xref->isEncrypted() && !xref->isRefEncrypted(entry->second.getRef())) {
         error(errSyntaxError, -1, "{0:s} is not encrypted and the document is. This may be a hacking attempt", key);
-        return Object(objNull);
+        return Object::null();
     }
 
     return entry->second.fetch(xref);
@@ -216,7 +217,7 @@ const Object &Dict::lookupNF(const char *key) const
     if (const auto *entry = find(key)) {
         return entry->second;
     }
-    static Object nullObj(objNull);
+    static Object nullObj = Object::null();
     return nullObj;
 }
 

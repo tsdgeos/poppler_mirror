@@ -31,7 +31,7 @@
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2021, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -389,13 +389,14 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
 
         if (field && field->getNumWidgets() == 1) {
 
-            static_cast<AnnotWidget *>(annot)->setField(field.get());
+            AnnotWidget *aw = static_cast<AnnotWidget *>(annot);
+            aw->setField(field.get());
 
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);
 
             if (!formWidget->getWidgetAnnotation()) {
-                formWidget->createWidgetAnnotation();
+                formWidget->setWidgetAnnotation(aw);
             }
 
             standaloneFields.push_back(std::move(field));

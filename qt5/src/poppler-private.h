@@ -122,7 +122,7 @@ public:
     DocumentData(QIODevice *device, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = device;
-        QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object(objNull));
+        QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object::null());
         init();
         doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
     }
@@ -131,7 +131,7 @@ public:
     {
         m_device = nullptr;
         fileContents = data;
-        MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object(objNull));
+        MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object::null());
         init();
         doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
     }

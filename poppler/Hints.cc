@@ -190,7 +190,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
     char *p = &buf[0];
 
     if (hintsOffset && hintsLength) {
-        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object(objNull)));
+        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object::null()));
         if (!s->reset()) {
             ok = false;
             return;
@@ -207,7 +207,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
     }
 
     if (hintsOffset2 && hintsLength2) {
-        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset2, false, hintsLength2, Object(objNull)));
+        std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset2, false, hintsLength2, Object::null()));
         if (!s->reset()) {
             ok = false;
             return;
@@ -223,9 +223,9 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         }
     }
 
-    MemStream *memStream = new MemStream(&buf[0], 0, bufLength, Object(objNull));
+    auto memStream = std::make_unique<MemStream>(&buf[0], 0, bufLength, Object::null());
 
-    Parser *parser = new Parser(xref, memStream, true);
+    Parser *parser = new Parser(xref, std::move(memStream), true);
 
     int num, gen;
     Object obj;

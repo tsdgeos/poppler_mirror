@@ -69,12 +69,12 @@ static const long long LongLongSafeLimit = (LLONG_MAX - 9) / 10;
 // Lexer
 //------------------------------------------------------------------------
 
-Lexer::Lexer(XRef *xrefA, Stream *str)
+Lexer::Lexer(XRef *xrefA, std::unique_ptr<Stream> &&str)
 {
     lookCharLastValueCached = LOOK_VALUE_NOT_CACHED;
     xref = xrefA;
 
-    curStr = Object(str);
+    curStr = Object(std::move(str));
     streams = new Array(xref);
     streams->add(curStr.copy());
     strPtr = 0;
@@ -175,7 +175,7 @@ Object Lexer::getObj(int objNum)
     comment = false;
     while (true) {
         if ((c = getChar()) == EOF) {
-            return Object(objEOF);
+            return Object::eof();
         }
         if (comment) {
             if (c == '\r' || c == '\n') {
@@ -420,7 +420,7 @@ Object Lexer::getObj(int objNum)
             }
             return Object(std::move(s));
         } else {
-            return Object(objEOF);
+            return Object::eof();
         }
         break;
     }
@@ -470,7 +470,7 @@ Object Lexer::getObj(int objNum)
                 // Somewhat arbitrary threshold
                 if (unlikely(n == 1024 * 1024)) {
                     error(errSyntaxError, getPos(), "Error: name token is larger than 1 MB. Suspicion of hostile file. Stopping parsing");
-                    return Object(objEOF);
+                    return Object::eof();
                 }
                 s.push_back((char)c);
             }
@@ -562,7 +562,7 @@ Object Lexer::getObj(int objNum)
             return Object(objCmd, tokBuf);
         } else {
             error(errSyntaxError, getPos(), "Illegal character '>'");
-            return Object(objError);
+            return Object::error();
         }
         break;
 
@@ -571,7 +571,7 @@ Object Lexer::getObj(int objNum)
     case '{':
     case '}':
         error(errSyntaxError, getPos(), "Illegal character '{0:c}'", c);
-        return Object(objError);
+        return Object::error();
         break;
 
     // command
@@ -593,7 +593,7 @@ Object Lexer::getObj(int objNum)
         } else if (tokBuf[0] == 'f' && !strcmp(tokBuf, "false")) {
             return Object(false);
         } else if (tokBuf[0] == 'n' && !strcmp(tokBuf, "null")) {
-            return Object(objNull);
+            return Object::null();
         } else {
             return Object(objCmd, tokBuf);
         }
@@ -617,7 +617,7 @@ Object Lexer::getObj(const char *cmdA, int objNum)
     while ((strcmp(cmdA, cmd1) != 0) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
         while (true) {
             if ((c = getChar()) == EOF) {
-                return Object(objEOF);
+                return Object::eof();
             }
             if (comment) {
                 if (c == '\r' || c == '\n') {

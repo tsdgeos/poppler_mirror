@@ -1997,7 +1997,7 @@ void FormFieldChoice::print(int indent)
 void FormFieldChoice::updateSelection()
 {
     Object objV;
-    Object objI(objNull);
+    Object objI = Object::null();
 
     if (edit && editedChoice) {
         // This is an editable combo-box with user-entered text
@@ -2701,7 +2701,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
     } else if (parent.isDict()) {
         return fieldLookup(parent.getDict(), key, usedParents);
     }
-    return Object(objNull);
+    return Object::null();
 }
 
 Object Form::fieldLookup(Dict *field, const char *key)

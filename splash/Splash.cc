@@ -19,7 +19,7 @@
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
-// Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018, 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
@@ -2048,6 +2048,9 @@ SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoo
     int i;
 
     fPath = new SplashPath();
+    // Estimate size, reserve
+    fPath->reserve(path->length * 2 + 2);
+
     flatness2 = flatness * flatness;
     i = 0;
     while (i < path->length) {
@@ -2455,14 +2458,57 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
 bool Splash::pathAllOutside(SplashPath *path)
 {
     SplashCoord xMin1, yMin1, xMax1, yMax1;
-    SplashCoord xMin2, yMin2, xMax2, yMax2;
-    SplashCoord x, y;
     int xMinI, yMinI, xMaxI, yMaxI;
-    int i;
+
+    struct _SplashPoint
+    {
+        SplashCoord x;
+        SplashCoord y;
+    };
+    auto calcLowerLeft = [](_SplashPoint a, _SplashPoint b) -> _SplashPoint { //
+        return { std::min(a.x, b.x), std::min(a.y, b.y) };
+    };
+    auto calcUpperRight = [](_SplashPoint a, _SplashPoint b) -> _SplashPoint { //
+        return { std::max(a.x, b.x), std::max(a.y, b.y) };
+    };
+
+    SplashCoord x, y, x2, y2;
+    transform(state->matrix, path->pts[0].x, path->pts[0].y, &x, &y);
+    xMinI = splashFloor(x);
+    yMinI = splashFloor(y);
+
+    auto clipState = state->clip->testRect(xMinI, yMinI, xMinI, yMinI);
+    if (clipState != splashClipAllOutside) {
+        // If the first point is inside the clipping rectangle,
+        // the check is sufficient
+        return false;
+    } else if (path->length == 1) {
+        return true;
+    }
+
+    transform(state->matrix, path->pts[path->length / 2].x, path->pts[path->length / 2].y, &x2, &y2);
+    auto ll = calcLowerLeft({ x, y }, { x2, y2 });
+    auto ur = calcUpperRight({ x, y }, { x2, y2 });
+
+    xMinI = splashFloor(ll.x);
+    yMinI = splashFloor(ll.y);
+    xMaxI = splashFloor(ur.x);
+    yMaxI = splashFloor(ur.y);
+
+    clipState = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI);
+    if (clipState != splashClipAllOutside) {
+        // If the bounding box of two points intersects with the
+        // clipping rectangle, the check is finished. Otherwise,
+        // we have to check the remaining points.
+        return false;
+    } else if (path->length == 2) {
+        return true;
+    }
 
     xMin1 = xMax1 = path->pts[0].x;
     yMin1 = yMax1 = path->pts[0].y;
-    for (i = 1; i < path->length; ++i) {
+
+    for (int i = 1; i < path->length; ++i) {
         if (path->pts[i].x < xMin1) {
             xMin1 = path->pts[i].x;
         } else if (path->pts[i].x > xMax1) {
@@ -2476,45 +2522,25 @@ bool Splash::pathAllOutside(SplashPath *path)
     }
 
     transform(state->matrix, xMin1, yMin1, &x, &y);
-    xMin2 = xMax2 = x;
-    yMin2 = yMax2 = y;
+    ll = { x, y };
+    ur = { x, y };
+
     transform(state->matrix, xMin1, yMax1, &x, &y);
-    if (x < xMin2) {
-        xMin2 = x;
-    } else if (x > xMax2) {
-        xMax2 = x;
-    }
-    if (y < yMin2) {
-        yMin2 = y;
-    } else if (y > yMax2) {
-        yMax2 = y;
-    }
+    ll = calcLowerLeft(ll, { x, y });
+    ur = calcUpperRight(ur, { x, y });
+
     transform(state->matrix, xMax1, yMin1, &x, &y);
-    if (x < xMin2) {
-        xMin2 = x;
-    } else if (x > xMax2) {
-        xMax2 = x;
-    }
-    if (y < yMin2) {
-        yMin2 = y;
-    } else if (y > yMax2) {
-        yMax2 = y;
-    }
+    ll = calcLowerLeft(ll, { x, y });
+    ur = calcUpperRight(ur, { x, y });
+
     transform(state->matrix, xMax1, yMax1, &x, &y);
-    if (x < xMin2) {
-        xMin2 = x;
-    } else if (x > xMax2) {
-        xMax2 = x;
-    }
-    if (y < yMin2) {
-        yMin2 = y;
-    } else if (y > yMax2) {
-        yMax2 = y;
-    }
-    xMinI = splashFloor(xMin2);
-    yMinI = splashFloor(yMin2);
-    xMaxI = splashFloor(xMax2);
-    yMaxI = splashFloor(yMax2);
+    ll = calcLowerLeft(ll, { x, y });
+    ur = calcUpperRight(ur, { x, y });
+
+    xMinI = splashFloor(ll.x);
+    yMinI = splashFloor(ll.y);
+    xMaxI = splashFloor(ur.x);
+    yMaxI = splashFloor(ur.y);
 
     return state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI) == splashClipAllOutside;
 }
@@ -6029,6 +6055,9 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
     for (i1 = i0; !(pathIn->flags[i1] & splashPathLast) && i1 + 1 < pathIn->length && pathIn->pts[i1 + 1].x == pathIn->pts[i1].x && pathIn->pts[i1 + 1].y == pathIn->pts[i1].y; ++i1) {
         ;
     }
+
+    // Estimate size, reserve
+    pathOut->reserve(pathIn->length * 4 + 4);
 
     while (i1 < pathIn->length) {
         if ((first = pathIn->flags[i0] & splashPathFirst)) {

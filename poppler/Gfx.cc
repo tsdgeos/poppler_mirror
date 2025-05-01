@@ -326,7 +326,7 @@ Object GfxResources::lookupXObject(const char *name)
         }
     }
     error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
-    return Object(objNull);
+    return Object::null();
 }
 
 Object GfxResources::lookupXObjectNF(const char *name)
@@ -342,7 +342,7 @@ Object GfxResources::lookupXObjectNF(const char *name)
         }
     }
     error(errSyntaxError, -1, "XObject '{0:s}' is unknown", name);
-    return Object(objNull);
+    return Object::null();
 }
 
 Object GfxResources::lookupMarkedContentNF(const char *name)
@@ -358,7 +358,7 @@ Object GfxResources::lookupMarkedContentNF(const char *name)
         }
     }
     error(errSyntaxError, -1, "Marked Content '{0:s}' is unknown", name);
-    return Object(objNull);
+    return Object::null();
 }
 
 Object GfxResources::lookupColorSpace(const char *name)
@@ -373,7 +373,7 @@ Object GfxResources::lookupColorSpace(const char *name)
             }
         }
     }
-    return Object(objNull);
+    return Object::null();
 }
 
 std::unique_ptr<GfxPattern> GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state)
@@ -413,7 +413,7 @@ Object GfxResources::lookupGState(const char *name)
 {
     Object obj = lookupGStateNF(name);
     if (obj.isNull()) {
-        return Object(objNull);
+        return Object::null();
     }
 
     if (!obj.isRef()) {
@@ -444,7 +444,7 @@ Object GfxResources::lookupGStateNF(const char *name)
         }
     }
     error(errSyntaxError, -1, "ExtGState '{0:s}' is unknown", name);
-    return Object(objNull);
+    return Object::null();
 }
 
 //------------------------------------------------------------------------

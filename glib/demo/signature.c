@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022-2023 Jan-Michael Brummer <jan.brummer@tabos.org>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -336,6 +337,7 @@ static gboolean pgd_signature_drawing_area_button_release(GtkWidget *area, GdkEv
         g_free(signature_left);
 
         poppler_document_sign(demo->doc, data, NULL, on_signing_done, NULL);
+        poppler_signing_data_free(data);
     }
 
     return TRUE;

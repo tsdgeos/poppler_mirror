@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2013, 2014, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -95,7 +95,7 @@ public:
 
 private:
     void computeIntersections(const SplashXPath &xPath);
-    bool addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
+    void addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
 
     bool eo;
     int xMin, yMin, xMax, yMax;

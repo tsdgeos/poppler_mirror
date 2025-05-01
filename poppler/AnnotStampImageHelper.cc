@@ -64,8 +64,8 @@ void AnnotStampImageHelper::initialize(PDFDoc *docA, int widthA, int heightA, Co
 
     std::vector<char> dataCopied { data, data + dataLength };
 
-    Stream *dataStream = new AutoFreeMemStream(std::move(dataCopied), Object(dict));
-    imgObj = Object(dataStream);
+    auto dataStream = std::make_unique<AutoFreeMemStream>(std::move(dataCopied), Object(dict));
+    imgObj = Object(std::move(dataStream));
     ref = doc->getXRef()->addIndirectObject(imgObj);
 }
 

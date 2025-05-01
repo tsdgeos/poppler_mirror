@@ -14,7 +14,7 @@
 // Copyright (C) 2008, 2010, 2014, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013, 2014, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -228,8 +228,7 @@ SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scann
 void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
 {
     const SplashXPathSeg *seg;
-    SplashCoord segXMin, segXMax, segYMin, segYMax, xx0, xx1;
-    int x, y, y0, y1, i;
+    SplashCoord segXMin, segXMax, segYMin, segYMax;
 
     if (yMin > yMax) {
         return;
@@ -238,7 +237,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
     // build the list of all intersections
     allIntersections.resize(yMax - yMin + 1);
 
-    for (i = 0; i < xPath.length; ++i) {
+    for (int i = 0; i < xPath.length; ++i) {
         seg = &xPath.segs[i];
         if (seg->flags & splashXPathFlip) {
             segYMin = seg->y1;
@@ -248,27 +247,23 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             segYMax = seg->y1;
         }
         if (seg->flags & splashXPathHoriz) {
-            y = splashFloor(seg->y0);
+            int y = splashFloor(seg->y0);
             if (y >= yMin && y <= yMax) {
-                if (!addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0)) {
-                    break;
-                }
+                addIntersection(segYMin, segYMax, y, splashFloor(seg->x0), splashFloor(seg->x1), 0);
             }
         } else if (seg->flags & splashXPathVert) {
-            y0 = splashFloor(segYMin);
+            int y0 = splashFloor(segYMin);
             if (y0 < yMin) {
                 y0 = yMin;
             }
-            y1 = splashFloor(segYMax);
+            int y1 = splashFloor(segYMax);
             if (y1 > yMax) {
                 y1 = yMax;
             }
-            x = splashFloor(seg->x0);
+            int x = splashFloor(seg->x0);
             int count = eo || (seg->flags & splashXPathFlip) ? 1 : -1;
-            for (y = y0; y <= y1; ++y) {
-                if (!addIntersection(segYMin, segYMax, y, x, x, count)) {
-                    break;
-                }
+            for (int y = y0; y <= y1; ++y) {
+                addIntersection(segYMin, segYMax, y, x, x, count);
             }
         } else {
             if (seg->x0 < seg->x1) {
@@ -278,11 +273,11 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                 segXMin = seg->x1;
                 segXMax = seg->x0;
             }
-            y0 = splashFloor(segYMin);
+            int y0 = splashFloor(segYMin);
             if (y0 < yMin) {
                 y0 = yMin;
             }
-            y1 = splashFloor(segYMax);
+            int y1 = splashFloor(segYMax);
             if (y1 > yMax) {
                 y1 = yMax;
             }
@@ -290,7 +285,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             // Calculate the projected intersection of the segment with the
             // X-Axis.
             SplashCoord xbase = seg->x0 - (seg->y0 * seg->dxdy);
-            xx0 = xbase + ((SplashCoord)y0) * seg->dxdy;
+            SplashCoord xx0 = xbase + ((SplashCoord)y0) * seg->dxdy;
             // the segment may not actually extend to the top and/or bottom edges
             if (xx0 < segXMin) {
                 xx0 = segXMin;
@@ -299,8 +294,8 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             }
             int x0 = splashFloor(xx0);
 
-            for (y = y0; y <= y1; ++y) {
-                xx1 = xbase + ((SplashCoord)(y + 1) * seg->dxdy);
+            for (int y = y0; y <= y1; ++y) {
+                SplashCoord xx1 = xbase + ((SplashCoord)(y + 1) * seg->dxdy);
 
                 if (xx1 < segXMin) {
                     xx1 = segXMin;
@@ -308,11 +303,8 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                     xx1 = segXMax;
                 }
                 int x1 = splashFloor(xx1);
-                if (!addIntersection(segYMin, segYMax, y, x0, x1, count)) {
-                    break;
-                }
+                addIntersection(segYMin, segYMax, y, x0, x1, count);
 
-                xx0 = xx1;
                 x0 = x1;
             }
         }
@@ -322,7 +314,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
     }
 }
 
-inline bool SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
+inline void SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
 {
     SplashIntersect intersect;
     intersect.y = y;
@@ -346,8 +338,6 @@ inline bool SplashXPathScanner::addIntersection(double segYMin, double segYMax, 
     }
 #endif
     line.push_back(intersect);
-
-    return true;
 }
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine) const

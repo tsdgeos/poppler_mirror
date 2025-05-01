@@ -8,6 +8,7 @@
  * Copyright (C) 2020, 2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -262,7 +263,7 @@ PopplerDocument *poppler_document_new_from_data(char *data, int length, const ch
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new MemStream(data, 0, length, Object(objNull));
+    str = new MemStream(data, 0, length, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
@@ -327,7 +328,7 @@ PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *pass
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new BytesStream(bytes, Object(objNull));
+    str = new BytesStream(bytes, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
     newDoc = new PDFDoc(str, password_g, password_g);
@@ -387,10 +388,10 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
             }
             length = g_seekable_tell(G_SEEKABLE(stream));
         }
-        str = new PopplerInputStream(stream, cancellable, 0, false, length, Object(objNull));
+        str = new PopplerInputStream(stream, cancellable, 0, false, length, Object::null());
     } else {
         CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length));
-        str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+        str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
@@ -512,9 +513,9 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         }
 
         CachedFile *cachedFile = new CachedFile(new FILECacheLoader(file));
-        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
+        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     } else {
-        stream = new OwningFileStream(GooFile::open(fd), Object(objNull));
+        stream = new OwningFileStream(GooFile::open(fd), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
@@ -3837,7 +3838,10 @@ std::unique_ptr<GooString> _poppler_convert_date_time_to_pdf_date(GDateTime *dat
 static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable)
 {
     const PopplerCertificateInfo *certificate_info;
+    const char *signing_data_partial_name;
     const char *signing_data_signature_text;
+    const char *signing_data_signature_text_left;
+    const char *signing_data_destination_filename;
     const PopplerColor *font_color;
     const PopplerColor *border_color;
     const PopplerColor *background_color;
@@ -3846,15 +3850,15 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     g_return_if_fail(POPPLER_IS_DOCUMENT(document));
     g_return_if_fail(signing_data != nullptr);
 
-    signing_data_signature_text = poppler_signing_data_get_signature_text(signing_data);
-    if (signing_data_signature_text == nullptr) {
-        g_task_return_new_error(task, POPPLER_ERROR, POPPLER_ERROR_SIGNING, "No signature given");
-        return;
-    }
-
     certificate_info = poppler_signing_data_get_certificate_info(signing_data);
     if (certificate_info == nullptr) {
         g_task_return_new_error(task, POPPLER_ERROR, POPPLER_ERROR_SIGNING, "Invalid certificate information provided for signing");
+        return;
+    }
+
+    signing_data_partial_name = poppler_signing_data_get_field_partial_name(signing_data);
+    if (signing_data_partial_name == nullptr) {
+        g_task_return_new_error(task, POPPLER_ERROR, POPPLER_ERROR_SIGNING, "Invalid partial name");
         return;
     }
 
@@ -3864,13 +3868,29 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
         return;
     }
 
+    signing_data_destination_filename = poppler_signing_data_get_destination_filename(signing_data);
+    if (signing_data_destination_filename == nullptr) {
+        g_task_return_new_error(task, POPPLER_ERROR, POPPLER_ERROR_SIGNING, "Invalid destination file name");
+        return;
+    }
+
     font_color = poppler_signing_data_get_font_color(signing_data);
     border_color = poppler_signing_data_get_border_color(signing_data);
     background_color = poppler_signing_data_get_background_color(signing_data);
 
-    std::unique_ptr<GooString> signature_text = std::make_unique<GooString>(utf8ToUtf16WithBom(signing_data_signature_text));
-    std::unique_ptr<GooString> signature_text_left = std::make_unique<GooString>(utf8ToUtf16WithBom(poppler_signing_data_get_signature_text_left(signing_data)));
-    auto field_partial_name = std::make_unique<GooString>(poppler_signing_data_get_field_partial_name(signing_data), strlen(poppler_signing_data_get_field_partial_name(signing_data)));
+    GooString signature_text;
+    signing_data_signature_text = poppler_signing_data_get_signature_text(signing_data);
+    if (signing_data_signature_text != nullptr) {
+        signature_text.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text));
+    }
+
+    GooString signature_text_left;
+    signing_data_signature_text_left = poppler_signing_data_get_signature_text_left(signing_data);
+    if (signing_data_signature_text_left != nullptr) {
+        signature_text.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text_left));
+    }
+
+    auto field_partial_name = std::make_unique<GooString>(signing_data_partial_name, strlen(signing_data_partial_name));
     const auto owner_pwd = std::optional<GooString>(poppler_signing_data_get_document_owner_password(signing_data));
     const auto user_pwd = std::optional<GooString>(poppler_signing_data_get_document_user_password(signing_data));
     const auto reason = std::unique_ptr<GooString>(poppler_signing_data_get_reason(signing_data) ? new GooString(poppler_signing_data_get_reason(signing_data), strlen(poppler_signing_data_get_reason(signing_data))) : nullptr);
@@ -3878,9 +3898,9 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     const PopplerRectangle *rect = poppler_signing_data_get_signature_rectangle(signing_data);
 
     ret = !document->doc
-                   ->sign(poppler_signing_data_get_destination_filename(signing_data), poppler_certificate_info_get_id((PopplerCertificateInfo *)certificate_info),
+                   ->sign(signing_data_destination_filename, poppler_certificate_info_get_id((PopplerCertificateInfo *)certificate_info),
                           poppler_signing_data_get_password(signing_data) ? poppler_signing_data_get_password(signing_data) : "", std::move(field_partial_name), poppler_signing_data_get_page(signing_data) + 1,
-                          PDFRectangle(rect->x1, rect->y1, rect->x2, rect->y2), *signature_text, *signature_text_left, poppler_signing_data_get_font_size(signing_data), poppler_signing_data_get_left_font_size(signing_data),
+                          PDFRectangle(rect->x1, rect->y1, rect->x2, rect->y2), signature_text, signature_text_left, poppler_signing_data_get_font_size(signing_data), poppler_signing_data_get_left_font_size(signing_data),
                           _poppler_convert_poppler_color_to_annot_color(font_color), poppler_signing_data_get_border_width(signing_data), _poppler_convert_poppler_color_to_annot_color(border_color),
                           _poppler_convert_poppler_color_to_annot_color(background_color), reason.get(), location.get(), poppler_signing_data_get_image_path(signing_data) ? poppler_signing_data_get_image_path(signing_data) : "", owner_pwd,
                           user_pwd)
@@ -3909,7 +3929,7 @@ void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *
     g_return_if_fail(signing_data != nullptr);
 
     task = g_task_new(document, cancellable, callback, user_data);
-    g_task_set_task_data(task, (void *)signing_data, nullptr);
+    g_task_set_task_data(task, poppler_signing_data_copy(signing_data), (GDestroyNotify)poppler_signing_data_free);
 
     g_task_run_in_thread(task, (GTaskThreadFunc)_poppler_sign_document_thread);
     g_object_unref(task);

@@ -1,3 +1,24 @@
+Release 25.04.0:
+        core:
+         * Properly verify adbe.pkcs7.sha1 signatures
+         * Improve errors on signing failure
+         * Allow empty outline titles
+         * Fix error in Distinguished Name parsing
+         * Fix build with Android API < 29
+         * Fix parsing Level PG document string
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfcairo: Fix document unit for SVG output
+
+        cpp:
+         * Add document::form_type
+         * Add document::has_javascript
+
+        build system:
+         * cmake: Use modern Python3 cmake module
+
 Release 25.03.0:
         core:
          * Fix opening some slightly malformed files

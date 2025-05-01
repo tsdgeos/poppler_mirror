@@ -49,34 +49,34 @@
 
 #define OBJECT_TYPE_CHECK(wanted_type)                                                                                                                                                                                                         \
     if (unlikely(type != (wanted_type))) {                                                                                                                                                                                                     \
-        error(errInternal, 0,                                                                                                                                                                                                                  \
-              "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
-              "not the expected type {1:d}",                                                                                                                                                                                                   \
-              type, wanted_type);                                                                                                                                                                                                              \
+        ::error(errInternal, 0,                                                                                                                                                                                                                \
+                "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
+                "not the expected type {1:d}",                                                                                                                                                                                                 \
+                type, wanted_type);                                                                                                                                                                                                            \
         abort();                                                                                                                                                                                                                               \
     }
 
 #define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2)                                                                                                                                                                                        \
     if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2))) {                                                                                                                                                                \
-        error(errInternal, 0,                                                                                                                                                                                                                  \
-              "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
-              "not the expected type {1:d} or {2:d}",                                                                                                                                                                                          \
-              type, wanted_type1, wanted_type2);                                                                                                                                                                                               \
+        ::error(errInternal, 0,                                                                                                                                                                                                                \
+                "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
+                "not the expected type {1:d} or {2:d}",                                                                                                                                                                                        \
+                type, wanted_type1, wanted_type2);                                                                                                                                                                                             \
         abort();                                                                                                                                                                                                                               \
     }
 
 #define OBJECT_3TYPES_CHECK(wanted_type1, wanted_type2, wanted_type3)                                                                                                                                                                          \
     if (unlikely(type != (wanted_type1)) && unlikely(type != (wanted_type2)) && unlikely(type != (wanted_type3))) {                                                                                                                            \
-        error(errInternal, 0,                                                                                                                                                                                                                  \
-              "Call to Object where the object was type {0:d}, "                                                                                                                                                                               \
-              "not the expected type {1:d}, {2:d} or {3:d}",                                                                                                                                                                                   \
-              type, wanted_type1, wanted_type2, wanted_type3);                                                                                                                                                                                 \
+        ::error(errInternal, 0,                                                                                                                                                                                                                \
+                "Call to Object where the object was type {0:d}, "                                                                                                                                                                             \
+                "not the expected type {1:d}, {2:d} or {3:d}",                                                                                                                                                                                 \
+                type, wanted_type1, wanted_type2, wanted_type3);                                                                                                                                                                               \
         abort();                                                                                                                                                                                                                               \
     }
 
 #define CHECK_NOT_DEAD                                                                                                                                                                                                                         \
     if (unlikely(type == objDead)) {                                                                                                                                                                                                           \
-        error(errInternal, 0, "Call to dead object");                                                                                                                                                                                          \
+        ::error(errInternal, 0, "Call to dead object");                                                                                                                                                                                        \
         abort();                                                                                                                                                                                                                               \
     }
 
@@ -207,6 +207,9 @@ constexpr int numObjTypes = 17; // total number of object types
 class POPPLER_PRIVATE_EXPORT Object
 {
 public:
+    static Object null() { return Object(objNull); }
+    static Object eof() { return Object(objEOF); }
+    static Object error() { return Object(objError); }
     Object() : type(objNone) { }
     ~Object() { free(); }
 
@@ -220,7 +223,6 @@ public:
         type = objInt;
         intg = intgA;
     }
-    explicit Object(ObjType typeA) { type = typeA; }
     explicit Object(double realA)
     {
         type = objReal;
@@ -267,11 +269,13 @@ public:
         type = objDict;
         dict = dictA;
     }
-    explicit Object(Stream *streamA)
+    template<typename StreamType>
+        requires(std::is_base_of_v<Stream, StreamType>)
+    explicit Object(std::unique_ptr<StreamType> &&streamA)
     {
         assert(streamA);
         type = objStream;
-        stream = streamA;
+        stream = streamA.release();
     }
     explicit Object(const Ref r)
     {
@@ -558,6 +562,7 @@ public:
     bool getBoolWithDefaultValue(bool defaultValue) const { return (type == objBool) ? booln : defaultValue; }
 
 private:
+    explicit Object(ObjType typeA) { type = typeA; }
     // Free object contents.
     void free();
 
