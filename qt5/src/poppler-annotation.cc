@@ -2158,7 +2158,7 @@ QString TextAnnotation::textIcon() const
 
     if (d->pdfAnnot->getType() == Annot::typeText) {
         const AnnotText *textann = static_cast<const AnnotText *>(d->pdfAnnot);
-        return QString::fromLatin1(textann->getIcon()->c_str());
+        return QString::fromStdString(textann->getIcon());
     }
 
     return QString();
@@ -2175,9 +2175,7 @@ void TextAnnotation::setTextIcon(const QString &icon)
 
     if (d->pdfAnnot->getType() == Annot::typeText) {
         AnnotText *textann = static_cast<AnnotText *>(d->pdfAnnot);
-        QByteArray encoded = icon.toLatin1();
-        GooString s(encoded.constData());
-        textann->setIcon(&s);
+        textann->setIcon(icon.toStdString());
     }
 }
 
@@ -3585,7 +3583,7 @@ QString StampAnnotation::stampIconName() const
     }
 
     const AnnotStamp *stampann = static_cast<const AnnotStamp *>(d->pdfAnnot);
-    return QString::fromLatin1(stampann->getIcon()->c_str());
+    return QString::fromStdString(stampann->getIcon());
 }
 
 void StampAnnotation::setStampIconName(const QString &name)
@@ -3598,9 +3596,7 @@ void StampAnnotation::setStampIconName(const QString &name)
     }
 
     AnnotStamp *stampann = static_cast<AnnotStamp *>(d->pdfAnnot);
-    QByteArray encoded = name.toLatin1();
-    GooString s(encoded.constData());
-    stampann->setIcon(&s);
+    stampann->setIcon(name.toStdString());
 }
 
 void StampAnnotation::setStampCustomImage(const QImage &image)

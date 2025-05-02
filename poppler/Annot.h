@@ -946,17 +946,17 @@ public:
 
     // getters
     bool getOpen() const { return open; }
-    const GooString *getIcon() const { return icon.get(); }
+    const std::string &getIcon() const { return icon; }
     AnnotTextState getState() const { return state; }
 
     void setOpen(bool openA);
-    void setIcon(GooString *new_icon);
+    void setIcon(const std::string &new_icon);
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
 
     bool open; // Open       (Default false)
-    std::unique_ptr<GooString> icon; // Name       (Default Note)
+    std::string icon; // Name       (Default Note)
     AnnotTextState state; // State      (Default Umarked if
                           //             StateModel Marked
                           //             None if StareModel Review)
@@ -1230,14 +1230,14 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void setIcon(GooString *new_icon);
+    void setIcon(const std::string &new_icon);
 
     void setCustomImage(AnnotStampImageHelper *stampImageHelperA);
 
     void clearCustomImage();
 
     // getters
-    const GooString *getIcon() const { return icon.get(); }
+    const std::string &getIcon() const { return icon; }
 
     Object getAppearanceResDict() override;
 
@@ -1247,7 +1247,7 @@ private:
     void generateStampCustomAppearance();
     void updateAppearanceResDict();
 
-    std::unique_ptr<GooString> icon; // Name       (Default Draft)
+    std::string icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;
 };
 

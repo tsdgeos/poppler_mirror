@@ -422,7 +422,7 @@ LinkGoTo::LinkGoTo(const Object *destObj)
 {
     // named destination
     if (destObj->isName()) {
-        namedDest = std::make_unique<GooString>(destObj->getName());
+        namedDest = std::make_unique<GooString>(destObj->getNameString());
     } else if (destObj->isString()) {
         namedDest = destObj->getString()->copy();
 
@@ -566,7 +566,7 @@ LinkNamed::LinkNamed(const Object *nameObj)
 {
     hasNameFlag = false;
     if (nameObj->isName()) {
-        name = (nameObj->getName()) ? nameObj->getName() : "";
+        name = nameObj->getNameString();
         hasNameFlag = true;
     }
 }
@@ -849,7 +849,7 @@ LinkResetForm::LinkResetForm(const Object *obj)
         for (int i = 0; i < obj1.arrayGetLength(); ++i) {
             const Object &obj2 = obj1.arrayGetNF(i);
             if (obj2.isName()) {
-                fields[i] = std::string(obj2.getName());
+                fields[i] = obj2.getNameString();
             } else if (obj2.isString()) {
                 fields[i] = obj2.getString()->toStr();
             } else if (obj2.isRef()) {
@@ -891,7 +891,7 @@ LinkSubmitForm::LinkSubmitForm(const Object *obj)
         for (int i = 0; i < objFields.arrayGetLength(); ++i) {
             const Object &objNF = objFields.arrayGetNF(i);
             if (objNF.isName()) {
-                fields[i] = std::string(objNF.getName());
+                fields[i] = objNF.getNameString();
             } else if (objNF.isString()) {
                 fields[i] = objNF.getString()->toStr();
             } else if (objNF.isRef()) {

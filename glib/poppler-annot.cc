@@ -1697,15 +1697,14 @@ void poppler_annot_text_set_is_open(PopplerAnnotText *poppler_annot, gboolean is
 gchar *poppler_annot_text_get_icon(PopplerAnnotText *poppler_annot)
 {
     AnnotText *annot;
-    const GooString *text;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT_TEXT(poppler_annot), NULL);
 
     annot = static_cast<AnnotText *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    text = annot->getIcon();
+    const std::string &text = annot->getIcon();
 
-    return text ? _poppler_goo_string_to_utf8(text) : nullptr;
+    return text.empty() ? nullptr : g_strdup(text.c_str());
 }
 
 /**
@@ -1750,15 +1749,13 @@ gchar *poppler_annot_text_get_icon(PopplerAnnotText *poppler_annot)
 void poppler_annot_text_set_icon(PopplerAnnotText *poppler_annot, const gchar *icon)
 {
     AnnotText *annot;
-    GooString *text;
 
     g_return_if_fail(POPPLER_IS_ANNOT_TEXT(poppler_annot));
 
     annot = static_cast<AnnotText *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    text = new GooString(icon);
+    std::string text = icon ? std::string { icon } : std::string {};
     annot->setIcon(text);
-    delete text;
 }
 
 /**
@@ -2367,43 +2364,42 @@ void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, 
 PopplerAnnotStampIcon poppler_annot_stamp_get_icon(PopplerAnnotStamp *poppler_annot)
 {
     AnnotStamp *annot;
-    const GooString *text;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT_STAMP(poppler_annot), POPPLER_ANNOT_STAMP_ICON_UNKNOWN);
 
     annot = static_cast<AnnotStamp *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    text = annot->getIcon();
+    std::string text = annot->getIcon();
 
-    if (!text) {
+    if (text.empty()) {
         return POPPLER_ANNOT_STAMP_ICON_NONE;
     }
 
-    if (!text->cmp("Approved")) {
+    if (text == "Approved") {
         return POPPLER_ANNOT_STAMP_ICON_APPROVED;
-    } else if (!text->cmp("AsIs")) {
+    } else if (text == "AsIs") {
         return POPPLER_ANNOT_STAMP_ICON_AS_IS;
-    } else if (!text->cmp("Confidential")) {
+    } else if (text == "Confidential") {
         return POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL;
-    } else if (!text->cmp("Final")) {
+    } else if (text == "Final") {
         return POPPLER_ANNOT_STAMP_ICON_FINAL;
-    } else if (!text->cmp("Experimental")) {
+    } else if (text == "Experimental") {
         return POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL;
-    } else if (!text->cmp("Expired")) {
+    } else if (text == "Expired") {
         return POPPLER_ANNOT_STAMP_ICON_EXPIRED;
-    } else if (!text->cmp("NotApproved")) {
+    } else if (text == "NotApproved") {
         return POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED;
-    } else if (!text->cmp("NotForPublicRelease")) {
+    } else if (text == "NotForPublicRelease") {
         return POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE;
-    } else if (!text->cmp("Sold")) {
+    } else if (text == "Sold") {
         return POPPLER_ANNOT_STAMP_ICON_SOLD;
-    } else if (!text->cmp("Departmental")) {
+    } else if (text == "Departmental") {
         return POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL;
-    } else if (!text->cmp("ForComment")) {
+    } else if (text == "ForComment") {
         return POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT;
-    } else if (!text->cmp("ForPublicRelease")) {
+    } else if (text == "ForPublicRelease") {
         return POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE;
-    } else if (!text->cmp("TopSecret")) {
+    } else if (text == "TopSecret") {
         return POPPLER_ANNOT_STAMP_ICON_TOP_SECRET;
     }
 
@@ -2422,7 +2418,6 @@ PopplerAnnotStampIcon poppler_annot_stamp_get_icon(PopplerAnnotStamp *poppler_an
 void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnotStampIcon icon)
 {
     AnnotStamp *annot;
-    GooString *goo_str;
     const gchar *text;
 
     g_return_if_fail(POPPLER_IS_ANNOT_STAMP(poppler_annot));
@@ -2430,7 +2425,7 @@ void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnot
     annot = static_cast<AnnotStamp *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     if (icon == POPPLER_ANNOT_STAMP_ICON_NONE) {
-        annot->setIcon(nullptr);
+        annot->setIcon(std::string {});
         return;
     }
 
@@ -2464,9 +2459,7 @@ void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnot
         return; /* POPPLER_ANNOT_STAMP_ICON_UNKNOWN */
     }
 
-    goo_str = new GooString(text);
-    annot->setIcon(goo_str);
-    delete goo_str;
+    annot->setIcon(std::string { text });
 }
 
 /**

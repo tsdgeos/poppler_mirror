@@ -1402,8 +1402,8 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         break;
     }
     case objName: {
-        GooString name(obj->getName());
-        outStr->printf("/%s ", sanitizedName(name.toStr()).c_str());
+        std::string name(obj->getNameString());
+        outStr->printf("/%s ", sanitizedName(name).c_str());
         break;
     }
     case objNull:

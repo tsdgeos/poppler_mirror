@@ -159,7 +159,7 @@ public:
 
     //----- functions to set parameters
     void addFontFile(const std::string &fontName, const std::string &path);
-    void setTextEncoding(const char *encodingName);
+    void setTextEncoding(const std::string &encodingName);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
@@ -207,8 +207,8 @@ private:
     // font files: font name mapped to path
     std::unordered_map<std::string, std::string> fontFiles;
     SysFontList *sysFonts; // system fonts
-    GooString *textEncoding; // encoding (unicodeMap) to use for text
-                             //   output
+    std::string textEncoding; // encoding (unicodeMap) to use for text
+                              //   output
     bool printCommands; // print the drawing commands
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?
