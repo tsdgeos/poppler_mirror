@@ -1,3 +1,16 @@
+Release 25.05.0:
+        core:
+         * Fix re-fetching after xref reconstruction. Issue #1584
+         * Fix compilation with ENABLE_ZLIB_UNCOMPRESS=ON
+         * Various annotation improvements. Issues #642, #1558, #1055
+         * CairoFontEngine: invalidate broken embedded fonts. Issue #1453
+         * Splash: Performance improvements
+         * Internal code improvements
+
+        glib:
+         * Small signature improvements
+
+
 Release 25.04.0:
         core:
          * Properly verify adbe.pkcs7.sha1 signatures
