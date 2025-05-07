@@ -153,3 +153,42 @@ if(ENABLE_LIBPNG OR ENABLE_LIBJPEG)
   unset(IMG_DIR)
   unset(INPUT_PDF)
 endif()
+
+if(ENABLE_NSS3)
+  set(pdf_validate_signature_SRCS
+    pdf-validate-signature.cc
+  )
+  add_executable(pdf-validate-signature ${pdf_validate_signature_SRCS})
+  target_link_libraries(pdf-validate-signature poppler)
+
+  set(VALIDATE_SIGNATURE_PATH ${EXECUTABLE_OUTPUT_PATH}/pdf-validate-signature)
+
+  file(GLOB files-valid ${TESTDATADIR}/unittestcases/signature/valid/*.pdf)
+  file(GLOB files-invalid ${TESTDATADIR}/unittestcases/signature/invalid/*.pdf)
+  file(GLOB files-digest-mismatch ${TESTDATADIR}/unittestcases/signature/digest_mismatch/*.pdf)
+
+  foreach(filename ${files-valid})
+    file(RELATIVE_PATH testname ${TESTDATADIR}/unittestcases ${filename})
+    add_test(
+      NAME ${testname}
+      COMMAND ${VALIDATE_SIGNATURE_PATH} ${filename} --valid
+  )
+  endforeach()
+
+  foreach(filename ${files-invalid})
+    file(RELATIVE_PATH testname ${TESTDATADIR}/unittestcases ${filename})
+    add_test(
+      NAME ${testname}
+      COMMAND ${VALIDATE_SIGNATURE_PATH} ${filename} --invalid
+  )
+  endforeach()
+
+  foreach(filename ${files-digest-mismatch})
+    file(RELATIVE_PATH testname ${TESTDATADIR}/unittestcases ${filename})
+    add_test(
+      NAME ${testname}
+      COMMAND ${VALIDATE_SIGNATURE_PATH} ${filename} --digest-mismatch
+  )
+  endforeach()
+
+endif()
