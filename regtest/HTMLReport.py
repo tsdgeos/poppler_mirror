@@ -43,7 +43,7 @@ class HTMLPrettyDiffImage(HTMLPrettyDiff):
 
     def write(self, test, outdir, result, actual, expected, diff):
         def get_relative_path(path):
-            return '../' * len(path.split('/')) + path
+            return '../../' + path
 
         html = """
 <html>
@@ -93,7 +93,7 @@ Difference between images: <a href="%s">diff</a><br>
 </script>
 </body>
 </html>
-""" % (test, get_relative_path(diff), get_relative_path(actual), expected)
+""" % (test, get_relative_path(diff), get_relative_path(actual), get_relative_path(expected))
 
         diffdir = self._create_diff_for_test(outdir, test)
         pretty_diff_name = result + '-pretty-diff.html'
