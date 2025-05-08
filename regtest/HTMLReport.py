@@ -43,7 +43,7 @@ class HTMLPrettyDiffImage(HTMLPrettyDiff):
 
     def write(self, test, outdir, result, actual, expected, diff):
         def get_relative_path(path):
-            return '../../' + path
+            return '../' + path
 
         html = """
 <html>
@@ -171,17 +171,18 @@ class BackendTestResult:
     def get_failed_html(self):
         html = ""
         for result in self._results:
-            actual = os.path.join(self._test, result)
-            actual_path = os.path.join(self._outdir, actual)
-            expected = os.path.join(self._refsdir, self._test, result)
+            actual_path = os.path.abspath(os.path.join(self._outdir, self._test, result))
+            expected_path = os.path.abspath(os.path.join(self._refsdir, self._test, result))
             if self.config.abs_paths:
-                expected = os.path.abspath(expected)
+                actual = actual_path
+                expected = expected_path
             else:
-                expected = os.path.relpath(expected, self._reportdir)
-            html += "<li><a href='../%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
+                actual = os.path.relpath(actual_path, self._reportdir)
+                expected = os.path.relpath(expected_path, self._reportdir)
+            html += "<li><a href='%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
             if self._backend.has_diff(actual_path):
                 diff = actual + self._backend.get_diff_ext()
-                html += "<a href='../%s'>diff</a> " % (diff)
+                html += "<a href='%s'>diff</a> " % (diff)
                 if self.config.pretty_diff:
                     pretty_diff = create_pretty_diff(self._backend)
                     if pretty_diff:
