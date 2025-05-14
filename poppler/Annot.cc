@@ -59,6 +59,7 @@
 // Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
+// Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
