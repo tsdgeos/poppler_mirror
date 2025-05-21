@@ -15,11 +15,11 @@ int main(int argc, char **argv)
     QElapsedTimer t;
     t.start();
 
-    QDir directory(argv[1]);
+    QDir directory(QString::fromLocal8Bit(argv[1]));
     foreach (const QString &fileName, directory.entryList()) {
         if (fileName.endsWith(QStringLiteral("pdf"))) {
             qDebug() << "Doing" << fileName.toLatin1().data() << ":";
-            std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(directory.canonicalPath() + '/' + fileName);
+            std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(directory.canonicalPath() + QChar::fromLatin1('/') + fileName);
             if (!doc) {
                 qWarning() << "doc not loaded";
             } else if (doc->isLocked()) {

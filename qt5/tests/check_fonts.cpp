@@ -60,7 +60,7 @@ static bool operator==(const FontInfo &f1, const FontInfo &f2)
 void TestFontsData::checkNoFonts()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/image.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/image.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -72,7 +72,7 @@ void TestFontsData::checkNoFonts()
 void TestFontsData::checkType1()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/text.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/text.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -90,7 +90,7 @@ void TestFontsData::checkType1()
 void TestFontsData::checkType3()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/type3.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -115,7 +115,7 @@ void TestFontsData::checkType3()
 void TestFontsData::checkTrueType()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -141,10 +141,10 @@ void TestFontsData::checkFontIterator()
 {
     // loading a 1-page document
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/type3.pdf"));
     QVERIFY(doc);
     // loading a 6-pages document
-    Poppler::Document *doc6 = Poppler::Document::load(TESTDATADIR "/tests/cropbox.pdf");
+    Poppler::Document *doc6 = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/cropbox.pdf"));
     QVERIFY(doc6);
 
     std::unique_ptr<Poppler::FontIterator> it;
@@ -195,7 +195,7 @@ void TestFontsData::checkFontIterator()
 void TestFontsData::checkSecondDocumentQuery()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/type3.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
@@ -210,7 +210,7 @@ void TestFontsData::checkSecondDocumentQuery()
 void TestFontsData::checkMultipleIterations()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/type3.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/type3.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = loadFontsViaIterator(doc);
@@ -224,7 +224,7 @@ void TestFontsData::checkMultipleIterations()
 void TestFontsData::checkIteratorFonts()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/tests/fonts.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/fonts.pdf"));
     QVERIFY(doc);
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();

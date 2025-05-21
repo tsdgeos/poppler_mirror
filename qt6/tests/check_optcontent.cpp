@@ -22,7 +22,7 @@ private slots:
 
 void TestOptionalContent::checkVisPolicy()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/vis_policy_test.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());
@@ -39,7 +39,7 @@ void TestOptionalContent::checkVisPolicy()
 
 void TestOptionalContent::checkNestedLayers()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/NestedLayers.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/NestedLayers.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());
@@ -71,7 +71,7 @@ void TestOptionalContent::checkNestedLayers()
 
 void TestOptionalContent::checkNoOptionalContent()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->hasOptionalContent(), false);
@@ -354,7 +354,7 @@ void TestOptionalContent::checkVisibilitySetting()
 
 void TestOptionalContent::checkRadioButtons()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/ClarityOCGs.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/ClarityOCGs.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasOptionalContent());

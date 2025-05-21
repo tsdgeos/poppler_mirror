@@ -72,7 +72,7 @@ QString SoundObject::url() const
         return QString();
     }
 
-    return QString(m_soundData->m_soundObj->getFileName().c_str());
+    return QString::fromStdString(m_soundData->m_soundObj->getFileName());
 }
 
 QByteArray SoundObject::data() const

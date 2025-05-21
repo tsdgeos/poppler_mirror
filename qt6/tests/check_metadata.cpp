@@ -47,7 +47,7 @@ void TestMetaData::checkStrings_data()
 
 void TestMetaData::checkStrings()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
 
     QFETCH(QString, key);
@@ -78,7 +78,7 @@ void TestMetaData::checkStrings2_data()
 
 void TestMetaData::checkStrings2()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QFETCH(QString, key);
@@ -88,7 +88,7 @@ void TestMetaData::checkStrings2()
 
 void TestMetaData::checkStringKeys()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QStringList keyList;
@@ -102,19 +102,19 @@ void TestMetaData::checkStringKeys()
 
 void TestMetaData::checkLinearised()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->isLinearized());
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->isLinearized(), false);
 }
 
 void TestMetaData::checkPortraitOrientation()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(0);
@@ -123,18 +123,18 @@ void TestMetaData::checkPortraitOrientation()
 
 void TestMetaData::checkNumPages()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->numPages(), 2);
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->numPages(), 1);
 }
 
 void TestMetaData::checkDate()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->date(QStringLiteral("ModDate")), QDateTime(QDate(2005, 12, 5), QTime(9, 44, 46), Qt::UTC));
     QCOMPARE(doc->date(QStringLiteral("CreationDate")), QDateTime(QDate(2005, 8, 13), QTime(1, 12, 11), Qt::UTC));
@@ -142,7 +142,7 @@ void TestMetaData::checkDate()
 
 void TestMetaData::checkPageSize()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     std::unique_ptr<Poppler::Page> page = doc->page(0);
     QCOMPARE(page->pageSize(), QSize(595, 842));
@@ -151,7 +151,7 @@ void TestMetaData::checkPageSize()
 
 void TestMetaData::checkLandscapeOrientation()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(1);
@@ -160,7 +160,7 @@ void TestMetaData::checkLandscapeOrientation()
 
 void TestMetaData::checkUpsideDownOrientation()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(2);
@@ -169,7 +169,7 @@ void TestMetaData::checkUpsideDownOrientation()
 
 void TestMetaData::checkSeascapeOrientation()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(3);
@@ -178,7 +178,7 @@ void TestMetaData::checkSeascapeOrientation()
 
 void TestMetaData::checkVersion()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
 
     auto pdfVersion = doc->getPdfVersion();
@@ -188,7 +188,7 @@ void TestMetaData::checkVersion()
 
 void TestMetaData::checkPdfId()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf"));
     QVERIFY(doc);
 
     const QByteArray referencePermanentId("00C9D5B6D8FB11D7A902003065D630AA");
@@ -222,7 +222,7 @@ void TestMetaData::checkPdfId()
 
 void TestMetaData::checkNoPdfId()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithActualText.pdf"));
     QVERIFY(doc);
 
     QVERIFY(!doc->getPdfId(nullptr, nullptr));

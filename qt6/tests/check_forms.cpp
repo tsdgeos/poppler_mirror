@@ -23,7 +23,7 @@ private slots:
 void TestForms::testCheckbox()
 {
     // Test for checkbox issue #655
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page(document->page(0));
@@ -51,7 +51,7 @@ void TestForms::testCheckbox()
 void TestForms::testStandAloneWidgets()
 {
     // Check for 'de facto' tooltips. Issue #34
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/tooltip.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/tooltip.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);
@@ -80,7 +80,7 @@ void TestForms::testStandAloneWidgets()
 void TestForms::testCheckboxIssue159()
 {
     // Test for checkbox issue #159
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);
@@ -127,7 +127,7 @@ void TestForms::testCheckboxIssue159()
 
 void TestForms::testSetIcon()
 {
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);
@@ -187,7 +187,7 @@ void TestForms::testSetIcon()
 
 void TestForms::testSetPrintable()
 {
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);
@@ -206,7 +206,7 @@ void TestForms::testSetPrintable()
 
 void TestForms::testSetAppearanceText()
 {
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);
@@ -246,7 +246,7 @@ void TestForms::testSetAppearanceText()
 
 void TestForms::testUnicodeFieldAttributes()
 {
-    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf");
+    std::unique_ptr<Poppler::Document> document = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf"));
     QVERIFY(document);
 
     std::unique_ptr<Poppler::Page> page = document->page(0);

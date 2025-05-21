@@ -15,7 +15,7 @@ private slots:
 
 void TestOverprint::checkOverprintImageRendering()
 {
-    Poppler::Document *doc = Poppler::Document::load(TESTDATADIR "/tests/mask-seams.pdf");
+    Poppler::Document *doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/mask-seams.pdf"));
     QVERIFY(doc);
 
     doc->setRenderHint(Poppler::Document::OverprintPreview, true);

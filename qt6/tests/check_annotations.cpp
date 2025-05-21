@@ -57,7 +57,7 @@ void TestAnnotations::checkFontSizeAndColor()
     tempFile.close();
 
     {
-        std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf") };
+        std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/UseNone.pdf")) };
         QVERIFY(doc.get());
 
         std::unique_ptr<Poppler::Page> page { doc->page(0) };
@@ -115,7 +115,7 @@ static bool operator==(const Poppler::HighlightAnnotation::Quad &a, const Popple
 
 void TestAnnotations::checkHighlightFromAndToQuads()
 {
-    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf") };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/UseNone.pdf")) };
 
     std::unique_ptr<Poppler::Page> page { doc->page(0) };
 
@@ -129,7 +129,7 @@ void TestAnnotations::checkHighlightFromAndToQuads()
 
 void TestAnnotations::checkUTF16LEAnnot()
 {
-    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(TESTDATADIR "/unittestcases/utf16le-annot.pdf") };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/utf16le-annot.pdf")) };
     QVERIFY(doc.get());
 
     std::unique_ptr<Poppler::Page> page { doc->page(0) };
@@ -162,7 +162,7 @@ void TestAnnotations::saveAndCheck(const std::unique_ptr<Poppler::Document> &doc
 
 void TestAnnotations::checkModificationCreationDate()
 {
-    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(TESTDATADIR "/unittestcases/utf16le-annot.pdf") };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/utf16le-annot.pdf")) };
     QVERIFY(doc.get());
 
     std::unique_ptr<Poppler::Page> page { doc->page(0) };
@@ -209,7 +209,7 @@ void TestAnnotations::checkModificationCreationDate()
 
 void TestAnnotations::checkNonMarkupAnnotations()
 {
-    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf") };
+    std::unique_ptr<Poppler::Document> doc { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf")) };
     QVERIFY(doc.get());
 
     std::unique_ptr<Poppler::Page> page { doc->page(0) };

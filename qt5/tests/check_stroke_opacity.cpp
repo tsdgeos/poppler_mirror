@@ -29,7 +29,7 @@ void TestStrokeOpacity::checkStrokeOpacity()
 {
     QFETCH(int, backendType);
 
-    auto doc = std::unique_ptr<Poppler::Document>(Poppler::Document::load(TESTDATADIR "/unittestcases/stroke-alpha-pattern.pdf"));
+    auto doc = std::unique_ptr<Poppler::Document>(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/stroke-alpha-pattern.pdf")));
     QVERIFY(doc != nullptr);
 
     doc->setRenderBackend((Poppler::Document::RenderBackend)backendType);

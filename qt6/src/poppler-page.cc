@@ -229,7 +229,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     case actionLaunch: {
         LinkLaunch *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
-        popplerLink = std::make_unique<LinkExecute>(linkArea, UnicodeParsedString(e->getFileName()), p ? p->c_str() : nullptr);
+        popplerLink = std::make_unique<LinkExecute>(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
 
     case actionNamed: {
@@ -269,7 +269,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     } break;
 
     case actionURI: {
-        popplerLink = std::make_unique<LinkBrowse>(linkArea, ((LinkURI *)a)->getURI().c_str());
+        popplerLink = std::make_unique<LinkBrowse>(linkArea, QString::fromStdString(((LinkURI *)a)->getURI()));
     } break;
 
     case actionSound: {

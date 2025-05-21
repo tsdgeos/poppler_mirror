@@ -225,6 +225,9 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Gui ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Widgets ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
 
+add_definitions(-DQT_NO_CAST_FROM_ASCII)
+add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
+
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 

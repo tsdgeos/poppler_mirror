@@ -18,7 +18,7 @@ private slots:
 void TestPageMode::checkNone()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf");
+    doc = Poppler::Document::load(QString::fromLocal8Bit(TESTDATADIR "/unittestcases/UseNone.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->pageMode(), Poppler::Document::UseNone);
@@ -29,7 +29,7 @@ void TestPageMode::checkNone()
 void TestPageMode::checkFullScreen()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/FullScreen.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/FullScreen.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->pageMode(), Poppler::Document::FullScreen);
@@ -40,7 +40,7 @@ void TestPageMode::checkFullScreen()
 void TestPageMode::checkAttachments()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseAttachments.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/UseAttachments.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->pageMode(), Poppler::Document::UseAttach);
@@ -51,7 +51,7 @@ void TestPageMode::checkAttachments()
 void TestPageMode::checkThumbs()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseThumbs.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/UseThumbs.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->pageMode(), Poppler::Document::UseThumbs);
@@ -62,7 +62,7 @@ void TestPageMode::checkThumbs()
 void TestPageMode::checkOC()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/UseOC.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/UseOC.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->pageMode(), Poppler::Document::UseOC);

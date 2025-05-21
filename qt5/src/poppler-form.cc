@@ -1039,18 +1039,18 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
 
         const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
-        certPriv->issuer_info.common_name = issuerInfo.commonName.c_str();
-        certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName.c_str();
-        certPriv->issuer_info.email_address = issuerInfo.email.c_str();
-        certPriv->issuer_info.org_name = issuerInfo.organization.c_str();
+        certPriv->issuer_info.common_name = QString::fromStdString(issuerInfo.commonName);
+        certPriv->issuer_info.distinguished_name = QString::fromStdString(issuerInfo.distinguishedName);
+        certPriv->issuer_info.email_address = QString::fromStdString(issuerInfo.email);
+        certPriv->issuer_info.org_name = QString::fromStdString(issuerInfo.organization);
 
         const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
-        certPriv->subject_info.common_name = subjectInfo.commonName.c_str();
-        certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
-        certPriv->subject_info.email_address = subjectInfo.email.c_str();
-        certPriv->subject_info.org_name = subjectInfo.organization.c_str();
+        certPriv->subject_info.common_name = QString::fromStdString(subjectInfo.commonName);
+        certPriv->subject_info.distinguished_name = QString::fromStdString(subjectInfo.distinguishedName);
+        certPriv->subject_info.email_address = QString::fromStdString(subjectInfo.email);
+        certPriv->subject_info.org_name = QString::fromStdString(subjectInfo.organization);
 
-        certPriv->nick_name = ci->getNickName().c_str();
+        certPriv->nick_name = QString::fromStdString(ci->getNickName().toStr());
 
         X509CertificateInfo::Validity certValidity = ci->getValidity();
         certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, QTimeZone::utc());

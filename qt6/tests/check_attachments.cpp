@@ -19,7 +19,7 @@ private slots:
 
 void TestAttachments::checkNoAttachments()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->hasEmbeddedFiles(), false);
@@ -27,7 +27,7 @@ void TestAttachments::checkNoAttachments()
 
 void TestAttachments::checkAttach1()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithAttachments.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -42,7 +42,7 @@ void TestAttachments::checkAttach1()
     QCOMPARE(embfile->modDate(), QDateTime(QDate(), QTime()));
     QCOMPARE(embfile->mimeType(), QString());
 
-    QFile file(TESTDATADIR "/unittestcases/kroller.png");
+    QFile file(QStringLiteral(TESTDATADIR "/unittestcases/kroller.png"));
     QVERIFY(file.open(QIODevice::ReadOnly));
     QByteArray krollerData = file.readAll();
     QByteArray embdata = embfile->data();
@@ -55,7 +55,7 @@ void TestAttachments::checkAttach1()
     QCOMPARE(embfile2->createDate(), QDateTime(QDate(), QTime()));
     QCOMPARE(embfile2->mimeType(), QString());
 
-    QFile file2(TESTDATADIR "/unittestcases/gnome-64.gif");
+    QFile file2(QStringLiteral(TESTDATADIR "/unittestcases/gnome-64.gif"));
     QVERIFY(file2.open(QIODevice::ReadOnly));
     QByteArray g64Data = file2.readAll();
     QByteArray emb2data = embfile2->data();
@@ -64,7 +64,7 @@ void TestAttachments::checkAttach1()
 
 void TestAttachments::checkAttach2()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -97,7 +97,7 @@ void TestAttachments::checkAttach2()
 
 void TestAttachments::checkAttach3()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/shapes+attachments.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/shapes+attachments.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -116,7 +116,7 @@ void TestAttachments::checkAttach3()
 
 void TestAttachments::checkAttach4()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());

@@ -230,7 +230,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     case actionLaunch: {
         LinkLaunch *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
-        popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? p->c_str() : nullptr);
+        popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
 
     case actionNamed: {
@@ -270,7 +270,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionURI: {
-        popplerLink = new LinkBrowse(linkArea, ((LinkURI *)a)->getURI().c_str());
+        popplerLink = new LinkBrowse(linkArea, QString::fromStdString(((LinkURI *)a)->getURI()));
     } break;
 
     case actionSound: {

@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[2], argv[1]);
+    Poppler::Document *doc = Poppler::Document::load(QString::fromLocal8Bit(argv[2]), argv[1]);
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);

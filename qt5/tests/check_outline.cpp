@@ -15,7 +15,7 @@ private slots:
 
 void TestOutline::checkOutline_xr02()
 {
-    std::unique_ptr<Poppler::Document> document { Poppler::Document::load(TESTDATADIR "/unittestcases/xr02.pdf") };
+    std::unique_ptr<Poppler::Document> document { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr02.pdf")) };
     QVERIFY(document.get());
 
     const auto outline = document->outline();

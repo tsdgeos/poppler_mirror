@@ -215,7 +215,7 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             const GooString *s = g->getNamedDest();
             QChar *charArray = new QChar[s->getLength()];
             for (int i = 0; i < s->getLength(); ++i) {
-                charArray[i] = QChar(s->c_str()[i]);
+                charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
             QString aux(charArray, s->getLength());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
@@ -237,7 +237,7 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             const GooString *s = g->getNamedDest();
             QChar *charArray = new QChar[s->getLength()];
             for (int i = 0; i < s->getLength(); ++i) {
-                charArray[i] = QChar(s->c_str()[i]);
+                charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
             QString aux(charArray, s->getLength());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
@@ -246,12 +246,12 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             LinkDestinationData ldd(destination, nullptr, doc, g->getFileName() != nullptr);
             e->setAttribute(QStringLiteral("Destination"), LinkDestination(ldd).toString());
         }
-        e->setAttribute(QStringLiteral("ExternalFileName"), g->getFileName()->c_str());
+        e->setAttribute(QStringLiteral("ExternalFileName"), QString::fromStdString(g->getFileName()->toStr()));
         break;
     }
     case actionURI: {
         const LinkURI *u = static_cast<const LinkURI *>(a);
-        e->setAttribute(QStringLiteral("DestinationURI"), u->getURI().c_str());
+        e->setAttribute(QStringLiteral("DestinationURI"), QString::fromStdString(u->getURI()));
     }
     default:;
     }
