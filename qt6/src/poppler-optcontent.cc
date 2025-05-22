@@ -352,7 +352,7 @@ bool OptContentModel::setData(const QModelIndex &index, const QVariant &value, i
             }
             std::stable_sort(indexes.begin(), indexes.end()); // NOLINT(modernize-use-ranges) We need Qt 6.8 for QModelIndexList to support ranges and our minimum requirement is 6.2
             Q_FOREACH (const QModelIndex &changedIndex, indexes) {
-                emit dataChanged(changedIndex, changedIndex);
+                Q_EMIT dataChanged(changedIndex, changedIndex);
             }
             return true;
         }
@@ -413,7 +413,7 @@ void OptContentModel::applyLink(LinkOCGState *link)
         }
         std::stable_sort(indexes.begin(), indexes.end()); // NOLINT(modernize-use-ranges) We need Qt 6.8 for QModelIndexList to support ranges and our minimum requirement is 6.2
         Q_FOREACH (const QModelIndex &changedIndex, indexes) {
-            emit dataChanged(changedIndex, changedIndex);
+            Q_EMIT dataChanged(changedIndex, changedIndex);
         }
     }
 }

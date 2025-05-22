@@ -7,7 +7,7 @@ class TestPageLayout : public QObject
     Q_OBJECT
 public:
     explicit TestPageLayout(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkNone();
     void checkSingle();
     void checkFacing();

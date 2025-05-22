@@ -12,7 +12,7 @@ class TestStrokeOpacity : public QObject
     Q_OBJECT
 public:
     explicit TestStrokeOpacity(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkStrokeOpacity_data();
     void checkStrokeOpacity();
 };

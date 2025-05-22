@@ -9,7 +9,7 @@ class TestLinks : public QObject
     Q_OBJECT
 public:
     explicit TestLinks(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkDocumentWithNoDests();
     void checkDests_xr01();
     void checkDests_xr02();

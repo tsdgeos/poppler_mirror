@@ -7,7 +7,7 @@ class TestPageMode : public QObject
     Q_OBJECT
 public:
     explicit TestPageMode(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkNone();
     void checkFullScreen();
     void checkAttachments();

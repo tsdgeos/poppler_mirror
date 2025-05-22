@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     t.start();
 
     QDir directory(QString::fromLocal8Bit(argv[1]));
-    foreach (const QString &fileName, directory.entryList()) {
+    Q_FOREACH (const QString &fileName, directory.entryList()) {
         if (fileName.endsWith(QStringLiteral("pdf"))) {
             qDebug() << "Doing" << fileName.toLatin1().data() << ":";
             std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(directory.canonicalPath() + QChar::fromLatin1('/') + fileName);

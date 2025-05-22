@@ -130,11 +130,11 @@ void NavigationToolBar::slotZoomComboChanged(const QString &_text)
     bool ok = false;
     int value = text.toInt(&ok);
     if (ok && value >= 10) {
-        emit zoomChanged(qreal(value) / 100);
+        Q_EMIT zoomChanged(qreal(value) / 100);
     }
 }
 
 void NavigationToolBar::slotRotationComboChanged(int idx)
 {
-    emit rotationChanged(idx * 90);
+    Q_EMIT rotationChanged(idx * 90);
 }

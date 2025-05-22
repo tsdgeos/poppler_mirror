@@ -183,7 +183,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
     q->setPopup(popup);
 
     // Flush revisions
-    foreach (Annotation *r, revisions) {
+    Q_FOREACH (Annotation *r, revisions) {
         // TODO: Flush revision
         delete r; // Object is no longer needed
     }
@@ -350,7 +350,7 @@ std::unique_ptr<AnnotPath> AnnotationPrivate::toAnnotPath(const QVector<QPointF>
     double MTX[6];
     fillTransformationMTX(MTX);
 
-    foreach (const QPointF &p, list) {
+    Q_FOREACH (const QPointF &p, list) {
         double x, y;
         XPDFReader::invTransform(MTX, p, x, y);
         ac.emplace_back(x, y);
@@ -1527,7 +1527,7 @@ std::vector<std::unique_ptr<Annotation>> Annotation::revisions() const
     if (!d->pdfAnnot) {
         /* Return aliases, whose ownership goes to the caller */
         std::vector<std::unique_ptr<Annotation>> res;
-        foreach (Annotation *rev, d->revisions)
+        Q_FOREACH (Annotation *rev, d->revisions)
             res.push_back(std::unique_ptr<Annotation>(rev->d_ptr->makeAlias()));
         return res;
     }
@@ -2603,7 +2603,7 @@ AnnotQuadrilaterals *HighlightAnnotationPrivate::toQuadrilaterals(const QList<Hi
     fillTransformationMTX(MTX);
 
     int pos = 0;
-    foreach (const HighlightAnnotation::Quad &q, quads) {
+    Q_FOREACH (const HighlightAnnotation::Quad &q, quads) {
         double x1, y1, x2, y2, x3, y3, x4, y4;
         XPDFReader::invTransform(MTX, q.points[0], x1, y1);
         XPDFReader::invTransform(MTX, q.points[1], x2, y2);

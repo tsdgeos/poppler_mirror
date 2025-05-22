@@ -12,7 +12,7 @@ public:
 
     void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
 
-private slots:
+private Q_SLOTS:
     void checkActualText1();
     void checkActualText2();
     void checkActualText2_data();

@@ -10,7 +10,7 @@ class TestInternalOutline : public QObject
     Q_OBJECT
 public:
     explicit TestInternalOutline(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testCreateOutline();
     void testSetOutline();
     void testInsertChild();

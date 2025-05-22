@@ -16,7 +16,7 @@ class TestDistinguishedNameParser : public QObject
     Q_OBJECT
 public:
     explicit TestDistinguishedNameParser(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     // The big set of input/output. Several of the helper functions can be tested independently
     void testParser();
     void testParser_data();

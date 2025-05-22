@@ -1173,7 +1173,7 @@ std::pair<SignatureValidationInfo, std::shared_ptr<Poppler::AsyncObject>> FormFi
                                                                     l.get(),
                                                                     [innerObj = std::weak_ptr<AsyncObject>(l)]() {
                                                                         if (auto innerLocked = innerObj.lock()) {
-                                                                            emit innerLocked->done();
+                                                                            Q_EMIT innerLocked->done();
                                                                         }
                                                                     },
                                                                     Qt::QueuedConnection);

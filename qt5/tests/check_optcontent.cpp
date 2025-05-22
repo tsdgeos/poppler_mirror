@@ -11,7 +11,7 @@ class TestOptionalContent : public QObject
     Q_OBJECT
 public:
     explicit TestOptionalContent(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkVisPolicy();
     void checkNestedLayers();
     void checkNoOptionalContent();

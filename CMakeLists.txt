@@ -227,6 +227,7 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
 
 add_definitions(-DQT_NO_CAST_FROM_ASCII)
 add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
+add_definitions(-DQT_NO_KEYWORDS)
 
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})

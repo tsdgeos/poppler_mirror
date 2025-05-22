@@ -10,7 +10,7 @@ class TestForms : public QObject
     Q_OBJECT
 public:
     explicit TestForms(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testCheckbox(); // Test for issue #655
     void testCheckboxIssue159(); // Test for issue #159
     void testSetIcon(); // Test that setIcon will always be valid.

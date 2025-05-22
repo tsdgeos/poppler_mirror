@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
     if (doc->hasEmbeddedFiles()) {
         std::cout << "Embedded files: " << std::endl;
-        foreach (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
+        Q_FOREACH (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
             std::cout << "    " << qPrintable(file->name()) << std::endl;
             std::cout << "    desc:" << qPrintable(file->description()) << std::endl;
             QByteArray data = file->data();

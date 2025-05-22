@@ -210,7 +210,7 @@ int main(int argc, char **argv)
         if (page) {
             QList<Poppler::FormField *> forms = page->formFields();
             std::cout << "\tPage " << i + 1 << std::endl;
-            foreach (const Poppler::FormField *form, forms) {
+            Q_FOREACH (const Poppler::FormField *form, forms) {
                 std::cout << "\t\tForm" << std::endl;
                 std::cout << "\t\t\tType: " << form->type() << std::endl;
                 std::cout << "\t\t\tRect: " << form->rect() << std::endl;

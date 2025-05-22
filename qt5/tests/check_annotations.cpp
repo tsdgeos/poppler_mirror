@@ -19,7 +19,7 @@ public:
 
     void saveAndCheck(const std::unique_ptr<Poppler::Document> &doc, const std::function<void(Poppler::Annotation *a)> &checkFunction);
 
-private slots:
+private Q_SLOTS:
     void checkQColorPrecision();
     void checkFontSizeAndColor();
     void checkHighlightFromAndToQuads();

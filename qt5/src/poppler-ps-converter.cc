@@ -228,7 +228,7 @@ bool PSConverter::convert()
     }
 
     std::vector<int> pages;
-    foreach (int page, d->pageList) {
+    Q_FOREACH (int page, d->pageList) {
         pages.push_back(page);
     }
 
@@ -248,7 +248,7 @@ bool PSConverter::convert()
     if (psOut->isOk()) {
         bool isPrinting = (d->opts & Printing) ? true : false;
         bool showAnnotations = (d->opts & HideAnnotations) ? false : true;
-        foreach (int page, d->pageList) {
+        Q_FOREACH (int page, d->pageList) {
             d->document->doc->displayPage(psOut, page, d->hDPI, d->vDPI, d->rotate, false, true, isPrinting, nullptr, nullptr, annotDisplayDecideCbk, &showAnnotations, true);
             if (d->pageConvertedCallback) {
                 (*d->pageConvertedCallback)(page, d->pageConvertedPayload);
