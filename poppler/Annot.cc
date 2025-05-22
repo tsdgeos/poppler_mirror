@@ -140,30 +140,30 @@
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
 
-static AnnotLineEndingStyle parseAnnotLineEndingStyle(const GooString *string)
+static AnnotLineEndingStyle parseAnnotLineEndingStyle(const Object &name)
 {
-    if (string != nullptr) {
-        if (!string->cmp("Square")) {
-            return annotLineEndingSquare;
-        } else if (!string->cmp("Circle")) {
-            return annotLineEndingCircle;
-        } else if (!string->cmp("Diamond")) {
-            return annotLineEndingDiamond;
-        } else if (!string->cmp("OpenArrow")) {
-            return annotLineEndingOpenArrow;
-        } else if (!string->cmp("ClosedArrow")) {
-            return annotLineEndingClosedArrow;
-        } else if (!string->cmp("Butt")) {
-            return annotLineEndingButt;
-        } else if (!string->cmp("ROpenArrow")) {
-            return annotLineEndingROpenArrow;
-        } else if (!string->cmp("RClosedArrow")) {
-            return annotLineEndingRClosedArrow;
-        } else if (!string->cmp("Slash")) {
-            return annotLineEndingSlash;
-        } else {
-            return annotLineEndingNone;
-        }
+    if (!name.isName()) {
+        return annotLineEndingNone;
+    }
+
+    if (name.isName("Square")) {
+        return annotLineEndingSquare;
+    } else if (name.isName("Circle")) {
+        return annotLineEndingCircle;
+    } else if (name.isName("Diamond")) {
+        return annotLineEndingDiamond;
+    } else if (name.isName("OpenArrow")) {
+        return annotLineEndingOpenArrow;
+    } else if (name.isName("ClosedArrow")) {
+        return annotLineEndingClosedArrow;
+    } else if (name.isName("Butt")) {
+        return annotLineEndingButt;
+    } else if (name.isName("ROpenArrow")) {
+        return annotLineEndingROpenArrow;
+    } else if (name.isName("RClosedArrow")) {
+        return annotLineEndingRClosedArrow;
+    } else if (name.isName("Slash")) {
+        return annotLineEndingSlash;
     } else {
         return annotLineEndingNone;
     }
@@ -2921,8 +2921,7 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("LE");
     if (obj1.isName()) {
-        GooString styleName(obj1.getNameString());
-        endStyle = parseAnnotLineEndingStyle(&styleName);
+        endStyle = parseAnnotLineEndingStyle(obj1);
     } else {
         endStyle = annotLineEndingNone;
     }
@@ -3449,16 +3448,14 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
 
         obj2 = obj1.arrayGet(0);
         if (obj2.isName()) {
-            GooString leName(obj2.getNameString());
-            startStyle = parseAnnotLineEndingStyle(&leName);
+            startStyle = parseAnnotLineEndingStyle(obj2);
         } else {
             startStyle = annotLineEndingNone;
         }
 
         obj2 = obj1.arrayGet(1);
         if (obj2.isName()) {
-            GooString leName(obj2.getNameString());
-            endStyle = parseAnnotLineEndingStyle(&leName);
+            endStyle = parseAnnotLineEndingStyle(obj2);
         } else {
             endStyle = annotLineEndingNone;
         }
@@ -3885,14 +3882,13 @@ void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Subtype");
     if (obj1.isName()) {
-        GooString typeName(obj1.getName());
-        if (!typeName.cmp("Highlight")) {
+        if (obj1.isName("Highlight")) {
             type = typeHighlight;
-        } else if (!typeName.cmp("Underline")) {
+        } else if (obj1.isName("Underline")) {
             type = typeUnderline;
-        } else if (!typeName.cmp("Squiggly")) {
+        } else if (obj1.isName("Squiggly")) {
             type = typeSquiggly;
-        } else if (!typeName.cmp("StrikeOut")) {
+        } else if (obj1.isName("StrikeOut")) {
             type = typeStrikeOut;
         }
     }
@@ -6007,10 +6003,9 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Subtype");
     if (obj1.isName()) {
-        GooString typeName(obj1.getName());
-        if (!typeName.cmp("Square")) {
+        if (obj1.isName("Square")) {
             type = typeSquare;
-        } else if (!typeName.cmp("Circle")) {
+        } else if (obj1.isName("Circle")) {
             type = typeCircle;
         }
     }
@@ -6176,10 +6171,9 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Subtype");
     if (obj1.isName()) {
-        GooString typeName(obj1.getName());
-        if (!typeName.cmp("Polygon")) {
+        if (obj1.isName("Polygon")) {
             type = typePolygon;
-        } else if (!typeName.cmp("PolyLine")) {
+        } else if (obj1.isName("PolyLine")) {
             type = typePolyLine;
         }
     }
@@ -6197,15 +6191,13 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict *dict)
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         Object obj2 = obj1.arrayGet(0);
         if (obj2.isName()) {
-            const GooString leName(obj2.getNameString());
-            startStyle = parseAnnotLineEndingStyle(&leName);
+            startStyle = parseAnnotLineEndingStyle(obj2);
         } else {
             startStyle = annotLineEndingNone;
         }
         obj2 = obj1.arrayGet(1);
         if (obj2.isName()) {
-            const GooString leName(obj2.getNameString());
-            endStyle = parseAnnotLineEndingStyle(&leName);
+            endStyle = parseAnnotLineEndingStyle(obj2);
         } else {
             endStyle = annotLineEndingNone;
         }
@@ -6497,10 +6489,9 @@ void AnnotCaret::initialize(PDFDoc *docA, Dict *dict)
     symbol = symbolNone;
     obj1 = dict->lookup("Sy");
     if (obj1.isName()) {
-        GooString typeName(obj1.getName());
-        if (!typeName.cmp("P")) {
+        if (obj1.isName("P")) {
             symbol = symbolP;
-        } else if (!typeName.cmp("None")) {
+        } else if (obj1.isName("None")) {
             symbol = symbolNone;
         }
     }
