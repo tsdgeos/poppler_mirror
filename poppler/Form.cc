@@ -37,7 +37,7 @@
 // Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
-// Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 //========================================================================
@@ -793,7 +793,6 @@ std::optional<CryptoSign::SigningError> FormWidgetSignature::signDocumentWithApp
     ffs->setCustomAppearanceLeftContent({});
     getWidgetAnnotation()->setAppearCharacs(std::move(origAppearCharacs));
     getWidgetAnnotation()->setBorder(std::move(origBorderCopy));
-    getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
 
     return signingResult;

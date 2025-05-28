@@ -7,7 +7,7 @@ class TestMetaData : public QObject
     Q_OBJECT
 public:
     explicit TestMetaData(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkStrings_data();
     void checkStrings();
     void checkStrings2_data();
@@ -48,7 +48,7 @@ void TestMetaData::checkStrings_data()
 void TestMetaData::checkStrings()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
 
     QFETCH(QString, key);
@@ -82,7 +82,7 @@ void TestMetaData::checkStrings2_data()
 void TestMetaData::checkStrings2()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QFETCH(QString, key);
@@ -95,7 +95,7 @@ void TestMetaData::checkStrings2()
 void TestMetaData::checkStringKeys()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QStringList keyList;
@@ -112,14 +112,14 @@ void TestMetaData::checkStringKeys()
 void TestMetaData::checkLinearised()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->isLinearized());
 
     delete doc;
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->isLinearized(), false);
 
@@ -129,7 +129,7 @@ void TestMetaData::checkLinearised()
 void TestMetaData::checkPortraitOrientation()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(0);
@@ -142,13 +142,13 @@ void TestMetaData::checkPortraitOrientation()
 void TestMetaData::checkNumPages()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->numPages(), 2);
 
     delete doc;
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->numPages(), 1);
 
@@ -159,7 +159,7 @@ void TestMetaData::checkDate()
 {
     Poppler::Document *doc;
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     QCOMPARE(doc->date(QStringLiteral("ModDate")), QDateTime(QDate(2005, 12, 5), QTime(9, 44, 46), Qt::UTC));
     QCOMPARE(doc->date(QStringLiteral("CreationDate")), QDateTime(QDate(2005, 8, 13), QTime(1, 12, 11), Qt::UTC));
@@ -171,7 +171,7 @@ void TestMetaData::checkPageSize()
 {
     Poppler::Document *doc;
 
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
     Poppler::Page *page = doc->page(0);
     QCOMPARE(page->pageSize(), QSize(595, 842));
@@ -184,7 +184,7 @@ void TestMetaData::checkPageSize()
 void TestMetaData::checkLandscapeOrientation()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(1);
@@ -197,7 +197,7 @@ void TestMetaData::checkLandscapeOrientation()
 void TestMetaData::checkUpsideDownOrientation()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(2);
@@ -210,7 +210,7 @@ void TestMetaData::checkUpsideDownOrientation()
 void TestMetaData::checkSeascapeOrientation()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(3);
@@ -223,7 +223,7 @@ void TestMetaData::checkSeascapeOrientation()
 void TestMetaData::checkVersion()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/doublepage.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/doublepage.pdf"));
     QVERIFY(doc);
 
     auto pdfVersion = doc->getPdfVersion();
@@ -236,7 +236,7 @@ void TestMetaData::checkVersion()
 void TestMetaData::checkPdfId()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf"));
     QVERIFY(doc);
 
     const QByteArray referencePermanentId("00C9D5B6D8FB11D7A902003065D630AA");
@@ -273,7 +273,7 @@ void TestMetaData::checkPdfId()
 void TestMetaData::checkNoPdfId()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithActualText.pdf"));
     QVERIFY(doc);
 
     QVERIFY(!doc->getPdfId(nullptr, nullptr));

@@ -1032,10 +1032,6 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> NSSSignatureC
         return CryptoSign::SigningError::GenericError;
     }
 
-    if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess) {
-        return CryptoSign::SigningError::GenericError;
-    }
-
     if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess) {
         return CryptoSign::SigningError::GenericError;
     }

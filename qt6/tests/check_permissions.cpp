@@ -7,13 +7,13 @@ class TestPermissions : public QObject
     Q_OBJECT
 public:
     explicit TestPermissions(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void permissions1();
 };
 
 void TestPermissions::permissions1()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/orientation.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/orientation.pdf"));
     QVERIFY(doc);
 
     // we are allowed to print

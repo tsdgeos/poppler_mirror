@@ -78,6 +78,10 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_STAMP(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_STAMP, PopplerAnnotStamp))
 #define POPPLER_IS_ANNOT_STAMP(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_STAMP))
 
+#define POPPLER_TYPE_ANNOT_INK (poppler_annot_ink_get_type())
+#define POPPLER_ANNOT_INK(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_ANNOT_INK, PopplerAnnotInk))
+#define POPPLER_IS_ANNOT_INK(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_ANNOT_INK))
+
 typedef enum
 {
     POPPLER_ANNOT_UNKNOWN,
@@ -450,8 +454,30 @@ void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnot
 POPPLER_PUBLIC
 gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, cairo_surface_t *image, GError **error);
 
+/* Paths of PopplerAnnotInk */
+POPPLER_PUBLIC
+GType poppler_path_get_type(void) G_GNUC_CONST;
+POPPLER_PUBLIC
+PopplerPath *poppler_path_new_from_array(PopplerPoint *points, gsize n_points);
+POPPLER_PUBLIC
+void poppler_path_free(PopplerPath *path);
+POPPLER_PUBLIC
+PopplerPath *poppler_path_copy(PopplerPath *path);
+POPPLER_PUBLIC
+PopplerPoint *poppler_path_get_points(PopplerPath *path, gsize *n_points);
+/* PopplerAnnotInk */
+POPPLER_PUBLIC
+GType poppler_annot_ink_get_type(void) G_GNUC_CONST;
+POPPLER_PUBLIC
+PopplerAnnot *poppler_annot_ink_new(PopplerDocument *doc, PopplerRectangle *rect);
+POPPLER_PUBLIC
+void poppler_annot_ink_set_ink_list(PopplerAnnotInk *annot, PopplerPath **ink_list, gsize n_paths);
+POPPLER_PUBLIC
+PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_paths);
+
 G_END_DECLS
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFontDescription, poppler_font_description_free)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPath, poppler_path_free)
 
 #endif /* __POPPLER_ANNOT_H__ */

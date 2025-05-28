@@ -10,7 +10,7 @@ class TestForms : public QObject
     Q_OBJECT
 public:
     explicit TestForms(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testCheckbox(); // Test for issue #655
     void testCheckboxIssue159(); // Test for issue #159
     void testSetIcon(); // Test that setIcon will always be valid.
@@ -23,7 +23,7 @@ private slots:
 void TestForms::testCheckbox()
 {
     // Test for checkbox issue #655
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/latex-hyperref-checkbox-issue-655.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -51,7 +51,7 @@ void TestForms::testCheckbox()
 void TestForms::testStandAloneWidgets()
 {
     // Check for 'de facto' tooltips. Issue #34
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/tooltip.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/tooltip.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -80,7 +80,7 @@ void TestForms::testStandAloneWidgets()
 void TestForms::testCheckboxIssue159()
 {
     // Test for checkbox issue #159
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -127,7 +127,7 @@ void TestForms::testCheckboxIssue159()
 
 void TestForms::testSetIcon()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/form_set_icon.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -187,7 +187,7 @@ void TestForms::testSetIcon()
 
 void TestForms::testSetPrintable()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/form_set_icon.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -206,7 +206,7 @@ void TestForms::testSetPrintable()
 
 void TestForms::testSetAppearanceText()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -246,7 +246,7 @@ void TestForms::testSetAppearanceText()
 
 void TestForms::testUnicodeFieldAttributes()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));

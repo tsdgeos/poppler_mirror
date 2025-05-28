@@ -423,7 +423,7 @@ GlobalParams::GlobalParams(const std::string &customPopplerDataDir) : popplerDat
     nameToUnicodeZapfDingbats = new NameToCharCode();
     nameToUnicodeText = new NameToCharCode();
     sysFonts = new SysFontList();
-    textEncoding = new GooString("UTF-8");
+    textEncoding = std::string { "UTF-8" };
     printCommands = false;
     profileCommands = false;
     errQuiet = false;
@@ -551,7 +551,6 @@ GlobalParams::~GlobalParams()
     delete nameToUnicodeZapfDingbats;
     delete nameToUnicodeText;
     delete sysFonts;
-    delete textEncoding;
 
     delete unicodeMapCache;
     delete cMapCache;
@@ -1410,7 +1409,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
 std::string GlobalParams::getTextEncodingName() const
 {
     globalParamsLocker();
-    return textEncoding->toStr();
+    return textEncoding;
 }
 
 const UnicodeMap *GlobalParams::getUtf8Map()
@@ -1478,7 +1477,7 @@ std::shared_ptr<CMap> GlobalParams::getCMap(const GooString &collection, const G
 
 const UnicodeMap *GlobalParams::getTextEncoding()
 {
-    return getUnicodeMap(textEncoding->toStr());
+    return getUnicodeMap(textEncoding);
 }
 
 std::vector<std::string> GlobalParams::getEncodingNames()
@@ -1504,11 +1503,10 @@ void GlobalParams::addFontFile(const std::string &fontName, const std::string &p
     fontFiles[fontName] = path;
 }
 
-void GlobalParams::setTextEncoding(const char *encodingName)
+void GlobalParams::setTextEncoding(const std::string &encodingName)
 {
     globalParamsLocker();
-    delete textEncoding;
-    textEncoding = new GooString(encodingName);
+    textEncoding = encodingName;
 }
 
 void GlobalParams::setPrintCommands(bool printCommandsA)

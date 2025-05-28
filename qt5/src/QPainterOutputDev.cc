@@ -467,7 +467,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
                 break;
             }
             case gfxFontLocExternal: { // font is in an external font file
-                QString fontFile(fontLoc->path.c_str());
+                QString fontFile = QString::fromStdString(fontLoc->path);
                 m_rawFont = new QRawFont(fontFile, fontSize, m_hintingPreference);
                 m_rawFontCache.insert(std::make_pair(fontID, std::unique_ptr<QRawFont>(m_rawFont)));
                 break;

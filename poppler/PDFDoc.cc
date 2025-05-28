@@ -1402,8 +1402,8 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
         break;
     }
     case objName: {
-        GooString name(obj->getName());
-        outStr->printf("/%s ", sanitizedName(name.toStr()).c_str());
+        std::string name(obj->getNameString());
+        outStr->printf("/%s ", sanitizedName(name).c_str());
         break;
     }
     case objNull:
@@ -2255,9 +2255,6 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
     border->setWidth(borderWidth);
     signatureAnnot->setBorder(std::move(border));
-
-    signatureAnnot->generateFieldAppearance();
-    signatureAnnot->updateAppearanceStream();
 
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);

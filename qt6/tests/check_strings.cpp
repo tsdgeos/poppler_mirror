@@ -41,7 +41,7 @@ public:
 
     QVector<GooString *> m_gooStrings;
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void check_unicodeToQString_data();

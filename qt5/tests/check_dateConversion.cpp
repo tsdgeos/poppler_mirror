@@ -11,7 +11,7 @@ class TestDateConv : public QObject
 public:
     explicit TestDateConv(QObject *parent = nullptr) : QObject(parent) { }
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void checkDates_data();
     void checkDates();

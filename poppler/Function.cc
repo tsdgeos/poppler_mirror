@@ -1376,7 +1376,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
             codeString->append(c);
         }
     }
-    return std::make_unique<GooString>(s);
+    return std::make_unique<GooString>(std::move(s));
 }
 
 void PostScriptFunction::resizeCode(int newSize)

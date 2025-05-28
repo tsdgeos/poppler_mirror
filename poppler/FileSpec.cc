@@ -50,7 +50,7 @@ EmbFile::EmbFile(Object &&efStream)
         // subtype is normally the mimetype
         Object subtypeName = dataDict->lookup("Subtype");
         if (subtypeName.isName()) {
-            m_mimetype = std::make_unique<GooString>(subtypeName.getName());
+            m_mimetype = std::make_unique<GooString>(subtypeName.getNameString());
         }
 
         // paramDict corresponds to Table 3.42 in the PDF1.6 spec

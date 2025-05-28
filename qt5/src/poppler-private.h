@@ -201,15 +201,15 @@ public:
     {
         const std::optional<std::string> &fiName = fi->getName();
         if (fiName) {
-            fontName = fiName->c_str();
+            fontName = QString::fromStdString(fiName.value());
         }
         const std::optional<std::string> &fiFile = fi->getFile();
         if (fiFile) {
-            fontFile = fiFile->c_str();
+            fontFile = QString::fromStdString(fiFile.value());
         }
         const std::optional<std::string> &fiSubstituteName = fi->getSubstituteName();
         if (fiSubstituteName) {
-            fontSubstituteName = fiSubstituteName->c_str();
+            fontSubstituteName = QString::fromStdString(fiSubstituteName.value());
         }
         isEmbedded = fi->getEmbedded();
         isSubset = fi->getSubset();

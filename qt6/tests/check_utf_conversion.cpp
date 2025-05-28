@@ -14,7 +14,7 @@ class TestUTFConversion : public QObject
     Q_OBJECT
 public:
     explicit TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testUTF_data();
     void testUTF();
     void testUnicodeToAscii7();

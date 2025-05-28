@@ -46,6 +46,7 @@
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -835,6 +836,7 @@ protected:
     mutable std::recursive_mutex mutex;
 
     bool hasBeenUpdated = false;
+    Ref updatedAppearanceStream = Ref::INVALID(); // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------
@@ -944,17 +946,17 @@ public:
 
     // getters
     bool getOpen() const { return open; }
-    const GooString *getIcon() const { return icon.get(); }
+    const std::string &getIcon() const { return icon; }
     AnnotTextState getState() const { return state; }
 
     void setOpen(bool openA);
-    void setIcon(GooString *new_icon);
+    void setIcon(const std::string &new_icon);
 
 private:
     void initialize(PDFDoc *docA, Dict *dict);
 
     bool open; // Open       (Default false)
-    std::unique_ptr<GooString> icon; // Name       (Default Note)
+    std::string icon; // Name       (Default Note)
     AnnotTextState state; // State      (Default Umarked if
                           //             StateModel Marked
                           //             None if StareModel Review)
@@ -1228,14 +1230,14 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void setIcon(GooString *new_icon);
+    void setIcon(const std::string &new_icon);
 
     void setCustomImage(AnnotStampImageHelper *stampImageHelperA);
 
     void clearCustomImage();
 
     // getters
-    const GooString *getIcon() const { return icon.get(); }
+    const std::string &getIcon() const { return icon; }
 
     Object getAppearanceResDict() override;
 
@@ -1245,9 +1247,8 @@ private:
     void generateStampCustomAppearance();
     void updateAppearanceResDict();
 
-    std::unique_ptr<GooString> icon; // Name       (Default Draft)
+    std::string icon; // Name       (Default Draft)
     AnnotStampImageHelper *stampImageHelper;
-    Ref updatedAppearanceStream;
 };
 
 //------------------------------------------------------------------------
@@ -1465,7 +1466,6 @@ public:
     ~AnnotWidget() override;
 
     void draw(Gfx *gfx, bool printing) override;
-    void invalidateAppearance() override;
 
     void generateFieldAppearance();
     void updateAppearanceStream();
@@ -1494,7 +1494,6 @@ private:
     // inherited  from Annot
     // AnnotBorderBS border;                // BS
     Dict *parent; // Parent
-    Ref updatedAppearanceStream; // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------

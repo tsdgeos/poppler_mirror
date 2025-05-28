@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[2], argv[1]);
+    Poppler::Document *doc = Poppler::Document::load(QString::fromLocal8Bit(argv[2]), argv[1]);
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     qDebug() << "OK to add notes: " << doc->okToAddNotes();
     qDebug() << "      Page mode: " << doc->pageMode();
     QStringList fontNameList;
-    foreach (const Poppler::FontInfo &font, doc->fonts())
+    Q_FOREACH (const Poppler::FontInfo &font, doc->fonts())
         fontNameList += font.name();
     qDebug() << "          Fonts: " << fontNameList.join(QStringLiteral(", "));
 

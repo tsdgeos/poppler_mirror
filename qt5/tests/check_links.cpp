@@ -9,7 +9,7 @@ class TestLinks : public QObject
     Q_OBJECT
 public:
     explicit TestLinks(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkDocumentWithNoDests();
     void checkDests_xr01();
     void checkDests_xr02();
@@ -29,7 +29,7 @@ static bool isDestinationValid_name(const Poppler::LinkDestination *dest)
 void TestLinks::checkDocumentWithNoDests()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithAttachments.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::LinkDestination> dest;
@@ -43,7 +43,7 @@ void TestLinks::checkDocumentWithNoDests()
 void TestLinks::checkDests_xr01()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/xr01.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr01.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(0);
@@ -78,7 +78,7 @@ void TestLinks::checkDests_xr01()
 void TestLinks::checkDests_xr02()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/xr02.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr02.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::LinkDestination> dest;
@@ -98,7 +98,7 @@ void TestLinks::checkDests_xr02()
 void TestLinks::checkDocumentURILink()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
     QVERIFY(doc);
 
     Poppler::Page *page = doc->page(0);

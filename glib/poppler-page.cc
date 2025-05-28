@@ -33,8 +33,6 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
-static void _page_unrotate_xy(Page *page, double *x, double *y);
-
 /**
  * SECTION:poppler-page
  * @short_description: Information about a page in a document
@@ -1305,6 +1303,9 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
         case Annot::typeText:
             mapping->annot = _poppler_annot_text_new(annot);
             break;
+        case Annot::typeInk:
+            mapping->annot = _poppler_annot_ink_new(annot);
+            break;
         case Annot::typeFreeText:
             mapping->annot = _poppler_annot_free_text_new(annot);
             break;
@@ -1438,10 +1439,39 @@ AnnotQuadrilaterals *new_quads_from_offset_cropbox(const PDFRectangle *crop_box,
     return new AnnotQuadrilaterals(std::move(quads_array), len);
 }
 
+/* This function rotates the passed-in @x @y point with the page rotation.
+ * In other words, it moves the point to where it'll be located in a displayed document */
+void _page_rotate_xy(Page *page, double *x, double *y)
+{
+    double page_width, page_height, temp;
+    gint rotation = page->getRotate();
+
+    if (rotation == 90 || rotation == 270) {
+        page_height = page->getCropWidth();
+        page_width = page->getCropHeight();
+    } else {
+        page_width = page->getCropWidth();
+        page_height = page->getCropHeight();
+    }
+
+    if (rotation == 90) {
+        temp = *x;
+        *x = *y;
+        *y = page_height - temp;
+    } else if (rotation == 180) {
+        *x = page_width - *x;
+        *y = page_height - *y;
+    } else if (rotation == 270) {
+        temp = *x;
+        *x = page_width - *y;
+        *y = temp;
+    }
+}
+
 /* This function undoes the rotation of @page in the passed-in @x @y point.
  * In other words, it moves the point to where it'll be located if @page
  * was put to zero rotation (unrotated) */
-static void _page_unrotate_xy(Page *page, double *x, double *y)
+void _page_unrotate_xy(Page *page, double *x, double *y)
 {
     double page_width, page_height, temp;
     gint rotation = page->getRotate();

@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 
     if (doc->hasEmbeddedFiles()) {
         qDebug() << "Embedded files:";
-        foreach (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
+        Q_FOREACH (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
             qDebug() << "   " << file->name();
         }
         qDebug();

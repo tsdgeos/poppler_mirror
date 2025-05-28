@@ -40,7 +40,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "25")
-set(POPPLER_MINOR_VERSION_STRING "04")
+set(POPPLER_MINOR_VERSION_STRING "05")
 # We want the string version to have 08 but the integer version can't have a leading 0 since otherwise it's considered octal
 # So strip a leading 0 if found in POPPLER_MINOR_VERSION_STRING and store the result in POPPLER_MINOR_VERSION
 string(REGEX REPLACE "^0?(.+)$" "\\1" POPPLER_MINOR_VERSION "${POPPLER_MINOR_VERSION_STRING}")
@@ -224,6 +224,10 @@ find_soft_mandatory_package(ENABLE_QT6 Qt6Core ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Gui ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Widgets ${QT6_VERSION})
 find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
+
+add_definitions(-DQT_NO_CAST_FROM_ASCII)
+add_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
+add_definitions(-DQT_NO_KEYWORDS)
 
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
@@ -608,7 +612,7 @@ ADD_GPERF_FILE(TimesItalicWidths)
 ADD_GPERF_FILE(TimesRomanWidths)
 ADD_GPERF_FILE(ZapfDingbatsWidths)
 
-set(POPPLER_SOVERSION_NUMBER "148")
+set(POPPLER_SOVERSION_NUMBER "149")
 
 set(LINKER_SCRIPT "${CMAKE_BINARY_DIR}/libpoppler.map")
 configure_file(

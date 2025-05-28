@@ -9,7 +9,7 @@ class TestLinks : public QObject
     Q_OBJECT
 public:
     explicit TestLinks(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkDocumentWithNoDests();
     void checkDests_xr01();
     void checkDests_xr02();
@@ -28,7 +28,7 @@ static bool isDestinationValid_name(const Poppler::LinkDestination *dest)
 
 void TestLinks::checkDocumentWithNoDests()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithAttachments.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::LinkDestination> dest = doc->linkDestination(QStringLiteral("no.dests.in.this.document"));
@@ -38,7 +38,7 @@ void TestLinks::checkDocumentWithNoDests()
 
 void TestLinks::checkDests_xr01()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/xr01.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr01.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(0);
@@ -68,7 +68,7 @@ void TestLinks::checkDests_xr01()
 
 void TestLinks::checkDests_xr02()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/xr02.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr02.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::LinkDestination> dest = doc->linkDestination(QStringLiteral("section.1"));
@@ -88,7 +88,7 @@ void TestLinks::checkDests_xr02()
 
 void TestLinks::checkDocumentURILink()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
     QVERIFY(doc);
 
     std::unique_ptr<Poppler::Page> page = doc->page(0);

@@ -8,7 +8,7 @@ class TestLexer : public QObject
     Q_OBJECT
 public:
     explicit TestLexer(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testNumbers();
 };
 

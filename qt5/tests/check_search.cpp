@@ -9,7 +9,7 @@ class TestSearch : public QObject
     Q_OBJECT
 public:
     explicit TestSearch(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testAcrossLinesSearch(); // leave it first
     void testAcrossLinesSearchDoubleColumn();
     void bug7063();
@@ -22,7 +22,7 @@ private slots:
 
 void TestSearch::bug7063()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/bug7063.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/bug7063.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -61,7 +61,7 @@ void TestSearch::bug7063()
 
 void TestSearch::testNextAndPrevious()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/xr01.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr01.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -150,7 +150,7 @@ void TestSearch::testNextAndPrevious()
 
 void TestSearch::testWholeWordsOnly()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithActualText.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -180,7 +180,7 @@ void TestSearch::testWholeWordsOnly()
 
 void TestSearch::testIgnoreDiacritics()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/Issue637.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/Issue637.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -239,7 +239,7 @@ void TestSearch::testIgnoreDiacritics()
 void TestSearch::testRussianSearch()
 {
     // Test for issue #743
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/russian.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/russian.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -268,7 +268,7 @@ void TestSearch::testRussianSearch()
 
 void TestSearch::testDeseretSearch()
 {
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/deseret.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/deseret.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));
@@ -288,7 +288,7 @@ void TestSearch::testAcrossLinesSearch()
     // Test for searching across lines with new flag Poppler::Page::AcrossLines
     // and its automatic features like ignoring hyphen at end of line or allowing
     // whitespace in the search term to match on newline character.
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/searchAcrossLines.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/searchAcrossLines.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(1));
@@ -382,7 +382,7 @@ void TestSearch::testAcrossLinesSearchDoubleColumn()
 {
     // Test for searching across lines with new flag Poppler::Page::AcrossLines
     // in a document with two columns of text.
-    QScopedPointer<Poppler::Document> document(Poppler::Document::load(TESTDATADIR "/unittestcases/searchAcrossLinesDoubleColumn.pdf"));
+    QScopedPointer<Poppler::Document> document(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/searchAcrossLinesDoubleColumn.pdf")));
     QVERIFY(document);
 
     QScopedPointer<Poppler::Page> page(document->page(0));

@@ -39,9 +39,10 @@ build:
   stage: build
   script:
     - apt-get update
+    - bash do-the-gnupg-2.4-dance.sh $PWD/build/gnupg/
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data -DENABLE_UNSTABLE_API_ABI_HEADERS=ON -DVERIFY_PUBLIC_PRIVATE_HEADERS=true ..
+    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data -DCMAKE_PREFIX_PATH=$PWD/gnupg -DENABLE_UNSTABLE_API_ABI_HEADERS=ON -DVERIFY_PUBLIC_PRIVATE_HEADERS=true ..
     - ninja -j ${FDO_CI_CONCURRENT}
     - ninja -j ${FDO_CI_CONCURRENT} all_verify_interface_header_sets
     - ctest --output-on-failure

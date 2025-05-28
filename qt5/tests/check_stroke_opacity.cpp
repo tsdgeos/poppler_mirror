@@ -12,7 +12,7 @@ class TestStrokeOpacity : public QObject
     Q_OBJECT
 public:
     explicit TestStrokeOpacity(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkStrokeOpacity_data();
     void checkStrokeOpacity();
 };
@@ -29,7 +29,7 @@ void TestStrokeOpacity::checkStrokeOpacity()
 {
     QFETCH(int, backendType);
 
-    auto doc = std::unique_ptr<Poppler::Document>(Poppler::Document::load(TESTDATADIR "/unittestcases/stroke-alpha-pattern.pdf"));
+    auto doc = std::unique_ptr<Poppler::Document>(Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/stroke-alpha-pattern.pdf")));
     QVERIFY(doc != nullptr);
 
     doc->setRenderBackend((Poppler::Document::RenderBackend)backendType);

@@ -302,7 +302,7 @@ LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDe
 
 LinkDestination::LinkDestination(const QString &description) : d(new LinkDestinationPrivate)
 {
-    const QStringList tokens = description.split(';');
+    const QStringList tokens = description.split(QChar::fromLatin1(';'));
     if (tokens.size() >= 10) {
         d->kind = static_cast<Kind>(tokens.at(0).toInt());
         d->pageNum = tokens.at(1).toInt();
@@ -373,16 +373,17 @@ bool LinkDestination::isChangeZoom() const
 
 QString LinkDestination::toString() const
 {
+    const QChar semicolon = QChar::fromLatin1(';');
     QString s = QString::number((qint8)d->kind);
-    s += ';' + QString::number(d->pageNum);
-    s += ';' + QString::number(d->left);
-    s += ';' + QString::number(d->bottom);
-    s += ';' + QString::number(d->right);
-    s += ';' + QString::number(d->top);
-    s += ';' + QString::number(d->zoom);
-    s += ';' + QString::number((qint8)d->changeLeft);
-    s += ';' + QString::number((qint8)d->changeTop);
-    s += ';' + QString::number((qint8)d->changeZoom);
+    s += semicolon + QString::number(d->pageNum);
+    s += semicolon + QString::number(d->left);
+    s += semicolon + QString::number(d->bottom);
+    s += semicolon + QString::number(d->right);
+    s += semicolon + QString::number(d->top);
+    s += semicolon + QString::number(d->zoom);
+    s += semicolon + QString::number((qint8)d->changeLeft);
+    s += semicolon + QString::number((qint8)d->changeTop);
+    s += semicolon + QString::number((qint8)d->changeZoom);
     return s;
 }
 

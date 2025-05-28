@@ -9,13 +9,13 @@ class TestOverprint : public QObject
     Q_OBJECT
 public:
     explicit TestOverprint(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkOverprintImageRendering();
 };
 
 void TestOverprint::checkOverprintImageRendering()
 {
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/tests/mask-seams.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/tests/mask-seams.pdf"));
     QVERIFY(doc);
 
     doc->setRenderHint(Poppler::Document::OverprintPreview, true);

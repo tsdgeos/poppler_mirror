@@ -9,7 +9,7 @@ class TestAttachments : public QObject
     Q_OBJECT
 public:
     explicit TestAttachments(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkNoAttachments();
     void checkAttach1();
     void checkAttach2();
@@ -20,7 +20,7 @@ private slots:
 void TestAttachments::checkNoAttachments()
 {
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/truetype.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
 
     QCOMPARE(doc->hasEmbeddedFiles(), false);
@@ -32,7 +32,7 @@ void TestAttachments::checkAttach1()
 {
 
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/WithAttachments.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -47,7 +47,7 @@ void TestAttachments::checkAttach1()
     QCOMPARE(embfile->modDate(), QDateTime(QDate(), QTime()));
     QCOMPARE(embfile->mimeType(), QString());
 
-    QFile file(TESTDATADIR "/unittestcases/kroller.png");
+    QFile file(QStringLiteral(TESTDATADIR "/unittestcases/kroller.png"));
     QVERIFY(file.open(QIODevice::ReadOnly));
     QByteArray krollerData = file.readAll();
     QByteArray embdata = embfile->data();
@@ -60,7 +60,7 @@ void TestAttachments::checkAttach1()
     QCOMPARE(embfile2->createDate(), QDateTime(QDate(), QTime()));
     QCOMPARE(embfile2->mimeType(), QString());
 
-    QFile file2(TESTDATADIR "/unittestcases/gnome-64.gif");
+    QFile file2(QStringLiteral(TESTDATADIR "/unittestcases/gnome-64.gif"));
     QVERIFY(file2.open(QIODevice::ReadOnly));
     QByteArray g64Data = file2.readAll();
     QByteArray emb2data = embfile2->data();
@@ -73,7 +73,7 @@ void TestAttachments::checkAttach2()
 {
 
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/A6EmbeddedFiles.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -110,7 +110,7 @@ void TestAttachments::checkAttach3()
 {
 
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/shapes+attachments.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/shapes+attachments.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());
@@ -132,7 +132,7 @@ void TestAttachments::checkAttach4()
 {
 
     Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf");
+    doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/imageretrieve+attachment.pdf"));
     QVERIFY(doc);
 
     QVERIFY(doc->hasEmbeddedFiles());

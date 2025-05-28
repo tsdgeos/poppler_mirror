@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(argv[1]);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QString::fromLocal8Bit(argv[1]));
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
     if (doc->hasEmbeddedFiles()) {
         std::cout << "Embedded files: " << std::endl;
-        foreach (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
+        Q_FOREACH (Poppler::EmbeddedFile *file, doc->embeddedFiles()) {
             std::cout << "    " << qPrintable(file->name()) << std::endl;
             std::cout << "    desc:" << qPrintable(file->description()) << std::endl;
             QByteArray data = file->data();

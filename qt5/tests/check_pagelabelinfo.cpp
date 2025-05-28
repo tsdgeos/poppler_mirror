@@ -11,7 +11,7 @@ class TestPageLabelInfo : public QObject
     Q_OBJECT
 public:
     explicit TestPageLabelInfo(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void testFromDecimal();
     void testFromDecimalUnicode();
     void testToRoman();

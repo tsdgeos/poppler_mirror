@@ -9,13 +9,13 @@ class TestOutline : public QObject
     Q_OBJECT
 public:
     explicit TestOutline(QObject *parent = nullptr) : QObject(parent) { }
-private slots:
+private Q_SLOTS:
     void checkOutline_xr02();
 };
 
 void TestOutline::checkOutline_xr02()
 {
-    std::unique_ptr<Poppler::Document> document { Poppler::Document::load(TESTDATADIR "/unittestcases/xr02.pdf") };
+    std::unique_ptr<Poppler::Document> document { Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/xr02.pdf")) };
     QVERIFY(document.get());
 
     const auto outline = document->outline();

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright 2005-2010, 2012, 2017, 2020-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2010, 2012, 2017, 2020-2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2009 Ryszard Trojnacki <rysiek@menel.com>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
@@ -162,7 +162,8 @@ bool DCTStream::reset()
                 if (cinfo.num_components == 3) {
                     if (cinfo.saw_JFIF_marker) {
                         colorXform = 1;
-                    } else if (cinfo.cur_comp_info[0]->component_id == 82 && cinfo.cur_comp_info[1]->component_id == 71 && cinfo.cur_comp_info[2]->component_id == 66) { // ASCII "RGB"
+                    } else if (cinfo.cur_comp_info[0] && cinfo.cur_comp_info[1] && cinfo.cur_comp_info[2] && cinfo.cur_comp_info[0]->component_id == 82 && cinfo.cur_comp_info[1]->component_id == 71
+                               && cinfo.cur_comp_info[2]->component_id == 66) { // ASCII "RGB"
                         colorXform = 0;
                     } else {
                         colorXform = 1;

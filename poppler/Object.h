@@ -473,6 +473,11 @@ public:
         OBJECT_TYPE_CHECK(objName);
         return cString;
     }
+    std::string getNameString() const
+    {
+        OBJECT_TYPE_CHECK(objName);
+        return std::string { cString };
+    }
     Array *getArray() const
     {
         OBJECT_TYPE_CHECK(objArray);

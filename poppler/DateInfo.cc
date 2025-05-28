@@ -122,6 +122,7 @@ std::string timeToStringWithFormat(const time_t *timeA, const char *format)
     while (strftime(&buf[0], buf.size(), fmt.c_str(), &localtime_tm) == 0) {
         buf.resize(bufLen *= 2);
     }
+    buf.resize(buf.find('\0'));
     return buf;
 }
 

@@ -2635,7 +2635,7 @@ std::unique_ptr<GfxColorSpace> GfxSeparationColorSpace::parse(GfxResources *res,
         error(errSyntaxWarning, -1, "Bad Separation color space (name)");
         return {};
     }
-    std::unique_ptr<GooString> nameA = std::make_unique<GooString>(obj1.getName());
+    std::unique_ptr<GooString> nameA = std::make_unique<GooString>(obj1.getNameString());
     obj1 = arr->get(2);
     if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
         error(errSyntaxWarning, -1, "Bad Separation color space (alternate color space)");
