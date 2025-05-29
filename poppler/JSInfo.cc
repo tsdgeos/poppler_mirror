@@ -189,15 +189,15 @@ void JSInfo::scan(int nPages)
         }
         // annotation actions (links, screen, widget)
         annots = page->getAnnots();
-        for (Annot *a : annots->getAnnots()) {
+        for (const std::shared_ptr<Annot> &a : annots->getAnnots()) {
             if (a->getType() == Annot::typeLink) {
-                AnnotLink *annot = static_cast<AnnotLink *>(a);
+                AnnotLink *annot = static_cast<AnnotLink *>(a.get());
                 scanLinkAction(annot->getAction(), "Link Annotation Activated");
                 if (onlyFirstJS && hasJS) {
                     return;
                 }
             } else if (a->getType() == Annot::typeScreen) {
-                AnnotScreen *annot = static_cast<AnnotScreen *>(a);
+                AnnotScreen *annot = static_cast<AnnotScreen *>(a.get());
                 scanLinkAction(annot->getAction(), "Screen Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Screen Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Screen Annotation Cursor Leave");
@@ -214,7 +214,7 @@ void JSInfo::scan(int nPages)
                     return;
                 }
             } else if (a->getType() == Annot::typeWidget) {
-                AnnotWidget *annot = static_cast<AnnotWidget *>(a);
+                AnnotWidget *annot = static_cast<AnnotWidget *>(a.get());
                 scanLinkAction(annot->getAction(), "Widget Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Widget Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Widget Annotation Cursor Leave");

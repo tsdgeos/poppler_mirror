@@ -58,7 +58,7 @@ public:
 
     /* Returns an Annotation of the right subclass whose d_ptr points to
      * this AnnotationPrivate */
-    virtual Annotation *makeAlias() = 0;
+    virtual std::unique_ptr<Annotation> makeAlias() = 0;
 
     /* properties: contents related */
     QString author;
@@ -78,18 +78,18 @@ public:
     /* revisions */
     Annotation::RevScope revisionScope;
     Annotation::RevType revisionType;
-    QList<Annotation *> revisions;
+    std::vector<std::unique_ptr<Annotation>> revisions;
 
     /* After this call, the Annotation object will behave like a wrapper for
      * the specified Annot object. All cached values are discarded */
-    void tieToNativeAnnot(Annot *ann, ::Page *page, DocumentData *doc);
+    void tieToNativeAnnot(std::shared_ptr<Annot> ann, ::Page *page, DocumentData *doc);
 
     /* Creates a new Annot object on the specified page, flushes current
      * values to that object and ties this Annotation to that object */
-    virtual Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) = 0;
+    virtual std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) = 0;
 
     /* Inited to 0 (i.e. untied annotation) */
-    Annot *pdfAnnot;
+    std::shared_ptr<Annot> pdfAnnot;
     ::Page *pdfPage;
     DocumentData *parentDoc;
 

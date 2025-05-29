@@ -327,10 +327,7 @@ err1:
     ok = false;
 }
 
-Page::~Page()
-{
-    delete annots;
-}
+Page::~Page() = default;
 
 Dict *Page::getResourceDict()
 {
@@ -369,11 +366,11 @@ void Page::replaceXRef(XRef *xrefA)
 }
 
 /* Loads standalone fields into Page, should be called once per page only */
-void Page::loadStandaloneFields(Annots *annotations, Form *form)
+void Page::loadStandaloneFields(Form *form)
 {
     /* Look for standalone annots, identified by being: 1) of type Widget
      * 2) not referenced from the Catalog's Form Field array */
-    for (Annot *annot : annots->getAnnots()) {
+    for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
 
         if (annot->getType() != Annot::typeWidget || !annot->getHasRef()) {
             continue;
@@ -389,7 +386,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
 
         if (field && field->getNumWidgets() == 1) {
 
-            AnnotWidget *aw = static_cast<AnnotWidget *>(annot);
+            auto aw = std::static_pointer_cast<AnnotWidget>(annot);
             aw->setField(field.get());
 
             field->setStandAlone(true);
@@ -408,15 +405,15 @@ Annots *Page::getAnnots(XRef *xrefA)
 {
     if (!annots) {
         Object obj = getAnnotsObject(xrefA);
-        annots = new Annots(doc, num, &obj);
+        annots = std::make_unique<Annots>(doc, num, &obj);
         // Load standalone fields once for the page
-        loadStandaloneFields(annots, doc->getCatalog()->getForm());
+        loadStandaloneFields(doc->getCatalog()->getForm());
     }
 
-    return annots;
+    return annots.get();
 }
 
-bool Page::addAnnot(Annot *annot)
+bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
 {
     if (unlikely(xref->getEntry(pageRef.num)->type == xrefEntryFree)) {
         // something very wrong happened if we're here
@@ -459,14 +456,14 @@ bool Page::addAnnot(Annot *annot)
     // Popup annots are already handled by markup annots,
     // so add to the list only Popup annots without a
     // markup annotation associated.
-    if (annot->getType() != Annot::typePopup || !static_cast<AnnotPopup *>(annot)->hasParent()) {
+    if (annot->getType() != Annot::typePopup || !static_cast<AnnotPopup *>(annot.get())->hasParent()) {
         annots->appendAnnot(annot);
     }
     annot->setPage(num, true);
 
-    AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup *>(annot);
+    AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup *>(annot.get());
     if (annotMarkup) {
-        AnnotPopup *annotPopup = annotMarkup->getPopup();
+        std::shared_ptr<AnnotPopup> annotPopup = annotMarkup->getPopup();
         if (annotPopup) {
             addAnnot(annotPopup);
         }
@@ -475,7 +472,7 @@ bool Page::addAnnot(Annot *annot)
     return true;
 }
 
-void Page::removeAnnot(Annot *annot)
+void Page::removeAnnot(const std::shared_ptr<Annot> &annot)
 {
     Ref annotRef = annot->getRef();
 
@@ -595,8 +592,8 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI, int rotate, bo
         if (globalParams->getPrintCommands()) {
             printf("***** Annotations\n");
         }
-        for (Annot *annot : annots->getAnnots()) {
-            if ((annotDisplayDecideCbk && (*annotDisplayDecideCbk)(annot, annotDisplayDecideCbkData)) || !annotDisplayDecideCbk) {
+        for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
+            if ((annotDisplayDecideCbk && (*annotDisplayDecideCbk)(annot.get(), annotDisplayDecideCbkData)) || !annotDisplayDecideCbk) {
                 annot->draw(gfx.get(), printing);
             }
         }
@@ -780,8 +777,8 @@ void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool 
 void Page::processLinks(OutputDev *out)
 {
     std::unique_ptr<Links> links = getLinks();
-    for (AnnotLink *link : links->getLinks()) {
-        out->processLink(link);
+    for (const std::shared_ptr<AnnotLink> &link : links->getLinks()) {
+        out->processLink(link.get());
     }
 }
 

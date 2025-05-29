@@ -271,7 +271,7 @@ std::unique_ptr<Link> FormField::additionalAction(AdditionalActionType type) con
 
 std::unique_ptr<Link> FormField::additionalAction(Annotation::AdditionalActionType type) const
 {
-    ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
+    ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation().get();
     if (!w) {
         return {};
     }
@@ -352,7 +352,7 @@ void FormFieldButton::setIcon(const FormFieldIcon &icon)
 
     FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     if (fwb->getButtonType() == formButtonPush) {
-        ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
+        std::shared_ptr<::AnnotWidget> w = m_formData->fm->getWidgetAnnotation();
         FormFieldIconData *data = FormFieldIconData::getData(icon);
         if (data->icon != nullptr) {
             w->setNewAppearance(data->icon->lookup("AP"));

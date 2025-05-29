@@ -722,9 +722,6 @@ public:
 
     static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, const double wMax, const double hMax, const bool forceZapfDingbats = {});
 
-    void incRefCnt();
-    void decRefCnt();
-
     virtual void draw(Gfx *gfx, bool printing);
     // Get the resource dict of the appearance stream
     virtual Object getAppearanceResDict();
@@ -781,6 +778,8 @@ public:
     // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
     static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
+    virtual ~Annot();
+
 private:
     void readArrayNum(Object *pdfArray, int key, double *value);
     // write vStr[i:j[ in appearBuf
@@ -789,7 +788,6 @@ private:
     void setPage(int pageIndex, bool updateP); // Called by Page::addAnnot and Annots ctor
 
 protected:
-    virtual ~Annot();
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
     Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict);
     Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
@@ -805,8 +803,6 @@ protected:
     virtual void invalidateAppearance();
 
     Object annotObj;
-
-    std::atomic_int refCnt;
 
     // required data
     AnnotSubtype type; // Annotation type
@@ -881,7 +877,7 @@ public:
 
     // getters
     const GooString *getLabel() const { return label.get(); }
-    AnnotPopup *getPopup() const { return popup.get(); }
+    std::shared_ptr<AnnotPopup> getPopup() const { return popup; }
     double getOpacity() const { return opacity; }
     // getRC
     const GooString *getDate() const { return date.get(); }
@@ -892,7 +888,7 @@ public:
     AnnotExternalDataType getExData() const { return exData; }
 
     // The annotation takes the ownership of new_popup
-    void setPopup(std::unique_ptr<AnnotPopup> &&new_popup);
+    void setPopup(std::shared_ptr<AnnotPopup> new_popup);
     void setLabel(std::unique_ptr<GooString> &&new_label);
     void setOpacity(double opacityA);
     void setDate(std::unique_ptr<GooString> new_date);
@@ -901,7 +897,7 @@ protected:
     void removeReferencedObjects() override;
 
     std::unique_ptr<GooString> label; // T            (Default author)
-    std::unique_ptr<AnnotPopup> popup; // Popup
+    std::shared_ptr<AnnotPopup> popup; // Popup
     double opacity; // CA           (Default 1.0)
     // RC
     std::unique_ptr<GooString> date; // CreationDate
@@ -1076,7 +1072,7 @@ public:
     void setDefaultAppearance(const DefaultAppearance &da);
     void setQuadding(VariableTextQuadding new_quadding);
     void setStyleString(GooString *new_string);
-    void setCalloutLine(AnnotCalloutLine *line);
+    void setCalloutLine(std::unique_ptr<AnnotCalloutLine> &&line);
     void setIntent(AnnotFreeTextIntent new_intent);
 
     // getters
@@ -1232,9 +1228,7 @@ public:
 
     void setIcon(const std::string &new_icon);
 
-    void setCustomImage(AnnotStampImageHelper *stampImageHelperA);
-
-    void clearCustomImage();
+    void setCustomImage(std::unique_ptr<AnnotStampImageHelper> &&stampImageHelperA);
 
     // getters
     const std::string &getIcon() const { return icon; }
@@ -1248,7 +1242,7 @@ private:
     void updateAppearanceResDict();
 
     std::string icon; // Name       (Default Draft)
-    AnnotStampImageHelper *stampImageHelper;
+    std::unique_ptr<AnnotStampImageHelper> stampImageHelper;
 };
 
 //------------------------------------------------------------------------
@@ -1770,17 +1764,17 @@ public:
     Annots(const Annots &) = delete;
     Annots &operator=(const Annots &) = delete;
 
-    const std::vector<Annot *> &getAnnots() { return annots; }
+    const std::vector<std::shared_ptr<Annot>> &getAnnots() { return annots; }
 
-    void appendAnnot(Annot *annot);
-    bool removeAnnot(Annot *annot);
+    void appendAnnot(std::shared_ptr<Annot> annot);
+    bool removeAnnot(const std::shared_ptr<Annot> &annot);
 
 private:
-    Annot *createAnnot(Object &&dictObject, const Object *obj);
-    Annot *findAnnot(Ref *ref);
+    std::shared_ptr<Annot> createAnnot(Object &&dictObject, const Object *obj);
+    std::shared_ptr<Annot> findAnnot(Ref *ref);
 
     PDFDoc *doc;
-    std::vector<Annot *> annots;
+    std::vector<std::shared_ptr<Annot>> annots;
 };
 
 #endif

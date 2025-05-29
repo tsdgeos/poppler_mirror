@@ -187,9 +187,9 @@ public:
     // Get annotations array.
     Object getAnnotsObject(XRef *xrefA = nullptr) { return annotsObj.fetch(xrefA ? xrefA : xref); }
     // Add a new annotation to the page
-    bool addAnnot(Annot *annot);
+    bool addAnnot(const std::shared_ptr<Annot> &annot);
     // Remove an existing annotation from the page
-    void removeAnnot(Annot *annot);
+    void removeAnnot(const std::shared_ptr<Annot> &annot);
 
     // Return a list of links.
     std::unique_ptr<Links> getLinks();
@@ -262,7 +262,7 @@ private:
     const Ref pageRef; // page reference
     int num; // page number
     std::unique_ptr<PageAttrs> attrs; // page attributes
-    Annots *annots; // annotations
+    std::unique_ptr<Annots> annots; // annotations
     Object annotsObj; // annotations array
     Object contents; // page contents
     Object thumb; // page thumbnail
@@ -278,7 +278,7 @@ private:
     // create standalone FormFields to contain those special FormWidgets, as
     // they are 'de facto' being used to implement tooltips. See #34
     std::vector<std::unique_ptr<FormField>> standaloneFields;
-    void loadStandaloneFields(Annots *annotations, Form *form);
+    void loadStandaloneFields(Form *form);
 };
 
 #endif

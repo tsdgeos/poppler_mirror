@@ -37,6 +37,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <memory>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
@@ -945,20 +946,13 @@ Links::Links(Annots *annots)
         return;
     }
 
-    for (Annot *annot : annots->getAnnots()) {
+    for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
 
         if (annot->getType() != Annot::typeLink) {
             continue;
         }
-
-        annot->incRefCnt();
-        links.push_back(static_cast<AnnotLink *>(annot));
+        links.push_back(std::static_pointer_cast<AnnotLink>(annot));
     }
 }
 
-Links::~Links()
-{
-    for (AnnotLink *link : links) {
-        link->decRefCnt();
-    }
-}
+Links::~Links() = default;

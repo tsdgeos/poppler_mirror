@@ -176,11 +176,11 @@ int main(int argc, char *argv[])
             break;
         }
 
-        for (Annot *annot : annots->getAnnots()) {
+        for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
             if (annot->getType() != Annot::typeFileAttachment) {
                 continue;
             }
-            embeddedFiles.push_back(std::make_unique<FileSpec>(static_cast<AnnotFileAttachment *>(annot)->getFile()));
+            embeddedFiles.push_back(std::make_unique<FileSpec>(static_cast<AnnotFileAttachment *>(annot.get())->getFile()));
         }
     }
 
