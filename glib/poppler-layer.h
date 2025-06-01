@@ -29,6 +29,14 @@ G_BEGIN_DECLS
 #define POPPLER_LAYER(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_LAYER, PopplerLayer))
 #define POPPLER_IS_LAYER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_LAYER))
 
+/**
+ * PopplerLayer:
+ *
+ * A #PopplerDocument layer.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_layer_get_type(void) G_GNUC_CONST;
 
@@ -46,5 +54,7 @@ POPPLER_PUBLIC
 gint poppler_layer_get_radio_button_group_id(PopplerLayer *layer);
 
 G_END_DECLS
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerLayer, g_object_unref)
 
 #endif /* __POPPLER_LAYER_H__ */

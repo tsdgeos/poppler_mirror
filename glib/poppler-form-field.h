@@ -148,6 +148,14 @@ typedef enum
     POPPLER_ADDITIONAL_ACTION_CALCULATE_FIELD
 } PopplerAdditionalActionType;
 
+/**
+ * PopplerFormField:
+ *
+ * A #PopplerDocument form field.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_form_field_get_type(void) G_GNUC_CONST;
 
@@ -381,6 +389,7 @@ void poppler_set_nss_password_callback(PopplerNssPasswordFunc func);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFormField, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSignatureInfo, poppler_signature_info_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSigningData, poppler_signing_data_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerCertificateInfo, poppler_certificate_info_free)

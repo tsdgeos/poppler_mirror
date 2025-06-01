@@ -31,6 +31,14 @@ G_BEGIN_DECLS
 #define POPPLER_PAGE(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_PAGE, PopplerPage))
 #define POPPLER_IS_PAGE(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_PAGE))
 
+/**
+ * PopplerPage:
+ *
+ * A #PopplerDocument page.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_page_get_type(void) G_GNUC_CONST;
 
@@ -445,6 +453,7 @@ void poppler_annot_mapping_free(PopplerAnnotMapping *mapping);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPage, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerRectangle, poppler_rectangle_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPoint, poppler_point_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerQuadrilateral, poppler_quadrilateral_free)

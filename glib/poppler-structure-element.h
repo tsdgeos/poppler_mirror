@@ -264,6 +264,14 @@ typedef enum
     POPPLER_STRUCTURE_TABLE_SCOPE_BOTH,
 } PopplerStructureTableScope;
 
+/**
+ * PopplerStructureElement:
+ *
+ * A #PopplerDocument structure element.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_structure_element_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -422,6 +430,7 @@ const gchar *poppler_text_span_get_font_name(PopplerTextSpan *poppler_text_span)
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerStructureElement, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerTextSpan, poppler_text_span_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerStructureElementIter, poppler_structure_element_iter_free)
 

@@ -291,7 +291,13 @@ gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *wid
 POPPLER_PUBLIC
 void poppler_annot_set_border_width(PopplerAnnot *poppler_annot, double width);
 
-/* PopplerAnnotMarkup */
+/**
+ * PopplerAnnotMarkup:
+ *
+ * An annotation for markup.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_markup_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -323,7 +329,13 @@ PopplerAnnotMarkupReplyType poppler_annot_markup_get_reply_to(PopplerAnnotMarkup
 POPPLER_PUBLIC
 PopplerAnnotExternalDataType poppler_annot_markup_get_external_data(PopplerAnnotMarkup *poppler_annot);
 
-/* PopplerAnnotText */
+/**
+ * PopplerAnnotText:
+ *
+ * An annotation for text.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_text_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -339,7 +351,13 @@ void poppler_annot_text_set_icon(PopplerAnnotText *poppler_annot, const gchar *i
 POPPLER_PUBLIC
 PopplerAnnotTextState poppler_annot_text_get_state(PopplerAnnotText *poppler_annot);
 
-/* PopplerAnnotTextMarkup */
+/**
+ * PopplerAnnotTextMarkup:
+ *
+ * An annotation for text markup.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_text_markup_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -355,7 +373,13 @@ void poppler_annot_text_markup_set_quadrilaterals(PopplerAnnotTextMarkup *popple
 POPPLER_PUBLIC
 GArray *poppler_annot_text_markup_get_quadrilaterals(PopplerAnnotTextMarkup *poppler_annot);
 
-/* PopplerAnnotFreeText */
+/**
+ * PopplerAnnotFreeText:
+ *
+ * An annotation for free text.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_free_text_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -383,7 +407,13 @@ void poppler_font_description_free(PopplerFontDescription *font_desc);
 POPPLER_PUBLIC
 PopplerFontDescription *poppler_font_description_copy(PopplerFontDescription *font_desc);
 
-/* PopplerAnnotFileAttachment */
+/**
+ * PopplerAnnotFileAttachment:
+ *
+ * An annotation for file attachment.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_file_attachment_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -391,7 +421,13 @@ PopplerAttachment *poppler_annot_file_attachment_get_attachment(PopplerAnnotFile
 POPPLER_PUBLIC
 gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *poppler_annot);
 
-/* PopplerAnnotMovie */
+/**
+ * PopplerAnnotMovie:
+ *
+ * An annotation for movie.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_movie_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -399,13 +435,25 @@ gchar *poppler_annot_movie_get_title(PopplerAnnotMovie *poppler_annot);
 POPPLER_PUBLIC
 PopplerMovie *poppler_annot_movie_get_movie(PopplerAnnotMovie *poppler_annot);
 
-/* PopplerAnnotScreen */
+/**
+ * PopplerAnnotScreen:
+ *
+ * An annotation for screen.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_screen_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 PopplerAction *poppler_annot_screen_get_action(PopplerAnnotScreen *poppler_annot);
 
-/* PopplerAnnotLine */
+/**
+ * PopplerAnnotLine:
+ *
+ * An annotation for line.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_line_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -413,7 +461,13 @@ PopplerAnnot *poppler_annot_line_new(PopplerDocument *doc, PopplerRectangle *rec
 POPPLER_PUBLIC
 void poppler_annot_line_set_vertices(PopplerAnnotLine *poppler_annot, PopplerPoint *start, PopplerPoint *end);
 
-/* PopplerAnnotCalloutLine */
+/**
+ * PopplerAnnotCalloutLine:
+ *
+ * An annotation for callout line.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_callout_line_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -423,7 +477,13 @@ PopplerAnnotCalloutLine *poppler_annot_callout_line_copy(PopplerAnnotCalloutLine
 POPPLER_PUBLIC
 void poppler_annot_callout_line_free(PopplerAnnotCalloutLine *callout);
 
-/* PopplerAnnotCircle */
+/**
+ * PopplerAnnotCircle:
+ *
+ * An annotation for circle.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_circle_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -433,7 +493,13 @@ void poppler_annot_circle_set_interior_color(PopplerAnnotCircle *poppler_annot, 
 POPPLER_PUBLIC
 PopplerColor *poppler_annot_circle_get_interior_color(PopplerAnnotCircle *poppler_annot);
 
-/* PopplerAnnotGeometry */
+/**
+ * PopplerAnnotSquare:
+ *
+ * An annotation for square.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_square_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -443,7 +509,13 @@ void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, 
 POPPLER_PUBLIC
 PopplerColor *poppler_annot_square_get_interior_color(PopplerAnnotSquare *poppler_annot);
 
-/* PopplerAnnotStamp */
+/**
+ * PopplerAnnotStamp:
+ *
+ * An annotation for stamp.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 POPPLER_PUBLIC
 GType poppler_annot_stamp_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -478,6 +550,19 @@ PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_pa
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnot, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotCircle, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotFileAttachment, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotFreeText, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotLine, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotMarkup, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotMovie, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotScreen, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotSquare, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotStamp, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotText, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotTextMarkup, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAnnotCalloutLine, poppler_annot_callout_line_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFontDescription, poppler_font_description_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerPath, poppler_path_free)
 

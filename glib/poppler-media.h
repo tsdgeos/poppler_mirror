@@ -77,4 +77,6 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerMedia, g_object_unref)
+
 #endif /* __POPPLER_MEDIA_H__ */

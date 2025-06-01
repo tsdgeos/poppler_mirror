@@ -51,6 +51,14 @@ typedef enum
     POPPLER_MOVIE_PLAY_MODE_PALINDROME
 } PopplerMoviePlayMode;
 
+/**
+ * PopplerMovie:
+ *
+ * A #PopplerDocument movie.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_movie_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -77,5 +85,7 @@ POPPLER_PUBLIC
 void poppler_movie_get_aspect(PopplerMovie *poppler_movie, gint *width, gint *height);
 
 G_END_DECLS
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerMovie, g_object_unref)
 
 #endif /* __POPPLER_MOVIE_H__ */
