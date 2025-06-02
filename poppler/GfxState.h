@@ -277,7 +277,7 @@ public:
 
     // create mapping for spot colorants
     virtual void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps);
-    int *getMapping() const { return mapping; }
+    const std::vector<int> &getMapping() const { return mapping; }
 
     // Does this ColorSpace support getRGBLine?
     virtual bool useGetRGBLine() const { return false; }
@@ -313,7 +313,7 @@ public:
 
 protected:
     unsigned int overprintMask;
-    int *mapping;
+    std::vector<int> mapping;
 };
 
 //------------------------------------------------------------------------
@@ -685,8 +685,12 @@ private:
 
 class GfxSeparationColorSpace : public GfxColorSpace
 {
+    class PrivateTag
+    {
+    };
+
 public:
-    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA);
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA);
     ~GfxSeparationColorSpace() override;
     std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csSeparation; }
@@ -711,14 +715,14 @@ public:
     // Separation-specific access.
     const GooString *getName() const { return name.get(); }
     GfxColorSpace *getAlt() { return alt.get(); }
-    const Function *getFunc() const { return func; }
+    const Function *getFunc() const { return func.get(); }
+
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA, PrivateTag = {});
 
 private:
-    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, Function *funcA, bool nonMarkingA, unsigned int overprintMaskA, int *mappingA);
-
     const std::unique_ptr<GooString> name; // colorant name
     const std::unique_ptr<GfxColorSpace> alt; // alternate color space
-    Function *func; // tint transform (into alternate color space)
+    std::unique_ptr<Function> func; // tint transform (into alternate color space)
     bool nonMarking;
 };
 
@@ -728,8 +732,12 @@ private:
 
 class GfxDeviceNColorSpace : public GfxColorSpace
 {
+    class PrivateTag
+    {
+    };
+
 public:
-    GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA, std::unique_ptr<GfxColorSpace> &&alt, Function *func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCS);
+    GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA, std::unique_ptr<GfxColorSpace> &&alt, std::unique_ptr<Function> func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> &&sepsCS);
     ~GfxDeviceNColorSpace() override;
     std::unique_ptr<GfxColorSpace> copy() const override;
     GfxColorSpaceMode getMode() const override { return csDeviceN; }
@@ -752,18 +760,18 @@ public:
     // DeviceN-specific access.
     const std::string &getColorantName(int i) const { return names[i]; }
     GfxColorSpace *getAlt() { return alt.get(); }
-    const Function *getTintTransformFunc() const { return func; }
+    const Function *getTintTransformFunc() const { return func.get(); }
+
+    GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&alt, std::unique_ptr<Function> func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> &&sepsCSA,
+                         const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag = {});
 
 private:
-    GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&alt, Function *func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCSA, int *mappingA, bool nonMarkingA,
-                         unsigned int overprintMaskA);
-
     const int nComps; // number of components
     const std::vector<std::string> names; // colorant names
     std::unique_ptr<GfxColorSpace> alt; // alternate color space
-    Function *func; // tint transform (into alternate color space)
+    std::unique_ptr<Function> func; // tint transform (into alternate color space)
     bool nonMarking;
-    std::vector<std::unique_ptr<GfxSeparationColorSpace>> *sepsCS; // list of separation cs for spot colorants;
+    std::vector<std::unique_ptr<GfxSeparationColorSpace>> sepsCS; // list of separation cs for spot colorants;
 };
 
 //------------------------------------------------------------------------
@@ -1536,7 +1544,7 @@ public:
     bool getFillOverprint() const { return fillOverprint; }
     bool getStrokeOverprint() const { return strokeOverprint; }
     int getOverprintMode() const { return overprintMode; }
-    Function **getTransfer() { return transfer; }
+    const std::vector<std::unique_ptr<Function>> &getTransfer() { return transfer; }
     double getLineWidth() const { return lineWidth; }
     const std::vector<double> &getLineDash(double *start)
     {
@@ -1621,7 +1629,7 @@ public:
     void setFillOverprint(bool op) { fillOverprint = op; }
     void setStrokeOverprint(bool op) { strokeOverprint = op; }
     void setOverprintMode(int op) { overprintMode = op; }
-    void setTransfer(Function **funcs);
+    void setTransfer(std::vector<std::unique_ptr<Function>> funcs);
     void setLineWidth(double width) { lineWidth = width; }
     void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
@@ -1749,10 +1757,10 @@ private:
     bool fillOverprint; // fill overprint
     bool strokeOverprint; // stroke overprint
     int overprintMode; // overprint mode
-    Function *transfer[4]; // transfer function (entries may be: all
-                           //   nullptr = identity; last three nullptr =
-                           //   single function; all four non-nullptr =
-                           //   R,G,B,gray functions)
+    std::vector<std::unique_ptr<Function>> transfer; // transfer function (entries may be: all
+                                                     //   nullptr = identity; last three nullptr =
+                                                     //   single function; all four non-nullptr =
+                                                     //   R,G,B,gray functions)
 
     double lineWidth; // line width
     std::vector<double> lineDash; // line dash

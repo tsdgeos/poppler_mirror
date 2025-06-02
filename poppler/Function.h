@@ -54,12 +54,12 @@ public:
     Function &operator=(const Function &other) = delete;
 
     // Construct a function.  Returns NULL if unsuccessful.
-    static Function *parse(Object *funcObj);
+    static std::unique_ptr<Function> parse(Object *funcObj);
 
     // Initialize the entries common to all function types.
     bool init(Dict *dict);
 
-    virtual Function *copy() const = 0;
+    virtual std::unique_ptr<Function> copy() const = 0;
 
     enum class Type
     {
@@ -89,7 +89,7 @@ public:
     virtual bool isOk() const = 0;
 
 protected:
-    static Function *parse(Object *funcObj, std::set<int> *usedParents);
+    static std::unique_ptr<Function> parse(Object *funcObj, std::set<int> *usedParents);
 
     explicit Function(const Function *func);
 
@@ -110,7 +110,7 @@ class IdentityFunction : public Function
 public:
     IdentityFunction();
     ~IdentityFunction() override;
-    Function *copy() const override { return new IdentityFunction(); }
+    std::unique_ptr<Function> copy() const override { return std::make_unique<IdentityFunction>(); }
     Type getType() const override { return Type::Identity; }
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return true; }
@@ -124,10 +124,14 @@ private:
 
 class SampledFunction : public Function
 {
+    class PrivateTag
+    {
+    };
+
 public:
     SampledFunction(Object *funcObj, Dict *dict);
     ~SampledFunction() override;
-    Function *copy() const override { return new SampledFunction(this); }
+    std::unique_ptr<Function> copy() const override { return std::make_unique<SampledFunction>(this); }
     Type getType() const override { return Type::Sampled; }
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
@@ -141,9 +145,9 @@ public:
     const double *getSamples() const { return samples; }
     int getSampleNumber() const { return nSamples; }
 
-private:
-    explicit SampledFunction(const SampledFunction *func);
+    explicit SampledFunction(const SampledFunction *func, PrivateTag = {});
 
+private:
     int // number of samples for each domain element
             sampleSize[funcMaxInputs];
     double // min and max values for domain encoder
@@ -167,10 +171,14 @@ private:
 
 class ExponentialFunction : public Function
 {
+    class PrivateTag
+    {
+    };
+
 public:
     ExponentialFunction(Object *funcObj, Dict *dict);
     ~ExponentialFunction() override;
-    Function *copy() const override { return new ExponentialFunction(this); }
+    std::unique_ptr<Function> copy() const override { return std::make_unique<ExponentialFunction>(this); }
     Type getType() const override { return Type::Exponential; }
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
@@ -179,9 +187,9 @@ public:
     const double *getC1() const { return c1; }
     double getE() const { return e; }
 
-private:
-    explicit ExponentialFunction(const ExponentialFunction *func);
+    explicit ExponentialFunction(const ExponentialFunction *func, PrivateTag = {});
 
+private:
     double c0[funcMaxOutputs];
     double c1[funcMaxOutputs];
     double e;
@@ -195,25 +203,29 @@ private:
 
 class StitchingFunction : public Function
 {
+    class PrivateTag
+    {
+    };
+
 public:
     StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents);
     ~StitchingFunction() override;
-    Function *copy() const override { return new StitchingFunction(this); }
+    std::unique_ptr<Function> copy() const override { return std::make_unique<StitchingFunction>(this); }
     Type getType() const override { return Type::Stitching; }
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
 
     int getNumFuncs() const { return k; }
-    const Function *getFunc(int i) const { return funcs[i]; }
+    const Function *getFunc(int i) const { return funcs[i].get(); }
     const double *getBounds() const { return bounds; }
     const double *getEncode() const { return encode; }
     const double *getScale() const { return scale; }
 
-private:
-    explicit StitchingFunction(const StitchingFunction *func);
+    explicit StitchingFunction(const StitchingFunction *func, PrivateTag = {});
 
+private:
     int k;
-    Function **funcs;
+    std::vector<std::unique_ptr<Function>> funcs;
     double *bounds;
     double *encode;
     double *scale;
@@ -226,18 +238,23 @@ private:
 
 class PostScriptFunction : public Function
 {
+    class PrivateTag
+    {
+    };
+
 public:
     PostScriptFunction(Object *funcObj, Dict *dict);
     ~PostScriptFunction() override;
-    Function *copy() const override { return new PostScriptFunction(this); }
+    std::unique_ptr<Function> copy() const override { return std::make_unique<PostScriptFunction>(this); }
     Type getType() const override { return Type::PostScript; }
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
 
     const GooString *getCodeString() const { return codeString.get(); }
 
+    explicit PostScriptFunction(const PostScriptFunction *func, PrivateTag = {});
+
 private:
-    explicit PostScriptFunction(const PostScriptFunction *func);
     bool parseCode(Stream *str, int *codePtr);
     std::unique_ptr<GooString> getToken(Stream *str);
     void resizeCode(int newSize);

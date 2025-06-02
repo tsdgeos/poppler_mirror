@@ -297,6 +297,22 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
         goto err2;
     }
 
+    if (annotsObj.isArray() && annotsObj.arrayGetLength() > 10000) {
+        error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, annotsObj.arrayGetLength());
+        goto err2;
+    }
+    if (annotsObj.isRef()) {
+        auto resolvedObj = getAnnotsObject();
+        if (resolvedObj.isArray() && resolvedObj.arrayGetLength() > 10000) {
+            error(errSyntaxError, -1, "Page annotations object (page {0:d}) is likely malformed. Too big: ({1:d})", num, resolvedObj.arrayGetLength());
+            goto err2;
+        }
+        if (!resolvedObj.isArray() && !resolvedObj.isNull()) {
+            error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
+            goto err2;
+        }
+    }
+
     // contents
     contents = pageObj.dictLookupNF("Contents").copy();
     if (!(contents.isRef() || contents.isArray() || contents.isNull())) {

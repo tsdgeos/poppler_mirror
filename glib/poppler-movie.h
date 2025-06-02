@@ -3,6 +3,7 @@
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2008 Hugo Mercier <hmercier31[@]gmail.com>
  * Copyright (C) 2017 Francesco Poli <invernomuto@paranoici.org>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +52,14 @@ typedef enum
     POPPLER_MOVIE_PLAY_MODE_PALINDROME
 } PopplerMoviePlayMode;
 
+/**
+ * PopplerMovie:
+ *
+ * A #PopplerDocument movie.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_movie_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -77,5 +86,7 @@ POPPLER_PUBLIC
 void poppler_movie_get_aspect(PopplerMovie *poppler_movie, gint *width, gint *height);
 
 G_END_DECLS
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerMovie, g_object_unref)
 
 #endif /* __POPPLER_MOVIE_H__ */

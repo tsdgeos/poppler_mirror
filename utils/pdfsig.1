@@ -48,6 +48,9 @@ Do not validate the certificate.
 .B \-no-ocsp
 Do not perform online OCSP certificate revocation check (local Certificate Revocation Lists (CRL) are still used).
 .TP
+.B \-assert-signer " fpr_or_file"
+This option checks whether the signature covering the full document been made with the specified key. The key is either specified as a fingerprint or a file listing fingerprints. The fingerprint must be given or listed in compact format (no colons or spaces in between). If fpr_or_file specifies a file, empty lines are ignored as well as all lines starting with a hash sign. Only available for GnuPG backend
+.TP
 .B \-no-appearance
 Do not add appearance information when signing existing fields (signer name and date).
 .TP

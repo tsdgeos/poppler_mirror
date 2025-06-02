@@ -5,6 +5,7 @@
  * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -289,6 +290,14 @@ typedef enum
     POPPLER_PDF_SUBTYPE_CONF_NONE
 } PopplerPDFConformance;
 
+/**
+ * PopplerDocument:
+ *
+ * A poppler document.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_document_get_type(void) G_GNUC_CONST;
 
@@ -539,6 +548,7 @@ struct _PopplerPageRange
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerDocument, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerIndexIter, poppler_index_iter_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFontInfo, poppler_font_info_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFontsIter, poppler_fonts_iter_free)

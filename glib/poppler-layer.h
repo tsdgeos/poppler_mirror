@@ -1,6 +1,7 @@
 /* poppler-layer.h: glib interface to poppler
  *
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,14 @@ G_BEGIN_DECLS
 #define POPPLER_LAYER(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), POPPLER_TYPE_LAYER, PopplerLayer))
 #define POPPLER_IS_LAYER(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), POPPLER_TYPE_LAYER))
 
+/**
+ * PopplerLayer:
+ *
+ * A #PopplerDocument layer.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
+
 POPPLER_PUBLIC
 GType poppler_layer_get_type(void) G_GNUC_CONST;
 
@@ -46,5 +55,7 @@ POPPLER_PUBLIC
 gint poppler_layer_get_radio_button_group_id(PopplerLayer *layer);
 
 G_END_DECLS
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerLayer, g_object_unref)
 
 #endif /* __POPPLER_LAYER_H__ */

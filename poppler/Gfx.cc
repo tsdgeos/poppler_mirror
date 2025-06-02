@@ -1046,11 +1046,11 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
         obj2 = obj1.dictLookup("TR");
     }
     if (obj2.isName("Default") || obj2.isName("Identity")) {
-        Function *funcs[4] = { nullptr, nullptr, nullptr, nullptr };
-        state->setTransfer(funcs);
+        state->setTransfer({});
         out->updateTransfer(state);
     } else if (obj2.isArray() && obj2.arrayGetLength() == 4) {
-        Function *funcs[4] = { nullptr, nullptr, nullptr, nullptr };
+        std::vector<std::unique_ptr<Function>> funcs;
+        funcs.resize(4);
         for (int i = 0; i < 4; ++i) {
             Object obj3 = obj2.arrayGet(i);
             funcs[i] = Function::parse(&obj3);
@@ -1059,18 +1059,14 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
             }
         }
         if (funcs[0] && funcs[1] && funcs[2] && funcs[3]) {
-            state->setTransfer(funcs);
+            state->setTransfer(std::move(funcs));
             out->updateTransfer(state);
-        } else {
-            for (Function *f : funcs) {
-                delete f;
-            }
         }
     } else if (obj2.isName() || obj2.isDict() || obj2.isStream()) {
-        Function *funcs[4];
-        if ((funcs[0] = Function::parse(&obj2))) {
-            funcs[1] = funcs[2] = funcs[3] = nullptr;
-            state->setTransfer(funcs);
+        if (auto func = Function::parse(&obj2)) {
+            std::vector<std::unique_ptr<Function>> funcs;
+            funcs.push_back(std::move(func));
+            state->setTransfer(std::move(funcs));
             out->updateTransfer(state);
         }
     } else if (!obj2.isNull()) {
@@ -1103,7 +1099,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
             } else { // "Luminosity"
                 alpha = false;
             }
-            Function *softMaskTransferFunc = nullptr;
+            std::unique_ptr<Function> softMaskTransferFunc = nullptr;
             obj3 = obj2.dictLookup("TR");
             if (!obj3.isNull()) {
                 if (obj3.isName("Default") || obj3.isName("Identity")) {
@@ -1112,8 +1108,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
                     softMaskTransferFunc = Function::parse(&obj3);
                     if (softMaskTransferFunc == nullptr || softMaskTransferFunc->getInputSize() != 1 || softMaskTransferFunc->getOutputSize() != 1) {
                         error(errSyntaxError, getPos(), "Invalid transfer function in soft mask in ExtGState");
-                        delete softMaskTransferFunc;
-                        softMaskTransferFunc = nullptr;
+                        softMaskTransferFunc.reset();
                     }
                 }
             }
@@ -1150,14 +1145,13 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
                             }
                         }
                     }
-                    doSoftMask(&obj3, alpha, blendingColorSpace.get(), isolated, knockout, softMaskTransferFunc, &backdropColor);
+                    doSoftMask(&obj3, alpha, blendingColorSpace.get(), isolated, knockout, softMaskTransferFunc.get(), &backdropColor);
                 } else {
                     error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
                 }
             } else {
                 error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
             }
-            delete softMaskTransferFunc;
         } else if (!obj2.isNull()) {
             error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState");
         }

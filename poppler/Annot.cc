@@ -7447,6 +7447,10 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj)
                 const Object &obj2 = annotsObj->arrayGetNF(i);
                 std::shared_ptr<Annot> annot = createAnnot(std::move(obj1), &obj2);
                 if (annot) {
+                    if (annot.use_count() > 100000) {
+                        error(errSyntaxError, -1, "Annotations likely malformed. Too many references. Stopping processing annots on page {0:d}", page);
+                        break;
+                    }
                     if (annot->isOk()) {
                         annot->setPage(page, false); // Don't change /P
                         appendAnnot(annot);

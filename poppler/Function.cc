@@ -53,24 +53,22 @@ Function::Function() : domain {} { }
 
 Function::~Function() = default;
 
-Function *Function::parse(Object *funcObj)
+std::unique_ptr<Function> Function::parse(Object *funcObj)
 {
     std::set<int> usedParents;
     return parse(funcObj, &usedParents);
 }
 
-Function *Function::parse(Object *funcObj, std::set<int> *usedParents)
+std::unique_ptr<Function> Function::parse(Object *funcObj, std::set<int> *usedParents)
 {
-    Function *func;
     Dict *dict;
-    int funcType;
 
     if (funcObj->isStream()) {
         dict = funcObj->streamGetDict();
     } else if (funcObj->isDict()) {
         dict = funcObj->getDict();
     } else if (funcObj->isName("Identity")) {
-        return new IdentityFunction();
+        return std::make_unique<IdentityFunction>();
     } else {
         error(errSyntaxError, -1, "Expected function dictionary or stream");
         return nullptr;
@@ -81,22 +79,22 @@ Function *Function::parse(Object *funcObj, std::set<int> *usedParents)
         error(errSyntaxError, -1, "Function type is missing or wrong type");
         return nullptr;
     }
-    funcType = obj1.getInt();
+    int funcType = obj1.getInt();
+    std::unique_ptr<Function> func;
 
     if (funcType == 0) {
-        func = new SampledFunction(funcObj, dict);
+        func = std::make_unique<SampledFunction>(funcObj, dict);
     } else if (funcType == 2) {
-        func = new ExponentialFunction(funcObj, dict);
+        func = std::make_unique<ExponentialFunction>(funcObj, dict);
     } else if (funcType == 3) {
-        func = new StitchingFunction(funcObj, dict, usedParents);
+        func = std::make_unique<StitchingFunction>(funcObj, dict, usedParents);
     } else if (funcType == 4) {
-        func = new PostScriptFunction(funcObj, dict);
+        func = std::make_unique<PostScriptFunction>(funcObj, dict);
     } else {
         error(errSyntaxError, -1, "Unimplemented function type ({0:d})", funcType);
         return nullptr;
     }
     if (!func->isOk()) {
-        delete func;
         return nullptr;
     }
 
@@ -417,7 +415,7 @@ SampledFunction::~SampledFunction()
     }
 }
 
-SampledFunction::SampledFunction(const SampledFunction *func) : Function(func)
+SampledFunction::SampledFunction(const SampledFunction *func, PrivateTag) : Function(func)
 {
     memcpy(sampleSize, func->sampleSize, funcMaxInputs * sizeof(int));
 
@@ -628,7 +626,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict)
 
 ExponentialFunction::~ExponentialFunction() = default;
 
-ExponentialFunction::ExponentialFunction(const ExponentialFunction *func) : Function(func)
+ExponentialFunction::ExponentialFunction(const ExponentialFunction *func, PrivateTag) : Function(func)
 {
     memcpy(c0, func->c0, funcMaxOutputs * sizeof(double));
     memcpy(c1, func->c1, funcMaxOutputs * sizeof(double));
@@ -672,7 +670,6 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     int i;
 
     ok = false;
-    funcs = nullptr;
     bounds = nullptr;
     encode = nullptr;
     scale = nullptr;
@@ -693,13 +690,10 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
         return;
     }
     k = obj1.arrayGetLength();
-    funcs = (Function **)gmallocn(k, sizeof(Function *));
+    funcs.resize(k);
     bounds = (double *)gmallocn(k + 1, sizeof(double));
     encode = (double *)gmallocn(2 * k, sizeof(double));
     scale = (double *)gmallocn(k, sizeof(double));
-    for (i = 0; i < k; ++i) {
-        funcs[i] = nullptr;
-    }
     for (i = 0; i < k; ++i) {
         std::set<int> usedParentsAux = *usedParents;
         Ref ref;
@@ -767,11 +761,11 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     ok = true;
 }
 
-StitchingFunction::StitchingFunction(const StitchingFunction *func) : Function(func)
+StitchingFunction::StitchingFunction(const StitchingFunction *func, PrivateTag) : Function(func)
 {
     k = func->k;
 
-    funcs = (Function **)gmallocn(k, sizeof(Function *));
+    funcs.resize(func->funcs.size());
     for (int i = 0; i < k; ++i) {
         funcs[i] = func->funcs[i]->copy();
     }
@@ -790,16 +784,6 @@ StitchingFunction::StitchingFunction(const StitchingFunction *func) : Function(f
 
 StitchingFunction::~StitchingFunction()
 {
-    int i;
-
-    if (funcs) {
-        for (i = 0; i < k; ++i) {
-            if (funcs[i]) {
-                delete funcs[i];
-            }
-        }
-    }
-    gfree(static_cast<void *>(funcs));
     gfree(bounds);
     gfree(encode);
     gfree(scale);
@@ -1160,7 +1144,7 @@ err1:
     return;
 }
 
-PostScriptFunction::PostScriptFunction(const PostScriptFunction *func) : Function(func)
+PostScriptFunction::PostScriptFunction(const PostScriptFunction *func, PrivateTag) : Function(func)
 {
     codeSize = func->codeSize;
 

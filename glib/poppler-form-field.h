@@ -3,6 +3,7 @@
  * Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -147,6 +148,14 @@ typedef enum
     POPPLER_ADDITIONAL_ACTION_VALIDATE_FIELD,
     POPPLER_ADDITIONAL_ACTION_CALCULATE_FIELD
 } PopplerAdditionalActionType;
+
+/**
+ * PopplerFormField:
+ *
+ * A #PopplerDocument form field.
+ *
+ * Since 25.06 this type supports g_autoptr
+ */
 
 POPPLER_PUBLIC
 GType poppler_form_field_get_type(void) G_GNUC_CONST;
@@ -381,6 +390,7 @@ void poppler_set_nss_password_callback(PopplerNssPasswordFunc func);
 
 G_END_DECLS
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerFormField, g_object_unref)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSignatureInfo, poppler_signature_info_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerSigningData, poppler_signing_data_free)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerCertificateInfo, poppler_certificate_info_free)

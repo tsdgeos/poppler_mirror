@@ -1,5 +1,6 @@
 /* poppler-attachment.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
+ * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +64,8 @@ typedef gboolean (*PopplerAttachmentSaveFunc)(const gchar *buf, gsize count, gpo
  *   20.09.0. Use poppler_attachment_get_ctime() instead.
  * @checksum: A 16-byte checksum of the file. Deprecated in poppler 20.09.0. Use
  *   poppler_attachment_get_checksum() instead.
+ *
+ * Since 25.06 this type supports g_autoptr
  */
 struct _PopplerAttachment
 {
@@ -119,5 +122,7 @@ POPPLER_PUBLIC
 gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, PopplerAttachmentSaveFunc save_func, gpointer user_data, GError **error);
 
 G_END_DECLS
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PopplerAttachment, g_object_unref)
 
 #endif /* __POPPLER_ATTACHMENT_H__ */
