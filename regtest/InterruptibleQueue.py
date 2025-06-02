@@ -45,7 +45,7 @@ class InterruptibleQueue:
         self._finished_condition.acquire()
         try:
             while self._n_unfinished_tasks:
-                self._finished_condition.wait(32768)
+                self._finished_condition.wait(None)
         finally:
             self._finished_condition.release()
 
