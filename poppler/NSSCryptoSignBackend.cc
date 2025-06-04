@@ -874,7 +874,9 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
     }
 
     SECItem *content_info_data = CMSSignedData->contentInfo.content.data;
-    if ((content_info_data && content_info_data->data) != (type == CryptoSign::SignatureType::adbe_pkcs7_sha1)) {
+    const bool econtent_present = content_info_data && content_info_data->data;
+    const bool signature_type_requires_econtent = type == CryptoSign::SignatureType::adbe_pkcs7_sha1;
+    if (signature_type_requires_econtent != econtent_present) {
         return SIGNATURE_INVALID;
     }
 
