@@ -31,6 +31,7 @@
 
 #include "poppler_private_export.h"
 
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -155,12 +156,17 @@ struct Type1CEexecBuf
 
 class POPPLER_PRIVATE_EXPORT FoFiType1C : public FoFiBase
 {
+    class PrivateTag
+    {
+    };
+
 public:
     // Create a FoFiType1C object from a memory buffer.
-    static FoFiType1C *make(const unsigned char *fileA, int lenA);
+    static std::unique_ptr<FoFiType1C> make(std::vector<unsigned char> &&fileA);
+    static std::unique_ptr<FoFiType1C> make(std::span<unsigned char> data);
 
     // Create a FoFiType1C object from a file on disk.
-    static FoFiType1C *load(const char *fileName);
+    static std::unique_ptr<FoFiType1C> load(const char *fileName);
 
     ~FoFiType1C() override;
 
@@ -211,8 +217,10 @@ public:
     //     the identity CID-to-GID mapping is used
     void convertToType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream);
 
+    explicit FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag = {});
+    explicit FoFiType1C(std::span<unsigned char> data, PrivateTag = {});
+
 private:
-    FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA);
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);
     void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
     void cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict);
@@ -234,7 +242,7 @@ private:
     void getIndexVal(const Type1CIndex *idx, int i, Type1CIndexVal *val, bool *ok) const;
     char *getString(int sid, char *buf, bool *ok) const;
 
-    GooString *name;
+    std::unique_ptr<GooString> name;
     char **encoding;
 
     Type1CIndex nameIdx;

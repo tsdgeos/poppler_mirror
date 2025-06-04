@@ -215,7 +215,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     std::optional<GfxFontLoc> fontLoc;
     char **enc;
     const char *name;
-    FoFiType1C *ff1c;
     std::optional<FreeTypeFontFace> font_face;
     std::vector<int> codeToGID;
     bool substitute = false;
@@ -284,7 +283,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
         } else {
             std::unique_ptr<FoFiTrueType> ff;
             if (!font_data.empty()) {
-                ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
+                ff = FoFiTrueType::make(std::span(font_data), faceIndex);
             } else {
                 ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
             }
@@ -299,7 +298,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontTrueTypeOT: {
         std::unique_ptr<FoFiTrueType> ff;
         if (!font_data.empty()) {
-            ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
+            ff = FoFiTrueType::make(std::span(font_data), faceIndex);
         } else {
             ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
         }
@@ -322,15 +321,15 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
     case fontCIDType0:
     case fontCIDType0C:
         if (!useCIDs) {
+            std::unique_ptr<FoFiType1C> ff1c;
             if (!font_data.empty()) {
-                ff1c = FoFiType1C::make(font_data.data(), font_data.size());
+                ff1c = FoFiType1C::make(std::span(font_data));
             } else {
                 ff1c = FoFiType1C::load(fileName.c_str());
             }
             if (ff1c) {
                 std::vector<int> src = ff1c->getCIDToGIDMap();
                 codeToGID = std::move(src);
-                delete ff1c;
             }
         }
 
@@ -351,7 +350,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfx
             if (!useCIDs) {
                 std::unique_ptr<FoFiTrueType> ff;
                 if (!font_data.empty()) {
-                    ff = FoFiTrueType::make(font_data.data(), font_data.size(), faceIndex);
+                    ff = FoFiTrueType::make(std::span(font_data), faceIndex);
                 } else {
                     ff = FoFiTrueType::load(fileName.c_str(), faceIndex);
                 }

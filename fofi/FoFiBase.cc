@@ -30,7 +30,6 @@
 #include <cstdio>
 #include <climits>
 #include "goo/gfile.h"
-#include "goo/gmem.h"
 #include "poppler/Error.h"
 #include "FoFiBase.h"
 
@@ -38,54 +37,43 @@
 // FoFiBase
 //------------------------------------------------------------------------
 
-FoFiBase::FoFiBase(const unsigned char *fileA, int lenA, bool freeFileDataA)
-{
-    file = fileA;
-    len = lenA;
-    freeFileData = freeFileDataA;
-}
+FoFiBase::FoFiBase(std::vector<unsigned char> &&fileA) : fileOwner(std::move(fileA)), file(fileOwner) { }
 
-FoFiBase::~FoFiBase()
-{
-    if (freeFileData) {
-        gfree((char *)file);
-    }
-}
+FoFiBase::FoFiBase(std::span<unsigned char> fileA) : file(fileA) { }
 
-char *FoFiBase::readFile(const char *fileName, int *fileLen)
+FoFiBase::~FoFiBase() = default;
+
+std::optional<std::vector<unsigned char>> FoFiBase::readFile(const char *fileName)
 {
     FILE *f;
-    char *buf;
-    int n;
 
     if (!(f = openFile(fileName, "rb"))) {
         error(errIO, -1, "Cannot open '{0:s}'", fileName);
-        return nullptr;
+        return std::nullopt;
     }
     if (fseek(f, 0, SEEK_END) != 0) {
         error(errIO, -1, "Cannot seek to end of '{0:s}'", fileName);
         fclose(f);
-        return nullptr;
+        return std::nullopt;
     }
-    n = (int)ftell(f);
+    int n = (int)ftell(f);
     if (n < 0) {
         error(errIO, -1, "Cannot determine length of '{0:s}'", fileName);
         fclose(f);
-        return nullptr;
+        return std::nullopt;
     }
     if (fseek(f, 0, SEEK_SET) != 0) {
         error(errIO, -1, "Cannot seek to start of '{0:s}'", fileName);
         fclose(f);
-        return nullptr;
+        return std::nullopt;
     }
-    buf = (char *)gmalloc(n);
-    if ((int)fread(buf, 1, n, f) != n) {
-        gfree(buf);
+    std::vector<unsigned char> buf;
+    buf.resize(n);
+    if ((int)fread(buf.data(), 1, n, f) != n) {
         fclose(f);
-        return nullptr;
+        return std::nullopt;
     }
     fclose(f);
-    *fileLen = n;
     return buf;
 }
 
@@ -93,7 +81,7 @@ int FoFiBase::getS8(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos >= len) {
+    if (pos < 0 || pos >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -106,7 +94,7 @@ int FoFiBase::getS8(int pos, bool *ok) const
 
 int FoFiBase::getU8(int pos, bool *ok) const
 {
-    if (pos < 0 || pos >= len) {
+    if (pos < 0 || pos >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -117,7 +105,7 @@ int FoFiBase::getS16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= len) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -133,7 +121,7 @@ int FoFiBase::getU16BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= len) {
+    if (pos < 0 || pos > INT_MAX - 1 || pos + 1 >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -146,7 +134,7 @@ int FoFiBase::getS32BE(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -164,7 +152,7 @@ unsigned int FoFiBase::getU32BE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -179,7 +167,7 @@ unsigned int FoFiBase::getU32LE(int pos, bool *ok) const
 {
     unsigned int x;
 
-    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= len) {
+    if (pos < 0 || pos > INT_MAX - 3 || pos + 3 >= int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -195,7 +183,7 @@ unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const
     unsigned int x;
     int i;
 
-    if (pos < 0 || pos > INT_MAX - size || pos + size > len) {
+    if (pos < 0 || pos > INT_MAX - size || pos + size > int(file.size())) {
         *ok = false;
         return 0;
     }
@@ -208,5 +196,5 @@ unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const
 
 bool FoFiBase::checkRegion(int pos, int size) const
 {
-    return pos >= 0 && size >= 0 && pos < INT_MAX - size && size < INT_MAX - pos && pos + size >= pos && pos + size <= len;
+    return pos >= 0 && size >= 0 && pos < INT_MAX - size && size < INT_MAX - pos && pos + size >= pos && pos + size <= int(file.size());
 }

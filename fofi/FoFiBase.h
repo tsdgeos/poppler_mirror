@@ -27,6 +27,9 @@
 #include "poppler_private_export.h"
 
 #include <cstddef>
+#include <optional>
+#include <vector>
+#include <span>
 
 //------------------------------------------------------------------------
 
@@ -45,8 +48,11 @@ public:
     virtual ~FoFiBase();
 
 protected:
-    FoFiBase(const unsigned char *fileA, int lenA, bool freeFileDataA);
-    static char *readFile(const char *fileName, int *fileLen);
+    // takes ownership over data
+    explicit FoFiBase(std::vector<unsigned char> &&fileA);
+    // callers responsibility to keep the data alive as long as this object exists
+    explicit FoFiBase(std::span<unsigned char> fileA);
+    static std::optional<std::vector<unsigned char>> readFile(const char *fileName);
 
     // S = signed / U = unsigned
     // 8/16/32/Var = word length, in bytes
@@ -62,9 +68,8 @@ protected:
 
     bool checkRegion(int pos, int size) const;
 
-    const unsigned char *file;
-    int len;
-    bool freeFileData;
+    std::vector<unsigned char> fileOwner;
+    std::span<unsigned char> file;
 };
 
 #endif

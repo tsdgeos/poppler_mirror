@@ -948,8 +948,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     const char **baseEnc;
     bool baseEncFromFontFile;
     int len;
-    FoFiType1 *ffT1;
-    FoFiType1C *ffT1C;
     char *charName;
     bool missing, hex;
     bool numeric;
@@ -1112,16 +1110,18 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         hasEncoding = true;
         baseEnc = winAnsiEncoding;
     }
+    // We need to keep ffT1 around until we have read everything out of 'baseEnc'
+    // in case we end up using that
+    std::unique_ptr<FoFiType1> ffT1;
+    std::unique_ptr<FoFiType1C> ffT1C;
 
     // check embedded font file for base encoding
     // (only for Type 1 fonts - trying to get an encoding out of a
     // TrueType font is a losing proposition)
-    ffT1 = nullptr;
-    ffT1C = nullptr;
     if (type == fontType1 && embFontID != Ref::INVALID()) {
-        const std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
+        std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
         if (buf) {
-            if ((ffT1 = FoFiType1::make(buf->data(), buf->size()))) {
+            if ((ffT1 = FoFiType1::make(std::move(buf).value()))) {
                 const std::string fontName = ffT1->getName();
                 if (!fontName.empty()) {
                     embFontName = std::make_unique<GooString>(fontName);
@@ -1133,9 +1133,9 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
             }
         }
     } else if (type == fontType1C && embFontID != Ref::INVALID()) {
-        const std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
+        std::optional<std::vector<unsigned char>> buf = readEmbFontFile(xref);
         if (buf) {
-            if ((ffT1C = FoFiType1C::make(buf->data(), buf->size()))) {
+            if ((ffT1C = FoFiType1C::make(std::move(buf).value()))) {
                 if (ffT1C->getName()) {
                     embFontName = std::make_unique<GooString>(ffT1C->getName());
                 }
@@ -1222,8 +1222,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
             }
         }
     }
-    delete ffT1;
-    delete ffT1C;
 
     //----- build the mapping to Unicode -----
 

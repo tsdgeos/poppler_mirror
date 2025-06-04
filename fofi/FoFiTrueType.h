@@ -49,9 +49,15 @@ struct TrueTypeCmap;
 
 class POPPLER_PRIVATE_EXPORT FoFiTrueType : public FoFiBase
 {
+    class PrivateTag
+    {
+    };
+
 public:
     // Create a FoFiTrueType object from a memory buffer.
-    static std::unique_ptr<FoFiTrueType> make(const unsigned char *fileA, int lenA, int faceIndexA);
+    // Note it is the responsibility of the caller to ensure the data is alive
+    // during the lifetime of this object
+    static std::unique_ptr<FoFiTrueType> make(std::span<unsigned char> data, int faceIndexA);
 
     // Create a FoFiTrueType object from a file on disk.
     static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA);
@@ -150,7 +156,7 @@ public:
     // Returns a pointer to the CFF font embedded in this OpenType font.
     // If successful, sets *<start> and *<length>, and returns true.
     // Otherwise returns false.  (Only useful for OpenType CFF fonts).
-    bool getCFFBlock(char **start, int *length) const;
+    std::optional<std::span<unsigned char>> getCFFBlock() const;
 
     // setup vert/vrt2 GSUB for default lang
     int setupGSUB(const char *scriptName);
@@ -158,8 +164,10 @@ public:
     // setup vert/vrt2 GSUB for specified lang
     int setupGSUB(const char *scriptName, const char *languageName);
 
+    FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
+    FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag = {});
+
 private:
-    FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA);
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const;
