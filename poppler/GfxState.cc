@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016, 2020, 2023 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -6414,6 +6414,7 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
 
     path = new GfxPath();
     curX = curY = 0;
+    curTextX = curTextY = 0;
     lineX = lineY = 0;
 
     clipXMin = 0;
@@ -6519,6 +6520,8 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     }
     curX = state->curX;
     curY = state->curY;
+    curTextX = state->curTextX;
+    curTextY = state->curTextY;
     lineX = state->lineX;
     lineY = state->lineY;
 
@@ -6974,14 +6977,14 @@ void GfxState::textShift(double tx, double ty)
     double dx, dy;
 
     textTransformDelta(tx, ty, &dx, &dy);
-    curX += dx;
-    curY += dy;
+    curTextX += dx;
+    curTextY += dy;
 }
 
-void GfxState::shift(double dx, double dy)
+void GfxState::textShiftWithUserCoords(double dx, double dy)
 {
-    curX += dx;
-    curY += dy;
+    curTextX += dx;
+    curTextY += dy;
 }
 
 GfxState *GfxState::save()
@@ -7004,6 +7007,8 @@ GfxState *GfxState::restore()
         oldState->path = path;
         oldState->curX = curX;
         oldState->curY = curY;
+        oldState->curTextX = curTextX;
+        oldState->curTextY = curTextY;
         oldState->lineX = lineX;
         oldState->lineY = lineY;
 
