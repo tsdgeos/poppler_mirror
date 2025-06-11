@@ -1606,7 +1606,11 @@ void FoFiTrueType::readPostTable()
                 if (!ok || !checkRegion(stringPos + 1, m)) {
                     continue;
                 }
-                name.assign((char *)&file[stringPos + 1], m);
+                if (((size_t(stringPos) + 1) == file.size()) || m == 0) {
+                    name.clear();
+                } else {
+                    name.assign((char *)&file[stringPos + 1], m);
+                }
                 nameToGID[name] = i;
                 ++stringIdx;
                 stringPos += 1 + m;
