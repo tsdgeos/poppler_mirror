@@ -71,7 +71,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
     std::shared_ptr<CMap> cMap;
 
     if (obj->isName()) {
-        const GooString cMapNameA(obj->getName());
+        const GooString cMapNameA(obj->getNameString());
         if (!(cMap = globalParams->getCMap(collectionA, cMapNameA))) {
             error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:t}'", &cMapNameA, &collectionA);
         }

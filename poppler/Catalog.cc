@@ -605,7 +605,7 @@ std::string Catalog::getJS(int i)
     if (!obj2.isName()) {
         return {};
     }
-    if (strcmp(obj2.getName(), "JavaScript") != 0) {
+    if (!obj2.isName("JavaScript")) {
         return {};
     }
     obj2 = obj.dictLookup("JS");
