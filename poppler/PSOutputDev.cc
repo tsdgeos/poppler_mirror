@@ -7181,7 +7181,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
             std::unique_ptr<GooString> codeString = func4->getCodeString()->copy();
             for (i = codeString->size() - 1; i > 0; i--) {
                 if (codeString->getChar(i) == '}') {
-                    codeString->del(i);
+                    codeString->del(i, 1);
                     break;
                 }
             }

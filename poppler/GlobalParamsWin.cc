@@ -300,7 +300,7 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
     while (i < s->size()) {
         c = s->getChar(i);
         if (c == ' ' || c == ',' || c == '-') {
-            s->del(i);
+            s->del(i,1);
         } else {
             ++i;
         }
@@ -323,9 +323,11 @@ static GooString *replaceSuffix(GooString *path, const char *suffixA, const char
     int baseLenB = path->size() - suffLenB;
 
     if (!strcasecmp(path->c_str() + baseLenA, suffixA)) {
-        path->del(baseLenA, suffLenA)->append(suffixB);
+        path->del(baseLenA, suffLenA);
+        path->append(suffixB);
     } else if (!strcasecmp(path->c_str() + baseLenB, suffixB)) {
-        path->del(baseLenB, suffLenB)->append(suffixA);
+        path->del(baseLenB, suffLenB);
+        path->append(suffixA);
     }
 
     return path;

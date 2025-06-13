@@ -218,11 +218,7 @@ public:
     }
 
     // Delete a character or range of characters.
-    GooString *del(int i, int n = 1)
-    {
-        erase(i, n);
-        return this;
-    }
+    void del(size_t i, size_t n) { erase(i, n); }
 
     // Convert string to all-lower case.
     POPPLER_PRIVATE_EXPORT GooString *lowerCase();

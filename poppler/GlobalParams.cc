@@ -290,7 +290,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         while (i < name2->size()) {
             const char c = name2->getChar(i);
             if (c == ' ' || c == ',' || c == '-') {
-                name2->del(i);
+                name2->del(i, 1);
             } else {
                 ++i;
             }
