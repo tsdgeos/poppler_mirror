@@ -1248,8 +1248,8 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
 
     outStr->printf("<<");
     for (int i = 0; i < dict->getLength(); i++) {
-        GooString keyName(dict->getKey(i));
-        outStr->printf("/%s ", sanitizedName(keyName.toStr()).c_str());
+        std::string keyName(dict->getKey(i));
+        outStr->printf("/%s ", sanitizedName(keyName).c_str());
         Object obj1 = dict->getValNF(i).copy();
         writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
     }

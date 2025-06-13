@@ -587,13 +587,13 @@ Object *Attribute::getDefaultValue(Attribute::Type type)
     return entry ? const_cast<Object *>(entry->defval) : nullptr;
 }
 
-void Attribute::setFormattedValue(const char *formattedA)
+void Attribute::setFormattedValue(const GooString *formattedA)
 {
     if (formattedA) {
         if (formatted) {
             formatted->Set(formattedA);
         } else {
-            formatted = GooString(formattedA);
+            formatted = formattedA->copy();
         }
     } else {
         formatted = {};
@@ -661,7 +661,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
     Attribute *attribute = new Attribute(std::move(name), &value);
     obj = property->lookup("F");
     if (obj.isString()) {
-        attribute->setFormattedValue(obj.getString()->c_str());
+        attribute->setFormattedValue(obj.getString());
     } else if (!obj.isNull()) {
         error(errSyntaxWarning, -1, "F object is wrong type ({0:s})", obj.getTypeName());
     }

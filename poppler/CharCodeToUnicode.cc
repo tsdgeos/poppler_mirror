@@ -214,8 +214,8 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
     while (pst->getToken(tok2, sizeof(tok2), &n2)) {
         if (!strcmp(tok2, "usecmap")) {
             if (tok1[0] == '/') {
-                GooString name { tok1 + 1 };
-                if ((f = globalParams->findToUnicodeFile(name.toStr()))) {
+                std::string name { tok1 + 1 };
+                if ((f = globalParams->findToUnicodeFile(name))) {
                     if (parseCMap1(&getCharFromFile, f, nBits)) {
                         ok = true;
                     }
