@@ -2680,10 +2680,12 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
     std::unique_ptr<GooString> psName = std::make_unique<GooString>(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
-        psName->append('_')->append(filteredName);
+        psName->append('_');
+        psName->append(filteredName);
     } else if (fontName) {
         std::string filteredName = filterPSName(*fontName);
-        psName->append('_')->append(filteredName);
+        psName->append('_');
+        psName->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
     return psName;

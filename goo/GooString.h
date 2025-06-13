@@ -160,11 +160,7 @@ public:
     using std::string::clear;
 
     // Append a character or string.
-    GooString *append(char c)
-    {
-        push_back(c);
-        return this;
-    }
+    void append(char c) { push_back(c); }
     GooString *append(const GooString *str)
     {
         static_cast<std::string &>(*this).append(*str);

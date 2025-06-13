@@ -1217,7 +1217,8 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[1].num, ops[1].isFP, charBuf);
                     cvtNum(ops[2].num, ops[2].isFP, charBuf);
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
-                    charBuf->append((char)12)->append((char)6);
+                    charBuf->append((char)12);
+                    charBuf->append((char)6);
                 } else if (nOps == 0) {
                     charBuf->append((char)14);
                 } else {
