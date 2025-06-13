@@ -59,6 +59,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
     height = heightA;
     mode = modeA;
     rowPad = rowPadA;
+    rowSize = -1; // some compilers can't see it will be initialized
     switch (mode) {
     case splashModeMono1:
         if (width > 0) {
