@@ -218,7 +218,7 @@ public:
     }
 
     // Delete a character or range of characters.
-    void del(size_t i, size_t n) { erase(i, n); }
+    using std::string::erase;
 
     // Convert string to all-lower case.
     POPPLER_PRIVATE_EXPORT GooString *lowerCase();

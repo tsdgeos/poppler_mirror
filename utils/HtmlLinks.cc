@@ -101,7 +101,7 @@ static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
                 tmp = s->copy();
             }
             if (tmp) {
-                tmp->del(j, 1);
+                tmp->erase(j, 1);
                 int l = strlen(replace);
                 tmp->insert(j, replace, l);
                 j += l - 1;

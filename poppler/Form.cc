@@ -1272,11 +1272,11 @@ const GooString *FormField::getFullyQualifiedName() const
         // Remove the last period
         if (unicode_encoded) {
             if (len > 1) {
-                fullyQualifiedName->del(len - 2, 2);
+                fullyQualifiedName->erase(len - 2, 2);
             }
         } else {
             if (len > 0) {
-                fullyQualifiedName->del(len - 1, 1);
+                fullyQualifiedName->erase(len - 1, 1);
             }
         }
     }

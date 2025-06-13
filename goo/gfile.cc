@@ -128,13 +128,13 @@ GooString *appendToPath(GooString *path, const char *fileName)
         }
         if (i <= 0) {
             if (path->getChar(0) == '/') {
-                path->del(1, path->size() - 1);
+                path->erase(1, path->size() - 1);
             } else {
                 path->clear();
                 path->append("..");
             }
         } else {
-            path->del(i, path->size() - i);
+            path->erase(i, path->size() - i);
         }
         return path;
     }

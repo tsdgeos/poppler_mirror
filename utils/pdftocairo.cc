@@ -305,7 +305,7 @@ static bool parseJpegOptions()
         }
         const int iequal = static_cast<int>(equal - opt.c_str());
         GooString value(&opt, iequal + 1, opt.size() - iequal - 1);
-        opt.del(iequal, opt.size() - iequal);
+        opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
         if (opt.cmp("quality") == 0) {

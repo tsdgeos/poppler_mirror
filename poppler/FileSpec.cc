@@ -273,7 +273,7 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
     i = 0;
     if (name->getChar(0) == '/') {
         if (name->size() >= 2 && name->getChar(1) == '/') {
-            name->del(0, 1);
+            name->erase(0, 1);
             i = 0;
         } else if (name->size() >= 2 && ((name->getChar(1) >= 'a' && name->getChar(1) <= 'z') || (name->getChar(1) >= 'A' && name->getChar(1) <= 'Z')) && (name->size() == 2 || name->getChar(2) == '/')) {
             name->setChar(0, name->getChar(1));
@@ -296,7 +296,7 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
         if (name->getChar(i) == '/') {
             name->setChar(i, '\\');
         } else if (name->getChar(i) == '\\' && i + 1 < name->size() && name->getChar(i + 1) == '/') {
-            name->del(i, 1);
+            name->erase(i, 1);
         }
     }
     fileName = Object(std::move(name));

@@ -290,7 +290,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         while (i < name2->size()) {
             const char c = name2->getChar(i);
             if (c == ' ' || c == ',' || c == '-') {
-                name2->del(i, 1);
+                name2->erase(i, 1);
             } else {
                 ++i;
             }
@@ -300,19 +300,19 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)
     if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
-        name2->del(n - 2, 2);
+        name2->erase(n - 2, 2);
         n -= 2;
     }
 
     // look for "Regular"
     if (n > 7 && !strcmp(name2->c_str() + n - 7, "Regular")) {
-        name2->del(n - 7, 7);
+        name2->erase(n - 7, 7);
         n -= 7;
     }
 
     // look for "Italic"
     if (n > 6 && !strcmp(name2->c_str() + n - 6, "Italic")) {
-        name2->del(n - 6, 6);
+        name2->erase(n - 6, 6);
         italic = true;
         n -= 6;
     } else {
@@ -321,7 +321,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // look for "Oblique"
     if (n > 6 && !strcmp(name2->c_str() + n - 7, "Oblique")) {
-        name2->del(n - 7, 7);
+        name2->erase(n - 7, 7);
         oblique = true;
         n -= 6;
     } else {
@@ -330,7 +330,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // look for "Bold"
     if (n > 4 && !strcmp(name2->c_str() + n - 4, "Bold")) {
-        name2->del(n - 4, 4);
+        name2->erase(n - 4, 4);
         bold = true;
         n -= 4;
     } else {
@@ -339,19 +339,19 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 
     // remove trailing "MT" (FooMT-Bold, etc.)
     if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
-        name2->del(n - 2, 2);
+        name2->erase(n - 2, 2);
         n -= 2;
     }
 
     // remove trailing "PS"
     if (n > 2 && !strcmp(name2->c_str() + n - 2, "PS")) {
-        name2->del(n - 2, 2);
+        name2->erase(n - 2, 2);
         n -= 2;
     }
 
     // remove trailing "IdentityH"
     if (n > 9 && !strcmp(name2->c_str() + n - 9, "IdentityH")) {
-        name2->del(n - 9, 9);
+        name2->erase(n - 9, 9);
         n -= 9;
     }
 

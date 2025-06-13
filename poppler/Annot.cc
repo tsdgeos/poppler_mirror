@@ -4405,12 +4405,12 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
                 // Back up to the previous word which fit, if there was a previous
                 // word.
                 *i = last_i1;
-                outBuf->del(last_o1, outBuf->size() - last_o1);
+                outBuf->erase(last_o1, outBuf->size() - last_o1);
             } else if (last_o2 > 0) {
                 // Otherwise, back up to the previous character (in the only word on
                 // this line)
                 *i = last_i2;
-                outBuf->del(last_o2, outBuf->size() - last_o2);
+                outBuf->erase(last_o2, outBuf->size() - last_o2);
             } else {
                 // Otherwise, we were trying to fit the first character; include it
                 // anyway even if it overflows the space--no updates to make.
