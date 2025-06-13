@@ -144,7 +144,8 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
 
     // Get length.
-    int getLength() const { return size(); }
+    using std::string::empty;
+    using std::string::size;
 
     // Get C string.
     using std::string::c_str;
@@ -153,7 +154,7 @@ public:
     char getChar(size_t i) const { return (*this)[i]; }
 
     // Change <i>th character.
-    void setChar(int i, char c) { (*this)[i] = c; }
+    void setChar(size_t i, char c) { (*this)[i] = c; }
 
     // Clear string to zero length.
     using std::string::clear;

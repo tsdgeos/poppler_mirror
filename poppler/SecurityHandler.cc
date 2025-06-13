@@ -127,11 +127,10 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
     if (versionObj.isInt() && revisionObj.isInt() && permObj.isInt() && ownerKeyObj.isString() && userKeyObj.isString()) {
         encVersion = versionObj.getInt();
         encRevision = revisionObj.getInt();
-        if ((encRevision <= 4 && ownerKeyObj.getString()->getLength() >= 1 && userKeyObj.getString()->getLength() >= 1)
+        if ((encRevision <= 4 && !ownerKeyObj.getString()->empty() && !userKeyObj.getString()->empty())
             || ((encRevision == 5 || encRevision == 6) &&
                 // the spec says 48 bytes, but Acrobat pads them out longer
-                ownerKeyObj.getString()->getLength() >= 48 && userKeyObj.getString()->getLength() >= 48 && ownerEncObj.isString() && ownerEncObj.getString()->getLength() == 32 && userEncObj.isString()
-                && userEncObj.getString()->getLength() == 32)) {
+                ownerKeyObj.getString()->size() >= 48 && userKeyObj.getString()->size() >= 48 && ownerEncObj.isString() && ownerEncObj.getString()->size() == 32 && userEncObj.isString() && userEncObj.getString()->size() == 32)) {
             encAlgorithm = cryptRC4;
             // revision 2 forces a 40-bit key - some buggy PDF generators
             // set the Length value incorrectly
@@ -229,18 +228,18 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
             if (encRevision <= 4) {
                 // Adobe apparently zero-pads the U value (and maybe the O value?)
                 // if it's short
-                while (ownerKey->getLength() < 32) {
+                while (ownerKey->size() < 32) {
                     ownerKey->append((char)0x00);
                 }
-                while (userKey->getLength() < 32) {
+                while (userKey->size() < 32) {
                     userKey->append((char)0x00);
                 }
             }
         } else {
             error(errSyntaxError, -1,
-                  "Invalid encryption key length. version: {0:d} - revision: {1:d} - ownerKeyLength: {2:d} - userKeyLength: {3:d} - ownerEncIsString: {4:d} - ownerEncLength: {5:d} - userEncIsString: {6:d} - userEncLength: {7:d}",
-                  encVersion, encRevision, ownerKeyObj.getString()->getLength(), userKeyObj.getString()->getLength(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString()->getLength() : -1, userEncObj.isString(),
-                  userEncObj.isString() ? userEncObj.getString()->getLength() : -1);
+                  "Invalid encryption key length. version: {0:d} - revision: {1:d} - ownerKeyLength: {2:uld} - userKeyLength: {3:uld} - ownerEncIsString: {4:d} - ownerEncLength: {5:uld} - userEncIsString: {6:d} - userEncLength: {7:uld}",
+                  encVersion, encRevision, ownerKeyObj.getString()->size(), userKeyObj.getString()->size(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString()->size() : -1, userEncObj.isString(),
+                  userEncObj.isString() ? userEncObj.getString()->size() : -1);
         }
     } else {
         error(errSyntaxError, -1, "Weird encryption info");

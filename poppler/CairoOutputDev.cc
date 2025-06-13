@@ -1879,7 +1879,7 @@ void CairoOutputDev::fillToStrokePathClip(GfxState *state)
 
 void CairoOutputDev::beginString(GfxState *state, const GooString *s)
 {
-    int len = s->getLength();
+    int len = s->size();
 
     if (needFontUpdate) {
         updateFont(state);
@@ -3153,7 +3153,7 @@ static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mim
     mime_id.appendf("{0:d}-{1:d}", ref.gen, ref.num);
 
     idBuffer = copyString(mime_id.c_str());
-    status = cairo_surface_set_mime_data(surface, mime_type, (const unsigned char *)idBuffer, mime_id.getLength(), gfree, idBuffer);
+    status = cairo_surface_set_mime_data(surface, mime_type, (const unsigned char *)idBuffer, mime_id.size(), gfree, idBuffer);
     if (status) {
         gfree(idBuffer);
     }
@@ -3203,7 +3203,7 @@ bool CairoOutputDev::setMimeDataForCCITTParams(Stream *str, cairo_surface_t *ima
     params.appendf(" DamagedRowsBeforeError={0:d}", ccittStr->getDamagedRowsBeforeError());
 
     char *p = strdup(params.c_str());
-    if (cairo_surface_set_mime_data(image, CAIRO_MIME_TYPE_CCITT_FAX_PARAMS, (const unsigned char *)p, params.getLength(), gfree, (void *)p)) {
+    if (cairo_surface_set_mime_data(image, CAIRO_MIME_TYPE_CCITT_FAX_PARAMS, (const unsigned char *)p, params.size(), gfree, (void *)p)) {
         gfree(p);
         return false;
     }

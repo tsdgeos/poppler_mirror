@@ -1329,7 +1329,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     // start the sfnts array
     if (name) {
         (*outputFunc)(outputStream, "/", 1);
-        (*outputFunc)(outputStream, name->c_str(), name->getLength());
+        (*outputFunc)(outputStream, name->c_str(), name->size());
         (*outputFunc)(outputStream, " [\n", 3);
     } else {
         (*outputFunc)(outputStream, "/sfnts [\n", 9);

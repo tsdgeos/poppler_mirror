@@ -1031,7 +1031,7 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
 
     contents = poppler_annot->annot->getContents();
 
-    return contents && contents->getLength() > 0 ? _poppler_goo_string_to_utf8(contents) : nullptr;
+    return contents && !contents->empty() ? _poppler_goo_string_to_utf8(contents) : nullptr;
 }
 
 /**

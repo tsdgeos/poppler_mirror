@@ -207,7 +207,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
         psNameLen = strlen(psName);
     } else {
         psName = name->c_str();
-        psNameLen = name->getLength();
+        psNameLen = name->size();
     }
 
     // write header and font dictionary, up to encoding
@@ -491,7 +491,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     // build the charstrings
     charStringOffsets = (int *)gmallocn(cidMap.size() + 1, sizeof(int));
     for (size_t i = 0; i < cidMap.size(); ++i) {
-        charStringOffsets[i] = charStrings.getLength();
+        charStringOffsets[i] = charStrings.size();
         if ((gid = cidMap[i]) >= 0) {
             ok = true;
             getIndexVal(&charStringsIdx, gid, &val, &ok);
@@ -505,13 +505,13 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
             }
         }
     }
-    charStringOffsets[cidMap.size()] = charStrings.getLength();
+    charStringOffsets[cidMap.size()] = charStrings.size();
 
     // compute gdBytes = number of bytes needed for charstring offsets
     // (offset size needs to account for the charstring offset table,
     // with a worst case of five bytes per entry, plus the charstrings
     // themselves)
-    int i = (cidMap.size() + 1) * 5 + charStrings.getLength();
+    int i = (cidMap.size() + 1) * 5 + charStrings.size();
     if (i < 0x100) {
         gdBytes = 1;
     } else if (i < 0x10000) {
@@ -689,7 +689,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
 
     // start the binary section
     offset = (cidMap.size() + 1) * (1 + gdBytes);
-    buf = GooString::format("(Hex) {0:d} StartData\n", offset + charStrings.getLength());
+    buf = GooString::format("(Hex) {0:uld} StartData\n", offset + charStrings.size());
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // write the charstring offset (CIDMap) table
@@ -714,7 +714,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     }
 
     // write the charstring data
-    n = charStrings.getLength();
+    n = charStrings.size();
     for (i = 0; i < n; i += 32) {
         for (j = 0; j < 32 && i + j < n; ++j) {
             buf = GooString::format("{0:02x}", charStrings.getChar(i + j) & 0xff);
@@ -1015,9 +1015,9 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int of
     std::set<int> offsetBeingParsed;
     cvtGlyph(offset, nBytes, &charBuf, subrIdx, pDict, true, offsetBeingParsed);
 
-    const std::string buf = GooString::format("/{0:s} {1:d} RD ", glyphName, charBuf.getLength());
+    const std::string buf = GooString::format("/{0:s} {1:uld} RD ", glyphName, charBuf.size());
     eexecWrite(eb, buf.c_str());
-    eexecWriteCharstring(eb, (unsigned char *)charBuf.c_str(), charBuf.getLength());
+    eexecWriteCharstring(eb, (unsigned char *)charBuf.c_str(), charBuf.size());
     eexecWrite(eb, " ND\n");
 }
 
@@ -1028,7 +1028,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
     double d, dx, dy;
     unsigned short r2;
     unsigned char byte;
-    int pos, subrBias, start, i, k;
+    int pos, subrBias, start, k;
 
     const auto [offsetEmplaceIt, inserted] = offsetBeingParsed.emplace(offset);
     if (!inserted) {
@@ -1036,7 +1036,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
         return;
     }
 
-    start = charBuf->getLength();
+    start = charBuf->size();
     if (top) {
         charBuf->append('\x49'); // 73;
         charBuf->append('\x3A'); // 58;
@@ -1648,7 +1648,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
     // charstring encryption
     if (top) {
         r2 = 4330;
-        for (i = start; i < charBuf->getLength(); ++i) {
+        for (size_t i = start; i < charBuf->size(); ++i) {
             byte = charBuf->getChar(i) ^ (r2 >> 8);
             charBuf->setChar(i, byte);
             r2 = (byte + r2) * 52845 + 22719;

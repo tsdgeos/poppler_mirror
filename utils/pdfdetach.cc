@@ -76,7 +76,7 @@ static const ArgDesc argDesc[] = { { "-list", argFlag, &doList, 0, "list all emb
 
 static std::string getFileName(const GooString &s, const UnicodeMap &uMap)
 {
-    int j;
+    size_t j;
     Unicode u;
     bool isUnicode;
     char uBuf[8];
@@ -88,7 +88,7 @@ static std::string getFileName(const GooString &s, const UnicodeMap &uMap)
         isUnicode = false;
         j = 0;
     }
-    while (j < s.getLength()) {
+    while (j < s.size()) {
         if (isUnicode) {
             u = ((s.getChar(j) & 0xff) << 8) | (s.getChar(j + 1) & 0xff);
             j += 2;

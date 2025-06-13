@@ -1085,7 +1085,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
         auto name = catalog->getDestNameTreeName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
         if (link_dest) {
-            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->getLength());
+            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->size());
             dest = _poppler_dest_new_goto(document, link_dest.get());
             g_tree_insert(tree, key, dest);
         }
@@ -1103,15 +1103,15 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
     char *result;
 
     if (hasUnicodeByteOrderMark(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else if (hasUnicodeByteOrderMarkLE(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
+        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
     } else {
         int len;
         gunichar *ucs4_temp;
         int i;
 
-        len = s->getLength();
+        len = s->size();
         ucs4_temp = g_new(gunichar, len + 1);
         for (i = 0; i < len; ++i) {
             ucs4_temp[i] = pdfDocEncoding[(unsigned char)s->getChar(i)];
@@ -3757,9 +3757,9 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
     gboolean retval;
 
     if (hasUnicodeByteOrderMark(date->toStr())) {
-        date_string = g_convert(date->c_str() + 2, date->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+        date_string = g_convert(date->c_str() + 2, date->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else {
-        date_string = g_strndup(date->c_str(), date->getLength());
+        date_string = g_strndup(date->c_str(), date->size());
     }
 
     retval = poppler_date_parse(date_string, gdate);

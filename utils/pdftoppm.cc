@@ -240,8 +240,8 @@ static bool parseJpegOptions()
             return false;
         }
         const int iequal = static_cast<int>(equal - opt.c_str());
-        GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
-        opt.del(iequal, opt.getLength() - iequal);
+        GooString value(&opt, iequal + 1, opt.size() - iequal - 1);
+        opt.del(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
         if (opt.cmp("quality") == 0) {
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (jpegOpt.getLength() > 0) {
+    if (!jpegOpt.empty()) {
         if (!jpeg) {
             fprintf(stderr, "Warning: -jpegopt only valid with jpeg output.\n");
         }

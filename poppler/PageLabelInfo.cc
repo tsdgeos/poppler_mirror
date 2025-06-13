@@ -46,7 +46,7 @@ PageLabelInfo::Interval::Interval(Object *dict, int baseA)
     obj = dict->dictLookup("P");
     if (obj.isString()) {
         const auto str = obj.getString();
-        prefix.assign(str->c_str(), str->getLength());
+        prefix.assign(str->toStr());
     }
 
     obj = dict->dictLookup("St");
@@ -118,7 +118,7 @@ void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsed
 bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
     const char *const str = label->c_str();
-    const std::size_t strLen = label->getLength();
+    const std::size_t strLen = label->size();
     const bool strUnicode = hasUnicodeByteOrderMark(label->toStr());
     int number;
     bool ok;
@@ -217,7 +217,7 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
         char ucs2_char[2];
 
         /* Convert the ascii number string to ucs2 and append. */
-        len = number_string.getLength();
+        len = number_string.size();
         ucs2_char[0] = 0;
         for (i = 0; i < len; ++i) {
             ucs2_char[1] = number_string.getChar(i);

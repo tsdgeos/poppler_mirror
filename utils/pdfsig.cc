@@ -283,7 +283,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
             return nullptr;
         }
         firstTime = false;
-        if (nssPassword.getLength() > 0) {
+        if (!nssPassword.empty()) {
             return strdup(nssPassword.c_str());
         } else {
             passwordNeeded = true;
@@ -507,7 +507,7 @@ int main(int argc, char *argv[])
 
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : std::make_unique<GooString>(utf8ToUtf16WithBom(reason.toStr())));
 
-        if (newSignatureFieldName.getLength() == 0) {
+        if (newSignatureFieldName.empty()) {
             // Create a random field name, it could be anything but 32 hex numbers should
             // hopefully give us something that is not already in the document
             std::random_device rd;

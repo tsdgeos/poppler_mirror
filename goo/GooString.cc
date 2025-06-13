@@ -431,7 +431,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                 case fmtGooString:
                     if (arg.gs) {
                         str = arg.gs->c_str();
-                        len = arg.gs->getLength();
+                        len = arg.gs->size();
                     } else {
                         str = "(null)";
                         len = 6;

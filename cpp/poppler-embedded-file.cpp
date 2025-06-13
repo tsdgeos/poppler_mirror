@@ -151,8 +151,8 @@ byte_array embedded_file::checksum() const
         return byte_array();
     }
     const char *ccs = cs->c_str();
-    byte_array data(cs->getLength());
-    for (int i = 0; i < cs->getLength(); ++i) {
+    byte_array data(cs->size());
+    for (size_t i = 0; i < cs->size(); ++i) {
         data[i] = ccs[i];
     }
     return data;

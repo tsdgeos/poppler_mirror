@@ -3855,7 +3855,7 @@ void Gfx::doShowText(const GooString *s)
         curY = state->getCurTextY();
         oldParser = parser;
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             dx = dx * state->getFontSize() + state->getCharSpace();
@@ -3933,7 +3933,7 @@ void Gfx::doShowText(const GooString *s)
 
     } else if (out->useDrawChar()) {
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             if (wMode) {
@@ -3964,7 +3964,7 @@ void Gfx::doShowText(const GooString *s)
     } else {
         dx = dy = 0;
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         nChars = nSpaces = 0;
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx2, &dy2, &originX, &originY);
@@ -4036,14 +4036,14 @@ void Gfx::doShowText(const GooString *s)
         out->restoreTextPos(state);
     }
 
-    updateLevel += 10 * s->getLength();
+    updateLevel += 10 * s->size();
 }
 
 // NB: this is only called when ocState is false.
 void Gfx::doIncCharCount(const GooString *s)
 {
     if (out->needCharCount()) {
-        out->incCharCount(s->getLength());
+        out->incCharCount(s->size());
     }
 }
 

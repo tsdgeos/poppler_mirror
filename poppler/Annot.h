@@ -777,7 +777,7 @@ public:
     bool inRect(double x, double y) const;
 
     // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
-    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
+    static void layoutText(const GooString *text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
     virtual ~Annot();
 

@@ -2400,7 +2400,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, Ar
         }
         obj1.streamClose();
     } else if (obj1.isString()) {
-        if (obj1.getString()->getLength() < (indexHighA + 1) * n) {
+        if (obj1.getString()->size() < size_t(indexHighA + 1) * n) {
             error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
             goto err3;
         }

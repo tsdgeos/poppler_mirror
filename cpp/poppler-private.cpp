@@ -64,7 +64,7 @@ rectf detail::pdfrectangle_to_rectf(const PDFRectangle &pdfrect)
 ustring detail::unicode_GooString_to_ustring(const GooString *str)
 {
     const char *data = str->c_str();
-    const int len = str->getLength();
+    const int len = str->size();
 
     const bool is_unicodeLE = hasUnicodeByteOrderMarkLE(str->toStr());
     const bool is_unicode = hasUnicodeByteOrderMark(str->toStr()) || is_unicodeLE;

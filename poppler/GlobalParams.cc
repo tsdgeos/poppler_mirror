@@ -280,14 +280,14 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 {
     GooString *name2;
     bool bold, italic, oblique;
-    int n;
+    size_t n;
 
     name2 = new GooString(name);
 
     // remove space, comma, dash chars
     {
-        int i = 0;
-        while (i < name2->getLength()) {
+        size_t i = 0;
+        while (i < name2->size()) {
             const char c = name2->getChar(i);
             if (c == ' ' || c == ',' || c == '-') {
                 name2->del(i);
@@ -295,7 +295,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
                 ++i;
             }
         }
-        n = name2->getLength();
+        n = name2->size();
     }
 
     // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)

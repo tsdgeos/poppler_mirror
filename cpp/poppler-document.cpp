@@ -1131,7 +1131,7 @@ std::map<std::string, destination> document::create_destination_map() const
     // Iterate from name-tree
     const int nDestsNameTree = catalog->numDestNameTree();
     for (int i = 0; i < nDestsNameTree; ++i) {
-        std::string key(catalog->getDestNameTreeName(i)->c_str(), catalog->getDestNameTreeName(i)->getLength());
+        std::string key(catalog->getDestNameTreeName(i)->toStr());
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
 
         if (link_dest) {

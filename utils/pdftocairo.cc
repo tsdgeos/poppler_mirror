@@ -304,8 +304,8 @@ static bool parseJpegOptions()
             return false;
         }
         const int iequal = static_cast<int>(equal - opt.c_str());
-        GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
-        opt.del(iequal, opt.getLength() - iequal);
+        GooString value(&opt, iequal + 1, opt.size() - iequal - 1);
+        opt.del(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
         if (opt.cmp("quality") == 0) {
@@ -883,7 +883,7 @@ static std::unique_ptr<GooString> getOutputFileName(GooString *fileName, GooStri
     // remove .pdf extension
     p = strrchr(name->c_str(), '.');
     if (p && strcasecmp(p, ".pdf") == 0) {
-        name = std::make_unique<GooString>(name->c_str(), name->getLength() - 4);
+        name = std::make_unique<GooString>(name->c_str(), name->size() - 4);
     }
 
     // append new extension
@@ -1001,7 +1001,7 @@ int main(int argc, char *argv[])
         exit(99);
     }
 
-    if (antialias.getLength() > 0) {
+    if (!antialias.empty()) {
         if (!parseAntialiasOption()) {
             exit(99);
         }
@@ -1022,7 +1022,7 @@ int main(int argc, char *argv[])
         exit(99);
     }
 
-    if (jpegOpt.getLength() > 0) {
+    if (!jpegOpt.empty()) {
         if (!jpeg) {
             fprintf(stderr, "Error: -jpegopt may only be used with jpeg output.\n");
             exit(99);

@@ -255,7 +255,7 @@ std::unique_ptr<GooString> HtmlFont::HtmlFilter(const Unicode *u, int uLen)
             break;
         case ' ':
         case '\t':
-            tmp->append(!xml && (i + 1 >= uLen || !tmp->getLength() || tmp->getChar(tmp->getLength() - 1) == ' ') ? "&#160;" : " ");
+            tmp->append(!xml && (i + 1 >= uLen || tmp->empty() || tmp->getChar(tmp->size() - 1) == ' ') ? "&#160;" : " ");
             break;
         default: {
             // convert unicode to string

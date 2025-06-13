@@ -749,7 +749,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     border->setWidth(borderWidth);
     getWidgetAnnotation()->setBorder(std::move(border));
 
-    if (signatureText.getLength() || signatureTextLeft.getLength()) {
+    if (!signatureText.empty() || !signatureTextLeft.empty()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
         if (pdfFontName.empty()) {
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
@@ -943,10 +943,10 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("SubFilter", Object(objName, toStdString(signatureType).c_str()));
     vObj.dictAdd("Name", Object(name.copy()));
     vObj.dictAdd("M", Object(timeToDateString(nullptr)));
-    if (reason && (reason->getLength() > 0)) {
+    if (reason && !reason->empty()) {
         vObj.dictAdd("Reason", Object(reason->copy()));
     }
-    if (location && (location->getLength() > 0)) {
+    if (location && !location->empty()) {
         vObj.dictAdd("Location", Object(location->copy()));
     }
 
@@ -1227,7 +1227,7 @@ const GooString *FormField::getFullyQualifiedName() const
             if (unicode_encoded) {
                 fullyQualifiedName->insert(0, "\0.", 2); // 2-byte unicode period
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
                 } else {
                     std::string tmp_str = pdfDocEncodingToUTF16(parent_name->toStr());
                     fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
@@ -1237,7 +1237,7 @@ const GooString *FormField::getFullyQualifiedName() const
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
                 } else {
                     fullyQualifiedName->insert(0, parent_name);
                 }
@@ -1253,7 +1253,7 @@ const GooString *FormField::getFullyQualifiedName() const
     if (partialName) {
         if (unicode_encoded) {
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
-                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->size() - 2); // Remove the unicode BOM
             } else {
                 std::string tmp_str = pdfDocEncodingToUTF16(partialName->toStr());
                 fullyQualifiedName->append(tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
@@ -1262,13 +1262,13 @@ const GooString *FormField::getFullyQualifiedName() const
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 unicode_encoded = true;
                 fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
-                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->size() - 2); // Remove the unicode BOM
             } else {
                 fullyQualifiedName->append(partialName.get());
             }
         }
     } else {
-        int len = fullyQualifiedName->getLength();
+        int len = fullyQualifiedName->size();
         // Remove the last period
         if (unicode_encoded) {
             if (len > 1) {
@@ -1644,14 +1644,14 @@ void FormFieldText::fillContent(FillValueType fillType)
     obj1 = Form::fieldLookup(dict, fillType == fillDefaultValue ? "DV" : "V");
     if (obj1.isString()) {
         if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
-            if (obj1.getString()->getLength() > 2) {
+            if (obj1.getString()->size() > 2) {
                 if (fillType == fillDefaultValue) {
                     defaultContent = obj1.takeString();
                 } else {
                     content = obj1.takeString();
                 }
             }
-        } else if (obj1.getString()->getLength() > 0) {
+        } else if (!obj1.getString()->empty()) {
             // non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
             std::string tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr());
 
@@ -2281,7 +2281,7 @@ void FormFieldSignature::parseInfo()
     Object contents_obj = sig_dict.dictLookup("Contents");
     if (contents_obj.isString()) {
         auto signatureString = contents_obj.takeString();
-        signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->getLength());
+        signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->size());
     }
 
     byte_range = sig_dict.dictLookup("ByteRange");
@@ -3055,7 +3055,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
 
     // If the text has some characters that are not available in the font, try adding a font for those
     std::unordered_set<Unicode> seen;
-    for (int i = 2; i < unicodeText->getLength(); i += 2) {
+    for (size_t i = 2; i < unicodeText->size(); i += 2) {
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 

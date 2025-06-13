@@ -177,7 +177,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref)
         if (fontLoc && fontLoc->locType == gfxFontLocExternal) {
             file = fontLoc->path;
         }
-        if (substituteNameAux.getLength() > 0) {
+        if (!substituteNameAux.empty()) {
             substituteName = substituteNameAux.toStr();
         }
     }

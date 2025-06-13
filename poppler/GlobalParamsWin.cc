@@ -248,7 +248,6 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
     int n;
     bool bold, italic, oblique, fixedWidth;
     char c;
-    int i;
     SysFontType type;
     GooString substituteName;
 
@@ -297,8 +296,8 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
 
     //----- normalize the font name
     std::unique_ptr<GooString> s = std::make_unique<GooString>(name, n);
-    i = 0;
-    while (i < s->getLength()) {
+    size_t i = 0;
+    while (i < s->size()) {
         c = s->getChar(i);
         if (c == ' ' || c == ',' || c == '-') {
             s->del(i);
@@ -320,8 +319,8 @@ static GooString *replaceSuffix(GooString *path, const char *suffixA, const char
 {
     int suffLenA = strlen(suffixA);
     int suffLenB = strlen(suffixB);
-    int baseLenA = path->getLength() - suffLenA;
-    int baseLenB = path->getLength() - suffLenB;
+    int baseLenA = path->size() - suffLenA;
+    int baseLenB = path->size() - suffLenB;
 
     if (!strcasecmp(path->c_str() + baseLenA, suffixA)) {
         path->del(baseLenA, suffLenA)->append(suffixB);

@@ -1549,9 +1549,9 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
                 printf(" link to page %d ", destPage);
             }
             if (printHtml) {
-                const char *p = file->c_str() + file->getLength() - 4;
+                const char *p = file->c_str() + file->size() - 4;
                 if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-                    file->del(file->getLength() - 4, 4);
+                    file->del(file->size() - 4, 4);
                     file->append(".html");
                 }
                 file->append('#');
@@ -1572,9 +1572,9 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
         if (printHtml) {
             LinkLaunch *ha = (LinkLaunch *)link->getAction();
             std::unique_ptr<GooString> file = std::make_unique<GooString>(ha->getFileName()->c_str());
-            const char *p = file->c_str() + file->getLength() - 4;
+            const char *p = file->c_str() + file->size() - 4;
             if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-                file->del(file->getLength() - 4, 4);
+                file->del(file->size() - 4, 4);
                 file->append(".html");
             }
             if (printCommands) {

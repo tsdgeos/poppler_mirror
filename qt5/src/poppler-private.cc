@@ -103,7 +103,7 @@ QString unicodeToQString(const Unicode *u, int len)
         convertedStr.append(buf, n);
     }
 
-    return QString::fromUtf8(convertedStr.c_str(), convertedStr.getLength());
+    return QString::fromUtf8(convertedStr.c_str(), convertedStr.size());
 }
 
 QString unicodeToQString(const std::vector<Unicode> &u)
@@ -213,11 +213,11 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             // get the destination for the page now, but it's VERY time consuming,
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i) {
+            QChar *charArray = new QChar[s->size()];
+            for (size_t i = 0; i < s->size(); ++i) {
                 charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
-            QString aux(charArray, s->getLength());
+            QString aux(charArray, s->size());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
             delete[] charArray;
         } else if (destination && destination->isOk()) {
@@ -235,11 +235,11 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
             // get the destination for the page now, but it's VERY time consuming,
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->getLength()];
-            for (int i = 0; i < s->getLength(); ++i) {
+            QChar *charArray = new QChar[s->size()];
+            for (size_t i = 0; i < s->size(); ++i) {
                 charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
-            QString aux(charArray, s->getLength());
+            QString aux(charArray, s->size());
             e->setAttribute(QStringLiteral("DestinationName"), aux);
             delete[] charArray;
         } else if (destination && destination->isOk()) {

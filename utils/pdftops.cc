@@ -396,9 +396,9 @@ int main(int argc, char *argv[])
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto err1;
     } else {
-        const char *p = fileName->c_str() + fileName->getLength() - 4;
+        const char *p = fileName->c_str() + fileName->size() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            psFileName = std::string(fileName->c_str(), fileName->getLength() - 4);
+            psFileName = std::string(fileName->c_str(), fileName->size() - 4);
 
         } else {
             psFileName = fileName->toStr();

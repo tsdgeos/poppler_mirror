@@ -1045,7 +1045,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->certificateType = fromPopplerCore(ci->getCertificateType());
 
         const GooString &certSerial = ci->getSerialNumber();
-        certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
+        certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.size());
 
         const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
         certPriv->issuer_info.common_name = QString::fromStdString(issuerInfo.commonName);
@@ -1066,12 +1066,12 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, QTimeZone::utc());
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
-        certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
+        certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.size());
         certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
         certPriv->public_key_strength = pkInfo.publicKeyStrength;
 
         const GooString &certDer = ci->getCertificateDER();
-        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
+        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.size());
 
         certPriv->is_null = false;
         certPriv->is_qualified = ci->isQualified();

@@ -1941,7 +1941,7 @@ Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4>
 Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
 {
     Dict *appearDict = new Dict(doc->getXRef());
-    appearDict->set("Length", Object(appearBuf->getLength()));
+    appearDict->set("Length", Object(int(appearBuf->size())));
     appearDict->set("Subtype", Object(objName, "Form"));
 
     Array *a = new Array(doc->getXRef());
@@ -1959,7 +1959,7 @@ Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4>
         appearDict->set("Resources", std::move(resDictObject));
     }
 
-    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
     auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
     return Object(std::move(mStream));
 }
@@ -3021,7 +3021,7 @@ public:
 
     HorizontalTextLayouter(const GooString *text, const Form *form, const GfxFont *font, std::optional<double> availableWidth, const bool noReencode)
     {
-        int i = 0;
+        size_t i = 0;
         double blockWidth;
         bool newFontNeeded = false;
         GooString outputText;
@@ -3057,7 +3057,7 @@ public:
                     if (isUnicode) {
                         prependUnicodeByteOrderMark(auxContents.toNonConstStr());
                     }
-                    int auxI = 0;
+                    size_t auxI = 0;
                     Annot::layoutText(&auxContents, &outputText, &auxI, *auxFont, &blockWidth, availableWidth ? *availableWidth : 0.0, &charCount, false, &newFontNeeded);
                     assert(!newFontNeeded);
                     if (availableWidth) {
@@ -3138,8 +3138,8 @@ double Annot::calculateFontSize(const Form *form, const GfxFont *font, const Goo
     for (fontSize = 20; fontSize > 1; --fontSize) {
         const double availableWidthInFontSize = wMax / fontSize;
         double y = hMax - 3;
-        int i = 0;
-        while (i < text->getLength()) {
+        size_t i = 0;
+        while (i < text->size()) {
             GooString lineText(text->toStr().substr(i));
             if (!hasUnicodeByteOrderMark(lineText.toStr()) && isUnicode) {
                 prependUnicodeByteOrderMark(lineText.toNonConstStr());
@@ -3648,8 +3648,8 @@ void AnnotLine::generateLineAppearance()
         fontResDict = new Dict(doc->getXRef());
         font = createAnnotDrawFont(doc->getXRef(), fontResDict);
         int lines = 0;
-        int i = 0;
-        while (i < contents->getLength()) {
+        size_t i = 0;
+        while (i < contents->size()) {
             GooString out;
             double linewidth;
             layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
@@ -3731,9 +3731,9 @@ void AnnotLine::generateLineAppearance()
         appearBuilder.appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} Tm\n", matr.m[0], matr.m[1], matr.m[2], matr.m[3], tx, ty);
         appearBuilder.appendf("0 {0:.2f} Td\n", -fontsize * font->getDescent());
         // Draw text
-        int i = 0;
+        size_t i = 0;
         double xposPrev = 0;
-        while (i < contents->getLength()) {
+        while (i < contents->size()) {
             GooString out;
             double linewidth, xpos;
             layoutText(contents.get(), &out, &i, *font, &linewidth, 0, nullptr, false);
@@ -4248,7 +4248,7 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded)
+void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded)
 {
     CharCode c;
     Unicode uChar;
@@ -4280,9 +4280,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     // We keep track of several points:
     //   1 - end of previous completed word which fits
     //   2 - previous character which fit
-    int last_i1, last_i2, last_o1, last_o2;
+    size_t last_i1, last_i2, last_o1, last_o2;
 
-    if (unicode && text->getLength() % 2 != 0) {
+    if (unicode && text->size() % 2 != 0) {
         error(errSyntaxError, -1, "AnnotWidget::layoutText, bad unicode string");
         return;
     }
@@ -4303,9 +4303,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     spacePrev = false;
     outBuf->clear();
 
-    while (*i < text->getLength()) {
+    while (*i < text->size()) {
         last_i2 = *i;
-        last_o2 = outBuf->getLength();
+        last_o2 = outBuf->size();
 
         if (unicode) {
             uChar = (unsigned char)(text->getChar(*i)) << 8;
@@ -4323,7 +4323,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         // Explicit line break?
         if (uChar == '\r' || uChar == '\n') {
             // Treat a <CR><LF> sequence as a single line break
-            if (uChar == '\r' && *i < text->getLength()) {
+            if (uChar == '\r' && *i < text->size()) {
                 if (unicode && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n') {
                     *i += 2;
                 } else if (!unicode && text->getChar(*i) == '\n') {
@@ -4393,9 +4393,9 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
         }
 
         // Compute width of character just output
-        if (outBuf->getLength() > last_o2) {
+        if (outBuf->size() > last_o2) {
             dx = 0.0;
-            font.getNextChar(outBuf->c_str() + last_o2, outBuf->getLength() - last_o2, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
+            font.getNextChar(outBuf->c_str() + last_o2, outBuf->size() - last_o2, &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
             w += dx;
         }
 
@@ -4405,12 +4405,12 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
                 // Back up to the previous word which fit, if there was a previous
                 // word.
                 *i = last_i1;
-                outBuf->del(last_o1, outBuf->getLength() - last_o1);
+                outBuf->del(last_o1, outBuf->size() - last_o1);
             } else if (last_o2 > 0) {
                 // Otherwise, back up to the previous character (in the only word on
                 // this line)
                 *i = last_i2;
-                outBuf->del(last_o2, outBuf->getLength() - last_o2);
+                outBuf->del(last_o2, outBuf->size() - last_o2);
             } else {
                 // Otherwise, we were trying to fit the first character; include it
                 // anyway even if it overflows the space--no updates to make.
@@ -4426,23 +4426,23 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     // widthLimit still.
     if (widthLimit > 0.0 && w > widthLimit) {
         if (unicode) {
-            while (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == ' ') {
+            while (*i < text->size() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == ' ') {
                 *i += 2;
             }
-            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\r') {
+            if (*i < text->size() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\r') {
                 *i += 2;
             }
-            if (*i < text->getLength() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n') {
+            if (*i < text->size() && text->getChar(*i) == '\0' && text->getChar(*i + 1) == '\n') {
                 *i += 2;
             }
         } else {
-            while (*i < text->getLength() && text->getChar(*i) == ' ') {
+            while (*i < text->size() && text->getChar(*i) == ' ') {
                 *i += 1;
             }
-            if (*i < text->getLength() && text->getChar(*i) == '\r') {
+            if (*i < text->size() && text->getChar(*i) == '\r') {
                 *i += 1;
             }
-            if (*i < text->getLength() && text->getChar(*i) == '\n') {
+            if (*i < text->size() && text->getChar(*i) == '\n') {
                 *i += 1;
             }
         }
@@ -4452,7 +4452,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i, const G
     // breakpoint, if this information is requested by the caller.
     if (width != nullptr || charCount != nullptr) {
         const char *s = outBuf->c_str();
-        int len = outBuf->getLength();
+        int len = outBuf->size();
 
         while (len > 0) {
             dx = 0.0;
@@ -4583,9 +4583,9 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     if (flags & TurnTextToStarsDrawTextFlag) {
         int len;
         if (hasUnicodeByteOrderMark(text->toStr())) {
-            len = (text->getLength() - 2) / 2;
+            len = (text->size() - 2) / 2;
         } else {
-            len = text->getLength();
+            len = text->size();
         }
 
         textToFree = std::make_unique<GooString>();
@@ -4823,7 +4823,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     GooString convertedText;
     const GfxFont *font;
     double fontSize, borderWidth, x, y;
-    int tfPos, tmPos, i, j;
+    int tfPos, tmPos;
     std::unique_ptr<const GfxFont> fontToFree;
 
     //~ if there is no MK entry, this should use the existing content stream,
@@ -4833,13 +4833,14 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     // parse the default appearance string
     tfPos = tmPos = -1;
     if (da) {
-        i = 0;
-        while (i < da->getLength()) {
-            while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
+        size_t i = 0;
+        size_t j = 0;
+        while (i < da->size()) {
+            while (i < da->size() && Lexer::isSpace(da->getChar(i))) {
                 ++i;
             }
-            if (i < da->getLength()) {
-                for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
+            if (i < da->size()) {
+                for (j = i + 1; j < da->size() && !Lexer::isSpace(da->getChar(j)); ++j) {
                     ;
                 }
                 daToks.push_back(std::make_unique<GooString>(da, i, j - i));
@@ -4860,7 +4861,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     fontSize = 0;
     if (tfPos >= 0) {
         tok = daToks[tfPos].get();
-        if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
+        if (!tok->empty() >= 1 && tok->getChar(0) == '/') {
             if (!resources || !(font = resources->lookupFont(tok->c_str() + 1).get())) {
                 if (xref != nullptr && resourcesDict != nullptr) {
                     const char *fallback = determineFallbackFont(tok->toStr(), "Helvetica");
@@ -4892,8 +4893,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     // compute font autosize
     if (fontSize == 0) {
         double wMax = 0;
-        for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
-            j = 0;
+        for (int i = 0; i < fieldChoice->getNumChoices(); ++i) {
+            size_t j = 0;
             if (fieldChoice->getChoice(i) == nullptr) {
                 error(errSyntaxError, -1, "Invalid annotation listbox");
                 return false;
@@ -4918,7 +4919,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     }
     // draw the text
     y = rect->y2 - rect->y1 - 1.1 * fontSize;
-    for (i = fieldChoice->getTopIndex(); i < fieldChoice->getNumChoices(); ++i) {
+    for (int i = fieldChoice->getTopIndex(); i < fieldChoice->getNumChoices(); ++i) {
         // setup
         appearBuf->append("q\n");
 
@@ -4932,7 +4933,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         appearBuf->append("BT\n");
 
         // compute text width and start position
-        j = 0;
+        size_t j = 0;
         double w;
         Annot::layoutText(fieldChoice->getChoice(i), &convertedText, &j, *font, &w, 0.0, nullptr, false);
         w *= fontSize;
@@ -5427,7 +5428,7 @@ void AnnotWidget::generateFieldAppearance()
 
     const GooString *appearBuf = appearBuilder.buffer();
     // fill the appearance stream dictionary
-    appearDict->add("Length", Object(appearBuf->getLength()));
+    appearDict->add("Length", Object(int(appearBuf->size())));
     appearDict->add("Subtype", Object(objName, "Form"));
     Array *bbox = new Array(doc->getXRef());
     bbox->add(Object(0));
@@ -5442,7 +5443,7 @@ void AnnotWidget::generateFieldAppearance()
     }
 
     // build the appearance stream
-    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+    std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
     auto appearStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(appearDict));
     if (hasBeenUpdated) {
         // We should technically do this for all annots but AnnotFreeText
@@ -5598,7 +5599,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             resDict->set("XObject", Object(imgDict));
 
             Dict *formDict = new Dict(gfx->getXRef());
-            formDict->set("Length", Object(appearBuf->getLength()));
+            formDict->set("Length", Object(int(appearBuf->size())));
             formDict->set("Subtype", Object(objName, "Form"));
             formDict->set("Name", Object(objName, "FRM"));
             Array *bboxArray = new Array(gfx->getXRef());
@@ -5617,7 +5618,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Matrix", Object(matrix));
             formDict->set("Resources", Object(resDict));
 
-            std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->getLength() };
+            std::vector<char> data { appearBuf->c_str(), appearBuf->c_str() + appearBuf->size() };
             auto mStream = std::make_unique<AutoFreeMemStream>(std::move(data), Object(formDict));
 
             Dict *dict = new Dict(gfx->getXRef());
