@@ -232,9 +232,7 @@ public:
     // Compare two strings:  -1:<  0:=  +1:>
     int cmp(const GooString *str) const { return compare(*str); }
     int cmp(const std::string &str) const { return compare(str); }
-    int cmpN(GooString *str, int n) const { return compare(0, n, *str); }
     int cmp(const char *sA) const { return compare(sA); }
-    int cmpN(const char *sA, int n) const { return compare(0, n, sA); }
 
     // Return true if strings starts with prefix
     using std::string::starts_with;
