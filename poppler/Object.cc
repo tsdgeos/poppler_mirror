@@ -49,7 +49,7 @@ Object Object::copy() const
     switch (type) {
     case objString:
     case objHexString:
-        obj.string = new GooString(string);
+        obj.string = string->copy().release();
         break;
     case objName:
     case objCmd:
@@ -81,7 +81,7 @@ Object Object::deepCopy() const
     switch (type) {
     case objString:
     case objHexString:
-        obj.string = new GooString(string);
+        obj.string = string->copy().release();
         break;
     case objName:
     case objCmd:

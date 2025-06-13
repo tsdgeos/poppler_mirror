@@ -102,7 +102,7 @@ static char userPassword[33] = "";
 static bool printVersion = false;
 
 static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key);
-static GooString *getInfoDate(Dict *infoDict, const char *key);
+static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key);
 
 static char textEncName[128] = "";
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<GooString> author;
     std::unique_ptr<GooString> keywords;
     std::unique_ptr<GooString> subject;
-    GooString *date = nullptr;
+    std::optional<std::string> date;
     std::unique_ptr<GooString> htmlFileName;
     HtmlOutputDev *htmlOut = nullptr;
     SplashOutputDev *splashOut = nullptr;
@@ -334,7 +334,6 @@ int main(int argc, char *argv[])
     // write text file
     htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->c_str(), docTitle->c_str(), author ? author->c_str() : nullptr, keywords ? keywords->c_str() : nullptr, subject ? subject->c_str() : nullptr, date ? date->c_str() : nullptr,
                                 rawOrder, firstPage, doOutline);
-    delete date;
 
     if ((complexMode || singleHtml) && !xml && !ignore) {
         // White paper color
@@ -428,13 +427,12 @@ static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
     return encodedString;
 }
 
-static GooString *getInfoDate(Dict *infoDict, const char *key)
+static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key)
 {
     Object obj;
     int year, mon, day, hour, min, sec, tz_hour, tz_minute;
     char tz;
     struct tm tmStruct;
-    GooString *result = nullptr;
     char buf[256];
 
     obj = infoDict->lookup(key);
@@ -453,13 +451,13 @@ static GooString *getInfoDate(Dict *infoDict, const char *key)
             tmStruct.tm_isdst = -1;
             mktime(&tmStruct); // compute the tm_wday and tm_yday fields
             if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tmStruct)) {
-                result = new GooString(buf);
+                return std::string(buf);
             } else {
-                result = new GooString(s);
+                return s->toStr();
             }
         } else {
-            result = new GooString(s);
+            return s->toStr();
         }
     }
-    return result;
+    return {};
 }

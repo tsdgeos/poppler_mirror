@@ -98,15 +98,13 @@ GooString *appendToPath(GooString *path, const char *fileName)
 {
 #ifdef _WIN32
     //---------- Win32 ----------
-    GooString *tmp;
     char buf[256];
     char *fp;
 
-    tmp = new GooString(path);
+    auto tmp = path->copy();
     tmp->append('/');
     tmp->append(fileName);
     GetFullPathNameA(tmp->c_str(), sizeof(buf), buf, &fp);
-    delete tmp;
     path->clear();
     path->append(buf);
     return path;
