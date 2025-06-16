@@ -66,7 +66,7 @@ private:
     bool bold;
     bool rotOrSkewed;
     std::string familyName;
-    std::unique_ptr<GooString> FontName;
+    std::string FontName;
     HtmlFontColor color;
     double rotSkewMat[4]; // only four values needed for rotation and skew
 public:
@@ -75,7 +75,7 @@ public:
     HtmlFont &operator=(const HtmlFont &x);
     HtmlFontColor getColor() const { return color; }
     ~HtmlFont();
-    std::unique_ptr<GooString> getFullName();
+    std::string getFullName() const;
     bool isItalic() const { return italic; }
     bool isBold() const { return bold; }
     bool isRotOrSkewed() const { return rotOrSkewed; }
@@ -88,11 +88,11 @@ public:
         memcpy(rotSkewMat, mat, sizeof(rotSkewMat));
     }
     const double *getRotMat() const { return rotSkewMat; }
-    std::unique_ptr<GooString> getFontName();
+    std::string getFontName() const;
     static std::unique_ptr<GooString> HtmlFilter(const Unicode *u, int uLen); // char* s);
     bool isEqual(const HtmlFont &x) const;
     bool isEqualIgnoreBold(const HtmlFont &x) const;
-    void print() const { printf("font: %s (%s) %d %s%s\n", FontName->c_str(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : ""); };
+    void print() const { printf("font: %s (%s) %d %s%s\n", FontName.c_str(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : ""); };
 };
 
 class HtmlFontAccu

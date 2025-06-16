@@ -138,7 +138,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
     }
 
     if (const std::optional<std::string> &fontname = font.getName()) {
-        FontName = std::make_unique<GooString>(*fontname);
+        FontName = *fontname;
 
         GooString fontnameLower(*fontname);
         fontnameLower.lowerCase();
@@ -154,7 +154,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
         familyName = *fontname;
         removeStyleSuffix(familyName);
     } else {
-        FontName = std::make_unique<GooString>(defaultFamilyName);
+        FontName = defaultFamilyName;
         familyName = defaultFamilyName;
     }
 
@@ -169,7 +169,7 @@ HtmlFont::HtmlFont(const HtmlFont &x)
     bold = x.bold;
     familyName = x.familyName;
     color = x.color;
-    FontName = x.FontName->copy();
+    FontName = x.FontName;
     rotOrSkewed = x.rotOrSkewed;
     memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
 }
@@ -187,7 +187,7 @@ HtmlFont &HtmlFont::operator=(const HtmlFont &x)
     bold = x.bold;
     familyName = x.familyName;
     color = x.color;
-    FontName = x.FontName->copy();
+    FontName = x.FontName;
     return *this;
 }
 
@@ -197,7 +197,7 @@ HtmlFont &HtmlFont::operator=(const HtmlFont &x)
 */
 bool HtmlFont::isEqual(const HtmlFont &x) const
 {
-    return (size == x.size) && (lineSize == x.lineSize) && (FontName->cmp(x.FontName.get()) == 0) && (bold == x.bold) && (italic == x.italic) && (color.isEqual(x.getColor())) && isRotOrSkewed() == x.isRotOrSkewed()
+    return (size == x.size) && (lineSize == x.lineSize) && (FontName == x.FontName) && (bold == x.bold) && (italic == x.italic) && (color.isEqual(x.getColor())) && isRotOrSkewed() == x.isRotOrSkewed()
             && (!isRotOrSkewed() || rot_matrices_equal(getRotMat(), x.getRotMat()));
 }
 
@@ -210,14 +210,14 @@ bool HtmlFont::isEqualIgnoreBold(const HtmlFont &x) const
     return ((size == x.size) && (familyName == x.familyName) && (color.isEqual(x.getColor())));
 }
 
-std::unique_ptr<GooString> HtmlFont::getFontName()
+std::string HtmlFont::getFontName() const
 {
-    return std::make_unique<GooString>(familyName);
+    return familyName;
 }
 
-std::unique_ptr<GooString> HtmlFont::getFullName()
+std::string HtmlFont::getFullName() const
 {
-    return FontName->copy();
+    return FontName;
 }
 
 // this method if plain wrong todo
@@ -295,7 +295,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
     g += i;
     HtmlFont font = *g;
     std::string colorStr = font.getColor().toString();
-    std::unique_ptr<GooString> fontName = (fontFullName ? font.getFullName() : font.getFontName());
+    std::string fontName = (fontFullName ? font.getFullName() : font.getFontName());
 
     if (!xml) {
         tmp->append(".ft");
@@ -308,7 +308,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
             tmp->append(std::to_string(font.getLineSize()));
         }
         tmp->append("px;font-family:");
-        tmp->append(fontName.get()); // font.getFontName());
+        tmp->append(fontName); // font.getFontName());
         tmp->append(";color:");
         tmp->append(colorStr);
         if (font.getColor().getOpacity() != 1.0) {
@@ -345,7 +345,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
         tmp->append("\" size=\"");
         tmp->append(std::to_string(font.getSize()));
         tmp->append("\" family=\"");
-        tmp->append(fontName.get());
+        tmp->append(fontName);
         tmp->append("\" color=\"");
         tmp->append(colorStr);
         if (font.getColor().getOpacity() != 1.0) {
