@@ -88,9 +88,9 @@ HtmlFontColor::HtmlFontColor(GfxRGB rgb, double opacity_)
     }
 }
 
-std::unique_ptr<GooString> HtmlFontColor::convtoX(unsigned int xcol) const
+std::string HtmlFontColor::convtoX(unsigned int xcol)
 {
-    auto xret = std::make_unique<GooString>();
+    std::string xret;
     char tmp;
     unsigned int k;
     k = (xcol / 16);
@@ -99,23 +99,23 @@ std::unique_ptr<GooString> HtmlFontColor::convtoX(unsigned int xcol) const
     } else {
         tmp = (char)('a' + k - 10);
     }
-    xret->append(tmp);
+    xret.push_back(tmp);
     k = (xcol % 16);
     if (k < 10) {
         tmp = (char)('0' + k);
     } else {
         tmp = (char)('a' + k - 10);
     }
-    xret->append(tmp);
+    xret.push_back(tmp);
     return xret;
 }
 
-std::unique_ptr<GooString> HtmlFontColor::toString() const
+std::string HtmlFontColor::toString() const
 {
-    auto tmp = std::make_unique<GooString>("#");
-    tmp->append(convtoX(r).get());
-    tmp->append(convtoX(g).get());
-    tmp->append(convtoX(b).get());
+    std::string tmp { "#" };
+    tmp.append(convtoX(r));
+    tmp.append(convtoX(g));
+    tmp.append(convtoX(b));
     return tmp;
 }
 
@@ -294,7 +294,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
     std::vector<HtmlFont>::iterator g = accu.begin();
     g += i;
     HtmlFont font = *g;
-    std::unique_ptr<GooString> colorStr = font.getColor().toString();
+    std::string colorStr = font.getColor().toString();
     std::unique_ptr<GooString> fontName = (fontFullName ? font.getFullName() : font.getFontName());
 
     if (!xml) {
@@ -310,7 +310,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
         tmp->append("px;font-family:");
         tmp->append(fontName.get()); // font.getFontName());
         tmp->append(";color:");
-        tmp->append(colorStr.get());
+        tmp->append(colorStr);
         if (font.getColor().getOpacity() != 1.0) {
             tmp->append(";opacity:");
             tmp->append(std::to_string(font.getColor().getOpacity()));
@@ -347,7 +347,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
         tmp->append("\" family=\"");
         tmp->append(fontName.get());
         tmp->append("\" color=\"");
-        tmp->append(colorStr.get());
+        tmp->append(colorStr);
         if (font.getColor().getOpacity() != 1.0) {
             tmp->append("\" opacity=\"");
             tmp->append(std::to_string(font.getColor().getOpacity()));

@@ -47,12 +47,12 @@ private:
     unsigned int b;
     unsigned int opacity;
     bool Ok(unsigned int xcol) { return xcol <= 255; }
-    std::unique_ptr<GooString> convtoX(unsigned int xcol) const;
+    static std::string convtoX(unsigned int xcol);
 
 public:
     HtmlFontColor() : r(0), g(0), b(0), opacity(255) { }
     HtmlFontColor(GfxRGB rgb, double opacity);
-    std::unique_ptr<GooString> toString() const;
+    std::string toString() const;
     double getOpacity() const { return opacity / 255.0; }
     bool isEqual(HtmlFontColor col) const { return ((r == col.r) && (g == col.g) && (b == col.b) && (opacity == col.opacity)); }
 };
