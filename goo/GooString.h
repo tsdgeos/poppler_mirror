@@ -189,9 +189,9 @@ public:
     POPPLER_PRIVATE_EXPORT GooString *appendfv(const char *fmt, va_list argList);
 
     // Insert a character or string.
-    GooString *insert(int i, char c)
+    GooString *insert(int i, int count, char c)
     {
-        static_cast<std::string &>(*this).insert(i, 1, c);
+        static_cast<std::string &>(*this).insert(i, count, c);
         return this;
     }
     GooString *insert(int i, const GooString *str)

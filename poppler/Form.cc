@@ -1219,7 +1219,7 @@ const GooString *FormField::getFullyQualifiedName() const
                     fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
                 }
             } else {
-                fullyQualifiedName->insert(0, '.'); // 1-byte ascii period
+                fullyQualifiedName->insert(0, 1, '.'); // 1-byte ascii period
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());

@@ -216,7 +216,7 @@ void SysFontList::scanWindowsFonts(const std::string &winFontDir)
                 if (!strcasecmp(data + n - 4, ".ttf") || !strcasecmp(data + n - 4, ".ttc") || !strcasecmp(data + n - 4, ".otf")) {
                     fontPath = new GooString(data);
                     if (!(dataLen >= 3 && data[1] == ':' && data[2] == '\\')) {
-                        fontPath->insert(0, '\\');
+                        fontPath->insert(0, 1, '\\');
                         fontPath->insert(0, winFontDir);
                         fontPath->append('\0');
                     }

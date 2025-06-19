@@ -287,7 +287,7 @@ Object getFileSpecNameForPlatform(const Object *fileSpec)
             }
             if (j < name->getLength()) {
                 name->setChar(0, '\\');
-                name->insert(0, '\\');
+                name->insert(0, 1, '\\');
                 i = 2;
             }
         }
