@@ -72,12 +72,12 @@ public:
     static std::unique_ptr<CharCodeToUnicode> make8BitToUnicode(Unicode *toUnicode);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font.
-    static std::unique_ptr<CharCodeToUnicode> parseCMap(const GooString *buf, int nBits);
+    static std::unique_ptr<CharCodeToUnicode> parseCMap(const std::string &buf, int nBits);
     static std::unique_ptr<CharCodeToUnicode> parseCMapFromFile(const GooString *fileName, int nBits);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font, merging it into
     // <this>.
-    void mergeCMap(const GooString *buf, int nBits);
+    void mergeCMap(const std::string &buf, int nBits);
 
     ~CharCodeToUnicode() = default;
 

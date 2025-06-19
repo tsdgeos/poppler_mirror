@@ -597,13 +597,13 @@ std::unique_ptr<CharCodeToUnicode> GfxFont::readToUnicodeCMap(Dict *fontDict, in
     if (!obj1.isStream()) {
         return ctu;
     }
-    auto buf = std::make_unique<GooString>();
-    obj1.getStream()->fillGooString(buf.get());
+    std::string buf;
+    obj1.getStream()->fillString(buf);
     obj1.streamClose();
     if (ctu) {
-        ctu->mergeCMap(buf.get(), nBits);
+        ctu->mergeCMap(buf, nBits);
     } else {
-        ctu = CharCodeToUnicode::parseCMap(buf.get(), nBits);
+        ctu = CharCodeToUnicode::parseCMap(buf, nBits);
     }
     hasToUnicode = true;
     return ctu;
