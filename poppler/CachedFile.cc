@@ -8,6 +8,7 @@
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2018-2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
+// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
