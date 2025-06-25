@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -28,6 +28,7 @@
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1572,6 +1573,8 @@ public:
     void setPath(GfxPath *pathA);
     double getCurX() const { return curX; }
     double getCurY() const { return curY; }
+    double getCurTextX() const { return curTextX; }
+    double getCurTextY() const { return curTextY; }
     void getClipBBox(double *xMin, double *yMin, double *xMax, double *yMax) const
     {
         *xMin = clipXMin;
@@ -1713,19 +1716,14 @@ public:
     void clipToRect(double xMin, double yMin, double xMax, double yMax);
 
     // Text position.
-    void textSetPos(double tx, double ty)
-    {
-        lineX = tx;
-        lineY = ty;
-    }
     void textMoveTo(double tx, double ty)
     {
         lineX = tx;
         lineY = ty;
-        textTransform(tx, ty, &curX, &curY);
+        textTransform(tx, ty, &curTextX, &curTextY);
     }
     void textShift(double tx, double ty);
-    void shift(double dx, double dy);
+    void textShiftWithUserCoords(double dx, double dy);
 
     // Push/pop GfxState on/off stack.
     GfxState *save();
@@ -1784,7 +1782,11 @@ private:
     int render; // text rendering mode
 
     GfxPath *path; // array of path elements
+    // Ideally we would not have curX and curTextX, but there are broken PDF producers that mix operators incorrectly
+    // and given that Adobe Reader renders them correctly we have decided to have two sets of coordinates to fix/workaround
+    // the rendering of those files
     double curX, curY; // current point (user coords)
+    double curTextX, curTextY; // start of current text line (user coords)
     double lineX, lineY; // start of current text line (text coords)
 
     double clipXMin, clipYMin, // bounding box for clip region

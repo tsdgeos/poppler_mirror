@@ -22,7 +22,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 <corentinf@free.fr>
-// Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -72,12 +72,12 @@ public:
     static std::unique_ptr<CharCodeToUnicode> make8BitToUnicode(Unicode *toUnicode);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font.
-    static std::unique_ptr<CharCodeToUnicode> parseCMap(const GooString *buf, int nBits);
+    static std::unique_ptr<CharCodeToUnicode> parseCMap(const std::string &buf, int nBits);
     static std::unique_ptr<CharCodeToUnicode> parseCMapFromFile(const GooString *fileName, int nBits);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font, merging it into
     // <this>.
-    void mergeCMap(const GooString *buf, int nBits);
+    void mergeCMap(const std::string &buf, int nBits);
 
     ~CharCodeToUnicode() = default;
 

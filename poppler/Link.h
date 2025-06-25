@@ -570,7 +570,7 @@ class LinkUnknown : public LinkAction
 {
 public:
     // Build a LinkUnknown with the specified action type.
-    explicit LinkUnknown(const char *actionA);
+    explicit LinkUnknown(std::string &&actionA);
 
     ~LinkUnknown() override;
 

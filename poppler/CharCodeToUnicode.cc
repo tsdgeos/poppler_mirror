@@ -166,10 +166,10 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::make8BitToUnicode(Unicode 
     return std::make_unique<CharCodeToUnicode>(std::optional<std::string> {}, std::move(data), std::vector<CharCodeToUnicodeString> {});
 }
 
-std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMap(const GooString *buf, int nBits)
+std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMap(const std::string &buf, int nBits)
 {
     auto ctu = std::make_unique<CharCodeToUnicode>(std::optional<std::string> {});
-    const char *p = buf->c_str();
+    const char *p = buf.c_str();
     if (!ctu->parseCMap1(&getCharFromString, static_cast<void *>(&p), nBits)) {
         return nullptr;
     }
@@ -192,9 +192,9 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const Go
     return ctu;
 }
 
-void CharCodeToUnicode::mergeCMap(const GooString *buf, int nBits)
+void CharCodeToUnicode::mergeCMap(const std::string &buf, int nBits)
 {
-    const char *p = buf->c_str();
+    const char *p = buf.c_str();
     parseCMap1(&getCharFromString, static_cast<void *>(&p), nBits);
 }
 

@@ -47,36 +47,48 @@ static const char hexChars[17] = "0123456789ABCDEF";
 // FoFiType1C
 //------------------------------------------------------------------------
 
-FoFiType1C *FoFiType1C::make(const unsigned char *fileA, int lenA)
+std::unique_ptr<FoFiType1C> FoFiType1C::make(std::vector<unsigned char> &&fileA)
 {
-    FoFiType1C *ff = new FoFiType1C(fileA, lenA, false);
+    auto ff = std::make_unique<FoFiType1C>(std::move(fileA));
     if (!ff->parse()) {
-        delete ff;
+        return nullptr;
+    }
+    return ff;
+}
+std::unique_ptr<FoFiType1C> FoFiType1C::make(std::span<unsigned char> data)
+{
+    auto ff = std::make_unique<FoFiType1C>(data);
+    if (!ff->parse()) {
         return nullptr;
     }
     return ff;
 }
 
-FoFiType1C *FoFiType1C::load(const char *fileName)
+std::unique_ptr<FoFiType1C> FoFiType1C::load(const char *fileName)
 {
-    FoFiType1C *ff;
-    char *fileA;
-    int lenA;
+    std::optional<std::vector<unsigned char>> fileA;
 
-    if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
+    if (!(fileA = FoFiBase::readFile(fileName))) {
         return nullptr;
     }
-    ff = new FoFiType1C((unsigned char *)fileA, lenA, true);
+    auto ff = std::make_unique<FoFiType1C>(std::move(fileA.value()));
     if (!ff->parse()) {
-        delete ff;
         return nullptr;
     }
     return ff;
 }
 
-FoFiType1C::FoFiType1C(const unsigned char *fileA, int lenA, bool freeFileDataA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBase(std::move(fileA))
 {
-    name = nullptr;
+    encoding = nullptr;
+    privateDicts = nullptr;
+    fdSelect = nullptr;
+    charset = nullptr;
+    charsetLength = 0;
+}
+
+FoFiType1C::FoFiType1C(std::span<unsigned char> data, PrivateTag) : FoFiBase(data)
+{
     encoding = nullptr;
     privateDicts = nullptr;
     fdSelect = nullptr;
@@ -88,7 +100,6 @@ FoFiType1C::~FoFiType1C()
 {
     int i;
 
-    delete name;
     if (encoding && encoding != fofiType1StandardEncoding && encoding != fofiType1ExpertEncoding) {
         for (i = 0; i < 256; ++i) {
             gfree(encoding[i]);
@@ -439,7 +450,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
 void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
 {
     std::vector<int> cidMap;
-    GooString *charStrings;
+    GooString charStrings;
     int *charStringOffsets;
     Type1CIndex subrIdx;
     Type1CIndexVal val;
@@ -478,10 +489,9 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     }
 
     // build the charstrings
-    charStrings = new GooString();
     charStringOffsets = (int *)gmallocn(cidMap.size() + 1, sizeof(int));
     for (size_t i = 0; i < cidMap.size(); ++i) {
-        charStringOffsets[i] = charStrings->getLength();
+        charStringOffsets[i] = charStrings.getLength();
         if ((gid = cidMap[i]) >= 0) {
             ok = true;
             getIndexVal(&charStringsIdx, gid, &val, &ok);
@@ -491,17 +501,17 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
                     subrIdx.pos = -1;
                 }
                 std::set<int> offsetBeingParsed;
-                cvtGlyph(val.pos, val.len, charStrings, &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], true, offsetBeingParsed);
+                cvtGlyph(val.pos, val.len, &charStrings, &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], true, offsetBeingParsed);
             }
         }
     }
-    charStringOffsets[cidMap.size()] = charStrings->getLength();
+    charStringOffsets[cidMap.size()] = charStrings.getLength();
 
     // compute gdBytes = number of bytes needed for charstring offsets
     // (offset size needs to account for the charstring offset table,
     // with a worst case of five bytes per entry, plus the charstrings
     // themselves)
-    int i = (cidMap.size() + 1) * 5 + charStrings->getLength();
+    int i = (cidMap.size() + 1) * 5 + charStrings.getLength();
     if (i < 0x100) {
         gdBytes = 1;
     } else if (i < 0x10000) {
@@ -679,7 +689,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
 
     // start the binary section
     offset = (cidMap.size() + 1) * (1 + gdBytes);
-    buf = GooString::format("(Hex) {0:d} StartData\n", offset + charStrings->getLength());
+    buf = GooString::format("(Hex) {0:d} StartData\n", offset + charStrings.getLength());
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // write the charstring offset (CIDMap) table
@@ -704,10 +714,10 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     }
 
     // write the charstring data
-    n = charStrings->getLength();
+    n = charStrings.getLength();
     for (i = 0; i < n; i += 32) {
         for (j = 0; j < 32 && i + j < n; ++j) {
-            buf = GooString::format("{0:02x}", charStrings->getChar(i + j) & 0xff);
+            buf = GooString::format("{0:02x}", charStrings.getChar(i + j) & 0xff);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         if (i + 32 >= n) {
@@ -717,7 +727,6 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     }
 
     gfree(charStringOffsets);
-    delete charStrings;
 }
 
 void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
@@ -1000,19 +1009,16 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
 
 void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict)
 {
-    GooString *charBuf;
+    GooString charBuf;
 
     // generate the charstring
-    charBuf = new GooString();
     std::set<int> offsetBeingParsed;
-    cvtGlyph(offset, nBytes, charBuf, subrIdx, pDict, true, offsetBeingParsed);
+    cvtGlyph(offset, nBytes, &charBuf, subrIdx, pDict, true, offsetBeingParsed);
 
-    const std::string buf = GooString::format("/{0:s} {1:d} RD ", glyphName, charBuf->getLength());
+    const std::string buf = GooString::format("/{0:s} {1:d} RD ", glyphName, charBuf.getLength());
     eexecWrite(eb, buf.c_str());
-    eexecWriteCharstring(eb, (unsigned char *)charBuf->c_str(), charBuf->getLength());
+    eexecWriteCharstring(eb, (unsigned char *)charBuf.c_str(), charBuf.getLength());
     eexecWrite(eb, " ND\n");
-
-    delete charBuf;
 }
 
 void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed)
@@ -1813,9 +1819,8 @@ bool FoFiType1C::parse()
 
     // some tools embed Type 1C fonts with an extra whitespace char at
     // the beginning
-    if (len > 0 && file[0] != '\x01') {
-        ++file;
-        --len;
+    if (!file.empty() && file[0] != '\x01') {
+        file = file.subspan(1);
     }
 
     // find the indexes
@@ -1833,7 +1838,7 @@ bool FoFiType1C::parse()
     if (!parsedOk) {
         return false;
     }
-    name = new GooString((char *)&file[val.pos], val.len);
+    name = std::make_unique<GooString>((char *)&file[val.pos], val.len);
 
     // read the top dict for the first font
     readTopDict();
@@ -2246,7 +2251,7 @@ void FoFiType1C::readFDSelect()
                 parsedOk = false;
                 return;
             }
-            memcpy(fdSelect, file + pos, nGlyphs);
+            memcpy(fdSelect, file.data() + pos, nGlyphs);
         } else if (fdSelectFmt == 3) {
             nRanges = getU16BE(pos, &parsedOk);
             pos += 2;
@@ -2592,11 +2597,11 @@ void FoFiType1C::getIndex(int pos, Type1CIndex *idx, bool *ok) const
             *ok = false;
         }
         idx->startPos = pos + 3 + (idx->len + 1) * idx->offSize - 1;
-        if (idx->startPos < 0 || idx->startPos >= len) {
+        if (idx->startPos < 0 || idx->startPos >= int(file.size())) {
             *ok = false;
         }
         idx->endPos = idx->startPos + getUVarBE(pos + 3 + idx->len * idx->offSize, idx->offSize, ok);
-        if (idx->endPos < idx->startPos || idx->endPos > len) {
+        if (idx->endPos < idx->startPos || idx->endPos > int(file.size())) {
             *ok = false;
         }
     }

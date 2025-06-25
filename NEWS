@@ -1,3 +1,17 @@
+Release 25.06.0:
+        core:
+         * Fix writing dates back to file
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        glib:
+         * Add the ink annotation type
+         * Add missing autopointers definitions
+
+        utils:
+         * pdfsig: Add assert-signer feature
+         * pdfsig: Return error code on error
+
 Release 25.05.0:
         core:
          * Fix re-fetching after xref reconstruction. Issue #1584
@@ -9,7 +23,6 @@ Release 25.05.0:
 
         glib:
          * Small signature improvements
-
 
 Release 25.04.0:
         core:

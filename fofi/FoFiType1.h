@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2018, 2022, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -27,6 +28,7 @@
 #include "FoFiBase.h"
 
 #include <string>
+#include <memory>
 
 //------------------------------------------------------------------------
 // FoFiType1
@@ -34,9 +36,13 @@
 
 class FoFiType1 : public FoFiBase
 {
+    class PrivateTag
+    {
+    };
+
 public:
     // Create a FoFiType1 object from a memory buffer.
-    static FoFiType1 *make(const unsigned char *fileA, int lenA);
+    static std::unique_ptr<FoFiType1> make(std::vector<unsigned char> &&fileA);
 
     ~FoFiType1() override;
 
@@ -50,9 +56,9 @@ public:
     // Write a version of the Type 1 font file with a new encoding.
     void writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc, void *outputStream) const;
 
-private:
-    FoFiType1(const unsigned char *fileA, int lenA, bool freeFileDataA);
+    explicit FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag = {});
 
+private:
     char *getNextLine(char *line) const;
     void parse();
     void undoPFB();

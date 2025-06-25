@@ -25,10 +25,9 @@
 
 std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
-    CachedFile *cachedFile = new CachedFile(new CurlCachedFileLoader(uri.toStr()));
+    auto cachedFile = std::make_shared<CachedFile>(std::make_unique<CurlCachedFileLoader>(uri.toStr()));
 
     if (cachedFile->getLength() == ((unsigned int)-1)) {
-        cachedFile->decRefCnt();
         return PDFDoc::ErrorPDFDoc(errOpenFile, uri.copy());
     }
 
@@ -39,7 +38,7 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
 
 bool CurlPDFDocBuilder::supports(const GooString &uri)
 {
-    if (uri.cmpN("http://", 7) == 0 || uri.cmpN("https://", 8) == 0) {
+    if (uri.starts_with("http://") || uri.starts_with("https://")) {
         return true;
     } else {
         return false;

@@ -43,7 +43,7 @@ class HTMLPrettyDiffImage(HTMLPrettyDiff):
 
     def write(self, test, outdir, result, actual, expected, diff):
         def get_relative_path(path):
-            return '../' * len(path.split('/')) + path
+            return '../' + path
 
         html = """
 <html>
@@ -93,7 +93,7 @@ Difference between images: <a href="%s">diff</a><br>
 </script>
 </body>
 </html>
-""" % (test, get_relative_path(diff), get_relative_path(actual), expected)
+""" % (test, get_relative_path(diff), get_relative_path(actual), get_relative_path(expected))
 
         diffdir = self._create_diff_for_test(outdir, test)
         pretty_diff_name = result + '-pretty-diff.html'
@@ -137,10 +137,11 @@ def create_pretty_diff(backend):
 
 class BackendTestResult:
 
-    def __init__(self, test, refsdir, outdir, backend, results):
+    def __init__(self, test, refsdir, outdir, reportdir, backend, results):
         self._test = test
         self._refsdir = refsdir
         self._outdir = outdir
+        self._reportdir = reportdir
         self._backend = backend
         self.config = Config()
 
@@ -170,15 +171,18 @@ class BackendTestResult:
     def get_failed_html(self):
         html = ""
         for result in self._results:
-            actual = os.path.join(self._test, result)
-            actual_path = os.path.join(self._outdir, actual)
-            expected = os.path.join(self._refsdir, self._test, result)
+            actual_path = os.path.abspath(os.path.join(self._outdir, self._test, result))
+            expected_path = os.path.abspath(os.path.join(self._refsdir, self._test, result))
             if self.config.abs_paths:
-                expected = os.path.abspath(expected)
-            html += "<li><a href='../%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
+                actual = actual_path
+                expected = expected_path
+            else:
+                actual = os.path.relpath(actual_path, self._reportdir)
+                expected = os.path.relpath(expected_path, self._reportdir)
+            html += "<li><a href='%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
             if self._backend.has_diff(actual_path):
                 diff = actual + self._backend.get_diff_ext()
-                html += "<a href='../%s'>diff</a> " % (diff)
+                html += "<a href='%s'>diff</a> " % (diff)
                 if self.config.pretty_diff:
                     pretty_diff = create_pretty_diff(self._backend)
                     if pretty_diff:
@@ -192,9 +196,10 @@ class BackendTestResult:
 
 class TestResult:
 
-    def __init__(self, docsdir, refsdir, outdir, resultdir, results, backends):
+    def __init__(self, docsdir, refsdir, outdir, reportdir, resultdir, results, backends):
         self._refsdir = refsdir
         self._outdir = outdir
+        self._reportdir = reportdir
         self.config = Config()
 
         self._test = resultdir[len(self._outdir):].lstrip('/')
@@ -204,7 +209,7 @@ class TestResult:
             ref_path = os.path.join(self._refsdir, self._test)
             if not backend.has_md5(ref_path) and not backend.is_crashed(ref_path) and not backend.is_failed(ref_path):
                 continue
-            self._results[backend] = BackendTestResult(self._test, refsdir, outdir, backend, results)
+            self._results[backend] = BackendTestResult(self._test, refsdir, outdir, reportdir, backend, results)
 
     def get_test(self):
         return self._test
@@ -231,8 +236,12 @@ class TestResult:
                 html += "<a href='../%s'>stderr</a>" % (stderr_name)
             html += "</li>\n%s" % (backend_html)
 
+        if not self.config.abs_paths:
+            doc = os.path.relpath(self._doc, self._reportdir)
+        else:
+            doc = os.path.abspath(self._doc)
         if html:
-            return "<h2><a name='%s'><a href='%s'>%s</a></a></h2>\n<ul>%s</ul><a href='#top'>Top</a>\n" % (self._test, self._doc, self._test, html)
+            return "<h2><a name='%s'><a href='%s'>%s</a></a></h2>\n<ul>%s</ul><a href='#top'>Top</a>\n" % (self._test, doc, self._test, html)
         return ""
 
     def get_crashed_html(self):
@@ -287,6 +296,7 @@ class HTMLReport:
             backends = get_all_backends()
 
         results = {}
+
         for root, dirs, files in os.walk(self._outdir, False):
             if not files:
                 continue
@@ -295,7 +305,7 @@ class HTMLReport:
             if root.startswith(self._htmldir):
                 continue
 
-            results[root] = TestResult(self._docsdir, self._refsdir, self._outdir, root, files, backends)
+            results[root] = TestResult(self._docsdir, self._refsdir, self._outdir, self._htmldir, root, files, backends)
 
         failed_anchors = []
         failed = ""

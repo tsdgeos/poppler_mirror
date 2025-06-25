@@ -143,7 +143,7 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const std
 
         // unknown action
     } else if (obj2.isName()) {
-        action = std::make_unique<LinkUnknown>(obj2.getName());
+        action = std::make_unique<LinkUnknown>(obj2.getNameString());
 
         // action is missing or wrong type
     } else {
@@ -456,7 +456,7 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj)
 
     // named destination
     if (destObj->isName()) {
-        namedDest = std::make_unique<GooString>(destObj->getName());
+        namedDest = std::make_unique<GooString>(destObj->getNameString());
     } else if (destObj->isString()) {
         namedDest = destObj->getString()->copy();
 
@@ -777,16 +777,15 @@ LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
                     stateList.push_back(stList);
                 }
 
-                const char *name = obj2.getName();
                 stList.list.clear();
-                if (!strcmp(name, "ON")) {
+                if (obj2.isName("ON")) {
                     stList.st = On;
-                } else if (!strcmp(name, "OFF")) {
+                } else if (obj2.isName("OFF")) {
                     stList.st = Off;
-                } else if (!strcmp(name, "Toggle")) {
+                } else if (obj2.isName("Toggle")) {
                     stList.st = Toggle;
                 } else {
-                    error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", name);
+                    error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", obj2.getName());
                     isValid = false;
                 }
             } else if (obj2.isRef()) {
@@ -929,10 +928,7 @@ LinkSubmitForm::~LinkSubmitForm() = default;
 // LinkUnknown
 //------------------------------------------------------------------------
 
-LinkUnknown::LinkUnknown(const char *actionA)
-{
-    action = std::string(actionA ? actionA : "");
-}
+LinkUnknown::LinkUnknown(std::string &&actionA) : action { actionA } { }
 
 LinkUnknown::~LinkUnknown() = default;
 

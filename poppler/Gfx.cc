@@ -3846,8 +3846,8 @@ void Gfx::doShowText(const GooString *s)
     }
 
     state->textTransformDelta(0, state->getRise(), &riseX, &riseY);
-    x0 = state->getCurX() + riseX;
-    y0 = state->getCurY() + riseY;
+    x0 = state->getCurTextX() + riseX;
+    y0 = state->getCurTextY() + riseY;
 
     // handle a Type 3 char
     if (font->getType() == fontType3 && out->interpretType3Chars()) {
@@ -3868,8 +3868,8 @@ void Gfx::doShowText(const GooString *s)
         newCTM[3] *= state->getFontSize();
         newCTM[0] *= state->getHorizScaling();
         newCTM[1] *= state->getHorizScaling();
-        curX = state->getCurX();
-        curY = state->getCurY();
+        curX = state->getCurTextX();
+        curY = state->getCurTextY();
         oldParser = parser;
         p = s->c_str();
         len = s->getLength();
@@ -3938,7 +3938,7 @@ void Gfx::doShowText(const GooString *s)
             // so we deal with it here using (curX, curY) and (lineX, lineY)
             curX += tdx;
             curY += tdy;
-            state->moveTo(curX, curY);
+            state->textShiftWithUserCoords(tdx, tdy);
             // Call updateCTM with the identity transformation.  That way, the CTM is unchanged,
             // but any side effect that the method may have is triggered.  This is the case,
             // in particular, for the Splash backend.
@@ -3972,9 +3972,9 @@ void Gfx::doShowText(const GooString *s)
             originY *= state->getFontSize();
             state->textTransformDelta(originX, originY, &tOriginX, &tOriginY);
             if (ocState) {
-                out->drawChar(state, state->getCurX() + riseX, state->getCurY() + riseY, tdx, tdy, tOriginX, tOriginY, code, n, u, uLen);
+                out->drawChar(state, state->getCurTextX() + riseX, state->getCurTextY() + riseY, tdx, tdy, tOriginX, tOriginY, code, n, u, uLen);
             }
-            state->shift(tdx, tdy);
+            state->textShiftWithUserCoords(tdx, tdy);
             p += n;
             len -= n;
         }
@@ -4006,7 +4006,7 @@ void Gfx::doShowText(const GooString *s)
         if (ocState) {
             out->drawString(state, s);
         }
-        state->shift(tdx, tdy);
+        state->textShiftWithUserCoords(tdx, tdy);
     }
 
     if (out->useDrawChar()) {
@@ -4020,8 +4020,8 @@ void Gfx::doShowText(const GooString *s)
         // set up a clipping bbox so doPatternText will work -- assume
         // that the text bounding box does not extend past the baseline in
         // any direction by more than twice the font size
-        x1 = state->getCurX() + riseX;
-        y1 = state->getCurY() + riseY;
+        x1 = state->getCurTextX() + riseX;
+        y1 = state->getCurTextY() + riseY;
         if (x0 > x1) {
             x = x0;
             x0 = x1;

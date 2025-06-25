@@ -861,7 +861,7 @@ static std::unique_ptr<GooString> getOutputFileName(GooString *fileName, GooStri
     }
 
     // be careful not to overwrite the input file when the output format is PDF
-    if (pdf && fileName->cmpN("http://", 7) != 0 && fileName->cmpN("https://", 8) != 0) {
+    if (pdf && !fileName->starts_with("http://") && !fileName->starts_with("https://")) {
         fprintf(stderr, "Error: an output filename or '-' must be supplied when the output format is PDF and input PDF file is a local file.\n");
         exit(99);
     }

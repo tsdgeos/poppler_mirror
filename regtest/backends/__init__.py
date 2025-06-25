@@ -87,7 +87,7 @@ class Backend:
         result_md5 = []
 
         for line in md5_file.readlines():
-            md5sum, ref_path = line.strip('\n').split(' ', 1)
+            md5sum, ref_path = line.strip('\n').split(None, 1)
             basename = os.path.basename(ref_path)
             if not self.__should_have_checksum(basename):
                 continue

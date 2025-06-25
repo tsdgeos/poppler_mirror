@@ -454,35 +454,40 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-std::unique_ptr<FoFiTrueType> FoFiTrueType::make(const unsigned char *fileA, int lenA, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(std::span<unsigned char> data, int faceIndexA)
 {
-    // Cannot use std::make_unique, because the constructor is private
-    auto ff = new FoFiTrueType(fileA, lenA, false, faceIndexA);
+    auto ff = std::make_unique<FoFiTrueType>(data, faceIndexA);
     if (!ff->parsedOk) {
-        delete ff;
         return nullptr;
     }
-    return std::unique_ptr<FoFiTrueType>(ff);
+    return ff;
 }
 
 std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceIndexA)
 {
-    char *fileA;
-    int lenA;
+    std::optional<std::vector<unsigned char>> fileA;
 
-    if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
+    if (!(fileA = FoFiBase::readFile(fileName))) {
         return nullptr;
     }
-    // Cannot use std::make_unique, because the constructor is private
-    auto ff = new FoFiTrueType((unsigned char *)fileA, lenA, true, faceIndexA);
+    auto ff = std::make_unique<FoFiTrueType>(std::move(fileA.value()), faceIndexA);
     if (!ff->parsedOk) {
-        delete ff;
         return nullptr;
     }
-    return std::unique_ptr<FoFiTrueType>(ff);
+    return ff;
 }
 
-FoFiTrueType::FoFiTrueType(const unsigned char *fileA, int lenA, bool freeFileDataA, int faceIndexA) : FoFiBase(fileA, lenA, freeFileDataA)
+FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag) : FoFiBase(std::move(fileA))
+{
+    parsedOk = false;
+    faceIndex = faceIndexA;
+    gsubFeatureTable = 0;
+    gsubLookupList = 0;
+
+    parse();
+}
+
+FoFiTrueType::FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -645,34 +650,29 @@ int FoFiTrueType::mapNameToGID(const char *name) const
     return gid->second;
 }
 
-bool FoFiTrueType::getCFFBlock(char **start, int *length) const
+std::optional<std::span<unsigned char>> FoFiTrueType::getCFFBlock() const
 {
     if (!openTypeCFF || tables.empty()) {
-        return false;
+        return std::nullopt;
     }
     int i = seekTable("CFF ");
     if (i < 0 || !checkRegion(tables[i].offset, tables[i].len)) {
-        return false;
+        return std::nullopt;
     }
-    *start = (char *)file + tables[i].offset;
-    *length = tables[i].len;
-    return true;
+    return std::span { file.data() + tables[i].offset, size_t(tables[i].len) };
 }
 
 std::vector<int> FoFiTrueType::getCIDToGIDMap() const
 {
-    char *start;
-    int length;
-    FoFiType1C *ff;
-
-    if (!getCFFBlock(&start, &length)) {
+    auto cffBlock = getCFFBlock();
+    if (!cffBlock) {
         return {};
     }
-    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
+    auto ff = FoFiType1C::make(cffBlock.value());
+    if (!ff) {
         return {};
     }
     std::vector<int> map = ff->getCIDToGIDMap();
-    delete ff;
     return map;
 }
 
@@ -703,18 +703,16 @@ int FoFiTrueType::getEmbeddingRights() const
 
 void FoFiTrueType::getFontMatrix(double *mat) const
 {
-    char *start;
-    int length;
-    FoFiType1C *ff;
+    auto cffBlock = getCFFBlock();
 
-    if (!getCFFBlock(&start, &length)) {
+    if (!cffBlock) {
         return;
     }
-    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
+    auto ff = FoFiType1C::make(cffBlock.value());
+    if (!ff) {
         return;
     }
     ff->getFontMatrix(mat);
-    delete ff;
 }
 
 void FoFiTrueType::convertToType42(const char *psName, char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
@@ -753,18 +751,15 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, const st
 
 void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding, bool ascii, FoFiOutputFunc outputFunc, void *outputStream) const
 {
-    char *start;
-    int length;
-    FoFiType1C *ff;
-
-    if (!getCFFBlock(&start, &length)) {
+    auto cffBlock = getCFFBlock();
+    if (!cffBlock) {
         return;
     }
-    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
+    auto ff = FoFiType1C::make(cffBlock.value());
+    if (!ff) {
         return;
     }
     ff->convertToType1(psName, newEncoding, ascii, outputFunc, outputStream);
-    delete ff;
 }
 
 void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, FoFiOutputFunc outputFunc, void *outputStream) const
@@ -876,18 +871,15 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> 
 
 void FoFiTrueType::convertToCIDType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
-    char *start;
-    int length;
-    FoFiType1C *ff;
-
-    if (!getCFFBlock(&start, &length)) {
+    auto cffBlock = getCFFBlock();
+    if (!cffBlock) {
         return;
     }
-    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
+    auto ff = FoFiType1C::make(cffBlock.value());
+    if (!ff) {
         return;
     }
     ff->convertToCIDType0(psName, cidMap, outputFunc, outputStream);
-    delete ff;
 }
 
 void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
@@ -993,18 +985,15 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
 
 void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
-    char *start;
-    int length;
-    FoFiType1C *ff;
-
-    if (!getCFFBlock(&start, &length)) {
+    auto cffBlock = getCFFBlock();
+    if (!cffBlock) {
         return;
     }
-    if (!(ff = FoFiType1C::make((unsigned char *)start, length))) {
+    auto ff = FoFiType1C::make(cffBlock.value());
+    if (!ff) {
         return;
     }
     ff->convertToType0(psName, cidMap, outputFunc, outputStream);
-    delete ff;
 }
 
 void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const
@@ -1124,7 +1113,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     if (!checkRegion(pos, 54)) {
         return;
     }
-    memcpy(headData.data(), file + pos, 54);
+    memcpy(headData.data(), file.data() + pos, 54);
     headData[8] = headData[9] = headData[10] = headData[11] = (unsigned char)0;
 
     // check for a bogus loca format field in the 'head' table
@@ -1243,14 +1232,14 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
                     length += 4 - (length & 3);
                 }
                 if (checkRegion(glyfPos + locaTable[j].origOffset, locaTable[j].len)) {
-                    checksum += computeTableChecksum(std::span(file + glyfPos + locaTable[j].origOffset, locaTable[j].len));
+                    checksum += computeTableChecksum(std::span(file.data() + glyfPos + locaTable[j].origOffset, locaTable[j].len));
                 }
             }
         } else {
             if ((j = seekTable(t42Tables[i].tag)) >= 0) {
                 length = tables[j].len;
                 if (checkRegion(tables[j].offset, length)) {
-                    checksum = computeTableChecksum(std::span(file + tables[j].offset, length));
+                    checksum = computeTableChecksum(std::span(file.data() + tables[j].offset, length));
                 }
             } else if (needVerticalMetrics && i == t42VheaTable) {
                 vheaTab[10] = advance / 256; // max advance height
@@ -1360,7 +1349,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             glyfPos = tables[seekTable("glyf")].offset;
             for (j = 0; j < nGlyphs; ++j) {
                 if (locaTable[j].len > 0 && checkRegion(glyfPos + locaTable[j].origOffset, locaTable[j].len)) {
-                    dumpString(std::span(file + glyfPos + locaTable[j].origOffset, locaTable[j].len), outputFunc, outputStream);
+                    dumpString(std::span(file.data() + glyfPos + locaTable[j].origOffset, locaTable[j].len), outputFunc, outputStream);
                 }
             }
         } else {
@@ -1369,7 +1358,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             // headers
             if ((length = newTables[i].len) > 0) {
                 if ((j = seekTable(t42Tables[i].tag)) >= 0 && checkRegion(tables[j].offset, tables[j].len)) {
-                    dumpString(std::span(file + tables[j].offset, tables[j].len), outputFunc, outputStream);
+                    dumpString(std::span(file.data() + tables[j].offset, tables[j].len), outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VheaTable) {
                     if (unlikely(length > (int)sizeof(vheaTab))) {
                         error(errSyntaxWarning, -1, "length bigger than vheaTab size");
@@ -1497,7 +1486,7 @@ void FoFiTrueType::parse()
         tables[j].offset = (int)getU32BE(pos + 8, &parsedOk);
         tables[j].len = (int)getU32BE(pos + 12, &parsedOk);
         if (unlikely((tables[j].offset < 0) || (tables[j].len < 0) || (tables[j].offset < INT_MAX - tables[j].len) || (tables[j].len > INT_MAX - tables[j].offset)
-                     || (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= len))) {
+                     || (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= int(file.size())))) {
             // ignore any bogus entries in the table directory
             ++j;
         }
@@ -1617,7 +1606,11 @@ void FoFiTrueType::readPostTable()
                 if (!ok || !checkRegion(stringPos + 1, m)) {
                     continue;
                 }
-                name.assign((char *)&file[stringPos + 1], m);
+                if (((size_t(stringPos) + 1) == file.size()) || m == 0) {
+                    name.clear();
+                } else {
+                    name.assign((char *)&file[stringPos + 1], m);
+                }
                 nameToGID[name] = i;
                 ++stringIdx;
                 stringPos += 1 + m;
