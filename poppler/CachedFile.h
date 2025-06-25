@@ -80,7 +80,7 @@ private:
     size_t length;
     size_t streamPos;
 
-    std::vector<Chunk> *chunks;
+    std::vector<Chunk> chunks;
 };
 
 //------------------------------------------------------------------------
