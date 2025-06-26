@@ -100,6 +100,7 @@ private:
     HashAlgorithm innerHashAlgorithm;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
+    bool signingCertificateAvailable();
 };
 
 class NSSSignatureCreation final : public CryptoSign::SigningInterface

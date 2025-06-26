@@ -30,8 +30,10 @@
 #include "NSSCryptoSignBackend.h"
 #include "goo/gmem.h"
 
+#include <algorithm>
 #include <array>
 #include <optional>
+#include <span>
 #include <vector>
 #include <filesystem>
 
@@ -148,6 +150,29 @@ const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr
  */
 const SEC_ASN1Template SigningCertificateV2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) }, { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2Template, 0 }, { 0, 0, nullptr, 0 } };
 
+// SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL and SEC_ASN1EncodeItem() do not work well together within NSS.
+// An additional template is necessary to accept attributes without the two optional fields.
+const SEC_ASN1Template ESSCertIDv2DecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
+                                                         { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_GET(SECOID_AlgorithmIDTemplate), 0 },
+                                                         { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
+                                                         { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
+                                                         { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template SigningCertificateV2DecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) },
+                                                                  { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2DecodingTemplate, 0 },
+                                                                  { 0, 0, nullptr, 0 } };
+// policies omitted on purpose. If present, decoding fails and the attribute is considered invalid, as required by ETSI EN 319 122-1 (CAdES).
+
+const SEC_ASN1Template ESSCertIDDecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
+                                                       { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
+                                                       { SEC_ASN1_INLINE | SEC_ASN1_OPTIONAL | SEC_ASN1_SKIP, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
+                                                       { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template SigningCertificateDecodingTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) },
+                                                                { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDDecodingTemplate, 0 },
+                                                                { 0, 0, nullptr, 0 } };
+// policies omitted on purpose. If present, decoding fails and the attribute is considered invalid, as required by ETSI EN 319 122-1 (CAdES).
+
 /*
 struct PKIStatusInfo
 {
@@ -239,6 +264,9 @@ static void shutdownNss()
 // 1.2.840.113549.1.9.16.2.47
 constexpr unsigned char OID_SIGNINGCERTIFICATEV2[] { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x02, 0x2f };
 
+// 1.2.840.113549.1.9.16.2.12
+constexpr unsigned char OID_SIGNINGCERTIFICATE[] { 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x09, 0x10, 0x02, 0x0c };
+
 static NSSCMSAttribute *my_NSS_CMSAttributeArray_FindAttrByOidTag(NSSCMSAttribute **attrs, SECOidTag oidtag, PRBool only)
 {
     SECOidData *oid;
@@ -278,6 +306,22 @@ static NSSCMSAttribute *my_NSS_CMSAttributeArray_FindAttrByOidTag(NSSCMSAttribut
     }
 
     return attr1;
+}
+
+static std::vector<const NSSCMSAttribute *> CMSAttributeArray_FindAttrByOid(NSSCMSAttribute **attrs, std::span<const unsigned char> oid)
+{
+    if (!attrs) {
+        return {};
+    }
+
+    std::vector<const NSSCMSAttribute *> res;
+
+    while (auto *attr = *attrs++) {
+        if (attr->type.data && std::ranges::equal(oid, std::span { attr->type.data, attr->type.len })) {
+            res.push_back(attr);
+        }
+    }
+    return res;
 }
 
 static SECStatus my_NSS_CMSArray_Add(PLArenaPool *poolp, void ***array, void *obj)
@@ -872,8 +916,8 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
     digest.data = digest_buffer.data();
     digest.len = digest_buffer.size();
 
-    if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr) {
-        CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
+    if (!signingCertificateAvailable()) {
+        return SIGNATURE_INVALID;
     }
 
     SECItem *content_info_data = CMSSignedData->contentInfo.content.data;
@@ -1150,6 +1194,74 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> NSSSig
     SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
 
     return signature;
+}
+
+bool NSSSignatureVerification::signingCertificateAvailable()
+{
+    auto *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+
+    if (!cert) {
+        return false;
+    }
+
+    if (type != CryptoSign::SignatureType::ETSI_CAdES_detached) {
+        return true;
+    }
+
+    const auto ess_signing_cert = CMSAttributeArray_FindAttrByOid(CMSSignerInfo->authAttr, OID_SIGNINGCERTIFICATE);
+    const auto ess_signing_cert_v2 = CMSAttributeArray_FindAttrByOid(CMSSignerInfo->authAttr, OID_SIGNINGCERTIFICATEV2);
+
+    const SEC_ASN1Template *decoding_template {};
+    HashAlgorithm hash_algorithm = HashAlgorithm::Unknown;
+    const NSSCMSAttribute *attr {};
+    bool have_attr_v2 = false;
+
+    if (ess_signing_cert.size() == 1 && ess_signing_cert_v2.empty()) {
+        attr = ess_signing_cert.front();
+        decoding_template = SigningCertificateDecodingTemplate;
+        hash_algorithm = HashAlgorithm::Sha1;
+    } else if (ess_signing_cert.empty() && ess_signing_cert_v2.size() == 1) {
+        attr = ess_signing_cert_v2.front();
+        decoding_template = SigningCertificateV2DecodingTemplate;
+        hash_algorithm = HashAlgorithm::Sha256;
+        have_attr_v2 = true;
+    } else {
+        return false;
+    }
+
+    if (!attr || !attr->values || !*attr->values || *std::next(attr->values)) {
+        return false;
+    }
+
+    SigningCertificateV2 decoded_attr;
+    auto arena_deleter = [](PLArenaPool *arena) { PORT_FreeArena(arena, PR_FALSE); };
+    std::unique_ptr<PLArenaPool, decltype(arena_deleter)> arena { PORT_NewArena(DER_DEFAULT_CHUNKSIZE) };
+
+    if (SEC_ASN1DecodeItem(arena.get(), &decoded_attr, decoding_template, *attr->values) != SECSuccess) {
+        return false;
+    }
+
+    if (!decoded_attr.certs || !*decoded_attr.certs || !decoded_attr.certs[0]->certHash.data) {
+        return false;
+    }
+
+    if (have_attr_v2) {
+        const SECItem *used_algorithm = &decoded_attr.certs[0]->hashAlgorithm.algorithm;
+        if (used_algorithm->data) {
+            auto hashType = HASH_GetHashTypeByOidTag(SECOID_FindOIDTag(used_algorithm));
+            hash_algorithm = ConvertHashTypeFromNss(hashType);
+        }
+    }
+
+    if (hash_algorithm == HashAlgorithm::Unknown) {
+        return false;
+    }
+
+    auto hash_context = HashContext::create(hash_algorithm);
+    hash_context->updateHash(cert->derCert.data, cert->derCert.len);
+    const auto cert_hash = hash_context->endHash();
+
+    return std::ranges::equal(cert_hash, std::span { decoded_attr.certs[0]->certHash.data, decoded_attr.certs[0]->certHash.len });
 }
 
 static char *GetPasswordFunction(PK11SlotInfo *slot, PRBool /*retry*/, void * /*arg*/)
