@@ -20,6 +20,7 @@
 #ifndef POPPLER_QT5_CONVERTER_PRIVATE_H
 #define POPPLER_QT5_CONVERTER_PRIVATE_H
 
+#include "poppler-qt5.h"
 #include <QtCore/QString>
 
 class QIODevice;
@@ -45,6 +46,8 @@ public:
     QIODevice *iodev;
     bool ownIodev : 1;
     BaseConverter::Error lastError;
+    PDFConverter::SigningResult lastSigningResult;
+    Poppler::ErrorString lastSigningErrorDetails;
 };
 
 }

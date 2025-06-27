@@ -34,7 +34,7 @@ public:
     GpgSignatureCreation(const std::string &certId);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
-    std::variant<std::vector<unsigned char>, CryptoSign::SigningError> signDetached(const std::string &password) final;
+    std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> signDetached(const std::string &password) final;
     CryptoSign::SignatureType signatureType() const final;
 
 private:

@@ -857,6 +857,13 @@ public:
 
     [[nodiscard]] SigningResult sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data);
 
+    /**
+     * A string with a string that might offer more details of the signing result failure
+     * \note the string here is likely not super useful for end users, but might give more details to a trained supporter / bug triager
+     * \since 25.07
+     */
+    ErrorString lastSigningErrorDetails() const;
+
 private:
     explicit SignatureAnnotation(SignatureAnnotationPrivate &dd);
     Q_DECLARE_PRIVATE(SignatureAnnotation)

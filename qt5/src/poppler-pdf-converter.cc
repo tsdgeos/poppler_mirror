@@ -141,10 +141,52 @@ bool PDFConverter::sign(const NewSignatureData &data)
     const auto location = std::unique_ptr<GooString>(data.location().isEmpty() ? nullptr : QStringToUnicodeGooString(data.location()));
     const auto ownerPwd = std::optional<GooString>(data.documentOwnerPassword().constData());
     const auto userPwd = std::optional<GooString>(data.documentUserPassword().constData());
-    return !doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
-                      boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(),
-                      convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd, userPwd)
-                    .has_value();
+    auto failure = doc->sign(d->outputFileName.toUtf8().constData(), data.certNickname().toUtf8().constData(), data.password().toUtf8().constData(), QStringToGooString(data.fieldPartialName()), data.page() + 1,
+                             boundaryToPdfRectangle(destPage, data.boundingRectangle(), Annotation::FixedRotation), *gSignatureText, *gSignatureLeftText, data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()),
+                             data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()), reason.get(), location.get(), data.imagePath().toStdString(), ownerPwd, userPwd);
+    if (failure) {
+        d->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
+        d->lastSigningResult = GenericSigningError; // catch all
+        switch (failure.value().type) {
+        case CryptoSign::SigningError::GenericError:
+            d->lastSigningResult = GenericSigningError;
+            break;
+        case CryptoSign::SigningError::InternalError:
+            d->lastSigningResult = InternalError;
+            break;
+        case CryptoSign::SigningError::KeyMissing:
+            d->lastSigningResult = KeyMissing;
+            break;
+        case CryptoSign::SigningError::UserCancelled:
+            d->lastSigningResult = UserCancelled;
+
+            break;
+        case CryptoSign::SigningError::WriteFailed:
+            d->lastSigningResult = WriteFailed;
+            break;
+        case CryptoSign::SigningError::BadPassphrase:
+
+            d->lastSigningResult = BadPassphrase;
+            break;
+        }
+        return false;
+    } else {
+        d->lastSigningErrorDetails = {};
+        d->lastSigningResult = SigningSuccess;
+        return true;
+    }
+}
+
+ErrorString PDFConverter::lastSigningErrorDetails() const
+{
+    Q_D(const PDFConverter);
+    return d->lastSigningErrorDetails;
+}
+
+PDFConverter::SigningResult PDFConverter::lastSigningResult() const
+{
+    Q_D(const PDFConverter);
+    return d->lastSigningResult;
 }
 
 struct PDFConverter::NewSignatureData::NewSignatureDataPrivate

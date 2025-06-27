@@ -253,6 +253,25 @@ public:
     bool hasSpaceAfter;
 };
 
+inline Poppler::ErrorStringType fromPopplerCore(::ErrorStringType type)
+{
+    switch (type) {
+    case ::ErrorStringType::ErrorCodeString:
+        return Poppler::ErrorStringType::ErrorCodeString;
+    case ::ErrorStringType::UserString:
+        return Poppler::ErrorStringType::UserString;
+    }
+    return Poppler::ErrorStringType::ErrorCodeString;
+}
+
+inline Poppler::ErrorString fromPopplerCore(const ::ErrorString &str)
+{
+    Poppler::ErrorString res;
+    res.type = fromPopplerCore(str.type);
+    res.data = QString::fromStdString(str.text);
+    return res;
+}
+
 class FormFieldData
 {
 public:
@@ -263,6 +282,7 @@ public:
     ::FormWidget *fm;
     QRectF box;
     static POPPLER_QT5_EXPORT ::FormWidget *getFormWidget(const FormField *f);
+    Poppler::ErrorString lastSigningErrorDetails;
 };
 
 class FormFieldIcon;

@@ -952,7 +952,13 @@ public:
     {
         FieldAlreadySigned, ///< Trying to sign a field that is already signed
         GenericSigningError,
-        SigningSuccess
+        SigningSuccess,
+        InternalError, ///< Unexpected error, likely a bug in poppler \since 25.07
+        KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath) \since 25.07
+        WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 25.07
+        UserCancelled, ///< User cancelled the process \since 25.07
+        BadPassphrase, ///< User entered bad passphrase \since 25.07
+
     };
 
     /**
@@ -963,6 +969,13 @@ public:
       \since 22.02
      */
     SigningResult sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const;
+
+    /**
+     * A string with a string that might offer more details of the signing result failure
+     * \note the string here is likely not super useful for end users, but might give more details to a trained supporter / bug triager
+     * \since 25.07
+     */
+    ErrorString lastSigningErrorDetails() const;
 
 private:
     Q_DISABLE_COPY(FormFieldSignature)
