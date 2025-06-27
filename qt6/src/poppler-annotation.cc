@@ -41,6 +41,7 @@
 #include <QImage>
 
 // local includes
+#include "CryptoSignBackend.h"
 #include "poppler-annotation.h"
 #include "poppler-link.h"
 #include "poppler-qt6.h"
@@ -2898,6 +2899,7 @@ public:
     QColor backgroundColor = QColor(240, 240, 240);
     QString imagePath;
     QString fieldPartialName;
+    ErrorString lastSigningErrorDetails;
     std::unique_ptr<::FormFieldSignature> field = nullptr;
 };
 
@@ -2922,12 +2924,16 @@ std::shared_ptr<Annot> SignatureAnnotationPrivate::createNativeAnnot(::Page *des
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(text));
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(leftText));
 
-    std::optional<PDFDoc::SignatureData> sig = destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, *gSignatureText, *gSignatureLeftText, fontSize, leftFontSize, convertQColor(fontColor), borderWidth,
-                                                                                   convertQColor(borderColor), convertQColor(backgroundColor), imagePath.toStdString());
+    std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> result =
+            destPage->getDoc()->createSignature(destPage, QStringToGooString(fieldPartialName), rect, *gSignatureText, *gSignatureLeftText, fontSize, leftFontSize, convertQColor(fontColor), borderWidth, convertQColor(borderColor),
+                                                convertQColor(backgroundColor), imagePath.toStdString());
 
-    if (!sig) {
+    if (std::holds_alternative<CryptoSign::SigningErrorMessage>(result)) {
+        error(errInternal, -1, "Failed creating signature data, will crash shortly: %s", std::get<CryptoSign::SigningErrorMessage>(result).message.text.c_str());
         return nullptr;
     }
+
+    auto sig = std::get_if<PDFDoc::SignatureData>(&result);
 
     sig->formWidget->updateWidgetAppearance();
     field = std::move(sig->field);
@@ -3065,6 +3071,7 @@ SignatureAnnotation::SigningResult SignatureAnnotation::sign(const QString &outp
     auto formField = std::make_unique<FormFieldSignature>(d->parentDoc, d->pdfPage, static_cast<::FormWidgetSignature *>(d->field->getCreateWidget()));
 
     const auto result = formField->sign(outputFileName, data);
+    d->lastSigningErrorDetails = formField->lastSigningErrorDetails();
 
     switch (result) {
     case FormFieldSignature::SigningSuccess:

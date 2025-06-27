@@ -36,6 +36,7 @@
  */
 
 #include "poppler-form.h"
+#include "poppler-converter.h"
 
 #include <config.h>
 
@@ -816,7 +817,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler->addData(buffer, 5);
-    std::variant<std::vector<unsigned char>, CryptoSign::SigningError> tmpSignature = sigHandler->signDetached(password.toStdString());
+    std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> tmpSignature = sigHandler->signDetached(password.toStdString());
     return std::holds_alternative<std::vector<unsigned char>>(tmpSignature);
 #else
     return false;
@@ -1220,7 +1221,8 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
                                                          data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
     if (failure) {
-        switch (failure.value()) {
+        m_formData->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
+        switch (failure.value().type) {
         case CryptoSign::SigningError::GenericError:
             return GenericSigningError;
         case CryptoSign::SigningError::InternalError:
@@ -1234,8 +1236,15 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
         case CryptoSign::SigningError::BadPassphrase:
             return BadPassphrase;
         }
+        return GenericSigningError;
     }
+    m_formData->lastSigningErrorDetails = {};
     return SigningSuccess;
+}
+
+ErrorString FormFieldSignature::lastSigningErrorDetails() const
+{
+    return m_formData->lastSigningErrorDetails;
 }
 
 bool hasNSSSupport()

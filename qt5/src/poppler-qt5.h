@@ -31,6 +31,7 @@
  * Copyright (C) 2022 Martin <martinbts@gmx.net>
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
+ * Copyright (C) 2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,6 +111,30 @@ using PopplerDebugFunc = void (*)(const QString & /*message*/, const QVariant & 
     \since 0.16
 */
 POPPLER_QT5_EXPORT void setDebugErrorFunction(PopplerDebugFunc debugFunction, const QVariant &closure);
+
+/**
+ * The various types of error strings.
+ *
+ * \since 25.07
+ */
+enum class ErrorStringType
+{
+    /**The string should be treated like a error code. It could be a hex code, a position in the poppler sources or something similar*/
+    ErrorCodeString,
+    /**The string should be treated as an advanced error message that can be shown to user */
+    UserString
+};
+
+/**
+ * Combination of an error data and type of error string
+ *
+ * \since 25.07
+ */
+struct ErrorString
+{
+    QVariant data;
+    ErrorStringType type;
+};
 
 /**
     Describes the physical location of text on a document page
@@ -2383,6 +2408,36 @@ public:
         \since 21.01
     */
     bool sign(const NewSignatureData &data);
+
+    /**
+     * \since 25.07
+     *
+     * BIC/SIC: Merge with SigningResult in poppler-converter and in poppler-annotation and poppler-form
+     */
+    enum SigningResult
+    {
+        SigningSuccess, ///< No error
+        FieldAlreadySigned, ///< Trying to sign a field that is already signed
+        GenericSigningError, ///< Unclassified error
+        InternalError, ///< Unexpected error, likely a bug in poppler
+        KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath)
+        WriteFailed, ///< Write failed (permissions, faulty disk, ...)
+        UserCancelled, ///< User cancelled the process
+        BadPassphrase, ///< User entered bad passphrase
+    };
+
+    /**
+     * The last signing result, mostly relevant if \ref sign returns false
+     * \since 25.07
+     */
+    SigningResult lastSigningResult() const;
+
+    /**
+     * A string with a string that might offer more details of the signing result failure
+     * \note the string here is likely not super useful for end users, but might give more details to a trained supporter / bug triager
+     * \since 25.07
+     */
+    ErrorString lastSigningErrorDetails() const;
 
     bool convert() override;
 

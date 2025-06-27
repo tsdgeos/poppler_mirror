@@ -809,7 +809,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
     unsigned char buffer[5];
     memcpy(buffer, "test", 5);
     sigHandler->addData(buffer, 5);
-    std::variant<std::vector<unsigned char>, CryptoSign::SigningError> tmpSignature = sigHandler->signDetached(password.toStdString());
+    std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> tmpSignature = sigHandler->signDetached(password.toStdString());
     return std::holds_alternative<std::vector<unsigned char>>(tmpSignature);
 #else
     return false;
@@ -1188,6 +1188,11 @@ SignatureValidationInfo::CertificateStatus FormFieldSignature::validateResult() 
     return fromInternal(static_cast<FormWidgetSignature *>(m_formData->fm)->validateSignatureResult());
 }
 
+ErrorString FormFieldSignature::lastSigningErrorDetails() const
+{
+    return m_formData->lastSigningErrorDetails;
+}
+
 FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const
 {
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
@@ -1209,11 +1214,29 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
-    const bool success = !fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
-                                                          data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()))
-                                  .has_value();
-
-    return success ? SigningSuccess : GenericSigningError;
+    auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
+                                                   data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
+    if (failure) {
+        m_formData->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
+        switch (failure.value().type) {
+        case CryptoSign::SigningError::GenericError:
+            return GenericSigningError;
+        case CryptoSign::SigningError::InternalError:
+            return InternalError;
+        case CryptoSign::SigningError::KeyMissing:
+            return KeyMissing;
+        case CryptoSign::SigningError::UserCancelled:
+            return UserCancelled;
+        case CryptoSign::SigningError::WriteFailed:
+            return WriteFailed;
+        case CryptoSign::SigningError::BadPassphrase:
+            return BadPassphrase;
+        }
+        return GenericSigningError; // catch all
+    } else {
+        m_formData->lastSigningErrorDetails = {};
+        return SigningSuccess;
+    }
 }
 
 bool hasNSSSupport()

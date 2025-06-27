@@ -279,26 +279,26 @@ void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
 {
     gpgData.write(dataBlock, dataLen);
 }
-std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureCreation::signDetached(const std::string &password)
+std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSignatureCreation::signDetached(const std::string &password)
 {
     if (!key) {
-        return CryptoSign::SigningError::KeyMissing;
+        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::KeyMissing, ERROR_IN_CODE_LOCATION };
     }
     gpgData.rewind();
     GpgME::Data signatureData;
     const auto signingResult = gpgContext->sign(gpgData, signatureData, GpgME::SignatureMode::Detached);
     if (!isValidResult(signingResult)) {
         if (signingResult.error().isCanceled()) {
-            return CryptoSign::SigningError::UserCancelled;
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::UserCancelled, ERROR_IN_CODE_LOCATION };
         } else {
             switch (signingResult.error().code()) {
             case GPG_ERR_NO_PASSPHRASE: // this is likely the user pressing enter. Let's treat it as cancelled for now
-                return CryptoSign::SigningError::UserCancelled;
+                return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::UserCancelled, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
             case GPG_ERR_BAD_PASSPHRASE:
-                return CryptoSign::SigningError::BadPassphrase;
+                return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::BadPassphrase, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
             }
             error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
-            return CryptoSign::SigningError::GenericError;
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
         }
     }
 
@@ -314,7 +314,7 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningError> GpgSignatureC
         } };
 
         if (CryptoSign::maxSupportedSignatureSize - prefixandsize <= signatureString.size()) {
-            return CryptoSign::SigningError::InternalError;
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
         }
         std::array<unsigned char, 4> bytes;
         int n = CryptoSign::maxSupportedSignatureSize - prefixandsize - signatureString.size();

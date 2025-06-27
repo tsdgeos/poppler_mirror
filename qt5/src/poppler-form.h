@@ -13,7 +13,7 @@
  * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Copyright (C) 2020, Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
  * Copyright (C) 2021, Theofilos Intzoglou <int.teo@gmail.com>
- * Copyright (C) 2023, 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2023-2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2024, Pratham Gandhi <ppg.1382@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -952,7 +952,13 @@ public:
     {
         FieldAlreadySigned, ///< Trying to sign a field that is already signed
         GenericSigningError,
-        SigningSuccess
+        SigningSuccess,
+        InternalError, ///< Unexpected error, likely a bug in poppler \since 25.07
+        KeyMissing, ///< Key not found (Either the input key is not from the list or the available keys has changed underneath) \since 25.07
+        WriteFailed, ///< Write failed (permissions, faulty disk, ...) \since 25.07
+        UserCancelled, ///< User cancelled the process \since 25.07
+        BadPassphrase, ///< User entered bad passphrase \since 25.07
+
     };
 
     /**
@@ -963,6 +969,13 @@ public:
       \since 22.02
      */
     SigningResult sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const;
+
+    /**
+     * A string with a string that might offer more details of the signing result failure
+     * \note the string here is likely not super useful for end users, but might give more details to a trained supporter / bug triager
+     * \since 25.07
+     */
+    ErrorString lastSigningErrorDetails() const;
 
 private:
     Q_DISABLE_COPY(FormFieldSignature)

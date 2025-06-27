@@ -2189,19 +2189,19 @@ bool PDFDoc::hasJavascript()
     return jsInfo.containsJS();
 }
 
-std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, std::unique_ptr<GooString> &&partialFieldName, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
-                                                             double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor,
-                                                             const std::string &imagePath)
+std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::createSignature(::Page *destPage, std::unique_ptr<GooString> &&partialFieldName, const PDFRectangle &rect, const GooString &signatureText,
+                                                                                             const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                                                             std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath)
 {
     if (destPage == nullptr) {
-        return std::nullopt;
+        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
     }
 
     Ref imageResourceRef = Ref::INVALID();
     if (!imagePath.empty()) {
         imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
         if (imageResourceRef == Ref::INVALID()) {
-            return std::nullopt;
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
         }
     }
 
@@ -2222,7 +2222,7 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     if (signatureText.getLength() || signatureTextLeft.getLength()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
         if (pdfFontName.empty()) {
-            return std::nullopt;
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
         }
 
         const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
@@ -2262,22 +2262,24 @@ std::optional<PDFDoc::SignatureData> PDFDoc::createSignature(::Page *destPage, s
     return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
 }
 
-std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, std::unique_ptr<GooString> &&partialFieldName, int page, const PDFRectangle &rect,
-                                                     const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
-                                                     std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath,
-                                                     const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
+std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, std::unique_ptr<GooString> &&partialFieldName, int page, const PDFRectangle &rect,
+                                                            const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth,
+                                                            std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location, const std::string &imagePath,
+                                                            const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword)
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
-        return CryptoSign::SigningError::InternalError;
+        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
     }
 
-    std::optional<SignatureData> sig =
+    std::variant<SignatureData, CryptoSign::SigningErrorMessage> result =
             createSignature(destPage, std::move(partialFieldName), rect, signatureText, signatureTextLeft, fontSize, leftFontSize, std::move(fontColor), borderWidth, std::move(borderColor), std::move(backgroundColor), imagePath);
 
-    if (!sig) {
-        return CryptoSign::SigningError::GenericError; /*This should probably be expanded with error handling from createSignature*/
+    if (std::holds_alternative<CryptoSign::SigningErrorMessage>(result)) {
+        return std::get<CryptoSign::SigningErrorMessage>(result);
     }
+
+    auto sig = std::get_if<SignatureData>(&result);
 
     sig->annotWidget->setFlags(sig->annotWidget->getFlags() | Annot::flagLocked);
 
@@ -2303,5 +2305,5 @@ std::optional<CryptoSign::SigningError> PDFDoc::sign(const std::string &saveFile
         return res;
     }
 
-    return CryptoSign::SigningError::InternalError;
+    return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
 }

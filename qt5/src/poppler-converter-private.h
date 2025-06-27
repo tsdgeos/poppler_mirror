@@ -1,6 +1,7 @@
 /* poppler-converter-private.h: Qt interface to poppler
  * Copyright (C) 2007, 2009, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
 #ifndef POPPLER_QT5_CONVERTER_PRIVATE_H
 #define POPPLER_QT5_CONVERTER_PRIVATE_H
 
+#include "poppler-qt5.h"
 #include <QtCore/QString>
 
 class QIODevice;
@@ -45,6 +47,8 @@ public:
     QIODevice *iodev;
     bool ownIodev : 1;
     BaseConverter::Error lastError;
+    PDFConverter::SigningResult lastSigningResult;
+    Poppler::ErrorString lastSigningErrorDetails;
 };
 
 }

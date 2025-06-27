@@ -928,6 +928,14 @@ public:
      */
     SigningResult sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const;
 
+    /**
+     * A string with a string that might offer more details of the signing result failure
+     * \note the string here is likely not super useful for end users, but might give more details to a trained supporter / bug triager
+     * \since 25.07
+     */
+
+    ErrorString lastSigningErrorDetails() const;
+
 private:
     Q_DISABLE_COPY(FormFieldSignature)
 };

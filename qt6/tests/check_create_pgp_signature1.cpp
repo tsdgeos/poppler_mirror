@@ -132,9 +132,10 @@ void TestSignWithGnupgPgp::testPgpSignVerify()
 
     auto activeBackendType = CryptoSign::Factory::getActive();
     if (activeBackendType == CryptoSign::Backend::Type::NSS3) {
-        QCOMPARE(signingResult, CryptoSign::SigningError::KeyMissing);
+        QVERIFY(signingResult.has_value());
+        QCOMPARE(signingResult.value().type, CryptoSign::SigningError::KeyMissing);
     } else if (activeBackendType == CryptoSign::Backend::Type::GPGME) {
-        QCOMPARE(signingResult, std::optional<CryptoSign::SigningError>());
+        QVERIFY(!signingResult.has_value());
         auto signedDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(d.filePath(QStringLiteral("signedFile.pdf")).toStdString()));
         QVERIFY(signedDoc->isOk());
         auto signatureFields = signedDoc->getSignatureFields();
