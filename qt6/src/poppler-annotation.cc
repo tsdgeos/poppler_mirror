@@ -3094,6 +3094,12 @@ SignatureAnnotation::SigningResult SignatureAnnotation::sign(const QString &outp
     return GenericSigningError;
 }
 
+Poppler::ErrorString SignatureAnnotation::lastSigningErrorDetails() const
+{
+    Q_D(const SignatureAnnotation);
+    return d->lastSigningErrorDetails;
+}
+
 /** InkAnnotation [Annotation] */
 class InkAnnotationPrivate : public AnnotationPrivate
 {
