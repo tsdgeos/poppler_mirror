@@ -1,3 +1,14 @@
+Release 25.07.0:
+        core:
+         * Changed rendering of malformed documents to mimic what Adobe Reader does. Issue #1602
+         * Improvemenst in signature validation in the NSS backend
+         * Add more detailed output when signing fails
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfsig: command line option for allowing PGP signatures in GnuPG backend
+
 Release 25.06.0:
         core:
          * Fix writing dates back to file
