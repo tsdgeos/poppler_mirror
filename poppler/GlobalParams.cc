@@ -1477,7 +1477,7 @@ std::shared_ptr<CMap> GlobalParams::getCMap(const GooString &collection, const G
 
 const UnicodeMap *GlobalParams::getTextEncoding()
 {
-    return getUnicodeMap(textEncoding);
+    return getUnicodeMap(getTextEncodingName());
 }
 
 std::vector<std::string> GlobalParams::getEncodingNames()
