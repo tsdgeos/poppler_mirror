@@ -276,6 +276,12 @@ typedef struct _PopplerRectangle PopplerRectangle;
 typedef struct _PopplerTextAttributes PopplerTextAttributes;
 typedef struct _PopplerColor PopplerColor;
 typedef struct _PopplerFontDescription PopplerFontDescription;
+
+/**
+ * PopplerPath:
+ *
+ * Since: 25.06.0
+ */
 typedef struct _PopplerPath PopplerPath;
 typedef struct _PopplerLinkMapping PopplerLinkMapping;
 typedef struct _PopplerPageTransition PopplerPageTransition;
@@ -312,6 +318,12 @@ typedef struct _PopplerTextSpan PopplerTextSpan;
 typedef struct _PopplerPageRange PopplerPageRange;
 typedef struct _PopplerSignatureInfo PopplerSignatureInfo;
 typedef struct _PopplerAnnotStamp PopplerAnnotStamp;
+
+/**
+ * PopplerAnnotInk:
+ *
+ * Since: 25.06.0
+ */
 typedef struct _PopplerAnnotInk PopplerAnnotInk;
 typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
 typedef struct _PopplerSigningData PopplerSigningData;
