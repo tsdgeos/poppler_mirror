@@ -57,6 +57,8 @@ POPPLER_PUBLIC
 cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page);
 POPPLER_PUBLIC
 void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color);
+POPPLER_PUBLIC
+void poppler_page_render_transparent_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *background_color, double background_opacity);
 
 POPPLER_PUBLIC
 void poppler_page_get_size(PopplerPage *page, double *width, double *height);
