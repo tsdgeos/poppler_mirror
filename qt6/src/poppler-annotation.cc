@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -2929,7 +2929,7 @@ std::shared_ptr<Annot> SignatureAnnotationPrivate::createNativeAnnot(::Page *des
                                                 convertQColor(backgroundColor), imagePath.toStdString());
 
     if (std::holds_alternative<CryptoSign::SigningErrorMessage>(result)) {
-        error(errInternal, -1, "Failed creating signature data, will crash shortly: %s", std::get<CryptoSign::SigningErrorMessage>(result).message.text.c_str());
+        error(errInternal, -1, "Failed creating signature data, will crash shortly: {0:s}", std::get<CryptoSign::SigningErrorMessage>(result).message.text.c_str());
         return nullptr;
     }
 

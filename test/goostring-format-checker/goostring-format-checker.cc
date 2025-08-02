@@ -74,7 +74,7 @@ GooStringFormatCheckerVisitor::GooStringFormatCheckerVisitor(CompilerInstance *c
     diag_wrongOrder = diag->getCustomDiagID(DiagnosticsEngine::Error, "Argument %0 must be consumed before argument %1");
     diag_unescapedBracket = diag->getCustomDiagID(DiagnosticsEngine::Error, "Unescaped '}' character");
     diag_unterminatedPlaceholder = diag->getCustomDiagID(DiagnosticsEngine::Error, "Unterminated placeholder");
-    diag_unconsumedArgs = diag->getCustomDiagID(DiagnosticsEngine::Warning, "Unconsumed argument(s)");
+    diag_unconsumedArgs = diag->getCustomDiagID(DiagnosticsEngine::Error, "Unconsumed argument(s)");
     diag_missingColon = diag->getCustomDiagID(DiagnosticsEngine::Error, "Invalid placeholder '{%0}': missing colon character");
     diag_missingArgNumber = diag->getCustomDiagID(DiagnosticsEngine::Error, "Invalid placeholder '{%0}': missing <arg> number");
     diag_badArgNumber = diag->getCustomDiagID(DiagnosticsEngine::Error, "Invalid placeholder '{%0}': bad <arg> number");

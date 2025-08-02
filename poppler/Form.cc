@@ -644,7 +644,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
-        error(errIO, -1, "signDocument: error saving to file \"%s\"", saveFilename.c_str());
+        error(errIO, -1, "signDocument: error saving to file \"{0:s}\"", saveFilename.c_str());
         return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::WriteFailed, ERROR_IN_CODE_LOCATION };
     }
 
