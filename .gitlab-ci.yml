@@ -115,9 +115,9 @@ build_clazy_fedora42:
     - CC=clang-20 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
-build_qt68_android:
+build_qt69_android:
   stage: build
-  image: invent-registry.kde.org/sysadmin/ci-images/android-qt68-ci
+  image: invent-registry.kde.org/sysadmin/ci-images/android-qt69-ci
   before_script:
     - echo "workaround for ECM Android toolchain wanting all binaries to be shared libraries"
     - sed -i -e 's/<LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>/<LINK_FLAGS>/g' /opt/nativetooling/share/ECM/toolchain/Android.cmake
