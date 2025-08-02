@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018, 2021 Adrian Johnson <ajohnson@redneon.com>
@@ -760,7 +760,7 @@ static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, b
         Dict *dict = info.getDict();
         for (i = 0; i < dict->getLength(); i++) {
             std::string key(dict->getKey(i));
-            if (docInfoStandardKeys.find(key) == docInfoStandardKeys.end()) {
+            if (!docInfoStandardKeys.contains(key)) {
                 hasCustom = true;
                 break;
             }
