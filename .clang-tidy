@@ -51,6 +51,7 @@ Checks:  >
     -modernize-pass-by-value,
     -modernize-avoid-bind,
     -modernize-concat-nested-namespaces,
+    -modernize-use-integer-sign-comparison,
     google-explicit-constructor,
     -clang-analyzer-*'
 WarningsAsErrors: '*'
