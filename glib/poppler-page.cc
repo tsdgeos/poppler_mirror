@@ -2,6 +2,7 @@
  * Copyright (C) 2005, Red Hat, Inc.
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

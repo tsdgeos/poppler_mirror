@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Ingo Klöcker <dev@ingo-kloecker.de>
 //========================================================================
 #include "DistinguishedNameParser.h"
 

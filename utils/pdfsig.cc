@@ -19,6 +19,7 @@
 // Copyright 2022 Felix Jung <fxjung@posteo.de>
 // Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023, 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================
 

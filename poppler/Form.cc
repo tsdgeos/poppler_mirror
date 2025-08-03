@@ -39,6 +39,7 @@
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================
 
