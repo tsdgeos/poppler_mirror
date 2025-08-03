@@ -77,6 +77,7 @@
 #include "Parser.h"
 #include "CIDFontsWidthsBuilder.h"
 #include "UTF.h"
+#include "ImageEmbeddingUtils.h"
 
 #include "fofi/FoFiTrueType.h"
 #include "fofi/FoFiIdentifier.h"
@@ -643,7 +644,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     // Incremental save to avoid breaking any existing signatures
     const GooString fname(saveFilename);
     if (doc->saveAs(fname, writeForceIncremental) != errNone) {
-        error(errIO, -1, "signDocument: error saving to file \"%s\"", saveFilename.c_str());
+        error(errIO, -1, "signDocument: error saving to file \"{0:s}\"", saveFilename.c_str());
         return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::WriteFailed, ERROR_IN_CODE_LOCATION };
     }
 
@@ -723,7 +724,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
                                                                                                const GooString *location, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword,
                                                                                                const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
                                                                                                std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                                                                                               std::unique_ptr<AnnotColor> &&backgroundColor)
+                                                                                               std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -765,6 +766,16 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
         form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
     }
+
+    // If a path to an image is given, embed it.
+    Ref imageResourceRef = Ref::INVALID();
+    if (!imagePath.empty()) {
+        imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
+        if (imageResourceRef == Ref::INVALID()) {
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
+        }
+    }
+
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
     appearCharacs->setBorderColor(std::move(borderColor));
     appearCharacs->setBackColor(std::move(backgroundColor));
@@ -777,6 +788,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     ffs->setCustomAppearanceContent(signatureText);
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
+    ffs->setImageResource(imageResourceRef);
 
     // say that there a now signatures and that we should append only
     doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));

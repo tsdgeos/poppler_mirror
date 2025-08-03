@@ -1857,6 +1857,15 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
             if (obj1.isDict()) {
                 Dict *dict = obj1.getDict();
                 Object type = dict->lookup("Type");
+                if (type.isNull()) {
+                    Object subType = dict->lookup("SubType");
+                    // Type is optional, subtype is required
+                    // If neither of them exists, something is probably
+                    // weird here, so let us just skip this entry
+                    if (subType.isNull()) {
+                        continue;
+                    }
+                }
                 if (type.isName() && strcmp(type.getName(), "Annot") == 0) {
                     const Object &obj2 = dict->lookupNF("P");
                     if (obj2.isRef()) {

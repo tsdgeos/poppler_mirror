@@ -489,26 +489,8 @@ cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page)
     return surface;
 }
 
-/**
- * poppler_page_render_selection:
- * @page: the #PopplerPage for which to render selection
- * @cairo: cairo context to render to
- * @selection: start and end point of selection as a rectangle
- * @old_selection: previous selection
- * @style: a #PopplerSelectionStyle
- * @glyph_color: color to use for drawing glyphs
- * @background_color: color to use for the selection background
- *
- * Render the selection specified by @selection for @page to
- * the given cairo context.  The selection will be rendered, using
- * @glyph_color for the glyphs and @background_color for the selection
- * background.
- *
- * If non-NULL, @old_selection specifies the selection that is already
- * rendered to @cairo, in which case this function will (some day)
- * only render the changed part of the selection.
- **/
-void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color)
+static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color, double background_opacity,
+                             bool draw_glyphs)
 {
     CairoOutputDev *output_dev;
     TextPage *text;
@@ -534,9 +516,61 @@ void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRec
     output_dev->setCairo(cairo);
 
     text = poppler_page_get_text_page(page);
-    text->drawSelection(output_dev, 1.0, 0, &pdf_selection, selection_style, &gfx_glyph_color, &gfx_background_color);
+    text->drawSelection(output_dev, 1.0, 0, &pdf_selection, selection_style, &gfx_glyph_color, &gfx_background_color, background_opacity, draw_glyphs);
 
     output_dev->setCairo(nullptr);
+}
+
+/**
+ * poppler_page_render_selection:
+ * @page: the #PopplerPage for which to render selection
+ * @cairo: cairo context to render to
+ * @selection: start and end point of selection as a rectangle
+ * @old_selection: previous selection
+ * @style: a #PopplerSelectionStyle
+ * @glyph_color: color to use for drawing glyphs
+ * @background_color: color to use for the selection background
+ *
+ * Render the selection specified by @selection for @page to
+ * the given cairo context.  The selection will be rendered, using
+ * @glyph_color for the glyphs and @background_color for the selection
+ * background.
+ *
+ * If non-NULL, @old_selection specifies the selection that is already
+ * rendered to @cairo, in which case this function will (some day)
+ * only render the changed part of the selection.
+ **/
+void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color)
+{
+    render_selection(page, cairo, selection, old_selection, style, glyph_color, background_color, 1, TRUE);
+}
+
+/**
+ * poppler_page_render_transparent_selection:
+ * @page: the #PopplerPage for which to render selection
+ * @cairo: cairo context to render to
+ * @selection: start and end point of selection as a rectangle
+ * @old_selection: previous selection
+ * @style: a #PopplerSelectionStyle
+ * @background_color: color to use for the selection background
+ * @background_opacity: opacity to use for the selection background
+ *
+ * Render the selection specified by @selection for @page to
+ * the given cairo context.  The selection will be rendered using
+ * @background_color and @background_opacity for the selection
+ * background. Glyphs will not be drawn.
+ *
+ * If non-NULL, @old_selection specifies the selection that is already
+ * rendered to @cairo, in which case this function will (some day)
+ * only render the changed part of the selection.
+ *
+ * Since: 25.08
+ **/
+void poppler_page_render_transparent_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *background_color, double background_opacity)
+{
+    PopplerColor glyph_color = { 0, 0, 0 };
+
+    render_selection(page, cairo, selection, old_selection, style, &glyph_color, background_color, background_opacity, FALSE);
 }
 
 /**

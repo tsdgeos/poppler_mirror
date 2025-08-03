@@ -1374,7 +1374,7 @@ void PostScriptFunction::resizeCode(int newSize)
 void PostScriptFunction::exec(PSStack *stack, int codePtr) const
 {
     int i1, i2;
-    double r1, r2, result;
+    double r1, r2;
     bool b1, b2;
 
     while (true) {
@@ -1416,15 +1416,16 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                     stack->pushBool(b1 && b2);
                 }
                 break;
-            case psOpAtan:
+            case psOpAtan: {
                 r2 = stack->popNum();
                 r1 = stack->popNum();
-                result = atan2(r1, r2) * 180.0 / M_PI;
+                double result = atan2(r1, r2) * 180.0 / M_PI;
                 if (result < 0) {
                     result += 360.0;
                 }
                 stack->pushReal(result);
                 break;
+            }
             case psOpBitshift:
                 i2 = stack->popInt();
                 i1 = stack->popInt();
@@ -1565,10 +1566,16 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
                 break;
             case psOpMul:
                 if (stack->topTwoAreInts()) {
+                    int result;
                     i2 = stack->popInt();
                     i1 = stack->popInt();
-                    //~ should check for out-of-range, and push a real instead
-                    stack->pushInt(i1 * i2);
+                    //~ should push a real instead?
+                    if (checkedMultiply(i1, i2, &result)) {
+                        error(errSyntaxError, -1, "PostScriptFunction::exec: Multiplication of two integers overflows: {0:d} {1:d}", i1, i2);
+                        stack->pushInt(0);
+                    } else {
+                        stack->pushInt(result);
+                    }
                 } else {
                     r2 = stack->popNum();
                     r1 = stack->popNum();

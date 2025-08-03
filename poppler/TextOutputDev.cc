@@ -4672,7 +4672,7 @@ void TextSelectionSizer::visitLine(TextLine *line, TextWord *begin, TextWord *en
 class TextSelectionPainter : public TextSelectionVisitor
 {
 public:
-    TextSelectionPainter(TextPage *page, double scale, int rotation, OutputDev *out, const GfxColor *box_color, const GfxColor *glyph_color);
+    TextSelectionPainter(TextPage *page, double scale, int rotation, OutputDev *out, const GfxColor *box_color, const GfxColor *glyph_color, double box_opacity, bool draw_glyphs);
     ~TextSelectionPainter() override;
 
     void visitBlock(TextBlock *block, TextLine *begin, TextLine *end, const PDFRectangle *selection) override { };
@@ -4683,13 +4683,15 @@ public:
 private:
     OutputDev *out;
     const GfxColor *glyph_color;
+    bool draw_glyphs;
     GfxState *state;
     std::vector<TextWordSelection *> *selectionList;
     Matrix ctm, ictm;
     bool hasGlyphLessFont();
 };
 
-TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotation, OutputDev *outA, const GfxColor *box_color, const GfxColor *glyph_colorA) : TextSelectionVisitor(p), out(outA), glyph_color(glyph_colorA)
+TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotation, OutputDev *outA, const GfxColor *box_color, const GfxColor *glyph_colorA, double box_opacity, bool draw_glyphsA)
+    : TextSelectionVisitor(p), out(outA), glyph_color(glyph_colorA), draw_glyphs(draw_glyphsA)
 {
     PDFRectangle box(0, 0, p->pageWidth, p->pageHeight);
 
@@ -4699,12 +4701,13 @@ TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotati
     state->getCTM(&ctm);
     ctm.invertTo(&ictm);
 
-    out->startPage(0, state, nullptr);
     out->setDefaultCTM(state->getCTM());
 
     state->setFillColorSpace(std::make_unique<GfxDeviceRGBColorSpace>());
     state->setFillColor(box_color);
+    state->setFillOpacity(box_opacity);
     out->updateFillColor(state);
+    out->updateFillOpacity(state);
 }
 
 TextSelectionPainter::~TextSelectionPainter()
@@ -4798,6 +4801,12 @@ bool TextSelectionPainter::hasGlyphLessFont()
 
 void TextSelectionPainter::endPage()
 {
+    if (!draw_glyphs) {
+        out->fill(state);
+        out->endPage();
+        return;
+    }
+
     /* Take a shortcut for glyphless fonts (eg. Tesseract scanned documents)
      * cause we just paint a transparent fill over existent text.Issue #157 */
     if (hasGlyphLessFont()) {
@@ -5221,9 +5230,9 @@ void TextPage::visitSelection(TextSelectionVisitor *visitor, const PDFRectangle 
     }
 }
 
-void TextPage::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color)
+void TextPage::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)
 {
-    TextSelectionPainter painter(this, scale, rotation, out, box_color, glyph_color);
+    TextSelectionPainter painter(this, scale, rotation, out, box_color, glyph_color, box_opacity, draw_glyphs);
 
     visitSelection(&painter, selection, style);
     painter.endPage();
@@ -5941,9 +5950,9 @@ GooString TextOutputDev::getText(double xMin, double yMin, double xMax, double y
     return text->getText(xMin, yMin, xMax, yMax, textEOL);
 }
 
-void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color)
+void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)
 {
-    text->drawSelection(out, scale, rotation, selection, style, glyph_color, box_color);
+    text->drawSelection(out, scale, rotation, selection, style, glyph_color, box_color, box_opacity, draw_glyphs);
 }
 
 std::vector<PDFRectangle *> *TextOutputDev::getSelectionRegion(const PDFRectangle *selection, SelectionStyle style, double scale)
