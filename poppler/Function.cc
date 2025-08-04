@@ -55,11 +55,11 @@ Function::~Function() = default;
 
 std::unique_ptr<Function> Function::parse(Object *funcObj)
 {
-    std::set<int> usedParents;
-    return parse(funcObj, &usedParents);
+    RefRecursionChecker usedParents;
+    return parse(funcObj, usedParents);
 }
 
-std::unique_ptr<Function> Function::parse(Object *funcObj, std::set<int> *usedParents)
+std::unique_ptr<Function> Function::parse(Object *funcObj, RefRecursionChecker &usedParents)
 {
     Dict *dict;
 
@@ -664,7 +664,7 @@ void ExponentialFunction::transform(const double *in, double *out) const
 // StitchingFunction
 //------------------------------------------------------------------------
 
-StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents)
+StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, RefRecursionChecker &usedParents)
 {
     Object obj1;
     int i;
@@ -695,17 +695,13 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     encode = (double *)gmallocn(2 * k, sizeof(double));
     scale = (double *)gmallocn(k, sizeof(double));
     for (i = 0; i < k; ++i) {
-        std::set<int> usedParentsAux = *usedParents;
         Ref ref;
         Object obj2 = obj1.getArray()->get(i, &ref);
-        if (ref != Ref::INVALID()) {
-            if (usedParentsAux.find(ref.num) == usedParentsAux.end()) {
-                usedParentsAux.insert(ref.num);
-            } else {
-                return;
-            }
+        if (!usedParents.insert(ref)) {
+            return;
         }
-        if (!(funcs[i] = Function::parse(&obj2, &usedParentsAux))) {
+        const RefRecursionCheckerRemover remover(usedParents, ref);
+        if (!(funcs[i] = Function::parse(&obj2, usedParents))) {
             return;
         }
         if (funcs[i]->getInputSize() != 1 || (i > 0 && funcs[i]->getOutputSize() != funcs[0]->getOutputSize())) {

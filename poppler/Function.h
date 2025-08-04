@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2018, 2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -90,7 +90,7 @@ public:
     virtual bool isOk() const = 0;
 
 protected:
-    static std::unique_ptr<Function> parse(Object *funcObj, std::set<int> *usedParents);
+    static std::unique_ptr<Function> parse(Object *funcObj, RefRecursionChecker &usedParents);
 
     explicit Function(const Function *func);
 
@@ -209,7 +209,7 @@ class StitchingFunction : public Function
     };
 
 public:
-    StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents);
+    StitchingFunction(Object *funcObj, Dict *dict, RefRecursionChecker &usedParents);
     ~StitchingFunction() override;
     std::unique_ptr<Function> copy() const override { return std::make_unique<StitchingFunction>(this); }
     Type getType() const override { return Type::Stitching; }
