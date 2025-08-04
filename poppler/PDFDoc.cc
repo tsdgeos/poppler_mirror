@@ -1237,14 +1237,13 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
         deleteSet = true;
     }
 
-    if (alreadyWrittenDicts->find(dict) != alreadyWrittenDicts->end()) {
+    const auto [_, inserted] = alreadyWrittenDicts->insert(dict);
+    if (!inserted) {
         error(errSyntaxWarning, -1, "PDFDoc::writeDictionary: Found recursive dicts");
         if (deleteSet) {
             delete alreadyWrittenDicts;
         }
         return;
-    } else {
-        alreadyWrittenDicts->insert(dict);
     }
 
     outStr->printf("<<");
@@ -1692,14 +1691,13 @@ bool PDFDoc::markDictionary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int
         deleteSet = true;
     }
 
-    if (alreadyMarkedDicts->find(dict) != alreadyMarkedDicts->end()) {
+    const auto [_, inserted] = alreadyMarkedDicts->insert(dict);
+    if (!inserted) {
         error(errSyntaxWarning, -1, "PDFDoc::markDictionary: Found recursive dicts");
         if (deleteSet) {
             delete alreadyMarkedDicts;
         }
         return true;
-    } else {
-        alreadyMarkedDicts->insert(dict);
     }
 
     for (int i = 0; i < dict->getLength(); i++) {
