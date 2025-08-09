@@ -4396,7 +4396,7 @@ bool PSOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shadin
     }
 
     shading->getDomain(&x0, &y0, &x1, &y1);
-    const double *mat = shading->getMatrix();
+    const std::array<double, 6> &mat = shading->getMatrix();
     writePSFmt("/mat [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     writePSFmt("/n {0:d} def\n", shading->getColorSpace()->getNComps());
     if (shading->getNFuncs() == 1) {

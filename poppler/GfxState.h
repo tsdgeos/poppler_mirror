@@ -987,7 +987,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxFunctionShading : public GfxShading
 {
 public:
-    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
+    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const std::array<double, 6> &matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
     explicit GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
@@ -1002,7 +1002,7 @@ public:
         *x1A = x1;
         *y1A = y1;
     }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
     int getNFuncs() const { return funcs.size(); }
     const Function *getFunc(int i) const { return funcs[i].get(); }
     void getColor(double x, double y, GfxColor *color) const;
@@ -1012,7 +1012,7 @@ protected:
 
 private:
     double x0, y0, x1, y1;
-    double matrix[6];
+    const std::array<double, 6> matrix;
     std::vector<std::unique_ptr<Function>> funcs;
 };
 

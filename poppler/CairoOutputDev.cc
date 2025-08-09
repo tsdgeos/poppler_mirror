@@ -1538,7 +1538,7 @@ bool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sha
     GfxRGB rgb;
     cairo_matrix_t mat;
 
-    const double *matrix = shading->getMatrix();
+    const std::array<double, 6> &matrix = shading->getMatrix();
     mat.xx = matrix[0];
     mat.yx = matrix[1];
     mat.xy = matrix[2];

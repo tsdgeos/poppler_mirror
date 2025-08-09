@@ -2413,7 +2413,7 @@ void Gfx::doFunctionShFill1(GfxFunctionShading *shading, double x0, double y0, d
     int nComps, i, j;
 
     nComps = shading->getColorSpace()->getNComps();
-    const double *matrix = shading->getMatrix();
+    const std::array<double, 6> &matrix = shading->getMatrix();
 
     // compare the four corner colors
     for (i = 0; i < 4; ++i) {

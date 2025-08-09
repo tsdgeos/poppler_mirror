@@ -3469,26 +3469,20 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
 // GfxFunctionShading
 //------------------------------------------------------------------------
 
-GfxFunctionShading::GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA) : GfxShading(1), funcs(std::move(funcsA))
+GfxFunctionShading::GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const std::array<double, 6> &matrixA, std::vector<std::unique_ptr<Function>> &&funcsA) : GfxShading(1), matrix(matrixA), funcs(std::move(funcsA))
 {
     x0 = x0A;
     y0 = y0A;
     x1 = x1A;
     y1 = y1A;
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
 }
 
-GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxShading(shading)
+GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxShading(shading), matrix(shading->matrix)
 {
     x0 = shading->x0;
     y0 = shading->y0;
     x1 = shading->x1;
     y1 = shading->y1;
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = shading->matrix[i];
-    }
     for (const auto &f : shading->funcs) {
         funcs.emplace_back(f->copy());
     }
@@ -3499,7 +3493,6 @@ GfxFunctionShading::~GfxFunctionShading() = default;
 std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
     double x0A, y0A, x1A, y1A;
-    double matrixA[6];
     std::vector<std::unique_ptr<Function>> funcsA;
     Object obj1;
     int i;
@@ -3520,6 +3513,7 @@ std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res,
         }
     }
 
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;

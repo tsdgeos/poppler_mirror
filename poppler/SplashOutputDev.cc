@@ -223,7 +223,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
     Matrix ctm;
     SplashColor defaultColor;
     GfxColor srcColor;
-    const double *matrix = shadingA->getMatrix();
+    const std::array<double, 6> &matrix = shadingA->getMatrix();
 
     shading = shadingA;
     state = stateA;
