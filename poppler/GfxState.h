@@ -480,13 +480,13 @@ public:
     double getGammaR() const { return gammaR; }
     double getGammaG() const { return gammaG; }
     double getGammaB() const { return gammaB; }
-    const double *getMatrix() const { return mat; }
+    const std::array<double, 9> &getMatrix() const { return mat; }
 
 private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double gammaR, gammaG, gammaB; // gamma values
-    double mat[9]; // ABC -> XYZ transform matrix
+    std::array<double, 9> mat; // ABC -> XYZ transform matrix
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;

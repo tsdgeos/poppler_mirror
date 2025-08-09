@@ -1066,8 +1066,6 @@ GfxCalRGBColorSpace::~GfxCalRGBColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
 {
-    int i;
-
     auto cs = std::make_unique<GfxCalRGBColorSpace>();
     cs->whiteX = whiteX;
     cs->whiteY = whiteY;
@@ -1078,9 +1076,7 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
     cs->gammaR = gammaR;
     cs->gammaG = gammaG;
     cs->gammaB = gammaB;
-    for (i = 0; i < 9; ++i) {
-        cs->mat[i] = mat[i];
-    }
+    cs->mat = mat;
 #ifdef USE_CMS
     cs->transform = transform;
 #endif
