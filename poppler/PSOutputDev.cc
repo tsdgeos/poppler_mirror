@@ -4207,8 +4207,8 @@ void PSOutputDev::eoFill(GfxState *state)
     writePS("f*\n");
 }
 
-bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4282,8 +4282,8 @@ bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4329,7 +4329,7 @@ bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     std::set<int>::iterator patternRefIt;
     const int patternRefNum = tPat->getPatternRefNum();

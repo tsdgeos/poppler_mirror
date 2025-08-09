@@ -1217,7 +1217,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
 void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor)
 {
     Dict *dict, *resDict;
-    double m[6];
+    std::array<double, 6> m;
     std::array<double, 4> bbox;
     Object obj1;
     int i;
@@ -1967,7 +1967,8 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
     const double *ctm, *btm;
-    double m[6], ictm[6], m1[6], imb[6];
+    double m[6], ictm[6], imb[6];
+    std::array<double, 6> m1;
     double det;
     double xstep, ystep;
     int i;
@@ -4688,7 +4689,7 @@ void Gfx::doForm(Object *str)
 {
     Dict *dict;
     bool transpGroup, isolated, knockout;
-    double m[6];
+    std::array<double, 6> m;
     std::array<double, 4> bbox;
     Dict *resDict;
     bool ocSaved;
@@ -4785,8 +4786,8 @@ void Gfx::doForm(Object *str)
     ocState = ocSaved;
 }
 
-void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const std::array<double, 4> &bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha, Function *transferFunc,
-                   GfxColor *backdropColor)
+void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha,
+                   Function *transferFunc, GfxColor *backdropColor)
 {
     Parser *oldParser;
     GfxState *savedState;
@@ -5156,7 +5157,6 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     Dict *dict, *resDict;
     double formXMin, formYMin, formXMax, formYMax;
     double x, y, sx, sy, tx, ty;
-    double m[6];
     GfxColor color;
     int i;
 
@@ -5192,6 +5192,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         dict = str->streamGetDict();
 
         std::array<double, 4> bbox;
+        std::array<double, 6> m;
 
         // get the form bounding box
         Object bboxObj = dict->lookup("BBox");

@@ -192,7 +192,7 @@ public:
 
     bool checkTransparencyGroup(Dict *resDict);
 
-    void drawForm(Object *str, Dict *resDict, const double *matrix, const std::array<double, 4> &bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false,
+    void drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false,
                   bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, GfxColor *backdropColor = nullptr);
 
     void pushResources(Dict *resDict);

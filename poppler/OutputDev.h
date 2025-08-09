@@ -234,7 +234,8 @@ public:
     virtual void stroke(GfxState * /*state*/) { }
     virtual void fill(GfxState * /*state*/) { }
     virtual void eoFill(GfxState * /*state*/) { }
-    virtual bool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, GfxTilingPattern * /*tPat*/, const double * /*mat*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/, double /*yStep*/)
+    virtual bool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, GfxTilingPattern * /*tPat*/, const std::array<double, 6> & /*mat*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/,
+                                   double /*yStep*/)
     {
         return false;
     }
