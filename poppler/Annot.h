@@ -554,7 +554,7 @@ public:
 
     // The following functions operate on coords relative to [origX origY]
     void extendTo(double x, double y);
-    void getBBoxRect(double bbox[4]) const;
+    std::array<double, 4> getBBoxRect() const;
 
     // Get boundaries in page coordinates
     double getPageXMin() const;
@@ -789,8 +789,8 @@ private:
 
 protected:
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict);
-    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Dict *resDict);
+    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;

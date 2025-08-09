@@ -1229,12 +1229,9 @@ void AnnotAppearanceBBox::extendTo(double x, double y)
     }
 }
 
-void AnnotAppearanceBBox::getBBoxRect(double bbox[4]) const
+std::array<double, 4> AnnotAppearanceBBox::getBBoxRect() const
 {
-    bbox[0] = minX - borderWidth;
-    bbox[1] = minY - borderWidth;
-    bbox[2] = maxX + borderWidth;
-    bbox[3] = maxY + borderWidth;
+    return { minX - borderWidth, minY - borderWidth, maxX + borderWidth, maxY + borderWidth };
 }
 
 double AnnotAppearanceBBox::getPageXMin() const
@@ -1936,12 +1933,12 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     return 0;
 }
 
-Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict)
+Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Dict *resDict)
 {
     return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
 }
 
-Object Annot::createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject)
+Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject)
 {
     Dict *appearDict = new Dict(doc->getXRef());
     appearDict->set("Length", Object(appearBuf->getLength()));
@@ -2698,8 +2695,7 @@ void AnnotText::draw(Gfx *gfx, bool printing)
         // Force 24x24 rectangle
         PDFRectangle fixedRect(rect->x1, rect->y2 - 24, rect->x1 + 24, rect->y2);
         appearBBox = std::make_unique<AnnotAppearanceBBox>(&fixedRect);
-        double bbox[4];
-        appearBBox->getBBoxRect(bbox);
+        const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
@@ -3336,10 +3332,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
-    double bbox[4];
-    bbox[0] = bbox[1] = 0;
-    bbox[2] = rect->x2 - rect->x1;
-    bbox[3] = rect->y2 - rect->y1;
+    const std::array<double, 4> bbox = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
 
     Object newAppearance;
     if (ca == 1) {
@@ -3775,8 +3768,7 @@ void AnnotLine::generateLineAppearance()
 
     appearBuilder.append("Q\n");
 
-    double bbox[4];
-    appearBBox->getBBoxRect(bbox);
+    const std::array<double, 4> bbox = appearBBox->getBBoxRect();
     if (ca == 1) {
         appearance = createForm(appearBuilder.buffer(), bbox, false, fontResDict);
     } else {
@@ -4095,11 +4087,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, bool printing)
         }
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        bbox[0] = appearBBox->getPageXMin();
-        bbox[1] = appearBBox->getPageYMin();
-        bbox[2] = appearBBox->getPageXMax();
-        bbox[3] = appearBBox->getPageYMax();
+        const std::array<double, 4> bbox = { appearBBox->getPageXMin(), appearBBox->getPageYMin(), appearBBox->getPageXMax(), appearBBox->getPageYMax() };
         Object aStream = createForm(appearBuilder.buffer(), bbox, true, nullptr);
 
         GooString appearBuf("/GS0 gs\n/Fm0 Do");
@@ -5649,10 +5637,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             appearBuf->append("Q\n");
             appearBuf->append("Q\n");
 
-            double bbox[4];
-            bbox[0] = bbox[1] = 0;
-            bbox[2] = width;
-            bbox[3] = height;
+            const std::array<double, 4> bbox = { 0, 0, static_cast<double>(width), static_cast<double>(height) };
             appearance = createForm(appearBuf.get(), bbox, false, resDict2);
         }
     }
@@ -5763,7 +5748,7 @@ void AnnotStamp::generateStampCustomAppearance()
 
     Dict *resDict = createResourcesDict(imgStrName.c_str(), Object(imgRef), "GS0", opacity, nullptr);
 
-    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const std::array<double, 4> bboxArray = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const GooString *appearBuf = appearBuilder.buffer();
     appearance = createForm(appearBuf, bboxArray, false, resDict);
 
@@ -5877,7 +5862,7 @@ void AnnotStamp::generateStampDefaultAppearance()
         extGStateDict = getDraftStampExtGStateDict(doc);
     }
 
-    const double bboxArray[4] = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
+    const std::array<double, 4> bboxArray = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
     const std::string scale = GooString::format("{0:.6g} 0 0 {1:.6g} 0 0 cm\nq\n", bboxArray[2] / stampUnscaledWidth, bboxArray[3] / stampUnscaledHeight);
     defaultAppearanceBuilder.append(scale.c_str());
     defaultAppearanceBuilder.append(stampCode);
@@ -6082,10 +6067,7 @@ void AnnotGeometry::draw(Gfx *gfx, bool printing)
         }
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        bbox[0] = bbox[1] = 0;
-        bbox[2] = rect->x2 - rect->x1;
-        bbox[3] = rect->y2 - rect->y1;
+        const std::array<double, 4> bbox = { 0, 0, rect->x2 - rect->x1, rect->y2 - rect->y1 };
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
@@ -6412,8 +6394,7 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing)
         }
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        appearBBox->getBBoxRect(bbox);
+        const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
@@ -6611,8 +6592,7 @@ void AnnotInk::draw(Gfx *gfx, bool printing)
 
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        appearBBox->getBBoxRect(bbox);
+        const std::array<double, 4> bbox = appearBBox->getBBoxRect();
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
@@ -6815,9 +6795,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
         }
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        bbox[0] = bbox[1] = 0;
-        bbox[2] = bbox[3] = 24;
+        static constexpr std::array<double, 4> bbox = { 0, 0, 24, 24 };
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
@@ -6964,9 +6942,7 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
         }
         appearBuilder.append("Q\n");
 
-        double bbox[4];
-        bbox[0] = bbox[1] = 0;
-        bbox[2] = bbox[3] = 24;
+        static constexpr std::array<double, 4> bbox = { 0, 0, 24, 24 };
         if (ca == 1) {
             appearance = createForm(appearBuilder.buffer(), bbox, false, nullptr);
         } else {
