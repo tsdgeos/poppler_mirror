@@ -2035,7 +2035,7 @@ void Splash::strokeWide(SplashPath *path, SplashCoord w)
 {
     SplashPath *path2;
 
-    path2 = makeStrokePath(path, w, false);
+    path2 = makeStrokePath(*path, w, false);
     fillWithPattern(path2, false, state->strokePattern, state->strokeAlpha);
     delete path2;
 }
@@ -6014,9 +6014,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     return splashOk;
 }
 
-SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten)
+SplashPath *Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten)
 {
-    SplashPath *pathIn, *dashPath, *pathOut;
+    const SplashPath *pathIn;
+    SplashPath *dashPath, *pathOut;
     SplashCoord d, dx, dy, wdx, wdy, dxNext, dyNext, wdxNext, wdyNext;
     SplashCoord crossprod, dotprod, miter, m;
     bool first, last, closed, hasangle;
@@ -6026,12 +6027,12 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
 
     pathOut = new SplashPath();
 
-    if (path->length == 0) {
+    if (path.length == 0) {
         return pathOut;
     }
 
     if (flatten) {
-        pathIn = flattenPath(*path, state->matrix, state->flatness);
+        pathIn = flattenPath(path, state->matrix, state->flatness);
         if (!state->lineDash.empty()) {
             dashPath = makeDashedPath(*pathIn);
             delete pathIn;
@@ -6042,7 +6043,7 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
             }
         }
     } else {
-        pathIn = path;
+        pathIn = &path;
     }
 
     subpathStart0 = subpathStart1 = 0; // make gcc happy
@@ -6388,7 +6389,7 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
         ++seg;
     }
 
-    if (pathIn != path) {
+    if (pathIn != &path) {
         delete pathIn;
     }
 
