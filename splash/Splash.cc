@@ -1926,13 +1926,13 @@ SplashError Splash::stroke(SplashPath *path)
     } else if (bitmap->mode == splashModeMono1) {
         // this gets close to Adobe's behavior in mono mode
         if (d1 * state->lineWidth <= 2) {
-            strokeNarrow(path2);
+            strokeNarrow(*path2);
         } else {
             strokeWide(path2, state->lineWidth);
         }
     } else {
         if (state->lineWidth == 0) {
-            strokeNarrow(path2);
+            strokeNarrow(*path2);
         } else {
             strokeWide(path2, state->lineWidth);
         }
@@ -1942,7 +1942,7 @@ SplashError Splash::stroke(SplashPath *path)
     return splashOk;
 }
 
-void Splash::strokeNarrow(SplashPath *path)
+void Splash::strokeNarrow(const SplashPath &path)
 {
     SplashPipe pipe;
     SplashXPathSeg *seg;
@@ -1954,7 +1954,7 @@ void Splash::strokeNarrow(SplashPath *path)
 
     nClipRes[0] = nClipRes[1] = nClipRes[2] = 0;
 
-    SplashXPath xPath(*path, state->matrix, state->flatness, false);
+    SplashXPath xPath(path, state->matrix, state->flatness, false);
 
     pipeInit(&pipe, 0, 0, state->strokePattern, nullptr, (unsigned char)splashRound(state->strokeAlpha * 255), false, false);
 
