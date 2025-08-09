@@ -69,20 +69,20 @@ char *strtok_r(char *s, const char *delim, char **save_ptr)
 {
     char *token;
 
-    if (s == NULL)
+    if (s == nullptr)
         s = *save_ptr;
 
     /* Scan leading delimiters.  */
     s += strspn(s, delim);
     if (*s == '\0') {
         *save_ptr = s;
-        return NULL;
+        return nullptr;
     }
 
     /* Find the end of the token.  */
     token = s;
     s = strpbrk(token, delim);
-    if (s == NULL)
+    if (s == nullptr)
         /* This token finishes the string.  */
         *save_ptr = __rawmemchr(token, '\0');
     else {

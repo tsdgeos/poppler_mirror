@@ -56,7 +56,7 @@ static void pgd_transitions_free(PgdTransitionsDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     g_free(demo);
@@ -192,21 +192,21 @@ static GtkWidget *pgd_transitions_create_list(GtkTreeModel *model)
     gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview)), GTK_SELECTION_NONE);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Page", renderer, "text", TRANSITIONS_PAGE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Page", renderer, "text", TRANSITIONS_PAGE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Type", renderer, "text", TRANSITIONS_TYPE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Type", renderer, "text", TRANSITIONS_TYPE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Alignment", renderer, "text", TRANSITIONS_ALIGNMENT_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Alignment", renderer, "text", TRANSITIONS_ALIGNMENT_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "Direction", renderer, "text", TRANSITIONS_DIRECTION_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "Direction", renderer, "text", TRANSITIONS_DIRECTION_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Duration", renderer, "text", TRANSITIONS_DURATION_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Duration", renderer, "text", TRANSITIONS_DURATION_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 5, "Angle", renderer, "text", TRANSITIONS_ANGLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 5, "Angle", renderer, "text", TRANSITIONS_ANGLE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 6, "Scale", renderer, "text", TRANSITIONS_SCALE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 6, "Scale", renderer, "text", TRANSITIONS_SCALE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 7, "Rectangular", renderer, "text", TRANSITIONS_RECTANGULAR_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 7, "Rectangular", renderer, "text", TRANSITIONS_RECTANGULAR_COLUMN, nullptr);
     return treeview;
 }
 
@@ -239,7 +239,7 @@ GtkWidget *pgd_transitions_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 6);
     gtk_widget_show(hbox);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     model = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);

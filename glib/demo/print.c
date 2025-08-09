@@ -45,7 +45,7 @@ static void pgd_print_free(PgdPrintDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     g_free(demo);
@@ -144,7 +144,7 @@ static void pgd_print_custom_widget_apply(GtkPrintOperation *op, GtkWidget *widg
 static void pgd_print_print(GtkWidget *button, PgdPrintDemo *demo)
 {
     GtkPrintOperation *op;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     op = gtk_print_operation_new();
     gtk_print_operation_set_custom_tab_label(op, "PDF Options");
@@ -159,7 +159,7 @@ static void pgd_print_print(GtkWidget *button, PgdPrintDemo *demo)
         dialog = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(button)), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", error->message);
         g_error_free(error);
 
-        g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+        g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), nullptr);
 
         gtk_widget_show(dialog);
     }

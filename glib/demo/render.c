@@ -54,12 +54,12 @@ static void pgd_render_free(PgdRenderDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->surface) {
         cairo_surface_destroy(demo->surface);
-        demo->surface = NULL;
+        demo->surface = nullptr;
     }
 
     g_free(demo);
@@ -95,7 +95,7 @@ static void pgd_render_start(GtkButton *button, PgdRenderDemo *demo)
     if (demo->surface) {
         cairo_surface_destroy(demo->surface);
     }
-    demo->surface = NULL;
+    demo->surface = nullptr;
 
     poppler_page_get_size(page, &page_width, &page_height);
 
@@ -156,7 +156,7 @@ static void pgd_render_start(GtkButton *button, PgdRenderDemo *demo)
     cairo_destroy(cr);
     g_object_unref(page);
 
-    str = g_strdup_printf("<i>Page rendered in %.4f seconds</i>", g_timer_elapsed(timer, NULL));
+    str = g_strdup_printf("<i>Page rendered in %.4f seconds</i>", g_timer_elapsed(timer, nullptr));
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), str);
     g_free(str);
 
@@ -377,9 +377,9 @@ GtkWidget *pgd_render_properties_selector_create(PgdRenderDemo *demo)
     gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, TRUE, 0);
     gtk_widget_show(button);
 
-    demo->timer_label = gtk_label_new(NULL);
+    demo->timer_label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), "<i>No page rendered</i>");
-    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, NULL);
+    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, nullptr);
     gtk_box_pack_end(GTK_BOX(vbox), demo->timer_label, FALSE, TRUE, 0);
     gtk_widget_show(demo->timer_label);
 
@@ -405,7 +405,7 @@ GtkWidget *pgd_render_create_widget(PopplerDocument *document)
     demo->darea = gtk_drawing_area_new();
     g_signal_connect(G_OBJECT(demo->darea), "draw", G_CALLBACK(pgd_render_drawing_area_draw), (gpointer)demo);
 
-    demo->swindow = gtk_scrolled_window_new(NULL, NULL);
+    demo->swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(demo->swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(demo->swindow), demo->darea);
     gtk_widget_show(demo->darea);

@@ -370,8 +370,8 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
     PDFDoc *newDoc;
     BaseStream *str;
 
-    g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
-    g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
+    g_return_val_if_fail(G_IS_INPUT_STREAM(stream), nullptr);
+    g_return_val_if_fail(length == (goffset)-1 || length > 0, nullptr);
 
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
@@ -426,7 +426,7 @@ PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *passwo
     PopplerDocument *document;
     GFileInputStream *stream;
 
-    g_return_val_if_fail(G_IS_FILE(file), NULL);
+    g_return_val_if_fail(G_IS_FILE(file), nullptr);
 
     if (g_file_is_native(file)) {
         gchar *uri;
@@ -762,7 +762,7 @@ PopplerPage *poppler_document_get_page(PopplerDocument *document, int index)
 {
     Page *page;
 
-    g_return_val_if_fail(0 <= index && index < poppler_document_get_n_pages(document), NULL);
+    g_return_val_if_fail(0 <= index && index < poppler_document_get_n_pages(document), nullptr);
 
     page = document->doc->getPage(index + 1);
     if (!page) {
@@ -852,7 +852,7 @@ GList *poppler_document_get_attachments(PopplerDocument *document)
     int n_files, i;
     GList *retval = nullptr;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     catalog = document->doc->getCatalog();
     if (catalog == nullptr || !catalog->isOk()) {
@@ -1275,7 +1275,7 @@ gchar *poppler_document_get_pdf_version_string(PopplerDocument *document)
 {
     gchar *retval;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     retval = g_strndup("PDF-", 15); /* allocates 16 chars, pads with \0s */
     g_ascii_formatd(retval + 4, 15 + 1 - 4, "%.2g", document->doc->getPDFMajorVersion() + document->doc->getPDFMinorVersion() / 10.0);
@@ -1318,7 +1318,7 @@ void poppler_document_get_pdf_version(PopplerDocument *document, guint *major_ve
  **/
 gchar *poppler_document_get_title(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_title = document->doc->getDocInfoTitle();
     return _poppler_goo_string_to_utf8(goo_title.get());
@@ -1361,7 +1361,7 @@ void poppler_document_set_title(PopplerDocument *document, const gchar *title)
  **/
 gchar *poppler_document_get_author(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_author = document->doc->getDocInfoAuthor();
     return _poppler_goo_string_to_utf8(goo_author.get());
@@ -1404,7 +1404,7 @@ void poppler_document_set_author(PopplerDocument *document, const gchar *author)
  **/
 gchar *poppler_document_get_subject(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_subject = document->doc->getDocInfoSubject();
     return _poppler_goo_string_to_utf8(goo_subject.get());
@@ -1447,7 +1447,7 @@ void poppler_document_set_subject(PopplerDocument *document, const gchar *subjec
  **/
 gchar *poppler_document_get_keywords(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_keywords = document->doc->getDocInfoKeywords();
     return _poppler_goo_string_to_utf8(goo_keywords.get());
@@ -1492,7 +1492,7 @@ void poppler_document_set_keywords(PopplerDocument *document, const gchar *keywo
  **/
 gchar *poppler_document_get_creator(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_creator = document->doc->getDocInfoCreator();
     return _poppler_goo_string_to_utf8(goo_creator.get());
@@ -1537,7 +1537,7 @@ void poppler_document_set_creator(PopplerDocument *document, const gchar *creato
  **/
 gchar *poppler_document_get_producer(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     const std::unique_ptr<GooString> goo_producer = document->doc->getDocInfoProducer();
     return _poppler_goo_string_to_utf8(goo_producer.get());
@@ -2077,7 +2077,7 @@ PopplerPermissions poppler_document_get_permissions(PopplerDocument *document)
  **/
 gchar *poppler_document_get_pdf_subtype_string(PopplerDocument *document)
 {
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     std::unique_ptr<GooString> infostring;
 
@@ -2175,7 +2175,7 @@ gchar *poppler_document_get_metadata(PopplerDocument *document)
     Catalog *catalog;
     gchar *retval = nullptr;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     catalog = document->doc->getCatalog();
     if (catalog && catalog->isOk()) {
@@ -2611,7 +2611,7 @@ PopplerIndexIter *poppler_index_iter_copy(PopplerIndexIter *iter)
 {
     PopplerIndexIter *new_iter;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     new_iter = g_slice_dup(PopplerIndexIter, iter);
     new_iter->document = (PopplerDocument *)g_object_ref(new_iter->document);
@@ -2696,7 +2696,7 @@ PopplerIndexIter *poppler_index_iter_get_child(PopplerIndexIter *parent)
     PopplerIndexIter *child;
     OutlineItem *item;
 
-    g_return_val_if_fail(parent != nullptr, NULL);
+    g_return_val_if_fail(parent != nullptr, nullptr);
 
     item = (*parent->items)[parent->index];
     item->open();
@@ -2764,7 +2764,7 @@ PopplerAction *poppler_index_iter_get_action(PopplerIndexIter *iter)
     PopplerAction *action;
     gchar *title;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     item = (*iter->items)[iter->index];
     link_action = item->getAction();
@@ -3036,7 +3036,7 @@ PopplerFontsIter *poppler_fonts_iter_copy(PopplerFontsIter *iter)
 {
     PopplerFontsIter *new_iter;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     new_iter = g_slice_dup(PopplerFontsIter, iter);
 
@@ -3132,7 +3132,7 @@ PopplerFontInfo *poppler_font_info_new(PopplerDocument *document)
 {
     PopplerFontInfo *font_info;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
     font_info = (PopplerFontInfo *)g_object_new(POPPLER_TYPE_FONT_INFO, nullptr);
     font_info->document = (PopplerDocument *)g_object_ref(document);
@@ -3393,7 +3393,7 @@ PopplerLayersIter *poppler_layers_iter_copy(PopplerLayersIter *iter)
 {
     PopplerLayersIter *new_iter;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     new_iter = g_slice_dup(PopplerLayersIter, iter);
     new_iter->document = (PopplerDocument *)g_object_ref(new_iter->document);
@@ -3459,7 +3459,7 @@ PopplerLayersIter *poppler_layers_iter_get_child(PopplerLayersIter *parent)
     PopplerLayersIter *child;
     Layer *layer;
 
-    g_return_val_if_fail(parent != nullptr, NULL);
+    g_return_val_if_fail(parent != nullptr, nullptr);
 
     layer = (Layer *)g_list_nth_data(parent->items, parent->index);
     if (!layer || !layer->kids) {
@@ -3491,7 +3491,7 @@ gchar *poppler_layers_iter_get_title(PopplerLayersIter *iter)
 {
     Layer *layer;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     layer = (Layer *)g_list_nth_data(iter->items, iter->index);
 
@@ -3514,7 +3514,7 @@ PopplerLayer *poppler_layers_iter_get_layer(PopplerLayersIter *iter)
     Layer *layer;
     PopplerLayer *poppler_layer = nullptr;
 
-    g_return_val_if_fail(iter != nullptr, NULL);
+    g_return_val_if_fail(iter != nullptr, nullptr);
 
     layer = (Layer *)g_list_nth_data(iter->items, iter->index);
     if (layer->oc) {
@@ -3615,9 +3615,9 @@ PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filena
 {
     PopplerPSFile *ps_file;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
-    g_return_val_if_fail(filename != nullptr, NULL);
-    g_return_val_if_fail(n_pages > 0, NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+    g_return_val_if_fail(filename != nullptr, nullptr);
+    g_return_val_if_fail(n_pages > 0, nullptr);
 
     ps_file = (PopplerPSFile *)g_object_new(POPPLER_TYPE_PS_FILE, nullptr);
     ps_file->document = (PopplerDocument *)g_object_ref(document);

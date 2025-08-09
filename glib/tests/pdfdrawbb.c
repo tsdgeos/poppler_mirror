@@ -29,7 +29,7 @@ char *pdfaddsuffix(char *infile, char *suffix)
     g_free(basename);
 
     pos = strrchr(outfile, '.');
-    if (pos != NULL && (!strcmp(pos, ".pdf") || !strcmp(pos, ".PDF"))) {
+    if (pos != nullptr && (!strcmp(pos, ".pdf") || !strcmp(pos, ".PDF"))) {
         *pos = '\0';
     }
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     gboolean usage = FALSE;
     char *infilename, *outfilename;
 
-    GError *err = NULL;
+    GError *err = nullptr;
     GFile *infile;
     PopplerDocument *doc;
     PopplerPage *page;
@@ -90,12 +90,12 @@ int main(int argc, char *argv[])
     /* open file */
 
     infile = g_file_new_for_path(infilename);
-    if (infile == NULL) {
+    if (infile == nullptr) {
         exit(EXIT_FAILURE);
     }
 
-    doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_gfile(infile, nullptr, nullptr, &err);
+    if (doc == nullptr) {
         g_printerr("error opening pdf file: %s\n", err->message);
         g_error_free(err);
         exit(EXIT_FAILURE);

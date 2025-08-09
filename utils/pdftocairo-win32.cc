@@ -113,7 +113,7 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
             nextOpt = comma + 1;
         } else {
             opt.Set(nextOpt);
-            nextOpt = NULL;
+            nextOpt = nullptr;
         }
         // here opt is "<optN>=<valN> "
         const char *equal = strchr(opt.c_str(), '=');
@@ -147,7 +147,7 @@ static void getLocalPos(HWND wind, HWND dlg, RECT *rect)
 
 static HWND createGroupBox(HWND parent, HINSTANCE hInstance, HMENU id, const char *label, RECT *rect)
 {
-    HWND hwnd = CreateWindowA(WC_BUTTONA, label, WS_CHILD | WS_VISIBLE | BS_GROUPBOX, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hInstance, NULL);
+    HWND hwnd = CreateWindowA(WC_BUTTONA, label, WS_CHILD | WS_VISIBLE | BS_GROUPBOX, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hInstance, nullptr);
     HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
     if (hFont)
         SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, (LPARAM)0);
@@ -156,7 +156,7 @@ static HWND createGroupBox(HWND parent, HINSTANCE hInstance, HMENU id, const cha
 
 static HWND createCheckBox(HWND parent, HINSTANCE hInstance, HMENU id, const char *label, RECT *rect)
 {
-    HWND hwnd = CreateWindowA(WC_BUTTONA, label, WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_TABSTOP, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hInstance, NULL);
+    HWND hwnd = CreateWindowA(WC_BUTTONA, label, WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_TABSTOP, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hInstance, nullptr);
     HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
     if (hFont)
         SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, (LPARAM)0);
@@ -165,7 +165,7 @@ static HWND createCheckBox(HWND parent, HINSTANCE hInstance, HMENU id, const cha
 
 static HWND createStaticText(HWND parent, HINSTANCE hinstance, HMENU id, const char *text, RECT *rect)
 {
-    HWND hwnd = CreateWindowA(WC_STATICA, text, WS_CHILD | WS_VISIBLE | SS_LEFT, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hinstance, NULL);
+    HWND hwnd = CreateWindowA(WC_STATICA, text, WS_CHILD | WS_VISIBLE | SS_LEFT, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hinstance, nullptr);
     HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
     if (hFont)
         SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, (LPARAM)0);
@@ -174,7 +174,7 @@ static HWND createStaticText(HWND parent, HINSTANCE hinstance, HMENU id, const c
 
 static HWND createPageScaleComboBox(HWND parent, HINSTANCE hinstance, HMENU id, RECT *rect)
 {
-    HWND hwnd = CreateWindowA(WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP | CBS_DROPDOWNLIST, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hinstance, NULL);
+    HWND hwnd = CreateWindowA(WC_COMBOBOX, "", WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP | CBS_DROPDOWNLIST, rect->left, rect->top, rect->right - rect->left, rect->bottom - rect->top, parent, id, hinstance, nullptr);
     HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
     if (hFont)
         SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, (LPARAM)0);

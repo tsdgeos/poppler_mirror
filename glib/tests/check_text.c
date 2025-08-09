@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
     GFile *infile;
     PopplerDocument *doc;
     PopplerPage *page;
-    PopplerRectangle *areas = NULL;
+    PopplerRectangle *areas = nullptr;
     guint n_glyph_areas, n_utf8_chars;
     int npages, n;
     char *text;
-    GError *err = NULL;
+    GError *err = nullptr;
 
     /* open file */
 
@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_gfile(infile, nullptr, nullptr, &err);
+    if (doc == nullptr) {
         g_printerr("error opening pdf file: %s\n", err->message);
         g_error_free(err);
         exit(EXIT_FAILURE);
@@ -67,15 +67,15 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_gfile(infile, nullptr, nullptr, &err);
+    if (doc == nullptr) {
         g_printerr("error opening pdf file: %s\n", err->message);
         g_error_free(err);
         exit(EXIT_FAILURE);
     }
 
     page = poppler_document_get_page(doc, 0);
-    if (page == NULL || !POPPLER_IS_PAGE(page)) {
+    if (page == nullptr || !POPPLER_IS_PAGE(page)) {
         g_print("error opening pdf page\n");
         exit(EXIT_FAILURE);
     }

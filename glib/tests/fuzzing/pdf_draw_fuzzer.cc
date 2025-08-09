@@ -7,7 +7,7 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    GError *err = NULL;
+    GError *err = nullptr;
     PopplerDocument *doc;
     PopplerPage *page;
     PopplerRectangle bb;
@@ -19,8 +19,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     cairo_surface_t *surface;
     cairo_status_t status;
 
-    doc = poppler_document_new_from_data((char *)data, size, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_data((char *)data, size, nullptr, &err);
+    if (doc == nullptr) {
         g_error_free(err);
         return 0;
     }

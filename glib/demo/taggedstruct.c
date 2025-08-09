@@ -41,7 +41,7 @@ static void pgd_taggedstruct_free(PgdTaggedStructDemo *demo)
 
     if (demo->store) {
         g_object_unref(demo->store);
-        demo->store = NULL;
+        demo->store = nullptr;
     }
 
     g_free(demo);
@@ -71,12 +71,12 @@ static GtkTreeStore *populate_store(PopplerStructureElementIter *iter)
     GtkTreeStore *store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
 
     if (iter) {
-        populate_store_aux(store, NULL, iter);
+        populate_store_aux(store, nullptr, iter);
     } else {
         GtkTreeIter pos;
 
-        gtk_tree_store_append(store, &pos, NULL);
-        gtk_tree_store_set(store, &pos, 0, "<b>Not a Tagged-PDF</b>", 1, NULL, -1);
+        gtk_tree_store_append(store, &pos, nullptr);
+        gtk_tree_store_set(store, &pos, 0, "<b>Not a Tagged-PDF</b>", 1, nullptr, -1);
     }
 
     return store;
@@ -145,8 +145,8 @@ GtkWidget *pgd_taggedstruct_create_widget(PopplerDocument *document)
     demo->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(demo->store));
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(demo->view), 0, "Type", renderer, "markup", 0, NULL);
-    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(demo->view), 0)), "expand", TRUE, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(demo->view), 0, "Type", renderer, "markup", 0, nullptr);
+    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(demo->view), 0)), "expand", TRUE, nullptr);
 
     gtk_tree_view_expand_all(GTK_TREE_VIEW(demo->view));
     gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(demo->view), TRUE);
@@ -155,7 +155,7 @@ GtkWidget *pgd_taggedstruct_create_widget(PopplerDocument *document)
     gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(demo->view), TRUE);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    scroll = gtk_scrolled_window_new(NULL, NULL);
+    scroll = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_container_add(GTK_CONTAINER(scroll), demo->view);
     gtk_widget_show(demo->view);
     gtk_box_pack_start(GTK_BOX(hbox), scroll, TRUE, TRUE, 0);
@@ -167,17 +167,17 @@ GtkWidget *pgd_taggedstruct_create_widget(PopplerDocument *document)
     gtk_grid_set_row_homogeneous(GTK_GRID(grid), FALSE);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 6);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 6);
-    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Type:</b>", &demo->type_value, NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>ID:</b>", &demo->id_value, NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Title:</b>", &demo->title_value, NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Language:</b>", &demo->lang_value, NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Abbreviation:</b>", &demo->abbr_value, NULL, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Type:</b>", &demo->type_value, nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>ID:</b>", &demo->id_value, nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Title:</b>", &demo->title_value, nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Language:</b>", &demo->lang_value, nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(grid), "<b>Abbreviation:</b>", &demo->abbr_value, nullptr, &row);
 
     vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
     gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
     gtk_widget_show(grid);
 
-    scroll = gtk_scrolled_window_new(NULL, NULL);
+    scroll = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_container_set_border_width(GTK_CONTAINER(scroll), 12);
     gtk_box_pack_end(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
     gtk_widget_show(scroll);

@@ -62,9 +62,9 @@ PopplerPage *_poppler_page_new(PopplerDocument *document, Page *page, int index)
 {
     PopplerPage *poppler_page;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
 
-    poppler_page = (PopplerPage *)g_object_new(POPPLER_TYPE_PAGE, nullptr, NULL);
+    poppler_page = (PopplerPage *)g_object_new(POPPLER_TYPE_PAGE, nullptr, nullptr);
     poppler_page->document = (PopplerDocument *)g_object_ref(document);
     poppler_page->page = page;
     poppler_page->index = index;
@@ -150,7 +150,7 @@ gchar *poppler_page_get_label(PopplerPage *page)
 {
     GooString label;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     page->document->doc->getCatalog()->indexToLabel(page->index, &label);
     return _poppler_goo_string_to_utf8(&label);
@@ -184,7 +184,7 @@ PopplerPageTransition *poppler_page_get_transition(PopplerPage *page)
     PageTransition *trans;
     PopplerPageTransition *transition;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     Object obj = page->page->getTrans();
     trans = new PageTransition(&obj);
@@ -478,7 +478,7 @@ cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page)
     int width, height, rowstride;
     cairo_surface_t *surface;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     if (!page->page->loadThumb(&data, &width, &height, &rowstride)) {
         return nullptr;
@@ -772,8 +772,8 @@ char *poppler_page_get_selected_text(PopplerPage *page, PopplerSelectionStyle st
     SelectionStyle selection_style = selectionStyleGlyph;
     PDFRectangle pdf_selection;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
-    g_return_val_if_fail(selection != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
+    g_return_val_if_fail(selection != nullptr, nullptr);
 
     pdf_selection.x1 = selection->x1;
     pdf_selection.y1 = selection->y1;
@@ -813,7 +813,7 @@ char *poppler_page_get_text(PopplerPage *page)
 {
     PopplerRectangle rectangle = { 0, 0, 0, 0 };
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     poppler_page_get_size(page, &rectangle.x2, &rectangle.y2);
 
@@ -833,8 +833,8 @@ char *poppler_page_get_text(PopplerPage *page)
  **/
 char *poppler_page_get_text_for_area(PopplerPage *page, PopplerRectangle *area)
 {
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
-    g_return_val_if_fail(area != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
+    g_return_val_if_fail(area != nullptr, nullptr);
 
     return poppler_page_get_selected_text(page, POPPLER_SELECTION_GLYPH, area);
 }
@@ -883,8 +883,8 @@ GList *poppler_page_find_text_with_options(PopplerPage *page, const char *text, 
     gboolean backwards;
     gboolean start_at_last = FALSE;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
-    g_return_val_if_fail(text != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
+    g_return_val_if_fail(text != nullptr, nullptr);
 
     text_dev = poppler_page_get_text_page(page);
 
@@ -988,7 +988,7 @@ GList *poppler_page_get_image_mapping(PopplerPage *page)
     CairoImageOutputDev *out;
     gint i;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     out = poppler_page_get_image_output_dev(page, nullptr, nullptr);
 
@@ -1036,7 +1036,7 @@ cairo_surface_t *poppler_page_get_image(PopplerPage *page, gint image_id)
     CairoImageOutputDev *out;
     cairo_surface_t *image;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     out = poppler_page_get_image_output_dev(page, image_draw_decide_cb, GINT_TO_POINTER(image_id));
 
@@ -1152,7 +1152,7 @@ GList *poppler_page_get_link_mapping(PopplerPage *page)
     Links *links;
     double width, height;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     links = new Links(page->page->getAnnots());
 
@@ -1251,7 +1251,7 @@ GList *poppler_page_get_form_field_mapping(PopplerPage *page)
     GList *map_list = nullptr;
     gint i;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     const std::unique_ptr<FormPageWidgets> forms = page->page->getFormWidgets();
 
@@ -1315,7 +1315,7 @@ GList *poppler_page_get_annot_mapping(PopplerPage *page)
     Annots *annots;
     const PDFRectangle *crop_box;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     annots = page->page->getAnnots();
     if (!annots) {
@@ -1726,7 +1726,7 @@ PopplerRectangle *poppler_rectangle_new(void)
  */
 PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle)
 {
-    g_return_val_if_fail(rectangle != nullptr, NULL);
+    g_return_val_if_fail(rectangle != nullptr, nullptr);
 
     auto ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
     return reinterpret_cast<PopplerRectangle *>(g_slice_dup(PopplerRectangleExtended, ext_rectangle));
@@ -1830,7 +1830,7 @@ PopplerPoint *poppler_point_new(void)
  **/
 PopplerPoint *poppler_point_copy(PopplerPoint *point)
 {
-    g_return_val_if_fail(point != nullptr, NULL);
+    g_return_val_if_fail(point != nullptr, nullptr);
 
     return g_slice_dup(PopplerPoint, point);
 }
@@ -1878,7 +1878,7 @@ PopplerQuadrilateral *poppler_quadrilateral_new(void)
  **/
 PopplerQuadrilateral *poppler_quadrilateral_copy(PopplerQuadrilateral *quad)
 {
-    g_return_val_if_fail(quad != nullptr, NULL);
+    g_return_val_if_fail(quad != nullptr, nullptr);
 
     return g_slice_dup(PopplerQuadrilateral, quad);
 }
@@ -2537,7 +2537,7 @@ GList *poppler_page_get_text_attributes(PopplerPage *page)
 {
     PopplerRectangle selection = { 0, 0, 0, 0 };
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
 
     poppler_page_get_size(page, &selection.x2, &selection.y2);
 
@@ -2570,7 +2570,7 @@ GList *poppler_page_get_text_attributes_for_area(PopplerPage *page, PopplerRecta
     gint offset = 0;
     GList *attributes = nullptr;
 
-    g_return_val_if_fail(POPPLER_IS_PAGE(page), NULL);
+    g_return_val_if_fail(POPPLER_IS_PAGE(page), nullptr);
     g_return_val_if_fail(area != nullptr, nullptr);
 
     selection.x1 = area->x1;

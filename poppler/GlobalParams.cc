@@ -835,7 +835,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
 
     const char *lang = getFontLang(font);
 
-    p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family.c_str(), FC_LANG, FcTypeString, lang, NULL);
+    p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family.c_str(), FC_LANG, FcTypeString, lang, nullptr);
     if (slant != -1) {
         FcPatternAddInteger(p, FC_SLANT, slant);
     }

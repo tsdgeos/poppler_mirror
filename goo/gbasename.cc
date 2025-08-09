@@ -50,7 +50,7 @@ std::string gbasename(const char *filename)
 {
 #ifdef _MSC_VER
     char fname[_MAX_FNAME] = {}, fext[_MAX_EXT] = {};
-    errno_t z = _splitpath_s(filename, NULL, 0, NULL, 0, fname, _countof(fname), fext, _countof(fext));
+    errno_t z = _splitpath_s(filename, nullptr, 0, nullptr, 0, fname, _countof(fname), fext, _countof(fext));
     return std::string(fname) + std::string(fext);
 #else
     char *mutabl = strdup(filename);

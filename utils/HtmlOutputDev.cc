@@ -412,7 +412,7 @@ void HtmlPage::endString()
 #if 0 //~tmp
   if (curStr->yMax - curStr->yMin > 20) {
     delete curStr;
-    curStr = NULL;
+    curStr = nullptr;
     return;
   }
 #endif
@@ -1179,7 +1179,7 @@ void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
       write=false;
       GooString* fname=Dirname(Docname);
       fname->append("image.log");
-      if((tin=fopen(getFileNameFromPath(fname->c_str(),fname->getLength()),"w"))==NULL){
+      if((tin=fopen(getFileNameFromPath(fname->c_str(),fname->getLength()),"w"))==nullptr){
 	printf("Error : can not open %s",fname);
 	exit(1);
       }

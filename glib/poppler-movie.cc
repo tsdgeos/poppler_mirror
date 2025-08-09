@@ -146,7 +146,7 @@ PopplerMovie *_poppler_movie_new(const Movie *poppler_movie)
  */
 const gchar *poppler_movie_get_filename(PopplerMovie *poppler_movie)
 {
-    g_return_val_if_fail(POPPLER_IS_MOVIE(poppler_movie), NULL);
+    g_return_val_if_fail(POPPLER_IS_MOVIE(poppler_movie), nullptr);
 
     return poppler_movie->filename;
 }

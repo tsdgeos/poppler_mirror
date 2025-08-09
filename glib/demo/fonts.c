@@ -50,7 +50,7 @@ static void pgd_fonts_free(PgdFontsDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     g_free(demo);
@@ -70,7 +70,7 @@ static void pdg_fonts_cell_data_func(GtkTreeViewColumn *col, GtkCellRenderer *re
         markup = g_strdup_printf("<b><big>%s</big></b>", name);
     }
 
-    g_object_set(renderer, "markup", markup, NULL);
+    g_object_set(renderer, "markup", markup, nullptr);
 
     g_free(markup);
     g_free(details);
@@ -232,7 +232,7 @@ GtkWidget *pgd_fonts_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 6);
     gtk_widget_show(hbox);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     model = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
@@ -246,7 +246,7 @@ GtkWidget *pgd_fonts_create_widget(PopplerDocument *document)
 
     renderer = gtk_cell_renderer_text_new();
     gtk_tree_view_column_pack_start(GTK_TREE_VIEW_COLUMN(column), renderer, FALSE);
-    gtk_tree_view_column_set_cell_data_func(column, renderer, pdg_fonts_cell_data_func, NULL, NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer, pdg_fonts_cell_data_func, nullptr, nullptr);
 
     gtk_container_add(GTK_CONTAINER(swindow), demo->treeview);
     gtk_widget_show(demo->treeview);

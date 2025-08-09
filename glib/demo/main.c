@@ -97,7 +97,7 @@ static GtkWidget *pgd_demo_list_create(void)
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Demos", renderer, "text", PGD_TITLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Demos", renderer, "text", PGD_TITLE_COLUMN, nullptr);
 
     for (i = 0; i < G_N_ELEMENTS(demo_list); i++) {
         GtkTreeIter iter;
@@ -124,7 +124,7 @@ static GtkWidget *pgd_demo_notebook_create(PopplerDocument *document)
         GtkWidget *demo_widget;
 
         demo_widget = demo_list[i].create_widget(document);
-        gtk_notebook_append_page(GTK_NOTEBOOK(notebook), demo_widget, NULL);
+        gtk_notebook_append_page(GTK_NOTEBOOK(notebook), demo_widget, nullptr);
         gtk_widget_show(demo_widget);
     }
 
@@ -137,7 +137,7 @@ static void pgd_demo_auth_dialog_entry_changed(GtkEditable *editable, GtkDialog 
 
     text = gtk_entry_get_text(GTK_ENTRY(editable));
 
-    gtk_dialog_set_response_sensitive(dialog, GTK_RESPONSE_OK, (text != NULL && *text != '\0'));
+    gtk_dialog_set_response_sensitive(dialog, GTK_RESPONSE_OK, (text != nullptr && *text != '\0'));
     g_object_set_data(G_OBJECT(dialog), "pgd-password", (gpointer)text);
 }
 
@@ -168,7 +168,7 @@ static GtkDialog *pgd_demo_get_auth_dialog(GFile *uri_file)
     gtk_window_set_icon_name(GTK_WINDOW(dialog), "dialog-password");
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
 
-    gtk_dialog_add_buttons(dialog, "_Cancel", GTK_RESPONSE_CANCEL, "_Unlock Document", GTK_RESPONSE_OK, NULL);
+    gtk_dialog_add_buttons(dialog, "_Cancel", GTK_RESPONSE_CANCEL, "_Unlock Document", GTK_RESPONSE_OK, nullptr);
     gtk_dialog_set_default_response(dialog, GTK_RESPONSE_OK);
     gtk_dialog_set_response_sensitive(GTK_DIALOG(dialog), GTK_RESPONSE_OK, FALSE);
 
@@ -188,7 +188,7 @@ static GtkDialog *pgd_demo_get_auth_dialog(GFile *uri_file)
     gtk_box_pack_start(GTK_BOX(hbox), main_vbox, TRUE, TRUE, 0);
     gtk_widget_show(main_vbox);
 
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_xalign(GTK_LABEL(label), 0.0);
     gtk_label_set_yalign(GTK_LABEL(label), 0.5);
     gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
@@ -244,7 +244,7 @@ gint main(gint argc, gchar **argv)
     GtkTreeSelection *selection;
     GFile *file;
     GTimer *timer;
-    GError *error = NULL;
+    GError *error = nullptr;
     GtkAccelGroup *gtk_accel;
     GClosure *closure;
 
@@ -258,7 +258,7 @@ gint main(gint argc, gchar **argv)
     file = g_file_new_for_commandline_arg(argv[1]);
 
     timer = g_timer_new();
-    document = poppler_document_new_from_gfile(file, NULL, NULL, &error);
+    document = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
     g_timer_stop(timer);
     if (error) {
         while (g_error_matches(error, POPPLER_ERROR, POPPLER_ERROR_ENCRYPTED)) {
@@ -277,7 +277,7 @@ gint main(gint argc, gchar **argv)
             password = g_object_get_data(G_OBJECT(dialog), "pgd-password");
 
             g_timer_start(timer);
-            document = poppler_document_new_from_gfile(file, password, NULL, &error);
+            document = poppler_document_new_from_gfile(file, password, nullptr, &error);
             g_timer_stop(timer);
 
             gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -294,17 +294,17 @@ gint main(gint argc, gchar **argv)
 
     g_object_unref(file);
 
-    g_print("Document successfully loaded in %.4f seconds\n", g_timer_elapsed(timer, NULL));
+    g_print("Document successfully loaded in %.4f seconds\n", g_timer_elapsed(timer, nullptr));
     g_timer_destroy(timer);
 
     /* Main window */
     win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(win), 1024, 768);
     gtk_window_set_title(GTK_WINDOW(win), "Poppler GLib Demo");
-    g_signal_connect(G_OBJECT(win), "delete-event", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(G_OBJECT(win), "delete-event", G_CALLBACK(gtk_main_quit), nullptr);
 
     gtk_accel = gtk_accel_group_new();
-    closure = g_cclosure_new(G_CALLBACK(gtk_main_quit), NULL, NULL);
+    closure = g_cclosure_new(G_CALLBACK(gtk_main_quit), nullptr, nullptr);
     gtk_accel_group_connect(gtk_accel, gdk_keyval_from_name("q"), GDK_CONTROL_MASK, 0, closure);
     g_closure_unref(closure);
     gtk_window_add_accel_group(GTK_WINDOW(win), gtk_accel);

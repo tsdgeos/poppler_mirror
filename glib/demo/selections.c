@@ -63,22 +63,22 @@ static void pgd_selections_clear_selections(PgdSelectionsDemo *demo)
 
     if (demo->selection_surface) {
         cairo_surface_destroy(demo->selection_surface);
-        demo->selection_surface = NULL;
+        demo->selection_surface = nullptr;
     }
 
     if (demo->selection_region) {
         cairo_region_destroy(demo->selection_region);
-        demo->selection_region = NULL;
+        demo->selection_region = nullptr;
     }
 
     if (demo->selected_text) {
         g_free(demo->selected_text);
-        demo->selected_text = NULL;
+        demo->selected_text = nullptr;
     }
 
     if (demo->selected_region) {
         cairo_region_destroy(demo->selected_region);
-        demo->selected_region = NULL;
+        demo->selected_region = nullptr;
     }
 }
 
@@ -95,17 +95,17 @@ static void pgd_selections_free(PgdSelectionsDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->page) {
         g_object_unref(demo->page);
-        demo->page = NULL;
+        demo->page = nullptr;
     }
 
     if (demo->surface) {
         cairo_surface_destroy(demo->surface);
-        demo->surface = NULL;
+        demo->surface = nullptr;
     }
 
     pgd_selections_clear_selections(demo);
@@ -136,7 +136,7 @@ static void pgd_selections_update_selected_text(PgdSelectionsDemo *demo)
     if (demo->selected_text) {
         g_free(demo->selected_text);
     }
-    demo->selected_text = NULL;
+    demo->selected_text = nullptr;
 
     text = poppler_page_get_selected_text(demo->page, demo->style, &demo->doc_area);
     if (text) {
@@ -152,7 +152,7 @@ static void pgd_selections_update_selected_text(PgdSelectionsDemo *demo)
 static void pgd_selections_update_cursor(PgdSelectionsDemo *demo, GdkCursorType cursor_type)
 {
     GdkWindow *window = gtk_widget_get_window(demo->darea);
-    GdkCursor *cursor = NULL;
+    GdkCursor *cursor = nullptr;
 
     if (cursor_type == demo->cursor) {
         return;
@@ -317,11 +317,11 @@ static void pgd_selections_drawing_area_realize(GtkWidget *area, PgdSelectionsDe
     GdkRGBA rgba;
 
     gtk_widget_add_events(area, GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
-    g_object_set(area, "has-tooltip", TRUE, NULL);
+    g_object_set(area, "has-tooltip", TRUE, nullptr);
 
     gtk_style_context_get_color(style_context, GTK_STATE_FLAG_SELECTED, &rgba);
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(demo->fg_color_button), &rgba);
-    gtk_style_context_get(style_context, GTK_STATE_FLAG_SELECTED, "background-color", &rgba, NULL);
+    gtk_style_context_get(style_context, GTK_STATE_FLAG_SELECTED, "background-color", &rgba, nullptr);
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(demo->bg_color_button), &rgba);
 }
 
@@ -373,7 +373,7 @@ static void pgd_selections_render(GtkButton *button, PgdSelectionsDemo *demo)
     if (demo->surface) {
         cairo_surface_destroy(demo->surface);
     }
-    demo->surface = NULL;
+    demo->surface = nullptr;
 
     poppler_page_get_size(demo->page, &page_width, &page_height);
     page_width *= demo->scale;
@@ -413,7 +413,7 @@ static void pgd_selections_page_selector_value_changed(GtkSpinButton *spinbutton
     if (demo->page) {
         g_object_unref(demo->page);
     }
-    demo->page = NULL;
+    demo->page = nullptr;
 }
 
 static void pgd_selections_scale_selector_value_changed(GtkSpinButton *spinbutton, PgdSelectionsDemo *demo)
@@ -603,7 +603,7 @@ GtkWidget *pgd_selections_create_widget(PopplerDocument *document)
     g_signal_connect(demo->darea, "motion_notify_event", G_CALLBACK(pgd_selections_drawing_area_motion_notify), (gpointer)demo);
     g_signal_connect(demo->darea, "button_release_event", G_CALLBACK(pgd_selections_drawing_area_button_release), (gpointer)demo);
     g_signal_connect(demo->darea, "query_tooltip", G_CALLBACK(pgd_selections_drawing_area_query_tooltip), (gpointer)demo);
-    demo->swindow = gtk_scrolled_window_new(NULL, NULL);
+    demo->swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(demo->swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(demo->swindow), demo->darea);
     gtk_widget_show(demo->darea);

@@ -29,7 +29,7 @@ FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, i
             pred = nullptr;
         }
     } else {
-        pred = NULL;
+        pred = nullptr;
     }
     out_pos = 0;
     memset(&d_stream, 0, sizeof(d_stream));

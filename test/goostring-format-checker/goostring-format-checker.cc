@@ -198,7 +198,7 @@ int GooStringFormatCheckerVisitor::findFormatArgumentIndex(const FunctionDecl *f
     if (!funcDecl)
         return -1;
 
-    AnnotateAttr *annotation = NULL;
+    AnnotateAttr *annotation = nullptr;
     for (specific_attr_iterator<AnnotateAttr> it = funcDecl->specific_attr_begin<AnnotateAttr>(); it != funcDecl->specific_attr_end<AnnotateAttr>() && !annotation; ++it) {
         if (it->getAnnotation() == "gooformat")
             annotation = *it;

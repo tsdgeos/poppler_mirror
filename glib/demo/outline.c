@@ -77,7 +77,7 @@ GtkTreeModel *pgd_outline_create_model(PopplerDocument *document)
     iter = poppler_index_iter_new(document);
     if (iter) {
         model = GTK_TREE_MODEL(gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_POINTER));
-        build_tree(document, model, NULL, iter);
+        build_tree(document, model, nullptr, iter);
         poppler_index_iter_free(iter);
     } else {
         GtkTreeIter tree_iter;
@@ -140,7 +140,7 @@ GtkWidget *pgd_outline_create_widget(PopplerDocument *document)
 
     action = pgd_action_view_new(document);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     model = pgd_outline_create_model(document);
@@ -148,15 +148,15 @@ GtkWidget *pgd_outline_create_widget(PopplerDocument *document)
     g_object_unref(model);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Title", renderer, "markup", OUTLINE_TITLE_COLUMN, NULL);
-    g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(treeview), 0)), "expand", TRUE, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Title", renderer, "markup", OUTLINE_TITLE_COLUMN, nullptr);
+    g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
+    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(treeview), 0)), "expand", TRUE, nullptr);
 
     if (GTK_IS_TREE_STORE(model)) {
         renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Action Type", renderer, "text", OUTLINE_ACTION_TYPE_COLUMN, NULL);
+        gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Action Type", renderer, "text", OUTLINE_ACTION_TYPE_COLUMN, nullptr);
 
-        expand_open_links(GTK_TREE_VIEW(treeview), model, NULL);
+        expand_open_links(GTK_TREE_VIEW(treeview), model, nullptr);
 
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
         g_signal_connect(G_OBJECT(selection), "changed", G_CALLBACK(pgd_outline_selection_changed), (gpointer)action);

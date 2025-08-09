@@ -22,13 +22,13 @@ int equal(double a, double b, double precision)
  */
 int main(int argc, char *argv[])
 {
-    g_autoptr(GFile) infile = NULL;
+    g_autoptr(GFile) infile = nullptr;
     PopplerDocument *doc;
     PopplerPage *page;
     int npages, n;
     gboolean hg;
     PopplerRectangle bb, correct;
-    GError *err = NULL;
+    GError *err = nullptr;
     int argx;
     double precision = 0.01;
 
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    doc = poppler_document_new_from_gfile(infile, NULL, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_gfile(infile, nullptr, nullptr, &err);
+    if (doc == nullptr) {
         g_printerr("error opening pdf file: %s\n", err->message);
         g_error_free(err);
         exit(EXIT_FAILURE);

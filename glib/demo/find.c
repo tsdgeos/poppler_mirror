@@ -65,12 +65,12 @@ static void pgd_find_free(PgdFindDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->surface) {
         cairo_surface_destroy(demo->surface);
-        demo->surface = NULL;
+        demo->surface = nullptr;
     }
 
     g_free(demo);
@@ -127,8 +127,8 @@ static gboolean pgd_find_find_text(PgdFindDemo *demo)
         gdouble height;
         gint n_match = 0;
 
-        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
-        poppler_page_get_size(page, NULL, &height);
+        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, nullptr);
+        poppler_page_get_size(page, nullptr, &height);
         for (l = matches; l && l->data; l = g_list_next(l)) {
             PopplerRectangle *rect = (PopplerRectangle *)l->data;
             gdouble tmp;
@@ -143,7 +143,7 @@ static gboolean pgd_find_find_text(PgdFindDemo *demo)
         }
         g_list_free(matches);
 
-        str = g_strdup_printf("%d matches found on page %d in %.4f seconds", n_match, demo->page_index + 1, g_timer_elapsed(timer, NULL));
+        str = g_strdup_printf("%d matches found on page %d in %.4f seconds", n_match, demo->page_index + 1, g_timer_elapsed(timer, nullptr));
 
         gtk_tree_store_set(GTK_TREE_STORE(model), &iter, TITLE_COLUMN, str, VISIBLE_COLUMN, FALSE, PAGE_COLUMN, demo->page_index, -1);
         g_free(str);
@@ -168,11 +168,11 @@ static cairo_surface_t *pgd_find_render_page(PgdFindDemo *demo)
     cairo_t *cr;
     PopplerPage *page;
     gdouble width, height;
-    cairo_surface_t *surface = NULL;
+    cairo_surface_t *surface = nullptr;
 
     page = poppler_document_get_page(demo->doc, demo->selected_page);
     if (!page) {
-        return NULL;
+        return nullptr;
     }
 
     poppler_page_get_size(page, &width, &height);
@@ -226,7 +226,7 @@ static gboolean pgd_find_viewer_drawing_area_draw(GtkWidget *area, cairo_t *cr, 
 static gboolean pgd_find_viewer_redraw(PgdFindDemo *demo)
 {
     cairo_surface_destroy(demo->surface);
-    demo->surface = NULL;
+    demo->surface = nullptr;
 
     gtk_widget_queue_draw(demo->darea);
 
@@ -273,7 +273,7 @@ static void pgd_find_button_sensitivity_cb(GtkWidget *button, GtkEntry *entry)
     const gchar *text;
 
     text = gtk_entry_get_text(entry);
-    gtk_widget_set_sensitive(button, text != NULL && text[0] != '\0');
+    gtk_widget_set_sensitive(button, text != nullptr && text[0] != '\0');
 }
 
 static void pgd_find_selection_changed(GtkTreeSelection *treeselection, PgdFindDemo *demo)
@@ -428,7 +428,7 @@ GtkWidget *pgd_find_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
     gtk_widget_show(hbox);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     model = pgd_find_create_model();
@@ -440,16 +440,16 @@ GtkWidget *pgd_find_create_widget(PopplerDocument *document)
     g_signal_connect(selection, "changed", G_CALLBACK(pgd_find_selection_changed), demo);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TITLE_COLUMN, "Matches", renderer, "text", TITLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TITLE_COLUMN, "Matches", renderer, "text", TITLE_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), X1_COLUMN, "X1", renderer, "text", X1_COLUMN, "visible", VISIBLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), X1_COLUMN, "X1", renderer, "text", X1_COLUMN, "visible", VISIBLE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), Y1_COLUMN, "Y1", renderer, "text", Y1_COLUMN, "visible", VISIBLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), Y1_COLUMN, "Y1", renderer, "text", Y1_COLUMN, "visible", VISIBLE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), X2_COLUMN, "X2", renderer, "text", X2_COLUMN, "visible", VISIBLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), X2_COLUMN, "X2", renderer, "text", X2_COLUMN, "visible", VISIBLE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), Y2_COLUMN, "Y2", renderer, "text", Y2_COLUMN, "visible", VISIBLE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), Y2_COLUMN, "Y2", renderer, "text", Y2_COLUMN, "visible", VISIBLE_COLUMN, nullptr);
     gtk_container_add(GTK_CONTAINER(swindow), treeview);
     gtk_widget_show(treeview);
 
@@ -459,7 +459,7 @@ GtkWidget *pgd_find_create_widget(PopplerDocument *document)
     demo->darea = gtk_drawing_area_new();
     g_signal_connect(demo->darea, "draw", G_CALLBACK(pgd_find_viewer_drawing_area_draw), demo);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
     gtk_widget_show(demo->darea);
 

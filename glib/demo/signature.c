@@ -45,11 +45,11 @@ static cairo_surface_t *pgd_signature_render_page(PgdSignatureDemo *demo)
     cairo_t *cr;
     PopplerPage *page;
     gdouble width, height;
-    cairo_surface_t *surface = NULL;
+    cairo_surface_t *surface = nullptr;
 
     page = poppler_document_get_page(demo->doc, demo->num_page);
     if (!page) {
-        return NULL;
+        return nullptr;
     }
 
     poppler_page_get_size(page, &width, &height);
@@ -141,7 +141,7 @@ static gboolean pgd_signature_view_drawing_area_draw(GtkWidget *area, cairo_t *c
 static gboolean pgd_signature_viewer_redraw(PgdSignatureDemo *demo)
 {
     cairo_surface_destroy(demo->surface);
-    demo->surface = NULL;
+    demo->surface = nullptr;
 
     gtk_widget_queue_draw(demo->darea);
 
@@ -177,7 +177,7 @@ char *password_callback(const char *in)
     GtkWidget *entry;
     char *ret;
 
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL, "Enter password");
+    dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL, "Enter password");
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "Enter password to open: %s", in);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
 
@@ -197,7 +197,7 @@ char *password_callback(const char *in)
 
 static void pgd_signature_update_cursor(PgdSignatureDemo *demo, GdkCursorType cursor_type)
 {
-    GdkCursor *cursor = NULL;
+    GdkCursor *cursor = nullptr;
 
     if (cursor_type == demo->cursor) {
         return;
@@ -268,7 +268,7 @@ static gboolean pgd_signature_drawing_area_motion_notify(GtkWidget *area, GdkEve
 static void on_signing_done(GObject *source, GAsyncResult *result, gpointer user_data)
 {
     PopplerDocument *document = POPPLER_DOCUMENT(source);
-    GError *error = NULL;
+    GError *error = nullptr;
     gboolean ret = poppler_document_sign_finish(document, result, &error);
 
     g_print("%s: result %d\n", __FUNCTION__, ret);
@@ -336,7 +336,7 @@ static gboolean pgd_signature_drawing_area_button_release(GtkWidget *area, GdkEv
         poppler_signing_data_set_signature_text_left(data, signature_left);
         g_free(signature_left);
 
-        poppler_document_sign(demo->doc, data, NULL, on_signing_done, NULL);
+        poppler_document_sign(demo->doc, data, nullptr, on_signing_done, nullptr);
         poppler_signing_data_free(data);
     }
 
@@ -420,7 +420,7 @@ GtkWidget *pgd_signature_create_widget(PopplerDocument *document)
     g_signal_connect(demo->darea, "motion_notify_event", G_CALLBACK(pgd_signature_drawing_area_motion_notify), (gpointer)demo);
     g_signal_connect(demo->darea, "button_release_event", G_CALLBACK(pgd_signature_drawing_area_button_release), (gpointer)demo);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
     gtk_widget_show(demo->darea);
 

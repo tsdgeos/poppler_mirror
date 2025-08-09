@@ -171,7 +171,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
 {
     PopplerAction *new_action;
 
-    g_return_val_if_fail(action != nullptr, NULL);
+    g_return_val_if_fail(action != nullptr, nullptr);
 
     /* Do a straight copy of the memory */
     new_action = g_slice_dup(PopplerAction, action);

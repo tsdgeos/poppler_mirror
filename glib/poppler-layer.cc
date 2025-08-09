@@ -67,8 +67,8 @@ PopplerLayer *_poppler_layer_new(PopplerDocument *document, Layer *layer, GList 
     PopplerLayer *poppler_layer;
     const GooString *layer_name;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
-    g_return_val_if_fail(layer != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+    g_return_val_if_fail(layer != nullptr, nullptr);
 
     poppler_layer = POPPLER_LAYER(g_object_new(POPPLER_TYPE_LAYER, nullptr));
 
@@ -94,7 +94,7 @@ PopplerLayer *_poppler_layer_new(PopplerDocument *document, Layer *layer, GList 
  **/
 const gchar *poppler_layer_get_title(PopplerLayer *poppler_layer)
 {
-    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), NULL);
+    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), nullptr);
 
     return poppler_layer->title;
 }

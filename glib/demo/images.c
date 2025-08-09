@@ -51,12 +51,12 @@ static void pgd_images_free(PgdImagesDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->model) {
         g_object_unref(demo->model);
-        demo->model = NULL;
+        demo->model = nullptr;
     }
 
     g_free(demo);
@@ -84,7 +84,7 @@ static GtkWidget *pgd_image_view_new()
     GtkWidget *swindow;
     GtkWidget *darea;
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
 
     darea = gtk_drawing_area_new();
     g_signal_connect(G_OBJECT(darea), "draw", G_CALLBACK(pgd_image_view_drawing_area_draw), (gpointer)swindow);
@@ -109,7 +109,7 @@ static void pgd_images_get_images(GtkWidget *button, PgdImagesDemo *demo)
     GTimer *timer;
 
     gtk_list_store_clear(demo->model);
-    pgd_image_view_set_image(demo->image_view, NULL);
+    pgd_image_view_set_image(demo->image_view, nullptr);
 
     page = poppler_document_get_page(demo->doc, demo->page);
     if (!page) {
@@ -124,7 +124,7 @@ static void pgd_images_get_images(GtkWidget *button, PgdImagesDemo *demo)
     if (n_images > 0) {
         gchar *str;
 
-        str = g_strdup_printf("<i>%d images found in %.4f seconds</i>", n_images, g_timer_elapsed(timer, NULL));
+        str = g_strdup_printf("<i>%d images found in %.4f seconds</i>", n_images, g_timer_elapsed(timer, nullptr));
         gtk_label_set_markup(GTK_LABEL(demo->timer_label), str);
         g_free(str);
     } else {
@@ -225,9 +225,9 @@ GtkWidget *pgd_images_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
     gtk_widget_show(hbox);
 
-    demo->timer_label = gtk_label_new(NULL);
+    demo->timer_label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), "<i>No images found</i>");
-    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, NULL);
+    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, nullptr);
     gtk_box_pack_start(GTK_BOX(vbox), demo->timer_label, FALSE, TRUE, 0);
     gtk_widget_show(demo->timer_label);
 
@@ -235,7 +235,7 @@ GtkWidget *pgd_images_create_widget(PopplerDocument *document)
 
     demo->image_view = pgd_image_view_new();
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     demo->model = gtk_list_store_new(N_COLUMNS, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -243,16 +243,16 @@ GtkWidget *pgd_images_create_widget(PopplerDocument *document)
 
     renderer = gtk_cell_renderer_text_new();
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Image", renderer, "text", IMAGES_ID_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Image", renderer, "text", IMAGES_ID_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "X1", renderer, "text", IMAGES_X1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "X1", renderer, "text", IMAGES_X1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Y1", renderer, "text", IMAGES_Y1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Y1", renderer, "text", IMAGES_Y1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "X2", renderer, "text", IMAGES_X2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "X2", renderer, "text", IMAGES_X2_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Y2", renderer, "text", IMAGES_Y2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Y2", renderer, "text", IMAGES_Y2_COLUMN, nullptr);
 
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
     g_signal_connect(G_OBJECT(selection), "changed", G_CALLBACK(pgd_images_selection_changed), (gpointer)demo);

@@ -51,9 +51,9 @@ static void pgd_attachments_fill_model(GtkListStore *model, PopplerDocument *doc
         description = poppler_attachment_get_description(attachment);
         size = g_strdup_printf("%" G_GSIZE_FORMAT, poppler_attachment_get_size(attachment));
         ctime = poppler_attachment_get_ctime(attachment);
-        ctime_str = ctime ? g_date_time_format(ctime, "%c") : NULL;
+        ctime_str = ctime ? g_date_time_format(ctime, "%c") : nullptr;
         mtime = poppler_attachment_get_mtime(attachment);
-        mtime_str = mtime ? g_date_time_format(mtime, "%c") : NULL;
+        mtime_str = mtime ? g_date_time_format(mtime, "%c") : nullptr;
 
         gtk_list_store_append(model, &iter);
         gtk_list_store_set(model, &iter, ATTACHMENTS_NAME_COLUMN, name ? name : "Unknown", ATTACHMENTS_DESCRIPTION_COLUMN, description ? description : "Unknown", ATTACHMENTS_SIZE_COLUMN, size ? size : "Unknown", ATTACHMENTS_CTIME_COLUMN,
@@ -78,24 +78,24 @@ static GtkWidget *pgd_attachments_create_list(GtkTreeModel *model)
     gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeview), TRUE);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Name", renderer, "text", ATTACHMENTS_NAME_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Name", renderer, "text", ATTACHMENTS_NAME_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Description", renderer, "text", ATTACHMENTS_DESCRIPTION_COLUMN, NULL);
-    g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(treeview), 1)), "expand", TRUE, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Description", renderer, "text", ATTACHMENTS_DESCRIPTION_COLUMN, nullptr);
+    g_object_set(G_OBJECT(renderer), "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
+    g_object_set(G_OBJECT(gtk_tree_view_get_column(GTK_TREE_VIEW(treeview), 1)), "expand", TRUE, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Size", renderer, "text", ATTACHMENTS_SIZE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Size", renderer, "text", ATTACHMENTS_SIZE_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "Creation Date", renderer, "text", ATTACHMENTS_CTIME_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "Creation Date", renderer, "text", ATTACHMENTS_CTIME_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Modification Date", renderer, "text", ATTACHMENTS_MTIME_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Modification Date", renderer, "text", ATTACHMENTS_MTIME_COLUMN, nullptr);
     return treeview;
 }
 
 static void pgd_attachments_save_dialog_response(GtkFileChooser *file_chooser, gint response, PopplerAttachment *attachment)
 {
     gchar *filename;
-    GError *error = NULL;
+    GError *error = nullptr;
 
     if (response != GTK_RESPONSE_ACCEPT) {
         g_object_unref(attachment);
@@ -132,7 +132,7 @@ static void pgd_attachments_save_button_clicked(GtkButton *button, GtkTreeView *
         return;
     }
 
-    file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(treeview))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+    file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(treeview))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, nullptr);
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), poppler_attachment_get_name(attachment));
     g_signal_connect(G_OBJECT(file_chooser), "response", G_CALLBACK(pgd_attachments_save_dialog_response), (gpointer)attachment);
     gtk_widget_show(file_chooser);
@@ -189,7 +189,7 @@ static void pgd_attachments_validate_button_clicked(GtkButton *button, GtkTreeVi
     }
 
     cs = g_checksum_new(G_CHECKSUM_MD5);
-    poppler_attachment_save_to_callback(attachment, attachment_save_callback, (gpointer)cs, NULL);
+    poppler_attachment_save_to_callback(attachment, attachment_save_callback, (gpointer)cs, nullptr);
     digest_len = g_checksum_type_get_length(G_CHECKSUM_MD5);
     digest = (guint8 *)g_malloc(digest_len);
     g_checksum_get_digest(cs, digest, &digest_len);
@@ -227,7 +227,7 @@ GtkWidget *pgd_attachments_create_widget(PopplerDocument *document)
 
     vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     has_attachments = poppler_document_has_attachments(document);
@@ -249,7 +249,7 @@ GtkWidget *pgd_attachments_create_widget(PopplerDocument *document)
         treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
 
         renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Name", renderer, "markup", 0, NULL);
+        gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Name", renderer, "markup", 0, nullptr);
     }
     g_object_unref(model);
 

@@ -5,14 +5,14 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    GError *err = NULL;
+    GError *err = nullptr;
     PopplerDocument *doc;
     PopplerPage *page;
     char *buf;
     int npages, n;
 
-    doc = poppler_document_new_from_data((char *)data, size, NULL, &err);
-    if (doc == NULL) {
+    doc = poppler_document_new_from_data((char *)data, size, nullptr, &err);
+    if (doc == nullptr) {
         g_error_free(err);
         return 0;
     }

@@ -45,7 +45,7 @@ static void pgd_page_free(PgdPageDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     g_free(demo);
@@ -125,7 +125,7 @@ static void pgd_page_set_page(PgdPageDemo *demo, PopplerPage *page)
 #endif
     gchar *str;
 
-    str = page ? g_strdup_printf("%d", poppler_page_get_index(page)) : NULL;
+    str = page ? g_strdup_printf("%d", poppler_page_get_index(page)) : nullptr;
     gtk_label_set_text(GTK_LABEL(demo->index), str);
     g_free(str);
 
@@ -134,7 +134,7 @@ static void pgd_page_set_page(PgdPageDemo *demo, PopplerPage *page)
         gtk_label_set_text(GTK_LABEL(demo->label), str);
         g_free(str);
     } else {
-        gtk_label_set_text(GTK_LABEL(demo->label), NULL);
+        gtk_label_set_text(GTK_LABEL(demo->label), nullptr);
     }
 
     if (page) {
@@ -145,17 +145,17 @@ static void pgd_page_set_page(PgdPageDemo *demo, PopplerPage *page)
         gtk_label_set_text(GTK_LABEL(demo->size), str);
         g_free(str);
     } else {
-        gtk_label_set_text(GTK_LABEL(demo->size), NULL);
+        gtk_label_set_text(GTK_LABEL(demo->size), nullptr);
     }
 
-    str = page ? g_strdup_printf("%.2f seconds", poppler_page_get_duration(page)) : NULL;
+    str = page ? g_strdup_printf("%.2f seconds", poppler_page_get_duration(page)) : nullptr;
     gtk_label_set_text(GTK_LABEL(demo->duration), str);
     g_free(str);
 
 #ifdef POPPLER_WITH_GDK
-    thumbnail = page ? poppler_page_get_thumbnail_pixbuf(page) : NULL;
+    thumbnail = page ? poppler_page_get_thumbnail_pixbuf(page) : nullptr;
 #else
-    thumbnail = page ? poppler_page_get_thumbnail(page) : NULL;
+    thumbnail = page ? poppler_page_get_thumbnail(page) : nullptr;
 #endif
     if (thumbnail) {
         gint width, height;
@@ -244,9 +244,9 @@ GtkWidget *pgd_page_create_widget(PopplerDocument *document)
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Page Properties</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -259,10 +259,10 @@ GtkWidget *pgd_page_create_widget(PopplerDocument *document)
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 
-    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Index:</b>", &(demo->index), NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Label:</b>", &(demo->label), NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Size:</b>", &(demo->size), NULL, &row);
-    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Duration:</b>", &(demo->duration), NULL, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Index:</b>", &(demo->index), nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Label:</b>", &(demo->label), nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Size:</b>", &(demo->size), nullptr, &row);
+    pgd_table_add_property_with_value_widget(GTK_GRID(table), "<b>Page Duration:</b>", &(demo->duration), nullptr, &row);
 
     gtk_container_add(GTK_CONTAINER(frame), table);
     gtk_widget_show(table);
@@ -270,10 +270,10 @@ GtkWidget *pgd_page_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
     gtk_widget_show(frame);
 
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
     gtk_frame_set_label_align(GTK_FRAME(frame), 0.5, 0.5);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Page Thumbnail</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -288,8 +288,8 @@ GtkWidget *pgd_page_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(thumnail_box), demo->thumbnail, TRUE, TRUE, 0);
     gtk_widget_show(demo->thumbnail);
 
-    demo->thumbnail_size = gtk_label_new(NULL);
-    g_object_set(G_OBJECT(demo->thumbnail_size), "xalign", 0.5, NULL);
+    demo->thumbnail_size = gtk_label_new(nullptr);
+    g_object_set(G_OBJECT(demo->thumbnail_size), "xalign", 0.5, nullptr);
     gtk_box_pack_start(GTK_BOX(thumnail_box), demo->thumbnail_size, TRUE, TRUE, 0);
     gtk_widget_show(demo->thumbnail_size);
 

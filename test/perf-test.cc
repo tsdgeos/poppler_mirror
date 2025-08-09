@@ -147,7 +147,7 @@ static bool gfTimings = false;
 static bool gfForceResolution = false;
 static int gResolutionX = 0;
 static int gResolutionY = 0;
-/* If NULL, we output the log info to stdout. If not NULL, should be a name
+/* If nullptr, we output the log info to stdout. If not nullptr, should be a name
    of the file to which we output log info.
    Controlled by -out command-line argument. */
 static char *gOutFileName = nullptr;

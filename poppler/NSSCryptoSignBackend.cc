@@ -287,7 +287,7 @@ static SECStatus my_NSS_CMSArray_Add(PLArenaPool *poolp, void ***array, void *ob
     int n = 0;
     void **dest;
 
-    PORT_Assert(array != NULL);
+    PORT_Assert(array != nullptr);
     if (array == nullptr) {
         return SECFailure;
     }
@@ -337,7 +337,7 @@ static SECStatus my_NSS_CMSAttributeArray_AddAttr(PLArenaPool *poolp, NSSCMSAttr
 
     /* see if we have one already */
     oattr = my_NSS_CMSAttributeArray_FindAttrByOidTag(*attrs, type, PR_FALSE);
-    PORT_Assert(oattr == NULL);
+    PORT_Assert(oattr == nullptr);
     if (oattr != nullptr) {
         goto loser; /* XXX or would it be better to replace it? */
     }

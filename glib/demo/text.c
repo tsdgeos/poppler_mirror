@@ -64,22 +64,22 @@ static void pgd_text_free(PgdTextDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->buffer) {
         g_object_unref(demo->buffer);
-        demo->buffer = NULL;
+        demo->buffer = nullptr;
     }
 
     if (demo->text_attrs) {
         poppler_page_free_text_attributes(demo->text_attrs);
-        demo->text_attrs = NULL;
+        demo->text_attrs = nullptr;
     }
 
     if (demo->model) {
         g_object_unref(demo->model);
-        demo->model = NULL;
+        demo->model = nullptr;
     }
 
     g_free(demo);
@@ -88,7 +88,7 @@ static void pgd_text_free(PgdTextDemo *demo)
 static void pgd_text_get_text(GtkWidget *button, PgdTextDemo *demo)
 {
     PopplerPage *page;
-    PopplerRectangle *recs = NULL;
+    PopplerRectangle *recs = nullptr;
     guint n_recs;
     gchar *text;
     GTimer *timer;
@@ -103,7 +103,7 @@ static void pgd_text_get_text(GtkWidget *button, PgdTextDemo *demo)
     if (demo->text_attrs) {
         poppler_page_free_text_attributes(demo->text_attrs);
     }
-    demo->text_attrs = NULL;
+    demo->text_attrs = nullptr;
 
     timer = g_timer_new();
     text = poppler_page_get_text_for_area(page, &demo->area);
@@ -113,19 +113,19 @@ static void pgd_text_get_text(GtkWidget *button, PgdTextDemo *demo)
         gchar *str;
         gdouble text_elapsed, layout_elapsed;
 
-        text_elapsed = g_timer_elapsed(timer, NULL);
+        text_elapsed = g_timer_elapsed(timer, nullptr);
 
         g_timer_start(timer);
         poppler_page_get_text_layout_for_area(page, &demo->area, &recs, &n_recs);
         g_timer_stop(timer);
 
-        layout_elapsed = g_timer_elapsed(timer, NULL);
+        layout_elapsed = g_timer_elapsed(timer, nullptr);
 
         g_timer_start(timer);
         demo->text_attrs = poppler_page_get_text_attributes_for_area(page, &demo->area);
         g_timer_stop(timer);
 
-        str = g_strdup_printf("<i>got %ld chars in %.4f seconds, %u layout units in %.4f seconds, text attrs in %.4f seconds</i>", g_utf8_strlen(text, -1), text_elapsed, n_recs, layout_elapsed, g_timer_elapsed(timer, NULL));
+        str = g_strdup_printf("<i>got %ld chars in %.4f seconds, %u layout units in %.4f seconds, text attrs in %.4f seconds</i>", g_utf8_strlen(text, -1), text_elapsed, n_recs, layout_elapsed, g_timer_elapsed(timer, nullptr));
         gtk_label_set_markup(GTK_LABEL(demo->timer_label), str);
         g_free(str);
     } else {
@@ -231,10 +231,10 @@ static gboolean pgd_text_view_query_tooltip(GtkTextView *textview, gint x, gint 
 
         gtk_tree_model_get(model, &iter, TEXT_X1_COLUMN, &x1, TEXT_Y1_COLUMN, &y1, TEXT_X2_COLUMN, &x2, TEXT_Y2_COLUMN, &y2, -1);
 
-        rect.x1 = g_strtod(x1, NULL);
-        rect.y1 = g_strtod(y1, NULL);
-        rect.x2 = g_strtod(x2, NULL);
-        rect.y2 = g_strtod(y2, NULL);
+        rect.x1 = g_strtod(x1, nullptr);
+        rect.y1 = g_strtod(y1, nullptr);
+        rect.x2 = g_strtod(x2, nullptr);
+        rect.y2 = g_strtod(y2, nullptr);
 
         g_free(x1);
         g_free(y1);
@@ -399,16 +399,16 @@ GtkWidget *pgd_text_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
     gtk_widget_show(hbox);
 
-    demo->timer_label = gtk_label_new(NULL);
+    demo->timer_label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), "<i>No text found</i>");
-    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, NULL);
+    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, nullptr);
     gtk_box_pack_start(GTK_BOX(vbox), demo->timer_label, FALSE, TRUE, 0);
     gtk_widget_show(demo->timer_label);
 
     hpaned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_paned_set_position(GTK_PANED(hpaned), 300);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     demo->model = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
@@ -416,16 +416,16 @@ GtkWidget *pgd_text_create_widget(PopplerDocument *document)
     demo->treeview = treeview;
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_X1_COLUMN, "X1", renderer, "text", TEXT_X1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_X1_COLUMN, "X1", renderer, "text", TEXT_X1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_Y1_COLUMN, "Y1", renderer, "text", TEXT_Y1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_Y1_COLUMN, "Y1", renderer, "text", TEXT_Y1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_X2_COLUMN, "X2", renderer, "text", TEXT_X2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_X2_COLUMN, "X2", renderer, "text", TEXT_X2_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_Y2_COLUMN, "Y2", renderer, "text", TEXT_Y2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_Y2_COLUMN, "Y2", renderer, "text", TEXT_Y2_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_OFFSET_COLUMN, "Offset", renderer, "text", TEXT_OFFSET_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), TEXT_OFFSET_COLUMN, "Offset", renderer, "text", TEXT_OFFSET_COLUMN, nullptr);
 
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
     g_signal_connect(selection, "changed", G_CALLBACK(pgd_text_selection_changed), (gpointer)demo);
@@ -437,9 +437,9 @@ GtkWidget *pgd_text_create_widget(PopplerDocument *document)
     gtk_widget_show(swindow);
 
     /* Text attributes */
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Text Attributes</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -452,11 +452,11 @@ GtkWidget *pgd_text_create_widget(PopplerDocument *document)
     gtk_grid_set_column_spacing(GTK_GRID(table), 6);
     gtk_grid_set_row_spacing(GTK_GRID(table), 6);
 
-    demo->font_name = gtk_label_new(NULL);
+    demo->font_name = gtk_label_new(nullptr);
     pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Font Name:</b>", demo->font_name, &row);
-    demo->font_size = gtk_label_new(NULL);
+    demo->font_size = gtk_label_new(nullptr);
     pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Font Size:</b>", demo->font_size, &row);
-    demo->is_underlined = gtk_label_new(NULL);
+    demo->is_underlined = gtk_label_new(nullptr);
     pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Underlined:</b>", demo->is_underlined, &row);
     demo->text_color = gtk_image_new();
     pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Color:</b>", demo->text_color, &row);
@@ -469,10 +469,10 @@ GtkWidget *pgd_text_create_widget(PopplerDocument *document)
     gtk_paned_add1(GTK_PANED(hpaned), vbox2);
     gtk_widget_show(vbox2);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-    demo->buffer = gtk_text_buffer_new(NULL);
+    demo->buffer = gtk_text_buffer_new(nullptr);
     textview = gtk_text_view_new_with_buffer(demo->buffer);
     g_signal_connect(textview, "query-tooltip", G_CALLBACK(pgd_text_view_query_tooltip), demo);
     g_signal_connect(demo->buffer, "notify::has-selection", G_CALLBACK(pgd_text_buffer_selection_changed), textview);

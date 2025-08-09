@@ -28,7 +28,7 @@ static void pgd_info_add_permissions(GtkGrid *table, PopplerPermissions permissi
     GtkWidget *checkbox;
 
     label = gtk_label_new(nullptr);
-    g_object_set(G_OBJECT(label), "xalign", 0.0, NULL);
+    g_object_set(G_OBJECT(label), "xalign", 0.0, nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Permissions:</b>");
     gtk_grid_attach(GTK_GRID(table), label, 0, *row, 1, 1);
     gtk_widget_show(label);
@@ -97,7 +97,7 @@ static void pgd_info_add_metadata(GtkGrid *table, const gchar *metadata, gint *r
     GtkTextBuffer *buffer;
 
     label = gtk_label_new(nullptr);
-    g_object_set(G_OBJECT(label), "xalign", 0.0, NULL);
+    g_object_set(G_OBJECT(label), "xalign", 0.0, nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Metadata:</b>");
     gtk_grid_attach(GTK_GRID(table), label, 0, *row, 1, 1);
     gtk_widget_show(label);
@@ -145,7 +145,7 @@ GtkWidget *pgd_info_create_widget(PopplerDocument *document)
     gint row = 0;
 
     g_object_get(document, "title", &title, "format", &format, "author", &author, "subject", &subject, "keywords", &keywords, "creation-datetime", &creation_date, "mod-datetime", &mod_date, "creator", &creator, "producer", &producer,
-                 "linearized", &linearized, "page-mode", &mode, "page-layout", &layout, "permissions", &permissions, "viewer-preferences", &view_prefs, "metadata", &metadata, NULL);
+                 "linearized", &linearized, "page-mode", &mode, "page-layout", &layout, "permissions", &permissions, "viewer-preferences", &view_prefs, "metadata", &metadata, nullptr);
 
     vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
 

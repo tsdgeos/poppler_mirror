@@ -56,12 +56,12 @@ static void pgd_forms_free(PgdFormsDemo *demo)
 
     if (demo->doc) {
         g_object_unref(demo->doc);
-        demo->doc = NULL;
+        demo->doc = nullptr;
     }
 
     if (demo->model) {
         g_object_unref(demo->model);
-        demo->model = NULL;
+        demo->model = nullptr;
     }
 
     g_free(demo);
@@ -71,9 +71,9 @@ static GtkWidget *pgd_form_field_view_new(void)
 {
     GtkWidget *frame, *label;
 
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Form Field Properties</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -88,13 +88,13 @@ static void pgd_form_field_view_add_choice_items(GtkGrid *table, PopplerFormFiel
     GtkTextBuffer *buffer;
     gint i;
 
-    label = gtk_label_new(NULL);
-    g_object_set(G_OBJECT(label), "xalign", 0.0, NULL);
+    label = gtk_label_new(nullptr);
+    g_object_set(G_OBJECT(label), "xalign", 0.0, nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Items:</b>");
     gtk_grid_attach(GTK_GRID(table), label, 0, *row, 1, 1);
     gtk_widget_show(label);
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     textview = gtk_text_view_new();
@@ -169,7 +169,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     if (action) {
         GtkWidget *action_view;
 
-        action_view = pgd_action_view_new(NULL);
+        action_view = pgd_action_view_new(nullptr);
         pgd_action_view_set_action(action_view, action);
         pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Action:</b>", action_view, &row);
         gtk_widget_show(action_view);
@@ -179,7 +179,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     if (action) {
         GtkWidget *action_view;
 
-        action_view = pgd_action_view_new(NULL);
+        action_view = pgd_action_view_new(nullptr);
         pgd_action_view_set_action(action_view, action);
         pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Field Modified Action:</b>", action_view, &row);
         gtk_widget_show(action_view);
@@ -189,7 +189,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     if (action) {
         GtkWidget *action_view;
 
-        action_view = pgd_action_view_new(NULL);
+        action_view = pgd_action_view_new(nullptr);
         pgd_action_view_set_action(action_view, action);
         pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Field Format Action:</b>", action_view, &row);
         gtk_widget_show(action_view);
@@ -199,7 +199,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     if (action) {
         GtkWidget *action_view;
 
-        action_view = pgd_action_view_new(NULL);
+        action_view = pgd_action_view_new(nullptr);
         pgd_action_view_set_action(action_view, action);
         pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Validate Field Action:</b>", action_view, &row);
         gtk_widget_show(action_view);
@@ -209,7 +209,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     if (action) {
         GtkWidget *action_view;
 
-        action_view = pgd_action_view_new(NULL);
+        action_view = pgd_action_view_new(nullptr);
         pgd_action_view_set_action(action_view, action);
         pgd_table_add_property_with_custom_widget(GTK_GRID(table), "<b>Calculate Field Action:</b>", action_view, &row);
         gtk_widget_show(action_view);
@@ -271,7 +271,7 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
         const gchar *signer_name;
 
         psig_info = poppler_form_field_signature_validate_sync(
-                field, POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE | POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK | POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH, NULL, NULL);
+                field, POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE | POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK | POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH, nullptr, nullptr);
         signer_name = poppler_signature_info_get_signer_name(psig_info);
         pgd_table_add_property(GTK_GRID(table), "<b>Signer Name:</b>", signer_name ? signer_name : "Signers name found", &row);
         text = g_date_time_format(poppler_signature_info_get_local_signing_time(psig_info), "%b %d %Y %H:%M:%S");
@@ -319,7 +319,7 @@ static void pgd_forms_get_form_fields(GtkWidget *button, PgdFormsDemo *demo)
     GTimer *timer;
 
     gtk_list_store_clear(demo->model);
-    pgd_form_field_view_set_field(demo->field_view, NULL);
+    pgd_form_field_view_set_field(demo->field_view, nullptr);
 
     page = poppler_document_get_page(demo->doc, demo->page);
     if (!page) {
@@ -334,7 +334,7 @@ static void pgd_forms_get_form_fields(GtkWidget *button, PgdFormsDemo *demo)
     if (n_fields > 0) {
         gchar *str;
 
-        str = g_strdup_printf("<i>%d form fields found in %.4f seconds</i>", n_fields, g_timer_elapsed(timer, NULL));
+        str = g_strdup_printf("<i>%d form fields found in %.4f seconds</i>", n_fields, g_timer_elapsed(timer, nullptr));
         gtk_label_set_markup(GTK_LABEL(demo->timer_label), str);
         g_free(str);
     } else {
@@ -434,9 +434,9 @@ GtkWidget *pgd_forms_create_widget(PopplerDocument *document)
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
     gtk_widget_show(hbox);
 
-    demo->timer_label = gtk_label_new(NULL);
+    demo->timer_label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), "<i>No form fields found</i>");
-    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, NULL);
+    g_object_set(G_OBJECT(demo->timer_label), "xalign", 1.0, nullptr);
     gtk_box_pack_start(GTK_BOX(vbox), demo->timer_label, FALSE, TRUE, 0);
     gtk_widget_show(demo->timer_label);
 
@@ -444,29 +444,29 @@ GtkWidget *pgd_forms_create_widget(PopplerDocument *document)
 
     demo->field_view = pgd_form_field_view_new();
 
-    swindow = gtk_scrolled_window_new(NULL, NULL);
+    swindow = gtk_scrolled_window_new(nullptr, nullptr);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     demo->model = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_OBJECT);
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(demo->model));
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Form Field Type", renderer, "text", FORMS_FIELD_TYPE_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 0, "Form Field Type", renderer, "text", FORMS_FIELD_TYPE_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Form Field Id", renderer, "text", FORMS_ID_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 1, "Form Field Id", renderer, "text", FORMS_ID_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_toggle_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Read Only", renderer, "active", FORMS_READ_ONLY_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 2, "Read Only", renderer, "active", FORMS_READ_ONLY_COLUMN, nullptr);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "X1", renderer, "text", FORMS_X1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 3, "X1", renderer, "text", FORMS_X1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Y1", renderer, "text", FORMS_Y1_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 4, "Y1", renderer, "text", FORMS_Y1_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 5, "X2", renderer, "text", FORMS_X2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 5, "X2", renderer, "text", FORMS_X2_COLUMN, nullptr);
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 6, "Y2", renderer, "text", FORMS_Y2_COLUMN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), 6, "Y2", renderer, "text", FORMS_Y2_COLUMN, nullptr);
 
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
     g_signal_connect(G_OBJECT(selection), "changed", G_CALLBACK(pgd_forms_selection_changed), (gpointer)demo);

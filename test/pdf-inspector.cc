@@ -84,15 +84,15 @@ PdfInspector::PdfInspector()
     g_signal_connect(gtk_tree_view_get_selection(GTK_TREE_VIEW(widget)), "changed", G_CALLBACK(on_selection_changed), this);
     model = (GtkTreeModel *)gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_DOUBLE);
     gtk_tree_view_set_model(GTK_TREE_VIEW(widget), model);
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 0, "Operation", gtk_cell_renderer_text_new(), "text", OP_STRING, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 0, "Operation", gtk_cell_renderer_text_new(), "text", OP_STRING, nullptr);
 
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 1, "Count", gtk_cell_renderer_text_new(), "text", OP_COUNT, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 1, "Count", gtk_cell_renderer_text_new(), "text", OP_COUNT, nullptr);
 
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 2, "Elapsed", gtk_cell_renderer_text_new(), "text", OP_TOTAL, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 2, "Elapsed", gtk_cell_renderer_text_new(), "text", OP_TOTAL, nullptr);
 
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 3, "Min", gtk_cell_renderer_text_new(), "text", OP_MIN, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 3, "Min", gtk_cell_renderer_text_new(), "text", OP_MIN, nullptr);
 
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 4, "Max", gtk_cell_renderer_text_new(), "text", OP_MAX, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(widget), 4, "Max", gtk_cell_renderer_text_new(), "text", OP_MAX, nullptr);
 
     for (int i = 0; i < N_COLUMNS; i++) {
         GtkTreeViewColumn *column;

@@ -367,7 +367,7 @@ PopplerAnnot *poppler_annot_text_markup_new_squiggly(PopplerDocument *doc, Poppl
     PopplerAnnot *poppler_annot;
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
+    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, nullptr);
 
     auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeSquiggly);
 
@@ -395,7 +395,7 @@ PopplerAnnot *poppler_annot_text_markup_new_strikeout(PopplerDocument *doc, Popp
     PopplerAnnot *poppler_annot;
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
+    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, nullptr);
 
     auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeStrikeOut);
 
@@ -423,7 +423,7 @@ PopplerAnnot *poppler_annot_text_markup_new_underline(PopplerDocument *doc, Popp
     PopplerAnnot *poppler_annot;
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
+    g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, nullptr);
 
     auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeUnderline);
 
@@ -1027,7 +1027,7 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
 {
     const GooString *contents;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), nullptr);
 
     contents = poppler_annot->annot->getContents();
 
@@ -1069,7 +1069,7 @@ gchar *poppler_annot_get_name(PopplerAnnot *poppler_annot)
 {
     const GooString *name;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), nullptr);
 
     name = poppler_annot->annot->getName();
 
@@ -1091,7 +1091,7 @@ gchar *poppler_annot_get_modified(PopplerAnnot *poppler_annot)
 {
     const GooString *text;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), nullptr);
 
     text = poppler_annot->annot->getModified();
 
@@ -1146,7 +1146,7 @@ void poppler_annot_set_flags(PopplerAnnot *poppler_annot, PopplerAnnotFlag flags
  **/
 PopplerColor *poppler_annot_get_color(PopplerAnnot *poppler_annot)
 {
-    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT(poppler_annot), nullptr);
 
     return _poppler_convert_annot_color_to_poppler_color(poppler_annot->annot->getColor());
 }
@@ -1304,7 +1304,7 @@ gchar *poppler_annot_markup_get_label(PopplerAnnotMarkup *poppler_annot)
     AnnotMarkup *annot;
     const GooString *text;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), nullptr);
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -1551,7 +1551,7 @@ GDate *poppler_annot_markup_get_date(PopplerAnnotMarkup *poppler_annot)
     const GooString *annot_date;
     time_t timet;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), nullptr);
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot.get());
     annot_date = annot->getDate();
@@ -1584,7 +1584,7 @@ gchar *poppler_annot_markup_get_subject(PopplerAnnotMarkup *poppler_annot)
     AnnotMarkup *annot;
     const GooString *text;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), nullptr);
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -1701,7 +1701,7 @@ gchar *poppler_annot_text_get_icon(PopplerAnnotText *poppler_annot)
 {
     AnnotText *annot;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_TEXT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_TEXT(poppler_annot), nullptr);
 
     annot = static_cast<AnnotText *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -1859,7 +1859,7 @@ GArray *poppler_annot_text_markup_get_quadrilaterals(PopplerAnnotTextMarkup *pop
     const PDFRectangle *crop_box;
     AnnotTextMarkup *annot;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_TEXT_MARKUP(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_TEXT_MARKUP(poppler_annot), nullptr);
 
     annot = static_cast<AnnotTextMarkup *>(POPPLER_ANNOT(poppler_annot)->annot.get());
     crop_box = _poppler_annot_get_cropbox(POPPLER_ANNOT(poppler_annot));
@@ -1915,7 +1915,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
     AnnotFreeText *annot;
     AnnotCalloutLine *line;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_FREE_TEXT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_FREE_TEXT(poppler_annot), nullptr);
 
     annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -2104,7 +2104,7 @@ PopplerAttachment *poppler_annot_file_attachment_get_attachment(PopplerAnnotFile
     AnnotFileAttachment *annot;
     PopplerAttachment *attachment;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_FILE_ATTACHMENT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_FILE_ATTACHMENT(poppler_annot), nullptr);
 
     annot = static_cast<AnnotFileAttachment *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -2129,7 +2129,7 @@ gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *popple
     AnnotFileAttachment *annot;
     const GooString *name;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_FILE_ATTACHMENT(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_FILE_ATTACHMENT(poppler_annot), nullptr);
 
     annot = static_cast<AnnotFileAttachment *>(POPPLER_ANNOT(poppler_annot)->annot.get());
     name = annot->getName();
@@ -2166,7 +2166,7 @@ PopplerAnnotCalloutLine *poppler_annot_callout_line_copy(PopplerAnnotCalloutLine
 {
     PopplerAnnotCalloutLine *new_callout;
 
-    g_return_val_if_fail(callout != nullptr, NULL);
+    g_return_val_if_fail(callout != nullptr, nullptr);
 
     new_callout = g_new0(PopplerAnnotCalloutLine, 1);
     *new_callout = *callout;
@@ -2201,7 +2201,7 @@ gchar *poppler_annot_movie_get_title(PopplerAnnotMovie *poppler_annot)
     AnnotMovie *annot;
     const GooString *title;
 
-    g_return_val_if_fail(POPPLER_IS_ANNOT_MOVIE(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_MOVIE(poppler_annot), nullptr);
 
     annot = static_cast<AnnotMovie *>(POPPLER_ANNOT(poppler_annot)->annot.get());
 
@@ -2299,7 +2299,7 @@ static void poppler_annot_geometry_set_interior_color(PopplerAnnot *poppler_anno
  */
 PopplerColor *poppler_annot_circle_get_interior_color(PopplerAnnotCircle *poppler_annot)
 {
-    g_return_val_if_fail(POPPLER_IS_ANNOT_CIRCLE(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_CIRCLE(poppler_annot), nullptr);
 
     return poppler_annot_geometry_get_interior_color(POPPLER_ANNOT(poppler_annot));
 }
@@ -2334,7 +2334,7 @@ void poppler_annot_circle_set_interior_color(PopplerAnnotCircle *poppler_annot, 
  */
 PopplerColor *poppler_annot_square_get_interior_color(PopplerAnnotSquare *poppler_annot)
 {
-    g_return_val_if_fail(POPPLER_IS_ANNOT_SQUARE(poppler_annot), NULL);
+    g_return_val_if_fail(POPPLER_IS_ANNOT_SQUARE(poppler_annot), nullptr);
 
     return poppler_annot_geometry_get_interior_color(POPPLER_ANNOT(poppler_annot));
 }

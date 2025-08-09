@@ -126,8 +126,8 @@ PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
  */
 const gchar *poppler_media_get_filename(PopplerMedia *poppler_media)
 {
-    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), NULL);
-    g_return_val_if_fail(!poppler_media->stream.isStream(), NULL);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), nullptr);
+    g_return_val_if_fail(!poppler_media->stream.isStream(), nullptr);
 
     return poppler_media->filename;
 }
@@ -215,7 +215,7 @@ gfloat poppler_media_get_repeat_count(PopplerMedia *poppler_media)
  */
 const gchar *poppler_media_get_mime_type(PopplerMedia *poppler_media)
 {
-    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), NULL);
+    g_return_val_if_fail(POPPLER_IS_MEDIA(poppler_media), nullptr);
 
     return poppler_media->mime_type;
 }

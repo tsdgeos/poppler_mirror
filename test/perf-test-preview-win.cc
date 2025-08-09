@@ -94,7 +94,7 @@ static void resizeClientArea(HWND hwnd, int x, int dx, int dy, int *dx_out)
     GetWindowRect(hwnd, &rw);
     int win_dx = rect_dx(&rw) + (dx - rect_dx(&rc));
     int win_dy = rect_dy(&rw) + (dy - rect_dy(&rc));
-    SetWindowPos(hwnd, NULL, x, 0, win_dx, win_dy, SWP_NOACTIVATE | SWP_NOREPOSITION | SWP_NOZORDER);
+    SetWindowPos(hwnd, nullptr, x, 0, win_dx, win_dy, SWP_NOACTIVATE | SWP_NOREPOSITION | SWP_NOZORDER);
     if (dx_out)
         *dx_out = win_dx;
 }
@@ -125,10 +125,10 @@ static void drawBitmap(HWND hwnd, SplashBitmap *bmp)
             int bmpDy = bmp->getHeight();
             BitBlt(hdc, xDest, yDest, bmpDx, bmpDy, bmpDC, xSrc, ySrc, SRCCOPY);
             DeleteDC(bmpDC);
-            bmpDC = NULL;
+            bmpDC = nullptr;
         }
         DeleteObject(hbmp);
-        hbmp = NULL;
+        hbmp = nullptr;
     }
     EndPaint(hwnd, &ps);
 }
@@ -178,13 +178,13 @@ static BOOL registerWinClass(void)
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
-    wcex.hInstance = NULL;
-    wcex.hIcon = NULL;
-    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = NULL;
-    wcex.lpszMenuName = NULL;
+    wcex.hInstance = nullptr;
+    wcex.hIcon = nullptr;
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground = nullptr;
+    wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = WIN_CLASS_NAME;
-    wcex.hIconSm = NULL;
+    wcex.hIconSm = nullptr;
 
     atom = RegisterClassEx(&wcex);
     if (atom)
@@ -202,7 +202,7 @@ static bool initWinIfNecessary(void)
 
     gBrushBg = CreateSolidBrush(COL_WINDOW_BG);
 
-    gHwndSplash = CreateWindow(WIN_CLASS_NAME, "Splash", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, NULL, NULL);
+    gHwndSplash = CreateWindow(WIN_CLASS_NAME, "Splash", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, nullptr, nullptr);
 
     if (!gHwndSplash)
         return false;
@@ -217,7 +217,7 @@ static void pumpMessages(void)
     MSG msg;
 
     for (;;) {
-        isMessage = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+        isMessage = PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE);
         if (!isMessage)
             return;
         TranslateMessage(&msg);
@@ -240,9 +240,9 @@ void PreviewBitmapDestroy(void)
 static void UpdateWindows(void)
 {
     if (gBmpSplash) {
-        resizeClientAreaToRenderedBitmap(gHwndSplash, gBmpSplash, 0, NULL);
+        resizeClientAreaToRenderedBitmap(gHwndSplash, gBmpSplash, 0, nullptr);
         ShowWindow(gHwndSplash, SW_SHOW);
-        InvalidateRect(gHwndSplash, NULL, FALSE);
+        InvalidateRect(gHwndSplash, nullptr, FALSE);
         UpdateWindow(gHwndSplash);
     } else {
         ShowWindow(gHwndSplash, SW_HIDE);

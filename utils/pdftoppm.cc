@@ -720,14 +720,14 @@ int main(int argc, char *argv[])
     jobs = (pthread_t *)malloc(numberOfJobs * sizeof(pthread_t));
 
     for (int i = 0; i < numberOfJobs; ++i) {
-        if (pthread_create(&jobs[i], NULL, (void *(*)(void *))processPageJobs, NULL) != 0) {
+        if (pthread_create(&jobs[i], nullptr, (void *(*)(void *))processPageJobs, nullptr) != 0) {
             fprintf(stderr, "pthread_create() failed with errno: %d\n", errno);
             exit(EXIT_FAILURE);
         }
     }
 
     for (int i = 0; i < numberOfJobs; ++i) {
-        if (pthread_join(jobs[i], NULL) != 0) {
+        if (pthread_join(jobs[i], nullptr) != 0) {
             fprintf(stderr, "pthread_join() failed with errno: %d\n", errno);
             exit(EXIT_FAILURE);
         }

@@ -78,8 +78,8 @@ PopplerFormField *_poppler_form_field_new(PopplerDocument *document, FormWidget 
 {
     PopplerFormField *poppler_field;
 
-    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
-    g_return_val_if_fail(field != nullptr, NULL);
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), nullptr);
+    g_return_val_if_fail(field != nullptr, nullptr);
 
     poppler_field = POPPLER_FORM_FIELD(g_object_new(POPPLER_TYPE_FORM_FIELD, nullptr));
 
@@ -321,7 +321,7 @@ gchar *poppler_form_field_get_partial_name(PopplerFormField *field)
 {
     const GooString *tmp;
 
-    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), nullptr);
 
     tmp = field->widget->getPartialName();
 
@@ -343,7 +343,7 @@ gchar *poppler_form_field_get_mapping_name(PopplerFormField *field)
 {
     const GooString *tmp;
 
-    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), nullptr);
 
     tmp = field->widget->getMappingName();
 
@@ -363,7 +363,7 @@ gchar *poppler_form_field_get_mapping_name(PopplerFormField *field)
  **/
 gchar *poppler_form_field_get_name(PopplerFormField *field)
 {
-    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), nullptr);
 
     const GooString *tmp = field->widget->getFullyQualifiedName();
 
@@ -386,7 +386,7 @@ gchar *poppler_form_field_get_alternate_ui_name(PopplerFormField *field)
 {
     const GooString *tmp;
 
-    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), NULL);
+    g_return_val_if_fail(POPPLER_IS_FORM_FIELD(field), nullptr);
 
     tmp = field->widget->getAlternateUiName();
 
@@ -566,7 +566,7 @@ PopplerSignatureInfo *poppler_form_field_signature_validate_sync(PopplerFormFiel
     PopplerSignatureInfo *signature_info;
     GTask *task;
 
-    g_return_val_if_fail(error == nullptr || *error == nullptr, NULL);
+    g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
 
     task = g_task_new(field, cancellable, nullptr, nullptr);
     g_task_set_task_data(task, GINT_TO_POINTER(flags), nullptr);
@@ -621,7 +621,7 @@ void poppler_form_field_signature_validate_async(PopplerFormField *field, Popple
  **/
 PopplerSignatureInfo *poppler_form_field_signature_validate_finish(PopplerFormField *field, GAsyncResult *result, GError **error)
 {
-    g_return_val_if_fail(g_task_is_valid(result, field), NULL);
+    g_return_val_if_fail(g_task_is_valid(result, field), nullptr);
 
     return (PopplerSignatureInfo *)g_task_propagate_pointer(G_TASK(result), error);
 }
@@ -642,7 +642,7 @@ PopplerSignatureInfo *poppler_signature_info_copy(const PopplerSignatureInfo *si
 {
     PopplerSignatureInfo *new_info;
 
-    g_return_val_if_fail(siginfo != nullptr, NULL);
+    g_return_val_if_fail(siginfo != nullptr, nullptr);
 
     new_info = g_new(PopplerSignatureInfo, 1);
     new_info->sig_status = siginfo->sig_status;
@@ -703,7 +703,7 @@ PopplerSignatureStatus poppler_signature_info_get_signature_status(const Poppler
  **/
 PopplerCertificateInfo *poppler_signature_info_get_certificate_info(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != nullptr, NULL);
+    g_return_val_if_fail(siginfo != nullptr, nullptr);
 
     return siginfo->certificate_info;
 }
@@ -737,7 +737,7 @@ PopplerCertificateStatus poppler_signature_info_get_certificate_status(const Pop
  **/
 const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != nullptr, NULL);
+    g_return_val_if_fail(siginfo != nullptr, nullptr);
 
     return siginfo->signer_name;
 }
@@ -758,7 +758,7 @@ const gchar *poppler_signature_info_get_signer_name(const PopplerSignatureInfo *
  **/
 GDateTime *poppler_signature_info_get_local_signing_time(const PopplerSignatureInfo *siginfo)
 {
-    g_return_val_if_fail(siginfo != nullptr, NULL);
+    g_return_val_if_fail(siginfo != nullptr, nullptr);
 
     return siginfo->local_signing_time;
 }
@@ -802,7 +802,7 @@ gchar *poppler_form_field_text_get_text(PopplerFormField *field)
     FormWidgetText *text_field;
     const GooString *tmp;
 
-    g_return_val_if_fail(field->widget->getType() == formText, NULL);
+    g_return_val_if_fail(field->widget->getType() == formText, nullptr);
 
     text_field = static_cast<FormWidgetText *>(field->widget);
     tmp = text_field->getContent();
@@ -997,8 +997,8 @@ gchar *poppler_form_field_choice_get_item(PopplerFormField *field, gint index)
 {
     const GooString *tmp;
 
-    g_return_val_if_fail(field->widget->getType() == formChoice, NULL);
-    g_return_val_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field), NULL);
+    g_return_val_if_fail(field->widget->getType() == formChoice, nullptr);
+    g_return_val_if_fail(index >= 0 && index < poppler_form_field_choice_get_n_items(field), nullptr);
 
     tmp = static_cast<FormWidgetChoice *>(field->widget)->getChoice(index);
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;
@@ -1096,7 +1096,7 @@ gchar *poppler_form_field_choice_get_text(PopplerFormField *field)
 {
     const GooString *tmp;
 
-    g_return_val_if_fail(field->widget->getType() == formChoice, NULL);
+    g_return_val_if_fail(field->widget->getType() == formChoice, nullptr);
 
     tmp = static_cast<FormWidgetChoice *>(field->widget)->getEditChoice();
     return tmp ? _poppler_goo_string_to_utf8(tmp) : nullptr;

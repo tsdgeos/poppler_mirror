@@ -27,8 +27,8 @@ void pgd_table_add_property_with_custom_widget(GtkGrid *table, const gchar *mark
 {
     GtkWidget *label;
 
-    label = gtk_label_new(NULL);
-    g_object_set(G_OBJECT(label), "xalign", 0.0, "yalign", 0.0, NULL);
+    label = gtk_label_new(nullptr);
+    g_object_set(G_OBJECT(label), "xalign", 0.0, "yalign", 0.0, nullptr);
     gtk_label_set_markup(GTK_LABEL(label), markup);
     gtk_grid_attach(GTK_GRID(table), label, 0, *row, 1, 1);
     gtk_widget_show(label);
@@ -45,7 +45,7 @@ void pgd_table_add_property_with_value_widget(GtkGrid *table, const gchar *marku
     GtkWidget *label;
 
     *value_widget = label = gtk_label_new(value);
-    g_object_set(G_OBJECT(label), "xalign", 0.0, "selectable", TRUE, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+    g_object_set(G_OBJECT(label), "xalign", 0.0, "selectable", TRUE, "ellipsize", PANGO_ELLIPSIZE_END, nullptr);
     pgd_table_add_property_with_custom_widget(table, markup, label, row);
 }
 
@@ -60,9 +60,9 @@ GtkWidget *pgd_action_view_new(PopplerDocument *document)
 {
     GtkWidget *frame, *label;
 
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Action Properties</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -86,7 +86,7 @@ static void pgd_action_view_add_destination(GtkWidget *action_view, GtkGrid *tab
     document = g_object_get_data(G_OBJECT(action_view), "document");
 
     if (dest->type != POPPLER_DEST_NAMED) {
-        str = NULL;
+        str = nullptr;
 
         if (document && !remote) {
             PopplerPage *poppler_page;
@@ -94,7 +94,7 @@ static void pgd_action_view_add_destination(GtkWidget *action_view, GtkGrid *tab
 
             poppler_page = poppler_document_get_page(document, MAX(0, dest->page_num - 1));
 
-            g_object_get(G_OBJECT(poppler_page), "label", &page_label, NULL);
+            g_object_get(G_OBJECT(poppler_page), "label", &page_label, nullptr);
             if (page_label) {
                 str = g_strdup_printf("%d (%s)", dest->page_num, page_label);
                 g_free(page_label);
@@ -167,13 +167,13 @@ static const gchar *get_movie_op(PopplerActionMovieOperation op)
     case POPPLER_ACTION_MOVIE_STOP:
         return "Stop";
     }
-    return NULL;
+    return nullptr;
 }
 
 static void free_tmp_file(GFile *tmp_file)
 {
 
-    g_file_delete(tmp_file, NULL, NULL);
+    g_file_delete(tmp_file, nullptr, nullptr);
     g_object_unref(tmp_file);
 }
 
@@ -186,16 +186,16 @@ static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError
 
 static void pgd_action_view_play_rendition(GtkWidget *button, PopplerMedia *media)
 {
-    GFile *file = NULL;
+    GFile *file = nullptr;
     gchar *uri;
 
     if (poppler_media_is_embedded(media)) {
         gint fd;
-        gchar *tmp_filename = NULL;
+        gchar *tmp_filename = nullptr;
 
-        fd = g_file_open_tmp(NULL, &tmp_filename, NULL);
+        fd = g_file_open_tmp(nullptr, &tmp_filename, nullptr);
         if (fd != -1) {
-            if (poppler_media_save_to_callback(media, save_helper, GINT_TO_POINTER(fd), NULL)) {
+            if (poppler_media_save_to_callback(media, save_helper, GINT_TO_POINTER(fd), nullptr)) {
                 file = g_file_new_for_path(tmp_filename);
                 g_object_set_data_full(G_OBJECT(media), "tmp-file", g_object_ref(file), (GDestroyNotify)free_tmp_file);
             } else {
@@ -220,7 +220,7 @@ static void pgd_action_view_play_rendition(GtkWidget *button, PopplerMedia *medi
 
             // FIXME: relative to doc uri, not cwd
             cwd = g_get_current_dir();
-            path = g_build_filename(cwd, filename, NULL);
+            path = g_build_filename(cwd, filename, nullptr);
             g_free(cwd);
 
             file = g_file_new_for_path(path);
@@ -235,7 +235,7 @@ static void pgd_action_view_play_rendition(GtkWidget *button, PopplerMedia *medi
             GtkWidget *toplevel;
 
             toplevel = gtk_widget_get_toplevel(button);
-            gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : NULL, uri, GDK_CURRENT_TIME, NULL);
+            gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : nullptr, uri, GDK_CURRENT_TIME, nullptr);
             g_free(uri);
         }
     }
@@ -351,7 +351,7 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
 
             button = gtk_button_new_with_mnemonic("_Play");
             g_signal_connect(button, "clicked", G_CALLBACK(pgd_action_view_play_rendition), action->rendition.media);
-            pgd_table_add_property_with_custom_widget(GTK_GRID(table), NULL, button, &row);
+            pgd_table_add_property_with_custom_widget(GTK_GRID(table), nullptr, button, &row);
             gtk_widget_show(button);
         }
     } break;
@@ -363,7 +363,7 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
 
         for (l = action->ocg_state.state_list; l; l = g_list_next(l)) {
             PopplerActionLayer *action_layer = (PopplerActionLayer *)l->data;
-            gchar *text = NULL;
+            gchar *text = nullptr;
             gint n_layers = g_list_length(action_layer->layers);
 
             switch (action_layer->action) {
@@ -383,7 +383,7 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
 
         button = gtk_button_new_with_label("Do action");
         g_signal_connect(button, "clicked", G_CALLBACK(pgd_action_view_do_action_layer), action->ocg_state.state_list);
-        pgd_table_add_property_with_custom_widget(GTK_GRID(table), NULL, button, &row);
+        pgd_table_add_property_with_custom_widget(GTK_GRID(table), nullptr, button, &row);
         gtk_widget_show(button);
     } break;
     case POPPLER_ACTION_JAVASCRIPT: {
@@ -393,7 +393,7 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
 
         pgd_table_add_property(GTK_GRID(table), "<b>Type:</b>", "JavaScript", &row);
 
-        buffer = gtk_text_buffer_new(NULL);
+        buffer = gtk_text_buffer_new(nullptr);
         if (action->javascript.script) {
             gtk_text_buffer_set_text(buffer, action->javascript.script, -1);
         }
@@ -402,12 +402,12 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
         gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
         g_object_unref(buffer);
 
-        swindow = gtk_scrolled_window_new(NULL, NULL);
+        swindow = gtk_scrolled_window_new(nullptr, nullptr);
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
         gtk_container_add(GTK_CONTAINER(swindow), textview);
         gtk_widget_show(textview);
 
-        pgd_table_add_property_with_custom_widget(GTK_GRID(table), NULL, swindow, &row);
+        pgd_table_add_property_with_custom_widget(GTK_GRID(table), nullptr, swindow, &row);
         gtk_widget_show(swindow);
     } break;
     case POPPLER_ACTION_RESET_FORM:
@@ -423,15 +423,15 @@ void pgd_action_view_set_action(GtkWidget *action_view, PopplerAction *action)
 
 gchar *pgd_format_date(time_t utime)
 {
-    GDateTime *dt = NULL;
-    gchar *s = NULL;
+    GDateTime *dt = nullptr;
+    gchar *s = nullptr;
 
     if (utime == 0) {
-        return NULL;
+        return nullptr;
     }
     dt = g_date_time_new_from_unix_local(utime);
-    if (dt == NULL) {
-        return NULL;
+    if (dt == nullptr) {
+        return nullptr;
     }
     s = g_date_time_format(dt, "%c");
     g_date_time_unref(dt);
@@ -443,9 +443,9 @@ GtkWidget *pgd_movie_view_new(void)
 {
     GtkWidget *frame, *label;
 
-    frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(nullptr);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-    label = gtk_label_new(NULL);
+    label = gtk_label_new(nullptr);
     gtk_label_set_markup(GTK_LABEL(label), "<b>Movie Properties</b>");
     gtk_frame_set_label_widget(GTK_FRAME(frame), label);
     gtk_widget_show(label);
@@ -470,7 +470,7 @@ static void pgd_movie_view_play_movie(GtkWidget *button, PopplerMovie *movie)
 
         // FIXME: relative to doc uri, not cwd
         cwd = g_get_current_dir();
-        path = g_build_filename(cwd, filename, NULL);
+        path = g_build_filename(cwd, filename, nullptr);
         g_free(cwd);
 
         file = g_file_new_for_path(path);
@@ -483,7 +483,7 @@ static void pgd_movie_view_play_movie(GtkWidget *button, PopplerMovie *movie)
         GtkWidget *toplevel;
 
         toplevel = gtk_widget_get_toplevel(button);
-        gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : NULL, uri, GDK_CURRENT_TIME, NULL);
+        gtk_show_uri_on_window(gtk_widget_is_toplevel(toplevel) ? GTK_WINDOW(toplevel) : nullptr, uri, GDK_CURRENT_TIME, nullptr);
         g_free(uri);
     }
 }
@@ -529,7 +529,7 @@ void pgd_movie_view_set_movie(GtkWidget *movie_view, PopplerMovie *movie)
 
     button = gtk_button_new_with_mnemonic("_Play");
     g_signal_connect(button, "clicked", G_CALLBACK(pgd_movie_view_play_movie), movie);
-    pgd_table_add_property_with_custom_widget(GTK_GRID(table), NULL, button, &row);
+    pgd_table_add_property_with_custom_widget(GTK_GRID(table), nullptr, button, &row);
     gtk_widget_show(button);
 
     gtk_container_add(GTK_CONTAINER(movie_view), table);
@@ -543,7 +543,7 @@ GdkPixbuf *pgd_pixbuf_new_for_color(PopplerColor *poppler_color)
     guchar *pixels;
 
     if (!poppler_color) {
-        return NULL;
+        return nullptr;
     }
 
     pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 16);
