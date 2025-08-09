@@ -2570,7 +2570,6 @@ void TextPage::clear()
 
 void TextPage::updateFont(const GfxState *state)
 {
-    const double *fm;
     const char *name;
     int code, mCode, letterCode, anyCode;
     double w;
@@ -2623,7 +2622,7 @@ void TextPage::updateFont(const GfxState *state)
             // better than nothing: 0.5 is a generic character width
             curFontSize *= w / 0.5;
         }
-        fm = gfxFont->getFontMatrix();
+        const std::array<double, 6> &fm = gfxFont->getFontMatrix();
         if (fm[0] != 0) {
             curFontSize *= fabs(fm[3] / fm[0]);
         }
@@ -2632,7 +2631,6 @@ void TextPage::updateFont(const GfxState *state)
 
 void TextPage::beginWord(const GfxState *state)
 {
-    const double *fontm;
     double m[4], m2[4];
     int rot;
 
@@ -2648,7 +2646,7 @@ void TextPage::beginWord(const GfxState *state)
     state->getFontTransMat(&m[0], &m[1], &m[2], &m[3]);
     const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
     if (gfxFont && gfxFont->getType() == fontType3) {
-        fontm = state->getFont()->getFontMatrix();
+        const std::array<double, 6> &fontm = state->getFont()->getFontMatrix();
         m2[0] = fontm[0] * m[0] + fontm[1] * m[2];
         m2[1] = fontm[0] * m[1] + fontm[1] * m[3];
         m2[2] = fontm[2] * m[0] + fontm[3] * m[2];

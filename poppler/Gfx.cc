@@ -3859,11 +3859,11 @@ void Gfx::doShowText(const GooString *s)
         tmp[1] = mat[0] * oldCTM[1] + mat[1] * oldCTM[3];
         tmp[2] = mat[2] * oldCTM[0] + mat[3] * oldCTM[2];
         tmp[3] = mat[2] * oldCTM[1] + mat[3] * oldCTM[3];
-        mat = font->getFontMatrix();
-        newCTM[0] = mat[0] * tmp[0] + mat[1] * tmp[2];
-        newCTM[1] = mat[0] * tmp[1] + mat[1] * tmp[3];
-        newCTM[2] = mat[2] * tmp[0] + mat[3] * tmp[2];
-        newCTM[3] = mat[2] * tmp[1] + mat[3] * tmp[3];
+        const std::array<double, 6> &fontMat = font->getFontMatrix();
+        newCTM[0] = fontMat[0] * tmp[0] + fontMat[1] * tmp[2];
+        newCTM[1] = fontMat[0] * tmp[1] + fontMat[1] * tmp[3];
+        newCTM[2] = fontMat[2] * tmp[0] + fontMat[3] * tmp[2];
+        newCTM[3] = fontMat[2] * tmp[1] + fontMat[3] * tmp[3];
         newCTM[0] *= state->getFontSize();
         newCTM[1] *= state->getFontSize();
         newCTM[2] *= state->getFontSize();

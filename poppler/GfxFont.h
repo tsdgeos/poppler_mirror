@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -255,7 +255,7 @@ public:
     virtual const CharCodeToUnicode *getToUnicode() const = 0;
 
     // Return the font matrix.
-    const double *getFontMatrix() const { return fontMat; }
+    const std::array<double, 6> &getFontMatrix() const { return fontMat; }
 
     // Return the font bounding box.
     const double *getFontBBox() const { return fontBBox; }
@@ -312,7 +312,7 @@ protected:
     int flags; // font descriptor flags
     std::unique_ptr<GooString> embFontName; // name of embedded font
     Ref embFontID; // ref to embedded font file stream
-    double fontMat[6]; // font matrix (Type 3 only)
+    std::array<double, 6> fontMat; // font matrix (Type 3 only)
     double fontBBox[4]; // font bounding box (Type 3 only)
     double missingWidth; // "default" width
     double ascent; // max height above baseline

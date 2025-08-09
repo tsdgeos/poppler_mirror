@@ -867,7 +867,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx,
         // Make the glyph position the coordinate origin -- that's our center of scaling
         m_painter.top()->translate(QPointF(x - originX, y - originY));
 
-        const double *mat = gfxFont->getFontMatrix();
+        const std::array<double, 6> &mat = gfxFont->getFontMatrix();
         QTransform fontMatrix(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
 
         // Scale with the font size

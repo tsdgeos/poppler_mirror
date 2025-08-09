@@ -2577,7 +2577,6 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     Dict *charProcs;
     Gfx *gfx;
     PDFRectangle box;
-    const double *m;
     int i;
 
     // set up resources used by font
@@ -2598,9 +2597,9 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     // font dictionary
     writePS("8 dict begin\n");
     writePS("/FontType 3 def\n");
-    m = font->getFontMatrix();
-    writePSFmt("/FontMatrix [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", m[0], m[1], m[2], m[3], m[4], m[5]);
-    m = font->getFontBBox();
+    const std::array<double, 6> &fontMatrix = font->getFontMatrix();
+    writePSFmt("/FontMatrix [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", fontMatrix[0], fontMatrix[1], fontMatrix[2], fontMatrix[3], fontMatrix[4], fontMatrix[5]);
+    const double *m = font->getFontBBox();
     writePSFmt("/FontBBox [{0:.6g} {1:.6g} {2:.6g} {3:.6g}] def\n", m[0], m[1], m[2], m[3]);
     writePS("/Encoding 256 array def\n");
     writePS("  0 1 255 { Encoding exch /.notdef put } for\n");

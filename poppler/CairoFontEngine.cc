@@ -430,7 +430,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     Dict *charProcs;
     Object charProc;
     cairo_matrix_t matrix, invert_y_axis;
-    const double *mat;
     double wx, wy;
     type3_font_info_t *info;
     Gfx *gfx;
@@ -449,7 +448,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         return CAIRO_STATUS_SUCCESS;
     }
 
-    mat = info->font->getFontMatrix();
+    const std::array<double, 6> &mat = info->font->getFontMatrix();
     matrix.xx = mat[0];
     matrix.yx = mat[1];
     matrix.xy = mat[2];

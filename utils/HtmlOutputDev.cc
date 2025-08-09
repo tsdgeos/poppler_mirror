@@ -300,7 +300,7 @@ void HtmlPage::updateFont(GfxState *state)
         // Grab the font size from the font bounding box if possible - remember to
         // scale from the glyph coordinate system.
         const double *fontBBox = font->getFontBBox();
-        const double *fontMat = font->getFontMatrix();
+        const std::array<double, 6> &fontMat = font->getFontMatrix();
         dimLength = (fontBBox[3] - fontBBox[1]) * fontMat[3];
         if (dimLength > 0) {
             fontSize *= dimLength;
