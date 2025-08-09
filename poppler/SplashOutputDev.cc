@@ -2071,7 +2071,7 @@ void SplashOutputDev::stroke(GfxState *state)
         return;
     }
     setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-    const SplashPath path = convertPath(state, state->getPath(), false);
+    const SplashPath path = convertPath(state->getPath(), false);
     splash->stroke(path);
 }
 
@@ -2081,7 +2081,7 @@ void SplashOutputDev::fill(GfxState *state)
         return;
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
-    SplashPath path = convertPath(state, state->getPath(), true);
+    SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, false);
 }
 
@@ -2091,30 +2091,30 @@ void SplashOutputDev::eoFill(GfxState *state)
         return;
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
-    SplashPath path = convertPath(state, state->getPath(), true);
+    SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, true);
 }
 
 void SplashOutputDev::clip(GfxState *state)
 {
-    const SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
     splash->clipToPath(path, false);
 }
 
 void SplashOutputDev::eoClip(GfxState *state)
 {
-    const SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
     splash->clipToPath(path, true);
 }
 
 void SplashOutputDev::clipToStrokePath(GfxState *state)
 {
-    const SplashPath path = convertPath(state, state->getPath(), false);
+    const SplashPath path = convertPath(state->getPath(), false);
     const std::unique_ptr<SplashPath> path2 = splash->makeStrokePath(path, state->getLineWidth());
     splash->clipToPath(*path2, false);
 }
 
-SplashPath SplashOutputDev::convertPath(GfxState *state, const GfxPath *path, bool dropEmptySubpaths)
+SplashPath SplashOutputDev::convertPath(const GfxPath *path, bool dropEmptySubpaths)
 {
     SplashPath sPath;
     int n, i, j;
@@ -4509,7 +4509,7 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    const SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
@@ -4572,7 +4572,7 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    const SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
