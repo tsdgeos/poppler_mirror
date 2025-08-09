@@ -1908,19 +1908,19 @@ SplashError Splash::stroke(const SplashPath &path)
     d1 *= 0.5;
     if (d1 > 0 && d1 * state->lineWidth * state->lineWidth < minLineWidth * minLineWidth) {
         w = minLineWidth / splashSqrt(d1);
-        strokeWide(path2.get(), w);
+        strokeWide(*path2, w);
     } else if (bitmap->mode == splashModeMono1) {
         // this gets close to Adobe's behavior in mono mode
         if (d1 * state->lineWidth <= 2) {
             strokeNarrow(*path2);
         } else {
-            strokeWide(path2.get(), state->lineWidth);
+            strokeWide(*path2, state->lineWidth);
         }
     } else {
         if (state->lineWidth == 0) {
             strokeNarrow(*path2);
         } else {
-            strokeWide(path2.get(), state->lineWidth);
+            strokeWide(*path2, state->lineWidth);
         }
     }
 
@@ -2016,9 +2016,9 @@ void Splash::strokeNarrow(const SplashPath &path)
     }
 }
 
-void Splash::strokeWide(SplashPath *path, SplashCoord w)
+void Splash::strokeWide(const SplashPath &path, SplashCoord w)
 {
-    const std::unique_ptr<SplashPath> path2 = makeStrokePath(*path, w, false);
+    const std::unique_ptr<SplashPath> path2 = makeStrokePath(path, w, false);
     fillWithPattern(path2.get(), false, state->strokePattern, state->strokeAlpha);
 }
 
