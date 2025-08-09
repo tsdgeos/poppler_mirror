@@ -877,13 +877,13 @@ public:
     std::unique_ptr<GfxPattern> copy() const override;
 
     GfxShading *getShading() { return shading.get(); }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
 
 private:
-    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA);
+    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const std::array<double, 6> &matrixA, int patternRefNumA);
 
     std::unique_ptr<GfxShading> shading;
-    double matrix[6];
+    const std::array<double, 6> matrix;
 };
 
 //------------------------------------------------------------------------

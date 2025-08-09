@@ -3275,7 +3275,6 @@ std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum)
 {
     Dict *dict;
-    double matrixA[6];
     Object obj1;
     int i;
 
@@ -3290,6 +3289,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
         return {};
     }
 
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;
@@ -3310,12 +3310,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
     return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
-GfxShadingPattern::GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA), shading(std::move(shadingA))
-{
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
-}
+GfxShadingPattern::GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const std::array<double, 6> &matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA), shading(std::move(shadingA)), matrix(matrixA) { }
 
 GfxShadingPattern::~GfxShadingPattern() = default;
 
