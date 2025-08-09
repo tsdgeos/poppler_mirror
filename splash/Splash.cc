@@ -1701,9 +1701,9 @@ SplashError Splash::clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, S
     return state->clip->clipToRect(x0, y0, x1, y1);
 }
 
-SplashError Splash::clipToPath(SplashPath *path, bool eo)
+SplashError Splash::clipToPath(const SplashPath &path, bool eo)
 {
-    return state->clip->clipToPath(*path, state->matrix, state->flatness, eo);
+    return state->clip->clipToPath(path, state->matrix, state->flatness, eo);
 }
 
 void Splash::setSoftMask(SplashBitmap *softMask)

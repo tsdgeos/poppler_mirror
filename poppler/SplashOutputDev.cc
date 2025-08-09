@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -2098,13 +2098,13 @@ void SplashOutputDev::eoFill(GfxState *state)
 void SplashOutputDev::clip(GfxState *state)
 {
     SplashPath path = convertPath(state, state->getPath(), true);
-    splash->clipToPath(&path, false);
+    splash->clipToPath(path, false);
 }
 
 void SplashOutputDev::eoClip(GfxState *state)
 {
     SplashPath path = convertPath(state, state->getPath(), true);
-    splash->clipToPath(&path, true);
+    splash->clipToPath(path, true);
 }
 
 void SplashOutputDev::clipToStrokePath(GfxState *state)
@@ -2113,7 +2113,7 @@ void SplashOutputDev::clipToStrokePath(GfxState *state)
 
     SplashPath path = convertPath(state, state->getPath(), false);
     path2 = splash->makeStrokePath(&path, state->getLineWidth());
-    splash->clipToPath(path2, false);
+    splash->clipToPath(*path2, false);
     delete path2;
 }
 
@@ -2565,7 +2565,7 @@ void SplashOutputDev::beginTextObject(GfxState *state) { }
 void SplashOutputDev::endTextObject(GfxState *state)
 {
     if (textClipPath) {
-        splash->clipToPath(textClipPath, false);
+        splash->clipToPath(*textClipPath, false);
         delete textClipPath;
         textClipPath = nullptr;
     }

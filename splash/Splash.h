@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -138,7 +138,7 @@ public:
     // NB: uses transformed coordinates.
     SplashError clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
     // NB: uses untransformed coordinates.
-    SplashError clipToPath(SplashPath *path, bool eo);
+    SplashError clipToPath(const SplashPath &path, bool eo);
     void setSoftMask(SplashBitmap *softMask);
     void setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA, int alpha0XA, int alpha0YA);
     void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
