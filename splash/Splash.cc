@@ -2545,59 +2545,6 @@ bool Splash::pathAllOutside(const SplashPath &path)
     return state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI) == splashClipAllOutside;
 }
 
-SplashError Splash::xorFill(SplashPath *path, bool eo)
-{
-    SplashPipe pipe;
-    int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
-    SplashClipResult clipRes, clipRes2;
-    SplashBlendFunc origBlendFunc;
-
-    if (path->length == 0) {
-        return splashErrEmptyPath;
-    }
-    SplashXPath xPath(*path, state->matrix, state->flatness, true);
-    xPath.sort();
-    SplashXPathScanner scanner(xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
-
-    // get the min and max x and y values
-    scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
-
-    // check clipping
-    if ((clipRes = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI)) != splashClipAllOutside) {
-        if (scanner.hasPartialClip()) {
-            clipRes = splashClipPartial;
-        }
-
-        origBlendFunc = state->blendFunc;
-        state->blendFunc = &blendXor;
-        pipeInit(&pipe, 0, yMinI, state->fillPattern, nullptr, 255, false, false);
-
-        // draw the spans
-        for (y = yMinI; y <= yMaxI; ++y) {
-            SplashXPathScanIterator iterator(scanner, y);
-            while (iterator.getNextSpan(&x0, &x1)) {
-                if (clipRes == splashClipAllInside) {
-                    drawSpan(&pipe, x0, x1, y, true);
-                } else {
-                    // limit the x range
-                    if (x0 < state->clip->getXMinI()) {
-                        x0 = state->clip->getXMinI();
-                    }
-                    if (x1 > state->clip->getXMaxI()) {
-                        x1 = state->clip->getXMaxI();
-                    }
-                    clipRes2 = state->clip->testSpan(x0, x1, y);
-                    drawSpan(&pipe, x0, x1, y, clipRes2 == splashClipAllInside);
-                }
-            }
-        }
-        state->blendFunc = origBlendFunc;
-    }
-    opClipRes = clipRes;
-
-    return splashOk;
-}
-
 SplashError Splash::fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *font)
 {
     SplashGlyphBitmap glyph;

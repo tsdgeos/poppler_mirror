@@ -160,9 +160,6 @@ public:
     // Fill a path using the current fill pattern.
     SplashError fill(SplashPath *path, bool eo);
 
-    // Fill a path, XORing with the current fill pattern.
-    SplashError xorFill(SplashPath *path, bool eo);
-
     // Draw a character, using the current fill pattern.
     SplashError fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *font);
 
