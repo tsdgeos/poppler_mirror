@@ -112,7 +112,7 @@ const QPicture &QPainterOutputDevType3Font::getGlyph(int gid) const
         // Glyph has not been rendered before: render it now
 
         // Smallest box that contains all the glyphs from this font
-        const double *fontBBox = m_font->getFontBBox();
+        const std::array<double, 4> &fontBBox = m_font->getFontBBox();
         PDFRectangle box(fontBBox[0], fontBBox[1], fontBBox[2], fontBBox[3]);
 
         Dict *resDict = m_font->getResources();

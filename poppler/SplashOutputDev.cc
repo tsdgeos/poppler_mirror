@@ -2245,7 +2245,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double
 {
     std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
-    const double *ctm, *bbox;
+    const double *ctm;
     T3FontCache *t3Font;
     T3GlyphStack *t3gs;
     bool validBBox;
@@ -2309,7 +2309,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double
                 t3FontCache[j] = t3FontCache[j - 1];
             }
             ++nT3Fonts;
-            bbox = gfxFont->getFontBBox();
+            const std::array<double, 4> &bbox = gfxFont->getFontBBox();
             if (bbox[0] == 0 && bbox[1] == 0 && bbox[2] == 0 && bbox[3] == 0) {
                 // unspecified bounding box -- just take a guess
                 xMin = xt - 5;

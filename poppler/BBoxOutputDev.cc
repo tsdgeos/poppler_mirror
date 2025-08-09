@@ -96,7 +96,6 @@ void BBoxOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *st
 void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
 {
     double leftent, rightent, ascent, descent;
-    const double *fb;
     double fontSize, w, adjust;
     double fx, fy;
 
@@ -115,7 +114,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
 
     fontSize = state->getFontSize();
 
-    fb = font->getFontBBox();
+    const std::array<double, 4> &fb = font->getFontBBox();
     if (font->getWMode() == writingModeHorizontal) {
         leftent = 0;
         rightent = 0;

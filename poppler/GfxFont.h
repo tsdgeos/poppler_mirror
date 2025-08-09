@@ -258,7 +258,7 @@ public:
     const std::array<double, 6> &getFontMatrix() const { return fontMat; }
 
     // Return the font bounding box.
-    const double *getFontBBox() const { return fontBBox; }
+    const std::array<double, 4> &getFontBBox() const { return fontBBox; }
 
     // Return the ascent and descent values.
     double getAscent() const { return ascent; }
@@ -313,7 +313,7 @@ protected:
     std::unique_ptr<GooString> embFontName; // name of embedded font
     Ref embFontID; // ref to embedded font file stream
     std::array<double, 6> fontMat; // font matrix (Type 3 only)
-    double fontBBox[4]; // font bounding box (Type 3 only)
+    std::array<double, 4> fontBBox; // font bounding box (Type 3 only)
     double missingWidth; // "default" width
     double ascent; // max height above baseline
     double descent; // max depth below baseline
