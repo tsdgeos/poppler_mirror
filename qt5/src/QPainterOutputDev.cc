@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
@@ -1110,7 +1110,7 @@ void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream
     m_painter.top()->drawImage(QRect(0, 0, 1, 1), image);
 }
 
-void QPainterOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
+void QPainterOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
 {
     // The entire transparency group will be painted into a
     // freshly created QPicture object.  Since an existing painter
@@ -1139,7 +1139,7 @@ void QPainterOutputDev::endTransparencyGroup(GfxState * /*state*/)
     m_qpictures.pop();
 }
 
-void QPainterOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
+void QPainterOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/)
 {
     // Actually draw the transparency group
     m_painter.top()->drawPicture(0, 0, *m_lastTransparencyGroupPicture);

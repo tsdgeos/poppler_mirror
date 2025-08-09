@@ -845,7 +845,7 @@ public:
 
     int getPaintType() const { return paintType; }
     int getTilingType() const { return tilingType; }
-    const double *getBBox() const { return bbox; }
+    const std::array<double, 4> &getBBox() const { return bbox; }
     double getXStep() const { return xStep; }
     double getYStep() const { return yStep; }
     Dict *getResDict() { return resDict.isDict() ? resDict.getDict() : (Dict *)nullptr; }
@@ -853,11 +853,11 @@ public:
     Object *getContentStream() { return &contentStream; }
 
 private:
-    GfxTilingPattern(int paintTypeA, int tilingTypeA, const double *bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA);
+    GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA);
 
     int paintType;
     int tilingType;
-    double bbox[4];
+    const std::array<double, 4> bbox;
     double xStep, yStep;
     Object resDict;
     double matrix[6];

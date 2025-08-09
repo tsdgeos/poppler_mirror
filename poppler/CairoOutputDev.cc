@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -1407,7 +1407,7 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     StrokePathClip *strokePathTmp;
     bool adjusted_stroke_width_tmp;
     cairo_pattern_t *maskTmp;
-    const double *bbox = tPat->getBBox();
+    const std::array<double, 4> &bbox = tPat->getBBox();
     const double *pmat = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     Dict *resDict = tPat->getResDict();
@@ -2144,7 +2144,7 @@ static cairo_surface_t *cairo_surface_create_similar_clip(cairo_t *cairo, cairo_
     return surface;
 }
 
-void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace *blendingColorSpace, bool /*isolated*/, bool knockout, bool forSoftMask)
+void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace *blendingColorSpace, bool /*isolated*/, bool knockout, bool forSoftMask)
 {
     /* push color space */
     ColorSpaceStack *css = new ColorSpaceStack;
@@ -2208,7 +2208,7 @@ void CairoOutputDev::endTransparencyGroup(GfxState * /*state*/)
     }
 }
 
-void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
+void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/)
 {
     LOG(printf("paint transparency group\n"));
 
@@ -2275,7 +2275,7 @@ static int luminocity(uint32_t x)
 }
 
 /* XXX: do we need to deal with shape here? */
-void CairoOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void CairoOutputDev::setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
 {
     cairo_pattern_destroy(mask);
 
@@ -2615,13 +2615,13 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
     }
 
     saveState(state);
-    double bbox[4] = { 0, 0, 1, 1 }; // dummy
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
     beginTransparencyGroup(state, bbox, state->getFillColorSpace(), true, false, false);
 }
 
 void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
 {
-    double bbox[4] = { 0, 0, 1, 1 }; // dummy
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
     endTransparencyGroup(state);
     restoreState(state);

@@ -338,10 +338,10 @@ public:
 
     //----- transparency groups and soft masks
     virtual bool checkTransparencyGroup(GfxState * /*state*/, bool /*knockout*/) { return true; }
-    virtual void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) { }
+    virtual void beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) { }
     virtual void endTransparencyGroup(GfxState * /*state*/) { }
-    virtual void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) { }
-    virtual void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) { }
+    virtual void paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/) { }
+    virtual void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) { }
     virtual void clearSoftMask(GfxState * /*state*/) { }
 
     //----- links

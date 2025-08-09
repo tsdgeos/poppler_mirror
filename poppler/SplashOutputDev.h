@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2015, 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -298,10 +298,10 @@ public:
 
     //----- transparency groups and soft masks
     bool checkTransparencyGroup(GfxState *state, bool knockout) override;
-    void beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
+    void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void endTransparencyGroup(GfxState *state) override;
-    void paintTransparencyGroup(GfxState *state, const double *bbox) override;
-    void setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
+    void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
+    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
     void clearSoftMask(GfxState *state) override;
 
     //----- special access

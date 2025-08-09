@@ -1217,7 +1217,8 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
 void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor)
 {
     Dict *dict, *resDict;
-    double m[6], bbox[4];
+    double m[6];
+    std::array<double, 4> bbox;
     Object obj1;
     int i;
 
@@ -4687,7 +4688,8 @@ void Gfx::doForm(Object *str)
 {
     Dict *dict;
     bool transpGroup, isolated, knockout;
-    double m[6], bbox[4];
+    double m[6];
+    std::array<double, 4> bbox;
     Dict *resDict;
     bool ocSaved;
     Object obj1;
@@ -4783,7 +4785,7 @@ void Gfx::doForm(Object *str)
     ocState = ocSaved;
 }
 
-void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha, Function *transferFunc,
+void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const std::array<double, 4> &bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha, Function *transferFunc,
                    GfxColor *backdropColor)
 {
     Parser *oldParser;
@@ -5154,7 +5156,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     Dict *dict, *resDict;
     double formXMin, formYMin, formXMax, formYMax;
     double x, y, sx, sy, tx, ty;
-    double m[6], bbox[4];
+    double m[6];
     GfxColor color;
     int i;
 
@@ -5188,6 +5190,8 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
 
         // get stream dict
         dict = str->streamGetDict();
+
+        std::array<double, 4> bbox;
 
         // get the form bounding box
         Object bboxObj = dict->lookup("BBox");

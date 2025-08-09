@@ -2647,7 +2647,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Str
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
     SplashColor maskColor;
-    double bbox[4] = { 0, 0, 1, 1 }; // default;
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // default;
 
     if (state->getFillColorSpace()->isNonMarking()) {
         return;
@@ -2693,7 +2693,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Str
 
 void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
 {
-    double bbox[4] = { 0, 0, 1, 1 }; // dummy
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
     if (!transpGroupStack) {
         return;
@@ -3839,7 +3839,7 @@ bool SplashOutputDev::checkTransparencyGroup(GfxState *state, bool knockout)
     return transpGroupStack != nullptr && transpGroupStack->shape != nullptr;
 }
 
-void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask)
+void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask)
 {
     SplashTransparencyGroup *transpGroup;
     SplashColor color;
@@ -3991,7 +3991,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state)
     updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
-void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox)
+void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox)
 {
     SplashBitmap *tBitmap;
     SplashTransparencyGroup *transpGroup;
@@ -4027,7 +4027,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox
     delete tBitmap;
 }
 
-void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void SplashOutputDev::setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
 {
     SplashBitmap *tBitmap;
     Splash *tSplash;
@@ -4225,7 +4225,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
-    const double *bbox = tPat->getBBox();
+    const std::array<double, 4> &bbox = tPat->getBBox();
     const double *ptm = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     Dict *resDict = tPat->getResDict();

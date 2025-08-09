@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -145,9 +145,9 @@ public:
     void type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) override;
 
     //----- transparency groups and soft masks
-    void beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
+    void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void endTransparencyGroup(GfxState *state) override;
-    void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+    void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
 
     //----- special access
 

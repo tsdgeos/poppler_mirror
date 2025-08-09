@@ -145,9 +145,9 @@ public:
     void type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) override;
 
     //----- transparency groups and soft masks
-    void beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
+    void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void endTransparencyGroup(GfxState *state) override;
-    void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+    void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
 
     //----- special access
 

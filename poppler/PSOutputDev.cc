@@ -4207,8 +4207,8 @@ void PSOutputDev::eoFill(GfxState *state)
     writePS("f*\n");
 }
 
-bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4282,8 +4282,8 @@ bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4343,7 +4343,7 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
         }
     }
 
-    const double *bbox = tPat->getBBox();
+    const std::array<double, 4> &bbox = tPat->getBBox();
     const double *pmat = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     const int tilingType = tPat->getTilingType();

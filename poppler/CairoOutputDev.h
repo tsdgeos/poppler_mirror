@@ -23,7 +23,7 @@
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
-// Copyright (C) 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
@@ -226,11 +226,11 @@ public:
     bool supportJPXtransparency() override { return true; }
 
     //----- transparency groups and soft masks
-    void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override;
+    void beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override;
     void endTransparencyGroup(GfxState * /*state*/) override;
     void popTransparencyGroup();
-    void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) override;
-    void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override;
+    void paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/) override;
+    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override;
     void clearSoftMask(GfxState * /*state*/) override;
 
     //----- Type 3 font operators
@@ -493,10 +493,10 @@ public:
     void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override { }
 
     //----- transparency groups and soft masks
-    void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override { }
+    void beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/) override { }
     void endTransparencyGroup(GfxState * /*state*/) override { }
-    void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) override { }
-    void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override { }
+    void paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/) override { }
+    void setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool /*alpha*/, Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override { }
     void clearSoftMask(GfxState * /*state*/) override { }
 
     //----- Image list
