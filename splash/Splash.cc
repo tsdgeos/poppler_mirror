@@ -1896,7 +1896,7 @@ SplashError Splash::stroke(SplashPath *path)
     if (path->length == 0) {
         return splashErrEmptyPath;
     }
-    path2 = flattenPath(path, state->matrix, state->flatness);
+    path2 = flattenPath(*path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
         dPath = makeDashedPath(path2);
         delete path2;
@@ -2040,7 +2040,7 @@ void Splash::strokeWide(SplashPath *path, SplashCoord w)
     delete path2;
 }
 
-SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness)
+SplashPath *Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness)
 {
     SplashPath *fPath;
     SplashCoord flatness2;
@@ -2049,24 +2049,24 @@ SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix, SplashCoo
 
     fPath = new SplashPath();
     // Estimate size, reserve
-    fPath->reserve(path->length * 2 + 2);
+    fPath->reserve(path.length * 2 + 2);
 
     flatness2 = flatness * flatness;
     i = 0;
-    while (i < path->length) {
-        flag = path->flags[i];
+    while (i < path.length) {
+        flag = path.flags[i];
         if (flag & splashPathFirst) {
-            fPath->moveTo(path->pts[i].x, path->pts[i].y);
+            fPath->moveTo(path.pts[i].x, path.pts[i].y);
             ++i;
         } else {
             if (flag & splashPathCurve) {
-                flattenCurve(path->pts[i - 1].x, path->pts[i - 1].y, path->pts[i].x, path->pts[i].y, path->pts[i + 1].x, path->pts[i + 1].y, path->pts[i + 2].x, path->pts[i + 2].y, matrix, flatness2, fPath);
+                flattenCurve(path.pts[i - 1].x, path.pts[i - 1].y, path.pts[i].x, path.pts[i].y, path.pts[i + 1].x, path.pts[i + 1].y, path.pts[i + 2].x, path.pts[i + 2].y, matrix, flatness2, fPath);
                 i += 3;
             } else {
-                fPath->lineTo(path->pts[i].x, path->pts[i].y);
+                fPath->lineTo(path.pts[i].x, path.pts[i].y);
                 ++i;
             }
-            if (path->flags[i - 1] & splashPathClosed) {
+            if (path.flags[i - 1] & splashPathClosed) {
                 fPath->close();
             }
         }
@@ -6031,7 +6031,7 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
     }
 
     if (flatten) {
-        pathIn = flattenPath(path, state->matrix, state->flatness);
+        pathIn = flattenPath(*path, state->matrix, state->flatness);
         if (!state->lineDash.empty()) {
             dashPath = makeDashedPath(pathIn);
             delete pathIn;
