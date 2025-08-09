@@ -6342,7 +6342,7 @@ void Splash::dumpXPath(const SplashXPath &path)
     }
 }
 
-SplashError Splash::shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath)
+SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath)
 {
     SplashPipe pipe;
     int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
@@ -6351,10 +6351,10 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pa
     if (vectorAntialias && aaBuf == nullptr) { // should not happen, but to be secure
         return splashErrGeneric;
     }
-    if (path->length == 0) {
+    if (path.length == 0) {
         return splashErrEmptyPath;
     }
-    SplashXPath xPath(*path, state->matrix, state->flatness, true);
+    SplashXPath xPath(path, state->matrix, state->flatness, true);
     if (vectorAntialias) {
         xPath.aaScale();
     }

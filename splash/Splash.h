@@ -248,7 +248,7 @@ public:
     //
     // clipToStrokePath: Whether the current clip region is a stroke path.
     //   In that case, strokeAlpha is used rather than fillAlpha.
-    SplashError shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath);
+    SplashError shadedFill(const SplashPath &path, bool hasBBox, SplashPattern *pattern, bool clipToStrokePath);
     // Draw a gouraud triangle shading.
     bool gouraudTriangleShadedFill(SplashGouraudColor *shading);
 
