@@ -1408,7 +1408,7 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     bool adjusted_stroke_width_tmp;
     cairo_pattern_t *maskTmp;
     const std::array<double, 4> &bbox = tPat->getBBox();
-    const double *pmat = tPat->getMatrix();
+    const std::array<double, 6> &pmat = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     Dict *resDict = tPat->getResDict();
     Object *str = tPat->getContentStream();

@@ -4207,8 +4207,8 @@ void PSOutputDev::eoFill(GfxState *state)
     writePS("f*\n");
 }
 
-bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
-                                      double xStep, double yStep)
+bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
+                                      double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4282,8 +4282,8 @@ bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
-                                      double xStep, double yStep)
+bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const double *mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
+                                      double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4344,7 +4344,6 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
     }
 
     const std::array<double, 4> &bbox = tPat->getBBox();
-    const double *pmat = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     const int tilingType = tPat->getTilingType();
     Dict *resDict = tPat->getResDict();
@@ -4372,9 +4371,9 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
         delete gfx;
         res = true;
     } else if (level == psLevel1 || level == psLevel1Sep) {
-        res = tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL1(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     } else {
-        res = tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL2(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     }
 
     if (patternRefNum != -1) {

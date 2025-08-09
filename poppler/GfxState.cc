@@ -3175,7 +3175,6 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
 {
     Dict *dict;
     int paintTypeA, tilingTypeA;
-    double matrixA[6];
     double xStepA, yStepA;
     Object resDictA;
     Object obj1;
@@ -3232,6 +3231,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     if (!resDictA.isDict()) {
         error(errSyntaxWarning, -1, "Invalid or missing Resources in pattern");
     }
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;
@@ -3252,17 +3252,15 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
-GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA)
-    : GfxPattern(1, patternRefNumA), bbox(bboxA)
+GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const std::array<double, 6> &matrixA, const Object *contentStreamA,
+                                   int patternRefNumA)
+    : GfxPattern(1, patternRefNumA), bbox(bboxA), matrix(matrixA)
 {
     paintType = paintTypeA;
     tilingType = tilingTypeA;
     xStep = xStepA;
     yStep = yStepA;
     resDict = resDictA->copy();
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
     contentStream = contentStreamA->copy();
 }
 

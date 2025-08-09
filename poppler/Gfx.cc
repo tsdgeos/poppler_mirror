@@ -1966,7 +1966,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double xMin, yMin, xMax, yMax, x, y, x1, y1;
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
-    const double *ctm, *btm, *ptm;
+    const double *ctm, *btm;
     double m[6], ictm[6], m1[6], imb[6];
     double det;
     double xstep, ystep;
@@ -1978,7 +1978,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     // construct a (pattern space) -> (current space) transform matrix
     ctm = state->getCTM();
     btm = baseMatrix;
-    ptm = tPat->getMatrix();
+    const std::array<double, 6> &ptm = tPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
     if (fabs(det) < 0.000001) {

@@ -849,18 +849,18 @@ public:
     double getXStep() const { return xStep; }
     double getYStep() const { return yStep; }
     Dict *getResDict() { return resDict.isDict() ? resDict.getDict() : (Dict *)nullptr; }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
     Object *getContentStream() { return &contentStream; }
 
 private:
-    GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA);
+    GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const std::array<double, 6> &matrixA, const Object *contentStreamA, int patternRefNumA);
 
     int paintType;
     int tilingType;
     const std::array<double, 4> bbox;
     double xStep, yStep;
     Object resDict;
-    double matrix[6];
+    const std::array<double, 6> matrix;
     Object contentStream;
 };
 

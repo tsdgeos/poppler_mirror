@@ -4226,7 +4226,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double kx, ky, sx, sy;
     bool retValue = false;
     const std::array<double, 4> &bbox = tPat->getBBox();
-    const double *ptm = tPat->getMatrix();
+    const std::array<double, 6> &ptm = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     Dict *resDict = tPat->getResDict();
 
