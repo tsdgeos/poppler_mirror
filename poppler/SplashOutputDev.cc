@@ -2071,7 +2071,7 @@ void SplashOutputDev::stroke(GfxState *state)
         return;
     }
     setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-    SplashPath path = convertPath(state, state->getPath(), false);
+    const SplashPath path = convertPath(state, state->getPath(), false);
     splash->stroke(path);
 }
 
@@ -2097,19 +2097,19 @@ void SplashOutputDev::eoFill(GfxState *state)
 
 void SplashOutputDev::clip(GfxState *state)
 {
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state, state->getPath(), true);
     splash->clipToPath(path, false);
 }
 
 void SplashOutputDev::eoClip(GfxState *state)
 {
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state, state->getPath(), true);
     splash->clipToPath(path, true);
 }
 
 void SplashOutputDev::clipToStrokePath(GfxState *state)
 {
-    SplashPath path = convertPath(state, state->getPath(), false);
+    const SplashPath path = convertPath(state, state->getPath(), false);
     const std::unique_ptr<SplashPath> path2 = splash->makeStrokePath(path, state->getLineWidth());
     splash->clipToPath(*path2, false);
 }
@@ -4509,7 +4509,7 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state, state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
@@ -4572,7 +4572,7 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state, state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
