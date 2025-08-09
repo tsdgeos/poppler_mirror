@@ -178,11 +178,11 @@ SplashError SplashClip::clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x
     return splashOk;
 }
 
-SplashError SplashClip::clipToPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness, bool eo)
+SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo)
 {
     int yMinAA, yMaxAA;
 
-    SplashXPath xPath(*path, matrix, flatness, true);
+    SplashXPath xPath(path, matrix, flatness, true);
 
     // check for an empty path
     if (xPath.length == 0) {
