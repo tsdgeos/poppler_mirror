@@ -2271,14 +2271,14 @@ SplashError Splash::fill(SplashPath *path, bool eo)
     return fillWithPattern(path, eo, state->fillPattern, state->fillAlpha);
 }
 
-inline void Splash::getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA)
+inline void Splash::getBBoxFP(const SplashPath &path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA)
 {
     SplashCoord xMinFP, yMinFP, xMaxFP, yMaxFP, tx, ty;
 
     // make compiler happy:
     xMinFP = xMaxFP = yMinFP = yMaxFP = 0;
-    for (int i = 0; i < path->length; ++i) {
-        transform(state->matrix, path->pts[i].x, path->pts[i].y, &tx, &ty);
+    for (int i = 0; i < path.length; ++i) {
+        transform(state->matrix, path.pts[i].x, path.pts[i].y, &tx, &ty);
         if (i == 0) {
             xMinFP = xMaxFP = tx;
             yMinFP = yMaxFP = ty;
@@ -2374,7 +2374,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
 
     if (eo && (yMinI == yMaxI || xMinI == xMaxI) && thinLineMode != splashThinLineDefault) {
         SplashCoord delta, xMinFP, yMinFP, xMaxFP, yMaxFP;
-        getBBoxFP(path, &xMinFP, &yMinFP, &xMaxFP, &yMaxFP);
+        getBBoxFP(*path, &xMinFP, &yMinFP, &xMaxFP, &yMaxFP);
         delta = (yMinI == yMaxI) ? yMaxFP - yMinFP : xMaxFP - xMinFP;
         if (delta < 0.2) {
             opClipRes = splashClipAllOutside;

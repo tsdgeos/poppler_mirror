@@ -282,7 +282,7 @@ private:
     static std::unique_ptr<SplashPath> flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness);
     static void flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord *matrix, SplashCoord flatness2, SplashPath *fPath);
     std::unique_ptr<SplashPath> makeDashedPath(const SplashPath &xPath);
-    void getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA);
+    void getBBoxFP(const SplashPath &path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA);
     SplashError fillWithPattern(SplashPath *path, bool eo, SplashPattern *pattern, SplashCoord alpha);
     bool pathAllOutside(const SplashPath &path);
     void fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noclip);
