@@ -1874,7 +1874,7 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
 
 SplashError Splash::stroke(const SplashPath &path)
 {
-    SplashPath *path2, *dPath;
+    SplashPath *path2;
     SplashCoord d1, d2, t1, t2, w;
 
     if (debugMode) {
@@ -1887,9 +1887,9 @@ SplashError Splash::stroke(const SplashPath &path)
     }
     path2 = flattenPath(path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
-        dPath = makeDashedPath(*path2);
+        std::unique_ptr<SplashPath> dPath = makeDashedPath(*path2);
         delete path2;
-        path2 = dPath;
+        path2 = dPath.release();
         if (path2->length == 0) {
             delete path2;
             return splashErrEmptyPath;
@@ -2148,9 +2148,8 @@ void Splash::flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, Splash
     }
 }
 
-SplashPath *Splash::makeDashedPath(const SplashPath &path)
+std::unique_ptr<SplashPath> Splash::makeDashedPath(const SplashPath &path)
 {
-    SplashPath *dPath;
     SplashCoord lineDashTotal;
     SplashCoord lineDashStartPhase, lineDashDist, segLen;
     SplashCoord x0, y0, x1, y1, xa, ya;
@@ -2163,7 +2162,7 @@ SplashPath *Splash::makeDashedPath(const SplashPath &path)
     }
     // Acrobat simply draws nothing if the dash array is [0]
     if (lineDashTotal == 0) {
-        return new SplashPath();
+        return std::make_unique<SplashPath>();
     }
     lineDashStartPhase = state->lineDashPhase;
     i = splashFloor(lineDashStartPhase / lineDashTotal);
@@ -2177,11 +2176,11 @@ SplashPath *Splash::makeDashedPath(const SplashPath &path)
             ++lineDashStartIdx;
         }
         if (unlikely(lineDashStartIdx == state->lineDash.size())) {
-            return new SplashPath();
+            return std::make_unique<SplashPath>();
         }
     }
 
-    dPath = new SplashPath();
+    auto dPath = std::make_unique<SplashPath>();
 
     // process each subpath
     i = 0;
@@ -5950,7 +5949,6 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
 std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten)
 {
     const SplashPath *pathIn;
-    SplashPath *dashPath;
     SplashCoord d, dx, dy, wdx, wdy, dxNext, dyNext, wdxNext, wdyNext;
     SplashCoord crossprod, dotprod, miter, m;
     bool first, last, closed, hasangle;
@@ -5967,9 +5965,9 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
     if (flatten) {
         pathIn = flattenPath(path, state->matrix, state->flatness);
         if (!state->lineDash.empty()) {
-            dashPath = makeDashedPath(*pathIn);
+            std::unique_ptr<SplashPath> dashPath = makeDashedPath(*pathIn);
             delete pathIn;
-            pathIn = dashPath;
+            pathIn = dashPath.release();
             if (pathIn->length == 0) {
                 delete pathIn;
                 return pathOut;
