@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -1954,7 +1954,7 @@ void Splash::strokeNarrow(SplashPath *path)
 
     nClipRes[0] = nClipRes[1] = nClipRes[2] = 0;
 
-    SplashXPath xPath(path, state->matrix, state->flatness, false);
+    SplashXPath xPath(*path, state->matrix, state->flatness, false);
 
     pipeInit(&pipe, 0, 0, state->strokePattern, nullptr, (unsigned char)splashRound(state->strokeAlpha * 255), false, false);
 
@@ -2372,7 +2372,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
         }
     }
 
-    SplashXPath xPath(path, state->matrix, state->flatness, true, adjustLine, linePosI);
+    SplashXPath xPath(*path, state->matrix, state->flatness, true, adjustLine, linePosI);
     if (vectorAntialias && !inShading) {
         xPath.aaScale();
     }
@@ -2555,7 +2555,7 @@ SplashError Splash::xorFill(SplashPath *path, bool eo)
     if (path->length == 0) {
         return splashErrEmptyPath;
     }
-    SplashXPath xPath(path, state->matrix, state->flatness, true);
+    SplashXPath xPath(*path, state->matrix, state->flatness, true);
     xPath.sort();
     SplashXPathScanner scanner(xPath, eo, state->clip->getYMinI(), state->clip->getYMaxI());
 
@@ -6427,7 +6427,7 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox, SplashPattern *pa
     if (path->length == 0) {
         return splashErrEmptyPath;
     }
-    SplashXPath xPath(path, state->matrix, state->flatness, true);
+    SplashXPath xPath(*path, state->matrix, state->flatness, true);
     if (vectorAntialias) {
         xPath.aaScale();
     }

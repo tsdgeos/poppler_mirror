@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -182,7 +182,7 @@ SplashError SplashClip::clipToPath(SplashPath *path, SplashCoord *matrix, Splash
 {
     int yMinAA, yMaxAA;
 
-    SplashXPath xPath(path, matrix, flatness, true);
+    SplashXPath xPath(*path, matrix, flatness, true);
 
     // check for an empty path
     if (xPath.length == 0) {
