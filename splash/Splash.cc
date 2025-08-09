@@ -1874,7 +1874,6 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
 
 SplashError Splash::stroke(const SplashPath &path)
 {
-    SplashPath *path2;
     SplashCoord d1, d2, t1, t2, w;
 
     if (debugMode) {
@@ -1885,13 +1884,11 @@ SplashError Splash::stroke(const SplashPath &path)
     if (path.length == 0) {
         return splashErrEmptyPath;
     }
-    path2 = flattenPath(path, state->matrix, state->flatness);
+    std::unique_ptr<SplashPath> path2 = flattenPath(path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
         std::unique_ptr<SplashPath> dPath = makeDashedPath(*path2);
-        delete path2;
-        path2 = dPath.release();
+        path2 = std::move(dPath);
         if (path2->length == 0) {
-            delete path2;
             return splashErrEmptyPath;
         }
     }
@@ -1911,23 +1908,22 @@ SplashError Splash::stroke(const SplashPath &path)
     d1 *= 0.5;
     if (d1 > 0 && d1 * state->lineWidth * state->lineWidth < minLineWidth * minLineWidth) {
         w = minLineWidth / splashSqrt(d1);
-        strokeWide(path2, w);
+        strokeWide(path2.get(), w);
     } else if (bitmap->mode == splashModeMono1) {
         // this gets close to Adobe's behavior in mono mode
         if (d1 * state->lineWidth <= 2) {
             strokeNarrow(*path2);
         } else {
-            strokeWide(path2, state->lineWidth);
+            strokeWide(path2.get(), state->lineWidth);
         }
     } else {
         if (state->lineWidth == 0) {
             strokeNarrow(*path2);
         } else {
-            strokeWide(path2, state->lineWidth);
+            strokeWide(path2.get(), state->lineWidth);
         }
     }
 
-    delete path2;
     return splashOk;
 }
 
@@ -2026,14 +2022,13 @@ void Splash::strokeWide(SplashPath *path, SplashCoord w)
     fillWithPattern(path2.get(), false, state->strokePattern, state->strokeAlpha);
 }
 
-SplashPath *Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness)
+std::unique_ptr<SplashPath> Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness)
 {
-    SplashPath *fPath;
     SplashCoord flatness2;
     unsigned char flag;
     int i;
 
-    fPath = new SplashPath();
+    auto fPath = std::make_unique<SplashPath>();
     // Estimate size, reserve
     fPath->reserve(path.length * 2 + 2);
 
@@ -2046,7 +2041,7 @@ SplashPath *Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, Spl
             ++i;
         } else {
             if (flag & splashPathCurve) {
-                flattenCurve(path.pts[i - 1].x, path.pts[i - 1].y, path.pts[i].x, path.pts[i].y, path.pts[i + 1].x, path.pts[i + 1].y, path.pts[i + 2].x, path.pts[i + 2].y, matrix, flatness2, fPath);
+                flattenCurve(path.pts[i - 1].x, path.pts[i - 1].y, path.pts[i].x, path.pts[i].y, path.pts[i + 1].x, path.pts[i + 1].y, path.pts[i + 2].x, path.pts[i + 2].y, matrix, flatness2, fPath.get());
                 i += 3;
             } else {
                 fPath->lineTo(path.pts[i].x, path.pts[i].y);
@@ -5963,7 +5958,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
     }
 
     if (flatten) {
-        pathIn = flattenPath(path, state->matrix, state->flatness);
+        pathIn = flattenPath(path, state->matrix, state->flatness).release();
         if (!state->lineDash.empty()) {
             std::unique_ptr<SplashPath> dashPath = makeDashedPath(*pathIn);
             delete pathIn;
