@@ -2109,12 +2109,9 @@ void SplashOutputDev::eoClip(GfxState *state)
 
 void SplashOutputDev::clipToStrokePath(GfxState *state)
 {
-    SplashPath *path2;
-
     SplashPath path = convertPath(state, state->getPath(), false);
-    path2 = splash->makeStrokePath(path, state->getLineWidth());
+    const std::unique_ptr<SplashPath> path2 = splash->makeStrokePath(path, state->getLineWidth());
     splash->clipToPath(*path2, false);
-    delete path2;
 }
 
 SplashPath SplashOutputDev::convertPath(GfxState *state, const GfxPath *path, bool dropEmptySubpaths)

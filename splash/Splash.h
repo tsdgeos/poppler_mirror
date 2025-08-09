@@ -219,7 +219,7 @@ public:
     // the line width <w>.  All other stroke parameters are taken from
     // the current state.  If <flatten> is true, this function will
     // first flatten the path and handle the linedash.
-    SplashPath *makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten = true);
+    std::unique_ptr<SplashPath> makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten = true);
 
     // Return the associated bitmap.
     SplashBitmap *getBitmap() { return bitmap; }

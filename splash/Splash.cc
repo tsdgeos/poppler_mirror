@@ -2033,11 +2033,8 @@ void Splash::strokeNarrow(const SplashPath &path)
 
 void Splash::strokeWide(SplashPath *path, SplashCoord w)
 {
-    SplashPath *path2;
-
-    path2 = makeStrokePath(*path, w, false);
-    fillWithPattern(path2, false, state->strokePattern, state->strokeAlpha);
-    delete path2;
+    const std::unique_ptr<SplashPath> path2 = makeStrokePath(*path, w, false);
+    fillWithPattern(path2.get(), false, state->strokePattern, state->strokeAlpha);
 }
 
 SplashPath *Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness)
@@ -5961,10 +5958,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     return splashOk;
 }
 
-SplashPath *Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten)
+std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool flatten)
 {
     const SplashPath *pathIn;
-    SplashPath *dashPath, *pathOut;
+    SplashPath *dashPath;
     SplashCoord d, dx, dy, wdx, wdy, dxNext, dyNext, wdxNext, wdyNext;
     SplashCoord crossprod, dotprod, miter, m;
     bool first, last, closed, hasangle;
@@ -5972,7 +5969,7 @@ SplashPath *Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool f
     int left0, left1, left2, right0, right1, right2, join0, join1, join2;
     int leftFirst, rightFirst, firstPt;
 
-    pathOut = new SplashPath();
+    auto pathOut = std::make_unique<SplashPath>();
 
     if (path.length == 0) {
         return pathOut;
