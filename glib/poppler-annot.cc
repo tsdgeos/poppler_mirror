@@ -437,7 +437,7 @@ PopplerColor *_poppler_convert_annot_color_to_poppler_color(const AnnotColor *co
     PopplerColor *poppler_color = nullptr;
 
     if (color) {
-        const double *values = color->getValues();
+        const std::array<double, 4> &values = color->getValues();
 
         switch (color->getSpace()) {
         case AnnotColor::colorGray:

@@ -5320,7 +5320,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         if (!aColor) {
             r = g = b = 0;
         } else if ((aColor->getSpace() == AnnotColor::colorRGB)) {
-            const double *values = aColor->getValues();
+            const std::array<double, 4> &values = aColor->getValues();
             r = values[0];
             g = values[1];
             b = values[2];

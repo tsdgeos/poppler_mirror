@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -1680,7 +1680,7 @@ Annot::~Annot() = default;
 
 void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill)
 {
-    const double *values = drawColor.getValues();
+    const std::array<double, 4> &values = drawColor.getValues();
 
     switch (drawColor.getSpace()) {
     case AnnotColor::colorCMYK:

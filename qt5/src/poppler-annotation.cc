@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -5024,7 +5024,7 @@ QColor convertAnnotColor(const AnnotColor *color)
     }
 
     QColor newcolor;
-    const double *color_data = color->getValues();
+    const std::array<double, 4> &color_data = color->getValues();
     switch (color->getSpace()) {
     case AnnotColor::colorTransparent: // = 0,
         newcolor = Qt::transparent;
