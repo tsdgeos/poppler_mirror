@@ -276,7 +276,7 @@ private:
     void drawAAPixel(SplashPipe *pipe, int x, int y);
     void drawSpan(SplashPipe *pipe, int x0, int x1, int y, bool noClip);
     void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
-    void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
+    static void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeNarrow(const SplashPath &path);
     void strokeWide(SplashPath *path, SplashCoord w);
     std::unique_ptr<SplashPath> flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness);
