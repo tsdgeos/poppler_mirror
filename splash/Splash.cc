@@ -1883,20 +1883,20 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha)
     }
 }
 
-SplashError Splash::stroke(SplashPath *path)
+SplashError Splash::stroke(const SplashPath &path)
 {
     SplashPath *path2, *dPath;
     SplashCoord d1, d2, t1, t2, w;
 
     if (debugMode) {
         printf("stroke [dash:%zu] [width:%.2f]:\n", state->lineDash.size(), (double)state->lineWidth);
-        dumpPath(*path);
+        dumpPath(path);
     }
     opClipRes = splashClipAllOutside;
-    if (path->length == 0) {
+    if (path.length == 0) {
         return splashErrEmptyPath;
     }
-    path2 = flattenPath(*path, state->matrix, state->flatness);
+    path2 = flattenPath(path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
         dPath = makeDashedPath(*path2);
         delete path2;

@@ -2072,7 +2072,7 @@ void SplashOutputDev::stroke(GfxState *state)
     }
     setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
     SplashPath path = convertPath(state, state->getPath(), false);
-    splash->stroke(&path);
+    splash->stroke(path);
 }
 
 void SplashOutputDev::fill(GfxState *state)
@@ -2208,7 +2208,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
             setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
             splash->fill(path, false);
             setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-            splash->stroke(path);
+            splash->stroke(*path);
         }
 
         // fill
@@ -2220,7 +2220,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
     } else if (doStroke) {
         if (path) {
             setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-            splash->stroke(path);
+            splash->stroke(*path);
         }
     }
     splash->setLineWidth(lineWidth);

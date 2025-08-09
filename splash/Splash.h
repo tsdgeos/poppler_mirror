@@ -155,7 +155,7 @@ public:
     void clear(SplashColorPtr color, unsigned char alpha = 0x00);
 
     // Stroke a path using the current stroke pattern.
-    SplashError stroke(SplashPath *path);
+    SplashError stroke(const SplashPath &path);
 
     // Fill a path using the current fill pattern.
     SplashError fill(SplashPath *path, bool eo);
