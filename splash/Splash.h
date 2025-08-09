@@ -284,7 +284,7 @@ private:
     void strokeWide(SplashPath *path, SplashCoord w);
     SplashPath *flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness);
     void flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord *matrix, SplashCoord flatness2, SplashPath *fPath);
-    SplashPath *makeDashedPath(SplashPath *xPath);
+    SplashPath *makeDashedPath(const SplashPath &xPath);
     void getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA);
     SplashError fillWithPattern(SplashPath *path, bool eo, SplashPattern *pattern, SplashCoord alpha);
     bool pathAllOutside(SplashPath *path);

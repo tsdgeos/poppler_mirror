@@ -1898,7 +1898,7 @@ SplashError Splash::stroke(SplashPath *path)
     }
     path2 = flattenPath(*path, state->matrix, state->flatness);
     if (!state->lineDash.empty()) {
-        dPath = makeDashedPath(path2);
+        dPath = makeDashedPath(*path2);
         delete path2;
         path2 = dPath;
         if (path2->length == 0) {
@@ -2162,7 +2162,7 @@ void Splash::flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, Splash
     }
 }
 
-SplashPath *Splash::makeDashedPath(SplashPath *path)
+SplashPath *Splash::makeDashedPath(const SplashPath &path)
 {
     SplashPath *dPath;
     SplashCoord lineDashTotal;
@@ -2199,10 +2199,10 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
 
     // process each subpath
     i = 0;
-    while (i < path->length) {
+    while (i < path.length) {
 
         // find the end of the subpath
-        for (j = i; j < path->length - 1 && !(path->flags[j] & splashPathLast); ++j) {
+        for (j = i; j < path.length - 1 && !(path.flags[j] & splashPathLast); ++j) {
             ;
         }
 
@@ -2216,10 +2216,10 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
         for (k = i; k < j; ++k) {
 
             // grab the segment
-            x0 = path->pts[k].x;
-            y0 = path->pts[k].y;
-            x1 = path->pts[k + 1].x;
-            y1 = path->pts[k + 1].y;
+            x0 = path.pts[k].x;
+            y0 = path.pts[k].y;
+            x1 = path.pts[k + 1].x;
+            y1 = path.pts[k + 1].y;
             segLen = splashDist(x0, y0, x1, y1);
 
             // process the segment
@@ -2268,12 +2268,12 @@ SplashPath *Splash::makeDashedPath(SplashPath *path)
 
     if (dPath->length == 0) {
         bool allSame = true;
-        for (i = 0; allSame && i < path->length - 1; ++i) {
-            allSame = path->pts[i].x == path->pts[i + 1].x && path->pts[i].y == path->pts[i + 1].y;
+        for (i = 0; allSame && i < path.length - 1; ++i) {
+            allSame = path.pts[i].x == path.pts[i + 1].x && path.pts[i].y == path.pts[i + 1].y;
         }
         if (allSame) {
-            x0 = path->pts[0].x;
-            y0 = path->pts[0].y;
+            x0 = path.pts[0].x;
+            y0 = path.pts[0].y;
             dPath->moveTo(x0, y0);
             dPath->lineTo(x0, y0);
         }
@@ -6033,7 +6033,7 @@ SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w, bool flatten
     if (flatten) {
         pathIn = flattenPath(*path, state->matrix, state->flatness);
         if (!state->lineDash.empty()) {
-            dashPath = makeDashedPath(pathIn);
+            dashPath = makeDashedPath(*pathIn);
             delete pathIn;
             pathIn = dashPath;
             if (pathIn->length == 0) {
