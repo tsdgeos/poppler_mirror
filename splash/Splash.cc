@@ -1890,7 +1890,7 @@ SplashError Splash::stroke(SplashPath *path)
 
     if (debugMode) {
         printf("stroke [dash:%zu] [width:%.2f]:\n", state->lineDash.size(), (double)state->lineWidth);
-        dumpPath(path);
+        dumpPath(*path);
     }
     opClipRes = splashClipAllOutside;
     if (path->length == 0) {
@@ -2286,7 +2286,7 @@ SplashError Splash::fill(SplashPath *path, bool eo)
 {
     if (debugMode) {
         printf("fill [eo:%d]:\n", eo);
-        dumpPath(path);
+        dumpPath(*path);
     }
     return fillWithPattern(path, eo, state->fillPattern, state->fillAlpha);
 }
@@ -6396,13 +6396,13 @@ SplashPath *Splash::makeStrokePath(const SplashPath &path, SplashCoord w, bool f
     return pathOut;
 }
 
-void Splash::dumpPath(SplashPath *path)
+void Splash::dumpPath(const SplashPath &path)
 {
     int i;
 
-    for (i = 0; i < path->length; ++i) {
-        printf("  %3d: x=%8.2f y=%8.2f%s%s%s%s\n", i, (double)path->pts[i].x, (double)path->pts[i].y, (path->flags[i] & splashPathFirst) ? " first" : "", (path->flags[i] & splashPathLast) ? " last" : "",
-               (path->flags[i] & splashPathClosed) ? " closed" : "", (path->flags[i] & splashPathCurve) ? " curve" : "");
+    for (i = 0; i < path.length; ++i) {
+        printf("  %3d: x=%8.2f y=%8.2f%s%s%s%s\n", i, (double)path.pts[i].x, (double)path.pts[i].y, (path.flags[i] & splashPathFirst) ? " first" : "", (path.flags[i] & splashPathLast) ? " last" : "",
+               (path.flags[i] & splashPathClosed) ? " closed" : "", (path.flags[i] & splashPathCurve) ? " curve" : "");
     }
 }
 

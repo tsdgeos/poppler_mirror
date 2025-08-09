@@ -307,7 +307,7 @@ private:
     void vertFlipImage(SplashBitmap *img, int width, int height, int nComps);
     void blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes);
     void blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
-    void dumpPath(SplashPath *path);
+    void dumpPath(const SplashPath &path);
     void dumpXPath(SplashXPath *path);
 
     static SplashPipeResultColorCtrl pipeResultColorNoAlphaBlend[];
