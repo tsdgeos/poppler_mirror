@@ -2335,7 +2335,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
     if (path->length == 0) {
         return splashErrEmptyPath;
     }
-    if (pathAllOutside(path)) {
+    if (pathAllOutside(*path)) {
         opClipRes = splashClipAllOutside;
         return splashOk;
     }
@@ -2455,7 +2455,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
     return splashOk;
 }
 
-bool Splash::pathAllOutside(SplashPath *path)
+bool Splash::pathAllOutside(const SplashPath &path)
 {
     SplashCoord xMin1, yMin1, xMax1, yMax1;
     int xMinI, yMinI, xMaxI, yMaxI;
@@ -2473,7 +2473,7 @@ bool Splash::pathAllOutside(SplashPath *path)
     };
 
     SplashCoord x, y, x2, y2;
-    transform(state->matrix, path->pts[0].x, path->pts[0].y, &x, &y);
+    transform(state->matrix, path.pts[0].x, path.pts[0].y, &x, &y);
     xMinI = splashFloor(x);
     yMinI = splashFloor(y);
 
@@ -2482,11 +2482,11 @@ bool Splash::pathAllOutside(SplashPath *path)
         // If the first point is inside the clipping rectangle,
         // the check is sufficient
         return false;
-    } else if (path->length == 1) {
+    } else if (path.length == 1) {
         return true;
     }
 
-    transform(state->matrix, path->pts[path->length / 2].x, path->pts[path->length / 2].y, &x2, &y2);
+    transform(state->matrix, path.pts[path.length / 2].x, path.pts[path.length / 2].y, &x2, &y2);
     auto ll = calcLowerLeft({ x, y }, { x2, y2 });
     auto ur = calcUpperRight({ x, y }, { x2, y2 });
 
@@ -2501,23 +2501,23 @@ bool Splash::pathAllOutside(SplashPath *path)
         // clipping rectangle, the check is finished. Otherwise,
         // we have to check the remaining points.
         return false;
-    } else if (path->length == 2) {
+    } else if (path.length == 2) {
         return true;
     }
 
-    xMin1 = xMax1 = path->pts[0].x;
-    yMin1 = yMax1 = path->pts[0].y;
+    xMin1 = xMax1 = path.pts[0].x;
+    yMin1 = yMax1 = path.pts[0].y;
 
-    for (int i = 1; i < path->length; ++i) {
-        if (path->pts[i].x < xMin1) {
-            xMin1 = path->pts[i].x;
-        } else if (path->pts[i].x > xMax1) {
-            xMax1 = path->pts[i].x;
+    for (int i = 1; i < path.length; ++i) {
+        if (path.pts[i].x < xMin1) {
+            xMin1 = path.pts[i].x;
+        } else if (path.pts[i].x > xMax1) {
+            xMax1 = path.pts[i].x;
         }
-        if (path->pts[i].y < yMin1) {
-            yMin1 = path->pts[i].y;
-        } else if (path->pts[i].y > yMax1) {
-            yMax1 = path->pts[i].y;
+        if (path.pts[i].y < yMin1) {
+            yMin1 = path.pts[i].y;
+        } else if (path.pts[i].y > yMax1) {
+            yMax1 = path.pts[i].y;
         }
     }
 
