@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -223,7 +223,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
     Matrix ctm;
     SplashColor defaultColor;
     GfxColor srcColor;
-    const double *matrix = shadingA->getMatrix();
+    const std::array<double, 6> &matrix = shadingA->getMatrix();
 
     shading = shadingA;
     state = stateA;
@@ -2071,8 +2071,8 @@ void SplashOutputDev::stroke(GfxState *state)
         return;
     }
     setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-    SplashPath path = convertPath(state, state->getPath(), false);
-    splash->stroke(&path);
+    const SplashPath path = convertPath(state->getPath(), false);
+    splash->stroke(path);
 }
 
 void SplashOutputDev::fill(GfxState *state)
@@ -2081,7 +2081,7 @@ void SplashOutputDev::fill(GfxState *state)
         return;
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
-    SplashPath path = convertPath(state, state->getPath(), true);
+    SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, false);
 }
 
@@ -2091,33 +2091,30 @@ void SplashOutputDev::eoFill(GfxState *state)
         return;
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
-    SplashPath path = convertPath(state, state->getPath(), true);
+    SplashPath path = convertPath(state->getPath(), true);
     splash->fill(&path, true);
 }
 
 void SplashOutputDev::clip(GfxState *state)
 {
-    SplashPath path = convertPath(state, state->getPath(), true);
-    splash->clipToPath(&path, false);
+    const SplashPath path = convertPath(state->getPath(), true);
+    splash->clipToPath(path, false);
 }
 
 void SplashOutputDev::eoClip(GfxState *state)
 {
-    SplashPath path = convertPath(state, state->getPath(), true);
-    splash->clipToPath(&path, true);
+    const SplashPath path = convertPath(state->getPath(), true);
+    splash->clipToPath(path, true);
 }
 
 void SplashOutputDev::clipToStrokePath(GfxState *state)
 {
-    SplashPath *path2;
-
-    SplashPath path = convertPath(state, state->getPath(), false);
-    path2 = splash->makeStrokePath(&path, state->getLineWidth());
-    splash->clipToPath(path2, false);
-    delete path2;
+    const SplashPath path = convertPath(state->getPath(), false);
+    const std::unique_ptr<SplashPath> path2 = splash->makeStrokePath(path, state->getLineWidth());
+    splash->clipToPath(*path2, false);
 }
 
-SplashPath SplashOutputDev::convertPath(GfxState *state, const GfxPath *path, bool dropEmptySubpaths)
+SplashPath SplashOutputDev::convertPath(const GfxPath *path, bool dropEmptySubpaths)
 {
     SplashPath sPath;
     int n, i, j;
@@ -2208,7 +2205,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
             setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
             splash->fill(path, false);
             setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-            splash->stroke(path);
+            splash->stroke(*path);
         }
 
         // fill
@@ -2220,7 +2217,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
     } else if (doStroke) {
         if (path) {
             setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(), state->getOverprintMode(), state->getStrokeColor());
-            splash->stroke(path);
+            splash->stroke(*path);
         }
     }
     splash->setLineWidth(lineWidth);
@@ -2248,7 +2245,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double
 {
     std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
-    const double *ctm, *bbox;
+    const double *ctm;
     T3FontCache *t3Font;
     T3GlyphStack *t3gs;
     bool validBBox;
@@ -2312,7 +2309,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double
                 t3FontCache[j] = t3FontCache[j - 1];
             }
             ++nT3Fonts;
-            bbox = gfxFont->getFontBBox();
+            const std::array<double, 4> &bbox = gfxFont->getFontBBox();
             if (bbox[0] == 0 && bbox[1] == 0 && bbox[2] == 0 && bbox[3] == 0) {
                 // unspecified bounding box -- just take a guess
                 xMin = xt - 5;
@@ -2565,7 +2562,7 @@ void SplashOutputDev::beginTextObject(GfxState *state) { }
 void SplashOutputDev::endTextObject(GfxState *state)
 {
     if (textClipPath) {
-        splash->clipToPath(textClipPath, false);
+        splash->clipToPath(*textClipPath, false);
         delete textClipPath;
         textClipPath = nullptr;
     }
@@ -2650,7 +2647,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Str
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
     SplashColor maskColor;
-    double bbox[4] = { 0, 0, 1, 1 }; // default;
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // default;
 
     if (state->getFillColorSpace()->isNonMarking()) {
         return;
@@ -2696,7 +2693,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Str
 
 void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
 {
-    double bbox[4] = { 0, 0, 1, 1 }; // dummy
+    static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
     if (!transpGroupStack) {
         return;
@@ -3842,7 +3839,7 @@ bool SplashOutputDev::checkTransparencyGroup(GfxState *state, bool knockout)
     return transpGroupStack != nullptr && transpGroupStack->shape != nullptr;
 }
 
-void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask)
+void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask)
 {
     SplashTransparencyGroup *transpGroup;
     SplashColor color;
@@ -3994,7 +3991,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state)
     updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
-void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox)
+void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox)
 {
     SplashBitmap *tBitmap;
     SplashTransparencyGroup *transpGroup;
@@ -4030,7 +4027,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox
     delete tBitmap;
 }
 
-void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void SplashOutputDev::setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
 {
     SplashBitmap *tBitmap;
     Splash *tSplash;
@@ -4214,7 +4211,7 @@ void SplashOutputDev::setFreeTypeHinting(bool enable, bool enableSlightHintingA)
     enableSlightHinting = enableSlightHintingA;
 }
 
-bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Splash *formerSplash = splash;
@@ -4228,8 +4225,8 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
-    const double *bbox = tPat->getBBox();
-    const double *ptm = tPat->getMatrix();
+    const std::array<double, 4> &bbox = tPat->getBBox();
+    const std::array<double, 6> &ptm = tPat->getMatrix();
     const int paintType = tPat->getPaintType();
     Dict *resDict = tPat->getResDict();
 
@@ -4512,13 +4509,13 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
     state->clearPath();
     setVectorAntialias(vaa);
 
@@ -4575,13 +4572,13 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     state->lineTo(xMax, yMax);
     state->lineTo(xMin, yMax);
     state->closePath();
-    SplashPath path = convertPath(state, state->getPath(), true);
+    const SplashPath path = convertPath(state->getPath(), true);
 
     pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
     // If state->getStrokePattern() is set, then the current clipping region
     // is a stroke path.
-    retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
+    retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern() != nullptr)) == splashOk);
     state->clearPath();
     setVectorAntialias(vaa);
 

@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -377,12 +377,12 @@ public:
     void adjustColor(int adjust);
 
     AnnotColorSpace getSpace() const { return (AnnotColorSpace)length; }
-    const double *getValues() const { return values; }
+    const std::array<double, 4> &getValues() const { return values; }
 
     Object writeToObject(XRef *xref) const;
 
 private:
-    double values[4];
+    std::array<double, 4> values;
     int length;
 };
 
@@ -554,7 +554,7 @@ public:
 
     // The following functions operate on coords relative to [origX origY]
     void extendTo(double x, double y);
-    void getBBoxRect(double bbox[4]) const;
+    std::array<double, 4> getBBoxRect() const;
 
     // Get boundaries in page coordinates
     double getPageXMin() const;
@@ -789,8 +789,8 @@ private:
 
 protected:
     virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Dict *resDict);
-    Object createForm(const GooString *appearBuf, const double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Dict *resDict);
+    Object createForm(const GooString *appearBuf, const std::array<double, 4> &bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
     Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName, double opacity, const char *blendMode);
     bool isVisible(bool printing);
     int getRotation() const;

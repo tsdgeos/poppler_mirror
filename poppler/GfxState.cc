@@ -1066,8 +1066,6 @@ GfxCalRGBColorSpace::~GfxCalRGBColorSpace() = default;
 
 std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
 {
-    int i;
-
     auto cs = std::make_unique<GfxCalRGBColorSpace>();
     cs->whiteX = whiteX;
     cs->whiteY = whiteY;
@@ -1078,9 +1076,7 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
     cs->gammaR = gammaR;
     cs->gammaG = gammaG;
     cs->gammaB = gammaB;
-    for (i = 0; i < 9; ++i) {
-        cs->mat[i] = mat[i];
-    }
+    cs->mat = mat;
 #ifdef USE_CMS
     cs->transform = transform;
 #endif
@@ -3175,7 +3171,6 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
 {
     Dict *dict;
     int paintTypeA, tilingTypeA;
-    double bboxA[4], matrixA[6];
     double xStepA, yStepA;
     Object resDictA;
     Object obj1;
@@ -3200,6 +3195,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
         tilingTypeA = 1;
         error(errSyntaxWarning, -1, "Invalid or missing TilingType in pattern");
     }
+    std::array<double, 4> bboxA;
     bboxA[0] = bboxA[1] = 0;
     bboxA[2] = bboxA[3] = 1;
     obj1 = dict->lookup("BBox");
@@ -3231,6 +3227,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     if (!resDictA.isDict()) {
         error(errSyntaxWarning, -1, "Invalid or missing Resources in pattern");
     }
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;
@@ -3251,22 +3248,15 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
     return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
-GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const double *bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA)
-    : GfxPattern(1, patternRefNumA)
+GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const std::array<double, 6> &matrixA, const Object *contentStreamA,
+                                   int patternRefNumA)
+    : GfxPattern(1, patternRefNumA), bbox(bboxA), matrix(matrixA)
 {
-    int i;
-
     paintType = paintTypeA;
     tilingType = tilingTypeA;
-    for (i = 0; i < 4; ++i) {
-        bbox[i] = bboxA[i];
-    }
     xStep = xStepA;
     yStep = yStepA;
     resDict = resDictA->copy();
-    for (i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
     contentStream = contentStreamA->copy();
 }
 
@@ -3285,7 +3275,6 @@ std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum)
 {
     Dict *dict;
-    double matrixA[6];
     Object obj1;
     int i;
 
@@ -3300,6 +3289,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
         return {};
     }
 
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;
@@ -3320,12 +3310,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
     return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
-GfxShadingPattern::GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA), shading(std::move(shadingA))
-{
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
-}
+GfxShadingPattern::GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const std::array<double, 6> &matrixA, int patternRefNumA) : GfxPattern(2, patternRefNumA), shading(std::move(shadingA)), matrix(matrixA) { }
 
 GfxShadingPattern::~GfxShadingPattern() = default;
 
@@ -3484,26 +3469,20 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
 // GfxFunctionShading
 //------------------------------------------------------------------------
 
-GfxFunctionShading::GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA) : GfxShading(1), funcs(std::move(funcsA))
+GfxFunctionShading::GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const std::array<double, 6> &matrixA, std::vector<std::unique_ptr<Function>> &&funcsA) : GfxShading(1), matrix(matrixA), funcs(std::move(funcsA))
 {
     x0 = x0A;
     y0 = y0A;
     x1 = x1A;
     y1 = y1A;
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = matrixA[i];
-    }
 }
 
-GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxShading(shading)
+GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading) : GfxShading(shading), matrix(shading->matrix)
 {
     x0 = shading->x0;
     y0 = shading->y0;
     x1 = shading->x1;
     y1 = shading->y1;
-    for (int i = 0; i < 6; ++i) {
-        matrix[i] = shading->matrix[i];
-    }
     for (const auto &f : shading->funcs) {
         funcs.emplace_back(f->copy());
     }
@@ -3514,7 +3493,6 @@ GfxFunctionShading::~GfxFunctionShading() = default;
 std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state)
 {
     double x0A, y0A, x1A, y1A;
-    double matrixA[6];
     std::vector<std::unique_ptr<Function>> funcsA;
     Object obj1;
     int i;
@@ -3535,6 +3513,7 @@ std::unique_ptr<GfxFunctionShading> GfxFunctionShading::parse(GfxResources *res,
         }
     }
 
+    std::array<double, 6> matrixA;
     matrixA[0] = 1;
     matrixA[1] = 0;
     matrixA[2] = 0;

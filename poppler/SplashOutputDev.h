@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2015, 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -265,7 +265,7 @@ public:
     void stroke(GfxState *state) override;
     void fill(GfxState *state) override;
     void eoFill(GfxState *state) override;
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
     bool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
     bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override;
     bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax) override;
@@ -298,10 +298,10 @@ public:
 
     //----- transparency groups and soft masks
     bool checkTransparencyGroup(GfxState *state, bool knockout) override;
-    void beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
+    void beginTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
     void endTransparencyGroup(GfxState *state) override;
-    void paintTransparencyGroup(GfxState *state, const double *bbox) override;
-    void setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
+    void paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox) override;
+    void setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
     void clearSoftMask(GfxState *state) override;
 
     //----- special access
@@ -360,7 +360,7 @@ private:
     SplashPattern *getColor(GfxColor *deviceN);
     static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColor, SplashColor splashMatteColor);
     void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag, int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
-    SplashPath convertPath(GfxState *state, const GfxPath *path, bool dropEmptySubpaths);
+    static SplashPath convertPath(const GfxPath *path, bool dropEmptySubpaths);
     void drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3FontCacheTag *tag, unsigned char *data);
 #ifdef USE_CMS
     bool useIccImageSrc(void *data);

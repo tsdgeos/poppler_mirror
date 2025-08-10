@@ -1217,7 +1217,8 @@ void Gfx::opSetExtGState(Object args[], int numArgs)
 void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, Function *transferFunc, GfxColor *backdropColor)
 {
     Dict *dict, *resDict;
-    double m[6], bbox[4];
+    std::array<double, 6> m;
+    std::array<double, 4> bbox;
     Object obj1;
     int i;
 
@@ -1965,8 +1966,9 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double xMin, yMin, xMax, yMax, x, y, x1, y1;
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
-    const double *ctm, *btm, *ptm;
-    double m[6], ictm[6], m1[6], imb[6];
+    const double *ctm, *btm;
+    double m[6], ictm[6], imb[6];
+    std::array<double, 6> m1;
     double det;
     double xstep, ystep;
     int i;
@@ -1977,7 +1979,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     // construct a (pattern space) -> (current space) transform matrix
     ctm = state->getCTM();
     btm = baseMatrix;
-    ptm = tPat->getMatrix();
+    const std::array<double, 6> &ptm = tPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
     if (fabs(det) < 0.000001) {
@@ -2184,7 +2186,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 {
     GfxShading *shading;
     GfxState *savedState;
-    const double *ctm, *btm, *ptm;
+    const double *ctm, *btm;
     double m[6], ictm[6], m1[6];
     double xMin, yMin, xMax, yMax;
     double det;
@@ -2211,7 +2213,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
     // construct a (pattern space) -> (current space) transform matrix
     ctm = state->getCTM();
     btm = baseMatrix;
-    ptm = sPat->getMatrix();
+    const std::array<double, 6> &ptm = sPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
     if (fabs(det) < 0.000001) {
@@ -2412,7 +2414,7 @@ void Gfx::doFunctionShFill1(GfxFunctionShading *shading, double x0, double y0, d
     int nComps, i, j;
 
     nComps = shading->getColorSpace()->getNComps();
-    const double *matrix = shading->getMatrix();
+    const std::array<double, 6> &matrix = shading->getMatrix();
 
     // compare the four corner colors
     for (i = 0; i < 4; ++i) {
@@ -3857,11 +3859,11 @@ void Gfx::doShowText(const GooString *s)
         tmp[1] = mat[0] * oldCTM[1] + mat[1] * oldCTM[3];
         tmp[2] = mat[2] * oldCTM[0] + mat[3] * oldCTM[2];
         tmp[3] = mat[2] * oldCTM[1] + mat[3] * oldCTM[3];
-        mat = font->getFontMatrix();
-        newCTM[0] = mat[0] * tmp[0] + mat[1] * tmp[2];
-        newCTM[1] = mat[0] * tmp[1] + mat[1] * tmp[3];
-        newCTM[2] = mat[2] * tmp[0] + mat[3] * tmp[2];
-        newCTM[3] = mat[2] * tmp[1] + mat[3] * tmp[3];
+        const std::array<double, 6> &fontMat = font->getFontMatrix();
+        newCTM[0] = fontMat[0] * tmp[0] + fontMat[1] * tmp[2];
+        newCTM[1] = fontMat[0] * tmp[1] + fontMat[1] * tmp[3];
+        newCTM[2] = fontMat[2] * tmp[0] + fontMat[3] * tmp[2];
+        newCTM[3] = fontMat[2] * tmp[1] + fontMat[3] * tmp[3];
         newCTM[0] *= state->getFontSize();
         newCTM[1] *= state->getFontSize();
         newCTM[2] *= state->getFontSize();
@@ -4687,7 +4689,8 @@ void Gfx::doForm(Object *str)
 {
     Dict *dict;
     bool transpGroup, isolated, knockout;
-    double m[6], bbox[4];
+    std::array<double, 6> m;
+    std::array<double, 4> bbox;
     Dict *resDict;
     bool ocSaved;
     Object obj1;
@@ -4783,8 +4786,8 @@ void Gfx::doForm(Object *str)
     ocState = ocSaved;
 }
 
-void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha, Function *transferFunc,
-                   GfxColor *backdropColor)
+void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup, bool softMask, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool alpha,
+                   Function *transferFunc, GfxColor *backdropColor)
 {
     Parser *oldParser;
     GfxState *savedState;
@@ -5154,7 +5157,6 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
     Dict *dict, *resDict;
     double formXMin, formYMin, formXMax, formYMax;
     double x, y, sx, sy, tx, ty;
-    double m[6], bbox[4];
     GfxColor color;
     int i;
 
@@ -5188,6 +5190,9 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
 
         // get stream dict
         dict = str->streamGetDict();
+
+        std::array<double, 4> bbox;
+        std::array<double, 6> m;
 
         // get the form bounding box
         Object bboxObj = dict->lookup("BBox");
@@ -5315,7 +5320,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
         if (!aColor) {
             r = g = b = 0;
         } else if ((aColor->getSpace() == AnnotColor::colorRGB)) {
-            const double *values = aColor->getValues();
+            const std::array<double, 4> &values = aColor->getValues();
             r = values[0];
             g = values[1];
             b = values[2];

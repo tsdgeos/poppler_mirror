@@ -4041,7 +4041,7 @@ QColor convertAnnotColor(const AnnotColor *color)
     }
 
     QColor newcolor;
-    const double *color_data = color->getValues();
+    const std::array<double, 4> &color_data = color->getValues();
     switch (color->getSpace()) {
     case AnnotColor::colorTransparent: // = 0,
         newcolor = Qt::transparent;

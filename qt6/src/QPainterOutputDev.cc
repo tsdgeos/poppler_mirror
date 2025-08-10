@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// // Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
@@ -112,7 +112,7 @@ const QPicture &QPainterOutputDevType3Font::getGlyph(int gid) const
         // Glyph has not been rendered before: render it now
 
         // Smallest box that contains all the glyphs from this font
-        const double *fontBBox = m_font->getFontBBox();
+        const std::array<double, 4> &fontBBox = m_font->getFontBBox();
         PDFRectangle box(fontBBox[0], fontBBox[1], fontBBox[2], fontBBox[3]);
 
         Dict *resDict = m_font->getResources();
@@ -869,7 +869,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx,
         // Make the glyph position the coordinate origin -- that's our center of scaling
         m_painter.top()->translate(QPointF(x - originX, y - originY));
 
-        const double *mat = gfxFont->getFontMatrix();
+        const std::array<double, 6> &mat = gfxFont->getFontMatrix();
         QTransform fontMatrix(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
 
         // Scale with the font size
@@ -1112,7 +1112,7 @@ void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream
     m_painter.top()->drawImage(QRect(0, 0, 1, 1), image);
 }
 
-void QPainterOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
+void QPainterOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace * /*blendingColorSpace*/, bool /*isolated*/, bool /*knockout*/, bool /*forSoftMask*/)
 {
     // The entire transparency group will be painted into a
     // freshly created QPicture object.  Since an existing painter
@@ -1141,7 +1141,7 @@ void QPainterOutputDev::endTransparencyGroup(GfxState * /*state*/)
     m_qpictures.pop();
 }
 
-void QPainterOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
+void QPainterOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/)
 {
     // Actually draw the transparency group
     m_painter.top()->drawPicture(0, 0, *m_lastTransparencyGroupPicture);

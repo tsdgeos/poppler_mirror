@@ -17,7 +17,7 @@
 // Copyright (C) 2007 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009-2013, 2017, 2018, 2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2013, 2017, 2018, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2010, 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -192,8 +192,8 @@ public:
 
     bool checkTransparencyGroup(Dict *resDict);
 
-    void drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false, bool knockout = false,
-                  bool alpha = false, Function *transferFunc = nullptr, GfxColor *backdropColor = nullptr);
+    void drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matrix, const std::array<double, 4> &bbox, bool transpGroup = false, bool softMask = false, GfxColorSpace *blendingColorSpace = nullptr, bool isolated = false,
+                  bool knockout = false, bool alpha = false, Function *transferFunc = nullptr, GfxColor *backdropColor = nullptr);
 
     void pushResources(Dict *resDict);
     void popResources();

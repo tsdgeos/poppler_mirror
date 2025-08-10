@@ -716,7 +716,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
     }
 }
 
-bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     return true;
     // do nothing -- this avoids the potentially slow loop in Gfx.cc

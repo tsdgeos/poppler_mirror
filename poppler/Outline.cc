@@ -458,9 +458,7 @@ std::vector<OutlineItem *> *OutlineItem::readItemList(OutlineItem *parent, const
 {
     auto items = new std::vector<OutlineItem *>();
 
-    // could be a hash (unordered_map) too for better avg case check
-    // small number of objects expected, likely doesn't matter
-    std::set<Ref> alreadyRead;
+    RefRecursionChecker alreadyRead;
 
     OutlineItem *parentO = parent;
     while (parentO) {
@@ -469,12 +467,11 @@ std::vector<OutlineItem *> *OutlineItem::readItemList(OutlineItem *parent, const
     }
 
     Object tempObj = firstItemRef->copy();
-    while (tempObj.isRef() && (tempObj.getRefNum() >= 0) && (tempObj.getRefNum() < xrefA->getNumObjects()) && alreadyRead.find(tempObj.getRef()) == alreadyRead.end()) {
+    while (tempObj.isRef() && (tempObj.getRefNum() >= 0) && (tempObj.getRefNum() < xrefA->getNumObjects()) && alreadyRead.insert(tempObj.getRef())) {
         Object obj = tempObj.fetch(xrefA);
         if (!obj.isDict()) {
             break;
         }
-        alreadyRead.insert(tempObj.getRef());
         OutlineItem *item = new OutlineItem(obj.getDict(), tempObj.getRef(), parent, xrefA, docA);
         items->push_back(item);
         tempObj = obj.dictLookupNF("Next").copy();

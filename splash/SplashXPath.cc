@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
-// Copyright (C) 2010, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -65,7 +65,7 @@ inline void SplashXPath::transform(const SplashCoord *matrix, SplashCoord xi, Sp
 // SplashXPath
 //------------------------------------------------------------------------
 
-SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines, int linePosI)
+SplashXPath::SplashXPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines, int linePosI)
 {
     SplashPathHint *hint;
     SplashXPathPoint *pts;
@@ -75,18 +75,18 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
     int curSubpath, i, j;
 
     // transform the points
-    pts = (SplashXPathPoint *)gmallocn(path->length, sizeof(SplashXPathPoint));
-    for (i = 0; i < path->length; ++i) {
-        transform(matrix, path->pts[i].x, path->pts[i].y, &pts[i].x, &pts[i].y);
+    pts = (SplashXPathPoint *)gmallocn(path.length, sizeof(SplashXPathPoint));
+    for (i = 0; i < path.length; ++i) {
+        transform(matrix, path.pts[i].x, path.pts[i].y, &pts[i].x, &pts[i].y);
     }
 
     // set up the stroke adjustment hints
-    if (path->hints) {
-        adjusts = (SplashXPathAdjust *)gmallocn_checkoverflow(path->hintsLength, sizeof(SplashXPathAdjust));
+    if (path.hints) {
+        adjusts = (SplashXPathAdjust *)gmallocn_checkoverflow(path.hintsLength, sizeof(SplashXPathAdjust));
         if (adjusts) {
-            for (i = 0; i < path->hintsLength; ++i) {
-                hint = &path->hints[i];
-                if (hint->ctrl0 + 1 >= path->length || hint->ctrl1 + 1 >= path->length) {
+            for (i = 0; i < path.hintsLength; ++i) {
+                hint = &path.hints[i];
+                if (hint->ctrl0 + 1 >= path.length || hint->ctrl1 + 1 >= path.length) {
                     gfree(adjusts);
                     adjusts = nullptr;
                     break;
@@ -155,7 +155,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
 
     // perform stroke adjustment
     if (adjusts) {
-        for (i = 0, adjust = adjusts; i < path->hintsLength; ++i, ++adjust) {
+        for (i = 0, adjust = adjusts; i < path.hintsLength; ++i, ++adjust) {
             for (j = adjust->firstPt; j <= adjust->lastPt; ++j) {
                 strokeAdjust(adjust, &pts[j].x, &pts[j].y);
             }
@@ -171,12 +171,12 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
     curSubpath = 0;
     i = 0;
     // reserve space for segments, rough estimate
-    grow(path->length * 2);
+    grow(path.length * 2);
 
-    while (i < path->length) {
+    while (i < path.length) {
 
         // first point in subpath - skip it
-        if (path->flags[i] & splashPathFirst) {
+        if (path.flags[i] & splashPathFirst) {
             x0 = pts[i].x;
             y0 = pts[i].y;
             xsp = x0;
@@ -187,15 +187,15 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
         } else {
 
             // curve segment
-            if (path->flags[i] & splashPathCurve) {
+            if (path.flags[i] & splashPathCurve) {
                 x1 = pts[i].x;
                 y1 = pts[i].y;
                 x2 = pts[i + 1].x;
                 y2 = pts[i + 1].y;
                 x3 = pts[i + 2].x;
                 y3 = pts[i + 2].y;
-                addCurve(x0, y0, x1, y1, x2, y2, x3, y3, flatness, (path->flags[i - 1] & splashPathFirst), (path->flags[i + 2] & splashPathLast),
-                         !closeSubpaths && (path->flags[i - 1] & splashPathFirst) && !(path->flags[i - 1] & splashPathClosed), !closeSubpaths && (path->flags[i + 2] & splashPathLast) && !(path->flags[i + 2] & splashPathClosed));
+                addCurve(x0, y0, x1, y1, x2, y2, x3, y3, flatness, (path.flags[i - 1] & splashPathFirst), (path.flags[i + 2] & splashPathLast),
+                         !closeSubpaths && (path.flags[i - 1] & splashPathFirst) && !(path.flags[i - 1] & splashPathClosed), !closeSubpaths && (path.flags[i + 2] & splashPathLast) && !(path.flags[i + 2] & splashPathClosed));
                 x0 = x3;
                 y0 = y3;
                 i += 3;
@@ -211,7 +211,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flat
             }
 
             // close a subpath
-            if (closeSubpaths && (path->flags[i - 1] & splashPathLast) && (pts[i - 1].x != pts[curSubpath].x || pts[i - 1].y != pts[curSubpath].y)) {
+            if (closeSubpaths && (path.flags[i - 1] & splashPathLast) && (pts[i - 1].x != pts[curSubpath].x || pts[i - 1].y != pts[curSubpath].y)) {
                 addSegment(x0, y0, xsp, ysp);
             }
         }

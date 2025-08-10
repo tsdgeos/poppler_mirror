@@ -6,6 +6,7 @@
 //
 // Copyright 2020 sgerwk <sgerwk@aol.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -95,7 +96,6 @@ void BBoxOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *st
 void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
 {
     double leftent, rightent, ascent, descent;
-    const double *fm, *fb;
     double fontSize, w, adjust;
     double fx, fy;
 
@@ -114,7 +114,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
 
     fontSize = state->getFontSize();
 
-    fb = font->getFontBBox();
+    const std::array<double, 4> &fb = font->getFontBBox();
     if (font->getWMode() == writingModeHorizontal) {
         leftent = 0;
         rightent = 0;
@@ -139,7 +139,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
         // similar to TextPage::updateFont()
         w = ((Gfx8BitFont *)font)->getWidth(code);
         adjust = w / 0.5;
-        fm = font->getFontMatrix();
+        const std::array<double, 6> &fm = font->getFontMatrix();
         if (fm[0] != 0) {
             adjust *= fabs(fm[3] / fm[0]);
         }

@@ -29,6 +29,7 @@
 // Copyright 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
+// Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================
 

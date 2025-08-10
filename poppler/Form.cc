@@ -39,6 +39,7 @@
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================
 
@@ -1346,7 +1347,7 @@ bool FormField::isAmongExcludedFields(const std::vector<std::string> &excludedFi
     Ref fieldRef;
 
     for (const std::string &field : excludedFields) {
-        if (field.compare(field.size() - 2, 2, " R") == 0) {
+        if (field.ends_with(" R")) {
             if (sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2 && fieldRef == getRef()) {
                 return true;
             }
@@ -3144,7 +3145,7 @@ FormField *Form::findFieldByFullyQualifiedNameOrRef(const std::string &field) co
 {
     Ref fieldRef;
 
-    if (field.size() > 1 && field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
+    if (field.ends_with(" R") && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
         return findFieldByRef(fieldRef);
     }
     return findFieldByFullyQualifiedName(field);
@@ -3164,7 +3165,7 @@ void Form::reset(const std::vector<std::string> &fields, bool excludeFields)
             for (const std::string &field : fields) {
                 Ref fieldRef;
 
-                if (field.size() > 1 && field.compare(field.size() - 2, 2, " R") == 0 && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
+                if (field.ends_with(" R") && sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
                     foundField = findFieldByRef(fieldRef);
                 } else {
                     foundField = findFieldByFullyQualifiedName(field);

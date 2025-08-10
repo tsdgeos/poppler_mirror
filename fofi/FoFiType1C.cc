@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2017-2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
@@ -1030,11 +1030,11 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
     unsigned char byte;
     int pos, subrBias, start, i, k;
 
-    if (offsetBeingParsed.find(offset) != offsetBeingParsed.end()) {
+    const auto [offsetEmplaceIt, inserted] = offsetBeingParsed.emplace(offset);
+    if (!inserted) {
+        // malformed file we already parsed that offset
         return;
     }
-
-    auto offsetEmplaceResult = offsetBeingParsed.emplace(offset);
 
     start = charBuf->getLength();
     if (top) {
@@ -1655,7 +1655,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
         }
     }
 
-    offsetBeingParsed.erase(offsetEmplaceResult.first);
+    offsetBeingParsed.erase(offsetEmplaceIt);
 }
 
 void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict)

@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -66,7 +66,7 @@ public:
     // lines) <path>.  Transforms all points from user space to device
     // space, via <matrix>.  If <closeSubpaths> is true, closes all open
     // subpaths.
-    SplashXPath(SplashPath *path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
+    SplashXPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
 
     ~SplashXPath();
 

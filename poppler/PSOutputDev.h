@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -237,7 +237,7 @@ public:
     void stroke(GfxState *state) override;
     void fill(GfxState *state) override;
     void eoFill(GfxState *state) override;
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
     bool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
     bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double /*tMin*/, double /*tMax*/) override;
     bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double /*sMin*/, double /*sMax*/) override;
@@ -394,8 +394,10 @@ private:
     void doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
     void doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
     void dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, bool genXform, bool updateColors, bool map01);
-    bool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep, double yStep);
-    bool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep, double yStep);
+    bool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
+                             double yStep);
+    bool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
+                             double yStep);
 
 #ifdef OPI_SUPPORT
     void opiBegin20(GfxState *state, Dict *dict);

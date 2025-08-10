@@ -1,3 +1,13 @@
+Release 25.08.0:
+        core:
+         * FormWidgetSignature::signDocumentWithAppearance: add imagePath parameter
+         * Fix parsing Distinguished Names that end with a hex string
+         * Fix crashes in malformed documents
+
+        glib:
+         * Add poppler_page_render_transparent_selection()
+         * Add missing since to the documentation
+
 Release 25.07.0:
         core:
          * Changed rendering of malformed documents to mimic what Adobe Reader does. Issue #1602

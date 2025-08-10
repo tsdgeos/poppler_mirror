@@ -415,7 +415,7 @@ static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_
     type3_font_info_t *info;
 
     info = (type3_font_info_t *)cairo_font_face_get_user_data(cairo_scaled_font_get_font_face(scaled_font), &type3_font_key);
-    const double *mat = info->font->getFontBBox();
+    const std::array<double, 4> &mat = info->font->getFontBBox();
     extents->ascent = mat[3]; /* y2 */
     extents->descent = -mat[3]; /* -y1 */
     extents->height = extents->ascent + extents->descent;
@@ -430,7 +430,6 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     Dict *charProcs;
     Object charProc;
     cairo_matrix_t matrix, invert_y_axis;
-    const double *mat;
     double wx, wy;
     type3_font_info_t *info;
     Gfx *gfx;
@@ -449,7 +448,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
         return CAIRO_STATUS_SUCCESS;
     }
 
-    mat = info->font->getFontMatrix();
+    const std::array<double, 6> &mat = info->font->getFontMatrix();
     matrix.xx = mat[0];
     matrix.yx = mat[1];
     matrix.xy = mat[2];
@@ -531,7 +530,6 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
 {
     std::vector<int> codeToGID;
     char *name;
-    const double *mat;
 
     Dict *charProcs = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getCharProcs();
     Ref ref = *gfxFont->getID();
@@ -549,7 +547,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     output_dev->setPrinting(printing);
 
     Dict *resDict = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getResources();
-    mat = gfxFont->getFontBBox();
+    const std::array<double, 4> &mat = gfxFont->getFontBBox();
     PDFRectangle box;
     box.x1 = mat[0];
     box.y1 = mat[1];

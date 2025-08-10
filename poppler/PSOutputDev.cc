@@ -2577,7 +2577,6 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     Dict *charProcs;
     Gfx *gfx;
     PDFRectangle box;
-    const double *m;
     int i;
 
     // set up resources used by font
@@ -2598,9 +2597,9 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
     // font dictionary
     writePS("8 dict begin\n");
     writePS("/FontType 3 def\n");
-    m = font->getFontMatrix();
-    writePSFmt("/FontMatrix [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", m[0], m[1], m[2], m[3], m[4], m[5]);
-    m = font->getFontBBox();
+    const std::array<double, 6> &fontMatrix = font->getFontMatrix();
+    writePSFmt("/FontMatrix [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", fontMatrix[0], fontMatrix[1], fontMatrix[2], fontMatrix[3], fontMatrix[4], fontMatrix[5]);
+    const std::array<double, 4> &m = font->getFontBBox();
     writePSFmt("/FontBBox [{0:.6g} {1:.6g} {2:.6g} {3:.6g}] def\n", m[0], m[1], m[2], m[3]);
     writePS("/Encoding 256 array def\n");
     writePS("  0 1 255 { Encoding exch /.notdef put } for\n");
@@ -4207,8 +4206,8 @@ void PSOutputDev::eoFill(GfxState *state)
     writePS("f*\n");
 }
 
-bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4282,8 +4281,8 @@ bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1, double xStep,
-                                      double yStep)
+bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
+                                      double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4329,7 +4328,7 @@ bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     std::set<int>::iterator patternRefIt;
     const int patternRefNum = tPat->getPatternRefNum();
@@ -4343,8 +4342,7 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
         }
     }
 
-    const double *bbox = tPat->getBBox();
-    const double *pmat = tPat->getMatrix();
+    const std::array<double, 4> &bbox = tPat->getBBox();
     const int paintType = tPat->getPaintType();
     const int tilingType = tPat->getTilingType();
     Dict *resDict = tPat->getResDict();
@@ -4372,9 +4370,9 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
         delete gfx;
         res = true;
     } else if (level == psLevel1 || level == psLevel1Sep) {
-        res = tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL1(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     } else {
-        res = tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL2(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     }
 
     if (patternRefNum != -1) {
@@ -4397,7 +4395,7 @@ bool PSOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shadin
     }
 
     shading->getDomain(&x0, &y0, &x1, &y1);
-    const double *mat = shading->getMatrix();
+    const std::array<double, 6> &mat = shading->getMatrix();
     writePSFmt("/mat [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     writePSFmt("/n {0:d} def\n", shading->getColorSpace()->getNComps());
     if (shading->getNFuncs() == 1) {

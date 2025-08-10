@@ -19,7 +19,7 @@
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018, 2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 // Copyright (C) 2024 Sebastian J. Bronner <waschtl@sbronner.com>
 //
@@ -126,7 +126,7 @@ public:
     bool useDrawChar() override { return false; }
 
     //----- path painting
-    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
 
     //----- image drawing
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;

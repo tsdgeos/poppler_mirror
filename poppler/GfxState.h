@@ -480,13 +480,13 @@ public:
     double getGammaR() const { return gammaR; }
     double getGammaG() const { return gammaG; }
     double getGammaB() const { return gammaB; }
-    const double *getMatrix() const { return mat; }
+    const std::array<double, 9> &getMatrix() const { return mat; }
 
 private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double gammaR, gammaG, gammaB; // gamma values
-    double mat[9]; // ABC -> XYZ transform matrix
+    std::array<double, 9> mat; // ABC -> XYZ transform matrix
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
@@ -845,22 +845,22 @@ public:
 
     int getPaintType() const { return paintType; }
     int getTilingType() const { return tilingType; }
-    const double *getBBox() const { return bbox; }
+    const std::array<double, 4> &getBBox() const { return bbox; }
     double getXStep() const { return xStep; }
     double getYStep() const { return yStep; }
     Dict *getResDict() { return resDict.isDict() ? resDict.getDict() : (Dict *)nullptr; }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
     Object *getContentStream() { return &contentStream; }
 
 private:
-    GfxTilingPattern(int paintTypeA, int tilingTypeA, const double *bboxA, double xStepA, double yStepA, const Object *resDictA, const double *matrixA, const Object *contentStreamA, int patternRefNumA);
+    GfxTilingPattern(int paintTypeA, int tilingTypeA, const std::array<double, 4> &bboxA, double xStepA, double yStepA, const Object *resDictA, const std::array<double, 6> &matrixA, const Object *contentStreamA, int patternRefNumA);
 
     int paintType;
     int tilingType;
-    double bbox[4];
+    const std::array<double, 4> bbox;
     double xStep, yStep;
     Object resDict;
-    double matrix[6];
+    const std::array<double, 6> matrix;
     Object contentStream;
 };
 
@@ -877,13 +877,13 @@ public:
     std::unique_ptr<GfxPattern> copy() const override;
 
     GfxShading *getShading() { return shading.get(); }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
 
 private:
-    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const double *matrixA, int patternRefNumA);
+    GfxShadingPattern(std::unique_ptr<GfxShading> &&shadingA, const std::array<double, 6> &matrixA, int patternRefNumA);
 
     std::unique_ptr<GfxShading> shading;
-    double matrix[6];
+    const std::array<double, 6> matrix;
 };
 
 //------------------------------------------------------------------------
@@ -987,7 +987,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxFunctionShading : public GfxShading
 {
 public:
-    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const double *matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
+    GfxFunctionShading(double x0A, double y0A, double x1A, double y1A, const std::array<double, 6> &matrixA, std::vector<std::unique_ptr<Function>> &&funcsA);
     explicit GfxFunctionShading(const GfxFunctionShading *shading);
     ~GfxFunctionShading() override;
 
@@ -1002,7 +1002,7 @@ public:
         *x1A = x1;
         *y1A = y1;
     }
-    const double *getMatrix() const { return matrix; }
+    const std::array<double, 6> &getMatrix() const { return matrix; }
     int getNFuncs() const { return funcs.size(); }
     const Function *getFunc(int i) const { return funcs[i].get(); }
     void getColor(double x, double y, GfxColor *color) const;
@@ -1012,7 +1012,7 @@ protected:
 
 private:
     double x0, y0, x1, y1;
-    double matrix[6];
+    const std::array<double, 6> matrix;
     std::vector<std::unique_ptr<Function>> funcs;
 };
 
