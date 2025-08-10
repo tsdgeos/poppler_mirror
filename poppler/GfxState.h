@@ -44,6 +44,7 @@
 #include "Object.h"
 #include "Function.h"
 
+#include <array>
 #include <cassert>
 #include <map>
 #include <memory>
