@@ -36,6 +36,7 @@
 #define GFXFONT_H
 
 #include <memory>
+#include <array>
 #include <optional>
 
 #include "goo/GooString.h"

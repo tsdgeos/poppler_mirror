@@ -56,8 +56,9 @@
 #ifndef ANNOT_H
 #define ANNOT_H
 
-#include <memory>
+#include <array>
 #include <atomic>
+#include <memory>
 #include <mutex>
 #include <vector>
 
