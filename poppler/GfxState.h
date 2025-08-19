@@ -1423,6 +1423,38 @@ private:
 };
 
 //------------------------------------------------------------------------
+// GfxXYZ2DisplayTransforms
+//------------------------------------------------------------------------
+
+#ifdef USE_CMS
+
+class POPPLER_PRIVATE_EXPORT GfxXYZ2DisplayTransforms
+{
+public:
+    // Constructor.
+    explicit GfxXYZ2DisplayTransforms(const GfxLCMSProfilePtr &displayProfileA);
+
+    // Accessors.
+    GfxLCMSProfilePtr getDisplayProfile() const { return displayProfile; }
+    std::shared_ptr<GfxColorTransform> getRelCol() const { return XYZ2DisplayTransformRelCol; }
+    std::shared_ptr<GfxColorTransform> getAbsCol() const { return XYZ2DisplayTransformAbsCol; }
+    std::shared_ptr<GfxColorTransform> getSat() const { return XYZ2DisplayTransformSat; }
+    std::shared_ptr<GfxColorTransform> getPerc() const { return XYZ2DisplayTransformPerc; }
+
+private:
+    static GfxLCMSProfilePtr XYZProfile;
+
+    GfxLCMSProfilePtr displayProfile;
+
+    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformRelCol;
+    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformAbsCol;
+    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformSat;
+    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
+};
+
+#endif
+
+//------------------------------------------------------------------------
 // GfxState
 //------------------------------------------------------------------------
 
@@ -1664,6 +1696,7 @@ public:
 #ifdef USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA);
     GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
+    void setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms);
     std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
     int getCmsRenderingIntent();
     static GfxLCMSProfilePtr sRGBProfile;
@@ -1800,11 +1833,7 @@ private:
 
 #ifdef USE_CMS
     GfxLCMSProfilePtr localDisplayProfile;
-    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformRelCol;
-    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformAbsCol;
-    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformSat;
-    std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
-    static GfxLCMSProfilePtr XYZProfile;
+    std::shared_ptr<GfxXYZ2DisplayTransforms> XYZ2DisplayTransforms;
 #endif
 
     std::unique_ptr<GfxColorSpace> defaultGrayColorSpace;

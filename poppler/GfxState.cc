@@ -395,6 +395,16 @@ static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const 
     error(errSyntaxWarning, -1, "{0:s}", text);
 }
 
+static void setCMSErrorHandler()
+{
+    static bool installed = false;
+
+    if (!installed) {
+        cmsSetLogErrorHandler(CMSError);
+        installed = true;
+    }
+}
+
 unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs)
 {
     switch (cs) {
@@ -6262,6 +6272,65 @@ void GfxPath::offset(double dx, double dy)
 //------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
+
+#ifdef USE_CMS
+
+GfxLCMSProfilePtr GfxXYZ2DisplayTransforms::XYZProfile = nullptr;
+
+GfxXYZ2DisplayTransforms::GfxXYZ2DisplayTransforms(const GfxLCMSProfilePtr &displayProfileA)
+{
+    if (!XYZProfile) {
+        // This is probably the one of the first invocations of lcms2, so we set the error handler
+        setCMSErrorHandler();
+
+        XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
+    }
+
+    displayProfile = displayProfileA;
+    if (displayProfile) {
+        cmsHTRANSFORM transform;
+        unsigned int nChannels;
+        unsigned int localDisplayPixelType;
+
+        localDisplayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile.get()));
+        nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile.get()));
+        // create transform from XYZ
+        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, displayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_RELATIVE_COLORIMETRIC, LCMS_FLAGS)) == nullptr) {
+            error(errSyntaxWarning, -1, "Can't create Lab transform");
+        } else {
+            XYZ2DisplayTransformRelCol = std::make_shared<GfxColorTransform>(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+        }
+
+        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, displayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_FLAGS)) == nullptr) {
+            error(errSyntaxWarning, -1, "Can't create Lab transform");
+        } else {
+            XYZ2DisplayTransformAbsCol = std::make_shared<GfxColorTransform>(transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+        }
+
+        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, displayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_SATURATION, LCMS_FLAGS)) == nullptr) {
+            error(errSyntaxWarning, -1, "Can't create Lab transform");
+        } else {
+            XYZ2DisplayTransformSat = std::make_shared<GfxColorTransform>(transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
+        }
+
+        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, displayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_PERCEPTUAL, LCMS_FLAGS)) == nullptr) {
+            error(errSyntaxWarning, -1, "Can't create Lab transform");
+        } else {
+            XYZ2DisplayTransformPerc = std::make_shared<GfxColorTransform>(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
+        }
+    } else {
+        XYZ2DisplayTransformRelCol = nullptr;
+        XYZ2DisplayTransformAbsCol = nullptr;
+        XYZ2DisplayTransformSat = nullptr;
+        XYZ2DisplayTransformPerc = nullptr;
+    }
+}
+
+#endif
+
+//------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------
 GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *pathA) : path(pathA), subPathOff(0), coordOff(0), numCoords(0), curSubPath(nullptr)
 {
     if (path->getNumSubpaths()) {
@@ -6409,21 +6478,14 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
     defaultRGBColorSpace = nullptr;
     defaultCMYKColorSpace = nullptr;
 #ifdef USE_CMS
-    XYZ2DisplayTransformRelCol = nullptr;
-    XYZ2DisplayTransformAbsCol = nullptr;
-    XYZ2DisplayTransformSat = nullptr;
-    XYZ2DisplayTransformPerc = nullptr;
     localDisplayProfile = nullptr;
+    XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(nullptr);
 
     if (!sRGBProfile) {
         // This is probably the one of the first invocations of lcms2, so we set the error handler
-        cmsSetLogErrorHandler(CMSError);
+        setCMSErrorHandler();
 
         sRGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
-    }
-
-    if (!XYZProfile) {
-        XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
     }
 #endif
 }
@@ -6513,10 +6575,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     saved = nullptr;
 #ifdef USE_CMS
     localDisplayProfile = state->localDisplayProfile;
-    XYZ2DisplayTransformRelCol = state->XYZ2DisplayTransformRelCol;
-    XYZ2DisplayTransformAbsCol = state->XYZ2DisplayTransformAbsCol;
-    XYZ2DisplayTransformSat = state->XYZ2DisplayTransformSat;
-    XYZ2DisplayTransformPerc = state->XYZ2DisplayTransformPerc;
+    XYZ2DisplayTransforms = state->XYZ2DisplayTransforms;
 #endif
 
     if (state->defaultGrayColorSpace) {
@@ -6539,54 +6598,28 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
 #ifdef USE_CMS
 
 GfxLCMSProfilePtr GfxState::sRGBProfile = nullptr;
-GfxLCMSProfilePtr GfxState::XYZProfile = nullptr;
 
 void GfxState::setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA)
 {
     localDisplayProfile = localDisplayProfileA;
-    if (localDisplayProfile) {
-        cmsHTRANSFORM transform;
-        unsigned int nChannels;
-        unsigned int localDisplayPixelType;
+    XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(localDisplayProfile);
+}
 
-        localDisplayPixelType = getCMSColorSpaceType(cmsGetColorSpace(localDisplayProfile.get()));
-        nChannels = getCMSNChannels(cmsGetColorSpace(localDisplayProfile.get()));
-        // create transform from XYZ
-        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, localDisplayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_RELATIVE_COLORIMETRIC, LCMS_FLAGS)) == nullptr) {
-            error(errSyntaxWarning, -1, "Can't create Lab transform");
-        } else {
-            XYZ2DisplayTransformRelCol = std::make_shared<GfxColorTransform>(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
-        }
-
-        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, localDisplayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_FLAGS)) == nullptr) {
-            error(errSyntaxWarning, -1, "Can't create Lab transform");
-        } else {
-            XYZ2DisplayTransformAbsCol = std::make_shared<GfxColorTransform>(transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
-        }
-
-        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, localDisplayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_SATURATION, LCMS_FLAGS)) == nullptr) {
-            error(errSyntaxWarning, -1, "Can't create Lab transform");
-        } else {
-            XYZ2DisplayTransformSat = std::make_shared<GfxColorTransform>(transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
-        }
-
-        if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL, localDisplayProfile.get(), COLORSPACE_SH(localDisplayPixelType) | CHANNELS_SH(nChannels) | BYTES_SH(1), INTENT_PERCEPTUAL, LCMS_FLAGS)) == nullptr) {
-            error(errSyntaxWarning, -1, "Can't create Lab transform");
-        } else {
-            XYZ2DisplayTransformPerc = std::make_shared<GfxColorTransform>(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
-        }
-    }
+void GfxState::setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms)
+{
+    XYZ2DisplayTransforms = std::move(transforms);
+    localDisplayProfile = XYZ2DisplayTransforms->getDisplayProfile();
 }
 
 std::shared_ptr<GfxColorTransform> GfxState::getXYZ2DisplayTransform()
 {
-    auto transform = XYZ2DisplayTransformRelCol;
+    auto transform = XYZ2DisplayTransforms->getRelCol();
     if (strcmp(renderingIntent, "AbsoluteColorimetric") == 0) {
-        transform = XYZ2DisplayTransformAbsCol;
+        transform = XYZ2DisplayTransforms->getAbsCol();
     } else if (strcmp(renderingIntent, "Saturation") == 0) {
-        transform = XYZ2DisplayTransformSat;
+        transform = XYZ2DisplayTransforms->getSat();
     } else if (strcmp(renderingIntent, "Perceptual") == 0) {
-        transform = XYZ2DisplayTransformPerc;
+        transform = XYZ2DisplayTransforms->getPerc();
     }
     return transform;
 }
