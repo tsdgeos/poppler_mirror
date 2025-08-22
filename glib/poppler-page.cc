@@ -42,11 +42,13 @@
  * @title: PopplerPage
  */
 
+namespace {
 enum
 {
     PROP_0,
     PROP_LABEL
 };
+}
 
 static PopplerRectangleExtended *poppler_rectangle_extended_new();
 

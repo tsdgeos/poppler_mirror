@@ -79,6 +79,7 @@
  * The #PopplerDocument is an object used to refer to a main document.
  */
 
+namespace {
 enum
 {
     PROP_0,
@@ -109,6 +110,7 @@ enum
     PROP_CREATION_DATETIME,
     PROP_MOD_DATETIME
 };
+}
 
 static void poppler_document_layers_free(PopplerDocument *document);
 
