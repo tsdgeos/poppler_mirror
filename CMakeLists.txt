@@ -150,6 +150,11 @@ set(GTK_REQUIRED "3.24")
 set(GDK_PIXBUF_REQUIRED "2.40")
 set(FREETYPE_VERSION "2.11")
 set(FONTCONFIG_VERSION "2.13")
+set(LIBCURL_VERSION "7.81")
+set(NSS3_VERSION "3.68")
+set(GPGME_VERSION "1.19")
+set(LCMS2_REQUIRED_VERSION "2.12")
+set(TIFF_VERSION "4.3")
 
 find_package(Freetype ${FREETYPE_VERSION} REQUIRED)
 if(WITH_FONTCONFIGURATION_FONTCONFIG)
@@ -167,9 +172,9 @@ macro(find_soft_mandatory_package _enable_option _package_name _package_version)
   endif()
 endmacro()
 
-find_soft_mandatory_package(ENABLE_NSS3 NSS3 3.68)
-find_soft_mandatory_package(ENABLE_GPGME Gpgmepp 1.19)
-find_soft_mandatory_package(ENABLE_LIBTIFF TIFF 4.3)
+find_soft_mandatory_package(ENABLE_NSS3 NSS3 ${NSS3_VERSION})
+find_soft_mandatory_package(ENABLE_GPGME Gpgmepp ${GPGME_VERSION})
+find_soft_mandatory_package(ENABLE_LIBTIFF TIFF ${TIFF_VERSION})
 
 macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
@@ -326,10 +331,10 @@ else()
 endif()
 set(ENABLE_LIBOPENJPEG "${WITH_OPENJPEG}")
 
-find_soft_mandatory_package(ENABLE_LCMS LCMS2 2.12)
+find_soft_mandatory_package(ENABLE_LCMS LCMS2 ${LCMS2_REQUIRED_VERSION})
 set(USE_CMS ${ENABLE_LCMS})
 
-find_soft_mandatory_package(ENABLE_LIBCURL CURL 7.81)
+find_soft_mandatory_package(ENABLE_LIBCURL CURL ${LIBCURL_VERSION})
 set(POPPLER_HAS_CURL_SUPPORT ${ENABLE_LIBCURL})
 
 if(MINGW)
@@ -508,12 +513,16 @@ set(poppler_SRCS
   splash/SplashXPathScanner.cc
 )
 set(poppler_LIBS Freetype::Freetype ZLIB::ZLIB)
+set(PC_REQUIRES_PRIVATE "freetype2 >= ${FREETYPE_VERSION} zlib")
+set(PC_LIBS_PRIVATE "")
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Fontconfig::Fontconfig)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} fontconfig >= ${FONTCONFIG_VERSION}")
 endif()
 
 if(Androidlib) 
   set(poppler_LIBS ${poppler_LIBS} ${Androidlib})
+  set(PC_LIBS_PRIVATE "${PC_LIBS_PRIVATE} ${Androidlib}")
 endif()
 
 if(ENABLE_LIBJPEG)
@@ -521,6 +530,7 @@ if(ENABLE_LIBJPEG)
     poppler/DCTStream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} JPEG::JPEG)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libjpeg")
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS)
   set(poppler_SRCS ${poppler_SRCS}
@@ -533,24 +543,28 @@ if(ENABLE_LIBCURL)
     poppler/CurlPDFDocBuilder.cc
   )
   set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libcurl >= ${LIBCURL_VERSION}")
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/NSSCryptoSignBackend.cc
   )
   set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} nss >= ${NSS3_VERSION}")
 endif()
 if (ENABLE_GPGME)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/GPGMECryptoSignBackend.cc
   )
   set(poppler_LIBS ${poppler_LIBS} Gpgmepp)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} gpgmepp >= ${GPGME_VERSION}")
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPEG2000Stream.cc
   )
   set(poppler_LIBS ${poppler_LIBS} openjp2)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libopenjp2")
 else ()
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPXStream.cc
@@ -558,18 +572,22 @@ else ()
 endif()
 if(USE_CMS)
   set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} lcms2 >= ${LCMS2_REQUIRED_VERSION}")
 endif()
 if(WIN32)
   # use clean APIs
   add_definitions(-DWIN32_LEAN_AND_MEAN)
   # gdi32 is needed under win32
   set(poppler_LIBS ${poppler_LIBS} gdi32)
+  set(PC_LIBS_PRIVATE "-lgdi32")
 endif()
 if(PNG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} PNG::PNG)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libpng")
 endif()
 if(ENABLE_LIBTIFF)
   set(poppler_LIBS ${poppler_LIBS} TIFF::TIFF)
+  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} libtiff-4 >= ${TIFF_VERSION}")
 endif()
 if(Boost_FOUND)
   set(poppler_LIBS ${poppler_LIBS} Boost::boost)
@@ -880,10 +898,7 @@ if(ENABLE_CPP)
   add_subdirectory(cpp)
 endif()
 
-# Configure "Requires" field & install .pc files for packagers
-set(PC_REQUIRES "")
-set(PC_REQUIRES_PRIVATE "Requires.private: poppler = ${POPPLER_VERSION}")
-
+# Install .pc files for packagers
 if(PKG_CONFIG_EXECUTABLE)
   poppler_create_install_pkgconfig(poppler.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
   if(ENABLE_QT5)
