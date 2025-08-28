@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -195,7 +195,6 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
 {
     std::optional<std::string> name;
     Ref embFontIDA;
-    GfxFontType typeA;
 
     // get base font name
     Object obj1 = fontDict->lookup("BaseFont");
@@ -223,7 +222,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     }
 
     // get embedded font ID and font type
-    typeA = getFontType(xref, fontDict, &embFontIDA);
+    const GfxFontType typeA = getFontType(xref, fontDict, &embFontIDA);
 
     // create the font object
     if (typeA < fontCIDType0) {
@@ -950,14 +949,12 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     int len;
     char *charName;
     bool missing, hex;
-    bool numeric;
     Unicode toUnicode[256];
     Unicode uBuf[8];
-    double mul;
     int firstChar, lastChar;
     unsigned short w;
     Object obj1;
-    int n, a, b, m;
+    int n, a, b;
 
     // do font name substitution for various aliases of the Base 14 font
     // names
@@ -976,7 +973,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         b = sizeof(base14FontMap) / sizeof(Base14FontMapEntry);
         // invariant: base14FontMap[a].altName <= name2 < base14FontMap[b].altName
         while (b - a > 1) {
-            m = (a + b) / 2;
+            const int m = (a + b) / 2;
             if (name2.compare(base14FontMap[m].altName) >= 0) {
                 a = m;
             } else {
@@ -1254,7 +1251,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
         }
     }
 
-    numeric = testForNumericNames(fontDict, hex);
+    const bool numeric = testForNumericNames(fontDict, hex);
 
     // construct the char code -> Unicode mapping object
     ctu = CharCodeToUnicode::make8BitToUnicode(toUnicode);
@@ -1318,7 +1315,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     if (lastChar < 0 || lastChar > 255) {
         lastChar = 255;
     }
-    mul = (type == fontType3) ? fontMat[0] : 0.001;
+    const double mul = (type == fontType3) ? fontMat[0] : 0.001;
     obj1 = fontDict->lookup("Widths");
     if (obj1.isArray()) {
         flags |= fontFixedWidth;
@@ -1534,12 +1531,10 @@ const CharCodeToUnicode *Gfx8BitFont::getToUnicode() const
 std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
 {
     std::vector<int> map;
-    int cmapPlatform, cmapEncoding;
     int unicodeCmap, macRomanCmap, msSymbolCmap, cmap;
     bool useMacRoman, useUnicode;
     char *charName;
     Unicode u;
-    int code, i, n;
 
     map.resize(256, 0);
 
@@ -1569,9 +1564,9 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
     // 3. If none of these rules apply, use the first cmap and hope for
     //    the best (this shouldn't happen).
     unicodeCmap = macRomanCmap = msSymbolCmap = -1;
-    for (i = 0; i < ff->getNumCmaps(); ++i) {
-        cmapPlatform = ff->getCmapPlatform(i);
-        cmapEncoding = ff->getCmapEncoding(i);
+    for (int i = 0; i < ff->getNumCmaps(); ++i) {
+        const int cmapPlatform = ff->getCmapPlatform(i);
+        const int cmapEncoding = ff->getCmapEncoding(i);
         if ((cmapPlatform == 3 && cmapEncoding == 1) || cmapPlatform == 0) {
             unicodeCmap = i;
         } else if (cmapPlatform == 1 && cmapEncoding == 0) {
@@ -1609,9 +1604,10 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
     // reverse map the char names through MacRomanEncoding, then map the
     // char codes through the cmap
     if (useMacRoman) {
-        for (i = 0; i < 256; ++i) {
+        for (int i = 0; i < 256; ++i) {
             if ((charName = enc[i])) {
-                if ((code = globalParams->getMacRomanCharCode(charName))) {
+                const CharCode code = globalParams->getMacRomanCharCode(charName);
+                if (code > 0) {
                     map[i] = ff->mapCodeToGID(cmap, code);
                 }
             } else {
@@ -1622,11 +1618,11 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
         // map Unicode through the cmap
     } else if (useUnicode) {
         const Unicode *uAux;
-        for (i = 0; i < 256; ++i) {
+        for (int i = 0; i < 256; ++i) {
             if (((charName = enc[i]) && (u = globalParams->mapNameToUnicodeAll(charName)))) {
                 map[i] = ff->mapCodeToGID(cmap, u);
             } else {
-                n = ctu->mapToUnicode((CharCode)i, &uAux);
+                const int n = ctu->mapToUnicode((CharCode)i, &uAux);
                 if (n > 0) {
                     map[i] = ff->mapCodeToGID(cmap, uAux[0]);
                 } else {
@@ -1638,7 +1634,7 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
         // map the char codes through the cmap, possibly with an offset of
         // 0xf000
     } else {
-        for (i = 0; i < 256; ++i) {
+        for (int i = 0; i < 256; ++i) {
             if (!(map[i] = ff->mapCodeToGID(cmap, i))) {
                 map[i] = ff->mapCodeToGID(cmap, 0xf000 + i);
             }
@@ -1646,7 +1642,7 @@ std::vector<int> Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff)
     }
 
     // try the TrueType 'post' table to handle any unmapped characters
-    for (i = 0; i < 256; ++i) {
+    for (int i = 0; i < 256; ++i) {
         if (map[i] <= 0 && (charName = enc[i])) {
             map[i] = ff->mapNameToGID(charName);
         }
@@ -1913,7 +1909,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
     CID cid;
     CharCode dummy;
     double w, h, vx, vy;
-    int n, a, b, m;
+    int n, a, b;
 
     if (!cMap) {
         *code = 0;
@@ -1954,7 +1950,7 @@ int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code, Unicode cons
             b = widths.excepsV.size();
             // invariant: widths.excepsV[a].first <= cid < widths.excepsV[b].first
             while (b - a > 1) {
-                m = (a + b) / 2;
+                const int m = (a + b) / 2;
                 if (widths.excepsV[m].last <= cid) {
                     a = m;
                 } else {
@@ -1996,7 +1992,7 @@ int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool 
 {
     unsigned short gid = ff->mapCodeToGID(cmapi, unicode);
     if (wmode) {
-        unsigned short vgid = ff->mapToVertGID(gid);
+        const unsigned short vgid = ff->mapToVertGID(gid);
         if (vgid != 0) {
             gid = vgid;
         }
@@ -2014,7 +2010,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     static const char *adobe_japan1_cmaps[] = { "UniJIS-UTF32-V", "UniJIS-UCS2-V", "UniJIS-UTF32-H", "UniJIS-UCS2-H", nullptr };
     static const char *adobe_japan2_cmaps[] = { "UniHojo-UTF32-V", "UniHojo-UCS2-V", "UniHojo-UTF32-H", "UniHojo-UCS2-H", nullptr };
     static const char *adobe_korea1_cmaps[] = { "UniKS-UTF32-V", "UniKS-UCS2-V", "UniKS-UTF32-H", "UniKS-UCS2-H", nullptr };
-    static struct CMapListEntry
+    static const struct CMapListEntry
     {
         const char *collection;
         const char *scriptTag;
@@ -2061,12 +2057,8 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     Unicode *vumap = nullptr;
     Unicode *tumap = nullptr;
     int i;
-    unsigned long code;
-    int wmode;
-    const char **cmapName;
-    CMapListEntry *lp;
+    const CMapListEntry *lp;
     int cmap;
-    int cmapPlatform, cmapEncoding;
     Ref embID;
 
     if (!ctu || !getCollection()) {
@@ -2088,8 +2080,8 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     /* we use only unicode cmap */
     cmap = -1;
     for (i = 0; i < ff->getNumCmaps(); ++i) {
-        cmapPlatform = ff->getCmapPlatform(i);
-        cmapEncoding = ff->getCmapEncoding(i);
+        const int cmapPlatform = ff->getCmapPlatform(i);
+        const int cmapEncoding = ff->getCmapEncoding(i);
         if (cmapPlatform == 3 && cmapEncoding == 10) {
             /* UCS-4 */
             cmap = i;
@@ -2106,7 +2098,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         return {};
     }
 
-    wmode = getWMode();
+    const int wmode = getWMode();
     for (lp = CMapList; lp->collection != nullptr; lp++) {
         if (strcmp(lp->collection, getCollection()->c_str()) == 0) {
             break;
@@ -2136,7 +2128,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         }
         vumap = new Unicode[n];
         memset(vumap, 0, sizeof(Unicode) * n);
-        for (cmapName = lp->CMaps; *cmapName != nullptr; cmapName++) {
+        for (const char **cmapName = lp->CMaps; *cmapName != nullptr; cmapName++) {
             const GooString cname(*cmapName);
 
             std::shared_ptr<CMap> cnameCMap;
@@ -2174,7 +2166,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     // map CID -> Unicode -> GID
     std::vector<int> codeToGID;
     codeToGID.resize(n, 0);
-    for (code = 0; code < n; ++code) {
+    for (unsigned long code = 0; code < n; ++code) {
         Unicode unicode;
         unsigned long gid;
 
@@ -2230,7 +2222,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
 double GfxCIDFont::getWidth(CID cid) const
 {
     double w;
-    int a, b, m;
+    int a, b;
 
     w = widths.defWidth;
     if (!widths.exceps.empty() && cid >= widths.exceps[0].first) {
@@ -2238,7 +2230,7 @@ double GfxCIDFont::getWidth(CID cid) const
         b = widths.exceps.size();
         // invariant: widths.exceps[a].first <= cid < widths.exceps[b].first
         while (b - a > 1) {
-            m = (a + b) / 2;
+            const int m = (a + b) / 2;
             if (widths.exceps[m].first <= cid) {
                 a = m;
             } else {
@@ -2257,7 +2249,7 @@ double GfxCIDFont::getWidth(char *s, int len) const
     int nUsed;
     CharCode c;
 
-    CID cid = cMap->getCID(s, len, &c, &nUsed);
+    const CID cid = cMap->getCID(s, len, &c, &nUsed);
     return getWidth(cid);
 }
 
