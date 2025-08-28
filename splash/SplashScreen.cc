@@ -33,10 +33,7 @@
 static const SplashScreenParams defaultParams = {
     splashScreenDispersed, // type
     2, // size
-    2, // dotRadius
-    1.0, // gamma
-    0.0, // blackThreshold
-    1.0 // whiteThreshold
+    2 // dotRadius
 };
 
 //------------------------------------------------------------------------
@@ -75,9 +72,6 @@ SplashScreen::SplashScreen(const SplashScreenParams *params)
 
 void SplashScreen::createMatrix()
 {
-    unsigned char u;
-    int black, white, i;
-
     const SplashScreenParams *params = screenParams;
 
     // size must be a power of 2, and at least 2
@@ -110,25 +104,11 @@ void SplashScreen::createMatrix()
 
     sizeM1 = size - 1;
 
-    // do gamma correction
-    black = splashRound((SplashCoord)255.0 * params->blackThreshold);
-    if (black < 1) {
-        black = 1;
-    }
-    int whiteAux = splashRound((SplashCoord)255.0 * params->whiteThreshold);
-    if (whiteAux > 255) {
-        white = 255;
-    } else {
-        white = whiteAux;
-    }
-    for (i = 0; i < size * size; ++i) {
-        u = splashRound((SplashCoord)255.0 * splashPow((SplashCoord)mat[i] / 255.0, params->gamma));
-        if (u < black) {
-            u = (unsigned char)black;
-        } else if (u >= white) {
-            u = (unsigned char)white;
+    static const unsigned char black = 1;
+    for (int i = 0; i < size * size; ++i) {
+        if (mat[i] < black) {
+            mat[i] = black;
         }
-        mat[i] = u;
     }
 }
 
