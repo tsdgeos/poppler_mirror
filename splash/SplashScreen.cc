@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2016, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2016, 2018, 2020, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -71,8 +71,6 @@ SplashScreen::SplashScreen(const SplashScreenParams *params)
     screenParams = params;
     mat = nullptr;
     size = 0;
-    maxVal = 0;
-    minVal = 0;
 }
 
 void SplashScreen::createMatrix()
@@ -112,9 +110,7 @@ void SplashScreen::createMatrix()
 
     sizeM1 = size - 1;
 
-    // do gamma correction and compute minVal/maxVal
-    minVal = 255;
-    maxVal = 0;
+    // do gamma correction
     black = splashRound((SplashCoord)255.0 * params->blackThreshold);
     if (black < 1) {
         black = 1;
@@ -133,11 +129,6 @@ void SplashScreen::createMatrix()
             u = (unsigned char)white;
         }
         mat[i] = u;
-        if (u < minVal) {
-            minVal = u;
-        } else if (u > maxVal) {
-            maxVal = u;
-        }
     }
 }
 
@@ -376,8 +367,6 @@ SplashScreen::SplashScreen(const SplashScreen *screen)
     if (likely(mat != nullptr)) {
         memcpy(mat, screen->mat, size * size * sizeof(unsigned char));
     }
-    minVal = screen->minVal;
-    maxVal = screen->maxVal;
 }
 
 SplashScreen::~SplashScreen()
