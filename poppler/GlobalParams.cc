@@ -707,7 +707,7 @@ static const char *getFontLang(const GfxFont &font)
     return "xx";
 }
 
-static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Name)
+static FcPattern *buildFcPattern(const GfxFont &font, const GooString *base14Name)
 {
     int weight = -1, slant = -1, width = -1, spacing = -1;
     FcPattern *p;
@@ -715,7 +715,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     // this is all heuristics will be overwritten if font had proper info
     std::string fontName;
     if (base14Name == nullptr) {
-        fontName = font->getNameWithoutSubsetTag();
+        fontName = font.getNameWithoutSubsetTag();
     } else {
         fontName = base14Name->toStr();
     }
@@ -762,23 +762,23 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     }
 
     // use font flags
-    if (font->isFixedWidth()) {
+    if (font.isFixedWidth()) {
         spacing = FC_MONO;
     }
-    if (font->isBold()) {
+    if (font.isBold()) {
         weight = FC_WEIGHT_BOLD;
     }
-    if (font->isItalic()) {
+    if (font.isItalic()) {
         slant = FC_SLANT_ITALIC;
     }
 
     // if the FontDescriptor specified a family name use it
-    if (font->getFamily()) {
-        family = font->getFamily()->toStr();
+    if (font.getFamily()) {
+        family = font.getFamily()->toStr();
     }
 
     // if the FontDescriptor specified a weight use it
-    switch (font->getWeight()) {
+    switch (font.getWeight()) {
     case GfxFont::W100:
         weight = FC_WEIGHT_EXTRALIGHT;
         break;
@@ -811,7 +811,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
     }
 
     // if the FontDescriptor specified a width use it
-    switch (font->getStretch()) {
+    switch (font.getStretch()) {
     case GfxFont::UltraCondensed:
         width = FC_WIDTH_ULTRACONDENSED;
         break;
@@ -843,7 +843,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
         break;
     }
 
-    const char *lang = getFontLang(*font);
+    const char *lang = getFontLang(font);
 
     p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family.c_str(), FC_LANG, FcTypeString, lang, NULL);
     if (slant != -1) {
@@ -952,7 +952,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
         FcFontSet *set;
         int i;
         FcLangSet *lb = nullptr;
-        p = buildFcPattern(font, base14Name);
+        p = buildFcPattern(*font, base14Name);
 
         if (!p) {
             goto fin;
@@ -1124,7 +1124,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
 
 UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
 {
-    FcPattern *pattern = buildFcPattern(&fontToEmulate, nullptr);
+    FcPattern *pattern = buildFcPattern(fontToEmulate, nullptr);
 
     FcConfigSubstitute(nullptr, pattern, FcMatchPattern);
     FcDefaultSubstitute(pattern);
