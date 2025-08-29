@@ -1757,7 +1757,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             ctu = CharCodeToUnicode::makeIdentityMapping();
         } else {
             // look for a user-supplied .cidToUnicode file
-            if (!(ctu = globalParams->getCIDToUnicode(collection.get()))) {
+            if (!(ctu = globalParams->getCIDToUnicode(collection->toStr()))) {
                 // I'm not completely sure that this is the best thing to do
                 // but it seems to produce better results when the .cidToUnicode
                 // files from the poppler-data package are missing. At least

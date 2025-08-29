@@ -1450,15 +1450,15 @@ bool GlobalParams::getErrQuiet()
     return errQuiet;
 }
 
-std::shared_ptr<CharCodeToUnicode> GlobalParams::getCIDToUnicode(const GooString *collection)
+std::shared_ptr<CharCodeToUnicode> GlobalParams::getCIDToUnicode(const std::string &collection)
 {
     std::shared_ptr<CharCodeToUnicode> ctu;
 
     globalParamsLocker();
-    if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection->toStr()))) {
-        const auto cidToUnicode = cidToUnicodes.find(collection->toStr());
+    if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection))) {
+        const auto cidToUnicode = cidToUnicodes.find(collection);
         if (cidToUnicode != cidToUnicodes.end()) {
-            if ((ctu = CharCodeToUnicode::parseCIDToUnicode(cidToUnicode->second.c_str(), collection->toStr()))) {
+            if ((ctu = CharCodeToUnicode::parseCIDToUnicode(cidToUnicode->second.c_str(), collection))) {
                 cidToUnicodeCache->add(ctu);
             }
         }

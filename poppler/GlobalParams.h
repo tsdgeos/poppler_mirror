@@ -148,7 +148,7 @@ public:
     bool getProfileCommands();
     bool getErrQuiet();
 
-    std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const GooString *collection);
+    std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const std::string &collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
     std::shared_ptr<CMap> getCMap(const GooString &collection, const GooString &cMapName);
     const UnicodeMap *getTextEncoding();
