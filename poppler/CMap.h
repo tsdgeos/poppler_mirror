@@ -119,7 +119,7 @@ public:
     // Stream is a stream containing the CMap, can be NULL and
     // this means the CMap will be searched in the CMap files
     // Returns NULL on failure.
-    std::shared_ptr<CMap> getCMap(const GooString &collection, const GooString &cMapName);
+    std::shared_ptr<CMap> getCMap(const std::string &collection, const std::string &cMapName);
 
 private:
     std::array<std::shared_ptr<CMap>, cMapCacheSize> cache;

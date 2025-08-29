@@ -220,7 +220,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     // GlobalParams::getCMap() in order to acqure the lock need to use
     // GlobalParams::getCMap
     if (cache) {
-        subCMap = cache->getCMap(*collection, useNameStr);
+        subCMap = cache->getCMap(collection->toStr(), useNameStr.toStr());
     } else {
         subCMap = globalParams->getCMap(*collection, useNameStr);
     }
@@ -399,15 +399,15 @@ void CMap::setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int
 
 CMapCache::CMapCache() = default;
 
-std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooString &cMapName)
+std::shared_ptr<CMap> CMapCache::getCMap(const std::string &collection, const std::string &cMapName)
 {
     int i, j;
 
-    if (cache[0] && cache[0]->match(collection.toStr(), cMapName.toStr())) {
+    if (cache[0] && cache[0]->match(collection, cMapName)) {
         return cache[0];
     }
     for (i = 1; i < cMapCacheSize; ++i) {
-        if (cache[i] && cache[i]->match(collection.toStr(), cMapName.toStr())) {
+        if (cache[i] && cache[i]->match(collection, cMapName)) {
             std::shared_ptr<CMap> cmap = cache[i];
             for (j = i; j >= 1; --j) {
                 cache[j] = cache[j - 1];
@@ -416,7 +416,7 @@ std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooS
             return cmap;
         }
     }
-    std::shared_ptr<CMap> cmap = CMap::parse(this, collection.toStr(), cMapName.toStr());
+    std::shared_ptr<CMap> cmap = CMap::parse(this, collection, cMapName);
     if (cmap) {
         for (j = cMapCacheSize - 1; j >= 1; --j) {
             cache[j] = cache[j - 1];

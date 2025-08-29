@@ -1482,7 +1482,7 @@ const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName)
 std::shared_ptr<CMap> GlobalParams::getCMap(const GooString &collection, const GooString &cMapName)
 {
     cMapCacheLocker();
-    return cMapCache->getCMap(collection, cMapName);
+    return cMapCache->getCMap(collection.toStr(), cMapName.toStr());
 }
 
 const UnicodeMap *GlobalParams::getTextEncoding()
