@@ -86,25 +86,25 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, const GooString &cMapNameA)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, const std::string &cMapNameA)
 {
     FILE *f;
 
-    if (!(f = globalParams->findCMapFile(collectionA.toStr(), cMapNameA.toStr()))) {
+    if (!(f = globalParams->findCMapFile(collectionA, cMapNameA))) {
 
         // Check for an identity CMap.
-        if (!cMapNameA.cmp("Identity") || !cMapNameA.cmp("Identity-H")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 0));
+        if (cMapNameA == "Identity" || cMapNameA == "Identity-H") {
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 0));
         }
-        if (!cMapNameA.cmp("Identity-V")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 1));
+        if (cMapNameA == "Identity-V") {
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 1));
         }
 
-        error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection", &cMapNameA, &collectionA);
+        error(errSyntaxError, -1, "Couldn't find '{0:s}' CMap file for '{1:s}' collection", cMapNameA.c_str(), collectionA.c_str());
         return {};
     }
 
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy()));
+    auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA)));
     cMap->parse2(cache, &getCharFromFile, f);
 
     fclose(f);
@@ -416,7 +416,7 @@ std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooS
             return cmap;
         }
     }
-    std::shared_ptr<CMap> cmap = CMap::parse(this, collection, cMapName);
+    std::shared_ptr<CMap> cmap = CMap::parse(this, collection.toStr(), cMapName.toStr());
     if (cmap) {
         for (j = cMapCacheSize - 1; j >= 1; --j) {
             cache[j] = cache[j - 1];

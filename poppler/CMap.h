@@ -50,7 +50,7 @@ public:
 
     // Create the CMap specified by <collection> and <cMapName>.  Sets
     // the initial reference count to 1.  Returns NULL on failure.
-    static std::shared_ptr<CMap> parse(CMapCache *cache, const GooString &collectionA, const GooString &cMapNameA);
+    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, const std::string &cMapNameA);
 
     // Parse a CMap from <str>.  Sets the initial reference count to 1.
     // Returns NULL on failure.
