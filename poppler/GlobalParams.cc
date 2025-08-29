@@ -919,12 +919,12 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 // not needed for fontconfig
 void GlobalParams::setupBaseFonts(const char *) { }
 
-std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont &font, GooString *substituteFontName)
 {
     SysFontType type;
     int fontNum;
 
-    return findSystemFontFile(*font, &type, &fontNum, substituteFontName, base14Name);
+    return findSystemFontFile(font, &type, &fontNum, substituteFontName, base14Name);
 }
 
 std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
@@ -1166,7 +1166,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 #elif defined(WITH_FONTCONFIGURATION_ANDROID)
 // Uses the font file mapping created by GlobalParams::setupBaseFonts
 // to return the path to a base-14 font file
-std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont & /*font*/, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1313,7 +1313,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 #elif defined(WITH_FONTCONFIGURATION_WIN32)
 #    include "GlobalParamsWin.cc"
 
-std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont & /*font*/, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
@@ -1332,7 +1332,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     return {};
 }
 
-std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString * /*substituteFontName*/)
+std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont & /*font*/, GooString * /*substituteFontName*/)
 {
     return findFontFile(base14Name->toStr());
 }
