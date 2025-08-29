@@ -458,9 +458,9 @@ CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, std
     isIdentity = false;
 }
 
-bool CharCodeToUnicode::match(const GooString *tagA)
+bool CharCodeToUnicode::match(const std::string &tagA)
 {
-    return tag && tag == tagA->toStr();
+    return tag && tag == tagA;
 }
 
 void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len)
@@ -573,7 +573,7 @@ CharCodeToUnicodeCache::~CharCodeToUnicodeCache() = default;
 std::shared_ptr<CharCodeToUnicode> CharCodeToUnicodeCache::getCharCodeToUnicode(const GooString *tag)
 {
     for (auto it = cache.begin(); it != cache.end(); ++it) {
-        if ((*it)->match(tag)) {
+        if ((*it)->match(tag->toStr())) {
             if (it != cache.begin()) {
                 auto item = std::move(*it);
                 cache.erase(it);
