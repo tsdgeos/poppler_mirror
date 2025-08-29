@@ -124,7 +124,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::makeIdentityMapping()
     return ctu;
 }
 
-std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCIDToUnicode(const char *fileName, const GooString *collection)
+std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCIDToUnicode(const char *fileName, const std::string &collection)
 {
     FILE *f;
     CharCode size;
@@ -157,7 +157,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCIDToUnicode(const ch
     fclose(f);
     mapA.resize(mapLenA);
 
-    return std::make_unique<CharCodeToUnicode>(collection->toStr(), std::move(mapA), std::vector<CharCodeToUnicodeString> {});
+    return std::make_unique<CharCodeToUnicode>(collection, std::move(mapA), std::vector<CharCodeToUnicodeString> {});
 }
 
 std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode)
