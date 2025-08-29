@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2018-2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018-2020, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -68,7 +68,7 @@ public:
 
     // Return true if this CMap matches the specified <collectionA>, and
     // <cMapNameA>.
-    bool match(const GooString &collectionA, const GooString &cMapNameA);
+    bool match(const std::string &collectionA, const std::string &cMapNameA);
 
     // Return the CID corresponding to the character code starting at
     // <s>, which contains <len> bytes.  Sets *<c> to the char code, and

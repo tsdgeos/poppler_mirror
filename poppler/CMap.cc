@@ -324,9 +324,9 @@ void CMap::freeCMapVector(CMapVectorEntry *vec)
     gfree(vec);
 }
 
-bool CMap::match(const GooString &collectionA, const GooString &cMapNameA)
+bool CMap::match(const std::string &collectionA, const std::string &cMapNameA)
 {
-    return !collection->cmp(collectionA.toStr()) && !cMapName->cmp(cMapNameA.toStr());
+    return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
 }
 
 CID CMap::getCID(const char *s, int len, CharCode *c, int *nUsed)
@@ -403,11 +403,11 @@ std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooS
 {
     int i, j;
 
-    if (cache[0] && cache[0]->match(collection, cMapName)) {
+    if (cache[0] && cache[0]->match(collection.toStr(), cMapName.toStr())) {
         return cache[0];
     }
     for (i = 1; i < cMapCacheSize; ++i) {
-        if (cache[i] && cache[i]->match(collection, cMapName)) {
+        if (cache[i] && cache[i]->match(collection.toStr(), cMapName.toStr())) {
             std::shared_ptr<CMap> cmap = cache[i];
             for (j = i; j >= 1; --j) {
                 cache[j] = cache[j - 1];
