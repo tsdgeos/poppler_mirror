@@ -701,7 +701,7 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
     }
 
     //----- system font
-    if ((path = globalParams->findSystemFontFile(this, &sysFontType, &fontNum, substituteFontName))) {
+    if ((path = globalParams->findSystemFontFile(*this, &sysFontType, &fontNum, substituteFontName))) {
         if (isCIDFont()) {
             if (sysFontType == sysFontTTF || sysFontType == sysFontTTC) {
                 GfxFontLoc fontLoc;
