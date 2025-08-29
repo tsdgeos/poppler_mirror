@@ -150,7 +150,7 @@ public:
 
     std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const std::string &collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    std::shared_ptr<CMap> getCMap(const GooString &collection, const GooString &cMapName);
+    std::shared_ptr<CMap> getCMap(const std::string &collection, const std::string &cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();

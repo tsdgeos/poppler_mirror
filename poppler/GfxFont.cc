@@ -2132,7 +2132,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
             const GooString cname(*cmapName);
 
             std::shared_ptr<CMap> cnameCMap;
-            if ((cnameCMap = globalParams->getCMap(*getCollection(), cname)) != nullptr) {
+            if ((cnameCMap = globalParams->getCMap(getCollection()->toStr(), cname.toStr())) != nullptr) {
                 if (cnameCMap->getWMode()) {
                     cnameCMap->setReverseMap(vumap, n, 1);
                 } else {

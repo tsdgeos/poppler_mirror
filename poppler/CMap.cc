@@ -72,7 +72,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
 
     if (obj->isName()) {
         const GooString cMapNameA(obj->getNameString());
-        if (!(cMap = globalParams->getCMap(collectionA, cMapNameA))) {
+        if (!(cMap = globalParams->getCMap(collectionA.toStr(), cMapNameA.toStr()))) {
             error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:t}'", &cMapNameA, &collectionA);
         }
     } else if (obj->isStream()) {
@@ -222,7 +222,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     if (cache) {
         subCMap = cache->getCMap(collection->toStr(), useNameStr.toStr());
     } else {
-        subCMap = globalParams->getCMap(*collection, useNameStr);
+        subCMap = globalParams->getCMap(collection->toStr(), useNameStr.toStr());
     }
     if (!subCMap) {
         return;
