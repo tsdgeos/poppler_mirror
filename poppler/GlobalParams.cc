@@ -608,12 +608,12 @@ FILE *GlobalParams::getUnicodeMapFile(const std::string &encodingName)
     return file;
 }
 
-FILE *GlobalParams::findCMapFile(const GooString &collection, const GooString &cMapName)
+FILE *GlobalParams::findCMapFile(const std::string &collection, const std::string &cMapName)
 {
     FILE *file = nullptr;
 
     globalParamsLocker();
-    const auto collectionCMapDirs = cMapDirs.equal_range(collection.toStr());
+    const auto collectionCMapDirs = cMapDirs.equal_range(collection);
     for (auto cMapDir = collectionCMapDirs.first; cMapDir != collectionCMapDirs.second; ++cMapDir) {
         auto *const path = new GooString(cMapDir->second);
         appendToPath(path, cMapName.c_str());

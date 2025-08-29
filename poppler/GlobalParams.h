@@ -136,7 +136,7 @@ public:
 
     UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
     FILE *getUnicodeMapFile(const std::string &encodingName);
-    FILE *findCMapFile(const GooString &collection, const GooString &cMapName);
+    FILE *findCMapFile(const std::string &collection, const std::string &cMapName);
     FILE *findToUnicodeFile(const std::string &name);
     std::optional<std::string> findFontFile(const std::string &fontName);
     std::optional<std::string> findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
