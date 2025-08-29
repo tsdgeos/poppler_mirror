@@ -662,39 +662,49 @@ static bool findModifier(const std::string &name, const size_t modStart, const c
     }
 }
 
-static const char *getFontLang(const GfxFont *font)
+static const char *getFontLang(const GfxFont &font)
 {
-    const char *lang;
+    static constexpr std::string_view adobeGB1 = "Adobe-GB1";
+    static constexpr std::string_view adobeCNS1 = "Adobe-CNS1";
+    static constexpr std::string_view adobeJapan1 = "Adobe-Japan1";
+    static constexpr std::string_view adobeJapan2 = "Adobe-Japan2";
+    static constexpr std::string_view adobeKorea1 = "Adobe-Korea1";
+    static constexpr std::string_view adobeUCS = "Adobe-UCS";
+    static constexpr std::string_view adobeIdentity = "Adobe-Identity";
 
     // find the language we want the font to support
-    if (font->isCIDFont()) {
-        const GooString *collection = ((GfxCIDFont *)font)->getCollection();
+    if (font.isCIDFont()) {
+        const GooString *const collection = static_cast<const GfxCIDFont *>(&font)->getCollection();
         if (collection) {
-            if (strcmp(collection->c_str(), "Adobe-GB1") == 0) {
-                lang = "zh-cn"; // Simplified Chinese
-            } else if (strcmp(collection->c_str(), "Adobe-CNS1") == 0) {
-                lang = "zh-tw"; // Traditional Chinese
-            } else if (strcmp(collection->c_str(), "Adobe-Japan1") == 0) {
-                lang = "ja"; // Japanese
-            } else if (strcmp(collection->c_str(), "Adobe-Japan2") == 0) {
-                lang = "ja"; // Japanese
-            } else if (strcmp(collection->c_str(), "Adobe-Korea1") == 0) {
-                lang = "ko"; // Korean
-            } else if (strcmp(collection->c_str(), "Adobe-UCS") == 0) {
-                lang = "xx";
-            } else if (strcmp(collection->c_str(), "Adobe-Identity") == 0) {
-                lang = "xx";
-            } else {
-                error(errUnimplemented, -1, "Unknown CID font collection: {0:t}. If this is expected to be a valid PDF document, please report to poppler bugtracker.", collection);
-                lang = "xx";
+            const std::string &collectionStr = collection->toStr();
+
+            if (collectionStr == adobeGB1) {
+                return "zh-cn"; // Simplified Chinese
             }
-        } else {
-            lang = "xx";
+            if (collectionStr == adobeCNS1) {
+                return "zh-tw"; // Traditional Chinese
+            }
+            if (collectionStr == adobeJapan1) {
+                return "ja"; // Japanese
+            }
+            if (collectionStr == adobeJapan2) {
+                return "ja"; // Japanese
+            }
+            if (collectionStr == adobeKorea1) {
+                return "ko"; // Korean
+            }
+            if (collectionStr == adobeUCS) {
+                return "xx";
+            }
+            if (collectionStr == adobeIdentity) {
+                return "xx";
+            }
+
+            error(errUnimplemented, -1, "Unknown CID font collection: {0:t}. If this is expected to be a valid PDF document, please report to poppler bugtracker.", collection);
         }
-    } else {
-        lang = "xx";
     }
-    return lang;
+
+    return "xx";
 }
 
 static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Name)
@@ -833,7 +843,7 @@ static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Nam
         break;
     }
 
-    const char *lang = getFontLang(font);
+    const char *lang = getFontLang(*font);
 
     p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, family.c_str(), FC_LANG, FcTypeString, lang, NULL);
     if (slant != -1) {
@@ -955,7 +965,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont *font,
         }
 
         // find the language we want the font to support
-        const char *lang = getFontLang(font);
+        const char *lang = getFontLang(*font);
         if (strcmp(lang, "xx") != 0) {
             lb = FcLangSetCreate();
             FcLangSetAdd(lb, (FcChar8 *)lang);
