@@ -627,14 +627,14 @@ FILE *GlobalParams::findCMapFile(const GooString &collection, const GooString &c
     return file;
 }
 
-FILE *GlobalParams::findToUnicodeFile(const GooString *name)
+FILE *GlobalParams::findToUnicodeFile(const std::string &name)
 {
     GooString *fileName;
     FILE *f;
 
     globalParamsLocker();
     for (const std::string &dir : toUnicodeDirs) {
-        fileName = appendToPath(new GooString(dir), name->c_str());
+        fileName = appendToPath(new GooString(dir), name.c_str());
         f = openFile(fileName->c_str(), "r");
         delete fileName;
         if (f) {

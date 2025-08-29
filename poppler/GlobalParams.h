@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -137,7 +137,7 @@ public:
     UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
     FILE *getUnicodeMapFile(const std::string &encodingName);
     FILE *findCMapFile(const GooString &collection, const GooString &cMapName);
-    FILE *findToUnicodeFile(const GooString *name);
+    FILE *findToUnicodeFile(const std::string &name);
     std::optional<std::string> findFontFile(const std::string &fontName);
     std::optional<std::string> findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
     std::optional<std::string> findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);

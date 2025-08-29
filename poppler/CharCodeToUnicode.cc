@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2012, 2018-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2012, 2018-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
@@ -181,7 +181,7 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const Go
     FILE *f;
 
     auto ctu = std::make_unique<CharCodeToUnicode>(std::optional<std::string>());
-    if ((f = globalParams->findToUnicodeFile(fileName))) {
+    if ((f = globalParams->findToUnicodeFile(fileName->toStr()))) {
         if (!ctu->parseCMap1(&getCharFromFile, static_cast<void *>(f), nBits)) {
             fclose(f);
             return nullptr;
@@ -215,7 +215,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
         if (!strcmp(tok2, "usecmap")) {
             if (tok1[0] == '/') {
                 GooString name { tok1 + 1 };
-                if ((f = globalParams->findToUnicodeFile(&name))) {
+                if ((f = globalParams->findToUnicodeFile(name.toStr()))) {
                     if (parseCMap1(&getCharFromFile, f, nBits)) {
                         ok = true;
                     }
