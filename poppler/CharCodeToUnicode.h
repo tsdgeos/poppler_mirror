@@ -126,7 +126,7 @@ public:
 
     // Get the CharCodeToUnicode object for <tag>.
     // Returns NULL on failure.
-    std::shared_ptr<CharCodeToUnicode> getCharCodeToUnicode(const GooString *tag);
+    std::shared_ptr<CharCodeToUnicode> getCharCodeToUnicode(const std::string &tag);
 
     // Insert <ctu> into the cache, in the most-recently-used position.
     void add(std::shared_ptr<CharCodeToUnicode> ctu);

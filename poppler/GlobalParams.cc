@@ -1455,7 +1455,7 @@ std::shared_ptr<CharCodeToUnicode> GlobalParams::getCIDToUnicode(const GooString
     std::shared_ptr<CharCodeToUnicode> ctu;
 
     globalParamsLocker();
-    if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection))) {
+    if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection->toStr()))) {
         const auto cidToUnicode = cidToUnicodes.find(collection->toStr());
         if (cidToUnicode != cidToUnicodes.end()) {
             if ((ctu = CharCodeToUnicode::parseCIDToUnicode(cidToUnicode->second.c_str(), collection))) {

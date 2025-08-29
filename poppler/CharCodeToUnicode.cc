@@ -570,10 +570,10 @@ CharCodeToUnicodeCache::CharCodeToUnicodeCache(int sizeA) : size(sizeA) { }
 
 CharCodeToUnicodeCache::~CharCodeToUnicodeCache() = default;
 
-std::shared_ptr<CharCodeToUnicode> CharCodeToUnicodeCache::getCharCodeToUnicode(const GooString *tag)
+std::shared_ptr<CharCodeToUnicode> CharCodeToUnicodeCache::getCharCodeToUnicode(const std::string &tag)
 {
     for (auto it = cache.begin(); it != cache.end(); ++it) {
-        if ((*it)->match(tag->toStr())) {
+        if ((*it)->match(tag)) {
             if (it != cache.begin()) {
                 auto item = std::move(*it);
                 cache.erase(it);
