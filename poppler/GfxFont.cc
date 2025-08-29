@@ -49,6 +49,7 @@
 
 #include <config.h>
 
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -2005,52 +2006,52 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
 #define N_UCS_CANDIDATES 2
     /* space characters */
     static const unsigned long spaces[] = { 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x00A0, 0x200B, 0x2060, 0x3000, 0xFEFF, 0 };
-    static const char *adobe_cns1_cmaps[] = { "UniCNS-UTF32-V", "UniCNS-UCS2-V", "UniCNS-UTF32-H", "UniCNS-UCS2-H", nullptr };
-    static const char *adobe_gb1_cmaps[] = { "UniGB-UTF32-V", "UniGB-UCS2-V", "UniGB-UTF32-H", "UniGB-UCS2-H", nullptr };
-    static const char *adobe_japan1_cmaps[] = { "UniJIS-UTF32-V", "UniJIS-UCS2-V", "UniJIS-UTF32-H", "UniJIS-UCS2-H", nullptr };
-    static const char *adobe_japan2_cmaps[] = { "UniHojo-UTF32-V", "UniHojo-UCS2-V", "UniHojo-UTF32-H", "UniHojo-UCS2-H", nullptr };
-    static const char *adobe_korea1_cmaps[] = { "UniKS-UTF32-V", "UniKS-UCS2-V", "UniKS-UTF32-H", "UniKS-UCS2-H", nullptr };
+    static const std::array<std::string, 4> adobe_cns1_cmaps = { "UniCNS-UTF32-V", "UniCNS-UCS2-V", "UniCNS-UTF32-H", "UniCNS-UCS2-H" };
+    static const std::array<std::string, 4> adobe_gb1_cmaps = { "UniGB-UTF32-V", "UniGB-UCS2-V", "UniGB-UTF32-H", "UniGB-UCS2-H" };
+    static const std::array<std::string, 4> adobe_japan1_cmaps = { "UniJIS-UTF32-V", "UniJIS-UCS2-V", "UniJIS-UTF32-H", "UniJIS-UCS2-H" };
+    static const std::array<std::string, 4> adobe_japan2_cmaps = { "UniHojo-UTF32-V", "UniHojo-UCS2-V", "UniHojo-UTF32-H", "UniHojo-UCS2-H" };
+    static const std::array<std::string, 4> adobe_korea1_cmaps = { "UniKS-UTF32-V", "UniKS-UCS2-V", "UniKS-UTF32-H", "UniKS-UCS2-H" };
     static const struct CMapListEntry
     {
         const char *collection;
         const char *scriptTag;
         const char *languageTag;
         const char *toUnicodeMap;
-        const char **CMaps;
+        const std::array<std::string, 4> *CMaps;
     } CMapList[] = { {
                              "Adobe-CNS1",
                              "hani",
                              "CHN ",
                              "Adobe-CNS1-UCS2",
-                             adobe_cns1_cmaps,
+                             &adobe_cns1_cmaps,
                      },
                      {
                              "Adobe-GB1",
                              "hani",
                              "CHN ",
                              "Adobe-GB1-UCS2",
-                             adobe_gb1_cmaps,
+                             &adobe_gb1_cmaps,
                      },
                      {
                              "Adobe-Japan1",
                              "kana",
                              "JAN ",
                              "Adobe-Japan1-UCS2",
-                             adobe_japan1_cmaps,
+                             &adobe_japan1_cmaps,
                      },
                      {
                              "Adobe-Japan2",
                              "kana",
                              "JAN ",
                              "Adobe-Japan2-UCS2",
-                             adobe_japan2_cmaps,
+                             &adobe_japan2_cmaps,
                      },
                      {
                              "Adobe-Korea1",
                              "hang",
                              "KOR ",
                              "Adobe-Korea1-UCS2",
-                             adobe_korea1_cmaps,
+                             &adobe_korea1_cmaps,
                      },
                      { nullptr, nullptr, nullptr, nullptr, nullptr } };
     Unicode *humap = nullptr;
@@ -2128,11 +2129,9 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         }
         vumap = new Unicode[n];
         memset(vumap, 0, sizeof(Unicode) * n);
-        for (const char **cmapName = lp->CMaps; *cmapName != nullptr; cmapName++) {
-            const GooString cname(*cmapName);
-
+        for (const std::string &cname : *lp->CMaps) {
             std::shared_ptr<CMap> cnameCMap;
-            if ((cnameCMap = globalParams->getCMap(getCollection()->toStr(), cname.toStr())) != nullptr) {
+            if ((cnameCMap = globalParams->getCMap(getCollection()->toStr(), cname)) != nullptr) {
                 if (cnameCMap->getWMode()) {
                     cnameCMap->setReverseMap(vumap, n, 1);
                 } else {
