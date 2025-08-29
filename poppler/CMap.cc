@@ -66,14 +66,14 @@ static int getCharFromStream(void *data)
 
 //------------------------------------------------------------------------
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, Object *obj)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj)
 {
     std::shared_ptr<CMap> cMap;
 
     if (obj->isName()) {
         const GooString cMapNameA(obj->getNameString());
-        if (!(cMap = globalParams->getCMap(collectionA.toStr(), cMapNameA.toStr()))) {
-            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:t}'", &cMapNameA, &collectionA);
+        if (!(cMap = globalParams->getCMap(collectionA, cMapNameA.toStr()))) {
+            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:s}'", &cMapNameA, collectionA.c_str());
         }
     } else if (obj->isStream()) {
         if (!(cMap = CMap::parse(nullptr, collectionA, obj->getStream()))) {
@@ -112,9 +112,9 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, Stream *str)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str)
 {
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), nullptr));
+    auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), nullptr));
     Object obj1 = str->getDict()->lookup("UseCMap");
     if (!obj1.isNull()) {
         cMap->useCMap(cache, &obj1);
@@ -235,7 +235,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
 
 void CMap::useCMap(CMapCache *cache, Object *obj)
 {
-    std::shared_ptr<CMap> subCMap = CMap::parse(cache, *collection, obj);
+    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj);
     if (!subCMap) {
         return;
     }
