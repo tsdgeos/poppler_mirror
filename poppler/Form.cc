@@ -643,14 +643,14 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     }
 
     // Incremental save to avoid breaking any existing signatures
-    const GooString fname(saveFilename);
-    if (doc->saveAs(fname, writeForceIncremental) != errNone) {
+    if (doc->saveAs(saveFilename, writeForceIncremental) != errNone) {
         error(errIO, -1, "signDocument: error saving to file \"{0:s}\"", saveFilename.c_str());
         return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::WriteFailed, ERROR_IN_CODE_LOCATION };
     }
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
+    const GooString fname(saveFilename);
     if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd, ownerPassword, userPassword)) {
         error(errIO, -1, "signDocument: unable to get signature object offsets");
         return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };

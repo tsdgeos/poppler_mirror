@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012-2014, 2017, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012-2014, 2017, 2018, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2016 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -120,7 +120,7 @@ static bool extractPages(const char *srcFileName, const char *destFileName)
     for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
         snprintf(pathName, sizeof(pathName) - 1, destFileName, pageNo);
         PDFDoc *pagedoc = new PDFDoc(std::make_unique<GooString>(srcFileName));
-        int errCode = pagedoc->savePageAs(GooString(pathName), pageNo);
+        int errCode = pagedoc->savePageAs(pathName, pageNo);
         if (errCode != errNone) {
             delete doc;
             delete pagedoc;
