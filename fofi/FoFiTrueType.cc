@@ -1648,11 +1648,11 @@ int FoFiTrueType::seekTable(const char *tag) const
     return -1;
 }
 
-unsigned int FoFiTrueType::charToTag(const char *tagName)
+unsigned int FoFiTrueType::charToTag(const std::string &tagName) const
 {
-    int n = strlen(tagName);
+    size_t n = tagName.size();
     unsigned int tag = 0;
-    int i;
+    size_t i;
 
     if (n > 4) {
         n = 4;
@@ -1688,7 +1688,7 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
     int x;
     unsigned int pos;
 
-    const unsigned int scriptTag = charToTag(scriptName.c_str());
+    const unsigned int scriptTag = charToTag(scriptName);
     /* read GSUB Header */
     if ((x = seekTable("GSUB")) < 0) {
         return 0; /* GSUB table not found */
@@ -1726,7 +1726,7 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
     /* use default language system */
     pos = gsubTable + scriptList + scriptTable;
     langSys = 0;
-    const unsigned int langTag = charToTag(languageName.c_str());
+    const unsigned int langTag = charToTag(languageName);
     const unsigned int langCount = getU16BE(pos + 2, &parsedOk);
     for (i = 0; i < langCount && langSys == 0; i++) {
         tag = getU32BE(pos + 4 + i * (4 + 2), &parsedOk);

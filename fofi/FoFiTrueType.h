@@ -173,7 +173,7 @@ private:
     void parse();
     void readPostTable();
     int seekTable(const char *tag) const;
-    unsigned int charToTag(const char *tagName);
+    unsigned int charToTag(const std::string &tagName) const;
     unsigned int doMapToVertGID(unsigned int orgGID);
     unsigned int scanLookupList(unsigned int listIndex, unsigned int orgGID);
     unsigned int scanLookupSubTable(unsigned int subTable, unsigned int orgGID);
