@@ -1270,3 +1270,56 @@ std::unique_ptr<LinkAction> Catalog::getOpenAction() const
     }
     return {};
 }
+
+#ifdef USE_CMS
+
+#    include <lcms2.h>
+
+GfxLCMSProfilePtr Catalog::getDisplayProfile()
+{
+    if (displayProfile) {
+        return displayProfile;
+    }
+
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    if (catDict.isDict()) {
+        Object outputIntents = catDict.dictLookup("OutputIntents");
+        if ((outputIntents.isArray() && outputIntents.arrayGetLength() == 1)) {
+            Object firstElement = outputIntents.arrayGet(0);
+            if (firstElement.isDict()) {
+                Object profile = firstElement.dictLookup("DestOutputProfile");
+                if (profile.isStream()) {
+                    Stream *iccStream = profile.getStream();
+                    const std::vector<unsigned char> profBuf = iccStream->toUnsignedChars(65536, 65536);
+                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
+                    if (!hp) {
+                        error(errSyntaxWarning, -1, "read ICCBased color space profile error");
+                        return nullptr;
+                    }
+
+                    displayProfile = hp;
+                    return displayProfile;
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<GfxXYZ2DisplayTransforms> Catalog::getXYZ2DisplayTransforms()
+{
+    if (!XYZ2DisplayTransforms) {
+
+        GfxLCMSProfilePtr profile = getDisplayProfile();
+        catalogLocker();
+
+        XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(profile);
+    }
+
+    return XYZ2DisplayTransforms;
+}
+
+#endif

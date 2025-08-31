@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017-2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -66,14 +66,14 @@ static int getCharFromStream(void *data)
 
 //------------------------------------------------------------------------
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, Object *obj)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj)
 {
     std::shared_ptr<CMap> cMap;
 
     if (obj->isName()) {
         const GooString cMapNameA(obj->getNameString());
-        if (!(cMap = globalParams->getCMap(collectionA, cMapNameA))) {
-            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:t}'", &cMapNameA, &collectionA);
+        if (!(cMap = globalParams->getCMap(collectionA, cMapNameA.toStr()))) {
+            error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:s}'", &cMapNameA, collectionA.c_str());
         }
     } else if (obj->isStream()) {
         if (!(cMap = CMap::parse(nullptr, collectionA, obj->getStream()))) {
@@ -86,25 +86,25 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, const GooString &cMapNameA)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, const std::string &cMapNameA)
 {
     FILE *f;
 
     if (!(f = globalParams->findCMapFile(collectionA, cMapNameA))) {
 
         // Check for an identity CMap.
-        if (!cMapNameA.cmp("Identity") || !cMapNameA.cmp("Identity-H")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 0));
+        if (cMapNameA == "Identity" || cMapNameA == "Identity-H") {
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 0));
         }
-        if (!cMapNameA.cmp("Identity-V")) {
-            return std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy(), 1));
+        if (cMapNameA == "Identity-V") {
+            return std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA), 1));
         }
 
-        error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection", &cMapNameA, &collectionA);
+        error(errSyntaxError, -1, "Couldn't find '{0:s}' CMap file for '{1:s}' collection", cMapNameA.c_str(), collectionA.c_str());
         return {};
     }
 
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), cMapNameA.copy()));
+    auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), std::make_unique<GooString>(cMapNameA)));
     cMap->parse2(cache, &getCharFromFile, f);
 
     fclose(f);
@@ -112,9 +112,9 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const GooString &collectionA, Stream *str)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str)
 {
-    auto cMap = std::shared_ptr<CMap>(new CMap(collectionA.copy(), nullptr));
+    auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), nullptr));
     Object obj1 = str->getDict()->lookup("UseCMap");
     if (!obj1.isNull()) {
         cMap->useCMap(cache, &obj1);
@@ -220,9 +220,9 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     // GlobalParams::getCMap() in order to acqure the lock need to use
     // GlobalParams::getCMap
     if (cache) {
-        subCMap = cache->getCMap(*collection, useNameStr);
+        subCMap = cache->getCMap(collection->toStr(), useNameStr.toStr());
     } else {
-        subCMap = globalParams->getCMap(*collection, useNameStr);
+        subCMap = globalParams->getCMap(collection->toStr(), useNameStr.toStr());
     }
     if (!subCMap) {
         return;
@@ -235,7 +235,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
 
 void CMap::useCMap(CMapCache *cache, Object *obj)
 {
-    std::shared_ptr<CMap> subCMap = CMap::parse(cache, *collection, obj);
+    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj);
     if (!subCMap) {
         return;
     }
@@ -324,9 +324,9 @@ void CMap::freeCMapVector(CMapVectorEntry *vec)
     gfree(vec);
 }
 
-bool CMap::match(const GooString &collectionA, const GooString &cMapNameA)
+bool CMap::match(const std::string &collectionA, const std::string &cMapNameA)
 {
-    return !collection->cmp(collectionA.toStr()) && !cMapName->cmp(cMapNameA.toStr());
+    return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
 }
 
 CID CMap::getCID(const char *s, int len, CharCode *c, int *nUsed)
@@ -399,7 +399,7 @@ void CMap::setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int
 
 CMapCache::CMapCache() = default;
 
-std::shared_ptr<CMap> CMapCache::getCMap(const GooString &collection, const GooString &cMapName)
+std::shared_ptr<CMap> CMapCache::getCMap(const std::string &collection, const std::string &cMapName)
 {
     int i, j;
 

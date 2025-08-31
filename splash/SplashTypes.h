@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2010, 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2010, 2019, 2020, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2009, 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
@@ -222,9 +222,6 @@ struct SplashScreenParams
     SplashScreenType type;
     int size;
     int dotRadius;
-    SplashCoord gamma;
-    SplashCoord blackThreshold;
-    SplashCoord whiteThreshold;
 };
 
 //------------------------------------------------------------------------

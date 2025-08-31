@@ -76,7 +76,7 @@ build_ubuntu_22_04:
     - sed -i s/http/ftp/ /etc/apt/sources.list
     - echo 'Dir::Bin::Methods::ftp "ftp";' > /etc/apt/apt.conf.d/99local-ftp
     - apt-get update
-    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev clang-15 libc++-15-dev libc++abi-15-dev
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev clang-15 libc++-15-dev libc++abi-15-dev libnghttp2-dev libidn2-dev librtmp-dev libssh-dev libpsl-dev libkrb5-dev libldap2-dev libzstd-dev libwebp-dev
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
@@ -89,6 +89,12 @@ build_ubuntu_22_04:
     - ctest --output-on-failure
     - cd .. && mkdir -p build_nondefault_options && cd build_nondefault_options
     - cmake -G Ninja -DENABLE_LIBOPENJPEG=unmaintained -DENABLE_DCTDECODER=unmaintained -DENABLE_LCMS=OFF -DENABLE_LIBCURL=OFF -DENABLE_LIBTIFF=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_ZLIB_UNCOMPRESS=ON -DUSE_FLOAT=ON -DTESTDATADIR=$PWD/../test-data ..
+    - ninja
+    - cd .. && mkdir -p build_static && cd build_static
+    - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data -DBUILD_SHARED_LIBS=OFF ..
+    - ninja install
+    - cd ../test/pkgconfig_test && mkdir -p build && cd build
+    - PKG_CONFIG="$(which pkg-config) --static" cmake -G Ninja ..
     - ninja
 
 build_mingw64_fedora42:

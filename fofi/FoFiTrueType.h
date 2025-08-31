@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011, 2012, 2018-2020, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2018-2020, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -158,11 +158,8 @@ public:
     // Otherwise returns false.  (Only useful for OpenType CFF fonts).
     std::optional<std::span<unsigned char>> getCFFBlock() const;
 
-    // setup vert/vrt2 GSUB for default lang
-    int setupGSUB(const char *scriptName);
-
     // setup vert/vrt2 GSUB for specified lang
-    int setupGSUB(const char *scriptName, const char *languageName);
+    int setupGSUB(const std::string &scriptName, const std::string &languageName);
 
     FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
     FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag = {});
@@ -176,7 +173,7 @@ private:
     void parse();
     void readPostTable();
     int seekTable(const char *tag) const;
-    unsigned int charToTag(const char *tagName);
+    unsigned int charToTag(const std::string &tagName) const;
     unsigned int doMapToVertGID(unsigned int orgGID);
     unsigned int scanLookupList(unsigned int listIndex, unsigned int orgGID);
     unsigned int scanLookupSubTable(unsigned int subTable, unsigned int orgGID);

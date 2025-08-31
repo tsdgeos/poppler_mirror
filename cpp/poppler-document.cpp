@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -1155,8 +1155,7 @@ bool document::save(const std::string &file_name) const
         return false;
     }
 
-    GooString fname(file_name.c_str());
-    return d->doc->saveAs(fname) == errNone;
+    return d->doc->saveAs(file_name) == errNone;
 }
 
 /**
@@ -1170,8 +1169,7 @@ bool document::save_a_copy(const std::string &file_name) const
         return false;
     }
 
-    GooString fname(file_name.c_str());
-    return d->doc->saveWithoutChangesAs(fname) == errNone;
+    return d->doc->saveWithoutChangesAs(file_name) == errNone;
 }
 
 /**

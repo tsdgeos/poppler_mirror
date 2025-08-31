@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2011, 2012, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2011, 2012, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -64,7 +64,7 @@ public:
     // Read the CID-to-Unicode mapping for <collection> from the file
     // specified by <fileName>.  Sets the initial reference count to 1.
     // Returns NULL on failure.
-    static std::unique_ptr<CharCodeToUnicode> parseCIDToUnicode(const char *fileName, const GooString *collection);
+    static std::unique_ptr<CharCodeToUnicode> parseCIDToUnicode(const char *fileName, const std::string &collection);
 
     // Create the CharCode-to-Unicode mapping for an 8-bit font.
     // <toUnicode> is an array of 256 Unicode indexes.  Sets the initial
@@ -73,7 +73,7 @@ public:
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font.
     static std::unique_ptr<CharCodeToUnicode> parseCMap(const std::string &buf, int nBits);
-    static std::unique_ptr<CharCodeToUnicode> parseCMapFromFile(const GooString *fileName, int nBits);
+    static std::unique_ptr<CharCodeToUnicode> parseCMapFromFile(const std::string &fileName, int nBits);
 
     // Parse a ToUnicode CMap for an 8- or 16-bit font, merging it into
     // <this>.
@@ -85,7 +85,7 @@ public:
     CharCodeToUnicode &operator=(const CharCodeToUnicode &) = delete;
 
     // Return true if this mapping matches the specified <tagA>.
-    bool match(const GooString *tagA);
+    bool match(const std::string &tagA);
 
     // Set the mapping for <c>.
     void setMapping(CharCode c, Unicode *u, int len);
@@ -126,7 +126,7 @@ public:
 
     // Get the CharCodeToUnicode object for <tag>.
     // Returns NULL on failure.
-    std::shared_ptr<CharCodeToUnicode> getCharCodeToUnicode(const GooString *tag);
+    std::shared_ptr<CharCodeToUnicode> getCharCodeToUnicode(const std::string &tag);
 
     // Insert <ctu> into the cache, in the most-recently-used position.
     void add(std::shared_ptr<CharCodeToUnicode> ctu);

@@ -162,7 +162,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
 {
     double x, y;
 
-    state->transform(state->getCurX(), state->getCurY(), &x, &y);
+    state->transform(state->getCurTextX(), state->getCurTextY(), &x, &y);
     if (std::shared_ptr<const GfxFont> font = state->getFont()) {
         double ascent = font->getAscent();
         double descent = font->getDescent();

@@ -47,6 +47,7 @@
 #include "poppler_private_export.h"
 #include "Object.h"
 #include "Link.h"
+#include "GfxState.h"
 
 #include <memory>
 #include <optional>
@@ -269,6 +270,11 @@ public:
 
     std::unique_ptr<LinkAction> getOpenAction() const;
 
+#ifdef USE_CMS
+    GfxLCMSProfilePtr getDisplayProfile();
+    std::shared_ptr<GfxXYZ2DisplayTransforms> getXYZ2DisplayTransforms();
+#endif
+
 private:
     // Get page label info.
     PageLabelInfo *getPageLabelInfo();
@@ -319,6 +325,11 @@ private:
     int catalogPdfMinorVersion = -1;
 
     mutable std::recursive_mutex mutex;
+
+#ifdef USE_CMS
+    GfxLCMSProfilePtr displayProfile;
+    std::shared_ptr<GfxXYZ2DisplayTransforms> XYZ2DisplayTransforms;
+#endif
 };
 
 #endif

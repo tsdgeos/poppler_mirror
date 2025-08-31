@@ -25,7 +25,6 @@ void TestInternalOutline::testCreateOutline()
     tempFile.close();
 
     const std::string tempFileName = tempFile.fileName().toStdString();
-    const GooString gooTempFileName { tempFileName };
 
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(GooString(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc.get());
@@ -41,10 +40,11 @@ void TestInternalOutline::testCreateOutline()
     outlineItems = outline->getItems();
     // no items will result in a nullptr rather than a 0 length list
     QVERIFY(outlineItems == nullptr);
-    doc->saveAs(gooTempFileName);
+    doc->saveAs(tempFileName);
 
     /******************************************************/
 
+    const GooString gooTempFileName { tempFileName };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName);
     QVERIFY(doc.get());
 
@@ -72,7 +72,6 @@ void TestInternalOutline::testSetOutline()
     tempFile.close();
 
     const std::string tempFileName = tempFile.fileName().toStdString();
-    const GooString gooTempFileName { tempFileName };
 
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(GooString(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc.get());
@@ -88,11 +87,12 @@ void TestInternalOutline::testSetOutline()
             { { "1", 1, { { "1.1", 1, {} }, { "1.2", 2, {} }, { "1.3", 3, { { "1.3.1", 1, {} }, { "1.3.2", 2, {} }, { "1.3.3", 3, {} }, { "1.3.4", 4, {} } } }, { "1.4", 4, {} } } }, { "2", 2, {} }, { "3", 3, {} }, { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(gooTempFileName);
+    doc->saveAs(tempFileName);
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName { tempFileName };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName);
     QVERIFY(doc.get());
 
@@ -161,9 +161,7 @@ void TestInternalOutline::testInsertChild()
     tempFile2.close();
 
     const std::string tempFileName = tempFile.fileName().toStdString();
-    const GooString gooTempFileName { tempFileName };
     const std::string tempFileName2 = tempFile2.fileName().toStdString();
-    const GooString gooTempFileName2 { tempFileName2 };
 
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(GooString(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc.get());
@@ -176,11 +174,12 @@ void TestInternalOutline::testInsertChild()
 
     // create an outline and save the file
     outline->setOutline({});
-    doc->saveAs(gooTempFileName);
+    doc->saveAs(tempFileName);
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName { tempFileName };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName);
     QVERIFY(doc.get());
 
@@ -208,11 +207,12 @@ void TestInternalOutline::testInsertChild()
     outlineItems->at(1)->insertChild("2.3", 2, 2);
 
     // save the file
-    doc->saveAs(gooTempFileName2);
+    doc->saveAs(tempFileName2);
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName2 { tempFileName2 };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName2);
     QVERIFY(doc.get());
 
@@ -263,9 +263,7 @@ void TestInternalOutline::testRemoveChild()
     tempFile2.close();
 
     const std::string tempFileName = tempFile.fileName().toStdString();
-    const GooString gooTempFileName { tempFileName };
     const std::string tempFileName2 = tempFile2.fileName().toStdString();
-    const GooString gooTempFileName2 { tempFileName2 };
 
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(GooString(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc.get());
@@ -283,11 +281,12 @@ void TestInternalOutline::testRemoveChild()
                           { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(gooTempFileName);
+    doc->saveAs(tempFileName);
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName { tempFileName };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName);
     QVERIFY(doc.get());
 
@@ -304,11 +303,12 @@ void TestInternalOutline::testRemoveChild()
     outline->getItems()->at(1)->removeChild(0);
 
     // save the file
-    doc->saveAs(gooTempFileName2);
+    doc->saveAs(tempFileName2);
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName2 { tempFileName2 };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName2);
     QVERIFY(doc.get());
 
@@ -357,9 +357,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     tempFile2.close();
 
     const std::string tempFileName = tempFile.fileName().toStdString();
-    const GooString gooTempFileName { tempFileName };
     const std::string tempFileName2 = tempFile2.fileName().toStdString();
-    const GooString gooTempFileName2 { tempFileName2 };
 
     std::unique_ptr<PDFDoc> doc = PDFDocFactory().createPDFDoc(GooString(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc.get());
@@ -377,12 +375,13 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
                           { "4", 4, {} } });
     outlineItems = outline->getItems();
     QVERIFY(outlineItems != nullptr);
-    doc->saveAs(gooTempFileName);
+    doc->saveAs(tempFileName);
 
     outline = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName { tempFileName };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName);
     QVERIFY(doc.get());
 
@@ -408,12 +407,13 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     }
 
     // save the file
-    doc->saveAs(gooTempFileName2);
+    doc->saveAs(tempFileName2);
     outline = nullptr;
     item = nullptr;
 
     /******************************************************/
 
+    const GooString gooTempFileName2 { tempFileName2 };
     doc = PDFDocFactory().createPDFDoc(gooTempFileName2);
     QVERIFY(doc.get());
 

@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018, 2020, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -54,17 +54,6 @@ public:
         return value < mat[(yy << log2Size) + xx] ? 0 : 1;
     }
 
-    // Returns true if value is above the white threshold or below the
-    // black threshold, i.e., if the corresponding halftone will be
-    // solid white or black.
-    bool isStatic(unsigned char value)
-    {
-        if (mat == nullptr) {
-            createMatrix();
-        }
-        return value < minVal || value >= maxVal;
-    }
-
 private:
     void createMatrix();
 
@@ -78,10 +67,6 @@ private:
     int size; // size of the threshold matrix
     int sizeM1; // size - 1
     int log2Size; // log2(size)
-    unsigned char minVal; // any pixel value below minVal generates
-                          //   solid black
-    unsigned char maxVal; // any pixel value above maxVal generates
-                          //   solid white
 };
 
 #endif

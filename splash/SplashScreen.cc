@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2016, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2016, 2018, 2020, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -33,10 +33,7 @@
 static const SplashScreenParams defaultParams = {
     splashScreenDispersed, // type
     2, // size
-    2, // dotRadius
-    1.0, // gamma
-    0.0, // blackThreshold
-    1.0 // whiteThreshold
+    2 // dotRadius
 };
 
 //------------------------------------------------------------------------
@@ -71,15 +68,10 @@ SplashScreen::SplashScreen(const SplashScreenParams *params)
     screenParams = params;
     mat = nullptr;
     size = 0;
-    maxVal = 0;
-    minVal = 0;
 }
 
 void SplashScreen::createMatrix()
 {
-    unsigned char u;
-    int black, white, i;
-
     const SplashScreenParams *params = screenParams;
 
     // size must be a power of 2, and at least 2
@@ -112,31 +104,10 @@ void SplashScreen::createMatrix()
 
     sizeM1 = size - 1;
 
-    // do gamma correction and compute minVal/maxVal
-    minVal = 255;
-    maxVal = 0;
-    black = splashRound((SplashCoord)255.0 * params->blackThreshold);
-    if (black < 1) {
-        black = 1;
-    }
-    int whiteAux = splashRound((SplashCoord)255.0 * params->whiteThreshold);
-    if (whiteAux > 255) {
-        white = 255;
-    } else {
-        white = whiteAux;
-    }
-    for (i = 0; i < size * size; ++i) {
-        u = splashRound((SplashCoord)255.0 * splashPow((SplashCoord)mat[i] / 255.0, params->gamma));
-        if (u < black) {
-            u = (unsigned char)black;
-        } else if (u >= white) {
-            u = (unsigned char)white;
-        }
-        mat[i] = u;
-        if (u < minVal) {
-            minVal = u;
-        } else if (u > maxVal) {
-            maxVal = u;
+    static const unsigned char black = 1;
+    for (int i = 0; i < size * size; ++i) {
+        if (mat[i] < black) {
+            mat[i] = black;
         }
     }
 }
@@ -376,8 +347,6 @@ SplashScreen::SplashScreen(const SplashScreen *screen)
     if (likely(mat != nullptr)) {
         memcpy(mat, screen->mat, size * size * sizeof(unsigned char));
     }
-    minVal = screen->minVal;
-    maxVal = screen->maxVal;
 }
 
 SplashScreen::~SplashScreen()

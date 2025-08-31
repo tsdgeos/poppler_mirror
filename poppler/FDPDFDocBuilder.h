@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -31,7 +31,7 @@ public:
     bool supports(const GooString &uri) override;
 
 private:
-    int parseFdFromUri(const GooString &uri);
+    int parseFdFromUri(const std::string &uri);
 };
 
 #endif /* FDPDFDOCBUILDER_H */

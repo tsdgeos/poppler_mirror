@@ -3169,15 +3169,15 @@ struct DrawMultiLineTextResult
 // if fontName is empty it is assumed it is sent from the outside
 // so for text that is in font no Tf is added and for text that is in the aux fonts
 // a pair of q/Q is added
-static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double availableWidth, const Form *form, const GfxFont &font, const std::string &fontName, double fontSize, VariableTextQuadding quadding, double borderWidth)
+static DrawMultiLineTextResult drawMultiLineText(const std::string &text, double availableWidth, const Form *form, const GfxFont &font, const std::string &fontName, double fontSize, VariableTextQuadding quadding, double borderWidth)
 {
     DrawMultiLineTextResult result;
-    int i = 0;
+    size_t i = 0;
     double xPosPrev = 0;
     const double availableTextWidthInFontPtSize = availableWidth / fontSize;
-    while (i < text.getLength()) {
-        GooString lineText(text.toStr().substr(i));
-        if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text.toStr())) {
+    while (i < text.size()) {
+        GooString lineText(text.substr(i));
+        if (!hasUnicodeByteOrderMark(lineText.toStr()) && hasUnicodeByteOrderMark(text)) {
             prependUnicodeByteOrderMark(lineText.toNonConstStr());
         }
         const HorizontalTextLayouter textLayouter(&lineText, form, &font, availableTextWidthInFontPtSize, false);
@@ -3231,7 +3231,7 @@ static DrawMultiLineTextResult drawMultiLineText(const GooString &text, double a
         if (i == 0) {
             i += textLayouter.consumedText;
         } else {
-            i += textLayouter.consumedText - (hasUnicodeByteOrderMark(text.toStr()) ? 2 : 0);
+            i += textLayouter.consumedText - (hasUnicodeByteOrderMark(text) ? 2 : 0);
         }
     }
     return result;
@@ -3328,7 +3328,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     // Set font state
     appearBuilder.setDrawColor(*da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin);
-    const DrawMultiLineTextResult textCommands = drawMultiLineText(*contents, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
+    const DrawMultiLineTextResult textCommands = drawMultiLineText(contents->toStr(), textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
     appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
@@ -4649,7 +4649,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             appearBuf->append(daTok)->append(' ');
         }
 
-        const DrawMultiLineTextResult textCommands = drawMultiLineText(*text, dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
+        const DrawMultiLineTextResult textCommands = drawMultiLineText(text->toStr(), dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
         appearBuf->append(textCommands.text);
 
         // single-line text
@@ -5220,7 +5220,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
     const GooString &leftText = field->getCustomAppearanceLeftContent();
     if (leftText.toStr().empty()) {
-        drawSignatureFieldText(contents, form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents.toStr(), form, DefaultAppearance(_da), border, rect, xref, resourcesDict, 0, false /* don't center vertically */, false /* don't center horizontally */);
     } else {
         const double halfWidth = (rect->x2 - rect->x1) / 2;
 
@@ -5243,7 +5243,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
         daLeft.setFontPtSize(leftFontSize);
 
         PDFRectangle rectLeft(rect->x1, rect->y1, rect->x1 + halfWidth, rect->y2);
-        drawSignatureFieldText(leftText, form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
+        drawSignatureFieldText(leftText.toStr(), form, daLeft, border, &rectLeft, xref, resourcesDict, 0, true /* center vertically */, true /* center horizontally */);
 
         DefaultAppearance daRight(_da);
 
@@ -5255,13 +5255,13 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
         daRight.setFontPtSize(fontSize);
 
         PDFRectangle rectRight(rectLeft.x2, rect->y1, rect->x2, rect->y2);
-        drawSignatureFieldText(contents, form, daRight, border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
+        drawSignatureFieldText(contents.toStr(), form, daRight, border, &rectRight, xref, resourcesDict, halfWidth, true /* center vertically */, false /* don't center horizontally */);
     }
 
     return true;
 }
 
-void AnnotAppearanceBuilder::drawSignatureFieldText(const GooString &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin,
+void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin,
                                                     bool centerVertically, bool centerHorizontally)
 {
     double borderWidth = 0;

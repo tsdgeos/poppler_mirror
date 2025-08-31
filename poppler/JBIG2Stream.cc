@@ -2353,7 +2353,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                     }
 
                     if (decodeSuccess && syms[symID]) {
-                        refDX = ((rdw >= 0) ? rdw : rdw - 1) / 2 + rdx;
+                        if (checkedAdd(((rdw >= 0) ? rdw : rdw - 1) / 2, rdx, &refDX)) {
+                            return nullptr;
+                        }
                         if (checkedAdd(((rdh >= 0) ? rdh : rdh - 1) / 2, rdy, &refDY)) {
                             return nullptr;
                         }

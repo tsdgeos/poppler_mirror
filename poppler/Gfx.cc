@@ -565,29 +565,11 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
 
 #ifdef USE_CMS
 
-#    include <lcms2.h>
-
 void Gfx::initDisplayProfile()
 {
-    Object catDict = xref->getCatalog();
-    if (catDict.isDict()) {
-        Object outputIntents = catDict.dictLookup("OutputIntents");
-        if (outputIntents.isArray() && outputIntents.arrayGetLength() == 1) {
-            Object firstElement = outputIntents.arrayGet(0);
-            if (firstElement.isDict()) {
-                Object profile = firstElement.dictLookup("DestOutputProfile");
-                if (profile.isStream()) {
-                    Stream *iccStream = profile.getStream();
-                    const std::vector<unsigned char> profBuf = iccStream->toUnsignedChars(65536, 65536);
-                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
-                    if (!hp) {
-                        error(errSyntaxWarning, -1, "read ICCBased color space profile error");
-                    } else {
-                        state->setDisplayProfile(hp);
-                    }
-                }
-            }
-        }
+    auto transforms = doc->getCatalog()->getXYZ2DisplayTransforms();
+    if (transforms) {
+        state->setXYZ2DisplayTransforms(std::move(transforms));
     }
 }
 
