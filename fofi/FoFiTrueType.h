@@ -159,7 +159,7 @@ public:
     std::optional<std::span<unsigned char>> getCFFBlock() const;
 
     // setup vert/vrt2 GSUB for specified lang
-    int setupGSUB(const char *scriptName, const char *languageName);
+    int setupGSUB(const std::string &scriptName, const std::string &languageName);
 
     FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
     FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag = {});

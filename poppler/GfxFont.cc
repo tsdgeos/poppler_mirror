@@ -2014,8 +2014,8 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     static const struct CMapListEntry
     {
         const char *collection;
-        const char *scriptTag;
-        const char *languageTag;
+        const std::string scriptTag;
+        const std::string languageTag;
         const std::string toUnicodeMap;
         const std::array<std::string, 4> *CMaps;
     } CMapList[] = { {
@@ -2053,7 +2053,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
                              "Adobe-Korea1-UCS2",
                              &adobe_korea1_cmaps,
                      },
-                     { nullptr, nullptr, nullptr, {}, nullptr } };
+                     { nullptr, {}, {}, {}, nullptr } };
     Unicode *humap = nullptr;
     Unicode *vumap = nullptr;
     Unicode *tumap = nullptr;

@@ -1672,7 +1672,7 @@ unsigned int FoFiTrueType::charToTag(const char *tagName)
   setup GSUB table data
   Only supporting vertical text substitution.
 */
-int FoFiTrueType::setupGSUB(const char *scriptName, const char *languageName)
+int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &languageName)
 {
     unsigned int gsubTable;
     unsigned int i;
@@ -1685,15 +1685,10 @@ int FoFiTrueType::setupGSUB(const char *scriptName, const char *languageName)
     unsigned int featureIndex;
     unsigned int ftable = 0;
     unsigned int llist;
-    unsigned int scriptTag;
     int x;
     unsigned int pos;
 
-    if (scriptName == nullptr) {
-        gsubFeatureTable = 0;
-        return 0;
-    }
-    scriptTag = charToTag(scriptName);
+    const unsigned int scriptTag = charToTag(scriptName.c_str());
     /* read GSUB Header */
     if ((x = seekTable("GSUB")) < 0) {
         return 0; /* GSUB table not found */
@@ -1731,14 +1726,12 @@ int FoFiTrueType::setupGSUB(const char *scriptName, const char *languageName)
     /* use default language system */
     pos = gsubTable + scriptList + scriptTable;
     langSys = 0;
-    if (languageName) {
-        unsigned int langTag = charToTag(languageName);
-        unsigned int langCount = getU16BE(pos + 2, &parsedOk);
-        for (i = 0; i < langCount && langSys == 0; i++) {
-            tag = getU32BE(pos + 4 + i * (4 + 2), &parsedOk);
-            if (tag == langTag) {
-                langSys = getU16BE(pos + 4 + i * (4 + 2) + 4, &parsedOk);
-            }
+    const unsigned int langTag = charToTag(languageName.c_str());
+    const unsigned int langCount = getU16BE(pos + 2, &parsedOk);
+    for (i = 0; i < langCount && langSys == 0; i++) {
+        tag = getU32BE(pos + 4 + i * (4 + 2), &parsedOk);
+        if (tag == langTag) {
+            langSys = getU16BE(pos + 4 + i * (4 + 2) + 4, &parsedOk);
         }
     }
     if (langSys == 0) {
