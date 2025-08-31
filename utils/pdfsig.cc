@@ -167,12 +167,10 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
         return false;
     }
 
-    const int sigCountLength = numberOfCharacters(sigCount);
-    // We want format to be {0:s}.sig{1:Xd} where X is sigCountLength
-    // since { is the magic character to replace things we need to put it twice where
-    // we don't want it to be replaced
-    const std::string format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
-    const std::string path = GooString::format(format.c_str(), gbasename(filename).c_str(), sig_num);
+    const int sigCountWidth = numberOfCharacters(sigCount);
+    const std::string filenameWithExtension = GooString::format("{0:s}.sig", gbasename(filename).c_str());
+    const std::string sig_numString = GooString::formatLongLong(sig_num, sigCountWidth);
+    const std::string path = filenameWithExtension + sig_numString;
     printf("Signature #%d (%lu bytes) => %s\n", sig_num, signature.size(), path.c_str());
     std::ofstream outfile(path.c_str(), std::ofstream::binary);
     outfile.write(reinterpret_cast<const char *>(signature.data()), signature.size());

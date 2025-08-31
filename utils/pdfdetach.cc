@@ -253,7 +253,11 @@ int main(int argc, char *argv[])
             }
         }
         if (saveNum < 1 || saveNum > nFiles) {
-            error(errCommandLine, -1, hasSaveFile ? "Invalid file name" : "Invalid file number");
+            if (hasSaveFile) {
+                error(errCommandLine, -1, "Invalid file name");
+            } else {
+                error(errCommandLine, -1, "Invalid file number");
+            }
             return 99;
         }
 

@@ -3243,12 +3243,10 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
     }
 }
 
-static inline void checkTrue(bool b, const char *message)
-{
-    if (unlikely(!b)) {
-        error(errSyntaxError, -1, message);
+#define checkTrue(b, message)                                                                                                                                                                                                                  \
+    if (unlikely(!(b))) {                                                                                                                                                                                                                      \
+        error(errSyntaxError, -1, message);                                                                                                                                                                                                    \
     }
-}
 
 void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1, double y1, GfxColor *color1, double x2, double y2, GfxColor *color2, int nComps, int depth, GfxState::ReusablePathIterator *path)
 {

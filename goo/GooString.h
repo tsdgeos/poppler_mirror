@@ -142,6 +142,8 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string format(const char *fmt, ...) GOOSTRING_FORMAT;
     POPPLER_PRIVATE_EXPORT static std::string formatv(const char *fmt, va_list argList);
 
+    POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
+
     // Get length.
     int getLength() const { return size(); }
 
