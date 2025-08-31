@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2012, 2014-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012, 2014-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -1666,15 +1666,6 @@ unsigned int FoFiTrueType::charToTag(const char *tagName)
         tag |= ' ';
     }
     return tag;
-}
-
-/*
-  setup GSUB table data
-  Only supporting vertical text substitution.
-*/
-int FoFiTrueType::setupGSUB(const char *scriptName)
-{
-    return setupGSUB(scriptName, nullptr);
 }
 
 /*
