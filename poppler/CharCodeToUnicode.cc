@@ -176,18 +176,18 @@ std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMap(const std::strin
     return ctu;
 }
 
-std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const GooString *fileName, int nBits)
+std::unique_ptr<CharCodeToUnicode> CharCodeToUnicode::parseCMapFromFile(const std::string &fileName, int nBits)
 {
     FILE *f;
 
     auto ctu = std::make_unique<CharCodeToUnicode>(std::optional<std::string>());
-    if ((f = globalParams->findToUnicodeFile(fileName->toStr()))) {
+    if ((f = globalParams->findToUnicodeFile(fileName))) {
         if (!ctu->parseCMap1(&getCharFromFile, static_cast<void *>(f), nBits)) {
             fclose(f);
             return nullptr;
         }
     } else {
-        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:t}'", fileName);
+        error(errSyntaxError, -1, "Couldn't find ToUnicode CMap file for '{0:s}'", fileName.c_str());
     }
     return ctu;
 }

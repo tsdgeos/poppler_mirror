@@ -2111,7 +2111,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     if (lp->collection != nullptr) {
         GooString tname(lp->toUnicodeMap);
 
-        if (std::unique_ptr<CharCodeToUnicode> tctu = CharCodeToUnicode::parseCMapFromFile(&tname, 16)) {
+        if (std::unique_ptr<CharCodeToUnicode> tctu = CharCodeToUnicode::parseCMapFromFile(tname.toStr(), 16)) {
             tumap = new Unicode[n];
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
