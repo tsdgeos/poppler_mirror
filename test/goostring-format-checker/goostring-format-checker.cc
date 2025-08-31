@@ -6,7 +6,7 @@
  * Clang++ compiler plugin that checks usage of GooString::format-like functions
  *
  * Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2021, 2025 Albert Astals Cid <aacid@kde.org>
  */
 
 #include <cctype>
