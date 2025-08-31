@@ -2016,7 +2016,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         const char *collection;
         const char *scriptTag;
         const char *languageTag;
-        const char *toUnicodeMap;
+        const std::string toUnicodeMap;
         const std::array<std::string, 4> *CMaps;
     } CMapList[] = { {
                              "Adobe-CNS1",
@@ -2053,7 +2053,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
                              "Adobe-Korea1-UCS2",
                              &adobe_korea1_cmaps,
                      },
-                     { nullptr, nullptr, nullptr, nullptr, nullptr } };
+                     { nullptr, nullptr, nullptr, {}, nullptr } };
     Unicode *humap = nullptr;
     Unicode *vumap = nullptr;
     Unicode *tumap = nullptr;
@@ -2109,9 +2109,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     humap = new Unicode[n * N_UCS_CANDIDATES];
     memset(humap, 0, sizeof(Unicode) * n * N_UCS_CANDIDATES);
     if (lp->collection != nullptr) {
-        GooString tname(lp->toUnicodeMap);
-
-        if (std::unique_ptr<CharCodeToUnicode> tctu = CharCodeToUnicode::parseCMapFromFile(tname.toStr(), 16)) {
+        if (std::unique_ptr<CharCodeToUnicode> tctu = CharCodeToUnicode::parseCMapFromFile(lp->toUnicodeMap, 16)) {
             tumap = new Unicode[n];
             CharCode cid;
             for (cid = 0; cid < n; cid++) {
