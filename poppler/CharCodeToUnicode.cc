@@ -575,9 +575,9 @@ std::shared_ptr<CharCodeToUnicode> CharCodeToUnicodeCache::getCharCodeToUnicode(
     for (auto it = cache.begin(); it != cache.end(); ++it) {
         if ((*it)->match(tag)) {
             if (it != cache.begin()) {
-                auto item = std::move(*it);
+                std::shared_ptr<CharCodeToUnicode> item = std::move(*it);
                 cache.erase(it);
-                cache.push_front(item);
+                cache.push_front(std::move(item));
             }
             return cache[0];
         }
