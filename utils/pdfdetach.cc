@@ -16,7 +16,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2020, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2021, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 <r.coeffier@bee-buzziness.com>
@@ -253,7 +253,11 @@ int main(int argc, char *argv[])
             }
         }
         if (saveNum < 1 || saveNum > nFiles) {
-            error(errCommandLine, -1, hasSaveFile ? "Invalid file name" : "Invalid file number");
+            if (hasSaveFile) {
+                error(errCommandLine, -1, "Invalid file name");
+            } else {
+                error(errCommandLine, -1, "Invalid file number");
+            }
             return 99;
         }
 

@@ -50,6 +50,7 @@
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3243,12 +3244,10 @@ void Gfx::doGouraudTriangleShFill(GfxGouraudTriangleShading *shading)
     }
 }
 
-static inline void checkTrue(bool b, const char *message)
-{
-    if (unlikely(!b)) {
-        error(errSyntaxError, -1, message);
+#define checkTrue(b, message)                                                                                                                                                                                                                  \
+    if (unlikely(!(b))) {                                                                                                                                                                                                                      \
+        error(errSyntaxError, -1, message);                                                                                                                                                                                                    \
     }
-}
 
 void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1, double y1, GfxColor *color1, double x2, double y2, GfxColor *color2, int nComps, int depth, GfxState::ReusablePathIterator *path)
 {

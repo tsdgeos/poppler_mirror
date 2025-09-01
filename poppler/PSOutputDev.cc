@@ -2888,7 +2888,11 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
                 if (line >= innerSize) {
                     break;
                 }
-                writePSFmt((char *)(doUseASCIIHex ? "dup {0:d} <" : "dup {0:d} <~"), line);
+                if (doUseASCIIHex) {
+                    writePSFmt("dup {0:d} <", line);
+                } else {
+                    writePSFmt("dup {0:d} <~", line);
+                }
                 col = 0;
             }
         }

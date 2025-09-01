@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -141,6 +141,8 @@ public:
     // To get literal curly braces, use {{ or }}.
     POPPLER_PRIVATE_EXPORT static std::string format(const char *fmt, ...) GOOSTRING_FORMAT;
     POPPLER_PRIVATE_EXPORT static std::string formatv(const char *fmt, va_list argList);
+
+    POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
 
     // Get length.
     int getLength() const { return size(); }

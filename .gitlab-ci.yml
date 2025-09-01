@@ -52,6 +52,8 @@ build_clang19_libcpp:
   script:
     - echo "We want to compile with C++23 here because it has some nice things like deleted std::string nullptr constructor"
     - sed -i -e "s@CMAKE_CXX_STANDARD 20@CMAKE_CXX_STANDARD 23@g" CMakeLists.txt
+    - echo "We pretend not to have gettext so the GooString::format calls with _( in pdfsig don't complain we're giving it a non literal"
+    - sed -i -e "s@#ifdef HAVE_GETTEXT@#if false@g" utils/pdfsig.cc
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - apt-get install --yes --no-install-recommends libclang-19-dev llvm-19-dev libc++-19-dev libc++abi-19-dev clang-tidy-19 clang-19 libunwind-19-dev gperf jq
     - srcdir=`pwd` && mkdir -p /tmp/poppler_build && cd /tmp/poppler_build

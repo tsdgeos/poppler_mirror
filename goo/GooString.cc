@@ -18,7 +18,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2008-2011, 2016-2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2011, 2016-2018, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -480,6 +480,17 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
     }
 
     return this;
+}
+
+std::string GooString::formatLongLong(long long x, int width)
+{
+    char buf[65];
+    const char *p;
+    int len;
+
+    formatInt(x, buf, sizeof(buf), true /*zeroFill*/, width, 10 /*base*/, &p, &len);
+
+    return { p, static_cast<size_t>(len) };
 }
 
 namespace {
