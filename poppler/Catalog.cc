@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -1294,13 +1294,10 @@ GfxLCMSProfilePtr Catalog::getDisplayProfile()
                 if (profile.isStream()) {
                     Stream *iccStream = profile.getStream();
                     const std::vector<unsigned char> profBuf = iccStream->toUnsignedChars(65536, 65536);
-                    auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
-                    if (!hp) {
+                    displayProfile = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf.data(), profBuf.size()));
+                    if (!displayProfile) {
                         error(errSyntaxWarning, -1, "read ICCBased color space profile error");
-                        return nullptr;
                     }
-
-                    displayProfile = hp;
                     return displayProfile;
                 }
             }
