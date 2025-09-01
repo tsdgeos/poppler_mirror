@@ -1,3 +1,19 @@
+Release 25.09.0:
+        core:
+         * Speed improvements when reusing the same document with different output devices
+         * Speed improvements when reading from network file systems
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        glib:
+         * fix ODR issue with enum
+
+        utils:
+         * pdftohtml: Fix text positioning. (Regressed in 25.07.0)
+
+        build system:
+         * Better pkgconfig support for static builds
+
 Release 25.08.0:
         core:
          * FormWidgetSignature::signDocumentWithAppearance: add imagePath parameter
