@@ -689,7 +689,7 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, RefRecursionCh
         error(errSyntaxError, -1, "Missing 'Functions' entry in stitching function");
         return;
     }
-    k = obj1.arrayGetLength();
+    const int k = obj1.arrayGetLength();
     funcs.resize(k);
     bounds = (double *)gmallocn(k + 1, sizeof(double));
     encode = (double *)gmallocn(2 * k, sizeof(double));
@@ -759,13 +759,12 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, RefRecursionCh
 
 StitchingFunction::StitchingFunction(const StitchingFunction *func, PrivateTag) : Function(func)
 {
-    k = func->k;
-
-    funcs.resize(func->funcs.size());
-    for (int i = 0; i < k; ++i) {
-        funcs[i] = func->funcs[i]->copy();
+    funcs.reserve(func->funcs.size());
+    for (const std::unique_ptr<Function> &f : func->funcs) {
+        funcs.push_back(f->copy());
     }
 
+    const int k = funcs.size();
     bounds = (double *)gmallocn(k + 1, sizeof(double));
     memcpy(bounds, func->bounds, (k + 1) * sizeof(double));
 
@@ -797,6 +796,7 @@ void StitchingFunction::transform(const double *in, double *out) const
     } else {
         x = in[0];
     }
+    const int k = funcs.size();
     for (i = 0; i < k - 1; ++i) {
         if (x < bounds[i + 1]) {
             break;

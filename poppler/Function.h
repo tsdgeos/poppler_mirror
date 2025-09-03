@@ -216,7 +216,7 @@ public:
     void transform(const double *in, double *out) const override;
     bool isOk() const override { return ok; }
 
-    int getNumFuncs() const { return k; }
+    int getNumFuncs() const { return funcs.size(); }
     const Function *getFunc(int i) const { return funcs[i].get(); }
     const double *getBounds() const { return bounds; }
     const double *getEncode() const { return encode; }
@@ -225,7 +225,6 @@ public:
     explicit StitchingFunction(const StitchingFunction *func, PrivateTag = {});
 
 private:
-    int k;
     std::vector<std::unique_ptr<Function>> funcs;
     double *bounds;
     double *encode;
