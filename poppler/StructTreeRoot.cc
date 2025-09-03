@@ -136,6 +136,10 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node)
                 }
                 int keyVal = key.getInt();
                 std::vector<Parent> &vec = parentTree[keyVal];
+                if (!vec.empty()) {
+                    error(errSyntaxError, -1, "Nums item at position {0:d} is a duplicate entry for key {1:d}", i, keyVal);
+                    continue;
+                }
 
                 Object valueArray = nums.arrayGet(i + 1);
                 if (valueArray.isArray()) {
