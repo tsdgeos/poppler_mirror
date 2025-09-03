@@ -557,7 +557,9 @@ if (ENABLE_GPGME)
     poppler/GPGMECryptoSignBackend.cc
   )
   set(poppler_LIBS ${poppler_LIBS} Gpgmepp)
-  set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} gpgmepp >= ${GPGME_VERSION}")
+  if (Gpgmepp_VERSION VERSION_GREATER_EQUAL 1.24.0)
+    set(PC_REQUIRES_PRIVATE "${PC_REQUIRES_PRIVATE} gpgmepp >= ${GPGME_VERSION}")
+  endif()
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
