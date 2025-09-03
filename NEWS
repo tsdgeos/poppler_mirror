@@ -1,7 +1,5 @@
 Release 25.09.1:
         core:
-         * Speed improvements when reusing the same document with different output devices
-         * Speed improvements when reading from network file systems
          * Internal code improvements
 
         build system:
