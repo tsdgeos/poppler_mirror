@@ -995,12 +995,11 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                         substituteName.Set((char *)s2);
                         res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
                         if (res == FcResultMatch && s2) {
-                            GooString *style = new GooString((char *)s2);
-                            if (style->cmp("Regular") != 0) {
+                            const std::string style = { (char *)s2 };
+                            if (style != "Regular") {
                                 substituteName.append(" ");
                                 substituteName.append(style);
                             }
-                            delete style;
                         }
                     }
                 }
