@@ -211,7 +211,6 @@ public:
     ~SysFontInfo();
     SysFontInfo(const SysFontInfo &) = delete;
     SysFontInfo &operator=(const SysFontInfo &) = delete;
-    bool match(const SysFontInfo &fi) const;
     bool match(const GooString &nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const;
     bool match(const GooString &nameA, bool boldA, bool italicA) const;
 };
@@ -228,11 +227,6 @@ SysFontInfo::SysFontInfo(std::unique_ptr<GooString> &&nameA, bool boldA, bool it
 }
 
 SysFontInfo::~SysFontInfo() = default;
-
-bool SysFontInfo::match(const SysFontInfo &fi) const
-{
-    return !strcasecmp(name->c_str(), fi.name->c_str()) && bold == fi.bold && italic == fi.italic && oblique == fi.oblique && fixedWidth == fi.fixedWidth;
-}
 
 bool SysFontInfo::match(const GooString &nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const
 {
