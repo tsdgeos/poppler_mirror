@@ -6,7 +6,7 @@
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2019 Marek Kasik <mkasik@redhat.com>
-// Copyright 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -51,7 +51,7 @@ public:
         duplexDuplexFlipLongEdge
     };
 
-    explicit ViewerPreferences(Dict *prefDict);
+    explicit ViewerPreferences(const Dict &prefDict);
     ~ViewerPreferences();
 
     bool getHideToolbar() const { return hideToolbar; }

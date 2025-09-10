@@ -1168,7 +1168,7 @@ ViewerPreferences *Catalog::getViewerPreferences()
     catalogLocker();
     if (!viewerPrefs) {
         if (viewerPreferences.isDict()) {
-            viewerPrefs = new ViewerPreferences(viewerPreferences.getDict());
+            viewerPrefs = new ViewerPreferences(*viewerPreferences.getDict());
         }
     }
 
