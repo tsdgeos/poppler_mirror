@@ -8,6 +8,7 @@
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
 // Albert Astals Cid <aacid@kde.org> (c) 2010, 2017-2019, 2022, 2024
 // Evgeny Stambulchik <fnevgeny@gmail.com> (c) 2019
+// g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (c) 2025
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
