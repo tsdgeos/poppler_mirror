@@ -125,11 +125,6 @@ void TestGooString::testFormat()
 void TestGooString::testFromNullptr()
 {
     {
-        GooString str { static_cast<const GooString *>(nullptr) };
-        QCOMPARE(str.getLength(), 0);
-    }
-
-    {
         GooString str;
         str.Set(static_cast<const GooString *>(nullptr));
         QCOMPARE(str.getLength(), 0);

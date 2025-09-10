@@ -17,6 +17,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,7 +50,7 @@ Object Object::copy() const
     switch (type) {
     case objString:
     case objHexString:
-        obj.string = new GooString(string);
+        obj.string = string->copy().release();
         break;
     case objName:
     case objCmd:
@@ -81,7 +82,7 @@ Object Object::deepCopy() const
     switch (type) {
     case objString:
     case objHexString:
-        obj.string = new GooString(string);
+        obj.string = string->copy().release();
         break;
     case objName:
     case objCmd:

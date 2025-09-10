@@ -58,12 +58,12 @@ EmbFile::EmbFile(Object &&efStream)
         if (paramDict.isDict()) {
             Object paramObj = paramDict.dictLookup("ModDate");
             if (paramObj.isString()) {
-                m_modDate = paramObj.getString()->copy();
+                m_modDate = paramObj.takeString();
             }
 
             paramObj = paramDict.dictLookup("CreationDate");
             if (paramObj.isString()) {
-                m_createDate = paramObj.getString()->copy();
+                m_createDate = paramObj.takeString();
             }
 
             paramObj = paramDict.dictLookup("Size");
@@ -73,7 +73,7 @@ EmbFile::EmbFile(Object &&efStream)
 
             paramObj = paramDict.dictLookup("CheckSum");
             if (paramObj.isString()) {
-                m_checksum = paramObj.getString()->copy();
+                m_checksum = paramObj.takeString();
             }
         }
     }
@@ -124,7 +124,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
         return;
     }
 
-    fileName = obj1.getString()->copy();
+    fileName = obj1.takeString();
 
     if (fileSpec.isDict()) {
         obj1 = fileSpec.dictLookup("EF");
@@ -140,7 +140,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
 
         obj1 = fileSpec.dictLookup("Desc");
         if (obj1.isString()) {
-            desc = obj1.getString()->copy();
+            desc = obj1.takeString();
         }
     }
 }
@@ -196,7 +196,7 @@ GooString *FileSpec::getFileNameForPlatform()
 
     Object obj1 = getFileSpecNameForPlatform(&fileSpec);
     if (obj1.isString()) {
-        platformFileName = obj1.getString()->copy();
+        platformFileName = obj1.takeString();
     }
 
     return platformFileName.get();

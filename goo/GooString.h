@@ -109,8 +109,7 @@ public:
     }
 
     // Copy a string.
-    explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string &>(*str) : std::string {}) { }
-    std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this); }
+    std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this->toStr()); }
 
     // Create a formatted string.  Similar to printf, but without the
     // string overflow issues.  Formatting elements consist of:

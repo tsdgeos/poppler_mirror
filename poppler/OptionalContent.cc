@@ -295,7 +295,7 @@ OptionalContentGroup::OptionalContentGroup(Dict *ocgDict) : m_name(nullptr)
     if (!ocgName.isString()) {
         error(errSyntaxWarning, -1, "Expected the name of the OCG, but wasn't able to find it, or it isn't a String");
     } else {
-        m_name = ocgName.getString()->copy();
+        m_name = ocgName.takeString();
     }
 
     viewState = printState = ocUsageUnset;

@@ -13,7 +13,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
-// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -75,8 +75,8 @@ public:
     void setSignatureValStatus(enum SignatureValidationStatus);
     void setSignerName(const std::string &);
     void setSubjectDN(const std::string &);
-    void setLocation(const GooString *);
-    void setReason(const GooString *);
+    void setLocation(std::unique_ptr<GooString> &&);
+    void setReason(std::unique_ptr<GooString> &&);
     void setHashAlgorithm(HashAlgorithm);
     void setSigningTime(time_t);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }

@@ -211,9 +211,8 @@ public:
     ~SysFontInfo();
     SysFontInfo(const SysFontInfo &) = delete;
     SysFontInfo &operator=(const SysFontInfo &) = delete;
-    bool match(const SysFontInfo *fi) const;
-    bool match(const GooString *nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const;
-    bool match(const GooString *nameA, bool boldA, bool italicA) const;
+    bool match(const std::string &nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const;
+    bool match(const std::string &nameA, bool boldA, bool italicA) const;
 };
 
 SysFontInfo::SysFontInfo(std::unique_ptr<GooString> &&nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA, std::unique_ptr<GooString> &&pathA, SysFontType typeA, int fontNumA, std::unique_ptr<GooString> &&substituteNameA)
@@ -229,19 +228,14 @@ SysFontInfo::SysFontInfo(std::unique_ptr<GooString> &&nameA, bool boldA, bool it
 
 SysFontInfo::~SysFontInfo() = default;
 
-bool SysFontInfo::match(const SysFontInfo *fi) const
+bool SysFontInfo::match(const std::string &nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const
 {
-    return !strcasecmp(name->c_str(), fi->name->c_str()) && bold == fi->bold && italic == fi->italic && oblique == fi->oblique && fixedWidth == fi->fixedWidth;
+    return !strcasecmp(name->c_str(), nameA.c_str()) && bold == boldA && italic == italicA && oblique == obliqueA && fixedWidth == fixedWidthA;
 }
 
-bool SysFontInfo::match(const GooString *nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) const
+bool SysFontInfo::match(const std::string &nameA, bool boldA, bool italicA) const
 {
-    return !strcasecmp(name->c_str(), nameA->c_str()) && bold == boldA && italic == italicA && oblique == obliqueA && fixedWidth == fixedWidthA;
-}
-
-bool SysFontInfo::match(const GooString *nameA, bool boldA, bool italicA) const
-{
-    return !strcasecmp(name->c_str(), nameA->c_str()) && bold == boldA && italic == italicA;
+    return !strcasecmp(name->c_str(), nameA.c_str()) && bold == boldA && italic == italicA;
 }
 
 //------------------------------------------------------------------------
@@ -365,7 +359,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
     const SysFontInfo *fi = nullptr;
     for (const SysFontInfo *f : fonts) {
         fi = f;
-        if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
+        if (fi->match(name2->toStr(), bold, italic, oblique, fixedWidth)) {
             if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                 break;
             }
@@ -376,7 +370,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         // try ignoring the bold flag
         for (const SysFontInfo *f : fonts) {
             fi = f;
-            if (fi->match(name2, false, italic)) {
+            if (fi->match(name2->toStr(), false, italic)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
@@ -388,7 +382,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
         // try ignoring the bold and italic flags
         for (const SysFontInfo *f : fonts) {
             fi = f;
-            if (fi->match(name2, false, false)) {
+            if (fi->match(name2->toStr(), false, false)) {
                 if (std::ranges::find(filesToIgnore, fi->path->toStr()) == filesToIgnore.end()) {
                     break;
                 }
@@ -1001,12 +995,11 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                         substituteName.Set((char *)s2);
                         res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
                         if (res == FcResultMatch && s2) {
-                            GooString *style = new GooString((char *)s2);
-                            if (style->cmp("Regular") != 0) {
+                            const std::string style = { (char *)s2 };
+                            if (style != "Regular") {
                                 substituteName.append(" ");
                                 substituteName.append(style);
                             }
-                            delete style;
                         }
                     }
                 }

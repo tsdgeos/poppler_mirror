@@ -28,6 +28,7 @@
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
 // Copyright (C) 2018 Mojca Miklavec <mojca@macports.org>
 // Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -98,15 +99,13 @@ GooString *appendToPath(GooString *path, const char *fileName)
 {
 #ifdef _WIN32
     //---------- Win32 ----------
-    GooString *tmp;
     char buf[256];
     char *fp;
 
-    tmp = new GooString(path);
+    auto tmp = path->copy();
     tmp->append('/');
     tmp->append(fileName);
     GetFullPathNameA(tmp->c_str(), sizeof(buf), buf, &fp);
-    delete tmp;
     path->clear();
     path->append(buf);
     return path;

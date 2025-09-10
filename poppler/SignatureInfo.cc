@@ -13,7 +13,7 @@
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 // Copyright 2021 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
-// Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -89,14 +89,14 @@ void SignatureInfo::setSubjectDN(const std::string &subjectDN)
     subject_dn = subjectDN;
 }
 
-void SignatureInfo::setLocation(const GooString *loc)
+void SignatureInfo::setLocation(std::unique_ptr<GooString> &&loc)
 {
-    location = GooString(loc);
+    location = std::move(*loc);
 }
 
-void SignatureInfo::setReason(const GooString *signingReason)
+void SignatureInfo::setReason(std::unique_ptr<GooString> &&signingReason)
 {
-    reason = GooString(signingReason);
+    reason = std::move(*signingReason);
 }
 
 void SignatureInfo::setHashAlgorithm(HashAlgorithm type)

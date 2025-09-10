@@ -1073,7 +1073,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
     // Variable Text
     obj1 = Form::fieldLookup(dict, "DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copy();
+        defaultAppearance = obj1.takeString();
     }
 
     obj1 = Form::fieldLookup(dict, "Q");
@@ -1087,17 +1087,17 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = dict->lookup("T");
     if (obj1.isString()) {
-        partialName = obj1.getString()->copy();
+        partialName = obj1.takeString();
     }
 
     obj1 = dict->lookup("TU");
     if (obj1.isString()) {
-        alternateUiName = obj1.getString()->copy();
+        alternateUiName = obj1.takeString();
     }
 
     obj1 = dict->lookup("TM");
     if (obj1.isString()) {
-        mappingName = obj1.getString()->copy();
+        mappingName = obj1.takeString();
     }
     widgets.shrink_to_fit();
     children.shrink_to_fit();
@@ -1646,9 +1646,9 @@ void FormFieldText::fillContent(FillValueType fillType)
         if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
             if (obj1.getString()->getLength() > 2) {
                 if (fillType == fillDefaultValue) {
-                    defaultContent = obj1.getString()->copy();
+                    defaultContent = obj1.takeString();
                 } else {
-                    content = obj1.getString()->copy();
+                    content = obj1.takeString();
                 }
             }
         } else if (obj1.getString()->getLength() > 0) {
@@ -1693,8 +1693,17 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                         const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
                         // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
                         // to the field DR dictionary
-                        for (const Form::AddFontResult &afr : newFonts) {
-                            fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                        if (!newFonts.empty()) {
+                            for (const Form::AddFontResult &afr : newFonts) {
+                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                                // This is not fully correct, it changes the entire font to the last added font
+                                // but it is much better than not doing anything, because we know that one of
+                                // the fonts have characters we need, so there is a bit of hope involved here
+                                // It is likely that we only have added one font, and it is likely that it is
+                                // a non-subset version of a subset or a reduced type1 font or similar.
+                                da.setFontName(Object(objName, afr.fontName.c_str()));
+                            }
+                            setDefaultAppearance(da.toAppearanceString());
                         }
                     } else {
                         form->ensureFontsForAllCharacters(content.get(), fontName);
@@ -1867,7 +1876,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
         for (int i = 0; i < numChoices; i++) {
             Object obj2 = obj1.arrayGet(i);
             if (obj2.isString()) {
-                choices[i].optionName = obj2.getString()->copy();
+                choices[i].optionName = obj2.takeString();
             } else if (obj2.isArray()) { // [Export_value, Displayed_text]
                 if (obj2.arrayGetLength() < 2) {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2");
@@ -1875,14 +1884,14 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
                 }
                 Object obj3 = obj2.arrayGet(0);
                 if (obj3.isString()) {
-                    choices[i].exportVal = obj3.getString()->copy();
+                    choices[i].exportVal = obj3.takeString();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string");
                 }
 
                 obj3 = obj2.arrayGet(1);
                 if (obj3.isString()) {
-                    choices[i].optionName = obj3.getString()->copy();
+                    choices[i].optionName = obj3.takeString();
                 } else {
                     error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string");
                 }
@@ -1954,7 +1963,7 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             // Set custom value if /V doesn't refer to any predefined option and the field is user-editable
             if (fillType == fillValue && !optionFound && edit) {
-                editedChoice = obj1.getString()->copy();
+                editedChoice = obj1.takeString();
             }
         } else if (obj1.isArray()) {
             for (int i = 0; i < numChoices; i++) {
@@ -2271,20 +2280,20 @@ void FormFieldSignature::parseInfo()
 
     Object contents_obj = sig_dict.dictLookup("Contents");
     if (contents_obj.isString()) {
-        auto signatureString = contents_obj.getString();
+        auto signatureString = contents_obj.takeString();
         signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->getLength());
     }
 
     byte_range = sig_dict.dictLookup("ByteRange");
 
-    const Object location_obj = sig_dict.dictLookup("Location");
+    Object location_obj = sig_dict.dictLookup("Location");
     if (location_obj.isString()) {
-        signature_info->setLocation(location_obj.getString());
+        signature_info->setLocation(location_obj.takeString());
     }
 
-    const Object reason_obj = sig_dict.dictLookup("Reason");
+    Object reason_obj = sig_dict.dictLookup("Reason");
     if (reason_obj.isString()) {
-        signature_info->setReason(reason_obj.getString());
+        signature_info->setReason(reason_obj.takeString());
     }
 
     // retrieve SigningTime
@@ -2612,7 +2621,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("DA");
     if (obj1.isString()) {
-        defaultAppearance = obj1.getString()->copy();
+        defaultAppearance = obj1.takeString();
     }
 
     obj1 = acroForm->dictLookup("Q");

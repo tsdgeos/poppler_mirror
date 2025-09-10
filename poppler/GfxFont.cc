@@ -489,7 +489,7 @@ void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
         // get family
         obj2 = obj1.dictLookup("FontFamily");
         if (obj2.isString()) {
-            family = std::make_unique<GooString>(obj2.getString());
+            family = obj2.takeString();
         }
 
         // get stretch
@@ -1739,7 +1739,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
             obj2 = Object(std::make_unique<GooString>("Adobe"));
             obj3 = Object(std::make_unique<GooString>("Identity"));
         }
-        collection = obj2.getString()->copy();
+        collection = obj2.takeString();
         collection->append('-');
         collection->append(obj3.getString());
     } else {
