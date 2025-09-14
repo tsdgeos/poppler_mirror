@@ -189,17 +189,6 @@ static inline bool splashColorEqual(SplashColorConstPtr dest, SplashColorConstPt
     return true;
 }
 
-static inline void splashColorXor(SplashColorPtr dest, SplashColorConstPtr src)
-{
-    dest[0] ^= src[0];
-    dest[1] ^= src[1];
-    dest[2] ^= src[2];
-    dest[3] ^= src[3];
-    for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
-        dest[i] ^= src[i];
-    }
-}
-
 //------------------------------------------------------------------------
 // blend functions
 //------------------------------------------------------------------------
