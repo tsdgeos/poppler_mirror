@@ -115,11 +115,11 @@ void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsed
     }
 }
 
-bool PageLabelInfo::labelToIndex(const GooString &label, int *index) const
+bool PageLabelInfo::labelToIndex(const std::string &label, int *index) const
 {
     const char *const str = label.c_str();
     const std::size_t strLen = label.size();
-    const bool strUnicode = hasUnicodeByteOrderMark(label.toStr());
+    const bool strUnicode = hasUnicodeByteOrderMark(label);
     int number;
     bool ok;
 
@@ -131,7 +131,7 @@ bool PageLabelInfo::labelToIndex(const GooString &label, int *index) const
 
         switch (interval.style) {
         case Interval::Arabic:
-            std::tie(number, ok) = fromDecimal(label.toStr().substr(prefixLen), strUnicode);
+            std::tie(number, ok) = fromDecimal(label.substr(prefixLen), strUnicode);
             if (ok && number - interval.first < interval.length) {
                 *index = interval.base + number - interval.first;
                 return true;
@@ -154,7 +154,7 @@ bool PageLabelInfo::labelToIndex(const GooString &label, int *index) const
             }
             break;
         case Interval::None:
-            if (interval.length == 1 && label.toStr() == interval.prefix) {
+            if (interval.length == 1 && label == interval.prefix) {
                 *index = interval.base;
                 return true;
             } else {

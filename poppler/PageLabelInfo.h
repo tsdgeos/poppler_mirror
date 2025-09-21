@@ -33,7 +33,7 @@ public:
     PageLabelInfo(const PageLabelInfo &) = delete;
     PageLabelInfo &operator=(const PageLabelInfo &) = delete;
 
-    bool labelToIndex(const GooString &label, int *index) const;
+    bool labelToIndex(const std::string &label, int *index) const;
     bool indexToLabel(int index, GooString *label) const;
 
 private:
