@@ -790,11 +790,11 @@ PopplerPage *poppler_document_get_page(PopplerDocument *document, int index)
 PopplerPage *poppler_document_get_page_by_label(PopplerDocument *document, const char *label)
 {
     Catalog *catalog;
-    GooString label_g(label);
+    const GooString label_g(label);
     int index;
 
     catalog = document->doc->getCatalog();
-    if (!catalog->labelToIndex(&label_g, &index)) {
+    if (!catalog->labelToIndex(label_g, &index)) {
         return nullptr;
     }
 

@@ -988,7 +988,7 @@ page *document::create_page(const ustring &label) const
     std::unique_ptr<GooString> goolabel(detail::ustring_to_unicode_GooString(label));
     int index = 0;
 
-    if (!d->doc->getCatalog()->labelToIndex(goolabel.get(), &index)) {
+    if (!d->doc->getCatalog()->labelToIndex(*goolabel, &index)) {
         return nullptr;
     }
     return create_page(index);

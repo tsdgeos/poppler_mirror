@@ -795,17 +795,17 @@ const GooString *NameTree::getName(int index) const
     }
 }
 
-bool Catalog::labelToIndex(GooString *label, int *index)
+bool Catalog::labelToIndex(const GooString &label, int *index)
 {
     char *end;
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        if (!pli->labelToIndex(*label, index)) {
+        if (!pli->labelToIndex(label, index)) {
             return false;
         }
     } else {
-        *index = strtol(label->c_str(), &end, 10) - 1;
+        *index = strtol(label.c_str(), &end, 10) - 1;
         if (*end != '\0') {
             return false;
         }
