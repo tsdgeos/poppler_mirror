@@ -28,7 +28,7 @@
 class PageLabelInfo
 {
 public:
-    PageLabelInfo(Object *tree, int numPages);
+    PageLabelInfo(const Object &tree, int numPages);
 
     PageLabelInfo(const PageLabelInfo &) = delete;
     PageLabelInfo &operator=(const PageLabelInfo &) = delete;
@@ -37,7 +37,7 @@ public:
     bool indexToLabel(int index, GooString *label) const;
 
 private:
-    void parse(const Object *tree, RefRecursionChecker &parsedRefs);
+    void parse(const Object &tree, RefRecursionChecker &parsedRefs);
 
     struct Interval
     {

@@ -59,7 +59,7 @@ PageLabelInfo::Interval::Interval(Object *dict, int baseA)
     base = baseA;
 }
 
-PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
+PageLabelInfo::PageLabelInfo(const Object &tree, int numPages)
 {
     RefRecursionChecker alreadyParsedRefs;
     parse(tree, alreadyParsedRefs);
@@ -75,10 +75,10 @@ PageLabelInfo::PageLabelInfo(Object *tree, int numPages)
     curr->length = std::max(0, numPages - curr->base);
 }
 
-void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsedRefs)
+void PageLabelInfo::parse(const Object &tree, RefRecursionChecker &alreadyParsedRefs)
 {
     // leaf node
-    Object nums = tree->dictLookup("Nums");
+    Object nums = tree.dictLookup("Nums");
     if (nums.isArray()) {
         for (int i = 0; i < nums.arrayGetLength(); i += 2) {
             Object obj = nums.arrayGet(i);
@@ -98,7 +98,7 @@ void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsed
         }
     }
 
-    Object kids = tree->dictLookup("Kids");
+    Object kids = tree.dictLookup("Kids");
     if (kids.isArray()) {
         const Array *kidsArray = kids.getArray();
         for (int i = 0; i < kidsArray->getLength(); ++i) {
@@ -109,7 +109,7 @@ void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsed
                 continue;
             }
             if (kid.isDict()) {
-                parse(&kid, alreadyParsedRefs);
+                parse(kid, alreadyParsedRefs);
             }
         }
     }
