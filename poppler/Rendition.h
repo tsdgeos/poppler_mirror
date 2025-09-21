@@ -77,7 +77,7 @@ struct MediaParameters
     // parse from a "Media Play Parameters" dictionary
     void parseMediaPlayParameters(const Dict &playDict);
     // parse from a "Media Screen Parameters" dictionary
-    void parseMediaScreenParameters(Object *screenObj);
+    void parseMediaScreenParameters(const Dict &screenDict);
 
     enum MediaFittingPolicy
     {

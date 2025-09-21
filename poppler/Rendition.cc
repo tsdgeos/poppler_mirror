@@ -219,9 +219,9 @@ void MediaParameters::parseMediaPlayParameters(const Dict &playDict)
     }
 }
 
-void MediaParameters::parseMediaScreenParameters(Object *obj)
+void MediaParameters::parseMediaScreenParameters(const Dict &screenDict)
 {
-    Object tmp = obj->dictLookup("W");
+    Object tmp = screenDict.lookup("W");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -242,7 +242,7 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 
     // background color
-    tmp = obj->dictLookup("B");
+    tmp = screenDict.lookup("B");
     if (tmp.isArray()) {
         Array *color = tmp.getArray();
 
@@ -257,13 +257,13 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 
     // opacity
-    tmp = obj->dictLookup("O");
+    tmp = screenDict.lookup("O");
     if (tmp.isNum()) {
         opacity = tmp.getNum();
     }
 
     if (windowParams.type == MediaWindowParameters::windowFloating) {
-        const Object winDict = obj->dictLookup("F");
+        const Object winDict = screenDict.lookup("F");
         if (winDict.isDict()) {
             windowParams.parseFWParams(*winDict.getDict());
         }
@@ -350,11 +350,11 @@ MediaRendition::MediaRendition(Object *obj)
     if (tmp2.isDict()) { // media screen parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaScreenParameters(&params);
+            MH.parseMediaScreenParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaScreenParameters(&params);
+            BE.parseMediaScreenParameters(*params.getDict());
         }
     }
 }
