@@ -7,7 +7,7 @@
 // Pino Toscano <pino@kde.org> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
 // Tobias Koenig <tobias.koenig@kdab.com> (c) 2012
-// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024
+// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024, 2025
 // g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (C) 2025
 //
 // This program is free software; you can redistribute it and/or modify
@@ -43,9 +43,9 @@ MediaWindowParameters::MediaWindowParameters()
     isResizeable = true;
 }
 
-void MediaWindowParameters::parseFWParams(Object *obj)
+void MediaWindowParameters::parseFWParams(const Dict &params)
 {
-    Object tmp = obj->dictLookup("D");
+    Object tmp = params.lookup("D");
     if (tmp.isArray()) {
         Array *dim = tmp.getArray();
 
@@ -62,7 +62,7 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("RT");
+    tmp = params.lookup("RT");
     if (tmp.isInt()) {
         int t = tmp.getInt();
         switch (t) {
@@ -78,7 +78,7 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("P");
+    tmp = params.lookup("P");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -122,15 +122,15 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("T");
+    tmp = params.lookup("T");
     if (tmp.isBool()) {
         hasTitleBar = tmp.getBool();
     }
-    tmp = obj->dictLookup("UC");
+    tmp = params.lookup("UC");
     if (tmp.isBool()) {
         hasCloseButton = tmp.getBool();
     }
-    tmp = obj->dictLookup("R");
+    tmp = params.lookup("R");
     if (tmp.isInt()) {
         isResizeable = (tmp.getInt() != 0);
     }
@@ -263,9 +263,9 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 
     if (windowParams.type == MediaWindowParameters::windowFloating) {
-        Object winDict = obj->dictLookup("F");
+        const Object winDict = obj->dictLookup("F");
         if (winDict.isDict()) {
-            windowParams.parseFWParams(&winDict);
+            windowParams.parseFWParams(*winDict.getDict());
         }
     }
 }
