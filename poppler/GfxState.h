@@ -366,7 +366,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csCalGray; }
 
     // Construct a CalGray color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(const Array &arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -462,7 +462,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csCalRGB; }
 
     // Construct a CalRGB color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(const Array &arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -539,7 +539,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csLab; }
 
     // Construct a Lab color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(Array *arr, GfxState *state);
+    static std::unique_ptr<GfxColorSpace> parse(const Array &arr, GfxState *state);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -588,7 +588,7 @@ public:
     std::unique_ptr<GfxICCBasedColorSpace> copyAsOwnType() const;
 
     // Construct an ICCBased color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(const Array &arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -647,7 +647,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csIndexed; }
 
     // Construct an Indexed color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -701,7 +701,7 @@ public:
     std::unique_ptr<GfxSeparationColorSpace> copyAsOwnType() const;
 
     // Construct a Separation color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -746,7 +746,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csDeviceN; }
 
     // Construct a DeviceN color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
@@ -790,7 +790,7 @@ public:
     GfxColorSpaceMode getMode() const override { return csPattern; }
 
     // Construct a Pattern color space.  Returns nullptr if unsuccessful.
-    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
+    static std::unique_ptr<GfxColorSpace> parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion);
 
     void getGray(const GfxColor *color, GfxGray *gray) const override;
     void getRGB(const GfxColor *color, GfxRGB *rgb) const override;

@@ -5,7 +5,7 @@
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Pino Toscano <pino@kde.org>
 // Copyright 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008, 2010, 2011, 2017-2019, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -157,14 +157,14 @@ bool OCGs::optContentIsVisible(const Object *dictRef) const
             if (ocg.isArray()) {
                 Object policy = dict->lookup("P");
                 if (policy.isName("AllOn")) {
-                    result = allOn(ocg.getArray());
+                    result = allOn(*ocg.getArray());
                 } else if (policy.isName("AllOff")) {
-                    result = allOff(ocg.getArray());
+                    result = allOff(*ocg.getArray());
                 } else if (policy.isName("AnyOff")) {
-                    result = anyOff(ocg.getArray());
+                    result = anyOff(*ocg.getArray());
                 } else if ((!policy.isName()) || (policy.isName("AnyOn"))) {
                     // this is the default
-                    result = anyOn(ocg.getArray());
+                    result = anyOn(*ocg.getArray());
                 }
             } else if (ocg.isRef()) {
                 OptionalContentGroup *oc = findOcgByRef(ocg.getRef());
@@ -231,10 +231,10 @@ bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) const
     return ret;
 }
 
-bool OCGs::allOn(Array *ocgArray) const
+bool OCGs::allOn(const Array &ocgArray) const
 {
-    for (int i = 0; i < ocgArray->getLength(); ++i) {
-        const Object &ocgItem = ocgArray->getNF(i);
+    for (int i = 0; i < ocgArray.getLength(); ++i) {
+        const Object &ocgItem = ocgArray.getNF(i);
         if (ocgItem.isRef()) {
             OptionalContentGroup *oc = findOcgByRef(ocgItem.getRef());
             if (oc && oc->getState() == OptionalContentGroup::Off) {
@@ -245,10 +245,10 @@ bool OCGs::allOn(Array *ocgArray) const
     return true;
 }
 
-bool OCGs::allOff(Array *ocgArray) const
+bool OCGs::allOff(const Array &ocgArray) const
 {
-    for (int i = 0; i < ocgArray->getLength(); ++i) {
-        const Object &ocgItem = ocgArray->getNF(i);
+    for (int i = 0; i < ocgArray.getLength(); ++i) {
+        const Object &ocgItem = ocgArray.getNF(i);
         if (ocgItem.isRef()) {
             OptionalContentGroup *oc = findOcgByRef(ocgItem.getRef());
             if (oc && oc->getState() == OptionalContentGroup::On) {
@@ -259,10 +259,10 @@ bool OCGs::allOff(Array *ocgArray) const
     return true;
 }
 
-bool OCGs::anyOn(Array *ocgArray) const
+bool OCGs::anyOn(const Array &ocgArray) const
 {
-    for (int i = 0; i < ocgArray->getLength(); ++i) {
-        const Object &ocgItem = ocgArray->getNF(i);
+    for (int i = 0; i < ocgArray.getLength(); ++i) {
+        const Object &ocgItem = ocgArray.getNF(i);
         if (ocgItem.isRef()) {
             OptionalContentGroup *oc = findOcgByRef(ocgItem.getRef());
             if (oc && oc->getState() == OptionalContentGroup::On) {
@@ -273,10 +273,10 @@ bool OCGs::anyOn(Array *ocgArray) const
     return false;
 }
 
-bool OCGs::anyOff(Array *ocgArray) const
+bool OCGs::anyOff(const Array &ocgArray) const
 {
-    for (int i = 0; i < ocgArray->getLength(); ++i) {
-        const Object &ocgItem = ocgArray->getNF(i);
+    for (int i = 0; i < ocgArray.getLength(); ++i) {
+        const Object &ocgItem = ocgArray.getNF(i);
         if (ocgItem.isRef()) {
             OptionalContentGroup *oc = findOcgByRef(ocgItem.getRef());
             if (oc && oc->getState() == OptionalContentGroup::Off) {

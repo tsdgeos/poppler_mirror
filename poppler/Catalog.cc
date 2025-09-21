@@ -430,11 +430,11 @@ std::unique_ptr<LinkDest> Catalog::createLinkDest(Object *obj)
 {
     std::unique_ptr<LinkDest> dest;
     if (obj->isArray()) {
-        dest = std::make_unique<LinkDest>(obj->getArray());
+        dest = std::make_unique<LinkDest>(*obj->getArray());
     } else if (obj->isDict()) {
         Object obj2 = obj->dictLookup("D");
         if (obj2.isArray()) {
-            dest = std::make_unique<LinkDest>(obj2.getArray());
+            dest = std::make_unique<LinkDest>(*obj2.getArray());
         } else {
             error(errSyntaxWarning, -1, "Bad named destination value");
         }
@@ -697,17 +697,17 @@ Catalog::PageLayout Catalog::getPageLayout()
 NameTree::NameTree() = default;
 NameTree::~NameTree() = default;
 
-NameTree::Entry::Entry(Array *array, int index)
+NameTree::Entry::Entry(const Array &array, int index)
 {
-    if (!array->getString(index, &name)) {
-        Object aux = array->get(index);
+    if (!array.getString(index, &name)) {
+        Object aux = array.get(index);
         if (aux.isString()) {
             name.append(aux.getString());
         } else {
             error(errSyntaxError, -1, "Invalid page tree");
         }
     }
-    value = array->getNF(index + 1).copy();
+    value = array.getNF(index + 1).copy();
 }
 
 NameTree::Entry::~Entry() = default;
@@ -732,7 +732,7 @@ void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
     Object names = tree->dictLookup("Names");
     if (names.isArray()) {
         for (int i = 0; i < names.arrayGetLength(); i += 2) {
-            auto entry = std::make_unique<Entry>(names.getArray(), i);
+            auto entry = std::make_unique<Entry>(*names.getArray(), i);
             entries.push_back(std::move(entry));
         }
     }

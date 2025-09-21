@@ -318,7 +318,7 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict)
 
 AnnotPath::AnnotPath() = default;
 
-AnnotPath::AnnotPath(Array *array)
+AnnotPath::AnnotPath(const Array &array)
 {
     parsePathArray(array);
 }
@@ -346,27 +346,27 @@ double AnnotPath::getY(int coord) const
     return 0;
 }
 
-void AnnotPath::parsePathArray(Array *array)
+void AnnotPath::parsePathArray(const Array &array)
 {
-    if (array->getLength() % 2) {
+    if (array.getLength() % 2) {
         error(errSyntaxError, -1, "Bad Annot Path");
         return;
     }
 
-    const auto tempLength = array->getLength() / 2;
+    const auto tempLength = array.getLength() / 2;
     std::vector<AnnotCoord> tempCoords;
     tempCoords.reserve(tempLength);
     for (int i = 0; i < tempLength; i++) {
         double x = 0, y = 0;
 
-        Object obj1 = array->get(i * 2);
+        Object obj1 = array.get(i * 2);
         if (obj1.isNum()) {
             x = obj1.getNum();
         } else {
             return;
         }
 
-        obj1 = array->get((i * 2) + 1);
+        obj1 = array.get((i * 2) + 1);
         if (obj1.isNum()) {
             y = obj1.getNum();
         } else {
@@ -399,9 +399,9 @@ AnnotCalloutMultiLine::~AnnotCalloutMultiLine() = default;
 // AnnotQuadrilateral
 //------------------------------------------------------------------------
 
-AnnotQuadrilaterals::AnnotQuadrilaterals(Array *array, PDFRectangle *rect)
+AnnotQuadrilaterals::AnnotQuadrilaterals(const Array &array, PDFRectangle *rect)
 {
-    int arrayLength = array->getLength();
+    int arrayLength = array.getLength();
     int quadsLength = 0;
     double quadArray[8];
 
@@ -415,7 +415,7 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(Array *array, PDFRectangle *rect)
         auto quads = std::make_unique<AnnotQuadrilateral[]>(quadsLength);
         for (i = 0; i < quadsLength; i++) {
             for (int j = 0; j < 8; j++) {
-                Object obj = array->get(i * 8 + j);
+                Object obj = array.get(i * 8 + j);
                 if (obj.isNum()) {
                     quadArray[j] = obj.getNum();
                 } else {
@@ -555,30 +555,30 @@ AnnotBorderArray::AnnotBorderArray()
     verticalCorner = 0;
 }
 
-AnnotBorderArray::AnnotBorderArray(Array *array)
+AnnotBorderArray::AnnotBorderArray(const Array &array)
 {
     Object obj1;
-    int arrayLength = array->getLength();
+    int arrayLength = array.getLength();
 
     bool correct = true;
     if (arrayLength == 3 || arrayLength == 4) {
         // implementation note 81 in Appendix H.
 
-        obj1 = array->get(0);
+        obj1 = array.get(0);
         if (obj1.isNum()) {
             horizontalCorner = obj1.getNum();
         } else {
             correct = false;
         }
 
-        obj1 = array->get(1);
+        obj1 = array.get(1);
         if (obj1.isNum()) {
             verticalCorner = obj1.getNum();
         } else {
             correct = false;
         }
 
-        obj1 = array->get(2);
+        obj1 = array.get(2);
         if (obj1.isNum()) {
             width = obj1.getNum();
         } else {
@@ -586,7 +586,7 @@ AnnotBorderArray::AnnotBorderArray(Array *array)
         }
 
         if (arrayLength == 4) {
-            obj1 = array->get(3);
+            obj1 = array.get(3);
             if (obj1.isArray()) {
                 correct = parseDashArray(&obj1);
             } else {
@@ -759,17 +759,17 @@ AnnotColor::AnnotColor(double c, double m, double y, double k)
 // If <adjust> is +1, color is brightened;
 // if <adjust> is -1, color is darkened;
 // otherwise color is not modified.
-AnnotColor::AnnotColor(Array *array, int adjust)
+AnnotColor::AnnotColor(const Array &array, int adjust)
 {
     int i;
 
-    length = array->getLength();
+    length = array.getLength();
     if (length > 4) {
         length = 4;
     }
 
     for (i = 0; i < length; i++) {
-        Object obj1 = array->get(i);
+        Object obj1 = array.get(i);
         if (obj1.isNum()) {
             values[i] = obj1.getNum();
 
@@ -1130,7 +1130,7 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
     if (obj1.isArray()) {
         Array *colorComponents = obj1.getArray();
         if (colorComponents->getLength() > 0) {
-            borderColor = std::make_unique<AnnotColor>(colorComponents);
+            borderColor = std::make_unique<AnnotColor>(*colorComponents);
         }
     }
 
@@ -1138,7 +1138,7 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict)
     if (obj1.isArray()) {
         Array *colorComponents = obj1.getArray();
         if (colorComponents->getLength() > 0) {
-            backColor = std::make_unique<AnnotColor>(colorComponents);
+            backColor = std::make_unique<AnnotColor>(*colorComponents);
         }
     }
 
@@ -1415,12 +1415,12 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     // follow this rule for annots tha can have a BS entry.
     obj1 = dict->lookup("Border");
     if (obj1.isArray()) {
-        border = std::make_unique<AnnotBorderArray>(obj1.getArray());
+        border = std::make_unique<AnnotBorderArray>(*obj1.getArray());
     }
 
     obj1 = dict->lookup("C");
     if (obj1.isArray()) {
-        color = std::make_unique<AnnotColor>(obj1.getArray());
+        color = std::make_unique<AnnotColor>(*obj1.getArray());
     }
 
     obj1 = dict->lookup("StructParent");
@@ -2780,7 +2780,7 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict)
     */
     obj1 = dict->lookup("QuadPoints");
     if (obj1.isArray()) {
-        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(obj1.getArray(), rect.get());
+        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray(), rect.get());
     }
 
     obj1 = dict->lookup("BS");
@@ -3442,7 +3442,7 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("IC");
     if (obj1.isArray()) {
-        interiorColor = std::make_unique<AnnotColor>(obj1.getArray());
+        interiorColor = std::make_unique<AnnotColor>(*obj1.getArray());
     }
 
     leaderLineLength = dict->lookup("LL").getNumWithDefaultValue(0);
@@ -3870,7 +3870,7 @@ void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("QuadPoints");
     if (obj1.isArray()) {
-        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(obj1.getArray(), rect.get());
+        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray(), rect.get());
     } else {
         error(errSyntaxError, -1, "Bad Annot Text Markup QuadPoints");
         ok = false;
@@ -3918,7 +3918,7 @@ void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
         a->add(Object(quadPoints.getY4(i)));
     }
 
-    quadrilaterals = std::make_unique<AnnotQuadrilaterals>(a, rect.get());
+    quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*a, rect.get());
 
     annotObj.dictSet("QuadPoints", Object(a));
     invalidateAppearance();
@@ -5968,7 +5968,7 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("IC");
     if (obj1.isArray()) {
-        interiorColor = std::make_unique<AnnotColor>(obj1.getArray());
+        interiorColor = std::make_unique<AnnotColor>(*obj1.getArray());
     }
 
     obj1 = dict->lookup("BS");
@@ -6133,7 +6133,7 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("Vertices");
     if (obj1.isArray()) {
-        vertices = std::make_unique<AnnotPath>(obj1.getArray());
+        vertices = std::make_unique<AnnotPath>(*obj1.getArray());
     } else {
         vertices = std::make_unique<AnnotPath>();
         error(errSyntaxError, -1, "Bad Annot Polygon Vertices");
@@ -6160,7 +6160,7 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("IC");
     if (obj1.isArray()) {
-        interiorColor = std::make_unique<AnnotColor>(obj1.getArray());
+        interiorColor = std::make_unique<AnnotColor>(*obj1.getArray());
     }
 
     obj1 = dict->lookup("BS");
@@ -6219,7 +6219,7 @@ void AnnotPolygon::setVertices(const AnnotPath &path)
         a->add(Object(path.getY(i)));
     }
 
-    vertices = std::make_unique<AnnotPath>(a);
+    vertices = std::make_unique<AnnotPath>(*a);
 
     update("Vertices", Object(a));
     invalidateAppearance();
@@ -6495,7 +6495,7 @@ void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("InkList");
     if (obj1.isArray()) {
-        parseInkList(obj1.getArray());
+        parseInkList(*obj1.getArray());
     } else {
         error(errSyntaxError, -1, "Bad Annot Ink List");
 
@@ -6528,15 +6528,15 @@ void AnnotInk::writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths
     }
 }
 
-void AnnotInk::parseInkList(Array *array)
+void AnnotInk::parseInkList(const Array &array)
 {
-    int inkListLength = array->getLength();
+    int inkListLength = array.getLength();
     inkList.clear();
     inkList.reserve(inkListLength);
     for (int i = 0; i < inkListLength; i++) {
-        Object obj2 = array->get(i);
+        Object obj2 = array.get(i);
         if (obj2.isArray()) {
-            inkList.push_back(std::make_unique<AnnotPath>(obj2.getArray()));
+            inkList.push_back(std::make_unique<AnnotPath>(*obj2.getArray()));
         } else {
             inkList.emplace_back();
         }
@@ -6548,7 +6548,7 @@ void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
     Array *a = new Array(doc->getXRef());
     writeInkList(paths, a);
 
-    parseInkList(a);
+    parseInkList(*a);
     annotObj.dictSet("InkList", Object(a));
     invalidateAppearance();
 }

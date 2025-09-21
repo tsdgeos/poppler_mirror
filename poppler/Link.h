@@ -17,7 +17,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
-// Copyright (C) 2018-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -121,7 +121,7 @@ class POPPLER_PRIVATE_EXPORT LinkDest
 {
 public:
     // Build a LinkDest from the array.
-    explicit LinkDest(const Array *a);
+    explicit LinkDest(const Array &a);
 
     // Was the LinkDest created successfully?
     bool isOk() const { return ok; }

@@ -91,7 +91,7 @@ public:
 private:
     struct Entry
     {
-        Entry(Array *array, int index);
+        Entry(const Array &array, int index);
         ~Entry();
         GooString name;
         Object value;

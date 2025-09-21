@@ -217,7 +217,7 @@ const std::vector<std::unique_ptr<LinkAction>> &LinkAction::nextActions() const
 // LinkDest
 //------------------------------------------------------------------------
 
-LinkDest::LinkDest(const Array *a)
+LinkDest::LinkDest(const Array &a)
 {
     // initialize fields
     left = bottom = right = top = zoom = 0;
@@ -225,11 +225,11 @@ LinkDest::LinkDest(const Array *a)
     ok = false;
 
     // get page
-    if (a->getLength() < 2) {
+    if (a.getLength() < 2) {
         error(errSyntaxWarning, -1, "Annotation destination array is too short");
         return;
     }
-    const Object &obj0 = a->getNF(0);
+    const Object &obj0 = a.getNF(0);
     if (obj0.isInt()) {
         pageNum = obj0.getInt() + 1;
         pageIsRef = false;
@@ -242,15 +242,15 @@ LinkDest::LinkDest(const Array *a)
     }
 
     // get destination type
-    Object obj1 = a->get(1);
+    Object obj1 = a.get(1);
 
     // XYZ link
     if (obj1.isName("XYZ")) {
         kind = destXYZ;
-        if (a->getLength() < 3) {
+        if (a.getLength() < 3) {
             changeLeft = false;
         } else {
-            Object obj2 = a->get(2);
+            Object obj2 = a.get(2);
             if (obj2.isNull()) {
                 changeLeft = false;
             } else if (obj2.isNum()) {
@@ -261,10 +261,10 @@ LinkDest::LinkDest(const Array *a)
                 return;
             }
         }
-        if (a->getLength() < 4) {
+        if (a.getLength() < 4) {
             changeTop = false;
         } else {
-            Object obj2 = a->get(3);
+            Object obj2 = a.get(3);
             if (obj2.isNull()) {
                 changeTop = false;
             } else if (obj2.isNum()) {
@@ -275,10 +275,10 @@ LinkDest::LinkDest(const Array *a)
                 return;
             }
         }
-        if (a->getLength() < 5) {
+        if (a.getLength() < 5) {
             changeZoom = false;
         } else {
-            Object obj2 = a->get(4);
+            Object obj2 = a.get(4);
             if (obj2.isNull()) {
                 changeZoom = false;
             } else if (obj2.isNum()) {
@@ -297,10 +297,10 @@ LinkDest::LinkDest(const Array *a)
         // FitH link
     } else if (obj1.isName("FitH")) {
         kind = destFitH;
-        if (a->getLength() < 3) {
+        if (a.getLength() < 3) {
             changeTop = false;
         } else {
-            Object obj2 = a->get(2);
+            Object obj2 = a.get(2);
             if (obj2.isNull()) {
                 changeTop = false;
             } else if (obj2.isNum()) {
@@ -314,12 +314,12 @@ LinkDest::LinkDest(const Array *a)
 
         // FitV link
     } else if (obj1.isName("FitV")) {
-        if (a->getLength() < 3) {
+        if (a.getLength() < 3) {
             error(errSyntaxWarning, -1, "Annotation destination array is too short");
             return;
         }
         kind = destFitV;
-        Object obj2 = a->get(2);
+        Object obj2 = a.get(2);
         if (obj2.isNull()) {
             changeLeft = false;
         } else if (obj2.isNum()) {
@@ -332,33 +332,33 @@ LinkDest::LinkDest(const Array *a)
 
         // FitR link
     } else if (obj1.isName("FitR")) {
-        if (a->getLength() < 6) {
+        if (a.getLength() < 6) {
             error(errSyntaxWarning, -1, "Annotation destination array is too short");
             return;
         }
         kind = destFitR;
-        Object obj2 = a->get(2);
+        Object obj2 = a.get(2);
         if (obj2.isNum()) {
             left = obj2.getNum();
         } else {
             error(errSyntaxWarning, -1, "Bad annotation destination position");
             kind = destFit;
         }
-        obj2 = a->get(3);
+        obj2 = a.get(3);
         if (obj2.isNum()) {
             bottom = obj2.getNum();
         } else {
             error(errSyntaxWarning, -1, "Bad annotation destination position");
             kind = destFit;
         }
-        obj2 = a->get(4);
+        obj2 = a.get(4);
         if (obj2.isNum()) {
             right = obj2.getNum();
         } else {
             error(errSyntaxWarning, -1, "Bad annotation destination position");
             kind = destFit;
         }
-        obj2 = a->get(5);
+        obj2 = a.get(5);
         if (obj2.isNum()) {
             top = obj2.getNum();
         } else {
@@ -372,12 +372,12 @@ LinkDest::LinkDest(const Array *a)
 
         // FitBH link
     } else if (obj1.isName("FitBH")) {
-        if (a->getLength() < 3) {
+        if (a.getLength() < 3) {
             error(errSyntaxWarning, -1, "Annotation destination array is too short");
             return;
         }
         kind = destFitBH;
-        Object obj2 = a->get(2);
+        Object obj2 = a.get(2);
         if (obj2.isNull()) {
             changeTop = false;
         } else if (obj2.isNum()) {
@@ -390,12 +390,12 @@ LinkDest::LinkDest(const Array *a)
 
         // FitBV link
     } else if (obj1.isName("FitBV")) {
-        if (a->getLength() < 3) {
+        if (a.getLength() < 3) {
             error(errSyntaxWarning, -1, "Annotation destination array is too short");
             return;
         }
         kind = destFitBV;
-        Object obj2 = a->get(2);
+        Object obj2 = a.get(2);
         if (obj2.isNull()) {
             changeLeft = false;
         } else if (obj2.isNum()) {
@@ -429,7 +429,7 @@ LinkGoTo::LinkGoTo(const Object *destObj)
 
         // destination dictionary
     } else if (destObj->isArray()) {
-        dest = std::make_unique<LinkDest>(destObj->getArray());
+        dest = std::make_unique<LinkDest>(*destObj->getArray());
         if (!dest->isOk()) {
             dest.reset();
         }
@@ -462,7 +462,7 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj)
 
         // destination dictionary
     } else if (destObj->isArray()) {
-        dest = std::make_unique<LinkDest>(destObj->getArray());
+        dest = std::make_unique<LinkDest>(*destObj->getArray());
         if (!dest->isOk()) {
             dest.reset();
         }

@@ -4,7 +4,7 @@
 //
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2013, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2013, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -54,10 +54,10 @@ private:
     bool ok;
 
     bool evalOCVisibilityExpr(const Object *expr, int recursion) const;
-    bool allOn(Array *ocgArray) const;
-    bool allOff(Array *ocgArray) const;
-    bool anyOn(Array *ocgArray) const;
-    bool anyOff(Array *ocgArray) const;
+    bool allOn(const Array &ocgArray) const;
+    bool allOff(const Array &ocgArray) const;
+    bool anyOn(const Array &ocgArray) const;
+    bool anyOff(const Array &ocgArray) const;
 
     std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> optionalContentGroups;
 
