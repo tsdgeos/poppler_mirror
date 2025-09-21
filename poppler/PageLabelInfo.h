@@ -41,7 +41,7 @@ private:
 
     struct Interval
     {
-        Interval(Object *dict, int baseA);
+        Interval(const Object &dict, int baseA);
 
         std::string prefix;
         enum NumberStyle
