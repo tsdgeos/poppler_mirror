@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018-2020, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018-2020, 2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -33,7 +33,7 @@ public:
     PageLabelInfo(const PageLabelInfo &) = delete;
     PageLabelInfo &operator=(const PageLabelInfo &) = delete;
 
-    bool labelToIndex(GooString *label, int *index) const;
+    bool labelToIndex(const GooString &label, int *index) const;
     bool indexToLabel(int index, GooString *label) const;
 
 private:

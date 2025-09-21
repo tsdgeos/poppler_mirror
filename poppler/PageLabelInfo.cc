@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2013, 2017, 2018, 2020, 2021, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2013, 2017, 2018, 2020, 2021, 2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -115,11 +115,11 @@ void PageLabelInfo::parse(const Object *tree, RefRecursionChecker &alreadyParsed
     }
 }
 
-bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
+bool PageLabelInfo::labelToIndex(const GooString &label, int *index) const
 {
-    const char *const str = label->c_str();
-    const std::size_t strLen = label->size();
-    const bool strUnicode = hasUnicodeByteOrderMark(label->toStr());
+    const char *const str = label.c_str();
+    const std::size_t strLen = label.size();
+    const bool strUnicode = hasUnicodeByteOrderMark(label.toStr());
     int number;
     bool ok;
 
@@ -131,7 +131,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 
         switch (interval.style) {
         case Interval::Arabic:
-            std::tie(number, ok) = fromDecimal(label->toStr().substr(prefixLen), strUnicode);
+            std::tie(number, ok) = fromDecimal(label.toStr().substr(prefixLen), strUnicode);
             if (ok && number - interval.first < interval.length) {
                 *index = interval.base + number - interval.first;
                 return true;
@@ -154,7 +154,7 @@ bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
             }
             break;
         case Interval::None:
-            if (interval.length == 1 && label->toStr() == interval.prefix) {
+            if (interval.length == 1 && label.toStr() == interval.prefix) {
                 *index = interval.base;
                 return true;
             } else {

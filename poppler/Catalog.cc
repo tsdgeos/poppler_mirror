@@ -801,7 +801,7 @@ bool Catalog::labelToIndex(GooString *label, int *index)
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        if (!pli->labelToIndex(label, index)) {
+        if (!pli->labelToIndex(*label, index)) {
             return false;
         }
     } else {
