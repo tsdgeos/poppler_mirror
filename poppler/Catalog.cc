@@ -939,7 +939,7 @@ StructTreeRoot *Catalog::getStructTreeRoot()
 
         Object root = catalog.dictLookup("StructTreeRoot");
         if (root.isDict("StructTreeRoot")) {
-            structTreeRoot = new StructTreeRoot(doc, root.getDict());
+            structTreeRoot = new StructTreeRoot(doc, *root.getDict());
         }
     }
     return structTreeRoot;

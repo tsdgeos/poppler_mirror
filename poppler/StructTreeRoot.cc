@@ -22,10 +22,9 @@
 #include <set>
 #include <cassert>
 
-StructTreeRoot::StructTreeRoot(PDFDoc *docA, Dict *structTreeRootDict) : doc(docA)
+StructTreeRoot::StructTreeRoot(PDFDoc *docA, const Dict &structTreeRootDict) : doc(docA)
 {
     assert(doc);
-    assert(structTreeRootDict);
     parse(structTreeRootDict);
 }
 
@@ -36,29 +35,29 @@ StructTreeRoot::~StructTreeRoot()
     }
 }
 
-void StructTreeRoot::parse(Dict *root)
+void StructTreeRoot::parse(const Dict &root)
 {
     // The RoleMap/ClassMap dictionaries are needed by all the parsing
     // functions, which will resolve the custom names to canonical
     // standard names.
-    roleMap = root->lookup("RoleMap");
-    classMap = root->lookup("ClassMap");
+    roleMap = root.lookup("RoleMap");
+    classMap = root.lookup("ClassMap");
 
     // ParentTree (optional). If present, it must be a number tree,
     // otherwise it is not possible to map stream objects to their
     // corresponding structure element. Here only the references are
     // loaded into the array, the pointers to the StructElements will
     // be filled-in later when parsing them.
-    const Object parentTreeObj = root->lookup("ParentTree");
+    const Object parentTreeObj = root.lookup("ParentTree");
     if (parentTreeObj.isDict()) {
-        parseNumberTreeNode(parentTreeObj.getDict());
+        parseNumberTreeNode(*parentTreeObj.getDict());
     }
 
     RefRecursionChecker seenElements;
 
     // Parse the children StructElements
     const bool marked = doc->getCatalog()->getMarkInfo() & Catalog::markInfoMarked;
-    Object kids = root->lookup("K");
+    Object kids = root.lookup("K");
     if (kids.isArray()) {
         if (marked && kids.arrayGetLength() > 1) {
             error(errSyntaxWarning, -1, "K in StructTreeRoot has more than one children in a tagged PDF");
@@ -91,7 +90,7 @@ void StructTreeRoot::parse(Dict *root)
         StructElement *child = new StructElement(kids.getDict(), this, nullptr, seenElements);
         if (child->isOk()) {
             appendChild(child);
-            const Object &ref = root->lookupNF("K");
+            const Object &ref = root.lookupNF("K");
             if (ref.isRef()) {
                 parentTreeAdd(ref.getRef(), child);
             }
@@ -107,14 +106,14 @@ void StructTreeRoot::parse(Dict *root)
     std::multimap<Ref, Parent *>().swap(refToParentMap);
 }
 
-void StructTreeRoot::parseNumberTreeNode(Dict *node)
+void StructTreeRoot::parseNumberTreeNode(const Dict &node)
 {
-    Object kids = node->lookup("Kids");
+    Object kids = node.lookup("Kids");
     if (kids.isArray()) {
         for (int i = 0; i < kids.arrayGetLength(); i++) {
             Object obj = kids.arrayGet(i);
             if (obj.isDict()) {
-                parseNumberTreeNode(obj.getDict());
+                parseNumberTreeNode(*obj.getDict());
             } else {
                 error(errSyntaxError, -1, "Kids item at position {0:d} is wrong type ({1:s})", i, obj.getTypeName());
             }
@@ -124,7 +123,7 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
         error(errSyntaxError, -1, "Kids object is wrong type ({0:s})", kids.getTypeName());
     }
 
-    Object nums = node->lookup("Nums");
+    Object nums = node.lookup("Nums");
     if (nums.isArray()) {
         if (nums.arrayGetLength() % 2 == 0) {
             // keys in even positions, references in odd ones
