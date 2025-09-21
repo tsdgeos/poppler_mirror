@@ -801,9 +801,11 @@ bool Catalog::labelToIndex(const GooString &label, int *index)
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        if (!pli->labelToIndex(label.toStr(), index)) {
+        std::optional<int> labelIndex = pli->labelToIndex(label.toStr());
+        if (!labelIndex) {
             return false;
         }
+        *index = *labelIndex;
     } else {
         *index = strtol(label.c_str(), &end, 10) - 1;
         if (*end != '\0') {

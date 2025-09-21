@@ -115,13 +115,12 @@ void PageLabelInfo::parse(const Object &tree, RefRecursionChecker &alreadyParsed
     }
 }
 
-bool PageLabelInfo::labelToIndex(const std::string &label, int *index) const
+std::optional<int> PageLabelInfo::labelToIndex(const std::string &label) const
 {
     const char *const str = label.c_str();
     const std::size_t strLen = label.size();
     const bool strUnicode = hasUnicodeByteOrderMark(label);
     int number;
-    bool ok;
 
     for (const auto &interval : intervals) {
         const std::size_t prefixLen = interval.prefix.size();
@@ -131,32 +130,29 @@ bool PageLabelInfo::labelToIndex(const std::string &label, int *index) const
 
         switch (interval.style) {
         case Interval::Arabic:
+            bool ok;
             std::tie(number, ok) = fromDecimal(label.substr(prefixLen), strUnicode);
             if (ok && number - interval.first < interval.length) {
-                *index = interval.base + number - interval.first;
-                return true;
+                return interval.base + number - interval.first;
             }
             break;
         case Interval::LowercaseRoman:
         case Interval::UppercaseRoman:
             number = fromRoman(str + prefixLen);
             if (number >= 0 && number - interval.first < interval.length) {
-                *index = interval.base + number - interval.first;
-                return true;
+                return interval.base + number - interval.first;
             }
             break;
         case Interval::UppercaseLatin:
         case Interval::LowercaseLatin:
             number = fromLatin(str + prefixLen);
             if (number >= 0 && number - interval.first < interval.length) {
-                *index = interval.base + number - interval.first;
-                return true;
+                return interval.base + number - interval.first;
             }
             break;
         case Interval::None:
             if (interval.length == 1 && label == interval.prefix) {
-                *index = interval.base;
-                return true;
+                return interval.base;
             } else {
                 error(errSyntaxError, -1, "asking to convert label to page index in an unknown scenario, report a bug");
             }
@@ -164,7 +160,7 @@ bool PageLabelInfo::labelToIndex(const std::string &label, int *index) const
         }
     }
 
-    return false;
+    return {};
 }
 
 bool PageLabelInfo::indexToLabel(int index, GooString *label) const
