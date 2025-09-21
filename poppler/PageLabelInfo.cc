@@ -25,10 +25,10 @@
 #include "PageLabelInfo.h"
 #include "PageLabelInfo_p.h"
 
-PageLabelInfo::Interval::Interval(const Object &dict, int baseA)
+PageLabelInfo::Interval::Interval(const Dict &dict, int baseA)
 {
     style = None;
-    Object obj = dict.dictLookup("S");
+    Object obj = dict.lookup("S");
     if (obj.isName()) {
         if (obj.isName("D")) {
             style = Arabic;
@@ -43,13 +43,13 @@ PageLabelInfo::Interval::Interval(const Object &dict, int baseA)
         }
     }
 
-    obj = dict.dictLookup("P");
+    obj = dict.lookup("P");
     if (obj.isString()) {
         const auto str = obj.getString();
         prefix.assign(str->toStr());
     }
 
-    obj = dict.dictLookup("St");
+    obj = dict.lookup("St");
     if (obj.isInt()) {
         first = obj.getInt();
     } else {
@@ -94,7 +94,7 @@ void PageLabelInfo::parse(const Object &tree, RefRecursionChecker &alreadyParsed
                 continue;
             }
 
-            intervals.emplace_back(obj, base);
+            intervals.emplace_back(*obj.getDict(), base);
         }
     }
 
