@@ -121,7 +121,7 @@ struct MediaParameters
 class POPPLER_PRIVATE_EXPORT MediaRendition
 {
 public:
-    explicit MediaRendition(Object *obj);
+    explicit MediaRendition(const Dict &dict);
     MediaRendition(const MediaRendition &other);
     ~MediaRendition();
     MediaRendition &operator=(const MediaRendition &) = delete;

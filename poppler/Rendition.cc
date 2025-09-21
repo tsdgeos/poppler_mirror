@@ -272,7 +272,7 @@ void MediaParameters::parseMediaScreenParameters(const Dict &screenDict)
 
 MediaRendition::~MediaRendition() = default;
 
-MediaRendition::MediaRendition(Object *obj)
+MediaRendition::MediaRendition(const Dict &dict)
 {
     bool hasClip = false;
 
@@ -282,7 +282,7 @@ MediaRendition::MediaRendition(Object *obj)
     //
     // Parse media clip data
     //
-    Object tmp2 = obj->dictLookup("C");
+    Object tmp2 = dict.lookup("C");
     if (tmp2.isDict()) { // media clip
         hasClip = true;
         Object tmp = tmp2.dictLookup("S");
@@ -329,7 +329,7 @@ MediaRendition::MediaRendition(Object *obj)
 
     //
     // parse Media Play Parameters
-    tmp2 = obj->dictLookup("P");
+    tmp2 = dict.lookup("P");
     if (tmp2.isDict()) { // media play parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
@@ -346,7 +346,7 @@ MediaRendition::MediaRendition(Object *obj)
 
     //
     // parse Media Screen Parameters
-    tmp2 = obj->dictLookup("SP");
+    tmp2 = dict.lookup("SP");
     if (tmp2.isDict()) { // media screen parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
