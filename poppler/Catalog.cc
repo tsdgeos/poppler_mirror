@@ -920,7 +920,7 @@ PageLabelInfo *Catalog::getPageLabelInfo()
 
         const Object obj = catDict.dictLookup("PageLabels");
         if (obj.isDict()) {
-            pageLabelInfo = new PageLabelInfo(obj, getNumPages());
+            pageLabelInfo = new PageLabelInfo(*obj.getDict(), getNumPages());
         }
     }
 
