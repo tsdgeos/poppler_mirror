@@ -149,19 +149,19 @@ MediaParameters::MediaParameters()
     duration = 0;
 }
 
-void MediaParameters::parseMediaPlayParameters(Object *obj)
+void MediaParameters::parseMediaPlayParameters(const Dict &playDict)
 {
-    Object tmp = obj->dictLookup("V");
+    Object tmp = playDict.lookup("V");
     if (tmp.isInt()) {
         volume = tmp.getInt();
     }
 
-    tmp = obj->dictLookup("C");
+    tmp = playDict.lookup("C");
     if (tmp.isBool()) {
         showControls = tmp.getBool();
     }
 
-    tmp = obj->dictLookup("F");
+    tmp = playDict.lookup("F");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -189,7 +189,7 @@ void MediaParameters::parseMediaPlayParameters(Object *obj)
 
     // duration parsing
     // duration's default value is set to 0, which means : intrinsinc media duration
-    tmp = obj->dictLookup("D");
+    tmp = playDict.lookup("D");
     if (tmp.isDict()) {
         Object oname = tmp.dictLookup("S");
         if (oname.isName()) {
@@ -208,12 +208,12 @@ void MediaParameters::parseMediaPlayParameters(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("A");
+    tmp = playDict.lookup("A");
     if (tmp.isBool()) {
         autoPlay = tmp.getBool();
     }
 
-    tmp = obj->dictLookup("RC");
+    tmp = playDict.lookup("RC");
     if (tmp.isNum()) {
         repeatCount = tmp.getNum();
     }
@@ -333,11 +333,11 @@ MediaRendition::MediaRendition(Object *obj)
     if (tmp2.isDict()) { // media play parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaPlayParameters(&params);
+            MH.parseMediaPlayParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaPlayParameters(&params);
+            BE.parseMediaPlayParameters(*params.getDict());
         }
     } else if (!hasClip) {
         error(errSyntaxError, -1, "Invalid Media Rendition");

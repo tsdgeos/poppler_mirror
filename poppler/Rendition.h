@@ -75,7 +75,7 @@ struct MediaParameters
     ~MediaParameters() = default;
 
     // parse from a "Media Play Parameters" dictionary
-    void parseMediaPlayParameters(Object *playObj);
+    void parseMediaPlayParameters(const Dict &playDict);
     // parse from a "Media Screen Parameters" dictionary
     void parseMediaScreenParameters(Object *screenObj);
 
