@@ -2647,7 +2647,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
     obj1 = acroForm->dictLookup("Fields");
     if (obj1.isArray()) {
         Array *array = obj1.getArray();
-        std::set<Ref> alreadyReadRefs;
+        RefRecursionChecker alreadyReadRefs;
         for (int i = 0; i < array->getLength(); i++) {
             Object obj2 = array->get(i);
             const Object &oref = array->getNF(i);
@@ -2661,10 +2661,9 @@ Form::Form(PDFDoc *docA) : doc(docA)
                 continue;
             }
 
-            if (alreadyReadRefs.find(oref.getRef()) != alreadyReadRefs.end()) {
+            if (!alreadyReadRefs.insert(oref.getRef())) {
                 continue;
             }
-            alreadyReadRefs.insert(oref.getRef());
 
             std::set<int> usedParents;
             rootFields.push_back(createFieldFromDict(std::move(obj2), doc, oref.getRef(), nullptr, &usedParents));
@@ -2697,7 +2696,7 @@ Form::~Form()
 }
 
 // Look up an inheritable field dictionary entry.
-static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParents)
+static Object fieldLookup(Dict *field, const char *key, RefRecursionChecker *usedParents)
 {
     Dict *dict = field;
     Object obj = dict->lookup(key);
@@ -2707,9 +2706,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
     const Object &parent = dict->lookupNF("Parent");
     if (parent.isRef()) {
         const Ref ref = parent.getRef();
-        if (usedParents->find(ref.num) == usedParents->end()) {
-            usedParents->insert(ref.num);
-
+        if (usedParents->insert(ref)) {
             Object obj2 = parent.fetch(dict->getXRef());
             if (obj2.isDict()) {
                 return fieldLookup(obj2.getDict(), key, usedParents);
@@ -2723,7 +2720,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
 
 Object Form::fieldLookup(Dict *field, const char *key)
 {
-    std::set<int> usedParents;
+    RefRecursionChecker usedParents;
     return ::fieldLookup(field, key, &usedParents);
 }
 

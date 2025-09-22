@@ -2132,9 +2132,9 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
         std::set<int>::iterator patternRefIt;
         const int patternRefNum = tPat->getPatternRefNum();
         if (patternRefNum != -1) {
-            if (formsDrawing.find(patternRefNum) == formsDrawing.end()) {
-                patternRefIt = formsDrawing.insert(patternRefNum).first;
-            } else {
+            bool inserted;
+            std::tie(patternRefIt, inserted) = formsDrawing.insert(patternRefNum);
+            if (!inserted) {
                 shouldDrawPattern = false;
             }
         }
@@ -3889,9 +3889,9 @@ void Gfx::doShowText(const GooString *s)
                     std::set<int>::iterator charProcDrawingIt;
                     bool displayCharProc = true;
                     if (refNum != -1) {
-                        if (charProcDrawing.find(refNum) == charProcDrawing.end()) {
-                            charProcDrawingIt = charProcDrawing.insert(refNum).first;
-                        } else {
+                        bool inserted;
+                        std::tie(charProcDrawingIt, inserted) = charProcDrawing.insert(refNum);
+                        if (!inserted) {
                             displayCharProc = false;
                             error(errSyntaxError, -1, "CharProc wants to draw a CharProc that is already being drawn");
                         }
@@ -4086,9 +4086,9 @@ void Gfx::opXObject(Object args[], int numArgs)
         std::set<int>::iterator drawingFormIt;
         if (refObj.isRef()) {
             const int num = refObj.getRef().num;
-            if (formsDrawing.find(num) == formsDrawing.end()) {
-                drawingFormIt = formsDrawing.insert(num).first;
-            } else {
+            bool inserted;
+            std::tie(drawingFormIt, inserted) = formsDrawing.insert(num);
+            if (!inserted) {
                 shouldDoForm = false;
             }
         }
