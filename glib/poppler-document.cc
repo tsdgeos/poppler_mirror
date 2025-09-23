@@ -3889,7 +3889,7 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     GooString signature_text_left;
     signing_data_signature_text_left = poppler_signing_data_get_signature_text_left(signing_data);
     if (signing_data_signature_text_left != nullptr) {
-        signature_text.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text_left));
+        signature_text_left.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text_left));
     }
 
     auto field_partial_name = std::make_unique<GooString>(signing_data_partial_name, strlen(signing_data_partial_name));
