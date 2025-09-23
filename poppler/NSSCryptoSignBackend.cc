@@ -943,14 +943,17 @@ void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_cloc
         inParams[2].type = cert_pi_end;
     }
 
-    CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr, CMSSignerInfo->cmsg->pwfn_arg);
+    int result = 0;
+    if (CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr, CMSSignerInfo->cmsg->pwfn_arg) != SECSuccess) {
+        result = PORT_GetError();
+    }
 
     // Here we are just faking the asynchronousness. It should
     // somehow be the call to CERT_PXIXVerifyCert that would
     // be put in the thread, but I'm not sure about all of the
     // thread safety of nss.
 
-    validationStatus = std::async([result = PORT_GetError(), doneCallback]() {
+    validationStatus = std::async([result, doneCallback]() {
         if (doneCallback) {
             doneCallback();
         }

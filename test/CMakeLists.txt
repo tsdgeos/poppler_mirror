@@ -192,3 +192,85 @@ if(ENABLE_NSS3)
   endforeach()
 
 endif()
+
+if(ENABLE_NSS3)
+  set(pdf_signing_nss_SRCS
+    pdf-signing-nss.cc
+  )
+  add_executable(pdf-signing-nss ${pdf_signing_nss_SRCS})
+  target_include_directories(pdf-signing-nss SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
+  target_link_libraries(pdf-signing-nss poppler)
+
+  set(NSS_SIGNING_PATH ${EXECUTABLE_OUTPUT_PATH}/pdf-signing-nss)
+
+  set(NSS_SIGNING_INPUT_FILE ${TESTDATADIR}/unittestcases/WithActualText.pdf)
+  set(NSS_SIGNING_WORKDIR ${TESTDATADIR}/unittestcases/signing_nss)
+  set(NSSDIR_SIGN ${NSS_SIGNING_WORKDIR}/db_complete/)
+  set(NSSDIR_VERIFY ${NSS_SIGNING_WORKDIR}/db_root_only/)
+
+  add_test(
+      NAME nss-sign-rsa-shortchain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "RSA test key 01" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-rsa-shortchain.pdf
+  )
+  add_test(
+      NAME nss-verify-rsa-shortchain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-rsa-shortchain.pdf
+  )
+  set_tests_properties(nss-sign-rsa-shortchain PROPERTIES FIXTURES_SETUP FIX_RSA01)
+  set_tests_properties(nss-verify-rsa-shortchain PROPERTIES FIXTURES_REQUIRED FIX_RSA01)
+  set_tests_properties(nss-sign-rsa-shortchain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-rsa-shortchain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-rsa-moderatechain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "RSA test key 02" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-rsa-moderatechain.pdf
+  )
+  add_test(
+      NAME nss-verify-rsa-moderatechain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-rsa-moderatechain.pdf
+  )
+  set_tests_properties(nss-sign-rsa-moderatechain PROPERTIES FIXTURES_SETUP FIX_RSA02)
+  set_tests_properties(nss-verify-rsa-moderatechain PROPERTIES FIXTURES_REQUIRED FIX_RSA02)
+  set_tests_properties(nss-sign-rsa-moderatechain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-rsa-moderatechain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-ecdsa-shortchain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "ECDSA test key 01" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-shortchain.pdf
+  )
+  add_test(
+      NAME nss-verify-ecdsa-shortchain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-shortchain.pdf
+  )
+  set_tests_properties(nss-sign-ecdsa-shortchain PROPERTIES FIXTURES_SETUP FIX_ECDSA01)
+  set_tests_properties(nss-verify-ecdsa-shortchain PROPERTIES FIXTURES_REQUIRED FIX_ECDSA01)
+  set_tests_properties(nss-sign-ecdsa-shortchain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-ecdsa-shortchain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-ecdsa-moderatechain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "ECDSA test key 02" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-moderatechain.pdf
+  )
+  add_test(
+      NAME nss-verify-ecdsa-moderatechain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-moderatechain.pdf
+  )
+  set_tests_properties(nss-sign-ecdsa-moderatechain PROPERTIES FIXTURES_SETUP FIX_ECDSA02)
+  set_tests_properties(nss-verify-ecdsa-moderatechain PROPERTIES FIXTURES_REQUIRED FIX_ECDSA02)
+  set_tests_properties(nss-sign-ecdsa-moderatechain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-ecdsa-moderatechain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+  add_test(
+      NAME nss-sign-ecdsa-longchain
+      COMMAND ${NSS_SIGNING_PATH} --sign ${NSSDIR_SIGN} "ECDSA test key 03" ${NSS_SIGNING_INPUT_FILE} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-longchain.pdf
+  )
+  add_test(
+      NAME nss-verify-ecdsa-longchain
+      COMMAND ${NSS_SIGNING_PATH} --verify ${NSSDIR_VERIFY} ${NSS_SIGNING_WORKDIR}/nss-ecdsa-longchain.pdf
+  )
+  set_tests_properties(nss-sign-ecdsa-longchain PROPERTIES FIXTURES_SETUP FIX_ECDSA03)
+  set_tests_properties(nss-verify-ecdsa-longchain PROPERTIES FIXTURES_REQUIRED FIX_ECDSA03)
+  set_tests_properties(nss-sign-ecdsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDDB_SIGN)
+  set_tests_properties(nss-verify-ecdsa-longchain PROPERTIES RESOURCE_LOCK LOCK_NSSDB_VERIFY)
+
+endif()
