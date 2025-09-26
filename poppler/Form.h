@@ -327,10 +327,10 @@ public:
                                                                               const GooString &signatureTextLeft = {}, double fontSize = {}, double leftFontSize = {}, std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {},
                                                                               std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {}, const std::string &imagePath = {});
 
-    // checks the length encoding of the signature and returns the hex encoded signature
-    // if the check passed (and the checked file size as output parameter in checkedFileSize)
-    // otherwise a nullptr is returned
-    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+    // checks the length encoding of the signature and returns the signature
+    // and the length that the signature is supposed to cover.
+    // if invalid, a empty optional and 0 is returned.
+    std::pair<std::optional<std::vector<unsigned char>>, int64_t> getCheckedSignature();
 
     const std::vector<unsigned char> &getSignature() const;
 
@@ -626,10 +626,10 @@ public:
     // the elements of the list are of type Goffset
     std::vector<Goffset> getSignedRangeBounds() const;
 
-    // checks the length encoding of the signature and returns the hex encoded signature
-    // if the check passed (and the checked file size as output parameter in checkedFileSize)
-    // otherwise a nullptr is returned
-    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+    // checks the length encoding of the signature and returns the signature
+    // and the end of data the signature covers
+    // otherwise a nullopt and 0 is returned
+    std::pair<std::optional<std::vector<unsigned char>>, int64_t> getCheckedSignature();
 
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }

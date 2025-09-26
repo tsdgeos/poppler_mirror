@@ -154,8 +154,7 @@ void TestSignatureBasics::testSignedRanges()
 {
     auto signatureFields = doc->getSignatureFields();
 
-    Goffset size0;
-    auto sig0 = signatureFields[0]->getCheckedSignature(&size0);
+    auto [sig0, size0] = signatureFields[0]->getCheckedSignature();
     QVERIFY(sig0);
     auto ranges0 = signatureFields[0]->getSignedRangeBounds();
     QCOMPARE(ranges0.size(), 4);
@@ -165,8 +164,7 @@ void TestSignatureBasics::testSignedRanges()
     QCOMPARE(ranges0[3], 58529);
     QVERIFY(ranges0[3] != size0); // signature does not cover all of it
 
-    Goffset size1;
-    auto sig1 = signatureFields[1]->getCheckedSignature(&size1);
+    auto [sig1, size1] = signatureFields[1]->getCheckedSignature();
     QVERIFY(sig1);
     auto ranges1 = signatureFields[1]->getSignedRangeBounds();
     QCOMPARE(ranges1.size(), 4);

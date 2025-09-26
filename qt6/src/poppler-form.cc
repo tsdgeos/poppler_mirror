@@ -1146,9 +1146,10 @@ static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignatu
             priv->range_bounds.append(bound);
         }
     }
-    const std::optional<GooString> checkedSignature = fws->getCheckedSignature(&priv->docLength);
+    std::optional<std::vector<unsigned char>> checkedSignature;
+    std::tie(checkedSignature, priv->docLength) = fws->getCheckedSignature();
     if (priv->range_bounds.size() == 4 && checkedSignature) {
-        priv->signature = QByteArray::fromHex(checkedSignature->c_str());
+        priv->signature = QByteArray::fromRawData(reinterpret_cast<const char *>(checkedSignature->data()), checkedSignature->size());
     }
 
     return SignatureValidationInfo(priv);
@@ -1205,8 +1206,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
         return FieldAlreadySigned;
     }
 
-    Goffset file_size = 0;
-    const std::optional<GooString> sig = fws->getCheckedSignature(&file_size);
+    const auto [sig, file_size] = fws->getCheckedSignature();
     if (sig) {
         // the above unsigned_signature_field check
         // should already catch this, but double check

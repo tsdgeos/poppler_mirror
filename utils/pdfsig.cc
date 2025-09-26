@@ -84,6 +84,9 @@ static const char *getReadableSigState(SignatureValidationStatus sig_vs)
     case SIGNATURE_NOT_VERIFIED:
         return "Signature has not yet been verified.";
 
+    case SIGNATURE_NOT_FOUND:
+        return "Signature not found.";
+
     default:
         return "Unknown Validation Failure.";
     }
@@ -580,8 +583,7 @@ int main(int argc, char *argv[])
         }
 
         FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
-        Goffset file_size = 0;
-        const std::optional<GooString> sig = ffs->getCheckedSignature(&file_size);
+        auto [sig, file_size] = ffs->getCheckedSignature();
         if (sig) {
             printf("Signature number %d is already signed\n", signatureNumber);
             return 2;
@@ -734,8 +736,7 @@ int main(int argc, char *argv[])
         const std::vector<Goffset> ranges = ffs->getSignedRangeBounds();
         if (ranges.size() == 4) {
             printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
-            Goffset checked_file_size;
-            const std::optional<GooString> signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
+            auto [signature, checked_file_size] = signatures.at(i)->getCheckedSignature();
             if (signature && checked_file_size == ranges[3]) {
                 if (totalDocumentSigned) {
                     printf("multiple signatures is covering entire document. Impossible");
