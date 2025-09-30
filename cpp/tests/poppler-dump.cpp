@@ -280,8 +280,8 @@ static void print_embedded_files(poppler::document *doc)
         std::left(std::cout);
         for (; it != it_end; ++it) {
             poppler::embedded_file *f = *it;
-            std::cout << " " << std::setw(out_width + 10) << f->name() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20) << out_date(f->modification_date_t())
-                      << std::endl
+            std::cout << " " << std::setw(out_width + 10) << f->unicodeName() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20)
+                      << out_date(f->modification_date_t()) << std::endl
                       << "     ";
             if (f->description().empty()) {
                 std::cout << "<no description>";

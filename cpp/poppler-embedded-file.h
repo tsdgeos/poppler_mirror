@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2021, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +35,8 @@ public:
     ~embedded_file();
 
     bool is_valid() const;
-    std::string name() const;
+    [[deprecated]] std::string name() const;
+    ustring unicodeName() const;
     ustring description() const;
     int size() const;
     [[deprecated]] time_type modification_date() const;

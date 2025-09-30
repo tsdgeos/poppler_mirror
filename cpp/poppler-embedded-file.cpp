@@ -3,6 +3,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +74,15 @@ std::string embedded_file::name() const
 {
     const GooString *goo = d->file_spec->getFileName();
     return goo ? std::string(goo->c_str()) : std::string();
+}
+
+/**
+ \returns the name of the embedded file
+ */
+ustring embedded_file::unicodeName() const
+{
+    const GooString *goo = d->file_spec->getFileName();
+    return goo ? detail::unicode_GooString_to_ustring(goo) : ustring();
 }
 
 /**
