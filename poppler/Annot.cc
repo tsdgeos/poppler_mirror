@@ -58,7 +58,7 @@
 // Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
-// Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
+// Copyright (C) 2024, 2025 Lucas Baudin <lucas.baudin@ensae.fr>
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 //
 // To see a description of the changes please see the Changelog file that

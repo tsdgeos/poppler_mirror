@@ -9,6 +9,7 @@
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

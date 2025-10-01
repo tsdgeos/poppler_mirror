@@ -10,6 +10,7 @@
 // Copyright 2017-2019, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018, Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2025, Kevin Backhouse <kevinbackhouse@github.com>
 //
 //========================================================================
 

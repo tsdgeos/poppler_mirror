@@ -5,6 +5,7 @@
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
+ * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

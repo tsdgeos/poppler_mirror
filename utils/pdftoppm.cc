@@ -38,6 +38,7 @@
 // Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
 // Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

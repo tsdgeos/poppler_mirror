@@ -31,6 +31,7 @@
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
 // Copyright (C) 2019, 2022-2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2023 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
