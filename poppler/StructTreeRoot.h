@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013, 2014 Igalia S.L.
-// Copyright 2018, 2019, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -25,7 +25,7 @@ class PDFDoc;
 class POPPLER_PRIVATE_EXPORT StructTreeRoot
 {
 public:
-    StructTreeRoot(PDFDoc *docA, Dict *rootDict);
+    StructTreeRoot(PDFDoc *docA, const Dict &rootDict);
     ~StructTreeRoot();
 
     StructTreeRoot &operator=(const StructTreeRoot &) = delete;
@@ -74,8 +74,8 @@ private:
     std::map<int, std::vector<Parent>> parentTree;
     std::multimap<Ref, Parent *> refToParentMap;
 
-    void parse(Dict *rootDict);
-    void parseNumberTreeNode(Dict *node);
+    void parse(const Dict &rootDict);
+    void parseNumberTreeNode(const Dict &node);
     void parentTreeAdd(const Ref objectRef, StructElement *element);
 
     friend class StructElement;

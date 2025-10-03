@@ -31,7 +31,7 @@ MarkedContentOutputDev::~MarkedContentOutputDev() = default;
 
 void MarkedContentOutputDev::endSpan()
 {
-    if (currentText && currentText->getLength()) {
+    if (currentText && !currentText->empty()) {
         // The TextSpan takes ownership of currentText and
         // increases the reference count for currentFont.
         textSpans.push_back(TextSpan(std::move(currentText), currentFont, currentColor));

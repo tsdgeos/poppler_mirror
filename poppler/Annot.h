@@ -44,7 +44,7 @@
 // Copyright (C) 2022 Martin <martinbts@gmx.net>
 // Copyright (C) 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
-// Copyright (C) 2024 Lucas Baudin <lucas.baudin@ensae.fr>
+// Copyright (C) 2024, 2025 Lucas Baudin <lucas.baudin@ensae.fr>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 //
@@ -138,7 +138,7 @@ class POPPLER_PRIVATE_EXPORT AnnotPath
 {
 public:
     AnnotPath();
-    explicit AnnotPath(Array *array);
+    explicit AnnotPath(const Array &array);
     explicit AnnotPath(std::vector<AnnotCoord> &&coords);
     ~AnnotPath();
 
@@ -152,7 +152,7 @@ public:
 protected:
     std::vector<AnnotCoord> coords;
 
-    void parsePathArray(Array *array);
+    void parsePathArray(const Array &array);
 };
 
 //------------------------------------------------------------------------
@@ -218,7 +218,7 @@ private:
 };
 
 //------------------------------------------------------------------------
-// AnnotQuadrilateral
+// AnnotQuadrilaterals
 //------------------------------------------------------------------------
 
 class POPPLER_PRIVATE_EXPORT AnnotQuadrilaterals
@@ -233,7 +233,7 @@ public:
         AnnotCoord coord1, coord2, coord3, coord4;
     };
 
-    AnnotQuadrilaterals(Array *array, PDFRectangle *rect);
+    AnnotQuadrilaterals(const Array &array, PDFRectangle *rect);
     AnnotQuadrilaterals(std::unique_ptr<AnnotQuadrilateral[]> &&quads, int quadsLength);
     ~AnnotQuadrilaterals();
 
@@ -312,7 +312,7 @@ class POPPLER_PRIVATE_EXPORT AnnotBorderArray : public AnnotBorder
 {
 public:
     AnnotBorderArray();
-    explicit AnnotBorderArray(Array *array);
+    explicit AnnotBorderArray(const Array &array);
 
     void setHorizontalCorner(double hc) { horizontalCorner = hc; }
     void setVerticalCorner(double vc) { verticalCorner = vc; }
@@ -373,7 +373,7 @@ public:
     explicit AnnotColor(double gray);
     AnnotColor(double r, double g, double b);
     AnnotColor(double c, double m, double y, double k);
-    explicit AnnotColor(Array *array, int adjust = 0);
+    explicit AnnotColor(const Array &array, int adjust = 0);
 
     void adjustColor(int adjust);
 
@@ -777,7 +777,7 @@ public:
     bool inRect(double x, double y) const;
 
     // If newFontNeeded is not null, it will contain whether the given font has glyphs to represent the needed text
-    static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
+    static void layoutText(const GooString *text, GooString *outBuf, size_t *i, const GfxFont &font, double *width, double widthLimit, int *charCount, bool noReencode, bool *newFontNeeded = nullptr);
 
     virtual ~Annot();
 
@@ -1370,18 +1370,22 @@ public:
     void draw(Gfx *gfx, bool printing) override;
 
     void setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths);
+    void setDrawBelow(bool drawBelow);
+    bool getDrawBelow();
 
     // getters
     const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }
 
 private:
+    void generateInkAppearance();
     void initialize(PDFDoc *docA, Dict *dict);
     void writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array);
-    void parseInkList(Array *src_array);
+    void parseInkList(const Array &array);
 
     // required
     std::vector<std::unique_ptr<AnnotPath>> inkList; // InkList
 
+    bool drawBelow;
     // optional
     // inherited from Annot
     // AnnotBorderBS border;  // BS

@@ -7,7 +7,7 @@
 // Pino Toscano <pino@kde.org> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
 // Tobias Koenig <tobias.koenig@kdab.com> (c) 2012
-// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024
+// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2024, 2025
 // g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk> (C) 2025
 //
 // This program is free software; you can redistribute it and/or modify
@@ -43,9 +43,9 @@ MediaWindowParameters::MediaWindowParameters()
     isResizeable = true;
 }
 
-void MediaWindowParameters::parseFWParams(Object *obj)
+void MediaWindowParameters::parseFWParams(const Dict &params)
 {
-    Object tmp = obj->dictLookup("D");
+    Object tmp = params.lookup("D");
     if (tmp.isArray()) {
         Array *dim = tmp.getArray();
 
@@ -62,7 +62,7 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("RT");
+    tmp = params.lookup("RT");
     if (tmp.isInt()) {
         int t = tmp.getInt();
         switch (t) {
@@ -78,7 +78,7 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("P");
+    tmp = params.lookup("P");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -122,15 +122,15 @@ void MediaWindowParameters::parseFWParams(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("T");
+    tmp = params.lookup("T");
     if (tmp.isBool()) {
         hasTitleBar = tmp.getBool();
     }
-    tmp = obj->dictLookup("UC");
+    tmp = params.lookup("UC");
     if (tmp.isBool()) {
         hasCloseButton = tmp.getBool();
     }
-    tmp = obj->dictLookup("R");
+    tmp = params.lookup("R");
     if (tmp.isInt()) {
         isResizeable = (tmp.getInt() != 0);
     }
@@ -149,19 +149,19 @@ MediaParameters::MediaParameters()
     duration = 0;
 }
 
-void MediaParameters::parseMediaPlayParameters(Object *obj)
+void MediaParameters::parseMediaPlayParameters(const Dict &playDict)
 {
-    Object tmp = obj->dictLookup("V");
+    Object tmp = playDict.lookup("V");
     if (tmp.isInt()) {
         volume = tmp.getInt();
     }
 
-    tmp = obj->dictLookup("C");
+    tmp = playDict.lookup("C");
     if (tmp.isBool()) {
         showControls = tmp.getBool();
     }
 
-    tmp = obj->dictLookup("F");
+    tmp = playDict.lookup("F");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -189,7 +189,7 @@ void MediaParameters::parseMediaPlayParameters(Object *obj)
 
     // duration parsing
     // duration's default value is set to 0, which means : intrinsinc media duration
-    tmp = obj->dictLookup("D");
+    tmp = playDict.lookup("D");
     if (tmp.isDict()) {
         Object oname = tmp.dictLookup("S");
         if (oname.isName()) {
@@ -208,20 +208,20 @@ void MediaParameters::parseMediaPlayParameters(Object *obj)
         }
     }
 
-    tmp = obj->dictLookup("A");
+    tmp = playDict.lookup("A");
     if (tmp.isBool()) {
         autoPlay = tmp.getBool();
     }
 
-    tmp = obj->dictLookup("RC");
+    tmp = playDict.lookup("RC");
     if (tmp.isNum()) {
         repeatCount = tmp.getNum();
     }
 }
 
-void MediaParameters::parseMediaScreenParameters(Object *obj)
+void MediaParameters::parseMediaScreenParameters(const Dict &screenDict)
 {
-    Object tmp = obj->dictLookup("W");
+    Object tmp = screenDict.lookup("W");
     if (tmp.isInt()) {
         int t = tmp.getInt();
 
@@ -242,7 +242,7 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 
     // background color
-    tmp = obj->dictLookup("B");
+    tmp = screenDict.lookup("B");
     if (tmp.isArray()) {
         Array *color = tmp.getArray();
 
@@ -257,22 +257,22 @@ void MediaParameters::parseMediaScreenParameters(Object *obj)
     }
 
     // opacity
-    tmp = obj->dictLookup("O");
+    tmp = screenDict.lookup("O");
     if (tmp.isNum()) {
         opacity = tmp.getNum();
     }
 
     if (windowParams.type == MediaWindowParameters::windowFloating) {
-        Object winDict = obj->dictLookup("F");
+        const Object winDict = screenDict.lookup("F");
         if (winDict.isDict()) {
-            windowParams.parseFWParams(&winDict);
+            windowParams.parseFWParams(*winDict.getDict());
         }
     }
 }
 
 MediaRendition::~MediaRendition() = default;
 
-MediaRendition::MediaRendition(Object *obj)
+MediaRendition::MediaRendition(const Dict &dict)
 {
     bool hasClip = false;
 
@@ -282,7 +282,7 @@ MediaRendition::MediaRendition(Object *obj)
     //
     // Parse media clip data
     //
-    Object tmp2 = obj->dictLookup("C");
+    Object tmp2 = dict.lookup("C");
     if (tmp2.isDict()) { // media clip
         hasClip = true;
         Object tmp = tmp2.dictLookup("S");
@@ -329,15 +329,15 @@ MediaRendition::MediaRendition(Object *obj)
 
     //
     // parse Media Play Parameters
-    tmp2 = obj->dictLookup("P");
+    tmp2 = dict.lookup("P");
     if (tmp2.isDict()) { // media play parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaPlayParameters(&params);
+            MH.parseMediaPlayParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaPlayParameters(&params);
+            BE.parseMediaPlayParameters(*params.getDict());
         }
     } else if (!hasClip) {
         error(errSyntaxError, -1, "Invalid Media Rendition");
@@ -346,15 +346,15 @@ MediaRendition::MediaRendition(Object *obj)
 
     //
     // parse Media Screen Parameters
-    tmp2 = obj->dictLookup("SP");
+    tmp2 = dict.lookup("SP");
     if (tmp2.isDict()) { // media screen parameters
         Object params = tmp2.dictLookup("MH");
         if (params.isDict()) {
-            MH.parseMediaScreenParameters(&params);
+            MH.parseMediaScreenParameters(*params.getDict());
         }
         params = tmp2.dictLookup("BE");
         if (params.isDict()) {
-            BE.parseMediaScreenParameters(&params);
+            BE.parseMediaScreenParameters(*params.getDict());
         }
     }
 }

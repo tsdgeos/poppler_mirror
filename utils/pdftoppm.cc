@@ -38,6 +38,7 @@
 // Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
 // Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -240,8 +241,8 @@ static bool parseJpegOptions()
             return false;
         }
         const int iequal = static_cast<int>(equal - opt.c_str());
-        GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
-        opt.del(iequal, opt.getLength() - iequal);
+        GooString value(&opt, iequal + 1, opt.size() - iequal - 1);
+        opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
         if (opt.cmp("quality") == 0) {
@@ -458,7 +459,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (jpegOpt.getLength() > 0) {
+    if (!jpegOpt.empty()) {
         if (!jpeg) {
             fprintf(stderr, "Warning: -jpegopt only valid with jpeg output.\n");
         }

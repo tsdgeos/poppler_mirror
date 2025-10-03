@@ -103,7 +103,7 @@ QString unicodeToQString(const Unicode *u, int len)
         convertedStr.append(buf, n);
     }
 
-    return QString::fromUtf8(convertedStr.c_str(), convertedStr.getLength());
+    return QString::fromUtf8(convertedStr.c_str(), convertedStr.size());
 }
 
 QString unicodeToQString(const std::vector<Unicode> &u)

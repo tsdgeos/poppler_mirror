@@ -2638,7 +2638,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
                     buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
                 }
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
-                (*outputFunc)(outputStream, t3String->c_str(), t3String->getLength());
+                (*outputFunc)(outputStream, t3String->c_str(), t3String->size());
                 delete t3String;
                 t3String = nullptr;
             }
@@ -2680,10 +2680,12 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
     std::unique_ptr<GooString> psName = std::make_unique<GooString>(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
-        psName->append('_')->append(filteredName);
+        psName->append('_');
+        psName->append(filteredName);
     } else if (fontName) {
         std::string filteredName = filterPSName(*fontName);
-        psName->append('_')->append(filteredName);
+        psName->append('_');
+        psName->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
     return psName;
@@ -4911,7 +4913,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     }
 
     // ignore empty strings
-    if (s->getLength() == 0) {
+    if (s->empty()) {
         return;
     }
 
@@ -4954,9 +4956,9 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     // compute the positioning (dx, dy) for each char in the string
     nChars = 0;
     p = s->c_str();
-    len = s->getLength();
+    len = s->size();
     s2 = new GooString();
-    dxdySize = font->isCIDFont() ? 8 : s->getLength();
+    dxdySize = font->isCIDFont() ? 8 : s->size();
     dxdy = (double *)gmallocn(2 * dxdySize, sizeof(double));
     while (len > 0) {
         n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
@@ -7179,9 +7181,9 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
         func4 = (const PostScriptFunction *)func;
         if (invertPSFunction) {
             std::unique_ptr<GooString> codeString = func4->getCodeString()->copy();
-            for (i = codeString->getLength() - 1; i > 0; i--) {
+            for (i = codeString->size() - 1; i > 0; i--) {
                 if (codeString->getChar(i) == '}') {
-                    codeString->del(i);
+                    codeString->erase(i, 1);
                     break;
                 }
             }
@@ -7330,7 +7332,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
     //   for the keyword, which was emitted by the caller)
 
     GooString *label2 = new GooString();
-    int labelLength = label->getLength();
+    int labelLength = label->size();
 
     if (labelLength == 0) {
         isNumeric = false;

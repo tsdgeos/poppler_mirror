@@ -1921,19 +1921,19 @@ static gchar *get_font_name_from_word(const TextWord *word, gint word_i)
     const GooString *font_name = word->getFontName(word_i);
     const gchar *name;
     gboolean subset;
-    gint i;
+    size_t i;
 
-    if (!font_name || font_name->getLength() == 0) {
+    if (!font_name || font_name->empty()) {
         return g_strdup("Default");
     }
 
     // check for a font subset name: capital letters followed by a '+' sign
-    for (i = 0; i < font_name->getLength(); ++i) {
+    for (i = 0; i < font_name->size(); ++i) {
         if (font_name->getChar(i) < 'A' || font_name->getChar(i) > 'Z') {
             break;
         }
     }
-    subset = i > 0 && i < font_name->getLength() && font_name->getChar(i) == '+';
+    subset = i > 0 && i < font_name->size() && font_name->getChar(i) == '+';
     name = font_name->c_str();
     if (subset) {
         name += i + 1;

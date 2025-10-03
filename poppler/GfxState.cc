@@ -305,21 +305,21 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
                 return state->copyDefaultCMYKColorSpace();
             }
         } else if (obj1.isName("CalGray")) {
-            return GfxCalGrayColorSpace::parse(csObj->getArray(), state);
+            return GfxCalGrayColorSpace::parse(*csObj->getArray(), state);
         } else if (obj1.isName("CalRGB")) {
-            return GfxCalRGBColorSpace::parse(csObj->getArray(), state);
+            return GfxCalRGBColorSpace::parse(*csObj->getArray(), state);
         } else if (obj1.isName("Lab")) {
-            return GfxLabColorSpace::parse(csObj->getArray(), state);
+            return GfxLabColorSpace::parse(*csObj->getArray(), state);
         } else if (obj1.isName("ICCBased")) {
-            return GfxICCBasedColorSpace::parse(csObj->getArray(), out, state, recursion);
+            return GfxICCBasedColorSpace::parse(*csObj->getArray(), out, state, recursion);
         } else if (obj1.isName("Indexed") || obj1.isName("I")) {
-            return GfxIndexedColorSpace::parse(res, csObj->getArray(), out, state, recursion);
+            return GfxIndexedColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
         } else if (obj1.isName("Separation")) {
-            return GfxSeparationColorSpace::parse(res, csObj->getArray(), out, state, recursion);
+            return GfxSeparationColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
         } else if (obj1.isName("DeviceN")) {
-            return GfxDeviceNColorSpace::parse(res, csObj->getArray(), out, state, recursion);
+            return GfxDeviceNColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
         } else if (obj1.isName("Pattern")) {
-            return GfxPatternColorSpace::parse(res, csObj->getArray(), out, state, recursion);
+            return GfxPatternColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
         } else {
             error(errSyntaxWarning, -1, "Bad color space");
         }
@@ -723,11 +723,11 @@ static void inline bradford_transform_to_d65(double &X, double &Y, double &Z, co
     Z = -0.00802913 * rho_in + 0.04166125 * gamma_in + 1.05519788 * beta_in;
 }
 
-std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(Array *arr, GfxState *state)
+std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, GfxState *state)
 {
     Object obj1, obj2;
 
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isDict()) {
         error(errSyntaxWarning, -1, "Bad CalGray color space");
         return {};
@@ -1094,12 +1094,12 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
     return cs;
 }
 
-std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(Array *arr, GfxState *state)
+std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxState *state)
 {
     Object obj1, obj2;
     int i;
 
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isDict()) {
         error(errSyntaxWarning, -1, "Bad CalRGB color space");
         return {};
@@ -1435,11 +1435,11 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::copy() const
     return cs;
 }
 
-std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(Array *arr, GfxState *state)
+std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(const Array &arr, GfxState *state)
 {
     Object obj1, obj2;
 
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isDict()) {
         error(errSyntaxWarning, -1, "Bad Lab color space");
         return {};
@@ -1712,18 +1712,18 @@ std::unique_ptr<GfxICCBasedColorSpace> GfxICCBasedColorSpace::copyAsOwnType() co
     return cs;
 }
 
-std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion)
+std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     int nCompsA;
     Dict *dict;
     Object obj1, obj2;
     int i;
 
-    if (arr->getLength() < 2) {
+    if (arr.getLength() < 2) {
         error(errSyntaxError, -1, "Bad ICCBased color space");
         return {};
     }
-    const Object &obj1Ref = arr->getNF(1);
+    const Object &obj1Ref = arr.getNF(1);
     const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
 #ifdef USE_CMS
     // check cache
@@ -1741,7 +1741,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(Array *arr, OutputDe
         }
     }
 #endif
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isStream()) {
         error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
         return nullptr;
@@ -1789,7 +1789,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(Array *arr, OutputDe
     }
 
 #ifdef USE_CMS
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isStream()) {
         error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
         return {};
@@ -2351,7 +2351,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::copy() const
     return cs;
 }
 
-std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
+std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     std::unique_ptr<GfxColorSpace> baseA;
     int indexHighA;
@@ -2359,16 +2359,16 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, Ar
     const char *s;
     int i, j;
 
-    if (arr->getLength() != 4) {
+    if (arr.getLength() != 4) {
         error(errSyntaxWarning, -1, "Bad Indexed color space");
         return nullptr;
     }
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!(baseA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
         error(errSyntaxWarning, -1, "Bad Indexed color space (base color space)");
         return {};
     }
-    obj1 = arr->get(2);
+    obj1 = arr.get(2);
     if (!obj1.isInt()) {
         error(errSyntaxWarning, -1, "Bad Indexed color space (hival)");
         return {};
@@ -2388,7 +2388,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, Ar
         error(errSyntaxWarning, -1, "Bad Indexed color space (invalid indexHigh value, was {0:d} using {1:d} to try to recover)", previousValue, indexHighA);
     }
     auto cs = std::make_unique<GfxIndexedColorSpace>(std::move(baseA), indexHighA);
-    obj1 = arr->get(3);
+    obj1 = arr.get(3);
     const int n = cs->getBase()->getNComps();
     if (obj1.isStream() && obj1.streamReset()) {
         for (i = 0; i <= indexHighA; ++i) {
@@ -2400,7 +2400,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, Ar
         }
         obj1.streamClose();
     } else if (obj1.isString()) {
-        if (obj1.getString()->getLength() < (indexHighA + 1) * n) {
+        if (obj1.getString()->size() < size_t(indexHighA + 1) * n) {
             error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
             goto err3;
         }
@@ -2615,28 +2615,28 @@ std::unique_ptr<GfxSeparationColorSpace> GfxSeparationColorSpace::copyAsOwnType(
 }
 
 //~ handle the 'All' and 'None' colorants
-std::unique_ptr<GfxColorSpace> GfxSeparationColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
+std::unique_ptr<GfxColorSpace> GfxSeparationColorSpace::parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     std::unique_ptr<GfxColorSpace> altA;
     std::unique_ptr<Function> funcA;
     Object obj1;
 
-    if (arr->getLength() != 4) {
+    if (arr.getLength() != 4) {
         error(errSyntaxWarning, -1, "Bad Separation color space");
         return {};
     }
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isName()) {
         error(errSyntaxWarning, -1, "Bad Separation color space (name)");
         return {};
     }
     std::unique_ptr<GooString> nameA = std::make_unique<GooString>(obj1.getNameString());
-    obj1 = arr->get(2);
+    obj1 = arr.get(2);
     if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
         error(errSyntaxWarning, -1, "Bad Separation color space (alternate color space)");
         return {};
     }
-    obj1 = arr->get(3);
+    obj1 = arr.get(3);
     if (!(funcA = Function::parse(&obj1))) {
         return {};
     }
@@ -2855,7 +2855,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::copy() const
 }
 
 //~ handle the 'None' colorant
-std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
+std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     int nCompsA;
     std::vector<std::string> namesA;
@@ -2864,11 +2864,11 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, Ar
     Object obj1;
     std::vector<std::unique_ptr<GfxSeparationColorSpace>> separationList;
 
-    if (arr->getLength() != 4 && arr->getLength() != 5) {
+    if (arr.getLength() != 4 && arr.getLength() != 5) {
         error(errSyntaxWarning, -1, "Bad DeviceN color space");
         return nullptr;
     }
-    obj1 = arr->get(1);
+    obj1 = arr.get(1);
     if (!obj1.isArray()) {
         error(errSyntaxWarning, -1, "Bad DeviceN color space (names)");
         return nullptr;
@@ -2887,17 +2887,17 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, Ar
         }
         namesA.emplace_back(obj2.getName());
     }
-    obj1 = arr->get(2);
+    obj1 = arr.get(2);
     if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
         error(errSyntaxWarning, -1, "Bad DeviceN color space (alternate color space)");
         return nullptr;
     }
-    obj1 = arr->get(3);
+    obj1 = arr.get(3);
     if (!(funcA = Function::parse(&obj1))) {
         return nullptr;
     }
-    if (arr->getLength() == 5) {
-        obj1 = arr->get(4);
+    if (arr.getLength() == 5) {
+        obj1 = arr.get(4);
         if (!obj1.isDict()) {
             error(errSyntaxWarning, -1, "Bad DeviceN color space (attributes)");
             return nullptr;
@@ -2909,7 +2909,7 @@ std::unique_ptr<GfxColorSpace> GfxDeviceNColorSpace::parse(GfxResources *res, Ar
             for (int i = 0; i < colorants->getLength(); i++) {
                 Object obj3 = colorants->getVal(i);
                 if (obj3.isArray()) {
-                    auto cs = GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion);
+                    auto cs = GfxSeparationColorSpace::parse(res, *obj3.getArray(), out, state, recursion);
                     if (cs) {
                         separationList.push_back(std::unique_ptr<GfxSeparationColorSpace>(static_cast<GfxSeparationColorSpace *>(cs.release())));
                     }
@@ -3101,17 +3101,17 @@ std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::copy() const
     return std::make_unique<GfxPatternColorSpace>(under ? under->copy() : nullptr);
 }
 
-std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion)
+std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::parse(GfxResources *res, const Array &arr, OutputDev *out, GfxState *state, int recursion)
 {
     Object obj1;
 
-    if (arr->getLength() != 1 && arr->getLength() != 2) {
+    if (arr.getLength() != 1 && arr.getLength() != 2) {
         error(errSyntaxWarning, -1, "Bad Pattern color space");
         return {};
     }
     std::unique_ptr<GfxColorSpace> underA;
-    if (arr->getLength() == 2) {
-        obj1 = arr->get(1);
+    if (arr.getLength() == 2) {
+        obj1 = arr.get(1);
         if (!(underA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
             error(errSyntaxWarning, -1, "Bad Pattern color space (underlying color space)");
             return {};

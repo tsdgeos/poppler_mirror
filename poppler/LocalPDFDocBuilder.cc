@@ -23,7 +23,7 @@ std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, co
 {
     if (uri.starts_with("file://")) {
         std::unique_ptr<GooString> fileName = uri.copy();
-        fileName->del(0, 7);
+        fileName->erase(0, 7);
         return std::make_unique<PDFDoc>(std::move(fileName), ownerPassword, userPassword);
     } else {
         return std::make_unique<PDFDoc>(uri.copy(), ownerPassword, userPassword);

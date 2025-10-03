@@ -2250,6 +2250,18 @@ double GfxCIDFont::getWidth(char *s, int len) const
     return getWidth(cid);
 }
 
+bool GfxFont::isBase14Font(std::string_view family, std::string_view style)
+{
+    std::string key;
+    key.reserve(family.size() + (style.empty() ? 0 : style.size() + 1));
+    key.append(family);
+    if (!style.empty()) {
+        key.push_back('-');
+        key.append(style);
+    }
+    return std::ranges::any_of(base14SubstFonts, [key](auto &&element) { return key == element; });
+}
+
 //------------------------------------------------------------------------
 // GfxFontDict
 //------------------------------------------------------------------------
@@ -2360,7 +2372,7 @@ void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h)
     case objString:
         h->hash('s');
         s = obj->getString();
-        h->hash(s->c_str(), s->getLength());
+        h->hash(s->c_str(), s->size());
         break;
     case objName:
         h->hash('n');

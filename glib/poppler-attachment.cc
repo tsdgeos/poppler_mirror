@@ -134,8 +134,8 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
-        if (embFile->checksum() && embFile->checksum()->getLength() > 0) {
-            attachment->checksum = g_string_new_len(embFile->checksum()->c_str(), embFile->checksum()->getLength());
+        if (embFile->checksum() && !embFile->checksum()->empty()) {
+            attachment->checksum = g_string_new_len(embFile->checksum()->c_str(), embFile->checksum()->size());
         }
         priv->obj_stream = embFile->streamObject()->copy();
     } else {

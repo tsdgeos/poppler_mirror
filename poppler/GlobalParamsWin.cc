@@ -248,7 +248,6 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
     int n;
     bool bold, italic, oblique, fixedWidth;
     char c;
-    int i;
     SysFontType type;
     GooString substituteName;
 
@@ -297,11 +296,11 @@ SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum, const c
 
     //----- normalize the font name
     std::unique_ptr<GooString> s = std::make_unique<GooString>(name, n);
-    i = 0;
-    while (i < s->getLength()) {
+    size_t i = 0;
+    while (i < s->size()) {
         c = s->getChar(i);
         if (c == ' ' || c == ',' || c == '-') {
-            s->del(i);
+            s->erase(i, 1);
         } else {
             ++i;
         }
@@ -320,13 +319,15 @@ static GooString *replaceSuffix(GooString *path, const char *suffixA, const char
 {
     int suffLenA = strlen(suffixA);
     int suffLenB = strlen(suffixB);
-    int baseLenA = path->getLength() - suffLenA;
-    int baseLenB = path->getLength() - suffLenB;
+    int baseLenA = path->size() - suffLenA;
+    int baseLenB = path->size() - suffLenB;
 
     if (!strcasecmp(path->c_str() + baseLenA, suffixA)) {
-        path->del(baseLenA, suffLenA)->append(suffixB);
+        path->erase(baseLenA, suffLenA);
+        path->append(suffixB);
     } else if (!strcasecmp(path->c_str() + baseLenB, suffixB)) {
-        path->del(baseLenB, suffLenB)->append(suffixA);
+        path->erase(baseLenB, suffLenB);
+        path->append(suffixA);
     }
 
     return path;
@@ -420,12 +421,12 @@ static const char *findSubstituteName(const GfxFont *font, const std::unordered_
     int n = strlen(origName);
     // remove trailing "-Identity-H"
     if (n > 11 && !strcmp(name2->c_str() + n - 11, "-Identity-H")) {
-        name2->del(n - 11, 11);
+        name2->erase(n - 11, 11);
         n -= 11;
     }
     // remove trailing "-Identity-V"
     if (n > 11 && !strcmp(name2->c_str() + n - 11, "-Identity-V")) {
-        name2->del(n - 11, 11);
+        name2->erase(n - 11, 11);
         n -= 11;
     }
     const auto substFile = substFiles.find(name2->c_str());
@@ -510,7 +511,22 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
 
     const SysFontInfo *fi = sysFonts->find(familyAndStyle, false, false, filesToIgnore);
     if (fi) {
-        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum);
+        return FamilyStyleFontSearchResult(fi->path->toStr(), fi->fontNum, false /* With the current code paths, windows don't give us any substitutions. */);
+    }
+    // Let's see if we have it in our own table of fonts
+    // in our own lookup table, we have fontFamily-fontStyle and fontFamily,fontStyle
+    std::vector<std::string> names;
+    if (fontStyle.empty()) {
+        names.push_back(fontFamily);
+    } else {
+        names.push_back(fontFamily + "-" + fontStyle);
+        names.push_back(fontFamily + "," + fontStyle);
+    }
+    for (const auto &name : names) {
+        auto it = fontFiles.find(name);
+        if (it != fontFiles.end()) {
+            return FamilyStyleFontSearchResult(it->second, 0, true);
+        }
     }
 
     return {};

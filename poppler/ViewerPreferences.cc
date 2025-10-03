@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
-// Copyright 2017, 2020, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2020, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
@@ -17,21 +17,21 @@
 #include "Object.h"
 #include "Dict.h"
 
-ViewerPreferences::ViewerPreferences(Dict *prefDict)
+ViewerPreferences::ViewerPreferences(const Dict &prefDict)
 {
-    hideToolbar = prefDict->lookup("HideToolbar").getBoolWithDefaultValue(false);
+    hideToolbar = prefDict.lookup("HideToolbar").getBoolWithDefaultValue(false);
 
-    hideMenubar = prefDict->lookup("HideMenubar").getBoolWithDefaultValue(false);
+    hideMenubar = prefDict.lookup("HideMenubar").getBoolWithDefaultValue(false);
 
-    hideWindowUI = prefDict->lookup("HideWindowUI").getBoolWithDefaultValue(false);
+    hideWindowUI = prefDict.lookup("HideWindowUI").getBoolWithDefaultValue(false);
 
-    fitWindow = prefDict->lookup("FitWindow").getBoolWithDefaultValue(false);
+    fitWindow = prefDict.lookup("FitWindow").getBoolWithDefaultValue(false);
 
-    centerWindow = prefDict->lookup("CenterWindow").getBoolWithDefaultValue(false);
+    centerWindow = prefDict.lookup("CenterWindow").getBoolWithDefaultValue(false);
 
-    displayDocTitle = prefDict->lookup("DisplayDocTitle").getBoolWithDefaultValue(false);
+    displayDocTitle = prefDict.lookup("DisplayDocTitle").getBoolWithDefaultValue(false);
 
-    Object obj = prefDict->lookup("NonFullScreenPageMode");
+    Object obj = prefDict.lookup("NonFullScreenPageMode");
     if (obj.isName()) {
         const char *mode = obj.getName();
         if (!strcmp(mode, "UseNone")) {
@@ -45,7 +45,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         }
     }
 
-    obj = prefDict->lookup("Direction");
+    obj = prefDict.lookup("Direction");
     if (obj.isName()) {
         const char *dir = obj.getName();
         if (!strcmp(dir, "L2R")) {
@@ -55,7 +55,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         }
     }
 
-    obj = prefDict->lookup("PrintScaling");
+    obj = prefDict.lookup("PrintScaling");
     if (obj.isName()) {
         const char *ps = obj.getName();
         if (!strcmp(ps, "None")) {
@@ -65,7 +65,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         }
     }
 
-    obj = prefDict->lookup("Duplex");
+    obj = prefDict.lookup("Duplex");
     if (obj.isName()) {
         const char *d = obj.getName();
         if (!strcmp(d, "Simplex")) {
@@ -77,9 +77,9 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         }
     }
 
-    pickTrayByPDFSize = prefDict->lookup("PickTrayByPDFSize").getBoolWithDefaultValue(false);
+    pickTrayByPDFSize = prefDict.lookup("PickTrayByPDFSize").getBoolWithDefaultValue(false);
 
-    obj = prefDict->lookup("NumCopies");
+    obj = prefDict.lookup("NumCopies");
     if (obj.isInt()) {
         numCopies = obj.getInt();
         if (numCopies < 2) {
@@ -87,7 +87,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
         }
     }
 
-    obj = prefDict->lookup("PrintPageRange");
+    obj = prefDict.lookup("PrintPageRange");
     if (obj.isArray()) {
         Array *range = obj.getArray();
         int length = range->getLength();

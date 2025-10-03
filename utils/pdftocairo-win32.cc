@@ -5,6 +5,7 @@
 // Copyright (C) 2014 Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -122,8 +123,8 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
             continue;
         }
         const int iequal = static_cast<int>(equal - opt.c_str());
-        GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
-        opt.del(iequal, opt.getLength() - iequal);
+        GooString value(&opt, iequal + 1, opt.size() - iequal - 1);
+        opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
         if (opt.cmp("source") == 0) {
@@ -315,7 +316,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt, bool duplex, boo
         printerName = (char *)gmalloc(size);
         GetDefaultPrinterA(printerName, &size);
     } else {
-        printerName = copyString(printer->c_str(), printer->getLength());
+        printerName = copyString(printer->c_str(), printer->size());
     }
 
     // Query the size of the DEVMODE struct

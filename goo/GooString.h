@@ -144,7 +144,8 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
 
     // Get length.
-    int getLength() const { return size(); }
+    using std::string::empty;
+    using std::string::size;
 
     // Get C string.
     using std::string::c_str;
@@ -153,17 +154,13 @@ public:
     char getChar(size_t i) const { return (*this)[i]; }
 
     // Change <i>th character.
-    void setChar(int i, char c) { (*this)[i] = c; }
+    void setChar(size_t i, char c) { (*this)[i] = c; }
 
     // Clear string to zero length.
     using std::string::clear;
 
     // Append a character or string.
-    GooString *append(char c)
-    {
-        push_back(c);
-        return this;
-    }
+    void append(char c) { push_back(c); }
     GooString *append(const GooString *str)
     {
         static_cast<std::string &>(*this).append(*str);
@@ -217,11 +214,7 @@ public:
     }
 
     // Delete a character or range of characters.
-    GooString *del(int i, int n = 1)
-    {
-        erase(i, n);
-        return this;
-    }
+    using std::string::erase;
 
     // Convert string to all-lower case.
     POPPLER_PRIVATE_EXPORT GooString *lowerCase();

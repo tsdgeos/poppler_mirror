@@ -636,7 +636,7 @@ void NSSSignatureConfiguration::setNSSDir(const GooString &nssDir)
 {
     static bool setNssDirCalled = false;
 
-    if (NSS_IsInitialized() && nssDir.getLength() > 0) {
+    if (NSS_IsInitialized() && !nssDir.empty()) {
         error(errInternal, 0, "You need to call setNSSDir before signature validation related operations happen");
         return;
     }
@@ -650,7 +650,7 @@ void NSSSignatureConfiguration::setNSSDir(const GooString &nssDir)
     atexit(shutdownNss);
 
     bool initSuccess = false;
-    if (nssDir.getLength() > 0) {
+    if (!nssDir.empty()) {
         initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
         sNssDir = nssDir.toStr();
     } else {

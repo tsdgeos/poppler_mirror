@@ -325,12 +325,12 @@ public:
     std::optional<CryptoSign::SigningErrorMessage> signDocumentWithAppearance(const std::string &filename, const std::string &certNickname, const std::string &password, const GooString *reason = nullptr, const GooString *location = nullptr,
                                                                               const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const GooString &signatureText = {},
                                                                               const GooString &signatureTextLeft = {}, double fontSize = {}, double leftFontSize = {}, std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {},
-                                                                              std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {}, const std::string &imagePath = {});
+                                                                              std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
 
-    // checks the length encoding of the signature and returns the hex encoded signature
-    // if the check passed (and the checked file size as output parameter in checkedFileSize)
-    // otherwise a nullptr is returned
-    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+    // checks the length encoding of the signature and returns the signature
+    // and the length that the signature is supposed to cover.
+    // if invalid, a empty optional and 0 is returned.
+    std::pair<std::optional<std::vector<unsigned char>>, int64_t> getCheckedSignature();
 
     const std::vector<unsigned char> &getSignature() const;
 
@@ -626,10 +626,10 @@ public:
     // the elements of the list are of type Goffset
     std::vector<Goffset> getSignedRangeBounds() const;
 
-    // checks the length encoding of the signature and returns the hex encoded signature
-    // if the check passed (and the checked file size as output parameter in checkedFileSize)
-    // otherwise a nullptr is returned
-    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+    // checks the length encoding of the signature and returns the signature
+    // and the end of data the signature covers
+    // otherwise a nullopt and 0 is returned
+    std::pair<std::optional<std::vector<unsigned char>>, int64_t> getCheckedSignature();
 
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }
@@ -749,7 +749,8 @@ private:
     // Finds in the system a font name matching the given fontFamily and fontStyle
     // And adds it to the default resources dictionary, font name there will be popplerfontXXX except if forceName is true,
     // in that case the font name will be fontFamily + " " + fontStyle (if fontStyle is empty just fontFamily)
-    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName = false);
+    // if fileSubstitutedIn is true,
+    AddFontResult addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool fontSubstitutedIn, bool forceName);
 
     AddFontResult doGetAddFontToDefaultResources(Unicode uChar, const GfxFont &fontToEmulate);
 

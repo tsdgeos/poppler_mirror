@@ -151,8 +151,6 @@ const char *Object::getTypeName() const
 
 void Object::print(FILE *f) const
 {
-    int i;
-
     switch (type) {
     case objBool:
         fprintf(f, "%s", booln ? "true" : "false");
@@ -165,12 +163,12 @@ void Object::print(FILE *f) const
         break;
     case objString:
         fprintf(f, "(");
-        fwrite(string->c_str(), 1, string->getLength(), f);
+        fwrite(string->c_str(), 1, string->size(), f);
         fprintf(f, ")");
         break;
     case objHexString:
         fprintf(f, "<");
-        for (i = 0; i < string->getLength(); i++) {
+        for (size_t i = 0; i < string->size(); i++) {
             fprintf(f, "%02x", string->getChar(i) & 0xff);
         }
         fprintf(f, ">");
@@ -183,7 +181,7 @@ void Object::print(FILE *f) const
         break;
     case objArray:
         fprintf(f, "[");
-        for (i = 0; i < arrayGetLength(); ++i) {
+        for (int i = 0; i < arrayGetLength(); ++i) {
             if (i > 0) {
                 fprintf(f, " ");
             }
@@ -194,7 +192,7 @@ void Object::print(FILE *f) const
         break;
     case objDict:
         fprintf(f, "<<");
-        for (i = 0; i < dictGetLength(); ++i) {
+        for (int i = 0; i < dictGetLength(); ++i) {
             fprintf(f, " /%s ", dictGetKey(i));
             const Object &obj = dictGetValNF(i);
             obj.print(f);

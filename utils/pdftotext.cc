@@ -33,6 +33,7 @@
 // Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 William Bader <williambader@hotmail.com>
 // Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
+// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -270,9 +271,9 @@ int main(int argc, char *argv[])
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         return 99;
     } else {
-        const char *p = fileName.c_str() + fileName.getLength() - 4;
+        const char *p = fileName.c_str() + fileName.size() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            textFileName = std::make_unique<GooString>(fileName.c_str(), fileName.getLength() - 4);
+            textFileName = std::make_unique<GooString>(fileName.c_str(), fileName.size() - 4);
         } else {
             textFileName = fileName.copy();
         }
@@ -418,7 +419,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
     bool isUnicode;
     Unicode u;
     char buf[9];
-    int i, n;
+    size_t i, n;
 
     Object obj = infoDict->lookup(key);
     if (obj.isString()) {
@@ -431,7 +432,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char
             isUnicode = false;
             i = 0;
         }
-        while (i < obj.getString()->getLength()) {
+        while (i < obj.getString()->size()) {
             if (isUnicode) {
                 u = ((s1->getChar(i) & 0xff) << 8) | (s1->getChar(i + 1) & 0xff);
                 i += 2;

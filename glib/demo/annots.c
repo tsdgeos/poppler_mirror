@@ -49,6 +49,8 @@ typedef struct
     const gchar *label;
 } Annotations;
 
+#define POPPLER_ANNOT_HIGHLIGHT_INK 1000
+
 static const Annotations supported_annots[] = { { POPPLER_ANNOT_TEXT, "Text" },
                                                 { POPPLER_ANNOT_FREE_TEXT, "Free Text" },
                                                 { POPPLER_ANNOT_LINE, "Line" },
@@ -59,7 +61,8 @@ static const Annotations supported_annots[] = { { POPPLER_ANNOT_TEXT, "Text" },
                                                 { POPPLER_ANNOT_SQUIGGLY, "Squiggly" },
                                                 { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" },
                                                 { POPPLER_ANNOT_STAMP, "Stamp" },
-                                                { POPPLER_ANNOT_INK, "Ink" } };
+                                                { POPPLER_ANNOT_INK, "Ink" },
+                                                { POPPLER_ANNOT_HIGHLIGHT_INK, "Highlight Ink" } };
 
 static const char *stamp_types[] = { [POPPLER_ANNOT_STAMP_ICON_UNKNOWN] = "Unknown",
                                      [POPPLER_ANNOT_STAMP_ICON_APPROVED] = "APPROVED",
@@ -552,6 +555,8 @@ static void pgd_annot_view_set_annot_ink(GtkWidget *table, PopplerAnnotInk *ink_
 
     pgd_table_add_property(GTK_GRID(table), "<b>Ink List:</b>", ink_list_str->str, row);
     g_string_free(ink_list_str, TRUE);
+
+    pgd_table_add_property(GTK_GRID(table), "<b>Draw:</b>", poppler_annot_ink_get_draw_below(ink_annot) ? "below" : "above", row);
 }
 
 static void pgd_annots_file_attachment_save_dialog_response(GtkFileChooser *file_chooser, gint response, PopplerAttachment *attachment)
@@ -988,6 +993,7 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
         annot = poppler_annot_text_markup_new_strikeout(demo->doc, &rect, quads_array);
         g_array_free(quads_array, TRUE);
     } break;
+    case POPPLER_ANNOT_HIGHLIGHT_INK:
     case POPPLER_ANNOT_INK: {
         g_autofree PopplerPath **ink_list = g_new(PopplerPath *, 2);
         PopplerPoint *ink_path = g_new0(PopplerPoint, 2);
@@ -1001,6 +1007,7 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
         ink_path[0].x = width;
         ink_list[1] = poppler_path_new_from_array(ink_path, 2);
         poppler_annot_set_border_width(annot, 10.);
+        poppler_annot_ink_set_draw_below(POPPLER_ANNOT_INK(annot), demo->annot_type == POPPLER_ANNOT_HIGHLIGHT_INK);
         poppler_page_add_annot(demo->page, annot);
         poppler_annot_ink_set_ink_list(POPPLER_ANNOT_INK(annot), ink_list, 2);
         poppler_path_free(ink_list[0]);

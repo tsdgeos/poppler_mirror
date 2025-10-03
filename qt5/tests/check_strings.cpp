@@ -194,11 +194,11 @@ void TestStrings::check_QStringToUnicodeGooString()
     std::unique_ptr<GooString> goo = Poppler::QStringToUnicodeGooString(string);
     if (string.isEmpty()) {
         QVERIFY(goo->toStr().empty());
-        QCOMPARE(goo->getLength(), 0);
+        QCOMPARE(goo->size(), 0);
     } else {
         QVERIFY(hasUnicodeByteOrderMark(goo->toStr()));
-        QCOMPARE(goo->getLength(), string.length() * 2 + 2);
-        QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
+        QCOMPARE(goo->size(), string.length() * 2 + 2);
+        QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->size() - 2));
     }
 }
 

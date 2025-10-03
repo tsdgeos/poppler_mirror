@@ -18,6 +18,7 @@
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2025 Adam Sampson <ats@offog.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -187,17 +188,6 @@ static inline bool splashColorEqual(SplashColorConstPtr dest, SplashColorConstPt
         }
     }
     return true;
-}
-
-static inline void splashColorXor(SplashColorPtr dest, SplashColorConstPtr src)
-{
-    dest[0] ^= src[0];
-    dest[1] ^= src[1];
-    dest[2] ^= src[2];
-    dest[3] ^= src[3];
-    for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
-        dest[i] ^= src[i];
-    }
 }
 
 //------------------------------------------------------------------------

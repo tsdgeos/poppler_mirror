@@ -85,7 +85,7 @@ QDateTime EmbeddedFile::createDate() const
 QByteArray EmbeddedFile::checksum() const
 {
     const GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : nullptr;
-    return goo ? QByteArray::fromRawData(goo->c_str(), goo->getLength()) : QByteArray();
+    return goo ? QByteArray::fromRawData(goo->c_str(), goo->size()) : QByteArray();
 }
 
 QString EmbeddedFile::mimeType() const

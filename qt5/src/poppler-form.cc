@@ -1037,7 +1037,7 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->certificateType = fromPopplerCore(ci->getCertificateType());
 
         const GooString &certSerial = ci->getSerialNumber();
-        certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
+        certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.size());
 
         const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
         certPriv->issuer_info.common_name = QString::fromStdString(issuerInfo.commonName);
@@ -1058,12 +1058,12 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, QTimeZone::utc());
 
         const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
-        certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
+        certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.size());
         certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
         certPriv->public_key_strength = pkInfo.publicKeyStrength;
 
         const GooString &certDer = ci->getCertificateDER();
-        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
+        certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.size());
 
         certPriv->is_null = false;
     }
@@ -1137,9 +1137,10 @@ static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignatu
             priv->range_bounds.append(bound);
         }
     }
-    const std::optional<GooString> checkedSignature = fws->getCheckedSignature(&priv->docLength);
+    std::optional<std::vector<unsigned char>> checkedSignature;
+    std::tie(checkedSignature, priv->docLength) = fws->getCheckedSignature();
     if (priv->range_bounds.size() == 4 && checkedSignature) {
-        priv->signature = QByteArray::fromHex(checkedSignature->c_str());
+        priv->signature = QByteArray::fromRawData(reinterpret_cast<const char *>(checkedSignature->data()), checkedSignature->size());
     }
 
     return SignatureValidationInfo(priv);
@@ -1201,8 +1202,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
         return FieldAlreadySigned;
     }
 
-    Goffset file_size = 0;
-    const std::optional<GooString> sig = fws->getCheckedSignature(&file_size);
+    const auto [sig, file_size] = fws->getCheckedSignature();
     if (sig) {
         // the above unsigned_signature_field check
         // should already catch this, but double check
@@ -1216,8 +1216,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
     const auto gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));
 
     auto failure = fws->signDocumentWithAppearance(outputFileName.toStdString(), data.certNickname().toStdString(), data.password().toStdString(), reason.get(), location.get(), ownerPwd, userPwd, *gSignatureText, *gSignatureLeftText,
-                                                   data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()),
-                                                   data.imagePath().toStdString());
+                                                   data.fontSize(), data.leftFontSize(), convertQColor(data.fontColor()), data.borderWidth(), convertQColor(data.borderColor()), convertQColor(data.backgroundColor()));
     if (failure) {
         m_formData->lastSigningErrorDetails = fromPopplerCore(failure.value().message);
         switch (failure.value().type) {

@@ -121,26 +121,26 @@ GooString *appendToPath(GooString *path, const char *fileName)
 
     // appending ".." goes up one directory
     if (!strcmp(fileName, "..")) {
-        for (i = path->getLength() - 2; i >= 0; --i) {
+        for (i = path->size() - 2; i >= 0; --i) {
             if (path->getChar(i) == '/') {
                 break;
             }
         }
         if (i <= 0) {
             if (path->getChar(0) == '/') {
-                path->del(1, path->getLength() - 1);
+                path->erase(1, path->size() - 1);
             } else {
                 path->clear();
                 path->append("..");
             }
         } else {
-            path->del(i, path->getLength() - i);
+            path->erase(i, path->size() - i);
         }
         return path;
     }
 
     // otherwise, append "/" and new path component
-    if (path->getLength() > 0 && path->getChar(path->getLength() - 1) != '/') {
+    if (!path->empty() && path->getChar(path->size() - 1) != '/') {
         path->append('/');
     }
     path->append(fileName);

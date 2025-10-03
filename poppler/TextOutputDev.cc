@@ -5390,7 +5390,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             uText.resize(word->len());
             std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
             dumpFragment(uText.data(), uText.size(), uMap, &s);
-            (*outputFunc)(outputStream, s.c_str(), s.getLength());
+            (*outputFunc)(outputStream, s.c_str(), s.size());
 
             if (word->next && fabs(word->next->base - word->base) < maxIntraLineDelta * word->fontSize && word->next->xMin > word->xMax - minDupBreakOverlap * word->fontSize) {
                 if (word->next->xMin > word->xMax + minWordSpacing * word->fontSize) {
@@ -5454,7 +5454,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             // print the line
             s.clear();
             col += dumpFragment(frag.line->text + frag.start, frag.len, uMap, &s);
-            (*outputFunc)(outputStream, s.c_str(), s.getLength());
+            (*outputFunc)(outputStream, s.c_str(), s.size());
 
             // print one or more returns if necessary
             if (i == frags.size() - 1) {
@@ -5481,7 +5481,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
                     }
                     s.clear();
                     dumpFragment(line->text, n, uMap, &s);
-                    (*outputFunc)(outputStream, s.c_str(), s.getLength());
+                    (*outputFunc)(outputStream, s.c_str(), s.size());
                     // output a newline when a hyphen is not suppressed
                     if (n == line->len) {
                         (*outputFunc)(outputStream, eol, eolLen);

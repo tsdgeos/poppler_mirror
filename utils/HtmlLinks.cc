@@ -78,7 +78,7 @@ bool HtmlLink::inLink(double xmin, double ymin, double xmax, double ymax) const
 static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
 {
     std::unique_ptr<GooString> tmp;
-    for (int i = 0, j = 0; i < s->getLength(); i++, j++) {
+    for (size_t i = 0, j = 0; i < s->size(); i++, j++) {
         const char *replace = nullptr;
         switch (s->getChar(i)) {
         case '"':
@@ -101,7 +101,7 @@ static std::unique_ptr<GooString> EscapeSpecialChars(GooString *s)
                 tmp = s->copy();
             }
             if (tmp) {
-                tmp->del(j, 1);
+                tmp->erase(j, 1);
                 int l = strlen(replace);
                 tmp->insert(j, replace, l);
                 j += l - 1;

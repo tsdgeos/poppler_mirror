@@ -5,6 +5,7 @@
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
+ * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,8 +281,8 @@ static void print_embedded_files(poppler::document *doc)
         std::left(std::cout);
         for (; it != it_end; ++it) {
             poppler::embedded_file *f = *it;
-            std::cout << " " << std::setw(out_width + 10) << f->name() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20) << out_date(f->modification_date_t())
-                      << std::endl
+            std::cout << " " << std::setw(out_width + 10) << f->unicodeName() << " " << std::setw(10) << out_size(f->size()) << " " << std::setw(20) << out_date(f->creation_date_t()) << " " << std::setw(20)
+                      << out_date(f->modification_date_t()) << std::endl
                       << "     ";
             if (f->description().empty()) {
                 std::cout << "<no description>";

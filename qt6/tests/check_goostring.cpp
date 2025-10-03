@@ -127,29 +127,29 @@ void TestGooString::testFromNullptr()
     {
         GooString str;
         str.Set(static_cast<const GooString *>(nullptr));
-        QCOMPARE(str.getLength(), 0);
+        QCOMPARE(str.size(), 0);
     }
 
     {
         GooString str { static_cast<const char *>(nullptr) };
-        QCOMPARE(str.getLength(), 0);
+        QCOMPARE(str.size(), 0);
     }
 
     {
         GooString str { static_cast<const char *>(nullptr), 0 };
-        QCOMPARE(str.getLength(), 0);
+        QCOMPARE(str.size(), 0);
     }
 
     {
         GooString str;
         str.Set(static_cast<const char *>(nullptr));
-        QCOMPARE(str.getLength(), 0);
+        QCOMPARE(str.size(), 0);
     }
 
     {
         GooString str;
         str.Set(static_cast<const char *>(nullptr), 0);
-        QCOMPARE(str.getLength(), 0);
+        QCOMPARE(str.size(), 0);
     }
 }
 

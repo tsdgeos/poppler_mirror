@@ -78,7 +78,6 @@
 #include "Parser.h"
 #include "CIDFontsWidthsBuilder.h"
 #include "UTF.h"
-#include "ImageEmbeddingUtils.h"
 
 #include "fofi/FoFiTrueType.h"
 #include "fofi/FoFiIdentifier.h"
@@ -725,7 +724,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
                                                                                                const GooString *location, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword,
                                                                                                const GooString &signatureText, const GooString &signatureTextLeft, double fontSize, double leftFontSize,
                                                                                                std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor,
-                                                                                               std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath)
+                                                                                               std::unique_ptr<AnnotColor> &&backgroundColor)
 {
     // Set the appearance
     GooString *aux = getField()->getDefaultAppearance();
@@ -749,7 +748,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     border->setWidth(borderWidth);
     getWidgetAnnotation()->setBorder(std::move(border));
 
-    if (signatureText.getLength() || signatureTextLeft.getLength()) {
+    if (!signatureText.empty() || !signatureTextLeft.empty()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
         if (pdfFontName.empty()) {
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
@@ -767,16 +766,6 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
         form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
     }
-
-    // If a path to an image is given, embed it.
-    Ref imageResourceRef = Ref::INVALID();
-    if (!imagePath.empty()) {
-        imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
-        if (imageResourceRef == Ref::INVALID()) {
-            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
-        }
-    }
-
     auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(nullptr);
     appearCharacs->setBorderColor(std::move(borderColor));
     appearCharacs->setBackColor(std::move(backgroundColor));
@@ -789,7 +778,6 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     ffs->setCustomAppearanceContent(signatureText);
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
-    ffs->setImageResource(imageResourceRef);
 
     // say that there a now signatures and that we should append only
     doc->getCatalog()->getAcroForm()->dictSet("SigFlags", Object(3));
@@ -943,10 +931,10 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("SubFilter", Object(objName, toStdString(signatureType).c_str()));
     vObj.dictAdd("Name", Object(name.copy()));
     vObj.dictAdd("M", Object(timeToDateString(nullptr)));
-    if (reason && (reason->getLength() > 0)) {
+    if (reason && !reason->empty()) {
         vObj.dictAdd("Reason", Object(reason->copy()));
     }
-    if (location && (location->getLength() > 0)) {
+    if (location && !location->empty()) {
         vObj.dictAdd("Location", Object(location->copy()));
     }
 
@@ -968,9 +956,9 @@ std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds() const
     return static_cast<FormFieldSignature *>(field)->getSignedRangeBounds();
 }
 
-std::optional<GooString> FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::pair<std::optional<std::vector<unsigned char>>, int64_t> FormWidgetSignature::getCheckedSignature()
 {
-    return static_cast<FormFieldSignature *>(field)->getCheckedSignature(checkedFileSize);
+    return static_cast<FormFieldSignature *>(field)->getCheckedSignature();
 }
 
 void FormWidgetSignature::updateWidgetAppearance()
@@ -1227,7 +1215,7 @@ const GooString *FormField::getFullyQualifiedName() const
             if (unicode_encoded) {
                 fullyQualifiedName->insert(0, "\0.", 2); // 2-byte unicode period
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
                 } else {
                     std::string tmp_str = pdfDocEncodingToUTF16(parent_name->toStr());
                     fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
@@ -1237,7 +1225,7 @@ const GooString *FormField::getFullyQualifiedName() const
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
-                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+                    fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
                 } else {
                     fullyQualifiedName->insert(0, parent_name);
                 }
@@ -1253,7 +1241,7 @@ const GooString *FormField::getFullyQualifiedName() const
     if (partialName) {
         if (unicode_encoded) {
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
-                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->size() - 2); // Remove the unicode BOM
             } else {
                 std::string tmp_str = pdfDocEncodingToUTF16(partialName->toStr());
                 fullyQualifiedName->append(tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
@@ -1262,21 +1250,21 @@ const GooString *FormField::getFullyQualifiedName() const
             if (hasUnicodeByteOrderMark(partialName->toStr())) {
                 unicode_encoded = true;
                 fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
-                fullyQualifiedName->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+                fullyQualifiedName->append(partialName->c_str() + 2, partialName->size() - 2); // Remove the unicode BOM
             } else {
                 fullyQualifiedName->append(partialName.get());
             }
         }
     } else {
-        int len = fullyQualifiedName->getLength();
+        int len = fullyQualifiedName->size();
         // Remove the last period
         if (unicode_encoded) {
             if (len > 1) {
-                fullyQualifiedName->del(len - 2, 2);
+                fullyQualifiedName->erase(len - 2, 2);
             }
         } else {
             if (len > 0) {
-                fullyQualifiedName->del(len - 1, 1);
+                fullyQualifiedName->erase(len - 1, 1);
             }
         }
     }
@@ -1644,14 +1632,14 @@ void FormFieldText::fillContent(FillValueType fillType)
     obj1 = Form::fieldLookup(dict, fillType == fillDefaultValue ? "DV" : "V");
     if (obj1.isString()) {
         if (hasUnicodeByteOrderMark(obj1.getString()->toStr())) {
-            if (obj1.getString()->getLength() > 2) {
+            if (obj1.getString()->size() > 2) {
                 if (fillType == fillDefaultValue) {
                     defaultContent = obj1.takeString();
                 } else {
                     content = obj1.takeString();
                 }
             }
-        } else if (obj1.getString()->getLength() > 0) {
+        } else if (!obj1.getString()->empty()) {
             // non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
             std::string tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr());
 
@@ -2278,13 +2266,13 @@ void FormFieldSignature::parseInfo()
         return;
     }
 
+    byte_range = sig_dict.dictLookup("ByteRange");
+
     Object contents_obj = sig_dict.dictLookup("Contents");
     if (contents_obj.isString()) {
         auto signatureString = contents_obj.takeString();
-        signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->getLength());
+        signature = std::vector<unsigned char>(signatureString->c_str(), signatureString->c_str() + signatureString->size());
     }
-
-    byte_range = sig_dict.dictLookup("ByteRange");
 
     Object location_obj = sig_dict.dictLookup("Location");
     if (location_obj.isString()) {
@@ -2396,7 +2384,16 @@ SignatureInfo *FormFieldSignature::validateSignatureAsync(bool doVerifyCert, boo
         return signature_info;
     }
 
-    signature_handler = backend->createVerificationHandler(std::vector(signature), signature_type);
+    // Some signatures are supposed to be padded with zeroes, but are instead padded with crap
+    // so preprocess them before sending them into the slightly stricter cryptobackend
+    auto [unpadded, _] = getCheckedSignature();
+    if (!unpadded) {
+        error(errSyntaxError, 0, "Invalid or missing Signature string");
+        return signature_info;
+    }
+
+    signature_handler = backend->createVerificationHandler(std::move(*unpadded), signature_type);
+
     if (!signature_handler) {
         if (doneCallback) {
             doneCallback();
@@ -2492,109 +2489,46 @@ std::vector<Goffset> FormFieldSignature::getSignedRangeBounds() const
     return range_vec;
 }
 
-std::optional<GooString> FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
+std::pair<std::optional<std::vector<unsigned char>>, int64_t> FormFieldSignature::getCheckedSignature()
 {
-    Goffset start = 0;
-    Goffset end = 0;
     const std::vector<Goffset> ranges = getSignedRangeBounds();
-    if (ranges.size() == 4) {
-        start = ranges[1];
-        end = ranges[2];
+    if (ranges.size() != 4) {
+        return { {}, 0 };
     }
-    if (end >= start + 6) {
-        BaseStream *stream = doc->getBaseStream();
-        *checkedFileSize = stream->getLength();
-        Goffset len = end - start;
-        stream->setPos(end - 1);
-        int c2 = stream->lookChar();
-        stream->setPos(start);
-        int c1 = stream->getChar();
-        // PDF signatures are first ASN1 DER, then hex encoded PKCS#7 structures,
-        // possibly padded with 0 characters and enclosed in '<' and '>'.
-        // The ASN1 DER encoding of a PKCS#7 structure must start with the tag 0x30
-        // for SEQUENCE. The next byte must be 0x80 for ASN1 DER indefinite length
-        // encoding or (0x80 + n) for ASN1 DER definite length encoding
-        // where n is the number of subsequent "length bytes" which big-endian
-        // encode the length of the content of the SEQUENCE following them.
-        if (len <= std::numeric_limits<int>::max() && *checkedFileSize > end && c1 == '<' && c2 == '>') {
-            GooString gstr;
-            ++start;
-            --end;
-            len = end - start;
-            Goffset pos = 0;
-            do {
-                c1 = stream->getChar();
-                if (c1 == EOF) {
-                    return {};
-                }
-                gstr.append(static_cast<char>(c1));
-            } while (++pos < len);
-            if (signature_type == CryptoSign::SignatureType::g10c_pgp_signature_detached) {
-                // Padding here is done as pgp packets, so keep no need to try to unmangle it
-                return gstr;
-            } else {
-                if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0') {
-                    if (gstr.getChar(2) == '8' && gstr.getChar(3) == '0') {
-                        // ASN1 DER indefinite length encoding:
-                        // We only check that all characters up to the enclosing '>'
-                        // are hex characters and that there are two hex encoded 0 bytes
-                        // just before the enclosing '>' marking the end of the indefinite
-                        // length encoding.
-                        int paddingCount = 0;
-                        while (gstr.getChar(len - 1) == '0' && gstr.getChar(len - 2) == '0') {
-                            ++paddingCount;
-                            len -= 2;
-                        }
-                        if (paddingCount < 2 || len % 2 == 1) {
-                            len = 0;
-                        }
-                    } else if (gstr.getChar(2) == '8') {
-                        // ASN1 DER definite length encoding:
-                        // We calculate the length of the following bytes from the length bytes and
-                        // check that after the length bytes and the following calculated number of
-                        // bytes all bytes up to the enclosing '>' character are hex encoded 0 bytes.
-                        int lenBytes = gstr.getChar(3) - '0';
-                        if (lenBytes > 0 && lenBytes <= 4) {
-                            int sigLen = 0;
-                            for (int i = 0; i < 2 * lenBytes; ++i) {
-                                sigLen <<= 4;
-                                char c = gstr.getChar(i + 4);
-                                if (isdigit(c)) {
-                                    sigLen += c - '0';
-                                } else if (isxdigit(c) && c >= 'a') {
-                                    sigLen += c - 'a' + 10;
-                                } else if (isxdigit(c) && c >= 'A') {
-                                    sigLen += c - 'A' + 10;
-                                } else {
-                                    len = 0;
-                                    break;
-                                }
-                            }
-                            if (sigLen > 0 && 2 * (sigLen + lenBytes) <= len - 4) {
-                                for (Goffset i = 2 * (sigLen + lenBytes) + 4; i < len; ++i) {
-                                    if (gstr.getChar(i) != '0') {
-                                        len = 0;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                len = 0;
-                            }
-                        }
-                    }
-                    for (const char c : gstr.toStr()) {
-                        if (!isxdigit(c)) {
-                            len = 0;
-                        }
-                    }
-                    if (len > 0) {
-                        return GooString(&gstr, 0, len);
-                    }
-                }
+    if (signature.size() < 150) { // This can't be a valid signature, and it simplifies later validation code.
+        return { {}, 0 };
+    }
+    BaseStream *stream = doc->getBaseStream();
+    Goffset checkedFileSize = stream->getLength();
+    if (signature_type == CryptoSign::SignatureType::g10c_pgp_signature_detached) {
+        // Padding here is done as pgp packets, so keep no need to try to unmangle it
+        return { signature, checkedFileSize };
+    }
+    // we have a asn1 object
+    if (signature[0] == 0x30) {
+        // 0x80 is indefinite lenth.
+        // defined length is anything above 0x80 with the number of bytes used for length in the next bits
+        if (signature[1] == 0x80) {
+            // infdefinite length, let's just do all of it if it ends with two nulls
+            if (signature[signature.size() - 1] == 0 && signature[signature.size() - 2] == 0) {
+                return { signature, checkedFileSize };
             }
+            return { {}, 0 };
+        } else if (signature[1] > 0x80) {
+            size_t lengthLength = signature[1] - 0x80;
+            size_t length = 0;
+            for (size_t i = 0; i < lengthLength; i++) {
+                length <<= 8;
+                length += signature[2 + i];
+            }
+            length += 2 + lengthLength; // we also need the two initial bytes 0x30 and 0x8?  and the number of length bytes
+            if (length > signature.size()) {
+                return { {}, 0 };
+            }
+            return { std::vector(signature.data(), signature.data() + length), checkedFileSize };
         }
     }
-    return {};
+    return { {}, 0 };
 }
 
 void FormFieldSignature::print(int indent)
@@ -2647,7 +2581,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
     obj1 = acroForm->dictLookup("Fields");
     if (obj1.isArray()) {
         Array *array = obj1.getArray();
-        std::set<Ref> alreadyReadRefs;
+        RefRecursionChecker alreadyReadRefs;
         for (int i = 0; i < array->getLength(); i++) {
             Object obj2 = array->get(i);
             const Object &oref = array->getNF(i);
@@ -2661,10 +2595,9 @@ Form::Form(PDFDoc *docA) : doc(docA)
                 continue;
             }
 
-            if (alreadyReadRefs.find(oref.getRef()) != alreadyReadRefs.end()) {
+            if (!alreadyReadRefs.insert(oref.getRef())) {
                 continue;
             }
-            alreadyReadRefs.insert(oref.getRef());
 
             std::set<int> usedParents;
             rootFields.push_back(createFieldFromDict(std::move(obj2), doc, oref.getRef(), nullptr, &usedParents));
@@ -2697,7 +2630,7 @@ Form::~Form()
 }
 
 // Look up an inheritable field dictionary entry.
-static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParents)
+static Object fieldLookup(Dict *field, const char *key, RefRecursionChecker *usedParents)
 {
     Dict *dict = field;
     Object obj = dict->lookup(key);
@@ -2707,9 +2640,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
     const Object &parent = dict->lookupNF("Parent");
     if (parent.isRef()) {
         const Ref ref = parent.getRef();
-        if (usedParents->find(ref.num) == usedParents->end()) {
-            usedParents->insert(ref.num);
-
+        if (usedParents->insert(ref)) {
             Object obj2 = parent.fetch(dict->getXRef());
             if (obj2.isDict()) {
                 return fieldLookup(obj2.getDict(), key, usedParents);
@@ -2723,7 +2654,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
 
 Object Form::fieldLookup(Dict *field, const char *key)
 {
-    std::set<int> usedParents;
+    RefRecursionChecker usedParents;
     return ::fieldLookup(field, key, &usedParents);
 }
 
@@ -2780,7 +2711,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
     FamilyStyleFontSearchResult findFontRes = globalParams->findSystemFontFileForFamilyAndStyle(fontFamily, fontStyle);
     std::vector<std::string> filesToIgnore;
     while (!findFontRes.filepath.empty()) {
-        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle, forceName);
+        Form::AddFontResult addFontRes = addFontToDefaultResources(findFontRes.filepath, findFontRes.faceIndex, fontFamily, fontStyle, findFontRes.substituted, forceName);
         if (!addFontRes.fontName.empty()) {
             return addFontRes;
         }
@@ -2790,7 +2721,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &fontFamil
     return {};
 }
 
-Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool forceName)
+Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath, int faceIndex, const std::string &fontFamily, const std::string &fontStyle, bool fontSubstitutedIn, bool forceName)
 {
     if (!filepath.ends_with(".ttf") && !filepath.ends_with(".ttc") && !filepath.ends_with(".otf")) {
         error(errIO, -1, "We only support embedding ttf/ttc/otf fonts for now. The font file for {0:s} {1:s} was {2:s}", fontFamily.c_str(), fontStyle.c_str(), filepath.c_str());
@@ -2810,15 +2741,19 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         return {};
     }
 
+    // If caller asked for one of the base14 fonts and got something named differently
+    // we are only having something close anyways, so don't embed the font program (and
+    // when we don't embed the font program, also don't embed widths and the CIDToGIDMap)
+    bool embedActualFont = !(fontSubstitutedIn && GfxFont::isBase14Font(fontFamily, fontStyle));
+
     XRef *xref = doc->getXRef();
     Object fontDict(new Dict(xref));
     fontDict.dictSet("Type", Object(objName, "Font"));
-    fontDict.dictSet("Subtype", Object(objName, "Type0"));
+    fontDict.dictSet("Subtype", Object(objName, (embedActualFont ? "Type0" : "Type1")));
     fontDict.dictSet("BaseFont", Object(objName, fontFamilyAndStyle.c_str()));
 
-    fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
-
-    {
+    if (embedActualFont) {
+        fontDict.dictSet("Encoding", Object(objName, "Identity-H"));
         std::unique_ptr<Array> descendantFonts = std::make_unique<Array>(xref);
 
         const bool isTrueType = (fontFoFiType == fofiIdTrueType || fontFoFiType == fofiIdTrueTypeCollection);
@@ -3055,7 +2990,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
 
     // If the text has some characters that are not available in the font, try adding a font for those
     std::unordered_set<Unicode> seen;
-    for (int i = 2; i < unicodeText->getLength(); i += 2) {
+    for (size_t i = 2; i < unicodeText->size(); i += 2) {
         Unicode uChar = (unsigned char)(unicodeText->getChar(i)) << 8;
         uChar += (unsigned char)(unicodeText->getChar(i + 1));
 
@@ -3100,7 +3035,9 @@ Form::AddFontResult Form::doGetAddFontToDefaultResources(Unicode uChar, const Gf
 
     std::string pdfFontName = findFontInDefaultResources(res.family, res.style);
     if (pdfFontName.empty()) {
-        return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style);
+        return addFontToDefaultResources(res.filepath, res.faceIndex, res.family, res.style,
+                                         true /*This is called when a string contains a uChar that is not present in the font for that string so we find a another font to display it, thus it's always a 'substitute' font*/,
+                                         false /*forceName*/);
     }
     return { pdfFontName, Ref::INVALID() };
 }

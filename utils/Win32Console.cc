@@ -25,7 +25,7 @@
 #    include <shellapi.h>
 
 static const int BUF_SIZE = 4096;
-static int bufLen = 0;
+static unsigned int bufLen = 0;
 static char buf[BUF_SIZE];
 static bool stdoutIsConsole = true;
 static bool stderrIsConsole = true;

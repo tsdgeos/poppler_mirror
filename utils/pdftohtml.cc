@@ -243,17 +243,17 @@ int main(int argc, char *argv[])
     if (argc == 3) {
         auto tmp = std::make_unique<GooString>(argv[2]);
         if (!xml) {
-            if (tmp->getLength() >= 5) {
-                const char *p = tmp->c_str() + tmp->getLength() - 5;
+            if (tmp->size() >= 5) {
+                const char *p = tmp->c_str() + tmp->size() - 5;
                 if (!strcmp(p, ".html") || !strcmp(p, ".HTML")) {
-                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->getLength() - 5);
+                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->size() - 5);
                 }
             }
         } else {
-            if (tmp->getLength() >= 4) {
-                const char *p = tmp->c_str() + tmp->getLength() - 4;
+            if (tmp->size() >= 4) {
+                const char *p = tmp->c_str() + tmp->size() - 4;
                 if (!strcmp(p, ".xml") || !strcmp(p, ".XML")) {
-                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->getLength() - 4);
+                    htmlFileName = std::make_unique<GooString>(tmp->c_str(), tmp->size() - 4);
                 }
             }
         }
@@ -264,9 +264,9 @@ int main(int argc, char *argv[])
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto error;
     } else {
-        const char *p = fileName->c_str() + fileName->getLength() - 4;
+        const char *p = fileName->c_str() + fileName->size() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            htmlFileName = std::make_unique<GooString>(fileName->c_str(), fileName->getLength() - 4);
+            htmlFileName = std::make_unique<GooString>(fileName->c_str(), fileName->size() - 4);
         } else {
             htmlFileName = fileName->copy();
         }
@@ -404,10 +404,10 @@ static std::unique_ptr<GooString> getInfoString(Dict *infoDict, const char *key)
         // Convert rawString to unicode
         if (hasUnicodeByteOrderMark(rawString->toStr())) {
             isUnicode = true;
-            unicodeLength = (obj.getString()->getLength() - 2) / 2;
+            unicodeLength = (obj.getString()->size() - 2) / 2;
         } else {
             isUnicode = false;
-            unicodeLength = obj.getString()->getLength();
+            unicodeLength = obj.getString()->size();
         }
         unicodeString = new Unicode[unicodeLength];
 

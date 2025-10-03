@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2021, 2024
+// Albert Astals Cid <aacid@kde.org> (C) 2017, 2018, 2021, 2024, 2025
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ struct MediaWindowParameters
     ~MediaWindowParameters() = default;
 
     // parse from a floating window parameters dictionary
-    void parseFWParams(Object *obj);
+    void parseFWParams(const Dict &params);
 
     enum MediaWindowType
     {
@@ -75,9 +75,9 @@ struct MediaParameters
     ~MediaParameters() = default;
 
     // parse from a "Media Play Parameters" dictionary
-    void parseMediaPlayParameters(Object *playObj);
+    void parseMediaPlayParameters(const Dict &playDict);
     // parse from a "Media Screen Parameters" dictionary
-    void parseMediaScreenParameters(Object *screenObj);
+    void parseMediaScreenParameters(const Dict &screenDict);
 
     enum MediaFittingPolicy
     {
@@ -121,7 +121,7 @@ struct MediaParameters
 class POPPLER_PRIVATE_EXPORT MediaRendition
 {
 public:
-    explicit MediaRendition(Object *obj);
+    explicit MediaRendition(const Dict &dict);
     MediaRendition(const MediaRendition &other);
     ~MediaRendition();
     MediaRendition &operator=(const MediaRendition &) = delete;

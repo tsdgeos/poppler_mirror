@@ -3,7 +3,7 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018-2020, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018-2020, 2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -28,20 +28,20 @@
 class PageLabelInfo
 {
 public:
-    PageLabelInfo(Object *tree, int numPages);
+    PageLabelInfo(const Dict &tree, int numPages);
 
     PageLabelInfo(const PageLabelInfo &) = delete;
     PageLabelInfo &operator=(const PageLabelInfo &) = delete;
 
-    bool labelToIndex(GooString *label, int *index) const;
+    std::optional<int> labelToIndex(const std::string &label) const;
     bool indexToLabel(int index, GooString *label) const;
 
 private:
-    void parse(const Object *tree, RefRecursionChecker &parsedRefs);
+    void parse(const Dict &tree, RefRecursionChecker &parsedRefs);
 
     struct Interval
     {
-        Interval(Object *dict, int baseA);
+        Interval(const Dict &dict, int baseA);
 
         std::string prefix;
         enum NumberStyle

@@ -2132,9 +2132,9 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
         std::set<int>::iterator patternRefIt;
         const int patternRefNum = tPat->getPatternRefNum();
         if (patternRefNum != -1) {
-            if (formsDrawing.find(patternRefNum) == formsDrawing.end()) {
-                patternRefIt = formsDrawing.insert(patternRefNum).first;
-            } else {
+            bool inserted;
+            std::tie(patternRefIt, inserted) = formsDrawing.insert(patternRefNum);
+            if (!inserted) {
                 shouldDrawPattern = false;
             }
         }
@@ -3855,7 +3855,7 @@ void Gfx::doShowText(const GooString *s)
         curY = state->getCurTextY();
         oldParser = parser;
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             dx = dx * state->getFontSize() + state->getCharSpace();
@@ -3889,9 +3889,9 @@ void Gfx::doShowText(const GooString *s)
                     std::set<int>::iterator charProcDrawingIt;
                     bool displayCharProc = true;
                     if (refNum != -1) {
-                        if (charProcDrawing.find(refNum) == charProcDrawing.end()) {
-                            charProcDrawingIt = charProcDrawing.insert(refNum).first;
-                        } else {
+                        bool inserted;
+                        std::tie(charProcDrawingIt, inserted) = charProcDrawing.insert(refNum);
+                        if (!inserted) {
                             displayCharProc = false;
                             error(errSyntaxError, -1, "CharProc wants to draw a CharProc that is already being drawn");
                         }
@@ -3933,7 +3933,7 @@ void Gfx::doShowText(const GooString *s)
 
     } else if (out->useDrawChar()) {
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
             if (wMode) {
@@ -3964,7 +3964,7 @@ void Gfx::doShowText(const GooString *s)
     } else {
         dx = dy = 0;
         p = s->c_str();
-        len = s->getLength();
+        len = s->size();
         nChars = nSpaces = 0;
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx2, &dy2, &originX, &originY);
@@ -4036,14 +4036,14 @@ void Gfx::doShowText(const GooString *s)
         out->restoreTextPos(state);
     }
 
-    updateLevel += 10 * s->getLength();
+    updateLevel += 10 * s->size();
 }
 
 // NB: this is only called when ocState is false.
 void Gfx::doIncCharCount(const GooString *s)
 {
     if (out->needCharCount()) {
-        out->incCharCount(s->getLength());
+        out->incCharCount(s->size());
     }
 }
 
@@ -4086,9 +4086,9 @@ void Gfx::opXObject(Object args[], int numArgs)
         std::set<int>::iterator drawingFormIt;
         if (refObj.isRef()) {
             const int num = refObj.getRef().num;
-            if (formsDrawing.find(num) == formsDrawing.end()) {
-                drawingFormIt = formsDrawing.insert(num).first;
-            } else {
+            bool inserted;
+            std::tie(drawingFormIt, inserted) = formsDrawing.insert(num);
+            if (!inserted) {
                 shouldDoForm = false;
             }
         }

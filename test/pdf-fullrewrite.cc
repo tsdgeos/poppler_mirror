@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     }
 
     // save it back (in rewrite or incremental update mode)
-    if (doc->saveAs(doc->getFileName()->toStr(), forceIncremental ? writeForceIncremental : writeForceRewrite) != 0) {
+    if (doc->saveAs(argv[2], forceIncremental ? writeForceIncremental : writeForceRewrite) != 0) {
         fprintf(stderr, "Error saving document\n");
         res = 1;
         goto done;

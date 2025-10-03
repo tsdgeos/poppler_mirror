@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -91,7 +91,7 @@ public:
 private:
     struct Entry
     {
-        Entry(Array *array, int index);
+        Entry(const Array &array, int index);
         ~Entry();
         GooString name;
         Object value;
@@ -201,7 +201,7 @@ public:
     std::string getJS(int i);
 
     // Convert between page indices and page labels.
-    bool labelToIndex(GooString *label, int *index);
+    bool labelToIndex(const GooString &label, int *index);
     bool indexToLabel(int index, GooString *label);
 
     Object *getOutline();

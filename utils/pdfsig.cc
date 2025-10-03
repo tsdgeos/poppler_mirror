@@ -18,7 +18,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2022 Felix Jung <fxjung@posteo.de>
 // Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
-// Copyright 2023, 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================
@@ -83,6 +83,9 @@ static const char *getReadableSigState(SignatureValidationStatus sig_vs)
 
     case SIGNATURE_NOT_VERIFIED:
         return "Signature has not yet been verified.";
+
+    case SIGNATURE_NOT_FOUND:
+        return "Signature not found.";
 
     default:
         return "Unknown Validation Failure.";
@@ -283,7 +286,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
             return nullptr;
         }
         firstTime = false;
-        if (nssPassword.getLength() > 0) {
+        if (!nssPassword.empty()) {
             return strdup(nssPassword.c_str());
         } else {
             passwordNeeded = true;
@@ -507,7 +510,7 @@ int main(int argc, char *argv[])
 
         const auto rs = std::unique_ptr<GooString>(reason.toStr().empty() ? nullptr : std::make_unique<GooString>(utf8ToUtf16WithBom(reason.toStr())));
 
-        if (newSignatureFieldName.getLength() == 0) {
+        if (newSignatureFieldName.empty()) {
             // Create a random field name, it could be anything but 32 hex numbers should
             // hopefully give us something that is not already in the document
             std::random_device rd;
@@ -580,8 +583,7 @@ int main(int argc, char *argv[])
         }
 
         FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
-        Goffset file_size = 0;
-        const std::optional<GooString> sig = ffs->getCheckedSignature(&file_size);
+        auto [sig, file_size] = ffs->getCheckedSignature();
         if (sig) {
             printf("Signature number %d is already signed\n", signatureNumber);
             return 2;
@@ -615,8 +617,7 @@ int main(int argc, char *argv[])
         const std::string signatureText(GooString::format(_("Digitally signed by {0:s}"), signerName.c_str()) + "\n" + GooString::format(_("Date: {0:s}"), timestamp.c_str()));
         const auto gSignatureText = std::make_unique<GooString>((signatureText.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signatureText));
         const auto gSignatureLeftText = std::make_unique<GooString>((signerName.empty() || noAppearance) ? "" : utf8ToUtf16WithBom(signerName));
-        const auto failure =
-                fws->signDocumentWithAppearance(argv[2], std::string { certNickname }, std::string { password }, rs.get(), nullptr, {}, {}, *gSignatureText, *gSignatureLeftText, 0, 0, std::make_unique<AnnotColor>(blackColor), {});
+        const auto failure = fws->signDocumentWithAppearance(argv[2], std::string { certNickname }, std::string { password }, rs.get(), nullptr, {}, {}, *gSignatureText, *gSignatureLeftText, 0, 0, std::make_unique<AnnotColor>(blackColor));
         return !failure.has_value() ? 0 : 3;
     }
 
@@ -734,8 +735,7 @@ int main(int argc, char *argv[])
         const std::vector<Goffset> ranges = ffs->getSignedRangeBounds();
         if (ranges.size() == 4) {
             printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n", ranges[0], ranges[1], ranges[2], ranges[3]);
-            Goffset checked_file_size;
-            const std::optional<GooString> signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
+            auto [signature, checked_file_size] = signatures.at(i)->getCheckedSignature();
             if (signature && checked_file_size == ranges[3]) {
                 if (totalDocumentSigned) {
                     printf("multiple signatures is covering entire document. Impossible");

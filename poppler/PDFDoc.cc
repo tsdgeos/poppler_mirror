@@ -141,8 +141,8 @@ PDFDoc::PDFDoc() = default;
 PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback) : fileName(std::move(fileNameA))
 {
 #ifdef _WIN32
-    const int n = fileName->getLength();
-    for (int i = 0; i < n; ++i) {
+    const size_t n = fileName->size();
+    for (size_t i = 0; i < n; ++i) {
         fileNameU.push_back((wchar_t)(fileName->getChar(i) & 0xff));
     }
 
@@ -209,8 +209,8 @@ PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, 
     if (strA->getFileName()) {
         fileName = strA->getFileName()->copy();
 #ifdef _WIN32
-        const int n = fileName->getLength();
-        for (int i = 0; i < n; ++i) {
+        const size_t n = fileName->size();
+        for (size_t i = 0; i < n; ++i) {
             fileNameU.push_back((wchar_t)(fileName->getChar(i) & 0xff));
         }
 #endif
@@ -720,7 +720,7 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
 
 void PDFDoc::setDocInfoStringEntry(const char *key, std::unique_ptr<GooString> value)
 {
-    bool removeEntry = !value || value->getLength() == 0 || (value->toStr() == unicodeByteOrderMark);
+    bool removeEntry = !value || value->empty() || (value->toStr() == unicodeByteOrderMark);
 
     Object infoObj = getDocInfo();
     if (infoObj.isNull() && removeEntry) {
@@ -765,7 +765,7 @@ static bool get_id(const GooString *encodedidstring, GooString *id)
     char pdfid[pdfIdLength + 1];
     int n;
 
-    if (encodedidstring->getLength() != pdfIdLength / 2) {
+    if (encodedidstring->size() != pdfIdLength / 2) {
         return false;
     }
 
@@ -1248,8 +1248,8 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
 
     outStr->printf("<<");
     for (int i = 0; i < dict->getLength(); i++) {
-        GooString keyName(dict->getKey(i));
-        outStr->printf("/%s ", sanitizedName(keyName.toStr()).c_str());
+        std::string keyName(dict->getKey(i));
+        outStr->printf("/%s ", sanitizedName(keyName).c_str());
         Object obj1 = dict->getValNF(i).copy();
         writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
     }
@@ -1309,7 +1309,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     // Encrypt string if encryption is enabled
     std::unique_ptr<GooString> sEnc = nullptr;
     if (fileKey) {
-        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
+        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
         sEnc = std::make_unique<GooString>();
         int c;
         if (!enc->reset()) {
@@ -1329,7 +1329,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
         const char *c = s->c_str();
         std::stringstream stream;
         stream << std::setfill('0') << std::hex;
-        for (int i = 0; i < s->getLength(); i++) {
+        for (size_t i = 0; i < s->size(); i++) {
             stream << std::setw(2) << (0xff & (unsigned int)*(c + i));
         }
         outStr->printf("<");
@@ -1338,7 +1338,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     } else {
         const char *c = s->c_str();
         outStr->printf("(");
-        for (int i = 0; i < s->getLength(); i++) {
+        for (size_t i = 0; i < s->size(); i++) {
             char unescaped = *(c + i) & 0x000000ff;
             // escape if needed
             if (unescaped == '\r') {
@@ -1394,7 +1394,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
     case objHexString: {
         const GooString *s = obj->getHexString();
         outStr->printf("<");
-        for (int i = 0; i < s->getLength(); i++) {
+        for (size_t i = 0; i < s->size(); i++) {
             outStr->printf("%02x", s->getChar(i) & 0xff);
         }
         outStr->printf("> ");
@@ -1586,7 +1586,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
 
     // calculate md5 digest
     unsigned char digest[16];
-    md5((unsigned char *)message.c_str(), message.getLength(), digest);
+    md5((unsigned char *)message.c_str(), message.size(), digest);
 
     // create ID array
     // In case of encrypted files, the ID must not be changed because it's used to calculate the key
@@ -1646,7 +1646,7 @@ void PDFDoc::writeXRefStreamTrailer(Object &&trailerDict, XRef *uxref, Ref *uxre
     uxref->writeStreamToBuffer(&stmData, trailerDict.getDict(), xRef);
 
     // Create XRef stream object and write it
-    auto mStream = std::make_unique<MemStream>(stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict));
+    auto mStream = std::make_unique<MemStream>(stmData.c_str(), 0, stmData.size(), std::move(trailerDict));
     writeObjectHeader(uxrefStreamRef, outStr);
     Object obj1(std::move(mStream));
     writeObject(&obj1, outStr, xRef, 0, nullptr, cryptRC4, 0, 0, 0);
@@ -2226,7 +2226,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
     rectArray->add(Object(rect.y2));
     annotObj.dictSet("Rect", Object(rectArray));
 
-    if (signatureText.getLength() || signatureTextLeft.getLength()) {
+    if (!signatureText.empty() || !signatureTextLeft.empty()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
         if (pdfFontName.empty()) {
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };

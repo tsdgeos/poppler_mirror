@@ -9,6 +9,7 @@
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -790,11 +791,11 @@ PopplerPage *poppler_document_get_page(PopplerDocument *document, int index)
 PopplerPage *poppler_document_get_page_by_label(PopplerDocument *document, const char *label)
 {
     Catalog *catalog;
-    GooString label_g(label);
+    const GooString label_g(label);
     int index;
 
     catalog = document->doc->getCatalog();
-    if (!catalog->labelToIndex(&label_g, &index)) {
+    if (!catalog->labelToIndex(label_g, &index)) {
         return nullptr;
     }
 
@@ -1085,7 +1086,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
         auto name = catalog->getDestNameTreeName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
         if (link_dest) {
-            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->getLength());
+            gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->size());
             dest = _poppler_dest_new_goto(document, link_dest.get());
             g_tree_insert(tree, key, dest);
         }
@@ -1103,15 +1104,15 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
     char *result;
 
     if (hasUnicodeByteOrderMark(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else if (hasUnicodeByteOrderMarkLE(s->toStr())) {
-        result = g_convert(s->c_str() + 2, s->getLength() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
+        result = g_convert(s->c_str() + 2, s->size() - 2, "UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
     } else {
         int len;
         gunichar *ucs4_temp;
         int i;
 
-        len = s->getLength();
+        len = s->size();
         ucs4_temp = g_new(gunichar, len + 1);
         for (i = 0; i < len; ++i) {
             ucs4_temp[i] = pdfDocEncoding[(unsigned char)s->getChar(i)];
@@ -3757,9 +3758,9 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
     gboolean retval;
 
     if (hasUnicodeByteOrderMark(date->toStr())) {
-        date_string = g_convert(date->c_str() + 2, date->getLength() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+        date_string = g_convert(date->c_str() + 2, date->size() - 2, "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
     } else {
-        date_string = g_strndup(date->c_str(), date->getLength());
+        date_string = g_strndup(date->c_str(), date->size());
     }
 
     retval = poppler_date_parse(date_string, gdate);
@@ -3889,7 +3890,7 @@ static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document
     GooString signature_text_left;
     signing_data_signature_text_left = poppler_signing_data_get_signature_text_left(signing_data);
     if (signing_data_signature_text_left != nullptr) {
-        signature_text.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text_left));
+        signature_text_left.toNonConstStr().assign(utf8ToUtf16WithBom(signing_data_signature_text_left));
     }
 
     auto field_partial_name = std::make_unique<GooString>(signing_data_partial_name, strlen(signing_data_partial_name));
