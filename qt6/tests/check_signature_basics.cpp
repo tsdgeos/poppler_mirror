@@ -66,13 +66,15 @@ void TestSignatureBasics::init()
 
 void TestSignatureBasics::initTestCase_data()
 {
-    QTest::addColumn<CryptoSign::Backend::Type>("backend");
-    QTest::addColumn<std::string>("filename");
 
 #ifdef ENABLE_SIGNATURES
     const auto availableBackends = CryptoSign::Factory::getAvailable();
+    QTest::addColumn<CryptoSign::Backend::Type>("backend");
+#endif
+    QTest::addColumn<std::string>("filename");
 
     for (auto document : { TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs.pdf", TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs-randompadded.pdf" }) {
+#ifdef ENABLE_SIGNATURES
 
 #    ifdef ENABLE_NSS3
         if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
@@ -88,8 +90,10 @@ void TestSignatureBasics::initTestCase_data()
             QWARN("Compiled with GPGME, but GPGME not functional");
         }
 #    endif
-    }
+#else
+        QTest::addRow("%s", document) << std::string { document };
 #endif
+    }
 }
 
 void TestSignatureBasics::cleanupTestCase()
