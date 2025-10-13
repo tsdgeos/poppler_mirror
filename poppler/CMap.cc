@@ -66,7 +66,13 @@ static int getCharFromStream(void *data)
 
 //------------------------------------------------------------------------
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj)
+{
+    RefRecursionChecker recursion;
+    return parse(cache, collectionA, obj, recursion);
+}
+
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj, RefRecursionChecker &recursion)
 {
     std::shared_ptr<CMap> cMap;
 
@@ -112,13 +118,13 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str, const std::shared_ptr<RefRecursionChecker> &recursion)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str, RefRecursionChecker &recursion)
 {
     auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), nullptr));
     Ref ref;
     Object obj1 = str->getDict()->lookup("UseCMap", &ref);
-    if (!recursion->insert(ref)) {
-        return nullptr;
+    if (!recursion.insert(ref)) {
+        return {};
     }
     if (!obj1.isNull()) {
         cMap->useCMap(cache, &obj1, recursion);
@@ -237,7 +243,7 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     }
 }
 
-void CMap::useCMap(CMapCache *cache, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion)
+void CMap::useCMap(CMapCache *cache, Object *obj, RefRecursionChecker &recursion)
 {
     std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj, recursion);
     if (!subCMap) {
