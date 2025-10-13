@@ -66,7 +66,7 @@ static int getCharFromStream(void *data)
 
 //------------------------------------------------------------------------
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion)
 {
     std::shared_ptr<CMap> cMap;
 
@@ -76,7 +76,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
             error(errSyntaxError, -1, "Unknown CMap '{0:t}' for character collection '{1:s}'", &cMapNameA, collectionA.c_str());
         }
     } else if (obj->isStream()) {
-        if (!(cMap = CMap::parse(nullptr, collectionA, obj->getStream()))) {
+        if (!(cMap = CMap::parse(nullptr, collectionA, obj->getStream(), recursion))) {
             error(errSyntaxError, -1, "Invalid CMap in Type 0 font");
         }
     } else {
@@ -112,12 +112,16 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
     return cMap;
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str)
+std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Stream *str, const std::shared_ptr<RefRecursionChecker> &recursion)
 {
     auto cMap = std::shared_ptr<CMap>(new CMap(std::make_unique<GooString>(collectionA), nullptr));
-    Object obj1 = str->getDict()->lookup("UseCMap");
+    Ref ref;
+    Object obj1 = str->getDict()->lookup("UseCMap", &ref);
+    if (!recursion->insert(ref)) {
+        return nullptr;
+    }
     if (!obj1.isNull()) {
-        cMap->useCMap(cache, &obj1);
+        cMap->useCMap(cache, &obj1, recursion);
     }
 
     if (str->reset()) {
@@ -233,9 +237,9 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     }
 }
 
-void CMap::useCMap(CMapCache *cache, Object *obj)
+void CMap::useCMap(CMapCache *cache, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion)
 {
-    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj);
+    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj, recursion);
     if (!subCMap) {
         return;
     }

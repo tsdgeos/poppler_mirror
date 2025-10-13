@@ -30,6 +30,7 @@
 #include <atomic>
 #include <memory>
 
+#include "Object.h"
 #include "poppler-config.h"
 #include "CharTypes.h"
 
@@ -46,15 +47,11 @@ class CMap
 public:
     // Parse a CMap from <obj>, which can be a name or a stream.  Sets
     // the initial reference count to 1.  Returns NULL on failure.
-    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Object *obj);
+    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion = std::make_shared<RefRecursionChecker>());
 
     // Create the CMap specified by <collection> and <cMapName>.  Sets
     // the initial reference count to 1.  Returns NULL on failure.
     static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, const std::string &cMapNameA);
-
-    // Parse a CMap from <str>.  Sets the initial reference count to 1.
-    // Returns NULL on failure.
-    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Stream *str);
 
     ~CMap();
 
@@ -81,11 +78,15 @@ public:
     void setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
 private:
+    // Parse a CMap from <str>.  Sets the initial reference count to 1.
+    // Returns NULL on failure.
+    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Stream *str, const std::shared_ptr<RefRecursionChecker> &recursion);
+
     void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
     CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA);
     CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA);
     void useCMap(CMapCache *cache, const char *useName);
-    void useCMap(CMapCache *cache, Object *obj);
+    void useCMap(CMapCache *cache, Object *obj, const std::shared_ptr<RefRecursionChecker> &recursion);
     void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
     void addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID);
     void freeCMapVector(CMapVectorEntry *vec);
