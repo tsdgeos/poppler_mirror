@@ -15,7 +15,7 @@
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
-// Copyright 2021 Marek Kasik <mkasik@redhat.com>
+// Copyright 2021, 2025 Marek Kasik <mkasik@redhat.com>
 // Copyright 2022 Erich E. Hoover <erich.e.hoover@gmail.com>
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -619,12 +619,21 @@ static std::optional<std::string> getDefaultFirefoxCertDB()
 #endif
 
     std::error_code ec; // ensures directory_iterator doesn't throw exceptions
+    std::optional<std::string> latestDir;
+    std::filesystem::file_time_type latestWriteTime;
     for (const auto &entry : std::filesystem::directory_iterator { firefoxPath, ec }) {
         if (entry.is_directory() && entry.path().string().find("default") != std::string::npos) {
-            return entry.path().string();
+            const auto certPath = entry.path() / "cert9.db";
+            if (std::filesystem::exists(certPath, ec) && std::filesystem::is_regular_file(certPath, ec)) {
+                const auto writeTime = std::filesystem::last_write_time(certPath, ec);
+                if (!latestDir.has_value() || writeTime > latestWriteTime) {
+                    latestWriteTime = writeTime;
+                    latestDir = entry.path().string();
+                }
+            }
         }
     }
-    return {};
+    return latestDir;
 }
 
 std::string NSSSignatureConfiguration::sNssDir;
