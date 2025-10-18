@@ -321,12 +321,24 @@ inline void SplashXPathScanner::addIntersection(double segYMin, int y, int x0, i
     }
 
     auto &line = allIntersections[y - yMin];
-#ifndef USE_BOOST_HEADERS
     if (line.empty()) {
+#ifndef USE_BOOST_HEADERS
         line.reserve(4);
-    }
 #endif
-    line.push_back(intersect);
+        line.push_back(intersect);
+    } else {
+        auto &last = line.back();
+        // Check if last and new overlap/touch
+        if ((last.x1 + 1) < intersect.x0) {
+            line.push_back(intersect);
+        } else if (last.x0 > (intersect.x1 + 1)) {
+            line.push_back(intersect);
+        } else {
+            last.count += intersect.count;
+            last.x0 = last.x0 < intersect.x0 ? last.x0 : intersect.x0;
+            last.x1 = last.x1 > intersect.x1 ? last.x1 : intersect.x1;
+        }
+    }
 }
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine) const
