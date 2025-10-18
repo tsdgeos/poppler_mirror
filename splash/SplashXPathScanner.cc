@@ -241,7 +241,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
         }
 
         if (y1 == y0) {
-            addIntersection(segYMin, segYMax, y1, splashFloor(seg->x0), splashFloor(seg->x1), 0);
+            addIntersection(segYMin, y1, splashFloor(seg->x0), splashFloor(seg->x1), 0);
         } else if (seg->flags & splashXPathVert) {
             if (y0 < yMin) {
                 y0 = yMin;
@@ -252,7 +252,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
             int x = splashFloor(seg->x0);
             int count = (seg->flags & splashXPathFlipped) ? 1 : -1;
             for (int y = y0; y <= y1; ++y) {
-                addIntersection(segYMin, segYMax, y, x, x, count);
+                addIntersection(segYMin, y, x, x, count);
             }
         } else {
             if (seg->x0 < seg->x1) {
@@ -290,7 +290,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                     xx1 = segXMax;
                 }
                 int x1 = splashFloor(xx1);
-                addIntersection(segYMin, segYMax, y, x0, x1, count);
+                addIntersection(segYMin, y, x0, x1, count);
 
                 x0 = x1;
             }
@@ -301,7 +301,7 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
     }
 }
 
-inline void SplashXPathScanner::addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count)
+inline void SplashXPathScanner::addIntersection(double segYMin, int y, int x0, int x1, int count)
 {
     SplashIntersect intersect;
     if (x0 < x1) {
