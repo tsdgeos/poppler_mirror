@@ -452,7 +452,7 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
 
     sig_field = static_cast<FormFieldSignature *>(field->widget->getField());
 
-    sig_info = sig_field->validateSignatureAsync(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE, force_revalidation, -1, flags & POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK,
+    sig_info = sig_field->validateSignatureAsync(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE, force_revalidation, -1, !(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK),
                                                  flags & POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH, {});
     CertificateValidationStatus certificateStatus = sig_field->validateSignatureResult();
 
