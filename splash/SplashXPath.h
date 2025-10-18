@@ -50,7 +50,7 @@ struct SplashXPathSeg
     0x01 // segment is vertical (y0 == y1)
          //   (dxdy is undef)
 #define splashXPathVert 0x02 // segment is horizontal (x0 == x1)
-#define splashXPathFlip 0x04 // y0 > y1
+#define splashXPathFlipped 0x04 // y0 > y1
 
 //------------------------------------------------------------------------
 // SplashXPath

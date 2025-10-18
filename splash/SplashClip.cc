@@ -178,6 +178,46 @@ SplashError SplashClip::clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x
     return splashOk;
 }
 
+namespace {
+// returns true if the 4 consecutive segments form a axis aligned rectangle
+// first and third segment must be the vertical segments
+constexpr bool isRect(const SplashXPathSeg &a, const SplashXPathSeg &b, const SplashXPathSeg &c, const SplashXPathSeg &d)
+{
+    // Check if segment a and c are vertical, and b and d are horizontal
+    if ((a.x0 != a.x1) || (b.y0 != b.y1) || (c.x0 != c.x1) || (d.y0 != d.y1)) {
+        return false;
+    }
+    // Check if x coordinates match
+    if ((a.x1 != b.x0) || (b.x1 != c.x0) || (c.x1 != d.x0) || (d.x1 != a.x0)) {
+        return false;
+    }
+    if ((a.y0 != c.y0) || (a.y1 != c.y1)) {
+        return false;
+    }
+    if ((a.y0 == b.y0) && (a.y1 == d.y0)) {
+        return true;
+    }
+    if ((a.y0 == d.y0) && (a.y1 == b.y0)) {
+        return true;
+    }
+    return false;
+}
+// 4 valid cases - two orientations, start on left or right
+static_assert(isRect({ 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 1.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 0.0, 0.0, 0.0, 0 }));
+static_assert(isRect({ 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }, { 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }));
+static_assert(isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 0.0, 0.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 1.0, 2.0, 1.0, 0.0, 0 }));
+static_assert(isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }));
+// 4 invalid cases, one segment point not closing
+static_assert(!isRect({ 2.0, 0.0, 2.0, 3.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }));
+static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 3.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }));
+static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 3.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }));
+static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 3.0, 0.0, 0.0, 0 }));
+// invalid case, closed, but left segment not vertical
+static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0, 0 }, { 1.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 1.0, 0.0, 2.0, 0.0, 0.0, 0 }));
+// invalid case, all horizontal/vertical, but horizontal segments coincident
+static_assert(!isRect({ 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }, { 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 0.0, 0.0, 0.0, 0 }));
+}
+
 SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo)
 {
     int yMinAA, yMaxAA;
@@ -191,15 +231,11 @@ SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, 
         xMaxI = splashCeil(xMax) - 1;
         yMaxI = splashCeil(yMax) - 1;
 
-        // check for a rectangle
-    } else if (xPath.length == 4
-               && ((xPath.segs[0].x0 == xPath.segs[0].x1 && xPath.segs[0].x0 == xPath.segs[1].x0 && xPath.segs[0].x0 == xPath.segs[3].x1 && xPath.segs[2].x0 == xPath.segs[2].x1 && xPath.segs[2].x0 == xPath.segs[1].x1
-                    && xPath.segs[2].x0 == xPath.segs[3].x0 && xPath.segs[1].y0 == xPath.segs[1].y1 && xPath.segs[1].y0 == xPath.segs[0].y1 && xPath.segs[1].y0 == xPath.segs[2].y0 && xPath.segs[3].y0 == xPath.segs[3].y1
-                    && xPath.segs[3].y0 == xPath.segs[0].y0 && xPath.segs[3].y0 == xPath.segs[2].y1)
-                   || (xPath.segs[0].y0 == xPath.segs[0].y1 && xPath.segs[0].y0 == xPath.segs[1].y0 && xPath.segs[0].y0 == xPath.segs[3].y1 && xPath.segs[2].y0 == xPath.segs[2].y1 && xPath.segs[2].y0 == xPath.segs[1].y1
-                       && xPath.segs[2].y0 == xPath.segs[3].y0 && xPath.segs[1].x0 == xPath.segs[1].x1 && xPath.segs[1].x0 == xPath.segs[0].x1 && xPath.segs[1].x0 == xPath.segs[2].x0 && xPath.segs[3].x0 == xPath.segs[3].x1
-                       && xPath.segs[3].x0 == xPath.segs[0].x0 && xPath.segs[3].x0 == xPath.segs[2].x1))) {
-        clipToRect(xPath.segs[0].x0, xPath.segs[0].y0, xPath.segs[2].x0, xPath.segs[2].y0);
+        // check for an axis aligned rectangle
+    } else if (xPath.length == 4 && isRect(xPath.segs[0], xPath.segs[1], xPath.segs[2], xPath.segs[3])) {
+        clipToRect(xPath.segs[0].x0, xPath.segs[0].y0, xPath.segs[2].x0, xPath.segs[2].y1);
+    } else if (xPath.length == 4 && isRect(xPath.segs[1], xPath.segs[2], xPath.segs[3], xPath.segs[0])) {
+        clipToRect(xPath.segs[1].x0, xPath.segs[1].y0, xPath.segs[3].x0, xPath.segs[3].y1);
 
     } else {
         grow(1);

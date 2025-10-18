@@ -392,14 +392,22 @@ void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, Spl
         if (x1 == x0) {
             segs[length].flags |= splashXPathVert;
         }
-    } else if (x1 == x0) {
+        ++length;
+        return;
+    }
+
+    if (x1 == x0) {
         segs[length].dxdy = 0;
         segs[length].flags |= splashXPathVert;
     } else {
         segs[length].dxdy = (x1 - x0) / (y1 - y0);
     }
     if (y0 > y1) {
-        segs[length].flags |= splashXPathFlip;
+        segs[length].y1 = y0;
+        segs[length].y0 = y1;
+        segs[length].x1 = x0;
+        segs[length].x0 = x1;
+        segs[length].flags |= splashXPathFlipped;
     }
     ++length;
 }
@@ -410,20 +418,10 @@ struct cmpXPathSegsFunctor
     {
         SplashCoord x0, y0, x1, y1;
 
-        if (seg0.flags & splashXPathFlip) {
-            x0 = seg0.x1;
-            y0 = seg0.y1;
-        } else {
-            x0 = seg0.x0;
-            y0 = seg0.y0;
-        }
-        if (seg1.flags & splashXPathFlip) {
-            x1 = seg1.x1;
-            y1 = seg1.y1;
-        } else {
-            x1 = seg1.x0;
-            y1 = seg1.y0;
-        }
+        x0 = seg0.x0;
+        y0 = seg0.y0;
+        x1 = seg1.x0;
+        y1 = seg1.y0;
         return (y0 != y1) ? (y0 < y1) : (x0 < x1);
     }
 };
