@@ -165,11 +165,12 @@ bool SplashXPathScanner::testSpan(int x0, int x1, int y) const
 
     // invariant: the subspan [x0,xx1] is inside the path
     int xx1 = x0 - 1;
+    int eoMask = eo ? 0x1 : ~0;
     while (xx1 < x1) {
         if (i >= line.size()) {
             return false;
         }
-        if (line[i].x0 > xx1 + 1 && !(eo ? (count & 1) : (count != 0))) {
+        if (line[i].x0 > xx1 + 1 && !(count & eoMask)) {
             return false;
         }
         if (line[i].x1 > xx1) {
@@ -189,11 +190,12 @@ bool SplashXPathScanIterator::getNextSpan(int *x0, int *x1)
     if (interIdx >= line.size()) {
         return false;
     }
+    int eoMask = eo ? 0x1 : ~0;
     xx0 = line[interIdx].x0;
     xx1 = line[interIdx].x1;
     interCount += line[interIdx].count;
     ++interIdx;
-    while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (eo ? (interCount & 1) : (interCount != 0)))) {
+    while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (interCount & eoMask))) {
         if (line[interIdx].x1 > xx1) {
             xx1 = line[interIdx].x1;
         }
@@ -348,6 +350,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int
             yyMax = yMax - splashAASize * y;
         }
 
+        int eoMask = eo ? 0x1 : ~0;
         for (; yy <= yyMax; ++yy) {
             const auto &line = allIntersections[splashAASize * y + yy - yMin];
             interIdx = 0;
@@ -357,7 +360,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int
                 xx1 = line[interIdx].x1;
                 interCount += line[interIdx].count;
                 ++interIdx;
-                while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (eo ? (interCount & 1) : (interCount != 0)))) {
+                while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (interCount & eoMask))) {
                     if (line[interIdx].x1 > xx1) {
                         xx1 = line[interIdx].x1;
                     }
@@ -422,6 +425,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const in
     if (yyMax + splashAASize * y > yMax) {
         yyMax = yMax - splashAASize * y;
     }
+    int eoMask = eo ? 0x1 : ~0;
     for (yy = 0; yy < splashAASize; ++yy) {
         xx = *x0 * splashAASize;
         if (yy >= yyMin && yy <= yyMax) {
@@ -437,7 +441,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const in
                 xx1 = line[interIdx].x1;
                 interCount += line[interIdx].count;
                 ++interIdx;
-                while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (eo ? (interCount & 1) : (interCount != 0)))) {
+                while (interIdx < line.size() && (line[interIdx].x0 <= xx1 || (interCount & eoMask))) {
                     if (line[interIdx].x1 > xx1) {
                         xx1 = line[interIdx].x1;
                     }
