@@ -387,17 +387,16 @@ void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, Spl
     segs[length].y1 = y1;
     segs[length].flags = 0;
     if (y1 == y0) {
-        segs[length].dxdy = segs[length].dydx = 0;
+        segs[length].dxdy = 0;
         segs[length].flags |= splashXPathHoriz;
         if (x1 == x0) {
             segs[length].flags |= splashXPathVert;
         }
     } else if (x1 == x0) {
-        segs[length].dxdy = segs[length].dydx = 0;
+        segs[length].dxdy = 0;
         segs[length].flags |= splashXPathVert;
     } else {
         segs[length].dxdy = (x1 - x0) / (y1 - y0);
-        segs[length].dydx = (SplashCoord)1 / segs[length].dxdy;
     }
     if (y0 > y1) {
         segs[length].flags |= splashXPathFlip;
