@@ -262,17 +262,18 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                 segXMin = seg->x1;
                 segXMax = seg->x0;
             }
+            // Calculate the projected intersection of the segment with the
+            // X-Axis.
+            SplashCoord xbase = seg->x0 - (seg->y0 * seg->dxdy);
+            SplashCoord xx0 = seg->x0;
             if (y0 < yMin) {
                 y0 = yMin;
+                xx0 = xbase + ((SplashCoord)y0) * seg->dxdy;
             }
             if (y1 > yMax) {
                 y1 = yMax;
             }
             int count = (seg->flags & splashXPathFlipped) ? 1 : -1;
-            // Calculate the projected intersection of the segment with the
-            // X-Axis.
-            SplashCoord xbase = seg->x0 - (seg->y0 * seg->dxdy);
-            SplashCoord xx0 = xbase + ((SplashCoord)y0) * seg->dxdy;
             // the segment may not actually extend to the top and/or bottom edges
             if (xx0 < segXMin) {
                 xx0 = segXMin;
