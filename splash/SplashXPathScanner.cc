@@ -111,29 +111,6 @@ void SplashXPathScanner::getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMax
     *yMaxA = yMax / splashAASize;
 }
 
-void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax) const
-{
-    if (y < yMin || y > yMax) {
-        *spanXMin = xMax + 1;
-        *spanXMax = xMax;
-        return;
-    }
-    const auto &line = allIntersections[y - yMin];
-    if (!line.empty()) {
-        *spanXMin = line[0].x0;
-        int xx = line[0].x1;
-        for (const SplashIntersect &intersect : line) {
-            if (intersect.x1 > xx) {
-                xx = intersect.x1;
-            }
-        }
-        *spanXMax = xx;
-    } else {
-        *spanXMin = xMax + 1;
-        *spanXMax = xMax;
-    }
-}
-
 bool SplashXPathScanner::test(int x, int y) const
 {
     if (y < yMin || y > yMax) {

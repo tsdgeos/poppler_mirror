@@ -73,9 +73,6 @@ public:
     // clipYMin/clipYMax bounds passed to the constructor.
     bool hasPartialClip() const { return partialClip; }
 
-    // Return the min/max x values for the span at <y>.
-    void getSpanBounds(int y, int *spanXMin, int *spanXMax) const;
-
     // Returns true if (<x>,<y>) is inside the path.
     bool test(int x, int y) const;
 
