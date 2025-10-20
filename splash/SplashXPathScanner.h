@@ -89,7 +89,7 @@ private:
     void computeIntersections(const SplashXPath &xPath);
     void addIntersection(double segYMin, int y, int x0, int x1, int count);
 
-    bool eo;
+    const bool eo;
     int xMin, yMin, xMax, yMax;
 
 #ifdef USE_BOOST_HEADERS

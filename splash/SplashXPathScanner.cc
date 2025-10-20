@@ -39,13 +39,12 @@
 // SplashXPathScanner
 //------------------------------------------------------------------------
 
-SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax)
+SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax) //
+    : eo(eoA)
 {
     const SplashXPathSeg *seg;
     SplashCoord xMinFP, yMinFP, xMaxFP, yMaxFP;
     int i;
-
-    eo = eoA;
 
     // compute the bbox
     xMin = yMin = 1;
