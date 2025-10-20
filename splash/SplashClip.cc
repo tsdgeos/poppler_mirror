@@ -34,12 +34,6 @@
 #include "SplashClip.h"
 
 //------------------------------------------------------------------------
-// SplashClip.flags
-//------------------------------------------------------------------------
-
-#define splashClipEO 0x01 // use even-odd rule
-
-//------------------------------------------------------------------------
 // SplashClip
 //------------------------------------------------------------------------
 
@@ -64,14 +58,10 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
     yMinI = splashFloor(yMin);
     xMaxI = splashCeil(xMax) - 1;
     yMaxI = splashCeil(yMax) - 1;
-    flags = nullptr;
-    length = size = 0;
 }
 
 SplashClip::SplashClip(const SplashClip *clip)
 {
-    int i;
-
     antialias = clip->antialias;
     xMin = clip->xMin;
     yMin = clip->yMin;
@@ -81,39 +71,12 @@ SplashClip::SplashClip(const SplashClip *clip)
     yMinI = clip->yMinI;
     xMaxI = clip->xMaxI;
     yMaxI = clip->yMaxI;
-    length = clip->length;
-    size = clip->size;
-    flags = (unsigned char *)gmallocn(size, sizeof(unsigned char));
     scanners = clip->scanners;
-    for (i = 0; i < length; ++i) {
-        flags[i] = clip->flags[i];
-    }
-}
-
-SplashClip::~SplashClip()
-{
-    gfree(flags);
-}
-
-void SplashClip::grow(int nPaths)
-{
-    if (length + nPaths > size) {
-        if (size == 0) {
-            size = 32;
-        }
-        while (size < length + nPaths) {
-            size *= 2;
-        }
-        flags = (unsigned char *)greallocn(flags, size, sizeof(unsigned char));
-    }
 }
 
 void SplashClip::resetToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1)
 {
-    gfree(flags);
-    flags = nullptr;
     scanners = {};
-    length = size = 0;
 
     if (x0 < x1) {
         xMin = x0;
@@ -238,12 +201,10 @@ SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, 
         clipToRect(xPath.segs[1].x0, xPath.segs[1].y0, xPath.segs[3].x0, xPath.segs[3].y1);
 
     } else {
-        grow(1);
         if (antialias) {
             xPath.aaScale();
         }
         xPath.sort();
-        flags[length] = eo ? splashClipEO : 0;
         if (antialias) {
             yMinAA = yMinI * splashAASize;
             yMaxAA = (yMaxI + 1) * splashAASize - 1;
@@ -252,7 +213,6 @@ SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, 
             yMaxAA = yMaxI;
         }
         scanners.emplace_back(std::make_shared<SplashXPathScanner>(xPath, eo, yMinAA, yMaxAA));
-        ++length;
     }
 
     return splashOk;
@@ -269,7 +229,7 @@ SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, 
     if ((SplashCoord)(rectXMax + 1) <= xMin || (SplashCoord)rectXMin >= xMax || (SplashCoord)(rectYMax + 1) <= yMin || (SplashCoord)rectYMin >= yMax) {
         return splashClipAllOutside;
     }
-    if ((SplashCoord)rectXMin >= xMin && (SplashCoord)(rectXMax + 1) <= xMax && (SplashCoord)rectYMin >= yMin && (SplashCoord)(rectYMax + 1) <= yMax && length == 0) {
+    if ((SplashCoord)rectXMin >= xMin && (SplashCoord)(rectXMax + 1) <= xMax && (SplashCoord)rectYMin >= yMin && (SplashCoord)(rectYMax + 1) <= yMax && scanners.empty()) {
         return splashClipAllInside;
     }
     return splashClipPartial;
@@ -277,8 +237,6 @@ SplashClipResult SplashClip::testRect(int rectXMin, int rectYMin, int rectXMax, 
 
 SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
 {
-    int i;
-
     // This tests the rectangle:
     //     x = [spanXMin, spanXMax + 1)    (note: span coords are ints)
     //     y = [spanY, spanY + 1)
@@ -292,14 +250,14 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
         return splashClipPartial;
     }
     if (antialias) {
-        for (i = 0; i < length; ++i) {
-            if (!scanners[i]->testSpan(spanXMin * splashAASize, spanXMax * splashAASize + (splashAASize - 1), spanY * splashAASize)) {
+        for (const auto &scanner : scanners) {
+            if (!scanner->testSpan(spanXMin * splashAASize, spanXMax * splashAASize + (splashAASize - 1), spanY * splashAASize)) {
                 return splashClipPartial;
             }
         }
     } else {
-        for (i = 0; i < length; ++i) {
-            if (!scanners[i]->testSpan(spanXMin, spanXMax, spanY)) {
+        for (const auto &scanner : scanners) {
+            if (!scanner->testSpan(spanXMin, spanXMax, spanY)) {
                 return splashClipPartial;
             }
         }
@@ -309,7 +267,7 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
 
 void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine)
 {
-    int xx0, xx1, xx, yy, i;
+    int xx0, xx1, xx, yy;
     SplashColorPtr p;
 
     // zero out pixels with x < xMin
@@ -355,8 +313,8 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
     }
 
     // check the paths
-    for (i = 0; i < length; ++i) {
-        scanners[i]->clipAALine(aaBuf, x0, x1, y);
+    for (const auto &scanner : scanners) {
+        scanner->clipAALine(aaBuf, x0, x1, y);
     }
     if (*x0 > *x1) {
         *x0 = *x1;
@@ -390,8 +348,8 @@ bool SplashClip::testClipPaths(int x, int y)
         y *= splashAASize;
     }
 
-    for (int i = 0; i < length; ++i) {
-        if (!scanners[i]->test(x, y)) {
+    for (const auto &scanner : scanners) {
+        if (!scanner->test(x, y)) {
             return false;
         }
     }
