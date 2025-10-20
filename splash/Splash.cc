@@ -2384,10 +2384,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
 
     // check clipping
     if ((clipRes = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI)) != splashClipAllOutside) {
-        if (scanner.hasPartialClip()) {
-            clipRes = splashClipPartial;
-        }
-
         pipeInit(&pipe, 0, yMinI, pattern, nullptr, (unsigned char)splashRound(alpha * 255), vectorAntialias && !inShading, false);
 
         // draw the spans

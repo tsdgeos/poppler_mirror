@@ -69,10 +69,6 @@ public:
     // Return the path's bounding box.
     void getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA) const;
 
-    // Returns true if at least part of the path was outside the
-    // clipYMin/clipYMax bounds passed to the constructor.
-    bool hasPartialClip() const { return partialClip; }
-
     // Returns true if (<x>,<y>) is inside the path.
     bool test(int x, int y) const;
 
@@ -95,7 +91,6 @@ private:
 
     bool eo;
     int xMin, yMin, xMax, yMax;
-    bool partialClip;
 
 #ifdef USE_BOOST_HEADERS
     typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;

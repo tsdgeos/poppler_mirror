@@ -46,7 +46,6 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int c
     int i;
 
     eo = eoA;
-    partialClip = false;
 
     // compute the bbox
     xMin = yMin = 1;
@@ -90,11 +89,9 @@ SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int c
         yMax = splashFloor(yMaxFP);
         if (clipYMin > yMin) {
             yMin = clipYMin;
-            partialClip = true;
         }
         if (clipYMax < yMax) {
             yMax = clipYMax;
-            partialClip = true;
         }
     }
 
