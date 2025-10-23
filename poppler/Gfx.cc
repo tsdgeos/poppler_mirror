@@ -598,7 +598,7 @@ Gfx::~Gfx()
     }
 }
 
-void Gfx::display(Object *obj, bool topLevel)
+void Gfx::display(Object *obj, DisplayType displayType)
 {
     // check for excessive recursion
     if (displayDepth > 100) {
@@ -618,12 +618,12 @@ void Gfx::display(Object *obj, bool topLevel)
         return;
     }
     parser = new Parser(xref, obj, false);
-    go(topLevel);
+    go(displayType);
     delete parser;
     parser = nullptr;
 }
 
-void Gfx::go(bool topLevel)
+void Gfx::go(DisplayType displayType)
 {
     Object obj;
     Object args[maxArgs];
@@ -631,6 +631,10 @@ void Gfx::go(bool topLevel)
     int lastAbortCheck;
 
     // scan a sequence of objects
+    displayTypes.push(displayType);
+    if (displayType == DisplayType::Type3Font) {
+        type3FontIsD1.push(false);
+    }
     pushStateGuard();
     updateLevel = 1; // make sure even empty pages trigger a call to dump()
     lastAbortCheck = 0;
@@ -732,8 +736,12 @@ void Gfx::go(bool topLevel)
     popStateGuard();
 
     // update display
-    if (topLevel && updateLevel > 0) {
+    if (displayType == DisplayType::TopLevel && updateLevel > 0) {
         out->dump();
+    }
+    displayTypes.pop();
+    if (displayType == DisplayType::Type3Font) {
+        type3FontIsD1.pop();
     }
 }
 
@@ -1269,6 +1277,10 @@ void Gfx::opSetRenderingIntent(Object args[], int numArgs)
 
 void Gfx::opSetFillGray(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     std::unique_ptr<GfxColorSpace> colorSpace;
 
@@ -1289,6 +1301,10 @@ void Gfx::opSetFillGray(Object args[], int numArgs)
 
 void Gfx::opSetStrokeGray(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     std::unique_ptr<GfxColorSpace> colorSpace;
 
@@ -1309,6 +1325,10 @@ void Gfx::opSetStrokeGray(Object args[], int numArgs)
 
 void Gfx::opSetFillCMYKColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     std::unique_ptr<GfxColorSpace> colorSpace;
     int i;
@@ -1332,6 +1352,10 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs)
 
 void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     std::unique_ptr<GfxColorSpace> colorSpace;
     int i;
@@ -1355,6 +1379,10 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs)
 
 void Gfx::opSetFillRGBColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor color;
     int i;
@@ -1378,6 +1406,10 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs)
 
 void Gfx::opSetStrokeRGBColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor color;
     int i;
@@ -1401,6 +1433,10 @@ void Gfx::opSetStrokeRGBColor(Object args[], int numArgs)
 
 void Gfx::opSetFillColorSpace(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor color;
 
@@ -1424,6 +1460,10 @@ void Gfx::opSetFillColorSpace(Object args[], int numArgs)
 
 void Gfx::opSetStrokeColorSpace(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     std::unique_ptr<GfxColorSpace> colorSpace;
     GfxColor color;
 
@@ -1447,6 +1487,10 @@ void Gfx::opSetStrokeColorSpace(Object args[], int numArgs)
 
 void Gfx::opSetFillColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     int i;
 
@@ -1464,6 +1508,10 @@ void Gfx::opSetFillColor(Object args[], int numArgs)
 
 void Gfx::opSetStrokeColor(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     int i;
 
@@ -1481,6 +1529,10 @@ void Gfx::opSetStrokeColor(Object args[], int numArgs)
 
 void Gfx::opSetFillColorN(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     int i;
 
@@ -1527,6 +1579,10 @@ void Gfx::opSetFillColorN(Object args[], int numArgs)
 
 void Gfx::opSetStrokeColorN(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font && type3FontIsD1.top()) {
+        return;
+    }
+
     GfxColor color;
     int i;
 
@@ -3898,7 +3954,7 @@ void Gfx::doShowText(const GooString *s)
                     }
                     if (displayCharProc) {
                         ++displayDepth;
-                        display(&charProc, false);
+                        display(&charProc, DisplayType::Type3Font);
                         --displayDepth;
 
                         if (refNum != -1) {
@@ -4828,7 +4884,7 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
 
     // draw the form
     ++displayDepth;
-    display(str, false);
+    display(str, DisplayType::Form);
     --displayDepth;
 
     if (stateBefore != state) {
@@ -4953,6 +5009,9 @@ void Gfx::opSetCharWidth(Object args[], int numArgs)
 
 void Gfx::opSetCacheDevice(Object args[], int numArgs)
 {
+    if (displayTypes.top() == DisplayType::Type3Font) {
+        type3FontIsD1.top() = true;
+    }
     out->type3D1(state, args[0].getNum(), args[1].getNum(), args[2].getNum(), args[3].getNum(), args[4].getNum(), args[5].getNum());
 }
 
