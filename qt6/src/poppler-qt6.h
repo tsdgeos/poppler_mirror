@@ -457,7 +457,8 @@ public:
     enum TextLayout
     {
         PhysicalLayout, ///< The text is layouted to resemble the real page layout
-        RawOrderLayout ///< The text is returned without any type of processing
+        RawOrderLayout, ///< The text is returned without any type of processing
+        ReadingOrder, ///< The text is returned in reading order, \since 26.01
     };
 
     /**
