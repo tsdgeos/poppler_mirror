@@ -4222,126 +4222,15 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
 
 GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const
 {
-    const UnicodeMap *uMap;
-    char space[8], eol[16];
-    int spaceLen, eolLen;
+    TextOutputFunc dumpToString = [](void *stream, const char *text, int len) {
+        GooString *s = static_cast<GooString *>(stream);
+        s->append(text, len);
+    };
 
     GooString s;
 
-    // get the output encoding
-    if (!(uMap = globalParams->getTextEncoding())) {
-        return s;
-    }
-
-    if (rawOrder) {
-        char mbc[16];
-        int mbc_len;
-
-        for (TextWord *word = rawWords; word && word <= rawLastWord; word = word->next) {
-            for (int j = 0; j < word->getLength(); ++j) {
-                double gXMin, gXMax, gYMin, gYMax;
-                word->getCharBBox(j, &gXMin, &gYMin, &gXMax, &gYMax);
-                if (xMin <= gXMin && gXMax <= xMax && yMin <= gYMin && gYMax <= yMax) {
-                    mbc_len = uMap->mapUnicode(*(word->getChar(j)), mbc, sizeof(mbc));
-                    s.append(mbc, mbc_len);
-                }
-            }
-        }
-        return s;
-    }
-    // FIXME: physLayout == true is assumed hereafter, dumping the text "flows"
-    // is not supported, compare with TextPage::dump
-
-    spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
-    eolLen = 0; // make gcc happy
-    switch (textEOL) {
-    case eolUnix:
-        eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
-        break;
-    case eolDOS:
-        eolLen = uMap->mapUnicode(0x0d, eol, sizeof(eol));
-        eolLen += uMap->mapUnicode(0x0a, eol + eolLen, sizeof(eol) - eolLen);
-        break;
-    case eolMac:
-        eolLen = uMap->mapUnicode(0x0d, eol, sizeof(eol));
-        break;
-    }
-
-    //~ writing mode (horiz/vert)
-
-    // collect the line fragments that are in the rectangle
-    std::vector<TextLineFrag> frags;
-    frags.reserve(256);
-    int lastRot = -1;
-    bool oneRot = true;
-    for (int i = 0; i < nBlocks; ++i) {
-        TextBlock *blk = blocks[i];
-        if (xMin < blk->xMax && blk->xMin < xMax && yMin < blk->yMax && blk->yMin < yMax) {
-            for (auto line = blk->lines; line; line = line->next) {
-                auto [start, len] = line->getLineBounds(PDFRectangle{xMin, yMin, xMax, yMax});
-                if (len) {
-                    frags.push_back({});
-                    frags.back().init(line, start, len);
-                    if (lastRot >= 0 && line->rot != lastRot) {
-                        oneRot = false;
-                    }
-                    lastRot = line->rot;
-                }
-            }
-        }
-    }
-
-    // sort the fragments and generate the string
-    if (!frags.empty()) {
-        for (auto &frag : frags) {
-            frag.computeCoords(oneRot);
-        }
-        assignColumns(frags.data(), frags.size(), oneRot);
-
-        // if all lines in the region have the same rotation, use it;
-        // otherwise, use the page's primary rotation
-        if (oneRot) {
-            std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
-        } else {
-            std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
-        }
-        for (auto it = frags.begin(); it != frags.end();) {
-            double delta = maxIntraLineDelta * it->line->words->fontSize;
-            double base = it->base;
-
-            auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
-                return fabs(frag.base - base) >= delta;
-            });
-            std::sort(it, end, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
-            it = end;
-        }
-
-        int col = 0;
-        bool multiLine = false;
-        for (size_t i = 0; i < frags.size(); ++i) {
-            TextLineFrag *frag = &frags[i];
-
-            // insert a return
-            if (frag->col < col || (i > 0 && fabs(frag->base - frags[i - 1].base) > maxIntraLineDelta * frags[i - 1].line->words->fontSize)) {
-                s.append(eol, eolLen);
-                col = 0;
-                multiLine = true;
-            }
-
-            // column alignment
-            for (; col < frag->col; ++col) {
-                s.append(space, spaceLen);
-            }
-
-            // get the fragment text
-            col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, &s);
-        }
-
-        if (multiLine) {
-            s.append(eol, eolLen);
-        }
-    }
-
+    PDFRectangle area { xMin, yMin, xMax, yMax };
+    dump(&s, dumpToString, physLayout, textEOL, false, true, &area);
     return s;
 }
 
