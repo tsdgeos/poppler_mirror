@@ -142,6 +142,6 @@ void POPPLER_PRIVATE_EXPORT unicodeToAscii7(std::span<const Unicode> in, Unicode
 // Convert a PDF Text String to UTF-8
 //   textStr    - PDF text string
 //   returns UTF-8 string.
-std::string POPPLER_PRIVATE_EXPORT TextStringToUtf8(const std::string &textStr);
+std::string POPPLER_PRIVATE_EXPORT TextStringToUtf8(std::string_view textStr);
 
 #endif

@@ -237,20 +237,24 @@ public:
     explicit Object(std::string &&stringA)
     {
         type = objString;
-        string = new GooString(stringA);
+        string = new GooString(std::move(stringA));
     }
+
     Object(ObjType typeA, std::string &&stringA)
     {
         assert(typeA == objHexString);
         type = typeA;
-        string = new GooString(stringA);
+        string = new GooString(std::move(stringA));
     }
-    Object(ObjType typeA, const char *stringA)
+
+    Object(ObjType typeA, const char *v) : Object(typeA, std::string_view(v)) { }
+    Object(ObjType typeA, std::string_view v)
     {
         assert(typeA == objName || typeA == objCmd);
-        assert(stringA);
         type = typeA;
-        cString = copyString(stringA);
+        cString = (char *)gmalloc(v.size() + 1);
+        memcpy(cString, v.data(), v.size());
+        cString[v.size()] = 0;
     }
     explicit Object(long long int64gA)
     {
@@ -422,9 +426,9 @@ public:
     }
 
     // Special type checking.
-    bool isName(const char *nameA) const { return type == objName && !strcmp(cString, nameA); }
-    bool isDict(const char *dictType) const;
-    bool isCmd(const char *cmdA) const { return type == objCmd && !strcmp(cString, cmdA); }
+    bool isName(std::string_view nameA) const { return type == objName && getName() == nameA; }
+    bool isDict(std::string_view dictType) const;
+    bool isCmd(std::string_view cmdA) const { return type == objCmd && cString == cmdA; }
 
     // Accessors.
     bool getBool() const
@@ -542,14 +546,13 @@ public:
 
     // Dict accessors.
     int dictGetLength() const;
-    void dictAdd(char *key, Object &&val) = delete;
-    void dictAdd(const char *key, Object &&val);
-    void dictSet(const char *key, Object &&val);
-    void dictRemove(const char *key);
-    bool dictIs(const char *dictType) const;
-    Object dictLookup(const char *key, int recursion = 0) const;
-    const Object &dictLookupNF(const char *key) const;
     const char *dictGetKey(int i) const;
+    void dictAdd(std::string_view key, Object &&val);
+    void dictSet(std::string_view key, Object &&val);
+    void dictRemove(std::string_view key);
+    bool dictIs(std::string_view dictType) const;
+    Object dictLookup(std::string_view key, int recursion = 0) const;
+    const Object &dictLookupNF(std::string_view key) const;
     Object dictGetVal(int i) const;
     const Object &dictGetValNF(int i) const;
 

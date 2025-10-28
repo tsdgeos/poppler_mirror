@@ -461,27 +461,25 @@ void unicodeToAscii7(std::span<const Unicode> in, Unicode **ucs4_out, int *out_l
 // Convert a PDF Text String to UTF-8
 //   textStr    - PDF text string
 //   returns UTF-8 string.
-std::string TextStringToUtf8(const std::string &textStr)
+std::string TextStringToUtf8(std::string_view textStr)
 {
     int i, len;
-    const char *s;
     std::string utf8;
 
     len = textStr.size();
-    s = textStr.c_str();
     if (hasUnicodeByteOrderMark(textStr)) {
         std::vector<uint16_t> utf16;
         len = len / 2 - 1;
         utf16.resize(len + 1);
         for (i = 0; i < len; i++) {
-            utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+            utf16[i] = (textStr[2 + i * 2] & 0xff) << 8 | (textStr[3 + i * 2] & 0xff);
         }
         utf16[i] = 0;
         utf8 = utf16ToUtf8(utf16.data(), utf16.size());
     } else {
         utf8.resize(len + 1);
         for (i = 0; i < len; i++) {
-            utf8[i] = pdfDocEncoding[s[i] & 0xff];
+            utf8[i] = pdfDocEncoding[textStr[i] & 0xff];
         }
         utf8[i] = 0;
     }

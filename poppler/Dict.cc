@@ -49,8 +49,8 @@ constexpr int SORT_LENGTH_LOWER_LIMIT = 32;
 struct Dict::CmpDictEntry
 {
     bool operator()(const DictEntry &lhs, const DictEntry &rhs) const { return lhs.first < rhs.first; }
-    bool operator()(const DictEntry &lhs, const char *rhs) const { return lhs.first < rhs; }
-    bool operator()(const char *lhs, const DictEntry &rhs) const { return lhs < rhs.first; }
+    bool operator()(const DictEntry &lhs, std::string_view rhs) const { return lhs.first < rhs; }
+    bool operator()(std::string_view lhs, const DictEntry &rhs) const { return lhs < rhs.first; }
 };
 
 Dict::Dict(XRef *xrefA)
@@ -99,14 +99,14 @@ Dict *Dict::deepCopy() const
     return dictA;
 }
 
-void Dict::add(const char *key, Object &&val)
+void Dict::add(std::string_view key, Object &&val)
 {
     dictLocker();
     entries.emplace_back(key, std::move(val));
     sorted = false;
 }
 
-inline const Dict::DictEntry *Dict::find(const char *key) const
+inline const Dict::DictEntry *Dict::find(std::string_view key) const
 {
     if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
         if (!sorted) {
@@ -134,12 +134,12 @@ inline const Dict::DictEntry *Dict::find(const char *key) const
     return nullptr;
 }
 
-inline Dict::DictEntry *Dict::find(const char *key)
+inline Dict::DictEntry *Dict::find(std::string_view key)
 {
     return const_cast<DictEntry *>(const_cast<const Dict *>(this)->find(key));
 }
 
-void Dict::remove(const char *key)
+void Dict::remove(std::string_view key)
 {
     dictLocker();
     if (auto *entry = find(key)) {
@@ -153,7 +153,7 @@ void Dict::remove(const char *key)
     }
 }
 
-void Dict::set(const char *key, Object &&val)
+void Dict::set(std::string_view key, Object &&val)
 {
     if (val.isNull()) {
         remove(key);
@@ -167,7 +167,7 @@ void Dict::set(const char *key, Object &&val)
     }
 }
 
-bool Dict::is(const char *type) const
+bool Dict::is(std::string_view type) const
 {
     if (const auto *entry = find("Type")) {
         return entry->second.isName(type);
@@ -175,7 +175,7 @@ bool Dict::is(const char *type) const
     return false;
 }
 
-Object Dict::lookup(const char *key, int recursion) const
+Object Dict::lookup(std::string_view key, int recursion) const
 {
     if (const auto *entry = find(key)) {
         return entry->second.fetch(xref, recursion);
@@ -183,7 +183,7 @@ Object Dict::lookup(const char *key, int recursion) const
     return Object::null();
 }
 
-Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
+Object Dict::lookup(std::string_view key, Ref *returnRef, int recursion) const
 {
     if (const auto *entry = find(key)) {
         if (entry->second.getType() == objRef) {
@@ -197,7 +197,7 @@ Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
     return Object::null();
 }
 
-Object Dict::lookupEnsureEncryptedIfNeeded(const char *key) const
+Object Dict::lookupEnsureEncryptedIfNeeded(std::string_view key) const
 {
     const auto *entry = find(key);
     if (!entry) {
@@ -205,14 +205,15 @@ Object Dict::lookupEnsureEncryptedIfNeeded(const char *key) const
     }
 
     if (entry->second.getType() == objRef && xref->isEncrypted() && !xref->isRefEncrypted(entry->second.getRef())) {
-        error(errSyntaxError, -1, "{0:s} is not encrypted and the document is. This may be a hacking attempt", key);
+        GooString errKey(key);
+        error(errSyntaxError, -1, "{0:t} is not encrypted and the document is. This may be a hacking attempt", &errKey);
         return Object::null();
     }
 
     return entry->second.fetch(xref);
 }
 
-const Object &Dict::lookupNF(const char *key) const
+const Object &Dict::lookupNF(std::string_view key) const
 {
     if (const auto *entry = find(key)) {
         return entry->second;
@@ -221,11 +222,11 @@ const Object &Dict::lookupNF(const char *key) const
     return nullObj;
 }
 
-bool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
+bool Dict::lookupInt(std::string_view key, std::optional<std::string_view> alt_key, int *value) const
 {
     auto obj1 = lookup(key);
-    if (obj1.isNull() && alt_key != nullptr) {
-        obj1 = lookup(alt_key);
+    if (obj1.isNull() && alt_key) {
+        obj1 = lookup(*alt_key);
     }
     if (obj1.isInt()) {
         *value = obj1.getInt();
@@ -245,17 +246,17 @@ Object Dict::getVal(int i, Ref *returnRef) const
     return entry.second.fetch(xref);
 }
 
-bool Dict::hasKey(const char *key) const
+bool Dict::hasKey(std::string_view key) const
 {
     return find(key) != nullptr;
 }
 
-std::string Dict::findAvailableKey(const std::string &suggestedKey)
+std::string Dict::findAvailableKey(std::string_view suggestedKey)
 {
     int i = 0;
-    std::string res = suggestedKey;
-    while (find(res.c_str())) {
-        res = suggestedKey + std::to_string(i++);
+    std::string res(suggestedKey);
+    while (find(res)) {
+        res = std::string(suggestedKey) + std::to_string(i++);
     }
     return res;
 }

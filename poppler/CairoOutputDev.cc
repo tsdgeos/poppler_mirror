@@ -3605,7 +3605,7 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
 
     int mcid = -1;
     if (properties) {
-        properties->lookupInt("MCID", nullptr, &mcid);
+        properties->lookupInt("MCID", {}, &mcid);
     }
 
     if (mcid == -1) {

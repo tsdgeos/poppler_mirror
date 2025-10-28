@@ -632,9 +632,9 @@ void GooString::lowerCase(std::string &s)
     }
 }
 
-std::string GooString::toLowerCase(const std::string &s)
+std::string GooString::toLowerCase(std::string_view s)
 {
-    std::string newString = s;
+    std::string newString(s);
     lowerCase(newString);
-    return s;
+    return newString;
 }
