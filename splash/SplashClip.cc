@@ -24,6 +24,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <algorithm>
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"
@@ -348,11 +349,9 @@ bool SplashClip::testClipPaths(int x, int y)
         y *= splashAASize;
     }
 
-    for (const auto &scanner : scanners) {
-        if (!scanner->test(x, y)) {
-            return false;
-        }
-    }
+    auto testXY = [x, y](const auto &scanner) -> bool { //
+        return scanner->test(x, y);
+    };
 
-    return true;
+    return std::ranges::all_of(scanners, testXY);
 }
