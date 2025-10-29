@@ -204,9 +204,6 @@ SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, 
     } else {
         if (antialias) {
             xPath.aaScale();
-        }
-        xPath.sort();
-        if (antialias) {
             yMinAA = yMinI * splashAASize;
             yMaxAA = (yMaxI + 1) * splashAASize - 1;
         } else {

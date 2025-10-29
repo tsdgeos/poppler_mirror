@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <limits>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "SplashMath.h"
@@ -40,58 +41,71 @@
 //------------------------------------------------------------------------
 
 SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax) //
-    : eo(eoA)
+    : eo(eoA), xMin(1), yMin(1), xMax(0), yMax(0)
 {
-    const SplashXPathSeg *seg;
-    SplashCoord xMinFP, yMinFP, xMaxFP, yMaxFP;
-    int i;
-
     // compute the bbox
-    xMin = yMin = 1;
-    xMax = yMax = 0;
-    if (xPath.length > 0) {
-        seg = &xPath.segs[0];
+    if (xPath.length == 0) {
+        return;
+    }
+    if (clipYMin > clipYMax) {
+        return;
+    }
+
+    SplashCoord xMaxFP = std::numeric_limits<SplashCoord>::lowest();
+    SplashCoord xMinFP = std::numeric_limits<SplashCoord>::max();
+    SplashCoord yMaxFP = std::numeric_limits<SplashCoord>::lowest();
+    SplashCoord yMinFP = std::numeric_limits<SplashCoord>::max();
+
+    SplashCoord clipYMinFP = clipYMin;
+    SplashCoord clipYMaxFP = clipYMax + 1.0;
+
+    for (int i = 0; i < xPath.length; ++i) {
+        const SplashXPathSeg *seg = &xPath.segs[i];
         if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
             return;
         }
-        if (seg->x0 <= seg->x1) {
+
+        const SplashCoord segYMin = seg->y0;
+        const SplashCoord segYMax = seg->y1;
+        if (segYMin >= clipYMaxFP) {
+            continue;
+        }
+        if (segYMax < clipYMinFP) {
+            continue;
+        }
+
+        if (segYMin < yMinFP) {
+            yMinFP = segYMin;
+        }
+        if (segYMax > yMaxFP) {
+            yMaxFP = segYMax;
+        }
+        if (seg->x0 < xMinFP) {
             xMinFP = seg->x0;
-            xMaxFP = seg->x1;
-        } else {
-            xMinFP = seg->x1;
+        }
+        if (seg->x0 > xMaxFP) {
             xMaxFP = seg->x0;
         }
-        yMinFP = seg->y0;
-        yMaxFP = seg->y1;
-        for (i = 1; i < xPath.length; ++i) {
-            seg = &xPath.segs[i];
-            if (unlikely(std::isnan(seg->x0) || std::isnan(seg->x1) || std::isnan(seg->y0) || std::isnan(seg->y1))) {
-                return;
-            }
-            if (seg->x0 < xMinFP) {
-                xMinFP = seg->x0;
-            } else if (seg->x0 > xMaxFP) {
-                xMaxFP = seg->x0;
-            }
-            if (seg->x1 < xMinFP) {
-                xMinFP = seg->x1;
-            } else if (seg->x1 > xMaxFP) {
-                xMaxFP = seg->x1;
-            }
-            if (seg->y1 > yMaxFP) {
-                yMaxFP = seg->y1;
-            }
+        if (seg->x1 < xMinFP) {
+            xMinFP = seg->x1;
         }
-        xMin = splashFloor(xMinFP);
-        xMax = splashFloor(xMaxFP);
-        yMin = splashFloor(yMinFP);
-        yMax = splashFloor(yMaxFP);
-        if (clipYMin > yMin) {
-            yMin = clipYMin;
+        if (seg->x1 > xMaxFP) {
+            xMaxFP = seg->x1;
         }
-        if (clipYMax < yMax) {
-            yMax = clipYMax;
-        }
+    }
+    if (yMinFP > yMaxFP) {
+        return;
+    }
+
+    xMin = splashFloor(xMinFP);
+    xMax = splashFloor(xMaxFP);
+    yMin = splashFloor(yMinFP);
+    yMax = splashFloor(yMaxFP);
+    if (clipYMin > yMin) {
+        yMin = clipYMin;
+    }
+    if (clipYMax < yMax) {
+        yMax = clipYMax;
     }
 
     computeIntersections(xPath);
@@ -191,29 +205,25 @@ SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scann
 
 void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
 {
-    const SplashXPathSeg *seg;
-    SplashCoord segXMin, segXMax, segYMin, segYMax;
-
-    if (yMin > yMax) {
-        return;
-    }
-
     // build the list of all intersections
     allIntersections.resize(yMax - yMin + 1);
 
+    const SplashCoord clipYMinFP = yMin;
+    const SplashCoord clipYMaxFP = yMax + 1.0;
+
     for (int i = 0; i < xPath.length; ++i) {
-        seg = &xPath.segs[i];
-        segYMin = seg->y0;
-        segYMax = seg->y1;
-        int y1 = splashFloor(segYMax);
-        if (y1 < yMin) {
+        const SplashXPathSeg *seg = &xPath.segs[i];
+        const SplashCoord segYMin = seg->y0;
+        const SplashCoord segYMax = seg->y1;
+        if (segYMin >= clipYMaxFP) {
+            continue;
+        }
+        if (segYMax < clipYMinFP) {
             continue;
         }
 
+        int y1 = splashFloor(segYMax);
         int y0 = (seg->flags & splashXPathHoriz) ? y1 : splashFloor(segYMin);
-        if (y0 > yMax) {
-            break;
-        }
 
         if (y1 == y0) {
             addIntersection(segYMin, y1, splashFloor(seg->x0), splashFloor(seg->x1), 0);
@@ -230,6 +240,8 @@ void SplashXPathScanner::computeIntersections(const SplashXPath &xPath)
                 addIntersection(segYMin, y, x, x, count);
             }
         } else {
+            SplashCoord segXMin, segXMax;
+
             if (seg->x0 < seg->x1) {
                 segXMin = seg->x0;
                 segXMax = seg->x1;

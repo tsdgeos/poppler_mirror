@@ -2356,7 +2356,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo, SplashPattern *pa
     if (vectorAntialias && !inShading) {
         xPath.aaScale();
     }
-    xPath.sort();
     yMinI = state->clip->getYMinI();
     yMaxI = state->clip->getYMaxI();
     if (vectorAntialias && !inShading) {
@@ -6358,7 +6357,6 @@ SplashError Splash::shadedFill(const SplashPath &path, bool hasBBox, SplashPatte
     if (vectorAntialias) {
         xPath.aaScale();
     }
-    xPath.sort();
     yMinI = state->clip->getYMinI();
     yMaxI = state->clip->getYMaxI();
     if (vectorAntialias && !inShading) {
