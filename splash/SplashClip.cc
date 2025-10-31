@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2010, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
