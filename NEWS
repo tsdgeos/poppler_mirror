@@ -1,3 +1,14 @@
+Release 25.11.0:
+        core:
+         * NSS Signatures: Tweak the logic that decides which firefox profile to use
+         * NSS Signatures: call PORT_GetError() only if the preceding CERT_PKIXVerifyCert() fails
+         * Splash: Performance improvements
+         * Fix crashes in malformed documents
+
+        glib:
+         * Fix ocsp check for signatures validation
+         * Fix warning when running glib-mkenums
+
 Release 25.10.0:
         core:
          * Fix image signature getting lost
