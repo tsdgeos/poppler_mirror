@@ -7,6 +7,7 @@
  * Copyright (C) 2021, 2023 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
+ * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -452,7 +453,7 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
 
     sig_field = static_cast<FormFieldSignature *>(field->widget->getField());
 
-    sig_info = sig_field->validateSignatureAsync(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE, force_revalidation, -1, flags & POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK,
+    sig_info = sig_field->validateSignatureAsync(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE, force_revalidation, -1, !(flags & POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK),
                                                  flags & POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH, {});
     CertificateValidationStatus certificateStatus = sig_field->validateSignatureResult();
 

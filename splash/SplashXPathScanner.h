@@ -38,7 +38,6 @@ class SplashBitmap;
 
 struct SplashIntersect
 {
-    int y;
     int x0, x1; // intersection of segment with [y, y+1)
     int count; // EO/NZWN counter increment
 };
@@ -70,13 +69,6 @@ public:
     // Return the path's bounding box.
     void getBBoxAA(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA) const;
 
-    // Returns true if at least part of the path was outside the
-    // clipYMin/clipYMax bounds passed to the constructor.
-    bool hasPartialClip() const { return partialClip; }
-
-    // Return the min/max x values for the span at <y>.
-    void getSpanBounds(int y, int *spanXMin, int *spanXMax) const;
-
     // Returns true if (<x>,<y>) is inside the path.
     bool test(int x, int y) const;
 
@@ -95,11 +87,10 @@ public:
 
 private:
     void computeIntersections(const SplashXPath &xPath);
-    void addIntersection(double segYMin, double segYMax, int y, int x0, int x1, int count);
+    void addIntersection(double segYMin, int y, int x0, int x1, int count);
 
-    bool eo;
+    const bool eo;
     int xMin, yMin, xMax, yMax;
-    bool partialClip;
 
 #ifdef USE_BOOST_HEADERS
     typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;

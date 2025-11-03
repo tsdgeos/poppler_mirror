@@ -1,3 +1,20 @@
+Release 25.10.0:
+        core:
+         * Fix image signature getting lost
+         * Don't embed substitutions for base14 fonts
+         * Form font improvements
+         * Handle signatures padded with random data
+         * Add feature to Ink annotation to render with multiply blend mode
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        glib:
+         * Fix signature text
+         * Add feature to Ink annotation to render with multiply blend mode
+
+        cpp:
+         * Added embedded_file::unicodeName function
+
 Release 25.09.1:
         core:
          * Internal code improvements

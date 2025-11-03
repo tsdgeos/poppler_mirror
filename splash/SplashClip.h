@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2010, 2018, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2019, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,7 +55,7 @@ public:
     // Copy a clip.
     SplashClip *copy() const { return new SplashClip(this); }
 
-    ~SplashClip();
+    ~SplashClip() = default;
 
     SplashClip(const SplashClip &) = delete;
     SplashClip &operator=(const SplashClip &) = delete;
@@ -113,19 +113,16 @@ public:
     int getYMaxI() { return yMaxI; }
 
     // Get the number of arbitrary paths used by the clip region.
-    int getNumPaths() { return length; }
+    int getNumPaths() { return scanners.size(); }
 
 protected:
     explicit SplashClip(const SplashClip *clip);
-    void grow(int nPaths);
     bool testClipPaths(int x, int y);
 
     bool antialias;
     SplashCoord xMin, yMin, xMax, yMax;
     int xMinI, yMinI, xMaxI, yMaxI;
-    unsigned char *flags;
     std::vector<std::shared_ptr<SplashXPathScanner>> scanners;
-    int length, size;
 };
 
 #endif

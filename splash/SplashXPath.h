@@ -43,17 +43,14 @@ struct SplashXPathSeg
     SplashCoord x0, y0; // first endpoint
     SplashCoord x1, y1; // second endpoint
     SplashCoord dxdy; // slope: delta-x / delta-y
-    SplashCoord dydx; // slope: delta-y / delta-x
     unsigned int flags;
 };
 
 #define splashXPathHoriz                                                                                                                                                                                                                       \
     0x01 // segment is vertical (y0 == y1)
          //   (dxdy is undef)
-#define splashXPathVert                                                                                                                                                                                                                        \
-    0x02 // segment is horizontal (x0 == x1)
-         //   (dydx is undef)
-#define splashXPathFlip 0x04 // y0 > y1
+#define splashXPathVert 0x02 // segment is horizontal (x0 == x1)
+#define splashXPathFlipped 0x04 // y0 > y1
 
 //------------------------------------------------------------------------
 // SplashXPath
