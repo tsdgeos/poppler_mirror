@@ -97,9 +97,9 @@ build_ubuntu_22_04:
     - PKG_CONFIG="$(which pkg-config) --static" cmake -G Ninja ..
     - ninja
 
-build_mingw64_fedora42:
+build_mingw64_fedora43:
   stage: build
-  image: fedora:42
+  image: fedora:43
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
@@ -109,16 +109,16 @@ build_mingw64_fedora42:
     - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -G Ninja ..
     - ninja
 
-build_clazy_fedora42:
+build_clazy_fedora43:
   stage: build
-  image: fedora:42
+  image: fedora:43
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
     - dnf -y install clazy ninja-build glibc-langpack-en
   script:
     - mkdir -p build && cd build
-    - CC=clang-20 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
+    - CC=clang-21 CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja -j ${FDO_CI_CONCURRENT}
 
 build_qt69_android:
