@@ -251,7 +251,7 @@ bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height, 
                                      cairo_surface_t *dest_surface)
 {
     int pixel_coverage_x, pixel_coverage_y;
-    int dest_y;
+    unsigned int dest_y;
     int src_y = 0;
     uint32_t *scanline;
     int *x_coverage = nullptr;
@@ -307,7 +307,7 @@ bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height, 
         }
     }
 
-    for (; dest_y < start_row + height; dest_y++) {
+    for (; dest_y < start_row + static_cast<unsigned int>(height); dest_y++) {
         int columns = 0;
         int box = 1 << FIXED_SHIFT;
         int start_coverage_y = y_coverage[dest_y];

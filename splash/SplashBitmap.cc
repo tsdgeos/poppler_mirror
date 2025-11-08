@@ -99,7 +99,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA, SplashColorMode
         }
         break;
     case splashModeDeviceN8:
-        if (width > 0 && width <= static_cast<int>(INT_MAX / splashMaxColorComps)) {
+        if (width > 0 && width <= INT_MAX / static_cast<int>(splashMaxColorComps)) {
             rowSize = width * splashMaxColorComps;
         } else {
             rowSize = -1;
