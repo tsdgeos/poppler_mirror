@@ -946,8 +946,8 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
     bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
     vObj.dictAdd("ByteRange", bObj.copy());
-    obj.dictSet("V", Object(vRef));
-    xref->setModifiedObject(&obj, ref);
+    field->getObj()->dictSet("V", Object(vRef));
+    xref->setModifiedObject(field->getObj(), field->getRef());
     return true;
 }
 
