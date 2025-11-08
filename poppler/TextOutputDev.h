@@ -525,11 +525,7 @@ public:
     TextWordList(const TextWordList &) = delete;
     TextWordList &operator=(const TextWordList &) = delete;
 
-    // Return the number of words on the list.
-    int getLength() const;
-
-    // Return the <idx>th word from the list.
-    TextWord *get(int idx);
+    const std::vector<TextWord *> &getWords() const { return words; }
 
 private:
     std::vector<TextWord *> words;

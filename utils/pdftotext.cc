@@ -623,19 +623,18 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
         double hgt = useCropBox ? doc->getPageCropHeight(page) : doc->getPageMediaHeight(page);
         fprintf(f, "  <page width=\"%f\" height=\"%f\">\n", wid, hgt);
         doc->displayPage(textOut, page, resolution, resolution, 0, !useCropBox, useCropBox, false);
-        std::unique_ptr<TextWordList> wordlist = textOut->makeWordList();
-        const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
-        TextWord *word;
-        double xMinA, yMinA, xMaxA, yMaxA;
-        if (word_length == 0) {
-            fprintf(stderr, "no word list\n");
-        }
+        const std::unique_ptr<TextWordList> wordlist = textOut->makeWordList();
+        const std::vector<TextWord *> &words = wordlist->getWords();
 
-        for (int i = 0; i < word_length; ++i) {
-            word = wordlist->get(i);
-            word->getBBox(&xMinA, &yMinA, &xMaxA, &yMaxA);
-            const std::string myString = myXmlTokenReplace(word->getText()->c_str());
-            fprintf(f, "    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
+        if (words.empty()) {
+            fprintf(stderr, "no word list\n");
+        } else {
+            for (const TextWord *word : words) {
+                double xMinA, yMinA, xMaxA, yMaxA;
+                word->getBBox(&xMinA, &yMinA, &xMaxA, &yMaxA);
+                const std::string myString = myXmlTokenReplace(word->getText()->c_str());
+                fprintf(f, "    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
+            }
         }
         fprintf(f, "  </page>\n");
     }
