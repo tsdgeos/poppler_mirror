@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2020, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>

@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 2010, 2012, 2015, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 2010, 2012, 2015, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
