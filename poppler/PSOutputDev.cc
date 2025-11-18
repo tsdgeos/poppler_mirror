@@ -2007,7 +2007,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
         }
 
         // scale substituted 8-bit fonts
-        if (fontLoc->locType == gfxFontLocResident && fontLoc->substIdx >= 0) {
+        if (fontLoc && fontLoc->locType == gfxFontLocResident && fontLoc->substIdx >= 0) {
             subst = true;
             for (code = 0; code < 256; ++code) {
                 if ((charName = ((Gfx8BitFont *)font)->getCharName(code)) && charName[0] == 'm' && charName[1] == '\0') {
