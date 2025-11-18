@@ -1005,7 +1005,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                 continue;
             }
 
-            if (usedParents->find(childRef.num) == usedParents->end()) {
+            if (!usedParents->contains(childRef.num)) {
                 // Field child: it could be a form field or a widget or composed dict
                 const Object &objParent = childObj.dictLookupNF("Parent");
                 Object obj3 = childObj.dictLookup("Parent");
@@ -2997,10 +2997,10 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;
         }
-        if (seen.find(uChar) != seen.end()) {
+        const auto [_, inserted] = seen.insert(uChar);
+        if (!inserted) {
             continue;
         }
-        seen.insert(uChar);
 
         CharCode c;
         bool addFont = false;

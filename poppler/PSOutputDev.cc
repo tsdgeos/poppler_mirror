@@ -1793,7 +1793,6 @@ void PSOutputDev::writeTrailer()
 
 void PSOutputDev::setupResources(Dict *resDict)
 {
-    bool skip;
 
     setupFonts(resDict);
     setupImages(resDict);
@@ -1805,14 +1804,13 @@ void PSOutputDev::setupResources(Dict *resDict)
         for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
 
             // avoid infinite recursion on XObjects
-            skip = false;
+            bool skip = false;
             const Object &xObjRef = xObjDict.dictGetValNF(i);
             if (xObjRef.isRef()) {
-                Ref ref0 = xObjRef.getRef();
-                if (resourceIDs.find(ref0.num) != resourceIDs.end()) {
+                const Ref ref0 = xObjRef.getRef();
+                const auto [_, inserted] = resourceIDs.insert(ref0.num);
+                if (!inserted) {
                     skip = true;
-                } else {
-                    resourceIDs.insert(ref0.num);
                 }
             }
             if (!skip) {
@@ -1825,11 +1823,11 @@ void PSOutputDev::setupResources(Dict *resDict)
                     if (resObj.isDict()) {
                         if (resObjRef != Ref::INVALID()) {
                             const int numObj = resObjRef.num;
-                            if (resourceIDs.find(numObj) != resourceIDs.end()) {
+                            const auto [_, inserted] = resourceIDs.insert(numObj);
+                            if (!inserted) {
                                 error(errSyntaxError, -1, "loop in Resources (numObj: {0:d})", numObj);
                                 continue;
                             }
-                            resourceIDs.insert(numObj);
                         }
                         setupResources(resObj.getDict());
                     }
@@ -1845,14 +1843,13 @@ void PSOutputDev::setupResources(Dict *resDict)
         for (int i = 0; i < patDict.dictGetLength(); ++i) {
 
             // avoid infinite recursion on Patterns
-            skip = false;
+            bool skip = false;
             const Object &patRef = patDict.dictGetValNF(i);
             if (patRef.isRef()) {
-                Ref ref0 = patRef.getRef();
-                if (resourceIDs.find(ref0.num) != resourceIDs.end()) {
+                const Ref ref0 = patRef.getRef();
+                const auto [_, inserted] = resourceIDs.insert(ref0.num);
+                if (!inserted) {
                     skip = true;
-                } else {
-                    resourceIDs.insert(ref0.num);
                 }
             }
             if (!skip) {
@@ -4339,13 +4336,13 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
     std::set<int>::iterator patternRefIt;
     const int patternRefNum = tPat->getPatternRefNum();
     if (patternRefNum != -1) {
-        if (patternsBeingTiled.find(patternRefNum) == patternsBeingTiled.end()) {
-            patternRefIt = patternsBeingTiled.insert(patternRefNum).first;
-        } else {
+        const auto [it, inserted] = patternsBeingTiled.insert(patternRefNum);
+        if (!inserted) {
             // pretend we drew it anyway
             error(errSyntaxError, -1, "Loop in pattern fills");
             return true;
         }
+        patternRefIt = it;
     }
 
     const std::array<double, 4> &bbox = tPat->getBBox();
