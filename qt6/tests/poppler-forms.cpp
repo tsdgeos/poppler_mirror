@@ -1,6 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <QtCore/QTimeZone>
 
 #include <iostream>
 
@@ -264,7 +265,7 @@ int main(int argc, char **argv)
                         std::cout << "\t\t\tSignerName: "
                                   << "(null)" << std::endl;
                     }
-                    const QDateTime sviTime = QDateTime::fromSecsSinceEpoch(svi.signingTime(), Qt::UTC);
+                    const QDateTime sviTime = QDateTime::fromSecsSinceEpoch(svi.signingTime(), QTimeZone::utc());
                     std::cout << "\t\t\tSigningTime: " << sviTime.toString() << std::endl;
                 } break;
                 }

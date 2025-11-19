@@ -1,4 +1,5 @@
 #include <QtTest/QTest>
+#include <QtCore/QTimeZone>
 
 #include <poppler-qt6.h>
 
@@ -136,8 +137,8 @@ void TestMetaData::checkDate()
 {
     std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QStringLiteral(TESTDATADIR "/unittestcases/truetype.pdf"));
     QVERIFY(doc);
-    QCOMPARE(doc->date(QStringLiteral("ModDate")), QDateTime(QDate(2005, 12, 5), QTime(9, 44, 46), Qt::UTC));
-    QCOMPARE(doc->date(QStringLiteral("CreationDate")), QDateTime(QDate(2005, 8, 13), QTime(1, 12, 11), Qt::UTC));
+    QCOMPARE(doc->date(QStringLiteral("ModDate")), QDateTime(QDate(2005, 12, 5), QTime(9, 44, 46), QTimeZone::utc()));
+    QCOMPARE(doc->date(QStringLiteral("CreationDate")), QDateTime(QDate(2005, 8, 13), QTime(1, 12, 11), QTimeZone::utc()));
 }
 
 void TestMetaData::checkPageSize()
