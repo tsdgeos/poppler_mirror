@@ -2436,19 +2436,6 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
 
 TextWordList::~TextWordList() = default;
 
-int TextWordList::getLength() const
-{
-    return words.size();
-}
-
-TextWord *TextWordList::get(int idx)
-{
-    if (idx < 0 || idx >= (int)words.size()) {
-        return nullptr;
-    }
-    return words[idx];
-}
-
 #endif // TEXTOUT_WORD_LIST
 
 //------------------------------------------------------------------------

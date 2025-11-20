@@ -1005,7 +1005,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
                 continue;
             }
 
-            if (usedParents->find(childRef.num) == usedParents->end()) {
+            if (!usedParents->contains(childRef.num)) {
                 // Field child: it could be a form field or a widget or composed dict
                 const Object &objParent = childObj.dictLookupNF("Parent");
                 Object obj3 = childObj.dictLookup("Parent");
@@ -1683,7 +1683,7 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
                         // to the field DR dictionary
                         if (!newFonts.empty()) {
                             for (const Form::AddFontResult &afr : newFonts) {
-                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName.c_str(), Object(afr.ref));
+                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName, Object(afr.ref));
                                 // This is not fully correct, it changes the entire font to the last added font
                                 // but it is much better than not doing anything, because we know that one of
                                 // the fonts have characters we need, so there is a bit of hope involved here
@@ -2696,7 +2696,7 @@ std::string Form::findFontInDefaultResources(const std::string &fontFamily, cons
             const Object fontObj = fontDict->getVal(i);
             if (fontObj.isDict() && fontObj.dictIs("Font")) {
                 const Object fontBaseFontObj = fontObj.dictLookup("BaseFont");
-                if (fontBaseFontObj.isName(fontFamilyAndStyle.c_str())) {
+                if (fontBaseFontObj.isName(fontFamilyAndStyle)) {
                     return key;
                 }
             }
@@ -2928,7 +2928,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         Object fontDictObj = resDict.getDict()->lookup("Font", &fontDictObjRef);
         assert(fontDictObj.isDict());
         dictFontName = fontDictObj.getDict()->findAvailableKey(dictFontName);
-        fontDictObj.dictSet(dictFontName.c_str(), Object(fontDictRef));
+        fontDictObj.dictSet(dictFontName, Object(fontDictRef));
 
         if (fontDictObjRef != Ref::INVALID()) {
             xref->setModifiedObject(&fontDictObj, fontDictObjRef);
@@ -2947,7 +2947,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
         defaultResources = new GfxResources(xref, resDict.getDict(), nullptr);
     } else {
         Dict *fontsDict = new Dict(xref);
-        fontsDict->set(dictFontName.c_str(), Object(fontDictRef));
+        fontsDict->set(dictFontName, Object(fontDictRef));
 
         Dict *defaultResourcesDict = new Dict(xref);
         defaultResourcesDict->set("Font", Object(fontsDict));
@@ -2997,10 +2997,10 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         if (uChar < 128 && !std::isprint(static_cast<unsigned char>(uChar))) {
             continue;
         }
-        if (seen.find(uChar) != seen.end()) {
+        const auto [_, inserted] = seen.insert(uChar);
+        if (!inserted) {
             continue;
         }
-        seen.insert(uChar);
 
         CharCode c;
         bool addFont = false;

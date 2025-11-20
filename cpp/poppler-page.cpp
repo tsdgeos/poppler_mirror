@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2020, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
@@ -404,70 +404,68 @@ std::vector<text_box> page::text_list(int opt_flag) const
                                   nullptr, nullptr, /* annotDisplayDecideCbk(), annotDisplayDecideCbkData */
                                   true); /* copyXRef */
 
-    if (std::unique_ptr<TextWordList> word_list { output_dev->makeWordList() }) {
+    const std::unique_ptr<TextWordList> word_list = output_dev->makeWordList();
 
-        output_list.reserve(word_list->getLength());
-        for (int i = 0; i < word_list->getLength(); i++) {
-            TextWord *word = word_list->get(i);
+    const std::vector<TextWord *> &words = word_list->getWords();
+    output_list.reserve(words.size());
+    for (const TextWord *word : words) {
+        std::unique_ptr<GooString> gooWord { word->getText() };
+        ustring ustr = ustring::from_utf8(gooWord->c_str());
 
-            std::unique_ptr<GooString> gooWord { word->getText() };
-            ustring ustr = ustring::from_utf8(gooWord->c_str());
+        double xMin, yMin, xMax, yMax;
+        word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-            double xMin, yMin, xMax, yMax;
-            word->getBBox(&xMin, &yMin, &xMax, &yMax);
+        text_box tb { new text_box_data { ustr, { xMin, yMin, xMax - xMin, yMax - yMin }, word->getRotation(), {}, word->hasSpaceAfter() == true, nullptr } };
 
-            text_box tb { new text_box_data { ustr, { xMin, yMin, xMax - xMin, yMax - yMin }, word->getRotation(), {}, word->hasSpaceAfter() == true, nullptr } };
+        std::unique_ptr<text_box_font_info_data> tb_font_info = nullptr;
+        if (opt_flag & page::text_list_include_font) {
+            d->init_font_info_cache();
 
-            std::unique_ptr<text_box_font_info_data> tb_font_info = nullptr;
-            if (opt_flag & page::text_list_include_font) {
-                d->init_font_info_cache();
+            std::unique_ptr<text_box_font_info_data> tb_font { new text_box_font_info_data {
+                    word->getFontSize(), // double font_size
+                    {}, // std::vector<text_box::writing_mode> wmodes;
+                    d->font_info_cache, // std::vector<font_info> font_info_cache;
+                    {} // std::vector<int> glyph_to_cache_index;
+            } };
 
-                std::unique_ptr<text_box_font_info_data> tb_font { new text_box_font_info_data {
-                        word->getFontSize(), // double font_size
-                        {}, // std::vector<text_box::writing_mode> wmodes;
-                        d->font_info_cache, // std::vector<font_info> font_info_cache;
-                        {} // std::vector<int> glyph_to_cache_index;
-                } };
+            tb_font_info = std::move(tb_font);
+        };
 
-                tb_font_info = std::move(tb_font);
-            };
+        tb.m_data->char_bboxes.reserve(word->getLength());
+        for (int j = 0; j < word->getLength(); j++) {
+            word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
+            tb.m_data->char_bboxes.emplace_back(xMin, yMin, xMax - xMin, yMax - yMin);
+        }
 
-            tb.m_data->char_bboxes.reserve(word->getLength());
+        if (tb_font_info && d->font_info_cache_initialized) {
+            tb_font_info->glyph_to_cache_index.reserve(word->getLength());
             for (int j = 0; j < word->getLength(); j++) {
-                word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
-                tb.m_data->char_bboxes.emplace_back(xMin, yMin, xMax - xMin, yMax - yMin);
-            }
+                const TextFontInfo *cur_text_font_info = word->getFontInfo(j);
 
-            if (tb_font_info && d->font_info_cache_initialized) {
-                tb_font_info->glyph_to_cache_index.reserve(word->getLength());
-                for (int j = 0; j < word->getLength(); j++) {
-                    const TextFontInfo *cur_text_font_info = word->getFontInfo(j);
+                // filter-out the invalid WMode value here.
+                switch (cur_text_font_info->getWMode()) {
+                case 0:
+                    tb_font_info->wmodes.push_back(text_box::horizontal_wmode);
+                    break;
+                case 1:
+                    tb_font_info->wmodes.push_back(text_box::vertical_wmode);
+                    break;
+                default:
+                    tb_font_info->wmodes.push_back(text_box::invalid_wmode);
+                };
 
-                    // filter-out the invalid WMode value here.
-                    switch (cur_text_font_info->getWMode()) {
-                    case 0:
-                        tb_font_info->wmodes.push_back(text_box::horizontal_wmode);
+                tb_font_info->glyph_to_cache_index.push_back(-1);
+                for (size_t k = 0; k < tb_font_info->font_info_cache.size(); k++) {
+                    if (cur_text_font_info->matches(&(tb_font_info->font_info_cache[k].d->ref))) {
+                        tb_font_info->glyph_to_cache_index[j] = k;
                         break;
-                    case 1:
-                        tb_font_info->wmodes.push_back(text_box::vertical_wmode);
-                        break;
-                    default:
-                        tb_font_info->wmodes.push_back(text_box::invalid_wmode);
-                    };
-
-                    tb_font_info->glyph_to_cache_index.push_back(-1);
-                    for (size_t k = 0; k < tb_font_info->font_info_cache.size(); k++) {
-                        if (cur_text_font_info->matches(&(tb_font_info->font_info_cache[k].d->ref))) {
-                            tb_font_info->glyph_to_cache_index[j] = k;
-                            break;
-                        }
                     }
                 }
-                tb.m_data->text_box_font = std::move(tb_font_info);
             }
-
-            output_list.push_back(std::move(tb));
+            tb.m_data->text_box_font = std::move(tb_font_info);
         }
+
+        output_list.push_back(std::move(tb));
     }
 
     return output_list;

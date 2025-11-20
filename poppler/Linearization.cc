@@ -51,7 +51,7 @@ unsigned int Linearization::getLength() const
     }
 
     int length;
-    if (linDict.getDict()->lookupInt("L", nullptr, &length) && length > 0) {
+    if (linDict.getDict()->lookupInt("L", {}, &length) && length > 0) {
         return length;
     } else {
         error(errSyntaxWarning, -1, "Length in linearization table is invalid");
@@ -128,7 +128,7 @@ unsigned int Linearization::getHintsLength2() const
 int Linearization::getObjectNumberFirst() const
 {
     int objectNumberFirst = 0;
-    if (linDict.isDict() && linDict.getDict()->lookupInt("O", nullptr, &objectNumberFirst) && objectNumberFirst > 0) {
+    if (linDict.isDict() && linDict.getDict()->lookupInt("O", {}, &objectNumberFirst) && objectNumberFirst > 0) {
         return objectNumberFirst;
     } else {
         error(errSyntaxWarning, -1, "Object number of first page in linearization table is invalid");
@@ -139,7 +139,7 @@ int Linearization::getObjectNumberFirst() const
 unsigned int Linearization::getEndFirst() const
 {
     int pageEndFirst = 0;
-    if (linDict.isDict() && linDict.getDict()->lookupInt("E", nullptr, &pageEndFirst) && pageEndFirst > 0) {
+    if (linDict.isDict() && linDict.getDict()->lookupInt("E", {}, &pageEndFirst) && pageEndFirst > 0) {
         return pageEndFirst;
     } else {
         error(errSyntaxWarning, -1, "First page end offset in linearization table is invalid");
@@ -150,7 +150,7 @@ unsigned int Linearization::getEndFirst() const
 int Linearization::getNumPages() const
 {
     int numPages = 0;
-    if (linDict.isDict() && linDict.getDict()->lookupInt("N", nullptr, &numPages) && numPages > 0) {
+    if (linDict.isDict() && linDict.getDict()->lookupInt("N", {}, &numPages) && numPages > 0) {
         return numPages;
     } else {
         error(errSyntaxWarning, -1, "Page count in linearization table is invalid");
@@ -161,7 +161,7 @@ int Linearization::getNumPages() const
 unsigned int Linearization::getMainXRefEntriesOffset() const
 {
     int mainXRefEntriesOffset = 0;
-    if (linDict.isDict() && linDict.getDict()->lookupInt("T", nullptr, &mainXRefEntriesOffset) && mainXRefEntriesOffset > 0) {
+    if (linDict.isDict() && linDict.getDict()->lookupInt("T", {}, &mainXRefEntriesOffset) && mainXRefEntriesOffset > 0) {
         return mainXRefEntriesOffset;
     } else {
         error(errSyntaxWarning, -1, "Main Xref offset in linearization table is invalid");
@@ -174,7 +174,7 @@ int Linearization::getPageFirst() const
     int pageFirst = 0; // Optional, defaults to 0.
 
     if (linDict.isDict()) {
-        linDict.getDict()->lookupInt("P", nullptr, &pageFirst);
+        linDict.getDict()->lookupInt("P", {}, &pageFirst);
     }
 
     if ((pageFirst < 0) || (pageFirst >= getNumPages())) {

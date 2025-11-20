@@ -58,7 +58,7 @@ public:
 
     // Get the next object from the input stream.
     Object getObj(int objNum = -1);
-    Object getObj(const char *cmdA, int objNum);
+    Object getObj(std::string_view cmdA, int objNum);
     template<typename T>
     Object getObj(T) = delete;
 
@@ -106,8 +106,6 @@ private:
     int strPtr; // index of current stream
     Object curStr; // current stream
     bool freeArray; // should lexer free the streams array?
-    char tokBuf[tokBufSize]; // temporary token buffer
-
     XRef *xref;
 };
 

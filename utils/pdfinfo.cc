@@ -698,7 +698,7 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                     printInfoDate(info.getDict(), "ModDate", "ModDate:         ", uMap);
                 }
             } else {
-                Object obj = dict->lookup(key.c_str());
+                Object obj = dict->lookup(key);
                 if (obj.isString()) {
                     // print key
                     std::vector<Unicode> u = utf8ToUCS4(key);

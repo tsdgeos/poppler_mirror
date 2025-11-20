@@ -60,32 +60,27 @@ public:
     // Get number of entries.
     int getLength() const { return static_cast<int>(entries.size()); }
 
-    // Add an entry. (Copies key into Dict.)
-    // val becomes a dead object after the call
-    void add(const char *key, Object &&val);
-
-    // Add an entry. (Takes ownership of key.)
-    void add(char *key, Object &&val) = delete;
+    // Add an entry. (Moves key into Dict.)
+    void add(std::string_view key, Object &&val);
 
     // Update the value of an existing entry, otherwise create it
-    // val becomes a dead object after the call
-    void set(const char *key, Object &&val);
+    void set(std::string_view key, Object &&val);
     // Remove an entry. This invalidate indexes
-    void remove(const char *key);
+    void remove(std::string_view key);
 
     // Check if dictionary is of specified type.
-    bool is(const char *type) const;
+    bool is(std::string_view type) const;
 
     // Look up an entry and return the value.  Returns a null object
     // if <key> is not in the dictionary.
-    Object lookup(const char *key, int recursion = 0) const;
+    Object lookup(std::string_view key, int recursion = 0) const;
     // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
-    Object lookup(const char *key, Ref *returnRef, int recursion = 0) const;
+    Object lookup(std::string_view key, Ref *returnRef, int recursion = 0) const;
     // Look up an entry and return the value.  Returns a null object
     // if <key> is not in the dictionary or if it is a ref to a non encrypted object in a partially encrypted document
-    Object lookupEnsureEncryptedIfNeeded(const char *key) const;
-    const Object &lookupNF(const char *key) const;
-    bool lookupInt(const char *key, const char *alt_key, int *value) const;
+    Object lookupEnsureEncryptedIfNeeded(std::string_view key) const;
+    const Object &lookupNF(std::string_view key) const;
+    bool lookupInt(std::string_view key, std::optional<std::string_view> alt_key, int *value) const;
 
     // Iterative accessors.
     const char *getKey(int i) const { return entries[i].first.c_str(); }
@@ -101,12 +96,12 @@ public:
 
     XRef *getXRef() const { return xref; }
 
-    bool hasKey(const char *key) const;
+    bool hasKey(std::string_view key) const;
 
     // Returns a key name that is not in the dictionary
     // It will be suggestedKey itself if available
     // otherwise it will start adding 0, 1, 2, 3, etc. to suggestedKey until there's one available
-    std::string findAvailableKey(const std::string &suggestedKey);
+    std::string findAvailableKey(std::string_view suggestedKey);
 
 private:
     friend class Object; // for incRef/decRef
@@ -124,8 +119,8 @@ private:
     std::atomic_bool sorted;
     mutable std::recursive_mutex mutex;
 
-    const DictEntry *find(const char *key) const;
-    DictEntry *find(const char *key);
+    const DictEntry *find(std::string_view key) const;
+    DictEntry *find(std::string_view key);
 };
 
 //------------------------------------------------------------------------
@@ -138,42 +133,42 @@ inline int Object::dictGetLength() const
     return dict->getLength();
 }
 
-inline void Object::dictAdd(const char *key, Object &&val)
+inline void Object::dictAdd(std::string_view key, Object &&val)
 {
     OBJECT_TYPE_CHECK(objDict);
     dict->add(key, std::move(val));
 }
 
-inline void Object::dictSet(const char *key, Object &&val)
+inline void Object::dictSet(std::string_view key, Object &&val)
 {
     OBJECT_TYPE_CHECK(objDict);
     dict->set(key, std::move(val));
 }
 
-inline void Object::dictRemove(const char *key)
+inline void Object::dictRemove(std::string_view key)
 {
     OBJECT_TYPE_CHECK(objDict);
     dict->remove(key);
 }
 
-inline bool Object::dictIs(const char *dictType) const
+inline bool Object::dictIs(std::string_view dictType) const
 {
     OBJECT_TYPE_CHECK(objDict);
     return dict->is(dictType);
 }
 
-inline bool Object::isDict(const char *dictType) const
+inline bool Object::isDict(std::string_view dictType) const
 {
     return type == objDict && dictIs(dictType);
 }
 
-inline Object Object::dictLookup(const char *key, int recursion) const
+inline Object Object::dictLookup(std::string_view key, int recursion) const
 {
     OBJECT_TYPE_CHECK(objDict);
     return dict->lookup(key, recursion);
 }
 
-inline const Object &Object::dictLookupNF(const char *key) const
+inline const Object &Object::dictLookupNF(std::string_view key) const
 {
     OBJECT_TYPE_CHECK(objDict);
     return dict->lookupNF(key);

@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2022, 2024, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2022, 2024, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -766,9 +766,9 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbor
 
     QHash<const TextWord *, TextBox *> wordBoxMap;
 
-    output_list.reserve(word_list->getLength());
-    for (int i = 0; i < word_list->getLength(); i++) {
-        TextWord *word = word_list->get(i);
+    const std::vector<TextWord *> &words = word_list->getWords();
+    output_list.reserve(words.size());
+    for (const TextWord *word : words) {
         GooString *gooWord = word->getText();
         QString string = QString::fromUtf8(gooWord->c_str());
         delete gooWord;
@@ -788,8 +788,7 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbor
         output_list.push_back(std::move(text_box));
     }
 
-    for (int i = 0; i < word_list->getLength(); i++) {
-        TextWord *word = word_list->get(i);
+    for (const TextWord *word : words) {
         TextBox *text_box = wordBoxMap.value(word);
         text_box->m_data->nextWord = wordBoxMap.value(word->nextWord());
     }

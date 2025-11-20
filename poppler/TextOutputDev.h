@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -525,11 +525,7 @@ public:
     TextWordList(const TextWordList &) = delete;
     TextWordList &operator=(const TextWordList &) = delete;
 
-    // Return the number of words on the list.
-    int getLength() const;
-
-    // Return the <idx>th word from the list.
-    TextWord *get(int idx);
+    const std::vector<TextWord *> &getWords() const { return words; }
 
 private:
     std::vector<TextWord *> words;

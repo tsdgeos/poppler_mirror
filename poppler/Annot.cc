@@ -4525,7 +4525,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
     tfPos = tmPos = -1;
     if (da) {
         FormFieldText::tokenizeDA(da->toStr(), &daToks, nullptr /*searchTok*/);
-        for (int i = 2; i < (int)daToks.size(); ++i) {
+        for (size_t i = 2; i < daToks.size(); ++i) {
             if (i >= 2 && daToks[i] == "Tf") {
                 tfPos = i - 2;
             } else if (i >= 6 && daToks[i] == "Tm") {

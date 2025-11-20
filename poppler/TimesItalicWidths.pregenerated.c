@@ -1,4 +1,4 @@
-/* ANSI-C code produced by gperf version 3.1 */
+/* ANSI-C code produced by gperf version 3.3 */
 /* Command-line: gperf poppler/TimesItalicWidths.gperf  */
 /* Computed positions: -k'1-2,5,$' */
 
@@ -49,11 +49,23 @@ inline
     switch (hval) {
     default:
         hval += asso_values[(unsigned char)str[4]];
+#if (defined __cplusplus && (__cplusplus >= 201703L || (__cplusplus >= 201103L && defined __clang__ && __clang_major__ + (__clang_minor__ >= 9) > 3)))                                                                                         \
+        || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 202000L && ((defined __GNUC__ && __GNUC__ >= 10) || (defined __clang__ && __clang_major__ >= 9)))
+        [[fallthrough]];
+#elif (defined __GNUC__ && __GNUC__ >= 7) || (defined __clang__ && __clang_major__ >= 10)
+        __attribute__((__fallthrough__));
+#endif
     /*FALLTHROUGH*/
     case 4:
     case 3:
     case 2:
         hval += asso_values[(unsigned char)str[1]];
+#if (defined __cplusplus && (__cplusplus >= 201703L || (__cplusplus >= 201103L && defined __clang__ && __clang_major__ + (__clang_minor__ >= 9) > 3)))                                                                                         \
+        || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 202000L && ((defined __GNUC__ && __GNUC__ >= 10) || (defined __clang__ && __clang_major__ >= 9)))
+        [[fallthrough]];
+#elif (defined __GNUC__ && __GNUC__ >= 7) || (defined __clang__ && __clang_major__ >= 10)
+        __attribute__((__fallthrough__));
+#endif
     /*FALLTHROUGH*/
     case 1:
         hval += asso_values[(unsigned char)str[0]];
@@ -1432,6 +1444,6 @@ const struct BuiltinFontWidth *TimesItalicWidthsLookup(register const char *str,
                 return &wordlist[key];
         }
     }
-    return 0;
+    return (struct BuiltinFontWidth *)0;
 }
 #line 330 "poppler/TimesItalicWidths.gperf"

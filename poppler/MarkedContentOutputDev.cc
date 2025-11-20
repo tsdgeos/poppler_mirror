@@ -79,7 +79,7 @@ void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properti
 {
     int id = -1;
     if (properties) {
-        properties->lookupInt("MCID", nullptr, &id);
+        properties->lookupInt("MCID", {}, &id);
     }
 
     if (id == -1) {

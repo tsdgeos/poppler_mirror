@@ -21,13 +21,17 @@ pdfsig uses the trusted certificates stored either in the Network Security Servi
 .PP
 pdfsig also uses the Online Certificate Status Protocol (OCSP) (refer to http://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol) to look up the certificate online and check if it has been revoked (unless -no-ocsp has been specified).
 .PP
+.nr step 0 1
+.nr PI 2n
 If the NSS backend is used, the NSS Database is searched for in the following locations:
-.IP \(bu
+.IP \n+[step]
 If the \-nssdir option is specified, the directory specified by this option.
-.IP \(bu
-The NSS Certificate database in the default Firefox profile. i.e. $HOME/.mozilla/firefox/*.default.
-.IP \(bu
-The NSS Certificate database in /etc/pki/nssdb.
+.IP \n+[step]
+The NSS Certificate database in the default Firefox profile. i.e. $HOME/.mozilla/firefox/*.default*.
+.IP \n+[step]
+System’s NSS Certificate database in /etc/pki/nssdb.
+.IP \n+[step]
+User’s NSS Certificate database in $HOME/.pki/nssdb.
 .PP
 If the GPG backend is used, the S/MIME certificate is read from $GNUPGHOME, defaulting to $HOME/.gnupg
 .SH OPTIONS

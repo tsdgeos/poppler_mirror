@@ -1,4 +1,5 @@
 #include <QtTest/QTest>
+#include <QtCore/QTimeZone>
 
 Q_DECLARE_METATYPE(QDate)
 Q_DECLARE_METATYPE(QTime)
@@ -69,7 +70,7 @@ void TestDateConv::checkDates()
     QFETCH(QDate, day);
     QFETCH(QTime, time);
 
-    QCOMPARE(Poppler::convertDate(input.constData()), QDateTime(day, time, Qt::UTC));
+    QCOMPARE(Poppler::convertDate(input.constData()), QDateTime(day, time, QTimeZone::utc()));
 }
 
 void TestDateConv::checkInvalidDates_data()

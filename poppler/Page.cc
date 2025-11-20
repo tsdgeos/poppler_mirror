@@ -294,7 +294,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
     annotsObj = pageObj.dictLookupNF("Annots").copy();
     if (!(annotsObj.isRef() || annotsObj.isArray() || annotsObj.isNull())) {
         error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, annotsObj.getTypeName());
-        goto err2;
+        annotsObj.setToNull();
     }
 
     if (annotsObj.isArray() && annotsObj.arrayGetLength() > 10000) {
@@ -309,7 +309,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_
         }
         if (!resolvedObj.isArray() && !resolvedObj.isNull()) {
             error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})", num, resolvedObj.getTypeName());
-            goto err2;
+            annotsObj.setToNull();
         }
     }
 

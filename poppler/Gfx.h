@@ -41,6 +41,7 @@
 #include "Object.h"
 #include "PopplerCache.h"
 
+#include <stack>
 #include <vector>
 
 class GooString;
@@ -169,7 +170,13 @@ public:
     XRef *getXRef() { return xref; }
 
     // Interpret a stream or array of streams.
-    void display(Object *obj, bool topLevel = true);
+    enum class DisplayType
+    {
+        TopLevel,
+        Type3Font,
+        Form
+    };
+    void display(Object *obj, DisplayType displayType = DisplayType::TopLevel);
 
     // Display an annotation, given its appearance (a Form XObject),
     // border style, and bounding box (in default user space).
@@ -210,6 +217,9 @@ private:
     GfxResources *res; // resource stack
     int updateLevel;
 
+    std::stack<DisplayType> displayTypes;
+    std::stack<bool> type3FontIsD1;
+
     GfxState *state; // current graphics state
     int stackHeight; // the height of the current graphics stack
     std::vector<int> stateGuards; // a stack of state limits; to guard against unmatched pops
@@ -235,7 +245,7 @@ private:
 
     static const Operator opTab[]; // table of operators
 
-    void go(bool topLevel);
+    void go(DisplayType displayType);
     void execOp(Object *cmd, Object args[], int numArgs);
     const Operator *findOp(const char *name);
     bool checkArg(Object *arg, TchkType type);

@@ -279,7 +279,7 @@ public:
     virtual void getDeviceNLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
 
     // create mapping for spot colorants
-    virtual void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps);
+    virtual void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps);
     const std::vector<int> &getMapping() const { return mapping; }
 
     // Does this ColorSpace support getRGBLine?
@@ -674,7 +674,7 @@ public:
     unsigned char *getLookup() { return lookup; }
     GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
     unsigned int getOverprintMask() const { return base->getOverprintMask(); }
-    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override { base->createMapping(separationList, maxSepComps); }
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) override { base->createMapping(separationList, maxSepComps); }
 
 private:
     std::unique_ptr<GfxColorSpace> base; // base color space
@@ -708,7 +708,7 @@ public:
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override;
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) override;
 
     int getNComps() const override { return 1; }
     void getDefaultColor(GfxColor *color) const override;
@@ -753,7 +753,7 @@ public:
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) override;
+    void createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) override;
 
     int getNComps() const override { return nComps; }
     void getDefaultColor(GfxColor *color) const override;

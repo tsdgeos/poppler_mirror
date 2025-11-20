@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -138,7 +138,6 @@ int main(int argc, char *argv[])
     XRef *yRef, *countRef;
     FILE *f;
     OutStream *outStr;
-    int i;
     int j, rootNum;
     std::vector<std::unique_ptr<PDFDoc>> docs;
     int majorVersion = 0;
@@ -160,7 +159,7 @@ int main(int argc, char *argv[])
     }
     globalParams = std::make_unique<GlobalParams>();
 
-    for (i = 1; i < argc - 1; i++) {
+    for (int i = 1; i < argc - 1; i++) {
         std::unique_ptr<PDFDoc> doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(argv[i]));
         if (doc->isOk() && !doc->isEncrypted() && doc->getXRef()->getCatalog().isDict()) {
             if (doc->getPDFMajorVersion() > majorVersion) {
@@ -228,7 +227,7 @@ int main(int argc, char *argv[])
             docs[0]->markPageObjects(names.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
         }
         if (intents.isArray() && intents.arrayGetLength() > 0) {
-            for (i = 1; i < (int)docs.size(); i++) {
+            for (size_t i = 1; i < docs.size(); i++) {
                 Object pagecatObj = docs[i]->getXRef()->getCatalog();
                 Dict *pagecatDict = pagecatObj.getDict();
                 Object pageintents = pagecatDict->lookup("OutputIntents");
@@ -283,7 +282,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    for (i = 0; i < (int)docs.size(); i++) {
+    for (size_t i = 0; i < docs.size(); i++) {
         for (j = 1; j <= docs[i]->getNumPages(); j++) {
             if (!docs[i]->getCatalog()->getPage(j)) {
                 continue;
@@ -393,9 +392,9 @@ int main(int argc, char *argv[])
     outStr->printf(" ] /Count %zd >>\nendobj\n", pages.size());
     objectsCount++;
 
-    for (i = 0; i < (int)pages.size(); i++) {
+    for (size_t i = 0; i < pages.size(); i++) {
         yRef->add(rootNum + i + 2, 0, outStr->getPos(), true);
-        outStr->printf("%d 0 obj\n", rootNum + i + 2);
+        outStr->printf("%zu 0 obj\n", rootNum + i + 2);
         outStr->printf("<< ");
         Dict *pageDict = pages[i].getDict();
         for (j = 0; j < pageDict->getLength(); j++) {

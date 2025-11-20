@@ -44,6 +44,7 @@
 
 #include <cstdarg>
 #include <memory>
+#include <optional>
 #include <string>
 
 #ifdef __clang__
@@ -86,6 +87,7 @@ public:
     // Create a string from <lengthA> chars at <sA>.  This string
     // can contain null characters.
     GooString(const char *sA, size_t lengthA) : std::string(sA ? sA : "", sA ? lengthA : 0) { }
+    explicit GooString(std::string_view str) : std::string(str) { }
 
     // Create a string from <lengthA> chars at <idx> in <str>.
     GooString(const GooString *str, int idx, size_t lengthA) : std::string(*str, idx, lengthA) { }
@@ -95,6 +97,11 @@ public:
     GooString *Set(const GooString *newStr)
     {
         assign(newStr ? static_cast<const std::string &>(*newStr) : std::string {});
+        return this;
+    }
+    GooString *Set(std::string_view newStr)
+    {
+        assign(newStr);
         return this;
     }
     GooString *Set(const char *newStr)
@@ -143,6 +150,8 @@ public:
 
     POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
 
+    using std::string::operator std::string_view;
+
     // Get length.
     using std::string::empty;
     using std::string::size;
@@ -167,6 +176,11 @@ public:
         return this;
     }
     GooString *append(const std::string &str)
+    {
+        static_cast<std::string &>(*this).append(str);
+        return this;
+    }
+    GooString *append(std::string_view str)
     {
         static_cast<std::string &>(*this).append(str);
         return this;
@@ -197,7 +211,7 @@ public:
         static_cast<std::string &>(*this).insert(i, *str);
         return this;
     }
-    GooString *insert(int i, const std::string &str)
+    GooString *insert(int i, std::string_view str)
     {
         static_cast<std::string &>(*this).insert(i, str);
         return this;
@@ -221,7 +235,7 @@ public:
     POPPLER_PRIVATE_EXPORT static void lowerCase(std::string &s);
 
     // Returns a new string converted to all-lower case.
-    POPPLER_PRIVATE_EXPORT static std::string toLowerCase(const std::string &s);
+    POPPLER_PRIVATE_EXPORT static std::string toLowerCase(std::string_view s);
 
     // Compare two strings:  -1:<  0:=  +1:>
     int cmp(const GooString *str) const { return compare(*str); }

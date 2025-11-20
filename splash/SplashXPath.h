@@ -74,9 +74,6 @@ public:
     // anti-aliased rendering.
     void aaScale();
 
-    // Sort by upper coordinate (lower y), in y-major order.
-    void sort();
-
 protected:
     void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);

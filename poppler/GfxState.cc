@@ -367,7 +367,7 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
     return {};
 }
 
-void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps) { }
+void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) { }
 
 void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const
 {
@@ -2751,7 +2751,7 @@ void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) const
     color->c[0] = gfxColorComp1;
 }
 
-void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps)
+void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps)
 {
     if (nonMarking) {
         return;
@@ -2786,8 +2786,8 @@ void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSepar
             }
             newOverprintMask <<= 1;
         }
-        if ((int)separationList->size() == maxSepComps) {
-            error(errSyntaxWarning, -1, "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, name.get());
+        if (separationList->size() == maxSepComps) {
+            error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:t}' immediately", static_cast<unsigned long long>(maxSepComps), name.get());
             mapping.clear();
             return;
         }
@@ -3004,7 +3004,7 @@ void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) const
     }
 }
 
-void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, int maxSepComps)
+void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps)
 {
     if (nonMarking) { // None
         return;
@@ -3057,8 +3057,8 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 startOverprintMask <<= 1;
             }
             if (!found) {
-                if ((int)separationList->size() == maxSepComps) {
-                    error(errSyntaxWarning, -1, "Too many ({0:d}) spots, convert '{1:s}' immediately", maxSepComps, names[i].c_str());
+                if (separationList->size() == maxSepComps) {
+                    error(errSyntaxWarning, -1, "Too many ({0:ulld}) spots, convert '{1:s}' immediately", static_cast<unsigned long long>(maxSepComps), names[i].c_str());
                     mapping.clear();
                     overprintMask = 0xffffffff;
                     return;

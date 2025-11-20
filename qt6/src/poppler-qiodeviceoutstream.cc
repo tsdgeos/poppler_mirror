@@ -59,7 +59,7 @@ static int poppler_vasprintf(char **buf_ptr, const char *format, va_list ap)
     va_end(ap_copy);
     *buf_ptr = new char[size];
 
-    return qvsnprintf(*buf_ptr, size, format, ap);
+    return vsnprintf(*buf_ptr, size, format, ap);
 }
 
 void QIODeviceOutStream::printf(const char *format, ...)

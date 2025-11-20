@@ -235,7 +235,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         Dict *hintsDict = obj.streamGetDict();
 
         int sharedStreamOffset = 0;
-        if (hintsDict->lookupInt("S", nullptr, &sharedStreamOffset) && sharedStreamOffset > 0) {
+        if (hintsDict->lookupInt("S", {}, &sharedStreamOffset) && sharedStreamOffset > 0) {
 
             if (!hintsStream->reset()) {
                 ok = false;

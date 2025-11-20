@@ -515,7 +515,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
     } else {
 
-        std::optional<std::vector<unsigned char>> fontBuffer;
+        std::vector<unsigned char> fontBuffer;
 
         std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont(xref, nullptr);
         if (!fontLoc) {
@@ -526,10 +526,11 @@ void QPainterOutputDev::updateFont(GfxState *state)
         // embedded font
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
-            fontBuffer = gfxFont->readEmbFontFile(xref);
-            if (!fontBuffer) {
+            std::optional<std::vector<unsigned char>> fontData = gfxFont->readEmbFontFile(xref);
+            if (!fontData) {
                 return;
             }
+            fontBuffer = std::move(*fontData);
 
             // external font
         } else { // gfxFontLocExternal
@@ -551,7 +552,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
                     return;
                 }
             } else {
-                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer->data(), fontBuffer->size(), fontLoc->fontNum, &freeTypeFace)) {
+                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer.data(), fontBuffer.size(), fontLoc->fontNum, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
@@ -581,7 +582,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
         }
         case fontTrueType:
         case fontTrueTypeOT: {
-            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer.value()), fontLoc->fontNum);
+            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer), fontLoc->fontNum);
 
             m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : std::vector<int> {};
 
@@ -593,7 +594,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
             // check for a CFF font
             if (!m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path.c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(std::span(fontBuffer.value())));
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path.c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(std::span(fontBuffer)));
 
                 cidToGIDMap = (ff) ? ff->getCIDToGIDMap() : std::vector<int> {};
             }
@@ -612,7 +613,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             std::vector<int> cidToGIDMap;
 
             if (codeToGID.empty() && !m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer.value()), fontLoc->fontNum);
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer), fontLoc->fontNum);
 
                 if (ff && ff->isOpenTypeCFF()) {
                     cidToGIDMap = ff->getCIDToGIDMap();
@@ -629,7 +630,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             if (((GfxCIDFont *)gfxFont.get())->getCIDToGIDLen() > 0) {
                 codeToGID = ((GfxCIDFont *)gfxFont.get())->getCIDToGID();
             } else {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer.value()), fontLoc->fontNum);
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str(), fontLoc->fontNum) : FoFiTrueType::make(std::span(fontBuffer), fontLoc->fontNum);
                 if (!ff) {
                     return;
                 }

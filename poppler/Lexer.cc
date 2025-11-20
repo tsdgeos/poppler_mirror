@@ -162,6 +162,7 @@ int Lexer::lookChar()
 
 Object Lexer::getObj(int objNum)
 {
+    char tokBuf[tokBufSize]; // temporary token buffer
     char *p;
     int c, c2;
     bool comment, neg, done, overflownInteger, overflownLongLong;
@@ -302,13 +303,9 @@ Object Lexer::getObj(int objNum)
         do {
             c2 = EOF;
             switch (c = getChar()) {
-
+            // Should technically error on newlines too, but this breaks
+            // some PDF files, e.g., ones from Photoshop.
             case EOF:
-#if 0
-      // This breaks some PDF files, e.g., ones from Photoshop.
-      case '\r':
-      case '\n':
-#endif
                 error(errSyntaxError, getPos(), "Unterminated string");
                 done = true;
                 break;
@@ -412,6 +409,7 @@ Object Lexer::getObj(int objNum)
                 ++n;
             }
         } while (!done);
+
         if (n >= 0) {
             s.append(tokBuf, n);
             // Check utf8
@@ -476,10 +474,9 @@ Object Lexer::getObj(int objNum)
             }
         }
         if (n < tokBufSize) {
-            *p = '\0';
-            return Object(objName, tokBuf);
+            return Object(objName, std::string_view(tokBuf, n));
         } else {
-            Object obj(objName, s.c_str());
+            Object obj(objName, s);
             return obj;
         }
         break;
@@ -487,11 +484,9 @@ Object Lexer::getObj(int objNum)
 
     // array punctuation
     case '[':
+        return Object(objCmd, std::string_view("[", 1));
     case ']':
-        tokBuf[0] = c;
-        tokBuf[1] = '\0';
-        return Object(objCmd, tokBuf);
-        break;
+        return Object(objCmd, std::string_view("]", 1));
 
     // hex string or dict punctuation
     case '<':
@@ -500,9 +495,7 @@ Object Lexer::getObj(int objNum)
         // dict punctuation
         if (c == '<') {
             getChar();
-            tokBuf[0] = tokBuf[1] = '<';
-            tokBuf[2] = '\0';
-            return Object(objCmd, tokBuf);
+            return Object(objCmd, std::string_view("<<", 2));
 
             // hex string
         } else {
@@ -557,9 +550,7 @@ Object Lexer::getObj(int objNum)
         c = lookChar();
         if (c == '>') {
             getChar();
-            tokBuf[0] = tokBuf[1] = '>';
-            tokBuf[2] = '\0';
-            return Object(objCmd, tokBuf);
+            return Object(objCmd, std::string_view(">>", 2));
         } else {
             error(errSyntaxError, getPos(), "Illegal character '>'");
             return Object::error();
@@ -587,15 +578,15 @@ Object Lexer::getObj(int objNum)
             }
             *p++ = c;
         }
-        *p = '\0';
-        if (tokBuf[0] == 't' && !strcmp(tokBuf, "true")) {
+        std::string_view res(tokBuf, n);
+        if (res == "true") {
             return Object(true);
-        } else if (tokBuf[0] == 'f' && !strcmp(tokBuf, "false")) {
+        } else if (res == "false") {
             return Object(false);
-        } else if (tokBuf[0] == 'n' && !strcmp(tokBuf, "null")) {
+        } else if (res == "null") {
             return Object::null();
         } else {
-            return Object(objCmd, tokBuf);
+            return Object(objCmd, res);
         }
         break;
     }
@@ -603,9 +594,10 @@ Object Lexer::getObj(int objNum)
     return Object();
 }
 
-Object Lexer::getObj(const char *cmdA, int objNum)
+Object Lexer::getObj(std::string_view cmdA, int objNum)
 {
-    char *p;
+    char tokBuf[tokBufSize]; // temporary token buffer
+    char *p = tokBuf;
     int c;
     bool comment;
     int n;
@@ -614,7 +606,7 @@ Object Lexer::getObj(const char *cmdA, int objNum)
     comment = false;
     const char *cmd1 = tokBuf;
     *tokBuf = 0;
-    while ((strcmp(cmdA, cmd1) != 0) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
+    while (cmdA != std::string_view(cmd1, p) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
         while (true) {
             if ((c = getChar()) == EOF) {
                 return Object::eof();
@@ -639,10 +631,9 @@ Object Lexer::getObj(const char *cmdA, int objNum)
             }
             *p++ = c;
         }
-        *p = '\0';
     }
 
-    return Object(objCmd, tokBuf);
+    return Object(objCmd, std::string_view(tokBuf, p));
 }
 
 void Lexer::skipToNextLine()

@@ -1229,7 +1229,7 @@ std::string PDFDoc::sanitizedName(const std::string &name)
     return sanitizedName;
 }
 
-void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
+void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned int numOffset, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
 {
     bool deleteSet = false;
     if (!alreadyWrittenDicts) {
@@ -1363,12 +1363,12 @@ Goffset PDFDoc::writeObjectHeader(Ref *ref, OutStream *outStr)
     return offset;
 }
 
-void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict *> *alreadyWrittenDicts)
+void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict *> *alreadyWrittenDicts)
 {
     writeObject(obj, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, { objNum, objGen }, alreadyWrittenDicts);
 }
 
-void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
+void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
 {
     Array *array;
 
