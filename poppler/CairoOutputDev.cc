@@ -383,10 +383,8 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
                     attrib.appendf("y={0:g} ", state->getPageHeight() - it.second->getTop());
                 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
                 cairo_tag_begin(cairo, CAIRO_TAG_DEST, attrib.c_str());
                 cairo_tag_end(cairo, CAIRO_TAG_DEST);
-#endif
             }
         }
 
@@ -555,9 +553,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
             attrib.appendf("uri='{0:s}'", act->getURI().c_str());
         }
     }
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     cairo_tag_begin(cairo, CAIRO_TAG_LINK, attrib.c_str());
-#endif
     return true;
 }
 
@@ -589,9 +585,7 @@ bool CairoOutputDev::beginLink(const StructElement *linkElem)
     if (linkAnnot) {
         emitted = beginLinkTag(linkAnnot);
     } else {
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
         cairo_tag_begin(cairo, linkElem->getTypeName(), nullptr);
-#endif
     }
     return emitted;
 }
@@ -662,7 +656,6 @@ void CairoOutputDev::emitStructElement(const StructElement *element)
         return;
     }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     if (element->isContent() && !element->isObjectRef()) {
         int structParents = getContentElementStructParents(element);
         int mcid = element->getMCID();
@@ -684,7 +677,6 @@ void CairoOutputDev::emitStructElement(const StructElement *element)
         }
         cairo_tag_end(cairo, element->getTypeName());
     }
-#endif
 }
 
 void CairoOutputDev::emitStructTree()
@@ -3589,9 +3581,7 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
 
     if (strcmp(name, "Artifact") == 0) {
         markedContentStack.emplace_back(name);
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
         cairo_tag_begin(cairo, name, nullptr);
-#endif
         return;
     }
 
@@ -3609,10 +3599,8 @@ void CairoOutputDev::beginMarkedContent(const char *name, Dict *properties)
     mcidEmitted.insert(std::pair<int, int>(currentStructParents, mcid));
 
     std::string tag;
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     tag = CAIRO_TAG_CONTENT;
     cairo_tag_begin(cairo, CAIRO_TAG_CONTENT, attribs.c_str());
-#endif
 
     markedContentStack.push_back(tag);
 }
@@ -3627,9 +3615,7 @@ void CairoOutputDev::endMarkedContent(GfxState * /*state*/)
         return;
     }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     cairo_tag_end(cairo, markedContentStack.back().c_str());
-#endif
     markedContentStack.pop_back();
 }
 

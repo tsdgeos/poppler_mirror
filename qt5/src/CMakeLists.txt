@@ -60,14 +60,10 @@ set(poppler_qt5_all_install_headers
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
 )
-if (${CMAKE_VERSION} VERSION_LESS "3.23.0")
-  install(FILES ${poppler_qt5_all_install_headers} DESTINATION include/poppler/qt5)
-else()
-  target_sources(poppler-qt5
-    PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
-    FILES ${poppler_qt5_all_install_headers}
-  )
-  install(TARGETS poppler-qt5 FILE_SET HEADERS DESTINATION include/poppler/qt5)
-endif()
+target_sources(poppler-qt5
+  PUBLIC
+  FILE_SET HEADERS
+  BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}
+  FILES ${poppler_qt5_all_install_headers}
+)
+install(TARGETS poppler-qt5 FILE_SET HEADERS DESTINATION include/poppler/qt5)

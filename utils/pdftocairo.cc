@@ -222,9 +222,7 @@ static const ArgDesc argDesc[] = {
     { .arg = "-nocenter", .kind = argFlag, .val = &noCenter, .size = 0, .usage = "don't center pages smaller than the paper size" },
     { .arg = "-duplex", .kind = argFlag, .val = &duplex, .size = 0, .usage = "enable duplex printing" },
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 18, 0)
     { .arg = "-struct", .kind = argFlag, .val = &docStruct, .size = 0, .usage = "enable logical document structure" },
-#endif
 
     { .arg = "-opw", .kind = argString, .val = ownerPassword, .size = sizeof(ownerPassword), .usage = "owner password (for encrypted files)" },
     { .arg = "-upw", .kind = argString, .val = userPassword, .size = sizeof(userPassword), .usage = "user password (for encrypted files)" },

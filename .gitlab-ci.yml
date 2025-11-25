@@ -53,7 +53,7 @@ build_clang17_libcpp:
   script:
     - echo "This is to simulate xcode 16.2 that is the minimum macos version we support"
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
-    - apt-get install --yes --no-install-recommends libclang-17-dev llvm-17-dev libc++-17-dev libc++abi-17-dev clang-17 libunwind-17-dev gperf jq
+    - apt-get install --yes --no-install-recommends libclang-17-dev llvm-17-dev libc++-17-dev libc++abi-17-dev clang-17 clang-tools-17 libunwind-17-dev gperf jq
     - mkdir -p build && cd build
     - echo "We disable Qt6 tests since Qt6 exposes std::string in its ABI which makes it not build in this CI since we're using libc++ but Qt6 in debian is build with libstdc++"
     - CC=clang-17 CXX=clang++-17 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Werror -Wno-deprecated-declarations -Wno-error=unused-command-line-argument" -DTESTDATADIR=$PWD/../test-data -DBUILD_QT6_TESTS=OFF -DENABLE_GPGME=OFF ..
@@ -82,14 +82,14 @@ build_clang22_libcpp:
     - cp "$srcdir/.clang-tidy" .
     - run-clang-tidy-22
 
-build_ubuntu_22_04:
+build_ubuntu_24_04:
   stage: build
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   before_script:
     - sed -i s/http/ftp/ /etc/apt/sources.list
     - echo 'Dir::Bin::Methods::ftp "ftp";' > /etc/apt/apt.conf.d/99local-ftp
     - apt-get update
-    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-nss-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev clang-15 libc++-15-dev libc++abi-15-dev libnghttp2-dev libidn2-dev librtmp-dev libssh-dev libpsl-dev libkrb5-dev libldap2-dev libzstd-dev libwebp-dev
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates libcurl4-openssl-dev liblcms2-dev libboost-container-dev libtiff-dev wget p7zip-full git qt6-base-dev clang clang-tools libc++-dev libc++abi-dev libnghttp2-dev libidn2-dev librtmp-dev libssh-dev libpsl-dev libkrb5-dev libldap2-dev libzstd-dev libwebp-dev
   script:
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
@@ -97,7 +97,8 @@ build_ubuntu_22_04:
     - ninja
     - ctest --output-on-failure
     - cd .. && mkdir -p build_clang && cd build_clang
-    - CC=clang-15 CXX=clang++-15 cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fexperimental-library" -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data ..
+    - echo "We disable Qt6 tests since Qt6 exposes std::string in its ABI which makes it not build in this CI since we're using libc++ but Qt6 in debian is build with libstdc++"
+    - CC=clang CXX=clang++ cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fexperimental-library" -G Ninja -DENABLE_GPGME=OFF -DBUILD_QT6_TESTS=OFF -DTESTDATADIR=$PWD/../test-data ..
     - ninja
     - ctest --output-on-failure
     - cd .. && mkdir -p build_nondefault_options && cd build_nondefault_options
@@ -119,7 +120,7 @@ build_mingw64_fedora44:
     - dnf -y install glibc-langpack-en make ninja-build mingw64-boost mingw64-curl mingw64-qt6-qtbase mingw64-gcc-c++ cmake-rpm-macros
   script:
     - mkdir -p build && cd build
-    - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -G Ninja ..
+    - mingw64-cmake -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_BOOST=OFF -G Ninja ..
     - ninja
 
 build_clazy_fedora44_clang22:
