@@ -47,6 +47,18 @@ build:
     - ninja -j ${FDO_CI_CONCURRENT} all_verify_interface_header_sets
     - ctest --output-on-failure
 
+build_clang17_libcpp:
+  stage: build
+  script:
+    - echo "This is to simulate xcode 16.2 that is the minimum macos version we support"
+    - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
+    - apt-get install --yes --no-install-recommends libclang-17-dev llvm-17-dev libc++-17-dev libc++abi-17-dev clang-17 libunwind-17-dev gperf jq
+    - mkdir -p build && cd build
+    - echo "We disable Qt6 tests since Qt6 exposes std::string in its ABI which makes it not build in this CI since we're using libc++ but Qt6 in debian is build with libstdc++"
+    - CC=clang-17 CXX=clang++-17 cmake -G Ninja -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Werror -Wno-deprecated-declarations -Wno-error=unused-command-line-argument" -DTESTDATADIR=$PWD/../test-data -DBUILD_QT6_TESTS=OFF -DENABLE_GPGME=OFF ..
+    - ninja -j ${FDO_CI_CONCURRENT}
+    - ctest --output-on-failure
+
 build_clang19_libcpp:
   stage: build
   script:
