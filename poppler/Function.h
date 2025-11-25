@@ -255,7 +255,7 @@ public:
     explicit PostScriptFunction(const PostScriptFunction *func, PrivateTag = {});
 
 private:
-    bool parseCode(Stream *str, int *codePtr);
+    bool parseCode(Stream *str, int *codePtr, int &recursionCounter);
     std::unique_ptr<GooString> getToken(Stream *str);
     void resizeCode(int newSize);
     void exec(PSStack *stack, int codePtr) const;
