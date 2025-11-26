@@ -877,23 +877,28 @@ const TextSpanArray &StructElement::getTextSpansInternal(MarkedContentOutputDev 
     return mcdev.getTextSpans();
 }
 
-static StructElement::Type roleMapResolve(Dict *roleMap, const char *name, const char *curName)
+static StructElement::Type roleMapResolve(Dict *roleMap, const char *name)
 {
-    // Circular reference
-    if (curName && !strcmp(name, curName)) {
+    Object resolved = roleMap->lookup(name);
+    while (true) {
+        if (resolved.isName()) {
+            StructElement::Type type = nameToType(resolved.getName());
+            if (type != StructElement::Unknown) {
+                return type;
+            }
+            resolved = roleMap->lookup(resolved.getName());
+            if (resolved.isName(name)) {
+                // circular reference
+                return StructElement::Unknown;
+            }
+            continue;
+        }
+
+        if (!resolved.isNull()) {
+            error(errSyntaxWarning, -1, "RoleMap entry is wrong type ({0:s})", resolved.getTypeName());
+        }
         return StructElement::Unknown;
     }
-
-    Object resolved = roleMap->lookup(curName ? curName : name);
-    if (resolved.isName()) {
-        StructElement::Type type = nameToType(resolved.getName());
-        return type == StructElement::Unknown ? roleMapResolve(roleMap, name, resolved.getName()) : type;
-    }
-
-    if (!resolved.isNull()) {
-        error(errSyntaxWarning, -1, "RoleMap entry is wrong type ({0:s})", resolved.getTypeName());
-    }
-    return StructElement::Unknown;
 }
 
 void StructElement::parse(Dict *element)
@@ -925,7 +930,7 @@ void StructElement::parse(Dict *element)
 
     // Type name may not be standard, resolve through RoleMap first.
     if (treeRoot->getRoleMap()) {
-        type = roleMapResolve(treeRoot->getRoleMap(), obj.getName(), nullptr);
+        type = roleMapResolve(treeRoot->getRoleMap(), obj.getName());
     }
 
     // Resolving through RoleMap may leave type as Unknown, e.g. for types
