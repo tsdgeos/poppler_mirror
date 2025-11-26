@@ -876,10 +876,11 @@ const TextSpanArray &StructElement::getTextSpansInternal(MarkedContentOutputDev 
     treeRoot->getDoc()->displayPages(&mcdev, startPage, endPage, 72.0, 72.0, 0, true, false, false);
     return mcdev.getTextSpans();
 }
-
 static StructElement::Type roleMapResolve(Dict *roleMap, const char *name)
 {
     Object resolved = roleMap->lookup(name);
+    std::set<std::string> recursion;
+    recursion.insert(name);
     while (true) {
         if (resolved.isName()) {
             StructElement::Type type = nameToType(resolved.getName());
@@ -887,8 +888,9 @@ static StructElement::Type roleMapResolve(Dict *roleMap, const char *name)
                 return type;
             }
             resolved = roleMap->lookup(resolved.getName());
-            if (resolved.isName(name)) {
+            if (!recursion.insert(resolved.getName()).second) {
                 // circular reference
+                error(errSyntaxWarning, -1, "RoleMap entries contains circular references");
                 return StructElement::Unknown;
             }
             continue;
