@@ -13,6 +13,7 @@
 // Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2023, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 //
 //========================================================================
 

@@ -40,6 +40,7 @@
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
+// Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 //
 //========================================================================
 
