@@ -4555,6 +4555,9 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
                     // (which is a std::unique_ptr) will delete the font object at the end of this method.
                     fontToFree = createAnnotDrawFont(xref, resourcesDict, tok.c_str() + 1, fallback);
                     font = fontToFree.get();
+                    if (font && forceZapfDingbats) {
+                        addedDingbatsResource = true;
+                    }
                 } else {
                     error(errSyntaxError, -1, "Unknown font in field's DA string");
                 }
@@ -5363,7 +5366,7 @@ static void recursiveMergeDicts(Dict *primary, const Dict *secondary)
     recursiveMergeDicts(primary, secondary, &alreadySeenDicts);
 }
 
-void AnnotWidget::generateFieldAppearance()
+void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
 {
     const GooString *da;
 
@@ -5424,6 +5427,10 @@ void AnnotWidget::generateFieldAppearance()
     if (!success && form && da != form->getDefaultAppearance()) {
         da = form->getDefaultAppearance();
         appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), resourcesDictObj.getDict());
+    }
+
+    if (addedDingbatsResource) {
+        *addedDingbatsResource = appearBuilder.getAddedDingbatsResource();
     }
 
     const GooString *appearBuf = appearBuilder.buffer();
@@ -5513,15 +5520,35 @@ void AnnotWidget::draw(Gfx *gfx, bool printing)
     // Only construct the appearance stream when
     // - annot doesn't have an AP or
     // - NeedAppearances is true and it isn't a Signature. There isn't enough data in our objects to generate it for signatures
+    bool addedDingbatsResource = false;
     if (field) {
         if (appearance.isNull() || (field->getType() != FormFieldType::formSignature && form && form->getNeedAppearances())) {
-            generateFieldAppearance();
+            generateFieldAppearance(&addedDingbatsResource);
         }
     }
 
     // draw the appearance stream
     Object obj = appearance.fetch(gfx->getXRef());
+    if (addedDingbatsResource) {
+        // We are forcing ZaDb but the font does not exist
+        // so create a fake one
+        // If refactoring this code remember to test issue #1642 afterwards
+        Dict *fontDict = new Dict(gfx->getXRef());
+        fontDict->add("BaseFont", Object(objName, "ZapfDingbats"));
+        fontDict->add("Subtype", Object(objName, "Type1"));
+
+        Dict *fontsDict = new Dict(gfx->getXRef());
+        fontsDict->add("ZaDb", Object(fontDict));
+
+        Dict *dict = new Dict(gfx->getXRef());
+        dict->add("Font", Object(fontsDict));
+        gfx->pushResources(dict);
+        delete dict;
+    }
     gfx->drawAnnot(&obj, nullptr, color.get(), rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
+    if (addedDingbatsResource) {
+        gfx->popResources();
+    }
 }
 
 //------------------------------------------------------------------------
@@ -7614,7 +7641,10 @@ Annots::~Annots() = default;
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
 
-AnnotAppearanceBuilder::AnnotAppearanceBuilder() : appearBuf { std::make_unique<GooString>() } { }
+AnnotAppearanceBuilder::AnnotAppearanceBuilder() : appearBuf { std::make_unique<GooString>() }
+{
+    addedDingbatsResource = false;
+}
 
 AnnotAppearanceBuilder::~AnnotAppearanceBuilder() = default;
 
