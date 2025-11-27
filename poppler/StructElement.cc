@@ -880,19 +880,19 @@ static StructElement::Type roleMapResolve(Dict *roleMap, const char *name)
 {
     Object resolved = roleMap->lookup(name);
     std::set<std::string> recursion;
-    recursion.insert(name);
     while (true) {
         if (resolved.isName()) {
-            StructElement::Type type = nameToType(resolved.getName());
-            if (type != StructElement::Unknown) {
-                return type;
-            }
-            resolved = roleMap->lookup(resolved.getName());
             if (!recursion.insert(resolved.getName()).second) {
                 // circular reference
                 error(errSyntaxWarning, -1, "RoleMap entries contains circular references");
                 return StructElement::Unknown;
             }
+
+            StructElement::Type type = nameToType(resolved.getName());
+            if (type != StructElement::Unknown) {
+                return type;
+            }
+            resolved = roleMap->lookup(resolved.getName());
             continue;
         }
 
