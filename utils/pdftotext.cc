@@ -163,6 +163,15 @@ static std::string myXmlTokenReplace(const char *inString)
     return myString;
 }
 
+static constexpr EndOfLineKind defaultEndOfLine()
+{
+#if defined(_WIN32)
+    return eolDOS;
+#else
+    return eolUnix;
+#endif
+}
+
 int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
@@ -172,7 +181,7 @@ int main(int argc, char *argv[])
     const UnicodeMap *uMap;
     Object info;
     bool ok;
-    EndOfLineKind textEOL = TextOutputDev::defaultEndOfLine();
+    EndOfLineKind textEOL = defaultEndOfLine();
 
     Win32Console win32Console(&argc, &argv);
 

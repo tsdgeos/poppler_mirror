@@ -881,14 +881,6 @@ public:
     // last rasterized page.
     const TextFlow *getFlows() const;
 
-    static constexpr EndOfLineKind defaultEndOfLine()
-    {
-#if defined(_WIN32)
-        return eolDOS;
-#else
-        return eolUnix;
-#endif
-    }
     void setTextEOL(EndOfLineKind textEOLA) { textEOL = textEOLA; }
     void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
     double getMinColSpacing1() const { return minColSpacing1; }

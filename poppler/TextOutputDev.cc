@@ -5671,7 +5671,7 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     rawOrder = rawOrderA;
     discardDiag = discardDiagA;
     doHTML = false;
-    textEOL = defaultEndOfLine();
+    textEOL = EndOfLineKind::eolUnix;
     textPageBreaks = true;
     ok = true;
     minColSpacing1 = minColSpacing1_default;
@@ -5715,7 +5715,7 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA
     doHTML = false;
     text = new TextPage(rawOrderA, discardDiagA);
     actualText = new ActualText(text);
-    textEOL = defaultEndOfLine();
+    textEOL = EndOfLineKind::eolUnix;
     textPageBreaks = true;
     ok = true;
     minColSpacing1 = minColSpacing1_default;
