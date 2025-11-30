@@ -10,6 +10,7 @@
 // Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Even Rouault <even.rouault@spatialys.com>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 //
 //========================================================================
 

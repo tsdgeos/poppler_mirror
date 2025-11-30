@@ -1092,6 +1092,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
     code = nullptr;
     codeSize = 0;
     ok = false;
+    int recursionCounter = 0;
 
     //----- initialize the generic stuff
     if (!init(dict)) {
@@ -1120,7 +1121,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
         goto err1;
     }
     codePtr = 0;
-    if (!parseCode(str, &codePtr)) {
+    if (!parseCode(str, &codePtr, recursionCounter)) {
         goto err2;
     }
     str->close();
@@ -1207,11 +1208,16 @@ void PostScriptFunction::transform(const double *in, double *out) const
     }
 }
 
-bool PostScriptFunction::parseCode(Stream *str, int *codePtr)
+bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCounter)
 {
     bool isReal;
     int opPtr, elsePtr;
     int a, b, mid, cmp;
+
+    if (recursionCounter > 1024) {
+        error(errSyntaxError, -1, "PostScript function recursion too deep");
+        return false;
+    }
 
     while (true) {
         // This needs to be on the heap to help make parseCode
@@ -1239,13 +1245,13 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr)
             opPtr = *codePtr;
             *codePtr += 3;
             resizeCode(opPtr + 2);
-            if (!parseCode(str, codePtr)) {
+            if (!parseCode(str, codePtr, ++recursionCounter)) {
                 return false;
             }
             tok = getToken(str);
             if (!tok->cmp("{")) {
                 elsePtr = *codePtr;
-                if (!parseCode(str, codePtr)) {
+                if (!parseCode(str, codePtr, ++recursionCounter)) {
                     return false;
                 }
                 tok = getToken(str);

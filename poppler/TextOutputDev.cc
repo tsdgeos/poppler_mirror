@@ -47,6 +47,7 @@
 // Copyright (C) 2024 Adam Sampson <ats@offog.org>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5671,7 +5672,7 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     rawOrder = rawOrderA;
     discardDiag = discardDiagA;
     doHTML = false;
-    textEOL = defaultEndOfLine();
+    textEOL = EndOfLineKind::eolUnix;
     textPageBreaks = true;
     ok = true;
     minColSpacing1 = minColSpacing1_default;
@@ -5715,7 +5716,7 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA
     doHTML = false;
     text = new TextPage(rawOrderA, discardDiagA);
     actualText = new ActualText(text);
-    textEOL = defaultEndOfLine();
+    textEOL = EndOfLineKind::eolUnix;
     textPageBreaks = true;
     ok = true;
     minColSpacing1 = minColSpacing1_default;

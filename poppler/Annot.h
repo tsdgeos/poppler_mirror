@@ -606,6 +606,7 @@ public:
     void appendf(const char *fmt, ...) GOOSTRING_FORMAT;
 
     const GooString *buffer() const;
+    bool getAddedDingbatsResource() const { return addedDingbatsResource; }
 
 private:
     enum DrawTextFlags
@@ -633,6 +634,7 @@ private:
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     std::unique_ptr<GooString> appearBuf;
+    bool addedDingbatsResource;
 };
 
 //------------------------------------------------------------------------
@@ -1466,7 +1468,7 @@ public:
 
     void draw(Gfx *gfx, bool printing) override;
 
-    void generateFieldAppearance();
+    void generateFieldAppearance(bool *addedDingbatsResource = nullptr);
     void updateAppearanceStream();
 
     AnnotWidgetHighlightMode getMode() { return mode; }

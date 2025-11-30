@@ -34,6 +34,7 @@
 // Copyright (C) 2021 William Bader <williambader@hotmail.com>
 // Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -163,6 +164,15 @@ static std::string myXmlTokenReplace(const char *inString)
     return myString;
 }
 
+static constexpr EndOfLineKind defaultEndOfLine()
+{
+#if defined(_WIN32)
+    return eolDOS;
+#else
+    return eolUnix;
+#endif
+}
+
 int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
@@ -172,7 +182,7 @@ int main(int argc, char *argv[])
     const UnicodeMap *uMap;
     Object info;
     bool ok;
-    EndOfLineKind textEOL = TextOutputDev::defaultEndOfLine();
+    EndOfLineKind textEOL = defaultEndOfLine();
 
     Win32Console win32Console(&argc, &argv);
 
