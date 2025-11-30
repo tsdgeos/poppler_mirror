@@ -422,7 +422,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     eexecWrite(&eb, buf.c_str());
     for (i = 0; i < nGlyphs; ++i) {
         ok = true;
-        getIndexVal(&charStringsIdx, i, &val, &ok);
+        getIndexVal(charStringsIdx, i, &val, &ok);
         if (ok && i < charsetLength) {
             getString(charset[i], buf2, &ok);
             if (ok) {
@@ -494,7 +494,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
         charStringOffsets[i] = charStrings.size();
         if ((gid = cidMap[i]) >= 0) {
             ok = true;
-            getIndexVal(&charStringsIdx, gid, &val, &ok);
+            getIndexVal(charStringsIdx, gid, &val, &ok);
             if (ok) {
                 getIndex(privateDicts[fdSelect ? fdSelect[gid] : 0].subrsOffset, &subrIdx, &ok);
                 if (!ok) {
@@ -940,7 +940,7 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
 
             // write the .notdef CharString
             ok = true;
-            getIndexVal(&charStringsIdx, 0, &val, &ok);
+            getIndexVal(charStringsIdx, 0, &val, &ok);
             if (ok) {
                 eexecCvtGlyph(&eb, ".notdef", val.pos, val.len, &subrIdx, &privateDicts[fd]);
             }
@@ -949,7 +949,7 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
             for (j = 0; j < 256 && i + j < int(cidMap.size()); ++j) {
                 if (cidMap[i + j] >= 0) {
                     ok = true;
-                    getIndexVal(&charStringsIdx, cidMap[i + j], &val, &ok);
+                    getIndexVal(charStringsIdx, cidMap[i + j], &val, &ok);
                     if (ok) {
                         buf = GooString::format("c{0:02x}", j);
                         eexecCvtGlyph(&eb, buf.c_str(), val.pos, val.len, &subrIdx, &privateDicts[fd]);
@@ -1190,7 +1190,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     k = subrBias + (int)ops[nOps - 1].num;
                     --nOps;
                     ok = true;
-                    getIndexVal(subrIdx, k, &val, &ok);
+                    getIndexVal(*subrIdx, k, &val, &ok);
                     if (likely(ok && val.pos != offset)) {
                         cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
@@ -1428,7 +1428,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     k = gsubrBias + (int)ops[nOps - 1].num;
                     --nOps;
                     ok = true;
-                    getIndexVal(&gsubrIdx, k, &val, &ok);
+                    getIndexVal(gsubrIdx, k, &val, &ok);
                     if (likely(ok && val.pos != offset)) {
                         cvtGlyph(val.pos, val.len, charBuf, subrIdx, pDict, false, offsetBeingParsed);
                     }
@@ -1835,7 +1835,7 @@ bool FoFiType1C::parse()
     gsubrBias = (gsubrIdx.len < 1240) ? 107 : (gsubrIdx.len < 33900) ? 1131 : 32768;
 
     // read the first font name
-    getIndexVal(&nameIdx, 0, &val, &parsedOk);
+    getIndexVal(nameIdx, 0, &val, &parsedOk);
     if (!parsedOk) {
         return false;
     }
@@ -1858,7 +1858,7 @@ bool FoFiType1C::parse()
             nFDs = fdIdx.len;
             privateDicts = (Type1CPrivateDict *)gmallocn(nFDs, sizeof(Type1CPrivateDict));
             for (i = 0; i < nFDs; ++i) {
-                getIndexVal(&fdIdx, i, &val, &parsedOk);
+                getIndexVal(fdIdx, i, &val, &parsedOk);
                 if (!parsedOk) {
                     return false;
                 }
@@ -1956,7 +1956,7 @@ void FoFiType1C::readTopDict()
     topDict.fdArrayOffset = 0;
     topDict.fdSelectOffset = 0;
 
-    getIndexVal(&topDictIdx, 0, &topDictPtr, &parsedOk);
+    getIndexVal(topDictIdx, 0, &topDictPtr, &parsedOk);
     if (!parsedOk) {
         return;
     }
@@ -2608,17 +2608,17 @@ void FoFiType1C::getIndex(int pos, Type1CIndex *idx, bool *ok) const
     }
 }
 
-void FoFiType1C::getIndexVal(const Type1CIndex *idx, int i, Type1CIndexVal *val, bool *ok) const
+void FoFiType1C::getIndexVal(const Type1CIndex &idx, int i, Type1CIndexVal *val, bool *ok) const
 {
     int pos0, pos1;
 
-    if (i < 0 || i >= idx->len) {
+    if (i < 0 || i >= idx.len) {
         *ok = false;
         return;
     }
-    pos0 = idx->startPos + getUVarBE(idx->pos + 3 + i * idx->offSize, idx->offSize, ok);
-    pos1 = idx->startPos + getUVarBE(idx->pos + 3 + (i + 1) * idx->offSize, idx->offSize, ok);
-    if (pos0 < idx->startPos || pos0 > idx->endPos || pos1 <= idx->startPos || pos1 > idx->endPos || pos1 < pos0) {
+    pos0 = idx.startPos + getUVarBE(idx.pos + 3 + i * idx.offSize, idx.offSize, ok);
+    pos1 = idx.startPos + getUVarBE(idx.pos + 3 + (i + 1) * idx.offSize, idx.offSize, ok);
+    if (pos0 < idx.startPos || pos0 > idx.endPos || pos1 <= idx.startPos || pos1 > idx.endPos || pos1 < pos0) {
         *ok = false;
         return;
     }
@@ -2637,7 +2637,7 @@ char *FoFiType1C::getString(int sid, char *buf, bool *ok) const
         strcpy(buf, fofiType1CStdStrings[sid]);
     } else {
         sid -= 391;
-        getIndexVal(&stringIdx, sid, &val, ok);
+        getIndexVal(stringIdx, sid, &val, ok);
         if (*ok) {
             if ((n = val.len) > 255) {
                 n = 255;
