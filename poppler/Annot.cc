@@ -7307,34 +7307,6 @@ AnnotRichMedia::Content::Content(Dict *dict)
 
 AnnotRichMedia::Content::~Content() = default;
 
-int AnnotRichMedia::Content::getConfigurationsCount() const
-{
-    return configurations.size();
-}
-
-AnnotRichMedia::Configuration *AnnotRichMedia::Content::getConfiguration(int index) const
-{
-    if (index < 0 || index >= (int)configurations.size()) {
-        return nullptr;
-    }
-
-    return configurations[index].get();
-}
-
-int AnnotRichMedia::Content::getAssetsCount() const
-{
-    return assets.size();
-}
-
-AnnotRichMedia::Asset *AnnotRichMedia::Content::getAsset(int index) const
-{
-    if (index < 0 || index >= (int)assets.size()) {
-        return nullptr;
-    }
-
-    return assets[index].get();
-}
-
 AnnotRichMedia::Asset::Asset() = default;
 
 AnnotRichMedia::Asset::~Asset() = default;
@@ -7411,20 +7383,6 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 }
 
 AnnotRichMedia::Configuration::~Configuration() = default;
-
-int AnnotRichMedia::Configuration::getInstancesCount() const
-{
-    return instances.size();
-}
-
-AnnotRichMedia::Instance *AnnotRichMedia::Configuration::getInstance(int index) const
-{
-    if (index < 0 || index >= (int)instances.size()) {
-        return nullptr;
-    }
-
-    return instances[index].get();
-}
 
 const GooString *AnnotRichMedia::Configuration::getName() const
 {

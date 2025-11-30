@@ -1629,8 +1629,7 @@ public:
 
         Type getType() const;
         const GooString *getName() const;
-        int getInstancesCount() const;
-        Instance *getInstance(int index) const;
+        const std::vector<std::unique_ptr<Instance>> &getInstances() const { return instances; }
 
     private:
         // optional
@@ -1669,11 +1668,9 @@ public:
         Content(const Content &) = delete;
         Content &operator=(const Content &) = delete;
 
-        int getConfigurationsCount() const;
-        Configuration *getConfiguration(int index) const;
+        const std::vector<std::unique_ptr<Configuration>> &getConfigurations() const { return configurations; }
 
-        int getAssetsCount() const;
-        Asset *getAsset(int index) const;
+        const std::vector<std::unique_ptr<Asset>> &getAssets() const { return assets; }
 
     private:
         // optional
