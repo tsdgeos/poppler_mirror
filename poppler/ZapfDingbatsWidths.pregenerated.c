@@ -32,8 +32,7 @@ __inline
 inline
 #    endif
 #endif
-        static unsigned int
-        hash(register const char *str, register size_t len)
+        static unsigned int hash(register const char *str, register size_t len)
 {
     static const unsigned short asso_values[] = { 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403,
                                                   403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 403, 35,  18,  180, 160, 140, 120, 100, 80,  60,  15,  195, 185, 217, 207, 218, 203, 0,   5,   10,  200,

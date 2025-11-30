@@ -4519,7 +4519,7 @@ GfxGouraudTriangleShading::GfxGouraudTriangleShading(const GfxGouraudTriangleSha
     vertices = (GfxGouraudVertex *)gmallocn(nVertices, sizeof(GfxGouraudVertex));
     memcpy(vertices, shading->vertices, nVertices * sizeof(GfxGouraudVertex));
     nTriangles = shading->nTriangles;
-    triangles = (int(*)[3])gmallocn(nTriangles * 3, sizeof(int));
+    triangles = (int (*)[3])gmallocn(nTriangles * 3, sizeof(int));
     memcpy(triangles, shading->triangles, nTriangles * 3 * sizeof(int));
     for (const auto &f : shading->funcs) {
         funcs.emplace_back(f->copy());
@@ -4541,7 +4541,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
     double xMul, yMul;
     double cMul[gfxColorMaxComps];
     GfxGouraudVertex *verticesA;
-    int(*trianglesA)[3];
+    int (*trianglesA)[3];
     int nComps, nVerticesA, nTrianglesA, vertSize, triSize;
     unsigned int x, y, flag;
     unsigned int c[gfxColorMaxComps];
@@ -4688,7 +4688,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
             } else if (state == 2 || flag > 0) {
                 if (nTrianglesA == triSize) {
                     triSize = (triSize == 0) ? 16 : 2 * triSize;
-                    trianglesA = (int(*)[3])greallocn(trianglesA, triSize * 3, sizeof(int));
+                    trianglesA = (int (*)[3])greallocn(trianglesA, triSize * 3, sizeof(int));
                 }
                 if (state == 2) {
                     trianglesA[nTrianglesA][0] = nVerticesA - 3;
@@ -4714,7 +4714,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
     if (typeA == 5 && nVerticesA > 0 && vertsPerRow > 0) {
         nRows = nVerticesA / vertsPerRow;
         nTrianglesA = (nRows - 1) * 2 * (vertsPerRow - 1);
-        trianglesA = (int(*)[3])gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int));
+        trianglesA = (int (*)[3])gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int));
         if (unlikely(!trianglesA)) {
             gfree(verticesA);
             return nullptr;
