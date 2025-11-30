@@ -1503,7 +1503,7 @@ bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
     const char *current = getAppearanceState();
     bool currentFound = false, newFound = false;
 
-    for (int i = 0; i < int(terminal ? widgets.size() : children.size()); i++) {
+    for (size_t i = 0; i < terminal ? widgets.size() : children.size(); i++) {
         FormWidgetButton *widget;
 
         // If radio button is a terminal field we want the widget at i, but
