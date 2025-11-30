@@ -1798,7 +1798,7 @@ int FormFieldText::tokenizeDA(const std::string &da, std::vector<std::string> *d
     return idx;
 }
 
-int FormFieldText::parseDA(std::vector<std::string> *daToks)
+int FormFieldText::parseDA(std::vector<std::string> *daToks) const
 {
     int idx = -1;
     if (obj.isDict()) {

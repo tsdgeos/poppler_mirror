@@ -516,7 +516,7 @@ public:
     static int tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
 
 protected:
-    int parseDA(std::vector<std::string> *daToks);
+    int parseDA(std::vector<std::string> *daToks) const;
     void fillContent(FillValueType fillType);
 
     std::unique_ptr<GooString> content;
