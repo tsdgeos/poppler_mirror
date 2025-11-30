@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -239,7 +239,7 @@ private:
     int getDeltaIntArray(int *arr, int maxLen) const;
     int getDeltaFPArray(double *arr, int maxLen) const;
     void getIndex(int pos, Type1CIndex *idx, bool *ok) const;
-    void getIndexVal(const Type1CIndex *idx, int i, Type1CIndexVal *val, bool *ok) const;
+    void getIndexVal(const Type1CIndex &idx, int i, Type1CIndexVal *val, bool *ok) const;
     char *getString(int sid, char *buf, bool *ok) const;
 
     std::unique_ptr<GooString> name;

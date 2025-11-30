@@ -179,7 +179,8 @@ bool FileReader::cmp(int pos, const char *s)
 
 bool FileReader::fillBuf(int pos, int len)
 {
-    if (pos < 0 || len < 0 || len > (int)sizeof(buf) || pos > INT_MAX - (int)sizeof(buf)) {
+    constexpr int bufSize = sizeof(buf);
+    if (pos < 0 || len < 0 || len > bufSize || pos > INT_MAX - bufSize) {
         return false;
     }
     if (pos >= bufPos && pos + len <= bufPos + bufLen) {
@@ -305,7 +306,8 @@ bool StreamReader::fillBuf(int pos, int len)
 {
     int c;
 
-    if (pos < 0 || len < 0 || len > (int)sizeof(buf) || pos > INT_MAX - (int)sizeof(buf)) {
+    constexpr int bufSize = sizeof(buf);
+    if (pos < 0 || len < 0 || len > bufSize || pos > INT_MAX - bufSize) {
         return false;
     }
     if (pos < bufPos) {
@@ -313,7 +315,7 @@ bool StreamReader::fillBuf(int pos, int len)
     }
 
     // if requested region will not fit in the current buffer...
-    if (pos + len > bufPos + (int)sizeof(buf)) {
+    if (pos + len > bufPos + bufSize) {
 
         // if the start of the requested data is already in the buffer, move
         // it to the start of the buffer
