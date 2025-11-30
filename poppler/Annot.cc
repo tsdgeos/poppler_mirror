@@ -829,21 +829,27 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
 
     if (da) {
         std::vector<std::string> daToks;
-        int i = FormFieldText::tokenizeDA(da->toStr(), &daToks, "Tf");
+        const std::optional<size_t> tfIndex = FormFieldText::tokenizeDA(da->toStr(), &daToks, "Tf");
 
-        if (i >= 1) {
-            fontPtSize = gatof(daToks[i - 1].c_str());
+        if (tfIndex && tfIndex >= 1) {
+            fontPtSize = gatof(daToks[*tfIndex - 1].c_str());
         }
-        if (i >= 2) {
+        if (tfIndex && tfIndex >= 2) {
             // We are expecting a name, therefore the first letter should be '/'.
-            const std::string &fontToken = daToks[i - 2];
+            const std::string &fontToken = daToks[*tfIndex - 2];
             if (fontToken.size() > 1 && fontToken[0] == '/') {
                 // The +1 is here to skip the leading '/'.
                 fontName = Object(objName, fontToken.c_str() + 1);
             }
         }
         // Scan backwards: we are looking for the last set value
-        for (i = daToks.size() - 1; i >= 0; --i) {
+        size_t i = daToks.size();
+        while (true) {
+            if (i == 0) {
+                break;
+            } else {
+                --i;
+            }
             if (!fontColor) {
                 if (daToks[i] == "g" && i >= 1) {
                     fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 1].c_str()));

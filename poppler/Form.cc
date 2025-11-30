@@ -1736,11 +1736,11 @@ void FormFieldText::reset(const std::vector<std::string> &excludedFields)
 double FormFieldText::getTextFontSize()
 {
     std::vector<std::string> daToks;
-    int idx = parseDA(&daToks);
+    const std::optional<size_t> idx = parseDA(&daToks);
     double fontSize = -1;
-    if (idx >= 0) {
+    if (idx) {
         char *p = nullptr;
-        fontSize = strtod(daToks[idx].c_str(), &p);
+        fontSize = strtod(daToks[*idx].c_str(), &p);
         if (!p || *p) {
             fontSize = -1;
         }
@@ -1752,8 +1752,8 @@ void FormFieldText::setTextFontSize(int fontSize)
 {
     if (fontSize > 0 && obj.isDict()) {
         std::vector<std::string> daToks;
-        int idx = parseDA(&daToks);
-        if (idx == -1) {
+        const std::optional<size_t> idx = parseDA(&daToks);
+        if (!idx) {
             error(errSyntaxError, -1, "FormFieldText:: invalid DA object");
             return;
         }
@@ -1762,7 +1762,7 @@ void FormFieldText::setTextFontSize(int fontSize)
             if (i > 0) {
                 defaultAppearance->append(' ');
             }
-            if (i == (std::size_t)idx) {
+            if (i == idx) {
                 defaultAppearance->appendf("{0:d}", fontSize);
             } else {
                 defaultAppearance->append(daToks[i]);
@@ -1774,9 +1774,9 @@ void FormFieldText::setTextFontSize(int fontSize)
     }
 }
 
-int FormFieldText::tokenizeDA(const std::string &da, std::vector<std::string> *daToks, const char *searchTok)
+std::optional<size_t> FormFieldText::tokenizeDA(const std::string &da, std::vector<std::string> *daToks, const char *searchTok)
 {
-    int idx = -1;
+    std::optional<size_t> idx;
     if (daToks) {
         size_t i = 0;
         size_t j = 0;
@@ -1798,17 +1798,19 @@ int FormFieldText::tokenizeDA(const std::string &da, std::vector<std::string> *d
     return idx;
 }
 
-int FormFieldText::parseDA(std::vector<std::string> *daToks) const
+std::optional<size_t> FormFieldText::parseDA(std::vector<std::string> *daToks) const
 {
-    int idx = -1;
     if (obj.isDict()) {
         Object objDA(obj.dictLookup("DA"));
         if (objDA.isString()) {
             const GooString *da = objDA.getString();
-            idx = tokenizeDA(da->toStr(), daToks, "Tf") - 1;
+            const std::optional<size_t> tfIndex = tokenizeDA(da->toStr(), daToks, "Tf");
+            if (tfIndex) {
+                return tfIndex.value() - 1;
+            }
         }
     }
-    return idx;
+    return {};
 }
 
 //------------------------------------------------------------------------

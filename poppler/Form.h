@@ -513,10 +513,10 @@ public:
     void print(int indent) override;
     void reset(const std::vector<std::string> &excludedFields) override;
 
-    static int tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
+    static std::optional<size_t> tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
 
 protected:
-    int parseDA(std::vector<std::string> *daToks) const;
+    std::optional<size_t> parseDA(std::vector<std::string> *daToks) const;
     void fillContent(FillValueType fillType);
 
     std::unique_ptr<GooString> content;
