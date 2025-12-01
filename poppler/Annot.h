@@ -33,7 +33,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
-// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
