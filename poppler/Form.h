@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -513,10 +513,10 @@ public:
     void print(int indent) override;
     void reset(const std::vector<std::string> &excludedFields) override;
 
-    static int tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
+    static std::optional<size_t> tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
 
 protected:
-    int parseDA(std::vector<std::string> *daToks);
+    std::optional<size_t> parseDA(std::vector<std::string> *daToks) const;
     void fillContent(FillValueType fillType);
 
     std::unique_ptr<GooString> content;

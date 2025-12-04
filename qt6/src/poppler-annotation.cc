@@ -607,111 +607,102 @@ std::vector<std::unique_ptr<Annotation>> AnnotationPrivate::findAnnotations(::Pa
             if (annotContent) {
                 RichMediaAnnotation::Content *content = new RichMediaAnnotation::Content;
 
-                const int configurationsCount = annotContent->getConfigurationsCount();
-                if (configurationsCount > 0) {
-                    QList<RichMediaAnnotation::Configuration *> configurations;
+                const std::vector<std::unique_ptr<AnnotRichMedia::Configuration>> &annotConfigurations = annotContent->getConfigurations();
+                QList<RichMediaAnnotation::Configuration *> configurations;
 
-                    for (int i = 0; i < configurationsCount; ++i) {
-                        const AnnotRichMedia::Configuration *annotConfiguration = annotContent->getConfiguration(i);
-                        if (!annotConfiguration) {
+                for (const std::unique_ptr<AnnotRichMedia::Configuration> &annotConfiguration : annotConfigurations) {
+                    if (!annotConfiguration) {
+                        continue;
+                    }
+
+                    RichMediaAnnotation::Configuration *configuration = new RichMediaAnnotation::Configuration;
+
+                    if (annotConfiguration->getName()) {
+                        configuration->setName(UnicodeParsedString(annotConfiguration->getName()));
+                    }
+
+                    switch (annotConfiguration->getType()) {
+                    case AnnotRichMedia::Configuration::type3D:
+                        configuration->setType(RichMediaAnnotation::Configuration::Type3D);
+                        break;
+                    case AnnotRichMedia::Configuration::typeFlash:
+                        configuration->setType(RichMediaAnnotation::Configuration::TypeFlash);
+                        break;
+                    case AnnotRichMedia::Configuration::typeSound:
+                        configuration->setType(RichMediaAnnotation::Configuration::TypeSound);
+                        break;
+                    case AnnotRichMedia::Configuration::typeVideo:
+                        configuration->setType(RichMediaAnnotation::Configuration::TypeVideo);
+                        break;
+                    }
+
+                    const std::vector<std::unique_ptr<AnnotRichMedia::Instance>> &annotInstances = annotConfiguration->getInstances();
+                    QList<RichMediaAnnotation::Instance *> instances;
+
+                    for (const std::unique_ptr<AnnotRichMedia::Instance> &annotInstance : annotInstances) {
+                        if (!annotInstance) {
                             continue;
                         }
 
-                        RichMediaAnnotation::Configuration *configuration = new RichMediaAnnotation::Configuration;
+                        RichMediaAnnotation::Instance *instance = new RichMediaAnnotation::Instance;
 
-                        if (annotConfiguration->getName()) {
-                            configuration->setName(UnicodeParsedString(annotConfiguration->getName()));
-                        }
-
-                        switch (annotConfiguration->getType()) {
-                        case AnnotRichMedia::Configuration::type3D:
-                            configuration->setType(RichMediaAnnotation::Configuration::Type3D);
+                        switch (annotInstance->getType()) {
+                        case AnnotRichMedia::Instance::type3D:
+                            instance->setType(RichMediaAnnotation::Instance::Type3D);
                             break;
-                        case AnnotRichMedia::Configuration::typeFlash:
-                            configuration->setType(RichMediaAnnotation::Configuration::TypeFlash);
+                        case AnnotRichMedia::Instance::typeFlash:
+                            instance->setType(RichMediaAnnotation::Instance::TypeFlash);
                             break;
-                        case AnnotRichMedia::Configuration::typeSound:
-                            configuration->setType(RichMediaAnnotation::Configuration::TypeSound);
+                        case AnnotRichMedia::Instance::typeSound:
+                            instance->setType(RichMediaAnnotation::Instance::TypeSound);
                             break;
-                        case AnnotRichMedia::Configuration::typeVideo:
-                            configuration->setType(RichMediaAnnotation::Configuration::TypeVideo);
+                        case AnnotRichMedia::Instance::typeVideo:
+                            instance->setType(RichMediaAnnotation::Instance::TypeVideo);
                             break;
                         }
 
-                        const int instancesCount = annotConfiguration->getInstancesCount();
-                        if (instancesCount > 0) {
-                            QList<RichMediaAnnotation::Instance *> instances;
+                        const AnnotRichMedia::Params *annotParams = annotInstance->getParams();
+                        if (annotParams) {
+                            RichMediaAnnotation::Params *params = new RichMediaAnnotation::Params;
 
-                            for (int j = 0; j < instancesCount; ++j) {
-                                const AnnotRichMedia::Instance *annotInstance = annotConfiguration->getInstance(j);
-                                if (!annotInstance) {
-                                    continue;
-                                }
-
-                                RichMediaAnnotation::Instance *instance = new RichMediaAnnotation::Instance;
-
-                                switch (annotInstance->getType()) {
-                                case AnnotRichMedia::Instance::type3D:
-                                    instance->setType(RichMediaAnnotation::Instance::Type3D);
-                                    break;
-                                case AnnotRichMedia::Instance::typeFlash:
-                                    instance->setType(RichMediaAnnotation::Instance::TypeFlash);
-                                    break;
-                                case AnnotRichMedia::Instance::typeSound:
-                                    instance->setType(RichMediaAnnotation::Instance::TypeSound);
-                                    break;
-                                case AnnotRichMedia::Instance::typeVideo:
-                                    instance->setType(RichMediaAnnotation::Instance::TypeVideo);
-                                    break;
-                                }
-
-                                const AnnotRichMedia::Params *annotParams = annotInstance->getParams();
-                                if (annotParams) {
-                                    RichMediaAnnotation::Params *params = new RichMediaAnnotation::Params;
-
-                                    if (annotParams->getFlashVars()) {
-                                        params->setFlashVars(UnicodeParsedString(annotParams->getFlashVars()));
-                                    }
-
-                                    instance->setParams(params);
-                                }
-
-                                instances.append(instance);
+                            if (annotParams->getFlashVars()) {
+                                params->setFlashVars(UnicodeParsedString(annotParams->getFlashVars()));
                             }
 
-                            configuration->setInstances(instances);
+                            instance->setParams(params);
                         }
 
-                        configurations.append(configuration);
+                        instances.append(instance);
                     }
 
-                    content->setConfigurations(configurations);
+                    configuration->setInstances(instances);
+
+                    configurations.append(configuration);
                 }
 
-                const int assetsCount = annotContent->getAssetsCount();
-                if (assetsCount > 0) {
-                    QList<RichMediaAnnotation::Asset *> assets;
+                content->setConfigurations(configurations);
 
-                    for (int i = 0; i < assetsCount; ++i) {
-                        const AnnotRichMedia::Asset *annotAsset = annotContent->getAsset(i);
-                        if (!annotAsset) {
-                            continue;
-                        }
+                const std::vector<std::unique_ptr<AnnotRichMedia::Asset>> &annotAssets = annotContent->getAssets();
+                QList<RichMediaAnnotation::Asset *> assets;
 
-                        RichMediaAnnotation::Asset *asset = new RichMediaAnnotation::Asset;
-
-                        if (annotAsset->getName()) {
-                            asset->setName(UnicodeParsedString(annotAsset->getName()));
-                        }
-
-                        auto fileSpec = std::make_unique<FileSpec>(annotAsset->getFileSpec());
-                        asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec))));
-
-                        assets.append(asset);
+                for (const std::unique_ptr<AnnotRichMedia::Asset> &annotAsset : annotAssets) {
+                    if (!annotAsset) {
+                        continue;
                     }
 
-                    content->setAssets(assets);
+                    RichMediaAnnotation::Asset *asset = new RichMediaAnnotation::Asset;
+
+                    if (annotAsset->getName()) {
+                        asset->setName(UnicodeParsedString(annotAsset->getName()));
+                    }
+
+                    auto fileSpec = std::make_unique<FileSpec>(annotAsset->getFileSpec());
+                    asset->setEmbeddedFile(new EmbeddedFile(*new EmbeddedFileData(std::move(fileSpec))));
+
+                    assets.append(asset);
                 }
+
+                content->setAssets(assets);
 
                 richMediaAnnotation->setContent(content);
             }

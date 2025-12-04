@@ -829,21 +829,27 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
 
     if (da) {
         std::vector<std::string> daToks;
-        int i = FormFieldText::tokenizeDA(da->toStr(), &daToks, "Tf");
+        const std::optional<size_t> tfIndex = FormFieldText::tokenizeDA(da->toStr(), &daToks, "Tf");
 
-        if (i >= 1) {
-            fontPtSize = gatof(daToks[i - 1].c_str());
+        if (tfIndex && tfIndex >= 1) {
+            fontPtSize = gatof(daToks[*tfIndex - 1].c_str());
         }
-        if (i >= 2) {
+        if (tfIndex && tfIndex >= 2) {
             // We are expecting a name, therefore the first letter should be '/'.
-            const std::string &fontToken = daToks[i - 2];
+            const std::string &fontToken = daToks[*tfIndex - 2];
             if (fontToken.size() > 1 && fontToken[0] == '/') {
                 // The +1 is here to skip the leading '/'.
                 fontName = Object(objName, fontToken.c_str() + 1);
             }
         }
         // Scan backwards: we are looking for the last set value
-        for (i = daToks.size() - 1; i >= 0; --i) {
+        size_t i = daToks.size();
+        while (true) {
+            if (i == 0) {
+                break;
+            } else {
+                --i;
+            }
             if (!fontColor) {
                 if (daToks[i] == "g" && i >= 1) {
                     fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 1].c_str()));
@@ -7307,34 +7313,6 @@ AnnotRichMedia::Content::Content(Dict *dict)
 
 AnnotRichMedia::Content::~Content() = default;
 
-int AnnotRichMedia::Content::getConfigurationsCount() const
-{
-    return configurations.size();
-}
-
-AnnotRichMedia::Configuration *AnnotRichMedia::Content::getConfiguration(int index) const
-{
-    if (index < 0 || index >= (int)configurations.size()) {
-        return nullptr;
-    }
-
-    return configurations[index].get();
-}
-
-int AnnotRichMedia::Content::getAssetsCount() const
-{
-    return assets.size();
-}
-
-AnnotRichMedia::Asset *AnnotRichMedia::Content::getAsset(int index) const
-{
-    if (index < 0 || index >= (int)assets.size()) {
-        return nullptr;
-    }
-
-    return assets[index].get();
-}
-
 AnnotRichMedia::Asset::Asset() = default;
 
 AnnotRichMedia::Asset::~Asset() = default;
@@ -7411,20 +7389,6 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 }
 
 AnnotRichMedia::Configuration::~Configuration() = default;
-
-int AnnotRichMedia::Configuration::getInstancesCount() const
-{
-    return instances.size();
-}
-
-AnnotRichMedia::Instance *AnnotRichMedia::Configuration::getInstance(int index) const
-{
-    if (index < 0 || index >= (int)instances.size()) {
-        return nullptr;
-    }
-
-    return instances[index].get();
-}
 
 const GooString *AnnotRichMedia::Configuration::getName() const
 {

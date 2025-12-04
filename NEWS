@@ -1,3 +1,19 @@
+Release 25.12.0:
+        core:
+         * Be less strict about the Page Annots object being correct. Issue #1641
+         * Fix rendering of some annotations. Issue #1642
+         * TextOuputDev: change default line ending to \n
+         * Splash: Performance improvements
+         * Ignore color operators when painting a Type3 font with d1
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfsig: specify search order for NSS certificate database on the man page
+
+        build system:
+         * Switch to C++23
+
 Release 25.11.0:
         core:
          * NSS Signatures: Tweak the logic that decides which firefox profile to use
