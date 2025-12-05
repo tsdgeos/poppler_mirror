@@ -45,10 +45,6 @@
 /* Do we have any JPX decoder?. */
 #cmakedefine HAVE_JPX_DECODER 1
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_DIRENT_H 1
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
 
@@ -91,22 +87,11 @@
 /* Defines if strtok_r is available on your system */
 #cmakedefine HAVE_STRTOK_R 1
 
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#cmakedefine HAVE_NDIR_H 1
-
 /* Define to 1 if you have the `popen' function. */
 #cmakedefine HAVE_POPEN 1
 
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_SYS_DIR_H 1
-
 /* Define to 1 if you have the <sys/mman.h> header file. */
 #cmakedefine HAVE_SYS_MMAN_H 1
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_SYS_NDIR_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #cmakedefine HAVE_SYS_STAT_H 1

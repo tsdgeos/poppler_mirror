@@ -39,22 +39,6 @@ check_function_exists(popen HAVE_POPEN)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 check_function_exists(strtok_r HAVE_STRTOK_R)
 
-macro(CHECK_FOR_DIR include var)
-  check_c_source_compiles(
-    "#include <${include}>
-
-int main(int argc, char *argv[])
-{
-  DIR* d = 0;
-  return 0;
-}
-" ${var})
-endmacro(CHECK_FOR_DIR)
-check_for_dir("dirent.h" HAVE_DIRENT_H)
-check_for_dir("ndir.h" HAVE_NDIR_H)
-check_for_dir("sys/dir.h" HAVE_SYS_DIR_H)
-check_for_dir("sys/ndir.h" HAVE_SYS_NDIR_H)
-
 check_function_exists("nanosleep" HAVE_NANOSLEEP)
 if(NOT HAVE_NANOSLEEP)
   check_library_exists("rt" "nanosleep" "" LIB_RT_HAS_NANOSLEEP)

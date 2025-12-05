@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2009, 2011, 2012, 2017, 2018, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012, 2017, 2018, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -56,22 +56,6 @@ extern "C" {
 #else
 #    include <unistd.h>
 #    include <sys/types.h>
-#    if defined(HAVE_DIRENT_H)
-#        include <dirent.h>
-#        define NAMLEN(d) strlen((d)->d_name)
-#    else
-#        define dirent direct
-#        define NAMLEN(d) (d)->d_namlen
-#        ifdef HAVE_SYS_NDIR_H
-#            include <sys/ndir.h>
-#        endif
-#        ifdef HAVE_SYS_DIR_H
-#            include <sys/dir.h>
-#        endif
-#        ifdef HAVE_NDIR_H
-#            include <ndir.h>
-#        endif
-#    endif
 #endif
 }
 

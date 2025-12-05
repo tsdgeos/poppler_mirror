@@ -74,32 +74,9 @@
 #cmakedefine ENABLE_LIBPNG 1
 #endif
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_DIRENT_H
-#cmakedefine HAVE_DIRENT_H 1
-#endif
-
 /* Defines if gettimeofday is available on your system */
 #ifndef HAVE_GETTIMEOFDAY
 #cmakedefine HAVE_GETTIMEOFDAY 1
-#endif
-
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#ifndef HAVE_NDIR_H
-#cmakedefine HAVE_NDIR_H 1
-#endif
-
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_SYS_DIR_H
-#cmakedefine HAVE_SYS_DIR_H 1
-#endif
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_SYS_NDIR_H
-#cmakedefine HAVE_SYS_NDIR_H 1
 #endif
 
 /* Defines if use cms */
