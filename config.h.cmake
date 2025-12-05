@@ -45,24 +45,11 @@
 /* Do we have any JPX decoder?. */
 #cmakedefine HAVE_JPX_DECODER 1
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_DIRENT_H 1
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#cmakedefine HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the <fcntl.h> header file. */
-#cmakedefine HAVE_FCNTL_H 1
-
 /* Define to 1 if you have the `fseek64' function. */
 #cmakedefine HAVE_FSEEK64 1
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
 #cmakedefine HAVE_FSEEKO 1
-
-/* Define to 1 if you have the `ftell64' function. */
-#cmakedefine HAVE_FTELL64 1
 
 /* Define to 1 if you have the `pread64' function. */
 #cmakedefine HAVE_PREAD64 1
@@ -85,34 +72,11 @@
 /* Defines if localtime_r is available on your system */
 #cmakedefine HAVE_LOCALTIME_R 1
 
-/* Define to 1 if you have the `mkstemp' function. */
-#cmakedefine HAVE_MKSTEMP 1
-
 /* Defines if strtok_r is available on your system */
 #cmakedefine HAVE_STRTOK_R 1
 
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#cmakedefine HAVE_NDIR_H 1
-
 /* Define to 1 if you have the `popen' function. */
 #cmakedefine HAVE_POPEN 1
-
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_SYS_DIR_H 1
-
-/* Define to 1 if you have the <sys/mman.h> header file. */
-#cmakedefine HAVE_SYS_MMAN_H 1
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#cmakedefine HAVE_SYS_NDIR_H 1
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#cmakedefine HAVE_SYS_STAT_H 1
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#cmakedefine HAVE_UNISTD_H 1
 
 /* Define to 1 if you have a big endian machine */
 #cmakedefine WORDS_BIGENDIAN 1

@@ -286,6 +286,9 @@ static void printStruct(const StructElement *element, unsigned indent)
         if (element->isInline() || element->isBlock()) {
             printf(" (%s)", element->isInline() ? "inline" : "block");
         }
+        if (element->getAltText()) {
+            printf(" [\"%s\"]", TextStringToUtf8(element->getAltText()->toStr()).c_str());
+        }
         if (element->getNumAttributes()) {
             putchar(':');
             for (unsigned i = 0; i < element->getNumAttributes(); i++) {

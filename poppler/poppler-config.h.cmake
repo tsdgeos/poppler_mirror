@@ -19,7 +19,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2020, 2025 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -74,32 +74,9 @@
 #cmakedefine ENABLE_LIBPNG 1
 #endif
 
-/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_DIRENT_H
-#cmakedefine HAVE_DIRENT_H 1
-#endif
-
 /* Defines if gettimeofday is available on your system */
 #ifndef HAVE_GETTIMEOFDAY
 #cmakedefine HAVE_GETTIMEOFDAY 1
-#endif
-
-/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
-#ifndef HAVE_NDIR_H
-#cmakedefine HAVE_NDIR_H 1
-#endif
-
-/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_SYS_DIR_H
-#cmakedefine HAVE_SYS_DIR_H 1
-#endif
-
-/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
-   */
-#ifndef HAVE_SYS_NDIR_H
-#cmakedefine HAVE_SYS_NDIR_H 1
 #endif
 
 /* Defines if use cms */
@@ -134,15 +111,9 @@
 // Compiler
 //------------------------------------------------------------------------
 
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#include <cstdio> // __MINGW_PRINTF_FORMAT is defined in the mingw stdio.h
-#ifdef __MINGW_PRINTF_FORMAT
+#if __GNUC__
 #define GCC_PRINTF_FORMAT(fmt_index, va_index) \
-	__attribute__((__format__(__MINGW_PRINTF_FORMAT, fmt_index, va_index)))
-#else
-#define GCC_PRINTF_FORMAT(fmt_index, va_index) \
-	__attribute__((__format__(__printf__, fmt_index, va_index)))
-#endif
+	__attribute__((__format__(printf, fmt_index, va_index)))
 #else
 #define GCC_PRINTF_FORMAT(fmt_index, va_index)
 #endif

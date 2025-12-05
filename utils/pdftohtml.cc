@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2020, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2020, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -43,9 +43,6 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
-#ifdef HAVE_DIRENT_H
-#    include <dirent.h>
-#endif
 #include <ctime>
 #include "parseargs.h"
 #include "goo/GooString.h"

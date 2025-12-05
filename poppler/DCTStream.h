@@ -6,7 +6,7 @@
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright 2005-2007, 2009-2011, 2017, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2007, 2009-2011, 2017, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -24,9 +24,6 @@
 #include <cstdlib>
 #include <cstddef>
 #include <csetjmp>
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#endif
 #include <cstring>
 #include <cctype>
 #include "goo/gmem.h"

@@ -56,9 +56,6 @@
 #include <cstdlib>
 #include <cstddef>
 #include <climits>
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#endif
 #include <cstring>
 #include <cctype>
 #include "goo/gmem.h"
