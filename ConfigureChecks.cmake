@@ -30,9 +30,4 @@ check_function_exists(localtime_r HAVE_LOCALTIME_R)
 check_function_exists(popen HAVE_POPEN)
 check_function_exists(strtok_r HAVE_STRTOK_R)
 
-check_function_exists("nanosleep" HAVE_NANOSLEEP)
-if(NOT HAVE_NANOSLEEP)
-  check_library_exists("rt" "nanosleep" "" LIB_RT_HAS_NANOSLEEP)
-endif(NOT HAVE_NANOSLEEP)
-
 cmake_pop_check_state()
