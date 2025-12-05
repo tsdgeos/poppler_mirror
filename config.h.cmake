@@ -111,9 +111,6 @@
 /* Support for curl based doc builder is compiled in. */
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
 
-/* Enable word list support. */
-#cmakedefine TEXTOUT_WORD_LIST 1
-
 /* Defines if use cms */
 #cmakedefine USE_CMS 1
 

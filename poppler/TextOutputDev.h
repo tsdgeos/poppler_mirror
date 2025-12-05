@@ -109,7 +109,6 @@ public:
     // Get the writing mode (0 or 1), or 0 if the font is not set
     int getWMode() const;
 
-#ifdef TEXTOUT_WORD_LIST
     // Get the font name (which may be NULL).
     const GooString *getFontName() const { return fontName; }
 
@@ -119,14 +118,11 @@ public:
     bool isSymbolic() const { return flags & fontSymbolic; }
     bool isItalic() const { return flags & fontItalic; }
     bool isBold() const { return flags & fontBold; }
-#endif
 
 private:
     std::shared_ptr<GfxFont> gfxFont;
-#ifdef TEXTOUT_WORD_LIST
     GooString *fontName;
     int flags;
-#endif
 
     friend class TextWord;
     friend class TextPage;
@@ -179,7 +175,6 @@ public:
     // Get the next TextWord on the linked list.
     const TextWord *getNext() const { return next; }
 
-#ifdef TEXTOUT_WORD_LIST
     int getLength() const { return chars.size(); }
     const Unicode *getChar(int idx) const { return &chars[idx].text; }
     GooString *getText() const;
@@ -203,7 +198,6 @@ public:
     int getCharPos() const { return chars.empty() ? 0 : chars.front().charPos; }
     int getCharLen() const { return chars.empty() ? 0 : chars.back().charPos - chars.front().charPos; }
     bool getSpaceAfter() const { return spaceAfter; }
-#endif
     bool isUnderlined() const { return underlined; }
     const AnnotLink *getLink() const { return link; }
     double getEdge(int i) const { return chars[i].edge; }
@@ -243,10 +237,8 @@ private:
     bool invisible; // whether we are invisible (glyphless)
     TextWord *next; // next word in line
 
-#ifdef TEXTOUT_WORD_LIST
     double colorR, // word color
             colorG, colorB;
-#endif
 
     AnnotLink *link;
 
@@ -506,8 +498,6 @@ private:
     friend class TextPage;
 };
 
-#ifdef TEXTOUT_WORD_LIST
-
 //------------------------------------------------------------------------
 // TextWordList
 //------------------------------------------------------------------------
@@ -531,8 +521,6 @@ public:
 private:
     std::vector<TextWord *> words;
 };
-
-#endif // TEXTOUT_WORD_LIST
 
 class TextWordSelection
 {
@@ -660,13 +648,11 @@ public:
     // character are drawn on eachother.
     void setMergeCombining(bool merge);
 
-#ifdef TEXTOUT_WORD_LIST
     // Build a flat word list, in content stream order (if
     // this->rawOrder is true), physical layout order (if <physLayout>
     // is true and this->rawOrder is false), or reading order (if both
     // flags are false).
     std::unique_ptr<TextWordList> makeWordList(bool physLayout);
-#endif
 
 private:
     // Destructor.
@@ -863,13 +849,11 @@ public:
     // character are drawn on eachother.
     void setMergeCombining(bool merge);
 
-#ifdef TEXTOUT_WORD_LIST
     // Build a flat word list, in content stream order (if
     // this->rawOrder is true), physical layout order (if
     // this->physLayout is true and this->rawOrder is false), or reading
     // order (if both flags are false).
     std::unique_ptr<TextWordList> makeWordList();
-#endif
 
     // Returns the TextPage object for the last rasterized page,
     // transferring ownership to the caller.

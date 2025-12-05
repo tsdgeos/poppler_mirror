@@ -44,11 +44,6 @@
 #cmakedefine USE_FLOAT 1
 #endif
 
-/* Enable word list support. */
-#ifndef TEXTOUT_WORD_LIST
-#cmakedefine TEXTOUT_WORD_LIST 1
-#endif
-
 /* Support for curl is compiled in. */
 #ifndef POPPLER_HAS_CURL_SUPPORT
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1

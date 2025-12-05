@@ -139,9 +139,6 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
-# Enable these unconditionally.
-set(TEXTOUT_WORD_LIST ON)
-
 # setting the minimum required versions for some components
 set(CAIRO_VERSION "1.16.0")
 set(GLIB_REQUIRED "2.72")

@@ -369,7 +369,6 @@ public:
 TextFontInfo::TextFontInfo(const GfxState *state)
 {
     gfxFont = state->getFont();
-#ifdef TEXTOUT_WORD_LIST
     if (gfxFont) {
         const std::optional<std::string> &gfxFontName = gfxFont->getName();
         if (gfxFontName) {
@@ -381,14 +380,11 @@ TextFontInfo::TextFontInfo(const GfxState *state)
         fontName = nullptr;
     }
     flags = gfxFont ? gfxFont->getFlags() : 0;
-#endif
 }
 
 TextFontInfo::~TextFontInfo()
 {
-#ifdef TEXTOUT_WORD_LIST
     delete fontName;
-#endif
 }
 
 bool TextFontInfo::matches(const GfxState *state) const
@@ -433,7 +429,6 @@ TextWord::TextWord(const GfxState *state, int rotA, double fontSizeA)
     next = nullptr;
     invisible = state->getRender() == 3;
 
-#ifdef TEXTOUT_WORD_LIST
     GfxRGB rgb;
 
     if ((state->getRender() & 3) == 1) {
@@ -444,7 +439,6 @@ TextWord::TextWord(const GfxState *state, int rotA, double fontSizeA)
     colorR = colToDbl(rgb.r);
     colorG = colToDbl(rgb.g);
     colorB = colToDbl(rgb.b);
-#endif
 
     underlined = false;
     link = nullptr;
@@ -822,8 +816,6 @@ bool TextWord::cmpYX(const TextWord *const word1, const TextWord *const word2)
     return cmp < 0;
 }
 
-#ifdef TEXTOUT_WORD_LIST
-
 GooString *TextWord::getText() const
 {
     GooString *s;
@@ -879,8 +871,6 @@ void TextWord::getCharBBox(int charIdx, double *xMinA, double *yMinA, double *xM
         break;
     }
 }
-
-#endif // TEXTOUT_WORD_LIST
 
 //------------------------------------------------------------------------
 // TextPool
@@ -2379,8 +2369,6 @@ bool TextFlow::blockFits(const TextBlock *blk, const TextBlock *prevBlk) const
     return fits;
 }
 
-#ifdef TEXTOUT_WORD_LIST
-
 //------------------------------------------------------------------------
 // TextWordList
 //------------------------------------------------------------------------
@@ -2436,8 +2424,6 @@ TextWordList::TextWordList(const TextPage *text, bool physLayout)
 }
 
 TextWordList::~TextWordList() = default;
-
-#endif // TEXTOUT_WORD_LIST
 
 //------------------------------------------------------------------------
 // TextPage
@@ -5592,12 +5578,10 @@ int TextPage::dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap,
     }
 }
 
-#ifdef TEXTOUT_WORD_LIST
 std::unique_ptr<TextWordList> TextPage::makeWordList(bool physLayout)
 {
     return std::make_unique<TextWordList>(this, physLayout);
 }
-#endif
 
 //------------------------------------------------------------------------
 // ActualText
@@ -5961,12 +5945,10 @@ void TextOutputDev::setMergeCombining(bool merge)
     text->setMergeCombining(merge);
 }
 
-#ifdef TEXTOUT_WORD_LIST
 std::unique_ptr<TextWordList> TextOutputDev::makeWordList()
 {
     return text->makeWordList(physLayout);
 }
-#endif
 
 TextPage *TextOutputDev::takeText()
 {
