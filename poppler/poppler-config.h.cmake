@@ -101,7 +101,7 @@
 // Compiler
 //------------------------------------------------------------------------
 
-#if __GNUC__
+#ifdef __GNUC__
 #define GCC_PRINTF_FORMAT(fmt_index, va_index) \
 	__attribute__((__format__(printf, fmt_index, va_index)))
 #else
