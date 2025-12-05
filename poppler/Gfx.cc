@@ -86,7 +86,7 @@
 #include "ProfileData.h"
 #include "Catalog.h"
 #include "OptionalContent.h"
-#ifdef ENABLE_LIBOPENJPEG
+#if ENABLE_LIBOPENJPEG
 #    include "JPEG2000Stream.h"
 #endif
 
@@ -499,7 +499,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
         out->clip(state);
         state->clearPath();
     }
-#ifdef USE_CMS
+#if USE_CMS
     initDisplayProfile();
 #endif
 }
@@ -559,12 +559,12 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
         out->clip(state);
         state->clearPath();
     }
-#ifdef USE_CMS
+#if USE_CMS
     initDisplayProfile();
 #endif
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 
 void Gfx::initDisplayProfile()
 {
@@ -4193,7 +4193,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     // get info from the stream
     bits = 0;
     csMode = streamCSNone;
-#ifdef ENABLE_LIBOPENJPEG
+#if ENABLE_LIBOPENJPEG
     if (str->getKind() == strJPX && out->supportJPXtransparency()) {
         JPXStream *jpxStream = dynamic_cast<JPXStream *>(str);
         jpxStream->setSupportJPXtransparency(true);

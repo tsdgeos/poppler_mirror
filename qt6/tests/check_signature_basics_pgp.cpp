@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 // Simple tests of reading signatures
@@ -19,7 +20,7 @@
 #include "SignatureInfo.h"
 #include "CryptoSignBackend.h"
 #include "config.h"
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 #    include <gpgme++/global.h>
 #    include "GPGMECryptoSignBackendConfiguration.h"
 #    include <gpgme++/importresult.h>
@@ -27,7 +28,7 @@
 #    include <gpgme++/data.h>
 #endif
 
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 const auto pubkey = R"ZxZ(
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -117,7 +118,7 @@ public:
     static std::unique_ptr<QTemporaryDir> tmpdir;
     static void initMain()
     {
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
         tmpdir = std::make_unique<QTemporaryDir>();
         qputenv("GNUPGHOME", tmpdir->path().toLocal8Bit().data());
         GpgME::initializeLibrary();
@@ -141,7 +142,7 @@ std::unique_ptr<QTemporaryDir> TestSignatureBasicsPgpSignature::tmpdir;
 
 void TestSignatureBasicsPgpSignature::init()
 {
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
     CryptoSign::Factory::setPreferredBackend(backend);
     QCOMPARE(CryptoSign::Factory::getActive(), backend);
@@ -153,17 +154,17 @@ void TestSignatureBasicsPgpSignature::initTestCase_data()
 {
     QTest::addColumn<CryptoSign::Backend::Type>("backend");
 
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     const auto availableBackends = CryptoSign::Factory::getAvailable();
 
-#    ifdef ENABLE_NSS3
+#    if ENABLE_NSS3
     if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
         QTest::addRow("nss") << CryptoSign::Backend::Type::NSS3;
     } else {
         QWARN("Compiled with NSS3, but NSS not functional");
     }
 #    endif
-#    ifdef ENABLE_GPGME
+#    if ENABLE_GPGME
     if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::GPGME) != availableBackends.end()) {
         QTest::addRow("gpg") << CryptoSign::Backend::Type::GPGME;
     } else {
@@ -176,7 +177,7 @@ void TestSignatureBasicsPgpSignature::initTestCase_data()
 void TestSignatureBasicsPgpSignature::testPgp()
 {
     std::optional<CryptoSign::Backend::Type> usedBackend;
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
     usedBackend = backend;
     if (backend == CryptoSign::Backend::Type::GPGME) {

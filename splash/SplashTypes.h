@@ -34,7 +34,7 @@
 // coordinates
 //------------------------------------------------------------------------
 
-#if defined(USE_FLOAT)
+#if USE_FLOAT
 typedef float SplashCoord;
 #else
 typedef double SplashCoord;

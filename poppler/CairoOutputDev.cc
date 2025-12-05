@@ -2669,7 +2669,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
                 dest[i] = 0;
             }
             if (!(pix[x] ^ invert_bit)) {
-#ifdef WORDS_BIGENDIAN
+#if WORDS_BIGENDIAN
                 dest[i] |= (1 << (7 - bit));
 #else
                 dest[i] |= (1 << bit);

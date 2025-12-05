@@ -31,13 +31,13 @@
 
 #include <config.h>
 #include "goo/ImgWriter.h"
-#if defined(ENABLE_LIBPNG)
+#if ENABLE_LIBPNG
 #    include "goo/PNGWriter.h"
 #endif
-#if defined(ENABLE_LIBJPEG)
+#if ENABLE_LIBJPEG
 #    include "goo/JpegWriter.h"
 #endif
-#if defined(ENABLE_LIBTIFF)
+#if ENABLE_LIBTIFF
 #    include "goo/TiffWriter.h"
 #endif
 #include "goo/NetPBMWriter.h"
@@ -343,17 +343,17 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     const int actual_dpi = dpi == -1 ? 75 : dpi;
     if (false) {
     }
-#if defined(ENABLE_LIBPNG)
+#if ENABLE_LIBPNG
     else if (fmt == "png") {
         w = std::make_unique<PNGWriter>();
     }
 #endif
-#if defined(ENABLE_LIBJPEG)
+#if ENABLE_LIBJPEG
     else if (fmt == "jpeg" || fmt == "jpg") {
         w = std::make_unique<JpegWriter>();
     }
 #endif
-#if defined(ENABLE_LIBTIFF)
+#if ENABLE_LIBTIFF
     else if (fmt == "tiff") {
         w = std::make_unique<TiffWriter>();
     }
@@ -457,14 +457,14 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
 std::vector<std::string> image::supported_image_formats()
 {
     std::vector<std::string> formats;
-#if defined(ENABLE_LIBPNG)
+#if ENABLE_LIBPNG
     formats.emplace_back("png");
 #endif
-#if defined(ENABLE_LIBJPEG)
+#if ENABLE_LIBJPEG
     formats.emplace_back("jpeg");
     formats.emplace_back("jpg");
 #endif
-#if defined(ENABLE_LIBTIFF)
+#if ENABLE_LIBTIFF
     formats.emplace_back("tiff");
 #endif
     formats.emplace_back("pnm");

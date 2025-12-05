@@ -19,7 +19,7 @@
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
 
 #    include "ImgWriter.h"
 

@@ -16,7 +16,7 @@
 
 #include "PNGWriter.h"
 
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
 
 #    include <zlib.h>
 #    include <cstdlib>

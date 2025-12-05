@@ -17,7 +17,7 @@
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
 
 #    include <sys/types.h>
 #    include "ImgWriter.h"

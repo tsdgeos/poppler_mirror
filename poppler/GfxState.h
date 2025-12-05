@@ -225,7 +225,7 @@ enum GfxColorSpaceMode
 // to ensure that the resources are properly released after usage.
 typedef std::shared_ptr<void> GfxLCMSProfilePtr;
 
-#ifdef USE_CMS
+#if USE_CMS
 GfxLCMSProfilePtr POPPLER_PRIVATE_EXPORT make_GfxLCMSProfilePtr(void *profile);
 #endif
 
@@ -390,7 +390,7 @@ private:
     double blackX, blackY, blackZ; // black point
     double gamma; // gamma value
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
-#ifdef USE_CMS
+#if USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
@@ -490,7 +490,7 @@ private:
     double gammaR, gammaG, gammaB; // gamma values
     std::array<double, 9> mat; // ABC -> XYZ transform matrix
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
-#ifdef USE_CMS
+#if USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
@@ -568,7 +568,7 @@ private:
     double blackX, blackY, blackZ; // black point
     double aMin, aMax, bMin, bMax; // range for the a and b components
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
-#ifdef USE_CMS
+#if USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
@@ -612,7 +612,7 @@ public:
     // ICCBased-specific access.
     GfxColorSpace *getAlt() { return alt.get(); }
     Ref getRef() { return iccProfileStream; }
-#ifdef USE_CMS
+#if USE_CMS
     char *getPostScriptCSA();
     void buildTransforms(GfxState *state);
     void setProfile(GfxLCMSProfilePtr &profileA) { profile = profileA; }
@@ -625,7 +625,7 @@ private:
     double rangeMin[4]; // min values for each component
     double rangeMax[4]; // max values for each component
     Ref iccProfileStream; // the ICC profile
-#ifdef USE_CMS
+#if USE_CMS
     GfxLCMSProfilePtr profile;
     char *psCSA;
     int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
@@ -1427,7 +1427,7 @@ private:
 // GfxXYZ2DisplayTransforms
 //------------------------------------------------------------------------
 
-#ifdef USE_CMS
+#if USE_CMS
 
 class POPPLER_PRIVATE_EXPORT GfxXYZ2DisplayTransforms
 {
@@ -1694,7 +1694,7 @@ public:
     void setRender(int renderA) { render = renderA; }
     void setRenderingIntent(const char *intent) { strncpy(renderingIntent, intent, 31); }
 
-#ifdef USE_CMS
+#if USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &localDisplayProfileA);
     GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
     void setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms);
@@ -1832,7 +1832,7 @@ private:
 
     GfxState(const GfxState *state, bool copyPath);
 
-#ifdef USE_CMS
+#if USE_CMS
     GfxLCMSProfilePtr localDisplayProfile;
     std::shared_ptr<GfxXYZ2DisplayTransforms> XYZ2DisplayTransforms;
 #endif

@@ -1,82 +1,66 @@
 /* config.h.  Generated from config.h.cmake by cmake.  */
 
-/* Build against libcurl. */
-#cmakedefine ENABLE_LIBCURL 1
+#include "poppler-config.h"
 
-/* Use libjpeg instead of builtin jpeg decoder. */
-#cmakedefine ENABLE_LIBJPEG 1
+/* Build against libcurl. */
+#cmakedefine01 ENABLE_LIBCURL
 
 /* Use libopenjpeg instead of builtin jpeg2000 decoder. */
-#cmakedefine ENABLE_LIBOPENJPEG 1
-
-/* Build against libtiff. */
-#cmakedefine ENABLE_LIBTIFF 1
-
-/* Build against libpng. */
-#cmakedefine ENABLE_LIBPNG 1
+#cmakedefine01 ENABLE_LIBOPENJPEG
 
 /* Do not hardcode the library location */
-#cmakedefine ENABLE_RELOCATABLE 1
-
-/* Use zlib instead of builtin zlib decoder to uncompress flate streams. */
-#cmakedefine ENABLE_ZLIB_UNCOMPRESS 1
+#cmakedefine01 ENABLE_RELOCATABLE
 
 /* Build against libnss3 for digital signature validation */
-#cmakedefine ENABLE_NSS3 1
+#cmakedefine01 ENABLE_NSS3
 
 /* Build against libgpgme for digital signature validation */
-#cmakedefine ENABLE_GPGME 1
+#cmakedefine01 ENABLE_GPGME
 
 /* Enable pgp signatures in GPG backend by default */
-#cmakedefine ENABLE_PGP_SIGNATURES 1
+#cmakedefine01 ENABLE_PGP_SIGNATURES
 
 /* Signatures enabled */
-#cmakedefine ENABLE_SIGNATURES 1
+#cmakedefine01 ENABLE_SIGNATURES
 
 /* Default signature backend */
 #cmakedefine DEFAULT_SIGNATURE_BACKEND "${DEFAULT_SIGNATURE_BACKEND}"
 
-/* Use cairo for rendering. */
-#cmakedefine HAVE_CAIRO 1
-
 /* Do we have any DCT decoder?. */
-#cmakedefine HAVE_DCT_DECODER 1
+#cmakedefine01 HAVE_DCT_DECODER
 
 /* Do we have any JPX decoder?. */
-#cmakedefine HAVE_JPX_DECODER 1
+#cmakedefine01 HAVE_JPX_DECODER
 
 /* Define to 1 if you have the `fseek64' function. */
-#cmakedefine HAVE_FSEEK64 1
+#cmakedefine01 HAVE_FSEEK64
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
-#cmakedefine HAVE_FSEEKO 1
+#cmakedefine01 HAVE_FSEEKO
 
 /* Define to 1 if you have the `pread64' function. */
-#cmakedefine HAVE_PREAD64 1
+#cmakedefine01 HAVE_PREAD64
 
 /* Define to 1 if you have the `lseek64' function. */
-#cmakedefine HAVE_LSEEK64 1
+#cmakedefine01 HAVE_LSEEK64
 
 /* Defines if gmtime_r is available on your system */
-#cmakedefine HAVE_GMTIME_R 1
+#cmakedefine01 HAVE_GMTIME_R
 
 /* Defines if timegm is available on your system */
-#cmakedefine HAVE_TIMEGM 1
-
-/* Define to 1 if you have the `z' library (-lz). */
-#cmakedefine HAVE_LIBZ 1
+#cmakedefine01 HAVE_TIMEGM
 
 /* Defines if localtime_r is available on your system */
-#cmakedefine HAVE_LOCALTIME_R 1
+#cmakedefine01 HAVE_LOCALTIME_R
 
 /* Defines if strtok_r is available on your system */
-#cmakedefine HAVE_STRTOK_R 1
+#cmakedefine01 HAVE_STRTOK_R
 
 /* Define to 1 if you have the `popen' function. */
-#cmakedefine HAVE_POPEN 1
+#cmakedefine01 HAVE_POPEN
 
 /* Define to 1 if you have a big endian machine */
-#cmakedefine WORDS_BIGENDIAN 1
+#cmakedefine01 WORDS_BIGENDIAN
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST ${ICONV_CONST}
@@ -105,29 +89,17 @@
 /* Poppler data dir */
 #define POPPLER_DATADIR "${POPPLER_DATADIR}"
 
-/* Support for curl based doc builder is compiled in. */
-#cmakedefine POPPLER_HAS_CURL_SUPPORT 1
-
-/* Defines if use cms */
-#cmakedefine USE_CMS 1
-
-/* Use single precision arithmetic in the Splash backend */
-#cmakedefine USE_FLOAT 1
-
 /* Version number of package */
 #define VERSION "${POPPLER_VERSION}"
 
 /* Use fontconfig font configuration backend */
-#cmakedefine WITH_FONTCONFIGURATION_FONTCONFIG 1
+#cmakedefine01 WITH_FONTCONFIGURATION_FONTCONFIG
 
 /* Use win32 font configuration backend */
-#cmakedefine WITH_FONTCONFIGURATION_WIN32 1
+#cmakedefine01 WITH_FONTCONFIGURATION_WIN32
 
 /* Use android font configuration backend */
-#cmakedefine WITH_FONTCONFIGURATION_ANDROID 1
-
-/* OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag */
-#cmakedefine WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG 1
+#cmakedefine01 WITH_FONTCONFIGURATION_ANDROID
 
 /* MS defined snprintf as deprecated but then added it in Visual Studio 2015. */
 #if defined(_MSC_VER) && _MSC_VER < 1900

@@ -287,9 +287,9 @@ char *getLine(char *buf, int size, FILE *f)
 
 int Gfseek(FILE *f, Goffset offset, int whence)
 {
-#if defined(HAVE_FSEEKO)
+#if HAVE_FSEEKO
     return fseeko(f, offset, whence);
-#elif defined(HAVE_FSEEK64)
+#elif HAVE_FSEEK64
     return fseek64(f, offset, whence);
 #elif defined(__MINGW32__)
     return fseeko64(f, offset, whence);
@@ -302,9 +302,9 @@ int Gfseek(FILE *f, Goffset offset, int whence)
 
 Goffset Gftell(FILE *f)
 {
-#if defined(HAVE_FSEEKO)
+#if HAVE_FSEEKO
     return ftello(f);
-#elif defined(HAVE_FSEEK64)
+#elif HAVE_FSEEK64
     return ftell64(f);
 #elif defined(__MINGW32__)
     return ftello64(f);
@@ -317,9 +317,9 @@ Goffset Gftell(FILE *f)
 
 Goffset GoffsetMax()
 {
-#if defined(HAVE_FSEEKO)
+#if HAVE_FSEEKO
     return (std::numeric_limits<off_t>::max)();
-#elif defined(HAVE_FSEEK64) || defined(__MINGW32__)
+#elif HAVE_FSEEK64 || defined(__MINGW32__)
     return (std::numeric_limits<off64_t>::max)();
 #elif defined(_WIN32)
     return (std::numeric_limits<__int64>::max)();
@@ -388,7 +388,7 @@ bool GooFile::modificationTimeChangedSinceOpen() const
 
 int GooFile::read(char *buf, int n, Goffset offset) const
 {
-#    ifdef HAVE_PREAD64
+#    if HAVE_PREAD64
     return pread64(fd, buf, n, offset);
 #    else
     return pread(fd, buf, n, offset);
@@ -397,7 +397,7 @@ int GooFile::read(char *buf, int n, Goffset offset) const
 
 Goffset GooFile::size() const
 {
-#    ifdef HAVE_LSEEK64
+#    if HAVE_LSEEK64
     return lseek64(fd, 0, SEEK_END);
 #    else
     return lseek(fd, 0, SEEK_END);

@@ -43,10 +43,10 @@
 #include "DateInfo.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
 #    include "NSSCryptoSignBackend.h"
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 #    include "GPGMECryptoSignBackendConfiguration.h"
 #endif
 #include "CryptoSignBackend.h"
@@ -190,7 +190,7 @@ static bool printVersion = false;
 static bool printHelp = false;
 static bool printCryptoSignBackends = false;
 static bool dontVerifyCert = false;
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 static bool allowPgp = GpgSignatureConfiguration::arePgpSignaturesAllowed();
 #else
 static bool allowPgp = false;
@@ -276,7 +276,7 @@ static void print_backends()
 
 static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     bool wrongPassword = false;
     bool passwordNeeded = false;
     auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
@@ -302,7 +302,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         return {};
     }
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
@@ -403,10 +403,10 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSDir(nssDir);
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     GpgSignatureConfiguration::setPgpSignaturesAllowed(allowPgp);
 #else
     if (allowPgp) {

@@ -562,7 +562,7 @@ SignatureValidationStatus GpgSignatureVerification::validateSignature()
     }
 }
 
-#ifdef ENABLE_PGP_SIGNATURES
+#if ENABLE_PGP_SIGNATURES
 bool GpgSignatureConfiguration::allowPgp = true;
 #else
 bool GpgSignatureConfiguration::allowPgp = false;

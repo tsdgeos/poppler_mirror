@@ -18,7 +18,7 @@
 #include <cctype>
 #include "sanitychecks.h"
 
-#ifdef USE_CMS
+#if USE_CMS
 bool checkICCProfile(const GfxLCMSProfilePtr &profile, const char *filename, cmsUInt32Number UsedDirection, cmsColorSpaceSignature expectedColorSpace)
 {
     if (!profile) {

@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 // Simple tests of reading signatures
@@ -79,7 +80,7 @@ void TestSignWithGnupgPgp::initTestCase_data()
 
     const auto availableBackends = CryptoSign::Factory::getAvailable();
 
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
         QTest::newRow("nss") << CryptoSign::Backend::Type::NSS3;
     } else {

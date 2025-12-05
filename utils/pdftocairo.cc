@@ -73,7 +73,7 @@
 #include "CairoOutputDev.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
-#ifdef USE_CMS
+#if USE_CMS
 #    include <lcms2.h>
 #endif
 #include <cairo.h>
@@ -154,14 +154,14 @@ static bool setupdlg = false;
 #endif
 
 static const ArgDesc argDesc[] = {
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
     { "-png", argFlag, &png, 0, "generate a PNG file" },
 #endif
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
     { "-jpeg", argFlag, &jpeg, 0, "generate a JPEG file" },
     { "-jpegopt", argGooString, &jpegOpt, 0, "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
 #endif
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
     { "-tiff", argFlag, &tiff, 0, "generate a TIFF file" },
     { "-tiffcompression", argString, tiffCompressionStr, sizeof(tiffCompressionStr), "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
 #endif
@@ -207,7 +207,7 @@ static const ArgDesc argDesc[] = {
     { "-gray", argFlag, &gray, 0, "generate a grayscale image file (PNG, JPEG)" },
     { "-transp", argFlag, &transp, 0, "use a transparent background instead of white (PNG)" },
     { "-antialias", argGooString, &antialias, 0, "set cairo antialias option" },
-#ifdef USE_CMS
+#if USE_CMS
     { "-icc", argGooString, &icc, 0, "ICC color profile to use" },
 #endif
 
@@ -245,7 +245,7 @@ static FILE *output_file;
 static bool usePDFPageSize;
 static cairo_antialias_t antialiasEnum = CAIRO_ANTIALIAS_DEFAULT;
 
-#ifdef USE_CMS
+#if USE_CMS
 static unsigned char *icc_data;
 static int icc_data_size;
 static GfxLCMSProfilePtr profile;
@@ -350,7 +350,7 @@ static void writePageImage(GooString *filename)
     unsigned char *data;
 
     if (png) {
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
         if (transp) {
             writer = new PNGWriter(PNGWriter::RGBA);
         } else if (gray) {
@@ -361,7 +361,7 @@ static void writePageImage(GooString *filename)
             writer = new PNGWriter(PNGWriter::RGB);
         }
 
-#    ifdef USE_CMS
+#    if USE_CMS
         if (icc_data) {
             cmsUInt8Number profileID[17];
             profileID[16] = '\0';
@@ -375,7 +375,7 @@ static void writePageImage(GooString *filename)
 #endif
 
     } else if (jpeg) {
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
         if (gray) {
             writer = new JpegWriter(JpegWriter::GRAY);
         } else {
@@ -389,7 +389,7 @@ static void writePageImage(GooString *filename)
         }
 #endif
     } else if (tiff) {
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
         if (transp) {
             writer = new TiffWriter(TiffWriter::RGBA_PREMULTIPLIED);
         } else if (gray) {
@@ -1105,7 +1105,7 @@ int main(int argc, char *argv[])
 
     outputFileName = getOutputFileName(fileName, outputName);
 
-#ifdef USE_CMS
+#if USE_CMS
     icc_data = nullptr;
     if (icc.c_str()[0]) {
         FILE *file = fopen(icc.c_str(), "rb");
@@ -1206,7 +1206,7 @@ int main(int argc, char *argv[])
     cairoOut = new CairoOutputDev();
     cairoOut->setLogicalStructure(docStruct);
 
-#ifdef USE_CMS
+#if USE_CMS
     cairoOut->setDisplayProfile(profile);
 #endif
     cairoOut->startDoc(doc.get());
@@ -1280,7 +1280,7 @@ int main(int argc, char *argv[])
     delete fileName;
     delete outputName;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (icc_data) {
         gfree(icc_data);
     }

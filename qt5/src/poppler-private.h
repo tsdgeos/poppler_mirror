@@ -178,7 +178,7 @@ public:
     QPointer<OptContentModel> m_optContentModel;
     QColor paperColor;
     int m_hints;
-#ifdef USE_CMS
+#if USE_CMS
     GfxLCMSProfilePtr m_sRGBProfile;
     GfxLCMSProfilePtr m_displayProfile;
 #endif

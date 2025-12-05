@@ -15,14 +15,14 @@
 #include <config.h>
 
 #include <memory>
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 #    include <cstdio>
 extern "C" {
 #    include <jpeglib.h>
 }
 #    include <csetjmp>
 #endif
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
 #    include <png.h>
 #endif
 
@@ -84,7 +84,7 @@ public:
 
 ImageEmbedder::~ImageEmbedder() { }
 
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
 // Transforms a PNG image to XObject.
 class PngEmbedder : public ImageEmbedder
 {
@@ -298,7 +298,7 @@ Ref PngEmbedder::embedImage(XRef *xref)
 }
 #endif
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 
 struct JpegErrorManager
 {
@@ -395,13 +395,13 @@ Ref embed(XRef *xref, const GooFile &imageFile)
 
     std::unique_ptr<ImageEmbedder> embedder;
     if (checkMagicNum(fileContent.data(), PNG_MAGIC_NUM, sizeof(PNG_MAGIC_NUM))) {
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
         embedder = PngEmbedder::create(std::move(fileContent));
 #else
         error(errUnimplemented, -1, "PNG format is not supported");
 #endif
     } else if (checkMagicNum(fileContent.data(), JPEG_MAGIC_NUM, sizeof(JPEG_MAGIC_NUM))) {
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
         embedder = JpegEmbedder::create(std::move(fileContent));
 #else
         error(errUnimplemented, -1, "JPEG format is not supported");

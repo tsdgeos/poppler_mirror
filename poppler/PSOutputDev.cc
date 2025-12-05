@@ -72,7 +72,7 @@
 #include "Page.h"
 #include "Stream.h"
 #include "FlateEncoder.h"
-#ifdef ENABLE_ZLIB_UNCOMPRESS
+#if ENABLE_ZLIB_UNCOMPRESS
 #    include "FlateStream.h"
 #endif
 #include "Annot.h"
@@ -87,7 +87,7 @@
 #include "PDFDoc.h"
 #include "UTF.h"
 
-#ifdef USE_CMS
+#if USE_CMS
 #    include <lcms2.h>
 #endif
 
@@ -1097,7 +1097,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
         f = stdout;
     } else if (fileName[0] == '|') {
         fileTypeA = psPipe;
-#ifdef HAVE_POPEN
+#if HAVE_POPEN
 #    ifndef _WIN32
         signal(SIGPIPE, (SignalFunc)SIG_IGN);
 #    endif
@@ -1404,7 +1404,7 @@ void PSOutputDev::postInit()
         } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || overprintPreview) {
             processColorFormat = splashModeCMYK8;
         }
-#ifdef USE_CMS
+#if USE_CMS
         else if (getDisplayProfile()) {
             auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
             if (processcolorspace == cmsSigCmykData) {
@@ -1433,7 +1433,7 @@ void PSOutputDev::postInit()
               " Resetting processColorFormat to CMYK8.");
         processColorFormat = splashModeCMYK8;
     }
-#ifdef USE_CMS
+#if USE_CMS
     if (getDisplayProfile()) {
         auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
         if (processColorFormat == splashModeCMYK8) {
@@ -1500,7 +1500,7 @@ PSOutputDev::~PSOutputDev()
         if (fileType == psFile) {
             fclose((FILE *)outputStream);
         }
-#ifdef HAVE_POPEN
+#if HAVE_POPEN
         else if (fileType == psPipe) {
             pclose((FILE *)outputStream);
 #    ifndef _WIN32
@@ -3098,7 +3098,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     splashOut = new SplashOutputDev(internalColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
-#ifdef USE_CMS
+#if USE_CMS
     splashOut->setDisplayProfile(getDisplayProfile());
     splashOut->setDefaultGrayProfile(getDefaultGrayProfile());
     splashOut->setDefaultRGBProfile(getDefaultRGBProfile());
@@ -6501,7 +6501,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
         break;
 
     case csICCBased:
-#ifdef USE_CMS
+#if USE_CMS
     {
         GfxICCBasedColorSpace *iccBasedCS;
         iccBasedCS = (GfxICCBasedColorSpace *)colorSpace;

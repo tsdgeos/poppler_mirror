@@ -29,50 +29,32 @@
 #ifndef POPPLER_CONFIG_H
 #define POPPLER_CONFIG_H
 
-// We duplicate some of the config.h #define's here since they are
-// used in some of the header files we install.  The #ifndef/#endif
-// around #undef look odd, but it's to silence warnings about
-// redefining those symbols.
-
 /* Defines the poppler version. */
-#ifndef POPPLER_VERSION
 #define POPPLER_VERSION "${POPPLER_VERSION}"
-#endif
 
 /* Use single precision arithmetic in the Splash backend */
-#ifndef USE_FLOAT
-#cmakedefine USE_FLOAT 1
-#endif
+#cmakedefine01 USE_FLOAT
 
 /* Support for curl is compiled in. */
-#ifndef POPPLER_HAS_CURL_SUPPORT
-#cmakedefine POPPLER_HAS_CURL_SUPPORT 1
-#endif
+#cmakedefine01 POPPLER_HAS_CURL_SUPPORT
 
 /* Use libjpeg instead of builtin jpeg decoder. */
-#ifndef ENABLE_LIBJPEG
-#cmakedefine ENABLE_LIBJPEG 1
-#endif
+#cmakedefine01 ENABLE_LIBJPEG
 
 /* Build against libtiff. */
-#ifndef ENABLE_LIBTIFF
-#cmakedefine ENABLE_LIBTIFF 1
-#endif
+#cmakedefine01 ENABLE_LIBTIFF
 
 /* Build against libpng. */
-#ifndef ENABLE_LIBPNG
-#cmakedefine ENABLE_LIBPNG 1
-#endif
+#cmakedefine01 ENABLE_LIBPNG
+
+/* Use zlib instead of builtin zlib decoder to uncompress flate streams. */
+#cmakedefine01 ENABLE_ZLIB_UNCOMPRESS
 
 /* Defines if use cms */
-#ifndef USE_CMS
-#cmakedefine USE_CMS 1
-#endif
+#cmakedefine01 USE_CMS
 
 /* Use header-only classes from Boost in the Splash backend */
-#ifndef USE_BOOST_HEADERS
-#cmakedefine USE_BOOST_HEADERS 1
-#endif
+#cmakedefine01 USE_BOOST_HEADERS
 
 //------------------------------------------------------------------------
 // version

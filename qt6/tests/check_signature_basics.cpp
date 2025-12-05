@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 
 // Simple tests of reading signatures
@@ -50,7 +51,7 @@ std::unique_ptr<QTemporaryDir> TestSignatureBasics::tmpdir;
 
 void TestSignatureBasics::init()
 {
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);
     CryptoSign::Factory::setPreferredBackend(backend);
     QCOMPARE(CryptoSign::Factory::getActive(), backend);
@@ -67,23 +68,23 @@ void TestSignatureBasics::init()
 void TestSignatureBasics::initTestCase_data()
 {
 
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     const auto availableBackends = CryptoSign::Factory::getAvailable();
     QTest::addColumn<CryptoSign::Backend::Type>("backend");
 #endif
     QTest::addColumn<std::string>("filename");
 
     for (auto document : { TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs.pdf", TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs-randompadded.pdf" }) {
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
 
-#    ifdef ENABLE_NSS3
+#    if ENABLE_NSS3
         if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::NSS3) != availableBackends.end()) {
             QTest::addRow("nss %s", document) << CryptoSign::Backend::Type::NSS3 << std::string { document };
         } else {
             QWARN("Compiled with NSS3, but NSS not functional");
         }
 #    endif
-#    ifdef ENABLE_GPGME
+#    if ENABLE_GPGME
         if (std::ranges::find(availableBackends, CryptoSign::Backend::Type::GPGME) != availableBackends.end()) {
             QTest::addRow("gpg %s", document) << CryptoSign::Backend::Type::GPGME << std::string { document };
         } else {
@@ -132,7 +133,7 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(signatureFields[0]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
     auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[0]->validateSignatureResult();
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     QCOMPARE(siginfo0->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo0->getHashAlgorithm(), HashAlgorithm::Sha256);
     QCOMPARE(siginfo0->getCertificateInfo()->getPublicKeyInfo().publicKeyStrength, 2048 / 8);
@@ -146,7 +147,7 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(signatureFields[1]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
     auto siginfo1 = signatureFields[1]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[1]->validateSignatureResult();
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     QCOMPARE(siginfo1->getSignerName(), std::string { "Koch, Werner" });
     QCOMPARE(siginfo1->getHashAlgorithm(), HashAlgorithm::Sha256);
     QFETCH_GLOBAL(CryptoSign::Backend::Type, backend);

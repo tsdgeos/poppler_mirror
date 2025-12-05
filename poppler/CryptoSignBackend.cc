@@ -5,14 +5,14 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2023, 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
-// Copyright 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2024, 2025 Albert Astals Cid <aacid@kde.org>
 //========================================================================
 #include "CryptoSignBackend.h"
 #include "config.h"
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 #    include "GPGMECryptoSignBackend.h"
 #endif
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
 #    include "NSSCryptoSignBackend.h"
 #endif
 
@@ -96,10 +96,10 @@ std::optional<CryptoSign::Backend::Type> Factory::getActive()
 static std::vector<Backend::Type> createAvailableBackends()
 {
     std::vector<Backend::Type> backends;
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     backends.push_back(Backend::Type::NSS3);
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     if (GpgSignatureBackend::hasSufficientVersion()) {
         backends.push_back(Backend::Type::GPGME);
     }
@@ -123,13 +123,13 @@ std::unique_ptr<CryptoSign::Backend> CryptoSign::Factory::create(Backend::Type b
 {
     switch (backend) {
     case Backend::Type::NSS3:
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
         return std::make_unique<NSSCryptoSignBackend>();
 #else
         return nullptr;
 #endif
     case Backend::Type::GPGME: {
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
         return std::make_unique<GpgSignatureBackend>();
 #else
         return nullptr;

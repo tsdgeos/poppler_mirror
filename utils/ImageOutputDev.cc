@@ -634,7 +634,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
     } else if (outputPNG && !(outputTiff && colorMap && (colorMap->getColorSpace()->getMode() == csDeviceCMYK || (colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 4)))) {
         // output in PNG format
 
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
         ImgWriter *writer;
 
         if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
@@ -659,7 +659,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
     } else if (outputTiff) {
         // output in TIFF format
 
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
         ImgWriter *writer;
 
         if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {

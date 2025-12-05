@@ -1278,7 +1278,7 @@ std::unique_ptr<LinkAction> Catalog::getOpenAction() const
     return {};
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 
 #    include <lcms2.h>
 

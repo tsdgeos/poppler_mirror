@@ -74,10 +74,10 @@ static bool printHelp = false;
 
 static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
                                    { "-l", argInt, &lastPage, 0, "last page to convert" },
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
                                    { "-png", argFlag, &enablePNG, 0, "change the default output format to PNG" },
 #endif
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
                                    { "-tiff", argFlag, &enableTiff, 0, "change the default output format to TIFF" },
 #endif
                                    { "-j", argFlag, &dumpJPEG, 0, "write JPEG images as JPEG files" },

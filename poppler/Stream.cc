@@ -73,15 +73,15 @@
 
 #include "splash/SplashBitmap.h"
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 #    include "DCTStream.h"
 #endif
 
-#ifdef ENABLE_ZLIB_UNCOMPRESS
+#if ENABLE_ZLIB_UNCOMPRESS
 #    include "FlateStream.h"
 #endif
 
-#ifdef ENABLE_LIBOPENJPEG
+#if ENABLE_LIBOPENJPEG
 #    include "JPEG2000Stream.h"
 #else
 #    include "JPXStream.h"
@@ -343,7 +343,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
         str = new CCITTFaxStream(str, encoding, endOfLine, byteAlign, columns, rows, endOfBlock, black, damagedRowsBeforeError);
     } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
-#ifdef HAVE_DCT_DECODER
+#if HAVE_DCT_DECODER
         int colorXform = -1;
         if (params->isDict()) {
             obj = params->dictLookup("ColorTransform", recursion);
@@ -389,7 +389,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
         str = new JBIG2Stream(str, std::move(globals), &obj);
     } else if (!strcmp(name, "JPXDecode")) {
-#ifdef HAVE_JPX_DECODER
+#if HAVE_JPX_DECODER
         str = new JPXStream(str);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
@@ -2611,7 +2611,7 @@ bool CCITTFaxStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-#ifndef ENABLE_LIBJPEG
+#if !ENABLE_LIBJPEG
 
 //------------------------------------------------------------------------
 // DCTStream
@@ -4082,7 +4082,7 @@ bool DCTStream::isBinary(bool last) const
 
 #endif
 
-#ifndef ENABLE_ZLIB_UNCOMPRESS
+#if !ENABLE_ZLIB_UNCOMPRESS
 //------------------------------------------------------------------------
 // FlateStream
 //------------------------------------------------------------------------

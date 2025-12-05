@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2014, 2018, 2019, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2014, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013, 2014, 2021 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -307,7 +307,7 @@ inline void SplashXPathScanner::addIntersection(double segYMin, int y, int x0, i
 
     auto &line = allIntersections[y - yMin];
     if (line.empty()) {
-#ifndef USE_BOOST_HEADERS
+#if !USE_BOOST_HEADERS
         line.reserve(4);
 #endif
         line.push_back(intersect);

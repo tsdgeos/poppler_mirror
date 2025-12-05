@@ -13,7 +13,7 @@
 
 #include "glibc.h"
 
-#ifndef HAVE_GMTIME_R
+#if !HAVE_GMTIME_R
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
 {
     struct tm *gt;
@@ -24,7 +24,7 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result)
 }
 #endif
 
-#ifndef HAVE_LOCALTIME_R
+#if !HAVE_LOCALTIME_R
 struct tm *localtime_r(const time_t *timep, struct tm *result)
 {
     struct tm *lt;
@@ -34,7 +34,7 @@ struct tm *localtime_r(const time_t *timep, struct tm *result)
 }
 #endif
 
-#ifndef HAVE_TIMEGM
+#if !HAVE_TIMEGM
 // Get offset of local time from UTC in seconds. DST is ignored.
 static time_t getLocalTimeZoneOffset()
 {

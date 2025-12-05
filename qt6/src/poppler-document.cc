@@ -64,7 +64,7 @@
 #include "poppler-page-private.h"
 #include "poppler-outline-private.h"
 
-#if defined(USE_CMS)
+#if USE_CMS
 #    include <lcms2.h>
 #endif
 
@@ -611,7 +611,7 @@ void Document::setPaperColor(const QColor &color)
 
 void Document::setColorDisplayProfile(void *outputProfileA)
 {
-#if defined(USE_CMS)
+#if USE_CMS
     if (m_doc->m_sRGBProfile && m_doc->m_sRGBProfile.get() == outputProfileA) {
         // Catch the special case that the user passes the sRGB profile
         m_doc->m_displayProfile = m_doc->m_sRGBProfile;
@@ -629,7 +629,7 @@ void Document::setColorDisplayProfile(void *outputProfileA)
 
 void Document::setColorDisplayProfileName(const QString &name)
 {
-#if defined(USE_CMS)
+#if USE_CMS
     void *rawprofile = cmsOpenProfileFromFile(name.toLocal8Bit().constData(), "r");
     m_doc->m_displayProfile = make_GfxLCMSProfilePtr(rawprofile);
 #else
@@ -639,7 +639,7 @@ void Document::setColorDisplayProfileName(const QString &name)
 
 void *Document::colorRgbProfile() const
 {
-#if defined(USE_CMS)
+#if USE_CMS
     if (!m_doc->m_sRGBProfile) {
         m_doc->m_sRGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
     }
@@ -651,7 +651,7 @@ void *Document::colorRgbProfile() const
 
 void *Document::colorDisplayProfile() const
 {
-#if defined(USE_CMS)
+#if USE_CMS
     return m_doc->m_displayProfile.get();
 #else
     return nullptr;
@@ -916,7 +916,7 @@ QDateTime convertDate(const char *dateString)
 
 bool isCmsAvailable()
 {
-#if defined(USE_CMS)
+#if USE_CMS
     return true;
 #else
     return false;

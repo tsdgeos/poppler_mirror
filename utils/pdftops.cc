@@ -59,7 +59,7 @@
 #include "Win32Console.h"
 #include "sanitychecks.h"
 
-#ifdef USE_CMS
+#if USE_CMS
 #    include <lcms2.h>
 #endif
 
@@ -126,7 +126,7 @@ static bool overprint = false;
 static GooString processcolorformatname;
 static SplashColorMode processcolorformat;
 static bool processcolorformatspecified = false;
-#ifdef USE_CMS
+#if USE_CMS
 static GooString processcolorprofilename;
 static GfxLCMSProfilePtr processcolorprofile;
 static GooString defaultgrayprofilename;
@@ -159,7 +159,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-aaRaster", argString, rasterAntialiasStr, sizeof(rasterAntialiasStr), "enable anti-aliasing on rasterization: yes, no" },
                                    { "-rasterize", argString, forceRasterizeStr, sizeof(forceRasterizeStr), "control rasterization: always, never, whenneeded" },
                                    { "-processcolorformat", argGooString, &processcolorformatname, 0, "color format that is used during rasterization and transparency reduction: MONO8, RGB8, CMYK8" },
-#ifdef USE_CMS
+#if USE_CMS
                                    { "-processcolorprofile", argGooString, &processcolorprofilename, 0, "ICC color profile to use as the process color profile during rasterization and transparency reduction" },
                                    { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
                                    { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     int exitCode;
     bool rasterAntialias = false;
     std::vector<int> pages;
-#ifdef USE_CMS
+#if USE_CMS
     cmsColorSpaceSignature profilecolorspace;
 #endif
 
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
         }
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     if (!processcolorprofilename.toStr().empty()) {
         processcolorprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(processcolorprofilename.c_str(), "r"));
         if (!processcolorprofile) {
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
         }
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     if (!defaultgrayprofilename.toStr().empty()) {
         defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
         if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
@@ -467,7 +467,7 @@ int main(int argc, char *argv[])
     if (processcolorformatspecified) {
         psOut->setProcessColorFormat(processcolorformat);
     }
-#ifdef USE_CMS
+#if USE_CMS
     psOut->setDisplayProfile(processcolorprofile);
     psOut->setDefaultGrayProfile(defaultgrayprofile);
     psOut->setDefaultRGBProfile(defaultrgbprofile);

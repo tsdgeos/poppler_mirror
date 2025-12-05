@@ -59,7 +59,7 @@
 
 #include "glibc.h"
 
-#ifndef HAVE_STRTOK_R
+#if !HAVE_STRTOK_R
 
 #    include <cstring>
 

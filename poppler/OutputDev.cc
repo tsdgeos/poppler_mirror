@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------
 
 OutputDev::OutputDev()
-#ifdef USE_CMS
+#if USE_CMS
     : iccColorSpaceCache(5)
 #endif
 {

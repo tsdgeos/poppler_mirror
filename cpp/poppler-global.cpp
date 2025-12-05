@@ -226,7 +226,7 @@ byte_array ustring::to_utf8() const
         return byte_array();
     }
 
-#ifdef WORDS_BIGENDIAN
+#if WORDS_BIGENDIAN
     MiniIconv ic("UTF-8", "UTF-16BE");
 #else
     MiniIconv ic("UTF-8", "UTF-16LE");
@@ -278,7 +278,7 @@ ustring ustring::from_utf8(const char *str, int len)
         }
     }
 
-#ifdef WORDS_BIGENDIAN
+#if WORDS_BIGENDIAN
     MiniIconv ic("UTF-16BE", "UTF-8");
 #else
     MiniIconv ic("UTF-16LE", "UTF-8");
