@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -25,9 +25,6 @@
 #include <config.h>
 
 #include <cstdio>
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#endif
 #include "SplashFontFile.h"
 #include "SplashFontFileID.h"
 

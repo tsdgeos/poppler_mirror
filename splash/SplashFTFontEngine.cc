@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009, 2011, 2012, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -27,9 +27,6 @@
 #include <config.h>
 
 #include <cstdio>
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#endif
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"

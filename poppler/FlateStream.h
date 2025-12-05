@@ -3,7 +3,7 @@
 // FlateStream.h
 //
 // Copyright (C) 2005, Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2010, 2011, 2019, 2021, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -18,9 +18,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstddef>
-#ifdef HAVE_UNISTD_H
-#    include <unistd.h>
-#endif
 #include <cstring>
 #include <cctype>
 #include "goo/gmem.h"

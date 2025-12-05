@@ -19,8 +19,6 @@ if (_FILE_OFFSET_BITS)
   set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -D_FILE_OFFSET_BITS=${_FILE_OFFSET_BITS})
 endif()
 
-check_include_files(unistd.h HAVE_UNISTD_H)
-
 check_function_exists(fseek64 HAVE_FSEEK64)
 check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
 check_function_exists(pread64 HAVE_PREAD64)
