@@ -140,7 +140,6 @@ else()
 endif()
 
 # Enable these unconditionally.
-set(OPI_SUPPORT ON)
 set(TEXTOUT_WORD_LIST ON)
 
 # setting the minimum required versions for some components

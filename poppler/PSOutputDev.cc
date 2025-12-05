@@ -1265,11 +1265,9 @@ void PSOutputDev::init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileTy
     inUncoloredPattern = false;
     t3FillColorOnly = false;
 
-#ifdef OPI_SUPPORT
     // initialize OPI nesting levels
     opi13Nest = 0;
     opi20Nest = 0;
-#endif
 
     tx0 = ty0 = -1;
     xScale0 = yScale0 = 0;
@@ -1729,11 +1727,9 @@ void PSOutputDev::writeDocSetup(Catalog *catalog, const std::vector<int> &pageLi
                 writePSFmt("{0:d} {1:d} pdfSetupPaper\n", paperWidth, paperHeight);
             }
         }
-#ifdef OPI_SUPPORT
         if (generateOPI) {
             writePS("/opiMatrix matrix currentmatrix def\n");
         }
-#endif
     }
     if (customCodeCbk) {
         if ((s = (*customCodeCbk)(this, psOutCustomDocSetup, 0, customCodeCbkData))) {
@@ -5944,7 +5940,6 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
 
         // end of image dictionary
         writePS(">>\n");
-#ifdef OPI_SUPPORT
         if (opi13Nest) {
             if (inlineImg) {
                 // this can't happen -- OPI dictionaries are in XObjects
@@ -5966,7 +5961,6 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             n += colorMap ? 14 : 15;
             writePSFmt("%%BeginData: {0:d} Hex Bytes\n", n);
         }
-#endif
         if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap && colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
             color.c[0] = gfxColorComp1;
             sepCS = (GfxSeparationColorSpace *)colorMap->getColorSpace();
@@ -5995,11 +5989,9 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         // add newline and trailer to the end
         writePSChar('\n');
         writePS("%-EOD-\n");
-#ifdef OPI_SUPPORT
         if (opi13Nest) {
             writePS("%%EndData\n");
         }
-#endif
 
         // delete encoders
         if (useLZW || useRLE || useASCII || inlineImg) {
@@ -6671,7 +6663,6 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
     }
 }
 
-#ifdef OPI_SUPPORT
 void PSOutputDev::opiBegin(GfxState *state, Dict *opiDict)
 {
     if (generateOPI) {
@@ -6988,7 +6979,6 @@ void PSOutputDev::opiEnd(GfxState *state, Dict *opiDict)
         }
     }
 }
-#endif // OPI_SUPPORT
 
 void PSOutputDev::type3D0(GfxState *state, double wx, double wy)
 {

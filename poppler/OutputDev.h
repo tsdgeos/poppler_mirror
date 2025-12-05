@@ -19,7 +19,7 @@
 // Copyright (C) 2007, 2011, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -314,11 +314,9 @@ public:
     virtual void markPoint(const char *name);
     virtual void markPoint(const char *name, Dict *properties);
 
-#ifdef OPI_SUPPORT
     //----- OPI functions
     virtual void opiBegin(GfxState *state, Dict *opiDict);
     virtual void opiEnd(GfxState *state, Dict *opiDict);
-#endif
 
     //----- Type 3 font operators
     virtual void type3D0(GfxState * /*state*/, double /*wx*/, double /*wy*/) { }

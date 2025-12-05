@@ -44,11 +44,6 @@
 #cmakedefine USE_FLOAT 1
 #endif
 
-/* Include support for OPI comments. */
-#ifndef OPI_SUPPORT
-#cmakedefine OPI_SUPPORT 1
-#endif
-
 /* Enable word list support. */
 #ifndef TEXTOUT_WORD_LIST
 #cmakedefine TEXTOUT_WORD_LIST 1

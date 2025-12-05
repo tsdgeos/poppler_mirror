@@ -260,11 +260,9 @@ public:
     void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg) override;
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
 
-#ifdef OPI_SUPPORT
     //----- OPI functions
     void opiBegin(GfxState *state, Dict *opiDict) override;
     void opiEnd(GfxState *state, Dict *opiDict) override;
-#endif
 
     //----- Type 3 font operators
     void type3D0(GfxState *state, double wx, double wy) override;
@@ -399,11 +397,9 @@ private:
     bool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep,
                              double yStep);
 
-#ifdef OPI_SUPPORT
     void opiBegin20(GfxState *state, Dict *dict);
     void opiBegin13(GfxState *state, Dict *dict);
     void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1);
-#endif
     void cvtFunction(const Function *func, bool invertPSFunction = false);
     static std::string filterPSName(const std::string &name);
 
@@ -532,10 +528,8 @@ private:
 
     std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted
 
-#ifdef OPI_SUPPORT
     int opi13Nest; // nesting level of OPI 1.3 objects
     int opi20Nest; // nesting level of OPI 2.0 objects
-#endif
 
     bool ok; // set up ok?
     std::set<int> patternsBeingTiled; // the patterns that are being tiled
