@@ -27,12 +27,6 @@
 
 #include <config.h>
 
-#ifdef _WIN32
-#    include <windows.h>
-#else
-#    include <strings.h>
-#endif
-
 // Define COPY_FILE if you want the file to be copied to a local disk first
 // before it's tested. This is desired if a file is on a slow drive.
 // Currently copying only works on Windows.
@@ -59,11 +53,6 @@
 #include "TextOutputDev.h"
 #include "PDFDoc.h"
 #include "Link.h"
-
-#ifdef _MSC_VER
-#    define strdup _strdup
-#    define strcasecmp _stricmp
-#endif
 
 #define dimof(X) (sizeof(X) / sizeof((X)[0]))
 
