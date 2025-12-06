@@ -457,17 +457,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int signatureNumber;
+    std::optional<unsigned int> signatureNumber;
     if (strlen(signatureName) > 0) {
         signatureNumber = atoi(signatureName);
         if (signatureNumber == 0) {
-            signatureNumber = -1;
+            signatureNumber = {};
         }
-    } else {
-        signatureNumber = 0;
     }
 
-    if (addNewSignature && signatureNumber > 0) {
+    if (addNewSignature && signatureNumber.has_value()) {
         // incompatible options
         print_version_usage(true);
         return 99;
@@ -532,7 +530,7 @@ int main(int argc, char *argv[])
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
 
-    if (signatureNumber == -1) {
+    if (!signatureNumber.has_value() && strlen(signatureName)) {
         for (unsigned int i = 0; i < sigCount; i++) {
             const GooString *goo = signatures.at(i)->getCreateWidget()->getField()->getFullyQualifiedName();
             if (!goo) {
@@ -546,21 +544,21 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (signatureNumber == -1) {
-            fprintf(stderr, "Signature field not found by name\n");
+        if (!signatureNumber.has_value()) {
+            fprintf(stderr, "Did not find signature field with name: %s\n", signatureName);
             return 2;
         }
     }
 
-    if (signatureNumber > 0) {
+    if (signatureNumber.has_value()) {
         // We are signing an existing signature field
         if (argc == 2) {
             fprintf(stderr, "An output filename for the signed document must be given\n");
             return 2;
         }
 
-        if (signatureNumber > static_cast<int>(sigCount)) {
-            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
+        if (signatureNumber > sigCount) {
+            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), *signatureNumber);
             return 2;
         }
 
@@ -582,10 +580,10 @@ int main(int argc, char *argv[])
             return 2;
         }
 
-        FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
+        FormFieldSignature *ffs = signatures.at(*signatureNumber - 1);
         auto [sig, file_size] = ffs->getCheckedSignature();
         if (sig) {
-            printf("Signature number %d is already signed\n", signatureNumber);
+            printf("Signature number %d is already signed\n", *signatureNumber);
             return 2;
         }
         if (etsiCAdESdetached) {
