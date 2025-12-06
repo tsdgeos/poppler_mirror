@@ -57,9 +57,6 @@
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine HAVE_LSEEK64 1
 
-/* Defines if gettimeofday is available on your system */
-#cmakedefine HAVE_GETTIMEOFDAY 1
-
 /* Defines if gmtime_r is available on your system */
 #cmakedefine HAVE_GMTIME_R 1
 
@@ -83,9 +80,6 @@
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST ${ICONV_CONST}
-
-/* Generate OPI comments in PS output. */
-#cmakedefine OPI_SUPPORT 1
 
 /* Name of package */
 #define PACKAGE "poppler"
@@ -113,9 +107,6 @@
 
 /* Support for curl based doc builder is compiled in. */
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
-
-/* Enable word list support. */
-#cmakedefine TEXTOUT_WORD_LIST 1
 
 /* Defines if use cms */
 #cmakedefine USE_CMS 1

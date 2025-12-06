@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -1296,10 +1296,16 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
     pages->addImage(std::move(fName), state);
 }
 
+// We need this because fclose returns int and the custom deleter of unique_ptr expects void
+static void custom_fclose(FILE *ptr)
+{
+    fclose(ptr);
+}
+
 void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool isMask)
 {
 #ifdef ENABLE_LIBPNG
-    std::unique_ptr<FILE, decltype(&fclose)> f1 { nullptr, &fclose };
+    std::unique_ptr<FILE, decltype(&custom_fclose)> f1 { nullptr, &custom_fclose };
     InMemoryFile ims;
 
     if (!colorMap && !isMask) {
