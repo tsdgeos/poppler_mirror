@@ -64,11 +64,6 @@
 #cmakedefine ENABLE_LIBPNG 1
 #endif
 
-/* Defines if gettimeofday is available on your system */
-#ifndef HAVE_GETTIMEOFDAY
-#cmakedefine HAVE_GETTIMEOFDAY 1
-#endif
-
 /* Defines if use cms */
 #ifndef USE_CMS
 #cmakedefine USE_CMS 1

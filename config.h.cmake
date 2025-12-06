@@ -57,9 +57,6 @@
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine HAVE_LSEEK64 1
 
-/* Defines if gettimeofday is available on your system */
-#cmakedefine HAVE_GETTIMEOFDAY 1
-
 /* Defines if gmtime_r is available on your system */
 #cmakedefine HAVE_GMTIME_R 1
 
