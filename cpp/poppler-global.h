@@ -92,8 +92,6 @@ enum case_sensitivity_enum
 
 typedef std::vector<char> byte_array;
 
-typedef unsigned int /* time_t */ time_type;
-
 // to disable warning only for this occurrence
 #ifdef _MSC_VER
 #    pragma warning(push)
@@ -121,8 +119,6 @@ private:
 #ifdef _MSC_VER
 #    pragma warning(pop)
 #endif
-
-[[deprecated]] POPPLER_CPP_EXPORT time_type convert_date(const std::string &date);
 
 POPPLER_CPP_EXPORT time_t convert_date_t(const std::string &date);
 

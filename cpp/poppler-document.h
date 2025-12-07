@@ -80,8 +80,6 @@ public:
     ustring info_key(const std::string &key) const;
     bool set_info_key(const std::string &key, const ustring &val);
 
-    [[deprecated]] time_type info_date(const std::string &key) const;
-    [[deprecated]] bool set_info_date(const std::string &key, time_type val);
     time_t info_date_t(const std::string &key) const;
     bool set_info_date_t(const std::string &key, time_t val);
 
@@ -97,12 +95,8 @@ public:
     bool set_creator(const ustring &creator);
     ustring get_producer() const;
     bool set_producer(const ustring &producer);
-    [[deprecated]] time_type get_creation_date() const;
-    [[deprecated]] bool set_creation_date(time_type creation_date);
     time_t get_creation_date_t() const;
     bool set_creation_date_t(time_t creation_date);
-    [[deprecated]] time_type get_modification_date() const;
-    [[deprecated]] bool set_modification_date(time_type mod_date);
     time_t get_modification_date_t() const;
     bool set_modification_date_t(time_t mod_date);
 

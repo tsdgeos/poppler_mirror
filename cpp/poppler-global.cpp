@@ -321,15 +321,6 @@ ustring ustring::from_latin1(const std::string &str)
 }
 
 /**
- Converts a string representing a PDF date to a value compatible with time_type.
- */
-time_type poppler::convert_date(const std::string &date)
-{
-    GooString gooDateStr(date.c_str());
-    return static_cast<time_type>(dateStringToTime(&gooDateStr));
-}
-
-/**
  Converts a string representing a PDF date to a value compatible with time_t.
  */
 time_t poppler::convert_date_t(const std::string &date)

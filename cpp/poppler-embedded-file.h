@@ -39,8 +39,6 @@ public:
     ustring unicodeName() const;
     ustring description() const;
     int size() const;
-    [[deprecated]] time_type modification_date() const;
-    [[deprecated]] time_type creation_date() const;
     time_t modification_date_t() const;
     time_t creation_date_t() const;
     byte_array checksum() const;

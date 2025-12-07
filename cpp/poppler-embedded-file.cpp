@@ -107,28 +107,6 @@ int embedded_file::size() const
 }
 
 /**
- \returns the time_type representing the modification date of the embedded file,
-          if available
- */
-time_type embedded_file::modification_date() const
-{
-    const EmbFile *ef = d->file_spec->getEmbeddedFile();
-    const GooString *goo = ef ? ef->modDate() : nullptr;
-    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
-}
-
-/**
- \returns the time_type representing the creation date of the embedded file,
-          if available
- */
-time_type embedded_file::creation_date() const
-{
-    const EmbFile *ef = d->file_spec->getEmbeddedFile();
-    const GooString *goo = ef ? ef->createDate() : nullptr;
-    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
-}
-
-/**
  \returns the time_t representing the modification date of the embedded file,
           if available
  */
