@@ -785,6 +785,16 @@ public:
 // EmbedStream is deleted, reads from the base stream will proceed where
 // the BaseStream left off.  Note that this is very different behavior
 // that creating a new FileStream (using makeSubStream).
+//
+// When an EmbedStream has been created with reusable set to true, it keeps a copy of
+// what is read in memory. This allows resetting it (which is generally not possible).
+// After reset whatever was recorded will be returned. When reaching the end of recorded
+// data and returning EOF once, the stream will go back to reading from its underlying stream.
+// Thw fact that an extra EOF is added when reaching the end of recorded data makes this
+// mostly only useful if you have read the full stream and want to go back to the beginning
+// to read it again.
+//
+// EmbedStream decreases it's length every time a character is read
 //------------------------------------------------------------------------
 
 class POPPLER_PRIVATE_EXPORT EmbedStream : public BaseStream
@@ -806,17 +816,13 @@ public:
     int getUnfilteredChar() override { return str->getUnfilteredChar(); }
     [[nodiscard]] bool unfilteredReset() override { return str->unfilteredReset(); }
 
-    void rewind();
-    void restore();
-
 private:
     bool hasGetChars() override { return true; }
     int getChars(int nChars, unsigned char *buffer) override;
 
     Stream *str;
-    bool limited;
-    bool reusable;
-    bool record;
+    const bool limited;
+    const bool reusable;
     bool replay;
     unsigned char *bufData;
     long bufMax;

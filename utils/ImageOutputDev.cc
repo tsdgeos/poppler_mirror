@@ -301,8 +301,6 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str, int wi
 
 long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, GfxImageColorMap *colorMap)
 {
-    long len;
-
     if (colorMap) {
         ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
         if (!imgStr.reset()) {
@@ -327,13 +325,13 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
     }
 
     EmbedStream *embedStr = (EmbedStream *)(str->getBaseStream());
-    embedStr->rewind();
-    len = 0;
+    if (!embedStr->reset()) {
+        return 0;
+    }
+    long len = 0;
     while (embedStr->getChar() != EOF) {
         len++;
     }
-
-    embedStr->restore();
 
     return len;
 }
@@ -553,14 +551,10 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool inlineImg)
 {
     ImageFormat format;
-    EmbedStream *embedStr;
 
     if (inlineImg) {
-        embedStr = (EmbedStream *)(str->getBaseStream());
         // Record the stream. This determines the size.
         getInlineImageLength(str, width, height, colorMap);
-        // Reading the stream again will return EOF at end of recording.
-        embedStr->rewind();
     }
 
     if (dumpJPEG && str->getKind() == strDCT) {
@@ -705,10 +699,6 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
         writeImageFile(writer, format, format == imgRGB ? "ppm" : "pbm", str, width, height, colorMap);
 
         delete writer;
-    }
-
-    if (inlineImg) {
-        embedStr->restore();
     }
 
     if (printFilenames) {

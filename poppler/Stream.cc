@@ -1152,19 +1152,15 @@ void AutoFreeMemStream::setFilterRemovalForbidden(bool forbidden)
 // EmbedStream
 //------------------------------------------------------------------------
 
-EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA), initialLength(length)
+EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA), limited(limitedA), reusable(reusableA), initialLength(length)
 {
     str = strA;
-    limited = limitedA;
     length = lengthA;
-    reusable = reusableA;
-    record = false;
     replay = false;
     if (reusable) {
         bufData = (unsigned char *)gmalloc(16384);
         bufMax = 16384;
         bufLen = 0;
-        record = true;
     }
 }
 
@@ -1177,14 +1173,20 @@ EmbedStream::~EmbedStream()
 
 bool EmbedStream::reset()
 {
-    if (replay) {
+    if (length == initialLength) {
+        // In general one can't reset EmbedStream
+        // but if we have not read anything yet, that's fine
+        return true;
+    }
+
+    if (reusable) {
+        // If the EmbedStream is reusable, resetting switches back to reading the recorded data
+        replay = true;
         bufPos = 0;
         return true;
     }
 
-    // In general one can't reset EmbedStream
-    // only works when you have not called getChar yet
-    return length == initialLength;
+    return false;
 }
 
 BaseStream *EmbedStream::copy()
@@ -1197,18 +1199,6 @@ std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset startA, bool limitedA
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
-}
-
-void EmbedStream::rewind()
-{
-    record = false;
-    replay = true;
-    bufPos = 0;
-}
-
-void EmbedStream::restore()
-{
-    replay = false;
 }
 
 Goffset EmbedStream::getPos()
@@ -1226,6 +1216,7 @@ int EmbedStream::getChar()
         if (bufPos < bufLen) {
             return bufData[bufPos++];
         } else {
+            replay = false;
             return EOF;
         }
     } else {
@@ -1234,7 +1225,7 @@ int EmbedStream::getChar()
         }
         int c = str->getChar();
         --length;
-        if (record) {
+        if (reusable) {
             bufData[bufLen] = c;
             bufLen++;
             if (bufLen >= bufMax) {
@@ -1264,28 +1255,28 @@ int EmbedStream::lookChar()
 
 int EmbedStream::getChars(int nChars, unsigned char *buffer)
 {
-    int len;
-
     if (nChars <= 0) {
         return 0;
     }
     if (replay) {
         if (bufPos >= bufLen) {
+            replay = false;
             return EOF;
         }
-        len = bufLen - bufPos;
+        const long len = bufLen - bufPos;
         if (nChars > len) {
             nChars = len;
         }
-        memcpy(buffer, bufData, nChars);
-        return len;
+        memcpy(buffer, &bufData[bufPos], nChars);
+        bufPos += nChars;
+        return nChars;
     } else {
         if (limited && length < nChars) {
             nChars = length;
         }
-        len = str->doGetChars(nChars, buffer);
+        const int len = str->doGetChars(nChars, buffer);
         length -= len;
-        if (record) {
+        if (reusable) {
             if (bufLen + len >= bufMax) {
                 while (bufLen + len >= bufMax) {
                     bufMax *= 2;
@@ -1295,8 +1286,8 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
             memcpy(bufData + bufLen, buffer, len);
             bufLen += len;
         }
+        return len;
     }
-    return len;
 }
 
 void EmbedStream::setPos(Goffset pos, int dir)
