@@ -5318,6 +5318,12 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
             }
         }
         imgCheckStr.close();
+
+        if (inlineImg) {
+            auto embedStr = static_cast<EmbedStream *>(str->getBaseStream());
+            // Reading the stream again will return EOF at end of recording.
+            embedStr->rewind();
+        }
     } else {
         isGray = false;
     }
@@ -5440,6 +5446,12 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool inv
     }
 
     str->close();
+
+    if (inlineImg && getOptimizeColorSpace()) {
+        auto embedStr = static_cast<EmbedStream *>(str->getBaseStream());
+        // Reading the stream again will return EOF at end of recording.
+        embedStr->restore();
+    }
 
     if (maskStr && !(maskColors && colorMap)) {
         writePS("pdfImClipEnd\n");

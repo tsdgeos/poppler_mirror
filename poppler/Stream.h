@@ -822,7 +822,7 @@ private:
     long bufMax;
     long bufLen;
     long bufPos;
-    Goffset start;
+    const Goffset initialLength;
 };
 
 //------------------------------------------------------------------------

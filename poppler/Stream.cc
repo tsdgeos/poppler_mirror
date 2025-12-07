@@ -1152,7 +1152,7 @@ void AutoFreeMemStream::setFilterRemovalForbidden(bool forbidden)
 // EmbedStream
 //------------------------------------------------------------------------
 
-EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA)
+EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA), initialLength(length)
 {
     str = strA;
     limited = limitedA;
@@ -1160,7 +1160,6 @@ EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset le
     reusable = reusableA;
     record = false;
     replay = false;
-    start = str->getPos();
     if (reusable) {
         bufData = (unsigned char *)gmalloc(16384);
         bufMax = 16384;
@@ -1178,25 +1177,14 @@ EmbedStream::~EmbedStream()
 
 bool EmbedStream::reset()
 {
-    bool success = true;
-    if (str->getPos() != start) {
-        success = str->reset();
-        // Might be a FilterStream that does not support str->setPos(start)
-        while (str->getPos() < start) {
-            if (str->getChar() == EOF) {
-                break;
-            }
-        }
-        if (str->getPos() != start) {
-            error(errInternal, -1, "Failed to reset EmbedStream");
-            success = false;
-        }
+    if (replay) {
+        bufPos = 0;
+        return true;
     }
-    record = false;
-    replay = false;
-    bufPos = 0;
 
-    return success;
+    // In general one can't reset EmbedStream
+    // only works when you have not called getChar yet
+    return length == initialLength;
 }
 
 BaseStream *EmbedStream::copy()
@@ -1296,6 +1284,7 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
             nChars = length;
         }
         len = str->doGetChars(nChars, buffer);
+        length -= len;
         if (record) {
             if (bufLen + len >= bufMax) {
                 while (bufLen + len >= bufMax) {
