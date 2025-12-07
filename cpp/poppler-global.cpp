@@ -4,7 +4,7 @@
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2020-2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020-2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -206,6 +206,10 @@ using namespace poppler;
  The case sensitivity.
 */
 
+// Not great to assign -1 to a size_t (which is unsigned)
+// but that's what the documentation says
+static constexpr size_t kIconvError = -1;
+
 noncopyable::noncopyable() = default;
 
 noncopyable &noncopyable::operator=(noncopyable &&other) noexcept = default;
@@ -236,13 +240,13 @@ byte_array ustring::to_utf8() const
     size_t me_len_char = size() * sizeof(value_type);
     size_t str_len_left = str.size();
     size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
-    if ((ir == (size_t)-1) && (errno == E2BIG)) {
+    if ((ir == kIconvError) && (errno == E2BIG)) {
         const size_t delta = str_data - &str[0];
         str_len_left += str.size();
         str.resize(str.size() * 2);
         str_data = &str[delta];
         ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
-        if (ir == (size_t)-1) {
+        if (ir == kIconvError) {
             return byte_array();
         }
     }
@@ -290,13 +294,13 @@ ustring ustring::from_utf8(const char *str, int len)
     size_t str_len_char = len;
     size_t ret_len_left = ret.size() * sizeof(ustring::value_type);
     size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
-    if ((ir == (size_t)-1) && (errno == E2BIG)) {
+    if ((ir == kIconvError) && (errno == E2BIG)) {
         const size_t delta = ret_data - reinterpret_cast<char *>(&ret[0]);
         ret_len_left += ret.size() * sizeof(ustring::value_type);
         ret.resize(ret.size() * 2);
         ret_data = reinterpret_cast<char *>(&ret[0]) + delta;
         ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
-        if (ir == (size_t)-1) {
+        if (ir == kIconvError) {
             return ustring();
         }
     }
