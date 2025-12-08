@@ -87,10 +87,6 @@
 #    include "JPXStream.h"
 #endif
 
-#ifdef __DJGPP__
-static bool setDJSYSFLAGS = false;
-#endif
-
 //------------------------------------------------------------------------
 // Stream (base class)
 //------------------------------------------------------------------------
