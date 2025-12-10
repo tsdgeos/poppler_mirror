@@ -2727,7 +2727,7 @@ struct SplashOutImageData
     SplashColor matteColor;
 };
 
-#ifdef USE_CMS
+#if USE_CMS
 bool SplashOutputDev::useIccImageSrc(void *data)
 {
     SplashOutImageData *imgData = (SplashOutImageData *)data;
@@ -2923,7 +2923,7 @@ bool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine, unsigned ch
     return true;
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 bool SplashOutputDev::iccImageSrc(void *data, SplashColorPtr colorLine, unsigned char * /*alphaLine*/)
 {
     SplashOutImageData *imgData = (SplashOutImageData *)data;
@@ -3346,7 +3346,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
     } else {
         srcMode = colorMode;
     }
-#ifdef USE_CMS
+#if USE_CMS
     src = maskColors ? &alphaImageSrc : useIccImageSrc(&imgData) ? &iccImageSrc : &imageSrc;
     tf = maskColors == nullptr && useIccImageSrc(&imgData) ? &iccTransform : nullptr;
 #else

@@ -356,7 +356,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, const char 
 
 void SplashBitmap::setJpegParams(ImgWriter *writer, WriteImgParams *params)
 {
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
     if (params) {
         static_cast<JpegWriter *>(writer)->setProgressive(params->jpegProgressive);
         static_cast<JpegWriter *>(writer)->setOptimize(params->jpegOptimize);
@@ -375,13 +375,13 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, do
     SplashColorMode imageWriterFormat = splashModeRGB8;
 
     switch (format) {
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
     case splashFormatPng:
         writer = new PNGWriter();
         break;
 #endif
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
     case splashFormatJpegCMYK:
         writer = new JpegWriter(JpegWriter::CMYK);
         setJpegParams(writer, params);
@@ -392,7 +392,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, do
         break;
 #endif
 
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
     case splashFormatTiff:
         switch (mode) {
         case splashModeMono1:

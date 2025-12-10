@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     XRef *yRef, *countRef;
     FILE *f;
     OutStream *outStr;
-    int j, rootNum;
+    int rootNum;
     std::vector<std::unique_ptr<PDFDoc>> docs;
     int majorVersion = 0;
     int minorVersion = 0;
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
                 Dict *pagecatDict = pagecatObj.getDict();
                 Object pageintents = pagecatDict->lookup("OutputIntents");
                 if (pageintents.isArray() && pageintents.arrayGetLength() > 0) {
-                    for (j = intents.arrayGetLength() - 1; j >= 0; j--) {
+                    for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
                         Object intent = intents.arrayGet(j, 0);
                         if (intent.isDict()) {
                             Object idf = intent.dictLookup("OutputConditionIdentifier");
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
             }
         }
         if (intents.isArray() && intents.arrayGetLength() > 0) {
-            for (j = intents.arrayGetLength() - 1; j >= 0; j--) {
+            for (int j = intents.arrayGetLength() - 1; j >= 0; j--) {
                 Object intent = intents.arrayGet(j, 0);
                 if (intent.isDict()) {
                     docs[0]->markPageObjects(intent.getDict(), yRef, countRef, numOffset, 0, 0);
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     }
 
     for (size_t i = 0; i < docs.size(); i++) {
-        for (j = 1; j <= docs[i]->getNumPages(); j++) {
+        for (int j = 1; j <= docs[i]->getNumPages(); j++) {
             if (!docs[i]->getCatalog()->getPage(j)) {
                 continue;
             }
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
     // insert OutputIntents
     if (intents.isArray() && intents.arrayGetLength() > 0) {
         outStr->printf(" /OutputIntents [");
-        for (j = 0; j < intents.arrayGetLength(); j++) {
+        for (int j = 0; j < intents.arrayGetLength(); j++) {
             Object intent = intents.arrayGet(j, 0);
             if (intent.isDict()) {
                 PDFDoc::writeObject(&intent, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
@@ -386,8 +386,8 @@ int main(int argc, char *argv[])
     yRef->add(rootNum + 1, 0, outStr->getPos(), true);
     outStr->printf("%d 0 obj\n", rootNum + 1);
     outStr->printf("<< /Type /Pages /Kids [");
-    for (j = 0; j < (int)pages.size(); j++) {
-        outStr->printf(" %d 0 R", rootNum + j + 2);
+    for (size_t j = 0; j < pages.size(); j++) {
+        outStr->printf(" %zd 0 R", rootNum + j + 2);
     }
     outStr->printf(" ] /Count %zd >>\nendobj\n", pages.size());
     objectsCount++;
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
         outStr->printf("%zu 0 obj\n", rootNum + i + 2);
         outStr->printf("<< ");
         Dict *pageDict = pages[i].getDict();
-        for (j = 0; j < pageDict->getLength(); j++) {
+        for (int j = 0; j < pageDict->getLength(); j++) {
             if (j > 0) {
                 outStr->printf(" ");
             }

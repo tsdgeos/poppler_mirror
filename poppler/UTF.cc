@@ -301,7 +301,7 @@ std::string utf8ToUtf16WithBom(std::string_view utf8)
     }
     std::u16string utf16 = utf8ToUtf16(utf8);
     char *tmp_str = (char *)utf16.data();
-#ifndef WORDS_BIGENDIAN
+#if !WORDS_BIGENDIAN
     for (size_t i = 0; i < utf16.size(); i++) {
         std::swap(tmp_str[i * 2], tmp_str[i * 2 + 1]);
     }

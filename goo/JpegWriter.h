@@ -21,7 +21,7 @@
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 
 #    include <sys/types.h>
 #    include "ImgWriter.h"

@@ -8,6 +8,7 @@
  * Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Jan-Michael Brummer <jan-michael.brummer1@volkswagen.de>
  * Copyright (C) 2025 lbaudin <lbaudin@gnome.org>
+ * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +31,7 @@
 #include "poppler-private.h"
 
 #include <CertificateInfo.h>
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
 #    include <NSSCryptoSignBackend.h>
 #endif
 #include <CryptoSignBackend.h>
@@ -2276,7 +2277,7 @@ PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
  **/
 void poppler_set_nss_dir(const char *path)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSDir(GooString(path));
 #else
     (void)path;
@@ -2294,7 +2295,7 @@ void poppler_set_nss_dir(const char *path)
  **/
 char *poppler_get_nss_dir(void)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     return g_strdup(NSSSignatureConfiguration::getNSSDir().c_str());
 #else
     return nullptr;
@@ -2311,7 +2312,7 @@ char *poppler_get_nss_dir(void)
  **/
 void poppler_set_nss_password_callback(PopplerNssPasswordFunc func)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSPasswordCallback(func);
 #else
     g_warning("poppler_set_nss_password_callback called but this poppler is built without NSS support");

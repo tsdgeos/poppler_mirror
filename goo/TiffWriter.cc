@@ -14,7 +14,7 @@
 
 #include "TiffWriter.h"
 
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
 
 #    include <cstring>
 

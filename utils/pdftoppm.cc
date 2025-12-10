@@ -80,7 +80,7 @@
 #    include <deque>
 #endif // UTILS_USE_PTHREADS
 
-#ifdef USE_CMS
+#if USE_CMS
 #    include <lcms2.h>
 #endif
 
@@ -105,7 +105,7 @@ static bool hideAnnotations = false;
 static bool useCropBox = false;
 static bool mono = false;
 static bool gray = false;
-#ifdef USE_CMS
+#if USE_CMS
 static GooString displayprofilename;
 static GfxLCMSProfilePtr displayprofile;
 static GooString defaultgrayprofilename;
@@ -170,7 +170,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
                                    { "-mono", argFlag, &mono, 0, "generate a monochrome PBM file" },
                                    { "-gray", argFlag, &gray, 0, "generate a grayscale PGM file" },
-#ifdef USE_CMS
+#if USE_CMS
                                    { "-displayprofile", argGooString, &displayprofilename, 0, "ICC color profile to use as the display profile" },
                                    { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
                                    { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
@@ -178,16 +178,16 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 #endif
                                    { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
                                    { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
-#ifdef ENABLE_LIBPNG
+#if ENABLE_LIBPNG
                                    { "-png", argFlag, &png, 0, "generate a PNG file" },
 #endif
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
                                    { "-jpeg", argFlag, &jpeg, 0, "generate a JPEG file" },
                                    { "-jpegcmyk", argFlag, &jpegcmyk, 0, "generate a CMYK JPEG file" },
                                    { "-jpegopt", argGooString, &jpegOpt, 0, "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*" },
 #endif
                                    { "-overprint", argFlag, &overprint, 0, "enable overprint" },
-#ifdef ENABLE_LIBTIFF
+#if ENABLE_LIBTIFF
                                    { "-tiff", argFlag, &tiff, 0, "generate a TIFF file" },
                                    { "-tiffcompression", argString, TiffCompressionStr, sizeof(TiffCompressionStr), "set TIFF compression: none, packbits, jpeg, lzw, deflate" },
 #endif
@@ -381,7 +381,7 @@ static void processPageJobs()
         splashOut->setFontAntialias(fontAntialias);
         splashOut->setVectorAntialias(vectorAntialias);
         splashOut->setEnableFreeType(enableFreeType);
-#    ifdef USE_CMS
+#    if USE_CMS
         splashOut->setDisplayProfile(displayprofile);
         splashOut->setDefaultGrayProfile(defaultgrayprofile);
         splashOut->setDefaultRGBProfile(defaultrgbprofile);
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
     bool ok;
     int pg, pg_num_len;
     double pg_w, pg_h;
-#ifdef USE_CMS
+#if USE_CMS
     cmsColorSpaceSignature profilecolorspace;
 #endif
 
@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
         paperColor[2] = 255;
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     if (!displayprofilename.toStr().empty()) {
         displayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(displayprofilename.c_str(), "r"));
         if (!displayprofile) {
@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
     splashOut->setEnableFreeType(enableFreeType);
-#    ifdef USE_CMS
+#    if USE_CMS
     splashOut->setDisplayProfile(displayprofile);
     splashOut->setDefaultGrayProfile(defaultgrayprofile);
     splashOut->setDefaultRGBProfile(defaultrgbprofile);

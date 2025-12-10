@@ -165,7 +165,7 @@ static const char *gfxColorSpaceModeNames[] = { "DeviceGray", "CalGray", "Device
 
 #define nGfxColorSpaceModes ((sizeof(gfxColorSpaceModeNames) / sizeof(char *)))
 
-#ifdef USE_CMS
+#if USE_CMS
 
 static const std::map<unsigned int, unsigned int>::size_type CMSCACHE_LIMIT = 2048;
 
@@ -389,7 +389,7 @@ const char *GfxColorSpace::getColorSpaceModeName(int idx)
     return gfxColorSpaceModeNames[idx];
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 
 static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const char *text)
 {
@@ -643,7 +643,7 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::copy() const
     cs->blackY = blackY;
     cs->blackZ = blackZ;
     cs->gamma = gamma;
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = transform;
 #endif
     return cs;
@@ -670,7 +670,7 @@ static const double white_d65_X = 0.9505;
 static const double white_d65_Y = 1.0;
 static const double white_d65_Z = 1.0890;
 
-#ifdef USE_CMS
+#if USE_CMS
 // D50 is the default white point as used in ICC profiles and in the lcms2 library
 static const double white_d50_X = 0.96422;
 static const double white_d50_Y = 1.0;
@@ -748,7 +748,7 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, Gfx
 
     cs->gamma = obj1.dictLookup("Gamma").getNumWithDefaultValue(1);
 
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
     return cs;
@@ -769,7 +769,7 @@ void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform && transform->getTransformPixelType() == PT_GRAY) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -795,7 +795,7 @@ void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     double r, g, b;
 
     getXYZ(color, &X, &Y, &Z);
-#ifdef USE_CMS
+#if USE_CMS
     if (transform && transform->getTransformPixelType() == PT_RGB) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -826,7 +826,7 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform && transform->getTransformPixelType() == PT_CMYK) {
         double in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -1088,7 +1088,7 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::copy() const
     cs->gammaG = gammaG;
     cs->gammaB = gammaB;
     cs->mat = mat;
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = transform;
 #endif
     return cs;
@@ -1133,7 +1133,7 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxS
         }
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
     return cs;
@@ -1156,7 +1156,7 @@ void GfxCalRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_GRAY) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -1182,7 +1182,7 @@ void GfxCalRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     double r, g, b;
 
     getXYZ(color, &X, &Y, &Z);
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -1214,7 +1214,7 @@ void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
         double in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -1429,7 +1429,7 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::copy() const
     cs->aMax = aMax;
     cs->bMin = bMin;
     cs->bMax = bMax;
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = transform;
 #endif
     return cs;
@@ -1468,13 +1468,13 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(const Array &arr, GfxStat
 
     if (!ok) {
         error(errSyntaxWarning, -1, "Bad Lab color space");
-#ifdef USE_CMS
+#if USE_CMS
         cs->transform = nullptr;
 #endif
         return {};
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
     return cs;
@@ -1484,7 +1484,7 @@ void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
     GfxRGB rgb;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_GRAY) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -1538,7 +1538,7 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     X *= whiteX;
     Y *= whiteY;
     Z *= whiteZ;
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
@@ -1592,7 +1592,7 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
 
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
         double in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -1674,7 +1674,7 @@ GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, std::unique_ptr<GfxCol
     iccProfileStream = *iccProfileStreamA;
     rangeMin[0] = rangeMin[1] = rangeMin[2] = rangeMin[3] = 0;
     rangeMax[0] = rangeMax[1] = rangeMax[2] = rangeMax[3] = 1;
-#ifdef USE_CMS
+#if USE_CMS
     transform = nullptr;
     lineTransform = nullptr;
     psCSA = nullptr;
@@ -1683,7 +1683,7 @@ GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, std::unique_ptr<GfxCol
 
 GfxICCBasedColorSpace::~GfxICCBasedColorSpace()
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (psCSA) {
         gfree(psCSA);
     }
@@ -1704,7 +1704,7 @@ std::unique_ptr<GfxICCBasedColorSpace> GfxICCBasedColorSpace::copyAsOwnType() co
         cs->rangeMin[i] = rangeMin[i];
         cs->rangeMax[i] = rangeMax[i];
     }
-#ifdef USE_CMS
+#if USE_CMS
     cs->profile = profile;
     cs->transform = transform;
     cs->lineTransform = lineTransform;
@@ -1725,7 +1725,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, Ou
     }
     const Object &obj1Ref = arr.getNF(1);
     const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
-#ifdef USE_CMS
+#if USE_CMS
     // check cache
     if (out && iccProfileStreamA != Ref::INVALID()) {
         if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
@@ -1788,7 +1788,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, Ou
         }
     }
 
-#ifdef USE_CMS
+#if USE_CMS
     obj1 = arr.get(1);
     if (!obj1.isStream()) {
         error(errSyntaxWarning, -1, "Bad ICCBased color space (stream)");
@@ -1812,7 +1812,7 @@ std::unique_ptr<GfxColorSpace> GfxICCBasedColorSpace::parse(const Array &arr, Ou
     return cs;
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
 {
     auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : nullptr;
@@ -1848,7 +1848,7 @@ void GfxICCBasedColorSpace::buildTransforms(GfxState *state)
 
 void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_GRAY) {
         unsigned char in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -1896,7 +1896,7 @@ void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 
 void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
         unsigned char in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -1995,7 +1995,7 @@ void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
 
 void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int length)
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
         unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
@@ -2014,7 +2014,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int
 
 void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, int length)
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
         unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
@@ -2055,7 +2055,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, in
 
 void GfxICCBasedColorSpace::getRGBXLine(unsigned char *in, unsigned char *out, int length)
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
         unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
@@ -2077,7 +2077,7 @@ void GfxICCBasedColorSpace::getRGBXLine(unsigned char *in, unsigned char *out, i
 
 void GfxICCBasedColorSpace::getCMYKLine(unsigned char *in, unsigned char *out, int length)
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
         transform->doTransform(in, out, length);
     } else if (lineTransform != nullptr && nComps != 4) {
@@ -2112,7 +2112,7 @@ void GfxICCBasedColorSpace::getCMYKLine(unsigned char *in, unsigned char *out, i
 
 void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out, int length)
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
         unsigned char *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
         transform->doTransform(in, tmp, length);
@@ -2162,7 +2162,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
 
 void GfxICCBasedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
 {
-#ifdef USE_CMS
+#if USE_CMS
     if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
         unsigned char in[gfxColorMaxComps];
         unsigned char out[gfxColorMaxComps];
@@ -2233,7 +2233,7 @@ void GfxICCBasedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
 
 bool GfxICCBasedColorSpace::useGetRGBLine() const
 {
-#ifdef USE_CMS
+#if USE_CMS
     return lineTransform != nullptr || alt->useGetRGBLine();
 #else
     return alt->useGetRGBLine();
@@ -2242,7 +2242,7 @@ bool GfxICCBasedColorSpace::useGetRGBLine() const
 
 bool GfxICCBasedColorSpace::useGetCMYKLine() const
 {
-#ifdef USE_CMS
+#if USE_CMS
     return lineTransform != nullptr || alt->useGetCMYKLine();
 #else
     return alt->useGetCMYKLine();
@@ -2251,7 +2251,7 @@ bool GfxICCBasedColorSpace::useGetCMYKLine() const
 
 bool GfxICCBasedColorSpace::useGetDeviceNLine() const
 {
-#ifdef USE_CMS
+#if USE_CMS
     return lineTransform != nullptr || alt->useGetDeviceNLine();
 #else
     return alt->useGetDeviceNLine();
@@ -2300,7 +2300,7 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRa
 #endif
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 char *GfxICCBasedColorSpace::getPostScriptCSA()
 {
     if (psCSA) {
@@ -6274,7 +6274,7 @@ void GfxPath::offset(double dx, double dy)
 //
 //------------------------------------------------------------------------
 
-#ifdef USE_CMS
+#if USE_CMS
 
 GfxLCMSProfilePtr GfxXYZ2DisplayTransforms::XYZProfile = nullptr;
 
@@ -6478,7 +6478,7 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox, int 
     defaultGrayColorSpace = nullptr;
     defaultRGBColorSpace = nullptr;
     defaultCMYKColorSpace = nullptr;
-#ifdef USE_CMS
+#if USE_CMS
     localDisplayProfile = nullptr;
     XYZ2DisplayTransforms = std::make_shared<GfxXYZ2DisplayTransforms>(nullptr);
 
@@ -6574,7 +6574,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     memcpy(renderingIntent, state->renderingIntent, sizeof(renderingIntent));
 
     saved = nullptr;
-#ifdef USE_CMS
+#if USE_CMS
     localDisplayProfile = state->localDisplayProfile;
     XYZ2DisplayTransforms = state->XYZ2DisplayTransforms;
 #endif
@@ -6596,7 +6596,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
     }
 }
 
-#ifdef USE_CMS
+#if USE_CMS
 
 GfxLCMSProfilePtr GfxState::sRGBProfile = nullptr;
 

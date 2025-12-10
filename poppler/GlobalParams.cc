@@ -84,7 +84,7 @@
 #include "GlobalParams.h"
 #include "GfxFont.h"
 
-#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
+#if WITH_FONTCONFIGURATION_FONTCONFIG
 #    include <fontconfig/fontconfig.h>
 #endif
 
@@ -112,7 +112,7 @@
 
 std::unique_ptr<GlobalParams> globalParams;
 
-#if defined(ENABLE_RELOCATABLE) && defined(_WIN32)
+#if ENABLE_RELOCATABLE && defined(_WIN32)
 
 /* search for data relative to where we are installed */
 
@@ -256,7 +256,7 @@ public:
 #ifdef _WIN32
     void scanWindowsFonts(const std::string &winFontDir);
 #endif
-#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
+#if WITH_FONTCONFIGURATION_FONTCONFIG
     void addFcFont(SysFontInfo *si) { fonts.push_back(si); }
 #endif
 private:
@@ -638,7 +638,7 @@ FILE *GlobalParams::findToUnicodeFile(const std::string &name)
     return nullptr;
 }
 
-#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
+#if WITH_FONTCONFIGURATION_FONTCONFIG
 static bool findModifier(const std::string &name, const size_t modStart, const char *modifier, size_t &start)
 {
     if (modStart == std::string::npos) {
@@ -869,7 +869,7 @@ std::optional<std::string> GlobalParams::findFontFile(const std::string &fontNam
     return {};
 }
 
-#if defined(WITH_FONTCONFIGURATION_FONTCONFIG) || defined(WITH_FONTCONFIGURATION_WIN32)
+#if WITH_FONTCONFIGURATION_FONTCONFIG || WITH_FONTCONFIGURATION_WIN32
 
 static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int faceIndex)
 {
@@ -909,7 +909,7 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 /* if you can't or don't want to use Fontconfig, you need to implement
    this function for your platform. For Windows, it's in GlobalParamsWin.cc
 */
-#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
+#if WITH_FONTCONFIGURATION_FONTCONFIG
 // not needed for fontconfig
 void GlobalParams::setupBaseFonts(const char *) { }
 
@@ -1158,7 +1158,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
 
     return {};
 }
-#elif defined(WITH_FONTCONFIGURATION_ANDROID)
+#elif WITH_FONTCONFIGURATION_ANDROID
 // Uses the font file mapping created by GlobalParams::setupBaseFonts
 // to return the path to a base-14 font file
 std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont & /*font*/, GooString * /*substituteFontName*/)
@@ -1305,7 +1305,7 @@ UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, co
     return {};
 }
 
-#elif defined(WITH_FONTCONFIGURATION_WIN32)
+#elif WITH_FONTCONFIGURATION_WIN32
 #    include "GlobalParamsWin.cc"
 
 std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont & /*font*/, GooString * /*substituteFontName*/)
@@ -1535,7 +1535,7 @@ void GlobalParams::setErrQuiet(bool errQuietA)
 #ifdef ANDROID
 void GlobalParams::setFontDir(const std::string &fontDir)
 {
-#    if defined(WITH_FONTCONFIGURATION_ANDROID)
+#    if WITH_FONTCONFIGURATION_ANDROID
     displayFontDir = fontDir;
 #    endif
 }

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -22,7 +22,7 @@
 #include "PDFDoc.h"
 #include "LocalPDFDocBuilder.h"
 #include "FDPDFDocBuilder.h"
-#ifdef ENABLE_LIBCURL
+#if ENABLE_LIBCURL
 #    include "CurlPDFDocBuilder.h"
 #endif
 #include "ErrorCodes.h"
@@ -40,7 +40,7 @@ PDFDocFactory::PDFDocFactory(std::vector<PDFDocBuilder *> *pdfDocBuilders)
     }
     builders->push_back(new LocalPDFDocBuilder());
     builders->push_back(new FileDescriptorPDFDocBuilder());
-#ifdef ENABLE_LIBCURL
+#if ENABLE_LIBCURL
     builders->push_back(new CurlPDFDocBuilder());
 #endif
 }

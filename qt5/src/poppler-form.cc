@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2024 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -50,10 +50,10 @@
 #include <SignatureInfo.h>
 #include <CertificateInfo.h>
 #include <CryptoSignBackend.h>
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
 #    include <NSSCryptoSignBackend.h>
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 #    include <GPGMECryptoSignBackendConfiguration.h>
 #endif
 
@@ -800,7 +800,7 @@ QByteArray CertificateInfo::certificateData() const
 
 bool CertificateInfo::checkPassword(const QString &password) const
 {
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     auto backend = CryptoSign::Factory::createActive();
     if (!backend) {
         return false;
@@ -881,7 +881,7 @@ QString SignatureValidationInfo::reason() const
 
 SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
 {
-#ifdef ENABLE_SIGNATURES
+#if ENABLE_SIGNATURES
     Q_D(const SignatureValidationInfo);
 
     switch (d->hash_algorithm) {
@@ -1242,7 +1242,7 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
 
 bool hasNSSSupport()
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     return true;
 #else
     return false;
@@ -1356,7 +1356,7 @@ bool hasCryptoSignBackendFeature(CryptoSignBackend backend, CryptoSignBackendFea
 
 QString POPPLER_QT5_EXPORT getNSSDir()
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     return QString::fromLocal8Bit(NSSSignatureConfiguration::getNSSDir().c_str());
 #else
     return QString();
@@ -1365,7 +1365,7 @@ QString POPPLER_QT5_EXPORT getNSSDir()
 
 void setNSSDir(const QString &path)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     if (path.isEmpty()) {
         return;
     }
@@ -1383,7 +1383,7 @@ std::function<QString(const QString &)> nssPasswordCall;
 
 void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSPasswordCallback(f);
 #else
     qWarning() << "setNSSPasswordCallback called but this poppler is built without NSS support";
@@ -1393,7 +1393,7 @@ void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
 
 void setPgpSignaturesAllowed(bool allowed)
 {
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     GpgSignatureConfiguration::setPgpSignaturesAllowed(allowed);
 #else
     qWarning() << "Trying to enable pgp signatures, but pgp not enabled in this build";
@@ -1403,7 +1403,7 @@ void setPgpSignaturesAllowed(bool allowed)
 
 bool arePgpSignaturesAllowed()
 {
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     return GpgSignatureConfiguration::arePgpSignaturesAllowed();
 #else
     return false;

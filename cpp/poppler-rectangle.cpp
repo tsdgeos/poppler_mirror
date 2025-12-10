@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2025, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ using namespace poppler;
  A rectangle with float (double) dimensions and coordinates.
  */
 
-std::ostream &poppler::operator<<(std::ostream &stream, const rect &r) // clazy:exclude=function-args-by-value
+std::ostream &poppler::operator<<(std::ostream &stream, const rect r)
 {
     stream << "[" << r.x() << "," << r.y() << " " << r.width() << "+" << r.height() << "]";
     return stream;

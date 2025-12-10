@@ -73,22 +73,18 @@
 
 #include "splash/SplashBitmap.h"
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 #    include "DCTStream.h"
 #endif
 
-#ifdef ENABLE_ZLIB_UNCOMPRESS
+#if ENABLE_ZLIB_UNCOMPRESS
 #    include "FlateStream.h"
 #endif
 
-#ifdef ENABLE_LIBOPENJPEG
+#if ENABLE_LIBOPENJPEG
 #    include "JPEG2000Stream.h"
 #else
 #    include "JPXStream.h"
-#endif
-
-#ifdef __DJGPP__
-static bool setDJSYSFLAGS = false;
 #endif
 
 //------------------------------------------------------------------------
@@ -347,7 +343,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
         str = new CCITTFaxStream(str, encoding, endOfLine, byteAlign, columns, rows, endOfBlock, black, damagedRowsBeforeError);
     } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
-#ifdef HAVE_DCT_DECODER
+#if HAVE_DCT_DECODER
         int colorXform = -1;
         if (params->isDict()) {
             obj = params->dictLookup("ColorTransform", recursion);
@@ -393,7 +389,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
         str = new JBIG2Stream(str, std::move(globals), &obj);
     } else if (!strcmp(name, "JPXDecode")) {
-#ifdef HAVE_JPX_DECODER
+#if HAVE_JPX_DECODER
         str = new JPXStream(str);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
@@ -1152,20 +1148,15 @@ void AutoFreeMemStream::setFilterRemovalForbidden(bool forbidden)
 // EmbedStream
 //------------------------------------------------------------------------
 
-EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA)
+EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA) : BaseStream(std::move(dictA), lengthA), limited(limitedA), reusable(reusableA), initialLength(length)
 {
     str = strA;
-    limited = limitedA;
     length = lengthA;
-    reusable = reusableA;
-    record = false;
     replay = false;
-    start = str->getPos();
     if (reusable) {
         bufData = (unsigned char *)gmalloc(16384);
         bufMax = 16384;
         bufLen = 0;
-        record = true;
     }
 }
 
@@ -1178,25 +1169,20 @@ EmbedStream::~EmbedStream()
 
 bool EmbedStream::reset()
 {
-    bool success = true;
-    if (str->getPos() != start) {
-        success = str->reset();
-        // Might be a FilterStream that does not support str->setPos(start)
-        while (str->getPos() < start) {
-            if (str->getChar() == EOF) {
-                break;
-            }
-        }
-        if (str->getPos() != start) {
-            error(errInternal, -1, "Failed to reset EmbedStream");
-            success = false;
-        }
+    if (length == initialLength) {
+        // In general one can't reset EmbedStream
+        // but if we have not read anything yet, that's fine
+        return true;
     }
-    record = false;
-    replay = false;
-    bufPos = 0;
 
-    return success;
+    if (reusable) {
+        // If the EmbedStream is reusable, resetting switches back to reading the recorded data
+        replay = true;
+        bufPos = 0;
+        return true;
+    }
+
+    return false;
 }
 
 BaseStream *EmbedStream::copy()
@@ -1209,18 +1195,6 @@ std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset startA, bool limitedA
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
-}
-
-void EmbedStream::rewind()
-{
-    record = false;
-    replay = true;
-    bufPos = 0;
-}
-
-void EmbedStream::restore()
-{
-    replay = false;
 }
 
 Goffset EmbedStream::getPos()
@@ -1238,6 +1212,7 @@ int EmbedStream::getChar()
         if (bufPos < bufLen) {
             return bufData[bufPos++];
         } else {
+            replay = false;
             return EOF;
         }
     } else {
@@ -1246,7 +1221,7 @@ int EmbedStream::getChar()
         }
         int c = str->getChar();
         --length;
-        if (record) {
+        if (reusable) {
             bufData[bufLen] = c;
             bufLen++;
             if (bufLen >= bufMax) {
@@ -1276,27 +1251,28 @@ int EmbedStream::lookChar()
 
 int EmbedStream::getChars(int nChars, unsigned char *buffer)
 {
-    int len;
-
     if (nChars <= 0) {
         return 0;
     }
     if (replay) {
         if (bufPos >= bufLen) {
+            replay = false;
             return EOF;
         }
-        len = bufLen - bufPos;
+        const long len = bufLen - bufPos;
         if (nChars > len) {
             nChars = len;
         }
-        memcpy(buffer, bufData, nChars);
-        return len;
+        memcpy(buffer, &bufData[bufPos], nChars);
+        bufPos += nChars;
+        return nChars;
     } else {
         if (limited && length < nChars) {
             nChars = length;
         }
-        len = str->doGetChars(nChars, buffer);
-        if (record) {
+        const int len = str->doGetChars(nChars, buffer);
+        length -= len;
+        if (reusable) {
             if (bufLen + len >= bufMax) {
                 while (bufLen + len >= bufMax) {
                     bufMax *= 2;
@@ -1306,8 +1282,8 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
             memcpy(bufData + bufLen, buffer, len);
             bufLen += len;
         }
+        return len;
     }
-    return len;
 }
 
 void EmbedStream::setPos(Goffset pos, int dir)
@@ -2635,7 +2611,7 @@ bool CCITTFaxStream::isBinary(bool last) const
     return str->isBinary(true);
 }
 
-#ifndef ENABLE_LIBJPEG
+#if !ENABLE_LIBJPEG
 
 //------------------------------------------------------------------------
 // DCTStream
@@ -4106,7 +4082,7 @@ bool DCTStream::isBinary(bool last) const
 
 #endif
 
-#ifndef ENABLE_ZLIB_UNCOMPRESS
+#if !ENABLE_ZLIB_UNCOMPRESS
 //------------------------------------------------------------------------
 // FlateStream
 //------------------------------------------------------------------------

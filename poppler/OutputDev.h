@@ -141,7 +141,7 @@ public:
 
     virtual void initGfxState(GfxState *state)
     {
-#ifdef USE_CMS
+#if USE_CMS
         state->setDisplayProfile(displayprofile);
 
         auto invalidref = Ref::INVALID();
@@ -351,7 +351,7 @@ public:
     virtual void setVectorAntialias(bool /*vaa*/) { }
 #endif
 
-#ifdef USE_CMS
+#if USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &profile) { displayprofile = profile; }
     GfxLCMSProfilePtr getDisplayProfile() const { return displayprofile; }
     void setDefaultGrayProfile(const GfxLCMSProfilePtr &profile) { defaultGrayProfile = profile; }
@@ -369,7 +369,7 @@ private:
     double defICTM[6]; // inverse of default CTM
     std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
-#ifdef USE_CMS
+#if USE_CMS
     GfxLCMSProfilePtr displayprofile;
     GfxLCMSProfilePtr defaultGrayProfile;
     GfxLCMSProfilePtr defaultRGBProfile;

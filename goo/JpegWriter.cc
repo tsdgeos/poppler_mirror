@@ -21,7 +21,7 @@
 
 #include <limits>
 
-#ifdef ENABLE_LIBJPEG
+#if ENABLE_LIBJPEG
 
 #    include "poppler/Error.h"
 #    include <cstdio>

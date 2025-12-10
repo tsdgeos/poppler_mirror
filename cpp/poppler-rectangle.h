@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2025, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +59,7 @@ private:
 typedef rectangle<int> rect;
 typedef rectangle<double> rectf;
 
-POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rect &r);
+POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rect r);
 POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rectf &r);
 
 }

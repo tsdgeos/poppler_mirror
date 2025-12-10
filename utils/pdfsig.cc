@@ -43,10 +43,10 @@
 #include "DateInfo.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
 #    include "NSSCryptoSignBackend.h"
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 #    include "GPGMECryptoSignBackendConfiguration.h"
 #endif
 #include "CryptoSignBackend.h"
@@ -190,7 +190,7 @@ static bool printVersion = false;
 static bool printHelp = false;
 static bool printCryptoSignBackends = false;
 static bool dontVerifyCert = false;
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
 static bool allowPgp = GpgSignatureConfiguration::arePgpSignaturesAllowed();
 #else
 static bool allowPgp = false;
@@ -276,7 +276,7 @@ static void print_backends()
 
 static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates(bool *error)
 {
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     bool wrongPassword = false;
     bool passwordNeeded = false;
     auto passwordCallback = [&passwordNeeded, &wrongPassword](const char *) -> char * {
@@ -302,7 +302,7 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         return {};
     }
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = backend->getAvailableSigningCertificates();
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSPasswordCallback({});
     if (passwordNeeded) {
         *error = true;
@@ -403,10 +403,10 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-#ifdef ENABLE_NSS3
+#if ENABLE_NSS3
     NSSSignatureConfiguration::setNSSDir(nssDir);
 #endif
-#ifdef ENABLE_GPGME
+#if ENABLE_GPGME
     GpgSignatureConfiguration::setPgpSignaturesAllowed(allowPgp);
 #else
     if (allowPgp) {
@@ -457,17 +457,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int signatureNumber;
+    std::optional<unsigned int> signatureNumber;
     if (strlen(signatureName) > 0) {
         signatureNumber = atoi(signatureName);
         if (signatureNumber == 0) {
-            signatureNumber = -1;
+            signatureNumber = {};
         }
-    } else {
-        signatureNumber = 0;
     }
 
-    if (addNewSignature && signatureNumber > 0) {
+    if (addNewSignature && signatureNumber.has_value()) {
         // incompatible options
         print_version_usage(true);
         return 99;
@@ -532,7 +530,7 @@ int main(int argc, char *argv[])
     const std::vector<FormFieldSignature *> signatures = doc->getSignatureFields();
     const unsigned int sigCount = signatures.size();
 
-    if (signatureNumber == -1) {
+    if (!signatureNumber.has_value() && strlen(signatureName)) {
         for (unsigned int i = 0; i < sigCount; i++) {
             const GooString *goo = signatures.at(i)->getCreateWidget()->getField()->getFullyQualifiedName();
             if (!goo) {
@@ -546,21 +544,21 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (signatureNumber == -1) {
-            fprintf(stderr, "Signature field not found by name\n");
+        if (!signatureNumber.has_value()) {
+            fprintf(stderr, "Did not find signature field with name: %s\n", signatureName);
             return 2;
         }
     }
 
-    if (signatureNumber > 0) {
+    if (signatureNumber.has_value()) {
         // We are signing an existing signature field
         if (argc == 2) {
             fprintf(stderr, "An output filename for the signed document must be given\n");
             return 2;
         }
 
-        if (signatureNumber > static_cast<int>(sigCount)) {
-            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), signatureNumber);
+        if (signatureNumber > sigCount) {
+            printf("File '%s' does not contain a signature with number %d\n", fileName->c_str(), *signatureNumber);
             return 2;
         }
 
@@ -582,10 +580,10 @@ int main(int argc, char *argv[])
             return 2;
         }
 
-        FormFieldSignature *ffs = signatures.at(signatureNumber - 1);
+        FormFieldSignature *ffs = signatures.at(*signatureNumber - 1);
         auto [sig, file_size] = ffs->getCheckedSignature();
         if (sig) {
-            printf("Signature number %d is already signed\n", signatureNumber);
+            printf("Signature number %d is already signed\n", *signatureNumber);
             return 2;
         }
         if (etsiCAdESdetached) {

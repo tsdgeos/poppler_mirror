@@ -2596,7 +2596,7 @@ struct _PopplerIndexIter
 {
     PopplerDocument *document;
     const std::vector<OutlineItem *> *items;
-    int index;
+    size_t index;
 };
 
 G_DEFINE_BOXED_TYPE(PopplerIndexIter, poppler_index_iter, poppler_index_iter_copy, poppler_index_iter_free)
@@ -2795,7 +2795,7 @@ gboolean poppler_index_iter_next(PopplerIndexIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (int)iter->items->size()) {
+    if (iter->index >= iter->items->size()) {
         return FALSE;
     }
 
@@ -2826,7 +2826,7 @@ void poppler_index_iter_free(PopplerIndexIter *iter)
 struct _PopplerFontsIter
 {
     std::vector<FontInfo *> items;
-    int index;
+    size_t index;
 };
 
 G_DEFINE_BOXED_TYPE(PopplerFontsIter, poppler_fonts_iter, poppler_fonts_iter_copy, poppler_fonts_iter_free)
@@ -3020,7 +3020,7 @@ gboolean poppler_fonts_iter_next(PopplerFontsIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (int)iter->items.size()) {
+    if (iter->index >= iter->items.size()) {
         return FALSE;
     }
 
@@ -3376,7 +3376,7 @@ struct _PopplerLayersIter
 {
     PopplerDocument *document;
     GList *items;
-    int index;
+    guint index;
 };
 
 G_DEFINE_BOXED_TYPE(PopplerLayersIter, poppler_layers_iter, poppler_layers_iter_copy, poppler_layers_iter_free)
@@ -3546,7 +3546,7 @@ gboolean poppler_layers_iter_next(PopplerLayersIter *iter)
     g_return_val_if_fail(iter != nullptr, FALSE);
 
     iter->index++;
-    if (iter->index >= (gint)g_list_length(iter->items)) {
+    if (iter->index >= g_list_length(iter->items)) {
         return FALSE;
     }
 

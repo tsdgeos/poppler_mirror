@@ -592,7 +592,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? true : false);
         splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false, m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
 
-#ifdef USE_CMS
+#if USE_CMS
         splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
 #endif
 
@@ -620,7 +620,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         qpainter_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
 
-#ifdef USE_CMS
+#if USE_CMS
         qpainter_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
 #endif
 

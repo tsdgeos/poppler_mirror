@@ -16,7 +16,7 @@
 
 #include "config.h"
 
-#ifdef USE_CMS
+#if USE_CMS
 #    include <lcms2.h>
 #    include "GfxState.h"
 
