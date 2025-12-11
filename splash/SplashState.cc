@@ -210,12 +210,6 @@ void SplashState::setFillPattern(SplashPattern *fillPatternA)
     fillPattern = fillPatternA;
 }
 
-void SplashState::setScreen(SplashScreen *screenA)
-{
-    delete screen;
-    screen = screenA;
-}
-
 void SplashState::setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA)
 {
     lineDash = lineDashA;

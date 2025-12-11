@@ -1592,11 +1592,6 @@ void Splash::setFillPattern(SplashPattern *fillPattern)
     state->setFillPattern(fillPattern);
 }
 
-void Splash::setScreen(SplashScreen *screen)
-{
-    state->setScreen(screen);
-}
-
 void Splash::setBlendFunc(SplashBlendFunc func)
 {
     state->blendFunc = func;

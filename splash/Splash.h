@@ -116,7 +116,6 @@ public:
     void setMatrix(const std::array<SplashCoord, 6> &matrix);
     void setStrokePattern(SplashPattern *strokePattern);
     void setFillPattern(SplashPattern *fillPattern);
-    void setScreen(SplashScreen *screen);
     void setBlendFunc(SplashBlendFunc func);
     void setStrokeAlpha(SplashCoord alpha);
     void setFillAlpha(SplashCoord alpha);

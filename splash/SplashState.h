@@ -74,9 +74,6 @@ public:
     // Set the fill pattern.  This does not copy <fillPatternA>.
     void setFillPattern(SplashPattern *fillPatternA);
 
-    // Set the screen.  This does not copy <screenA>.
-    void setScreen(SplashScreen *screenA);
-
     // Set the line dash pattern.
     void setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA);
 
