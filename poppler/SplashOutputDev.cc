@@ -252,7 +252,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
 
 SplashFunctionPattern::~SplashFunctionPattern() = default;
 
-bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c)
+bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c) const
 {
     GfxColor gfxColor;
     double xc, yc;
@@ -294,7 +294,7 @@ SplashUnivariatePattern::SplashUnivariatePattern(SplashColorMode colorModeA, Gfx
 
 SplashUnivariatePattern::~SplashUnivariatePattern() = default;
 
-bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
+bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) const
 {
     GfxColor gfxColor;
     double xc, yc, t;
@@ -314,7 +314,7 @@ bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
     return true;
 }
 
-bool SplashUnivariatePattern::testPosition(int x, int y)
+bool SplashUnivariatePattern::testPosition(int x, int y) const
 {
     double xc, yc, t;
 
@@ -349,7 +349,7 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
 
 SplashRadialPattern::~SplashRadialPattern() = default;
 
-bool SplashRadialPattern::getParameter(double xs, double ys, double *t)
+bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
 {
     double b, c, s0, s1;
 
@@ -461,7 +461,7 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
 
 SplashAxialPattern::~SplashAxialPattern() = default;
 
-bool SplashAxialPattern::getParameter(double xc, double yc, double *t)
+bool SplashAxialPattern::getParameter(double xc, double yc, double *t) const
 {
     double s;
 
