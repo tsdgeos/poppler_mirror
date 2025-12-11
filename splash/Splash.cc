@@ -2687,7 +2687,6 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip)
 
 SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int w, int h, SplashCoord *mat, bool glyphMode)
 {
-    SplashBitmap *scaledMask;
     SplashClipResult clipRes;
     bool minorAxisZero;
     int x0, y0, x1, y1, scaledWidth, scaledHeight;
@@ -2730,9 +2729,8 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
             if (yp < 0 || yp > INT_MAX - 1) {
                 return splashErrBadArg;
             }
-            scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
-            blitMask(scaledMask, x0, y0, clipRes);
-            delete scaledMask;
+            const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
+            blitMask(scaledMask.get(), x0, y0, clipRes);
         }
 
         // scaling plus vertical flip
@@ -2757,10 +2755,9 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
             if (yp < 0 || yp > INT_MAX - 1) {
                 return splashErrBadArg;
             }
-            scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
-            vertFlipImage(scaledMask, scaledWidth, scaledHeight, 1);
-            blitMask(scaledMask, x0, y0, clipRes);
-            delete scaledMask;
+            const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
+            vertFlipImage(scaledMask.get(), scaledWidth, scaledHeight, 1);
+            blitMask(scaledMask.get(), x0, y0, clipRes);
         }
 
         // all other cases
@@ -2773,7 +2770,6 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
 
 void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, SplashCoord *mat, bool glyphMode)
 {
-    SplashBitmap *scaledMask;
     SplashClipResult clipRes, clipRes2;
     SplashPipe pipe;
     int scaledWidth, scaledHeight, t0, t1;
@@ -2877,10 +2873,9 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
     ir11 = r00 / det;
 
     // scale the input image
-    scaledMask = scaleMask(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight);
+    const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight);
     if (scaledMask->data == nullptr) {
         error(errInternal, -1, "scaledMask->data is NULL in Splash::arbitraryTransformMask");
-        delete scaledMask;
         return;
     }
 
@@ -3030,27 +3025,23 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, in
             }
         }
     }
-
-    delete scaledMask;
 }
 
 // Scale an image mask into a SplashBitmap.
-SplashBitmap *Splash::scaleMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight)
+std::unique_ptr<SplashBitmap> Splash::scaleMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight)
 {
-    SplashBitmap *dest;
-
-    dest = new SplashBitmap(scaledWidth, scaledHeight, 1, splashModeMono8, false);
+    std::unique_ptr<SplashBitmap> dest = std::make_unique<SplashBitmap>(scaledWidth, scaledHeight, 1, splashModeMono8, false);
     if (scaledHeight < srcHeight) {
         if (scaledWidth < srcWidth) {
-            scaleMaskYdownXdown(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+            scaleMaskYdownXdown(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
         } else {
-            scaleMaskYdownXup(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+            scaleMaskYdownXup(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
         }
     } else {
         if (scaledWidth < srcWidth) {
-            scaleMaskYupXdown(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+            scaleMaskYupXdown(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
         } else {
-            scaleMaskYupXup(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+            scaleMaskYupXup(src, srcData, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
         }
     }
     return dest;
@@ -3460,7 +3451,6 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest, SplashClipResult 
 SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, bool srcAlpha, int w, int h, SplashCoord *mat, bool interpolate, bool tilingPattern)
 {
     bool ok;
-    SplashBitmap *scaledImg;
     SplashClipResult clipRes;
     bool minorAxisZero;
     int x0, y0, x1, y1, scaledWidth, scaledHeight;
@@ -3537,15 +3527,14 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
             if (yp < 0 || yp > INT_MAX - 1) {
                 return splashErrBadArg;
             }
-            scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
+            const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
             if (scaledImg == nullptr) {
                 return splashErrBadArg;
             }
             if (tf != nullptr) {
-                (*tf)(srcData, scaledImg);
+                (*tf)(srcData, scaledImg.get());
             }
-            blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
-            delete scaledImg;
+            blitImage(scaledImg.get(), srcAlpha, x0, y0, clipRes);
         }
 
         // scaling plus vertical flip
@@ -3577,16 +3566,15 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
             if (yp < 0 || yp > INT_MAX - 1) {
                 return splashErrBadArg;
             }
-            scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
+            const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h, scaledWidth, scaledHeight, interpolate, tilingPattern);
             if (scaledImg == nullptr) {
                 return splashErrBadArg;
             }
             if (tf != nullptr) {
-                (*tf)(srcData, scaledImg);
+                (*tf)(srcData, scaledImg.get());
             }
-            vertFlipImage(scaledImg, scaledWidth, scaledHeight, nComps);
-            blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
-            delete scaledImg;
+            vertFlipImage(scaledImg.get(), scaledWidth, scaledHeight, nComps);
+            blitImage(scaledImg.get(), srcAlpha, x0, y0, clipRes);
         }
 
         // all other cases
@@ -3600,7 +3588,6 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
 SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, SplashCoord *mat, bool interpolate,
                                             bool tilingPattern)
 {
-    SplashBitmap *scaledImg;
     SplashClipResult clipRes, clipRes2;
     SplashPipe pipe;
     SplashColor pixel = {};
@@ -3742,14 +3729,14 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
     if (yp < 0 || yp > INT_MAX - 1) {
         return splashErrBadArg;
     }
-    scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate);
+    const std::unique_ptr<SplashBitmap> scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate);
 
     if (scaledImg == nullptr) {
         return splashErrBadArg;
     }
 
     if (tf != nullptr) {
-        (*tf)(srcData, scaledImg);
+        (*tf)(srcData, scaledImg.get());
     }
     // construct the three sections
     i = 0;
@@ -3910,7 +3897,6 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
         }
     }
 
-    delete scaledImg;
     return splashOk;
 }
 
@@ -3931,37 +3917,33 @@ static bool isImageInterpolationRequired(int srcWidth, int srcHeight, int scaled
 }
 
 // Scale an image into a SplashBitmap.
-SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern)
+std::unique_ptr<SplashBitmap> Splash::scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern)
 {
-    SplashBitmap *dest;
-
-    dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, true, bitmap->getSeparationList());
+    std::unique_ptr<SplashBitmap> dest = std::make_unique<SplashBitmap>(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, true, bitmap->getSeparationList());
     if (dest->getDataPtr() != nullptr && srcHeight > 0 && srcWidth > 0) {
         bool success = true;
         if (scaledHeight < srcHeight) {
             if (scaledWidth < srcWidth) {
-                success = scaleImageYdownXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                success = scaleImageYdownXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
             } else {
-                success = scaleImageYdownXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                success = scaleImageYdownXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
             }
         } else {
             if (scaledWidth < srcWidth) {
-                success = scaleImageYupXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                success = scaleImageYupXdown(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
             } else {
                 if (!tilingPattern && isImageInterpolationRequired(srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate)) {
-                    success = scaleImageYupXupBilinear(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                    success = scaleImageYupXupBilinear(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
                 } else {
-                    success = scaleImageYupXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+                    success = scaleImageYupXup(src, srcData, srcMode, nComps, srcAlpha, srcWidth, srcHeight, scaledWidth, scaledHeight, dest.get());
                 }
             }
         }
         if (unlikely(!success)) {
-            delete dest;
-            dest = nullptr;
+            return {};
         }
     } else {
-        delete dest;
-        dest = nullptr;
+        return {};
     }
     return dest;
 }
