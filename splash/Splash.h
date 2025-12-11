@@ -107,7 +107,7 @@ public:
     SplashCoord getFlatness();
     SplashCoord getLineDashPhase();
     bool getStrokeAdjust();
-    SplashClip *getClip();
+    const SplashClip &getClip() const;
     SplashBitmap *getSoftMask();
     bool getInNonIsolatedGroup();
 

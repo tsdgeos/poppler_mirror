@@ -109,7 +109,7 @@ private:
     std::vector<SplashCoord> lineDash;
     SplashCoord lineDashPhase;
     bool strokeAdjust;
-    SplashClip *clip;
+    std::unique_ptr<SplashClip> clip;
     SplashBitmap *softMask;
     bool deleteSoftMask;
     bool inNonIsolatedGroup;

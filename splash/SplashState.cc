@@ -66,7 +66,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     flatness = 1;
     lineDashPhase = 0;
     strokeAdjust = false;
-    clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
+    clip = std::make_unique<SplashClip>(0, 0, width - 0.001, height - 0.001, vectorAntialias);
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
@@ -119,7 +119,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     flatness = 1;
     lineDashPhase = 0;
     strokeAdjust = false;
-    clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
+    clip = std::make_unique<SplashClip>(0, 0, width - 0.001, height - 0.001, vectorAntialias);
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
@@ -192,7 +192,6 @@ SplashState::~SplashState()
     delete strokePattern;
     delete fillPattern;
     delete screen;
-    delete clip;
     if (deleteSoftMask && softMask) {
         delete softMask;
     }

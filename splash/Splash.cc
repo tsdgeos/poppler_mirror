@@ -1558,9 +1558,9 @@ bool Splash::getStrokeAdjust()
     return state->strokeAdjust;
 }
 
-SplashClip *Splash::getClip()
+const SplashClip &Splash::getClip() const
 {
-    return state->clip;
+    return *state->clip;
 }
 
 SplashBitmap *Splash::getSoftMask()
@@ -2530,7 +2530,7 @@ SplashError Splash::fillChar(SplashCoord x, SplashCoord y, int c, SplashFont *fo
     xFrac = splashFloor((xt - x0) * splashFontFraction);
     y0 = splashFloor(yt);
     yFrac = splashFloor((yt - y0) * splashFontFraction);
-    if (!font->getGlyph(c, xFrac, yFrac, &glyph, x0, y0, state->clip, &clipRes)) {
+    if (!font->getGlyph(c, xFrac, yFrac, &glyph, x0, y0, state->clip.get(), &clipRes)) {
         return splashErrNoGlyph;
     }
     if (clipRes != splashClipAllOutside) {
@@ -5305,7 +5305,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     double xt = 0., xa = 0., yt = 0.;
 
     const int bitmapWidth = bitmap->getWidth();
-    SplashClip *clip = getClip();
+    const SplashClip &clip = getClip();
     SplashBitmap *blitTarget = bitmap;
     SplashColorPtr bitmapData = bitmap->getDataPtr();
     const int bitmapOffLimit = bitmap->getHeight() * bitmap->getRowSize();
@@ -5558,7 +5558,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                         // FIXME : standard rectangular clipping can be done for a
                         // complete scanline which is faster
                         // --> see SplashClip and its methods
-                        if (!clip->test(X, Y)) {
+                        if (!clip.test(X, Y)) {
                             continue;
                         }
 
@@ -5726,7 +5726,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                         // FIXME : standard rectangular clipping can be done for a
                         // complete scanline which is faster
                         // --> see SplashClip and its methods
-                        if (!clip->test(X, Y)) {
+                        if (!clip.test(X, Y)) {
                             continue;
                         }
 
