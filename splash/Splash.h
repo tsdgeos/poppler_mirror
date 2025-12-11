@@ -201,7 +201,7 @@ public:
 
     // Composite a rectangular region from <src> onto this Splash
     // object.
-    SplashError composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout = false, SplashCoord knockoutOpacity = 1.0);
+    SplashError composite(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout = false, SplashCoord knockoutOpacity = 1.0);
 
     // Composite this Splash object onto a background color.  The
     // background alpha is assumed to be 1.
@@ -210,8 +210,8 @@ public:
     // Copy a rectangular region from <src> onto the bitmap belonging to
     // this Splash object.  The destination alpha values are all set to
     // zero.
-    SplashError blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
-    void blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest);
+    SplashError blitTransparent(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
+    void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest);
 
     //----- misc
 
@@ -292,7 +292,7 @@ private:
     void scaleMaskYdownXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void scaleMaskYupXdown(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void blitMask(SplashBitmap *src, int xDest, int yDest, SplashClipResult clipRes);
+    void blitMask(const SplashBitmap &src, int xDest, int yDest, SplashClipResult clipRes);
     SplashError arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, SplashCoord *mat, bool interpolate,
                                         bool tilingPattern = false);
     std::unique_ptr<SplashBitmap> scaleImage(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, bool interpolate,
@@ -303,8 +303,8 @@ private:
     static bool scaleImageYupXup(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     static bool scaleImageYupXupBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void vertFlipImage(SplashBitmap *img, int width, int height, int nComps);
-    void blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes);
-    void blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
+    void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes);
+    void blitImageClipped(const SplashBitmap &src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
     static void dumpPath(const SplashPath &path);
     static void dumpXPath(const SplashXPath &path);
 

@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2012, 2018, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
@@ -100,7 +100,7 @@ public:
 
     bool convertToXBGR(ConversionMode conversionMode = conversionOpaque);
 
-    void getPixel(int x, int y, SplashColorPtr pixel);
+    void getPixel(int x, int y, SplashColorPtr pixel) const;
     void getRGBLine(int y, SplashColorPtr line);
     void getXBGRLine(int y, SplashColorPtr line, ConversionMode conversionMode = conversionOpaque);
     void getCMYKLine(int y, SplashColorPtr line);

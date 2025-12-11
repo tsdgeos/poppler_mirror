@@ -3971,7 +3971,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
         SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
         int shapeTx = (knockout) ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
         int shapeTy = (knockout) ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
-        splash->blitTransparent(transpGroup->origBitmap, tx, ty, 0, 0, w, h);
+        splash->blitTransparent(*transpGroup->origBitmap, tx, ty, 0, 0, w, h);
         splash->setInNonIsolatedGroup(shape, shapeTx, shapeTy);
     }
     transpGroup->tBitmap = bitmap;
@@ -4007,7 +4007,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<d
     if (tx < bitmap->getWidth() && ty < bitmap->getHeight()) {
         SplashCoord knockoutOpacity = (transpGroupStack->next != nullptr) ? transpGroupStack->next->knockoutOpacity : transpGroupStack->knockoutOpacity;
         splash->setOverprintMask(0xffffffff, false);
-        splash->composite(tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
+        splash->composite(*tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
         fontEngine->setAA(transpGroupStack->fontAA);
         if (transpGroupStack->next != nullptr && transpGroupStack->next->shape != nullptr) {
             transpGroupStack->next->knockout = true;
@@ -4421,7 +4421,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
             for (int x = 0; x < imgData.repeatX; ++x) {
                 x0 = splashFloor(matc[4]) + x * tBitmap->getWidth();
                 y0 = splashFloor(matc[5]) + y * tBitmap->getHeight();
-                splash->blitImage(tBitmap, true, x0, y0);
+                splash->blitImage(*tBitmap, true, x0, y0);
             }
         }
         retValue = true;

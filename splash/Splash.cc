@@ -2730,7 +2730,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
                 return splashErrBadArg;
             }
             const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
-            blitMask(scaledMask.get(), x0, y0, clipRes);
+            blitMask(*scaledMask, x0, y0, clipRes);
         }
 
         // scaling plus vertical flip
@@ -2757,7 +2757,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
             }
             const std::unique_ptr<SplashBitmap> scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
             vertFlipImage(scaledMask.get(), scaledWidth, scaledHeight, 1);
-            blitMask(scaledMask.get(), x0, y0, clipRes);
+            blitMask(*scaledMask, x0, y0, clipRes);
         }
 
         // all other cases
@@ -3394,17 +3394,16 @@ void Splash::scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWi
     gfree(lineBuf);
 }
 
-void Splash::blitMask(SplashBitmap *src, int xDest, int yDest, SplashClipResult clipRes)
+void Splash::blitMask(const SplashBitmap &src, int xDest, int yDest, SplashClipResult clipRes)
 {
     SplashPipe pipe;
-    unsigned char *p;
-    int w, h, x, y;
+    int x, y;
 
-    w = src->getWidth();
-    h = src->getHeight();
-    p = src->getDataPtr();
+    const int w = src.getWidth();
+    const int h = src.getHeight();
+    const unsigned char *p = src.getDataPtr();
     if (p == nullptr) {
-        error(errInternal, -1, "src->getDataPtr() is NULL in Splash::blitMask");
+        error(errInternal, -1, "src.getDataPtr() is NULL in Splash::blitMask");
         return;
     }
     if (vectorAntialias && clipRes != splashClipAllInside) {
@@ -3534,7 +3533,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
             if (tf != nullptr) {
                 (*tf)(srcData, scaledImg.get());
             }
-            blitImage(scaledImg.get(), srcAlpha, x0, y0, clipRes);
+            blitImage(*scaledImg, srcAlpha, x0, y0, clipRes);
         }
 
         // scaling plus vertical flip
@@ -3574,7 +3573,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
                 (*tf)(srcData, scaledImg.get());
             }
             vertFlipImage(scaledImg.get(), scaledWidth, scaledHeight, nComps);
-            blitImage(scaledImg.get(), srcAlpha, x0, y0, clipRes);
+            blitImage(*scaledImg, srcAlpha, x0, y0, clipRes);
         }
 
         // all other cases
@@ -4920,24 +4919,23 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height, int nComps)
     gfree(lineBuf);
 }
 
-void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest)
+void Splash::blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest)
 {
-    SplashClipResult clipRes = state->clip->testRect(xDest, yDest, xDest + src->getWidth() - 1, yDest + src->getHeight() - 1);
+    SplashClipResult clipRes = state->clip->testRect(xDest, yDest, xDest + src.getWidth() - 1, yDest + src.getHeight() - 1);
     if (clipRes != splashClipAllOutside) {
         blitImage(src, srcAlpha, xDest, yDest, clipRes);
     }
 }
 
-void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes)
+void Splash::blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes)
 {
     SplashPipe pipe;
     SplashColor pixel = {};
-    unsigned char *ap;
     int w, h, x0, y0, x1, y1, x, y;
 
     // split the image into clipped and unclipped regions
-    w = src->getWidth();
-    h = src->getHeight();
+    w = src.getWidth();
+    h = src.getHeight();
     if (clipRes == splashClipAllInside) {
         x0 = 0;
         y0 = 0;
@@ -4975,9 +4973,9 @@ void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, S
         if (srcAlpha) {
             for (y = y0; y < y1; ++y) {
                 pipeSetXY(&pipe, xDest + x0, yDest + y);
-                ap = src->getAlphaPtr() + y * w + x0;
+                const unsigned char *ap = src.getAlphaPtr() + y * w + x0;
                 for (x = x0; x < x1; ++x) {
-                    src->getPixel(x, y, pixel);
+                    src.getPixel(x, y, pixel);
                     pipe.shape = *ap++;
                     (this->*pipe.run)(&pipe);
                 }
@@ -4986,7 +4984,7 @@ void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, S
             for (y = y0; y < y1; ++y) {
                 pipeSetXY(&pipe, xDest + x0, yDest + y);
                 for (x = x0; x < x1; ++x) {
-                    src->getPixel(x, y, pixel);
+                    src.getPixel(x, y, pixel);
                     (this->*pipe.run)(&pipe);
                 }
             }
@@ -5008,11 +5006,11 @@ void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest, S
     }
 }
 
-void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h)
+void Splash::blitImageClipped(const SplashBitmap &src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h)
 {
     SplashPipe pipe;
     SplashColor pixel = {};
-    unsigned char *ap;
+    const unsigned char *ap;
     int x, y;
 
     if (vectorAntialias) {
@@ -5020,9 +5018,9 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
         drawAAPixelInit();
         if (srcAlpha) {
             for (y = 0; y < h; ++y) {
-                ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+                ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     pipe.shape = *ap++;
                     drawAAPixel(&pipe, xDest + x, yDest + y);
                 }
@@ -5030,7 +5028,7 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
         } else {
             for (y = 0; y < h; ++y) {
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     pipe.shape = 255;
                     drawAAPixel(&pipe, xDest + x, yDest + y);
                 }
@@ -5040,11 +5038,11 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
         pipeInit(&pipe, xDest, yDest, nullptr, pixel, (unsigned char)splashRound(state->fillAlpha * 255), srcAlpha, false);
         if (srcAlpha) {
             for (y = 0; y < h; ++y) {
-                ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+                ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
                 pipeSetXY(&pipe, xDest, yDest + y);
                 for (x = 0; x < w; ++x) {
                     if (state->clip->test(xDest + x, yDest + y)) {
-                        src->getPixel(xSrc + x, ySrc + y, pixel);
+                        src.getPixel(xSrc + x, ySrc + y, pixel);
                         pipe.shape = *ap++;
                         (this->*pipe.run)(&pipe);
                     } else {
@@ -5058,7 +5056,7 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
                 pipeSetXY(&pipe, xDest, yDest + y);
                 for (x = 0; x < w; ++x) {
                     if (state->clip->test(xDest + x, yDest + y)) {
-                        src->getPixel(xSrc + x, ySrc + y, pixel);
+                        src.getPixel(xSrc + x, ySrc + y, pixel);
                         (this->*pipe.run)(&pipe);
                     } else {
                         pipeIncX(&pipe);
@@ -5069,15 +5067,15 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha, int xSrc, int yS
     }
 }
 
-SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout, SplashCoord knockoutOpacity)
+SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h, bool noClip, bool nonIsolated, bool knockout, SplashCoord knockoutOpacity)
 {
     SplashPipe pipe;
     SplashColor pixel;
     unsigned char alpha;
-    unsigned char *ap;
+    const unsigned char *ap;
     int x, y;
 
-    if (src->mode != bitmap->mode) {
+    if (src.mode != bitmap->mode) {
         return splashErrModeMismatch;
     }
 
@@ -5085,19 +5083,19 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
         return splashErrZeroImage;
     }
 
-    if (src->getSeparationList()->size() > bitmap->getSeparationList()->size()) {
-        for (x = bitmap->getSeparationList()->size(); x < (int)src->getSeparationList()->size(); x++) {
-            bitmap->getSeparationList()->push_back(((*src->getSeparationList())[x])->copyAsOwnType());
+    if (src.getSeparationList()->size() > bitmap->getSeparationList()->size()) {
+        for (x = bitmap->getSeparationList()->size(); x < (int)src.getSeparationList()->size(); x++) {
+            bitmap->getSeparationList()->push_back(((*src.getSeparationList())[x])->copyAsOwnType());
         }
     }
-    if (src->alpha) {
+    if (src.alpha) {
         pipeInit(&pipe, xDest, yDest, nullptr, pixel, (unsigned char)splashRound(state->fillAlpha * 255), true, nonIsolated, knockout, (unsigned char)splashRound(knockoutOpacity * 255));
         if (noClip) {
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
-                ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+                ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     alpha = *ap++;
                     // this uses shape instead of alpha, which isn't technically
                     // correct, but works out the same
@@ -5108,9 +5106,9 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
         } else {
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
-                ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+                ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     alpha = *ap++;
                     if (state->clip->test(xDest + x, yDest + y)) {
                         // this uses shape instead of alpha, which isn't technically
@@ -5129,7 +5127,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     (this->*pipe.run)(&pipe);
                 }
             }
@@ -5137,7 +5135,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc, int xDest, 
             for (y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 for (x = 0; x < w; ++x) {
-                    src->getPixel(xSrc + x, ySrc + y, pixel);
+                    src.getPixel(xSrc + x, ySrc + y, pixel);
                     if (state->clip->test(xDest + x, yDest + y)) {
                         (this->*pipe.run)(&pipe);
                     } else {
@@ -5787,13 +5785,13 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     return true;
 }
 
-SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int xDest, int yDest, int w, int h)
+SplashError Splash::blitTransparent(const SplashBitmap &src, int xSrc, int ySrc, int xDest, int yDest, int w, int h)
 {
     SplashColorPtr p, sp;
     unsigned char *q;
     int x, y, mask, srcMask, width = w, height = h;
 
-    if (src->mode != bitmap->mode) {
+    if (src.mode != bitmap->mode) {
         return splashErrModeMismatch;
     }
 
@@ -5801,12 +5799,12 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
         return splashErrZeroImage;
     }
 
-    if (src->getWidth() - xSrc < width) {
-        width = src->getWidth() - xSrc;
+    if (src.getWidth() - xSrc < width) {
+        width = src.getWidth() - xSrc;
     }
 
-    if (src->getHeight() - ySrc < height) {
-        height = src->getHeight() - ySrc;
+    if (src.getHeight() - ySrc < height) {
+        height = src.getHeight() - ySrc;
     }
 
     if (bitmap->getWidth() - xDest < width) {
@@ -5830,7 +5828,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + (xDest >> 3)];
             mask = 0x80 >> (xDest & 7);
-            sp = &src->data[(ySrc + y) * src->rowSize + (xSrc >> 3)];
+            sp = &src.data[(ySrc + y) * src.rowSize + (xSrc >> 3)];
             srcMask = 0x80 >> (xSrc & 7);
             for (x = 0; x < width; ++x) {
                 if (*sp & srcMask) {
@@ -5852,7 +5850,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeMono8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + xDest];
-            sp = &src->data[(ySrc + y) * src->rowSize + xSrc];
+            sp = &src.data[(ySrc + y) * src.rowSize + xSrc];
             for (x = 0; x < width; ++x) {
                 *p++ = *sp++;
             }
@@ -5862,7 +5860,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeBGR8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + 3 * xDest];
-            sp = &src->data[(ySrc + y) * src->rowSize + 3 * xSrc];
+            sp = &src.data[(ySrc + y) * src.rowSize + 3 * xSrc];
             for (x = 0; x < width; ++x) {
                 *p++ = *sp++;
                 *p++ = *sp++;
@@ -5873,7 +5871,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeXBGR8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
-            sp = &src->data[(ySrc + y) * src->rowSize + 4 * xSrc];
+            sp = &src.data[(ySrc + y) * src.rowSize + 4 * xSrc];
             for (x = 0; x < width; ++x) {
                 *p++ = *sp++;
                 *p++ = *sp++;
@@ -5886,7 +5884,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeCMYK8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
-            sp = &src->data[(ySrc + y) * src->rowSize + 4 * xSrc];
+            sp = &src.data[(ySrc + y) * src.rowSize + 4 * xSrc];
             for (x = 0; x < width; ++x) {
                 *p++ = *sp++;
                 *p++ = *sp++;
@@ -5898,7 +5896,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc, int x
     case splashModeDeviceN8:
         for (y = 0; y < height; ++y) {
             p = &bitmap->data[(yDest + y) * bitmap->rowSize + (SPOT_NCOMPS + 4) * xDest];
-            sp = &src->data[(ySrc + y) * src->rowSize + (SPOT_NCOMPS + 4) * xSrc];
+            sp = &src.data[(ySrc + y) * src.rowSize + (SPOT_NCOMPS + 4) * xSrc];
             for (x = 0; x < width; ++x) {
                 for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *p++ = *sp++;
