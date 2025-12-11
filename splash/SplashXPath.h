@@ -63,7 +63,7 @@ public:
     // lines) <path>.  Transforms all points from user space to device
     // space, via <matrix>.  If <closeSubpaths> is true, closes all open
     // subpaths.
-    SplashXPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
+    SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines = false, int linePosI = 0);
 
     ~SplashXPath();
 
@@ -75,7 +75,7 @@ public:
     void aaScale();
 
 protected:
-    void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
+    void transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
     void grow(int nSegs);
     void addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness, bool first, bool last, bool end0, bool end1);

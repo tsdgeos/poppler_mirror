@@ -1418,7 +1418,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
 //------------------------------------------------------------------------
 
 // Transform a point from user space to device space.
-inline void Splash::transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo)
+inline void Splash::transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo)
 {
     //                          [ m[0] m[1] 0 ]
     // [xo yo 1] = [xi yi 1] *  [ m[2] m[3] 0 ]
@@ -1488,7 +1488,7 @@ Splash::~Splash()
 // state read
 //------------------------------------------------------------------------
 
-SplashCoord *Splash::getMatrix()
+const std::array<SplashCoord, 6> &Splash::getMatrix() const
 {
     return state->matrix;
 }
@@ -1577,9 +1577,9 @@ bool Splash::getInNonIsolatedGroup()
 // state write
 //------------------------------------------------------------------------
 
-void Splash::setMatrix(SplashCoord *matrix)
+void Splash::setMatrix(const std::array<SplashCoord, 6> &matrix)
 {
-    memcpy(state->matrix, matrix, 6 * sizeof(SplashCoord));
+    state->matrix = matrix;
 }
 
 void Splash::setStrokePattern(SplashPattern *strokePattern)
@@ -2022,7 +2022,7 @@ void Splash::strokeWide(const SplashPath &path, SplashCoord w)
     fillWithPattern(path2.get(), false, state->strokePattern, state->strokeAlpha);
 }
 
-std::unique_ptr<SplashPath> Splash::flattenPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness)
+std::unique_ptr<SplashPath> Splash::flattenPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness)
 {
     SplashCoord flatness2;
     unsigned char flag;
@@ -2055,7 +2055,7 @@ std::unique_ptr<SplashPath> Splash::flattenPath(const SplashPath &path, SplashCo
     return fPath;
 }
 
-void Splash::flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord *matrix, SplashCoord flatness2, SplashPath *fPath)
+void Splash::flattenCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness2, SplashPath *fPath)
 {
     SplashCoord cx[splashMaxCurveSplits + 1][3];
     SplashCoord cy[splashMaxCurveSplits + 1][3];
@@ -2685,7 +2685,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip)
     }
 }
 
-SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int w, int h, SplashCoord *mat, bool glyphMode)
+SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int w, int h, const std::array<SplashCoord, 6> &mat, bool glyphMode)
 {
     SplashClipResult clipRes;
     bool minorAxisZero;
@@ -2768,7 +2768,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData, int 
     return splashOk;
 }
 
-void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, SplashCoord *mat, bool glyphMode)
+void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat, bool glyphMode)
 {
     SplashClipResult clipRes, clipRes2;
     SplashPipe pipe;
@@ -3447,7 +3447,7 @@ void Splash::blitMask(const SplashBitmap &src, int xDest, int yDest, SplashClipR
     }
 }
 
-SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, bool srcAlpha, int w, int h, SplashCoord *mat, bool interpolate, bool tilingPattern)
+SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, bool srcAlpha, int w, int h, const std::array<SplashCoord, 6> &mat, bool interpolate, bool tilingPattern)
 {
     bool ok;
     SplashClipResult clipRes;
@@ -3584,8 +3584,8 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
     return splashOk;
 }
 
-SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, SplashCoord *mat, bool interpolate,
-                                            bool tilingPattern)
+SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat,
+                                            bool interpolate, bool tilingPattern)
 {
     SplashClipResult clipRes, clipRes2;
     SplashPipe pipe;
@@ -5315,7 +5315,7 @@ bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     SplashColorPtr bitmapData = bitmap->getDataPtr();
     const int bitmapOffLimit = bitmap->getHeight() * bitmap->getRowSize();
     SplashColorPtr bitmapAlpha = bitmap->getAlphaPtr();
-    SplashCoord *userToCanvasMatrix = getMatrix();
+    const std::array<SplashCoord, 6> &userToCanvasMatrix = getMatrix();
     const SplashColorMode bitmapMode = bitmap->getMode();
     bool hasAlpha = (bitmapAlpha != nullptr);
     const int rowSize = bitmap->getRowSize();

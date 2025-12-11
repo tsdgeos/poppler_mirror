@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2014, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2014, 2019, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -43,18 +43,10 @@ struct SplashFontCacheTag
 // SplashFont
 //------------------------------------------------------------------------
 
-SplashFont::SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA, const SplashCoord *textMatA, bool aaA)
+SplashFont::SplashFont(SplashFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA) : mat(matA), textMat(textMatA)
 {
     fontFile = fontFileA;
     fontFile->incRefCnt();
-    mat[0] = matA[0];
-    mat[1] = matA[1];
-    mat[2] = matA[2];
-    mat[3] = matA[3];
-    textMat[0] = textMatA[0];
-    textMat[1] = textMatA[1];
-    textMat[2] = textMatA[2];
-    textMat[3] = textMatA[3];
     aa = aaA;
 
     cache = nullptr;

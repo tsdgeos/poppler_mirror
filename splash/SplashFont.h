@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2018, 2019, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2018, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -25,6 +25,8 @@
 #include "SplashTypes.h"
 #include "SplashClip.h"
 #include "poppler_private_export.h"
+
+#include <array>
 
 struct SplashGlyphBitmap;
 struct SplashFontCacheTag;
@@ -46,7 +48,7 @@ class SplashPath;
 class POPPLER_PRIVATE_EXPORT SplashFont
 {
 public:
-    SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA, const SplashCoord *textMatA, bool aaA);
+    SplashFont(SplashFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA);
 
     // This must be called after the constructor, so that the subclass
     // constructor has a chance to compute the bbox.
@@ -60,7 +62,7 @@ public:
     SplashFontFile *getFontFile() { return fontFile; }
 
     // Return true if <this> matches the specified font file and matrix.
-    bool matches(SplashFontFile *fontFileA, const SplashCoord *matA, const SplashCoord *textMatA) const
+    bool matches(SplashFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA) const
     {
         return fontFileA == fontFile && matA[0] == mat[0] && matA[1] == mat[1] && matA[2] == mat[2] && matA[3] == mat[3] && textMatA[0] == textMat[0] && textMatA[1] == textMat[1] && textMatA[2] == textMat[2] && textMatA[3] == textMat[3];
     }
@@ -85,9 +87,6 @@ public:
     // < 0 means not known
     virtual double getGlyphAdvance(int c) { return -1; }
 
-    // Return the font transform matrix.
-    SplashCoord *getMatrix() { return mat; }
-
     // Return the glyph bounding box.
     void getBBox(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA)
     {
@@ -99,10 +98,10 @@ public:
 
 protected:
     SplashFontFile *fontFile;
-    SplashCoord mat[4]; // font transform matrix
-                        //   (text space -> device space)
-    SplashCoord textMat[4]; // text transform matrix
-                            //   (text space -> user space)
+    const std::array<SplashCoord, 4> mat; // font transform matrix
+                                          //   (text space -> device space)
+    const std::array<SplashCoord, 4> textMat; // text transform matrix
+                                              //   (text space -> user space)
     bool aa; // anti-aliasing
     int xMin, yMin, xMax, yMax; // glyph bounding box
     unsigned char *cache; // glyph bitmap cache

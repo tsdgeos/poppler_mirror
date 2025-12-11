@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2009, 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2020 Peter Wang <novalazy@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -146,7 +146,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
 
 SplashState::SplashState(const SplashState *state)
 {
-    memcpy(matrix, state->matrix, 6 * sizeof(SplashCoord));
+    matrix = state->matrix;
     strokePattern = state->strokePattern->copy();
     fillPattern = state->fillPattern->copy();
     screen = state->screen->copy();

@@ -67,7 +67,7 @@ public:
     SplashError clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
 
     // Intersect the clip with <path>.
-    SplashError clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo);
+    SplashError clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo);
 
     // Returns true if (<x>,<y>) is inside the clip.
     bool test(int x, int y)

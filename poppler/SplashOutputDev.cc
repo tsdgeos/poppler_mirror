@@ -1309,7 +1309,6 @@ void SplashOutputDev::startDoc(PDFDoc *docA)
 void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 {
     int w, h;
-    SplashCoord mat[6];
     SplashColor color;
 
     xref = xrefA;
@@ -1349,6 +1348,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     splash->setMinLineWidth(s_minLineWidth);
     if (state) {
         const double *ctm = state->getCTM();
+        std::array<SplashCoord, 6> mat;
         mat[0] = (SplashCoord)ctm[0];
         mat[1] = (SplashCoord)ctm[1];
         mat[2] = (SplashCoord)ctm[2];
@@ -1433,7 +1433,7 @@ void SplashOutputDev::updateAll(GfxState *state)
 
 void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
 
     const double *ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
@@ -1818,7 +1818,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashFontSrc *fontsrc = nullptr;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;
-    SplashCoord mat[4];
+    std::array<SplashCoord, 4> mat;
     bool recreateFont = false;
     bool doAdjustFontMatrix = false;
 
@@ -2596,7 +2596,7 @@ bool SplashOutputDev::imageMaskSrc(void *data, SplashColorPtr line)
 
 void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
 
     if (state->getFillColorSpace()->isNonMarking()) {
@@ -2642,7 +2642,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
 void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
 {
     const double *ctm;
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
     SplashColor maskColor;
@@ -3221,7 +3221,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
 
 void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageData imgData;
     SplashColorMode srcMode;
     SplashImageSource src;
@@ -3485,7 +3485,7 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
 
 void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutMaskedImageData imgData;
     SplashOutImageMaskData imgMaskData;
     SplashColorMode srcMode;
@@ -3642,7 +3642,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                           bool maskInterpolate)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageData imgData;
     SplashOutImageData imgMaskData;
     SplashColorMode srcMode;
@@ -4218,7 +4218,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double width, height;
     int surface_width, surface_height, result_width, result_height, i;
     int repeatX, repeatY;
-    SplashCoord matc[6];
+    std::array<SplashCoord, 6> matc;
     Matrix m1;
     const double *ctm;
     double savedCTM[6];

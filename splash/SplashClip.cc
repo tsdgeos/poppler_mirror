@@ -182,7 +182,7 @@ static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0,
 static_assert(!isRect({ 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }, { 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 0.0, 0.0, 0.0, 0 }));
 }
 
-SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo)
+SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo)
 {
     int yMinAA, yMaxAA;
 

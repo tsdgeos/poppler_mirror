@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -25,6 +25,7 @@
 
 #include "SplashTypes.h"
 
+#include <array>
 #include <vector>
 
 class SplashPattern;
@@ -93,7 +94,7 @@ public:
 private:
     explicit SplashState(const SplashState *state);
 
-    SplashCoord matrix[6];
+    std::array<SplashCoord, 6> matrix;
     SplashPattern *strokePattern;
     SplashPattern *fillPattern;
     SplashScreen *screen;

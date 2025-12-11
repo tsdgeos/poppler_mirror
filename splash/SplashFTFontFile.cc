@@ -14,7 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2014, 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2018, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2018, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
@@ -119,7 +119,7 @@ SplashFTFontFile::~SplashFTFontFile()
     }
 }
 
-SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat, const SplashCoord *textMat)
+SplashFont *SplashFTFontFile::makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat)
 {
     SplashFont *font;
 

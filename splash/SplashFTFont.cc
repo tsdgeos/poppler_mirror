@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -53,7 +53,7 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, cons
 // SplashFTFont
 //------------------------------------------------------------------------
 
-SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA, const SplashCoord *textMatA)
+SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA)
     : SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), textScale(0), enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting), enableSlightHinting(fontFileA->engine->enableSlightHinting), isOk(false)
 {
     FT_Face face;
