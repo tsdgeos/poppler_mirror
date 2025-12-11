@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2021, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -25,6 +25,7 @@
 
 #include "SplashTypes.h"
 
+#include <array>
 #include <vector>
 
 class SplashPattern;
@@ -57,7 +58,7 @@ class SplashState
 public:
     // Create a new state object, initialized with default settings.
     SplashState(int width, int height, bool vectorAntialias, SplashScreenParams *screenParams);
-    SplashState(int width, int height, bool vectorAntialias, SplashScreen *screenA);
+    SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA);
 
     // Copy a state object.
     SplashState *copy() const { return new SplashState(this); }
@@ -72,9 +73,6 @@ public:
 
     // Set the fill pattern.  This does not copy <fillPatternA>.
     void setFillPattern(SplashPattern *fillPatternA);
-
-    // Set the screen.  This does not copy <screenA>.
-    void setScreen(SplashScreen *screenA);
 
     // Set the line dash pattern.
     void setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA);
@@ -93,7 +91,7 @@ public:
 private:
     explicit SplashState(const SplashState *state);
 
-    SplashCoord matrix[6];
+    std::array<SplashCoord, 6> matrix;
     SplashPattern *strokePattern;
     SplashPattern *fillPattern;
     SplashScreen *screen;
@@ -111,7 +109,7 @@ private:
     std::vector<SplashCoord> lineDash;
     SplashCoord lineDashPhase;
     bool strokeAdjust;
-    SplashClip *clip;
+    std::unique_ptr<SplashClip> clip;
     SplashBitmap *softMask;
     bool deleteSoftMask;
     bool inNonIsolatedGroup;

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pdfsig\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 11:15+0200\n"
+"POT-Creation-Date: 2025-12-10 11:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: pdfsig.cc:617
+#: pdfsig.cc:615
 #, c++-format
 msgid "Date: {0:s}"
 msgstr ""
 
-#: pdfsig.cc:617
+#: pdfsig.cc:615
 #, c++-format
 msgid "Digitally signed by {0:s}"
 msgstr ""

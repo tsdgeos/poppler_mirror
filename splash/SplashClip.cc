@@ -61,7 +61,7 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
     yMaxI = splashCeil(yMax) - 1;
 }
 
-SplashClip::SplashClip(const SplashClip *clip)
+SplashClip::SplashClip(const SplashClip *clip, PrivateTag)
 {
     antialias = clip->antialias;
     xMin = clip->xMin;
@@ -182,7 +182,7 @@ static_assert(!isRect({ 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 1.0, 0.0, 1.0, 0.0,
 static_assert(!isRect({ 0.0, 0.0, 0.0, 1.0, 0.0, 0 }, { 0.0, 0.0, 2.0, 0.0, 0.0, 0 }, { 2.0, 0.0, 2.0, 1.0, 0.0, 0 }, { 2.0, 0.0, 0.0, 0.0, 0.0, 0 }));
 }
 
-SplashError SplashClip::clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo)
+SplashError SplashClip::clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo)
 {
     int yMinAA, yMaxAA;
 
@@ -339,7 +339,7 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
     }
 }
 
-bool SplashClip::testClipPaths(int x, int y)
+bool SplashClip::testClipPaths(int x, int y) const
 {
     if (antialias) {
         x *= splashAASize;

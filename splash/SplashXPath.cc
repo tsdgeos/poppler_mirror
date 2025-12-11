@@ -52,7 +52,7 @@ struct SplashXPathAdjust
 //------------------------------------------------------------------------
 
 // Transform a point from user space to device space.
-inline void SplashXPath::transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo)
+inline void SplashXPath::transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo)
 {
     //                          [ m[0] m[1] 0 ]
     // [xo yo 1] = [xi yi 1] *  [ m[2] m[3] 0 ]
@@ -65,7 +65,7 @@ inline void SplashXPath::transform(const SplashCoord *matrix, SplashCoord xi, Sp
 // SplashXPath
 //------------------------------------------------------------------------
 
-SplashXPath::SplashXPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines, int linePosI)
+SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool closeSubpaths, bool adjustLines, int linePosI)
 {
     SplashPathHint *hint;
     SplashXPathPoint *pts;

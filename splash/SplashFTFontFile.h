@@ -14,7 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2019, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
@@ -49,7 +49,7 @@ public:
 
     // Create a new SplashFTFont, i.e., a scaled instance of this font
     // file.
-    SplashFont *makeFont(SplashCoord *mat, const SplashCoord *textMat) override;
+    SplashFont *makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat) override;
 
 private:
     SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A);

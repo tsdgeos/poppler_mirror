@@ -44,7 +44,7 @@ SplashSolidColor::SplashSolidColor(SplashColorConstPtr colorA)
 
 SplashSolidColor::~SplashSolidColor() = default;
 
-bool SplashSolidColor::getColor(int x, int y, SplashColorPtr c)
+bool SplashSolidColor::getColor(int x, int y, SplashColorPtr c) const
 {
     splashColorCopy(c, color);
     return true;

@@ -274,7 +274,7 @@ SplashError SplashBitmap::writeAlphaPGMFile(char *fileName)
     return splashOk;
 }
 
-void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel)
+void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) const
 {
     SplashColorPtr p;
 

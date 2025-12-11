@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2009, 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2020 Peter Wang <novalazy@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -66,7 +66,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     flatness = 1;
     lineDashPhase = 0;
     strokeAdjust = false;
-    clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
+    clip = std::make_unique<SplashClip>(0, 0, width - 0.001, height - 0.001, vectorAntialias);
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
@@ -91,7 +91,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     next = nullptr;
 }
 
-SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScreen *screenA)
+SplashState::SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA)
 {
     SplashColor color;
     int i;
@@ -105,7 +105,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     memset(&color, 0, sizeof(SplashColor));
     strokePattern = new SplashSolidColor(color);
     fillPattern = new SplashSolidColor(color);
-    screen = screenA->copy();
+    screen = screenA.copy();
     blendFunc = nullptr;
     strokeAlpha = 1;
     fillAlpha = 1;
@@ -119,7 +119,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     flatness = 1;
     lineDashPhase = 0;
     strokeAdjust = false;
-    clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
+    clip = std::make_unique<SplashClip>(0, 0, width - 0.001, height - 0.001, vectorAntialias);
     softMask = nullptr;
     deleteSoftMask = false;
     inNonIsolatedGroup = false;
@@ -146,7 +146,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
 
 SplashState::SplashState(const SplashState *state)
 {
-    memcpy(matrix, state->matrix, 6 * sizeof(SplashCoord));
+    matrix = state->matrix;
     strokePattern = state->strokePattern->copy();
     fillPattern = state->fillPattern->copy();
     screen = state->screen->copy();
@@ -192,7 +192,6 @@ SplashState::~SplashState()
     delete strokePattern;
     delete fillPattern;
     delete screen;
-    delete clip;
     if (deleteSoftMask && softMask) {
         delete softMask;
     }
@@ -208,12 +207,6 @@ void SplashState::setFillPattern(SplashPattern *fillPatternA)
 {
     delete fillPattern;
     fillPattern = fillPatternA;
-}
-
-void SplashState::setScreen(SplashScreen *screenA)
-{
-    delete screen;
-    screen = screenA;
 }
 
 void SplashState::setLineDash(std::vector<SplashCoord> &&lineDashA, SplashCoord lineDashPhaseA)

@@ -48,12 +48,16 @@ enum SplashClipResult
 
 class SplashClip
 {
+    class PrivateTag
+    {
+    };
+
 public:
     // Create a clip, for the given rectangle.
     SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, bool antialiasA);
 
     // Copy a clip.
-    SplashClip *copy() const { return new SplashClip(this); }
+    std::unique_ptr<SplashClip> copy() const { return std::make_unique<SplashClip>(this); }
 
     ~SplashClip() = default;
 
@@ -67,10 +71,10 @@ public:
     SplashError clipToRect(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
 
     // Intersect the clip with <path>.
-    SplashError clipToPath(const SplashPath &path, SplashCoord *matrix, SplashCoord flatness, bool eo);
+    SplashError clipToPath(const SplashPath &path, const std::array<SplashCoord, 6> &matrix, SplashCoord flatness, bool eo);
 
     // Returns true if (<x>,<y>) is inside the clip.
-    bool test(int x, int y)
+    bool test(int x, int y) const
     {
         // check the rectangle
         if (x < xMinI || x > xMaxI || y < yMinI || y > yMaxI) {
@@ -115,9 +119,10 @@ public:
     // Get the number of arbitrary paths used by the clip region.
     int getNumPaths() { return scanners.size(); }
 
+    explicit SplashClip(const SplashClip *clip, PrivateTag = {});
+
 protected:
-    explicit SplashClip(const SplashClip *clip);
-    bool testClipPaths(int x, int y);
+    bool testClipPaths(int x, int y) const;
 
     bool antialias;
     SplashCoord xMin, yMin, xMax, yMax;

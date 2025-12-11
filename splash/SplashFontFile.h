@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2010, 2018, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2018, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -73,7 +73,7 @@ public:
 
     // Create a new SplashFont, i.e., a scaled instance of this font
     // file.
-    virtual SplashFont *makeFont(SplashCoord *mat, const SplashCoord *textMat) = 0;
+    virtual SplashFont *makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat) = 0;
 
     // Get the font file ID.
     const SplashFontFileID &getID() const { return *id; }

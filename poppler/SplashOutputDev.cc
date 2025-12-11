@@ -252,7 +252,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
 
 SplashFunctionPattern::~SplashFunctionPattern() = default;
 
-bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c)
+bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c) const
 {
     GfxColor gfxColor;
     double xc, yc;
@@ -294,7 +294,7 @@ SplashUnivariatePattern::SplashUnivariatePattern(SplashColorMode colorModeA, Gfx
 
 SplashUnivariatePattern::~SplashUnivariatePattern() = default;
 
-bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
+bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) const
 {
     GfxColor gfxColor;
     double xc, yc, t;
@@ -314,7 +314,7 @@ bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
     return true;
 }
 
-bool SplashUnivariatePattern::testPosition(int x, int y)
+bool SplashUnivariatePattern::testPosition(int x, int y) const
 {
     double xc, yc, t;
 
@@ -349,7 +349,7 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
 
 SplashRadialPattern::~SplashRadialPattern() = default;
 
-bool SplashRadialPattern::getParameter(double xs, double ys, double *t)
+bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
 {
     double b, c, s0, s1;
 
@@ -461,7 +461,7 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
 
 SplashAxialPattern::~SplashAxialPattern() = default;
 
-bool SplashAxialPattern::getParameter(double xc, double yc, double *t)
+bool SplashAxialPattern::getParameter(double xc, double yc, double *t) const
 {
     double s;
 
@@ -892,7 +892,8 @@ static void splashOutBlendHue(SplashColorPtr src, SplashColorPtr dest, SplashCol
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setSat(src[0], src[0], src[0], getSat(dest[0], dest[0], dest[0]), &r0, &g0, &b0);
+        setLum(r0, g0, b0, getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -934,7 +935,8 @@ static void splashOutBlendSaturation(SplashColorPtr src, SplashColorPtr dest, Sp
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setSat(dest[0], dest[0], dest[0], getSat(src[0], src[0], src[0]), &r0, &g0, &b0);
+        setLum(r0, g0, b0, getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -974,7 +976,7 @@ static void splashOutBlendColor(SplashColorPtr src, SplashColorPtr dest, SplashC
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setLum(src[0], src[0], src[0], getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -1012,7 +1014,7 @@ static void splashOutBlendLuminosity(SplashColorPtr src, SplashColorPtr dest, Sp
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setLum(dest[0], dest[0], dest[0], getLum(src[0], src[0], src[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -1307,7 +1309,6 @@ void SplashOutputDev::startDoc(PDFDoc *docA)
 void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 {
     int w, h;
-    SplashCoord mat[6];
     SplashColor color;
 
     xref = xrefA;
@@ -1347,6 +1348,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     splash->setMinLineWidth(s_minLineWidth);
     if (state) {
         const double *ctm = state->getCTM();
+        std::array<SplashCoord, 6> mat;
         mat[0] = (SplashCoord)ctm[0];
         mat[1] = (SplashCoord)ctm[1];
         mat[2] = (SplashCoord)ctm[2];
@@ -1431,7 +1433,7 @@ void SplashOutputDev::updateAll(GfxState *state)
 
 void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
 
     const double *ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
@@ -1816,7 +1818,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     SplashFontSrc *fontsrc = nullptr;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;
-    SplashCoord mat[4];
+    std::array<SplashCoord, 4> mat;
     bool recreateFont = false;
     bool doAdjustFontMatrix = false;
 
@@ -2594,7 +2596,7 @@ bool SplashOutputDev::imageMaskSrc(void *data, SplashColorPtr line)
 
 void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
 
     if (state->getFillColorSpace()->isNonMarking()) {
@@ -2640,7 +2642,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
 void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
 {
     const double *ctm;
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
     SplashColor maskColor;
@@ -3219,7 +3221,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
 
 void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageData imgData;
     SplashColorMode srcMode;
     SplashImageSource src;
@@ -3483,7 +3485,7 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
 
 void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutMaskedImageData imgData;
     SplashOutImageMaskData imgMaskData;
     SplashColorMode srcMode;
@@ -3640,7 +3642,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
                                           bool maskInterpolate)
 {
-    SplashCoord mat[6];
+    std::array<SplashCoord, 6> mat;
     SplashOutImageData imgData;
     SplashOutImageData imgMaskData;
     SplashColorMode srcMode;
@@ -3969,7 +3971,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
         SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
         int shapeTx = (knockout) ? tx : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->tx + tx : tx;
         int shapeTy = (knockout) ? ty : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->ty + ty : ty;
-        splash->blitTransparent(transpGroup->origBitmap, tx, ty, 0, 0, w, h);
+        splash->blitTransparent(*transpGroup->origBitmap, tx, ty, 0, 0, w, h);
         splash->setInNonIsolatedGroup(shape, shapeTx, shapeTy);
     }
     transpGroup->tBitmap = bitmap;
@@ -4005,7 +4007,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<d
     if (tx < bitmap->getWidth() && ty < bitmap->getHeight()) {
         SplashCoord knockoutOpacity = (transpGroupStack->next != nullptr) ? transpGroupStack->next->knockoutOpacity : transpGroupStack->knockoutOpacity;
         splash->setOverprintMask(0xffffffff, false);
-        splash->composite(tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
+        splash->composite(*tBitmap, 0, 0, tx, ty, tBitmap->getWidth(), tBitmap->getHeight(), false, !isolated, transpGroupStack->next != nullptr && transpGroupStack->next->knockout, knockoutOpacity);
         fontEngine->setAA(transpGroupStack->fontAA);
         if (transpGroupStack->next != nullptr && transpGroupStack->next->shape != nullptr) {
             transpGroupStack->next->knockout = true;
@@ -4216,7 +4218,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double width, height;
     int surface_width, surface_height, result_width, result_height, i;
     int repeatX, repeatY;
-    SplashCoord matc[6];
+    std::array<SplashCoord, 6> matc;
     Matrix m1;
     const double *ctm;
     double savedCTM[6];
@@ -4419,7 +4421,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
             for (int x = 0; x < imgData.repeatX; ++x) {
                 x0 = splashFloor(matc[4]) + x * tBitmap->getWidth();
                 y0 = splashFloor(matc[5]) + y * tBitmap->getHeight();
-                splash->blitImage(tBitmap, true, x0, y0);
+                splash->blitImage(*tBitmap, true, x0, y0);
             }
         }
         retValue = true;

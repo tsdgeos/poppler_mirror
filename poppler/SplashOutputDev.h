@@ -65,15 +65,15 @@ public:
 
     ~SplashFunctionPattern() override;
 
-    bool testPosition(int x, int y) override { return true; }
+    bool testPosition(int x, int y) const override { return true; }
 
-    bool isStatic() override { return false; }
+    bool isStatic() const override { return false; }
 
-    bool getColor(int x, int y, SplashColorPtr c) override;
+    bool getColor(int x, int y, SplashColorPtr c) const override;
 
     virtual GfxFunctionShading *getShading() { return shading; }
 
-    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
+    bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
 protected:
     Matrix ictm;
@@ -91,17 +91,17 @@ public:
 
     ~SplashUnivariatePattern() override;
 
-    bool getColor(int x, int y, SplashColorPtr c) override;
+    bool getColor(int x, int y, SplashColorPtr c) const override;
 
-    bool testPosition(int x, int y) override;
+    bool testPosition(int x, int y) const override;
 
-    bool isStatic() override { return false; }
+    bool isStatic() const override { return false; }
 
-    virtual bool getParameter(double xs, double ys, double *t) = 0;
+    virtual bool getParameter(double xs, double ys, double *t) const = 0;
 
     virtual GfxUnivariateShading *getShading() { return shading; }
 
-    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
+    bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
 protected:
     Matrix ictm;
@@ -121,7 +121,7 @@ public:
 
     ~SplashAxialPattern() override;
 
-    bool getParameter(double xc, double yc, double *t) override;
+    bool getParameter(double xc, double yc, double *t) const override;
 
 private:
     double x0, y0, x1, y1;
@@ -138,13 +138,13 @@ public:
 
     ~SplashGouraudPattern() override;
 
-    bool getColor(int x, int y, SplashColorPtr c) override { return false; }
+    bool getColor(int x, int y, SplashColorPtr c) const override { return false; }
 
-    bool testPosition(int x, int y) override { return false; }
+    bool testPosition(int x, int y) const override { return false; }
 
-    bool isStatic() override { return false; }
+    bool isStatic() const override { return false; }
 
-    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
+    bool isCMYK() const override { return gfxMode == csDeviceCMYK; }
 
     bool isParameterized() override { return shading->isParameterized(); }
     int getNTriangles() override { return shading->getNTriangles(); }
@@ -174,7 +174,7 @@ public:
 
     ~SplashRadialPattern() override;
 
-    bool getParameter(double xs, double ys, double *t) override;
+    bool getParameter(double xs, double ys, double *t) const override;
 
 private:
     double x0, y0, r0, dx, dy, dr;

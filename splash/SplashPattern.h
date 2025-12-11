@@ -44,17 +44,17 @@ public:
     SplashPattern &operator=(const SplashPattern &) = delete;
 
     // Return the color value for a specific pixel.
-    virtual bool getColor(int x, int y, SplashColorPtr c) = 0;
+    virtual bool getColor(int x, int y, SplashColorPtr c) const = 0;
 
     // Test if x,y-position is inside pattern.
-    virtual bool testPosition(int x, int y) = 0;
+    virtual bool testPosition(int x, int y) const = 0;
 
     // Returns true if this pattern object will return the same color
     // value for all pixels.
-    virtual bool isStatic() = 0;
+    virtual bool isStatic() const = 0;
 
     // Returns true if this pattern colorspace is CMYK.
-    virtual bool isCMYK() = 0;
+    virtual bool isCMYK() const = 0;
 
 private:
 };
@@ -72,13 +72,13 @@ public:
 
     ~SplashSolidColor() override;
 
-    bool getColor(int x, int y, SplashColorPtr c) override;
+    bool getColor(int x, int y, SplashColorPtr c) const override;
 
-    bool testPosition(int x, int y) override { return false; }
+    bool testPosition(int x, int y) const override { return false; }
 
-    bool isStatic() override { return true; }
+    bool isStatic() const override { return true; }
 
-    bool isCMYK() override { return false; }
+    bool isCMYK() const override { return false; }
 
 private:
     SplashColor color;

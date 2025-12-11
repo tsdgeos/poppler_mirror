@@ -206,9 +206,9 @@ void SplashFontEngine::setAA(bool aa)
     }
 }
 
-SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile, const SplashCoord *textMat, const SplashCoord *ctm)
+SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm)
 {
-    SplashCoord mat[4];
+    std::array<SplashCoord, 4> mat;
 
     mat[0] = textMat[0] * ctm[0] + textMat[1] * ctm[2];
     mat[1] = -(textMat[0] * ctm[1] + textMat[1] * ctm[3]);

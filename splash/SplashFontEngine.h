@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011, 2018, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2018, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -79,7 +79,7 @@ public:
     // specifies the font transform in PostScript style:
     //    [x' y'] = [x y] * mat
     // Note that the Splash y axis points downward.
-    SplashFont *getFont(SplashFontFile *fontFile, const SplashCoord *textMat, const SplashCoord *ctm);
+    SplashFont *getFont(SplashFontFile *fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm);
     bool getAA();
     void setAA(bool aa);
 
