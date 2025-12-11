@@ -91,7 +91,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     next = nullptr;
 }
 
-SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScreen *screenA)
+SplashState::SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA)
 {
     SplashColor color;
     int i;
@@ -105,7 +105,7 @@ SplashState::SplashState(int width, int height, bool vectorAntialias, SplashScre
     memset(&color, 0, sizeof(SplashColor));
     strokePattern = new SplashSolidColor(color);
     fillPattern = new SplashSolidColor(color);
-    screen = screenA->copy();
+    screen = screenA.copy();
     blendFunc = nullptr;
     strokeAlpha = 1;
     fillAlpha = 1;

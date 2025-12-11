@@ -84,7 +84,7 @@ class POPPLER_PRIVATE_EXPORT Splash
 public:
     // Create a new rasterizer object.
     Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams *screenParams = nullptr);
-    Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreen *screenA);
+    Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA);
 
     ~Splash();
 
@@ -96,7 +96,7 @@ public:
     const std::array<SplashCoord, 6> &getMatrix() const;
     SplashPattern *getStrokePattern();
     SplashPattern *getFillPattern();
-    SplashScreen *getScreen();
+    const SplashScreen &getScreen() const;
     SplashBlendFunc getBlendFunc();
     SplashCoord getStrokeAlpha();
     SplashCoord getFillAlpha();

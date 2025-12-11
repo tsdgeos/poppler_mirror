@@ -1453,7 +1453,7 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreenParams 
     alpha0Bitmap = nullptr;
 }
 
-Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, SplashScreen *screenA)
+Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA, const SplashScreen &screenA)
 {
     int i;
 
@@ -1503,9 +1503,9 @@ SplashPattern *Splash::getFillPattern()
     return state->fillPattern;
 }
 
-SplashScreen *Splash::getScreen()
+const SplashScreen &Splash::getScreen() const
 {
-    return state->screen;
+    return *state->screen;
 }
 
 SplashBlendFunc Splash::getBlendFunc()

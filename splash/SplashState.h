@@ -58,7 +58,7 @@ class SplashState
 public:
     // Create a new state object, initialized with default settings.
     SplashState(int width, int height, bool vectorAntialias, SplashScreenParams *screenParams);
-    SplashState(int width, int height, bool vectorAntialias, SplashScreen *screenA);
+    SplashState(int width, int height, bool vectorAntialias, const SplashScreen &screenA);
 
     // Copy a state object.
     SplashState *copy() const { return new SplashState(this); }
