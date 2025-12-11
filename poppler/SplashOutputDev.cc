@@ -892,7 +892,8 @@ static void splashOutBlendHue(SplashColorPtr src, SplashColorPtr dest, SplashCol
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setSat(src[0], src[0], src[0], getSat(dest[0], dest[0], dest[0]), &r0, &g0, &b0);
+        setLum(r0, g0, b0, getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -934,7 +935,8 @@ static void splashOutBlendSaturation(SplashColorPtr src, SplashColorPtr dest, Sp
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setSat(dest[0], dest[0], dest[0], getSat(src[0], src[0], src[0]), &r0, &g0, &b0);
+        setLum(r0, g0, b0, getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -974,7 +976,7 @@ static void splashOutBlendColor(SplashColorPtr src, SplashColorPtr dest, SplashC
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setLum(src[0], src[0], src[0], getLum(dest[0], dest[0], dest[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
@@ -1012,7 +1014,7 @@ static void splashOutBlendLuminosity(SplashColorPtr src, SplashColorPtr dest, Sp
     switch (cm) {
     case splashModeMono1:
     case splashModeMono8:
-        blend[0] = dest[0];
+        setLum(dest[0], dest[0], dest[0], getLum(src[0], src[0], src[0]), &blend[0], &blend[0], &blend[0]);
         break;
     case splashModeXBGR8:
         src[3] = 255;
