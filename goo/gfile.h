@@ -43,7 +43,7 @@
 #include <ctime>
 #include <string>
 extern "C" {
-#if defined(_WIN32)
+#ifdef _WIN32
 #    include <sys/stat.h>
 #    ifdef FPTEX
 #        include <win32lib.h>

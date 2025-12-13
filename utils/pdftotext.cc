@@ -166,7 +166,7 @@ static std::string myXmlTokenReplace(const char *inString)
 
 static constexpr EndOfLineKind defaultEndOfLine()
 {
-#if defined(_WIN32)
+#ifdef _WIN32
     return eolDOS;
 #else
     return eolUnix;
