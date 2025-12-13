@@ -7,7 +7,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2016 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2022, 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 

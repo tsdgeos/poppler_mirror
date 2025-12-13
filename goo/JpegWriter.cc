@@ -9,7 +9,7 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
-// Copyright (C) 2017, 2018, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2018, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2018 Ed Porras <ed@motologic.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
