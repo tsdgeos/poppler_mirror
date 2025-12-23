@@ -33,9 +33,10 @@
 #include <fstream>
 #include <random>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include "parseargs.h"
 #include "goo/gbasename.h"
-#include "goo/gmem.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
@@ -116,11 +117,12 @@ static const char *getReadableCertState(CertificateValidationStatus cert_vs)
     }
 }
 
-static char *getReadableTime(time_t unix_time)
+static std::string getReadableTime(time_t unix_time)
 {
-    char *time_str = (char *)gmalloc(64);
-    strftime(time_str, 64, "%b %d %Y %H:%M:%S", localtime(&unix_time));
-    return time_str;
+    std::stringstream stringStream;
+    const std::tm tm = *std::localtime(&unix_time);
+    stringStream << std::put_time(&tm, "%b %d %Y %H:%M:%S");
+    return stringStream.str();
 }
 
 static std::string_view trim(std::string_view input)
@@ -364,7 +366,6 @@ static std::string TextStringToUTF8(const std::string &str)
 
 int main(int argc, char *argv[])
 {
-    char *time_str = nullptr;
     globalParams = std::make_unique<GlobalParams>();
 
     Win32Console win32Console(&argc, &argv);
@@ -683,7 +684,7 @@ int main(int argc, char *argv[])
             printf("  - Signer fingerprint: %s\n", sig_info->getCertificateInfo()->getNickName().c_str());
         }
         printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN().c_str());
-        printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
+        printf("  - Signing Time: %s\n", getReadableTime(sig_info->getSigningTime()).c_str());
         printf("  - Signing Hash Algorithm: ");
         switch (sig_info->getHashAlgorithm()) {
         case HashAlgorithm::Md2:
@@ -747,7 +748,6 @@ int main(int argc, char *argv[])
             }
         }
         printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
-        gfree(time_str);
         if (sig_info->getSignatureValStatus() != SIGNATURE_VALID) {
             oneSignatureInvalid = true;
             continue;
