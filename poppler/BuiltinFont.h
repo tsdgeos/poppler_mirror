@@ -24,6 +24,7 @@
 #define BUILTINFONT_H
 
 #include "BuiltinFontWidth.h"
+#include "FontEncodingTables.h"
 
 #include <cstddef>
 #include <cstring>
