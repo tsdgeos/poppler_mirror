@@ -32,6 +32,7 @@
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2025, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -494,7 +495,8 @@ public:
     enum TextLayout
     {
         PhysicalLayout, ///< The text is layouted to resemble the real page layout
-        RawOrderLayout ///< The text is returned without any type of processing
+        RawOrderLayout, ///< The text is returned without any type of processing
+        ReadingOrder, ///< The text is returned in reading order, \since 26.01
     };
 
     /**

@@ -28,6 +28,7 @@
 #include "Parser.h"
 #include "Lexer.h"
 #include "SecurityHandler.h"
+#include "goo/gmem.h"
 
 #include <climits>
 

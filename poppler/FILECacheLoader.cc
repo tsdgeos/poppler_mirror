@@ -47,7 +47,7 @@ size_t FILECacheLoader::init(CachedFile *cachedFile)
     return size;
 }
 
-int FILECacheLoader::load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer)
+int FILECacheLoader::load(const std::vector<ByteRange> & /*ranges*/, CachedFileWriter * /*writer*/)
 {
     return 0;
 }

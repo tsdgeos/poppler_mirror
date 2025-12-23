@@ -31,8 +31,6 @@
 
 #include "FontInfo.h"
 
-#include <algorithm>
-
 using namespace poppler;
 
 /**

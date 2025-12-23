@@ -70,7 +70,6 @@
 
 #include <array>
 #include <cctype>
-#include <clocale>
 #include <cstdio>
 #include <cerrno>
 #include <climits>
@@ -83,8 +82,6 @@
 #include <sstream>
 #include <sys/stat.h>
 #include "CryptoSignBackend.h"
-#include "goo/glibc.h"
-#include "goo/gstrtod.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"
 #include "GlobalParams.h"
@@ -97,7 +94,6 @@
 #include "OutputDev.h"
 #include "Error.h"
 #include "Lexer.h"
-#include "Parser.h"
 #include "SecurityHandler.h"
 #include "Decrypt.h"
 #include "Outline.h"

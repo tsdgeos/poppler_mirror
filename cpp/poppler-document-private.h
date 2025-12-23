@@ -24,7 +24,6 @@
 
 #include "poppler-global.h"
 
-#include "poppler-config.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "GlobalParams.h"

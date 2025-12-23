@@ -21,9 +21,6 @@
 
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
-#include "goo/gmem.h"
-#include <cstdlib>
-#include <cstring>
 
 /* Constructor & Destructor */
 

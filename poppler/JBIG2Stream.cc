@@ -49,6 +49,8 @@
 //~ share these tables
 #include "Stream-CCITT.h"
 
+#include "goo/gmem.h"
+
 //------------------------------------------------------------------------
 
 static const int contextSize[4] = { 16, 13, 10, 10 };

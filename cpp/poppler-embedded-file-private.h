@@ -20,6 +20,7 @@
 #ifndef POPPLER_EMBEDDED_FILE_PRIVATE_H
 #define POPPLER_EMBEDDED_FILE_PRIVATE_H
 
+#include "poppler-embedded-file.h"
 #include <FileSpec.h>
 
 #include <memory>

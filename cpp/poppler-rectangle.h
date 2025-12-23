@@ -20,7 +20,9 @@
 #ifndef POPPLER_RECTANGLE_H
 #define POPPLER_RECTANGLE_H
 
-#include "poppler-global.h"
+#include "poppler_cpp_export.h"
+
+#include <ostream>
 
 namespace poppler {
 

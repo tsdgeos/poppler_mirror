@@ -15,7 +15,6 @@
 #ifndef CERTIFICATEINFO_H
 #define CERTIFICATEINFO_H
 
-#include <memory>
 #include <ctime>
 #include "goo/GooString.h"
 #include "poppler_private_export.h"

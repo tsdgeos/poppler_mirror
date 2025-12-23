@@ -72,28 +72,29 @@ void BBoxOutputDev::eoFill(GfxState *state)
     updatePath(&bb, state->getPath(), state);
 }
 
-void BBoxOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void BBoxOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream * /*str*/, int /*width*/, int /*height*/, bool /*invert*/, bool /*interpolate*/, bool /*inlineImg*/)
 {
     updateImage(&bb, state);
 }
 
-void BBoxOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void BBoxOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream * /*str*/, int /*width*/, int /*height*/, GfxImageColorMap * /*colorMap*/, bool /*interpolate*/, const int * /*maskColors*/, bool /*inlineImg*/)
 {
     updateImage(&bb, state);
 }
 
-void BBoxOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
+void BBoxOutputDev::drawMaskedImage(GfxState *state, Object * /*ref*/, Stream * /*str*/, int /*width*/, int /*height*/, GfxImageColorMap * /*colorMap*/, bool /*interpolate*/, Stream * /*maskStr*/, int /*maskWidth*/, int /*maskHeight*/,
+                                    bool /*maskInvert*/, bool /*maskInterpolate*/)
 {
     updateImage(&bb, state);
 }
 
-void BBoxOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
-                                        bool maskInterpolate)
+void BBoxOutputDev::drawSoftMaskedImage(GfxState *state, Object * /*ref*/, Stream * /*str*/, int /*width*/, int /*height*/, GfxImageColorMap * /*colorMap*/, bool /*interpolate*/, Stream * /*maskStr*/, int /*maskWidth*/, int /*maskHeight*/,
+                                        GfxImageColorMap * /*maskColorMap*/, bool /*maskInterpolate*/)
 {
     updateImage(&bb, state);
 }
 
-void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
+void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double /*originX*/, double /*originY*/, CharCode code, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/)
 {
     double leftent, rightent, ascent, descent;
     double fontSize, w, adjust;

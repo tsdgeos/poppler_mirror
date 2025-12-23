@@ -17,7 +17,6 @@
 #define OPTIONALCONTENT_H
 
 #include "Object.h"
-#include "CharTypes.h"
 #include "poppler_private_export.h"
 #include <unordered_map>
 #include <memory>

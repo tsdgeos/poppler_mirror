@@ -14,17 +14,8 @@
 #ifndef FLATEENCODE_H
 #define FLATEENCODE_H
 
-#include "poppler-config.h"
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
-#include <cstring>
-#include <cctype>
-#include "goo/gmem.h"
-#include "goo/gfile.h"
-#include "Error.h"
 #include "Object.h"
-#include "Decrypt.h"
 
 #include "Stream.h"
 
@@ -45,8 +36,8 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
     int lookChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
-    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
-    bool isBinary(bool last = true) const override { return true; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
+    bool isBinary(bool /*last*/ = true) const override { return true; }
     bool isEncoder() const override { return true; }
 
 private:

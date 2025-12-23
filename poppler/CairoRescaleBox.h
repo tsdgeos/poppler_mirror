@@ -42,6 +42,8 @@
 
 #include <cairo.h>
 
+#include <cstdint>
+
 class CairoRescaleBox
 {
 public:

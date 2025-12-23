@@ -32,7 +32,6 @@
 #include "GlobalParams.h"
 #include "Gfx.h"
 #include "GfxFont.h"
-#include "Link.h"
 #include "Catalog.h"
 #include "Page.h"
 #include "PreScanOutputDev.h"

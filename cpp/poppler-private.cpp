@@ -27,7 +27,7 @@
 #include "poppler-private.h"
 
 #include "goo/GooString.h"
-#include "Page.h"
+#include "PDFRectangle.h"
 #include "UTF.h"
 
 #include <ctime>

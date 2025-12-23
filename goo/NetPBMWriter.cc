@@ -28,8 +28,6 @@
 //
 //========================================================================
 
-#include "poppler-config.h"
-
 #include "NetPBMWriter.h"
 
 // Writer for the NetPBM formats (PBM and PPM)

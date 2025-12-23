@@ -19,7 +19,6 @@
 #define IN_MEMORY_FILE_H
 
 #include <cstdio>
-#include <string>
 #include <vector>
 
 #if defined(__USE_GNU) && !defined(__ANDROID_API__)

@@ -25,7 +25,12 @@
 
 #include "CharTypes.h"
 
+#include "poppler-qt5.h"
+
+#include <QtCore/QVector>
+
 class QRectF;
+class QString;
 
 class LinkAction;
 class Page;

@@ -12,7 +12,6 @@
 #ifndef CURLCACHELOADER_H
 #define CURLCACHELOADER_H
 
-#include "poppler-config.h"
 #include "CachedFile.h"
 
 #include <curl/curl.h>

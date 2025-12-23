@@ -35,15 +35,12 @@
 #ifndef GFILE_H
 #define GFILE_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
 #include <ctime>
 #include <string>
 extern "C" {
-#if defined(_WIN32)
+#ifdef _WIN32
 #    include <sys/stat.h>
 #    ifdef FPTEX
 #        include <win32lib.h>

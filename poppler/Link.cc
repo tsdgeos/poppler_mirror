@@ -38,7 +38,6 @@
 #include <cstddef>
 #include <cstring>
 #include <memory>
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "Object.h"
@@ -650,7 +649,7 @@ LinkSound::LinkSound(const Object *soundObj)
         }
         // 'Sound' object
         tmp = soundObj->dictLookup("Sound");
-        sound = Sound::parseSound(&tmp);
+        sound = Sound::parseSound(tmp);
     }
 }
 

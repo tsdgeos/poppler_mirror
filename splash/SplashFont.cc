@@ -24,7 +24,6 @@
 #include <climits>
 #include <cstring>
 #include "goo/gmem.h"
-#include "SplashMath.h"
 #include "SplashGlyphBitmap.h"
 #include "SplashFontFile.h"
 #include "SplashFont.h"

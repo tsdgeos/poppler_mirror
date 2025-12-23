@@ -23,8 +23,6 @@
 
 #include "poppler-global.h"
 
-#include <vector>
-
 namespace poppler {
 
 class embedded_file_private;

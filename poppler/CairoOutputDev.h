@@ -214,7 +214,7 @@ public:
     void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
     void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix) override;
     void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
-    void drawImageMaskRegular(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
+    void drawImageMaskRegular(GfxState *state, Stream *str, int width, int height, bool invert, bool interpolate);
 
     void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg) override;
     void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
@@ -243,7 +243,7 @@ public:
     void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = nullptr);
 
     // Called to prepare this output dev for rendering CairoType3Font.
-    void startType3Render(GfxState *state, XRef *xref);
+    void startType3Render(XRef *xref);
 
     bool isReverseVideo() { return false; }
 
@@ -274,13 +274,13 @@ public:
     bool type3GlyphHasColor() { return t3_glyph_has_color; }
 
 protected:
-    void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
+    void doPath(cairo_t *cairo, const GfxPath *path);
     cairo_surface_t *downscaleSurface(cairo_surface_t *orig_surface);
     void getScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight);
     cairo_filter_t getFilterForSurface(cairo_surface_t *image, bool interpolate);
     bool getStreamData(Stream *str, char **buffer, int *length);
     void setMimeData(GfxState *state, Stream *str, Object *ref, GfxImageColorMap *colorMap, cairo_surface_t *image, int height);
-    void fillToStrokePathClip(GfxState *state);
+    void fillToStrokePathClip();
     void alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y);
     AnnotLink *findLinkObject(const StructElement *elem);
     void quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double destPageHeight, cairo_rectangle_t *rect);
@@ -292,7 +292,7 @@ protected:
     int getContentElementStructParents(const StructElement *element);
     bool checkIfStructElementNeeded(const StructElement *element);
     void emitStructElement(const StructElement *elem);
-    void startFirstPage(int pageNum, GfxState *state, XRef *xrefA);
+    void startFirstPage(XRef *xrefA);
     bool setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image);
     bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
     static void textStringToQuotedUtf8(const GooString *text, GooString *s);

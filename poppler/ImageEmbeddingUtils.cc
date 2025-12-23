@@ -3,7 +3,7 @@
 // ImageEmbeddingUtils.cc
 //
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Marco Genasci <fedeliallalinea@gmail.com>
 // Copyright (C) 2023 Jordan Abrahams-Whitehead <ajordanr@google.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -16,7 +16,7 @@
 
 #include <memory>
 #if ENABLE_LIBJPEG
-#    include <cstdio>
+#    include <cstdio> // jpeglib.h is broken on purpose and needs cstdio include before it
 extern "C" {
 #    include <jpeglib.h>
 }
@@ -27,7 +27,6 @@ extern "C" {
 #endif
 
 #include "ImageEmbeddingUtils.h"
-#include "goo/gmem.h"
 #include "goo/GooCheckedOps.h"
 #include "Object.h"
 #include "Array.h"

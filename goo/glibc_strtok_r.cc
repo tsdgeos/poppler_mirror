@@ -48,7 +48,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2012 Alexey Pavlov <alexpux@gmail.com>
-// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017 Pekka Vuorela <pekka.vuorela@jollamobile.com>
 //

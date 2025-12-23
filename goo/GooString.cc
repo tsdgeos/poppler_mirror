@@ -41,7 +41,6 @@
 
 #include <config.h>
 
-#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cmath>

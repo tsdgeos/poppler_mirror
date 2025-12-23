@@ -21,7 +21,6 @@
 #include "Object.h"
 #include "poppler_private_export.h"
 #include <vector>
-#include <set>
 
 class GooString;
 class Dict;

@@ -26,12 +26,6 @@
 
 #include <config.h>
 
-#include <cstdio>
-#include "goo/gmem.h"
-#include "goo/GooString.h"
-#include "goo/gfile.h"
-#include "fofi/FoFiTrueType.h"
-#include "fofi/FoFiType1C.h"
 #include "SplashFTFontFile.h"
 #include "SplashFontFileID.h"
 #include "SplashFTFontEngine.h"

@@ -16,7 +16,6 @@
 
 #include "Linearization.h"
 #include "Parser.h"
-#include "Lexer.h"
 
 //------------------------------------------------------------------------
 // Linearization

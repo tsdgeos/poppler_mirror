@@ -12,13 +12,9 @@
 
 #include "AnnotStampImageHelper.h"
 
-#include "goo/gmem.h"
-#include "goo/gstrtod.h"
 #include "PDFDoc.h"
 #include "Stream.h"
 #include "Dict.h"
-
-#include <iostream>
 
 AnnotStampImageHelper::AnnotStampImageHelper(PDFDoc *docA, int widthA, int heightA, ColorSpace colorSpace, int bitsPerComponent, char *data, int dataLength)
 {

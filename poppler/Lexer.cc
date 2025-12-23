@@ -30,9 +30,6 @@
 
 #include <config.h>
 
-#include <cstdlib>
-#include <cstddef>
-#include <cstring>
 #include <climits>
 #include <cctype>
 #include "Lexer.h"

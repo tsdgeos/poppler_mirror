@@ -61,9 +61,6 @@
 #include "poppler-private.h"
 #include "poppler-annotation-helper.h"
 
-#include <cmath>
-#include <cctype>
-
 namespace {
 
 Qt::Alignment formTextAlignment(::FormWidget *fm)

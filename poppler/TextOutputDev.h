@@ -39,12 +39,11 @@
 #ifndef TEXTOUTPUTDEV_H
 #define TEXTOUTPUTDEV_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
-#include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"
+#include "PDFRectangle.h"
 
 class GooString;
 class Gfx;
@@ -192,6 +191,8 @@ public:
         *xMaxA = xMax;
         *yMaxA = yMax;
     }
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
+
     void getCharBBox(int charIdx, double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const;
     double getFontSize() const { return fontSize; }
     int getRotation() const { return rot; }
@@ -325,6 +326,7 @@ public:
     void coalesce(const UnicodeMap *uMap);
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
 
     // Get the head of the linked list of TextWords.
     const TextWord *getWords() const { return words; }
@@ -336,6 +338,8 @@ public:
     bool isHyphenated() const { return hyphenated; }
 
 private:
+    std::pair<int, int> getLineBounds(const PDFRectangle &area) const;
+
     TextBlock *blk; // parent block
     int rot; // text rotation
     double xMin, xMax; // bounding box x coordinates
@@ -415,6 +419,7 @@ public:
         *xMaxA = xMax;
         *yMaxA = yMax;
     }
+    PDFRectangle getBBox() const { return { xMin, yMin, xMax, yMax }; }
 
     int getLineCount() const { return nLines; }
 
@@ -621,7 +626,7 @@ public:
                   double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
 
     // Get the text which is inside the specified rectangle.
-    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
+    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -639,7 +644,7 @@ public:
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Dump contents of page to a file.
-    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks);
+    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol = false, const PDFRectangle *area = nullptr) const;
 
     // Get the head of the linked list of TextFlows.
     const TextFlow *getFlows() const { return flows; }

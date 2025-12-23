@@ -23,8 +23,6 @@
 #ifndef SECURITYHANDLER_H
 #define SECURITYHANDLER_H
 
-#include "poppler-config.h"
-
 #include "Object.h"
 
 #include <optional>

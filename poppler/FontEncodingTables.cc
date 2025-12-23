@@ -7,7 +7,6 @@
 //========================================================================
 
 #include <config.h>
-#include <cstdlib>
 #include "FontEncodingTables.h"
 
 const char *macRomanEncoding[256] = { nullptr,

@@ -16,7 +16,6 @@
 //========================================================================
 
 #include <config.h>
-#include <climits>
 #include <cstdlib>
 #include <cstdio>
 #include <cassert>

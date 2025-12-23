@@ -13,8 +13,6 @@
 #ifndef HINTS_H
 #define HINTS_H
 
-#include <cstring>
-#include <vector>
 #include "PDFDoc.h"
 
 class Stream;

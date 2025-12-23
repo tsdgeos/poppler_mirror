@@ -24,7 +24,6 @@
 
 #include <config.h>
 
-#include <cstdio>
 #include "SplashFontFile.h"
 #include "SplashFontFileID.h"
 

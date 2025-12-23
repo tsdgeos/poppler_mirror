@@ -32,14 +32,10 @@
 #include <charconv>
 #include <optional>
 
-#include <cstdlib>
 #include <cstring>
-#include <climits>
-#include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "FoFiEncodings.h"
 #include "FoFiType1.h"
-#include "poppler/Error.h"
 
 //------------------------------------------------------------------------
 // FoFiType1

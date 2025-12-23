@@ -31,24 +31,18 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include <shlobj.h>
 #include <cstring>
 #include <cstdio>
-#include <cctype>
 #include <cassert>
 
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"
 #include "Error.h"
-#include "NameToCharCode.h"
 #include "CharCodeToUnicode.h"
-#include "UnicodeMap.h"
 #include "CMap.h"
-#include "FontEncodingTables.h"
 #include "GlobalParams.h"
 #include "GfxFont.h"
 #include <sys/stat.h>
 #include "Object.h"
 #include "Stream.h"
-#include "Lexer.h"
 #include "Parser.h"
 
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"

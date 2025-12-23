@@ -15,10 +15,6 @@
 #ifndef PAGELABELINFO_H
 #define PAGELABELINFO_H
 
-#include <climits>
-#include <cstdlib>
-#include <cstdio>
-#include <cctype>
 #include <cassert>
 #include <string>
 #include <vector>

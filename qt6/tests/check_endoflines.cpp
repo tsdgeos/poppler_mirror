@@ -22,7 +22,7 @@ void EndOfLines::checkEndOfLines()
 
     auto text = page->text(QRect {});
 
-    QCOMPARE(text, QStringLiteral("Hello World!\nHello World!\nHello World!\n"));
+    QCOMPARE(text, QStringLiteral("Hello World!\n\nHello World!\n\nHello World!"));
 }
 
 QTEST_GUILESS_MAIN(EndOfLines)

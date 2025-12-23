@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -29,7 +29,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <cstdarg>
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "goo/gfile.h"
@@ -69,7 +68,7 @@ struct ErrorString
     ErrorStringType type;
 };
 
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #    define POPPLER_FUNCTION_INFO __FUNCSIG__
 #elif defined(__GNUC__) // this should also cover clang
 #    define POPPLER_FUNCTION_INFO __PRETTY_FUNCTION__

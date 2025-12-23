@@ -40,9 +40,8 @@
 #include <cassert>
 #include <set>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <climits>
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"
 #include "Error.h"
@@ -253,7 +252,7 @@ public:
     {
         assert(typeA == objName || typeA == objCmd);
         type = typeA;
-        cString = (char *)gmalloc(v.size() + 1);
+        cString = (char *)std::malloc(v.size() + 1);
         memcpy(cString, v.data(), v.size());
         cString[v.size()] = 0;
     }

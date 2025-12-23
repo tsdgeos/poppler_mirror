@@ -26,6 +26,7 @@
 #include "Object.h"
 #include "Stream.h"
 #include "JArithmeticDecoder.h"
+#include "goo/gmem.h"
 
 //------------------------------------------------------------------------
 // JArithmeticDecoderStates

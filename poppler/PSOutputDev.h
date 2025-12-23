@@ -40,22 +40,19 @@
 #ifndef PSOUTPUTDEV_H
 #define PSOUTPUTDEV_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
-#include <cstddef>
 #include "Object.h"
 #include "GfxState.h"
 #include "GlobalParams.h"
 #include "OutputDev.h"
 #include "fofi/FoFiBase.h"
+#include "splash/SplashTypes.h"
 #include <set>
 #include <map>
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
 #include <string>
-
-#include "splash/Splash.h"
 
 class PDFDoc;
 class XRef;

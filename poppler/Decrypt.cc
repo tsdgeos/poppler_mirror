@@ -64,8 +64,8 @@ static const unsigned char passwordPad[32] = { 0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x7
 // Decrypt
 //------------------------------------------------------------------------
 
-bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, const GooString *ownerEnc, const GooString *userEnc, int permissions, const GooString *fileID,
-                          const GooString *ownerPassword, const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata, bool *ownerPasswordOk)
+bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, const GooString *ownerEnc, const GooString *userEnc, int permissions, const GooString *fileID, const GooString *ownerPassword,
+                          const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata, bool *ownerPasswordOk)
 {
     DecryptAES256State state;
     unsigned char test[127 + 56], test2[32];
@@ -196,7 +196,7 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength, const 
                 }
             }
             userPassword2 = new GooString((char *)test2, 32);
-            if (makeFileKey2(encVersion, encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword2, fileKey, encryptMetadata)) {
+            if (makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword2, fileKey, encryptMetadata)) {
                 *ownerPasswordOk = true;
                 delete userPassword2;
                 return true;
@@ -205,12 +205,11 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength, const 
         }
 
         // try using the supplied user password
-        return makeFileKey2(encVersion, encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword, fileKey, encryptMetadata);
+        return makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword, fileKey, encryptMetadata);
     }
 }
 
-bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, int permissions, const GooString *fileID, const GooString *userPassword, unsigned char *fileKey,
-                           bool encryptMetadata)
+bool Decrypt::makeFileKey2(int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, int permissions, const GooString *fileID, const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata)
 {
     unsigned char *buf;
     unsigned char test[32];

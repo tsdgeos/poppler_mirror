@@ -27,7 +27,6 @@
 #ifndef SPLASH_H
 #define SPLASH_H
 
-#include <cstddef>
 #include "SplashTypes.h"
 #include "SplashClip.h"
 #include "SplashPattern.h"

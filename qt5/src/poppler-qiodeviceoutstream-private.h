@@ -23,7 +23,6 @@
 #ifndef POPPLER_QIODEVICESTREAM_PRIVATE_H
 #define POPPLER_QIODEVICESTREAM_PRIVATE_H
 
-#include "Object.h"
 #include "Stream.h"
 
 class QIODevice;

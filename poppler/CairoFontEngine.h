@@ -34,10 +34,8 @@
 
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <vector>
 
-#include "poppler-config.h"
 #include <cairo-ft.h>
 
 #include "GfxFont.h"
@@ -55,7 +53,7 @@ public:
 
     virtual bool matches(Ref &other, bool printing);
     cairo_font_face_t *getFontFace();
-    std::optional<unsigned long> getGlyph(CharCode code, const Unicode *u, int uLen);
+    std::optional<unsigned long> getGlyph(CharCode code);
     double getSubstitutionCorrection(const std::shared_ptr<GfxFont> &gfxFont);
 
     bool isSubstitute() { return substitute; }
@@ -83,7 +81,7 @@ struct FreeTypeFontFace
 class CairoFreeTypeFont : public CairoFont
 {
 public:
-    static CairoFreeTypeFont *create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, CairoFontEngine *fontEngine, bool useCIDs);
+    static CairoFreeTypeFont *create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
     ~CairoFreeTypeFont() override;
 
 private:
@@ -97,13 +95,13 @@ private:
 class CairoType3Font : public CairoFont
 {
 public:
-    static CairoType3Font *create(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref);
+    static CairoType3Font *create(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing);
     ~CairoType3Font() override;
 
     bool matches(Ref &other, bool printing) override;
 
 private:
-    CairoType3Font(Ref ref, cairo_font_face_t *cairo_font_face, std::vector<int> &&codeToGIDA, bool printing, XRef *xref);
+    CairoType3Font(Ref ref, cairo_font_face_t *cairo_font_face, std::vector<int> &&codeToGIDA, bool printing);
 };
 
 //------------------------------------------------------------------------

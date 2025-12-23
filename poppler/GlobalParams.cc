@@ -61,7 +61,6 @@
 #include <algorithm>
 #include <cstring>
 #include <cstdio>
-#include <cctype>
 #include <filesystem>
 #ifdef _WIN32
 #    include <shlobj.h>

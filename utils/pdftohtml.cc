@@ -41,17 +41,14 @@
 #include <poppler-config.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstddef>
 #include <cstring>
 #include <ctime>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gbase64.h"
 #include "goo/gbasename.h"
-#include "goo/gmem.h"
 #include "Object.h"
 #include "Stream.h"
-#include "Array.h"
 #include "Dict.h"
 #include "XRef.h"
 #include "Catalog.h"

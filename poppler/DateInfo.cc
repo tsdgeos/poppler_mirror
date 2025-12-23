@@ -27,7 +27,6 @@
 #include <config.h>
 
 #include "goo/glibc.h"
-#include "goo/gmem.h"
 #include "DateInfo.h"
 #include "UTF.h"
 

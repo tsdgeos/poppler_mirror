@@ -24,7 +24,6 @@
 ========================================================================*/
 
 #include <cstdio>
-#include <cstddef>
 #include <cstring>
 #include <cstdlib>
 #include <cctype>

@@ -32,7 +32,6 @@
 #include <poppler-config.h>
 
 #include <cstdio>
-#include <cstddef>
 #include <cstdarg>
 #include "goo/GooString.h"
 #include "GlobalParams.h"

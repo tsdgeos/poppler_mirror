@@ -15,7 +15,6 @@
 #ifndef NETPBMWRITER_H
 #define NETPBMWRITER_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 
 #include "ImgWriter.h"

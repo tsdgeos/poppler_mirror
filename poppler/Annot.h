@@ -57,7 +57,6 @@
 #define ANNOT_H
 
 #include <array>
-#include <atomic>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -233,7 +232,7 @@ public:
         AnnotCoord coord1, coord2, coord3, coord4;
     };
 
-    AnnotQuadrilaterals(const Array &array, PDFRectangle *rect);
+    explicit AnnotQuadrilaterals(const Array &array);
     AnnotQuadrilaterals(std::unique_ptr<AnnotQuadrilateral[]> &&quads, int quadsLength);
     ~AnnotQuadrilaterals();
 
@@ -625,8 +624,7 @@ private:
                            Dict *resourcesDict);
     bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
                              XRef *xref, Dict *resourcesDict);
-    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                                XRef *xref, Dict *resourcesDict);
+    bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
     bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
@@ -855,7 +853,7 @@ public:
     void setOpen(bool openA);
 
 protected:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     Ref parentRef; // Parent
     bool open; // Open
@@ -952,7 +950,7 @@ public:
     void setIcon(const std::string &new_icon);
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     bool open; // Open       (Default false)
     std::string icon; // Name       (Default Note)
@@ -978,7 +976,7 @@ public:
     Movie *getMovie() { return movie.get(); }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<GooString> title; // T
     std::unique_ptr<Movie> movie; // Movie + A
@@ -1002,7 +1000,7 @@ public:
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<GooString> title; // T
 
@@ -1039,7 +1037,7 @@ public:
     AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
 protected:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<LinkAction> action; // A, Dest
     AnnotLinkEffect linkEffect; // H          (Default I)
@@ -1090,7 +1088,7 @@ public:
     AnnotLineEndingStyle getEndStyle() const { return endStyle; }
 
 protected:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
     void generateFreeTextAppearance();
 
     // required
@@ -1163,7 +1161,7 @@ public:
     double getY2() const { return coord2->getY(); }
 
 protected:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
     void generateLineAppearance();
 
     // required
@@ -1208,7 +1206,7 @@ public:
     AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
 protected:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<AnnotQuadrilaterals> quadrilaterals; // QuadPoints
 
@@ -1239,7 +1237,7 @@ public:
     Object getAppearanceResDict() override;
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
     void generateStampDefaultAppearance();
     void generateStampCustomAppearance();
     void updateAppearanceResDict();
@@ -1270,7 +1268,7 @@ public:
     PDFRectangle *getGeometryRect() const { return geometryRect.get(); }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<AnnotColor> interiorColor; // IC
     std::unique_ptr<AnnotBorderEffect> borderEffect; // BE
@@ -1312,7 +1310,7 @@ public:
     AnnotPolygonIntent getIntent() const { return intent; }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     // required
     std::unique_ptr<AnnotPath> vertices; // Vertices
@@ -1352,7 +1350,7 @@ public:
     PDFRectangle *getCaretRect() const { return caretRect.get(); }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     AnnotCaretSymbol symbol; // Sy         (Default None)
     std::unique_ptr<PDFRectangle> caretRect; // RD (combined with Rect)
@@ -1380,7 +1378,7 @@ public:
 
 private:
     void generateInkAppearance();
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
     void writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array);
     void parseInkList(const Array &array);
 
@@ -1411,7 +1409,7 @@ public:
     const GooString *getName() const { return name.get(); }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     // required
     Object file; // FS
@@ -1438,7 +1436,7 @@ public:
     const GooString *getName() const { return name.get(); }
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     // required
     std::unique_ptr<Sound> sound; // Sound
@@ -1484,7 +1482,7 @@ public:
     void setField(FormField *f) { field = f; };
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     Form *form;
     FormField *field; // FormField object for this annotation
@@ -1556,7 +1554,7 @@ public:
     // getters
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     std::unique_ptr<Activation> activation; // 3DA
 };
@@ -1744,7 +1742,7 @@ public:
     Settings *getSettings() const;
 
 private:
-    void initialize(PDFDoc *docA, Dict *dict);
+    void initialize(Dict *dict);
 
     // required
     std::unique_ptr<Content> content; // RichMediaContent

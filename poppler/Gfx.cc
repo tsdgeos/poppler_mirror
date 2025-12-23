@@ -61,11 +61,9 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <cstddef>
 #include <cstring>
 #include <cmath>
 #include <memory>
-#include "goo/gmem.h"
 #include "goo/GooTimer.h"
 #include "GlobalParams.h"
 #include "CharTypes.h"

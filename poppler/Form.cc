@@ -76,7 +76,6 @@
 #include "Annot.h"
 #include "Link.h"
 #include "Lexer.h"
-#include "Parser.h"
 #include "CIDFontsWidthsBuilder.h"
 #include "UTF.h"
 

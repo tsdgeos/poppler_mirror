@@ -14,13 +14,11 @@
 //
 //========================================================================
 
-#include "goo/GooString.h"
 #include "StructTreeRoot.h"
 #include "StructElement.h"
 #include "PDFDoc.h"
 #include "Object.h"
 #include "Dict.h"
-#include <set>
 #include <cassert>
 
 StructTreeRoot::StructTreeRoot(PDFDoc *docA, const Dict &structTreeRootDict) : doc(docA)

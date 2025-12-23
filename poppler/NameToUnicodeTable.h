@@ -24,8 +24,6 @@
 
 #include "CharTypes.h"
 
-#include <cstddef>
-
 struct NameToUnicodeTab
 {
     Unicode u;

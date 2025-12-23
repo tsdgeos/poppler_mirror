@@ -15,7 +15,6 @@
 #ifndef MARKEDCONTENTOUTPUTDEV_H
 #define MARKEDCONTENTOUTPUTDEV_H
 
-#include "goo/gmem.h"
 #include "poppler_private_export.h"
 #include "OutputDev.h"
 #include "GfxState.h"

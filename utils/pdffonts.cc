@@ -29,14 +29,10 @@
 #include "config.h"
 #include <poppler-config.h>
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
-#include <cmath>
 #include <memory>
 #include <string>
 #include "parseargs.h"
 #include "goo/GooString.h"
-#include "goo/gmem.h"
 #include "GlobalParams.h"
 #include "Object.h"
 #include "PDFDoc.h"

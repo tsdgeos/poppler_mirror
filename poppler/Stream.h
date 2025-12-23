@@ -54,6 +54,7 @@
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "Object.h"
+#include "goo/GooCheckedOps.h"
 
 class GooFile;
 class BaseStream;

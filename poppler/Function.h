@@ -29,7 +29,6 @@
 #define FUNCTION_H
 
 #include "Object.h"
-#include <set>
 
 class Dict;
 class Stream;
@@ -177,7 +176,7 @@ class ExponentialFunction : public Function
     };
 
 public:
-    ExponentialFunction(Object *funcObj, Dict *dict);
+    explicit ExponentialFunction(Dict *dict);
     ~ExponentialFunction() override;
     std::unique_ptr<Function> copy() const override { return std::make_unique<ExponentialFunction>(this); }
     Type getType() const override { return Type::Exponential; }
@@ -209,7 +208,7 @@ class StitchingFunction : public Function
     };
 
 public:
-    StitchingFunction(Object *funcObj, Dict *dict, RefRecursionChecker &usedParents);
+    StitchingFunction(Dict *dict, RefRecursionChecker &usedParents);
     ~StitchingFunction() override;
     std::unique_ptr<Function> copy() const override { return std::make_unique<StitchingFunction>(this); }
     Type getType() const override { return Type::Stitching; }

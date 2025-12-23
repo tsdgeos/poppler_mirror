@@ -19,7 +19,6 @@
 #include <poppler-config.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstddef>
 #include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
@@ -27,7 +26,6 @@
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
 #include "Win32Console.h"
-#include <cctype>
 
 static int firstPage = 0;
 static int lastPage = 0;

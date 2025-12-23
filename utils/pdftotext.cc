@@ -50,11 +50,8 @@
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
-#include "goo/gmem.h"
 #include "GlobalParams.h"
 #include "Object.h"
-#include "Stream.h"
-#include "Array.h"
 #include "Dict.h"
 #include "XRef.h"
 #include "Catalog.h"
@@ -71,7 +68,6 @@
 #include <iomanip>
 #include "Win32Console.h"
 #include "DateInfo.h"
-#include <cfloat>
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2, const UnicodeMap *uMap);
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *text1, const char *text2);
@@ -166,7 +162,7 @@ static std::string myXmlTokenReplace(const char *inString)
 
 static constexpr EndOfLineKind defaultEndOfLine()
 {
-#if defined(_WIN32)
+#ifdef _WIN32
     return eolDOS;
 #else
     return eolUnix;

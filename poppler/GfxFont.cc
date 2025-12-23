@@ -1786,7 +1786,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
         error(errSyntaxError, -1, "Missing Encoding entry in Type 0 font");
         return;
     }
-    if (!(cMap = CMap::parse(nullptr, collection->toStr(), &obj1))) {
+    if (!(cMap = CMap::parse(collection->toStr(), &obj1))) {
         return;
     }
     if (cMap->getCMapName()) {

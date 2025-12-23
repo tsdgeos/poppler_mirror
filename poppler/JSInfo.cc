@@ -18,8 +18,6 @@
 
 #include "config.h"
 #include <cstdio>
-#include "Object.h"
-#include "Dict.h"
 #include "Annot.h"
 #include "PDFDoc.h"
 #include "JSInfo.h"

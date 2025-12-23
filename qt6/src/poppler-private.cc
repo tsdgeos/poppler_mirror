@@ -44,6 +44,7 @@
 #include <PDFDocEncoding.h>
 #include <UnicodeMap.h>
 #include <UTF.h>
+#include <goo/gmem.h>
 
 #ifdef ANDROID
 #    include <QtCore/QString>

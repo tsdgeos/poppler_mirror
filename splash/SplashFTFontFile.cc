@@ -25,8 +25,6 @@
 #include <config.h>
 
 #include "goo/ft_utils.h"
-#include "goo/gmem.h"
-#include "goo/GooString.h"
 #include "poppler/GfxFont.h"
 #include "SplashFTFontEngine.h"
 #include "SplashFTFont.h"

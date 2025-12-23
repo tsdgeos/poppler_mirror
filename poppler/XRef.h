@@ -39,7 +39,6 @@
 
 #include <functional>
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "Object.h"
 #include "Stream.h"

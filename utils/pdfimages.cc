@@ -15,7 +15,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2018, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2018, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -34,18 +34,9 @@
 #include "config.h"
 #include <poppler-config.h>
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
-#include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
-#include "goo/gmem.h"
 #include "GlobalParams.h"
-#include "Object.h"
-#include "Stream.h"
-#include "Array.h"
-#include "Dict.h"
-#include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
 #include "PDFDoc.h"

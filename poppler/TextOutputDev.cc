@@ -61,7 +61,6 @@
 #include <cstddef>
 #include <cmath>
 #include <cfloat>
-#include <cctype>
 #include <algorithm>
 #include <functional>
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -71,7 +70,6 @@
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "poppler-config.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"
@@ -922,7 +920,19 @@ void TextPool::sort()
         return back;
     };
 
-    const auto SortedMerge = [](TextWord *a, TextWord *b) {
+    const auto PosCmp = [](const TextWord &a, const TextWord &b) -> bool {
+        if (a.rot == 0) {
+            return ((a.xMin + a.xMax) <= (b.xMin + b.xMax));
+        } else if (a.rot == 1) {
+            return ((a.yMin + a.yMax) <= (b.yMin + b.yMax));
+        } else if (a.rot == 2) {
+            return ((b.xMin + b.xMax) <= (a.xMin + a.xMax));
+        } else {
+            return ((b.yMin + b.yMax) <= (a.yMin + a.yMax));
+        }
+    };
+
+    const auto SortedMerge = [PosCmp](TextWord *a, TextWord *b) {
         if (!a) {
             return b;
         } else if (!b) {
@@ -932,7 +942,7 @@ void TextPool::sort()
         TextWord *head = nullptr;
         TextWord *cursor = nullptr;
 
-        if (a->primaryCmp(b) <= 0) {
+        if (PosCmp(*a, *b)) {
             head = cursor = a;
             a = a->next;
         } else {
@@ -941,7 +951,7 @@ void TextPool::sort()
         }
 
         while (a && b) {
-            if (a->primaryCmp(b) <= 0) {
+            if (PosCmp(*a, *b)) {
                 cursor->next = a;
                 cursor = cursor->next;
                 a = a->next;
@@ -4208,213 +4218,17 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     return false;
 }
 
-GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const
+GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const
 {
-    const UnicodeMap *uMap;
-    char space[8], eol[16];
-    int spaceLen, eolLen;
+    TextOutputFunc dumpToString = [](void *stream, const char *text, int len) {
+        GooString *s = static_cast<GooString *>(stream);
+        s->append(text, len);
+    };
 
     GooString s;
 
-    // get the output encoding
-    if (!(uMap = globalParams->getTextEncoding())) {
-        return s;
-    }
-
-    if (rawOrder) {
-        char mbc[16];
-        int mbc_len;
-
-        for (TextWord *word = rawWords; word && word <= rawLastWord; word = word->next) {
-            for (int j = 0; j < word->getLength(); ++j) {
-                double gXMin, gXMax, gYMin, gYMax;
-                word->getCharBBox(j, &gXMin, &gYMin, &gXMax, &gYMax);
-                if (xMin <= gXMin && gXMax <= xMax && yMin <= gYMin && gYMax <= yMax) {
-                    mbc_len = uMap->mapUnicode(*(word->getChar(j)), mbc, sizeof(mbc));
-                    s.append(mbc, mbc_len);
-                }
-            }
-        }
-        return s;
-    }
-
-    spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
-    eolLen = 0; // make gcc happy
-    switch (textEOL) {
-    case eolUnix:
-        eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
-        break;
-    case eolDOS:
-        eolLen = uMap->mapUnicode(0x0d, eol, sizeof(eol));
-        eolLen += uMap->mapUnicode(0x0a, eol + eolLen, sizeof(eol) - eolLen);
-        break;
-    case eolMac:
-        eolLen = uMap->mapUnicode(0x0d, eol, sizeof(eol));
-        break;
-    }
-
-    //~ writing mode (horiz/vert)
-
-    // collect the line fragments that are in the rectangle
-    std::vector<TextLineFrag> frags;
-    frags.reserve(256);
-    int lastRot = -1;
-    bool oneRot = true;
-    for (int i = 0; i < nBlocks; ++i) {
-        TextBlock *blk = blocks[i];
-        if (xMin < blk->xMax && blk->xMin < xMax && yMin < blk->yMax && blk->yMin < yMax) {
-            for (TextLine *line = blk->lines; line; line = line->next) {
-                if (xMin < line->xMax && line->xMin < xMax && yMin < line->yMax && line->yMin < yMax) {
-                    double y = 0.5 * (line->yMin + line->yMax);
-                    double x = 0.5 * (line->xMin + line->xMax);
-                    int idx0, idx1;
-                    idx0 = idx1 = -1;
-                    switch (line->rot) {
-                    case 0:
-                        if (yMin < y && y < yMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > xMin) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < xMax) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 1:
-                        if (xMin < x && x < xMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > yMin) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < yMax) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 2:
-                        if (yMin < y && y < yMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < xMax) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > xMin) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    case 3:
-                        if (xMin < x && x < xMax) {
-                            int j = 0;
-                            while (j < line->len) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) < yMax) {
-                                    idx0 = j;
-                                    break;
-                                }
-                                ++j;
-                            }
-                            j = line->len - 1;
-                            while (j >= 0) {
-                                if (0.5 * (line->edge[j] + line->edge[j + 1]) > yMin) {
-                                    idx1 = j;
-                                    break;
-                                }
-                                --j;
-                            }
-                        }
-                        break;
-                    }
-                    if (idx0 >= 0 && idx1 >= 0) {
-                        frags.push_back({});
-                        frags.back().init(line, idx0, idx1 - idx0 + 1);
-                        if (lastRot >= 0 && line->rot != lastRot) {
-                            oneRot = false;
-                        }
-                        lastRot = line->rot;
-                    }
-                }
-            }
-        }
-    }
-
-    // sort the fragments and generate the string
-    if (!frags.empty()) {
-        for (auto &frag : frags) {
-            frag.computeCoords(oneRot);
-        }
-        assignColumns(frags.data(), frags.size(), oneRot);
-
-        // if all lines in the region have the same rotation, use it;
-        // otherwise, use the page's primary rotation
-        if (oneRot) {
-            std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
-        } else {
-            std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
-        }
-        for (auto it = frags.begin(); it != frags.end();) {
-            double delta = maxIntraLineDelta * it->line->words->fontSize;
-            double base = it->base;
-
-            auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
-                return fabs(frag.base - base) >= delta;
-            });
-            std::sort(it, end, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
-            it = end;
-        }
-
-        int col = 0;
-        bool multiLine = false;
-        for (size_t i = 0; i < frags.size(); ++i) {
-            TextLineFrag *frag = &frags[i];
-
-            // insert a return
-            if (frag->col < col || (i > 0 && fabs(frag->base - frags[i - 1].base) > maxIntraLineDelta * frags[i - 1].line->words->fontSize)) {
-                s.append(eol, eolLen);
-                col = 0;
-                multiLine = true;
-            }
-
-            // column alignment
-            for (; col < frag->col; ++col) {
-                s.append(space, spaceLen);
-            }
-
-            // get the fragment text
-            col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, &s);
-        }
-
-        if (multiLine) {
-            s.append(eol, eolLen);
-        }
-    }
-
+    PDFRectangle area { xMin, yMin, xMax, yMax };
+    dump(&s, dumpToString, physLayout, textEOL, false, true, &area);
     return s;
 }
 
@@ -5325,7 +5139,60 @@ bool TextPage::findCharRange(int pos, int length, double *xMin, double *yMin, do
     return false;
 }
 
-void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks)
+std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
+{
+    const auto bBox = getBBox();
+    auto clipped { bBox };
+    clipped.clipTo(&area);
+
+    if (clipped.isEmpty()) {
+        return { 0, 0 };
+    } else if (bBox == clipped) {
+        return { 0, len };
+    }
+
+    if (rot == 0 || rot == 2) {
+        auto centerY = (bBox.y1 + bBox.y2) * 0.5;
+        if (centerY < area.y1 || centerY > area.y2) {
+            return { 0, 0 };
+        }
+    } else {
+        auto centerX = (bBox.x1 + bBox.x2) * 0.5;
+        if (centerX < area.x1 || centerX > area.x2) {
+            return { 0, 0 };
+        }
+    }
+
+    using Cmp = bool (*)(double, double);
+    auto findEdge = [this](int start, double wantedEdge, Cmp cmp) -> int {
+        for (int i = start; i < len; i++) {
+            if (cmp(edge[i + 1], wantedEdge)) {
+                auto center = (edge[i] + edge[i + 1]) * 0.5;
+                if (cmp(center, wantedEdge)) {
+                    return i;
+                }
+                return i + 1;
+            }
+        }
+        return len;
+    };
+
+    if (rot == 0 || rot == 1) {
+        auto edge1 = (rot == 0) ? clipped.x1 : clipped.y1;
+        auto edge2 = (rot == 0) ? clipped.x2 : clipped.y2;
+        int l = findEdge(0, edge1, [](double a, double b) { return a > b; });
+        int u = findEdge(l, edge2, [](double a, double b) { return a > b; });
+        return { l, u - l };
+    } else {
+        auto edge1 = (rot == 2) ? clipped.x2 : clipped.y2;
+        auto edge2 = (rot == 2) ? clipped.x1 : clipped.y1;
+        int l = findEdge(0, edge1, [](double a, double b) { return a < b; });
+        int u = findEdge(l, edge2, [](double a, double b) { return a < b; });
+        return { l, u - l };
+    }
+}
+
+void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, const PDFRectangle *area) const
 {
     const UnicodeMap *uMap;
     char space[8], eol[16], eop[8];
@@ -5351,6 +5218,11 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
     }
     eopLen = uMap->mapUnicode(0x0c, eop, sizeof(eop));
 
+    if (area && area->x1 <= 0.0 && area->y1 <= 0.0 //
+        && area->x2 >= pageWidth && area->y2 >= pageHeight) {
+        area = nullptr;
+    }
+
     //~ writing mode (horiz/vert)
 
     // output the page in raw (content stream) order
@@ -5360,36 +5232,66 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
         std::vector<Unicode> uText;
 
         for (TextWord *word = rawWords; word; word = word->next) {
+            if (area) {
+                auto bBox = word->getBBox();
+                if (!area->contains(bBox.x1, bBox.y1) && !area->contains(bBox.x2, bBox.y2)) {
+                    continue;
+                }
+            }
             s.clear();
             uText.resize(word->len());
             std::ranges::transform(word->chars, uText.begin(), [](auto &c) { return c.text; });
             dumpFragment(uText.data(), uText.size(), uMap, &s);
             (*outputFunc)(outputStream, s.c_str(), s.size());
 
-            if (word->next && fabs(word->next->base - word->base) < maxIntraLineDelta * word->fontSize && word->next->xMin > word->xMax - minDupBreakOverlap * word->fontSize) {
-                if (word->next->xMin > word->xMax + minWordSpacing * word->fontSize) {
-                    (*outputFunc)(outputStream, space, spaceLen);
-                }
-            } else {
+            if (!word->next) {
+                continue;
+            }
+            if (fabs(word->next->base - word->base) >= maxIntraLineDelta * word->fontSize) {
                 (*outputFunc)(outputStream, eol, eolLen);
+            } else if (fabs(word->next->xMin - word->xMax) > minDupBreakOverlap * word->fontSize) {
+                (*outputFunc)(outputStream, space, spaceLen);
             }
         }
 
         // output the page, maintaining the original physical layout
     } else if (physLayout) {
+        int rotations = 0;
 
         // collect the line fragments for the page and sort them
         std::vector<TextLineFrag> frags;
         frags.reserve(256);
         for (int i = 0; i < nBlocks; ++i) {
             TextBlock *blk = blocks[i];
+            if (area) {
+                auto bBox = blk->getBBox();
+                bBox.clipTo(area);
+                if (bBox.isEmpty()) {
+                    continue;
+                }
+            }
             for (TextLine *line = blk->lines; line; line = line->next) {
-                frags.push_back({});
-                frags.back().init(line, 0, line->len);
-                frags.back().computeCoords(true);
+                const auto [start, len] = area ? line->getLineBounds(*area) : std::pair { 0, line->len };
+                if (len) {
+                    rotations |= 1 << line->rot;
+                    frags.push_back({});
+                    frags.back().init(line, start, len);
+                }
             }
         }
-        std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
+
+        bool oneRot = (rotations == 1) || (rotations == 2) || (rotations == 4) || (rotations == 8);
+        for (auto &frag : frags) {
+            frag.computeCoords(oneRot);
+        }
+        if (!frags.empty() && area) {
+            assignColumns(&frags[0], frags.size(), true);
+        }
+        if (oneRot) {
+            std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
+        } else {
+            std::ranges::sort(frags, &TextLineFrag::cmpYXPrimaryRot);
+        }
         for (auto it = frags.begin(); it != frags.end();) {
             double delta = maxIntraLineDelta * it->line->words->fontSize;
             double base = it->base;
@@ -5397,7 +5299,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             auto end = std::find_if(it + 1, frags.end(), [base, delta](const TextLineFrag &frag) { //
                 return fabs(frag.base - base) >= delta;
             });
-            std::sort(it, end, &TextLineFrag::cmpXYColumnPrimaryRot);
+            std::sort(it, end, oneRot ? &TextLineFrag::cmpXYColumnLineRot : &TextLineFrag::cmpXYColumnPrimaryRot);
             it = end;
         }
 
@@ -5432,7 +5334,9 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 
             // print one or more returns if necessary
             if (i == frags.size() - 1) {
-                (*outputFunc)(outputStream, eol, eolLen);
+                if (!suppressLastEol) {
+                    (*outputFunc)(outputStream, eol, eolLen);
+                }
             } else if (frags[i + 1].col < col || fabs(frags[i + 1].base - frag.base) > maxIntraLineDelta * frag.line->words->fontSize) {
                 int d = (int)((frags[i + 1].base - frag.base) / frag.line->words->fontSize);
                 d = std::clamp(d, 1, 5);
@@ -5917,7 +5821,7 @@ bool TextOutputDev::findText(const Unicode *s, int len, bool startAtTop, bool st
 
 GooString TextOutputDev::getText(double xMin, double yMin, double xMax, double yMax) const
 {
-    return text->getText(xMin, yMin, xMax, yMax, textEOL);
+    return text->getText(xMin, yMin, xMax, yMax, textEOL, physLayout);
 }
 
 void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)

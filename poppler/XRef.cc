@@ -44,15 +44,12 @@
 //========================================================================
 
 #include <config.h>
-#include "poppler-config.h"
 
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
-#include <cmath>
 #include <cctype>
 #include <climits>
-#include <cfloat>
 #include <limits>
 #include "goo/gfile.h"
 #include "goo/gmem.h"

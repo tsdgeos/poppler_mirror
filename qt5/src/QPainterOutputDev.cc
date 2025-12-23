@@ -42,14 +42,12 @@
 #include <array>
 
 #include "goo/ft_utils.h"
-#include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
 #include "GfxState.h"
 #include "GfxFont.h"
 #include "Link.h"
-#include "FontEncodingTables.h"
 #include <fofi/FoFiTrueType.h>
 #include <fofi/FoFiType1C.h>
 #include "QPainterOutputDev.h"
