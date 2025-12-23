@@ -1,6 +1,8 @@
 //========================================================================
 //
-// Page.cc
+// PDFRectange.h
+//
+// Code originally from Page.cc
 //
 // Copyright 1996-2007 Glyph & Cog, LLC
 //

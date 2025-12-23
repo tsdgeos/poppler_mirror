@@ -28,7 +28,7 @@
  * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
  * Copyright (C) 2021 Thomas Huxhorn <thomas.huxhorn@web.de>
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
- * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+ * Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
