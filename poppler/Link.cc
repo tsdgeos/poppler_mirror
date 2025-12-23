@@ -650,7 +650,7 @@ LinkSound::LinkSound(const Object *soundObj)
         }
         // 'Sound' object
         tmp = soundObj->dictLookup("Sound");
-        sound = Sound::parseSound(&tmp);
+        sound = Sound::parseSound(tmp);
     }
 }
 

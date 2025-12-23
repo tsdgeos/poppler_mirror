@@ -1,6 +1,6 @@
 /* Sound.cc - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2009, 2017-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2009, 2017-2020, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,14 +23,14 @@
 #include "Stream.h"
 #include "FileSpec.h"
 
-std::unique_ptr<Sound> Sound::parseSound(Object *obj)
+std::unique_ptr<Sound> Sound::parseSound(const Object &obj)
 {
     // let's try to see if this Object is a Sound, according to the PDF specs
     // (section 9.2)
     Stream *str = nullptr;
     // the Object must be a Stream
-    if (obj->isStream()) {
-        str = obj->getStream();
+    if (obj.isStream()) {
+        str = obj.getStream();
     } else {
         return nullptr;
     }
@@ -48,9 +48,9 @@ std::unique_ptr<Sound> Sound::parseSound(Object *obj)
     }
 }
 
-Sound::Sound(const Object *obj, bool readAttrs)
+Sound::Sound(const Object &obj, bool readAttrs)
 {
-    streamObj = obj->copy();
+    streamObj = obj.copy();
 
     samplingRate = 0.0;
     channels = 1;
@@ -110,7 +110,7 @@ Stream *Sound::getStream()
 
 Sound *Sound::copy() const
 {
-    Sound *newsound = new Sound(&streamObj, false);
+    Sound *newsound = new Sound(streamObj, false);
 
     newsound->kind = kind;
     newsound->fileName = fileName;

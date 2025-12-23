@@ -1,6 +1,6 @@
 /* Sound.h - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2021, 2024, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2021, 2024, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class POPPLER_PRIVATE_EXPORT Sound
 {
 public:
     // Try to parse the Object obj
-    static std::unique_ptr<Sound> parseSound(Object *obj);
+    static std::unique_ptr<Sound> parseSound(const Object &obj);
 
     // Destructor
     ~Sound();
@@ -55,7 +55,7 @@ public:
     Sound(const Sound &) = delete;
     Sound &operator=(const Sound &) = delete;
 
-    const Object *getObject() const { return &streamObj; }
+    const Object &getObject() const { return streamObj; }
     Stream *getStream();
 
     SoundKind getSoundKind() const { return kind; }
@@ -69,7 +69,7 @@ public:
 
 private:
     // Create a sound. The Object obj is ensured to be a Stream with a Dict
-    explicit Sound(const Object *obj, bool readAttrs = true);
+    explicit Sound(const Object &obj, bool readAttrs = true);
 
     Object streamObj;
     SoundKind kind;
