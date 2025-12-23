@@ -69,9 +69,9 @@
 //------------------------------------------------------------------------
 
 #if defined(_WIN32) && !defined(_MSC_VER)
-#include <windef.h>
+#    include <windef.h>
 #else
-#define CDECL
+#    define CDECL
 #endif
 
 //------------------------------------------------------------------------
@@ -79,10 +79,13 @@
 //------------------------------------------------------------------------
 
 #ifdef __GNUC__
-#define GCC_PRINTF_FORMAT(fmt_index, va_index) \
-	__attribute__((__format__(printf, fmt_index, va_index)))
+#    ifdef __MINGW32__
+#        define GCC_PRINTF_FORMAT(fmt_index, va_index) __attribute__((__format__(gnu_printf, fmt_index, va_index)))
+#    else
+#        define GCC_PRINTF_FORMAT(fmt_index, va_index) __attribute__((__format__(printf, fmt_index, va_index)))
+#    endif
 #else
-#define GCC_PRINTF_FORMAT(fmt_index, va_index)
+#    define GCC_PRINTF_FORMAT(fmt_index, va_index)
 #endif
 
 #endif /* POPPLER_CONFIG_H */
