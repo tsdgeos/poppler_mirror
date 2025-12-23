@@ -46,12 +46,11 @@ public:
     // and returns true if either is correct.  Sets <ownerPasswordOk> if
     // the owner password was correct.  Either or both of the passwords
     // may be NULL, which is treated as an empty string.
-    static bool makeFileKey(int encVersion, int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, const GooString *ownerEnc, const GooString *userEnc, int permissions, const GooString *fileID,
-                            const GooString *ownerPassword, const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata, bool *ownerPasswordOk);
+    static bool makeFileKey(int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, const GooString *ownerEnc, const GooString *userEnc, int permissions, const GooString *fileID, const GooString *ownerPassword,
+                            const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata, bool *ownerPasswordOk);
 
 private:
-    static bool makeFileKey2(int encVersion, int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, int permissions, const GooString *fileID, const GooString *userPassword, unsigned char *fileKey,
-                             bool encryptMetadata);
+    static bool makeFileKey2(int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, int permissions, const GooString *fileID, const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata);
 };
 
 //------------------------------------------------------------------------

@@ -280,7 +280,7 @@ bool StandardSecurityHandler::authorize(void *authData)
         ownerPassword = nullptr;
         userPassword = nullptr;
     }
-    if (!Decrypt::makeFileKey(encVersion, encRevision, fileKeyLength, ownerKey.get(), userKey.get(), ownerEnc.get(), userEnc.get(), permFlags, fileID.get(), ownerPassword, userPassword, fileKey, encryptMetadata, &ownerPasswordOk)) {
+    if (!Decrypt::makeFileKey(encRevision, fileKeyLength, ownerKey.get(), userKey.get(), ownerEnc.get(), userEnc.get(), permFlags, fileID.get(), ownerPassword, userPassword, fileKey, encryptMetadata, &ownerPasswordOk)) {
         return false;
     }
     return true;

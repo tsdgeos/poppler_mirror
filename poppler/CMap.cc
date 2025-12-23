@@ -65,13 +65,13 @@ static int getCharFromStream(void *data)
 
 //------------------------------------------------------------------------
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj)
+std::shared_ptr<CMap> CMap::parse(const std::string &collectionA, Object *obj)
 {
     RefRecursionChecker recursion;
-    return parse(cache, collectionA, obj, recursion);
+    return parse(collectionA, obj, recursion);
 }
 
-std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectionA, Object *obj, RefRecursionChecker &recursion)
+std::shared_ptr<CMap> CMap::parse(const std::string &collectionA, Object *obj, RefRecursionChecker &recursion)
 {
     std::shared_ptr<CMap> cMap;
 
@@ -126,7 +126,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
         return {};
     }
     if (!obj1.isNull()) {
-        cMap->useCMap(cache, &obj1, recursion);
+        cMap->useCMap(&obj1, recursion);
     }
 
     if (str->reset()) {
@@ -242,9 +242,9 @@ void CMap::useCMap(CMapCache *cache, const char *useName)
     }
 }
 
-void CMap::useCMap(CMapCache *cache, Object *obj, RefRecursionChecker &recursion)
+void CMap::useCMap(Object *obj, RefRecursionChecker &recursion)
 {
-    std::shared_ptr<CMap> subCMap = CMap::parse(cache, collection->toStr(), obj, recursion);
+    std::shared_ptr<CMap> subCMap = CMap::parse(collection->toStr(), obj, recursion);
     if (!subCMap) {
         return;
     }

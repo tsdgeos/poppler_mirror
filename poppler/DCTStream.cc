@@ -20,7 +20,7 @@
 
 #include "DCTStream.h"
 
-static void str_init_source(j_decompress_ptr cinfo) { }
+static void str_init_source(j_decompress_ptr /*cinfo*/) { }
 
 static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
 {
@@ -62,7 +62,7 @@ static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
     src->pub.bytes_in_buffer -= num_bytes;
 }
 
-static void str_term_source(j_decompress_ptr cinfo) { }
+static void str_term_source(j_decompress_ptr /*cinfo*/) { }
 
 DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) : FilterStream(strA)
 {
@@ -269,7 +269,7 @@ std::optional<std::string> DCTStream::getPSFilter(int psLevel, const char *inden
     return s;
 }
 
-bool DCTStream::isBinary(bool last) const
+bool DCTStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

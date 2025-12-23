@@ -46,7 +46,7 @@ class CMap
 public:
     // Parse a CMap from <obj>, which can be a name or a stream.  Sets
     // the initial reference count to 1.  Returns NULL on failure.
-    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Object *obj);
+    static std::shared_ptr<CMap> parse(const std::string &collectionA, Object *obj);
 
     // Create the CMap specified by <collection> and <cMapName>.  Sets
     // the initial reference count to 1.  Returns NULL on failure.
@@ -77,14 +77,14 @@ public:
     void setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
 private:
-    static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Object *obj, RefRecursionChecker &recursion);
+    static std::shared_ptr<CMap> parse(const std::string &collectionA, Object *obj, RefRecursionChecker &recursion);
     static std::shared_ptr<CMap> parse(CMapCache *cache, const std::string &collectionA, Stream *str, RefRecursionChecker &recursion);
 
     void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
     CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA);
     CMap(std::unique_ptr<GooString> &&collectionA, std::unique_ptr<GooString> &&cMapNameA, int wModeA);
     void useCMap(CMapCache *cache, const char *useName);
-    void useCMap(CMapCache *cache, Object *obj, RefRecursionChecker &recursion);
+    void useCMap(Object *obj, RefRecursionChecker &recursion);
     void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
     void addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID);
     void freeCMapVector(CMapVectorEntry *vec);

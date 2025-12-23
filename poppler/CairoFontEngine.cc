@@ -76,7 +76,7 @@ CairoFont::~CairoFont()
     cairo_font_face_destroy(cairo_font_face);
 }
 
-bool CairoFont::matches(Ref &other, bool printingA)
+bool CairoFont::matches(Ref &other, bool /*printingA*/)
 {
     return (other == ref);
 }
@@ -86,7 +86,7 @@ cairo_font_face_t *CairoFont::getFontFace()
     return cairo_font_face;
 }
 
-std::optional<unsigned long> CairoFont::getGlyph(CharCode code, const Unicode *u, int uLen)
+std::optional<unsigned long> CairoFont::getGlyph(CharCode code)
 {
     FT_UInt gid;
 
@@ -204,7 +204,7 @@ std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Lib
     return font_face;
 }
 
-CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, CairoFontEngine *fontEngine, bool useCIDs)
+CairoFreeTypeFont *CairoFreeTypeFont::create(const std::shared_ptr<GfxFont> &gfxFont, XRef *xref, FT_Library lib, bool useCIDs)
 {
     std::string fileName;
     int faceIndex = 0;
@@ -408,7 +408,7 @@ static void _free_type3_font_info(void *closure)
     delete info;
 }
 
-static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_t *cr, cairo_font_extents_t *extents)
+static cairo_status_t _init_type3_glyph(cairo_scaled_font_t *scaled_font, cairo_t * /*cr*/, cairo_font_extents_t *extents)
 {
     type3_font_info_t *info;
 
@@ -468,7 +468,7 @@ static cairo_status_t _render_type3_glyph(cairo_scaled_font_t *scaled_font, unsi
     gfx->saveState();
 
     output_dev->startDoc(info->doc, info->fontEngine);
-    output_dev->startType3Render(gfx->getState(), gfx->getXRef());
+    output_dev->startType3Render(gfx->getXRef());
     output_dev->setType3RenderType(color ? CairoOutputDev::Type3RenderColor : CairoOutputDev::Type3RenderMask);
     charProc = charProcs->getVal(glyph);
     if (!charProc.isStream()) {
@@ -524,7 +524,7 @@ static cairo_status_t _render_type3_noncolor_glyph(cairo_scaled_font_t *scaled_f
     return _render_type3_glyph(scaled_font, glyph, cr, metrics, false);
 }
 
-CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing, XRef *xref)
+CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, PDFDoc *doc, CairoFontEngine *fontEngine, bool printing)
 {
     std::vector<int> codeToGID;
     char *name;
@@ -569,10 +569,10 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
         }
     }
 
-    return new CairoType3Font(ref, font_face, std::move(codeToGID), printing, xref);
+    return new CairoType3Font(ref, font_face, std::move(codeToGID), printing);
 }
 
-CairoType3Font::CairoType3Font(Ref refA, cairo_font_face_t *cairo_font_faceA, std::vector<int> &&codeToGIDA, bool printingA, XRef *xref) : CairoFont(refA, cairo_font_faceA, std::move(codeToGIDA), false, printingA) { }
+CairoType3Font::CairoType3Font(Ref refA, cairo_font_face_t *cairo_font_faceA, std::vector<int> &&codeToGIDA, bool printingA) : CairoFont(refA, cairo_font_faceA, std::move(codeToGIDA), false, printingA) { }
 
 CairoType3Font::~CairoType3Font() = default;
 
@@ -620,9 +620,9 @@ std::shared_ptr<CairoFont> CairoFontEngine::getFont(const std::shared_ptr<GfxFon
 
     GfxFontType fontType = gfxFont->getType();
     if (fontType == fontType3) {
-        font = std::shared_ptr<CairoFont>(CairoType3Font::create(gfxFont, doc, this, printing, xref));
+        font = std::shared_ptr<CairoFont>(CairoType3Font::create(gfxFont, doc, this, printing));
     } else {
-        font = std::shared_ptr<CairoFont>(CairoFreeTypeFont::create(gfxFont, xref, lib, this, useCIDs));
+        font = std::shared_ptr<CairoFont>(CairoFreeTypeFont::create(gfxFont, xref, lib, useCIDs));
     }
 
     if (font) {

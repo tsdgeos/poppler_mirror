@@ -397,7 +397,7 @@ AnnotCalloutMultiLine::~AnnotCalloutMultiLine() = default;
 // AnnotQuadrilateral
 //------------------------------------------------------------------------
 
-AnnotQuadrilaterals::AnnotQuadrilaterals(const Array &array, PDFRectangle *rect)
+AnnotQuadrilaterals::AnnotQuadrilaterals(const Array &array)
 {
     int arrayLength = array.getLength();
     int quadsLength = 0;
@@ -2103,18 +2103,18 @@ AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     type = typePopup;
 
     annotObj.dictSet("Subtype", Object(objName, "Popup"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotPopup::AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typePopup;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotPopup::~AnnotPopup() = default;
 
-void AnnotPopup::initialize(PDFDoc *docA, Dict *dict)
+void AnnotPopup::initialize(Dict *dict)
 {
     const Object &parentObj = dict->lookupNF("Parent");
     if (parentObj.isRef()) {
@@ -2299,7 +2299,7 @@ AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rect
     flags |= flagNoZoom | flagNoRotate;
 
     annotObj.dictSet("Subtype", Object(objName, "Text"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotText::AnnotText(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
@@ -2307,12 +2307,12 @@ AnnotText::AnnotText(PDFDoc *docA, Object &&dictObject, const Object *obj) : Ann
 
     type = typeText;
     flags |= flagNoZoom | flagNoRotate;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotText::~AnnotText() = default;
 
-void AnnotText::initialize(PDFDoc *docA, Dict *dict)
+void AnnotText::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -2727,19 +2727,19 @@ AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 {
     type = typeLink;
     annotObj.dictSet("Subtype", Object(objName, "Link"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotLink::AnnotLink(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
 
     type = typeLink;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotLink::~AnnotLink() = default;
 
-void AnnotLink::initialize(PDFDoc *docA, Dict *dict)
+void AnnotLink::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -2784,7 +2784,7 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict)
     */
     obj1 = dict->lookup("QuadPoints");
     if (obj1.isArray()) {
-        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray(), rect.get());
+        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray());
     }
 
     obj1 = dict->lookup("BS");
@@ -2819,18 +2819,18 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(do
     annotObj.dictSet("Subtype", Object(objName, "FreeText"));
     annotObj.dictSet("DA", Object(std::make_unique<GooString>()));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotFreeText::AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeFreeText;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotFreeText::~AnnotFreeText() = default;
 
-void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict)
+void AnnotFreeText::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -3393,18 +3393,18 @@ AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rect
     type = typeLine;
     annotObj.dictSet("Subtype", Object(objName, "Line"));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotLine::AnnotLine(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeLine;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotLine::~AnnotLine() = default;
 
-void AnnotLine::initialize(PDFDoc *docA, Dict *dict)
+void AnnotLine::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -3843,19 +3843,19 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype
     }
     annotObj.dictSet("QuadPoints", Object(quadPoints));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typeHighlight;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotTextMarkup::~AnnotTextMarkup() = default;
 
-void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict)
+void AnnotTextMarkup::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -3874,7 +3874,7 @@ void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict)
 
     obj1 = dict->lookup("QuadPoints");
     if (obj1.isArray()) {
-        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray(), rect.get());
+        quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*obj1.getArray());
     } else {
         error(errSyntaxError, -1, "Bad Annot Text Markup QuadPoints");
         ok = false;
@@ -3922,7 +3922,7 @@ void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
         a->add(Object(quadPoints.getY4(i)));
     }
 
-    quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*a, rect.get());
+    quadrilaterals = std::make_unique<AnnotQuadrilaterals>(*a);
 
     annotObj.dictSet("QuadPoints", Object(a));
     invalidateAppearance();
@@ -4123,19 +4123,19 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj) :
 {
     type = typeWidget;
     field = nullptr;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA) : Annot(docA, dictObject->copy(), obj)
 {
     type = typeWidget;
     field = fieldA;
-    initialize(docA, dictObject->getDict());
+    initialize(dictObject->getDict());
 }
 
 AnnotWidget::~AnnotWidget() = default;
 
-void AnnotWidget::initialize(PDFDoc *docA, Dict *dict)
+void AnnotWidget::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -5109,7 +5109,7 @@ bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *f
         return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
         break;
     case formSignature:
-        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, resources, da, border, appearCharacs, rect, xref, resourcesDict);
+        return drawSignatureFieldText(static_cast<const FormFieldSignature *>(field), form, da, border, rect, xref, resourcesDict);
         break;
     case formUndef:
     default:
@@ -5206,8 +5206,7 @@ static void setChildDictEntryValue(Dict *parentDict, const char *childDictName, 
     childDictionaryObj.dictSet(childDictEntryName, Object(childDictEntryValue));
 }
 
-bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GfxResources *resources, const GooString *_da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs,
-                                                    const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
+bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *_da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict)
 {
     const GooString &contents = field->getCustomAppearanceContent();
     if (contents.toStr().empty()) {
@@ -5566,18 +5565,18 @@ AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rectA, Movie *movieA) : Annot
     movie = movieA->copy();
     // TODO: create movie dict from movieA
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotMovie::AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeMovie;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotMovie::~AnnotMovie() = default;
 
-void AnnotMovie::initialize(PDFDoc *docA, Dict *dict)
+void AnnotMovie::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -5686,18 +5685,18 @@ AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
     type = typeScreen;
 
     annotObj.dictSet("Subtype", Object(objName, "Screen"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotScreen::AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeScreen;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotScreen::~AnnotScreen() = default;
 
-void AnnotScreen::initialize(PDFDoc *docA, Dict *dict)
+void AnnotScreen::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -5740,18 +5739,18 @@ AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, re
 {
     type = typeStamp;
     annotObj.dictSet("Subtype", Object(objName, "Stamp"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotStamp::AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeStamp;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotStamp::~AnnotStamp() = default;
 
-void AnnotStamp::initialize(PDFDoc *docA, Dict *dict)
+void AnnotStamp::initialize(Dict *dict)
 {
     Object obj1 = dict->lookup("Name");
     if (obj1.isName()) {
@@ -5972,19 +5971,19 @@ AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype sub
         assert(0 && "Invalid subtype for AnnotGeometry\n");
     }
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotGeometry::AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typeSquare;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotGeometry::~AnnotGeometry() = default;
 
-void AnnotGeometry::initialize(PDFDoc *docA, Dict *dict)
+void AnnotGeometry::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -6137,19 +6136,19 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subTy
     a->add(Object(0.));
     annotObj.dictSet("Vertices", Object(a));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotPolygon::AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     // the real type will be read in initialize()
     type = typePolygon;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotPolygon::~AnnotPolygon() = default;
 
-void AnnotPolygon::initialize(PDFDoc *docA, Dict *dict)
+void AnnotPolygon::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -6454,18 +6453,18 @@ AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, re
     type = typeCaret;
 
     annotObj.dictSet("Subtype", Object(objName, "Caret"));
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotCaret::AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeCaret;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotCaret::~AnnotCaret() = default;
 
-void AnnotCaret::initialize(PDFDoc *docA, Dict *dict)
+void AnnotCaret::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -6511,18 +6510,18 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
 
     drawBelow = false;
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotInk::AnnotInk(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeInk;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotInk::~AnnotInk() = default;
 
-void AnnotInk::initialize(PDFDoc *docA, Dict *dict)
+void AnnotInk::initialize(Dict *dict)
 {
     Object obj1;
 
@@ -6708,18 +6707,18 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rectA, GooS
     annotObj.dictSet("Subtype", Object(objName, "FileAttachment"));
     annotObj.dictSet("FS", Object(filename->copy()));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeFileAttachment;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotFileAttachment::~AnnotFileAttachment() = default;
 
-void AnnotFileAttachment::initialize(PDFDoc *docA, Dict *dict)
+void AnnotFileAttachment::initialize(Dict *dict)
 {
     Object objFS = dict->lookup("FS");
     if (objFS.isDict() || objFS.isString()) {
@@ -6907,18 +6906,18 @@ AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rectA, Sound *soundA) : Annot
     annotObj.dictSet("Subtype", Object(objName, "Sound"));
     annotObj.dictSet("Sound", soundA->getObject().copy());
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotSound::AnnotSound(PDFDoc *docA, Object &&dictObject, const Object *obj) : AnnotMarkup(docA, std::move(dictObject), obj)
 {
     type = typeSound;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotSound::~AnnotSound() = default;
 
-void AnnotSound::initialize(PDFDoc *docA, Dict *dict)
+void AnnotSound::initialize(Dict *dict)
 {
     Object obj1 = dict->lookup("Sound");
 
@@ -7053,18 +7052,18 @@ Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, rectA)
 
     annotObj.dictSet("Subtype", Object(objName, "3D"));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 Annot3D::Annot3D(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = type3D;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 Annot3D::~Annot3D() = default;
 
-void Annot3D::initialize(PDFDoc *docA, Dict *dict)
+void Annot3D::initialize(Dict *dict)
 {
     Object obj1 = dict->lookup("3DA");
     if (obj1.isDict()) {
@@ -7156,18 +7155,18 @@ AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rectA) : Annot(docA, 
 
     annotObj.dictSet("Subtype", Object(objName, "RichMedia"));
 
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object *obj) : Annot(docA, std::move(dictObject), obj)
 {
     type = typeRichMedia;
-    initialize(docA, annotObj.getDict());
+    initialize(annotObj.getDict());
 }
 
 AnnotRichMedia::~AnnotRichMedia() = default;
 
-void AnnotRichMedia::initialize(PDFDoc *docA, Dict *dict)
+void AnnotRichMedia::initialize(Dict *dict)
 {
     Object obj1 = dict->lookup("RichMediaContent");
     if (obj1.isDict()) {
