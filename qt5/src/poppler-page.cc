@@ -69,6 +69,7 @@
 #include <QPainterOutputDev.h>
 #include <Rendition.h>
 #include <SplashOutputDev.h>
+#include <goo/gmem.h>
 #include <splash/SplashBitmap.h>
 
 #include "poppler-private.h"

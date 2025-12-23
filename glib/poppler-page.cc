@@ -31,6 +31,7 @@
 #    include <GfxState.h>
 #    include <PageTransition.h>
 #    include <BBoxOutputDev.h>
+#    include <goo/gmem.h>
 #endif
 
 #include "poppler.h"

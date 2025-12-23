@@ -32,6 +32,7 @@
 #include "Dict.h"
 #include "Stream.h"
 #include "XRef.h"
+#include "goo/gmem.h"
 
 //------------------------------------------------------------------------
 // Object

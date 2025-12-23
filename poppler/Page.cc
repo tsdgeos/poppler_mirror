@@ -61,6 +61,7 @@
 #include "Error.h"
 #include "Page.h"
 #include "Catalog.h"
+#include "goo/gmem.h"
 
 //------------------------------------------------------------------------
 // PDFRectangle

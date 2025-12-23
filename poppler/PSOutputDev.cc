@@ -86,6 +86,7 @@
 #include "PSOutputDev.h"
 #include "PDFDoc.h"
 #include "UTF.h"
+#include "goo/gmem.h"
 
 #if USE_CMS
 #    include <lcms2.h>

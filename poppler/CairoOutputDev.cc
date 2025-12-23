@@ -69,6 +69,7 @@
 #include "Link.h"
 #include "PDFDocEncoding.h"
 #include <fofi/FoFiTrueType.h>
+#include <goo/gmem.h>
 #include <splash/SplashBitmap.h>
 #include "CairoOutputDev.h"
 #include "CairoFontEngine.h"

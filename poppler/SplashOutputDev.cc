@@ -66,6 +66,7 @@
 #include "PDFDoc.h"
 #include "Link.h"
 #include "fofi/FoFiTrueType.h"
+#include "goo/gmem.h"
 #include "splash/SplashBitmap.h"
 #include "splash/SplashGlyphBitmap.h"
 #include "splash/SplashPattern.h"

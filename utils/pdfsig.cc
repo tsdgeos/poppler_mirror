@@ -35,6 +35,7 @@
 #include <filesystem>
 #include "parseargs.h"
 #include "goo/gbasename.h"
+#include "goo/gmem.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
