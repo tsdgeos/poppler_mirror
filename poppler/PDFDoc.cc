@@ -84,6 +84,7 @@
 #include "CryptoSignBackend.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"
+#include "goo/glibc.h"
 #include "GlobalParams.h"
 #include "Page.h"
 #include "Catalog.h"

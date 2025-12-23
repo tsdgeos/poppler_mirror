@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstring>
 #include "goo/gfile.h"
+#include "goo/glibc.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"
