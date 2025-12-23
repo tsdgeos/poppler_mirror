@@ -37,14 +37,11 @@
 #define HTMLOUTPUTDEV_H
 
 #include <cstdio>
-#include "goo/gbasename.h"
-#include "GfxFont.h"
 #include "OutputDev.h"
 #include "HtmlLinks.h"
 #include "HtmlFonts.h"
 #include "Link.h"
 #include "Catalog.h"
-#include "UnicodeMap.h"
 
 #define xoutRound(x) ((int)((x) + 0.5))
 

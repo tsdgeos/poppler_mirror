@@ -27,7 +27,6 @@
 #include "goo/gmem.h"
 #include "goo/grandom.h"
 #include "goo/GooLikely.h"
-#include "SplashMath.h"
 #include "SplashScreen.h"
 
 static const SplashScreenParams defaultParams = {

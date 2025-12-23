@@ -23,7 +23,6 @@
 
 #include <config.h>
 
-#include <cstring>
 #include "NameToCharCode.h"
 
 void NameToCharCode::add(const char *name, CharCode c)

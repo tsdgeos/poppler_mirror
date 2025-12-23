@@ -25,7 +25,6 @@
 #include <config.h>
 
 #include <cstdio>
-#include <cstdlib>
 #include "PSTokenizer.h"
 
 //------------------------------------------------------------------------

@@ -13,10 +13,6 @@
 //========================================================================
 
 #include <cstdio>
-#include <cstddef>
-#include <cstring>
-#include <cstdlib>
-#include <cctype>
 #include "sanitychecks.h"
 
 #if USE_CMS

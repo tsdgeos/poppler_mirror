@@ -38,7 +38,6 @@
 #include <memory>
 #include <deque>
 
-#include "poppler-config.h"
 #include "CharTypes.h"
 
 class GooString;

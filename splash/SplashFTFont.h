@@ -25,8 +25,6 @@
 #ifndef SPLASHFTFONT_H
 #define SPLASHFTFONT_H
 
-#include "poppler-config.h"
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "SplashFont.h"

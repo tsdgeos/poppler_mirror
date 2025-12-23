@@ -52,11 +52,9 @@
 #define PDFDOC_H
 
 #include <algorithm>
-#include <cstdio>
 #include <mutex>
 
 #include "CryptoSignBackend.h"
-#include "poppler-config.h"
 
 #include "poppler_private_export.h"
 

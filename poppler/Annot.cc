@@ -72,7 +72,6 @@
 #include <cmath>
 #include <cassert>
 #include <numbers>
-#include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Error.h"
 #include "Object.h"
@@ -90,7 +89,6 @@
 #include "Movie.h"
 #include "OptionalContent.h"
 #include "Sound.h"
-#include "FileSpec.h"
 #include "DateInfo.h"
 #include "Link.h"
 #include "UTF.h"

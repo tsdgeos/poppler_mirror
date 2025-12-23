@@ -45,7 +45,6 @@
 
 #include <cstdarg>
 #include <memory>
-#include <optional>
 #include <string>
 
 #ifdef __clang__

@@ -27,7 +27,6 @@
 #include <cstring>
 #include <algorithm>
 #include <limits>
-#include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "SplashMath.h"
 #include "SplashXPath.h"

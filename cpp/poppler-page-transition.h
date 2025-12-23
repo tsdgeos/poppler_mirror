@@ -20,7 +20,7 @@
 #ifndef POPPLER_PAGE_TRANSITION_H
 #define POPPLER_PAGE_TRANSITION_H
 
-#include "poppler-global.h"
+#include "poppler_cpp_export.h"
 
 class Object;
 

@@ -52,7 +52,6 @@
 #include "goo/GooString.h"
 #include "goo/gfile.h"
 #include "goo/glibc.h"
-#include "goo/gmem.h"
 #include "GlobalParams.h"
 #include "Object.h"
 #include "Stream.h"

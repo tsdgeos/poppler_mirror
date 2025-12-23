@@ -54,10 +54,8 @@
 #include <cstdio>
 #include <cmath>
 #include "parseargs.h"
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "GlobalParams.h"
-#include "Object.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "splash/SplashBitmap.h"

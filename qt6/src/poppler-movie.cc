@@ -21,7 +21,6 @@
 
 #include "poppler-qt6.h"
 
-#include "Object.h"
 #include "Annot.h"
 #include "Movie.h"
 

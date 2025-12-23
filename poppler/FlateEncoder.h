@@ -14,17 +14,8 @@
 #ifndef FLATEENCODE_H
 #define FLATEENCODE_H
 
-#include "poppler-config.h"
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
-#include <cstring>
-#include <cctype>
-#include "goo/gmem.h"
-#include "goo/gfile.h"
-#include "Error.h"
 #include "Object.h"
-#include "Decrypt.h"
 
 #include "Stream.h"
 

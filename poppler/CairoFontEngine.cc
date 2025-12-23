@@ -49,14 +49,12 @@
 #include <config.h>
 
 #include <cstring>
-#include <fstream>
 #include "CairoFontEngine.h"
 #include "CairoOutputDev.h"
 #include "GlobalParams.h"
 #include <fofi/FoFiTrueType.h>
 #include <fofi/FoFiType1C.h>
 #include "goo/ft_utils.h"
-#include "goo/gfile.h"
 #include "Error.h"
 #include "XRef.h"
 #include "Gfx.h"

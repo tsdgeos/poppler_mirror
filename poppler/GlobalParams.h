@@ -40,7 +40,6 @@
 #define GLOBALPARAMS_H
 
 #include <cassert>
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include <cstdio>
 #include "CharTypes.h"

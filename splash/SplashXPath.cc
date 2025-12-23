@@ -24,9 +24,6 @@
 
 #include <config.h>
 
-#include <cstdlib>
-#include <cstring>
-#include <algorithm>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "SplashMath.h"

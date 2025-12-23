@@ -24,7 +24,6 @@
 #include "printencodings.h"
 
 #include "GlobalParams.h"
-#include "goo/GooString.h"
 
 void printEncodings()
 {

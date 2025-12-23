@@ -28,11 +28,9 @@
 #define CMAP_H
 
 #include <array>
-#include <atomic>
 #include <memory>
 
 #include "Object.h"
-#include "poppler-config.h"
 #include "CharTypes.h"
 
 class GooString;

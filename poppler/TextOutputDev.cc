@@ -61,7 +61,6 @@
 #include <cstddef>
 #include <cmath>
 #include <cfloat>
-#include <cctype>
 #include <algorithm>
 #include <functional>
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -71,7 +70,6 @@
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "poppler-config.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"

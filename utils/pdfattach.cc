@@ -20,7 +20,6 @@
 #include "GlobalParams.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
-#include "Error.h"
 #include "ErrorCodes.h"
 #include "UTF.h"
 #include "Win32Console.h"

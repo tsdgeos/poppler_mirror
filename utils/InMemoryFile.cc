@@ -18,7 +18,6 @@
 #include "InMemoryFile.h"
 
 #include <cstring>
-#include <sstream>
 
 InMemoryFile::InMemoryFile() = default;
 

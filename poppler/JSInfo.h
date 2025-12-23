@@ -20,7 +20,6 @@
 #define JS_INFO_H
 
 #include <cstdio>
-#include "Object.h"
 #include "PDFDoc.h"
 #include "poppler_private_export.h"
 #include "Link.h"

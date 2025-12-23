@@ -42,7 +42,6 @@
 #include <memory>
 #include <mutex>
 
-#include "poppler-config.h"
 #include "Object.h"
 #include "PDFRectangle.h"
 #include "poppler_private_export.h"

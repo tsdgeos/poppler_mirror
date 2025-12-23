@@ -29,7 +29,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <cstdarg>
 #include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "goo/gfile.h"

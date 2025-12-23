@@ -31,10 +31,7 @@
 
 #include <cstdio>
 #include <cstring>
-#include "goo/glibc.h"
-#include "goo/gmem.h"
 #include "goo/gfile.h"
-#include "goo/GooString.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"

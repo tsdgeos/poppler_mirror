@@ -22,10 +22,7 @@
 
 #include <config.h>
 
-#include <cstdlib>
-#include <cstring>
 #include <algorithm>
-#include "goo/gmem.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"
 #include "SplashPath.h"

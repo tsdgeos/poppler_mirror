@@ -26,7 +26,8 @@
 #ifndef UNICODEMAPFUNCS_H
 #define UNICODEMAPFUNCS_H
 
-#include "UTF.h"
+#include "CharTypes.h"
+#include "poppler_private_export.h"
 
 int POPPLER_PRIVATE_EXPORT mapUTF8(Unicode u, char *buf, int bufSize);
 

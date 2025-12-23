@@ -32,7 +32,6 @@
 #include <mutex>
 #include <vector>
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "Object.h"
 

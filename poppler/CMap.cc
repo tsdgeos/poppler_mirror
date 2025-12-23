@@ -31,7 +31,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"

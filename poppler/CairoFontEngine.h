@@ -34,10 +34,8 @@
 
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <vector>
 
-#include "poppler-config.h"
 #include <cairo-ft.h>
 
 #include "GfxFont.h"

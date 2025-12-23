@@ -25,6 +25,9 @@
 
 #include "BuiltinFontWidth.h"
 
+#include <cstddef>
+#include <cstring>
+
 //------------------------------------------------------------------------
 
 using GetWidthFunction = const BuiltinFontWidth *(*)(const char *str, size_t len);

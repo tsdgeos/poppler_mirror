@@ -30,7 +30,6 @@
 #ifndef FOFITRUETYPE_H
 #define FOFITRUETYPE_H
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 #include <unordered_map>

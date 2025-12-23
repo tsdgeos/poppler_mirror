@@ -32,7 +32,6 @@
 
 #include <config.h>
 
-#include <cstddef>
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"

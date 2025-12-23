@@ -19,7 +19,6 @@
 #ifndef POPPLER_DESTINATION_PRIVATE_H
 #define POPPLER_DESTINATION_PRIVATE_H
 
-#include "poppler-global.h"
 #include "poppler-destination.h"
 
 #include "Object.h"

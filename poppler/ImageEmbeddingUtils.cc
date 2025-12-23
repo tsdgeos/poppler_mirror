@@ -16,7 +16,7 @@
 
 #include <memory>
 #if ENABLE_LIBJPEG
-#    include <cstdio>
+#    include <cstdio> // jpeglib.h is broken on purpose and needs cstdio include before it
 extern "C" {
 #    include <jpeglib.h>
 }
@@ -27,7 +27,6 @@ extern "C" {
 #endif
 
 #include "ImageEmbeddingUtils.h"
-#include "goo/gmem.h"
 #include "goo/GooCheckedOps.h"
 #include "Object.h"
 #include "Array.h"

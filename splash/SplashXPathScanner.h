@@ -23,8 +23,6 @@
 #ifndef SPLASHXPATHSCANNER_H
 #define SPLASHXPATHSCANNER_H
 
-#include "SplashTypes.h"
-
 #include <poppler-config.h>
 
 #if USE_BOOST_HEADERS

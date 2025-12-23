@@ -67,7 +67,6 @@
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
 #include "GlobalParams.h"
-#include "Object.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"

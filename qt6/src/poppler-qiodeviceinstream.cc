@@ -21,8 +21,6 @@
 
 #include <QtCore/QIODevice>
 
-#include <cstdio>
-
 namespace Poppler {
 
 QIODeviceInStream::QIODeviceInStream(QIODevice *device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA)), m_device(device) { }

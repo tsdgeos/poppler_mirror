@@ -44,7 +44,6 @@
 
 #include <config.h>
 
-#include <cstddef>
 #include <climits>
 #include "GlobalParams.h"
 #include "Object.h"

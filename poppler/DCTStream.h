@@ -19,18 +19,8 @@
 #ifndef DCTSTREAM_H
 #define DCTSTREAM_H
 
-#include "poppler-config.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstddef>
 #include <csetjmp>
-#include <cstring>
-#include <cctype>
-#include "goo/gmem.h"
-#include "goo/gfile.h"
-#include "Error.h"
 #include "Object.h"
-#include "Decrypt.h"
 #include "Stream.h"
 
 extern "C" {

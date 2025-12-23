@@ -34,14 +34,11 @@
 #include <random>
 #include <filesystem>
 #include "parseargs.h"
-#include "Object.h"
-#include "Array.h"
 #include "goo/gbasename.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "DateInfo.h"
-#include "Error.h"
 #include "GlobalParams.h"
 #if ENABLE_NSS3
 #    include "NSSCryptoSignBackend.h"

@@ -29,6 +29,7 @@
 #include <memory>
 
 #include <QtCore/QDebug>
+#include <QtCore/QPointF>
 
 #include <Object.h>
 

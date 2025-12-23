@@ -30,7 +30,6 @@
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"
-#include "Error.h"
 #include "Stream.h"
 #include "XRef.h"
 

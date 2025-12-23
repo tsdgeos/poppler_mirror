@@ -21,8 +21,10 @@
 #ifndef POPPLER_IMAGE_H
 #define POPPLER_IMAGE_H
 
-#include "poppler-global.h"
-#include "poppler-rectangle.h"
+#include "poppler_cpp_export.h"
+
+#include <string>
+#include <vector>
 
 namespace poppler {
 

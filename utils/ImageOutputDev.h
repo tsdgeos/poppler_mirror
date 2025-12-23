@@ -31,9 +31,6 @@
 #ifndef IMAGEOUTPUTDEV_H
 #define IMAGEOUTPUTDEV_H
 
-#include "poppler/poppler-config.h"
-
-#include <cstdio>
 #include "goo/ImgWriter.h"
 #include "OutputDev.h"
 

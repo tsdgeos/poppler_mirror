@@ -29,7 +29,6 @@
 #define FUNCTION_H
 
 #include "Object.h"
-#include <set>
 
 class Dict;
 class Stream;

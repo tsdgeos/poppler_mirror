@@ -29,11 +29,9 @@
 #ifndef UNICODEMAP_H
 #define UNICODEMAP_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "CharTypes.h"
 
-#include <atomic>
 #include <memory>
 #include <string>
 #include <vector>

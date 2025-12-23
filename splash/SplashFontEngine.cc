@@ -30,12 +30,8 @@
 
 #include <config.h>
 
-#include <cstdlib>
-#include <cstdio>
 #include <algorithm>
 
-#include "goo/gmem.h"
-#include "goo/GooString.h"
 #include "SplashMath.h"
 #include "SplashFTFontEngine.h"
 #include "SplashFontFile.h"

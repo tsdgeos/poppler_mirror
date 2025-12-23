@@ -31,7 +31,6 @@
 
 #include <config.h>
 
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "XRef.h"

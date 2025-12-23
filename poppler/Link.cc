@@ -38,7 +38,6 @@
 #include <cstddef>
 #include <cstring>
 #include <memory>
-#include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "Object.h"

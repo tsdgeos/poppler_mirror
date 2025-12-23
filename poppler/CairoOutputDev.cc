@@ -67,7 +67,6 @@
 #include "GfxFont.h"
 #include "Page.h"
 #include "Link.h"
-#include "FontEncodingTables.h"
 #include "PDFDocEncoding.h"
 #include <fofi/FoFiTrueType.h>
 #include <splash/SplashBitmap.h>

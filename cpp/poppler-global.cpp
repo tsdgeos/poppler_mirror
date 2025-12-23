@@ -30,9 +30,9 @@
 #include "poppler-global.h"
 
 #include "poppler-private.h"
-#include "poppler-document-private.h"
 
 #include "DateInfo.h"
+#include "GlobalParams.h"
 
 #include <algorithm>
 

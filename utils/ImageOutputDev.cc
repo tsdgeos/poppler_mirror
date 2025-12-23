@@ -39,8 +39,6 @@
 #include <poppler-config.h>
 
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
 #include <cctype>
 #include <cmath>
 #include "goo/gmem.h"

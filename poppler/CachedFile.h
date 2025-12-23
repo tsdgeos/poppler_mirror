@@ -16,10 +16,8 @@
 #ifndef CACHEDFILE_H
 #define CACHEDFILE_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 
-#include "Object.h"
 #include "Stream.h"
 
 #include <vector>

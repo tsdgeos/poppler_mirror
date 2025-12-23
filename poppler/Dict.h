@@ -33,11 +33,11 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 #include <utility>
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include "Object.h"
 

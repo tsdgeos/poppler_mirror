@@ -35,11 +35,8 @@
 #ifndef GFILE_H
 #define GFILE_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
 #include <cstdio>
-#include <cstdlib>
-#include <cstddef>
 #include <ctime>
 #include <string>
 extern "C" {

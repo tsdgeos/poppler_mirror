@@ -41,7 +41,6 @@
 #    include <sys/types.h>
 #    include <sys/stat.h>
 #    include <fcntl.h>
-#    include <climits>
 #    include <cstring>
 #    include <pwd.h>
 #endif // _WIN32

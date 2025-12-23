@@ -39,9 +39,7 @@
 #ifndef TEXTOUTPUTDEV_H
 #define TEXTOUTPUTDEV_H
 
-#include "poppler-config.h"
 #include "poppler_private_export.h"
-#include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"

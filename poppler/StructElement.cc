@@ -18,7 +18,6 @@
 #include "StructElement.h"
 #include "StructTreeRoot.h"
 #include "GlobalParams.h"
-#include "UnicodeMap.h"
 #include "PDFDoc.h"
 #include "Dict.h"
 

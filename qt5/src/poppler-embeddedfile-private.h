@@ -21,6 +21,9 @@
 #ifndef POPPLER_EMBEDDEDFILE_PRIVATE_H
 #define POPPLER_EMBEDDEDFILE_PRIVATE_H
 
+#include <memory>
+
+class EmbFile;
 class FileSpec;
 
 namespace Poppler {

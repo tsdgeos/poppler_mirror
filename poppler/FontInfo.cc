@@ -32,13 +32,7 @@
 //========================================================================
 
 #include "config.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstddef>
-#include <cstring>
-#include <cmath>
 #include "GlobalParams.h"
-#include "Error.h"
 #include "Object.h"
 #include "Dict.h"
 #include "GfxFont.h"
