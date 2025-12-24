@@ -142,12 +142,10 @@ inline void *gmallocn3(int width, int height, int size, bool checkoverflow = fal
     return gmalloc(bytes, checkoverflow);
 }
 
-inline void *greallocn(void *p, int count, int size, bool checkoverflow = false, bool free_p = true)
+inline void *greallocn(void *p, int count, int size, bool checkoverflow = false)
 {
     if (count == 0) {
-        if (free_p) {
-            gfree(p);
-        }
+        gfree(p);
         return nullptr;
     }
 
@@ -156,9 +154,7 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
         std::fputs("Bogus memory allocation size\n", stderr);
 
         if (checkoverflow) {
-            if (free_p) {
-                gfree(p);
-            }
+            gfree(p);
             return nullptr;
         }
 
@@ -169,9 +165,7 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
     if (void *q = grealloc(p, bytes, checkoverflow)) {
         return q;
     }
-    if (free_p) {
-        gfree(p);
-    }
+    gfree(p);
     return nullptr;
 }
 
