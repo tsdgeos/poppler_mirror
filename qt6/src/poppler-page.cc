@@ -771,9 +771,8 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbor
     const std::vector<TextWord *> &words = word_list->getWords();
     output_list.reserve(words.size());
     for (const TextWord *word : words) {
-        GooString *gooWord = word->getText();
-        QString string = QString::fromUtf8(gooWord->c_str());
-        delete gooWord;
+        const std::unique_ptr<std::string> wordText = word->getText();
+        const QString string = QString::fromUtf8(wordText->c_str());
         double xMin, yMin, xMax, yMax;
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 

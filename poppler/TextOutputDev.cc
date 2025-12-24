@@ -814,13 +814,12 @@ bool TextWord::cmpYX(const TextWord *const word1, const TextWord *const word2)
     return cmp < 0;
 }
 
-GooString *TextWord::getText() const
+std::unique_ptr<std::string> TextWord::getText() const
 {
-    GooString *s;
     const UnicodeMap *uMap;
     char buf[8];
 
-    s = new GooString();
+    auto s = std::make_unique<std::string>();
     if (!(uMap = globalParams->getTextEncoding())) {
         return s;
     }

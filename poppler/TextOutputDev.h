@@ -176,7 +176,7 @@ public:
 
     int getLength() const { return chars.size(); }
     const Unicode *getChar(int idx) const { return &chars[idx].text; }
-    GooString *getText() const;
+    std::unique_ptr<std::string> getText() const;
     const GooString *getFontName(int idx) const { return chars[idx].font->fontName; }
     void getColor(double *r, double *g, double *b) const
     {
