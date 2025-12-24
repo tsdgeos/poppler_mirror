@@ -148,7 +148,7 @@ std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *ind
     return s;
 }
 
-bool FlateStream::isBinary(bool last) const
+bool FlateStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

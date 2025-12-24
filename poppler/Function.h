@@ -81,7 +81,7 @@ public:
     double getRangeMin(int i) const { return range[i][0]; }
     double getRangeMax(int i) const { return range[i][1]; }
     bool getHasRange() const { return hasRange; }
-    virtual bool hasDifferentResultSet(const Function *func) const { return false; }
+    virtual bool hasDifferentResultSet(const Function * /*func*/) const { return false; }
 
     // Transform an input tuple into an output tuple.
     virtual void transform(const double *in, double *out) const = 0;

@@ -53,7 +53,7 @@ static void poppler_layer_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_layer_parent_class)->finalize(object);
 }
 
-static void poppler_layer_init(PopplerLayer *layer) { }
+static void poppler_layer_init(PopplerLayer * /*layer*/) { }
 
 static void poppler_layer_class_init(PopplerLayerClass *klass)
 {

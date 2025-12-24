@@ -465,7 +465,7 @@ Page::~Page()
 }
 
 // Callback that filters out everything but form fields
-static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) {
+static auto annotDisplayDecideCbk = [](Annot *annot, void * /*user_data*/) {
     // Hide everything but forms
     return (annot->getType() == Annot::typeWidget);
 };

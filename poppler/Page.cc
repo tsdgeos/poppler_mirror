@@ -266,7 +266,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 
 #define pageLocker() const std::scoped_lock locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA, Form *form) : pageRef(pageRefA), attrs(std::move(attrsA))
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA) : pageRef(pageRefA), attrs(std::move(attrsA))
 {
     ok = true;
     doc = docA;

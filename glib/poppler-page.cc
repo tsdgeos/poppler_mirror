@@ -493,8 +493,7 @@ cairo_surface_t *poppler_page_get_thumbnail(PopplerPage *page)
     return surface;
 }
 
-static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color, double background_opacity,
-                             bool draw_glyphs)
+static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color, double background_opacity, bool draw_glyphs)
 {
     CairoOutputDev *output_dev;
     TextPage *text;
@@ -544,9 +543,9 @@ static void render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle
  * rendered to @cairo, in which case this function will (some day)
  * only render the changed part of the selection.
  **/
-void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color)
+void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle * /*old_selection*/, PopplerSelectionStyle style, PopplerColor *glyph_color, PopplerColor *background_color)
 {
-    render_selection(page, cairo, selection, old_selection, style, glyph_color, background_color, 1, TRUE);
+    render_selection(page, cairo, selection, style, glyph_color, background_color, 1, TRUE);
 }
 
 /**
@@ -570,11 +569,11 @@ void poppler_page_render_selection(PopplerPage *page, cairo_t *cairo, PopplerRec
  *
  * Since: 25.08
  **/
-void poppler_page_render_transparent_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle *old_selection, PopplerSelectionStyle style, PopplerColor *background_color, double background_opacity)
+void poppler_page_render_transparent_selection(PopplerPage *page, cairo_t *cairo, PopplerRectangle *selection, PopplerRectangle * /*old_selection*/, PopplerSelectionStyle style, PopplerColor *background_color, double background_opacity)
 {
     PopplerColor glyph_color = { 0, 0, 0 };
 
-    render_selection(page, cairo, selection, old_selection, style, &glyph_color, background_color, background_opacity, FALSE);
+    render_selection(page, cairo, selection, style, &glyph_color, background_color, background_opacity, FALSE);
 }
 
 /**
@@ -1137,7 +1136,7 @@ static void poppler_page_class_init(PopplerPageClass *klass)
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_LABEL, g_param_spec_string("label", "Page Label", "The label of the page", nullptr, G_PARAM_READABLE));
 }
 
-static void poppler_page_init(PopplerPage *page) { }
+static void poppler_page_init(PopplerPage * /*page*/) { }
 
 /**
  * poppler_page_get_link_mapping:

@@ -989,8 +989,8 @@ public:
     bool reset() override;
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
-    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
-    bool isBinary(bool last = true) const override { return true; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
+    bool isBinary(bool /*last*/ = true) const override { return true; }
     bool isEncoder() const override { return true; }
 
 private:
@@ -1932,7 +1932,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 case fontTrueType:
                 case fontTrueTypeOT:
                     psName = makePSFontName(font, font->getID());
-                    setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName.get(), fontLoc->fontNum);
+                    setupEmbeddedTrueTypeFont(font, psName.get(), fontLoc->fontNum);
                     break;
                 case fontCIDType0C:
                     psName = makePSFontName(font, &fontLoc->embFontID);
@@ -1942,7 +1942,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
                 case fontCIDType2OT:
                     psName = makePSFontName(font, font->getID());
                     //~ should check to see if font actually uses vertical mode
-                    setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName.get(), true, fontLoc->fontNum);
+                    setupEmbeddedCIDTrueTypeFont(font, psName.get(), true, fontLoc->fontNum);
                     break;
                 case fontCIDType0COT:
                     psName = makePSFontName(font, &fontLoc->embFontID);
@@ -2365,7 +2365,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, int faceIndex)
+void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, int faceIndex)
 {
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2499,7 +2499,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     writePS("%%EndResource\n");
 }
 
-void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName, bool needVerticalMetrics, int faceIndex)
+void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName, bool needVerticalMetrics, int faceIndex)
 {
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -3776,19 +3776,19 @@ void PSOutputDev::endPage()
     }
 }
 
-void PSOutputDev::saveState(GfxState *state)
+void PSOutputDev::saveState(GfxState * /*state*/)
 {
     writePS("q\n");
     ++numSaves;
 }
 
-void PSOutputDev::restoreState(GfxState *state)
+void PSOutputDev::restoreState(GfxState * /*state*/)
 {
     writePS("Q\n");
     --numSaves;
 }
 
-void PSOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
+void PSOutputDev::updateCTM(GfxState * /*state*/, double m11, double m12, double m21, double m22, double m31, double m32)
 {
     writePSFmt("[{0:.6gs} {1:.6gs} {2:.6gs} {3:.6gs} {4:.6gs} {5:.6gs}] cm\n", m11, m12, m21, m22, m31, m32);
 }
@@ -4172,12 +4172,12 @@ void PSOutputDev::updateTextShift(GfxState *state, double shift)
     }
 }
 
-void PSOutputDev::saveTextPos(GfxState *state)
+void PSOutputDev::saveTextPos(GfxState * /*state*/)
 {
     writePS("currentpoint\n");
 }
 
-void PSOutputDev::restoreTextPos(GfxState *state)
+void PSOutputDev::restoreTextPos(GfxState * /*state*/)
 {
     writePS("m\n");
 }
@@ -4206,8 +4206,7 @@ void PSOutputDev::eoFill(GfxState *state)
     writePS("f*\n");
 }
 
-bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
-                                      double xStep, double yStep)
+bool PSOutputDev::tilingPatternFillL1(Object *str, int paintType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4281,8 +4280,7 @@ bool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1,
-                                      double xStep, double yStep)
+bool PSOutputDev::tilingPatternFillL2(Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -4328,7 +4326,7 @@ bool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str
     return true;
 }
 
-bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool PSOutputDev::tilingPatternFill(GfxState * /*state*/, Gfx *gfxA, Catalog * /*cat*/, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     std::set<int>::iterator patternRefIt;
     const int patternRefNum = tPat->getPatternRefNum();
@@ -4370,9 +4368,9 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
         delete gfx;
         res = true;
     } else if (level == psLevel1 || level == psLevel1Sep) {
-        res = tilingPatternFillL1(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL1(str, paintType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
     } else {
-        res = tilingPatternFillL2(state, cat, str, paintType, tilingType, resDict, mat, bbox, x0, y0, x1, y1, xStep, yStep);
+        res = tilingPatternFillL2(str, paintType, tilingType, resDict, mat, bbox, xStep, yStep);
     }
 
     if (patternRefNum != -1) {
@@ -4382,7 +4380,7 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Gf
     return res;
 }
 
-bool PSOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading)
+bool PSOutputDev::functionShadedFill(GfxState * /*state*/, GfxFunctionShading *shading)
 {
     double x0, y0, x1, y1;
     int i;
@@ -5040,9 +5038,9 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     }
 }
 
-void PSOutputDev::beginTextObject(GfxState *state) { }
+void PSOutputDev::beginTextObject(GfxState * /*state*/) { }
 
-void PSOutputDev::endTextObject(GfxState *state)
+void PSOutputDev::endTextObject(GfxState * /*state*/)
 {
     if (haveTextClip) {
         writePS("Tclip\n");
@@ -5050,7 +5048,7 @@ void PSOutputDev::endTextObject(GfxState *state)
     }
 }
 
-void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool /*interpolate*/, bool inlineImg)
 {
     int len;
 
@@ -5071,21 +5069,21 @@ void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int w
     }
 }
 
-void PSOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
+void PSOutputDev::setSoftMaskFromImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double * /*baseMatrix*/)
 {
     if (level != psLevel1 && level != psLevel1Sep) {
         maskToClippingPath(str, width, height, invert);
     }
 }
 
-void PSOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
+void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, double * /*baseMatrix*/)
 {
     if (level != psLevel1 && level != psLevel1Sep) {
         writePS("pdfImClipEnd\n");
     }
 }
 
-void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool /*interpolate*/, const int *maskColors, bool inlineImg)
 {
     int len;
 
@@ -5096,7 +5094,7 @@ void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width
         break;
     case psLevel1Sep:
         //~ handle indexed, separation, ... color spaces
-        doImageL1Sep(ref, colorMap, false, inlineImg, str, width, height, len, maskColors, nullptr, 0, 0, false);
+        doImageL1Sep(colorMap, str, width, height, maskColors, nullptr, 0, 0, false);
         break;
     case psLevel2:
     case psLevel2Sep:
@@ -5110,7 +5108,7 @@ void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width
     t3Cacheable = false;
 }
 
-void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
+void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool /*interpolate*/, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool /*maskInterpolate*/)
 {
     int len;
 
@@ -5121,7 +5119,7 @@ void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int
         break;
     case psLevel1Sep:
         //~ handle indexed, separation, ... color spaces
-        doImageL1Sep(ref, colorMap, false, false, str, width, height, len, nullptr, maskStr, maskWidth, maskHeight, maskInvert);
+        doImageL1Sep(colorMap, str, width, height, nullptr, maskStr, maskWidth, maskHeight, maskInvert);
         break;
     case psLevel2:
     case psLevel2Sep:
@@ -5285,7 +5283,7 @@ end:
     }
 }
 
-void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap, bool invert, bool inlineImg, Stream *str, int width, int height, int len, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
+void PSOutputDev::doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int width, int height, const int *maskColors, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert)
 {
     unsigned char pixBuf[gfxColorMaxComps];
     GfxCMYK cmyk;
@@ -6679,7 +6677,7 @@ void PSOutputDev::opiBegin(GfxState *state, Dict *opiDict)
     }
 }
 
-void PSOutputDev::opiBegin20(GfxState *state, Dict *dict)
+void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
 {
     double width, height, left, right, top, bottom;
     int w, h;
@@ -6961,7 +6959,7 @@ void PSOutputDev::opiTransform(GfxState *state, double x0, double y0, double *x1
     *y1 *= yScale;
 }
 
-void PSOutputDev::opiEnd(GfxState *state, Dict *opiDict)
+void PSOutputDev::opiEnd(GfxState * /*state*/, Dict *opiDict)
 {
     if (generateOPI) {
         Object dict = opiDict->lookup("2.0");
@@ -6981,14 +6979,14 @@ void PSOutputDev::opiEnd(GfxState *state, Dict *opiDict)
     }
 }
 
-void PSOutputDev::type3D0(GfxState *state, double wx, double wy)
+void PSOutputDev::type3D0(GfxState * /*state*/, double wx, double wy)
 {
     writePSFmt("{0:.6g} {1:.6g} setcharwidth\n", wx, wy);
     writePS("q\n");
     t3NeedsRestore = true;
 }
 
-void PSOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury)
+void PSOutputDev::type3D1(GfxState * /*state*/, double wx, double wy, double llx, double lly, double urx, double ury)
 {
     t3WX = wx;
     t3WY = wy;

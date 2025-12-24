@@ -227,7 +227,7 @@ HtmlString::~HtmlString()
     gfree(xRight);
 }
 
-void HtmlString::addChar(GfxState *state, double x, double y, double dx, double dy, Unicode u)
+void HtmlString::addChar(GfxState * /*state*/, double x, double /*y*/, double dx, double /*dy*/, Unicode u)
 {
     if (dir == textDirUnknown) {
         // dir = UnicodeMap::getDirection(u);
@@ -328,7 +328,7 @@ void HtmlPage::updateFont(GfxState *state)
     }
 }
 
-void HtmlPage::beginString(GfxState *state, const GooString *s)
+void HtmlPage::beginString(GfxState *state, const GooString * /*s*/)
 {
     curStr = new HtmlString(state, fontSize, fonts.get());
 }
@@ -345,7 +345,7 @@ void HtmlPage::conv()
     }
 }
 
-void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy, double ox, double oy, const Unicode *u, int uLen)
+void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy, double /*ox*/, double /*oy*/, const Unicode *u, int uLen)
 {
     double x1, y1, w1, h1, dx2, dy2;
     int n, i;
@@ -1169,7 +1169,7 @@ HtmlOutputDev::~HtmlOutputDev()
     }
 }
 
-void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
+void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef * /*xref*/)
 {
 #if 0
   if (mode&&!xml){
@@ -1246,12 +1246,12 @@ void HtmlOutputDev::beginString(GfxState *state, const GooString *s)
     pages->beginString(state, s);
 }
 
-void HtmlOutputDev::endString(GfxState *state)
+void HtmlOutputDev::endString(GfxState * /*state*/)
 {
     pages->endString();
 }
 
-void HtmlOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int /*nBytes*/, const Unicode *u, int uLen)
+void HtmlOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode /*code*/, int /*nBytes*/, const Unicode *u, int uLen)
 {
     if (!showHidden && (state->getRender() & 3) == 3) {
         return;

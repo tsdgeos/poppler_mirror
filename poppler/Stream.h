@@ -1283,7 +1283,7 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
     bool isBinary(bool last = true) const override;
 
     int lookChar(int idx);
@@ -1416,8 +1416,8 @@ public:
     [[nodiscard]] bool reset() override;
     int getChar() override;
     int lookChar() override;
-    std::optional<std::string> getPSFilter(int psLevel, const char *indent) override { return {}; }
-    bool isBinary(bool last = true) const override { return true; }
+    std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
+    bool isBinary(bool /*last*/ = true) const override { return true; }
     bool isEncoder() const override { return true; }
 
 private:

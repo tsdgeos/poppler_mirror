@@ -78,6 +78,7 @@ FILE *InMemoryFile::open(const char *mode)
     };
     return fptr = fopencookie(this, mode, methods);
 #else
+    (void)mode;
     fprintf(stderr, "If you can read this, your platform does not support the features necessary to achieve your goals.");
     return nullptr;
 #endif

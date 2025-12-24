@@ -122,7 +122,7 @@ class POPPLER_PRIVATE_EXPORT Page
 {
 public:
     // Constructor.
-    Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA, Form *form);
+    Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA);
 
     // Destructor.
     ~Page();

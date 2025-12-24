@@ -302,10 +302,10 @@ private:
     void getImageParams2(int *bitsPerComponent, StreamColorSpaceMode *csMode);
     bool readBoxes();
     bool readColorSpecBox(unsigned int dataLen);
-    bool readCodestream(unsigned int len);
+    bool readCodestream();
     bool readTilePart();
     bool readTilePartData(unsigned int tileIdx, unsigned int tilePartLen, bool tilePartToEOC);
-    bool readCodeBlockData(JPXTileComp *tileComp, JPXResLevel *resLevel, JPXPrecinct *precinct, JPXSubband *subband, unsigned int res, unsigned int sb, JPXCodeBlock *cb);
+    bool readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsigned int sb, JPXCodeBlock *cb);
     void inverseTransform(JPXTileComp *tileComp);
     void inverseTransformLevel(JPXTileComp *tileComp, unsigned int r, JPXResLevel *resLevel);
     void inverseTransform1D(JPXTileComp *tileComp, int *data, unsigned int offset, unsigned int n);

@@ -297,7 +297,7 @@ int OptContentModel::rowCount(const QModelIndex &parent) const
     }
 }
 
-int OptContentModel::columnCount(const QModelIndex &parent) const
+int OptContentModel::columnCount(const QModelIndex & /*parent*/) const
 {
     return 1;
 }

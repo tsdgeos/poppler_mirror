@@ -78,7 +78,7 @@ protected:
     void transform(const std::array<SplashCoord, 6> &matrix, SplashCoord xi, SplashCoord yi, SplashCoord *xo, SplashCoord *yo);
     void strokeAdjust(SplashXPathAdjust *adjust, SplashCoord *xp, SplashCoord *yp);
     void grow(int nSegs);
-    void addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness, bool first, bool last, bool end0, bool end1);
+    void addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness);
     void addSegment(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1);
 
     SplashXPathSeg *segs;

@@ -69,7 +69,7 @@ public:
 
     // Copy the rectangle (srcX, srcY, width, height) to (destX, destY)
     // in destDC.
-    void redraw(int srcX, int srcY, cairo_t *cr, int destX, int destY, int width, int height);
+    void redraw(int srcX, int srcY, cairo_t *cr, int width, int height);
 
 private:
     int incrementalUpdate;
@@ -96,7 +96,7 @@ typedef struct
 // GDKSplashOutputDev
 //------------------------------------------------------------------------
 
-GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen *screen, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc), incrementalUpdate(1)
+GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc), incrementalUpdate(1)
 {
     redrawCbk = redrawCbkA;
     redrawCbkData = redrawCbkDataA;
@@ -130,7 +130,7 @@ void GDKSplashOutputDev::updateFont(GfxState *state)
     SplashOutputDev::updateFont(state);
 }
 
-void GDKSplashOutputDev::redraw(int srcX, int srcY, cairo_t *cr, int destX, int destY, int width, int height)
+void GDKSplashOutputDev::redraw(int srcX, int srcY, cairo_t *cr, int width, int height)
 {
     GdkPixbuf *pixbuf;
     int gdk_rowstride;
@@ -144,7 +144,7 @@ void GDKSplashOutputDev::redraw(int srcX, int srcY, cairo_t *cr, int destX, int 
     g_object_unref(pixbuf);
 }
 
-static gboolean drawing_area_draw(GtkWidget *drawing_area, cairo_t *cr, View *view)
+static gboolean drawing_area_draw(GtkWidget * /*drawing_area*/, cairo_t *cr, View *view)
 {
     GdkRectangle document;
     GdkRectangle clip;
@@ -172,7 +172,7 @@ static gboolean drawing_area_draw(GtkWidget *drawing_area, cairo_t *cr, View *vi
         cairo_set_source_surface(cr, view->surface, 0, 0);
         cairo_paint(cr);
     } else {
-        view->out->redraw(draw.x, draw.y, cr, draw.x, draw.y, draw.width, draw.height);
+        view->out->redraw(draw.x, draw.y, cr, draw.width, draw.height);
     }
 
     return TRUE;
@@ -236,7 +236,7 @@ static void view_free(View *view)
     g_slice_free(View, view);
 }
 
-static void destroy_window_callback(GtkWindow *window, View *view)
+static void destroy_window_callback(GtkWindow * /*window*/, View *view)
 {
     view_list = g_list_remove(view_list, view);
     view_free(view);

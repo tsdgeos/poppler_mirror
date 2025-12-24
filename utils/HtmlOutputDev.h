@@ -243,8 +243,9 @@ public:
 
     //----- initialization and control
 
-    bool checkPageSlice(Page *p, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data) = nullptr,
-                        void *abortCheckCbkData = nullptr, bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr, void *annotDisplayDecideCbkData = nullptr) override
+    bool checkPageSlice(Page *p, double /*hDPI*/, double /*vDPI*/, int /*rotate*/, bool /*useMediaBox*/, bool /*crop*/, int /*sliceX*/, int /*sliceY*/, int /*sliceW*/, int /*sliceH*/, bool /*printing*/,
+                        bool (* /*abortCheckCbk*/)(void *data) = nullptr, void * /*abortCheckCbkData*/ = nullptr, bool (* /*annotDisplayDecideCbk*/)(Annot *annot, void *user_data) = nullptr,
+                        void * /*annotDisplayDecideCbkData*/ = nullptr) override
     {
         docPage = p;
         return true;

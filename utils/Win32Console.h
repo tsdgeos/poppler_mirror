@@ -63,7 +63,7 @@ private:
 class Win32Console
 {
 public:
-    Win32Console(int *argc, char ***argv) { }
+    Win32Console(int * /*argc*/, char *** /*argv*/) { }
 };
 
 #endif // _WIN32

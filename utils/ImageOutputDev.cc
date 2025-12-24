@@ -546,7 +546,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
     }
 }
 
-void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool inlineImg)
+void ImageOutputDev::writeImage(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool inlineImg)
 {
     ImageFormat format;
 
@@ -704,13 +704,14 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
     }
 }
 
-bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool ImageOutputDev::tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, GfxTilingPattern * /*tPat*/, const std::array<double, 6> & /*mat*/, int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/, double /*xStep*/,
+                                       double /*yStep*/)
 {
     return true;
     // do nothing -- this avoids the potentially slow loop in Gfx.cc
 }
 
-void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool /*invert*/, bool interpolate, bool inlineImg)
 {
     if (listImages) {
         listImage(state, ref, str, width, height, nullptr, interpolate, inlineImg, imgStencil);
@@ -719,7 +720,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, in
     }
 }
 
-void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int * /*maskColors*/, bool inlineImg)
 {
     if (listImages) {
         listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
@@ -728,7 +729,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int wi
     }
 }
 
-void ImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
+void ImageOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool /*maskInvert*/, bool maskInterpolate)
 {
     if (listImages) {
         listImage(state, ref, str, width, height, colorMap, interpolate, false, imgImage);

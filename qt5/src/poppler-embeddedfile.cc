@@ -41,7 +41,7 @@ EmbFile *EmbeddedFileData::embFile() const
     return filespec->isOk() ? filespec->getEmbeddedFile() : nullptr;
 }
 
-EmbeddedFile::EmbeddedFile(EmbFile *embfile) : m_embeddedFile(nullptr)
+EmbeddedFile::EmbeddedFile(EmbFile * /*embfile*/) : m_embeddedFile(nullptr)
 {
     assert(!"You must not use this private constructor!");
 }

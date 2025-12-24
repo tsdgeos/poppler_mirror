@@ -1305,7 +1305,7 @@ void SplashOutputDev::startDoc(PDFDoc *docA)
     nT3Fonts = 0;
 }
 
-void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
+void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
 {
     int w, h;
     SplashColor color;
@@ -1395,7 +1395,7 @@ void SplashOutputDev::endPage()
     }
 }
 
-void SplashOutputDev::saveState(GfxState *state)
+void SplashOutputDev::saveState(GfxState * /*state*/)
 {
     splash->saveState();
     if (t3GlyphStack && !t3GlyphStack->haveDx) {
@@ -1404,7 +1404,7 @@ void SplashOutputDev::saveState(GfxState *state)
     }
 }
 
-void SplashOutputDev::restoreState(GfxState *state)
+void SplashOutputDev::restoreState(GfxState * /*state*/)
 {
     splash->restoreState();
     needFontUpdate = true;
@@ -1430,7 +1430,7 @@ void SplashOutputDev::updateAll(GfxState *state)
     needFontUpdate = true;
 }
 
-void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32)
+void SplashOutputDev::updateCTM(GfxState *state, double /*m11*/, double /*m12*/, double /*m21*/, double /*m22*/, double /*m31*/, double /*m32*/)
 {
     std::array<SplashCoord, 6> mat;
 
@@ -1460,7 +1460,7 @@ void SplashOutputDev::updateLineDash(GfxState *state)
     splash->setLineDash(std::move(dash), (SplashCoord)dashStart);
 }
 
-void SplashOutputDev::updateFlatness(GfxState *state)
+void SplashOutputDev::updateFlatness(GfxState * /*state*/)
 {
 #if 0 // Acrobat ignores the flatness setting, and always renders curves
       // with a fairly small flatness value
@@ -1748,7 +1748,7 @@ void SplashOutputDev::updatePatternOpacity(GfxState *state)
     splash->setPatternAlpha((SplashCoord)state->getStrokeOpacity(), (SplashCoord)state->getFillOpacity());
 }
 
-void SplashOutputDev::clearPatternOpacity(GfxState *state)
+void SplashOutputDev::clearPatternOpacity(GfxState * /*state*/)
 {
     splash->clearPatternAlpha();
 }
@@ -2141,7 +2141,7 @@ SplashPath SplashOutputDev::convertPath(const GfxPath *path, bool dropEmptySubpa
     return sPath;
 }
 
-void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
+void SplashOutputDev::drawChar(GfxState *state, double x, double y, double /*dx*/, double /*dy*/, double originX, double originY, CharCode code, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/)
 {
     SplashPath *path;
     int render;
@@ -2239,7 +2239,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
     delete path;
 }
 
-bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen)
+bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/, double /*dx*/, double /*dy*/, CharCode code, const Unicode * /*u*/, int /*uLen*/)
 {
     std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
@@ -2405,7 +2405,7 @@ void SplashOutputDev::endType3Char(GfxState *state)
     delete t3gs;
 }
 
-void SplashOutputDev::type3D0(GfxState *state, double wx, double wy)
+void SplashOutputDev::type3D0(GfxState * /*state*/, double /*wx*/, double /*wy*/)
 {
     if (likely(t3GlyphStack != nullptr)) {
         t3GlyphStack->haveDx = true;
@@ -2414,7 +2414,7 @@ void SplashOutputDev::type3D0(GfxState *state, double wx, double wy)
     }
 }
 
-void SplashOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury)
+void SplashOutputDev::type3D1(GfxState *state, double /*wx*/, double /*wy*/, double llx, double lly, double urx, double ury)
 {
     T3FontCache *t3Font;
     SplashColor color;
@@ -2555,9 +2555,9 @@ void SplashOutputDev::drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3Fon
     splash->fillGlyph(0, 0, &glyph);
 }
 
-void SplashOutputDev::beginTextObject(GfxState *state) { }
+void SplashOutputDev::beginTextObject(GfxState * /*state*/) { }
 
-void SplashOutputDev::endTextObject(GfxState *state)
+void SplashOutputDev::endTextObject(GfxState * /*state*/)
 {
     if (textClipPath) {
         splash->clipToPath(*textClipPath, false);
@@ -2593,7 +2593,7 @@ bool SplashOutputDev::imageMaskSrc(void *data, SplashColorPtr line)
     return true;
 }
 
-void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*interpolate*/, bool inlineImg)
 {
     std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
@@ -2638,7 +2638,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
     str->close();
 }
 
-void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
+void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double *baseMatrix)
 {
     const double *ctm;
     std::array<SplashCoord, 6> mat;
@@ -3218,7 +3218,7 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
     return true;
 }
 
-void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {
     std::array<SplashCoord, 6> mat;
     SplashOutImageData imgData;
@@ -3989,7 +3989,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state)
     updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
-void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<double, 4> &bbox)
+void SplashOutputDev::paintTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/)
 {
     SplashBitmap *tBitmap;
     SplashTransparencyGroup *transpGroup;
@@ -4025,7 +4025,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, const std::array<d
     delete tBitmap;
 }
 
-void SplashOutputDev::setSoftMask(GfxState *state, const std::array<double, 4> &bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor)
+void SplashOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, bool alpha, Function *transferFunc, GfxColor *backdropColor)
 {
     SplashBitmap *tBitmap;
     Splash *tSplash;
@@ -4160,7 +4160,7 @@ void SplashOutputDev::setSoftMask(GfxState *state, const std::array<double, 4> &
     delete tBitmap;
 }
 
-void SplashOutputDev::clearSoftMask(GfxState *state)
+void SplashOutputDev::clearSoftMask(GfxState * /*state*/)
 {
     splash->setSoftMask(nullptr);
 }
@@ -4209,7 +4209,7 @@ void SplashOutputDev::setFreeTypeHinting(bool enable, bool enableSlightHintingA)
     enableSlightHinting = enableSlightHintingA;
 }
 
-bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*catalog*/, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Splash *formerSplash = splash;
@@ -4458,7 +4458,7 @@ bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
     return retVal;
 }
 
-bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax)
+bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern)
 {
     double xMin, yMin, xMax, yMax;
     bool vaa = getVectorAntialias();
@@ -4585,20 +4585,20 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
     return retVal;
 }
 
-bool SplashOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
+bool SplashOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double /*tMin*/, double /*tMax*/)
 {
     SplashAxialPattern *pattern = new SplashAxialPattern(colorMode, state, shading);
-    bool retVal = univariateShadedFill(state, pattern, tMin, tMax);
+    bool retVal = univariateShadedFill(state, pattern);
 
     delete pattern;
 
     return retVal;
 }
 
-bool SplashOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax)
+bool SplashOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, double /*tMin*/, double /*tMax*/)
 {
     SplashRadialPattern *pattern = new SplashRadialPattern(colorMode, state, shading);
-    bool retVal = univariateShadedFill(state, pattern, tMin, tMax);
+    bool retVal = univariateShadedFill(state, pattern);
 
     delete pattern;
 

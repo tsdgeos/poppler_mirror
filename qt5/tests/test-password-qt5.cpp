@@ -52,7 +52,7 @@ PDFDisplay::~PDFDisplay()
     delete doc;
 }
 
-void PDFDisplay::paintEvent(QPaintEvent *e)
+void PDFDisplay::paintEvent(QPaintEvent * /*e*/)
 {
     QPainter paint(this); // paint widget
     if (!image.isNull()) {

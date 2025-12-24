@@ -106,13 +106,13 @@ int Stream::getRawChar()
     return EOF;
 }
 
-int Stream::getChars(int nChars, unsigned char *buffer)
+int Stream::getChars(int /*nChars*/, unsigned char * /*buffer*/)
 {
     error(errInternal, -1, "Internal: called getChars() on non-predictor stream");
     return 0;
 }
 
-void Stream::getRawChars(int nChars, int *buffer)
+void Stream::getRawChars(int /*nChars*/, int * /*buffer*/)
 {
     error(errInternal, -1, "Internal: called getRawChars() on non-predictor stream");
 }
@@ -161,7 +161,7 @@ unsigned int Stream::discardChars(unsigned int n)
     return count;
 }
 
-std::optional<std::string> Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> Stream::getPSFilter(int /*psLevel*/, const char * /*indent*/)
 {
     return std::string {};
 }
@@ -236,7 +236,7 @@ public:
     [[nodiscard]] bool reset() override { return str->getBaseStream()->reset(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
-    bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
+    bool isBinary(bool /*last*/ = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
     [[nodiscard]] bool unfilteredReset() override { return str->getBaseStream()->unfilteredReset(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
@@ -583,7 +583,7 @@ void FilterStream::close()
     str->close();
 }
 
-void FilterStream::setPos(Goffset pos, int dir)
+void FilterStream::setPos(Goffset /*pos*/, int /*dir*/)
 {
     error(errInternal, -1, "Internal: called setPos() on FilterStream");
 }
@@ -1191,7 +1191,7 @@ BaseStream *EmbedStream::copy()
     return nullptr;
 }
 
-std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset /*startA*/, bool /*limitedA*/, Goffset /*lengthA*/, Object && /*dictA*/)
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
@@ -1286,7 +1286,7 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
     }
 }
 
-void EmbedStream::setPos(Goffset pos, int dir)
+void EmbedStream::setPos(Goffset /*pos*/, int /*dir*/)
 {
     error(errInternal, -1, "Internal: called setPos() on EmbedStream");
 }
@@ -1297,7 +1297,7 @@ Goffset EmbedStream::getStart()
     return 0;
 }
 
-void EmbedStream::moveStart(Goffset delta)
+void EmbedStream::moveStart(Goffset /*delta*/)
 {
     error(errInternal, -1, "Internal: called moveStart() on EmbedStream");
 }
@@ -1394,7 +1394,7 @@ std::optional<std::string> ASCIIHexStream::getPSFilter(int psLevel, const char *
     return s;
 }
 
-bool ASCIIHexStream::isBinary(bool last) const
+bool ASCIIHexStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(false);
 }
@@ -1485,7 +1485,7 @@ std::optional<std::string> ASCII85Stream::getPSFilter(int psLevel, const char *i
     return s;
 }
 
-bool ASCII85Stream::isBinary(bool last) const
+bool ASCII85Stream::isBinary(bool /*last*/) const
 {
     return str->isBinary(false);
 }
@@ -1712,7 +1712,7 @@ std::optional<std::string> LZWStream::getPSFilter(int psLevel, const char *inden
     return s;
 }
 
-bool LZWStream::isBinary(bool last) const
+bool LZWStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -1776,7 +1776,7 @@ std::optional<std::string> RunLengthStream::getPSFilter(int psLevel, const char 
     return s;
 }
 
-bool RunLengthStream::isBinary(bool last) const
+bool RunLengthStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -2606,7 +2606,7 @@ std::optional<std::string> CCITTFaxStream::getPSFilter(int psLevel, const char *
     return s;
 }
 
-bool CCITTFaxStream::isBinary(bool last) const
+bool CCITTFaxStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -2643,7 +2643,7 @@ static int dctClipInit = 0;
 static const int dctZigZag[64] = { 0,  1,  8,  16, 9,  2,  3,  10, 17, 24, 32, 25, 18, 11, 4,  5,  12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6,  7,  14, 21, 28,
                                    35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) : FilterStream(strA)
+DCTStream::DCTStream(Stream *strA, int colorXformA, Dict * /*dict*/, int /*recursion*/) : FilterStream(strA)
 {
     int i, j;
 
@@ -4075,7 +4075,7 @@ std::optional<std::string> DCTStream::getPSFilter(int psLevel, const char *inden
     return s;
 }
 
-bool DCTStream::isBinary(bool last) const
+bool DCTStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4292,7 +4292,7 @@ std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *ind
     return s;
 }
 
-bool FlateStream::isBinary(bool last) const
+bool FlateStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4701,7 +4701,7 @@ int BufStream::lookChar(int idx)
     return buf[idx];
 }
 
-bool BufStream::isBinary(bool last) const
+bool BufStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4747,7 +4747,7 @@ int FixedLengthEncoder::lookChar()
     return str->getChar();
 }
 
-bool FixedLengthEncoder::isBinary(bool last) const
+bool FixedLengthEncoder::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

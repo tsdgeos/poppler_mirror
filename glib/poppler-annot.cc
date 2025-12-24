@@ -217,7 +217,7 @@ static void poppler_annot_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_annot_parent_class)->finalize(object);
 }
 
-static void poppler_annot_init(PopplerAnnot *poppler_annot) { }
+static void poppler_annot_init(PopplerAnnot * /*poppler_annot*/) { }
 
 static void poppler_annot_class_init(PopplerAnnotClass *klass)
 {
@@ -231,13 +231,13 @@ PopplerAnnot *_poppler_annot_new(const std::shared_ptr<Annot> &annot)
     return _poppler_create_annot(POPPLER_TYPE_ANNOT, annot);
 }
 
-static void poppler_annot_markup_init(PopplerAnnotMarkup *poppler_annot) { }
+static void poppler_annot_markup_init(PopplerAnnotMarkup * /*poppler_annot*/) { }
 
-static void poppler_annot_markup_class_init(PopplerAnnotMarkupClass *klass) { }
+static void poppler_annot_markup_class_init(PopplerAnnotMarkupClass * /*klass*/) { }
 
-static void poppler_annot_text_init(PopplerAnnotText *poppler_annot) { }
+static void poppler_annot_text_init(PopplerAnnotText * /*poppler_annot*/) { }
 
-static void poppler_annot_text_class_init(PopplerAnnotTextClass *klass) { }
+static void poppler_annot_text_class_init(PopplerAnnotTextClass * /*klass*/) { }
 
 PopplerAnnot *_poppler_annot_text_new(const std::shared_ptr<Annot> &annot)
 {
@@ -318,9 +318,9 @@ static GArray *create_poppler_quads_from_annot_quads(AnnotQuadrilaterals *quads_
     return quads;
 }
 
-static void poppler_annot_text_markup_init(PopplerAnnotTextMarkup *poppler_annot) { }
+static void poppler_annot_text_markup_init(PopplerAnnotTextMarkup * /*poppler_annot*/) { }
 
-static void poppler_annot_text_markup_class_init(PopplerAnnotTextMarkupClass *klass) { }
+static void poppler_annot_text_markup_class_init(PopplerAnnotTextMarkupClass * /*klass*/) { }
 
 /**
  * poppler_annot_text_markup_new_highlight:
@@ -476,9 +476,9 @@ std::unique_ptr<AnnotColor> _poppler_convert_poppler_color_to_annot_color(const 
     return std::make_unique<AnnotColor>(CLAMP((double)poppler_color->red / 65535, 0., 1.), CLAMP((double)poppler_color->green / 65535, 0., 1.), CLAMP((double)poppler_color->blue / 65535, 0., 1.));
 }
 
-static void poppler_annot_free_text_init(PopplerAnnotFreeText *poppler_annot) { }
+static void poppler_annot_free_text_init(PopplerAnnotFreeText * /*poppler_annot*/) { }
 
-static void poppler_annot_free_text_class_init(PopplerAnnotFreeTextClass *klass) { }
+static void poppler_annot_free_text_class_init(PopplerAnnotFreeTextClass * /*klass*/) { }
 
 // Single map with string keys and enum values
 enum FontPropType
@@ -632,9 +632,9 @@ PopplerAnnot *poppler_annot_free_text_new(PopplerDocument *doc, PopplerRectangle
     return poppler_annot;
 }
 
-static void poppler_annot_file_attachment_init(PopplerAnnotFileAttachment *poppler_annot) { }
+static void poppler_annot_file_attachment_init(PopplerAnnotFileAttachment * /*poppler_annot*/) { }
 
-static void poppler_annot_file_attachment_class_init(PopplerAnnotFileAttachmentClass *klass) { }
+static void poppler_annot_file_attachment_class_init(PopplerAnnotFileAttachmentClass * /*klass*/) { }
 
 PopplerAnnot *_poppler_annot_file_attachment_new(const std::shared_ptr<Annot> &annot)
 {
@@ -653,7 +653,7 @@ static void poppler_annot_movie_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_annot_movie_parent_class)->finalize(object);
 }
 
-static void poppler_annot_movie_init(PopplerAnnotMovie *poppler_annot) { }
+static void poppler_annot_movie_init(PopplerAnnotMovie * /*poppler_annot*/) { }
 
 static void poppler_annot_movie_class_init(PopplerAnnotMovieClass *klass)
 {
@@ -686,7 +686,7 @@ static void poppler_annot_screen_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_annot_screen_parent_class)->finalize(object);
 }
 
-static void poppler_annot_screen_init(PopplerAnnotScreen *poppler_annot) { }
+static void poppler_annot_screen_init(PopplerAnnotScreen * /*poppler_annot*/) { }
 
 static void poppler_annot_screen_class_init(PopplerAnnotScreenClass *klass)
 {
@@ -716,9 +716,9 @@ PopplerAnnot *_poppler_annot_line_new(const std::shared_ptr<Annot> &annot)
     return _poppler_create_annot(POPPLER_TYPE_ANNOT_LINE, annot);
 }
 
-static void poppler_annot_line_init(PopplerAnnotLine *poppler_annot) { }
+static void poppler_annot_line_init(PopplerAnnotLine * /*poppler_annot*/) { }
 
-static void poppler_annot_line_class_init(PopplerAnnotLineClass *klass) { }
+static void poppler_annot_line_class_init(PopplerAnnotLineClass * /*klass*/) { }
 
 /**
  * poppler_annot_line_new:
@@ -752,9 +752,9 @@ PopplerAnnot *_poppler_annot_circle_new(const std::shared_ptr<Annot> &annot)
     return _poppler_create_annot(POPPLER_TYPE_ANNOT_CIRCLE, annot);
 }
 
-static void poppler_annot_circle_init(PopplerAnnotCircle *poppler_annot) { }
+static void poppler_annot_circle_init(PopplerAnnotCircle * /*poppler_annot*/) { }
 
-static void poppler_annot_circle_class_init(PopplerAnnotCircleClass *klass) { }
+static void poppler_annot_circle_class_init(PopplerAnnotCircleClass * /*klass*/) { }
 
 /**
  * poppler_annot_circle_new:
@@ -783,9 +783,9 @@ PopplerAnnot *_poppler_annot_square_new(const std::shared_ptr<Annot> &annot)
     return _poppler_create_annot(POPPLER_TYPE_ANNOT_SQUARE, annot);
 }
 
-static void poppler_annot_square_init(PopplerAnnotSquare *poppler_annot) { }
+static void poppler_annot_square_init(PopplerAnnotSquare * /*poppler_annot*/) { }
 
-static void poppler_annot_square_class_init(PopplerAnnotSquareClass *klass) { }
+static void poppler_annot_square_class_init(PopplerAnnotSquareClass * /*klass*/) { }
 
 /**
  * poppler_annot_square_new:
@@ -814,7 +814,7 @@ static void poppler_annot_stamp_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_annot_stamp_parent_class)->finalize(object);
 }
 
-static void poppler_annot_stamp_init(PopplerAnnotStamp *poppler_annot) { }
+static void poppler_annot_stamp_init(PopplerAnnotStamp * /*poppler_annot*/) { }
 
 static void poppler_annot_stamp_class_init(PopplerAnnotStampClass *klass)
 {
@@ -2673,9 +2673,9 @@ PopplerPoint *poppler_path_get_points(PopplerPath *path, gsize *n_points)
     return path->points;
 }
 
-static void poppler_annot_ink_class_init(PopplerAnnotInkClass *klass) { }
+static void poppler_annot_ink_class_init(PopplerAnnotInkClass * /*klass*/) { }
 
-static void poppler_annot_ink_init(PopplerAnnotInk *annot) { }
+static void poppler_annot_ink_init(PopplerAnnotInk * /*poppler_annot*/) { }
 
 /**
  * poppler_annot_ink_set_ink_list:

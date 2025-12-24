@@ -277,7 +277,7 @@ static bool parseJpegOptions()
     return true;
 }
 
-static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) { return !hideAnnotations; };
+static auto annotDisplayDecideCbk = [](Annot * /*annot*/, void * /*user_data*/) { return !hideAnnotations; };
 
 static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x, int y, int w, int h, double pg_w, double pg_h, char *ppmFile)
 {

@@ -48,7 +48,7 @@ static void aesKeyExpansion(DecryptAESState *s, const unsigned char *objKey, int
 static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in);
 static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last);
 
-static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, bool decrypt);
 static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in);
 static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last);
 
@@ -105,7 +105,7 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                     // test contains the initial SHA-256 hash input K.
                     revision6Hash(ownerPassword, test, userKey->c_str());
                 }
-                aes256KeyExpansion(&state, test, 32, true);
+                aes256KeyExpansion(&state, test, true);
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
@@ -145,7 +145,7 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                     // user key is not used in computing intermediate user key.
                     revision6Hash(userPassword, test, nullptr);
                 }
-                aes256KeyExpansion(&state, test, 32, true);
+                aes256KeyExpansion(&state, test, true);
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
@@ -419,7 +419,7 @@ bool EncryptStream::reset()
         state.aes.paddingReached = false;
         break;
     case cryptAES256:
-        aes256KeyExpansion(&state.aes256, objKey, objKeyLength, false);
+        aes256KeyExpansion(&state.aes256, objKey, false);
         memcpy(state.aes256.buf, state.aes256.cbc, 16); // Copy CBC IV to buf
         state.aes256.bufIdx = 0;
         state.aes256.paddingReached = false;
@@ -502,7 +502,7 @@ bool DecryptStream::reset()
         state.aes.bufIdx = 16;
         break;
     case cryptAES256:
-        aes256KeyExpansion(&state.aes256, objKey, objKeyLength, true);
+        aes256KeyExpansion(&state.aes256, objKey, true);
         for (i = 0; i < 16; ++i) {
             state.aes256.cbc[i] = str->getChar();
         }
@@ -1027,7 +1027,7 @@ static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool la
 // AES-256 decryption
 //------------------------------------------------------------------------
 
-static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt)
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, bool decrypt)
 {
     unsigned int temp;
     int i, round;

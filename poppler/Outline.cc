@@ -190,7 +190,7 @@ static int recursiveRemoveList(Ref ref, XRef *xref)
     return count;
 }
 
-static void removeChildHelper(unsigned int pos, PDFDoc *doc, XRef *xref, std::vector<OutlineItem *> &items)
+static void removeChildHelper(unsigned int pos, XRef *xref, std::vector<OutlineItem *> &items)
 {
     std::vector<OutlineItem *>::const_iterator it;
     if (pos >= items.size()) {
@@ -259,7 +259,7 @@ static void removeChildHelper(unsigned int pos, PDFDoc *doc, XRef *xref, std::ve
 
 void Outline::removeChild(unsigned int pos)
 {
-    removeChildHelper(pos, doc, xref, *items);
+    removeChildHelper(pos, xref, *items);
 }
 
 //------------------------------------------------------------------------
@@ -542,7 +542,7 @@ void OutlineItem::insertChild(const std::string &itemTitle, int destPageNum, uns
 void OutlineItem::removeChild(unsigned int pos)
 {
     open();
-    removeChildHelper(pos, doc, xref, *kids);
+    removeChildHelper(pos, xref, *kids);
 }
 
 void OutlineItem::setStartsOpen(bool value)

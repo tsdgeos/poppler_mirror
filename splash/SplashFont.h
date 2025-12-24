@@ -85,7 +85,7 @@ public:
 
     // Return the advance of a glyph. (in 0..1 range)
     // < 0 means not known
-    virtual double getGlyphAdvance(int c) { return -1; }
+    virtual double getGlyphAdvance(int /*c*/) { return -1; }
 
     // Return the glyph bounding box.
     void getBBox(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA)

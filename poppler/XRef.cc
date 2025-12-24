@@ -1645,9 +1645,9 @@ XRef::XRefPreScanWriter::XRefPreScanWriter()
     hasOffsetsBeyond4GB = false;
 }
 
-void XRef::XRefPreScanWriter::startSection(int first, int count) { }
+void XRef::XRefPreScanWriter::startSection(int /*first*/, int /*count*/) { }
 
-void XRef::XRefPreScanWriter::writeEntry(Goffset offset, int gen, XRefEntryType type)
+void XRef::XRefPreScanWriter::writeEntry(Goffset offset, int /*gen*/, XRefEntryType /*type*/)
 {
     if (offset >= 0x100000000ll) {
         hasOffsetsBeyond4GB = true;

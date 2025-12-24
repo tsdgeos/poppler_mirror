@@ -138,12 +138,12 @@ int JPXStream::lookChar()
     return doLookChar(priv);
 }
 
-std::optional<std::string> JPXStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JPXStream::getPSFilter(int /*psLevel*/, const char * /*indent*/)
 {
     return {};
 }
 
-bool JPXStream::isBinary(bool last) const
+bool JPXStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

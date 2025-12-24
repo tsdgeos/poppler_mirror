@@ -145,13 +145,13 @@ public:
     TextWord &operator=(const TextWord &) = delete;
 
     // Add a character to the word.
-    void addChar(const GfxState *state, TextFontInfo *fontA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA);
+    void addChar(TextFontInfo *fontA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA);
 
     // Attempt to add a character to the word as a combining character.
     // Either character u or the last character in the word must be an
     // acute, dieresis, or other combining character.  Returns true if
     // the character was added.
-    bool addCombining(const GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA);
+    bool addCombining(TextFontInfo *fontA, double fontSizeA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA);
 
     // Merge <word> onto the end of <this>.
     void merge(TextWord *word);
@@ -166,7 +166,7 @@ public:
 
     static bool cmpYX(const TextWord *const word1, const TextWord *const word2);
 
-    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
+    void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection);
 
     // Get the TextFontInfo object associated with a character.
     const TextFontInfo *getFontInfo(int idx) const { return chars[idx].font; }
@@ -478,11 +478,11 @@ public:
     // Add a block to the end of this flow.
     void addBlock(TextBlock *blk);
 
-    // Returns true if <blk> fits below <prevBlk> in the flow, i.e., (1)
+    // Returns true if <blk> fits in the flow, i.e., (1)
     // it uses a font no larger than the last block added to the flow,
     // and (2) it fits within the flow's [priMin, priMax] along the
     // primary axis.
-    bool blockFits(const TextBlock *blk, const TextBlock *prevBlk) const;
+    bool blockFits(const TextBlock *blk) const;
 
     // Get the head of the linked list of TextBlocks.
     const TextBlock *getBlocks() const { return blocks; }

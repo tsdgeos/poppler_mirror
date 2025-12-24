@@ -74,7 +74,7 @@ static void poppler_movie_class_init(PopplerMovieClass *klass)
     gobject_class->finalize = poppler_movie_finalize;
 }
 
-static void poppler_movie_init(PopplerMovie *movie) { }
+static void poppler_movie_init(PopplerMovie * /*movie*/) { }
 
 PopplerMovie *_poppler_movie_new(const Movie *poppler_movie)
 {

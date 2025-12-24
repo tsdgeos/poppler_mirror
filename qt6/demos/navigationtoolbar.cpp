@@ -125,7 +125,7 @@ void NavigationToolBar::slotComboActivated(int index)
     setPage(index);
 }
 
-void NavigationToolBar::slotZoomComboActivated(int index)
+void NavigationToolBar::slotZoomComboActivated(int /*index*/)
 {
     QString text = m_zoomCombo->currentText();
     text.remove(QLatin1Char('%'));

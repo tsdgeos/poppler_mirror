@@ -81,7 +81,7 @@ static void poppler_media_class_init(PopplerMediaClass *klass)
     gobject_class->finalize = poppler_media_finalize;
 }
 
-static void poppler_media_init(PopplerMedia *media) { }
+static void poppler_media_init(PopplerMedia * /*media*/) { }
 
 PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
 {

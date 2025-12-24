@@ -66,7 +66,7 @@ static PopplerStructureElement *_poppler_structure_element_new(PopplerDocument *
     return poppler_structure_element;
 }
 
-static void poppler_structure_element_init(PopplerStructureElement *poppler_structure_element) { }
+static void poppler_structure_element_init(PopplerStructureElement * /*poppler_structure_element*/) { }
 
 static void poppler_structure_element_finalize(GObject *object)
 {

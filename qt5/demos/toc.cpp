@@ -111,7 +111,7 @@ public:
         return n->m_item.hasChildren();
     }
 
-    int columnCount(const QModelIndex &parent) const override { return 1; }
+    int columnCount(const QModelIndex & /*parent*/) const override { return 1; }
 
 private:
     QVector<Node *> m_topItems;

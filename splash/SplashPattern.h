@@ -74,7 +74,7 @@ public:
 
     bool getColor(int x, int y, SplashColorPtr c) const override;
 
-    bool testPosition(int x, int y) const override { return false; }
+    bool testPosition(int /*x*/, int /*y*/) const override { return false; }
 
     bool isStatic() const override { return true; }
 

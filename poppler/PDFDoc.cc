@@ -2160,7 +2160,7 @@ std::unique_ptr<Page> PDFDoc::parsePage(int page)
     }
     Dict *pageDict = obj.getDict();
 
-    return std::make_unique<Page>(this, page, std::move(obj), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict), catalog->getForm());
+    return std::make_unique<Page>(this, page, std::move(obj), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
 }
 
 Page *PDFDoc::getPage(int page)

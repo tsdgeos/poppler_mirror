@@ -374,7 +374,7 @@ bool Catalog::cacheSubTree()
     Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
         auto attrs = std::make_unique<PageAttrs>(attrsList.back().get(), kid.getDict());
-        auto p = std::make_unique<Page>(doc, pages.size() + 1, std::move(kid), kidRef.getRef(), std::move(attrs), form);
+        auto p = std::make_unique<Page>(doc, pages.size() + 1, std::move(kid), kidRef.getRef(), std::move(attrs));
         if (!p->isOk()) {
             error(errSyntaxError, -1, "Failed to create page (page {0:uld})", pages.size() + 1);
             return false;
@@ -871,7 +871,7 @@ int Catalog::getNumPages()
                 Dict *pageDict = pagesDict.getDict();
                 if (pageRootRef.isRef()) {
                     const Ref pageRef = pageRootRef.getRef();
-                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict), form);
+                    auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, std::make_unique<PageAttrs>(nullptr, pageDict));
                     if (p->isOk()) {
                         pages.emplace_back(std::move(p), pageRef);
                         refPageMap.emplace(pageRef, pages.size());

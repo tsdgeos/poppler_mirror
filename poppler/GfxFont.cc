@@ -229,7 +229,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     if (typeA < fontCIDType0) {
         return std::make_unique<Gfx8BitFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     } else {
-        return std::make_unique<GfxCIDFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
+        return std::make_unique<GfxCIDFont>(tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     }
 }
 
@@ -454,7 +454,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
     return t;
 }
 
-void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
+void GfxFont::readFontDescriptor(Dict *fontDict)
 {
     double t;
 
@@ -1012,7 +1012,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     }
 
     // get info from font descriptor
-    readFontDescriptor(xref, fontDict);
+    readFontDescriptor(fontDict);
 
     // for non-embedded fonts, don't trust the ascent/descent/bbox
     // values from the font descriptor
@@ -1513,7 +1513,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
     return 0;
 }
 
-int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const
+int Gfx8BitFont::getNextChar(const char *s, int /*len*/, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const
 {
     CharCode c;
 
@@ -1694,7 +1694,7 @@ struct cmpWidthExcepVFunctor
     bool operator()(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) { return w1.first < w2.first; }
 };
 
-GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
+GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     Dict *desFontDict;
     Object desFontDictObj;
@@ -1724,7 +1724,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     desFontDict = desFontDictObj.getDict();
 
     // get info from font descriptor
-    readFontDescriptor(xref, desFontDict);
+    readFontDescriptor(desFontDict);
 
     //----- encoding info -----
 

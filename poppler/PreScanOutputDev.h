@@ -62,7 +62,7 @@ public:
     // Does this device use functionShadedFill(), axialShadedFill(), and
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
-    bool useShadedFills(int type) override { return true; }
+    bool useShadedFills(int /*type*/) override { return true; }
 
     // Does this device use beginType3Char/endType3Char?  Otherwise,
     // text in Type 3 fonts will be drawn with drawChar/drawString.

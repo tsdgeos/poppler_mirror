@@ -88,7 +88,7 @@ public:
 
     // Does this device support specific shading types?
     // see gouraudTriangleShadedFill() and patchMeshShadedFill()
-    virtual bool useShadedFills(int type) { return false; }
+    virtual bool useShadedFills(int /*type*/) { return false; }
 
     // Does this device use FillColorStop()?
     virtual bool useFillColorStop() { return false; }
@@ -124,14 +124,15 @@ public:
     // returns false, the page display is aborted.  Typically, an
     // OutputDev will use some alternate means to display the page
     // before returning false.
-    virtual bool checkPageSlice(Page *page, double hDPI, double vDPI, int rotate, bool useMediaBox, bool crop, int sliceX, int sliceY, int sliceW, int sliceH, bool printing, bool (*abortCheckCbk)(void *data) = nullptr,
-                                void *abortCheckCbkData = nullptr, bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr, void *annotDisplayDecideCbkData = nullptr)
+    virtual bool checkPageSlice(Page * /*page*/, double /*hDPI*/, double /*vDPI*/, int /*rotate*/, bool /*useMediaBox*/, bool /*crop*/, int /*sliceX*/, int /*sliceY*/, int /*sliceW*/, int /*sliceH*/, bool /*printing*/,
+                                bool (* /*abortCheckCbk*/)(void *data) = nullptr, void * /*abortCheckCbkData */ = nullptr, bool (* /*annotDisplayDecideCbk*/)(Annot *annot, void *user_data) = nullptr,
+                                void * /*annotDisplayDecideCbkData*/ = nullptr)
     {
         return true;
     }
 
     // Start a page.
-    virtual void startPage(int pageNum, GfxState *state, XRef *xref) { }
+    virtual void startPage(int /*pageNum*/, GfxState * /*state*/, XRef * /*xref*/) { }
 
     // End a page.
     virtual void endPage() { }
@@ -168,6 +169,8 @@ public:
             cs->buildTransforms(state); // needs to happen after state->setDisplayProfile has been called
             state->setDefaultCMYKColorSpace(std::move(cs));
         }
+#else
+        (void)state;
 #endif
     }
 
@@ -244,8 +247,8 @@ public:
     virtual bool axialShadedSupportExtend(GfxState * /*state*/, GfxAxialShading * /*shading*/) { return false; }
     virtual bool radialShadedFill(GfxState * /*state*/, GfxRadialShading * /*shading*/, double /*sMin*/, double /*sMax*/) { return false; }
     virtual bool radialShadedSupportExtend(GfxState * /*state*/, GfxRadialShading * /*shading*/) { return false; }
-    virtual bool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading) { return false; }
-    virtual bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) { return false; }
+    virtual bool gouraudTriangleShadedFill(GfxState * /*state*/, GfxGouraudTriangleShading * /*shading*/) { return false; }
+    virtual bool patchMeshShadedFill(GfxState * /*state*/, GfxPatchMeshShading * /*shading*/) { return false; }
 
     //----- path clipping
 

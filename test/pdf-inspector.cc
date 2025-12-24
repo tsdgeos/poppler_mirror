@@ -161,7 +161,7 @@ void PdfInspector::on_selection_changed(GtkTreeSelection *selection, PdfInspecto
     g_free(op);
 }
 
-void PdfInspector::on_analyze_clicked(GtkWidget *widget, PdfInspector *inspector)
+void PdfInspector::on_analyze_clicked(GtkWidget * /*widget*/, PdfInspector *inspector)
 {
     GtkWidget *spin;
     int page;

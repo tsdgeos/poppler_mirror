@@ -174,11 +174,11 @@ void QPainterOutputDev::startDoc(PDFDoc *doc)
     m_codeToGID = nullptr;
 }
 
-void QPainterOutputDev::startPage(int pageNum, GfxState *state, XRef *) { }
+void QPainterOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef *) { }
 
 void QPainterOutputDev::endPage() { }
 
-void QPainterOutputDev::saveState(GfxState *state)
+void QPainterOutputDev::saveState(GfxState * /*state*/)
 {
     m_currentPenStack.push(m_currentPen);
     m_currentBrushStack.push(m_currentBrush);
@@ -189,7 +189,7 @@ void QPainterOutputDev::saveState(GfxState *state)
     m_painter.top()->save();
 }
 
-void QPainterOutputDev::restoreState(GfxState *state)
+void QPainterOutputDev::restoreState(GfxState * /*state*/)
 {
     m_painter.top()->restore();
 
@@ -265,7 +265,7 @@ void QPainterOutputDev::updateLineDash(GfxState *state)
     m_painter.top()->setPen(m_currentPen);
 }
 
-void QPainterOutputDev::updateFlatness(GfxState *state)
+void QPainterOutputDev::updateFlatness(GfxState * /*state*/)
 {
     // qDebug() << "updateFlatness";
 }
@@ -648,7 +648,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
     }
 }
 
-static QPainterPath convertPath(GfxState *state, const GfxPath *path, Qt::FillRule fillRule)
+static QPainterPath convertPath(const GfxPath *path, Qt::FillRule fillRule)
 {
     int i, j;
 
@@ -678,17 +678,17 @@ static QPainterPath convertPath(GfxState *state, const GfxPath *path, Qt::FillRu
 
 void QPainterOutputDev::stroke(GfxState *state)
 {
-    m_painter.top()->strokePath(convertPath(state, state->getPath(), Qt::OddEvenFill), m_currentPen);
+    m_painter.top()->strokePath(convertPath(state->getPath(), Qt::OddEvenFill), m_currentPen);
 }
 
 void QPainterOutputDev::fill(GfxState *state)
 {
-    m_painter.top()->fillPath(convertPath(state, state->getPath(), Qt::WindingFill), m_currentBrush);
+    m_painter.top()->fillPath(convertPath(state->getPath(), Qt::WindingFill), m_currentBrush);
 }
 
 void QPainterOutputDev::eoFill(GfxState *state)
 {
-    m_painter.top()->fillPath(convertPath(state, state->getPath(), Qt::OddEvenFill), m_currentBrush);
+    m_painter.top()->fillPath(convertPath(state->getPath(), Qt::OddEvenFill), m_currentBrush);
 }
 
 bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
@@ -811,7 +811,7 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
 
     // Actually paint the shaded region
     QBrush newBrush(gradient);
-    m_painter.top()->fillPath(convertPath(state, state->getPath(), Qt::WindingFill), newBrush);
+    m_painter.top()->fillPath(convertPath(state->getPath(), Qt::WindingFill), newBrush);
 
     state->clearPath();
 
@@ -821,17 +821,17 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
 
 void QPainterOutputDev::clip(GfxState *state)
 {
-    m_painter.top()->setClipPath(convertPath(state, state->getPath(), Qt::WindingFill), Qt::IntersectClip);
+    m_painter.top()->setClipPath(convertPath(state->getPath(), Qt::WindingFill), Qt::IntersectClip);
 }
 
 void QPainterOutputDev::eoClip(GfxState *state)
 {
-    m_painter.top()->setClipPath(convertPath(state, state->getPath(), Qt::OddEvenFill), Qt::IntersectClip);
+    m_painter.top()->setClipPath(convertPath(state->getPath(), Qt::OddEvenFill), Qt::IntersectClip);
 }
 
 void QPainterOutputDev::clipToStrokePath(GfxState *state)
 {
-    QPainterPath clipPath = convertPath(state, state->getPath(), Qt::WindingFill);
+    QPainterPath clipPath = convertPath(state->getPath(), Qt::WindingFill);
 
     // Get the outline of 'clipPath' as a separate path
     QPainterPathStroker stroker;
@@ -847,7 +847,7 @@ void QPainterOutputDev::clipToStrokePath(GfxState *state)
     m_painter.top()->setClipPath(clipPathOutline, Qt::IntersectClip);
 }
 
-void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen)
+void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double /*dx*/, double /*dy*/, double originX, double originY, CharCode code, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/)
 {
 
     // First handle type3 fonts
@@ -953,13 +953,13 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx,
     }
 }
 
-void QPainterOutputDev::type3D0(GfxState *state, double wx, double wy) { }
+void QPainterOutputDev::type3D0(GfxState * /*state*/, double /*wx*/, double /*wy*/) { }
 
-void QPainterOutputDev::type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) { }
+void QPainterOutputDev::type3D1(GfxState * /*state*/, double /*wx*/, double /*wy*/, double /*llx*/, double /*lly*/, double /*urx*/, double /*ury*/) { }
 
-void QPainterOutputDev::endTextObject(GfxState *state) { }
+void QPainterOutputDev::endTextObject(GfxState * /*state*/) { }
 
-void QPainterOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void QPainterOutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*interpolate*/, bool /*inlineImg*/)
 {
     auto imgStr = std::make_unique<ImageStream>(str, width,
                                                 1, // numPixelComps
@@ -999,7 +999,7 @@ void QPainterOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 }
 
 // TODO: lots more work here.
-void QPainterOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void QPainterOutputDev::drawImage(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool /*interpolate*/, const int *maskColors, bool /*inlineImg*/)
 {
     unsigned int *data;
     unsigned int *line;
@@ -1051,7 +1051,7 @@ void QPainterOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int
 }
 
 void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
-                                            bool maskInterpolate)
+                                            bool /*maskInterpolate*/)
 {
     // Bail out if the image size doesn't match the mask size.  I don't know
     // what to do in this case.
