@@ -821,7 +821,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-DefaultAppearance::DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
+DefaultAppearance::DefaultAppearance(const std::string &fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(fontNameA), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
 DefaultAppearance::DefaultAppearance(const GooString *da)
 {
@@ -839,7 +839,7 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
             const std::string &fontToken = daToks[*tfIndex - 2];
             if (fontToken.size() > 1 && fontToken[0] == '/') {
                 // The +1 is here to skip the leading '/'.
-                fontName = Object(objName, fontToken.c_str() + 1);
+                fontName = fontToken.substr(1);
             }
         }
         // Scan backwards: we are looking for the last set value
@@ -863,9 +863,9 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
     }
 }
 
-void DefaultAppearance::setFontName(Object &&fontNameA)
+void DefaultAppearance::setFontName(const std::string &fontNameA)
 {
-    fontName = std::move(fontNameA);
+    fontName = fontNameA;
 }
 
 void DefaultAppearance::setFontPtSize(double fontPtSizeA)
@@ -1701,10 +1701,10 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor &drawColor, bool fill
     }
 }
 
-void AnnotAppearanceBuilder::setTextFont(const Object &fontName, double fontSize)
+void AnnotAppearanceBuilder::setTextFont(const std::string &fontName, double fontSize)
 {
-    if (fontName.isName() && strlen(fontName.getName()) > 0) {
-        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.getName(), fontSize);
+    if (!fontName.empty()) {
+        appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.c_str(), fontSize);
     }
 }
 
@@ -3335,8 +3335,8 @@ void AnnotFreeText::generateFreeTextAppearance()
     DefaultAppearance da { appearanceString.get() };
 
     // Default values
-    if (!da.getFontName().isName()) {
-        da.setFontName(Object(objName, "AnnotDrawFont"));
+    if (da.getFontName().empty()) {
+        da.setFontName("AnnotDrawFont");
     }
     if (da.getFontPtSize() <= 0) {
         da.setFontPtSize(undefinedFontPtSize);
@@ -3386,10 +3386,10 @@ void AnnotFreeText::generateFreeTextAppearance()
         } else {
             // Get the font dictionary for the actual requested font
             Ref fontReference;
-            Object fontDictionary = fontResources.getDict()->lookup(da.getFontName().getName(), &fontReference);
+            Object fontDictionary = fontResources.getDict()->lookup(da.getFontName(), &fontReference);
 
             if (fontDictionary.isDict()) {
-                font = GfxFont::makeFont(doc->getXRef(), da.getFontName().getName(), fontReference, fontDictionary.getDict());
+                font = GfxFont::makeFont(doc->getXRef(), da.getFontName().c_str(), fontReference, fontDictionary.getDict());
             } else {
                 error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
             }
@@ -3400,13 +3400,13 @@ void AnnotFreeText::generateFreeTextAppearance()
     if (!font) {
         Dict *fontResDict = new Dict(doc->getXRef());
         resourceObj = Object(fontResDict);
-        font = createAnnotDrawFont(doc->getXRef(), fontResDict, da.getFontName().getName());
+        font = createAnnotDrawFont(doc->getXRef(), fontResDict, da.getFontName().c_str());
     }
 
     // Set font state
     appearBuilder.setDrawColor(*da.getFontColor(), true);
     appearBuilder.appendf("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin);
-    const DrawMultiLineTextResult textCommands = drawMultiLineText(contents->toStr(), textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
+    const DrawMultiLineTextResult textCommands = drawMultiLineText(contents->toStr(), textwidth, form, *font, da.getFontName(), da.getFontPtSize(), quadding, 0 /*borderWidth*/);
     appearBuilder.append(textCommands.text.c_str());
     appearBuilder.append("ET Q\n");
 
@@ -5318,7 +5318,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
         double leftFontSize = field->getCustomAppearanceLeftFontSize();
         if (leftFontSize == 0) {
-            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().getName());
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().c_str());
             leftFontSize = Annot::calculateFontSize(form, font.get(), &leftText, wMax / 2.0, hMax);
         }
         daLeft.setFontPtSize(leftFontSize);
@@ -5330,7 +5330,7 @@ bool AnnotAppearanceBuilder::drawSignatureFieldText(const FormFieldSignature *fi
 
         double fontSize = daRight.getFontPtSize();
         if (fontSize == 0) {
-            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().getName());
+            std::shared_ptr<GfxFont> font = form->getDefaultResources()->lookupFont(daLeft.getFontName().c_str());
             fontSize = Annot::calculateFontSize(form, font.get(), &contents, wMax / 2.0, hMax);
         }
         daRight.setFontPtSize(fontSize);
@@ -5362,16 +5362,16 @@ void AnnotAppearanceBuilder::drawSignatureFieldText(const std::string &text, con
     const double textwidth = width - 2 * textmargin;
 
     // create a Helvetica fake font
-    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName().getName()) : nullptr;
+    std::shared_ptr<const GfxFont> font = form ? form->getDefaultResources()->lookupFont(da.getFontName().c_str()) : nullptr;
     if (!font) {
-        font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().getName());
+        font = createAnnotDrawFont(xref, resourcesDict, da.getFontName().c_str());
     }
 
     // Setup text clipping
     appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re W n\n", leftMargin + textmargin, textmargin, textwidth, height - 2 * textmargin);
     setDrawColor(*da.getFontColor(), true);
     const DrawMultiLineTextResult textCommands =
-            drawMultiLineText(text, textwidth, form, *font, da.getFontName().getName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified, 0 /*borderWidth*/);
+            drawMultiLineText(text, textwidth, form, *font, da.getFontName(), da.getFontPtSize(), centerHorizontally ? VariableTextQuadding::centered : VariableTextQuadding::leftJustified, 0 /*borderWidth*/);
 
     double yDelta = height - textmargin;
     if (centerVertically) {

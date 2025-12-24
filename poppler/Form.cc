@@ -761,7 +761,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         if (leftFontSize == 0) {
             leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
         }
-        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());
         form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
         form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
@@ -1682,31 +1682,29 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
         Form *form = doc->getCatalog()->getForm();
         if (form) {
             DefaultAppearance da(defaultAppearance.get());
-            if (da.getFontName().isName()) {
-                const std::string fontName = da.getFontName().getName();
-                if (!fontName.empty()) {
-                    // Use the field resource dictionary if it exists
-                    Object fieldResourcesDictObj = obj.dictLookup("DR");
-                    if (fieldResourcesDictObj.isDict()) {
-                        GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
-                        // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
-                        // to the field DR dictionary
-                        if (!newFonts.empty()) {
-                            for (const Form::AddFontResult &afr : newFonts) {
-                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName, Object(afr.ref));
-                                // This is not fully correct, it changes the entire font to the last added font
-                                // but it is much better than not doing anything, because we know that one of
-                                // the fonts have characters we need, so there is a bit of hope involved here
-                                // It is likely that we only have added one font, and it is likely that it is
-                                // a non-subset version of a subset or a reduced type1 font or similar.
-                                da.setFontName(Object(objName, afr.fontName.c_str()));
-                            }
-                            setDefaultAppearance(da.toAppearanceString());
+            const std::string &fontName = da.getFontName();
+            if (!fontName.empty()) {
+                // Use the field resource dictionary if it exists
+                Object fieldResourcesDictObj = obj.dictLookup("DR");
+                if (fieldResourcesDictObj.isDict()) {
+                    GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
+                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
+                    // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
+                    // to the field DR dictionary
+                    if (!newFonts.empty()) {
+                        for (const Form::AddFontResult &afr : newFonts) {
+                            fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName, Object(afr.ref));
+                            // This is not fully correct, it changes the entire font to the last added font
+                            // but it is much better than not doing anything, because we know that one of
+                            // the fonts have characters we need, so there is a bit of hope involved here
+                            // It is likely that we only have added one font, and it is likely that it is
+                            // a non-subset version of a subset or a reduced type1 font or similar.
+                            da.setFontName(afr.fontName);
                         }
-                    } else {
-                        form->ensureFontsForAllCharacters(content.get(), fontName);
+                        setDefaultAppearance(da.toAppearanceString());
                     }
+                } else {
+                    form->ensureFontsForAllCharacters(content.get(), fontName);
                 }
             } else {
                 // This is wrong, there has to be a Tf in DA

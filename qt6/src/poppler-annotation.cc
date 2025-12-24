@@ -1612,7 +1612,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
                 }
             }
         }
-        DefaultAppearance da { { objName, fontName.c_str() }, pointSize, convertQColor(textColor) };
+        DefaultAppearance da { fontName, pointSize, convertQColor(textColor) };
         ftextann->setDefaultAppearance(da);
     }
 }

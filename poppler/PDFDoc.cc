@@ -2231,7 +2231,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
         }
 
-        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         const std::string daStr = da.toAppearanceString();
         annotObj.dictSet("DA", Object(std::make_unique<GooString>(daStr)));
 
