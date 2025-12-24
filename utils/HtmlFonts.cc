@@ -140,8 +140,8 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
     if (const std::optional<std::string> &fontname = font.getName()) {
         FontName = *fontname;
 
-        GooString fontnameLower(*fontname);
-        fontnameLower.lowerCase();
+        std::string fontnameLower = *fontname;
+        GooString::lowerCase(fontnameLower);
 
         if (!bold && strstr(fontnameLower.c_str(), "bold")) {
             bold = true;

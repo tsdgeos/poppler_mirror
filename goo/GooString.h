@@ -231,7 +231,6 @@ public:
     using std::string::erase;
 
     // Convert string to all-lower case.
-    POPPLER_PRIVATE_EXPORT GooString *lowerCase();
     POPPLER_PRIVATE_EXPORT static void lowerCase(std::string &s);
 
     // Returns a new string converted to all-lower case.
