@@ -143,11 +143,11 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
         std::string fontnameLower = *fontname;
         GooString::lowerCase(fontnameLower);
 
-        if (!bold && strstr(fontnameLower.c_str(), "bold")) {
+        if (!bold && fontnameLower.contains("bold")) {
             bold = true;
         }
 
-        if (!italic && (strstr(fontnameLower.c_str(), "italic") || strstr(fontnameLower.c_str(), "oblique"))) {
+        if (!italic && (fontnameLower.contains("italic") || fontnameLower.contains("oblique"))) {
             italic = true;
         }
 
