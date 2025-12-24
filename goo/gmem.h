@@ -87,11 +87,6 @@ inline void *grealloc(void *p, size_t size, bool checkoverflow = false)
     std::abort();
 }
 
-inline void *grealloc_checkoverflow(void *p, size_t size)
-{
-    return grealloc(p, size, true);
-}
-
 /*
  * These are similar to gmalloc and grealloc, but take an object count
  * and size. The result is similar to allocating <count> * <size>
