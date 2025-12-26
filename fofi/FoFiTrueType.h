@@ -166,7 +166,7 @@ public:
 private:
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
-    void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const;
+    void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const;
     static void dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream);
     static unsigned int computeTableChecksum(std::span<const unsigned char> data);
     void parse();

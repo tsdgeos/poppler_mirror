@@ -743,7 +743,7 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, const st
     // write the guts of the dictionary
     cvtEncoding(encoding, outputFunc, outputStream);
     cvtCharStrings(encoding, codeToGID, outputFunc, outputStream);
-    cvtSfnts(outputFunc, outputStream, nullptr, false, &maxUsedGlyph);
+    cvtSfnts(outputFunc, outputStream, std::nullopt, false, &maxUsedGlyph);
 
     // end the dictionary and define the font
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -863,7 +863,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> 
     (*outputFunc)(outputStream, "  end readonly def\n", 19);
 
     // write the guts of the dictionary
-    cvtSfnts(outputFunc, outputStream, nullptr, needVerticalMetrics, &maxUsedGlyph);
+    cvtSfnts(outputFunc, outputStream, std::nullopt, needVerticalMetrics, &maxUsedGlyph);
 
     // end the dictionary and define the font
     (*outputFunc)(outputStream, "CIDFontName currentdict end /CIDFont defineresource pop\n", 56);
@@ -884,7 +884,6 @@ void FoFiTrueType::convertToCIDType0(const char *psName, const std::vector<int> 
 
 void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
 {
-    GooString *sfntsName;
     int maxUsedGlyph, n, i, j;
 
     *maxValidGlyph = -1;
@@ -894,9 +893,8 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     }
 
     // write the Type 42 sfnts array
-    sfntsName = (new GooString(psName))->append("_sfnts");
+    const std::string sfntsName = GooString(psName).append("_sfnts")->toStr();
     cvtSfnts(outputFunc, outputStream, sfntsName, needVerticalMetrics, &maxUsedGlyph);
-    delete sfntsName;
 
     // write the descendant Type 42 fonts
     // (The following is a kludge: nGlyphs is the glyph count from the
@@ -1069,7 +1067,7 @@ err:
     (*outputFunc)(outputStream, "end readonly def\n", 17);
 }
 
-void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const
+void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const
 {
     std::array<unsigned char, 54> headData;
     std::vector<unsigned char> locaData;
