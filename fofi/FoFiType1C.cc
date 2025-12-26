@@ -729,7 +729,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     gfree(charStringOffsets);
 }
 
-void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
+void FoFiType1C::convertToType0(const std::string &psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
 {
     std::vector<int> cidMap;
     Type1CIndex subrIdx;
@@ -792,7 +792,7 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
             // font dictionary (unencrypted section)
             (*outputFunc)(outputStream, "16 dict begin\n", 14);
             (*outputFunc)(outputStream, "/FontName /", 11);
-            (*outputFunc)(outputStream, psName, strlen(psName));
+            (*outputFunc)(outputStream, psName.c_str(), psName.length());
             std::string buf = GooString::format("_{0:02x} def\n", i >> 8);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
             (*outputFunc)(outputStream, "/FontType 1 def\n", 16);
@@ -979,7 +979,7 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
     // write the Type 0 parent font
     (*outputFunc)(outputStream, "16 dict begin\n", 14);
     (*outputFunc)(outputStream, "/FontName /", 11);
-    (*outputFunc)(outputStream, psName, strlen(psName));
+    (*outputFunc)(outputStream, psName.c_str(), psName.length());
     (*outputFunc)(outputStream, " def\n", 5);
     (*outputFunc)(outputStream, "/FontType 0 def\n", 16);
     if (topDict.hasFontMatrix) {
@@ -999,7 +999,7 @@ void FoFiType1C::convertToType0(const char *psName, const std::vector<int> &code
     (*outputFunc)(outputStream, "/FDepVector [\n", 14);
     for (int i = 0; i < int(cidMap.size()); i += 256) {
         (*outputFunc)(outputStream, "/", 1);
-        (*outputFunc)(outputStream, psName, strlen(psName));
+        (*outputFunc)(outputStream, psName.c_str(), psName.length());
         const std::string buf = GooString::format("_{0:02x} findfont\n", i >> 8);
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }

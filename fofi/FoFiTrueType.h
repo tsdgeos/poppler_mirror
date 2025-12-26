@@ -145,12 +145,12 @@ public:
     // PostScript font name (so we don't need to depend on the 'name'
     // table in the font).  The <cidMap> array maps CIDs to GIDs; it has
     // <nCIDs> entries.  (Not useful for OpenType CFF fonts.)
-    void convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType0(const std::string &psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 0 (but non-CID) composite font, suitable for
     // embedding in a PostScript file.  <psName> will be used as the
     // PostScript font name.  (Only useful for OpenType CFF fonts.)
-    void convertToType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType0(const std::string &psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Returns a pointer to the CFF font embedded in this OpenType font.
     // If successful, sets *<start> and *<length>, and returns true.

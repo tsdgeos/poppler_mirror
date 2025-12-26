@@ -2450,7 +2450,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
             } else {
                 // otherwise: use a non-CID composite font
                 int maxValidGlyph = -1;
-                ffTT->convertToType0(psName->c_str(), codeToGID, needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
+                ffTT->convertToType0(psName->toStr(), codeToGID, needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
                 updateFontMaxValidGlyph(font, maxValidGlyph);
             }
         } else {
@@ -2490,7 +2490,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
                 ffT1C->convertToCIDType0(psName->c_str(), {}, outputFunc, outputStream);
             } else {
                 // otherwise: use a non-CID composite font
-                ffT1C->convertToType0(psName->c_str(), {}, outputFunc, outputStream);
+                ffT1C->convertToType0(psName->toStr(), {}, outputFunc, outputStream);
             }
         }
     }
@@ -2517,7 +2517,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName,
             } else {
                 // otherwise: use a non-CID composite font
                 int maxValidGlyph = -1;
-                ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
+                ffTT->convertToType0(psName->toStr(), ((GfxCIDFont *)font)->getCIDToGID(), needVerticalMetrics, &maxValidGlyph, outputFunc, outputStream);
                 updateFontMaxValidGlyph(font, maxValidGlyph);
             }
         }
@@ -2555,7 +2555,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
                     ffTT->convertToCIDType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
                 } else {
                     // otherwise: use a non-CID composite font
-                    ffTT->convertToType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
+                    ffTT->convertToType0(psName->toStr(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
                 }
             }
         }
