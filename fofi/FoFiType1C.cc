@@ -447,7 +447,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
     (*outputFunc)(outputStream, "cleartomark\n", 12);
 }
 
-void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
+void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream)
 {
     std::vector<int> cidMap;
     GooString charStrings;
@@ -526,7 +526,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, const std::vector<int> &c
     (*outputFunc)(outputStream, "/CIDInit /ProcSet findresource begin\n", 37);
     (*outputFunc)(outputStream, "20 dict begin\n", 14);
     (*outputFunc)(outputStream, "/CIDFontName /", 14);
-    (*outputFunc)(outputStream, psName, strlen(psName));
+    (*outputFunc)(outputStream, psName.c_str(), psName.length());
     (*outputFunc)(outputStream, " def\n", 5);
     (*outputFunc)(outputStream, "/CIDFontType 0 def\n", 19);
     (*outputFunc)(outputStream, "/CIDSystemInfo 3 dict dup begin\n", 32);

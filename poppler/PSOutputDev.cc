@@ -2443,7 +2443,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
                 codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT.get());
             }
             if (ffTT->isOpenTypeCFF()) {
-                ffTT->convertToCIDType0(psName->c_str(), codeToGID, outputFunc, outputStream);
+                ffTT->convertToCIDType0(psName->toStr(), codeToGID, outputFunc, outputStream);
             } else if (level >= psLevel3) {
                 // Level 3: use a CID font
                 ffTT->convertToCIDType2(psName->c_str(), codeToGID, needVerticalMetrics, outputFunc, outputStream);
@@ -2487,7 +2487,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
         if (auto ffT1C = FoFiType1C::make(std::move(fontBuf).value())) {
             if (level >= psLevel3) {
                 // Level 3: use a CID font
-                ffT1C->convertToCIDType0(psName->c_str(), {}, outputFunc, outputStream);
+                ffT1C->convertToCIDType0(psName->toStr(), {}, outputFunc, outputStream);
             } else {
                 // otherwise: use a non-CID composite font
                 ffT1C->convertToType0(psName->toStr(), {}, outputFunc, outputStream);
@@ -2552,7 +2552,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
             if (ffTT->isOpenTypeCFF()) {
                 if (level >= psLevel3) {
                     // Level 3: use a CID font
-                    ffTT->convertToCIDType0(psName->c_str(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
+                    ffTT->convertToCIDType0(psName->toStr(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
                 } else {
                     // otherwise: use a non-CID composite font
                     ffTT->convertToType0(psName->toStr(), ((GfxCIDFont *)font)->getCIDToGID(), outputFunc, outputStream);
