@@ -7,7 +7,7 @@
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2017 Jan-Erik S <janerik234678@gmail.com>
-// Copyright 2017-2019, 2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017-2019, 2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018, Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025, Kevin Backhouse <kevinbackhouse@github.com>

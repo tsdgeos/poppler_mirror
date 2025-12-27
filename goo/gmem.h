@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2007-2010, 2017, 2019, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2017, 2019, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>

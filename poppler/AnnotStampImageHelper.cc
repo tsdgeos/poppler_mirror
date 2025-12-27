@@ -3,7 +3,7 @@
 // AnnotStampImageHelper.cc
 //
 // Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
-// Copyright (C) 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // Licensed under GPLv2 or later

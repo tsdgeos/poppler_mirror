@@ -6,7 +6,7 @@
 //
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2015 Jason Crain <jason@aquaticape.us>
-// Copyright 2017, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2019, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Even Rouault <even.rouault@spatialys.com>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>

@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
