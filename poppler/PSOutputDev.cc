@@ -2309,7 +2309,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName.get());
+            psName->insert(0, it.psName->toStr());
             return;
         }
     }
@@ -2339,7 +2339,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName.get());
+            psName->insert(0, it.psName->toStr());
             return;
         }
     }
@@ -2469,7 +2469,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName.get());
+            psName->insert(0, it.psName->toStr());
             return;
         }
     }
@@ -2533,7 +2533,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
     for (PST1FontName &it : t1FontNames) {
         if (it.fontFileID == *id) {
             psName->clear();
-            psName->insert(0, it.psName.get());
+            psName->insert(0, it.psName->toStr());
             return;
         }
     }

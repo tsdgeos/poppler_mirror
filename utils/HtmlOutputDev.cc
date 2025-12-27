@@ -542,7 +542,7 @@ void HtmlPage::coalesce()
     }
     if (str1->getLink() != nullptr) {
         const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
-        str1->htext->insert(0, ls.get());
+        str1->htext->insert(0, ls->toStr());
     }
     curX = str1->xMin;
     curY = str1->yMin;
@@ -674,7 +674,7 @@ void HtmlPage::coalesce()
             }
             if (str1->getLink() != nullptr) {
                 const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
-                str1->htext->insert(0, ls.get());
+                str1->htext->insert(0, ls->toStr());
             }
         }
     }

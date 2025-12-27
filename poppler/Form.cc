@@ -1227,7 +1227,7 @@ const GooString *FormField::getFullyQualifiedName() const
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
                     fullyQualifiedName->insert(0, parent_name->c_str() + 2, parent_name->size() - 2); // Remove the unicode BOM
                 } else {
-                    fullyQualifiedName->insert(0, parent_name);
+                    fullyQualifiedName->insert(0, parent_name->toStr());
                 }
             }
         }
