@@ -358,7 +358,7 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
     g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
     stream = poppler_media->stream.getStream();
-    if (!stream->reset()) {
+    if (!stream->rewind()) {
         return FALSE;
     }
 

@@ -380,7 +380,7 @@ void MediaRendition::outputToFile(FILE *fp)
         return;
     }
 
-    if (!embeddedStreamObject.streamReset()) {
+    if (!embeddedStreamObject.streamRewind()) {
         return;
     }
 

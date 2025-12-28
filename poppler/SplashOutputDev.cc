@@ -2617,7 +2617,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     mat[5] = ctm[3] + ctm[5];
 
     imgMaskData.imgStr = std::make_unique<ImageStream>(str, width, 1, 1);
-    if (!imgMaskData.imgStr->reset()) {
+    if (!imgMaskData.imgStr->rewind()) {
         return;
     }
     imgMaskData.invert = invert ? false : true;
@@ -2658,7 +2658,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
         }
     }
     imgMaskData.imgStr = std::make_unique<ImageStream>(str, width, 1, 1);
-    if (!imgMaskData.imgStr->reset()) {
+    if (!imgMaskData.imgStr->rewind()) {
         return;
     }
 
@@ -3240,7 +3240,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
         }
     }
     imgData.imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgData.imgStr->reset()) {
+    if (!imgData.imgStr->rewind()) {
         return;
     }
 
@@ -3518,7 +3518,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         mat[4] = 0;
         mat[5] = 0;
         imgMaskData.imgStr = std::make_unique<ImageStream>(maskStr, maskWidth, 1, 1);
-        if (!imgMaskData.imgStr->reset()) {
+        if (!imgMaskData.imgStr->rewind()) {
             return;
         }
         imgMaskData.invert = maskInvert ? false : true;
@@ -3556,7 +3556,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         mat[5] = ctm[3] + ctm[5];
 
         imgData.imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        if (!imgData.imgStr->reset()) {
+        if (!imgData.imgStr->rewind()) {
             return;
         }
         imgData.colorMap = colorMap;
@@ -3677,7 +3677,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         if (checkedMultiply(maskWidth, maskHeight, &maskChars)) {
             return;
         }
-        if (!maskStr->reset()) {
+        if (!maskStr->rewind()) {
             return;
         }
         std::vector<char> data;
@@ -3692,7 +3692,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         maskStr = ownedMaskStr.get();
     }
     imgMaskData.imgStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-    if (!imgMaskData.imgStr->reset()) {
+    if (!imgMaskData.imgStr->rewind()) {
         return;
     }
     imgMaskData.colorMap = maskColorMap;
@@ -3725,7 +3725,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
     //----- draw the source image
 
     imgData.imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgData.imgStr->reset()) {
+    if (!imgData.imgStr->rewind()) {
         return;
     }
     imgData.colorMap = colorMap;
@@ -3739,7 +3739,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
         getMatteColor(colorMode, colorMap, maskColorMap->getMatteColor(), imgData.matteColor);
         imgData.maskColorMap = maskColorMap;
         imgData.maskStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-        if (!imgData.maskStr->reset()) {
+        if (!imgData.maskStr->rewind()) {
             return;
         }
     }

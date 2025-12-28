@@ -2396,7 +2396,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
     auto cs = std::make_unique<GfxIndexedColorSpace>(std::move(baseA), indexHighA);
     obj1 = arr.get(3);
     const int n = cs->getBase()->getNComps();
-    if (obj1.isStream() && obj1.streamReset()) {
+    if (obj1.isStream() && obj1.streamRewind()) {
         for (i = 0; i <= indexHighA; ++i) {
             const int readChars = obj1.streamGetChars(n, &cs->lookup[i * n]);
             for (j = readChars; j < n; ++j) {
@@ -4457,7 +4457,7 @@ private:
 GfxShadingBitBuf::GfxShadingBitBuf(Stream *strA)
 {
     str = strA;
-    (void)str->reset();
+    (void)str->rewind();
     bitBuf = 0;
     nBits = 0;
 }

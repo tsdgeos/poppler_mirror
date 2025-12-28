@@ -34,7 +34,7 @@ public:
     JPXStream &operator=(const JPXStream &other) = delete;
 
     StreamKind getKind() const override { return strJPX; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     Goffset getPos() override;
     int getChar() override;

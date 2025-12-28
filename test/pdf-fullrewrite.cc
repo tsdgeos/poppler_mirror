@@ -204,8 +204,8 @@ static bool compareObjects(const Object *objA, const Object *objB)
                 return false;
             } else {
                 int c;
-                (void)streamA->reset();
-                (void)streamB->reset();
+                (void)streamA->rewind();
+                (void)streamB->rewind();
                 do {
                     c = streamA->getChar();
                     if (c != streamB->getChar()) {

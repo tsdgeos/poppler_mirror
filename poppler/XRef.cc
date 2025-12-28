@@ -158,7 +158,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         error(errSyntaxError, -1, "Too many objects in an object stream");
         return;
     }
-    if (!objStr.streamReset()) {
+    if (!objStr.streamRewind()) {
         return;
     }
     objs = new Object[nObjects];
@@ -753,7 +753,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
         return false;
     }
 
-    if (!xrefStr->reset()) {
+    if (!xrefStr->rewind()) {
         return false;
     }
 
@@ -915,7 +915,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
         xrefReconstructedCb();
     }
 
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return false;
     }
     while (true) {

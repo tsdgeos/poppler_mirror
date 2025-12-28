@@ -172,7 +172,7 @@ byte_array embedded_file::data() const
         return byte_array();
     }
 
-    if (!stream->reset()) {
+    if (!stream->rewind()) {
         return byte_array {};
     }
     byte_array ret(1024);

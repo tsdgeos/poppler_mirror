@@ -1159,7 +1159,7 @@ JBIG2Stream::~JBIG2Stream()
     delete str;
 }
 
-bool JBIG2Stream::reset()
+bool JBIG2Stream::rewind()
 {
     segments.resize(0);
     globalSegments.resize(0);
@@ -1168,7 +1168,7 @@ bool JBIG2Stream::reset()
     // read the globals stream
     if (globalsStream.isStream()) {
         curStr = globalsStream.getStream();
-        innerReset = innerReset && curStr->reset();
+        innerReset = innerReset && curStr->rewind();
         arithDecoder->setStream(curStr);
         huffDecoder->setStream(curStr);
         mmrDecoder->setStream(curStr);
@@ -1180,7 +1180,7 @@ bool JBIG2Stream::reset()
 
     // read the main stream
     curStr = str;
-    innerReset = innerReset && curStr->reset();
+    innerReset = innerReset && curStr->rewind();
     arithDecoder->setStream(curStr);
     huffDecoder->setStream(curStr);
     mmrDecoder->setStream(curStr);

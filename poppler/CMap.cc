@@ -129,7 +129,7 @@ std::shared_ptr<CMap> CMap::parse(CMapCache *cache, const std::string &collectio
         cMap->useCMap(&obj1, recursion);
     }
 
-    if (str->reset()) {
+    if (str->rewind()) {
         cMap->parse2(cache, &getCharFromStream, str);
     }
     str->close();

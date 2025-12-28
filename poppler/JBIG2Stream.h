@@ -50,7 +50,7 @@ public:
     JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
     ~JBIG2Stream() override;
     StreamKind getKind() const override { return strJBIG2; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     Goffset getPos() override;
     int getChar() override;

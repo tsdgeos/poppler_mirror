@@ -28,7 +28,7 @@ public:
     FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
     virtual ~FlateStream();
     StreamKind getKind() const override { return strFlate; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int getChar() override;
     int lookChar() override;
     int getRawChar() override;

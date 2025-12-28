@@ -43,9 +43,9 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-bool FlateStream::reset()
+bool FlateStream::rewind()
 {
-    // FIXME: what are the semantics of reset?
+    // FIXME: what are the semantics of rewind?
     // i.e. how much initialization has to happen in the constructor?
 
     /* reinitialize zlib */
@@ -53,7 +53,7 @@ bool FlateStream::reset()
     memset(&d_stream, 0, sizeof(d_stream));
     inflateInit(&d_stream);
 
-    str->reset();
+    str->rewind();
     d_stream.avail_in = 0;
     status = Z_OK;
     out_pos = 0;

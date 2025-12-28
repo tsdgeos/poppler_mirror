@@ -362,8 +362,8 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         error(errSyntaxError, -1, "Function has invalid number of samples");
         return;
     }
-    if (!str->reset()) {
-        error(errSyntaxError, -1, "Stream reset error");
+    if (!str->rewind()) {
+        error(errSyntaxError, -1, "Stream rewind error");
         return;
     }
     buf = 0;
@@ -1109,8 +1109,8 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
         goto err1;
     }
     str = funcObj->getStream();
-    if (!str->reset()) {
-        error(errSyntaxError, -1, "Stream reset error");
+    if (!str->rewind()) {
+        error(errSyntaxError, -1, "Stream rewind error");
         goto err1;
     }
 

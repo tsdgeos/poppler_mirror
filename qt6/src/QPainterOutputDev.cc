@@ -967,7 +967,7 @@ void QPainterOutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, St
                                                 1, // numPixelComps
                                                 1 // getBits
     );
-    if (!imgStr->reset()) {
+    if (!imgStr->rewind()) {
         imgStr->close();
         return;
     }
@@ -1013,7 +1013,7 @@ void QPainterOutputDev::drawImage(GfxState * /*state*/, Object * /*ref*/, Stream
 
     /* TODO: Do we want to cache these? */
     auto imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgStr->reset()) {
+    if (!imgStr->rewind()) {
         imgStr->close();
         return;
     }
@@ -1073,12 +1073,12 @@ void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream
 
     /* TODO: Do we want to cache these? */
     auto imgStr = std::make_unique<ImageStream>(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgStr->reset()) {
+    if (!imgStr->rewind()) {
         return;
     }
 
     auto maskImageStr = std::make_unique<ImageStream>(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-    if (!maskImageStr->reset()) {
+    if (!maskImageStr->rewind()) {
         return;
     }
 

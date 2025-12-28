@@ -710,7 +710,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
 
     if (data_out) {
         ImageStream imgstr { str, width, colorMap.getNumPixelComps(), colorMap.getBits() };
-        if (!imgstr.reset()) {
+        if (!imgstr.rewind()) {
             return false;
         }
         unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);

@@ -270,9 +270,9 @@ JPXStream::~JPXStream()
     delete bufStr;
 }
 
-bool JPXStream::reset()
+bool JPXStream::rewind()
 {
-    bool ret = bufStr->reset();
+    bool ret = bufStr->rewind();
     if (readBoxes()) {
         curY = img.yOffset;
     } else {
@@ -496,7 +496,7 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
     csPrec = 0; // make gcc happy
     *hasAlpha = false;
     haveBPC = haveCSMode = false;
-    (void)bufStr->reset();
+    (void)bufStr->rewind();
     if (bufStr->lookChar() == 0xff) {
         getImageParams2(bitsPerComponent, csMode);
     } else {

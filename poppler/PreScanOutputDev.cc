@@ -183,7 +183,7 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
     }
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width + 7) / 8);
@@ -220,7 +220,7 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
     }
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width * colorMap->getNumPixelComps() * colorMap->getBits() + 7) / 8);

@@ -301,7 +301,7 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
 {
     if (colorMap) {
         ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        if (!imgStr.reset()) {
+        if (!imgStr.rewind()) {
             imgStr.close();
             return 0;
         }
@@ -311,7 +311,7 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
 
         imgStr.close();
     } else {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return 0;
         }
         for (int y = 0; y < height; y++) {
@@ -323,7 +323,7 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
     }
 
     EmbedStream *embedStr = (EmbedStream *)(str->getBaseStream());
-    if (!embedStr->reset()) {
+    if (!embedStr->rewind()) {
         return 0;
     }
     long len = 0;
@@ -350,9 +350,9 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext)
 
     // initialize stream
     str = str->getNextStream();
-    if (!str->reset()) {
+    if (!str->rewind()) {
         fclose(f);
-        error(errIO, -1, "Couldn't reset stream");
+        error(errIO, -1, "Couldn't rewind stream");
         errorCode = 2;
         return;
     }
@@ -402,16 +402,16 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
     if (format != imgMonochrome) {
         // initialize stream
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        if (!imgStr->reset()) {
-            error(errIO, -1, "Stream reset failed");
+        if (!imgStr->rewind()) {
+            error(errIO, -1, "Stream rewind failed");
             errorCode = 3;
             return;
         }
     } else {
         // initialize stream
-        if (!str->reset()) {
+        if (!str->rewind()) {
             errorCode = 3;
-            error(errIO, -1, "Stream reset failed");
+            error(errIO, -1, "Stream rewind failed");
             return;
         }
     }
@@ -578,7 +578,7 @@ void ImageOutputDev::writeImage(GfxState * /*state*/, Object * /*ref*/, Stream *
                 errorCode = 2;
                 return;
             }
-            if (globalsStr->reset()) {
+            if (globalsStr->rewind()) {
                 while ((c = globalsStr->getChar()) != EOF) {
                     fputc(c, f);
                 }

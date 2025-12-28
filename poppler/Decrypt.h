@@ -96,7 +96,7 @@ public:
     BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~BaseCryptStream() override;
     StreamKind getKind() const override { return strCrypt; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int getChar() override;
     int lookChar() override = 0;
     Goffset getPos() override;
@@ -128,7 +128,7 @@ class EncryptStream : public BaseCryptStream
 public:
     EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~EncryptStream() override;
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int lookChar() override;
 };
 
@@ -137,7 +137,7 @@ class DecryptStream : public BaseCryptStream
 public:
     DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~DecryptStream() override;
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int lookChar() override;
 };
 

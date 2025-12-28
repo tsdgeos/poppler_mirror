@@ -233,12 +233,12 @@ public:
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
-    [[nodiscard]] bool reset() override { return str->getBaseStream()->reset(); }
+    [[nodiscard]] bool rewind() override { return str->getBaseStream()->rewind(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
     bool isBinary(bool /*last*/ = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
-    [[nodiscard]] bool unfilteredReset() override { return str->getBaseStream()->unfilteredReset(); }
+    [[nodiscard]] bool unfilteredRewind() override { return str->getBaseStream()->unfilteredRewind(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
     void setPos(Goffset pos, int dir) override { str->getBaseStream()->setPos(pos, dir); }
     BaseStream *getBaseStream() override { return str->getBaseStream()->getBaseStream(); }
@@ -477,7 +477,7 @@ BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset 
 
 BaseSeekInputStream::~BaseSeekInputStream() = default;
 
-bool BaseSeekInputStream::reset()
+bool BaseSeekInputStream::rewind()
 {
     savePos = currentPos();
     setCurrentPos(start);
@@ -631,9 +631,9 @@ ImageStream::~ImageStream()
     gfree(inputLine);
 }
 
-bool ImageStream::reset()
+bool ImageStream::rewind()
 {
-    return str->reset();
+    return str->rewind();
 }
 
 void ImageStream::close()
@@ -916,7 +916,7 @@ bool StreamPredictor::getNextLine()
         }
     }
 
-    // reset to start of line
+    // rewind to start of line
     predIdx = pixBytes;
 
     return true;
@@ -954,7 +954,7 @@ std::unique_ptr<Stream> FileStream::makeSubStream(Goffset startA, bool limitedA,
     return std::make_unique<FileStream>(file, startA, limitedA, lengthA, std::move(dictA));
 }
 
-bool FileStream::reset()
+bool FileStream::rewind()
 {
     savePos = offset;
     offset = start;
@@ -1054,7 +1054,7 @@ std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool lim
     return std::make_unique<CachedFileStream>(cc, startA, limitedA, lengthA, std::move(dictA));
 }
 
-bool CachedFileStream::reset()
+bool CachedFileStream::rewind()
 {
     savePos = (unsigned int)cc->tell();
     cc->seek(start, SEEK_SET);
@@ -1167,16 +1167,16 @@ EmbedStream::~EmbedStream()
     }
 }
 
-bool EmbedStream::reset()
+bool EmbedStream::rewind()
 {
     if (length == initialLength) {
-        // In general one can't reset EmbedStream
+        // In general one can't rewind EmbedStream
         // but if we have not read anything yet, that's fine
         return true;
     }
 
     if (reusable) {
-        // If the EmbedStream is reusable, resetting switches back to reading the recorded data
+        // If the EmbedStream is reusable, rewinding switches back to reading the recorded data
         replay = true;
         bufPos = 0;
         return true;
@@ -1317,12 +1317,12 @@ ASCIIHexStream::~ASCIIHexStream()
     delete str;
 }
 
-bool ASCIIHexStream::reset()
+bool ASCIIHexStream::rewind()
 {
     buf = EOF;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int ASCIIHexStream::lookChar()
@@ -1414,12 +1414,12 @@ ASCII85Stream::~ASCII85Stream()
     delete str;
 }
 
-bool ASCII85Stream::reset()
+bool ASCII85Stream::rewind()
 {
     index = n = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int ASCII85Stream::lookChar()
@@ -1589,9 +1589,9 @@ int LZWStream::getChars(int nChars, unsigned char *buffer)
     return n;
 }
 
-bool LZWStream::reset()
+bool LZWStream::rewind()
 {
-    bool success = str->reset();
+    bool success = str->rewind();
     eof = false;
     inputBits = 0;
     clearTable();
@@ -1662,7 +1662,7 @@ start:
     }
     prevCode = code;
 
-    // reset buffer
+    // rewind buffer
     seqIndex = 0;
 
     return true;
@@ -1732,12 +1732,12 @@ RunLengthStream::~RunLengthStream()
     delete str;
 }
 
-bool RunLengthStream::reset()
+bool RunLengthStream::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int RunLengthStream::getChars(int nChars, unsigned char *buffer)
@@ -1859,7 +1859,7 @@ CCITTFaxStream::~CCITTFaxStream()
     gfree(codingLine);
 }
 
-bool CCITTFaxStream::ccittReset(bool unfiltered)
+bool CCITTFaxStream::ccittRewind(bool unfiltered)
 {
     row = 0;
     nextLine2D = encoding < 0;
@@ -1869,22 +1869,22 @@ bool CCITTFaxStream::ccittReset(bool unfiltered)
     buf = EOF;
 
     if (unfiltered) {
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     } else {
-        return str->reset();
+        return str->rewind();
     }
 }
 
-bool CCITTFaxStream::unfilteredReset()
+bool CCITTFaxStream::unfilteredRewind()
 {
-    return ccittReset(true);
+    return ccittRewind(true);
 }
 
-bool CCITTFaxStream::reset()
+bool CCITTFaxStream::rewind()
 {
     int code1;
 
-    bool resetSuccess = ccittReset(false);
+    bool rewindSuccess = ccittRewind(false);
 
     if (codingLine != nullptr && refLine != nullptr) {
         eof = false;
@@ -1907,7 +1907,7 @@ bool CCITTFaxStream::reset()
         eatBits(1);
     }
 
-    return resetSuccess;
+    return rewindSuccess;
 }
 
 inline void CCITTFaxStream::addPixels(int a1, int blackPixels)
@@ -2678,7 +2678,7 @@ DCTStream::~DCTStream()
     delete str;
 }
 
-bool DCTStream::dctReset(bool unfiltered)
+bool DCTStream::dctRewind(bool unfiltered)
 {
     progressive = interleaved = false;
     width = height = 0;
@@ -2690,21 +2690,21 @@ bool DCTStream::dctReset(bool unfiltered)
     gotAdobeMarker = false;
     restartInterval = 0;
     if (unfiltered)
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     else
-        return str->reset();
+        return str->rewind();
 }
 
-bool DCTStream::unfilteredReset()
+bool DCTStream::unfilteredRewind()
 {
-    return dctReset(true);
+    return dctRewind(true);
 }
 
-bool DCTStream::reset()
+bool DCTStream::rewind()
 {
     int i, j;
 
-    bool resetResult = dctReset(false);
+    bool resetResult = dctRewind(false);
 
     if (!readHeader()) {
         y = height;
@@ -4171,7 +4171,7 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-bool FlateStream::flateReset(bool unfiltered)
+bool FlateStream::flateRewind(bool unfiltered)
 {
     index = 0;
     remain = 0;
@@ -4181,22 +4181,22 @@ bool FlateStream::flateReset(bool unfiltered)
     endOfBlock = true;
     eof = true;
     if (unfiltered) {
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     } else {
-        return str->reset();
+        return str->rewind();
     }
 }
 
-bool FlateStream::unfilteredReset()
+bool FlateStream::unfilteredRewind()
 {
-    return flateReset(true);
+    return flateRewind(true);
 }
 
-bool FlateStream::reset()
+bool FlateStream::rewind()
 {
     int cmf, flg;
 
-    bool internalResetResult = flateReset(false);
+    bool internalResetResult = flateRewind(false);
 
     // read header
     //~ need to look at window size?
@@ -4667,11 +4667,11 @@ BufStream::~BufStream()
     delete str;
 }
 
-bool BufStream::reset()
+bool BufStream::rewind()
 {
     int i;
 
-    bool success = str->reset();
+    bool success = str->rewind();
     for (i = 0; i < bufSize; ++i) {
         buf[i] = str->getChar();
     }
@@ -4723,11 +4723,11 @@ FixedLengthEncoder::~FixedLengthEncoder()
     }
 }
 
-bool FixedLengthEncoder::reset()
+bool FixedLengthEncoder::rewind()
 {
     count = 0;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int FixedLengthEncoder::getChar()
@@ -4770,13 +4770,13 @@ ASCIIHexEncoder::~ASCIIHexEncoder()
     }
 }
 
-bool ASCIIHexEncoder::reset()
+bool ASCIIHexEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool ASCIIHexEncoder::fillBuf()
@@ -4821,13 +4821,13 @@ ASCII85Encoder::~ASCII85Encoder()
     }
 }
 
-bool ASCII85Encoder::reset()
+bool ASCII85Encoder::rewind()
 {
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool ASCII85Encoder::fillBuf()
@@ -4917,12 +4917,12 @@ RunLengthEncoder::~RunLengthEncoder()
     }
 }
 
-bool RunLengthEncoder::reset()
+bool RunLengthEncoder::rewind()
 {
     bufPtr = bufEnd = nextEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 //
@@ -5030,11 +5030,11 @@ LZWEncoder::~LZWEncoder()
     }
 }
 
-bool LZWEncoder::reset()
+bool LZWEncoder::rewind()
 {
     int i;
 
-    bool success = str->reset();
+    bool success = str->rewind();
 
     // initialize code table
     for (i = 0; i < 256; ++i) {
@@ -5181,12 +5181,12 @@ CMYKGrayEncoder::~CMYKGrayEncoder()
     }
 }
 
-bool CMYKGrayEncoder::reset()
+bool CMYKGrayEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool CMYKGrayEncoder::fillBuf()
@@ -5231,12 +5231,12 @@ RGBGrayEncoder::~RGBGrayEncoder()
     }
 }
 
-bool RGBGrayEncoder::reset()
+bool RGBGrayEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool RGBGrayEncoder::fillBuf()
@@ -5278,7 +5278,7 @@ SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap
 
 SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() = default;
 
-bool SplashBitmapCMYKEncoder::reset()
+bool SplashBitmapCMYKEncoder::rewind()
 {
     bufPtr = width;
     curLine = height - 1;

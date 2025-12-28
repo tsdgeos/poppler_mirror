@@ -81,7 +81,7 @@ JPXStream::~JPXStream()
     delete priv;
 }
 
-bool JPXStream::reset()
+bool JPXStream::rewind()
 {
     priv->counter = 0;
     priv->ccounter = 0;

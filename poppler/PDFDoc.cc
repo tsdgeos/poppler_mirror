@@ -234,8 +234,8 @@ bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::opt
         return false;
     }
 
-    if (!str->reset()) {
-        error(errSyntaxError, -1, "Document base stream reset failure");
+    if (!str->rewind()) {
+        error(errSyntaxError, -1, "Document base stream rewind failure");
         errCode = errFileIO;
         return false;
     }
@@ -1054,7 +1054,7 @@ int PDFDoc::saveWithoutChangesAs(OutStream *outStr)
     }
 
     std::unique_ptr<BaseStream> copyStr { str->copy() };
-    if (!copyStr->reset()) {
+    if (!copyStr->rewind()) {
         return errFileIO;
     }
     while (copyStr->lookChar() != EOF) {
@@ -1074,7 +1074,7 @@ void PDFDoc::saveIncrementalUpdate(OutStream *outStr)
 {
     // copy the original file
     std::unique_ptr<BaseStream> copyStr { str->copy() };
-    if (!copyStr->reset()) {
+    if (!copyStr->rewind()) {
         // some err;
     }
     while (copyStr->lookChar() != EOF) {
@@ -1260,7 +1260,7 @@ void PDFDoc::writeDictionary(Dict *dict, OutStream *outStr, XRef *xRef, unsigned
 
 void PDFDoc::writeStream(Stream *str, OutStream *outStr)
 {
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return;
     }
     outStr->printf("stream\r\n");
@@ -1286,8 +1286,8 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
     }
 
     outStr->printf("stream\r\n");
-    if (!str->unfilteredReset()) {
-        error(errSyntaxError, -1, "PDFDoc::writeRawStream, reset failed");
+    if (!str->unfilteredRewind()) {
+        error(errSyntaxError, -1, "PDFDoc::writeRawStream, rewind failed");
         return;
     }
     for (Goffset i = 0; i < length; i++) {
@@ -1298,7 +1298,7 @@ void PDFDoc::writeRawStream(Stream *str, OutStream *outStr)
         }
         outStr->printf("%c", c);
     }
-    (void)str->reset();
+    (void)str->rewind();
     outStr->printf("\r\nendstream\r\n");
 }
 
@@ -1310,7 +1310,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
         EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
         sEnc = std::make_unique<GooString>();
         int c;
-        if (!enc->reset()) {
+        if (!enc->rewind()) {
             return;
         }
         while ((c = enc->getChar()) != EOF) {
@@ -1466,7 +1466,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                 stream = encStream.get();
             }
 
-            if (!stream->reset()) {
+            if (!stream->rewind()) {
                 break;
             }
             // recalculate stream length
@@ -1661,7 +1661,7 @@ void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeA
     // file size (doesn't include the trailer)
     unsigned int fileSize = 0;
     int c;
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return;
     }
     while ((c = str->getChar()) != EOF) {

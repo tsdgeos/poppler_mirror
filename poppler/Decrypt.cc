@@ -348,11 +348,11 @@ BaseCryptStream::~BaseCryptStream()
     }
 }
 
-bool BaseCryptStream::reset()
+bool BaseCryptStream::rewind()
 {
     charactersRead = 0;
     nextCharBuff = EOF;
-    return str->reset();
+    return str->rewind();
 }
 
 Goffset BaseCryptStream::getPos()
@@ -403,9 +403,9 @@ EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 EncryptStream::~EncryptStream() = default;
 
-bool EncryptStream::reset()
+bool EncryptStream::rewind()
 {
-    bool baseResult = BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::rewind();
 
     switch (algo) {
     case cryptRC4:
@@ -484,10 +484,10 @@ DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 DecryptStream::~DecryptStream() = default;
 
-bool DecryptStream::reset()
+bool DecryptStream::rewind()
 {
     int i;
-    bool baseResult = BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::rewind();
 
     switch (algo) {
     case cryptRC4:

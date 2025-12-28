@@ -57,11 +57,11 @@ FlateEncoder::~FlateEncoder()
     }
 }
 
-bool FlateEncoder::reset()
+bool FlateEncoder::rewind()
 {
     int zlib_status;
 
-    bool innerReset = str->reset();
+    bool innerReset = str->rewind();
 
     outBufPtr = outBufEnd = outBuf;
     inBufEof = outBufEof = false;
@@ -72,7 +72,7 @@ bool FlateEncoder::reset()
 
     if (zlib_status != Z_OK) {
         inBufEof = outBufEof = true;
-        error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::reset()");
+        error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::rewind()");
         return false;
     }
 

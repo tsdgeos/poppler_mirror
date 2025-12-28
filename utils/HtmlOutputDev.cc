@@ -1275,9 +1275,9 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 
     // initialize stream
     str = str->getNextStream();
-    if (!str->reset()) {
+    if (!str->rewind()) {
         fclose(f1);
-        error(errIO, -1, "Couldn't reset stream");
+        error(errIO, -1, "Couldn't rewind stream");
         return;
     }
 
@@ -1330,8 +1330,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
         unsigned char *p;
         GfxRGB rgb;
         ImageStream imgStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
-        if (!imgStr.reset()) {
-            error(errInternal, -1, "Can't reset image stream");
+        if (!imgStr.rewind()) {
+            error(errInternal, -1, "Can't rewind image stream");
             return;
         }
         unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
@@ -1384,8 +1384,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             }
         }
 
-        if (!str->reset()) {
-            error(errInternal, -1, "failed to reset stream");
+        if (!str->rewind()) {
+            error(errInternal, -1, "failed to rewind stream");
             return;
         }
         unsigned char *png_row = (unsigned char *)gmalloc(size);

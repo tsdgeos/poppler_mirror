@@ -50,7 +50,7 @@ public:
     DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
     ~DCTStream() override;
     StreamKind getKind() const override { return strDCT; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int getChar() override;
     int lookChar() override;
     std::optional<std::string> getPSFilter(int psLevel, const char *indent) override;

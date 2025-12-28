@@ -289,7 +289,7 @@ public:
     JPXStream(Stream *strA);
     virtual ~JPXStream();
     StreamKind getKind() const override { return strJPX; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     int getChar() override;
     int lookChar() override;

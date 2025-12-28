@@ -120,11 +120,11 @@ void DCTStream::init()
     row_buffer = nullptr;
 }
 
-bool DCTStream::reset()
+bool DCTStream::rewind()
 {
     int row_stride;
 
-    bool success = str->reset();
+    bool success = str->rewind();
 
     if (row_buffer) {
         jpeg_destroy_decompress(&cinfo);

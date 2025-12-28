@@ -33,7 +33,7 @@ public:
     explicit FlateEncoder(Stream *strA);
     ~FlateEncoder() override;
     StreamKind getKind() const override { return strWeird; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     int getChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
     int lookChar() override { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
     std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }

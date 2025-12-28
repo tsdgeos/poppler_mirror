@@ -986,7 +986,7 @@ public:
     DeviceNRecoder(Stream *strA, int widthA, int heightA, GfxImageColorMap *colorMapA);
     ~DeviceNRecoder() override;
     StreamKind getKind() const override { return strWeird; }
-    bool reset() override;
+    bool rewind() override;
     int getChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
     int lookChar() override { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
     std::optional<std::string> getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return {}; }
@@ -1026,10 +1026,10 @@ DeviceNRecoder::~DeviceNRecoder()
     }
 }
 
-bool DeviceNRecoder::reset()
+bool DeviceNRecoder::rewind()
 {
     imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    return imgStr->reset();
+    return imgStr->rewind();
 }
 
 bool DeviceNRecoder::fillBuf()
@@ -2095,7 +2095,7 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
     length2 = obj2.getInt();
     length3 = obj3.getInt();
 
-    if (!strObj.streamReset()) {
+    if (!strObj.streamRewind()) {
         return;
     }
 
@@ -2109,8 +2109,8 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
         // PFB format
         length1 = strObj.streamGetChar() | (strObj.streamGetChar() << 8) | (strObj.streamGetChar() << 16) | (strObj.streamGetChar() << 24);
     } else {
-        if (!strObj.streamReset()) {
-            error(errSyntaxError, -1, "Failed reset stream");
+        if (!strObj.streamRewind()) {
+            error(errSyntaxError, -1, "Failed rewind stream");
             goto err1;
         }
     }
@@ -2790,7 +2790,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
     }
 
     // compute image data size
-    if (!str->reset()) {
+    if (!str->rewind()) {
         delete str;
         return;
     }
@@ -2836,7 +2836,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, bool mask)
     str->close();
 
     // write the data into the array
-    if (!str->reset()) {
+    if (!str->rewind()) {
         delete str;
         return;
     }
@@ -3381,7 +3381,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             } else {
                 isOptimizedGray = false;
             }
-            (void)str0->reset();
+            (void)str0->rewind();
             if (useFlate) {
                 if (isOptimizedGray && numComps == 4) {
                     str = new FlateEncoder(new CMYKGrayEncoder(str0));
@@ -3461,14 +3461,14 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             } else {
                 str = new ASCII85Encoder(str);
             }
-            (void)str->reset();
+            (void)str->rewind();
             if (useBinary) {
                 // Count the bytes to write a document comment
                 int len = 0;
                 while (str->getChar() != EOF) {
                     len++;
                 }
-                (void)str->reset();
+                (void)str->rewind();
                 writePSFmt("%%BeginData: {0:d} Binary Bytes\n", len + 6 + 1);
             }
             writePS("image\n");
@@ -5151,7 +5151,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert
             // create an array
             str = new FixedLengthEncoder(str, len);
             str = new ASCIIHexEncoder(str);
-            if (!str->reset()) {
+            if (!str->rewind()) {
                 delete str;
                 return;
             }
@@ -5204,7 +5204,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert
 
             // set up to process the data stream
             ImageStream imgStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
-            if (!imgStr.reset()) {
+            if (!imgStr.rewind()) {
                 goto end;
             }
 
@@ -5243,7 +5243,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert
             str->close();
             // imagemask
         } else {
-            if (!str->reset()) {
+            if (!str->rewind()) {
                 goto end;
             }
             i = 0;
@@ -5301,7 +5301,7 @@ void PSOutputDev::doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int widt
     // scan for all gray
     if (getOptimizeColorSpace()) {
         ImageStream imgCheckStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
-        if (!imgCheckStr.reset()) {
+        if (!imgCheckStr.rewind()) {
             return;
         }
         isGray = true;
@@ -5323,7 +5323,7 @@ void PSOutputDev::doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int widt
 
     // set up to process the data stream
     ImageStream imgStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
-    if (!imgStr.reset()) {
+    if (!imgStr.rewind()) {
         return;
     }
 
@@ -5454,7 +5454,7 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
     int i, x0, x1, y, maskXor;
 
     ImageStream imgStr(maskStr, maskWidth, 1, 1);
-    if (!imgStr.reset()) {
+    if (!imgStr.rewind()) {
         return;
     }
     rects0Len = rects1Len = rectsOutLen = 0;
@@ -5591,7 +5591,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         // isn't allowed with inline images anyway
         numComps = colorMap->getNumPixelComps();
         ImageStream imgStr(str, width, numComps, colorMap->getBits());
-        if (!imgStr.reset()) {
+        if (!imgStr.rewind()) {
             return;
         }
         rects0Len = rects1Len = 0;
@@ -5757,7 +5757,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             } else {
                 str2 = new ASCII85Encoder(str2);
             }
-            (void)str2->reset();
+            (void)str2->rewind();
             col = 0;
             writePS((char *)(useASCIIHex ? "[<" : "[<~"));
             do {
@@ -5948,7 +5948,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                 // need to read the stream to count characters -- the length
                 // is data-dependent (because of ASCII and LZW/RLE filters)
                 n = 0;
-                if (str->reset()) {
+                if (str->rewind()) {
                     while ((c = str->getChar()) != EOF) {
                         ++n;
                     }
@@ -5970,7 +5970,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         }
 
         // copy the stream data
-        if (str->reset()) {
+        if (str->rewind()) {
             i = 0;
             while ((c = str->getChar()) != EOF) {
                 dataBuf[i++] = c;
@@ -6090,7 +6090,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
 
             // copy the stream data
-            (void)maskStr->reset();
+            (void)maskStr->rewind();
             while ((c = maskStr->getChar()) != EOF) {
                 writePSChar(c);
             }
@@ -6130,7 +6130,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             } else {
                 str2 = new ASCII85Encoder(str2);
             }
-            (void)str2->reset();
+            (void)str2->rewind();
             col = 0;
             writePS((char *)(useASCIIHex ? "[<" : "[<~"));
             do {
@@ -6361,7 +6361,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
         }
 
         // copy the stream data
-        if (str->reset()) {
+        if (str->rewind()) {
             while ((c = str->getChar()) != EOF) {
                 writePSChar(c);
             }
@@ -7017,7 +7017,7 @@ void PSOutputDev::psXObject(Stream *psStream, Stream *level1Stream)
     } else {
         str = psStream;
     }
-    if (str->reset()) {
+    if (str->rewind()) {
         while ((c = str->getChar()) != EOF) {
             writePSChar(c);
         }

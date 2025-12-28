@@ -193,7 +193,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
     if (hintsOffset && hintsLength) {
         std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object::null()));
-        if (!s->reset()) {
+        if (!s->rewind()) {
             ok = false;
             return;
         }
@@ -210,7 +210,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
     if (hintsOffset2 && hintsLength2) {
         std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset2, false, hintsLength2, Object::null()));
-        if (!s->reset()) {
+        if (!s->rewind()) {
             ok = false;
             return;
         }
@@ -239,12 +239,12 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         int sharedStreamOffset = 0;
         if (hintsDict->lookupInt("S", {}, &sharedStreamOffset) && sharedStreamOffset > 0) {
 
-            if (!hintsStream->reset()) {
+            if (!hintsStream->rewind()) {
                 ok = false;
             } else {
                 ok = readPageOffsetTable(hintsStream);
                 if (ok) {
-                    if (hintsStream->reset()) {
+                    if (hintsStream->rewind()) {
                         for (int i = 0; i < sharedStreamOffset; i++) {
                             hintsStream->getChar();
                         }

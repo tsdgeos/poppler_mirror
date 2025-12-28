@@ -89,7 +89,7 @@ QByteArray MediaRendition::data() const
         return QByteArray();
     }
 
-    if (!s->reset()) {
+    if (!s->rewind()) {
         return QByteArray {};
     }
 

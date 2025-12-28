@@ -102,7 +102,7 @@ bool EmbFile::save2(FILE *f)
         return false;
     }
 
-    if (!m_objStr.streamReset()) {
+    if (!m_objStr.streamRewind()) {
         return false;
     }
     while ((c = m_objStr.streamGetChar()) != EOF) {
