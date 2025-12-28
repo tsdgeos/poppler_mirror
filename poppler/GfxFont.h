@@ -301,7 +301,7 @@ protected:
     GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA);
 
     static GfxFontType getFontType(XRef *xref, Dict *fontDict, Ref *embID);
-    void readFontDescriptor(XRef *xref, Dict *fontDict);
+    void readFontDescriptor(Dict *fontDict);
     [[nodiscard]] std::unique_ptr<CharCodeToUnicode> readToUnicodeCMap(Dict *fontDict, int nBits, std::unique_ptr<CharCodeToUnicode> ctu);
     static std::optional<GfxFontLoc> getExternalFont(const std::string &path, bool cid);
 
@@ -392,7 +392,7 @@ private:
 class POPPLER_PRIVATE_EXPORT GfxCIDFont : public GfxFont
 {
 public:
-    GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
+    GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
     bool isCIDFont() const override { return true; }
 

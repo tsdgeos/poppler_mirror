@@ -280,7 +280,7 @@ void GpgSignatureCreation::addData(unsigned char *dataBlock, int dataLen)
 {
     gpgData.write(dataBlock, dataLen);
 }
-std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSignatureCreation::signDetached(const std::string &password)
+std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSignatureCreation::signDetached(const std::string & /*password*/)
 {
     if (!key) {
         return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::KeyMissing, ERROR_IN_CODE_LOCATION };
@@ -464,7 +464,7 @@ std::chrono::system_clock::time_point GpgSignatureVerification::getSigningTime()
     return std::chrono::system_clock::from_time_t(signature->creationTime());
 }
 
-void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneFunction)
+void GpgSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point /*validation_time*/, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneFunction)
 {
     cachedValidationStatus.reset();
     if (!gpgResult) {

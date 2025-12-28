@@ -1026,7 +1026,7 @@ PopplerDest *poppler_document_find_dest(PopplerDocument *document, const gchar *
     return dest;
 }
 
-static gint _poppler_dest_compare_keys(gconstpointer a, gconstpointer b, gpointer user_data)
+static gint _poppler_dest_compare_keys(gconstpointer a, gconstpointer b, gpointer /*user_data*/)
 {
     return g_strcmp0(static_cast<const gchar *>(a), static_cast<const gchar *>(b));
 }
@@ -2583,7 +2583,7 @@ static void poppler_document_class_init(PopplerDocumentClass *klass)
     g_object_class_install_property(G_OBJECT_CLASS(klass), PROP_METADATA, g_param_spec_string("metadata", "XML Metadata", "Embedded XML metadata", nullptr, G_PARAM_READABLE));
 }
 
-static void poppler_document_init(PopplerDocument *document) { }
+static void poppler_document_init(PopplerDocument * /*document*/) { }
 
 /**
  * PopplerIndexIter:
@@ -3838,7 +3838,7 @@ std::unique_ptr<GooString> _poppler_convert_date_time_to_pdf_date(GDateTime *dat
     return std::make_unique<GooString>(std::move(out_str));
 }
 
-static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable)
+static void _poppler_sign_document_thread(GTask *task, PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable * /*cancellable*/)
 {
     const PopplerCertificateInfo *certificate_info;
     const char *signing_data_partial_name;

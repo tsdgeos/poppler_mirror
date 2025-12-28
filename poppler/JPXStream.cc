@@ -13,12 +13,13 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2012, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2012, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -270,9 +271,9 @@ JPXStream::~JPXStream()
     delete bufStr;
 }
 
-bool JPXStream::reset()
+bool JPXStream::rewind()
 {
-    bool ret = bufStr->reset();
+    bool ret = bufStr->rewind();
     if (readBoxes()) {
         curY = img.yOffset;
     } else {
@@ -475,12 +476,12 @@ void JPXStream::fillReadBuf()
     } while (readBufLen < 8);
 }
 
-std::optional<std::string> JPXStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JPXStream::getPSFilter(int /*psLevel*/, const char * /*indent*/)
 {
     return {};
 }
 
-bool JPXStream::isBinary(bool last) const
+bool JPXStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -496,7 +497,7 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
     csPrec = 0; // make gcc happy
     *hasAlpha = false;
     haveBPC = haveCSMode = false;
-    (void)bufStr->reset();
+    (void)bufStr->rewind();
     if (bufStr->lookChar() == 0xff) {
         getImageParams2(bitsPerComponent, csMode);
     } else {
@@ -618,7 +619,7 @@ bool JPXStream::readBoxes()
     if (bufStr->lookChar() == 0xff) {
         cover(7);
         error(errSyntaxWarning, getPos(), "Naked JPEG 2000 codestream, missing JP2/JPX wrapper");
-        if (!readCodestream(0)) {
+        if (!readCodestream()) {
             return false;
         }
         nComps = img.nComps;
@@ -744,7 +745,7 @@ bool JPXStream::readBoxes()
             if (!haveCS) {
                 error(errSyntaxError, getPos(), "JPX stream has no supported color spec");
             }
-            if (!readCodestream(dataLen)) {
+            if (!readCodestream()) {
                 return false;
             }
             break;
@@ -881,7 +882,7 @@ err:
     return false;
 }
 
-bool JPXStream::readCodestream(unsigned int len)
+bool JPXStream::readCodestream()
 {
     JPXTile *tile;
     JPXTileComp *tileComp;
@@ -2056,7 +2057,7 @@ bool JPXStream::readTilePartData(unsigned int tileIdx, unsigned int tilePartLen,
                 for (cbX = 0; cbX < subband->nXCBs; ++cbX) {
                     cb = &subband->cbs[cbY * subband->nXCBs + cbX];
                     if (cb->included) {
-                        if (!readCodeBlockData(tileComp, resLevel, precinct, subband, tile->res, sb, cb)) {
+                        if (!readCodeBlockData(tileComp, tile->res, sb, cb)) {
                             return false;
                         }
                         if (tileComp->codeBlockStyle & 0x04) {
@@ -2154,7 +2155,7 @@ err:
     return false;
 }
 
-bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, JPXResLevel *resLevel, JPXPrecinct *precinct, JPXSubband *subband, unsigned int res, unsigned int sb, JPXCodeBlock *cb)
+bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsigned int sb, JPXCodeBlock *cb)
 {
     int *coeff0, *coeff1, *coeff;
     char *touched0, *touched1, *touched;

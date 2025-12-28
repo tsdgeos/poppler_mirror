@@ -4,7 +4,7 @@
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2019, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -161,7 +161,7 @@ void PdfInspector::on_selection_changed(GtkTreeSelection *selection, PdfInspecto
     g_free(op);
 }
 
-void PdfInspector::on_analyze_clicked(GtkWidget *widget, PdfInspector *inspector)
+void PdfInspector::on_analyze_clicked(GtkWidget * /*widget*/, PdfInspector *inspector)
 {
     GtkWidget *spin;
     int page;

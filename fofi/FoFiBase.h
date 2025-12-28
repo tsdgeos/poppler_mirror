@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018, 2022, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //

@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017-2023 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2023, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -13,6 +13,7 @@
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -81,7 +82,7 @@ JPXStream::~JPXStream()
     delete priv;
 }
 
-bool JPXStream::reset()
+bool JPXStream::rewind()
 {
     priv->counter = 0;
     priv->ccounter = 0;
@@ -138,12 +139,12 @@ int JPXStream::lookChar()
     return doLookChar(priv);
 }
 
-std::optional<std::string> JPXStream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> JPXStream::getPSFilter(int /*psLevel*/, const char * /*indent*/)
 {
     return {};
 }
 
-bool JPXStream::isBinary(bool last) const
+bool JPXStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

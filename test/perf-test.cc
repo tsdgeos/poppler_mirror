@@ -296,7 +296,7 @@ static SplashColor splashColBlack;
 
 static SplashColorPtr gBgColor = SPLASH_COL_WHITE_PTR;
 
-static void splashColorSet(SplashColorPtr col, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+static void splashColorSet(SplashColorPtr col, unsigned char red, unsigned char green, unsigned char blue)
 {
     switch (gSplashColorMode) {
     case splashModeBGR8:
@@ -317,11 +317,11 @@ static void splashColorSet(SplashColorPtr col, unsigned char red, unsigned char 
 
 static void SplashColorsInit()
 {
-    splashColorSet(SPLASH_COL_RED_PTR, 0xff, 0, 0, 0);
-    splashColorSet(SPLASH_COL_GREEN_PTR, 0, 0xff, 0, 0);
-    splashColorSet(SPLASH_COL_BLUE_PTR, 0, 0, 0xff, 0);
-    splashColorSet(SPLASH_COL_BLACK_PTR, 0, 0, 0, 0);
-    splashColorSet(SPLASH_COL_WHITE_PTR, 0xff, 0xff, 0xff, 0);
+    splashColorSet(SPLASH_COL_RED_PTR, 0xff, 0, 0);
+    splashColorSet(SPLASH_COL_GREEN_PTR, 0, 0xff, 0);
+    splashColorSet(SPLASH_COL_BLUE_PTR, 0, 0, 0xff);
+    splashColorSet(SPLASH_COL_BLACK_PTR, 0, 0, 0);
+    splashColorSet(SPLASH_COL_WHITE_PTR, 0xff, 0xff, 0xff);
 }
 
 PdfEnginePoppler::PdfEnginePoppler() : _fileName(nullptr), _pageCount(INVALID_PAGE_NO), _pdfDoc(nullptr), _outputDev(nullptr) { }
@@ -455,7 +455,7 @@ static void StrList_Destroy(StrList **root)
     *root = nullptr;
 }
 
-static void my_error(ErrorCategory, Goffset pos, const char *msg)
+static void my_error(ErrorCategory, Goffset /*pos*/, const char * /*msg*/)
 {
 #if 0
     char        buf[4096], *p = buf;

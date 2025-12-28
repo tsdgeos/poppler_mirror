@@ -21,6 +21,7 @@
 // Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -362,8 +363,8 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) : cacheOut {}
         error(errSyntaxError, -1, "Function has invalid number of samples");
         return;
     }
-    if (!str->reset()) {
-        error(errSyntaxError, -1, "Stream reset error");
+    if (!str->rewind()) {
+        error(errSyntaxError, -1, "Stream rewind error");
         return;
     }
     buf = 0;
@@ -1109,8 +1110,8 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
         goto err1;
     }
     str = funcObj->getStream();
-    if (!str->reset()) {
-        error(errSyntaxError, -1, "Stream reset error");
+    if (!str->rewind()) {
+        error(errSyntaxError, -1, "Stream rewind error");
         goto err1;
     }
 

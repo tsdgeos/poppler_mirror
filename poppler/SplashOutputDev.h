@@ -65,7 +65,7 @@ public:
 
     ~SplashFunctionPattern() override;
 
-    bool testPosition(int x, int y) const override { return true; }
+    bool testPosition(int /*x*/, int /*y*/) const override { return true; }
 
     bool isStatic() const override { return false; }
 
@@ -138,9 +138,9 @@ public:
 
     ~SplashGouraudPattern() override;
 
-    bool getColor(int x, int y, SplashColorPtr c) const override { return false; }
+    bool getColor(int /*x*/, int /*y*/, SplashColorPtr /*c*/) const override { return false; }
 
-    bool testPosition(int x, int y) const override { return false; }
+    bool testPosition(int /*x*/, int /*y*/) const override { return false; }
 
     bool isStatic() const override { return false; }
 
@@ -351,7 +351,7 @@ protected:
     void doUpdateFont(GfxState *state);
 
 private:
-    bool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax);
+    bool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern);
 
     void setupScreenParams(double hDPI, double vDPI);
     SplashPattern *getColor(GfxGray gray);

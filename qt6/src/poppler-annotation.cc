@@ -3231,7 +3231,7 @@ std::unique_ptr<Annotation> LinkAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new LinkAnnotation(*this));
 }
 
-std::shared_ptr<Annot> LinkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> LinkAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }
@@ -3392,7 +3392,7 @@ std::unique_ptr<Annotation> FileAttachmentAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new FileAttachmentAnnotation(*this));
 }
 
-std::shared_ptr<Annot> FileAttachmentAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> FileAttachmentAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }
@@ -3458,7 +3458,7 @@ std::unique_ptr<Annotation> SoundAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new SoundAnnotation(*this));
 }
 
-std::shared_ptr<Annot> SoundAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> SoundAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }
@@ -3524,7 +3524,7 @@ std::unique_ptr<Annotation> MovieAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new MovieAnnotation(*this));
 }
 
-std::shared_ptr<Annot> MovieAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> MovieAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }
@@ -3592,7 +3592,7 @@ std::unique_ptr<Annotation> ScreenAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new ScreenAnnotation(*this));
 }
 
-std::shared_ptr<Annot> ScreenAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> ScreenAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }
@@ -3649,7 +3649,7 @@ std::unique_ptr<Annotation> WidgetAnnotationPrivate::makeAlias()
     return std::unique_ptr<Annotation>(new WidgetAnnotation(*this));
 }
 
-std::shared_ptr<Annot> WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+std::shared_ptr<Annot> WidgetAnnotationPrivate::createNativeAnnot(::Page * /*destPage*/, DocumentData * /*doc*/)
 {
     return nullptr; // Not implemented
 }

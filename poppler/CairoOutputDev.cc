@@ -44,6 +44,7 @@
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2524,7 +2525,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *st
 
         {
             ImageStream imgStr(str, width, 1, 1);
-            if (!imgStr.reset()) {
+            if (!imgStr.rewind()) {
                 return;
             }
             imgStr.getPixel(&pix);
@@ -2571,7 +2572,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/,
 
         {
             ImageStream imgStr(str, width, 1, 1);
-            if (imgStr.reset()) {
+            if (imgStr.rewind()) {
                 imgStr.getPixel(&pix);
             } else {
                 pix = 0;
@@ -2645,7 +2646,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Stream *str, int widt
 
     /* TODO: Do we want to cache these? */
     ImageStream imgStr(str, width, 1, 1);
-    if (!imgStr.reset()) {
+    if (!imgStr.rewind()) {
         return;
     }
 
@@ -2758,7 +2759,7 @@ void CairoOutputDev::drawMaskedImage(GfxState * /*state*/, Object * /*ref*/, Str
     cairo_filter_t maskFilter;
 
     ImageStream maskImgStr(maskStr, maskWidth, 1, 1);
-    if (!maskImgStr.reset()) {
+    if (!maskImgStr.rewind()) {
         return;
     }
 
@@ -2807,7 +2808,7 @@ void CairoOutputDev::drawMaskedImage(GfxState * /*state*/, Object * /*ref*/, Str
 
     /* TODO: Do we want to cache these? */
     ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgStr.reset()) {
+    if (!imgStr.rewind()) {
         return;
     }
 
@@ -2949,7 +2950,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     }
 
     ImageStream maskImgStr(maskStr, maskWidth, maskColorMap->getNumPixelComps(), maskColorMap->getBits());
-    if (!maskImgStr.reset()) {
+    if (!maskImgStr.rewind()) {
         return;
     }
 
@@ -2991,7 +2992,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
     /* TODO: Do we want to cache these? */
     ImageStream imgStr(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-    if (!imgStr.reset()) {
+    if (!imgStr.rewind()) {
         return;
     }
 
@@ -3106,7 +3107,7 @@ bool CairoOutputDev::getStreamData(Stream *str, char **buffer, int *length)
 
     len = 0;
     str->close();
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return false;
     }
     while (str->getChar() != EOF) {
@@ -3116,7 +3117,7 @@ bool CairoOutputDev::getStreamData(Stream *str, char **buffer, int *length)
         return false;
     }
     str->close();
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return false;
     }
 
@@ -3339,7 +3340,7 @@ public:
 
         /* TODO: Do we want to cache these? */
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
-        if (!imgStr->reset()) {
+        if (!imgStr->rewind()) {
             delete imgStr;
             return image;
         }

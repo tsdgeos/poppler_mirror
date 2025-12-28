@@ -13,9 +13,10 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -289,7 +290,7 @@ public:
     JPXStream(Stream *strA);
     virtual ~JPXStream();
     StreamKind getKind() const override { return strJPX; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     int getChar() override;
     int lookChar() override;
@@ -302,10 +303,10 @@ private:
     void getImageParams2(int *bitsPerComponent, StreamColorSpaceMode *csMode);
     bool readBoxes();
     bool readColorSpecBox(unsigned int dataLen);
-    bool readCodestream(unsigned int len);
+    bool readCodestream();
     bool readTilePart();
     bool readTilePartData(unsigned int tileIdx, unsigned int tilePartLen, bool tilePartToEOC);
-    bool readCodeBlockData(JPXTileComp *tileComp, JPXResLevel *resLevel, JPXPrecinct *precinct, JPXSubband *subband, unsigned int res, unsigned int sb, JPXCodeBlock *cb);
+    bool readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsigned int sb, JPXCodeBlock *cb);
     void inverseTransform(JPXTileComp *tileComp);
     void inverseTransformLevel(JPXTileComp *tileComp, unsigned int r, JPXResLevel *resLevel);
     void inverseTransform1D(JPXTileComp *tileComp, int *data, unsigned int offset, unsigned int n);

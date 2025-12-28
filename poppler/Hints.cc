@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2011, 2013, 2014, 2016-2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2011, 2013, 2014, 2016-2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010, 2013 Pino Toscano <pino@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -14,6 +14,7 @@
 // Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================
 
@@ -193,7 +194,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
     if (hintsOffset && hintsLength) {
         std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object::null()));
-        if (!s->reset()) {
+        if (!s->rewind()) {
             ok = false;
             return;
         }
@@ -210,7 +211,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
     if (hintsOffset2 && hintsLength2) {
         std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset2, false, hintsLength2, Object::null()));
-        if (!s->reset()) {
+        if (!s->rewind()) {
             ok = false;
             return;
         }
@@ -239,12 +240,12 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         int sharedStreamOffset = 0;
         if (hintsDict->lookupInt("S", {}, &sharedStreamOffset) && sharedStreamOffset > 0) {
 
-            if (!hintsStream->reset()) {
+            if (!hintsStream->rewind()) {
                 ok = false;
             } else {
                 ok = readPageOffsetTable(hintsStream);
                 if (ok) {
-                    if (hintsStream->reset()) {
+                    if (hintsStream->rewind()) {
                         for (int i = 0; i < sharedStreamOffset; i++) {
                             hintsStream->getChar();
                         }

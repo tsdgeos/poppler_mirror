@@ -10,6 +10,7 @@
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // Licensed under GPLv2 or later
 //
@@ -34,7 +35,7 @@ public:
     JPXStream &operator=(const JPXStream &other) = delete;
 
     StreamKind getKind() const override { return strJPX; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     Goffset getPos() override;
     int getChar() override;

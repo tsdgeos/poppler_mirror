@@ -8,6 +8,7 @@
 // Copyright (C) 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -57,11 +58,11 @@ FlateEncoder::~FlateEncoder()
     }
 }
 
-bool FlateEncoder::reset()
+bool FlateEncoder::rewind()
 {
     int zlib_status;
 
-    bool innerReset = str->reset();
+    bool innerReset = str->rewind();
 
     outBufPtr = outBufEnd = outBuf;
     inBufEof = outBufEof = false;
@@ -72,7 +73,7 @@ bool FlateEncoder::reset()
 
     if (zlib_status != Z_OK) {
         inBufEof = outBufEof = true;
-        error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::reset()");
+        error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::rewind()");
         return false;
     }
 

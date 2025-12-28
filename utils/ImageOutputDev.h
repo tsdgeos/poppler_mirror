@@ -111,7 +111,7 @@ public:
     bool needNonText() override { return true; }
 
     // Start a page
-    void startPage(int pageNumA, GfxState *state, XRef *xref) override { pageNum = pageNumA; }
+    void startPage(int pageNumA, GfxState * /*state*/, XRef * /*xref*/) override { pageNum = pageNumA; }
 
     //---- get info about output device
 

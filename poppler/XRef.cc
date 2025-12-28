@@ -37,6 +37,7 @@
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -158,7 +159,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         error(errSyntaxError, -1, "Too many objects in an object stream");
         return;
     }
-    if (!objStr.streamReset()) {
+    if (!objStr.streamRewind()) {
         return;
     }
     objs = new Object[nObjects];
@@ -749,11 +750,13 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
             return false;
         }
     }
-    if (w[0] > (int)sizeof(int) || w[1] > (int)sizeof(long long) || w[2] > (int)sizeof(long long)) {
+    constexpr int intNBytes = sizeof(int);
+    constexpr int longLongNBytes = sizeof(long long);
+    if (w[0] > intNBytes || w[1] > longLongNBytes || w[2] > longLongNBytes) {
         return false;
     }
 
-    if (!xrefStr->reset()) {
+    if (!xrefStr->rewind()) {
         return false;
     }
 
@@ -915,7 +918,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict)
         xrefReconstructedCb();
     }
 
-    if (!str->reset()) {
+    if (!str->rewind()) {
         return false;
     }
     while (true) {
@@ -1645,9 +1648,9 @@ XRef::XRefPreScanWriter::XRefPreScanWriter()
     hasOffsetsBeyond4GB = false;
 }
 
-void XRef::XRefPreScanWriter::startSection(int first, int count) { }
+void XRef::XRefPreScanWriter::startSection(int /*first*/, int /*count*/) { }
 
-void XRef::XRefPreScanWriter::writeEntry(Goffset offset, int gen, XRefEntryType type)
+void XRef::XRefPreScanWriter::writeEntry(Goffset offset, int /*gen*/, XRefEntryType /*type*/)
 {
     if (offset >= 0x100000000ll) {
         hasOffsetsBeyond4GB = true;

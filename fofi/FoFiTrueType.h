@@ -138,19 +138,19 @@ public:
     // Convert to a Type 0 CIDFont, suitable for embedding in a
     // PostScript file.  <psName> will be used as the PostScript font
     // name.  (Only useful for OpenType CFF fonts.)
-    void convertToCIDType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToCIDType0(const std::string &psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 0 (but non-CID) composite font, suitable for
     // embedding in a PostScript file.  <psName> will be used as the
     // PostScript font name (so we don't need to depend on the 'name'
     // table in the font).  The <cidMap> array maps CIDs to GIDs; it has
     // <nCIDs> entries.  (Not useful for OpenType CFF fonts.)
-    void convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType0(const std::string &psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Convert to a Type 0 (but non-CID) composite font, suitable for
     // embedding in a PostScript file.  <psName> will be used as the
     // PostScript font name.  (Only useful for OpenType CFF fonts.)
-    void convertToType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
+    void convertToType0(const std::string &psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const;
 
     // Returns a pointer to the CFF font embedded in this OpenType font.
     // If successful, sets *<start> and *<length>, and returns true.
@@ -166,7 +166,7 @@ public:
 private:
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
-    void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const;
+    void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const;
     static void dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream);
     static unsigned int computeTableChecksum(std::span<const unsigned char> data);
     void parse();

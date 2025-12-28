@@ -20,6 +20,7 @@
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -72,7 +73,7 @@ void PreScanOutputDev::eoFill(GfxState *state)
     check(state->getFillColorSpace(), state->getFillColor(), state->getFillOpacity(), state->getBlendMode());
 }
 
-bool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
+bool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog * /*catalog*/, GfxTilingPattern *tPat, const std::array<double, 6> &mat, int x0, int y0, int x1, int y1, double /*xStep*/, double /*yStep*/)
 {
     if (tPat->getPaintType() == 1) {
         bool tilingNeeded = (x1 - x0 != 1 || y1 - y0 != 1);
@@ -183,7 +184,7 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
     }
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width + 7) / 8);
@@ -220,7 +221,7 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
     }
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width * colorMap->getNumPixelComps() * colorMap->getBits() + 7) / 8);

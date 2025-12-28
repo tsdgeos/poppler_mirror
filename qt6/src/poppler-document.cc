@@ -23,6 +23,7 @@
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
  * Copyright (C) 2024 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -248,7 +249,7 @@ QByteArray Document::fontData(const FontInfo &fi) const
 
         Object refObj(fi.m_data->embRef);
         Object strObj = refObj.fetch(xref);
-        if (strObj.isStream() && strObj.streamReset()) {
+        if (strObj.isStream() && strObj.streamRewind()) {
             int c;
             while ((c = strObj.streamGetChar()) != EOF) {
                 result.append((char)c);

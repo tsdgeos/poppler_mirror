@@ -743,7 +743,7 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding, const st
     // write the guts of the dictionary
     cvtEncoding(encoding, outputFunc, outputStream);
     cvtCharStrings(encoding, codeToGID, outputFunc, outputStream);
-    cvtSfnts(outputFunc, outputStream, nullptr, false, &maxUsedGlyph);
+    cvtSfnts(outputFunc, outputStream, std::nullopt, false, &maxUsedGlyph);
 
     // end the dictionary and define the font
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -863,13 +863,13 @@ void FoFiTrueType::convertToCIDType2(const char *psName, const std::vector<int> 
     (*outputFunc)(outputStream, "  end readonly def\n", 19);
 
     // write the guts of the dictionary
-    cvtSfnts(outputFunc, outputStream, nullptr, needVerticalMetrics, &maxUsedGlyph);
+    cvtSfnts(outputFunc, outputStream, std::nullopt, needVerticalMetrics, &maxUsedGlyph);
 
     // end the dictionary and define the font
     (*outputFunc)(outputStream, "CIDFontName currentdict end /CIDFont defineresource pop\n", 56);
 }
 
-void FoFiTrueType::convertToCIDType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToCIDType0(const std::string &psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     auto cffBlock = getCFFBlock();
     if (!cffBlock) {
@@ -882,9 +882,8 @@ void FoFiTrueType::convertToCIDType0(const char *psName, const std::vector<int> 
     ff->convertToCIDType0(psName, cidMap, outputFunc, outputStream);
 }
 
-void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType0(const std::string &psName, const std::vector<int> &cidMap, bool needVerticalMetrics, int *maxValidGlyph, FoFiOutputFunc outputFunc, void *outputStream) const
 {
-    GooString *sfntsName;
     int maxUsedGlyph, n, i, j;
 
     *maxValidGlyph = -1;
@@ -894,9 +893,8 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     }
 
     // write the Type 42 sfnts array
-    sfntsName = (new GooString(psName))->append("_sfnts");
+    const std::string sfntsName = psName + "_sfnts";
     cvtSfnts(outputFunc, outputStream, sfntsName, needVerticalMetrics, &maxUsedGlyph);
-    delete sfntsName;
 
     // write the descendant Type 42 fonts
     // (The following is a kludge: nGlyphs is the glyph count from the
@@ -931,7 +929,7 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     for (i = 0; i < n; i += 256) {
         (*outputFunc)(outputStream, "10 dict begin\n", 14);
         (*outputFunc)(outputStream, "/FontName /", 11);
-        (*outputFunc)(outputStream, psName, strlen(psName));
+        (*outputFunc)(outputStream, psName.c_str(), psName.length());
         std::string buf = GooString::format("_{0:02x} def\n", i >> 8);
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
         (*outputFunc)(outputStream, "/FontType 42 def\n", 17);
@@ -940,7 +938,7 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
         (*outputFunc)(outputStream, "/PaintType 0 def\n", 17);
         (*outputFunc)(outputStream, "/sfnts ", 7);
-        (*outputFunc)(outputStream, psName, strlen(psName));
+        (*outputFunc)(outputStream, psName.c_str(), psName.length());
         (*outputFunc)(outputStream, "_sfnts def\n", 11);
         (*outputFunc)(outputStream, "/Encoding 256 array\n", 20);
         for (j = 0; j < 256 && i + j < n; ++j) {
@@ -961,7 +959,7 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     // write the Type 0 parent font
     (*outputFunc)(outputStream, "16 dict begin\n", 14);
     (*outputFunc)(outputStream, "/FontName /", 11);
-    (*outputFunc)(outputStream, psName, strlen(psName));
+    (*outputFunc)(outputStream, psName.c_str(), psName.length());
     (*outputFunc)(outputStream, " def\n", 5);
     (*outputFunc)(outputStream, "/FontType 0 def\n", 16);
     (*outputFunc)(outputStream, "/FontMatrix [1 0 0 1 0 0] def\n", 30);
@@ -975,7 +973,7 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     (*outputFunc)(outputStream, "/FDepVector [\n", 14);
     for (i = 0; i < n; i += 256) {
         (*outputFunc)(outputStream, "/", 1);
-        (*outputFunc)(outputStream, psName, strlen(psName));
+        (*outputFunc)(outputStream, psName.c_str(), psName.length());
         const std::string buf = GooString::format("_{0:02x} findfont\n", i >> 8);
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
     }
@@ -983,7 +981,7 @@ void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &ci
     (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType0(const char *psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::convertToType0(const std::string &psName, const std::vector<int> &cidMap, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     auto cffBlock = getCFFBlock();
     if (!cffBlock) {
@@ -1069,7 +1067,7 @@ err:
     (*outputFunc)(outputStream, "end readonly def\n", 17);
 }
 
-void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const GooString *name, bool needVerticalMetrics, int *maxUsedGlyph) const
+void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const
 {
     std::array<unsigned char, 54> headData;
     std::vector<unsigned char> locaData;

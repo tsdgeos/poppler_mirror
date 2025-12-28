@@ -40,6 +40,7 @@
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -367,9 +368,9 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
     return {};
 }
 
-void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> *separationList, size_t maxSepComps) { }
+void GfxColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparationColorSpace>> * /*separationList*/, size_t /*maxSepComps*/) { }
 
-void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const
+void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int /*maxImgPixel*/) const
 {
     int i;
 
@@ -750,6 +751,8 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, Gfx
 
 #if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
+#else
+    (void)state;
 #endif
     return cs;
 }
@@ -1135,6 +1138,8 @@ std::unique_ptr<GfxColorSpace> GfxCalRGBColorSpace::parse(const Array &arr, GfxS
 
 #if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
+#else
+    (void)state;
 #endif
     return cs;
 }
@@ -1476,6 +1481,8 @@ std::unique_ptr<GfxColorSpace> GfxLabColorSpace::parse(const Array &arr, GfxStat
 
 #if USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
+#else
+    (void)state;
 #endif
     return cs;
 }
@@ -1654,7 +1661,7 @@ void GfxLabColorSpace::getDefaultColor(GfxColor *color) const
     }
 }
 
-void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int maxImgPixel) const
+void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange, int /*maxImgPixel*/) const
 {
     decodeLow[0] = 0;
     decodeRange[0] = 100;
@@ -2390,7 +2397,7 @@ std::unique_ptr<GfxColorSpace> GfxIndexedColorSpace::parse(GfxResources *res, co
     auto cs = std::make_unique<GfxIndexedColorSpace>(std::move(baseA), indexHighA);
     obj1 = arr.get(3);
     const int n = cs->getBase()->getNComps();
-    if (obj1.isStream() && obj1.streamReset()) {
+    if (obj1.isStream() && obj1.streamRewind()) {
         for (i = 0; i <= indexHighA; ++i) {
             const int readChars = obj1.streamGetChars(n, &cs->lookup[i * n]);
             for (j = readChars; j < n; ++j) {
@@ -3120,23 +3127,23 @@ std::unique_ptr<GfxColorSpace> GfxPatternColorSpace::parse(GfxResources *res, co
     return std::make_unique<GfxPatternColorSpace>(std::move(underA));
 }
 
-void GfxPatternColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
+void GfxPatternColorSpace::getGray(const GfxColor * /*color*/, GfxGray *gray) const
 {
     *gray = 0;
 }
 
-void GfxPatternColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
+void GfxPatternColorSpace::getRGB(const GfxColor * /*color*/, GfxRGB *rgb) const
 {
     rgb->r = rgb->g = rgb->b = 0;
 }
 
-void GfxPatternColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
+void GfxPatternColorSpace::getCMYK(const GfxColor * /*color*/, GfxCMYK *cmyk) const
 {
     cmyk->c = cmyk->m = cmyk->y = 0;
     cmyk->k = 1;
 }
 
-void GfxPatternColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const
+void GfxPatternColorSpace::getDeviceN(const GfxColor * /*color*/, GfxColor *deviceN) const
 {
     clearGfxColor(deviceN);
     deviceN->c[3] = 1;
@@ -4451,7 +4458,7 @@ private:
 GfxShadingBitBuf::GfxShadingBitBuf(Stream *strA)
 {
     str = strA;
-    (void)str->reset();
+    (void)str->rewind();
     bitBuf = 0;
     nBits = 0;
 }

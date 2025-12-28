@@ -6,6 +6,7 @@
 // Copyright 2012 Fabio D'Urso
 // Copyright 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================
 
@@ -204,8 +205,8 @@ static bool compareObjects(const Object *objA, const Object *objB)
                 return false;
             } else {
                 int c;
-                (void)streamA->reset();
-                (void)streamB->reset();
+                (void)streamA->rewind();
+                (void)streamB->rewind();
                 do {
                     c = streamA->getChar();
                     if (c != streamB->getChar()) {

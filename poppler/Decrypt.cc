@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2016-2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -24,6 +24,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,7 +49,7 @@ static void aesKeyExpansion(DecryptAESState *s, const unsigned char *objKey, int
 static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in);
 static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last);
 
-static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, bool decrypt);
 static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in);
 static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last);
 
@@ -105,7 +106,7 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                     // test contains the initial SHA-256 hash input K.
                     revision6Hash(ownerPassword, test, userKey->c_str());
                 }
-                aes256KeyExpansion(&state, test, 32, true);
+                aes256KeyExpansion(&state, test, true);
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
@@ -145,7 +146,7 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
                     // user key is not used in computing intermediate user key.
                     revision6Hash(userPassword, test, nullptr);
                 }
-                aes256KeyExpansion(&state, test, 32, true);
+                aes256KeyExpansion(&state, test, true);
                 for (i = 0; i < 16; ++i) {
                     state.cbc[i] = 0;
                 }
@@ -348,11 +349,11 @@ BaseCryptStream::~BaseCryptStream()
     }
 }
 
-bool BaseCryptStream::reset()
+bool BaseCryptStream::rewind()
 {
     charactersRead = 0;
     nextCharBuff = EOF;
-    return str->reset();
+    return str->rewind();
 }
 
 Goffset BaseCryptStream::getPos()
@@ -403,9 +404,9 @@ EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 EncryptStream::~EncryptStream() = default;
 
-bool EncryptStream::reset()
+bool EncryptStream::rewind()
 {
-    bool baseResult = BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::rewind();
 
     switch (algo) {
     case cryptRC4:
@@ -419,7 +420,7 @@ bool EncryptStream::reset()
         state.aes.paddingReached = false;
         break;
     case cryptAES256:
-        aes256KeyExpansion(&state.aes256, objKey, objKeyLength, false);
+        aes256KeyExpansion(&state.aes256, objKey, false);
         memcpy(state.aes256.buf, state.aes256.cbc, 16); // Copy CBC IV to buf
         state.aes256.bufIdx = 0;
         state.aes256.paddingReached = false;
@@ -484,10 +485,10 @@ DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAl
 
 DecryptStream::~DecryptStream() = default;
 
-bool DecryptStream::reset()
+bool DecryptStream::rewind()
 {
     int i;
-    bool baseResult = BaseCryptStream::reset();
+    bool baseResult = BaseCryptStream::rewind();
 
     switch (algo) {
     case cryptRC4:
@@ -502,7 +503,7 @@ bool DecryptStream::reset()
         state.aes.bufIdx = 16;
         break;
     case cryptAES256:
-        aes256KeyExpansion(&state.aes256, objKey, objKeyLength, true);
+        aes256KeyExpansion(&state.aes256, objKey, true);
         for (i = 0; i < 16; ++i) {
             state.aes256.cbc[i] = str->getChar();
         }
@@ -1027,7 +1028,7 @@ static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool la
 // AES-256 decryption
 //------------------------------------------------------------------------
 
-static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt)
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, bool decrypt)
 {
     unsigned int temp;
     int i, round;

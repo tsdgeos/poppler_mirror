@@ -3,7 +3,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2015-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2015-2019, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -296,7 +296,7 @@ int OptContentModel::rowCount(const QModelIndex &parent) const
     }
 }
 
-int OptContentModel::columnCount(const QModelIndex &parent) const
+int OptContentModel::columnCount(const QModelIndex & /*parent*/) const
 {
     return 1;
 }

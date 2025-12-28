@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, 2020, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *

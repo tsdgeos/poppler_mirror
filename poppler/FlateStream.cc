@@ -7,6 +7,7 @@
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //
@@ -43,9 +44,9 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-bool FlateStream::reset()
+bool FlateStream::rewind()
 {
-    // FIXME: what are the semantics of reset?
+    // FIXME: what are the semantics of rewind?
     // i.e. how much initialization has to happen in the constructor?
 
     /* reinitialize zlib */
@@ -53,7 +54,7 @@ bool FlateStream::reset()
     memset(&d_stream, 0, sizeof(d_stream));
     inflateInit(&d_stream);
 
-    str->reset();
+    str->rewind();
     d_stream.avail_in = 0;
     status = Z_OK;
     out_pos = 0;
@@ -148,7 +149,7 @@ std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *ind
     return s;
 }
 
-bool FlateStream::isBinary(bool last) const
+bool FlateStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }

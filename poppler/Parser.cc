@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017-2020, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
@@ -24,6 +24,7 @@
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,7 +72,7 @@ Object Parser::getObj(int recursion)
 static std::unique_ptr<GooString> decryptedString(const GooString *s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
     DecryptStream decrypt(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, { objNum, objGen });
-    if (!decrypt.reset()) {
+    if (!decrypt.rewind()) {
         return {};
     }
     std::unique_ptr<GooString> res = std::make_unique<GooString>();

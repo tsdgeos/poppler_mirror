@@ -1183,7 +1183,7 @@ struct AFontDestroyer
 
 #    endif
 
-std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font, SysFontType *type, int *fontNum, GooString *substituteFontName, const GooString *base14Name)
+std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font, SysFontType *type, int * /*fontNum*/, GooString * /*substituteFontName*/, const GooString * /*base14Name*/)
 {
     const std::optional<std::string> &fontName = font.getName();
 
@@ -1292,13 +1292,13 @@ void GlobalParams::setupBaseFonts(const char *dir)
     }
 }
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string & /*fontFamily*/, const std::string & /*fontStyle*/, const std::vector<std::string> & /*filesToIgnore*/)
 {
     error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForFamilyAndStyle not implemented for this platform");
     return {};
 }
 
-UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode /*uChar*/, const GfxFont & /*fontToEmulate*/)
 {
     error(errUnimplemented, -1, "GlobalParams::findSystemFontFileForUChar not implemented for this platform");
     return {};

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2019, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -229,7 +229,7 @@ void PdfViewer::closeDocument()
     m_fileSaveCopyAct->setEnabled(false);
 }
 
-void PdfViewer::xrefReconstructedHandler(Poppler::Document *doc)
+void PdfViewer::xrefReconstructedHandler(Poppler::Document * /*doc*/)
 {
     if (!xrefReconstructed) {
         QMessageBox msgbox(QMessageBox::Critical, tr("File may be corrupted"), tr("The PDF may be broken but we're still showing something, contents may not be correct"), QMessageBox::Ok, this);

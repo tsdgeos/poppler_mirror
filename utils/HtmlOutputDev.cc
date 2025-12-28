@@ -48,6 +48,7 @@
 // Copyright (C) 2021 Christopher Hasse <hasse.christopher@gmail.com>
 // Copyright (C) 2022 Brian Rosenfield <brosenfi@yahoo.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -227,7 +228,7 @@ HtmlString::~HtmlString()
     gfree(xRight);
 }
 
-void HtmlString::addChar(GfxState *state, double x, double y, double dx, double dy, Unicode u)
+void HtmlString::addChar(GfxState * /*state*/, double x, double /*y*/, double dx, double /*dy*/, Unicode u)
 {
     if (dir == textDirUnknown) {
         // dir = UnicodeMap::getDirection(u);
@@ -328,7 +329,7 @@ void HtmlPage::updateFont(GfxState *state)
     }
 }
 
-void HtmlPage::beginString(GfxState *state, const GooString *s)
+void HtmlPage::beginString(GfxState *state, const GooString * /*s*/)
 {
     curStr = new HtmlString(state, fontSize, fonts.get());
 }
@@ -345,7 +346,7 @@ void HtmlPage::conv()
     }
 }
 
-void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy, double ox, double oy, const Unicode *u, int uLen)
+void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy, double /*ox*/, double /*oy*/, const Unicode *u, int uLen)
 {
     double x1, y1, w1, h1, dx2, dy2;
     int n, i;
@@ -542,7 +543,7 @@ void HtmlPage::coalesce()
     }
     if (str1->getLink() != nullptr) {
         const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
-        str1->htext->insert(0, ls.get());
+        str1->htext->insert(0, ls->toStr());
     }
     curX = str1->xMin;
     curY = str1->yMin;
@@ -674,7 +675,7 @@ void HtmlPage::coalesce()
             }
             if (str1->getLink() != nullptr) {
                 const std::unique_ptr<GooString> ls = str1->getLink()->getLinkStart();
-                str1->htext->insert(0, ls.get());
+                str1->htext->insert(0, ls->toStr());
             }
         }
     }
@@ -1169,7 +1170,7 @@ HtmlOutputDev::~HtmlOutputDev()
     }
 }
 
-void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref)
+void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef * /*xref*/)
 {
 #if 0
   if (mode&&!xml){
@@ -1246,12 +1247,12 @@ void HtmlOutputDev::beginString(GfxState *state, const GooString *s)
     pages->beginString(state, s);
 }
 
-void HtmlOutputDev::endString(GfxState *state)
+void HtmlOutputDev::endString(GfxState * /*state*/)
 {
     pages->endString();
 }
 
-void HtmlOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int /*nBytes*/, const Unicode *u, int uLen)
+void HtmlOutputDev::drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode /*code*/, int /*nBytes*/, const Unicode *u, int uLen)
 {
     if (!showHidden && (state->getRender() & 3) == 3) {
         return;
@@ -1275,9 +1276,9 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 
     // initialize stream
     str = str->getNextStream();
-    if (!str->reset()) {
+    if (!str->rewind()) {
         fclose(f1);
-        error(errIO, -1, "Couldn't reset stream");
+        error(errIO, -1, "Couldn't rewind stream");
         return;
     }
 
@@ -1330,8 +1331,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
         unsigned char *p;
         GfxRGB rgb;
         ImageStream imgStr { str, width, colorMap->getNumPixelComps(), colorMap->getBits() };
-        if (!imgStr.reset()) {
-            error(errInternal, -1, "Can't reset image stream");
+        if (!imgStr.rewind()) {
+            error(errInternal, -1, "Can't rewind image stream");
             return;
         }
         unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
@@ -1384,8 +1385,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             }
         }
 
-        if (!str->reset()) {
-            error(errInternal, -1, "failed to reset stream");
+        if (!str->rewind()) {
+            error(errInternal, -1, "failed to rewind stream");
             return;
         }
         unsigned char *png_row = (unsigned char *)gmalloc(size);

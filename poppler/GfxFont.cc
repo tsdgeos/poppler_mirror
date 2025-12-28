@@ -41,6 +41,7 @@
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 G B <glen.browman@veeva.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -229,7 +230,7 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     if (typeA < fontCIDType0) {
         return std::make_unique<Gfx8BitFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     } else {
-        return std::make_unique<GfxCIDFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
+        return std::make_unique<GfxCIDFont>(tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     }
 }
 
@@ -408,7 +409,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
     if (*embID != Ref::INVALID()) {
         Object obj3(*embID);
         Object obj4 = obj3.fetch(xref);
-        if (obj4.isStream() && obj4.streamReset()) {
+        if (obj4.isStream() && obj4.streamRewind()) {
             fft = FoFiIdentifier::identifyStream(&readFromStream, obj4.getStream());
             obj4.streamClose();
             switch (fft) {
@@ -454,7 +455,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID)
     return t;
 }
 
-void GfxFont::readFontDescriptor(XRef *xref, Dict *fontDict)
+void GfxFont::readFontDescriptor(Dict *fontDict)
 {
     double t;
 
@@ -1012,7 +1013,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, std::optional<st
     }
 
     // get info from font descriptor
-    readFontDescriptor(xref, fontDict);
+    readFontDescriptor(fontDict);
 
     // for non-embedded fonts, don't trust the ascent/descent/bbox
     // values from the font descriptor
@@ -1513,7 +1514,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
     return 0;
 }
 
-int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const
+int Gfx8BitFont::getNextChar(const char *s, int /*len*/, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const
 {
     CharCode c;
 
@@ -1694,7 +1695,7 @@ struct cmpWidthExcepVFunctor
     bool operator()(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) { return w1.first < w2.first; }
 };
 
-GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
+GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict) : GfxFont(tagA, idA, std::move(nameA), typeA, embFontIDA)
 {
     Dict *desFontDict;
     Object desFontDictObj;
@@ -1724,7 +1725,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
     desFontDict = desFontDictObj.getDict();
 
     // get info from font descriptor
-    readFontDescriptor(xref, desFontDict);
+    readFontDescriptor(desFontDict);
 
     //----- encoding info -----
 
@@ -1797,7 +1798,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, std::optional<std:
 
     // CIDToGIDMap (for embedded TrueType fonts)
     obj1 = desFontDict->lookup("CIDToGIDMap");
-    if (obj1.isStream() && obj1.streamReset()) {
+    if (obj1.isStream() && obj1.streamRewind()) {
         while ((c1 = obj1.streamGetChar()) != EOF && (c2 = obj1.streamGetChar()) != EOF) {
             cidToGID.push_back((c1 << 8) + c2);
         }

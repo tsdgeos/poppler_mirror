@@ -1,6 +1,6 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2007, 2012, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2007, 2012, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>

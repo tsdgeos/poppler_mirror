@@ -60,6 +60,8 @@
 // Copyright (C) 2024 Carsten Emde <ce@ceek.de>
 // Copyright (C) 2024, 2025 Lucas Baudin <lucas.baudin@ensae.fr>
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright (C) 2025 Aditya Tiwari <suntiwari3495@gmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1406,7 +1408,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict)
     if (appearStreams) {
         appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
         Object obj = appearance.fetch(doc->getXRef());
-        if (obj.isStream() && !obj.getStream()->reset()) {
+        if (obj.isStream() && !obj.getStream()->rewind()) {
             // appearance stream is invalid as reset() returned false - Issue #1557
             appearance.setToNull();
         }
@@ -2655,6 +2657,64 @@ void AnnotText::setIcon(const std::string &new_icon)
     "16.641 7.859 20 12 20 c 16.141 20 19.5 16.641 19.5 12.5 c h\n"                                                                                                                                                                            \
     "19.5 12.5 m S\n"
 
+#define ANNOT_TEXT_AP_CHECK                                                                                                                                                                                                                    \
+    "0.8 0.2 0.8 RG 4.0 w\n"                                                                                                                                                                                                                   \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 6 12 m 10 8 l S\n"                                                                                                                                                                                                                    \
+    "10 8 m 18 16 l S\n"
+
+#define ANNOT_TEXT_AP_STAR                                                                                                                                                                                                                     \
+    "0.2 0.8 0.6 RG 2.5 w\n"                                                                                                                                                                                                                   \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 12 22 m 15.4 15.8 l 22 14.8 l 17 10 l 18.2 3.2 l 12 6.4 l 5.8 3.2 l 7 10 l 2 14.8 l 8.6 15.8 l h\n"                                                                                                                                   \
+    "S\n"
+
+#define ANNOT_TEXT_AP_RIGHT_ARROW                                                                                                                                                                                                              \
+    "0.533333 0.541176 0.521569 RG 2.5 w\n"                                                                                                                                                                                                    \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 19.5 12 m 19.5 15.866 16.366 19 12.5 19 c 8.634 19 5.5 15.866 5.5\n"                                                                                                                                                                  \
+    "12 c 5.5 8.134 8.634 5 12.5 5 c 16.366 5 19.5 8.134 19.5 12 c h\n"                                                                                                                                                                        \
+    "19.5 12 m S\n"                                                                                                                                                                                                                            \
+    "8 12 m 16 12 l S\n"                                                                                                                                                                                                                       \
+    "13 9 m 16 12 l 13 15 l S\n"
+
+#define ANNOT_TEXT_AP_RIGHT_POINTER                                                                                                                                                                                                            \
+    "0.9 0.4 0.2 rg\n"                                                                                                                                                                                                                         \
+    "4 M 6 8 m 6 16 l 18 12 l h\n"                                                                                                                                                                                                             \
+    "f\n"
+
+#define ANNOT_TEXT_AP_UP_ARROW                                                                                                                                                                                                                 \
+    "0.2 0.6 0.9 RG 2.5 w\n"                                                                                                                                                                                                                   \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 12 6 m 12 18 l S\n"                                                                                                                                                                                                                   \
+    "9 15 m 12 18 l 15 15 l S\n"
+
+#define ANNOT_TEXT_AP_UP_LEFT_ARROW                                                                                                                                                                                                            \
+    "0.9 0.2 0.8 RG 2.5 w\n"                                                                                                                                                                                                                   \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 18 6 m 6 18 l S\n"                                                                                                                                                                                                                    \
+    "6 18 m 11 18 l S\n"                                                                                                                                                                                                                       \
+    "6 18 m 6 13 l S\n"
+
+#define ANNOT_TEXT_AP_CROSS_HAIRS                                                                                                                                                                                                              \
+    "0.2 0.8 0.3 RG 2.5 w\n"                                                                                                                                                                                                                   \
+    "1 J\n"                                                                                                                                                                                                                                    \
+    "1 j\n"                                                                                                                                                                                                                                    \
+    "[] 0.0 d\n"                                                                                                                                                                                                                               \
+    "4 M 12 10 m 12 14 l S\n"                                                                                                                                                                                                                  \
+    "10 12 m 14 12 l S\n"                                                                                                                                                                                                                      \
+    "17 12 m 17 9.239 14.761 7 12 7 c 9.239 7 7 9.239 7 12 c 7 14.761 9.239 17 12 17 c 14.761 17 17 14.761 17 12 c h S\n"
+
 void AnnotText::draw(Gfx *gfx, bool printing)
 {
     double ca = 1;
@@ -2693,6 +2753,20 @@ void AnnotText::draw(Gfx *gfx, bool printing)
             appearBuilder.append(ANNOT_TEXT_AP_CROSS);
         } else if (icon == "Circle") {
             appearBuilder.append(ANNOT_TEXT_AP_CIRCLE);
+        } else if (icon == "Check") {
+            appearBuilder.append(ANNOT_TEXT_AP_CHECK);
+        } else if (icon == "Star") {
+            appearBuilder.append(ANNOT_TEXT_AP_STAR);
+        } else if (icon == "RightArrow") {
+            appearBuilder.append(ANNOT_TEXT_AP_RIGHT_ARROW);
+        } else if (icon == "RightPointer") {
+            appearBuilder.append(ANNOT_TEXT_AP_RIGHT_POINTER);
+        } else if (icon == "UpArrow") {
+            appearBuilder.append(ANNOT_TEXT_AP_UP_ARROW);
+        } else if (icon == "UpLeftArrow") {
+            appearBuilder.append(ANNOT_TEXT_AP_UP_LEFT_ARROW);
+        } else if (icon == "CrossHairs") {
+            appearBuilder.append(ANNOT_TEXT_AP_CROSS_HAIRS);
         }
         appearBuilder.append("Q\n");
 

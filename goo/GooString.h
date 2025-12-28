@@ -200,38 +200,12 @@ public:
     POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
     POPPLER_PRIVATE_EXPORT GooString *appendfv(const char *fmt, va_list argList);
 
-    // Insert a character or string.
-    GooString *insert(int i, int count, char c)
-    {
-        static_cast<std::string &>(*this).insert(i, count, c);
-        return this;
-    }
-    GooString *insert(int i, const GooString *str)
-    {
-        static_cast<std::string &>(*this).insert(i, *str);
-        return this;
-    }
-    GooString *insert(int i, std::string_view str)
-    {
-        static_cast<std::string &>(*this).insert(i, str);
-        return this;
-    }
-    GooString *insert(int i, const char *str)
-    {
-        static_cast<std::string &>(*this).insert(i, str);
-        return this;
-    }
-    GooString *insert(int i, const char *str, int lengthA)
-    {
-        static_cast<std::string &>(*this).insert(i, str, lengthA);
-        return this;
-    }
+    using std::string::insert;
 
     // Delete a character or range of characters.
     using std::string::erase;
 
     // Convert string to all-lower case.
-    POPPLER_PRIVATE_EXPORT GooString *lowerCase();
     POPPLER_PRIVATE_EXPORT static void lowerCase(std::string &s);
 
     // Returns a new string converted to all-lower case.

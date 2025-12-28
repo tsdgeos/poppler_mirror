@@ -7,7 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
-// Copyright 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017-2020, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.

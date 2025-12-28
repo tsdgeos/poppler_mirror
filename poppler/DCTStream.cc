@@ -15,6 +15,7 @@
 // Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 // Copyright 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================
 
@@ -120,11 +121,11 @@ void DCTStream::init()
     row_buffer = nullptr;
 }
 
-bool DCTStream::reset()
+bool DCTStream::rewind()
 {
     int row_stride;
 
-    bool success = str->reset();
+    bool success = str->rewind();
 
     if (row_buffer) {
         jpeg_destroy_decompress(&cinfo);

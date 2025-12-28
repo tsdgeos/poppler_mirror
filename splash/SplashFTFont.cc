@@ -150,7 +150,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, const std::array<SplashC
 
 SplashFTFont::~SplashFTFont() = default;
 
-bool SplashFTFont::getGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
+bool SplashFTFont::getGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
 {
     return SplashFont::getGlyph(c, xFrac, 0, bitmap, x0, y0, clip, clipRes);
 }
@@ -185,7 +185,7 @@ static FT_Int32 getFTLoadFlags(bool type1, bool trueType, bool aa, bool enableFr
     return ret;
 }
 
-bool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
+bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes)
 {
     SplashFTFontFile *ff;
     FT_Vector offset;

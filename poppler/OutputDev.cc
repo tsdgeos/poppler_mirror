@@ -21,6 +21,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -98,17 +99,17 @@ void OutputDev::updateAll(GfxState *state)
     updateFont(state);
 }
 
-bool OutputDev::beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen)
+bool OutputDev::beginType3Char(GfxState * /*state*/, double /*x*/, double /*y*/, double /*dx*/, double /*dy*/, CharCode /*code*/, const Unicode * /*u*/, int /*uLen*/)
 {
     return false;
 }
 
-void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg)
+void OutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, bool /*invert*/, bool /*interpolate*/, bool inlineImg)
 {
     int i, j;
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width + 7) / 8);
@@ -119,19 +120,19 @@ void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int wid
     }
 }
 
-void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix)
+void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double * /*baseMatrix*/)
 {
     drawImageMask(state, ref, str, width, height, invert, false, inlineImg);
 }
 
-void OutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) { }
+void OutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, double * /*baseMatrix*/) { }
 
-void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
+void OutputDev::drawImage(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool /*interpolate*/, const int * /*maskColors*/, bool inlineImg)
 {
     int i, j;
 
     if (inlineImg) {
-        if (!str->reset()) {
+        if (!str->rewind()) {
             return;
         }
         j = height * ((width * colorMap->getNumPixelComps() * colorMap->getBits() + 7) / 8);
@@ -142,28 +143,29 @@ void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int width, 
     }
 }
 
-void OutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate)
+void OutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream * /*maskStr*/, int /*maskWidth*/, int /*maskHeight*/, bool /*maskInvert*/,
+                                bool /*maskInterpolate*/)
 {
     drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, false);
 }
 
-void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
-                                    bool maskInterpolate)
+void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream * /*maskStr*/, int /*maskWidth*/, int /*maskHeight*/,
+                                    GfxImageColorMap * /*maskColorMap*/, bool /*maskInterpolate*/)
 {
     drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, false);
 }
 
-void OutputDev::endMarkedContent(GfxState *state) { }
+void OutputDev::endMarkedContent(GfxState * /*state*/) { }
 
-void OutputDev::beginMarkedContent(const char *name, Dict *properties) { }
+void OutputDev::beginMarkedContent(const char * /*name*/, Dict * /*properties*/) { }
 
-void OutputDev::markPoint(const char *name) { }
+void OutputDev::markPoint(const char * /*name*/) { }
 
-void OutputDev::markPoint(const char *name, Dict *properties) { }
+void OutputDev::markPoint(const char * /*name*/, Dict * /*properties*/) { }
 
-void OutputDev::opiBegin(GfxState *state, Dict *opiDict) { }
+void OutputDev::opiBegin(GfxState * /*state*/, Dict * /*opiDict*/) { }
 
-void OutputDev::opiEnd(GfxState *state, Dict *opiDict) { }
+void OutputDev::opiEnd(GfxState * /*state*/, Dict * /*opiDict*/) { }
 
 void OutputDev::startProfile()
 {

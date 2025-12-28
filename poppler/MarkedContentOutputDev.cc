@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018-2020, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018-2020, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -40,7 +40,7 @@ void MarkedContentOutputDev::endSpan()
     currentText.reset();
 }
 
-void MarkedContentOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
+void MarkedContentOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef * /*xref*/)
 {
     if (state) {
         pageWidth = state->getPageWidth();
@@ -60,7 +60,7 @@ void MarkedContentOutputDev::beginForm(Object * /* obj */, Ref id)
     formStack.push_back(id);
 }
 
-void MarkedContentOutputDev::endForm(Object * /* obj */, Ref id)
+void MarkedContentOutputDev::endForm(Object * /* obj */, Ref /*id*/)
 {
     formStack.pop_back();
 }
@@ -76,7 +76,7 @@ bool MarkedContentOutputDev::contentStreamMatch()
     return formStack.empty();
 }
 
-void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properties)
+void MarkedContentOutputDev::beginMarkedContent(const char * /*name*/, Dict *properties)
 {
     int id = -1;
     if (properties) {
@@ -93,7 +93,7 @@ void MarkedContentOutputDev::beginMarkedContent(const char *name, Dict *properti
     }
 }
 
-void MarkedContentOutputDev::endMarkedContent(GfxState *state)
+void MarkedContentOutputDev::endMarkedContent(GfxState * /*state*/)
 {
     if (inMarkedContent()) {
         mcidStack.pop_back();
@@ -127,7 +127,7 @@ bool MarkedContentOutputDev::needFontChange(const std::shared_ptr<const GfxFont>
     return true;
 }
 
-void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, double dx, double dy, double ox, double oy, CharCode c, int nBytes, const Unicode *u, int uLen)
+void MarkedContentOutputDev::drawChar(GfxState *state, double xx, double yy, double dx, double dy, double /*ox*/, double /*oy*/, CharCode c, int /*nBytes*/, const Unicode *u, int uLen)
 {
     if (!inMarkedContent() || !uLen) {
         return;

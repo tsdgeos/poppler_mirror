@@ -3,6 +3,7 @@
 // FontEncodingTables.cc
 //
 // Copyright 2001-2003 Glyph & Cog, LLC
+// Copyright 2025 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 

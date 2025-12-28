@@ -44,6 +44,7 @@
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Martin Emrich <dev@martinemrich.me>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -106,13 +107,13 @@ int Stream::getRawChar()
     return EOF;
 }
 
-int Stream::getChars(int nChars, unsigned char *buffer)
+int Stream::getChars(int /*nChars*/, unsigned char * /*buffer*/)
 {
     error(errInternal, -1, "Internal: called getChars() on non-predictor stream");
     return 0;
 }
 
-void Stream::getRawChars(int nChars, int *buffer)
+void Stream::getRawChars(int /*nChars*/, int * /*buffer*/)
 {
     error(errInternal, -1, "Internal: called getRawChars() on non-predictor stream");
 }
@@ -161,7 +162,7 @@ unsigned int Stream::discardChars(unsigned int n)
     return count;
 }
 
-std::optional<std::string> Stream::getPSFilter(int psLevel, const char *indent)
+std::optional<std::string> Stream::getPSFilter(int /*psLevel*/, const char * /*indent*/)
 {
     return std::string {};
 }
@@ -233,12 +234,12 @@ public:
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
-    [[nodiscard]] bool reset() override { return str->getBaseStream()->reset(); }
+    [[nodiscard]] bool rewind() override { return str->getBaseStream()->rewind(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
-    bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
+    bool isBinary(bool /*last*/ = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
-    [[nodiscard]] bool unfilteredReset() override { return str->getBaseStream()->unfilteredReset(); }
+    [[nodiscard]] bool unfilteredRewind() override { return str->getBaseStream()->unfilteredRewind(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
     void setPos(Goffset pos, int dir) override { str->getBaseStream()->setPos(pos, dir); }
     BaseStream *getBaseStream() override { return str->getBaseStream()->getBaseStream(); }
@@ -477,7 +478,7 @@ BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset 
 
 BaseSeekInputStream::~BaseSeekInputStream() = default;
 
-bool BaseSeekInputStream::reset()
+bool BaseSeekInputStream::rewind()
 {
     savePos = currentPos();
     setCurrentPos(start);
@@ -583,7 +584,7 @@ void FilterStream::close()
     str->close();
 }
 
-void FilterStream::setPos(Goffset pos, int dir)
+void FilterStream::setPos(Goffset /*pos*/, int /*dir*/)
 {
     error(errInternal, -1, "Internal: called setPos() on FilterStream");
 }
@@ -631,9 +632,9 @@ ImageStream::~ImageStream()
     gfree(inputLine);
 }
 
-bool ImageStream::reset()
+bool ImageStream::rewind()
 {
-    return str->reset();
+    return str->rewind();
 }
 
 void ImageStream::close()
@@ -916,7 +917,7 @@ bool StreamPredictor::getNextLine()
         }
     }
 
-    // reset to start of line
+    // rewind to start of line
     predIdx = pixBytes;
 
     return true;
@@ -954,7 +955,7 @@ std::unique_ptr<Stream> FileStream::makeSubStream(Goffset startA, bool limitedA,
     return std::make_unique<FileStream>(file, startA, limitedA, lengthA, std::move(dictA));
 }
 
-bool FileStream::reset()
+bool FileStream::rewind()
 {
     savePos = offset;
     offset = start;
@@ -1054,7 +1055,7 @@ std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool lim
     return std::make_unique<CachedFileStream>(cc, startA, limitedA, lengthA, std::move(dictA));
 }
 
-bool CachedFileStream::reset()
+bool CachedFileStream::rewind()
 {
     savePos = (unsigned int)cc->tell();
     cc->seek(start, SEEK_SET);
@@ -1167,16 +1168,16 @@ EmbedStream::~EmbedStream()
     }
 }
 
-bool EmbedStream::reset()
+bool EmbedStream::rewind()
 {
     if (length == initialLength) {
-        // In general one can't reset EmbedStream
+        // In general one can't rewind EmbedStream
         // but if we have not read anything yet, that's fine
         return true;
     }
 
     if (reusable) {
-        // If the EmbedStream is reusable, resetting switches back to reading the recorded data
+        // If the EmbedStream is reusable, rewinding switches back to reading the recorded data
         replay = true;
         bufPos = 0;
         return true;
@@ -1191,7 +1192,7 @@ BaseStream *EmbedStream::copy()
     return nullptr;
 }
 
-std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+std::unique_ptr<Stream> EmbedStream::makeSubStream(Goffset /*startA*/, bool /*limitedA*/, Goffset /*lengthA*/, Object && /*dictA*/)
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
@@ -1286,7 +1287,7 @@ int EmbedStream::getChars(int nChars, unsigned char *buffer)
     }
 }
 
-void EmbedStream::setPos(Goffset pos, int dir)
+void EmbedStream::setPos(Goffset /*pos*/, int /*dir*/)
 {
     error(errInternal, -1, "Internal: called setPos() on EmbedStream");
 }
@@ -1297,7 +1298,7 @@ Goffset EmbedStream::getStart()
     return 0;
 }
 
-void EmbedStream::moveStart(Goffset delta)
+void EmbedStream::moveStart(Goffset /*delta*/)
 {
     error(errInternal, -1, "Internal: called moveStart() on EmbedStream");
 }
@@ -1317,12 +1318,12 @@ ASCIIHexStream::~ASCIIHexStream()
     delete str;
 }
 
-bool ASCIIHexStream::reset()
+bool ASCIIHexStream::rewind()
 {
     buf = EOF;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int ASCIIHexStream::lookChar()
@@ -1394,7 +1395,7 @@ std::optional<std::string> ASCIIHexStream::getPSFilter(int psLevel, const char *
     return s;
 }
 
-bool ASCIIHexStream::isBinary(bool last) const
+bool ASCIIHexStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(false);
 }
@@ -1414,12 +1415,12 @@ ASCII85Stream::~ASCII85Stream()
     delete str;
 }
 
-bool ASCII85Stream::reset()
+bool ASCII85Stream::rewind()
 {
     index = n = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int ASCII85Stream::lookChar()
@@ -1485,7 +1486,7 @@ std::optional<std::string> ASCII85Stream::getPSFilter(int psLevel, const char *i
     return s;
 }
 
-bool ASCII85Stream::isBinary(bool last) const
+bool ASCII85Stream::isBinary(bool /*last*/) const
 {
     return str->isBinary(false);
 }
@@ -1589,9 +1590,9 @@ int LZWStream::getChars(int nChars, unsigned char *buffer)
     return n;
 }
 
-bool LZWStream::reset()
+bool LZWStream::rewind()
 {
-    bool success = str->reset();
+    bool success = str->rewind();
     eof = false;
     inputBits = 0;
     clearTable();
@@ -1662,7 +1663,7 @@ start:
     }
     prevCode = code;
 
-    // reset buffer
+    // rewind buffer
     seqIndex = 0;
 
     return true;
@@ -1712,7 +1713,7 @@ std::optional<std::string> LZWStream::getPSFilter(int psLevel, const char *inden
     return s;
 }
 
-bool LZWStream::isBinary(bool last) const
+bool LZWStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -1732,12 +1733,12 @@ RunLengthStream::~RunLengthStream()
     delete str;
 }
 
-bool RunLengthStream::reset()
+bool RunLengthStream::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int RunLengthStream::getChars(int nChars, unsigned char *buffer)
@@ -1776,7 +1777,7 @@ std::optional<std::string> RunLengthStream::getPSFilter(int psLevel, const char 
     return s;
 }
 
-bool RunLengthStream::isBinary(bool last) const
+bool RunLengthStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -1859,7 +1860,7 @@ CCITTFaxStream::~CCITTFaxStream()
     gfree(codingLine);
 }
 
-bool CCITTFaxStream::ccittReset(bool unfiltered)
+bool CCITTFaxStream::ccittRewind(bool unfiltered)
 {
     row = 0;
     nextLine2D = encoding < 0;
@@ -1869,22 +1870,22 @@ bool CCITTFaxStream::ccittReset(bool unfiltered)
     buf = EOF;
 
     if (unfiltered) {
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     } else {
-        return str->reset();
+        return str->rewind();
     }
 }
 
-bool CCITTFaxStream::unfilteredReset()
+bool CCITTFaxStream::unfilteredRewind()
 {
-    return ccittReset(true);
+    return ccittRewind(true);
 }
 
-bool CCITTFaxStream::reset()
+bool CCITTFaxStream::rewind()
 {
     int code1;
 
-    bool resetSuccess = ccittReset(false);
+    bool rewindSuccess = ccittRewind(false);
 
     if (codingLine != nullptr && refLine != nullptr) {
         eof = false;
@@ -1907,7 +1908,7 @@ bool CCITTFaxStream::reset()
         eatBits(1);
     }
 
-    return resetSuccess;
+    return rewindSuccess;
 }
 
 inline void CCITTFaxStream::addPixels(int a1, int blackPixels)
@@ -2606,7 +2607,7 @@ std::optional<std::string> CCITTFaxStream::getPSFilter(int psLevel, const char *
     return s;
 }
 
-bool CCITTFaxStream::isBinary(bool last) const
+bool CCITTFaxStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -2643,7 +2644,7 @@ static int dctClipInit = 0;
 static const int dctZigZag[64] = { 0,  1,  8,  16, 9,  2,  3,  10, 17, 24, 32, 25, 18, 11, 4,  5,  12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6,  7,  14, 21, 28,
                                    35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) : FilterStream(strA)
+DCTStream::DCTStream(Stream *strA, int colorXformA, Dict * /*dict*/, int /*recursion*/) : FilterStream(strA)
 {
     int i, j;
 
@@ -2678,7 +2679,7 @@ DCTStream::~DCTStream()
     delete str;
 }
 
-bool DCTStream::dctReset(bool unfiltered)
+bool DCTStream::dctRewind(bool unfiltered)
 {
     progressive = interleaved = false;
     width = height = 0;
@@ -2690,21 +2691,21 @@ bool DCTStream::dctReset(bool unfiltered)
     gotAdobeMarker = false;
     restartInterval = 0;
     if (unfiltered)
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     else
-        return str->reset();
+        return str->rewind();
 }
 
-bool DCTStream::unfilteredReset()
+bool DCTStream::unfilteredRewind()
 {
-    return dctReset(true);
+    return dctRewind(true);
 }
 
-bool DCTStream::reset()
+bool DCTStream::rewind()
 {
     int i, j;
 
-    bool resetResult = dctReset(false);
+    bool resetResult = dctRewind(false);
 
     if (!readHeader()) {
         y = height;
@@ -4075,7 +4076,7 @@ std::optional<std::string> DCTStream::getPSFilter(int psLevel, const char *inden
     return s;
 }
 
-bool DCTStream::isBinary(bool last) const
+bool DCTStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4171,7 +4172,7 @@ FlateStream::~FlateStream()
     delete str;
 }
 
-bool FlateStream::flateReset(bool unfiltered)
+bool FlateStream::flateRewind(bool unfiltered)
 {
     index = 0;
     remain = 0;
@@ -4181,22 +4182,22 @@ bool FlateStream::flateReset(bool unfiltered)
     endOfBlock = true;
     eof = true;
     if (unfiltered) {
-        return str->unfilteredReset();
+        return str->unfilteredRewind();
     } else {
-        return str->reset();
+        return str->rewind();
     }
 }
 
-bool FlateStream::unfilteredReset()
+bool FlateStream::unfilteredRewind()
 {
-    return flateReset(true);
+    return flateRewind(true);
 }
 
-bool FlateStream::reset()
+bool FlateStream::rewind()
 {
     int cmf, flg;
 
-    bool internalResetResult = flateReset(false);
+    bool internalResetResult = flateRewind(false);
 
     // read header
     //~ need to look at window size?
@@ -4292,7 +4293,7 @@ std::optional<std::string> FlateStream::getPSFilter(int psLevel, const char *ind
     return s;
 }
 
-bool FlateStream::isBinary(bool last) const
+bool FlateStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4667,11 +4668,11 @@ BufStream::~BufStream()
     delete str;
 }
 
-bool BufStream::reset()
+bool BufStream::rewind()
 {
     int i;
 
-    bool success = str->reset();
+    bool success = str->rewind();
     for (i = 0; i < bufSize; ++i) {
         buf[i] = str->getChar();
     }
@@ -4701,7 +4702,7 @@ int BufStream::lookChar(int idx)
     return buf[idx];
 }
 
-bool BufStream::isBinary(bool last) const
+bool BufStream::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4723,11 +4724,11 @@ FixedLengthEncoder::~FixedLengthEncoder()
     }
 }
 
-bool FixedLengthEncoder::reset()
+bool FixedLengthEncoder::rewind()
 {
     count = 0;
 
-    return str->reset();
+    return str->rewind();
 }
 
 int FixedLengthEncoder::getChar()
@@ -4747,7 +4748,7 @@ int FixedLengthEncoder::lookChar()
     return str->getChar();
 }
 
-bool FixedLengthEncoder::isBinary(bool last) const
+bool FixedLengthEncoder::isBinary(bool /*last*/) const
 {
     return str->isBinary(true);
 }
@@ -4770,13 +4771,13 @@ ASCIIHexEncoder::~ASCIIHexEncoder()
     }
 }
 
-bool ASCIIHexEncoder::reset()
+bool ASCIIHexEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool ASCIIHexEncoder::fillBuf()
@@ -4821,13 +4822,13 @@ ASCII85Encoder::~ASCII85Encoder()
     }
 }
 
-bool ASCII85Encoder::reset()
+bool ASCII85Encoder::rewind()
 {
     bufPtr = bufEnd = buf;
     lineLen = 0;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool ASCII85Encoder::fillBuf()
@@ -4917,12 +4918,12 @@ RunLengthEncoder::~RunLengthEncoder()
     }
 }
 
-bool RunLengthEncoder::reset()
+bool RunLengthEncoder::rewind()
 {
     bufPtr = bufEnd = nextEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 //
@@ -5030,11 +5031,11 @@ LZWEncoder::~LZWEncoder()
     }
 }
 
-bool LZWEncoder::reset()
+bool LZWEncoder::rewind()
 {
     int i;
 
-    bool success = str->reset();
+    bool success = str->rewind();
 
     // initialize code table
     for (i = 0; i < 256; ++i) {
@@ -5181,12 +5182,12 @@ CMYKGrayEncoder::~CMYKGrayEncoder()
     }
 }
 
-bool CMYKGrayEncoder::reset()
+bool CMYKGrayEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool CMYKGrayEncoder::fillBuf()
@@ -5231,12 +5232,12 @@ RGBGrayEncoder::~RGBGrayEncoder()
     }
 }
 
-bool RGBGrayEncoder::reset()
+bool RGBGrayEncoder::rewind()
 {
     bufPtr = bufEnd = buf;
     eof = false;
 
-    return str->reset();
+    return str->rewind();
 }
 
 bool RGBGrayEncoder::fillBuf()
@@ -5278,7 +5279,7 @@ SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap
 
 SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() = default;
 
-bool SplashBitmapCMYKEncoder::reset()
+bool SplashBitmapCMYKEncoder::rewind()
 {
     bufPtr = width;
     curLine = height - 1;

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006-2010, 2012-2014, 2017-2019, 2024 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2017-2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -22,6 +22,7 @@
 // Copyright (C) 2023 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -77,7 +78,7 @@ Lexer::Lexer(XRef *xrefA, std::unique_ptr<Stream> &&str)
     streams->add(curStr.copy());
     strPtr = 0;
     freeArray = true;
-    (void)curStr.streamReset();
+    (void)curStr.streamRewind();
 }
 
 Lexer::Lexer(XRef *xrefA, Object *obj)
@@ -97,7 +98,7 @@ Lexer::Lexer(XRef *xrefA, Object *obj)
     if (streams->getLength() > 0) {
         curStr = streams->get(strPtr);
         if (curStr.isStream()) {
-            (void)curStr.streamReset();
+            (void)curStr.streamRewind();
         }
     }
 }
@@ -133,7 +134,7 @@ int Lexer::getChar(bool comesFromLook)
             if (strPtr < streams->getLength()) {
                 curStr = streams->get(strPtr);
                 if (curStr.isStream()) {
-                    if (!curStr.streamReset()) {
+                    if (!curStr.streamRewind()) {
                         return EOF;
                     }
                 }

@@ -18,10 +18,11 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
-// Copyright (C) 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -50,7 +51,7 @@ public:
     JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
     ~JBIG2Stream() override;
     StreamKind getKind() const override { return strJBIG2; }
-    [[nodiscard]] bool reset() override;
+    [[nodiscard]] bool rewind() override;
     void close() override;
     Goffset getPos() override;
     int getChar() override;
@@ -65,24 +66,24 @@ private:
     int getChars(int nChars, unsigned char *buffer) override;
 
     void readSegments();
-    bool readSymbolDictSeg(unsigned int segNum, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs);
-    void readTextRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs);
+    bool readSymbolDictSeg(unsigned int segNum, unsigned int *refSegs, unsigned int nRefSegs);
+    void readTextRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
     std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
                                                 unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
                                                 const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
                                                 const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty);
     void readPatternDictSeg(unsigned int segNum, unsigned int length);
-    void readHalftoneRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs);
-    void readGenericRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length);
+    void readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
+    void readGenericRegionSeg(unsigned int segNum, bool imm, unsigned int length);
     void mmrAddPixels(int a1, int blackPixels, int *codingLine, int *a0i, int w);
     void mmrAddPixelsNeg(int a1, int blackPixels, int *codingLine, int *a0i, int w);
     std::unique_ptr<JBIG2Bitmap> readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength);
-    void readGenericRefinementRegionSeg(unsigned int segNum, bool imm, bool lossless, unsigned int length, unsigned int *refSegs, unsigned int nRefSegs);
+    void readGenericRefinementRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
     std::unique_ptr<JBIG2Bitmap> readGenericRefinementRegion(int w, int h, int templ, bool tpgrOn, JBIG2Bitmap *refBitmap, int refDX, int refDY, int *atx, int *aty);
-    void readPageInfoSeg(unsigned int length);
+    void readPageInfoSeg();
     void readEndOfStripeSeg(unsigned int length);
     void readProfilesSeg(unsigned int length);
-    void readCodeTableSeg(unsigned int segNum, unsigned int length);
+    void readCodeTableSeg(unsigned int segNum);
     void readExtensionSeg(unsigned int length);
     JBIG2Segment *findSegment(unsigned int segNum);
     void discardSegment(unsigned int segNum);

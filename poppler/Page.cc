@@ -36,6 +36,7 @@
 // Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -266,7 +267,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box)
 
 #define pageLocker() const std::scoped_lock locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA, Form *form) : pageRef(pageRefA), attrs(std::move(attrsA))
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, std::unique_ptr<PageAttrs> attrsA) : pageRef(pageRefA), attrs(std::move(attrsA))
 {
     ok = true;
     doc = docA;
@@ -710,7 +711,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
 
     if (data_out) {
         ImageStream imgstr { str, width, colorMap.getNumPixelComps(), colorMap.getBits() };
-        if (!imgstr.reset()) {
+        if (!imgstr.rewind()) {
             return false;
         }
         unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);

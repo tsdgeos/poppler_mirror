@@ -617,12 +617,6 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec, bool tri
 
 }
 
-GooString *GooString::lowerCase()
-{
-    lowerCase(*this);
-    return this;
-}
-
 void GooString::lowerCase(std::string &s)
 {
     for (auto &c : s) {

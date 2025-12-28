@@ -1,9 +1,10 @@
 /* poppler-document.cc: qt interface to poppler
- * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, 2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2023, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ EmbFile *EmbeddedFileData::embFile() const
     return filespec->isOk() ? filespec->getEmbeddedFile() : nullptr;
 }
 
-EmbeddedFile::EmbeddedFile(EmbFile *embfile) : m_embeddedFile(nullptr)
+EmbeddedFile::EmbeddedFile(EmbFile * /*embfile*/) : m_embeddedFile(nullptr)
 {
     assert(!"You must not use this private constructor!");
 }
@@ -104,7 +105,7 @@ QByteArray EmbeddedFile::data()
         return QByteArray();
     }
 
-    if (!stream->reset()) {
+    if (!stream->rewind()) {
         return QByteArray();
     }
     auto data = stream->toUnsignedChars();

@@ -3,6 +3,7 @@
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2008 Hugo Mercier <hmercier31[@]gmail.com>
  * Copyright (C) 2017 Francesco Poli <invernomuto@paranoici.org>
+ * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +75,7 @@ static void poppler_movie_class_init(PopplerMovieClass *klass)
     gobject_class->finalize = poppler_movie_finalize;
 }
 
-static void poppler_movie_init(PopplerMovie *movie) { }
+static void poppler_movie_init(PopplerMovie * /*movie*/) { }
 
 PopplerMovie *_poppler_movie_new(const Movie *poppler_movie)
 {

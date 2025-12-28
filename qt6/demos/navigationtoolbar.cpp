@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -125,7 +125,7 @@ void NavigationToolBar::slotComboActivated(int index)
     setPage(index);
 }
 
-void NavigationToolBar::slotZoomComboActivated(int index)
+void NavigationToolBar::slotZoomComboActivated(int /*index*/)
 {
     QString text = m_zoomCombo->currentText();
     text.remove(QLatin1Char('%'));

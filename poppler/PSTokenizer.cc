@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
-// Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Vincent Le Garrec <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that

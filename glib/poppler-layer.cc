@@ -1,6 +1,7 @@
 /* poppler-layer.cc: glib interface to poppler
  *
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +54,7 @@ static void poppler_layer_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_layer_parent_class)->finalize(object);
 }
 
-static void poppler_layer_init(PopplerLayer *layer) { }
+static void poppler_layer_init(PopplerLayer * /*layer*/) { }
 
 static void poppler_layer_class_init(PopplerLayerClass *klass)
 {

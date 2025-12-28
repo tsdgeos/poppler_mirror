@@ -818,6 +818,7 @@ bool CertificateInfo::checkPassword(const QString &password) const
     std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> tmpSignature = sigHandler->signDetached(password.toStdString());
     return std::holds_alternative<std::vector<unsigned char>>(tmpSignature);
 #else
+    (void)password;
     return false;
 #endif
 }

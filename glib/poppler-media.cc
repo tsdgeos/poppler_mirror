@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +83,7 @@ static void poppler_media_class_init(PopplerMediaClass *klass)
     gobject_class->finalize = poppler_media_finalize;
 }
 
-static void poppler_media_init(PopplerMedia *media) { }
+static void poppler_media_init(PopplerMedia * /*media*/) { }
 
 PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
 {
@@ -357,7 +359,7 @@ gboolean poppler_media_save_to_callback(PopplerMedia *poppler_media, PopplerMedi
     g_return_val_if_fail(poppler_media->stream.isStream(), FALSE);
 
     stream = poppler_media->stream.getStream();
-    if (!stream->reset()) {
+    if (!stream->rewind()) {
         return FALSE;
     }
 

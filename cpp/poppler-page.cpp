@@ -408,8 +408,8 @@ std::vector<text_box> page::text_list(int opt_flag) const
     const std::vector<TextWord *> &words = word_list->getWords();
     output_list.reserve(words.size());
     for (const TextWord *word : words) {
-        std::unique_ptr<GooString> gooWord { word->getText() };
-        ustring ustr = ustring::from_utf8(gooWord->c_str());
+        const std::unique_ptr<std::string> wordText = word->getText();
+        const ustring ustr = ustring::from_utf8(wordText->c_str());
 
         double xMin, yMin, xMax, yMax;
         word->getBBox(&xMin, &yMin, &xMax, &yMax);

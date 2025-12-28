@@ -364,6 +364,9 @@ void SplashBitmap::setJpegParams(ImgWriter *writer, WriteImgParams *params)
             static_cast<JpegWriter *>(writer)->setQuality(params->jpegQuality);
         }
     }
+#else
+    (void)writer;
+    (void)params;
 #endif
 }
 
@@ -390,6 +393,8 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, do
         writer = new JpegWriter();
         setJpegParams(writer, params);
         break;
+#else
+        (void)params;
 #endif
 
 #if ENABLE_LIBTIFF
@@ -419,6 +424,8 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, do
             ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.c_str());
         }
         break;
+#else
+        (void)params;
 #endif
 
     default:

@@ -4,6 +4,7 @@
  * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,7 +173,7 @@ byte_array embedded_file::data() const
         return byte_array();
     }
 
-    if (!stream->reset()) {
+    if (!stream->rewind()) {
         return byte_array {};
     }
     byte_array ret(1024);

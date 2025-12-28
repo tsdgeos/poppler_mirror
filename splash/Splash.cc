@@ -5068,7 +5068,6 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
     SplashColor pixel;
     unsigned char alpha;
     const unsigned char *ap;
-    int x, y;
 
     if (src.mode != bitmap->mode) {
         return splashErrModeMismatch;
@@ -5079,17 +5078,17 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
     }
 
     if (src.getSeparationList()->size() > bitmap->getSeparationList()->size()) {
-        for (x = bitmap->getSeparationList()->size(); x < (int)src.getSeparationList()->size(); x++) {
-            bitmap->getSeparationList()->push_back(((*src.getSeparationList())[x])->copyAsOwnType());
+        for (size_t i = bitmap->getSeparationList()->size(); i < src.getSeparationList()->size(); i++) {
+            bitmap->getSeparationList()->push_back(((*src.getSeparationList())[i])->copyAsOwnType());
         }
     }
     if (src.alpha) {
         pipeInit(&pipe, xDest, yDest, nullptr, pixel, (unsigned char)splashRound(state->fillAlpha * 255), true, nonIsolated, knockout, (unsigned char)splashRound(knockoutOpacity * 255));
         if (noClip) {
-            for (y = 0; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
-                for (x = 0; x < w; ++x) {
+                for (int x = 0; x < w; ++x) {
                     src.getPixel(xSrc + x, ySrc + y, pixel);
                     alpha = *ap++;
                     // this uses shape instead of alpha, which isn't technically
@@ -5099,10 +5098,10 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
                 }
             }
         } else {
-            for (y = 0; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
                 ap = src.getAlphaPtr() + (ySrc + y) * src.getWidth() + xSrc;
-                for (x = 0; x < w; ++x) {
+                for (int x = 0; x < w; ++x) {
                     src.getPixel(xSrc + x, ySrc + y, pixel);
                     alpha = *ap++;
                     if (state->clip->test(xDest + x, yDest + y)) {
@@ -5119,17 +5118,17 @@ SplashError Splash::composite(const SplashBitmap &src, int xSrc, int ySrc, int x
     } else {
         pipeInit(&pipe, xDest, yDest, nullptr, pixel, (unsigned char)splashRound(state->fillAlpha * 255), false, nonIsolated);
         if (noClip) {
-            for (y = 0; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
-                for (x = 0; x < w; ++x) {
+                for (int x = 0; x < w; ++x) {
                     src.getPixel(xSrc + x, ySrc + y, pixel);
                     (this->*pipe.run)(&pipe);
                 }
             }
         } else {
-            for (y = 0; y < h; ++y) {
+            for (int y = 0; y < h; ++y) {
                 pipeSetXY(&pipe, xDest, yDest + y);
-                for (x = 0; x < w; ++x) {
+                for (int x = 0; x < w; ++x) {
                     src.getPixel(xSrc + x, ySrc + y, pixel);
                     if (state->clip->test(xDest + x, yDest + y)) {
                         (this->*pipe.run)(&pipe);

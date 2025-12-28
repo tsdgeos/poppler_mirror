@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2007-2010, 2017, 2019, 2022 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2017, 2019, 2022, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
@@ -87,11 +87,6 @@ inline void *grealloc(void *p, size_t size, bool checkoverflow = false)
     std::abort();
 }
 
-inline void *grealloc_checkoverflow(void *p, size_t size)
-{
-    return grealloc(p, size, true);
-}
-
 /*
  * These are similar to gmalloc and grealloc, but take an object count
  * and size. The result is similar to allocating <count> * <size>
@@ -147,12 +142,10 @@ inline void *gmallocn3(int width, int height, int size, bool checkoverflow = fal
     return gmalloc(bytes, checkoverflow);
 }
 
-inline void *greallocn(void *p, int count, int size, bool checkoverflow = false, bool free_p = true)
+inline void *greallocn(void *p, int count, int size, bool checkoverflow = false)
 {
     if (count == 0) {
-        if (free_p) {
-            gfree(p);
-        }
+        gfree(p);
         return nullptr;
     }
 
@@ -161,9 +154,7 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
         std::fputs("Bogus memory allocation size\n", stderr);
 
         if (checkoverflow) {
-            if (free_p) {
-                gfree(p);
-            }
+            gfree(p);
             return nullptr;
         }
 
@@ -174,9 +165,7 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
     if (void *q = grealloc(p, bytes, checkoverflow)) {
         return q;
     }
-    if (free_p) {
-        gfree(p);
-    }
+    gfree(p);
     return nullptr;
 }
 

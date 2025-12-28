@@ -191,8 +191,7 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                 y2 = pts[i + 1].y;
                 x3 = pts[i + 2].x;
                 y3 = pts[i + 2].y;
-                addCurve(x0, y0, x1, y1, x2, y2, x3, y3, flatness, (path.flags[i - 1] & splashPathFirst), (path.flags[i + 2] & splashPathLast),
-                         !closeSubpaths && (path.flags[i - 1] & splashPathFirst) && !(path.flags[i - 1] & splashPathClosed), !closeSubpaths && (path.flags[i + 2] & splashPathLast) && !(path.flags[i + 2] & splashPathClosed));
+                addCurve(x0, y0, x1, y1, x2, y2, x3, y3, flatness);
                 x0 = x3;
                 y0 = y3;
                 i += 3;
@@ -266,7 +265,7 @@ void SplashXPath::grow(int nSegs)
     }
 }
 
-void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness, bool first, bool last, bool end0, bool end1)
+void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoord y1, SplashCoord x2, SplashCoord y2, SplashCoord x3, SplashCoord y3, SplashCoord flatness)
 {
     if (!curveData) {
         // allocate on first use

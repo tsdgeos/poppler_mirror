@@ -503,10 +503,9 @@ static void printLine(FILE *f, const TextLine *line)
             lineYMax = yMax;
         }
 
-        GooString *wordText = word->getText();
+        const std::unique_ptr<std::string> wordText = word->getText();
         const std::string myString = myXmlTokenReplace(wordText->c_str());
         wordXML << "          <word xMin=\"" << xMin << "\" yMin=\"" << yMin << "\" xMax=\"" << xMax << "\" yMax=\"" << yMax << "\">" << myString << "</word>\n";
-        delete wordText;
     }
     fprintf(f, "        <line xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">\n", lineXMin, lineYMin, lineXMax, lineYMax);
     fputs(wordXML.str().c_str(), f);
@@ -599,8 +598,8 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
                             lyMax = yMax;
                         }
 
-                        lineWordsBuffer->appendf("{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:t}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin,
-                                                 wordConf, word->getText());
+                        lineWordsBuffer->appendf("{0:d}\t{1:d}\t{2:d}\t{3:d}\t{4:d}\t{5:d}\t{6:.2f}\t{7:.2f}\t{8:.2f}\t{9:.2f}\t{10:d}\t{11:s}\n", wordLevel, page, flowNum, blockNum, lineNum, wordNum, xMin, yMin, xMax - xMin, yMax - yMin,
+                                                 wordConf, word->getText()->c_str());
                         wordNum++;
                     }
 

@@ -67,7 +67,7 @@ static void poppler_form_field_finalize(GObject *object)
     G_OBJECT_CLASS(poppler_form_field_parent_class)->finalize(object);
 }
 
-static void poppler_form_field_init(PopplerFormField *field) { }
+static void poppler_form_field_init(PopplerFormField * /*field*/) { }
 
 static void poppler_form_field_class_init(PopplerFormFieldClass *klass)
 {
@@ -531,7 +531,7 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
     return poppler_sig_info;
 }
 
-static void signature_validate_thread(GTask *task, gpointer source_object, gpointer task_data, GCancellable *cancellable)
+static void signature_validate_thread(GTask *task, gpointer source_object, gpointer task_data, GCancellable * /*cancellable*/)
 {
     PopplerSignatureValidationFlags flags = (PopplerSignatureValidationFlags)GPOINTER_TO_INT(task_data);
     PopplerSignatureInfo *signature_info;

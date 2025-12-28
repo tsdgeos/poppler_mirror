@@ -83,7 +83,7 @@ void PDFDisplay::display()
 
 PDFDisplay::~PDFDisplay() = default;
 
-void PDFDisplay::paintEvent(QPaintEvent *e)
+void PDFDisplay::paintEvent(QPaintEvent * /*e*/)
 {
     QPainter paint(this); // paint widget
     if (!image.isNull()) {
