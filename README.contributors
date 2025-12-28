@@ -49,4 +49,8 @@ that enables rebase on landing. See the gitlab docs for details:
 
 https://docs.gitlab.com/ee/user/project/merge_requests/allow_collaboration.html
 
+If this is the first time you are forking a project in https://gitlab.freedesktop.org/
+you will need to ask for permission to fork the project. See
+https://gitlab.freedesktop.org/freedesktop/freedesktop/-/wikis/home
+
 And keep hacking on poppler!
