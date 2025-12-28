@@ -7,6 +7,7 @@
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
 // Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // This file is under the GPLv2 or later license
 //

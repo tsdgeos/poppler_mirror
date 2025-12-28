@@ -59,6 +59,7 @@
 // Copyright (C) 2024 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2025 Juraj Šarinay <juraj@sarinay.com>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

@@ -16,6 +16,7 @@
 // Copyright (C) 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

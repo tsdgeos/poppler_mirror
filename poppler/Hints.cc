@@ -14,6 +14,7 @@
 // Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
+// Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================
 
