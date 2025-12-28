@@ -749,7 +749,9 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos)
             return false;
         }
     }
-    if (w[0] > (int)sizeof(int) || w[1] > (int)sizeof(long long) || w[2] > (int)sizeof(long long)) {
+    constexpr int intNBytes = sizeof(int);
+    constexpr int longLongNBytes = sizeof(long long);
+    if (w[0] > intNBytes || w[1] > longLongNBytes || w[2] > longLongNBytes) {
         return false;
     }
 
