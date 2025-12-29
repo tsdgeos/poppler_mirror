@@ -1747,6 +1747,32 @@ gchar *poppler_annot_text_get_icon(PopplerAnnotText *poppler_annot)
  *  </varlistentry>
  * </variablelist>
  *
+ * Since 26.1.0, Poppler also knows how to render the following icons,
+ * which are somewhat standard and other PDF renderers may also support:
+ * <variablelist>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_CHECK</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_STAR</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_RIGHT_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_RIGHT_POINTER</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_UP_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_UP_LEFT_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_CROSS_HAIRS</term>
+ *  </varlistentry>
+ * </variablelist>
+ *
  * Since: 0.16
  */
 void poppler_annot_text_set_icon(PopplerAnnotText *poppler_annot, const gchar *icon)

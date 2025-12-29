@@ -550,6 +550,19 @@ public:
        - NewParagraph
        - Note (this is the default icon to use)
        - Paragraph
+
+       Since 26.1.0 Poppler knows how to render the following additional
+       icon names, which are somewhat standard and other PDF renderers may
+       also support:
+       - Check
+       - Circle
+       - Cross
+       - CrossHairs
+       - RightArrow
+       - RightPointer
+       - Star
+       - UpArrow
+       - UpLeftArrow
     */
     QString textIcon() const;
 
