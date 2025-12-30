@@ -571,11 +571,11 @@ Object Lexer::getObj(int objNum)
         n = 1;
         while ((c = lookChar()) != EOF && !specialChars[c]) {
             getChar();
+            *p++ = c;
             if (++n == tokBufSize) {
                 error(errSyntaxError, getPos(), "Command token too long");
                 break;
             }
-            *p++ = c;
         }
         std::string_view res(tokBuf, n);
         if (res == "true") {
