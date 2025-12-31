@@ -6618,10 +6618,14 @@ void AnnotInk::initialize(Dict *dict)
 
     obj1 = getAppearanceResDict();
     if (obj1.isDict()) {
-        if (obj1.dictLookup("ExtGState").isDict()) {
-            obj1 = obj1.dictLookup("ExtGState").dictGetVal(0);
-            if (obj1.isDict() && obj1.dictLookup("BM").isName("Multiply")) {
-                drawBelow = true;
+        const Object extGState = obj1.dictLookup("ExtGState");
+        if (extGState.isDict()) {
+            const Dict *extGStateDict = extGState.getDict();
+            if (extGStateDict->getLength() > 0) {
+                obj1 = extGStateDict->getVal(0);
+                if (obj1.isDict() && obj1.dictLookup("BM").isName("Multiply")) {
+                    drawBelow = true;
+                }
             }
         }
     }

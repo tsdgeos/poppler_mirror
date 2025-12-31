@@ -5,6 +5,7 @@
  * Copyright (C) 2025 Markus Göllnitz <camelcasenick@bewares.it>
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>
  * Copyright (C) 2025 Marco Trevisan <mail@3v1n0.net>
+ * Copyright (C) 2025 Aditya Tiwari <suntiwari3495@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,6 +151,13 @@ typedef enum
 #define POPPLER_ANNOT_TEXT_ICON_INSERT "Insert"
 #define POPPLER_ANNOT_TEXT_ICON_CROSS "Cross"
 #define POPPLER_ANNOT_TEXT_ICON_CIRCLE "Circle"
+#define POPPLER_ANNOT_TEXT_ICON_CHECK "Check"
+#define POPPLER_ANNOT_TEXT_ICON_STAR "Star"
+#define POPPLER_ANNOT_TEXT_ICON_RIGHT_ARROW "RightArrow"
+#define POPPLER_ANNOT_TEXT_ICON_RIGHT_POINTER "RightPointer"
+#define POPPLER_ANNOT_TEXT_ICON_UP_ARROW "UpArrow"
+#define POPPLER_ANNOT_TEXT_ICON_UP_LEFT_ARROW "UpLeftArrow"
+#define POPPLER_ANNOT_TEXT_ICON_CROSS_HAIRS "CrossHairs"
 
 typedef enum
 {

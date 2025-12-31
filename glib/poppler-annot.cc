@@ -7,6 +7,7 @@
  * Copyright (C) 2025 Markus Göllnitz <camelcasenick@bewares.it>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>
+ * Copyright (C) 2025 Aditya Tiwari <suntiwari3495@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1744,6 +1745,32 @@ gchar *poppler_annot_text_get_icon(PopplerAnnotText *poppler_annot)
  *  </varlistentry>
  *  <varlistentry>
  *   <term>#POPPLER_ANNOT_TEXT_ICON_CIRCLE</term>
+ *  </varlistentry>
+ * </variablelist>
+ *
+ * Since 26.1.0, Poppler also knows how to render the following icons,
+ * which are somewhat standard and other PDF renderers may also support:
+ * <variablelist>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_CHECK</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_STAR</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_RIGHT_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_RIGHT_POINTER</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_UP_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_UP_LEFT_ARROW</term>
+ *  </varlistentry>
+ *  <varlistentry>
+ *   <term>#POPPLER_ANNOT_TEXT_ICON_CROSS_HAIRS</term>
  *  </varlistentry>
  * </variablelist>
  *
