@@ -133,7 +133,7 @@ typedef enum
 } PopplerSelectionStyle;
 
 /**
- * PopplerRenderFlags:
+ * PopplerRenderAnnotsFlags:
  * @POPPLER_RENDER_ANNOTS_NONE: do not render annotations
  * @POPPLER_RENDER_ANNOTS_TEXT: render text annotations
  * @POPPLER_RENDER_ANNOTS_LINK: render link annotations
