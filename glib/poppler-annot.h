@@ -210,6 +210,11 @@ typedef enum
 
 /* The next three enums are value-compatible with pango equivalents. */
 
+/**
+ * PopplerStretch:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_STRETCH_ULTRA_CONDENSED,
@@ -223,6 +228,11 @@ typedef enum
     POPPLER_STRETCH_ULTRA_EXPANDED
 } PopplerStretch;
 
+/**
+ * PopplerWeight:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_WEIGHT_THIN = 100,
@@ -236,6 +246,11 @@ typedef enum
     POPPLER_WEIGHT_HEAVY = 900
 } PopplerWeight;
 
+/**
+ * PopplerStyle:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_STYLE_NORMAL,
