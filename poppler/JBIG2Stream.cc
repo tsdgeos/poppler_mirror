@@ -197,7 +197,7 @@ public:
     // Returns false for OOB, otherwise sets *<x> and returns true.
     bool decodeInt(int *x, const JBIG2HuffmanTable *table);
 
-    unsigned int readBits(unsigned int n);
+    unsigned int readBits(unsigned int n, bool *eof = nullptr);
     unsigned int readBit();
 
     // Sort the table by prefix length and assign prefix values.
@@ -257,7 +257,7 @@ bool JBIG2HuffmanDecoder::decodeInt(int *x, const JBIG2HuffmanTable *table)
     return false;
 }
 
-unsigned int JBIG2HuffmanDecoder::readBits(unsigned int n)
+unsigned int JBIG2HuffmanDecoder::readBits(unsigned int n, bool *eof)
 {
     unsigned int x, mask, nLeft;
 
@@ -270,12 +270,20 @@ unsigned int JBIG2HuffmanDecoder::readBits(unsigned int n)
         nLeft = n - bufLen;
         bufLen = 0;
         while (nLeft >= 8) {
-            x = (x << 8) | (str->getChar() & 0xff);
+            const int c = str->getChar();
+            if (eof) {
+                *eof = *eof || c == EOF;
+            }
+            x = (x << 8) | (c & 0xff);
             ++byteCounter;
             nLeft -= 8;
         }
         if (nLeft > 0) {
-            buf = str->getChar();
+            const int c = str->getChar();
+            if (eof) {
+                *eof = *eof || c == EOF;
+            }
+            buf = c;
             ++byteCounter;
             bufLen = 8 - nLeft;
             x = (x << nLeft) | ((buf >> bufLen) & ((1 << nLeft) - 1));
@@ -3923,6 +3931,7 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
     unsigned int flags, oob, prefixBits, rangeBits;
     int lowVal, highVal, val;
     unsigned int huffTabSize, i;
+    bool eof = false;
 
     if (!readUByte(&flags) || !readLong(&lowVal) || !readLong(&highVal)) {
         goto eofError;
@@ -3949,13 +3958,13 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
             }
         }
         huffTab[i].val = val;
-        huffTab[i].prefixLen = huffDecoder->readBits(prefixBits);
-        huffTab[i].rangeLen = huffDecoder->readBits(rangeBits);
+        huffTab[i].prefixLen = huffDecoder->readBits(prefixBits, &eof);
+        huffTab[i].rangeLen = huffDecoder->readBits(rangeBits, &eof);
 
         constexpr auto intNBits = sizeof(int) * CHAR_BIT;
         const int shiftBits = huffTab[i].rangeLen % intNBits;
 
-        if (unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
+        if (eof || unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
             free(huffTab);
             return;
         }
