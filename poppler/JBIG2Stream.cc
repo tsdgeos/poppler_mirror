@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -3951,7 +3951,11 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         huffTab[i].val = val;
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits);
         huffTab[i].rangeLen = huffDecoder->readBits(rangeBits);
-        if (unlikely(checkedAdd(val, 1 << huffTab[i].rangeLen, &val))) {
+
+        constexpr auto intNBits = sizeof(int) * CHAR_BIT;
+        const int shiftBits = huffTab[i].rangeLen % intNBits;
+
+        if (unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
             free(huffTab);
             return;
         }
