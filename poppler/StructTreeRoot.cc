@@ -49,7 +49,8 @@ void StructTreeRoot::parse(const Dict &root)
     // be filled-in later when parsing them.
     const Object parentTreeObj = root.lookup("ParentTree");
     if (parentTreeObj.isDict()) {
-        parseNumberTreeNode(*parentTreeObj.getDict());
+        RefRecursionChecker usedParents;
+        parseNumberTreeNode(*parentTreeObj.getDict(), usedParents);
     }
 
     RefRecursionChecker seenElements;
@@ -105,14 +106,19 @@ void StructTreeRoot::parse(const Dict &root)
     std::multimap<Ref, Parent *>().swap(refToParentMap);
 }
 
-void StructTreeRoot::parseNumberTreeNode(const Dict &node)
+void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &usedParents)
 {
     Object kids = node.lookup("Kids");
     if (kids.isArray()) {
         for (int i = 0; i < kids.arrayGetLength(); i++) {
-            Object obj = kids.arrayGet(i);
+            Ref ref;
+            const Object obj = kids.getArray()->get(i, &ref);
+            if (!usedParents.insert(ref)) {
+                return;
+            }
+            const RefRecursionCheckerRemover remover(usedParents, ref);
             if (obj.isDict()) {
-                parseNumberTreeNode(*obj.getDict());
+                parseNumberTreeNode(*obj.getDict(), usedParents);
             } else {
                 error(errSyntaxError, -1, "Kids item at position {0:d} is wrong type ({1:s})", i, obj.getTypeName());
             }
