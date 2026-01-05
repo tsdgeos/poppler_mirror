@@ -837,6 +837,7 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Get the text which is inside the specified rectangle.
+    // The rectangle is ignored when both physLayout and fixedPitch are false
     GooString getText(double xMin, double yMin, double xMax, double yMax) const;
 
     // Find a string by character position and length.  If found, sets

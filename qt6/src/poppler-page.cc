@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2022, 2024, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2022, 2024-2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -695,6 +695,10 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
             s = output_dev->getText(rect->y1, rect->x1, rect->y2, rect->x2);
         }
     } else {
+        if (textLayout == ReadingOrder) {
+            qWarning() << "ReadingOrder is not supported with non null rect";
+            return {};
+        }
         s = output_dev->getText(r.left(), r.top(), r.right(), r.bottom());
     }
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2020, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2020, 2025, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
@@ -277,7 +277,8 @@ static void appendToGooString(void *stream, const char *text, int len)
 
  \param rect if not empty, it will be extracted the text in it; otherwise, the
              text of the whole page
- \param layout_mode the layout of the text
+ \param layout_mode the layout of the text. non_raw_non_physical_layout is not
+                    supported together with a non empty rect
 
  \returns the text of the page in the specified rect or in the whole page
 
@@ -292,6 +293,10 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
     if (r.is_empty()) {
         d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     } else {
+        if (layout_mode == non_raw_non_physical_layout) {
+            detail::user_debug_function("non_raw_non_physical_layout is not supported together with a non empty rect", detail::debug_closure);
+            return {};
+        }
         d->doc->doc->displayPageSlice(&td, d->index + 1, 72, 72, 0, false, true, false, r.left(), r.top(), r.width(), r.height());
     }
     return ustring::from_utf8(out->c_str());
