@@ -15,7 +15,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Even Rouault <even.rouault@spatialys.com>
 //
@@ -106,6 +106,8 @@ public:
     void resetByteCounter() { nBytesRead = 0; }
     unsigned int getByteCounter() { return nBytesRead; }
 
+    bool getReadPastEndOfStream() const { return readPastEndOfStream; }
+
 private:
     unsigned int readByte();
     int decodeIntBit(JArithmeticDecoderStats *stats);
@@ -126,6 +128,7 @@ private:
     unsigned int nBytesRead;
     int dataLen;
     bool limitStream;
+    bool readPastEndOfStream = false;
 };
 
 #endif

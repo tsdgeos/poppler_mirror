@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2020 Even Rouault <even.rouault@spatialys.com>
-// Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -99,11 +99,14 @@ inline unsigned int JArithmeticDecoder::readByte()
     if (limitStream) {
         --dataLen;
         if (dataLen < 0) {
+            readPastEndOfStream = true;
             return 0xff;
         }
     }
     ++nBytesRead;
-    return (unsigned int)str->getChar() & 0xff;
+    const int strChar = str->getChar();
+    readPastEndOfStream = strChar == EOF;
+    return (unsigned int)strChar & 0xff;
 }
 
 JArithmeticDecoder::~JArithmeticDecoder()
@@ -113,6 +116,7 @@ JArithmeticDecoder::~JArithmeticDecoder()
 
 void JArithmeticDecoder::start()
 {
+    readPastEndOfStream = false;
     buf0 = readByte();
     buf1 = readByte();
 
@@ -129,6 +133,8 @@ void JArithmeticDecoder::restart(int dataLenA)
     unsigned int cAdd;
     bool prevFF;
     int k, nBits;
+
+    readPastEndOfStream = false;
 
     if (dataLen >= 0) {
         dataLen = dataLenA;
