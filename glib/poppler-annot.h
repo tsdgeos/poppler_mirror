@@ -151,12 +151,47 @@ typedef enum
 #define POPPLER_ANNOT_TEXT_ICON_INSERT "Insert"
 #define POPPLER_ANNOT_TEXT_ICON_CROSS "Cross"
 #define POPPLER_ANNOT_TEXT_ICON_CIRCLE "Circle"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_CHECK:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_CHECK "Check"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_STAR:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_STAR "Star"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_RIGHT_ARROW:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_RIGHT_ARROW "RightArrow"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_RIGHT_POINTER:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_RIGHT_POINTER "RightPointer"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_UP_ARROW:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_UP_ARROW "UpArrow"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_UP_LEFT_ARROW:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_UP_LEFT_ARROW "UpLeftArrow"
+/**
+ * POPPLER_ANNOT_TEXT_ICON_CROSS_HAIRS:
+ *
+ * Since: 26.01
+ */
 #define POPPLER_ANNOT_TEXT_ICON_CROSS_HAIRS "CrossHairs"
 
 typedef enum
@@ -210,6 +245,11 @@ typedef enum
 
 /* The next three enums are value-compatible with pango equivalents. */
 
+/**
+ * PopplerStretch:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_STRETCH_ULTRA_CONDENSED,
@@ -223,6 +263,11 @@ typedef enum
     POPPLER_STRETCH_ULTRA_EXPANDED
 } PopplerStretch;
 
+/**
+ * PopplerWeight:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_WEIGHT_THIN = 100,
@@ -236,6 +281,11 @@ typedef enum
     POPPLER_WEIGHT_HEAVY = 900
 } PopplerWeight;
 
+/**
+ * PopplerStyle:
+ *
+ * Since: 24.12
+ */
 typedef enum
 {
     POPPLER_STYLE_NORMAL,

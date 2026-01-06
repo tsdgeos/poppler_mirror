@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013, 2014 Igalia S.L.
-// Copyright 2018, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -75,7 +75,7 @@ private:
     std::multimap<Ref, Parent *> refToParentMap;
 
     void parse(const Dict &rootDict);
-    void parseNumberTreeNode(const Dict &node);
+    void parseNumberTreeNode(const Dict &node, RefRecursionChecker &usedParents);
     void parentTreeAdd(const Ref objectRef, StructElement *element);
 
     friend class StructElement;

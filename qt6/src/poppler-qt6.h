@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017-2022, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2022, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -701,6 +701,10 @@ rather unexpected results.
        \param rect the rectangle specifying the area of interest,
        with coordinates given in points, i.e., 1/72th of an inch.
        If rect is null, all text on the page is given
+
+       \param textLayout the layouting that should be applied to the text.
+                         ReadingOrder is not supported with non null rect
+
     **/
     QString text(const QRectF &rect, TextLayout textLayout) const;
 

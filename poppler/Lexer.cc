@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006-2010, 2012-2014, 2017-2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2017-2019, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -571,11 +571,11 @@ Object Lexer::getObj(int objNum)
         n = 1;
         while ((c = lookChar()) != EOF && !specialChars[c]) {
             getChar();
+            *p++ = c;
             if (++n == tokBufSize) {
                 error(errSyntaxError, getPos(), "Command token too long");
                 break;
             }
-            *p++ = c;
         }
         std::string_view res(tokBuf, n);
         if (res == "true") {

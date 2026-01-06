@@ -626,7 +626,8 @@ public:
                   double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
 
     // Get the text which is inside the specified rectangle.
-    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const;
+    // physical layout false and raw order false does not go well with a rectangle
+    GooString getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -644,7 +645,7 @@ public:
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Dump contents of page to a file.
-    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol = false, const PDFRectangle *area = nullptr) const;
+    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const;
 
     // Get the head of the linked list of TextFlows.
     const TextFlow *getFlows() const { return flows; }
@@ -837,7 +838,8 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Get the text which is inside the specified rectangle.
-    GooString getText(double xMin, double yMin, double xMax, double yMax) const;
+    // You can only give an area if either physLayout or rawOrder are true
+    GooString getText(const std::optional<PDFRectangle> &area) const;
 
     // Find a string by character position and length.  If found, sets
     // the text bounding rectangle and returns true; otherwise returns

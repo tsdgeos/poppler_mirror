@@ -47,32 +47,32 @@ public:
     constexpr bool isValid() const { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
     constexpr bool isEmpty() const { return x1 == x2 && y1 == y2; }
     constexpr bool contains(double x, double y) const { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
-    constexpr void clipTo(const PDFRectangle *rect);
+    constexpr void clipTo(const PDFRectangle &rect);
 
     constexpr bool operator==(const PDFRectangle &rect) const { return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2; }
 };
 
-constexpr void PDFRectangle::clipTo(const PDFRectangle *rect)
+constexpr void PDFRectangle::clipTo(const PDFRectangle &rect)
 {
-    if (x1 < rect->x1) {
-        x1 = rect->x1;
-    } else if (x1 > rect->x2) {
-        x1 = rect->x2;
+    if (x1 < rect.x1) {
+        x1 = rect.x1;
+    } else if (x1 > rect.x2) {
+        x1 = rect.x2;
     }
-    if (x2 < rect->x1) {
-        x2 = rect->x1;
-    } else if (x2 > rect->x2) {
-        x2 = rect->x2;
+    if (x2 < rect.x1) {
+        x2 = rect.x1;
+    } else if (x2 > rect.x2) {
+        x2 = rect.x2;
     }
-    if (y1 < rect->y1) {
-        y1 = rect->y1;
-    } else if (y1 > rect->y2) {
-        y1 = rect->y2;
+    if (y1 < rect.y1) {
+        y1 = rect.y1;
+    } else if (y1 > rect.y2) {
+        y1 = rect.y2;
     }
-    if (y2 < rect->y1) {
-        y2 = rect->y1;
-    } else if (y2 > rect->y2) {
-        y2 = rect->y2;
+    if (y2 < rect.y1) {
+        y2 = rect.y1;
+    } else if (y2 > rect.y2) {
+        y2 = rect.y2;
     }
 }
 
