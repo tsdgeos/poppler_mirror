@@ -34,7 +34,7 @@
 // Copyright (C) 2020, 2021, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2024 Pablo Correa Gómez <ablocorrea@hotmail.com>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //

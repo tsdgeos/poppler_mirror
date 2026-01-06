@@ -23,7 +23,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2018-2022 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2018-2022, 2026 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019, 2020 2024, Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>

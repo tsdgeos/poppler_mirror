@@ -45,7 +45,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
 // Copyright (C) 2024 Adam Sampson <ats@offog.org>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //

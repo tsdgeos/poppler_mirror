@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -28,7 +28,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
