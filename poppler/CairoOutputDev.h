@@ -248,7 +248,7 @@ public:
     bool isReverseVideo() { return false; }
 
     void setCairo(cairo_t *cr);
-    void setTextPage(TextPage *text);
+    void setTextPage(std::shared_ptr<TextPage> text);
     void setPrinting(bool printingA)
     {
         printing = printingA;
@@ -360,8 +360,8 @@ protected:
     std::set<std::string> emittedDestinations;
     std::map<int, int> pdfPageToCairoPageMap;
 
-    TextPage *textPage; // text for the current page
-    ActualText *actualText;
+    std::shared_ptr<TextPage> textPage; // text for the current page
+    std::unique_ptr<ActualText> actualText;
 
     cairo_pattern_t *group;
     cairo_pattern_t *shape;

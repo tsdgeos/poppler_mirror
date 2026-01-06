@@ -213,10 +213,6 @@ CairoOutputDev::~CairoOutputDev()
     if (shape) {
         cairo_pattern_destroy(shape);
     }
-    if (textPage) {
-        textPage->decRefCnt();
-    }
-    delete actualText;
 }
 
 void CairoOutputDev::setCairo(cairo_t *c)
@@ -248,19 +244,12 @@ bool CairoOutputDev::isPDF()
     return false;
 }
 
-void CairoOutputDev::setTextPage(TextPage *text)
+void CairoOutputDev::setTextPage(std::shared_ptr<TextPage> text)
 {
+    actualText.reset();
+    textPage = std::move(text);
     if (textPage) {
-        textPage->decRefCnt();
-    }
-    delete actualText;
-    if (text) {
-        textPage = text;
-        textPage->incRefCnt();
-        actualText = new ActualText(text);
-    } else {
-        textPage = nullptr;
-        actualText = nullptr;
+        actualText = std::make_unique<ActualText>(textPage.get());
     }
 }
 

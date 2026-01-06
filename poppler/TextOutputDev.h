@@ -557,9 +557,8 @@ public:
 
     TextPage(const TextPage &) = delete;
     TextPage &operator=(const TextPage &) = delete;
-
-    void incRefCnt();
-    void decRefCnt();
+    // Destructor.
+    ~TextPage();
 
     // Start a new page.
     void startPage(const GfxState *state);
@@ -661,9 +660,6 @@ public:
     std::unique_ptr<TextWordList> makeWordList(bool physLayout);
 
 private:
-    // Destructor.
-    ~TextPage();
-
     void clear();
     void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
@@ -706,8 +702,6 @@ private:
     std::vector<std::unique_ptr<TextUnderline>> underlines;
     std::vector<std::unique_ptr<TextLink>> links;
 
-    int refCnt;
-
     friend class TextLine;
     friend class TextLineFrag;
     friend class TextBlock;
@@ -724,7 +718,8 @@ private:
 class POPPLER_PRIVATE_EXPORT ActualText
 {
 public:
-    // Create an ActualText
+    /// Create an ActualText
+    /// \note: \param out must be kept alive during the lifetime of this object
     explicit ActualText(TextPage *out);
     ~ActualText();
 
@@ -864,7 +859,7 @@ public:
 
     // Returns the TextPage object for the last rasterized page,
     // transferring ownership to the caller.
-    TextPage *takeText();
+    std::unique_ptr<TextPage> takeText();
 
     // Turn extra processing for HTML conversion on or off.
     void enableHTMLExtras(bool doHTMLA) { doHTML = doHTMLA; }
@@ -883,7 +878,7 @@ private:
     void *outputStream; // output stream
     bool needClose; // need to close the output file?
                     //   (only if outputStream is a FILE*)
-    TextPage *text; // text for the current page
+    std::unique_ptr<TextPage> text; // text for the current page
     bool physLayout; // maintain original physical layout when
                      //   dumping text
     double fixedPitch; // if physLayout is true and this is non-zero,
@@ -899,7 +894,7 @@ private:
     bool textPageBreaks; // insert end-of-page markers?
     EndOfLineKind textEOL; // type of EOL marker to use
 
-    ActualText *actualText;
+    std::unique_ptr<ActualText> actualText;
 };
 
 #endif

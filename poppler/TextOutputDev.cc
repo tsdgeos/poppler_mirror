@@ -2442,7 +2442,6 @@ TextPage::TextPage(bool rawOrderA, bool discardDiagA)
 {
     int rot;
 
-    refCnt = 1;
     rawOrder = rawOrderA;
     discardDiag = discardDiagA;
     curWord = nullptr;
@@ -2470,18 +2469,6 @@ TextPage::TextPage(bool rawOrderA, bool discardDiagA)
 TextPage::~TextPage()
 {
     clear();
-}
-
-void TextPage::incRefCnt()
-{
-    refCnt++;
-}
-
-void TextPage::decRefCnt()
-{
-    if (--refCnt == 0) {
-        delete this;
-    }
 }
 
 void TextPage::startPage(const GfxState *state)
@@ -5494,16 +5481,12 @@ std::unique_ptr<TextWordList> TextPage::makeWordList(bool physLayout)
 //------------------------------------------------------------------------
 ActualText::ActualText(TextPage *out)
 {
-    out->incRefCnt();
     text = out;
     actualText = nullptr;
     actualTextNBytes = 0;
 }
 
-ActualText::~ActualText()
-{
-    text->decRefCnt();
-}
+ActualText::~ActualText() = default;
 
 void ActualText::addChar(const GfxState *state, double x, double y, double dx, double dy, CharCode c, int nBytes, const Unicode *u, int uLen)
 {
@@ -5590,8 +5573,8 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA, double fixe
     }
 
     // set up text object
-    text = new TextPage(rawOrderA, discardDiagA);
-    actualText = new ActualText(text);
+    text = std::make_unique<TextPage>(rawOrderA, discardDiagA);
+    actualText = std::make_unique<ActualText>(text.get());
 }
 
 TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA, double fixedPitchA, bool rawOrderA, bool discardDiagA)
@@ -5604,8 +5587,8 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream, bool physLayoutA
     rawOrder = rawOrderA;
     discardDiag = discardDiagA;
     doHTML = false;
-    text = new TextPage(rawOrderA, discardDiagA);
-    actualText = new ActualText(text);
+    text = std::make_unique<TextPage>(rawOrderA, discardDiagA);
+    actualText = std::make_unique<ActualText>(text.get());
     textEOL = EndOfLineKind::eolUnix;
     textPageBreaks = true;
     ok = true;
@@ -5617,10 +5600,6 @@ TextOutputDev::~TextOutputDev()
     if (needClose) {
         fclose((FILE *)outputStream);
     }
-    if (text) {
-        text->decRefCnt();
-    }
-    delete actualText;
 }
 
 void TextOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef * /*xref*/)
@@ -5856,14 +5835,12 @@ std::unique_ptr<TextWordList> TextOutputDev::makeWordList()
     return text->makeWordList(physLayout);
 }
 
-TextPage *TextOutputDev::takeText()
+std::unique_ptr<TextPage> TextOutputDev::takeText()
 {
-    TextPage *ret;
+    auto ret = std::move(text);
 
-    ret = text;
-    text = new TextPage(rawOrder, discardDiag);
-    delete actualText;
-    actualText = new ActualText(text);
+    text = std::make_unique<TextPage>(rawOrder, discardDiag);
+    actualText = std::make_unique<ActualText>(text.get());
     return ret;
 }
 
