@@ -644,7 +644,7 @@ public:
     bool findCharRange(int pos, int length, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Dump contents of page to a file.
-    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol = false, const PDFRectangle *area = nullptr) const;
+    void dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const;
 
     // Get the head of the linked list of TextFlows.
     const TextFlow *getFlows() const { return flows; }

@@ -4227,7 +4227,7 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
     GooString s;
 
     PDFRectangle area { xMin, yMin, xMax, yMax };
-    dump(&s, dumpToString, physLayout, textEOL, false, true, &area);
+    dump(&s, dumpToString, physLayout, textEOL, false, true, area);
     return s;
 }
 
@@ -5142,7 +5142,7 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
 {
     const auto bBox = getBBox();
     auto clipped { bBox };
-    clipped.clipTo(&area);
+    clipped.clipTo(area);
 
     if (clipped.isEmpty()) {
         return { 0, 0 };
@@ -5191,7 +5191,7 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
     }
 }
 
-void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, const PDFRectangle *area) const
+void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const
 {
     const UnicodeMap *uMap;
     char space[8], eol[16], eop[8];
@@ -5219,7 +5219,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
 
     if (area && area->x1 <= 0.0 && area->y1 <= 0.0 //
         && area->x2 >= pageWidth && area->y2 >= pageHeight) {
-        area = nullptr;
+        area = std::nullopt;
     }
 
     //~ writing mode (horiz/vert)
@@ -5264,7 +5264,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             TextBlock *blk = blocks[i];
             if (area) {
                 auto bBox = blk->getBBox();
-                bBox.clipTo(area);
+                bBox.clipTo(area.value());
                 if (bBox.isEmpty()) {
                     continue;
                 }
@@ -5630,7 +5630,7 @@ void TextOutputDev::endPage()
     text->endPage();
     text->coalesce(physLayout, fixedPitch, doHTML, minColSpacing1);
     if (outputStream) {
-        text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks);
+        text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks, false, std::nullopt);
     }
 }
 
