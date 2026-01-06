@@ -626,7 +626,8 @@ public:
                   double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
 
     // Get the text which is inside the specified rectangle.
-    GooString getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const;
+    // physical layout false and raw order false does not go well with a rectangle
+    GooString getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const;
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection, SelectionStyle style);
 
@@ -837,8 +838,8 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax, double *yMax) const;
 
     // Get the text which is inside the specified rectangle.
-    // The rectangle is ignored when both physLayout and fixedPitch are false
-    GooString getText(double xMin, double yMin, double xMax, double yMax) const;
+    // You can only give an area if either physLayout or rawOrder are true
+    GooString getText(const std::optional<PDFRectangle> &area) const;
 
     // Find a string by character position and length.  If found, sets
     // the text bounding rectangle and returns true; otherwise returns

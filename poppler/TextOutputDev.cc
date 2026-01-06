@@ -4217,7 +4217,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
     return false;
 }
 
-GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL, bool physLayout) const
+GooString TextPage::getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const
 {
     TextOutputFunc dumpToString = [](void *stream, const char *text, int len) {
         GooString *s = static_cast<GooString *>(stream);
@@ -4226,7 +4226,10 @@ GooString TextPage::getText(double xMin, double yMin, double xMax, double yMax, 
 
     GooString s;
 
-    PDFRectangle area { xMin, yMin, xMax, yMax };
+    if (!physLayout && !rawOrder && area) {
+        error(errInternal, -1, "physical layout false, rawOrder false and an area does not work well together");
+    }
+
     dump(&s, dumpToString, physLayout, textEOL, false, true, area);
     return s;
 }
@@ -5818,9 +5821,9 @@ bool TextOutputDev::findText(const Unicode *s, int len, bool startAtTop, bool st
     return text->findText(s, len, startAtTop, stopAtBottom, startAtLast, stopAtLast, caseSensitive, backward, wholeWord, xMin, yMin, xMax, yMax);
 }
 
-GooString TextOutputDev::getText(double xMin, double yMin, double xMax, double yMax) const
+GooString TextOutputDev::getText(const std::optional<PDFRectangle> &area) const
 {
-    return text->getText(xMin, yMin, xMax, yMax, textEOL, physLayout);
+    return text->getText(area, textEOL, physLayout);
 }
 
 void TextOutputDev::drawSelection(OutputDev *out, double scale, int rotation, const PDFRectangle *selection, SelectionStyle style, const GfxColor *glyph_color, const GfxColor *box_color, double box_opacity, bool draw_glyphs)

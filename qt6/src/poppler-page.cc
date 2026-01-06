@@ -690,16 +690,16 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
     if (r.isNull()) {
         const PDFRectangle *rect = m_page->page->getCropBox();
         if (orientation() == Orientation::Portrait || orientation() == Orientation::UpsideDown) {
-            s = output_dev->getText(rect->x1, rect->y1, rect->x2, rect->y2);
+            s = output_dev->getText(*rect);
         } else {
-            s = output_dev->getText(rect->y1, rect->x1, rect->y2, rect->x2);
+            s = output_dev->getText(PDFRectangle { rect->y1, rect->x1, rect->y2, rect->x2 });
         }
     } else {
         if (textLayout == ReadingOrder) {
             qWarning() << "ReadingOrder is not supported with non null rect";
             return {};
         }
-        s = output_dev->getText(r.left(), r.top(), r.right(), r.bottom());
+        s = output_dev->getText(PDFRectangle { r.left(), r.top(), r.right(), r.bottom() });
     }
 
     result = QString::fromStdString(s.toStr());

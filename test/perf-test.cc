@@ -579,7 +579,7 @@ static void RenderPdfAsText(const char *fileName)
         bool crop = true;
         bool doLinks = false;
         pdfDoc->displayPage(textOut, curPage, 72, 72, rotate, useMediaBox, crop, doLinks);
-        GooString txt = textOut->getText(0.0, 0.0, 10000.0, 10000.0);
+        GooString txt = textOut->getText(PDFRectangle { 0.0, 0.0, 10000.0, 10000.0 });
         msTimer.stop();
         timeInMs = msTimer.getElapsed();
         if (gfTimings) {
