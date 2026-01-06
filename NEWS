@@ -1,3 +1,20 @@
+Release 26.01.0:
+        core:
+         * Improve signature compatibiluty on some files
+         * Add support for de-facto standard annotation icons
+         * Splash: Implement more blending modes for mono1/8
+         * Internal code improvements
+         * Fix crashes in malformed documents
+
+        utils:
+         * pdfinfo: Print alt text in -struct
+
+        cpp:
+         * Remove deprecated time functions
+
+        qt:
+         * Add reading order option for getText()
+
 Release 25.12.0:
         core:
          * Be less strict about the Page Annots object being correct. Issue #1641
