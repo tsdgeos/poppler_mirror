@@ -19,7 +19,7 @@
 // Copyright (C) 2007, 2011, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -176,12 +176,8 @@ public:
 
     //----- coordinate conversion
 
-    // Convert between device and user coordinates.
-    virtual void cvtDevToUser(double dx, double dy, double *ux, double *uy);
+    // Convert between user and device coordinates.
     virtual void cvtUserToDev(double ux, double uy, int *dx, int *dy);
-
-    const double *getDefCTM() const { return defCTM; }
-    const double *getDefICTM() const { return defICTM; }
 
     //----- save/restore graphics state
     virtual void saveState(GfxState * /*state*/) { }
@@ -369,7 +365,6 @@ public:
 
 private:
     double defCTM[6]; // default coordinate transform matrix
-    double defICTM[6]; // inverse of default CTM
     std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
 #if USE_CMS
