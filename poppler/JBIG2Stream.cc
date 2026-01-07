@@ -3871,6 +3871,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats))) {
                     bitmap->setPixel(x, y);
                 }
+
+                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                    return nullptr;
+                }
             }
         }
     }
