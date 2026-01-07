@@ -71,8 +71,6 @@ private:
     std::array<double, 4> rotSkewMat; // only four values needed for rotation and skew
 public:
     HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity);
-    HtmlFont(const HtmlFont &x);
-    HtmlFont &operator=(const HtmlFont &x);
     HtmlFontColor getColor() const { return color; }
     ~HtmlFont();
     std::string getFullName() const;

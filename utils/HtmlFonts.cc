@@ -161,35 +161,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
     rotSkewMat[0] = rotSkewMat[1] = rotSkewMat[2] = rotSkewMat[3] = 0;
 }
 
-HtmlFont::HtmlFont(const HtmlFont &x)
-{
-    size = x.size;
-    lineSize = x.lineSize;
-    italic = x.italic;
-    bold = x.bold;
-    familyName = x.familyName;
-    color = x.color;
-    FontName = x.FontName;
-    rotOrSkewed = x.rotOrSkewed;
-    rotSkewMat = x.rotSkewMat;
-}
-
 HtmlFont::~HtmlFont() = default;
-
-HtmlFont &HtmlFont::operator=(const HtmlFont &x)
-{
-    if (this == &x) {
-        return *this;
-    }
-    size = x.size;
-    lineSize = x.lineSize;
-    italic = x.italic;
-    bold = x.bold;
-    familyName = x.familyName;
-    color = x.color;
-    FontName = x.FontName;
-    return *this;
-}
 
 /*
   This function is used to compare font uniquely for insertion into
