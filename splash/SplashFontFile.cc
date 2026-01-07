@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -31,19 +31,14 @@
 // SplashFontFile
 //------------------------------------------------------------------------
 
-SplashFontFile::SplashFontFile(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA)
+SplashFontFile::SplashFontFile(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA) : src(std::move(srcA))
 {
     id = std::move(idA);
-    src = srcA;
-    src->ref();
     refCnt = 0;
     doAdjustMatrix = false;
 }
 
-SplashFontFile::~SplashFontFile()
-{
-    src->unref();
-}
+SplashFontFile::~SplashFontFile() = default;
 
 void SplashFontFile::incRefCnt()
 {
@@ -59,25 +54,9 @@ void SplashFontFile::decRefCnt()
 
 //
 
-SplashFontSrc::SplashFontSrc()
-{
-    isFile = false;
-    refcnt = 1;
-}
+SplashFontSrc::SplashFontSrc() = default;
 
 SplashFontSrc::~SplashFontSrc() = default;
-
-void SplashFontSrc::ref()
-{
-    refcnt++;
-}
-
-void SplashFontSrc::unref()
-{
-    if (!--refcnt) {
-        delete this;
-    }
-}
 
 void SplashFontSrc::setFile(const std::string &file)
 {

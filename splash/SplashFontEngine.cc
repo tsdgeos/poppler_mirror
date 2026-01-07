@@ -14,7 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2009, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Dmytro Morgun <lztoad@gmail.com>
@@ -76,115 +76,67 @@ SplashFontFile *SplashFontEngine::getFontFile(const SplashFontFileID &id)
     return nullptr;
 }
 
-SplashFontFile *SplashFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex)
+SplashFontFile *SplashFontEngine::loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadType1Font(std::move(idA), src, enc, faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadType1Font(std::move(idA), std::move(src), enc, faceIndex);
     }
 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex)
+SplashFontFile *SplashFontEngine::loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadType1CFont(std::move(idA), src, enc, faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadType1CFont(std::move(idA), std::move(src), enc, faceIndex);
     }
 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, const char **enc, int faceIndex)
+SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadOpenTypeT1CFont(std::move(idA), src, enc, faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadOpenTypeT1CFont(std::move(idA), std::move(src), enc, faceIndex);
     }
 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadCIDFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, int faceIndex)
+SplashFontFile *SplashFontEngine::loadCIDFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadCIDFont(std::move(idA), src, faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadCIDFont(std::move(idA), std::move(src), faceIndex);
     }
 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
+SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadOpenTypeCFFFont(std::move(idA), src, std::move(codeToGID), faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadOpenTypeCFFFont(std::move(idA), std::move(src), std::move(codeToGID), faceIndex);
     }
 
     return fontFile;
 }
 
-SplashFontFile *SplashFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *src, std::vector<int> &&codeToGID, int faceIndex)
+SplashFontFile *SplashFontEngine::loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex)
 {
     SplashFontFile *fontFile = nullptr;
 
     if (ftEngine) {
-        fontFile = ftEngine->loadTrueTypeFont(std::move(idA), src, std::move(codeToGID), faceIndex);
-    }
-
-    // delete the (temporary) font file -- with Unix hard link
-    // semantics, this will remove the last link; otherwise it will
-    // return an error, leaving the file to be deleted later (if
-    // loadXYZFont failed, the file will always be deleted)
-    if (src->isFile) {
-        src->unref();
+        fontFile = ftEngine->loadTrueTypeFont(std::move(idA), std::move(src), std::move(codeToGID), faceIndex);
     }
 
     return fontFile;

@@ -43,6 +43,7 @@ class POPPLER_PRIVATE_EXPORT SplashFontSrc
 {
 public:
     SplashFontSrc();
+    ~SplashFontSrc();
 
     SplashFontSrc(const SplashFontSrc &) = delete;
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
@@ -50,16 +51,9 @@ public:
     void setFile(const std::string &file);
     void setBuf(std::vector<unsigned char> &&bufA);
 
-    void ref();
-    void unref();
-
-    bool isFile;
+    bool isFile = false;
     std::string fileName;
     std::vector<unsigned char> buf;
-
-private:
-    ~SplashFontSrc();
-    int refcnt;
 };
 
 class POPPLER_PRIVATE_EXPORT SplashFontFile
@@ -87,10 +81,10 @@ public:
     bool doAdjustMatrix;
 
 protected:
-    SplashFontFile(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA);
+    SplashFontFile(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA);
 
     std::unique_ptr<SplashFontFileID> id;
-    SplashFontSrc *src;
+    const std::unique_ptr<SplashFontSrc> src;
     int refCnt;
 
     friend class SplashFontEngine;
