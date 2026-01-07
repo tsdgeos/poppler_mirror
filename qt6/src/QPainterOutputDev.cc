@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// // Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// // Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
@@ -877,7 +877,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double /*d
         m_painter.top()->setTransform(fontMatrix, true);
 
         // Apply the text matrix on top
-        const double *textMat = state->getTextMat();
+        const std::array<double, 6> &textMat = state->getTextMat();
 
         QTransform textTransform(textMat[0] * state->getHorizScaling(), textMat[1] * state->getHorizScaling(), textMat[2], textMat[3], 0, 0);
 
@@ -924,7 +924,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double /*d
         // reflect the page at glyphPosition.y().
 
         // Make the glyph position the coordinate origin -- that's our center of scaling
-        const double *textMat = state->getTextMat();
+        const std::array<double, 6> &textMat = state->getTextMat();
 
         m_painter.top()->translate(QPointF(glyphPosition.x(), glyphPosition.y()));
 

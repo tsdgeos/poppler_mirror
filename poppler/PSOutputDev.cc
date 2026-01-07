@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -4112,7 +4112,7 @@ void PSOutputDev::updateFont(GfxState *state)
 
 void PSOutputDev::updateTextMat(GfxState *state)
 {
-    const double *mat = state->getTextMat();
+    const std::array<double, 6> &mat = state->getTextMat();
     if (fabs(mat[0] * mat[3] - mat[1] * mat[2]) < 0.00001) {
         // avoid a singular (or close-to-singular) matrix
         writePSFmt("[0.00001 0 0 0.00001 {0:.6g} {1:.6g}] Tm\n", mat[4], mat[5]);

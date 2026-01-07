@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -3850,7 +3850,7 @@ void Gfx::doShowText(const GooString *s)
     double originX, originY, tOriginX, tOriginY;
     double x0, y0, x1, y1;
     double tmp[4], newCTM[6];
-    const double *oldCTM, *mat;
+    const double *oldCTM;
     Dict *resDict;
     Parser *oldParser;
     GfxState *savedState;
@@ -3890,7 +3890,7 @@ void Gfx::doShowText(const GooString *s)
     // handle a Type 3 char
     if (font->getType() == fontType3 && out->interpretType3Chars()) {
         oldCTM = state->getCTM();
-        mat = state->getTextMat();
+        const std::array<double, 6> &mat = state->getTextMat();
         tmp[0] = mat[0] * oldCTM[0] + mat[1] * oldCTM[2];
         tmp[1] = mat[0] * oldCTM[1] + mat[1] * oldCTM[3];
         tmp[2] = mat[2] * oldCTM[0] + mat[3] * oldCTM[2];

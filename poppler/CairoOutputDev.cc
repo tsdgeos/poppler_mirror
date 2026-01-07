@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -1165,7 +1165,7 @@ void CairoOutputDev::updateFont(GfxState *state)
     use_show_text_glyphs = state->getFont()->hasToUnicodeCMap() && cairo_surface_has_show_text_glyphs(cairo_get_target(cairo));
 
     double fontSize = state->getFontSize();
-    const double *m = state->getTextMat();
+    const std::array<double, 6> &m = state->getTextMat();
     /* NOTE: adjusting by a constant is hack. The correct solution
      * is probably to use user-fonts and compute the scale on a per
      * glyph basis instead of for the entire font */

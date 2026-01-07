@@ -1814,7 +1814,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     GfxFontType fontType;
     SplashFontFile *fontFile;
     std::unique_ptr<SplashOutFontFileID> id;
-    const double *textMat;
     double m11, m12, m21, m22, fontSize;
     std::array<SplashCoord, 4> mat;
     bool recreateFont = false;
@@ -1996,7 +1995,7 @@ reload:
     }
 
     // get the font matrix
-    textMat = state->getTextMat();
+    const std::array<double, 6> &textMat = state->getTextMat();
     fontSize = state->getFontSize();
     m11 = textMat[0] * fontSize * state->getHorizScaling();
     m12 = textMat[1] * fontSize * state->getHorizScaling();

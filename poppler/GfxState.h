@@ -1595,7 +1595,7 @@ public:
     bool getTextKnockout() const { return textKnockout; }
     const std::shared_ptr<GfxFont> &getFont() const { return font; }
     double getFontSize() const { return fontSize; }
-    const double *getTextMat() const { return textMat; }
+    const std::array<double, 6> &getTextMat() const { return textMat; }
     double getCharSpace() const { return charSpace; }
     double getWordSpace() const { return wordSpace; }
     double getHorizScaling() const { return horizScaling; }
@@ -1807,7 +1807,7 @@ private:
 
     std::shared_ptr<GfxFont> font; // font
     double fontSize; // font size
-    double textMat[6]; // text matrix
+    std::array<double, 6> textMat; // text matrix
     double charSpace; // character spacing
     double wordSpace; // word spacing
     double horizScaling; // horizontal scaling

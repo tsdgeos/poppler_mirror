@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007, 2010, 2012, 2018, 2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2010, 2012, 2018, 2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
@@ -171,7 +171,7 @@ HtmlFont::HtmlFont(const HtmlFont &x)
     color = x.color;
     FontName = x.FontName;
     rotOrSkewed = x.rotOrSkewed;
-    memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
+    rotSkewMat = x.rotSkewMat;
 }
 
 HtmlFont::~HtmlFont() = default;
@@ -317,7 +317,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
         }
         // if there is rotation or skew, include the matrix
         if (font.isRotOrSkewed()) {
-            const double *const text_mat = font.getRotMat();
+            const std::array<double, 4> &text_mat = font.getRotMat();
             GooString matrix_str(" matrix(");
             matrix_str.appendf("{0:10.10g}, {1:10.10g}, {2:10.10g}, {3:10.10g}, 0, 0)", text_mat[0], text_mat[1], text_mat[2], text_mat[3]);
             tmp->append(";-moz-transform:");

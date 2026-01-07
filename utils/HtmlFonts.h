@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
-// Copyright (C) 2010, 2012, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2017, 2018, 2020, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
@@ -68,7 +68,7 @@ private:
     std::string familyName;
     std::string FontName;
     HtmlFontColor color;
-    double rotSkewMat[4]; // only four values needed for rotation and skew
+    std::array<double, 4> rotSkewMat; // only four values needed for rotation and skew
 public:
     HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity);
     HtmlFont(const HtmlFont &x);
@@ -82,12 +82,12 @@ public:
     int getSize() const { return size; }
     int getLineSize() const { return lineSize; }
     void setLineSize(int _lineSize) { lineSize = _lineSize; }
-    void setRotMat(const double *const mat)
+    void setRotMat(const std::array<double, 4> &mat)
     {
         rotOrSkewed = true;
-        memcpy(rotSkewMat, mat, sizeof(rotSkewMat));
+        rotSkewMat = mat;
     }
-    const double *getRotMat() const { return rotSkewMat; }
+    const std::array<double, 4> &getRotMat() const { return rotSkewMat; }
     std::string getFontName() const;
     static std::unique_ptr<GooString> HtmlFilter(const Unicode *u, int uLen); // char* s);
     bool isEqual(const HtmlFont &x) const;

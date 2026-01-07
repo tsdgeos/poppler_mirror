@@ -6555,7 +6555,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
 
     font = state->font;
     fontSize = state->fontSize;
-    memcpy(textMat, state->textMat, sizeof(textMat));
+    textMat = state->textMat;
     charSpace = state->charSpace;
     wordSpace = state->wordSpace;
     horizScaling = state->horizScaling;
