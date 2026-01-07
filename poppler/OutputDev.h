@@ -118,7 +118,7 @@ public:
     //----- initialization and control
 
     // Set default transform matrix.
-    virtual void setDefaultCTM(const double *ctm);
+    virtual void setDefaultCTM(const std::array<double, 6> &ctm);
 
     // Check to see if a page slice should be displayed.  If this
     // returns false, the page display is aborted.  Typically, an
@@ -364,7 +364,7 @@ public:
 #endif
 
 private:
-    double defCTM[6]; // default coordinate transform matrix
+    std::array<double, 6> defCTM; // default coordinate transform matrix
     std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
 #if USE_CMS

@@ -834,7 +834,7 @@ void CairoOutputDev::updateAll(GfxState *state)
     }
 }
 
-void CairoOutputDev::setDefaultCTM(const double *ctm)
+void CairoOutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 {
     cairo_matrix_t matrix;
     matrix.xx = ctm[0];
@@ -2027,7 +2027,7 @@ bool CairoOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/,
     cairo_save(cairo);
     cairo_matrix_t matrix;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     matrix.xx = ctm[0];
     matrix.yx = ctm[1];
     matrix.xy = ctm[2];
@@ -3667,7 +3667,7 @@ void CairoImageOutputDev::saveImage(CairoImage *image)
 
 void CairoImageOutputDev::getBBox(GfxState *state, int width, int height, double *x1, double *y1, double *x2, double *y2)
 {
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     cairo_matrix_t matrix;
     cairo_matrix_init(&matrix, ctm[0], ctm[1], -ctm[2], -ctm[3], ctm[2] + ctm[4], ctm[3] + ctm[5]);
 

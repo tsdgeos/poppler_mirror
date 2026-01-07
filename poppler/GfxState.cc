@@ -6508,7 +6508,7 @@ GfxState::GfxState(const GfxState *state, bool copyPath)
 {
     hDPI = state->hDPI;
     vDPI = state->vDPI;
-    memcpy(ctm, state->ctm, sizeof(ctm));
+    ctm = state->ctm;
     px1 = state->px1;
     py1 = state->py1;
     px2 = state->px2;

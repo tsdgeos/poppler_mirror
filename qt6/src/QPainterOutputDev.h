@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -87,7 +87,7 @@ public:
     //----- initialization and control
 
     // Set Current Transformation Matrix to a fixed matrix given in ctm[0],...,ctm[5]
-    void setDefaultCTM(const double *ctm) override;
+    void setDefaultCTM(const std::array<double, 6> &ctm) override;
 
     // Start a page.
     void startPage(int pageNum, GfxState *state, XRef *xref) override;

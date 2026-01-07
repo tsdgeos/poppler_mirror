@@ -48,11 +48,9 @@ OutputDev::OutputDev()
 
 OutputDev::~OutputDev() = default;
 
-void OutputDev::setDefaultCTM(const double *ctm)
+void OutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 {
-    for (int i = 0; i < 6; ++i) {
-        defCTM[i] = ctm[i];
-    }
+    defCTM = ctm;
 }
 
 void OutputDev::cvtUserToDev(double ux, double uy, int *dx, int *dy)

@@ -2004,7 +2004,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double xMin, yMin, xMax, yMax, x, y, x1, y1;
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
-    const double *ctm, *btm;
+    const double *btm;
     double m[6], ictm[6], imb[6];
     std::array<double, 6> m1;
     double det;
@@ -2015,7 +2015,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     patCS = (GfxPatternColorSpace *)(stroke ? state->getStrokeColorSpace() : state->getFillColorSpace());
 
     // construct a (pattern space) -> (current space) transform matrix
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     btm = baseMatrix;
     const std::array<double, 6> &ptm = tPat->getMatrix();
     // iCTM = invert CTM
@@ -2224,7 +2224,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 {
     GfxShading *shading;
     GfxState *savedState;
-    const double *ctm, *btm;
+    const double *btm;
     double m[6], ictm[6], m1[6];
     double xMin, yMin, xMax, yMax;
     double det;
@@ -2249,7 +2249,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
     state->clearPath();
 
     // construct a (pattern space) -> (current space) transform matrix
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     btm = baseMatrix;
     const std::array<double, 6> &ptm = sPat->getMatrix();
     // iCTM = invert CTM
@@ -3018,7 +3018,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
     // achieve a curve flatness of 0.1 pixel in device space for the
     // largest circle (note that "device space" is 72 dpi when generating
     // PostScript, hence the relatively small 0.1 pixel accuracy)
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     t = fabs(ctm[0]);
     if (fabs(ctm[1]) > t) {
         t = fabs(ctm[1]);
@@ -3850,7 +3850,6 @@ void Gfx::doShowText(const GooString *s)
     double originX, originY, tOriginX, tOriginY;
     double x0, y0, x1, y1;
     double tmp[4], newCTM[6];
-    const double *oldCTM;
     Dict *resDict;
     Parser *oldParser;
     GfxState *savedState;
@@ -3889,7 +3888,7 @@ void Gfx::doShowText(const GooString *s)
 
     // handle a Type 3 char
     if (font->getType() == fontType3 && out->interpretType3Chars()) {
-        oldCTM = state->getCTM();
+        const std::array<double, 6> &oldCTM = state->getCTM();
         const std::array<double, 6> &mat = state->getTextMat();
         tmp[0] = mat[0] * oldCTM[0] + mat[1] * oldCTM[2];
         tmp[1] = mat[0] * oldCTM[1] + mat[1] * oldCTM[3];
@@ -4211,7 +4210,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
     }
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     const double det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
     // Detect singular matrix (non invertible) to avoid drawing Image in such case
     const bool singular_matrix = fabs(det) < 0.000001;

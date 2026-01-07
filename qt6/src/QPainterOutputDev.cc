@@ -213,7 +213,7 @@ void QPainterOutputDev::updateAll(GfxState *state)
 }
 
 // Set CTM (Current Transformation Matrix) to a fixed matrix
-void QPainterOutputDev::setDefaultCTM(const double *ctm)
+void QPainterOutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 {
     m_painter.top()->setTransform(QTransform(ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
 }

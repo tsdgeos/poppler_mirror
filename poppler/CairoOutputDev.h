@@ -23,7 +23,7 @@
 // Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
-// Copyright (C) 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
@@ -159,7 +159,7 @@ public:
 
     //----- update graphics state
     void updateAll(GfxState *state) override;
-    void setDefaultCTM(const double *ctm) override;
+    void setDefaultCTM(const std::array<double, 6> &ctm) override;
     void updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32) override;
     void updateLineDash(GfxState *state) override;
     void updateFlatness(GfxState *state) override;
@@ -453,7 +453,7 @@ public:
 
     //----- update graphics state
     void updateAll(GfxState * /*state*/) override { }
-    void setDefaultCTM(const double * /*ctm*/) override { }
+    void setDefaultCTM(const std::array<double, 6> & /*ctm*/) override { }
     void updateCTM(GfxState * /*state*/, double /*m11*/, double /*m12*/, double /*m21*/, double /*m22*/, double /*m31*/, double /*m32*/) override { }
     void updateLineDash(GfxState * /*state*/) override { }
     void updateFlatness(GfxState * /*state*/) override { }

@@ -1346,7 +1346,7 @@ void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
     splash->setThinLineMode(thinLineMode);
     splash->setMinLineWidth(s_minLineWidth);
     if (state) {
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         std::array<SplashCoord, 6> mat;
         mat[0] = (SplashCoord)ctm[0];
         mat[1] = (SplashCoord)ctm[1];
@@ -1434,7 +1434,7 @@ void SplashOutputDev::updateCTM(GfxState *state, double /*m11*/, double /*m12*/,
 {
     std::array<SplashCoord, 6> mat;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
     mat[1] = (SplashCoord)ctm[1];
     mat[2] = (SplashCoord)ctm[2];
@@ -2226,7 +2226,6 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
 {
     std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
-    const double *ctm;
     T3FontCache *t3Font;
     T3GlyphStack *t3gs;
     bool validBBox;
@@ -2254,7 +2253,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
         return false;
     }
     fontID = gfxFont->getID();
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     state->transform(0, 0, &xt, &yt);
 
     // is it the first (MRU) font in the cache?
@@ -2378,7 +2377,7 @@ void SplashOutputDev::endType3Char(GfxState *state)
         delete splash;
         bitmap = t3GlyphStack->origBitmap;
         splash = t3GlyphStack->origSplash;
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3], t3GlyphStack->origCTM4, t3GlyphStack->origCTM5);
         updateCTM(state, 0, 0, 0, 0, 0, 0);
         drawType3Glyph(state, t3GlyphStack->cache, t3GlyphStack->cacheTag, t3GlyphStack->cacheData);
@@ -2496,7 +2495,7 @@ void SplashOutputDev::type3D1(GfxState *state, double /*wx*/, double /*wy*/, dou
     // save state
     t3GlyphStack->origBitmap = bitmap;
     t3GlyphStack->origSplash = splash;
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     t3GlyphStack->origCTM4 = ctm[4];
     t3GlyphStack->origCTM5 = ctm[5];
 
@@ -2586,7 +2585,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -2623,7 +2622,6 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
 
 void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double *baseMatrix)
 {
-    const double *ctm;
     std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
@@ -2634,7 +2632,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
         return;
     }
 
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -2649,7 +2647,6 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     baseMatrix[4] -= transpGroupStack->tx;
     baseMatrix[5] -= transpGroupStack->ty;
 
-    ctm = state->getCTM();
     mat[0] = ctm[0];
     mat[1] = ctm[1];
     mat[2] = -ctm[2];
@@ -3216,7 +3213,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
     unsigned char pix;
     int n, i;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -3525,7 +3522,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 
         //----- draw the source image
 
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         for (i = 0; i < 6; ++i) {
             if (!std::isfinite(ctm[i])) {
                 return;
@@ -3640,7 +3637,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
     colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -4202,7 +4199,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     int repeatX, repeatY;
     std::array<SplashCoord, 6> matc;
     Matrix m1;
-    const double *ctm;
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
@@ -4219,13 +4215,13 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     }
 
     // calculate offsets
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
         savedCTM[i] = ctm[i];
     }
     state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     state->concatCTM(1, 0, 0, 1, bbox[0], bbox[1]);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM calls
     for (i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
@@ -4317,7 +4313,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
     state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     state->concatCTM(width * repeatX, 0, 0, height * repeatY, bbox[0], bbox[1]);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM calls
     matc[0] = ctm[0];
     matc[1] = ctm[1];
     matc[2] = ctm[2];
@@ -4350,7 +4346,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     kx = result_width / (fabs(kx) + 1);
     ky = result_height / (fabs(ky) + 1);
     state->concatCTM(kx, 0, 0, ky, 0, 0);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM call
     matc[0] = ctm[0];
     matc[1] = ctm[1];
     matc[2] = ctm[2];

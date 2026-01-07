@@ -64,7 +64,7 @@ class GfxSeparationColorSpace;
 class Matrix
 {
 public:
-    double m[6];
+    std::array<double, 6> m;
 
     void init(double xx, double yx, double xy, double yy, double x0, double y0)
     {
@@ -1550,8 +1550,8 @@ public:
     // Accessors.
     double getHDPI() const { return hDPI; }
     double getVDPI() const { return vDPI; }
-    const double *getCTM() const { return ctm; }
-    void getCTM(Matrix *m) const { memcpy(m->m, ctm, sizeof m->m); }
+    const std::array<double, 6> &getCTM() const { return ctm; }
+    void getCTM(Matrix *m) const { m->m = ctm; }
     double getX1() const { return px1; }
     double getY1() const { return py1; }
     double getX2() const { return px2; }
@@ -1772,7 +1772,7 @@ public:
 
 private:
     double hDPI, vDPI; // resolution
-    double ctm[6]; // coord transform matrix
+    std::array<double, 6> ctm; // coord transform matrix
     double px1, py1, px2, py2; // page corners (user coords)
     double pageWidth, pageHeight; // page size (pixels)
     int rotate; // page rotation angle
