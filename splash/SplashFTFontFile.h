@@ -31,6 +31,8 @@
 #include FT_FREETYPE_H
 #include "SplashFontFile.h"
 
+#include <memory>
+
 class SplashFontFileID;
 class SplashFTFontEngine;
 
@@ -38,12 +40,16 @@ class SplashFTFontEngine;
 // SplashFTFontFile
 //------------------------------------------------------------------------
 
-class SplashFTFontFile : public SplashFontFile
+class SplashFTFontFile : public SplashFontFile, public std::enable_shared_from_this<SplashFTFontFile>
 {
+    class PrivateTag
+    {
+    };
+
 public:
-    static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **encA, int faceIndexA);
-    static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
-    static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
+    static std::shared_ptr<SplashFontFile> loadType1Font(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **encA, int faceIndexA);
+    static std::shared_ptr<SplashFontFile> loadCIDFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
+    static std::shared_ptr<SplashFontFile> loadTrueTypeFont(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGIDA, int faceIndexA);
 
     ~SplashFTFontFile() override;
 
@@ -51,9 +57,9 @@ public:
     // file.
     SplashFont *makeFont(const std::array<SplashCoord, 4> &mat, const std::array<SplashCoord, 4> &textMat) override;
 
-private:
-    SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A);
+    SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A, PrivateTag = {});
 
+private:
     SplashFTFontEngine *engine;
     FT_Face face;
     std::vector<int> codeToGID;

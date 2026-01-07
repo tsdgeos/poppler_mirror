@@ -25,6 +25,7 @@
 #define SPLASHFONTFILE_H
 
 #include <string>
+#include <variant>
 #include <vector>
 #include <memory>
 
@@ -42,18 +43,20 @@ class SplashFontFileID;
 class POPPLER_PRIVATE_EXPORT SplashFontSrc
 {
 public:
-    SplashFontSrc();
-    ~SplashFontSrc();
+    explicit SplashFontSrc(const std::string &file);
+    explicit SplashFontSrc(std::vector<unsigned char> &&data);
 
     SplashFontSrc(const SplashFontSrc &) = delete;
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
 
-    void setFile(const std::string &file);
-    void setBuf(std::vector<unsigned char> &&bufA);
+    const std::vector<unsigned char> &buf() const { return std::get<std::vector<unsigned char>>(m_data); }
 
-    bool isFile = false;
-    std::string fileName;
-    std::vector<unsigned char> buf;
+    const std::string &fileName() const { return std::get<std::string>(m_data); }
+    bool isFile() const { return std::holds_alternative<std::string>(m_data); }
+    ~SplashFontSrc();
+
+private:
+    const std::variant<std::string, std::vector<unsigned char>> m_data;
 };
 
 class POPPLER_PRIVATE_EXPORT SplashFontFile
@@ -71,13 +74,6 @@ public:
     // Get the font file ID.
     const SplashFontFileID &getID() const { return *id; }
 
-    // Increment the reference count.
-    void incRefCnt();
-
-    // Decrement the reference count.  If the new value is zero, delete
-    // the SplashFontFile object.
-    void decRefCnt();
-
     bool doAdjustMatrix;
 
 protected:
@@ -85,7 +81,6 @@ protected:
 
     std::unique_ptr<SplashFontFileID> id;
     const std::unique_ptr<SplashFontSrc> src;
-    int refCnt;
 
     friend class SplashFontEngine;
 };

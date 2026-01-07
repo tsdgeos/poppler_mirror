@@ -53,7 +53,7 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, cons
 // SplashFTFont
 //------------------------------------------------------------------------
 
-SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA)
+SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA)
     : SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), textScale(0), enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting), enableSlightHinting(fontFileA->engine->enableSlightHinting), isOk(false)
 {
     FT_Face face;
@@ -199,7 +199,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
         return false;
     }
 
-    ff = (SplashFTFontFile *)fontFile;
+    ff = (SplashFTFontFile *)fontFile.get();
 
     ff->face->size = sizeObj;
     offset.x = (FT_Pos)(int)((SplashCoord)xFrac * splashFontFractionMul * 64);
@@ -271,7 +271,7 @@ double SplashFTFont::getGlyphAdvance(int c)
     FT_UInt gid;
     FT_Matrix identityMatrix;
 
-    ff = (SplashFTFontFile *)fontFile;
+    ff = (SplashFTFontFile *)fontFile.get();
 
     // init the matrix
     identityMatrix.xx = 65536; // 1 in 16.16 format
@@ -334,7 +334,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
         return nullptr;
     }
 
-    ff = (SplashFTFontFile *)fontFile;
+    ff = (SplashFTFontFile *)fontFile.get();
     ff->face->size = sizeObj;
     FT_Set_Transform(ff->face, &textMatrix, nullptr);
     slot = ff->face->glyph;

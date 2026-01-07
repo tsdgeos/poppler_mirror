@@ -163,7 +163,7 @@ class POPPLER_PRIVATE_EXPORT FoFiType1C : public FoFiBase
 public:
     // Create a FoFiType1C object from a memory buffer.
     static std::unique_ptr<FoFiType1C> make(std::vector<unsigned char> &&fileA);
-    static std::unique_ptr<FoFiType1C> make(std::span<unsigned char> data);
+    static std::unique_ptr<FoFiType1C> make(std::span<const unsigned char> data);
 
     // Create a FoFiType1C object from a file on disk.
     static std::unique_ptr<FoFiType1C> load(const char *fileName);
@@ -218,7 +218,7 @@ public:
     void convertToType0(const std::string &psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream);
 
     explicit FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag = {});
-    explicit FoFiType1C(std::span<unsigned char> data, PrivateTag = {});
+    explicit FoFiType1C(std::span<const unsigned char> data, PrivateTag = {});
 
 private:
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);

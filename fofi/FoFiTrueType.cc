@@ -454,7 +454,7 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-std::unique_ptr<FoFiTrueType> FoFiTrueType::make(std::span<unsigned char> data, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(std::span<const unsigned char> data, int faceIndexA)
 {
     auto ff = std::make_unique<FoFiTrueType>(data, faceIndexA);
     if (!ff->parsedOk) {
@@ -487,7 +487,7 @@ FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, P
     parse();
 }
 
-FoFiTrueType::FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
+FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -650,7 +650,7 @@ int FoFiTrueType::mapNameToGID(const char *name) const
     return gid->second;
 }
 
-std::optional<std::span<unsigned char>> FoFiTrueType::getCFFBlock() const
+std::optional<std::span<const unsigned char>> FoFiTrueType::getCFFBlock() const
 {
     if (!openTypeCFF || tables.empty()) {
         return std::nullopt;

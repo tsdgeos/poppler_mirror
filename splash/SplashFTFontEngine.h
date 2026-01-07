@@ -51,12 +51,12 @@ public:
     SplashFTFontEngine &operator=(const SplashFTFontEngine &) = delete;
 
     // Load fonts.
-    SplashFontFile *loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadCIDFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, int faceIndex);
-    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
-    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadCIDFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
     bool getAA() { return aa; }
     void setAA(bool aaA) { aa = aaA; }
 

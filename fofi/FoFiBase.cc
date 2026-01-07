@@ -40,7 +40,7 @@
 
 FoFiBase::FoFiBase(std::vector<unsigned char> &&fileA) : fileOwner(std::move(fileA)), file(fileOwner) { }
 
-FoFiBase::FoFiBase(std::span<unsigned char> fileA) : file(fileA) { }
+FoFiBase::FoFiBase(std::span<const unsigned char> fileA) : file(fileA) { }
 
 FoFiBase::~FoFiBase() = default;
 

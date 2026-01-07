@@ -34,38 +34,14 @@
 SplashFontFile::SplashFontFile(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA) : src(std::move(srcA))
 {
     id = std::move(idA);
-    refCnt = 0;
     doAdjustMatrix = false;
 }
 
 SplashFontFile::~SplashFontFile() = default;
 
-void SplashFontFile::incRefCnt()
-{
-    ++refCnt;
-}
-
-void SplashFontFile::decRefCnt()
-{
-    if (!--refCnt) {
-        delete this;
-    }
-}
-
 //
 
-SplashFontSrc::SplashFontSrc() = default;
+SplashFontSrc::SplashFontSrc(const std::string &file) : m_data(file) { }
+SplashFontSrc::SplashFontSrc(std::vector<unsigned char> &&data) : m_data(std::move(data)) { }
 
 SplashFontSrc::~SplashFontSrc() = default;
-
-void SplashFontSrc::setFile(const std::string &file)
-{
-    isFile = true;
-    fileName = file;
-}
-
-void SplashFontSrc::setBuf(std::vector<unsigned char> &&bufA)
-{
-    isFile = false;
-    buf = std::move(bufA);
-}

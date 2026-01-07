@@ -1812,7 +1812,7 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
     GfxFontType fontType;
-    SplashFontFile *fontFile;
+    std::shared_ptr<SplashFontFile> fontFile;
     std::unique_ptr<SplashOutFontFileID> id;
     double m11, m12, m21, m22, fontSize;
     std::array<SplashCoord, 4> mat;
@@ -1868,11 +1868,11 @@ reload:
             doAdjustFontMatrix = true;
         }
 
-        auto fontsrc = std::make_unique<SplashFontSrc>();
+        std::unique_ptr<SplashFontSrc> fontsrc;
         if (!fileName.empty()) {
-            fontsrc->setFile(fileName);
+            fontsrc = std::make_unique<SplashFontSrc>(fileName);
         } else {
-            fontsrc->setBuf(std::move(tmpBuf.value()));
+            fontsrc = std::make_unique<SplashFontSrc>(std::move(tmpBuf.value()));
         }
 
         // load the font file
@@ -1910,7 +1910,7 @@ reload:
             if (!fileName.empty()) {
                 ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
             } else {
-                ff = FoFiTrueType::make(fontsrc->buf, fontLoc->fontNum);
+                ff = FoFiTrueType::make(fontsrc->buf(), fontLoc->fontNum);
             }
             std::vector<int> codeToGID;
             if (ff) {
@@ -1970,7 +1970,7 @@ reload:
                 if (!fileName.empty()) {
                     ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
                 } else {
-                    ff = FoFiTrueType::make(fontsrc->buf, fontLoc->fontNum);
+                    ff = FoFiTrueType::make(fontsrc->buf(), fontLoc->fontNum);
                 }
                 if (!ff) {
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");

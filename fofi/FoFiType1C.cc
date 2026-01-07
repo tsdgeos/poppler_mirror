@@ -55,7 +55,7 @@ std::unique_ptr<FoFiType1C> FoFiType1C::make(std::vector<unsigned char> &&fileA)
     }
     return ff;
 }
-std::unique_ptr<FoFiType1C> FoFiType1C::make(std::span<unsigned char> data)
+std::unique_ptr<FoFiType1C> FoFiType1C::make(std::span<const unsigned char> data)
 {
     auto ff = std::make_unique<FoFiType1C>(data);
     if (!ff->parse()) {
@@ -87,7 +87,7 @@ FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBas
     charsetLength = 0;
 }
 
-FoFiType1C::FoFiType1C(std::span<unsigned char> data, PrivateTag) : FoFiBase(data)
+FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag) : FoFiBase(data)
 {
     encoding = nullptr;
     privateDicts = nullptr;

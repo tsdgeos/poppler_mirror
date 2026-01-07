@@ -56,7 +56,7 @@ public:
     // Create a FoFiTrueType object from a memory buffer.
     // Note it is the responsibility of the caller to ensure the data is alive
     // during the lifetime of this object
-    static std::unique_ptr<FoFiTrueType> make(std::span<unsigned char> data, int faceIndexA);
+    static std::unique_ptr<FoFiTrueType> make(std::span<const unsigned char> data, int faceIndexA);
 
     // Create a FoFiTrueType object from a file on disk.
     static std::unique_ptr<FoFiTrueType> load(const char *fileName, int faceIndexA);
@@ -155,13 +155,13 @@ public:
     // Returns a pointer to the CFF font embedded in this OpenType font.
     // If successful, sets *<start> and *<length>, and returns true.
     // Otherwise returns false.  (Only useful for OpenType CFF fonts).
-    std::optional<std::span<unsigned char>> getCFFBlock() const;
+    std::optional<std::span<const unsigned char>> getCFFBlock() const;
 
     // setup vert/vrt2 GSUB for specified lang
     int setupGSUB(const std::string &scriptName, const std::string &languageName);
 
     FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
-    FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag = {});
+    FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag = {});
 
 private:
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;

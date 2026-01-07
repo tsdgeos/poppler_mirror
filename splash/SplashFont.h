@@ -48,7 +48,7 @@ class SplashPath;
 class POPPLER_PRIVATE_EXPORT SplashFont
 {
 public:
-    SplashFont(SplashFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA);
+    SplashFont(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA, bool aaA);
 
     // This must be called after the constructor, so that the subclass
     // constructor has a chance to compute the bbox.
@@ -59,10 +59,10 @@ public:
     SplashFont(const SplashFont &) = delete;
     SplashFont &operator=(const SplashFont &) = delete;
 
-    SplashFontFile *getFontFile() { return fontFile; }
+    std::shared_ptr<SplashFontFile> getFontFile() { return fontFile; }
 
     // Return true if <this> matches the specified font file and matrix.
-    bool matches(SplashFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA) const
+    bool matches(const std::shared_ptr<SplashFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA) const
     {
         return fontFileA == fontFile && matA[0] == mat[0] && matA[1] == mat[1] && matA[2] == mat[2] && matA[3] == mat[3] && textMatA[0] == textMat[0] && textMatA[1] == textMat[1] && textMatA[2] == textMat[2] && textMatA[3] == textMat[3];
     }
@@ -97,7 +97,7 @@ public:
     }
 
 protected:
-    SplashFontFile *fontFile;
+    std::shared_ptr<SplashFontFile> fontFile;
     const std::array<SplashCoord, 4> mat; // font transform matrix
                                           //   (text space -> device space)
     const std::array<SplashCoord, 4> textMat; // text transform matrix

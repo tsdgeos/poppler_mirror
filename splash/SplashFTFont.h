@@ -38,7 +38,7 @@ class SplashFTFontFile;
 class SplashFTFont : public SplashFont
 {
 public:
-    SplashFTFont(SplashFTFontFile *fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA);
+    SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA);
 
     ~SplashFTFont() override;
 

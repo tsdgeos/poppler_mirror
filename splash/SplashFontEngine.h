@@ -61,15 +61,15 @@ public:
 
     // Get a font file from the cache.  Returns NULL if there is no
     // matching entry in the cache.
-    SplashFontFile *getFontFile(const SplashFontFileID &id);
+    std::shared_ptr<SplashFontFile> getFontFile(const SplashFontFileID &id);
 
     // Load fonts - these create new SplashFontFile objects.
-    SplashFontFile *loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
-    SplashFontFile *loadCIDFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, int faceIndex);
-    SplashFontFile *loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
-    SplashFontFile *loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadType1Font(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadType1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadOpenTypeT1CFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, const char **enc, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadCIDFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadOpenTypeCFFFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
+    std::shared_ptr<SplashFontFile> loadTrueTypeFont(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> src, std::vector<int> &&codeToGID, int faceIndex);
 
     // Get a font - this does a cache lookup first, and if not found,
     // creates a new SplashFont object and adds it to the cache.  The
@@ -79,7 +79,7 @@ public:
     // specifies the font transform in PostScript style:
     //    [x' y'] = [x y] * mat
     // Note that the Splash y axis points downward.
-    SplashFont *getFont(SplashFontFile *fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm);
+    SplashFont *getFont(std::shared_ptr<SplashFontFile> fontFile, const std::array<SplashCoord, 4> &textMat, const std::array<SplashCoord, 6> &ctm);
     bool getAA();
     void setAA(bool aa);
 
