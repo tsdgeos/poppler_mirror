@@ -56,6 +56,7 @@
 
 static const int contextSize[4] = { 16, 13, 10, 10 };
 static const int refContextSize[2] = { 13, 10 };
+static constexpr auto intNBits = sizeof(int) * CHAR_BIT;
 
 //------------------------------------------------------------------------
 // JBIG2HuffmanTable
@@ -341,11 +342,12 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
         prefix = 0;
         table[i++].prefix = prefix++;
         for (; table[i].rangeLen != jbig2HuffmanEOT; ++i) {
-            if (table[i].prefixLen - table[i - 1].prefixLen > 32) {
+            const size_t bitsToShift = table[i].prefixLen - table[i - 1].prefixLen;
+            if (bitsToShift >= intNBits) {
                 error(errSyntaxError, -1, "Failed to build table for JBIG2 stream");
                 return false;
             } else {
-                prefix <<= table[i].prefixLen - table[i - 1].prefixLen;
+                prefix <<= bitsToShift;
             }
             table[i].prefix = prefix++;
         }
@@ -3968,7 +3970,6 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits, &eof);
         huffTab[i].rangeLen = huffDecoder->readBits(rangeBits, &eof);
 
-        constexpr auto intNBits = sizeof(int) * CHAR_BIT;
         const int shiftBits = huffTab[i].rangeLen % intNBits;
 
         if (eof || unlikely(checkedAdd(val, 1 << shiftBits, &val))) {
