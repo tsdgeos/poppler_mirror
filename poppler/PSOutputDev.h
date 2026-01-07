@@ -451,9 +451,7 @@ private:
     PSFont16Enc *font16Enc; // encodings for substitute 16-bit fonts
     int font16EncLen; // number of entries in font16Enc array
     int font16EncSize; // size of font16Enc array
-    Ref *imgIDs; // list of image IDs for in-memory images
-    int imgIDLen; // number of entries in imgIDs array
-    int imgIDSize; // size of imgIDs array
+    std::set<Ref> imgIDs; // set of image IDs for in-memory images
     Ref *formIDs; // list of IDs for predefined forms
     int formIDLen; // number of entries in formIDs array
     int formIDSize; // size of formIDs array
