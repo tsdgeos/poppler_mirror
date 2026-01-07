@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2010, 2018, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2018, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -48,7 +48,6 @@ public:
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
 
     void setFile(const std::string &file);
-    void setBuf(char *bufA, int buflenA);
     void setBuf(std::vector<unsigned char> &&bufA);
 
     void ref();
