@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -177,9 +177,8 @@ static inline void convertGfxShortColor(SplashColorPtr dest, const SplashColorMo
 //------------------------------------------------------------------------
 // SplashGouraudPattern
 //------------------------------------------------------------------------
-SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA, GfxState *stateA, GfxGouraudTriangleShading *shadingA)
+SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA, GfxGouraudTriangleShading *shadingA)
 {
-    state = stateA;
     shading = shadingA;
     bDirectColorTranslation = bDirectColorTranslationA;
     gfxMode = shadingA->getColorSpace()->getMode();
@@ -4435,7 +4434,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     return retValue;
 }
 
-bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
+bool SplashOutputDev::gouraudTriangleShadedFill(GfxState * /*state*/, GfxGouraudTriangleShading *shading)
 {
     GfxColorSpaceMode shadingMode = shading->getColorSpace()->getMode();
     bool bDirectColorTranslation = false; // triggers an optimization.
@@ -4451,7 +4450,7 @@ bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
         break;
     }
     // restore vector antialias because we support it here
-    SplashGouraudPattern splashShading(bDirectColorTranslation, state, shading);
+    SplashGouraudPattern splashShading(bDirectColorTranslation, shading);
     const bool vaa = getVectorAntialias();
     setVectorAntialias(true);
     const bool retVal = splash->gouraudTriangleShadedFill(&splashShading);

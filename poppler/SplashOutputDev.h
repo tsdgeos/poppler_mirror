@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012, 2015, 2018-2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2015, 2018-2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -132,9 +132,9 @@ private:
 class SplashGouraudPattern : public SplashGouraudColor
 {
 public:
-    SplashGouraudPattern(bool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading);
+    SplashGouraudPattern(bool bDirectColorTranslation, GfxGouraudTriangleShading *shading);
 
-    SplashPattern *copy() const override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
+    SplashPattern *copy() const override { return new SplashGouraudPattern(bDirectColorTranslation, shading); }
 
     ~SplashGouraudPattern() override;
 
@@ -159,7 +159,6 @@ public:
 
 private:
     GfxGouraudTriangleShading *shading;
-    GfxState *state;
     bool bDirectColorTranslation;
     GfxColorSpaceMode gfxMode;
 };
