@@ -299,8 +299,8 @@ public:
     // If 'invert' is false, a sample value of 0 marks the page with the current color,
     // and a 1 leaves the previous contents unchanged. If 'invert' is true, these meanings are reversed.
     virtual void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
-    virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix);
-    virtual void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix);
+    virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix);
+    virtual void unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix);
     virtual void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg);
     virtual void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate);
     virtual void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,

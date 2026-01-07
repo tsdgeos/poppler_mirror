@@ -2620,7 +2620,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     str->close();
 }
 
-void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double *baseMatrix)
+void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> &baseMatrix)
 {
     std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
@@ -2669,7 +2669,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     str->close();
 }
 
-void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
+void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix)
 {
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 

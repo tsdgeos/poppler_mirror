@@ -2548,7 +2548,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *st
     drawImageMaskRegular(state, str, width, height, invert, interpolate);
 }
 
-void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double * /*baseMatrix*/)
+void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> & /*baseMatrix*/)
 {
 
     /* FIXME: Doesn't the image mask support any colorspace? */
@@ -2610,7 +2610,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/,
     beginTransparencyGroup(state, bbox, state->getFillColorSpace(), true, false, false);
 }
 
-void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double * /*baseMatrix*/)
+void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> & /*baseMatrix*/)
 {
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
@@ -3717,7 +3717,7 @@ void CairoImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *st
     }
 }
 
-void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double * /*baseMatrix*/)
+void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     cairo_t *cr;
     cairo_surface_t *surface;

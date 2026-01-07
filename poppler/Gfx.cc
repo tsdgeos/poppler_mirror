@@ -454,8 +454,6 @@ Object GfxResources::lookupGStateNF(const char *name)
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
-    int i;
-
     doc = docA;
     xref = (xrefA == nullptr) ? doc->getXRef() : xrefA;
     catalog = doc->getCatalog();
@@ -478,9 +476,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
     out->startPage(pageNum, state, xref);
     out->setDefaultCTM(state->getCTM());
     out->updateAll(state);
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    baseMatrix = state->getCTM();
     displayDepth = 0;
     ocState = true;
     parser = nullptr;
@@ -506,8 +502,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
-    int i;
-
     doc = docA;
     if (gfxA) {
         xref = gfxA->getXRef();
@@ -538,9 +532,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
     fontChanged = false;
     clip = clipNone;
     ignoreUndef = 0;
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    baseMatrix = state->getCTM();
     displayDepth = 0;
     ocState = true;
     parser = nullptr;
@@ -2004,7 +1996,6 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double xMin, yMin, xMax, yMax, x, y, x1, y1;
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
-    const double *btm;
     double m[6], ictm[6], imb[6];
     std::array<double, 6> m1;
     double det;
@@ -2016,7 +2007,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
 
     // construct a (pattern space) -> (current space) transform matrix
     const std::array<double, 6> &ctm = state->getCTM();
-    btm = baseMatrix;
+    const std::array<double, 6> &btm = baseMatrix;
     const std::array<double, 6> &ptm = tPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
@@ -2224,7 +2215,6 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 {
     GfxShading *shading;
     GfxState *savedState;
-    const double *btm;
     double m[6], ictm[6], m1[6];
     double xMin, yMin, xMax, yMax;
     double det;
@@ -2250,7 +2240,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 
     // construct a (pattern space) -> (current space) transform matrix
     const std::array<double, 6> &ctm = state->getCTM();
-    btm = baseMatrix;
+    const std::array<double, 6> &btm = baseMatrix;
     const std::array<double, 6> &ptm = sPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
@@ -4822,8 +4812,6 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
 {
     Parser *oldParser;
     GfxState *savedState;
-    double oldBaseMatrix[6];
-    int i;
 
     // push new resources on stack
     pushResources(resDict);
@@ -4869,10 +4857,8 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
     }
 
     // set new base matrix
-    for (i = 0; i < 6; ++i) {
-        oldBaseMatrix[i] = baseMatrix[i];
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    const std::array<double, 6> oldBaseMatrix = baseMatrix;
+    baseMatrix = state->getCTM();
 
     GfxState *stateBefore = state;
 
@@ -4897,9 +4883,7 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
     }
 
     // restore base matrix
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = oldBaseMatrix[i];
-    }
+    baseMatrix = oldBaseMatrix;
 
     // restore parser
     parser = oldParser;
