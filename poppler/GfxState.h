@@ -1128,14 +1128,14 @@ public:
     /**
      * @precondition isParameterized() == false
      */
-    void getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2);
+    void getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2) const;
 
     /**
      * Variant for functions.
      *
      * @precondition isParameterized() == true
      */
-    void getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2);
+    void getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2) const;
 
     void getParameterizedColor(double t, GfxColor *color) const;
 

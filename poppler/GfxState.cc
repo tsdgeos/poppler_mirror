@@ -4793,7 +4793,7 @@ std::unique_ptr<GfxShading> GfxGouraudTriangleShading::copy() const
     return std::make_unique<GfxGouraudTriangleShading>(this);
 }
 
-void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2)
+void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2) const
 {
     int v;
 
@@ -4825,7 +4825,7 @@ void GfxGouraudTriangleShading::getParameterizedColor(double t, GfxColor *color)
     }
 }
 
-void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2)
+void GfxGouraudTriangleShading::getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2) const
 {
     int v;
 
