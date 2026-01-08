@@ -133,12 +133,6 @@ void TestGooString::testFromNullptr()
         GooString str { static_cast<const char *>(nullptr), 0 };
         QCOMPARE(str.size(), 0);
     }
-
-    {
-        GooString str;
-        str.Set(static_cast<const char *>(nullptr), 0);
-        QCOMPARE(str.size(), 0);
-    }
 }
 
 QTEST_GUILESS_MAIN(TestGooString)

@@ -774,7 +774,7 @@ static bool get_id(const GooString *encodedidstring, GooString *id)
         return false;
     }
 
-    id->Set(pdfid, pdfIdLength);
+    id->assign(pdfid, pdfIdLength);
     return true;
 }
 

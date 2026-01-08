@@ -110,7 +110,7 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
+            opt.assign(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
             opt.assign(nextOpt);

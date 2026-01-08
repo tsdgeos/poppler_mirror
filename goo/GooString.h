@@ -94,11 +94,6 @@ public:
     GooString(const std::string &str, int idx, size_t lengthA) : std::string(str, idx, lengthA) { }
 
     using std::string::assign;
-    GooString *Set(const char *newStr, int newLen)
-    {
-        assign(newStr ? newStr : "", newStr ? newLen : 0);
-        return this;
-    }
 
     // Copy a string.
     std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this->toStr()); }
