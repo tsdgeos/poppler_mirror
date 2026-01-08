@@ -858,8 +858,8 @@ static FcPattern *buildFcPattern(const GfxFont &font, const GooString *base14Nam
 
 std::optional<std::string> GlobalParams::findFontFile(const std::string &fontName)
 {
-    setupBaseFonts(POPPLER_FONTSDIR);
     globalParamsLocker();
+    setupBaseFonts(POPPLER_FONTSDIR);
     const auto fontFile = fontFiles.find(fontName);
     if (fontFile != fontFiles.end()) {
         return fontFile->second;
