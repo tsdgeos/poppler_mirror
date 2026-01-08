@@ -147,11 +147,8 @@ public:
     using std::string::clear;
 
     // Append a character or string.
+    using std::string::append;
     using std::string::push_back;
-    void append(const std::string &str) { static_cast<std::string &>(*this).append(str); }
-    void append(std::string_view str) { static_cast<std::string &>(*this).append(str); }
-    void append(const char *str) { static_cast<std::string &>(*this).append(str); }
-    void append(const char *str, size_t lengthA) { static_cast<std::string &>(*this).append(str, lengthA); }
 
     // Append a formatted string.
     POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
