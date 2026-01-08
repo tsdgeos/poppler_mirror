@@ -489,17 +489,6 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
     return this;
 }
 
-std::string GooString::formatLongLong(long long x, int width)
-{
-    char buf[65];
-    const char *p;
-    int len;
-
-    formatInt(x, buf, sizeof(buf), true /*zeroFill*/, width, 10 /*base*/, &p, &len);
-
-    return { p, static_cast<size_t>(len) };
-}
-
 namespace {
 
 const char lowerCaseDigits[17] = "0123456789abcdef";
