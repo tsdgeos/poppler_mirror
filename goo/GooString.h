@@ -167,7 +167,6 @@ public:
 
     // Compare two strings:  -1:<  0:=  +1:>
     using std::string::compare;
-    int cmp(const std::string &str) const { return compare(str); }
     int cmp(const char *sA) const { return compare(sA); }
 
     // Return true if strings starts with prefix

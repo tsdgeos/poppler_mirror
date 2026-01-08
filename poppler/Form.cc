@@ -1941,11 +1941,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
-                    if (choices[i].exportVal->cmp(obj1.getString()->toStr()) == 0) {
+                    if (choices[i].exportVal->compare(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 } else if (choices[i].optionName) {
-                    if (choices[i].optionName->cmp(obj1.getString()->toStr()) == 0) {
+                    if (choices[i].optionName->compare(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 }

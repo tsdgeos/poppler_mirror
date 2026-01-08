@@ -3041,7 +3041,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                 sepFunc = func.get();
             } else {
                 for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                    if (!sepCS->getName()->cmp(names[i])) {
+                    if (!sepCS->getName()->compare(names[i])) {
                         sepFunc = sepCS->getFunc();
                         break;
                     }
@@ -3049,7 +3049,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
             }
             for (std::size_t j = 0; j < separationList->size(); j++) {
                 const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[j];
-                if (!sepCS->getName()->cmp(names[i])) {
+                if (!sepCS->getName()->compare(names[i])) {
                     if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
                         error(errSyntaxWarning, -1, "Different functions found for '{0:s}', convert immediately", names[i].c_str());
                         mapping.clear();
@@ -3076,7 +3076,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<std::unique_ptr<GfxSeparati
                     separationList->push_back(std::make_unique<GfxSeparationColorSpace>(std::make_unique<GooString>(names[i]), alt->copy(), func->copy()));
                 } else {
                     for (const std::unique_ptr<GfxSeparationColorSpace> &sepCS : sepsCS) {
-                        if (!sepCS->getName()->cmp(names[i])) {
+                        if (!sepCS->getName()->compare(names[i])) {
                             found = true;
                             separationList->push_back(sepCS->copyAsOwnType());
                             break;
