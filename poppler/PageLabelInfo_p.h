@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include "goo/GooLikely.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "UTF.h"

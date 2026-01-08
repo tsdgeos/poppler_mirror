@@ -937,7 +937,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
-        substituteName.Set(fi->substituteName->c_str());
+        substituteName.Set(fi->substituteName->toStr());
     } else {
         FcChar8 *s;
         char *ext;
@@ -1073,7 +1073,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         *fontNum = fi->fontNum;
     }
     if (substituteFontName) {
-        substituteFontName->Set(substituteName.c_str());
+        substituteFontName->Set(substituteName.toStr());
     }
 fin:
     if (p) {

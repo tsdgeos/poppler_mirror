@@ -1568,7 +1568,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
             for (int i = 0; i < docInfo.getDict()->getLength(); i++) {
                 Object obj2 = docInfo.getDict()->getVal(i);
                 if (obj2.isString()) {
-                    message.append(obj2.getString());
+                    message.append(obj2.getString()->toStr());
                 }
             }
         }

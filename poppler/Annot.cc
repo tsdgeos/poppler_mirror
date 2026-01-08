@@ -4728,7 +4728,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
         // write the DA string
         for (const std::string &daTok : daToks) {
-            appearBuf->append(daTok)->append(' ');
+            appearBuf->append(daTok);
+            appearBuf->append(' ');
         }
 
         const DrawMultiLineTextResult textCommands = drawMultiLineText(text->toStr(), dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
@@ -4778,7 +4779,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
             // write the DA string
             for (const std::string &daTok : daToks) {
-                appearBuf->append(daTok)->append(' ');
+                appearBuf->append(daTok);
+                appearBuf->append(' ');
             }
 
             // write the text string
@@ -4866,7 +4868,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
             // write the DA string
             for (const std::string &daTok : daToks) {
-                appearBuf->append(daTok)->append(' ');
+                appearBuf->append(daTok);
+                appearBuf->append(' ');
             }
             // This newline is not neeed at all but it makes for easier reading
             // and our auto tests "wrongly" assume it will be there, so add it anyway
@@ -5044,7 +5047,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
         // write the DA string
         for (const std::unique_ptr<GooString> &daTok : daToks) {
-            appearBuf->append(daTok.get())->append(' ');
+            appearBuf->append(daTok->toStr());
+            appearBuf->append(' ');
         }
 
         // write the font matrix (if not part of the DA string)

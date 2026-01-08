@@ -220,7 +220,7 @@ bool PageLabelInfo::indexToLabel(int index, GooString *label) const
             label->append(ucs2_char, 2);
         }
     } else {
-        label->append(&number_string);
+        label->append(number_string.toStr());
     }
 
     return true;

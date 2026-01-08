@@ -293,13 +293,13 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
             GooString matrix_str(" matrix(");
             matrix_str.appendf("{0:10.10g}, {1:10.10g}, {2:10.10g}, {3:10.10g}, 0, 0)", text_mat[0], text_mat[1], text_mat[2], text_mat[3]);
             tmp->append(";-moz-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-webkit-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-o-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-ms-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             // Todo: 75% is a wild guess that seems to work pretty well;
             // We probably need to calculate the real percentage
             // Based on the characteristic baseline and bounding box of current font

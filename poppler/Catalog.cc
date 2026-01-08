@@ -702,7 +702,7 @@ NameTree::Entry::Entry(const Array &array, int index)
     if (!array.getString(index, &name)) {
         Object aux = array.get(index);
         if (aux.isString()) {
-            name.append(aux.getString());
+            name.append(aux.getString()->toStr());
         } else {
             error(errSyntaxError, -1, "Invalid page tree");
         }

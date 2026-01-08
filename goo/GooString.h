@@ -93,20 +93,9 @@ public:
     GooString(const GooString *str, int idx, size_t lengthA) : std::string(*str, idx, lengthA) { }
     GooString(const std::string &str, int idx, size_t lengthA) : std::string(str, idx, lengthA) { }
 
-    // Set content of a string to <newStr>.
-    GooString *Set(const GooString *newStr)
-    {
-        assign(newStr ? static_cast<const std::string &>(*newStr) : std::string {});
-        return this;
-    }
     GooString *Set(std::string_view newStr)
     {
         assign(newStr);
-        return this;
-    }
-    GooString *Set(const char *newStr)
-    {
-        assign(newStr ? newStr : "");
         return this;
     }
     GooString *Set(const char *newStr, int newLen)
@@ -170,31 +159,10 @@ public:
 
     // Append a character or string.
     void append(char c) { push_back(c); }
-    GooString *append(const GooString *str)
-    {
-        static_cast<std::string &>(*this).append(*str);
-        return this;
-    }
-    GooString *append(const std::string &str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(std::string_view str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(const char *str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(const char *str, size_t lengthA)
-    {
-        static_cast<std::string &>(*this).append(str, lengthA);
-        return this;
-    }
+    void append(const std::string &str) { static_cast<std::string &>(*this).append(str); }
+    void append(std::string_view str) { static_cast<std::string &>(*this).append(str); }
+    void append(const char *str) { static_cast<std::string &>(*this).append(str); }
+    void append(const char *str, size_t lengthA) { static_cast<std::string &>(*this).append(str, lengthA); }
 
     // Append a formatted string.
     POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;

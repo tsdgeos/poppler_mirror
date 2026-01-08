@@ -115,7 +115,7 @@ std::unique_ptr<GooString> HtmlLink::getLinkStart() const
 {
     std::unique_ptr<GooString> res = std::make_unique<GooString>("<a href=\"");
     std::unique_ptr<GooString> d = xml ? EscapeSpecialChars(dest.get()) : nullptr;
-    res->append(d ? d.get() : dest.get());
+    res->append(d ? d->toStr() : dest->toStr());
     res->append("\">");
     return res;
 }
