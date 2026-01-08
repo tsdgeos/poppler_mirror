@@ -4414,40 +4414,40 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
         }
 
         if (noReencode) {
-            outBuf->append(uChar);
+            outBuf->push_back(uChar);
         } else {
             const CharCodeToUnicode *ccToUnicode = font.getToUnicode();
             if (!ccToUnicode) {
                 // This assumes an identity CMap.
-                outBuf->append((uChar >> 8) & 0xff);
-                outBuf->append(uChar & 0xff);
+                outBuf->push_back((uChar >> 8) & 0xff);
+                outBuf->push_back(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
                 if (font.isCIDFont()) {
                     auto cidFont = static_cast<const GfxCIDFont *>(&font);
                     if (c < cidFont->getCIDToGIDLen()) {
                         const int glyph = cidFont->getCIDToGID()[c];
                         if (glyph > 0 || c == 0) {
-                            outBuf->append((c >> 8) & 0xff);
-                            outBuf->append(c & 0xff);
+                            outBuf->push_back((c >> 8) & 0xff);
+                            outBuf->push_back(c & 0xff);
                         } else {
                             if (newFontNeeded) {
                                 *newFontNeeded = true;
                                 *i -= unicode ? 2 : 1;
                                 break;
                             }
-                            outBuf->append((c >> 8) & 0xff);
-                            outBuf->append(c & 0xff);
+                            outBuf->push_back((c >> 8) & 0xff);
+                            outBuf->push_back(c & 0xff);
                             error(errSyntaxError, -1, "AnnotWidget::layoutText, font doesn't have glyph for charcode U+{0:04uX}", c);
                         }
                     } else {
                         // TODO: This assumes an identity CMap.  It should be extended to
                         // handle the general case.
-                        outBuf->append((c >> 8) & 0xff);
-                        outBuf->append(c & 0xff);
+                        outBuf->push_back((c >> 8) & 0xff);
+                        outBuf->push_back(c & 0xff);
                     }
                 } else {
                     // 8-bit font
-                    outBuf->append(c);
+                    outBuf->push_back(c);
                 }
             } else {
                 if (newFontNeeded) {
@@ -4558,20 +4558,20 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
 // escaping characters as appropriate.
 void AnnotAppearanceBuilder::writeString(const std::string &str)
 {
-    appearBuf->append('(');
+    appearBuf->push_back('(');
 
     for (const char c : str) {
         if (c == '(' || c == ')' || c == '\\') {
-            appearBuf->append('\\');
-            appearBuf->append(c);
+            appearBuf->push_back('\\');
+            appearBuf->push_back(c);
         } else if (c < 0x20) {
             appearBuf->appendf("\\{0:03o}", (unsigned char)c);
         } else {
-            appearBuf->append(c);
+            appearBuf->push_back(c);
         }
     }
 
-    appearBuf->append(')');
+    appearBuf->push_back(')');
 }
 
 // Draw the variable text or caption for a field.
@@ -4672,7 +4672,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
 
         textToFree = std::make_unique<GooString>();
         for (int i = 0; i < len; ++i) {
-            textToFree->append('*');
+            textToFree->push_back('*');
         }
         text = textToFree.get();
     }
@@ -4729,7 +4729,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
         // write the DA string
         for (const std::string &daTok : daToks) {
             appearBuf->append(daTok);
-            appearBuf->append(' ');
+            appearBuf->push_back(' ');
         }
 
         const DrawMultiLineTextResult textCommands = drawMultiLineText(text->toStr(), dx, form, *font, std::string(), fontSize, quadding, borderWidth + 2);
@@ -4780,7 +4780,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             // write the DA string
             for (const std::string &daTok : daToks) {
                 appearBuf->append(daTok);
-                appearBuf->append(' ');
+                appearBuf->push_back(' ');
             }
 
             // write the text string
@@ -4869,7 +4869,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const Form *form, c
             // write the DA string
             for (const std::string &daTok : daToks) {
                 appearBuf->append(daTok);
-                appearBuf->append(' ');
+                appearBuf->push_back(' ');
             }
             // This newline is not neeed at all but it makes for easier reading
             // and our auto tests "wrongly" assume it will be there, so add it anyway
@@ -5048,7 +5048,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
         // write the DA string
         for (const std::unique_ptr<GooString> &daTok : daToks) {
             appearBuf->append(daTok->toStr());
-            appearBuf->append(' ');
+            appearBuf->push_back(' ');
         }
 
         // write the font matrix (if not part of the DA string)

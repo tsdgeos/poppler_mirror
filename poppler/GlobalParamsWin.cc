@@ -212,7 +212,7 @@ void SysFontList::scanWindowsFonts(const std::string &winFontDir)
                     if (!(dataLen >= 3 && data[1] == ':' && data[2] == '\\')) {
                         fontPath->insert(0, "\\");
                         fontPath->insert(0, winFontDir);
-                        fontPath->append('\0');
+                        fontPath->push_back('\0');
                     }
                     p0 = valName;
                     fontNum = 0;

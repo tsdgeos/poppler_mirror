@@ -41,7 +41,7 @@ bool parseDateString(const GooString *date, int *year, int *month, int *day, int
     for (auto &c : u) {
         // Ignore any non ASCII characters
         if (c < 128) {
-            s.append(c);
+            s.push_back(c);
         }
     }
     const char *dateString = s.c_str();

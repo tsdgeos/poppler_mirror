@@ -1329,7 +1329,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
         if ((c = str->getChar()) == EOF) {
             break;
         }
-        codeString->append(c);
+        codeString->push_back(c);
         if (comment) {
             if (c == '\x0a' || c == '\x0d') {
                 comment = false;
@@ -1350,7 +1350,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->append(c);
+            codeString->push_back(c);
         }
     } else {
         while (true) {
@@ -1360,7 +1360,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->append(c);
+            codeString->push_back(c);
         }
     }
     return std::make_unique<GooString>(std::move(s));

@@ -1768,7 +1768,7 @@ void FormFieldText::setTextFontSize(int fontSize)
         defaultAppearance = std::make_unique<GooString>();
         for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0) {
-                defaultAppearance->append(' ');
+                defaultAppearance->push_back(' ');
             }
             if (i == idx) {
                 defaultAppearance->appendf("{0:d}", fontSize);

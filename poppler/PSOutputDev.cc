@@ -2669,11 +2669,11 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
     std::unique_ptr<GooString> psName = std::make_unique<GooString>(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
-        psName->append('_');
+        psName->push_back('_');
         psName->append(filteredName);
     } else if (fontName) {
         std::string filteredName = filterPSName(*fontName);
-        psName->append('_');
+        psName->push_back('_');
         psName->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
@@ -4958,7 +4958,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
                 for (i = 0; i < uLen; ++i) {
                     m = uMap->mapUnicode(u[i], buf, (int)sizeof(buf));
                     for (j = 0; j < m; ++j) {
-                        s2->append(buf[j]);
+                        s2->push_back(buf[j]);
                     }
                     //~ this really needs to get the number of chars in the target
                     //~ encoding - which may be more than the number of Unicode
@@ -4980,15 +4980,15 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
                     dxdySize *= 2;
                     dxdy = (double *)greallocn(dxdy, 2 * dxdySize, sizeof(double));
                 }
-                s2->append((char)((code >> 8) & 0xff));
-                s2->append((char)(code & 0xff));
+                s2->push_back((char)((code >> 8) & 0xff));
+                s2->push_back((char)(code & 0xff));
                 dxdy[2 * nChars] = dx;
                 dxdy[2 * nChars + 1] = dy;
                 ++nChars;
             }
         } else {
             if (codeToGID.empty() || codeToGID[code] >= 0) {
-                s2->append((char)code);
+                s2->push_back((char)code);
                 dxdy[2 * nChars] = dx;
                 dxdy[2 * nChars + 1] = dy;
                 ++nChars;
@@ -7171,7 +7171,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
 void PSOutputDev::writePSChar(char c)
 {
     if (t3String) {
-        t3String->append(c);
+        t3String->push_back(c);
     } else {
         (*outputFunc)(outputStream, &c, 1);
     }
@@ -7190,7 +7190,7 @@ void PSOutputDev::writePSBuf(const char *s, int len)
 {
     if (t3String) {
         for (int i = 0; i < len; i++) {
-            t3String->append(s[i]);
+            t3String->push_back(s[i]);
         }
     } else {
         (*outputFunc)(outputStream, s, len);
@@ -7335,7 +7335,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
             label2->append(aux);
             j += 4;
         } else {
-            label2->append(c);
+            label2->push_back(c);
             ++j;
         }
     }

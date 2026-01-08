@@ -156,7 +156,7 @@ public:
     using std::string::clear;
 
     // Append a character or string.
-    void append(char c) { push_back(c); }
+    using std::string::push_back;
     void append(const std::string &str) { static_cast<std::string &>(*this).append(str); }
     void append(std::string_view str) { static_cast<std::string &>(*this).append(str); }
     void append(const char *str) { static_cast<std::string &>(*this).append(str); }

@@ -176,7 +176,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     // save both Unicode and 8-bit copies of the file name
     std::unique_ptr<GooString> fileNameG = std::make_unique<GooString>();
     for (int i = 0; i < fileNameLen; ++i) {
-        fileNameG->append((char)fileNameA[i]);
+        fileNameG->push_back((char)fileNameA[i]);
         fileNameU.push_back(fileNameA[i]);
     }
     fileName = std::move(fileNameG);
@@ -1315,7 +1315,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
             return;
         }
         while ((c = enc->getChar()) != EOF) {
-            sEnc->append((char)c);
+            sEnc->push_back((char)c);
         }
 
         delete enc;

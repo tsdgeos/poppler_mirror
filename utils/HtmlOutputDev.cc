@@ -1564,7 +1564,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
                     file->erase(file->size() - 4, 4);
                     file->append(".html");
                 }
-                file->append('#');
+                file->push_back('#');
                 file->append(std::to_string(destPage));
             }
         }

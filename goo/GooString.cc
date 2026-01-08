@@ -183,7 +183,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             ++p0;
             if (*p0 == '{') {
                 ++p0;
-                append('{');
+                push_back('{');
             } else {
 
                 // parse the format string
@@ -455,13 +455,13 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
                 // append the formatted arg, handling width and alignment
                 if (!reverseAlign && len < width) {
                     for (i = len; i < width; ++i) {
-                        append(' ');
+                        push_back(' ');
                     }
                 }
                 append(str, len);
                 if (reverseAlign && len < width) {
                     for (i = len; i < width; ++i) {
-                        append(' ');
+                        push_back(' ');
                     }
                 }
             }
@@ -471,7 +471,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             if (*p0 == '}') {
                 ++p0;
             }
-            append('}');
+            push_back('}');
 
         } else {
             for (p1 = p0 + 1; *p1 && *p1 != '{' && *p1 != '}'; ++p1) {

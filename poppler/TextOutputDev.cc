@@ -4625,7 +4625,7 @@ void TextSelectionPainter::endPage()
             /* The only purpose of this string is to let the output device query
              * it's length.  Might want to change this interface later. */
             string.clear();
-            std::for_each(sel->word->chars.begin() + begin, sel->word->chars.begin() + fEnd, [&string](const auto c) { string.append(c.charcode); });
+            std::for_each(sel->word->chars.begin() + begin, sel->word->chars.begin() + fEnd, [&string](const auto c) { string.push_back(c.charcode); });
             out->beginString(state, &string);
 
             for (int j = begin; j < fEnd; j++) {

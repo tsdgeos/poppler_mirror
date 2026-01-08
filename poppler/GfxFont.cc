@@ -1741,7 +1741,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
             obj3 = Object(std::make_unique<GooString>("Identity"));
         }
         collection = obj2.takeString();
-        collection->append('-');
+        collection->push_back('-');
         collection->append(obj3.getString()->toStr());
     } else {
         error(errSyntaxError, -1, "Missing CIDSystemInfo dictionary in Type 0 descendant font");

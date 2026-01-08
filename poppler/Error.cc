@@ -63,7 +63,7 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...)
         if (c < (char)0x20 || c >= (char)0x7f) {
             sanitized.appendf("<{0:02x}>", c & 0xff);
         } else {
-            sanitized.append(c);
+            sanitized.push_back(c);
         }
     }
 

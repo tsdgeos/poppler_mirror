@@ -292,7 +292,7 @@ void CairoOutputDev::textStringToQuotedUtf8(const GooString *text, GooString *s)
         if (c == '\\' || c == '\'') {
             s->append("\\");
         }
-        s->append(c);
+        s->push_back(c);
     }
     s->append("'");
 }

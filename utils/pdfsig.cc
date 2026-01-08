@@ -513,7 +513,7 @@ int main(int argc, char *argv[])
             std::uniform_int_distribution<> distrib(1, 15);
             for (int i = 0; i < 32; ++i) {
                 const int value = distrib(gen);
-                newSignatureFieldName.append(value < 10 ? 48 + value : 65 + (value - 10));
+                newSignatureFieldName.push_back(value < 10 ? 48 + value : 65 + (value - 10));
             }
         }
 
