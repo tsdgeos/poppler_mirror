@@ -315,7 +315,7 @@ void FormWidgetButton::setState(bool astate)
     for (int i = 0; i < tot; i++) {
         bool found_related = false;
         FormWidget *wid = this_page_widgets->getWidget(i);
-        const bool same_fqn = wid->getFullyQualifiedName()->cmp(getFullyQualifiedName()) == 0;
+        const bool same_fqn = wid->getFullyQualifiedName()->compare(getFullyQualifiedName()->toStr()) == 0;
         const bool same_button_type = wid->getType() == formButton && static_cast<const FormWidgetButton *>(wid)->getButtonType() == this_button_type;
 
         if (same_fqn && same_button_type) {
@@ -1941,11 +1941,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
-                    if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
+                    if (choices[i].exportVal->cmp(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 } else if (choices[i].optionName) {
-                    if (choices[i].optionName->cmp(obj1.getString()) == 0) {
+                    if (choices[i].optionName->cmp(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 }
@@ -1976,11 +1976,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                     bool matches = false;
 
                     if (choices[i].exportVal) {
-                        if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
+                        if (choices[i].exportVal->compare(obj2.getString()->toStr()) == 0) {
                             matches = true;
                         }
                     } else if (choices[i].optionName) {
-                        if (choices[i].optionName->cmp(obj2.getString()) == 0) {
+                        if (choices[i].optionName->compare(obj2.getString()->toStr()) == 0) {
                             matches = true;
                         }
                     }

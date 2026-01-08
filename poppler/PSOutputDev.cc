@@ -4028,7 +4028,7 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
         return;
     }
     for (cc = customColors; cc; cc = cc->next) {
-        if (!cc->name->cmp(sepCS->getName())) {
+        if (!cc->name->compare(sepCS->getName()->toStr())) {
             return;
         }
     }

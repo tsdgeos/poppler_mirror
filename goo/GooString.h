@@ -81,7 +81,7 @@ public:
     explicit GooString(const std::string &str) : std::string(str) { }
     explicit GooString(std::string &&str) : std::string(std::move(str)) { }
 
-    const std::string &toStr() const { return *this; }
+    constexpr const std::string &toStr() const { return *this; }
     std::string &toNonConstStr() { return *this; }
 
     // Create a string from <lengthA> chars at <sA>.  This string
@@ -166,7 +166,7 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string toLowerCase(std::string_view s);
 
     // Compare two strings:  -1:<  0:=  +1:>
-    int cmp(const GooString *str) const { return compare(*str); }
+    using std::string::compare;
     int cmp(const std::string &str) const { return compare(str); }
     int cmp(const char *sA) const { return compare(sA); }
 

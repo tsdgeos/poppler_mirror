@@ -2781,7 +2781,7 @@ void GfxSeparationColorSpace::createMapping(std::vector<std::unique_ptr<GfxSepar
         unsigned int newOverprintMask = 0x10;
         for (std::size_t i = 0; i < separationList->size(); i++) {
             const std::unique_ptr<GfxSeparationColorSpace> &sepCS = (*separationList)[i];
-            if (!sepCS->getName()->cmp(name.get())) {
+            if (!sepCS->getName()->compare(name->toStr())) {
                 if (sepCS->getFunc()->hasDifferentResultSet(func.get())) {
                     error(errSyntaxWarning, -1, "Different functions found for '{0:t}', convert immediately", name.get());
                     mapping.clear();
