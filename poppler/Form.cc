@@ -1380,7 +1380,7 @@ FormField *FormField::findFieldByRef(Ref aref)
 FormField *FormField::findFieldByFullyQualifiedName(const std::string &name)
 {
     if (terminal) {
-        if (getFullyQualifiedName()->cmp(name.c_str()) == 0) {
+        if (getFullyQualifiedName()->compare(name) == 0) {
             return this;
         }
     } else {

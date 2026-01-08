@@ -91,13 +91,13 @@ int main(int argc, char *argv[])
         }
     }
     if (!colorSpace.toStr().empty()) {
-        if (colorSpace.cmp(baseImageDict->lookup("ColorSpace").getName()) != 0) {
+        if (colorSpace.compare(baseImageDict->lookup("ColorSpace").getName()) != 0) {
             fprintf(stderr, "A problem with ColorSpace.\n");
             return 1;
         }
     }
     if (!filter.toStr().empty()) {
-        if (filter.cmp(baseImageDict->lookup("Filter").getName()) != 0) {
+        if (filter.compare(baseImageDict->lookup("Filter").getName()) != 0) {
             fprintf(stderr, "A problem with Filter.\n");
             return 1;
         }

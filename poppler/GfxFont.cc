@@ -1755,7 +1755,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
 
         // use an identity mapping for the "Adobe-Identity" and
         // "Adobe-UCS" collections
-        if (!collection->cmp("Adobe-Identity") || !collection->cmp("Adobe-UCS")) {
+        if (!collection->compare("Adobe-Identity") || !collection->compare("Adobe-UCS")) {
             ctu = CharCodeToUnicode::makeIdentityMapping();
         } else {
             // look for a user-supplied .cidToUnicode file
@@ -1769,7 +1769,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
                     "Adobe-CNS1", "Adobe-GB1", "Adobe-Japan1", "Adobe-Japan2", "Adobe-Korea1",
                 };
                 for (const char *knownCollection : knownCollections) {
-                    if (collection->cmp(knownCollection) == 0) {
+                    if (collection->compare(knownCollection) == 0) {
                         error(errSyntaxError, -1, "Missing language pack for '{0:t}' mapping", collection.get());
                         return;
                     }
@@ -2068,7 +2068,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
     }
 
     if (getEmbeddedFontID(&embID)) {
-        if (getCollection()->cmp("Adobe-Identity") == 0) {
+        if (getCollection()->compare("Adobe-Identity") == 0) {
             return {};
         }
 
@@ -2140,7 +2140,7 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         }
         ff->setupGSUB(lp->scriptTag, lp->languageTag);
     } else {
-        if (getCollection()->cmp("Adobe-Identity") == 0) {
+        if (getCollection()->compare("Adobe-Identity") == 0) {
             error(errSyntaxError, -1, "non-embedded font using identity encoding: {0:s}", name ? name->c_str() : "(null)");
         } else {
             error(errSyntaxError, -1, "Unknown character collection {0:t}", getCollection());

@@ -2585,16 +2585,16 @@ void GfxIndexedColorSpace::getDefaultRanges(double *decodeLow, double *decodeRan
 GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA) : name(std::move(nameA)), alt(std::move(altA))
 {
     func = std::move(funcA);
-    nonMarking = !name->cmp("None");
-    if (!name->cmp("Cyan")) {
+    nonMarking = !name->compare("None");
+    if (!name->compare("Cyan")) {
         overprintMask = 0x01;
-    } else if (!name->cmp("Magenta")) {
+    } else if (!name->compare("Magenta")) {
         overprintMask = 0x02;
-    } else if (!name->cmp("Yellow")) {
+    } else if (!name->compare("Yellow")) {
         overprintMask = 0x04;
-    } else if (!name->cmp("Black")) {
+    } else if (!name->compare("Black")) {
         overprintMask = 0x08;
-    } else if (!name->cmp("All")) {
+    } else if (!name->compare("All")) {
         overprintMask = 0xffffffff;
     }
 }
@@ -2666,7 +2666,7 @@ void GfxSeparationColorSpace::getGray(const GfxColor *color, GfxGray *gray) cons
     GfxColor color2;
     int i;
 
-    if (alt->getMode() == csDeviceGray && name->cmp("Black") == 0) {
+    if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
         *gray = clip01(gfxColorComp1 - color->c[0]);
     } else {
         x = colToDbl(color->c[0]);
@@ -2685,7 +2685,7 @@ void GfxSeparationColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
     GfxColor color2;
     int i;
 
-    if (alt->getMode() == csDeviceGray && name->cmp("Black") == 0) {
+    if (alt->getMode() == csDeviceGray && name->compare("Black") == 0) {
         rgb->r = clip01(gfxColorComp1 - color->c[0]);
         rgb->g = clip01(gfxColorComp1 - color->c[0]);
         rgb->b = clip01(gfxColorComp1 - color->c[0]);
@@ -2707,22 +2707,22 @@ void GfxSeparationColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
     GfxColor color2;
     int i;
 
-    if (name->cmp("Black") == 0) {
+    if (name->compare("Black") == 0) {
         cmyk->c = 0;
         cmyk->m = 0;
         cmyk->y = 0;
         cmyk->k = color->c[0];
-    } else if (name->cmp("Cyan") == 0) {
+    } else if (name->compare("Cyan") == 0) {
         cmyk->c = color->c[0];
         cmyk->m = 0;
         cmyk->y = 0;
         cmyk->k = 0;
-    } else if (name->cmp("Magenta") == 0) {
+    } else if (name->compare("Magenta") == 0) {
         cmyk->c = 0;
         cmyk->m = color->c[0];
         cmyk->y = 0;
         cmyk->k = 0;
-    } else if (name->cmp("Yellow") == 0) {
+    } else if (name->compare("Yellow") == 0) {
         cmyk->c = 0;
         cmyk->m = 0;
         cmyk->y = color->c[0];

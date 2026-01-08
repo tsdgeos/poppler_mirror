@@ -1700,7 +1700,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
             mask &= ~7;
         } else if (colorSpace->getMode() == csSeparation) {
             GfxSeparationColorSpace *deviceSep = (GfxSeparationColorSpace *)colorSpace;
-            additive = deviceSep->getName()->cmp("All") != 0 && mask == 0x0f && !deviceSep->isNonMarking();
+            additive = deviceSep->getName()->compare("All") != 0 && mask == 0x0f && !deviceSep->isNonMarking();
         } else if (colorSpace->getMode() == csDeviceN) {
             GfxDeviceNColorSpace *deviceNCS = (GfxDeviceNColorSpace *)colorSpace;
             additive = mask == 0x0f && !deviceNCS->isNonMarking();

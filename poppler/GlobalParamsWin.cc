@@ -435,15 +435,15 @@ static const char *findSubstituteName(const GfxFont *font, const std::unordered_
         const GooString *collection = ((GfxCIDFont *)font)->getCollection();
 
         const char *name3 = nullptr;
-        if (!collection->cmp("Adobe-CNS1"))
+        if (!collection->compare("Adobe-CNS1"))
             name3 = DEFAULT_CID_FONT_AC1_MSWIN;
-        else if (!collection->cmp("Adobe-GB1"))
+        else if (!collection->compare("Adobe-GB1"))
             name3 = DEFAULT_CID_FONT_AG1_MSWIN;
-        else if (!collection->cmp("Adobe-Japan1"))
+        else if (!collection->compare("Adobe-Japan1"))
             name3 = DEFAULT_CID_FONT_AJ1_MSWIN;
-        else if (!collection->cmp("Adobe-Japan2"))
+        else if (!collection->compare("Adobe-Japan2"))
             name3 = DEFAULT_CID_FONT_AJ2_MSWIN;
-        else if (!collection->cmp("Adobe-Korea1"))
+        else if (!collection->compare("Adobe-Korea1"))
             name3 = DEFAULT_CID_FONT_AK1_MSWIN;
 
         if (name3 && fontFiles.count(name3) != 0)

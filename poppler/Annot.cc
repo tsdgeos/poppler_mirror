@@ -2335,19 +2335,19 @@ void AnnotText::initialize(Dict *dict)
         if (obj2.isString()) {
             const GooString *stateName = obj2.getString();
 
-            if (!stateName->cmp("Marked")) {
+            if (!stateName->compare("Marked")) {
                 state = stateMarked;
-            } else if (!stateName->cmp("Unmarked")) {
+            } else if (!stateName->compare("Unmarked")) {
                 state = stateUnmarked;
-            } else if (!stateName->cmp("Accepted")) {
+            } else if (!stateName->compare("Accepted")) {
                 state = stateAccepted;
-            } else if (!stateName->cmp("Rejected")) {
+            } else if (!stateName->compare("Rejected")) {
                 state = stateRejected;
-            } else if (!stateName->cmp("Cancelled")) {
+            } else if (!stateName->compare("Cancelled")) {
                 state = stateCancelled;
-            } else if (!stateName->cmp("Completed")) {
+            } else if (!stateName->compare("Completed")) {
                 state = stateCompleted;
-            } else if (!stateName->cmp("None")) {
+            } else if (!stateName->compare("None")) {
                 state = stateNone;
             } else {
                 state = stateUnknown;
@@ -2356,7 +2356,7 @@ void AnnotText::initialize(Dict *dict)
             state = stateUnknown;
         }
 
-        if (!modelName->cmp("Marked")) {
+        if (!modelName->compare("Marked")) {
             switch (state) {
             case stateUnknown:
                 state = stateMarked;
@@ -2371,7 +2371,7 @@ void AnnotText::initialize(Dict *dict)
             default:
                 break;
             }
-        } else if (!modelName->cmp("Review")) {
+        } else if (!modelName->compare("Review")) {
             switch (state) {
             case stateUnknown:
                 state = stateNone;
@@ -4933,9 +4933,9 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
             }
         }
         for (std::size_t k = 2; k < daToks.size(); ++k) {
-            if (k >= 2 && !(daToks[k])->cmp("Tf")) {
+            if (k >= 2 && !(daToks[k])->compare("Tf")) {
                 tfPos = k - 2;
-            } else if (k >= 6 && !(daToks[k])->cmp("Tm")) {
+            } else if (k >= 6 && !(daToks[k])->compare("Tm")) {
                 tmPos = k - 6;
             }
         }
@@ -5209,7 +5209,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     switch (field->getButtonType()) {
     case formButtonRadio: {
         //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-        if (appearState && appearState->cmp("Off") != 0 && field->getState(appearState->c_str())) {
+        if (appearState && appearState->compare("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
                 return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             } else if (appearCharacs) {
@@ -5230,7 +5230,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         }
         break;
     case formButtonCheck:
-        if (appearState && appearState->cmp("Off") != 0) {
+        if (appearState && appearState->compare("Off") != 0) {
             if (!caption) {
                 GooString checkMark("3");
                 return drawText(&checkMark, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
@@ -6951,13 +6951,13 @@ void AnnotFileAttachment::draw(Gfx *gfx, bool printing)
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
-        if (!name->cmp("PushPin")) {
+        if (!name->compare("PushPin")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PUSHPIN);
-        } else if (!name->cmp("Paperclip")) {
+        } else if (!name->compare("Paperclip")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_PAPERCLIP);
-        } else if (!name->cmp("Graph")) {
+        } else if (!name->compare("Graph")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_GRAPH);
-        } else if (!name->cmp("Tag")) {
+        } else if (!name->compare("Tag")) {
             appearBuilder.append(ANNOT_FILE_ATTACHMENT_AP_TAG);
         }
         appearBuilder.append("Q\n");
@@ -7102,9 +7102,9 @@ void AnnotSound::draw(Gfx *gfx, bool printing)
         } else {
             appearBuilder.append("1 1 1 rg\n");
         }
-        if (!name->cmp("Speaker")) {
+        if (!name->compare("Speaker")) {
             appearBuilder.append(ANNOT_SOUND_AP_SPEAKER);
-        } else if (!name->cmp("Mic")) {
+        } else if (!name->compare("Mic")) {
             appearBuilder.append(ANNOT_SOUND_AP_MIC);
         }
         appearBuilder.append("Q\n");
