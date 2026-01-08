@@ -113,7 +113,7 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
             opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
-            opt.Set(nextOpt);
+            opt.assign(nextOpt);
             nextOpt = NULL;
         }
         // here opt is "<optN>=<valN> "

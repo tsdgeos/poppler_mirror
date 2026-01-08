@@ -639,9 +639,9 @@ Attribute *Attribute::parseUserProperty(Dict *property)
 
     obj = property->lookup("N");
     if (obj.isString()) {
-        name.Set(obj.getString()->toStr());
+        name.assign(obj.getString()->toStr());
     } else if (obj.isName()) {
-        name.Set(obj.getNameString());
+        name.assign(obj.getNameString());
     } else {
         error(errSyntaxError, -1, "N object is wrong type ({0:s})", obj.getTypeName());
         return nullptr;

@@ -475,7 +475,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         *type = fi->type;
         *fontNum = fi->fontNum;
         if (substituteFontName)
-            substituteFontName->Set(fi->substituteName->c_str());
+            substituteFontName->assign(fi->substituteName->toStr());
     } else {
         GooString *substFontName = new GooString(findSubstituteName(&font, fontFiles, substFiles, fontName->c_str()));
         error(errSyntaxError, -1, "Couldn't find a font for '{0:s}', subst is '{1:t}'", fontName->c_str(), substFontName);
@@ -483,7 +483,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         if (fontFile != fontFiles.end()) {
             path = fontFile->second;
             if (substituteFontName)
-                substituteFontName->Set(path.c_str());
+                substituteFontName->assign(path);
             if (path.ends_with(".ttc")) {
                 *type = sysFontTTC;
             } else {

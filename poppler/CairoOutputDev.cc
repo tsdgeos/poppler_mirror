@@ -287,7 +287,7 @@ void CairoOutputDev::startDoc(PDFDoc *docA, CairoFontEngine *parentFontEngine)
 void CairoOutputDev::textStringToQuotedUtf8(const GooString *text, GooString *s)
 {
     std::string utf8 = TextStringToUtf8(text->toStr());
-    s->Set("'");
+    s->assign("'");
     for (char c : utf8) {
         if (c == '\\' || c == '\'') {
             s->append("\\");

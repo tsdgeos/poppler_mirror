@@ -93,11 +93,7 @@ public:
     GooString(const GooString *str, int idx, size_t lengthA) : std::string(*str, idx, lengthA) { }
     GooString(const std::string &str, int idx, size_t lengthA) : std::string(str, idx, lengthA) { }
 
-    GooString *Set(std::string_view newStr)
-    {
-        assign(newStr);
-        return this;
-    }
+    using std::string::assign;
     GooString *Set(const char *newStr, int newLen)
     {
         assign(newStr ? newStr : "", newStr ? newLen : 0);

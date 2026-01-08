@@ -229,7 +229,7 @@ static bool parseJpegOptions()
             opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
-            opt.Set(nextOpt);
+            opt.assign(nextOpt);
             nextOpt = nullptr;
         }
         // here opt is "<optN>=<valN> "

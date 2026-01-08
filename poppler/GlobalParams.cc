@@ -937,7 +937,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         path = fi->path->toStr();
         *type = fi->type;
         *fontNum = fi->fontNum;
-        substituteName.Set(fi->substituteName->toStr());
+        substituteName.assign(fi->substituteName->toStr());
     } else {
         FcChar8 *s;
         char *ext;
@@ -985,13 +985,13 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
                 FcChar8 *s2;
                 res = FcPatternGetString(set->fonts[i], FC_FULLNAME, 0, &s2);
                 if (res == FcResultMatch && s2) {
-                    substituteName.Set((char *)s2);
+                    substituteName.assign((char *)s2);
                 } else {
                     // fontconfig does not extract fullname for some fonts
                     // create the fullname from family and style
                     res = FcPatternGetString(set->fonts[i], FC_FAMILY, 0, &s2);
                     if (res == FcResultMatch && s2) {
-                        substituteName.Set((char *)s2);
+                        substituteName.assign((char *)s2);
                         res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
                         if (res == FcResultMatch && s2) {
                             const std::string style = { (char *)s2 };
@@ -1073,7 +1073,7 @@ std::optional<std::string> GlobalParams::findSystemFontFile(const GfxFont &font,
         *fontNum = fi->fontNum;
     }
     if (substituteFontName) {
-        substituteFontName->Set(substituteName.toStr());
+        substituteFontName->assign(substituteName.toStr());
     }
 fin:
     if (p) {
