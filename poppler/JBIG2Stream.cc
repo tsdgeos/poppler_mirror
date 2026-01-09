@@ -2842,9 +2842,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    unsigned char mask;
-    int x1;
-
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
         return nullptr;
@@ -3199,7 +3196,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf3 |= *atP3++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 14) & 0x07;
@@ -3252,7 +3250,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 14) & 0x07;
@@ -3330,7 +3329,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 13) & 0x0f;
@@ -3374,7 +3374,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 13) & 0x0f;
@@ -3450,7 +3451,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 14) & 0x07;
@@ -3491,7 +3493,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx0 = (buf0 >> 14) & 0x07;
@@ -3558,7 +3561,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx1 = (buf1 >> 14) & 0x1f;
@@ -3594,7 +3598,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
                             const unsigned int cx1 = (buf1 >> 14) & 0x1f;
