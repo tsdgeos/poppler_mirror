@@ -2850,7 +2850,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     unsigned int buf0, buf1, buf2;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     unsigned char mask;
-    int y, x1, pix, i;
+    int y, x1, i;
 
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
@@ -3206,7 +3206,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3260,7 +3260,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3333,7 +3333,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3377,7 +3377,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3450,7 +3450,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3491,7 +3491,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3553,7 +3553,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3589,7 +3589,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
