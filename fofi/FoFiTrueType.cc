@@ -608,6 +608,9 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         segCnt = getU32BE(pos + 12, &ok);
         a = -1;
         b = segCnt - 1;
+        if (b > std::numeric_limits<int>::max() / 12) {
+            return 0;
+        }
         segEnd = getU32BE(pos + 16 + 12 * b + 4, &ok);
         if (c > segEnd) {
             return 0;
