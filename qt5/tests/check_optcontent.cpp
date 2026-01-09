@@ -178,7 +178,7 @@ void TestOptionalContent::checkVisibilitySetting()
     OptionalContentGroup *ocgA = ocgs->findOcgByRef(ref21);
     QVERIFY(ocgA);
 
-    QVERIFY((ocgA->getName()->cmp("A")) == 0);
+    QVERIFY((ocgA->getName()->compare("A")) == 0);
     QCOMPARE(ocgA->getState(), OptionalContentGroup::On);
 
     Object ref28obj(Ref { 28, 0 });
@@ -186,7 +186,7 @@ void TestOptionalContent::checkVisibilitySetting()
     OptionalContentGroup *ocgB = ocgs->findOcgByRef(ref28);
     QVERIFY(ocgB);
 
-    QVERIFY((ocgB->getName()->cmp("B")) == 0);
+    QVERIFY((ocgB->getName()->compare("B")) == 0);
     QCOMPARE(ocgB->getState(), OptionalContentGroup::On);
 
     // turn one Off

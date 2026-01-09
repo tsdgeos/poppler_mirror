@@ -78,12 +78,12 @@ void X509CertificateInfo::setVersion(int version)
 
 void X509CertificateInfo::setSerialNumber(const GooString &serialNumber)
 {
-    cert_serial.Set(&serialNumber);
+    cert_serial.assign(serialNumber.toStr());
 }
 
 void X509CertificateInfo::setNickName(const GooString &nickName)
 {
-    cert_nick.Set(&nickName);
+    cert_nick.assign(nickName.toStr());
 }
 
 void X509CertificateInfo::setIssuerInfo(EntityInfo &&issuerInfo)
@@ -113,7 +113,7 @@ void X509CertificateInfo::setKeyUsageExtensions(unsigned int keyUsages)
 
 void X509CertificateInfo::setCertificateDER(const GooString &certDer)
 {
-    cert_der.Set(&certDer);
+    cert_der.assign(certDer.toStr());
 }
 
 void X509CertificateInfo::setIsSelfSigned(bool isSelfSigned)

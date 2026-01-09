@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -133,9 +133,14 @@ static GooString* Dirname(GooString* str){
 }
 #endif
 
-static std::string print_matrix(const double *mat)
+static std::string print_matrix(const std::array<double, 4> &mat)
 {
-    return GooString::format("[{0:g} {1:g} {2:g} {3:g} {4:g} {5:g}]", *mat, mat[1], mat[2], mat[3], mat[4], mat[5]);
+    return GooString::format("[{0:g} {1:g} {2:g} {3:g}]", mat[0], mat[1], mat[2], mat[3]);
+}
+
+static std::string print_matrix(const std::array<double, 6> &mat)
+{
+    return GooString::format("[{0:g} {1:g} {2:g} {3:g} {4:g} {5:g}]", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
 }
 
 static std::string print_uni_str(const Unicode *u, const unsigned uLen)
@@ -179,8 +184,8 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
         state->getFillRGB(&rgb);
         HtmlFont hfont = HtmlFont(*font, std::lround(fontSize), rgb, state->getFillOpacity());
         if (isMatRotOrSkew(state->getTextMat())) {
-            double normalizedMatrix[4];
-            memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));
+            const std::array<double, 6> &textMatrix = state->getTextMat();
+            std::array<double, 4> normalizedMatrix = { textMatrix[0], textMatrix[1], textMatrix[2], textMatrix[3] };
             // browser rotates the opposite way
             // so flip the sign of the angle -> sin() components change sign
             if (debug) {
@@ -358,7 +363,7 @@ void HtmlPage::addChar(GfxState *state, double x, double y, double dx, double dy
     // if ((UnicodeMap::getDirection(u[0]) != curStr->dir) ||
     // XXX
     if (debug) {
-        const double *text_mat = state->getTextMat();
+        const std::array<double, 6> &text_mat = state->getTextMat();
         // rotation is (cos q, sin q, -sin q, cos q, 0, 0)
         // sin q is zero iff there is no rotation, or 180 deg. rotation;
         // for 180 rotation, cos q will be negative
@@ -633,7 +638,7 @@ void HtmlPage::coalesce()
             CloseTags(str1->htext.get(), finish_a, finish_italic, finish_bold);
             if (switch_links && hlink2 != nullptr) {
                 const std::unique_ptr<GooString> ls = hlink2->getLinkStart();
-                str1->htext->append(ls.get());
+                str1->htext->append(ls->toStr());
             }
             if ((!hfont1->isItalic() || finish_italic) && hfont2->isItalic()) {
                 str1->htext->append("<i>", 3);
@@ -642,7 +647,7 @@ void HtmlPage::coalesce()
                 str1->htext->append("<b>", 3);
             }
 
-            str1->htext->append(str2->htext.get());
+            str1->htext->append(str2->htext->toStr());
             // str1 now contains href for link of str2 (if it is defined)
             str1->link = str2->link;
             hfont1 = hfont2;
@@ -988,9 +993,9 @@ HtmlMetaVar::~HtmlMetaVar() = default;
 std::unique_ptr<GooString> HtmlMetaVar::toString() const
 {
     auto result = std::make_unique<GooString>("<meta name=\"");
-    result->append(name.get());
+    result->append(name->toStr());
     result->append("\" content=\"");
-    result->append(content.get());
+    result->append(content->toStr());
     result->append("\"/>");
     return result;
 }
@@ -1559,7 +1564,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
                     file->erase(file->size() - 4, 4);
                     file->append(".html");
                 }
-                file->append('#');
+                file->push_back('#');
                 file->append(std::to_string(destPage));
             }
         }

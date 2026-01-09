@@ -1117,7 +1117,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict)
 
     //----- parse the function
     codeString = std::make_unique<GooString>();
-    if (getToken(str)->cmp("{") != 0) {
+    if (getToken(str)->compare("{") != 0) {
         error(errSyntaxError, -1, "Expected '{{' at start of PostScript function");
         goto err1;
     }
@@ -1242,7 +1242,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
                 code[*codePtr].intg = atoi(tok->c_str());
             }
             ++*codePtr;
-        } else if (!tok->cmp("{")) {
+        } else if (!tok->compare("{")) {
             opPtr = *codePtr;
             *codePtr += 3;
             resizeCode(opPtr + 2);
@@ -1250,7 +1250,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
                 return false;
             }
             tok = getToken(str);
-            if (!tok->cmp("{")) {
+            if (!tok->compare("{")) {
                 elsePtr = *codePtr;
                 if (!parseCode(str, codePtr, ++recursionCounter)) {
                     return false;
@@ -1259,7 +1259,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
             } else {
                 elsePtr = -1;
             }
-            if (!tok->cmp("if")) {
+            if (!tok->compare("if")) {
                 if (elsePtr >= 0) {
                     error(errSyntaxError, -1, "Got 'if' operator with two blocks in PostScript function");
                     return false;
@@ -1268,7 +1268,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
                 code[opPtr].op = psOpIf;
                 code[opPtr + 2].type = psBlock;
                 code[opPtr + 2].blk = *codePtr;
-            } else if (!tok->cmp("ifelse")) {
+            } else if (!tok->compare("ifelse")) {
                 if (elsePtr < 0) {
                     error(errSyntaxError, -1, "Got 'ifelse' operator with one block in PostScript function");
                     return false;
@@ -1283,7 +1283,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
                 error(errSyntaxError, -1, "Expected if/ifelse operator in PostScript function");
                 return false;
             }
-        } else if (!tok->cmp("}")) {
+        } else if (!tok->compare("}")) {
             resizeCode(*codePtr);
             code[*codePtr].type = psOperator;
             code[*codePtr].op = psOpReturn;
@@ -1296,7 +1296,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr, int &recursionCoun
             // invariant: psOpNames[a] < tok < psOpNames[b]
             while (b - a > 1) {
                 mid = (a + b) / 2;
-                cmp = tok->cmp(psOpNames[mid]);
+                cmp = tok->compare(psOpNames[mid]);
                 if (cmp > 0) {
                     a = mid;
                 } else if (cmp < 0) {
@@ -1329,7 +1329,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
         if ((c = str->getChar()) == EOF) {
             break;
         }
-        codeString->append(c);
+        codeString->push_back(c);
         if (comment) {
             if (c == '\x0a' || c == '\x0d') {
                 comment = false;
@@ -1350,7 +1350,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->append(c);
+            codeString->push_back(c);
         }
     } else {
         while (true) {
@@ -1360,7 +1360,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
                 break;
             }
             str->getChar();
-            codeString->append(c);
+            codeString->push_back(c);
         }
     }
     return std::make_unique<GooString>(std::move(s));

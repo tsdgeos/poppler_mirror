@@ -176,7 +176,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     // save both Unicode and 8-bit copies of the file name
     std::unique_ptr<GooString> fileNameG = std::make_unique<GooString>();
     for (int i = 0; i < fileNameLen; ++i) {
-        fileNameG->append((char)fileNameA[i]);
+        fileNameG->push_back((char)fileNameA[i]);
         fileNameU.push_back(fileNameA[i]);
     }
     fileName = std::move(fileNameG);
@@ -774,7 +774,7 @@ static bool get_id(const GooString *encodedidstring, GooString *id)
         return false;
     }
 
-    id->Set(pdfid, pdfIdLength);
+    id->assign(pdfid, pdfIdLength);
     return true;
 }
 
@@ -1315,7 +1315,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
             return;
         }
         while ((c = enc->getChar()) != EOF) {
-            sEnc->append((char)c);
+            sEnc->push_back((char)c);
         }
 
         delete enc;
@@ -1568,7 +1568,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
             for (int i = 0; i < docInfo.getDict()->getLength(); i++) {
                 Object obj2 = docInfo.getDict()->getVal(i);
                 if (obj2.isString()) {
-                    message.append(obj2.getString());
+                    message.append(obj2.getString()->toStr());
                 }
             }
         }
@@ -2231,7 +2231,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
         }
 
-        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         const std::string daStr = da.toAppearanceString();
         annotObj.dictSet("DA", Object(std::make_unique<GooString>(daStr)));
 

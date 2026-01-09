@@ -233,8 +233,8 @@ void TestAnnotations::checkDefaultAppearance()
         GooString daString { "/Helv 10 Tf 0.1 0.2 0.3 rg" };
         const DefaultAppearance da { &daString };
         QCOMPARE(da.getFontPtSize(), 10.);
-        QVERIFY(da.getFontName().isName());
-        QCOMPARE(da.getFontName().getName(), "Helv");
+        QVERIFY(!da.getFontName().empty());
+        QCOMPARE(da.getFontName(), "Helv");
         const AnnotColor *color = da.getFontColor();
         QVERIFY(color);
         QCOMPARE(color->getSpace(), AnnotColor::colorRGB);
@@ -247,8 +247,8 @@ void TestAnnotations::checkDefaultAppearance()
         /* roundtrip through parse/generate/parse shall preserve values */
         const DefaultAppearance da { roundtripString.get() };
         QCOMPARE(da.getFontPtSize(), 10.);
-        QVERIFY(da.getFontName().isName());
-        QCOMPARE(da.getFontName().getName(), "Helv");
+        QVERIFY(!da.getFontName().empty());
+        QCOMPARE(da.getFontName(), "Helv");
         const AnnotColor *color = da.getFontColor();
         QVERIFY(color);
         QCOMPARE(color->getSpace(), AnnotColor::colorRGB);
@@ -260,7 +260,7 @@ void TestAnnotations::checkDefaultAppearance()
         /* parsing bad DA strings must not cause crash */
         GooString daString { "/ % Tf 1 2 rg" };
         const DefaultAppearance da { &daString };
-        QVERIFY(!da.getFontName().isName());
+        QVERIFY(da.getFontName().empty());
     }
 }
 

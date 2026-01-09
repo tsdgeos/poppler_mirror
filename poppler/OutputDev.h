@@ -19,7 +19,7 @@
 // Copyright (C) 2007, 2011, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2021, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -118,7 +118,7 @@ public:
     //----- initialization and control
 
     // Set default transform matrix.
-    virtual void setDefaultCTM(const double *ctm);
+    virtual void setDefaultCTM(const std::array<double, 6> &ctm);
 
     // Check to see if a page slice should be displayed.  If this
     // returns false, the page display is aborted.  Typically, an
@@ -176,12 +176,8 @@ public:
 
     //----- coordinate conversion
 
-    // Convert between device and user coordinates.
-    virtual void cvtDevToUser(double dx, double dy, double *ux, double *uy);
+    // Convert between user and device coordinates.
     virtual void cvtUserToDev(double ux, double uy, int *dx, int *dy);
-
-    const double *getDefCTM() const { return defCTM; }
-    const double *getDefICTM() const { return defICTM; }
 
     //----- save/restore graphics state
     virtual void saveState(GfxState * /*state*/) { }
@@ -303,8 +299,8 @@ public:
     // If 'invert' is false, a sample value of 0 marks the page with the current color,
     // and a 1 leaves the previous contents unchanged. If 'invert' is true, these meanings are reversed.
     virtual void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg);
-    virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix);
-    virtual void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix);
+    virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> &baseMatrix);
+    virtual void unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix);
     virtual void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg);
     virtual void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate);
     virtual void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
@@ -368,8 +364,7 @@ public:
 #endif
 
 private:
-    double defCTM[6]; // default coordinate transform matrix
-    double defICTM[6]; // inverse of default CTM
+    std::array<double, 6> defCTM; // default coordinate transform matrix
     std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
 #if USE_CMS

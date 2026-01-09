@@ -51,7 +51,7 @@ static void parseSource(GooString *source)
 {
     const Win32Option *option = win32PaperSource;
     while (option->name) {
-        if (source->cmp(option->name) == 0) {
+        if (source->compare(option->name) == 0) {
             devmode->dmDefaultSource = option->value;
             devmode->dmFields |= DM_DEFAULTSOURCE;
             return;
@@ -67,7 +67,7 @@ static void parseDuplex(GooString *mode)
 {
     const Win32Option *option = win32DuplexMode;
     while (option->name) {
-        if (mode->cmp(option->name) == 0) {
+        if (mode->compare(option->name) == 0) {
             devmode->dmDuplex = option->value;
             devmode->dmFields |= DM_DUPLEX;
             return;
@@ -110,10 +110,10 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
+            opt.assign(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
-            opt.Set(nextOpt);
+            opt.assign(nextOpt);
             nextOpt = NULL;
         }
         // here opt is "<optN>=<valN> "
@@ -127,9 +127,9 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
         opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
-        if (opt.cmp("source") == 0) {
+        if (opt.compare("source") == 0) {
             parseSource(&value);
-        } else if (opt.cmp("duplex") == 0) {
+        } else if (opt.compare("duplex") == 0) {
             if (duplex)
                 fprintf(stderr, "Warning: duplex mode is specified both as standalone and printer options\n");
             else
@@ -426,7 +426,7 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
     DOCINFOA docinfo;
     memset(&docinfo, 0, sizeof(docinfo));
     docinfo.cbSize = sizeof(docinfo);
-    if (inputFileName->cmp("fd://0") == 0)
+    if (inputFileName->compare("fd://0") == 0)
         docinfo.lpszDocName = "pdftocairo <stdin>";
     else
         docinfo.lpszDocName = inputFileName->c_str();

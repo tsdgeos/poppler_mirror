@@ -2,6 +2,7 @@
  * Copyright (C) 2004, Red Hat, Inc.
  * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>
+ * Copyright (C) 2026 Maximiliano Sandoval <msandova@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

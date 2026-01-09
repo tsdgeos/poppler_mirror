@@ -146,16 +146,14 @@ static bool compareObjects(const Object *objA, const Object *objB)
         } else {
             const GooString *strA = objA->getString();
             const GooString *strB = objB->getString();
-            return (strA->cmp(strB) == 0);
+            return (strA->compare(strB->toStr()) == 0);
         }
     }
     case objName: {
         if (objB->getType() != objName) {
             return false;
         } else {
-            GooString nameA(objA->getName());
-            GooString nameB(objB->getName());
-            return (nameA.cmp(&nameB) == 0);
+            return objA->getNameString() == objB->getNameString();
         }
     }
     case objNull: {

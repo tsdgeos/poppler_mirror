@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -48,27 +48,9 @@ OutputDev::OutputDev()
 
 OutputDev::~OutputDev() = default;
 
-void OutputDev::setDefaultCTM(const double *ctm)
+void OutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 {
-    int i;
-    double det;
-
-    for (i = 0; i < 6; ++i) {
-        defCTM[i] = ctm[i];
-    }
-    det = 1 / (defCTM[0] * defCTM[3] - defCTM[1] * defCTM[2]);
-    defICTM[0] = defCTM[3] * det;
-    defICTM[1] = -defCTM[1] * det;
-    defICTM[2] = -defCTM[2] * det;
-    defICTM[3] = defCTM[0] * det;
-    defICTM[4] = (defCTM[2] * defCTM[5] - defCTM[3] * defCTM[4]) * det;
-    defICTM[5] = (defCTM[1] * defCTM[4] - defCTM[0] * defCTM[5]) * det;
-}
-
-void OutputDev::cvtDevToUser(double dx, double dy, double *ux, double *uy)
-{
-    *ux = defICTM[0] * dx + defICTM[2] * dy + defICTM[4];
-    *uy = defICTM[1] * dx + defICTM[3] * dy + defICTM[5];
+    defCTM = ctm;
 }
 
 void OutputDev::cvtUserToDev(double ux, double uy, int *dx, int *dy)
@@ -120,12 +102,12 @@ void OutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *st
     }
 }
 
-void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double * /*baseMatrix*/)
+void OutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     drawImageMask(state, ref, str, width, height, invert, false, inlineImg);
 }
 
-void OutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, double * /*baseMatrix*/) { }
+void OutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, std::array<double, 6> & /*baseMatrix*/) { }
 
 void OutputDev::drawImage(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool /*interpolate*/, const int * /*maskColors*/, bool inlineImg)
 {

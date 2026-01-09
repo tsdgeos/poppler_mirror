@@ -229,10 +229,10 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 // Adobe apparently zero-pads the U value (and maybe the O value?)
                 // if it's short
                 while (ownerKey->size() < 32) {
-                    ownerKey->append((char)0x00);
+                    ownerKey->push_back((char)0x00);
                 }
                 while (userKey->size() < 32) {
-                    userKey->append((char)0x00);
+                    userKey->push_back((char)0x00);
                 }
             }
         } else {

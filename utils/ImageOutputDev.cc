@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021, 2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021, 2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -230,7 +230,7 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str, int wi
         printf("[none]     ");
     }
 
-    const double *mat = state->getCTM();
+    const std::array<double, 6> &mat = state->getCTM();
     double width2 = sqrt(mat[0] * mat[0] + mat[1] * mat[1]);
     double height2 = sqrt(mat[2] * mat[2] + mat[3] * mat[3]);
     double xppi = fabs(width * 72.0 / width2);

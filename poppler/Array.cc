@@ -121,7 +121,7 @@ bool Array::getString(int i, GooString *string) const
     const Object &obj = getNF(i);
     if (obj.isString()) {
         string->clear();
-        string->append(obj.getString());
+        string->append(obj.getString()->toStr());
         return true;
     } else {
         return false;

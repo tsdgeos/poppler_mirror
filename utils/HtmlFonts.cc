@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007, 2010, 2012, 2018, 2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2010, 2012, 2018, 2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
@@ -161,35 +161,7 @@ HtmlFont::HtmlFont(const GfxFont &font, int _size, GfxRGB rgb, double opacity)
     rotSkewMat[0] = rotSkewMat[1] = rotSkewMat[2] = rotSkewMat[3] = 0;
 }
 
-HtmlFont::HtmlFont(const HtmlFont &x)
-{
-    size = x.size;
-    lineSize = x.lineSize;
-    italic = x.italic;
-    bold = x.bold;
-    familyName = x.familyName;
-    color = x.color;
-    FontName = x.FontName;
-    rotOrSkewed = x.rotOrSkewed;
-    memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
-}
-
 HtmlFont::~HtmlFont() = default;
-
-HtmlFont &HtmlFont::operator=(const HtmlFont &x)
-{
-    if (this == &x) {
-        return *this;
-    }
-    size = x.size;
-    lineSize = x.lineSize;
-    italic = x.italic;
-    bold = x.bold;
-    familyName = x.familyName;
-    color = x.color;
-    FontName = x.FontName;
-    return *this;
-}
 
 /*
   This function is used to compare font uniquely for insertion into
@@ -317,17 +289,17 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
         }
         // if there is rotation or skew, include the matrix
         if (font.isRotOrSkewed()) {
-            const double *const text_mat = font.getRotMat();
+            const std::array<double, 4> &text_mat = font.getRotMat();
             GooString matrix_str(" matrix(");
             matrix_str.appendf("{0:10.10g}, {1:10.10g}, {2:10.10g}, {3:10.10g}, 0, 0)", text_mat[0], text_mat[1], text_mat[2], text_mat[3]);
             tmp->append(";-moz-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-webkit-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-o-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             tmp->append(";-ms-transform:");
-            tmp->append(&matrix_str);
+            tmp->append(matrix_str.toStr());
             // Todo: 75% is a wild guess that seems to work pretty well;
             // We probably need to calculate the real percentage
             // Based on the characteristic baseline and bounding box of current font

@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -64,7 +64,7 @@ class GfxSeparationColorSpace;
 class Matrix
 {
 public:
-    double m[6];
+    std::array<double, 6> m;
 
     void init(double xx, double yx, double xy, double yy, double x0, double y0)
     {
@@ -1128,14 +1128,14 @@ public:
     /**
      * @precondition isParameterized() == false
      */
-    void getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2);
+    void getTriangle(int i, double *x0, double *y0, GfxColor *color0, double *x1, double *y1, GfxColor *color1, double *x2, double *y2, GfxColor *color2) const;
 
     /**
      * Variant for functions.
      *
      * @precondition isParameterized() == true
      */
-    void getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2);
+    void getTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2) const;
 
     void getParameterizedColor(double t, GfxColor *color) const;
 
@@ -1550,8 +1550,8 @@ public:
     // Accessors.
     double getHDPI() const { return hDPI; }
     double getVDPI() const { return vDPI; }
-    const double *getCTM() const { return ctm; }
-    void getCTM(Matrix *m) const { memcpy(m->m, ctm, sizeof m->m); }
+    const std::array<double, 6> &getCTM() const { return ctm; }
+    void getCTM(Matrix *m) const { m->m = ctm; }
     double getX1() const { return px1; }
     double getY1() const { return py1; }
     double getX2() const { return px2; }
@@ -1595,7 +1595,7 @@ public:
     bool getTextKnockout() const { return textKnockout; }
     const std::shared_ptr<GfxFont> &getFont() const { return font; }
     double getFontSize() const { return fontSize; }
-    const double *getTextMat() const { return textMat; }
+    const std::array<double, 6> &getTextMat() const { return textMat; }
     double getCharSpace() const { return charSpace; }
     double getWordSpace() const { return wordSpace; }
     double getHorizScaling() const { return horizScaling; }
@@ -1604,7 +1604,6 @@ public:
     int getRender() const { return render; }
     const char *getRenderingIntent() const { return renderingIntent; }
     const GfxPath *getPath() const { return path; }
-    void setPath(GfxPath *pathA);
     double getCurX() const { return curX; }
     double getCurY() const { return curY; }
     double getCurTextX() const { return curTextX; }
@@ -1773,7 +1772,7 @@ public:
 
 private:
     double hDPI, vDPI; // resolution
-    double ctm[6]; // coord transform matrix
+    std::array<double, 6> ctm; // coord transform matrix
     double px1, py1, px2, py2; // page corners (user coords)
     double pageWidth, pageHeight; // page size (pixels)
     int rotate; // page rotation angle
@@ -1808,7 +1807,7 @@ private:
 
     std::shared_ptr<GfxFont> font; // font
     double fontSize; // font size
-    double textMat[6]; // text matrix
+    std::array<double, 6> textMat; // text matrix
     double charSpace; // character spacing
     double wordSpace; // word spacing
     double horizScaling; // horizontal scaling

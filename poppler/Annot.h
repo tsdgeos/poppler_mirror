@@ -393,10 +393,10 @@ private:
 class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
-    DefaultAppearance(Object &&fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
+    DefaultAppearance(const std::string &fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
     explicit DefaultAppearance(const GooString *da);
-    void setFontName(Object &&fontNameA);
-    const Object &getFontName() const { return fontName; }
+    void setFontName(const std::string &fontNameA);
+    const std::string &getFontName() const { return fontName; }
     void setFontPtSize(double fontPtSizeA);
     double getFontPtSize() const { return fontPtSize; }
     void setFontColor(std::unique_ptr<AnnotColor> fontColorA);
@@ -407,7 +407,7 @@ public:
     DefaultAppearance &operator=(const DefaultAppearance &) = delete;
 
 private:
-    Object fontName;
+    std::string fontName;
     double fontPtSize;
     std::unique_ptr<AnnotColor> fontColor;
 };
@@ -583,7 +583,7 @@ public:
 
     void setDrawColor(const AnnotColor &color, bool fill);
     void setLineStyleForBorder(const AnnotBorder &border);
-    void setTextFont(const Object &fontName, double fontSize);
+    void setTextFont(const std::string &fontName, double fontSize);
     void drawCircle(double cx, double cy, double r, bool fill);
     void drawEllipse(double cx, double cy, double rx, double ry, bool fill, bool stroke);
     void drawCircleTopLeft(double cx, double cy, double r);

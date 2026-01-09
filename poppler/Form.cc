@@ -23,7 +23,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2018-2022 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2018-2022, 2026 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019, 2020 2024, Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
@@ -315,7 +315,7 @@ void FormWidgetButton::setState(bool astate)
     for (int i = 0; i < tot; i++) {
         bool found_related = false;
         FormWidget *wid = this_page_widgets->getWidget(i);
-        const bool same_fqn = wid->getFullyQualifiedName()->cmp(getFullyQualifiedName()) == 0;
+        const bool same_fqn = wid->getFullyQualifiedName()->compare(getFullyQualifiedName()->toStr()) == 0;
         const bool same_button_type = wid->getType() == formButton && static_cast<const FormWidgetButton *>(wid)->getButtonType() == this_button_type;
 
         if (same_fqn && same_button_type) {
@@ -761,7 +761,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
         if (leftFontSize == 0) {
             leftFontSize = Annot::calculateFontSize(form, font.get(), &signatureTextLeft, wMax / 2.0, hMax);
         }
-        const DefaultAppearance da { { objName, pdfFontName.c_str() }, fontSize, std::move(fontColor) };
+        const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
         getField()->setDefaultAppearance(da.toAppearanceString());
         form->ensureFontsForAllCharacters(&signatureText, pdfFontName);
         form->ensureFontsForAllCharacters(&signatureTextLeft, pdfFontName);
@@ -1232,7 +1232,7 @@ const GooString *FormField::getFullyQualifiedName() const
                     fullyQualifiedName->insert(0, tmp_str.c_str() + 2, tmp_str.size() - 2); // Remove the unicode BOM
                 }
             } else {
-                fullyQualifiedName->insert(0, 1, '.'); // 1-byte ascii period
+                fullyQualifiedName->insert(0, "."); // 1-byte ascii period
                 if (hasUnicodeByteOrderMark(parent_name->toStr())) {
                     unicode_encoded = true;
                     fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
@@ -1263,7 +1263,7 @@ const GooString *FormField::getFullyQualifiedName() const
                 fullyQualifiedName = convertToUtf16(fullyQualifiedName.get());
                 fullyQualifiedName->append(partialName->c_str() + 2, partialName->size() - 2); // Remove the unicode BOM
             } else {
-                fullyQualifiedName->append(partialName.get());
+                fullyQualifiedName->append(partialName->toStr());
             }
         }
     } else {
@@ -1380,7 +1380,7 @@ FormField *FormField::findFieldByRef(Ref aref)
 FormField *FormField::findFieldByFullyQualifiedName(const std::string &name)
 {
     if (terminal) {
-        if (getFullyQualifiedName()->cmp(name.c_str()) == 0) {
+        if (getFullyQualifiedName()->compare(name) == 0) {
             return this;
         }
     } else {
@@ -1682,31 +1682,29 @@ void FormFieldText::setContent(std::unique_ptr<GooString> new_content)
         Form *form = doc->getCatalog()->getForm();
         if (form) {
             DefaultAppearance da(defaultAppearance.get());
-            if (da.getFontName().isName()) {
-                const std::string fontName = da.getFontName().getName();
-                if (!fontName.empty()) {
-                    // Use the field resource dictionary if it exists
-                    Object fieldResourcesDictObj = obj.dictLookup("DR");
-                    if (fieldResourcesDictObj.isDict()) {
-                        GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
-                        const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
-                        // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
-                        // to the field DR dictionary
-                        if (!newFonts.empty()) {
-                            for (const Form::AddFontResult &afr : newFonts) {
-                                fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName, Object(afr.ref));
-                                // This is not fully correct, it changes the entire font to the last added font
-                                // but it is much better than not doing anything, because we know that one of
-                                // the fonts have characters we need, so there is a bit of hope involved here
-                                // It is likely that we only have added one font, and it is likely that it is
-                                // a non-subset version of a subset or a reduced type1 font or similar.
-                                da.setFontName(Object(objName, afr.fontName.c_str()));
-                            }
-                            setDefaultAppearance(da.toAppearanceString());
+            const std::string &fontName = da.getFontName();
+            if (!fontName.empty()) {
+                // Use the field resource dictionary if it exists
+                Object fieldResourcesDictObj = obj.dictLookup("DR");
+                if (fieldResourcesDictObj.isDict()) {
+                    GfxResources fieldResources(doc->getXRef(), fieldResourcesDictObj.getDict(), form->getDefaultResources());
+                    const std::vector<Form::AddFontResult> newFonts = form->ensureFontsForAllCharacters(content.get(), fontName, &fieldResources);
+                    // If we added new fonts to the Form object default resuources we also need to add them (we only add the ref so this is cheap)
+                    // to the field DR dictionary
+                    if (!newFonts.empty()) {
+                        for (const Form::AddFontResult &afr : newFonts) {
+                            fieldResourcesDictObj.dictLookup("Font").dictAdd(afr.fontName, Object(afr.ref));
+                            // This is not fully correct, it changes the entire font to the last added font
+                            // but it is much better than not doing anything, because we know that one of
+                            // the fonts have characters we need, so there is a bit of hope involved here
+                            // It is likely that we only have added one font, and it is likely that it is
+                            // a non-subset version of a subset or a reduced type1 font or similar.
+                            da.setFontName(afr.fontName);
                         }
-                    } else {
-                        form->ensureFontsForAllCharacters(content.get(), fontName);
+                        setDefaultAppearance(da.toAppearanceString());
                     }
+                } else {
+                    form->ensureFontsForAllCharacters(content.get(), fontName);
                 }
             } else {
                 // This is wrong, there has to be a Tf in DA
@@ -1770,7 +1768,7 @@ void FormFieldText::setTextFontSize(int fontSize)
         defaultAppearance = std::make_unique<GooString>();
         for (std::size_t i = 0; i < daToks.size(); ++i) {
             if (i > 0) {
-                defaultAppearance->append(' ');
+                defaultAppearance->push_back(' ');
             }
             if (i == idx) {
                 defaultAppearance->appendf("{0:d}", fontSize);
@@ -1943,11 +1941,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
 
             for (int i = 0; i < numChoices; i++) {
                 if (choices[i].exportVal) {
-                    if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
+                    if (choices[i].exportVal->compare(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 } else if (choices[i].optionName) {
-                    if (choices[i].optionName->cmp(obj1.getString()) == 0) {
+                    if (choices[i].optionName->compare(obj1.getString()->toStr()) == 0) {
                         optionFound = true;
                     }
                 }
@@ -1978,11 +1976,11 @@ void FormFieldChoice::fillChoices(FillValueType fillType)
                     bool matches = false;
 
                     if (choices[i].exportVal) {
-                        if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
+                        if (choices[i].exportVal->compare(obj2.getString()->toStr()) == 0) {
                             matches = true;
                         }
                     } else if (choices[i].optionName) {
-                        if (choices[i].optionName->cmp(obj2.getString()) == 0) {
+                        if (choices[i].optionName->compare(obj2.getString()->toStr()) == 0) {
                             matches = true;
                         }
                     }

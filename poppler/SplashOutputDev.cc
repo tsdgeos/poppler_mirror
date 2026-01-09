@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -177,9 +177,8 @@ static inline void convertGfxShortColor(SplashColorPtr dest, const SplashColorMo
 //------------------------------------------------------------------------
 // SplashGouraudPattern
 //------------------------------------------------------------------------
-SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA, GfxState *stateA, GfxGouraudTriangleShading *shadingA)
+SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA, GfxGouraudTriangleShading *shadingA)
 {
-    state = stateA;
     shading = shadingA;
     bDirectColorTranslation = bDirectColorTranslationA;
     gfxMode = shadingA->getColorSpace()->getMode();
@@ -1347,7 +1346,7 @@ void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
     splash->setThinLineMode(thinLineMode);
     splash->setMinLineWidth(s_minLineWidth);
     if (state) {
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         std::array<SplashCoord, 6> mat;
         mat[0] = (SplashCoord)ctm[0];
         mat[1] = (SplashCoord)ctm[1];
@@ -1435,7 +1434,7 @@ void SplashOutputDev::updateCTM(GfxState *state, double /*m11*/, double /*m12*/,
 {
     std::array<SplashCoord, 6> mat;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
     mat[1] = (SplashCoord)ctm[1];
     mat[2] = (SplashCoord)ctm[2];
@@ -1701,7 +1700,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
             mask &= ~7;
         } else if (colorSpace->getMode() == csSeparation) {
             GfxSeparationColorSpace *deviceSep = (GfxSeparationColorSpace *)colorSpace;
-            additive = deviceSep->getName()->cmp("All") != 0 && mask == 0x0f && !deviceSep->isNonMarking();
+            additive = deviceSep->getName()->compare("All") != 0 && mask == 0x0f && !deviceSep->isNonMarking();
         } else if (colorSpace->getMode() == csDeviceN) {
             GfxDeviceNColorSpace *deviceNCS = (GfxDeviceNColorSpace *)colorSpace;
             additive = mask == 0x0f && !deviceNCS->isNonMarking();
@@ -1813,10 +1812,8 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
     GfxFontType fontType;
-    SplashFontFile *fontFile;
+    std::shared_ptr<SplashFontFile> fontFile;
     std::unique_ptr<SplashOutFontFileID> id;
-    SplashFontSrc *fontsrc = nullptr;
-    const double *textMat;
     double m11, m12, m21, m22, fontSize;
     std::array<SplashCoord, 4> mat;
     bool recreateFont = false;
@@ -1827,26 +1824,21 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
 
     GfxFont *const gfxFont = state->getFont().get();
     if (!gfxFont) {
-        goto err;
+        return;
     }
     fontType = gfxFont->getType();
     if (fontType == fontType3) {
-        goto err;
+        return;
     }
 
     // sanity-check the font size - skip anything larger than 10 inches
     // (this avoids problems allocating memory for the font cache)
     if (state->getTransformedFontSize() > 10 * (state->getHDPI() + state->getVDPI())) {
-        goto err;
+        return;
     }
 
     // check the font file cache
 reload:
-    if (fontsrc && !fontsrc->isFile) {
-        fontsrc->unref();
-        fontsrc = nullptr;
-    }
-
     id = std::make_unique<SplashOutFontFileID>(gfxFont->getID());
     if ((fontFile = fontEngine->getFontFile(*id))) {
         id.reset();
@@ -1855,7 +1847,7 @@ reload:
         std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr);
         if (!fontLoc) {
             error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-            goto err;
+            return;
         }
 
         // embedded font
@@ -1866,7 +1858,7 @@ reload:
             // if there is an embedded font, read it to memory
             tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef());
             if (!tmpBuf) {
-                goto err;
+                return;
             }
 
             // external font
@@ -1876,40 +1868,40 @@ reload:
             doAdjustFontMatrix = true;
         }
 
-        fontsrc = new SplashFontSrc;
+        std::unique_ptr<SplashFontSrc> fontsrc;
         if (!fileName.empty()) {
-            fontsrc->setFile(fileName);
+            fontsrc = std::make_unique<SplashFontSrc>(fileName);
         } else {
-            fontsrc->setBuf(std::move(tmpBuf.value()));
+            fontsrc = std::make_unique<SplashFontSrc>(std::move(tmpBuf.value()));
         }
 
         // load the font file
         switch (fontType) {
         case fontType1:
-            if (!(fontFile = fontEngine->loadType1Font(std::move(id), fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadType1Font(std::move(id), std::move(fontsrc), (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         case fontType1C:
-            if (!(fontFile = fontEngine->loadType1CFont(std::move(id), fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadType1CFont(std::move(id), std::move(fontsrc), (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         case fontType1COT:
-            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(std::move(id), fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadOpenTypeT1CFont(std::move(id), std::move(fontsrc), (const char **)((Gfx8BitFont *)gfxFont)->getEncoding(), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         case fontTrueType:
@@ -1918,7 +1910,7 @@ reload:
             if (!fileName.empty()) {
                 ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
             } else {
-                ff = FoFiTrueType::make(fontsrc->buf, fontLoc->fontNum);
+                ff = FoFiTrueType::make(fontsrc->buf(), fontLoc->fontNum);
             }
             std::vector<int> codeToGID;
             if (ff) {
@@ -1934,23 +1926,23 @@ reload:
                     }
                 }
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), std::move(fontsrc), std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         }
         case fontCIDType0:
         case fontCIDType0C:
-            if (!(fontFile = fontEngine->loadCIDFont(std::move(id), fontsrc, fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadCIDFont(std::move(id), std::move(fontsrc), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         case fontCIDType0COT: {
@@ -1959,12 +1951,12 @@ reload:
                 codeToGID = ((GfxCIDFont *)gfxFont)->getCIDToGID();
             } else {
             }
-            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadOpenTypeCFFFont(std::move(id), std::move(fontsrc), std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         }
@@ -1978,32 +1970,32 @@ reload:
                 if (!fileName.empty()) {
                     ff = FoFiTrueType::load(fileName.c_str(), fontLoc->fontNum);
                 } else {
-                    ff = FoFiTrueType::make(fontsrc->buf, fontLoc->fontNum);
+                    ff = FoFiTrueType::make(fontsrc->buf(), fontLoc->fontNum);
                 }
                 if (!ff) {
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                    goto err;
+                    return;
                 }
                 codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get());
             }
-            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), fontsrc, std::move(codeToGID), fontLoc->fontNum))) {
+            if (!(fontFile = fontEngine->loadTrueTypeFont(std::move(id), std::move(fontsrc), std::move(codeToGID), fontLoc->fontNum))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
                 }
-                goto err;
+                return;
             }
             break;
         }
         default:
             // this shouldn't happen
-            goto err;
+            return;
         }
         fontFile->doAdjustMatrix = doAdjustFontMatrix;
     }
 
     // get the font matrix
-    textMat = state->getTextMat();
+    const std::array<double, 6> &textMat = state->getTextMat();
     fontSize = state->getFontSize();
     m11 = textMat[0] * fontSize * state->getHorizScaling();
     m12 = textMat[1] * fontSize * state->getHorizScaling();
@@ -2051,16 +2043,6 @@ reload:
         mat[2] = m21;
         mat[3] = m22;
         font = fontEngine->getFont(fontFile, mat, splash->getMatrix());
-    }
-
-    if (fontsrc && !fontsrc->isFile) {
-        fontsrc->unref();
-    }
-    return;
-
-err:
-    if (fontsrc && !fontsrc->isFile) {
-        fontsrc->unref();
     }
 }
 
@@ -2244,7 +2226,6 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
 {
     std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
-    const double *ctm;
     T3FontCache *t3Font;
     T3GlyphStack *t3gs;
     bool validBBox;
@@ -2272,7 +2253,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
         return false;
     }
     fontID = gfxFont->getID();
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     state->transform(0, 0, &xt, &yt);
 
     // is it the first (MRU) font in the cache?
@@ -2396,7 +2377,7 @@ void SplashOutputDev::endType3Char(GfxState *state)
         delete splash;
         bitmap = t3GlyphStack->origBitmap;
         splash = t3GlyphStack->origSplash;
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3], t3GlyphStack->origCTM4, t3GlyphStack->origCTM5);
         updateCTM(state, 0, 0, 0, 0, 0, 0);
         drawType3Glyph(state, t3GlyphStack->cache, t3GlyphStack->cacheTag, t3GlyphStack->cacheData);
@@ -2514,7 +2495,7 @@ void SplashOutputDev::type3D1(GfxState *state, double /*wx*/, double /*wy*/, dou
     // save state
     t3GlyphStack->origBitmap = bitmap;
     t3GlyphStack->origSplash = splash;
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     t3GlyphStack->origCTM4 = ctm[4];
     t3GlyphStack->origCTM5 = ctm[5];
 
@@ -2604,7 +2585,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     }
     setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(), state->getOverprintMode(), state->getFillColor());
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -2639,9 +2620,8 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     str->close();
 }
 
-void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double *baseMatrix)
+void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> &baseMatrix)
 {
-    const double *ctm;
     std::array<SplashCoord, 6> mat;
     SplashOutImageMaskData imgMaskData;
     Splash *maskSplash;
@@ -2652,7 +2632,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
         return;
     }
 
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -2667,7 +2647,6 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     baseMatrix[4] -= transpGroupStack->tx;
     baseMatrix[5] -= transpGroupStack->ty;
 
-    ctm = state->getCTM();
     mat[0] = ctm[0];
     mat[1] = ctm[1];
     mat[2] = -ctm[2];
@@ -2690,7 +2669,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     str->close();
 }
 
-void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix)
+void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> &baseMatrix)
 {
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
@@ -3234,7 +3213,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
     unsigned char pix;
     int n, i;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -3543,7 +3522,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 
         //----- draw the source image
 
-        const double *ctm = state->getCTM();
+        const std::array<double, 6> &ctm = state->getCTM();
         for (i = 0; i < 6; ++i) {
             if (!std::isfinite(ctm[i])) {
                 return;
@@ -3658,7 +3637,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
     colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
     setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(), state->getOverprintMode(), nullptr);
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             return;
@@ -3894,14 +3873,18 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     } else if (ty >= bitmap->getHeight()) {
         ty = bitmap->getHeight() - 1;
     }
-    w = (int)ceil(xMax) - tx + 1;
+    if (checkedSubtraction((int)ceil(xMax), tx + 1, &w)) {
+        w = 1;
+    }
     if (tx + w > bitmap->getWidth()) {
         w = bitmap->getWidth() - tx;
     }
     if (w < 1) {
         w = 1;
     }
-    h = (int)ceil(yMax) - ty + 1;
+    if (checkedSubtraction((int)ceil(yMax), ty + 1, &h)) {
+        h = 1;
+    }
     if (ty + h > bitmap->getHeight()) {
         h = bitmap->getHeight() - ty;
     }
@@ -4220,7 +4203,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     int repeatX, repeatY;
     std::array<SplashCoord, 6> matc;
     Matrix m1;
-    const double *ctm;
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
@@ -4237,13 +4219,13 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     }
 
     // calculate offsets
-    ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
         savedCTM[i] = ctm[i];
     }
     state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     state->concatCTM(1, 0, 0, 1, bbox[0], bbox[1]);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM calls
     for (i = 0; i < 6; ++i) {
         if (!std::isfinite(ctm[i])) {
             state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
@@ -4273,8 +4255,8 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     surface_width = (int)ceil(fabs(kx));
     surface_height = (int)ceil(fabs(ky));
 
-    sx = (double)result_width / (surface_width * (x1 - x0));
-    sy = (double)result_height / (surface_height * (y1 - y0));
+    sx = result_width / (surface_width * double(x1 - x0));
+    sy = result_height / (surface_height * double(y1 - y0));
     m1.m[0] *= sx;
     m1.m[3] *= sy;
     m1.transform(width, height, &kx, &ky);
@@ -4335,7 +4317,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
     state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
     state->concatCTM(width * repeatX, 0, 0, height * repeatY, bbox[0], bbox[1]);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM calls
     matc[0] = ctm[0];
     matc[1] = ctm[1];
     matc[2] = ctm[2];
@@ -4368,7 +4350,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     kx = result_width / (fabs(kx) + 1);
     ky = result_height / (fabs(ky) + 1);
     state->concatCTM(kx, 0, 0, ky, 0, 0);
-    ctm = state->getCTM();
+    // ctm now is different because of the concatCTM call
     matc[0] = ctm[0];
     matc[1] = ctm[1];
     matc[2] = ctm[2];
@@ -4435,7 +4417,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     return retValue;
 }
 
-bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
+bool SplashOutputDev::gouraudTriangleShadedFill(GfxState * /*state*/, GfxGouraudTriangleShading *shading)
 {
     GfxColorSpaceMode shadingMode = shading->getColorSpace()->getMode();
     bool bDirectColorTranslation = false; // triggers an optimization.
@@ -4451,7 +4433,7 @@ bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
         break;
     }
     // restore vector antialias because we support it here
-    SplashGouraudPattern splashShading(bDirectColorTranslation, state, shading);
+    SplashGouraudPattern splashShading(bDirectColorTranslation, shading);
     const bool vaa = getVectorAntialias();
     setVectorAntialias(true);
     const bool retVal = splash->gouraudTriangleShadedFill(&splashShading);

@@ -55,7 +55,7 @@ std::unique_ptr<FoFiType1C> FoFiType1C::make(std::vector<unsigned char> &&fileA)
     }
     return ff;
 }
-std::unique_ptr<FoFiType1C> FoFiType1C::make(std::span<unsigned char> data)
+std::unique_ptr<FoFiType1C> FoFiType1C::make(std::span<const unsigned char> data)
 {
     auto ff = std::make_unique<FoFiType1C>(data);
     if (!ff->parse()) {
@@ -87,7 +87,7 @@ FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBas
     charsetLength = 0;
 }
 
-FoFiType1C::FoFiType1C(std::span<unsigned char> data, PrivateTag) : FoFiBase(data)
+FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag) : FoFiBase(data)
 {
     encoding = nullptr;
     privateDicts = nullptr;
@@ -1038,10 +1038,10 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
 
     start = charBuf->size();
     if (top) {
-        charBuf->append('\x49'); // 73;
-        charBuf->append('\x3A'); // 58;
-        charBuf->append('\x93'); // 147;
-        charBuf->append('\x86'); // 134;
+        charBuf->push_back('\x49'); // 73;
+        charBuf->push_back('\x3A'); // 58;
+        charBuf->push_back('\x93'); // 147;
+        charBuf->push_back('\x86'); // 134;
         nOps = 0;
         nHints = 0;
         firstOp = true;
@@ -1083,7 +1083,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         d += ops[k + 1].num;
                         dFP |= ops[k + 1].isFP;
                     }
-                    charBuf->append((char)1);
+                    charBuf->push_back((char)1);
                 }
                 nHints += nOps / 2;
                 nOps = 0;
@@ -1113,7 +1113,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         d += ops[k + 1].num;
                         dFP |= ops[k + 1].isFP;
                     }
-                    charBuf->append((char)3);
+                    charBuf->push_back((char)3);
                 }
                 nHints += nOps / 2;
                 nOps = 0;
@@ -1124,14 +1124,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->append((char)9);
+                    charBuf->push_back((char)9);
                     openPath = false;
                 }
                 if (nOps != 1) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vmoveto", nOps);
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
-                charBuf->append((char)4);
+                charBuf->push_back((char)4);
                 nOps = 0;
                 break;
             case 0x0005: // rlineto
@@ -1141,7 +1141,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 for (k = 0; k < nOps; k += 2) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->append((char)5);
+                    charBuf->push_back((char)5);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1152,7 +1152,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 for (k = 0; k < nOps; ++k) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                    charBuf->append((char)((k & 1) ? 7 : 6));
+                    charBuf->push_back((char)((k & 1) ? 7 : 6));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1163,7 +1163,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 for (k = 0; k < nOps; ++k) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
-                    charBuf->append((char)((k & 1) ? 6 : 7));
+                    charBuf->push_back((char)((k & 1) ? 6 : 7));
                 }
                 nOps = 0;
                 openPath = true;
@@ -1179,7 +1179,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1208,7 +1208,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->append((char)9);
+                    charBuf->push_back((char)9);
                     openPath = false;
                 }
                 if (nOps == 4) {
@@ -1217,10 +1217,10 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[1].num, ops[1].isFP, charBuf);
                     cvtNum(ops[2].num, ops[2].isFP, charBuf);
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
-                    charBuf->append((char)12);
-                    charBuf->append((char)6);
+                    charBuf->push_back((char)12);
+                    charBuf->push_back((char)6);
                 } else if (nOps == 0) {
-                    charBuf->append((char)14);
+                    charBuf->push_back((char)14);
                 } else {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 endchar", nOps);
                 }
@@ -1288,7 +1288,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->append((char)9);
+                    charBuf->push_back((char)9);
                     openPath = false;
                 }
                 if (nOps != 2) {
@@ -1296,7 +1296,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
                 cvtNum(ops[1].num, ops[1].isFP, charBuf);
-                charBuf->append((char)21);
+                charBuf->push_back((char)21);
                 nOps = 0;
                 break;
             case 0x0016: // hmoveto
@@ -1305,14 +1305,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     firstOp = false;
                 }
                 if (openPath) {
-                    charBuf->append((char)9);
+                    charBuf->push_back((char)9);
                     openPath = false;
                 }
                 if (nOps != 1) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hmoveto", nOps);
                 }
                 cvtNum(ops[0].num, ops[0].isFP, charBuf);
-                charBuf->append((char)22);
+                charBuf->push_back((char)22);
                 nOps = 0;
                 break;
             case 0x0017: // vstemhm
@@ -1338,12 +1338,12 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 if (likely(k + 1 < nOps)) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->append((char)5);
+                    charBuf->push_back((char)5);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1355,7 +1355,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 for (k = 0; k < nOps - 6; k += 2) {
                     cvtNum(ops[k].num, ops[k].isFP, charBuf);
                     cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
-                    charBuf->append((char)5);
+                    charBuf->push_back((char)5);
                 }
                 cvtNum(ops[k].num, ops[k].isFP, charBuf);
                 cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
@@ -1363,7 +1363,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                 cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                 cvtNum(ops[k + 5].num, ops[k + 5].isFP, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1378,7 +1378,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
                     cvtNum(0, false, charBuf);
                     cvtNum(ops[4].num, ops[4].isFP, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                     k = 5;
                 } else {
                     k = 0;
@@ -1390,7 +1390,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                     cvtNum(0, false, charBuf);
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1406,7 +1406,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[3].num, ops[3].isFP, charBuf);
                     cvtNum(ops[4].num, ops[4].isFP, charBuf);
                     cvtNum(0, false, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                     k = 5;
                 } else {
                     k = 0;
@@ -1418,7 +1418,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                     cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     cvtNum(0, false, charBuf);
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1447,13 +1447,13 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->append((char)30);
+                        charBuf->push_back((char)30);
                     } else {
                         cvtNum(ops[k].num, ops[k].isFP, charBuf);
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->append((char)31);
+                        charBuf->push_back((char)31);
                     }
                 }
                 if (k == nOps - 5) {
@@ -1472,7 +1472,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                     }
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1487,13 +1487,13 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->append((char)31);
+                        charBuf->push_back((char)31);
                     } else {
                         cvtNum(ops[k].num, ops[k].isFP, charBuf);
                         cvtNum(ops[k + 1].num, ops[k + 1].isFP, charBuf);
                         cvtNum(ops[k + 2].num, ops[k + 2].isFP, charBuf);
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
-                        charBuf->append((char)30);
+                        charBuf->push_back((char)30);
                     }
                 }
                 if (k == nOps - 5) {
@@ -1512,7 +1512,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                         cvtNum(ops[k + 3].num, ops[k + 3].isFP, charBuf);
                         cvtNum(ops[k + 4].num, ops[k + 4].isFP, charBuf);
                     }
-                    charBuf->append((char)8);
+                    charBuf->push_back((char)8);
                 }
                 nOps = 0;
                 openPath = true;
@@ -1556,14 +1556,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[2].num, ops[2].isFP, charBuf);
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(0, false, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
                 cvtNum(-ops[2].num, ops[2].isFP, charBuf);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1577,14 +1577,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
                 cvtNum(ops[9].num, ops[9].isFP, charBuf);
                 cvtNum(ops[10].num, ops[10].isFP, charBuf);
                 cvtNum(ops[11].num, ops[11].isFP, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1598,14 +1598,14 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(0, false, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
                 cvtNum(0, false, charBuf);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
                 cvtNum(-(ops[1].num + ops[3].num + ops[7].num), ops[1].isFP | ops[3].isFP | ops[7].isFP, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1619,7 +1619,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 cvtNum(ops[3].num, ops[3].isFP, charBuf);
                 cvtNum(ops[4].num, ops[4].isFP, charBuf);
                 cvtNum(ops[5].num, ops[5].isFP, charBuf);
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 cvtNum(ops[6].num, ops[6].isFP, charBuf);
                 cvtNum(ops[7].num, ops[7].isFP, charBuf);
                 cvtNum(ops[8].num, ops[8].isFP, charBuf);
@@ -1633,7 +1633,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                     cvtNum(-dx, ops[0].isFP | ops[2].isFP | ops[4].isFP | ops[6].isFP | ops[8].isFP, charBuf);
                     cvtNum(ops[10].num, ops[10].isFP, charBuf);
                 }
-                charBuf->append((char)8);
+                charBuf->push_back((char)8);
                 nOps = 0;
                 openPath = true;
                 break;
@@ -1678,7 +1678,7 @@ void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPriva
     }
     cvtNum(0, false, charBuf);
     cvtNum(w, wFP, charBuf);
-    charBuf->append((char)13);
+    charBuf->push_back((char)13);
 }
 
 void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const

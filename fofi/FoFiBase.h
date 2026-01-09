@@ -52,7 +52,7 @@ protected:
     // takes ownership over data
     explicit FoFiBase(std::vector<unsigned char> &&fileA);
     // callers responsibility to keep the data alive as long as this object exists
-    explicit FoFiBase(std::span<unsigned char> fileA);
+    explicit FoFiBase(std::span<const unsigned char> fileA);
     static std::optional<std::vector<unsigned char>> readFile(const char *fileName);
 
     // S = signed / U = unsigned
@@ -70,7 +70,7 @@ protected:
     bool checkRegion(int pos, int size) const;
 
     std::vector<unsigned char> fileOwner;
-    std::span<unsigned char> file;
+    std::span<const unsigned char> file;
 };
 
 #endif

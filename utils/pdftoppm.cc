@@ -226,10 +226,10 @@ static bool parseJpegOptions()
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
+            opt.assign(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
-            opt.Set(nextOpt);
+            opt.assign(nextOpt);
             nextOpt = nullptr;
         }
         // here opt is "<optN>=<valN> "
@@ -243,7 +243,7 @@ static bool parseJpegOptions()
         opt.erase(iequal, opt.size() - iequal);
         // here opt is "<optN>" and value is "<valN>"
 
-        if (opt.cmp("quality") == 0) {
+        if (opt.compare("quality") == 0) {
             if (!isInt(value.c_str())) {
                 fprintf(stderr, "Invalid jpeg quality\n");
                 return false;
@@ -253,19 +253,19 @@ static bool parseJpegOptions()
                 fprintf(stderr, "jpeg quality must be between 0 and 100\n");
                 return false;
             }
-        } else if (opt.cmp("progressive") == 0) {
+        } else if (opt.compare("progressive") == 0) {
             jpegProgressive = false;
-            if (value.cmp("y") == 0) {
+            if (value.compare("y") == 0) {
                 jpegProgressive = true;
-            } else if (value.cmp("n") != 0) {
+            } else if (value.compare("n") != 0) {
                 fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
                 return false;
             }
-        } else if (opt.cmp("optimize") == 0 || opt.cmp("optimise") == 0) {
+        } else if (opt.compare("optimize") == 0 || opt.compare("optimise") == 0) {
             jpegOptimize = false;
-            if (value.cmp("y") == 0) {
+            if (value.compare("y") == 0) {
                 jpegOptimize = true;
-            } else if (value.cmp("n") != 0) {
+            } else if (value.compare("n") != 0) {
                 fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
                 return false;
             }
@@ -495,7 +495,7 @@ int main(int argc, char *argv[])
     if (fileName == nullptr) {
         fileName = new GooString("fd://0");
     }
-    if (fileName->cmp("-") == 0) {
+    if (fileName->compare("-") == 0) {
         delete fileName;
         fileName = new GooString("fd://0");
     }

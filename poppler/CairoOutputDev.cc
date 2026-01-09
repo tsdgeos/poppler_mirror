@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021, 2023-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -213,10 +213,6 @@ CairoOutputDev::~CairoOutputDev()
     if (shape) {
         cairo_pattern_destroy(shape);
     }
-    if (textPage) {
-        textPage->decRefCnt();
-    }
-    delete actualText;
 }
 
 void CairoOutputDev::setCairo(cairo_t *c)
@@ -248,19 +244,12 @@ bool CairoOutputDev::isPDF()
     return false;
 }
 
-void CairoOutputDev::setTextPage(TextPage *text)
+void CairoOutputDev::setTextPage(std::shared_ptr<TextPage> text)
 {
+    actualText.reset();
+    textPage = std::move(text);
     if (textPage) {
-        textPage->decRefCnt();
-    }
-    delete actualText;
-    if (text) {
-        textPage = text;
-        textPage->incRefCnt();
-        actualText = new ActualText(text);
-    } else {
-        textPage = nullptr;
-        actualText = nullptr;
+        actualText = std::make_unique<ActualText>(textPage.get());
     }
 }
 
@@ -298,12 +287,12 @@ void CairoOutputDev::startDoc(PDFDoc *docA, CairoFontEngine *parentFontEngine)
 void CairoOutputDev::textStringToQuotedUtf8(const GooString *text, GooString *s)
 {
     std::string utf8 = TextStringToUtf8(text->toStr());
-    s->Set("'");
+    s->assign("'");
     for (char c : utf8) {
         if (c == '\\' || c == '\'') {
             s->append("\\");
         }
-        s->append(c);
+        s->push_back(c);
     }
     s->append("'");
 }
@@ -845,7 +834,7 @@ void CairoOutputDev::updateAll(GfxState *state)
     }
 }
 
-void CairoOutputDev::setDefaultCTM(const double *ctm)
+void CairoOutputDev::setDefaultCTM(const std::array<double, 6> &ctm)
 {
     cairo_matrix_t matrix;
     matrix.xx = ctm[0];
@@ -1176,7 +1165,7 @@ void CairoOutputDev::updateFont(GfxState *state)
     use_show_text_glyphs = state->getFont()->hasToUnicodeCMap() && cairo_surface_has_show_text_glyphs(cairo_get_target(cairo));
 
     double fontSize = state->getFontSize();
-    const double *m = state->getTextMat();
+    const std::array<double, 6> &m = state->getTextMat();
     /* NOTE: adjusting by a constant is hack. The correct solution
      * is probably to use user-fonts and compute the scale on a per
      * glyph basis instead of for the entire font */
@@ -2038,7 +2027,7 @@ bool CairoOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/,
     cairo_save(cairo);
     cairo_matrix_t matrix;
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     matrix.xx = ctm[0];
     matrix.yx = ctm[1];
     matrix.xy = ctm[2];
@@ -2559,7 +2548,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *st
     drawImageMaskRegular(state, str, width, height, invert, interpolate);
 }
 
-void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double * /*baseMatrix*/)
+void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> & /*baseMatrix*/)
 {
 
     /* FIXME: Doesn't the image mask support any colorspace? */
@@ -2621,7 +2610,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/,
     beginTransparencyGroup(state, bbox, state->getFillColorSpace(), true, false, false);
 }
 
-void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double * /*baseMatrix*/)
+void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, std::array<double, 6> & /*baseMatrix*/)
 {
     static constexpr std::array<double, 4> bbox = { 0, 0, 1, 1 }; // dummy
 
@@ -3678,7 +3667,7 @@ void CairoImageOutputDev::saveImage(CairoImage *image)
 
 void CairoImageOutputDev::getBBox(GfxState *state, int width, int height, double *x1, double *y1, double *x2, double *y2)
 {
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     cairo_matrix_t matrix;
     cairo_matrix_init(&matrix, ctm[0], ctm[1], -ctm[2], -ctm[3], ctm[2] + ctm[4], ctm[3] + ctm[5]);
 
@@ -3728,7 +3717,7 @@ void CairoImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *st
     }
 }
 
-void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double * /*baseMatrix*/)
+void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, std::array<double, 6> & /*baseMatrix*/)
 {
     cairo_t *cr;
     cairo_surface_t *surface;

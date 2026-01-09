@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -454,8 +454,6 @@ Object GfxResources::lookupGStateNF(const char *name)
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI, double vDPI, const PDFRectangle *box, const PDFRectangle *cropBox, int rotate, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, XRef *xrefA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
-    int i;
-
     doc = docA;
     xref = (xrefA == nullptr) ? doc->getXRef() : xrefA;
     catalog = doc->getCatalog();
@@ -478,9 +476,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
     out->startPage(pageNum, state, xref);
     out->setDefaultCTM(state->getCTM());
     out->updateAll(state);
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    baseMatrix = state->getCTM();
     displayDepth = 0;
     ocState = true;
     parser = nullptr;
@@ -506,8 +502,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict, double hDPI,
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, const PDFRectangle *cropBox, bool (*abortCheckCbkA)(void *data), void *abortCheckCbkDataA, Gfx *gfxA)
     : printCommands(globalParams->getPrintCommands()), profileCommands(globalParams->getProfileCommands())
 {
-    int i;
-
     doc = docA;
     if (gfxA) {
         xref = gfxA->getXRef();
@@ -538,9 +532,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict, const PDFRectangle *box, 
     fontChanged = false;
     clip = clipNone;
     ignoreUndef = 0;
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    baseMatrix = state->getCTM();
     displayDepth = 0;
     ocState = true;
     parser = nullptr;
@@ -2004,7 +1996,6 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     double xMin, yMin, xMax, yMax, x, y, x1, y1;
     double cxMin, cyMin, cxMax, cyMax;
     int xi0, yi0, xi1, yi1, xi, yi;
-    const double *ctm, *btm;
     double m[6], ictm[6], imb[6];
     std::array<double, 6> m1;
     double det;
@@ -2015,8 +2006,8 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat, bool stroke, bool eoFill, 
     patCS = (GfxPatternColorSpace *)(stroke ? state->getStrokeColorSpace() : state->getFillColorSpace());
 
     // construct a (pattern space) -> (current space) transform matrix
-    ctm = state->getCTM();
-    btm = baseMatrix;
+    const std::array<double, 6> &ctm = state->getCTM();
+    const std::array<double, 6> &btm = baseMatrix;
     const std::array<double, 6> &ptm = tPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
@@ -2224,7 +2215,6 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
 {
     GfxShading *shading;
     GfxState *savedState;
-    const double *ctm, *btm;
     double m[6], ictm[6], m1[6];
     double xMin, yMin, xMax, yMax;
     double det;
@@ -2249,8 +2239,8 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat, bool stroke, bool eoFill
     state->clearPath();
 
     // construct a (pattern space) -> (current space) transform matrix
-    ctm = state->getCTM();
-    btm = baseMatrix;
+    const std::array<double, 6> &ctm = state->getCTM();
+    const std::array<double, 6> &btm = baseMatrix;
     const std::array<double, 6> &ptm = sPat->getMatrix();
     // iCTM = invert CTM
     det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
@@ -3018,7 +3008,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
     // achieve a curve flatness of 0.1 pixel in device space for the
     // largest circle (note that "device space" is 72 dpi when generating
     // PostScript, hence the relatively small 0.1 pixel accuracy)
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     t = fabs(ctm[0]);
     if (fabs(ctm[1]) > t) {
         t = fabs(ctm[1]);
@@ -3850,7 +3840,6 @@ void Gfx::doShowText(const GooString *s)
     double originX, originY, tOriginX, tOriginY;
     double x0, y0, x1, y1;
     double tmp[4], newCTM[6];
-    const double *oldCTM, *mat;
     Dict *resDict;
     Parser *oldParser;
     GfxState *savedState;
@@ -3889,8 +3878,8 @@ void Gfx::doShowText(const GooString *s)
 
     // handle a Type 3 char
     if (font->getType() == fontType3 && out->interpretType3Chars()) {
-        oldCTM = state->getCTM();
-        mat = state->getTextMat();
+        const std::array<double, 6> &oldCTM = state->getCTM();
+        const std::array<double, 6> &mat = state->getTextMat();
         tmp[0] = mat[0] * oldCTM[0] + mat[1] * oldCTM[2];
         tmp[1] = mat[0] * oldCTM[1] + mat[1] * oldCTM[3];
         tmp[2] = mat[2] * oldCTM[0] + mat[3] * oldCTM[2];
@@ -4211,7 +4200,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
         }
     }
 
-    const double *ctm = state->getCTM();
+    const std::array<double, 6> &ctm = state->getCTM();
     const double det = ctm[0] * ctm[3] - ctm[1] * ctm[2];
     // Detect singular matrix (non invertible) to avoid drawing Image in such case
     const bool singular_matrix = fabs(det) < 0.000001;
@@ -4823,8 +4812,6 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
 {
     Parser *oldParser;
     GfxState *savedState;
-    double oldBaseMatrix[6];
-    int i;
 
     // push new resources on stack
     pushResources(resDict);
@@ -4870,10 +4857,8 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
     }
 
     // set new base matrix
-    for (i = 0; i < 6; ++i) {
-        oldBaseMatrix[i] = baseMatrix[i];
-        baseMatrix[i] = state->getCTM()[i];
-    }
+    const std::array<double, 6> oldBaseMatrix = baseMatrix;
+    baseMatrix = state->getCTM();
 
     GfxState *stateBefore = state;
 
@@ -4898,9 +4883,7 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
     }
 
     // restore base matrix
-    for (i = 0; i < 6; ++i) {
-        baseMatrix[i] = oldBaseMatrix[i];
-    }
+    baseMatrix = oldBaseMatrix;
 
     // restore parser
     parser = oldParser;

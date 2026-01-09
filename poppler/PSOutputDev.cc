@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -1084,7 +1084,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
     customCodeCbkData = customCodeCbkDataA;
 
     font16Enc = nullptr;
-    imgIDs = nullptr;
     formIDs = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
@@ -1139,7 +1138,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
     customCodeCbkData = customCodeCbkDataA;
 
     font16Enc = nullptr;
-    imgIDs = nullptr;
     formIDs = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
@@ -1175,7 +1173,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
     customCodeCbkData = customCodeCbkDataA;
 
     font16Enc = nullptr;
-    imgIDs = nullptr;
     formIDs = nullptr;
     embFontList = nullptr;
     customColors = nullptr;
@@ -1390,8 +1387,6 @@ void PSOutputDev::postInit()
     }
     font16EncLen = 0;
     font16EncSize = 0;
-    imgIDLen = 0;
-    imgIDSize = 0;
     formIDLen = 0;
     formIDSize = 0;
 
@@ -1518,7 +1513,6 @@ PSOutputDev::~PSOutputDev()
         }
         gfree(font16Enc);
     }
-    gfree(imgIDs);
     gfree(formIDs);
     while (customColors) {
         cc = customColors;
@@ -2675,11 +2669,11 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
     std::unique_ptr<GooString> psName = std::make_unique<GooString>(GooString::format("FF{0:d}_{1:d}", id->num, id->gen));
     if ((s = font->getEmbeddedFontName())) {
         std::string filteredName = filterPSName(s->toStr());
-        psName->append('_');
+        psName->push_back('_');
         psName->append(filteredName);
     } else if (fontName) {
         std::string filteredName = filterPSName(*fontName);
-        psName->append('_');
+        psName->push_back('_');
         psName->append(filteredName);
     }
     fontNames.emplace(psName->toStr());
@@ -2688,8 +2682,6 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
 
 void PSOutputDev::setupImages(Dict *resDict)
 {
-    Ref imgID;
-
     if (!(mode == psModeForm || inType3Char || preloadImagesForms)) {
         return;
     }
@@ -2704,23 +2696,9 @@ void PSOutputDev::setupImages(Dict *resDict)
                 Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
                 if (subtypeObj.isName("Image")) {
                     if (xObjRef.isRef()) {
-                        imgID = xObjRef.getRef();
-                        int j;
-                        for (j = 0; j < imgIDLen; ++j) {
-                            if (imgIDs[j] == imgID) {
-                                break;
-                            }
-                        }
-                        if (j == imgIDLen) {
-                            if (imgIDLen >= imgIDSize) {
-                                if (imgIDSize == 0) {
-                                    imgIDSize = 64;
-                                } else {
-                                    imgIDSize *= 2;
-                                }
-                                imgIDs = (Ref *)greallocn(imgIDs, imgIDSize, sizeof(Ref));
-                            }
-                            imgIDs[imgIDLen++] = imgID;
+                        const Ref imgID = xObjRef.getRef();
+                        const auto [_, inserted] = imgIDs.insert(imgID);
+                        if (inserted) {
                             setupImage(imgID, xObj.getStream(), false);
                             if (level >= psLevel3) {
                                 Object maskObj = xObj.streamGetDict()->lookup("Mask");
@@ -4027,30 +4005,30 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS)
     GfxColor color;
     GfxCMYK cmyk;
 
-    if (!sepCS->getName()->cmp("Black")) {
+    if (!sepCS->getName()->compare("Black")) {
         processColors |= psProcessBlack;
         return;
     }
-    if (!sepCS->getName()->cmp("Cyan")) {
+    if (!sepCS->getName()->compare("Cyan")) {
         processColors |= psProcessCyan;
         return;
     }
-    if (!sepCS->getName()->cmp("Yellow")) {
+    if (!sepCS->getName()->compare("Yellow")) {
         processColors |= psProcessYellow;
         return;
     }
-    if (!sepCS->getName()->cmp("Magenta")) {
+    if (!sepCS->getName()->compare("Magenta")) {
         processColors |= psProcessMagenta;
         return;
     }
-    if (!sepCS->getName()->cmp("All")) {
+    if (!sepCS->getName()->compare("All")) {
         return;
     }
-    if (!sepCS->getName()->cmp("None")) {
+    if (!sepCS->getName()->compare("None")) {
         return;
     }
     for (cc = customColors; cc; cc = cc->next) {
-        if (!cc->name->cmp(sepCS->getName())) {
+        if (!cc->name->compare(sepCS->getName()->toStr())) {
             return;
         }
     }
@@ -4112,7 +4090,7 @@ void PSOutputDev::updateFont(GfxState *state)
 
 void PSOutputDev::updateTextMat(GfxState *state)
 {
-    const double *mat = state->getTextMat();
+    const std::array<double, 6> &mat = state->getTextMat();
     if (fabs(mat[0] * mat[3] - mat[1] * mat[2]) < 0.00001) {
         // avoid a singular (or close-to-singular) matrix
         writePSFmt("[0.00001 0 0 0.00001 {0:.6g} {1:.6g}] Tm\n", mat[4], mat[5]);
@@ -4980,7 +4958,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
                 for (i = 0; i < uLen; ++i) {
                     m = uMap->mapUnicode(u[i], buf, (int)sizeof(buf));
                     for (j = 0; j < m; ++j) {
-                        s2->append(buf[j]);
+                        s2->push_back(buf[j]);
                     }
                     //~ this really needs to get the number of chars in the target
                     //~ encoding - which may be more than the number of Unicode
@@ -5002,15 +4980,15 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
                     dxdySize *= 2;
                     dxdy = (double *)greallocn(dxdy, 2 * dxdySize, sizeof(double));
                 }
-                s2->append((char)((code >> 8) & 0xff));
-                s2->append((char)(code & 0xff));
+                s2->push_back((char)((code >> 8) & 0xff));
+                s2->push_back((char)(code & 0xff));
                 dxdy[2 * nChars] = dx;
                 dxdy[2 * nChars + 1] = dy;
                 ++nChars;
             }
         } else {
             if (codeToGID.empty() || codeToGID[code] >= 0) {
-                s2->append((char)code);
+                s2->push_back((char)code);
                 dxdy[2 * nChars] = dx;
                 dxdy[2 * nChars + 1] = dy;
                 ++nChars;
@@ -5070,14 +5048,14 @@ void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, int w
     }
 }
 
-void PSOutputDev::setSoftMaskFromImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, double * /*baseMatrix*/)
+void PSOutputDev::setSoftMaskFromImageMask(GfxState * /*state*/, Object * /*ref*/, Stream *str, int width, int height, bool invert, bool /*inlineImg*/, std::array<double, 6> & /*baseMatrix*/)
 {
     if (level != psLevel1 && level != psLevel1Sep) {
         maskToClippingPath(str, width, height, invert);
     }
 }
 
-void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, double * /*baseMatrix*/)
+void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * /*state*/, std::array<double, 6> & /*baseMatrix*/)
 {
     if (level != psLevel1 && level != psLevel1Sep) {
         writePS("pdfImClipEnd\n");
@@ -7193,7 +7171,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction)
 void PSOutputDev::writePSChar(char c)
 {
     if (t3String) {
-        t3String->append(c);
+        t3String->push_back(c);
     } else {
         (*outputFunc)(outputStream, &c, 1);
     }
@@ -7212,7 +7190,7 @@ void PSOutputDev::writePSBuf(const char *s, int len)
 {
     if (t3String) {
         for (int i = 0; i < len; i++) {
-            t3String->append(s[i]);
+            t3String->push_back(s[i]);
         }
     } else {
         (*outputFunc)(outputStream, s, len);
@@ -7357,7 +7335,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
             label2->append(aux);
             j += 4;
         } else {
-            label2->append(c);
+            label2->push_back(c);
             ++j;
         }
     }

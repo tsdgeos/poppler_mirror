@@ -48,11 +48,11 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
                     const Object &mkey = mergeNameArray.arrayGetNF(j);
                     const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
                     if (mkey.isString() && mvalue.isRef()) {
-                        if (mkey.getString()->cmp(key.getString()) < 0) {
+                        if (mkey.getString()->compare(key.getString()->toStr()) < 0) {
                             newNameArray->add(Object(mkey.getString()->copy()));
                             newNameArray->add(Object(Ref { mvalue.getRef().num + numOffset, mvalue.getRef().gen }));
                             j += 2;
-                        } else if (mkey.getString()->cmp(key.getString()) == 0) {
+                        } else if (mkey.getString()->compare(key.getString()->toStr()) == 0) {
                             j += 2;
                         } else {
                             break;
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
                                         Object pgidf = pgintent.dictLookup("OutputConditionIdentifier");
                                         if (pgidf.isString()) {
                                             const GooString *gpgidf = pgidf.getString();
-                                            if (gpgidf->cmp(gidf) == 0) {
+                                            if (gpgidf->compare(gidf->toStr()) == 0) {
                                                 removeIntent = false;
                                                 break;
                                             }

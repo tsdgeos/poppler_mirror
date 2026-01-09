@@ -33,9 +33,10 @@
 #include <fstream>
 #include <random>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include "parseargs.h"
 #include "goo/gbasename.h"
-#include "goo/gmem.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
@@ -50,7 +51,6 @@
 #include "CryptoSignBackend.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
-#include "numberofcharacters.h"
 #include "UTF.h"
 #if __has_include(<libgen.h>)
 #    include <libgen.h>
@@ -116,11 +116,12 @@ static const char *getReadableCertState(CertificateValidationStatus cert_vs)
     }
 }
 
-static char *getReadableTime(time_t unix_time)
+static std::string getReadableTime(time_t unix_time)
 {
-    char *time_str = (char *)gmalloc(64);
-    strftime(time_str, 64, "%b %d %Y %H:%M:%S", localtime(&unix_time));
-    return time_str;
+    std::stringstream stringStream;
+    const std::tm tm = *std::localtime(&unix_time);
+    stringStream << std::put_time(&tm, "%b %d %Y %H:%M:%S");
+    return stringStream.str();
 }
 
 static std::string_view trim(std::string_view input)
@@ -160,7 +161,7 @@ static std::vector<std::string> parseAssertSigner(std::string_view input)
     return std::vector<std::string> { std::string { input } };
 }
 
-static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, const char *filename)
+static bool dumpSignature(int sig_num, FormFieldSignature *s, const char *filename)
 {
     const std::vector<unsigned char> &signature = s->getSignature();
     if (signature.empty()) {
@@ -168,9 +169,8 @@ static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, cons
         return false;
     }
 
-    const int sigCountWidth = numberOfCharacters(sigCount);
     const std::string filenameWithExtension = GooString::format("{0:s}.sig", gbasename(filename).c_str());
-    const std::string sig_numString = GooString::formatLongLong(sig_num, sigCountWidth);
+    const std::string sig_numString = std::to_string(sig_num);
     const std::string path = filenameWithExtension + sig_numString;
     printf("Signature #%d (%lu bytes) => %s\n", sig_num, signature.size(), path.c_str());
     std::ofstream outfile(path.c_str(), std::ofstream::binary);
@@ -364,7 +364,6 @@ static std::string TextStringToUTF8(const std::string &str)
 
 int main(int argc, char *argv[])
 {
-    char *time_str = nullptr;
     globalParams = std::make_unique<GlobalParams>();
 
     Win32Console win32Console(&argc, &argv);
@@ -514,7 +513,7 @@ int main(int argc, char *argv[])
             std::uniform_int_distribution<> distrib(1, 15);
             for (int i = 0; i < 32; ++i) {
                 const int value = distrib(gen);
-                newSignatureFieldName.append(value < 10 ? 48 + value : 65 + (value - 10));
+                newSignatureFieldName.push_back(value < 10 ? 48 + value : 65 + (value - 10));
             }
         }
 
@@ -627,7 +626,7 @@ int main(int argc, char *argv[])
         if (dumpSignatures) {
             printf("Dumping Signatures: %u\n", sigCount);
             for (unsigned int i = 0; i < sigCount; i++) {
-                const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
+                const bool dumpingOk = dumpSignature(i, signatures.at(i), fileName->c_str());
                 if (!dumpingOk) {
                     // for now, do nothing. We have logged a message
                     // to the user before returning false in dumpSignature
@@ -683,7 +682,7 @@ int main(int argc, char *argv[])
             printf("  - Signer fingerprint: %s\n", sig_info->getCertificateInfo()->getNickName().c_str());
         }
         printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN().c_str());
-        printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
+        printf("  - Signing Time: %s\n", getReadableTime(sig_info->getSigningTime()).c_str());
         printf("  - Signing Hash Algorithm: ");
         switch (sig_info->getHashAlgorithm()) {
         case HashAlgorithm::Md2:
@@ -747,7 +746,6 @@ int main(int argc, char *argv[])
             }
         }
         printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
-        gfree(time_str);
         if (sig_info->getSignatureValStatus() != SIGNATURE_VALID) {
             oneSignatureInvalid = true;
             continue;

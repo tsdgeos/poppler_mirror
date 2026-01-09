@@ -231,7 +231,7 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
 
     TextOutputDev td(nullptr, true, 0, false, false);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, rotation_value, false, true, false);
-    TextPage *text_page = td.takeText();
+    std::unique_ptr<TextPage> text_page = td.takeText();
 
     switch (direction) {
     case search_from_top:
@@ -245,7 +245,6 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
         break;
     }
 
-    text_page->decRefCnt();
     r.set_left(rect_left);
     r.set_top(rect_top);
     r.set_right(rect_right);

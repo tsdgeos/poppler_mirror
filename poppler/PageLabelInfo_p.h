@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include "goo/GooLikely.h"
 #include "goo/GooString.h"
 #include "Error.h"
 #include "UTF.h"
@@ -139,23 +140,23 @@ static void toRoman(int number, GooString *str, bool uppercase)
         case 0:
             break;
         case 5:
-            str->append(wh[2 * k + 1]);
+            str->push_back(wh[2 * k + 1]);
             break;
         case 9:
-            str->append(wh[2 * k + 0]);
-            str->append(wh[2 * k + 2]);
+            str->push_back(wh[2 * k + 0]);
+            str->push_back(wh[2 * k + 2]);
             break;
         case 4:
-            str->append(wh[2 * k + 0]);
-            str->append(wh[2 * k + 1]);
+            str->push_back(wh[2 * k + 0]);
+            str->push_back(wh[2 * k + 1]);
             break;
         default:
             if (i > 5) {
-                str->append(wh[2 * k + 1]);
+                str->push_back(wh[2 * k + 1]);
                 i -= 5;
             }
             for (j = 0; j < i; j++) {
-                str->append(wh[2 * k + 0]);
+                str->push_back(wh[2 * k + 0]);
             }
         }
 
@@ -204,7 +205,7 @@ static void toLatin(int number, GooString *str, bool uppercase)
     letter = base + (number - 1) % 26;
 
     for (i = 0; i < count; i++) {
-        str->append(letter);
+        str->push_back(letter);
     }
 }
 

@@ -81,7 +81,7 @@ public:
     explicit GooString(const std::string &str) : std::string(str) { }
     explicit GooString(std::string &&str) : std::string(std::move(str)) { }
 
-    const std::string &toStr() const { return *this; }
+    constexpr const std::string &toStr() const { return *this; }
     std::string &toNonConstStr() { return *this; }
 
     // Create a string from <lengthA> chars at <sA>.  This string
@@ -93,27 +93,7 @@ public:
     GooString(const GooString *str, int idx, size_t lengthA) : std::string(*str, idx, lengthA) { }
     GooString(const std::string &str, int idx, size_t lengthA) : std::string(str, idx, lengthA) { }
 
-    // Set content of a string to <newStr>.
-    GooString *Set(const GooString *newStr)
-    {
-        assign(newStr ? static_cast<const std::string &>(*newStr) : std::string {});
-        return this;
-    }
-    GooString *Set(std::string_view newStr)
-    {
-        assign(newStr);
-        return this;
-    }
-    GooString *Set(const char *newStr)
-    {
-        assign(newStr ? newStr : "");
-        return this;
-    }
-    GooString *Set(const char *newStr, int newLen)
-    {
-        assign(newStr ? newStr : "", newStr ? newLen : 0);
-        return this;
-    }
+    using std::string::assign;
 
     // Copy a string.
     std::unique_ptr<GooString> copy() const { return std::make_unique<GooString>(this->toStr()); }
@@ -148,8 +128,6 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string format(const char *fmt, ...) GOOSTRING_FORMAT;
     POPPLER_PRIVATE_EXPORT static std::string formatv(const char *fmt, va_list argList);
 
-    POPPLER_PRIVATE_EXPORT static std::string formatLongLong(long long x, int width);
-
     using std::string::operator std::string_view;
 
     // Get length.
@@ -169,32 +147,8 @@ public:
     using std::string::clear;
 
     // Append a character or string.
-    void append(char c) { push_back(c); }
-    GooString *append(const GooString *str)
-    {
-        static_cast<std::string &>(*this).append(*str);
-        return this;
-    }
-    GooString *append(const std::string &str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(std::string_view str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(const char *str)
-    {
-        static_cast<std::string &>(*this).append(str);
-        return this;
-    }
-    GooString *append(const char *str, size_t lengthA)
-    {
-        static_cast<std::string &>(*this).append(str, lengthA);
-        return this;
-    }
+    using std::string::append;
+    using std::string::push_back;
 
     // Append a formatted string.
     POPPLER_PRIVATE_EXPORT GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
@@ -212,9 +166,7 @@ public:
     POPPLER_PRIVATE_EXPORT static std::string toLowerCase(std::string_view s);
 
     // Compare two strings:  -1:<  0:=  +1:>
-    int cmp(const GooString *str) const { return compare(*str); }
-    int cmp(const std::string &str) const { return compare(str); }
-    int cmp(const char *sA) const { return compare(sA); }
+    using std::string::compare;
 
     // Return true if strings starts with prefix
     using std::string::starts_with;

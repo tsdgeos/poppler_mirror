@@ -66,7 +66,7 @@ struct _PopplerPage
     PopplerDocument *document;
     Page *page;
     int index;
-    TextPage *text;
+    std::shared_ptr<TextPage> text;
 };
 
 struct _PopplerFormField

@@ -570,8 +570,8 @@ PopplerAnnot *_poppler_annot_free_text_new(const std::shared_ptr<Annot> &annot)
     PopplerAnnotFreeText *ft_annot = POPPLER_ANNOT_FREE_TEXT(poppler_annot);
     std::unique_ptr<DefaultAppearance> da = ((AnnotFreeText *)annot.get())->getDefaultAppearance();
     PopplerFontDescription *desc = nullptr;
-    if (da->getFontName().isName()) {
-        desc = poppler_font_description_new(da->getFontName().getName());
+    if (!da->getFontName().empty()) {
+        desc = poppler_font_description_new(da->getFontName().c_str());
         desc->size_pt = da->getFontPtSize();
 
         /* Attempt to resolve the actual font name. */
@@ -2041,7 +2041,7 @@ static void poppler_annot_free_text_set_da_to_native(PopplerAnnotFreeText *poppl
         size = poppler_annot->font_desc->size_pt;
     }
 
-    DefaultAppearance da { { objName, font_name.c_str() }, size, _poppler_convert_poppler_color_to_annot_color(&(poppler_annot->font_color)) };
+    DefaultAppearance da { font_name, size, _poppler_convert_poppler_color_to_annot_color(&(poppler_annot->font_color)) };
     ((AnnotFreeText *)annot)->setDefaultAppearance(da);
 }
 

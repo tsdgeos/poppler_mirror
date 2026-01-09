@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -119,7 +119,7 @@ FormField::FormField(std::unique_ptr<FormFieldData> dd) : m_formData(std::move(d
         m_formData->fm->getRect(&left, &bottom, &right, &top);
         // build a normalized transform matrix for this page at 100% scale
         GfxState gfxState(72.0, 72.0, m_formData->page->getCropBox(), rotation, true);
-        const double *gfxCTM = gfxState.getCTM();
+        const std::array<double, 6> &gfxCTM = gfxState.getCTM();
         double MTX[6];
         double pageWidth = m_formData->page->getCropWidth();
         double pageHeight = m_formData->page->getCropHeight();

@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2012, 2014-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012, 2014-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -454,7 +454,7 @@ static const char *macGlyphNames[258] = { ".notdef",
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-std::unique_ptr<FoFiTrueType> FoFiTrueType::make(std::span<unsigned char> data, int faceIndexA)
+std::unique_ptr<FoFiTrueType> FoFiTrueType::make(std::span<const unsigned char> data, int faceIndexA)
 {
     auto ff = std::make_unique<FoFiTrueType>(data, faceIndexA);
     if (!ff->parsedOk) {
@@ -487,7 +487,7 @@ FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, P
     parse();
 }
 
-FoFiTrueType::FoFiTrueType(std::span<unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
+FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -608,6 +608,9 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
         segCnt = getU32BE(pos + 12, &ok);
         a = -1;
         b = segCnt - 1;
+        if (b > std::numeric_limits<int>::max() / 12) {
+            return 0;
+        }
         segEnd = getU32BE(pos + 16 + 12 * b + 4, &ok);
         if (c > segEnd) {
             return 0;
@@ -650,7 +653,7 @@ int FoFiTrueType::mapNameToGID(const char *name) const
     return gid->second;
 }
 
-std::optional<std::span<unsigned char>> FoFiTrueType::getCFFBlock() const
+std::optional<std::span<const unsigned char>> FoFiTrueType::getCFFBlock() const
 {
     if (!openTypeCFF || tables.empty()) {
         return std::nullopt;
@@ -1521,7 +1524,12 @@ void FoFiTrueType::parse()
             cmaps[j].offset = tables[i].offset + getU32BE(pos + 4, &parsedOk);
             pos += 8;
             cmaps[j].fmt = getU16BE(cmaps[j].offset, &parsedOk);
-            cmaps[j].len = getU16BE(cmaps[j].offset + 2, &parsedOk);
+            int lenOffset;
+            if (checkedAdd(cmaps[j].offset, 2, &lenOffset)) {
+                parsedOk = false;
+            } else {
+                cmaps[j].len = getU16BE(lenOffset, &parsedOk);
+            }
         }
         if (!parsedOk) {
             cmaps.clear();

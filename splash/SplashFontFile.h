@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2008, 2010, 2018, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2018, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -25,6 +25,7 @@
 #define SPLASHFONTFILE_H
 
 #include <string>
+#include <variant>
 #include <vector>
 #include <memory>
 
@@ -42,25 +43,20 @@ class SplashFontFileID;
 class POPPLER_PRIVATE_EXPORT SplashFontSrc
 {
 public:
-    SplashFontSrc();
+    explicit SplashFontSrc(const std::string &file);
+    explicit SplashFontSrc(std::vector<unsigned char> &&data);
 
     SplashFontSrc(const SplashFontSrc &) = delete;
     SplashFontSrc &operator=(const SplashFontSrc &) = delete;
 
-    void setFile(const std::string &file);
-    void setBuf(char *bufA, int buflenA);
-    void setBuf(std::vector<unsigned char> &&bufA);
+    const std::vector<unsigned char> &buf() const { return std::get<std::vector<unsigned char>>(m_data); }
 
-    void ref();
-    void unref();
-
-    bool isFile;
-    std::string fileName;
-    std::vector<unsigned char> buf;
+    const std::string &fileName() const { return std::get<std::string>(m_data); }
+    bool isFile() const { return std::holds_alternative<std::string>(m_data); }
+    ~SplashFontSrc();
 
 private:
-    ~SplashFontSrc();
-    int refcnt;
+    const std::variant<std::string, std::vector<unsigned char>> m_data;
 };
 
 class POPPLER_PRIVATE_EXPORT SplashFontFile
@@ -78,21 +74,13 @@ public:
     // Get the font file ID.
     const SplashFontFileID &getID() const { return *id; }
 
-    // Increment the reference count.
-    void incRefCnt();
-
-    // Decrement the reference count.  If the new value is zero, delete
-    // the SplashFontFile object.
-    void decRefCnt();
-
     bool doAdjustMatrix;
 
 protected:
-    SplashFontFile(std::unique_ptr<SplashFontFileID> idA, SplashFontSrc *srcA);
+    SplashFontFile(std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA);
 
     std::unique_ptr<SplashFontFileID> id;
-    SplashFontSrc *src;
-    int refCnt;
+    const std::unique_ptr<SplashFontSrc> src;
 
     friend class SplashFontEngine;
 };

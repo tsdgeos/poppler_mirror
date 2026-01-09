@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -28,7 +28,7 @@
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -557,9 +557,8 @@ public:
 
     TextPage(const TextPage &) = delete;
     TextPage &operator=(const TextPage &) = delete;
-
-    void incRefCnt();
-    void decRefCnt();
+    // Destructor.
+    ~TextPage();
 
     // Start a new page.
     void startPage(const GfxState *state);
@@ -661,9 +660,6 @@ public:
     std::unique_ptr<TextWordList> makeWordList(bool physLayout);
 
 private:
-    // Destructor.
-    ~TextPage();
-
     void clear();
     void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
@@ -706,8 +702,6 @@ private:
     std::vector<std::unique_ptr<TextUnderline>> underlines;
     std::vector<std::unique_ptr<TextLink>> links;
 
-    int refCnt;
-
     friend class TextLine;
     friend class TextLineFrag;
     friend class TextBlock;
@@ -724,7 +718,8 @@ private:
 class POPPLER_PRIVATE_EXPORT ActualText
 {
 public:
-    // Create an ActualText
+    /// Create an ActualText
+    /// \note: \param out must be kept alive during the lifetime of this object
     explicit ActualText(TextPage *out);
     ~ActualText();
 
@@ -864,7 +859,7 @@ public:
 
     // Returns the TextPage object for the last rasterized page,
     // transferring ownership to the caller.
-    TextPage *takeText();
+    std::unique_ptr<TextPage> takeText();
 
     // Turn extra processing for HTML conversion on or off.
     void enableHTMLExtras(bool doHTMLA) { doHTML = doHTMLA; }
@@ -883,7 +878,7 @@ private:
     void *outputStream; // output stream
     bool needClose; // need to close the output file?
                     //   (only if outputStream is a FILE*)
-    TextPage *text; // text for the current page
+    std::unique_ptr<TextPage> text; // text for the current page
     bool physLayout; // maintain original physical layout when
                      //   dumping text
     double fixedPitch; // if physLayout is true and this is non-zero,
@@ -899,7 +894,7 @@ private:
     bool textPageBreaks; // insert end-of-page markers?
     EndOfLineKind textEOL; // type of EOL marker to use
 
-    ActualText *actualText;
+    std::unique_ptr<ActualText> actualText;
 };
 
 #endif

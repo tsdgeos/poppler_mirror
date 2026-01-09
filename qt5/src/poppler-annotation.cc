@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -261,7 +261,7 @@ static void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotatio
 
     // build a normalized transform matrix for this page at 100% scale
     GfxState *gfxState = new GfxState(72.0, 72.0, pdfPage->getCropBox(), pageRotation, true);
-    const double *gfxCTM = gfxState->getCTM();
+    const std::array<double, 6> &gfxCTM = gfxState->getCTM();
 
     double w = pdfPage->getCropWidth();
     double h = pdfPage->getCropHeight();
@@ -1970,7 +1970,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
                 }
             }
         }
-        DefaultAppearance da { { objName, fontName.c_str() }, pointSize, convertQColor(textColor) };
+        DefaultAppearance da { fontName, pointSize, convertQColor(textColor) };
         ftextann->setDefaultAppearance(da);
     }
 }

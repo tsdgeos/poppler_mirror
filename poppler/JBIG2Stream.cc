@@ -56,6 +56,7 @@
 
 static const int contextSize[4] = { 16, 13, 10, 10 };
 static const int refContextSize[2] = { 13, 10 };
+static constexpr auto intNBits = sizeof(int) * CHAR_BIT;
 
 //------------------------------------------------------------------------
 // JBIG2HuffmanTable
@@ -341,11 +342,12 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
         prefix = 0;
         table[i++].prefix = prefix++;
         for (; table[i].rangeLen != jbig2HuffmanEOT; ++i) {
-            if (table[i].prefixLen - table[i - 1].prefixLen > 32) {
+            const size_t bitsToShift = table[i].prefixLen - table[i - 1].prefixLen;
+            if (bitsToShift >= intNBits) {
                 error(errSyntaxError, -1, "Failed to build table for JBIG2 stream");
                 return false;
             } else {
-                prefix <<= table[i].prefixLen - table[i - 1].prefixLen;
+                prefix <<= bitsToShift;
             }
             table[i].prefix = prefix++;
         }
@@ -2840,18 +2842,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    bool ltp;
-    unsigned int ltpCX, cx, cx0, cx1, cx2;
-    int *refLine, *codingLine;
-    int code1, code2, code3;
-    unsigned char *p0, *p1, *p2, *pp;
-    unsigned char *atP0, *atP1, *atP2, *atP3;
-    unsigned int buf0, buf1, buf2;
-    unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
-    int atShift0, atShift1, atShift2, atShift3;
-    unsigned char mask;
-    int x, y, x0, x1, a0i, b1i, blackPixels, pix, i;
-
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
         return nullptr;
@@ -2867,8 +2857,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         // ---> max codingLine size = w + 1
         // refLine has one extra guard entry at the end
         // ---> max refLine size = w + 2
-        codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
-        refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
+        int *codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
+        int *refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
 
         if (unlikely(!codingLine || !refLine)) {
             gfree(codingLine);
@@ -2877,24 +2867,27 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         memset(refLine, 0, (w + 2) * sizeof(int));
-        for (i = 0; i < w + 1; ++i) {
+        for (int i = 0; i < w + 1; ++i) {
             codingLine[i] = w;
         }
 
-        for (y = 0; y < h; ++y) {
+        for (int y = 0; y < h; ++y) {
 
             // copy coding line to ref line
-            for (i = 0; codingLine[i] < w; ++i) {
-                refLine[i] = codingLine[i];
+            {
+                int i;
+                for (i = 0; codingLine[i] < w; ++i) {
+                    refLine[i] = codingLine[i];
+                }
+                refLine[i++] = w;
+                refLine[i] = w;
             }
-            refLine[i++] = w;
-            refLine[i] = w;
 
             // decode a line
             codingLine[0] = 0;
-            a0i = 0;
-            b1i = 0;
-            blackPixels = 0;
+            int a0i = 0;
+            int b1i = 0;
+            int blackPixels = 0;
             // invariant:
             // refLine[b1i-1] <= codingLine[a0i] < refLine[b1i] < refLine[b1i+1] <= w
             // exception at left edge:
@@ -2902,8 +2895,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             // exception at right edge:
             //   refLine[b1i] = refLine[b1i+1] = w is possible
             while (codingLine[a0i] < w) {
-                code1 = mmrDecoder->get2DCode();
-                switch (code1) {
+                switch (mmrDecoder->get2DCode()) {
                 case twoDimPass:
                     if (unlikely(b1i + 1 >= w + 2)) {
                         break;
@@ -2913,9 +2905,11 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         b1i += 2;
                     }
                     break;
-                case twoDimHoriz:
-                    code1 = code2 = 0;
+                case twoDimHoriz: {
+                    int code1 = 0;
+                    int code2 = 0;
                     if (blackPixels) {
+                        int code3;
                         do {
                             code1 += code3 = mmrDecoder->getBlackCode();
                         } while (code3 >= 64);
@@ -2923,6 +2917,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             code2 += code3 = mmrDecoder->getWhiteCode();
                         } while (code3 >= 64);
                     } else {
+                        int code3;
                         do {
                             code1 += code3 = mmrDecoder->getWhiteCode();
                         } while (code3 >= 64);
@@ -2938,6 +2933,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         b1i += 2;
                     }
                     break;
+                }
                 case twoDimVertR3:
                     if (unlikely(b1i >= w + 2)) {
                         break;
@@ -3052,15 +3048,17 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             }
 
             // convert the run lengths to a bitmap line
-            i = 0;
-            while (true) {
-                for (x = codingLine[i]; x < codingLine[i + 1]; ++x) {
-                    bitmap->setPixel(x, y);
+            {
+                int i = 0;
+                while (true) {
+                    for (int x = codingLine[i]; x < codingLine[i + 1]; ++x) {
+                        bitmap->setPixel(x, y);
+                    }
+                    if (codingLine[i + 1] >= w || codingLine[i + 2] >= w) {
+                        break;
+                    }
+                    i += 2;
                 }
-                if (codingLine[i + 1] >= w || codingLine[i + 2] >= w) {
-                    break;
-                }
-                i += 2;
             }
         }
 
@@ -3079,27 +3077,28 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
     } else {
         // set up the typical row context
-        ltpCX = 0; // make gcc happy
-        if (tpgdOn) {
-            switch (templ) {
-            case 0:
-                ltpCX = 0x3953; // 001 11001 0101 0011
-                break;
-            case 1:
-                ltpCX = 0x079a; // 0011 11001 101 0
-                break;
-            case 2:
-                ltpCX = 0x0e3; // 001 1100 01 1
-                break;
-            case 3:
-                ltpCX = 0x18b; // 01100 0101 1
-                break;
+        const unsigned int ltpCX = [tpgdOn, templ] {
+            if (tpgdOn) {
+                switch (templ) {
+                case 0:
+                    return 0x3953; // 001 11001 0101 0011
+                    break;
+                case 1:
+                    return 0x079a; // 0011 11001 101 0
+                    break;
+                case 2:
+                    return 0x0e3; // 001 1100 01 1
+                    break;
+                case 3:
+                    return 0x18b; // 01100 0101 1
+                    break;
+                }
             }
-        }
+            return 0;
+        }();
 
-        ltp = false;
-        cx = cx0 = cx1 = cx2 = 0; // make gcc happy
-        for (y = 0; y < h; ++y) {
+        bool ltp = false;
+        for (int y = 0; y < h; ++y) {
 
             // check for a "typical" (duplicate) row
             if (tpgdOn) {
@@ -3115,11 +3114,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             }
 
             switch (templ) {
-            case 0:
+            case 0: {
 
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3137,6 +3138,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 if (atx[0] >= -8 && atx[0] <= 8 && atx[1] >= -8 && atx[1] <= 8 && atx[2] >= -8 && atx[2] <= 8 && atx[3] >= -8 && atx[3] <= 8) {
                     // set up the adaptive context
+                    unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
+                    unsigned char *atP0, *atP1, *atP2, *atP3;
                     if (y + aty[0] >= 0 && y + aty[0] < bitmap->getHeight()) {
                         atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3144,7 +3147,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
                     if (y + aty[1] >= 0 && y + aty[1] < bitmap->getHeight()) {
                         atP1 = bitmap->getDataPtr() + (y + aty[1]) * bitmap->getLineSize();
                         atBuf1 = *atP1++ << 8;
@@ -3152,7 +3155,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP1 = nullptr;
                         atBuf1 = 0;
                     }
-                    atShift1 = 15 - atx[1];
+                    const int atShift1 = 15 - atx[1];
                     if (y + aty[2] >= 0 && y + aty[2] < bitmap->getHeight()) {
                         atP2 = bitmap->getDataPtr() + (y + aty[2]) * bitmap->getLineSize();
                         atBuf2 = *atP2++ << 8;
@@ -3160,7 +3163,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP2 = nullptr;
                         atBuf2 = 0;
                     }
-                    atShift2 = 15 - atx[2];
+                    const int atShift2 = 15 - atx[2];
                     if (y + aty[3] >= 0 && y + aty[3] < bitmap->getHeight()) {
                         atP3 = bitmap->getDataPtr() + (y + aty[3]) * bitmap->getLineSize();
                         atBuf3 = *atP3++ << 8;
@@ -3168,10 +3171,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP3 = nullptr;
                         atBuf3 = 0;
                     }
-                    atShift3 = 15 - atx[3];
+                    const int atShift3 = 15 - atx[3];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3193,19 +3196,20 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf3 |= *atP3++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (((atBuf0 >> atShift0) & 1) << 3) | (((atBuf1 >> atShift1) & 1) << 2) | (((atBuf2 >> atShift2) & 1) << 1) | ((atBuf3 >> atShift3) & 1);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (((atBuf0 >> atShift0) & 1) << 3) | (((atBuf1 >> atShift1) & 1) << 2) | (((atBuf2 >> atShift2) & 1) << 1) | ((atBuf3 >> atShift3) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3236,7 +3240,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3246,20 +3250,21 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (bitmap->getPixel(x + atx[0], y + aty[0]) << 3) | (bitmap->getPixel(x + atx[1], y + aty[1]) << 2) | (bitmap->getPixel(x + atx[2], y + aty[2]) << 1)
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (bitmap->getPixel(x + atx[0], y + aty[0]) << 3) | (bitmap->getPixel(x + atx[1], y + aty[1]) << 2) | (bitmap->getPixel(x + atx[2], y + aty[2]) << 1)
                                     | bitmap->getPixel(x + atx[3], y + aty[3]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3273,12 +3278,14 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
-            case 1:
+            }
+            case 1: {
 
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3297,6 +3304,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
+                    unsigned char *atP0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3304,10 +3313,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3320,19 +3329,20 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 13) & 0x0f;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x07;
-                            cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx0 = (buf0 >> 13) & 0x0f;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x07;
+                            const unsigned int cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3354,7 +3364,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3364,19 +3374,20 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 13) & 0x0f;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x07;
-                            cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx0 = (buf0 >> 13) & 0x0f;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x07;
+                            const unsigned int cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3390,12 +3401,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
-            case 2:
-
+            }
+            case 2: {
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3414,6 +3426,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
+                    unsigned char *atP0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3421,10 +3435,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3437,19 +3451,20 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 14) & 0x0f;
-                            cx2 = (buf2 >> 16) & 0x03;
-                            cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 14) & 0x0f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x03;
+                            const unsigned int cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3468,7 +3483,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3478,19 +3493,20 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 14) & 0x0f;
-                            cx2 = (buf2 >> 16) & 0x03;
-                            cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 14) & 0x0f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x03;
+                            const unsigned int cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3504,12 +3520,14 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
+            }
             case 3:
 
                 // set up the context
+                unsigned char *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3521,6 +3539,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
+                    unsigned char *atP0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3528,10 +3548,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p1) {
                                 buf1 |= *p1++;
@@ -3541,18 +3561,19 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                                 atBuf0 |= *atP0++;
                             }
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx1 = (buf1 >> 14) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx1 << 5) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx1 = (buf1 >> 14) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx1 << 5) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                     if (aty[0] == 0) {
@@ -3570,25 +3591,26 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p1) {
                                 buf1 |= *p1++;
                             }
                             buf2 |= *p2++;
                         }
-                        for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
+                        unsigned char mask = 0x80;
+                        for (int x1 = 0; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx1 = (buf1 >> 14) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx1 << 5) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx1 = (buf1 >> 14) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx1 << 5) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
 
                                 // decode the pixel
-                                if ((pix = arithDecoder->decodeBit(cx, genericRegionStats))) {
+                                if (arithDecoder->decodeBit(cx, genericRegionStats)) {
                                     *pp |= mask;
                                     buf2 |= 0x8000;
                                 }
@@ -3871,6 +3893,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                 if ((pix = arithDecoder->decodeBit(cx, refinementRegionStats))) {
                     bitmap->setPixel(x, y);
                 }
+
+                if (unlikely(arithDecoder->getReadPastEndOfStream())) {
+                    return nullptr;
+                }
             }
         }
     }
@@ -3964,7 +3990,6 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum)
         huffTab[i].prefixLen = huffDecoder->readBits(prefixBits, &eof);
         huffTab[i].rangeLen = huffDecoder->readBits(rangeBits, &eof);
 
-        constexpr auto intNBits = sizeof(int) * CHAR_BIT;
         const int shiftBits = huffTab[i].rangeLen % intNBits;
 
         if (eof || unlikely(checkedAdd(val, 1 << shiftBits, &val))) {

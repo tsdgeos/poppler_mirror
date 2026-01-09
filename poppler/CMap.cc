@@ -336,7 +336,7 @@ void CMap::freeCMapVector(CMapVectorEntry *vec)
 
 bool CMap::match(const std::string &collectionA, const std::string &cMapNameA)
 {
-    return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
+    return !collection->compare(collectionA) && !cMapName->compare(cMapNameA);
 }
 
 CID CMap::getCID(const char *s, int len, CharCode *c, int *nUsed)

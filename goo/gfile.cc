@@ -102,7 +102,7 @@ GooString *appendToPath(GooString *path, const char *fileName)
     char *fp;
 
     auto tmp = path->copy();
-    tmp->append('/');
+    tmp->push_back('/');
     tmp->append(fileName);
     GetFullPathNameA(tmp->c_str(), sizeof(buf), buf, &fp);
     path->clear();
@@ -140,7 +140,7 @@ GooString *appendToPath(GooString *path, const char *fileName)
 
     // otherwise, append "/" and new path component
     if (!path->empty() && path->getChar(path->size() - 1) != '/') {
-        path->append('/');
+        path->push_back('/');
     }
     path->append(fileName);
     return path;

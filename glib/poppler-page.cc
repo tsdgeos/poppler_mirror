@@ -83,9 +83,6 @@ static void poppler_page_finalize(GObject *object)
     g_object_unref(page->document);
     page->document = nullptr;
 
-    if (page->text != nullptr) {
-        page->text->decRefCnt();
-    }
     /* page->page is owned by the document */
 
     G_OBJECT_CLASS(poppler_page_parent_class)->finalize(object);
@@ -259,21 +256,18 @@ PopplerPageTransition *poppler_page_get_transition(PopplerPage *page)
 static TextPage *poppler_page_get_text_page(PopplerPage *page)
 {
     if (page->text == nullptr) {
-        TextOutputDev *text_dev;
 
-        text_dev = new TextOutputDev(nullptr, true, 0, false, false);
-        std::unique_ptr<Gfx> gfx = page->page->createGfx(text_dev, 72.0, 72.0, 0, false, /* useMediaBox */
+        auto text_dev = std::make_unique<TextOutputDev>(nullptr, true, 0, false, false);
+        std::unique_ptr<Gfx> gfx = page->page->createGfx(text_dev.get(), 72.0, 72.0, 0, false, /* useMediaBox */
                                                          true, /* Crop */
                                                          -1, -1, -1, -1, nullptr, nullptr);
         page->page->display(gfx.get());
         text_dev->endPage();
 
         page->text = text_dev->takeText();
-        gfx.reset(); // deletion order here is important, gfx before text_dev
-        delete text_dev;
     }
 
-    return page->text;
+    return page->text.get();
 }
 
 static bool annots_display_decide_cb(Annot *annot, void *user_data)
@@ -317,7 +311,7 @@ void poppler_page_render_full(PopplerPage *page, cairo_t *cairo, gboolean printi
     output_dev->setPrinting(printing);
 
     if (!printing && page->text == nullptr) {
-        page->text = new TextPage(false);
+        page->text = std::make_shared<TextPage>(false);
         output_dev->setTextPage(page->text);
     }
 

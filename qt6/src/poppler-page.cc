@@ -29,7 +29,7 @@
  * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  * Copyright (C) 2024, 2025 Stefan Brüns <stefan.bruens@rwth-aachen.de>
  * Copyright (C) 2024 Pratham Gandhi <ppg.1382@gmail.com>
- * Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2024, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -387,7 +387,7 @@ std::unique_ptr<Link> PageData::convertLinkActionToLink(::LinkAction *a, Documen
     return popplerLink;
 }
 
-inline TextPage *PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u)
+inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u)
 {
     *u = text.toUcs4();
 
@@ -396,7 +396,7 @@ inline TextPage *PageData::prepareTextSearch(const QString &text, Page::Rotation
     // fetch ourselves a textpage
     TextOutputDev td(nullptr, true, 0, false, false);
     parentDoc->doc->displayPage(&td, index + 1, 72, 72, rotation, false, true, false, nullptr, nullptr, nullptr, nullptr, true);
-    TextPage *textPage = td.takeText();
+    std::unique_ptr<TextPage> textPage = td.takeText();
 
     return textPage;
 }
@@ -721,11 +721,9 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
     const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
 
     QVector<Unicode> u;
-    TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
+    std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage, u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
-
-    textPage->decRefCnt();
+    const bool found = m_page->performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
 
     return found;
 }
@@ -738,11 +736,9 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
     const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
 
     QVector<Unicode> u;
-    TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
+    std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    QList<QRectF> results = m_page->performMultipleTextSearch(textPage, u, sCase, sWords, sDiacritics, sAcrossLines);
-
-    textPage->decRefCnt();
+    QList<QRectF> results = m_page->performMultipleTextSearch(textPage.get(), u, sCase, sWords, sDiacritics, sAcrossLines);
 
     return results;
 }
