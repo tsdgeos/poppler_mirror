@@ -4251,8 +4251,8 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog * /*
     surface_width = (int)ceil(fabs(kx));
     surface_height = (int)ceil(fabs(ky));
 
-    sx = (double)result_width / (surface_width * (x1 - x0));
-    sy = (double)result_height / (surface_height * (y1 - y0));
+    sx = result_width / (surface_width * double(x1 - x0));
+    sy = result_height / (surface_height * double(y1 - y0));
     m1.m[0] *= sx;
     m1.m[3] *= sy;
     m1.transform(width, height, &kx, &ky);
