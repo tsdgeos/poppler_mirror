@@ -2846,7 +2846,6 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     int code1, code2, code3;
     unsigned char *p0, *p1, *p2, *pp;
     unsigned char *atP0, *atP1, *atP2, *atP3;
-    unsigned int buf0, buf1, buf2;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     unsigned char mask;
     int x1, i;
@@ -3115,11 +3114,12 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             }
 
             switch (templ) {
-            case 0:
+            case 0: {
 
                 // set up the context
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3273,12 +3273,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
-            case 1:
+            }
+            case 1: {
 
                 // set up the context
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3390,12 +3391,12 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
-            case 2:
-
+            }
+            case 2: {
                 // set up the context
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf0, buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
@@ -3504,12 +3505,13 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     }
                 }
                 break;
-
+            }
             case 3:
 
                 // set up the context
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
-                buf2 = *p2++ << 8;
+                unsigned int buf1;
+                unsigned int buf2 = *p2++ << 8;
                 if (y >= 1) {
                     p1 = bitmap->getDataPtr() + (y - 1) * bitmap->getLineSize();
                     buf1 = *p1++ << 8;
