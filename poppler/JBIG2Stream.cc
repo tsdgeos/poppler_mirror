@@ -2843,7 +2843,7 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
     unsigned char mask;
-    int x1, i;
+    int x1;
 
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
@@ -2870,18 +2870,21 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         memset(refLine, 0, (w + 2) * sizeof(int));
-        for (i = 0; i < w + 1; ++i) {
+        for (int i = 0; i < w + 1; ++i) {
             codingLine[i] = w;
         }
 
         for (int y = 0; y < h; ++y) {
 
             // copy coding line to ref line
-            for (i = 0; codingLine[i] < w; ++i) {
-                refLine[i] = codingLine[i];
+            {
+                int i;
+                for (i = 0; codingLine[i] < w; ++i) {
+                    refLine[i] = codingLine[i];
+                }
+                refLine[i++] = w;
+                refLine[i] = w;
             }
-            refLine[i++] = w;
-            refLine[i] = w;
 
             // decode a line
             codingLine[0] = 0;
@@ -3048,15 +3051,17 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             }
 
             // convert the run lengths to a bitmap line
-            i = 0;
-            while (true) {
-                for (int x = codingLine[i]; x < codingLine[i + 1]; ++x) {
-                    bitmap->setPixel(x, y);
+            {
+                int i = 0;
+                while (true) {
+                    for (int x = codingLine[i]; x < codingLine[i + 1]; ++x) {
+                        bitmap->setPixel(x, y);
+                    }
+                    if (codingLine[i + 1] >= w || codingLine[i + 2] >= w) {
+                        break;
+                    }
+                    i += 2;
                 }
-                if (codingLine[i + 1] >= w || codingLine[i + 2] >= w) {
-                    break;
-                }
-                i += 2;
             }
         }
 
