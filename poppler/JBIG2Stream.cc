@@ -2852,7 +2852,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     int atShift0, atShift1, atShift2, atShift3;
     unsigned char mask;
-    int y, x1, a0i, b1i, blackPixels, pix, i;
+    int y, x1, pix, i;
 
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
@@ -2894,9 +2894,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
             // decode a line
             codingLine[0] = 0;
-            a0i = 0;
-            b1i = 0;
-            blackPixels = 0;
+            int a0i = 0;
+            int b1i = 0;
+            int blackPixels = 0;
             // invariant:
             // refLine[b1i-1] <= codingLine[a0i] < refLine[b1i] < refLine[b1i+1] <= w
             // exception at left edge:
