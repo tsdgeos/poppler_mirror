@@ -2843,7 +2843,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
     bool ltp;
-    unsigned int ltpCX;
     int *refLine, *codingLine;
     int code1, code2, code3;
     unsigned char *p0, *p1, *p2, *pp;
@@ -3080,23 +3079,25 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
     } else {
         // set up the typical row context
-        ltpCX = 0; // make gcc happy
-        if (tpgdOn) {
-            switch (templ) {
-            case 0:
-                ltpCX = 0x3953; // 001 11001 0101 0011
-                break;
-            case 1:
-                ltpCX = 0x079a; // 0011 11001 101 0
-                break;
-            case 2:
-                ltpCX = 0x0e3; // 001 1100 01 1
-                break;
-            case 3:
-                ltpCX = 0x18b; // 01100 0101 1
-                break;
+        const unsigned int ltpCX = [tpgdOn, templ] {
+            if (tpgdOn) {
+                switch (templ) {
+                case 0:
+                    return 0x3953; // 001 11001 0101 0011
+                    break;
+                case 1:
+                    return 0x079a; // 0011 11001 101 0
+                    break;
+                case 2:
+                    return 0x0e3; // 001 1100 01 1
+                    break;
+                case 3:
+                    return 0x18b; // 01100 0101 1
+                    break;
+                }
             }
-        }
+            return 0;
+        }();
 
         ltp = false;
         for (y = 0; y < h; ++y) {
