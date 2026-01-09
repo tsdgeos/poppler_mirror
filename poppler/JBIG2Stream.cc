@@ -2843,7 +2843,7 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
     bool ltp;
-    unsigned int ltpCX, cx, cx0, cx1, cx2;
+    unsigned int ltpCX;
     int *refLine, *codingLine;
     int code1, code2, code3;
     unsigned char *p0, *p1, *p2, *pp;
@@ -3100,7 +3100,6 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         ltp = false;
-        cx = cx0 = cx1 = cx2 = 0; // make gcc happy
         for (y = 0; y < h; ++y) {
 
             // check for a "typical" (duplicate) row
@@ -3198,10 +3197,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (((atBuf0 >> atShift0) & 1) << 3) | (((atBuf1 >> atShift1) & 1) << 2) | (((atBuf2 >> atShift2) & 1) << 1) | ((atBuf3 >> atShift3) & 1);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (((atBuf0 >> atShift0) & 1) << 3) | (((atBuf1 >> atShift1) & 1) << 2) | (((atBuf2 >> atShift2) & 1) << 1) | ((atBuf3 >> atShift3) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3251,10 +3250,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (bitmap->getPixel(x + atx[0], y + aty[0]) << 3) | (bitmap->getPixel(x + atx[1], y + aty[1]) << 2) | (bitmap->getPixel(x + atx[2], y + aty[2]) << 1)
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx0 << 13) | (cx1 << 8) | (cx2 << 4) | (bitmap->getPixel(x + atx[0], y + aty[0]) << 3) | (bitmap->getPixel(x + atx[1], y + aty[1]) << 2) | (bitmap->getPixel(x + atx[2], y + aty[2]) << 1)
                                     | bitmap->getPixel(x + atx[3], y + aty[3]);
 
                             // check for a skipped pixel
@@ -3325,10 +3324,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 13) & 0x0f;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x07;
-                            cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx0 = (buf0 >> 13) & 0x0f;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x07;
+                            const unsigned int cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3369,10 +3368,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 13) & 0x0f;
-                            cx1 = (buf1 >> 13) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x07;
-                            cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx0 = (buf0 >> 13) & 0x0f;
+                            const unsigned int cx1 = (buf1 >> 13) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x07;
+                            const unsigned int cx = (cx0 << 9) | (cx1 << 4) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3442,10 +3441,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 14) & 0x0f;
-                            cx2 = (buf2 >> 16) & 0x03;
-                            cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 14) & 0x0f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x03;
+                            const unsigned int cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3483,10 +3482,10 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx0 = (buf0 >> 14) & 0x07;
-                            cx1 = (buf1 >> 14) & 0x0f;
-                            cx2 = (buf2 >> 16) & 0x03;
-                            cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx0 = (buf0 >> 14) & 0x07;
+                            const unsigned int cx1 = (buf1 >> 14) & 0x0f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x03;
+                            const unsigned int cx = (cx0 << 7) | (cx1 << 3) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3546,9 +3545,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx1 = (buf1 >> 14) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx1 << 5) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
+                            const unsigned int cx1 = (buf1 >> 14) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx1 << 5) | (cx2 << 1) | ((atBuf0 >> atShift0) & 1);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
@@ -3582,9 +3581,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         for (x1 = 0, mask = 0x80; x1 < 8 && x < w; ++x1, ++x, mask >>= 1) {
 
                             // build the context
-                            cx1 = (buf1 >> 14) & 0x1f;
-                            cx2 = (buf2 >> 16) & 0x0f;
-                            cx = (cx1 << 5) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
+                            const unsigned int cx1 = (buf1 >> 14) & 0x1f;
+                            const unsigned int cx2 = (buf2 >> 16) & 0x0f;
+                            const unsigned int cx = (cx1 << 5) | (cx2 << 1) | bitmap->getPixel(x + atx[0], y + aty[0]);
 
                             // check for a skipped pixel
                             if (!(useSkip && skip->getPixel(x, y))) {
