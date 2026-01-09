@@ -2844,7 +2844,6 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 {
     unsigned char *p0, *p1, *p2, *pp;
     unsigned char *atP0, *atP1, *atP2, *atP3;
-    unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     unsigned char mask;
     int x1, i;
 
@@ -3138,6 +3137,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 if (atx[0] >= -8 && atx[0] <= 8 && atx[1] >= -8 && atx[1] <= 8 && atx[2] >= -8 && atx[2] <= 8 && atx[3] >= -8 && atx[3] <= 8) {
                     // set up the adaptive context
+                    unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
                     if (y + aty[0] >= 0 && y + aty[0] < bitmap->getHeight()) {
                         atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3299,6 +3299,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3416,6 +3417,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
@@ -3524,6 +3526,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                 if (atx[0] >= -8 && atx[0] <= 8) {
                     // set up the adaptive context
                     const int atY = y + aty[0];
+                    unsigned int atBuf0;
                     if ((atY >= 0) && (atY < bitmap->getHeight())) {
                         atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
                         atBuf0 = *atP0++ << 8;
