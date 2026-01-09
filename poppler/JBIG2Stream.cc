@@ -2842,7 +2842,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    bool ltp;
     int *refLine, *codingLine;
     int code1, code2, code3;
     unsigned char *p0, *p1, *p2, *pp;
@@ -3099,7 +3098,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             return 0;
         }();
 
-        ltp = false;
+        bool ltp = false;
         for (int y = 0; y < h; ++y) {
 
             // check for a "typical" (duplicate) row
