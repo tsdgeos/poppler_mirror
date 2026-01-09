@@ -2842,7 +2842,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    int *refLine, *codingLine;
     unsigned char *p0, *p1, *p2, *pp;
     unsigned char *atP0, *atP1, *atP2, *atP3;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
@@ -2864,8 +2863,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         // ---> max codingLine size = w + 1
         // refLine has one extra guard entry at the end
         // ---> max refLine size = w + 2
-        codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
-        refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
+        int *codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
+        int *refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
 
         if (unlikely(!codingLine || !refLine)) {
             gfree(codingLine);
