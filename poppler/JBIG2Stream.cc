@@ -2850,7 +2850,6 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     unsigned char *atP0, *atP1, *atP2, *atP3;
     unsigned int buf0, buf1, buf2;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
-    int atShift0, atShift1, atShift2, atShift3;
     unsigned char mask;
     int y, x1, pix, i;
 
@@ -3145,7 +3144,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
                     if (y + aty[1] >= 0 && y + aty[1] < bitmap->getHeight()) {
                         atP1 = bitmap->getDataPtr() + (y + aty[1]) * bitmap->getLineSize();
                         atBuf1 = *atP1++ << 8;
@@ -3153,7 +3152,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP1 = nullptr;
                         atBuf1 = 0;
                     }
-                    atShift1 = 15 - atx[1];
+                    const int atShift1 = 15 - atx[1];
                     if (y + aty[2] >= 0 && y + aty[2] < bitmap->getHeight()) {
                         atP2 = bitmap->getDataPtr() + (y + aty[2]) * bitmap->getLineSize();
                         atBuf2 = *atP2++ << 8;
@@ -3161,7 +3160,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP2 = nullptr;
                         atBuf2 = 0;
                     }
-                    atShift2 = 15 - atx[2];
+                    const int atShift2 = 15 - atx[2];
                     if (y + aty[3] >= 0 && y + aty[3] < bitmap->getHeight()) {
                         atP3 = bitmap->getDataPtr() + (y + aty[3]) * bitmap->getLineSize();
                         atBuf3 = *atP3++ << 8;
@@ -3169,7 +3168,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP3 = nullptr;
                         atBuf3 = 0;
                     }
-                    atShift3 = 15 - atx[3];
+                    const int atShift3 = 15 - atx[3];
 
                     // decode the row
                     for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
@@ -3305,7 +3304,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
                     for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
@@ -3422,7 +3421,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
                     for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
@@ -3529,7 +3528,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         atP0 = nullptr;
                         atBuf0 = 0;
                     }
-                    atShift0 = 15 - atx[0];
+                    const int atShift0 = 15 - atx[0];
 
                     // decode the row
                     for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
