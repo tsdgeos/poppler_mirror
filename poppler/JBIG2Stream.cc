@@ -2852,7 +2852,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     int atShift0, atShift1, atShift2, atShift3;
     unsigned char mask;
-    int x, y, x0, x1, a0i, b1i, blackPixels, pix, i;
+    int y, x1, a0i, b1i, blackPixels, pix, i;
 
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
@@ -3056,7 +3056,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             // convert the run lengths to a bitmap line
             i = 0;
             while (true) {
-                for (x = codingLine[i]; x < codingLine[i + 1]; ++x) {
+                for (int x = codingLine[i]; x < codingLine[i + 1]; ++x) {
                     bitmap->setPixel(x, y);
                 }
                 if (codingLine[i + 1] >= w || codingLine[i + 2] >= w) {
@@ -3172,7 +3172,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     atShift3 = 15 - atx[3];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3237,7 +3237,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3308,7 +3308,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3355,7 +3355,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3425,7 +3425,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3469,7 +3469,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p0) {
                                 buf0 |= *p0++;
@@ -3532,7 +3532,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                     atShift0 = 15 - atx[0];
 
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p1) {
                                 buf1 |= *p1++;
@@ -3571,7 +3571,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
 
                 } else {
                     // decode the row
-                    for (x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
+                    for (int x0 = 0, x = 0; x0 < w; x0 += 8, ++pp) {
                         if (x0 + 8 < w) {
                             if (p1) {
                                 buf1 |= *p1++;
