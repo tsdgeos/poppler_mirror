@@ -2842,7 +2842,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
-    unsigned char *p0, *p1, *p2, *pp;
     unsigned char *atP0, *atP1, *atP2, *atP3;
     unsigned char mask;
     int x1, i;
@@ -3117,6 +3116,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             case 0: {
 
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
                 unsigned int buf0, buf1;
                 unsigned int buf2 = *p2++ << 8;
@@ -3278,6 +3278,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             case 1: {
 
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
                 unsigned int buf0, buf1;
                 unsigned int buf2 = *p2++ << 8;
@@ -3396,6 +3397,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             }
             case 2: {
                 // set up the context
+                unsigned char *p0, *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
                 unsigned int buf0, buf1;
                 unsigned int buf2 = *p2++ << 8;
@@ -3512,6 +3514,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             case 3:
 
                 // set up the context
+                unsigned char *p1, *p2, *pp;
                 p2 = pp = bitmap->getDataPtr() + y * bitmap->getLineSize();
                 unsigned int buf1;
                 unsigned int buf2 = *p2++ << 8;
