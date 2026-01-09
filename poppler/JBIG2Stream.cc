@@ -2850,7 +2850,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
     unsigned int buf0, buf1, buf2;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
     unsigned char mask;
-    int y, x1, i;
+    int x1, i;
 
     auto bitmap = std::make_unique<JBIG2Bitmap>(0, w, h);
     if (!bitmap->isOk()) {
@@ -2881,7 +2881,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             codingLine[i] = w;
         }
 
-        for (y = 0; y < h; ++y) {
+        for (int y = 0; y < h; ++y) {
 
             // copy coding line to ref line
             for (i = 0; codingLine[i] < w; ++i) {
@@ -3100,7 +3100,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }();
 
         ltp = false;
-        for (y = 0; y < h; ++y) {
+        for (int y = 0; y < h; ++y) {
 
             // check for a "typical" (duplicate) row
             if (tpgdOn) {
