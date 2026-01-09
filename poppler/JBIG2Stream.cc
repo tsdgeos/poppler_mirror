@@ -2843,7 +2843,6 @@ inline void JBIG2Stream::mmrAddPixelsNeg(int a1, int blackPixels, int *codingLin
 std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int h, int templ, bool tpgdOn, bool useSkip, JBIG2Bitmap *skip, int *atx, int *aty, int mmrDataLength)
 {
     int *refLine, *codingLine;
-    int code1, code2, code3;
     unsigned char *p0, *p1, *p2, *pp;
     unsigned char *atP0, *atP1, *atP2, *atP3;
     unsigned int atBuf0, atBuf1, atBuf2, atBuf3;
@@ -2900,8 +2899,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
             // exception at right edge:
             //   refLine[b1i] = refLine[b1i+1] = w is possible
             while (codingLine[a0i] < w) {
-                code1 = mmrDecoder->get2DCode();
-                switch (code1) {
+                switch (mmrDecoder->get2DCode()) {
                 case twoDimPass:
                     if (unlikely(b1i + 1 >= w + 2)) {
                         break;
@@ -2911,9 +2909,11 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         b1i += 2;
                     }
                     break;
-                case twoDimHoriz:
-                    code1 = code2 = 0;
+                case twoDimHoriz: {
+                    int code1 = 0;
+                    int code2 = 0;
                     if (blackPixels) {
+                        int code3;
                         do {
                             code1 += code3 = mmrDecoder->getBlackCode();
                         } while (code3 >= 64);
@@ -2921,6 +2921,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                             code2 += code3 = mmrDecoder->getWhiteCode();
                         } while (code3 >= 64);
                     } else {
+                        int code3;
                         do {
                             code1 += code3 = mmrDecoder->getWhiteCode();
                         } while (code3 >= 64);
@@ -2936,6 +2937,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
                         b1i += 2;
                     }
                     break;
+                }
                 case twoDimVertR3:
                     if (unlikely(b1i >= w + 2)) {
                         break;
