@@ -112,9 +112,9 @@ public:
         m_filePath = filePath;
 
 #ifdef _WIN32
-        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #else
-        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #endif
     }
 
@@ -123,7 +123,7 @@ public:
         m_device = device;
         QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     DocumentData(const QByteArray &data, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt6ErrorFunction)
@@ -132,7 +132,7 @@ public:
         fileContents = data;
         MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     void init();
@@ -161,7 +161,7 @@ public:
      * where we'll set xrefReconstructed flag and notify users of the
      * reconstruction event
      */
-    void noitfyXRefReconstructed();
+    void notifyXRefReconstructed();
 
     static std::unique_ptr<Document> checkDocument(DocumentData *doc);
 

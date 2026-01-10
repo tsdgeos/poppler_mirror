@@ -238,7 +238,7 @@ void DocumentData::init()
 #endif
 }
 
-void DocumentData::noitfyXRefReconstructed()
+void DocumentData::notifyXRefReconstructed()
 {
     if (!xrefReconstructed) {
         xrefReconstructed = true;

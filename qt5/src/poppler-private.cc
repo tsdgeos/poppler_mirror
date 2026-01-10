@@ -324,7 +324,7 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
     }
 }
 
-void DocumentData::noitfyXRefReconstructed()
+void DocumentData::notifyXRefReconstructed()
 {
     if (!xrefReconstructed) {
         xrefReconstructed = true;
