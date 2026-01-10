@@ -229,9 +229,8 @@ std::unique_ptr<GfxFont> GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA
     // create the font object
     if (typeA < fontCIDType0) {
         return std::make_unique<Gfx8BitFont>(xref, tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
-    } else {
-        return std::make_unique<GfxCIDFont>(tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
     }
+    return std::make_unique<GfxCIDFont>(tagA, idA, std::move(name), typeA, embFontIDA, fontDict);
 }
 
 GfxFont::GfxFont(const char *tagA, Ref idA, std::optional<std::string> &&nameA, GfxFontType typeA, Ref embFontIDA) : tag(tagA), id(idA), name(std::move(nameA)), type(typeA)
@@ -752,15 +751,14 @@ std::optional<GfxFontLoc> GfxFont::locateFont(XRef *xref, PSOutputDev *ps, GooSt
             fontLoc.path = substName;
             fontLoc.substIdx = substIdx;
             return fontLoc;
-        } else {
-            path = globalParams->findFontFile(substName);
-            if (path) {
-                if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
-                    error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
-                    name = base14SubstFonts[substIdx];
-                    fontLoc->substIdx = substIdx;
-                    return fontLoc;
-                }
+        }
+        path = globalParams->findFontFile(substName);
+        if (path) {
+            if (std::optional<GfxFontLoc> fontLoc = getExternalFont(*path, false)) {
+                error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'", base14SubstFonts[substIdx], name ? name->c_str() : "");
+                name = base14SubstFonts[substIdx];
+                fontLoc->substIdx = substIdx;
+                return fontLoc;
             }
         }
 
@@ -1418,7 +1416,8 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen, bool names, bo
         char *var_part = strchr(charName, '.');
         if (var_part == charName) {
             return 0; // .notdef or similar
-        } else if (var_part != nullptr) {
+        }
+        if (var_part != nullptr) {
             // parse names of the form 7.oldstyle, P.swash, s.sc, etc.
             char *main_part = copyString(charName, var_part - charName);
             bool namesRecurse = true, variantsRecurse = false;
@@ -1662,18 +1661,16 @@ Object Gfx8BitFont::getCharProc(int code)
 {
     if (enc[code] && charProcs.isDict()) {
         return charProcs.dictLookup(enc[code]);
-    } else {
-        return Object::null();
     }
+    return Object::null();
 }
 
 Object Gfx8BitFont::getCharProcNF(int code)
 {
     if (enc[code] && charProcs.isDict()) {
         return charProcs.dictLookupNF(enc[code]).copy();
-    } else {
-        return Object::null();
     }
+    return Object::null();
 }
 
 Dict *Gfx8BitFont::getResources()
@@ -2089,7 +2086,8 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
             cmap = i;
             /* use UCS-4 cmap */
             break;
-        } else if (cmapPlatform == 3 && cmapEncoding == 1) {
+        }
+        if (cmapPlatform == 3 && cmapEncoding == 1) {
             /* Unicode */
             cmap = i;
         } else if (cmapPlatform == 0 && cmap < 0) {

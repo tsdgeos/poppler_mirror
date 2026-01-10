@@ -23,7 +23,6 @@ Checks:  >
     -readability-use-std-min-max,
     -readability-isolate-declaration,
     -readability-math-missing-parentheses,
-    -readability-else-after-return,
     -readability-function-cognitive-complexity,
     -readability-convert-member-functions-to-static,
     -readability-uppercase-literal-suffix,

@@ -292,57 +292,57 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *
     if (reconstruct && !(ok = constructXRef(wasReconstructed))) {
         errCode = errDamaged;
         return;
+    }
+    // if there was a problem with the 'startxref' position, try to
+    // reconstruct the xref table
+    if (prevXRefOffset == 0) {
+        if (!(ok = constructXRef(wasReconstructed))) {
+            errCode = errDamaged;
+            return;
+        }
+
+        // read the xref table
     } else {
-        // if there was a problem with the 'startxref' position, try to
-        // reconstruct the xref table
-        if (prevXRefOffset == 0) {
-            if (!(ok = constructXRef(wasReconstructed))) {
-                errCode = errDamaged;
-                return;
-            }
+        std::vector<Goffset> followedXRefStm;
+        readXRef(&prevXRefOffset, &followedXRefStm, nullptr);
 
-            // read the xref table
-        } else {
-            std::vector<Goffset> followedXRefStm;
-            readXRef(&prevXRefOffset, &followedXRefStm, nullptr);
-
-            // if there was a problem with the xref table,
-            // try to reconstruct it
-            if (!ok) {
-                if (!(ok = constructXRef(wasReconstructed))) {
-                    errCode = errDamaged;
-                    return;
-                }
-            }
-        }
-
-        // set size to (at least) the size specified in trailer dict
-        obj = trailerDict.dictLookupNF("Size").copy();
-        if (!obj.isInt()) {
-            error(errSyntaxWarning, -1, "No valid XRef size in trailer");
-        } else {
-            if (obj.getInt() > size) {
-                if (resize(obj.getInt()) != obj.getInt()) {
-                    if (!(ok = constructXRef(wasReconstructed))) {
-                        errCode = errDamaged;
-                        return;
-                    }
-                }
-            }
-        }
-
-        // get the root dictionary (catalog) object
-        obj = trailerDict.dictLookupNF("Root").copy();
-        if (obj.isRef()) {
-            rootNum = obj.getRefNum();
-            rootGen = obj.getRefGen();
-        } else {
+        // if there was a problem with the xref table,
+        // try to reconstruct it
+        if (!ok) {
             if (!(ok = constructXRef(wasReconstructed))) {
                 errCode = errDamaged;
                 return;
             }
         }
     }
+
+    // set size to (at least) the size specified in trailer dict
+    obj = trailerDict.dictLookupNF("Size").copy();
+    if (!obj.isInt()) {
+        error(errSyntaxWarning, -1, "No valid XRef size in trailer");
+    } else {
+        if (obj.getInt() > size) {
+            if (resize(obj.getInt()) != obj.getInt()) {
+                if (!(ok = constructXRef(wasReconstructed))) {
+                    errCode = errDamaged;
+                    return;
+                }
+            }
+        }
+    }
+
+    // get the root dictionary (catalog) object
+    obj = trailerDict.dictLookupNF("Root").copy();
+    if (obj.isRef()) {
+        rootNum = obj.getRefNum();
+        rootGen = obj.getRefGen();
+    } else {
+        if (!(ok = constructXRef(wasReconstructed))) {
+            errCode = errDamaged;
+            return;
+        }
+    }
+
     // now set the trailer dictionary's xref pointer so we can fetch
     // indirect objects from it
     trailerDict.getDict()->setXRef(this);
@@ -1137,15 +1137,14 @@ bool XRef::okToPrintHighRes(bool ignoreOwnerPW) const
     if (encrypted) {
         if (2 == encRevision) {
             return (okToPrint(ignoreOwnerPW));
-        } else if (encRevision >= 3) {
-            return (okToPrint(ignoreOwnerPW) && (permFlags & permHighResPrint));
-        } else {
-            // something weird - unknown security handler version
-            return false;
         }
-    } else {
-        return true;
+        if (encRevision >= 3) {
+            return (okToPrint(ignoreOwnerPW) && (permFlags & permHighResPrint));
+        }
+        // something weird - unknown security handler version
+        return false;
     }
+    return true;
 }
 
 bool XRef::okToChange(bool ignoreOwnerPW) const
@@ -1413,9 +1412,8 @@ int XRef::getNumEntry(Goffset offset)
             }
         }
         return res;
-    } else {
-        return -1;
     }
+    return -1;
 }
 
 void XRef::add(Ref ref, Goffset offs, bool used)

@@ -519,7 +519,6 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start)
     }
     if (pos + 1 < endPos && reader->getByte(pos) == 12 && reader->getByte(pos + 1) == 30) {
         return fofiIdCFFCID;
-    } else {
-        return fofiIdCFF8Bit;
     }
+    return fofiIdCFF8Bit;
 }

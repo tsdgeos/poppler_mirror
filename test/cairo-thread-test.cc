@@ -143,9 +143,8 @@ static cairo_status_t writeStream(void *closure, const unsigned char *data, unsi
 
     if (fwrite(data, length, 1, file) == 1) {
         return CAIRO_STATUS_SUCCESS;
-    } else {
-        return CAIRO_STATUS_WRITE_ERROR;
     }
+    return CAIRO_STATUS_WRITE_ERROR;
 }
 
 // PDF/PS/SVG output

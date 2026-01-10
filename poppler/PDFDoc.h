@@ -293,11 +293,11 @@ public:
         const int catalogMajorVersion = catalog->getPDFMajorVersion();
         if (catalogMajorVersion > headerPdfMajorVersion) {
             return catalog->getPDFMinorVersion();
-        } else if (headerPdfMajorVersion > catalogMajorVersion) {
-            return headerPdfMinorVersion;
-        } else {
-            return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
         }
+        if (headerPdfMajorVersion > catalogMajorVersion) {
+            return headerPdfMinorVersion;
+        }
+        return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
     }
 
     // Return the PDF ID in the trailer dictionary (if any).

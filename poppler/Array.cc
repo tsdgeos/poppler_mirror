@@ -123,7 +123,6 @@ bool Array::getString(int i, GooString *string) const
         string->clear();
         string->append(obj.getString()->toStr());
         return true;
-    } else {
-        return false;
     }
+    return false;
 }

@@ -127,16 +127,15 @@ int Lexer::getChar(bool comesFromLook)
     while (curStr.isStream() && (c = curStr.streamGetChar()) == EOF) {
         if (comesFromLook) {
             return EOF;
-        } else {
-            curStr.streamClose();
-            curStr = Object();
-            ++strPtr;
-            if (strPtr < streams->getLength()) {
-                curStr = streams->get(strPtr);
-                if (curStr.isStream()) {
-                    if (!curStr.streamRewind()) {
-                        return EOF;
-                    }
+        }
+        curStr.streamClose();
+        curStr = Object();
+        ++strPtr;
+        if (strPtr < streams->getLength()) {
+            curStr = streams->get(strPtr);
+            if (curStr.isStream()) {
+                if (!curStr.streamRewind()) {
+                    return EOF;
                 }
             }
         }
@@ -154,9 +153,8 @@ int Lexer::lookChar()
     if (lookCharLastValueCached == EOF) {
         lookCharLastValueCached = LOOK_VALUE_NOT_CACHED;
         return EOF;
-    } else {
-        return lookCharLastValueCached;
     }
+    return lookCharLastValueCached;
 }
 
 Object Lexer::getObj(int objNum)
@@ -252,16 +250,14 @@ Object Lexer::getObj(int objNum)
         if (unlikely(overflownInteger)) {
             if (overflownLongLong) {
                 return Object(xf);
-            } else {
-                if (unlikely(xll == INT_MIN)) {
-                    return Object(static_cast<int>(INT_MIN));
-                } else {
-                    return Object(xll);
-                }
             }
-        } else {
-            return Object(xi);
+            if (unlikely(xll == INT_MIN)) {
+                return Object(static_cast<int>(INT_MIN));
+            }
+            return Object(xll);
         }
+        return Object(xi);
+
         break;
     doReal:
         if (likely(!overflownInteger)) {
@@ -416,9 +412,9 @@ Object Lexer::getObj(int objNum)
                 s = utf8ToUtf16WithBom(s);
             }
             return Object(std::move(s));
-        } else {
-            return Object::eof();
         }
+        return Object::eof();
+
         break;
     }
     // name
@@ -474,10 +470,9 @@ Object Lexer::getObj(int objNum)
         }
         if (n < tokBufSize) {
             return Object(objName, std::string_view(tokBuf, n));
-        } else {
-            Object obj(objName, s);
-            return obj;
         }
+        Object obj(objName, s);
+        return obj;
         break;
     }
 
@@ -488,7 +483,7 @@ Object Lexer::getObj(int objNum)
         return Object(objCmd, std::string_view("]", 1));
 
     // hex string or dict punctuation
-    case '<':
+    case '<': {
         c = lookChar();
 
         // dict punctuation
@@ -497,52 +492,53 @@ Object Lexer::getObj(int objNum)
             return Object(objCmd, std::string_view("<<", 2));
 
             // hex string
-        } else {
-            p = tokBuf;
-            m = n = 0;
-            c2 = 0;
-            std::string s;
-            while (true) {
-                c = getChar();
-                if (c == '>') {
-                    break;
-                } else if (c == EOF) {
-                    error(errSyntaxError, getPos(), "Unterminated hex string");
-                    break;
-                } else if (specialChars[c] != 1) {
-                    c2 = c2 << 4;
-                    if (c >= '0' && c <= '9') {
-                        c2 += c - '0';
-                    } else if (c >= 'A' && c <= 'F') {
-                        c2 += c - 'A' + 10;
-                    } else if (c >= 'a' && c <= 'f') {
-                        c2 += c - 'a' + 10;
-                    } else {
-                        error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in hex string", c);
+        }
+        p = tokBuf;
+        m = n = 0;
+        c2 = 0;
+        std::string s;
+        while (true) {
+            c = getChar();
+            if (c == '>') {
+                break;
+            }
+            if (c == EOF) {
+                error(errSyntaxError, getPos(), "Unterminated hex string");
+                break;
+            }
+            if (specialChars[c] != 1) {
+                c2 = c2 << 4;
+                if (c >= '0' && c <= '9') {
+                    c2 += c - '0';
+                } else if (c >= 'A' && c <= 'F') {
+                    c2 += c - 'A' + 10;
+                } else if (c >= 'a' && c <= 'f') {
+                    c2 += c - 'a' + 10;
+                } else {
+                    error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in hex string", c);
+                }
+                if (++m == 2) {
+                    if (n == tokBufSize) {
+                        s.append(tokBuf, tokBufSize);
+                        p = tokBuf;
+                        n = 0;
                     }
-                    if (++m == 2) {
-                        if (n == tokBufSize) {
-                            s.append(tokBuf, tokBufSize);
-                            p = tokBuf;
-                            n = 0;
-                        }
-                        *p++ = (char)c2;
-                        ++n;
-                        c2 = 0;
-                        m = 0;
-                    }
+                    *p++ = (char)c2;
+                    ++n;
+                    c2 = 0;
+                    m = 0;
                 }
             }
-            s.append(tokBuf, n);
-            if (m == 1) {
-                s.push_back((char)(c2 << 4));
-            }
-            if (isUtf8WithBom(s)) {
-                s = utf8ToUtf16WithBom(s);
-            }
-            return Object(std::move(s));
         }
-        break;
+        s.append(tokBuf, n);
+        if (m == 1) {
+            s.push_back((char)(c2 << 4));
+        }
+        if (isUtf8WithBom(s)) {
+            s = utf8ToUtf16WithBom(s);
+        }
+        return Object(std::move(s));
+    } break;
 
     // dict punctuation
     case '>':
@@ -550,10 +546,10 @@ Object Lexer::getObj(int objNum)
         if (c == '>') {
             getChar();
             return Object(objCmd, std::string_view(">>", 2));
-        } else {
-            error(errSyntaxError, getPos(), "Illegal character '>'");
-            return Object::error();
         }
+        error(errSyntaxError, getPos(), "Illegal character '>'");
+        return Object::error();
+
         break;
 
     // error
@@ -580,13 +576,15 @@ Object Lexer::getObj(int objNum)
         std::string_view res(tokBuf, n);
         if (res == "true") {
             return Object(true);
-        } else if (res == "false") {
-            return Object(false);
-        } else if (res == "null") {
-            return Object::null();
-        } else {
-            return Object(objCmd, res);
         }
+        if (res == "false") {
+            return Object(false);
+        }
+        if (res == "null") {
+            return Object::null();
+        }
+        return Object(objCmd, res);
+
         break;
     }
 

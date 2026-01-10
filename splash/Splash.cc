@@ -2448,7 +2448,8 @@ bool Splash::pathAllOutside(const SplashPath &path)
         // If the first point is inside the clipping rectangle,
         // the check is sufficient
         return false;
-    } else if (path.length == 1) {
+    }
+    if (path.length == 1) {
         return true;
     }
 
@@ -2467,7 +2468,8 @@ bool Splash::pathAllOutside(const SplashPath &path)
         // clipping rectangle, the check is finished. Otherwise,
         // we have to check the remaining points.
         return false;
-    } else if (path.length == 2) {
+    }
+    if (path.length == 2) {
         return true;
     }
 

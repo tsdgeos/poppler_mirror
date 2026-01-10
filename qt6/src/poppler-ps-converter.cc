@@ -192,9 +192,8 @@ static bool annotDisplayDecideCbk(Annot *annot, void *user_data)
 {
     if (annot->getType() == Annot::typeWidget) {
         return true; // Never hide forms
-    } else {
-        return *(bool *)user_data;
     }
+    return *(bool *)user_data;
 }
 
 bool PSConverter::convert()
@@ -255,11 +254,10 @@ bool PSConverter::convert()
         delete psOut;
         d->closeDevice();
         return true;
-    } else {
-        delete psOut;
-        d->closeDevice();
-        return false;
     }
+    delete psOut;
+    d->closeDevice();
+    return false;
 }
 
 }

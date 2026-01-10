@@ -1769,7 +1769,8 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
             /* convert to offset from file top */
             gsubFeatureTable = ftable + gsubTable + featureList;
             return 0;
-        } else if (tag == vertTag) {
+        }
+        if (tag == vertTag) {
             ftable = getU16BE(tpos, &parsedOk);
         }
     }
@@ -1790,7 +1791,8 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
             /* vrt2 is preferred, overwrite vert */
             ftable = getU16BE(pos, &parsedOk);
             break;
-        } else if (ftable == 0 && tag == vertTag) {
+        }
+        if (ftable == 0 && tag == vertTag) {
             ftable = getU16BE(pos, &parsedOk);
         }
         pos = oldPos; /* restore old position */

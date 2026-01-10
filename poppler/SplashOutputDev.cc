@@ -409,10 +409,12 @@ bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
         if (0 <= s0 && s0 <= 1) {
             *t = t0 + dt * s0;
             return true;
-        } else if (s0 < 0 && shading->getExtend0()) {
+        }
+        if (s0 < 0 && shading->getExtend0()) {
             *t = t0;
             return true;
-        } else if (s0 > 1 && shading->getExtend1()) {
+        }
+        if (s0 > 1 && shading->getExtend1()) {
             *t = t1;
             return true;
         }
@@ -422,10 +424,12 @@ bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
         if (0 <= s1 && s1 <= 1) {
             *t = t0 + dt * s1;
             return true;
-        } else if (s1 < 0 && shading->getExtend0()) {
+        }
+        if (s1 < 0 && shading->getExtend0()) {
             *t = t0;
             return true;
-        } else if (s1 > 1 && shading->getExtend1()) {
+        }
+        if (s1 > 1 && shading->getExtend1()) {
             *t = t1;
             return true;
         }

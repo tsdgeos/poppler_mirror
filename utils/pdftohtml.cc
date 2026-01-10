@@ -446,12 +446,10 @@ static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key)
             mktime(&tmStruct); // compute the tm_wday and tm_yday fields
             if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tmStruct)) {
                 return std::string(buf);
-            } else {
-                return s->toStr();
             }
-        } else {
             return s->toStr();
         }
+        return s->toStr();
     }
     return {};
 }

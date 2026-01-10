@@ -391,9 +391,8 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
         if (unlikely(code >= newLen)) {
             error(errSyntaxWarning, -1, "Illegal code value in CharCodeToUnicode::addMapping");
             return;
-        } else {
-            map.resize(newLen, 0);
         }
+        map.resize(newLen, 0);
     }
     if (n <= 4) {
         if (!parseHex(uStr, n, &u)) {

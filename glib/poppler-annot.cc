@@ -2405,29 +2405,41 @@ PopplerAnnotStampIcon poppler_annot_stamp_get_icon(PopplerAnnotStamp *poppler_an
 
     if (text == "Approved") {
         return POPPLER_ANNOT_STAMP_ICON_APPROVED;
-    } else if (text == "AsIs") {
+    }
+    if (text == "AsIs") {
         return POPPLER_ANNOT_STAMP_ICON_AS_IS;
-    } else if (text == "Confidential") {
+    }
+    if (text == "Confidential") {
         return POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL;
-    } else if (text == "Final") {
+    }
+    if (text == "Final") {
         return POPPLER_ANNOT_STAMP_ICON_FINAL;
-    } else if (text == "Experimental") {
+    }
+    if (text == "Experimental") {
         return POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL;
-    } else if (text == "Expired") {
+    }
+    if (text == "Expired") {
         return POPPLER_ANNOT_STAMP_ICON_EXPIRED;
-    } else if (text == "NotApproved") {
+    }
+    if (text == "NotApproved") {
         return POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED;
-    } else if (text == "NotForPublicRelease") {
+    }
+    if (text == "NotForPublicRelease") {
         return POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE;
-    } else if (text == "Sold") {
+    }
+    if (text == "Sold") {
         return POPPLER_ANNOT_STAMP_ICON_SOLD;
-    } else if (text == "Departmental") {
+    }
+    if (text == "Departmental") {
         return POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL;
-    } else if (text == "ForComment") {
+    }
+    if (text == "ForComment") {
         return POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT;
-    } else if (text == "ForPublicRelease") {
+    }
+    if (text == "ForPublicRelease") {
         return POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE;
-    } else if (text == "TopSecret") {
+    }
+    if (text == "TopSecret") {
         return POPPLER_ANNOT_STAMP_ICON_TOP_SECRET;
     }
 
@@ -2537,10 +2549,9 @@ gboolean poppler_annot_get_border_width(PopplerAnnot *poppler_annot, double *wid
     if (b) {
         *width = b->getWidth();
         return TRUE;
-    } else {
-        *width = 0.;
-        return FALSE;
     }
+    *width = 0.;
+    return FALSE;
 }
 /**
  * poppler_annot_set_border_width:

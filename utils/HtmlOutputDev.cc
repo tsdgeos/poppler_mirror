@@ -1534,9 +1534,8 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
                 printf(" link to page %d ", destPage);
             }
             return file;
-        } else {
-            return std::make_unique<GooString>();
         }
+        return std::make_unique<GooString>();
     }
     case actionGoToR: {
         LinkGoToR *ha = (LinkGoToR *)link->getAction();

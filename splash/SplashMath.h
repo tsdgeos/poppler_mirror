@@ -80,9 +80,9 @@ static inline int splashFloor(SplashCoord x)
 #else
     if (x > 0) {
         return (int)x;
-    } else {
-        return (int)floor(x);
     }
+    return (int)floor(x);
+
 #endif
 }
 

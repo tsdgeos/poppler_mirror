@@ -247,9 +247,8 @@ static gboolean pgd_text_view_query_tooltip(GtkTextView *textview, gint x, gint 
         g_free(text);
         g_object_unref(page);
         return TRUE;
-    } else {
-        return FALSE;
     }
+    return FALSE;
 }
 
 static void pgd_text_area_selector_setup(PgdTextDemo *demo)

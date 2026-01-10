@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
         // usage:
         // pdf-signing-nss --sign nssdir nick input output
         return sign_file(argv[2], argv[3], argv[4], argv[5]);
-    } else if (argc == 4 && argv[1] == "--verify"s) {
+    }
+    if (argc == 4 && argv[1] == "--verify"s) {
         // usage:
         // pdf-signing-nss --verify nssdir input
         return verify_file(argv[2], argv[3]);

@@ -237,39 +237,36 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
                     return state->copyDefaultGrayColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultGrayColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (csObj->isName("DeviceRGB") || csObj->isName("RGB")) {
+            return state->copyDefaultGrayColorSpace();
+        }
+        if (csObj->isName("DeviceRGB") || csObj->isName("RGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
                     return state->copyDefaultRGBColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultRGBColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (csObj->isName("DeviceCMYK") || csObj->isName("CMYK")) {
+            return state->copyDefaultRGBColorSpace();
+        }
+        if (csObj->isName("DeviceCMYK") || csObj->isName("CMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
                     return state->copyDefaultCMYKColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultCMYKColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (csObj->isName("Pattern")) {
-            return std::make_unique<GfxPatternColorSpace>(nullptr);
-        } else {
-            error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
+            return state->copyDefaultCMYKColorSpace();
         }
+        if (csObj->isName("Pattern")) {
+            return std::make_unique<GfxPatternColorSpace>(nullptr);
+        }
+        error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
+
     } else if (csObj->isArray() && csObj->arrayGetLength() > 0) {
         obj1 = csObj->arrayGet(0);
         if (obj1.isName("DeviceGray") || obj1.isName("G")) {
@@ -277,53 +274,57 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
                     return state->copyDefaultGrayColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultGrayColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (obj1.isName("DeviceRGB") || obj1.isName("RGB")) {
+            return state->copyDefaultGrayColorSpace();
+        }
+        if (obj1.isName("DeviceRGB") || obj1.isName("RGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
                     return state->copyDefaultRGBColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultRGBColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (obj1.isName("DeviceCMYK") || obj1.isName("CMYK")) {
+            return state->copyDefaultRGBColorSpace();
+        }
+        if (obj1.isName("DeviceCMYK") || obj1.isName("CMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
                     return state->copyDefaultCMYKColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultCMYKColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (obj1.isName("CalGray")) {
-            return GfxCalGrayColorSpace::parse(*csObj->getArray(), state);
-        } else if (obj1.isName("CalRGB")) {
-            return GfxCalRGBColorSpace::parse(*csObj->getArray(), state);
-        } else if (obj1.isName("Lab")) {
-            return GfxLabColorSpace::parse(*csObj->getArray(), state);
-        } else if (obj1.isName("ICCBased")) {
-            return GfxICCBasedColorSpace::parse(*csObj->getArray(), out, state, recursion);
-        } else if (obj1.isName("Indexed") || obj1.isName("I")) {
-            return GfxIndexedColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
-        } else if (obj1.isName("Separation")) {
-            return GfxSeparationColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
-        } else if (obj1.isName("DeviceN")) {
-            return GfxDeviceNColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
-        } else if (obj1.isName("Pattern")) {
-            return GfxPatternColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
-        } else {
-            error(errSyntaxWarning, -1, "Bad color space");
+            return state->copyDefaultCMYKColorSpace();
         }
+        if (obj1.isName("CalGray")) {
+            return GfxCalGrayColorSpace::parse(*csObj->getArray(), state);
+        }
+        if (obj1.isName("CalRGB")) {
+            return GfxCalRGBColorSpace::parse(*csObj->getArray(), state);
+        }
+        if (obj1.isName("Lab")) {
+            return GfxLabColorSpace::parse(*csObj->getArray(), state);
+        }
+        if (obj1.isName("ICCBased")) {
+            return GfxICCBasedColorSpace::parse(*csObj->getArray(), out, state, recursion);
+        }
+        if (obj1.isName("Indexed") || obj1.isName("I")) {
+            return GfxIndexedColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
+        }
+        if (obj1.isName("Separation")) {
+            return GfxSeparationColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
+        }
+        if (obj1.isName("DeviceN")) {
+            return GfxDeviceNColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
+        }
+        if (obj1.isName("Pattern")) {
+            return GfxPatternColorSpace::parse(res, *csObj->getArray(), out, state, recursion);
+        }
+        error(errSyntaxWarning, -1, "Bad color space");
+
     } else if (csObj->isDict()) {
         obj1 = csObj->dictLookup("ColorSpace");
         if (obj1.isName("DeviceGray")) {
@@ -331,37 +332,33 @@ std::unique_ptr<GfxColorSpace> GfxColorSpace::parse(GfxResources *res, Object *c
                 Object objCS = res->lookupColorSpace("DefaultGray");
                 if (objCS.isNull()) {
                     return state->copyDefaultGrayColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultGrayColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (obj1.isName("DeviceRGB")) {
+            return state->copyDefaultGrayColorSpace();
+        }
+        if (obj1.isName("DeviceRGB")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultRGB");
                 if (objCS.isNull()) {
                     return state->copyDefaultRGBColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultRGBColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else if (obj1.isName("DeviceCMYK")) {
+            return state->copyDefaultRGBColorSpace();
+        }
+        if (obj1.isName("DeviceCMYK")) {
             if (res != nullptr) {
                 Object objCS = res->lookupColorSpace("DefaultCMYK");
                 if (objCS.isNull()) {
                     return state->copyDefaultCMYKColorSpace();
-                } else {
-                    return GfxColorSpace::parse(nullptr, &objCS, out, state);
                 }
-            } else {
-                return state->copyDefaultCMYKColorSpace();
+                return GfxColorSpace::parse(nullptr, &objCS, out, state);
             }
-        } else {
-            error(errSyntaxWarning, -1, "Bad color space dict'");
+            return state->copyDefaultCMYKColorSpace();
         }
+        error(errSyntaxWarning, -1, "Bad color space dict'");
+
     } else {
         error(errSyntaxWarning, -1, "Bad color space - expected name or array or dict");
     }
@@ -1559,7 +1556,8 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         rgb->g = byteToCol(out[1]);
         rgb->b = byteToCol(out[2]);
         return;
-    } else if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
+    }
+    if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
         double c, m, y, k, c1, m1, y1, k1, r, g, b;
@@ -3175,7 +3173,8 @@ std::unique_ptr<GfxPattern> GfxPattern::parse(GfxResources *res, Object *obj, Ou
     }
     if (obj1.isInt() && obj1.getInt() == 1) {
         return GfxTilingPattern::parse(obj, patternRefNum);
-    } else if (obj1.isInt() && obj1.getInt() == 2) {
+    }
+    if (obj1.isInt() && obj1.getInt() == 2) {
         return GfxShadingPattern::parse(res, obj, out, state, patternRefNum);
     }
     return {};
@@ -7049,7 +7048,8 @@ bool GfxState::parseBlendMode(Object *obj, GfxBlendMode *mode)
             }
         }
         return false;
-    } else if (obj->isArray()) {
+    }
+    if (obj->isArray()) {
         for (i = 0; i < obj->arrayGetLength(); ++i) {
             Object obj2 = obj->arrayGet(i);
             if (!obj2.isName()) {
@@ -7064,7 +7064,6 @@ bool GfxState::parseBlendMode(Object *obj, GfxBlendMode *mode)
         }
         *mode = gfxBlendNormal;
         return true;
-    } else {
-        return false;
     }
+    return false;
 }

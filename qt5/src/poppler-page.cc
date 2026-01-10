@@ -166,9 +166,8 @@ public:
                     gfree(data);
                 }
                 return i;
-            } else {
-                return QImage(data, bw, bh, brs, format).copy();
             }
+            return QImage(data, bw, bh, brs, format).copy();
         }
 
         return QImage();
@@ -406,9 +405,11 @@ inline bool PageData::performSingleTextSearch(TextPage *textPage, QVector<Unicod
 {
     if (direction == Page::FromTop) {
         return textPage->findText(u.data(), u.size(), true, true, false, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
-    } else if (direction == Page::NextResult) {
+    }
+    if (direction == Page::NextResult) {
         return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
-    } else if (direction == Page::PreviousResult) {
+    }
+    if (direction == Page::PreviousResult) {
         return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, true, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
     }
 
@@ -859,9 +860,8 @@ QSizeF Page::pageSizeF() const
     Page::Orientation orient = orientation();
     if ((Page::Landscape == orient) || (Page::Seascape == orient)) {
         return QSizeF(m_page->page->getCropHeight(), m_page->page->getCropWidth());
-    } else {
-        return QSizeF(m_page->page->getCropWidth(), m_page->page->getCropHeight());
     }
+    return QSizeF(m_page->page->getCropWidth(), m_page->page->getCropHeight());
 }
 
 QSize Page::pageSize() const

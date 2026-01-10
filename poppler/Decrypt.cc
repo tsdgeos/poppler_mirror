@@ -160,54 +160,52 @@ bool Decrypt::makeFileKey(int encRevision, int keyLength, const GooString *owner
         }
 
         return false;
-    } else {
-
-        // try using the supplied owner password to generate the user password
-        if (ownerPassword) {
-            len = ownerPassword->size();
-            if (len < 32) {
-                memcpy(test, ownerPassword->c_str(), len);
-                memcpy(test + len, passwordPad, 32 - len);
-            } else {
-                memcpy(test, ownerPassword->c_str(), 32);
-            }
-            md5(test, 32, test);
-            if (encRevision == 3) {
-                for (i = 0; i < 50; ++i) {
-                    md5(test, keyLength, test);
-                }
-            }
-            if (encRevision == 2) {
-                rc4InitKey(test, keyLength, fState);
-                fx = fy = 0;
-                for (i = 0; i < 32; ++i) {
-                    test2[i] = rc4DecryptByte(fState, &fx, &fy, ownerKey->getChar(i));
-                }
-            } else {
-                memcpy(test2, ownerKey->c_str(), 32);
-                for (i = 19; i >= 0; --i) {
-                    for (j = 0; j < keyLength; ++j) {
-                        tmpKey[j] = test[j] ^ i;
-                    }
-                    rc4InitKey(tmpKey, keyLength, fState);
-                    fx = fy = 0;
-                    for (j = 0; j < 32; ++j) {
-                        test2[j] = rc4DecryptByte(fState, &fx, &fy, test2[j]);
-                    }
-                }
-            }
-            userPassword2 = new GooString((char *)test2, 32);
-            if (makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword2, fileKey, encryptMetadata)) {
-                *ownerPasswordOk = true;
-                delete userPassword2;
-                return true;
-            }
-            delete userPassword2;
-        }
-
-        // try using the supplied user password
-        return makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword, fileKey, encryptMetadata);
     }
+    // try using the supplied owner password to generate the user password
+    if (ownerPassword) {
+        len = ownerPassword->size();
+        if (len < 32) {
+            memcpy(test, ownerPassword->c_str(), len);
+            memcpy(test + len, passwordPad, 32 - len);
+        } else {
+            memcpy(test, ownerPassword->c_str(), 32);
+        }
+        md5(test, 32, test);
+        if (encRevision == 3) {
+            for (i = 0; i < 50; ++i) {
+                md5(test, keyLength, test);
+            }
+        }
+        if (encRevision == 2) {
+            rc4InitKey(test, keyLength, fState);
+            fx = fy = 0;
+            for (i = 0; i < 32; ++i) {
+                test2[i] = rc4DecryptByte(fState, &fx, &fy, ownerKey->getChar(i));
+            }
+        } else {
+            memcpy(test2, ownerKey->c_str(), 32);
+            for (i = 19; i >= 0; --i) {
+                for (j = 0; j < keyLength; ++j) {
+                    tmpKey[j] = test[j] ^ i;
+                }
+                rc4InitKey(tmpKey, keyLength, fState);
+                fx = fy = 0;
+                for (j = 0; j < 32; ++j) {
+                    test2[j] = rc4DecryptByte(fState, &fx, &fy, test2[j]);
+                }
+            }
+        }
+        userPassword2 = new GooString((char *)test2, 32);
+        if (makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword2, fileKey, encryptMetadata)) {
+            *ownerPasswordOk = true;
+            delete userPassword2;
+            return true;
+        }
+        delete userPassword2;
+    }
+
+    // try using the supplied user password
+    return makeFileKey2(encRevision, keyLength, ownerKey, userKey, permissions, fileID, userPassword, fileKey, encryptMetadata);
 }
 
 bool Decrypt::makeFileKey2(int encRevision, int keyLength, const GooString *ownerKey, const GooString *userKey, int permissions, const GooString *fileID, const GooString *userPassword, unsigned char *fileKey, bool encryptMetadata)
@@ -622,15 +620,14 @@ static bool aesReadBlock(Stream *str, unsigned char *in, bool addPadding)
 
     if (i == 16) {
         return true;
-    } else {
-        if (addPadding) {
-            c = 16 - i;
-            while (i < 16) {
-                in[i++] = (unsigned char)c;
-            }
-        }
-        return false;
     }
+    if (addPadding) {
+        c = 16 - i;
+        while (i < 16) {
+            in[i++] = (unsigned char)c;
+        }
+    }
+    return false;
 }
 
 static const unsigned char sbox[256] = { 0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,

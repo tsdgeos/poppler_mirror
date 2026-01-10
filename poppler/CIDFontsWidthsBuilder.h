@@ -122,23 +122,20 @@ private:
                     m_values.push_back(value);
                     m_lastIndex = index;
                     return true;
-                } else {
-                    // We need to end a range segment
-                    // to start a new segment with different value
-                    return false;
                 }
-            } else {
-                if (uniqueElementsFromEnd(value) >= 3) {
-                    // We now have at least 3 unique elements
-                    // at the end, so we should finish the previous
-                    // list segment and then start a range segment
-                    return false;
-                } else {
-                    m_values.push_back(value);
-                    m_lastIndex = index;
-                    return true;
-                }
+                // We need to end a range segment
+                // to start a new segment with different value
+                return false;
             }
+            if (uniqueElementsFromEnd(value) >= 3) {
+                // We now have at least 3 unique elements
+                // at the end, so we should finish the previous
+                // list segment and then start a range segment
+                return false;
+            }
+            m_values.push_back(value);
+            m_lastIndex = index;
+            return true;
         }
         /**
          * Builds the segment of the values so far.
@@ -171,16 +168,15 @@ private:
                 m_values = std::move(savedValues);
                 differentValues = false;
                 return segment;
-            } else {
-                assert(m_firstIndex.has_value());
-                assert(m_lastIndex.has_value());
-                auto segment = RangeSegment { m_firstIndex.value(), m_lastIndex.value(), m_values.back() };
-                m_values.clear();
-                m_firstIndex = {};
-                m_lastIndex = {};
-                differentValues = false;
-                return segment;
             }
+            assert(m_firstIndex.has_value());
+            assert(m_lastIndex.has_value());
+            auto segment = RangeSegment { m_firstIndex.value(), m_lastIndex.value(), m_values.back() };
+            m_values.clear();
+            m_firstIndex = {};
+            m_lastIndex = {};
+            differentValues = false;
+            return segment;
         }
         std::vector<int> m_values;
         std::optional<int> m_lastIndex;

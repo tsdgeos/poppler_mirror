@@ -346,9 +346,9 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
             if (bitsToShift >= intNBits) {
                 error(errSyntaxError, -1, "Failed to build table for JBIG2 stream");
                 return false;
-            } else {
-                prefix <<= bitsToShift;
             }
+            prefix <<= bitsToShift;
+
             table[i].prefix = prefix++;
         }
     }
@@ -3806,7 +3806,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
                         bitmap->clearPixel(x, y);
                         continue;
-                    } else if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
+                    }
+                    if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
                         bitmap->setPixel(x, y);
                         continue;
                     }
@@ -3880,7 +3881,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
                         bitmap->clearPixel(x, y);
                         continue;
-                    } else if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
+                    }
+                    if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
                         bitmap->setPixel(x, y);
                         continue;
                     }

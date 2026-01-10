@@ -660,7 +660,8 @@ bool LinkMovie::isReferencedAnnotation(const MovieAnnotation *annotation) const
     Q_D(const LinkMovie);
     if (d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference()) {
         return true;
-    } else if (!d->annotationTitle.isNull()) {
+    }
+    if (!d->annotationTitle.isNull()) {
         return (annotation->movieTitle() == d->annotationTitle);
     }
 

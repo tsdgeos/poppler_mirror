@@ -229,10 +229,9 @@ static std::pair<std::optional<std::string_view>, std::pair<std::string, std::st
                         value.push_back(xtoi(stringv.front(), stringv[1]));
                         stringv.remove_prefix(2);
                         break;
-                    } else {
-                        // invalid escape
-                        return {};
                     }
+                    // invalid escape
+                    return {};
                 }
                 }
                 break;

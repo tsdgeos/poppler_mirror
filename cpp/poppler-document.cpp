@@ -88,13 +88,13 @@ document *document_private::check_document(document_private *doc, byte_array *fi
             doc->is_locked = true;
         }
         return new document(*doc);
-    } else {
-        // put back the document data where it was before
-        if (file_data) {
-            file_data->swap(doc->doc_data);
-        }
-        delete doc;
     }
+    // put back the document data where it was before
+    if (file_data) {
+        file_data->swap(doc->doc_data);
+    }
+    delete doc;
+
     return nullptr;
 }
 
@@ -877,13 +877,11 @@ page *document::create_page(int index) const
         page *p = new page(d, index);
         if (p->d->page) {
             return p;
-        } else {
-            delete p;
-            return nullptr;
         }
-    } else {
+        delete p;
         return nullptr;
     }
+    return nullptr;
 }
 
 /**

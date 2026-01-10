@@ -406,7 +406,8 @@ FormFieldText::TextType FormFieldText::textType() const
     FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     if (fwt->isFileSelect()) {
         return FormFieldText::FileSelect;
-    } else if (fwt->isMultiline()) {
+    }
+    if (fwt->isMultiline()) {
         return FormFieldText::Multiline;
     }
     return FormFieldText::Normal;
@@ -559,9 +560,8 @@ QString FormFieldChoice::editChoice() const
 
     if (fwc->isCombo() && fwc->hasEdit()) {
         return UnicodeParsedString(fwc->getEditChoice());
-    } else {
-        return QString();
     }
+    return QString();
 }
 
 void FormFieldChoice::setEditChoice(const QString &text)
@@ -1232,10 +1232,9 @@ FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &output
             return BadPassphrase;
         }
         return GenericSigningError; // catch all
-    } else {
-        m_formData->lastSigningErrorDetails = {};
-        return SigningSuccess;
     }
+    m_formData->lastSigningErrorDetails = {};
+    return SigningSuccess;
 }
 
 bool hasNSSSupport()

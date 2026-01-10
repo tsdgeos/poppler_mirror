@@ -435,9 +435,8 @@ int main(int argc, char *argv[])
         }
         if (printVersion || printHelp) {
             return 0;
-        } else {
-            return kOtherError;
         }
+        return kOtherError;
     }
     if (argc > 1) {
         fileName = new GooString(argv[1]);

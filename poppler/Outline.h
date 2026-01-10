@@ -58,9 +58,8 @@ public:
     {
         if (!items || items->empty()) {
             return nullptr;
-        } else {
-            return items;
         }
+        return items;
     }
 
     struct OutlineTreeNode

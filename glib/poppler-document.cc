@@ -2848,9 +2848,8 @@ const char *poppler_fonts_iter_get_full_name(PopplerFontsIter *iter)
     const std::optional<std::string> &name = info->getName();
     if (name) {
         return name->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2902,9 +2901,8 @@ const char *poppler_fonts_iter_get_substitute_name(PopplerFontsIter *iter)
     const std::optional<std::string> &name = info->getSubstituteName();
     if (name) {
         return name->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2925,9 +2923,8 @@ const char *poppler_fonts_iter_get_file_name(PopplerFontsIter *iter)
     const std::optional<std::string> &file = info->getFile();
     if (file) {
         return file->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2968,9 +2965,8 @@ const char *poppler_fonts_iter_get_encoding(PopplerFontsIter *iter)
     const std::string &encoding = info->getEncoding();
     if (!encoding.empty()) {
         return encoding.c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -3183,9 +3179,8 @@ gboolean poppler_font_info_scan(PopplerFontInfo *font_info, int n_pages, Poppler
     if (items.empty()) {
         *iter = nullptr;
         return FALSE;
-    } else {
-        *iter = poppler_fonts_iter_new(std::move(items));
     }
+    *iter = poppler_fonts_iter_new(std::move(items));
 
     return TRUE;
 }

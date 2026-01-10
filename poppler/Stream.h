@@ -138,17 +138,16 @@ public:
     {
         if (hasGetChars()) {
             return getChars(nChars, buffer);
-        } else {
-            for (int i = 0; i < nChars; ++i) {
-                const int c = getChar();
-                if (likely(c != EOF)) {
-                    buffer[i] = c;
-                } else {
-                    return i;
-                }
-            }
-            return nChars;
         }
+        for (int i = 0; i < nChars; ++i) {
+            const int c = getChar();
+            if (likely(c != EOF)) {
+                buffer[i] = c;
+            } else {
+                return i;
+            }
+        }
+        return nChars;
     }
 
     void fillString(std::string &s)

@@ -125,36 +125,32 @@ static bool compareObjects(const Object *objA, const Object *objB)
     case objBool: {
         if (objB->getType() != objBool) {
             return false;
-        } else {
-            return (objA->getBool() == objB->getBool());
         }
+        return (objA->getBool() == objB->getBool());
     }
     case objInt:
     case objInt64:
     case objReal: {
         if (!objB->isNum()) {
             return false;
-        } else {
-            // Fuzzy comparison
-            const double diff = objA->getNum() - objB->getNum();
-            return (-0.01 < diff) && (diff < 0.01);
         }
+        // Fuzzy comparison
+        const double diff = objA->getNum() - objB->getNum();
+        return (-0.01 < diff) && (diff < 0.01);
     }
     case objString: {
         if (objB->getType() != objString) {
             return false;
-        } else {
-            const GooString *strA = objA->getString();
-            const GooString *strB = objB->getString();
-            return (strA->compare(strB->toStr()) == 0);
         }
+        const GooString *strA = objA->getString();
+        const GooString *strB = objB->getString();
+        return (strA->compare(strB->toStr()) == 0);
     }
     case objName: {
         if (objB->getType() != objName) {
             return false;
-        } else {
-            return objA->getNameString() == objB->getNameString();
         }
+        return objA->getNameString() == objB->getNameString();
     }
     case objNull: {
         return objB->getType() == objNull;
@@ -162,64 +158,57 @@ static bool compareObjects(const Object *objA, const Object *objB)
     case objArray: {
         if (objB->getType() != objArray) {
             return false;
-        } else {
-            Array *arrayA = objA->getArray();
-            Array *arrayB = objB->getArray();
-            const int length = arrayA->getLength();
-            if (arrayB->getLength() != length) {
+        }
+        Array *arrayA = objA->getArray();
+        Array *arrayB = objB->getArray();
+        const int length = arrayA->getLength();
+        if (arrayB->getLength() != length) {
+            return false;
+        }
+        for (int i = 0; i < length; ++i) {
+            const Object &elemA = arrayA->getNF(i);
+            const Object &elemB = arrayB->getNF(i);
+            if (!compareObjects(&elemA, &elemB)) {
                 return false;
-            } else {
-                for (int i = 0; i < length; ++i) {
-                    const Object &elemA = arrayA->getNF(i);
-                    const Object &elemB = arrayB->getNF(i);
-                    if (!compareObjects(&elemA, &elemB)) {
-                        return false;
-                    }
-                }
-                return true;
             }
         }
+        return true;
     }
     case objDict: {
         if (objB->getType() != objDict) {
             return false;
-        } else {
-            Dict *dictA = objA->getDict();
-            Dict *dictB = objB->getDict();
-            return compareDictionaries(dictA, dictB);
         }
+        Dict *dictA = objA->getDict();
+        Dict *dictB = objB->getDict();
+        return compareDictionaries(dictA, dictB);
     }
     case objStream: {
         if (objB->getType() != objStream) {
             return false;
-        } else {
-            Stream *streamA = objA->getStream();
-            Stream *streamB = objB->getStream();
-            if (!compareDictionaries(streamA->getDict(), streamB->getDict())) {
-                return false;
-            } else {
-                int c;
-                (void)streamA->rewind();
-                (void)streamB->rewind();
-                do {
-                    c = streamA->getChar();
-                    if (c != streamB->getChar()) {
-                        return false;
-                    }
-                } while (c != EOF);
-                return true;
-            }
         }
+        Stream *streamA = objA->getStream();
+        Stream *streamB = objB->getStream();
+        if (!compareDictionaries(streamA->getDict(), streamB->getDict())) {
+            return false;
+        }
+        int c;
+        (void)streamA->rewind();
+        (void)streamB->rewind();
+        do {
+            c = streamA->getChar();
+            if (c != streamB->getChar()) {
+                return false;
+            }
+        } while (c != EOF);
         return true;
     }
     case objRef: {
         if (objB->getType() != objRef) {
             return false;
-        } else {
-            const Ref refA = objA->getRef();
-            const Ref refB = objB->getRef();
-            return refA == refB;
         }
+        const Ref refA = objA->getRef();
+        const Ref refB = objB->getRef();
+        return refA == refB;
     }
     default: {
         fprintf(stderr, "compareObjects failed: unexpected object type %u\n", objA->getType());

@@ -391,7 +391,8 @@ void CMap::setReverseMapVector(unsigned int startCode, CMapVectorEntry *vec, uns
                     if (rmap[idx] == 0) {
                         rmap[idx] = code;
                         break;
-                    } else if (rmap[idx] == code) {
+                    }
+                    if (rmap[idx] == code) {
                         break;
                     }
                 }

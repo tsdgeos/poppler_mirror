@@ -648,12 +648,11 @@ static bool findModifier(const std::string &name, const size_t modStart, const c
     size_t match = name.find(modifier, modStart);
     if (match == std::string::npos) {
         return false;
-    } else {
-        if (start == std::string::npos || match < start) {
-            start = match;
-        }
-        return true;
     }
+    if (start == std::string::npos || match < start) {
+        start = match;
+    }
+    return true;
 }
 
 static const char *getFontLang(const GfxFont &font)

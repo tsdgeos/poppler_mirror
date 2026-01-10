@@ -355,18 +355,16 @@ text_box::writing_mode_enum text_box::get_wmode(int i) const
 {
     if (this->has_font_info()) {
         return m_data->text_box_font->wmodes[i];
-    } else {
-        return text_box::invalid_wmode;
     }
+    return text_box::invalid_wmode;
 }
 
 double text_box::get_font_size() const
 {
     if (this->has_font_info()) {
         return m_data->text_box_font->font_size;
-    } else {
-        return -1;
     }
+    return -1;
 }
 
 std::string text_box::get_font_name(int i) const

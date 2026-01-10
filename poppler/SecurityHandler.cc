@@ -79,9 +79,8 @@ bool SecurityHandler::checkEncryption(const std::optional<GooString> &ownerPassw
     if (!ok) {
         if (!ownerPassword && !userPassword) {
             return checkEncryption(GooString(), GooString());
-        } else {
-            error(errCommandLine, -1, "Incorrect password");
         }
+        error(errCommandLine, -1, "Incorrect password");
     }
     return ok;
 }

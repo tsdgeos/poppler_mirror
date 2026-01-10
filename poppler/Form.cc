@@ -2521,7 +2521,8 @@ std::pair<std::optional<std::vector<unsigned char>>, int64_t> FormFieldSignature
                 return { signature, checkedFileSize };
             }
             return { {}, 0 };
-        } else if (signature[1] > 0x80) {
+        }
+        if (signature[1] > 0x80) {
             size_t lengthLength = signature[1] - 0x80;
             size_t length = 0;
             for (size_t i = 0; i < lengthLength; i++) {
@@ -2670,15 +2671,18 @@ std::unique_ptr<FormField> Form::createFieldFromDict(Object &&obj, PDFDoc *docA,
     const Object obj2 = Form::fieldLookup(obj.getDict(), "FT");
     if (obj2.isName("Btn")) {
         return std::make_unique<FormFieldButton>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Tx")) {
-        return std::make_unique<FormFieldText>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Ch")) {
-        return std::make_unique<FormFieldChoice>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Sig")) {
-        return std::make_unique<FormFieldSignature>(docA, std::move(obj), aref, parent, usedParents);
-    } else { // we don't have an FT entry => non-terminal field
-        return std::make_unique<FormField>(docA, std::move(obj), aref, parent, usedParents);
     }
+    if (obj2.isName("Tx")) {
+        return std::make_unique<FormFieldText>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    if (obj2.isName("Ch")) {
+        return std::make_unique<FormFieldChoice>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    if (obj2.isName("Sig")) {
+        return std::make_unique<FormFieldSignature>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    // we don't have an FT entry => non-terminal field
+    return std::make_unique<FormField>(docA, std::move(obj), aref, parent, usedParents);
 
     return {};
 }

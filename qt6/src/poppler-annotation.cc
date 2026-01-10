@@ -315,13 +315,15 @@ PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags
 
     if (rotationFixUp == 0) {
         return PDFRectangle(tl_x, tl_y, br_x, br_y);
-    } else if (rotationFixUp == 90) {
-        return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
-    } else if (rotationFixUp == 180) {
-        return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
-    } else { // rotationFixUp == 270
-        return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
     }
+    if (rotationFixUp == 90) {
+        return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
+    }
+    if (rotationFixUp == 180) {
+        return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
+    }
+    // rotationFixUp == 270
+    return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
 }
 
 PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
@@ -1119,9 +1121,8 @@ QDateTime Annotation::modificationDate() const
 
     if (d->pdfAnnot->getModified()) {
         return convertDate(d->pdfAnnot->getModified()->c_str());
-    } else {
-        return QDateTime();
     }
+    return QDateTime();
 }
 
 void Annotation::setModificationDate(const QDateTime &date)
@@ -1622,9 +1623,8 @@ std::unique_ptr<DefaultAppearance> TextAnnotationPrivate::getDefaultAppearanceFr
     if (pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(pdfAnnot.get());
         return ftextann->getDefaultAppearance();
-    } else {
-        return {};
     }
+    return {};
 }
 
 TextAnnotation::TextAnnotation(TextAnnotation::TextType type) : Annotation(*new TextAnnotationPrivate())
@@ -1810,9 +1810,8 @@ QPointF TextAnnotation::calloutPoint(int id) const
     const QVector<QPointF> points = calloutPoints();
     if (id < 0 || id >= points.size()) {
         return QPointF();
-    } else {
-        return points[id];
     }
+    return points[id];
 }
 
 QVector<QPointF> TextAnnotation::calloutPoints() const
@@ -2092,10 +2091,9 @@ LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::TermStyle)lineann->getStartStyle();
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)polyann->getStartStyle();
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    return (LineAnnotation::TermStyle)polyann->getStartStyle();
 }
 
 void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
@@ -2127,10 +2125,9 @@ LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::TermStyle)lineann->getEndStyle();
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)polyann->getEndStyle();
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    return (LineAnnotation::TermStyle)polyann->getEndStyle();
 }
 
 void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
@@ -2334,14 +2331,13 @@ LineAnnotation::LineIntent LineAnnotation::lineIntent() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::LineIntent)(lineann->getIntent() + 1);
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
-            return LineAnnotation::PolygonCloud;
-        } else { // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
-            return LineAnnotation::Dimension;
-        }
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
+        return LineAnnotation::PolygonCloud;
+    }
+    // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
+    return LineAnnotation::Dimension;
 }
 
 void LineAnnotation::setLineIntent(LineAnnotation::LineIntent intent)
@@ -2443,9 +2439,9 @@ GeomAnnotation::GeomType GeomAnnotation::geomType() const
 
     if (d->pdfAnnot->getType() == Annot::typeSquare) {
         return GeomAnnotation::InscribedSquare;
-    } else { // Annot::typeCircle
-        return GeomAnnotation::InscribedCircle;
     }
+    // Annot::typeCircle
+    return GeomAnnotation::InscribedCircle;
 }
 
 void GeomAnnotation::setGeomType(GeomAnnotation::GeomType type)
@@ -2630,13 +2626,15 @@ HighlightAnnotation::HighlightType HighlightAnnotation::highlightType() const
 
     if (subType == Annot::typeHighlight) {
         return HighlightAnnotation::Highlight;
-    } else if (subType == Annot::typeUnderline) {
-        return HighlightAnnotation::Underline;
-    } else if (subType == Annot::typeSquiggly) {
-        return HighlightAnnotation::Squiggly;
-    } else { // Annot::typeStrikeOut
-        return HighlightAnnotation::StrikeOut;
     }
+    if (subType == Annot::typeUnderline) {
+        return HighlightAnnotation::Underline;
+    }
+    if (subType == Annot::typeSquiggly) {
+        return HighlightAnnotation::Squiggly;
+    }
+    // Annot::typeStrikeOut
+    return HighlightAnnotation::StrikeOut;
 }
 
 void HighlightAnnotation::setHighlightType(HighlightAnnotation::HighlightType type)

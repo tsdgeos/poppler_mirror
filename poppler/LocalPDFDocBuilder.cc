@@ -25,18 +25,17 @@ std::unique_ptr<PDFDoc> LocalPDFDocBuilder::buildPDFDoc(const GooString &uri, co
         std::unique_ptr<GooString> fileName = uri.copy();
         fileName->erase(0, 7);
         return std::make_unique<PDFDoc>(std::move(fileName), ownerPassword, userPassword);
-    } else {
-        return std::make_unique<PDFDoc>(uri.copy(), ownerPassword, userPassword);
     }
+    return std::make_unique<PDFDoc>(uri.copy(), ownerPassword, userPassword);
 }
 
 bool LocalPDFDocBuilder::supports(const GooString &uri)
 {
     if (uri.starts_with("file://")) {
         return true;
-    } else if (!strstr(uri.c_str(), "://")) {
-        return true;
-    } else {
-        return false;
     }
+    if (!strstr(uri.c_str(), "://")) {
+        return true;
+    }
+    return false;
 }

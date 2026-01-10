@@ -782,7 +782,8 @@ PopplerFormTextType poppler_form_field_text_get_text_type(PopplerFormField *fiel
 
     if (text_field->isMultiline()) {
         return POPPLER_FORM_TEXT_MULTILINE;
-    } else if (text_field->isFileSelect()) {
+    }
+    if (text_field->isFileSelect()) {
         return POPPLER_FORM_TEXT_FILE_SELECT;
     }
 
@@ -912,9 +913,8 @@ PopplerFormChoiceType poppler_form_field_choice_get_choice_type(PopplerFormField
 
     if (static_cast<FormWidgetChoice *>(field->widget)->isCombo()) {
         return POPPLER_FORM_CHOICE_COMBO;
-    } else {
-        return POPPLER_FORM_CHOICE_LIST;
     }
+    return POPPLER_FORM_CHOICE_LIST;
 }
 
 /**

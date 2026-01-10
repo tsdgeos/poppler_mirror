@@ -2095,7 +2095,8 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict)
                 pSize = (int)ops[0].num;
                 pOffset = (int)ops[1].num;
                 break;
-            } else if (ops[nOps - 1].op == 0x0c07) {
+            }
+            if (ops[nOps - 1].op == 0x0c07) {
                 fontMatrix[0] = ops[0].num;
                 fontMatrix[1] = ops[1].num;
                 fontMatrix[2] = ops[2].num;

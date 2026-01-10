@@ -196,13 +196,12 @@ int main(int argc, char **argv)
         test.show(); // show it
 
         return QApplication::exec(); // start event loop
-    } else {
-        std::unique_ptr<Poppler::Page> page = doc->page(0);
-
-        QLabel *l = new QLabel(page->text(QRectF()), nullptr);
-        l->show();
-        return QApplication::exec();
     }
+    std::unique_ptr<Poppler::Page> page = doc->page(0);
+
+    QLabel *l = new QLabel(page->text(QRectF()), nullptr);
+    l->show();
+    return QApplication::exec();
 }
 
 #include "test-poppler-qt6.moc"

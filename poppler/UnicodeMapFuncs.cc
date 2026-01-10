@@ -32,14 +32,16 @@ int mapUTF8(Unicode u, char *buf, int bufSize)
         }
         buf[0] = (char)u;
         return 1;
-    } else if (u <= 0x000007ff) {
+    }
+    if (u <= 0x000007ff) {
         if (bufSize < 2) {
             return 0;
         }
         buf[0] = (char)(0xc0 + (u >> 6));
         buf[1] = (char)(0x80 + (u & 0x3f));
         return 2;
-    } else if (u <= 0x0000ffff) {
+    }
+    if (u <= 0x0000ffff) {
         if (bufSize < 3) {
             return 0;
         }
@@ -47,7 +49,8 @@ int mapUTF8(Unicode u, char *buf, int bufSize)
         buf[1] = (char)(0x80 + ((u >> 6) & 0x3f));
         buf[2] = (char)(0x80 + (u & 0x3f));
         return 3;
-    } else if (u <= 0x0010ffff) {
+    }
+    if (u <= 0x0010ffff) {
         if (bufSize < 4) {
             return 0;
         }
@@ -56,9 +59,8 @@ int mapUTF8(Unicode u, char *buf, int bufSize)
         buf[2] = (char)(0x80 + ((u >> 6) & 0x3f));
         buf[3] = (char)(0x80 + (u & 0x3f));
         return 4;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 int mapUTF16(Unicode u, char *buf, int bufSize)
@@ -70,7 +72,8 @@ int mapUTF16(Unicode u, char *buf, int bufSize)
         buf[0] = (char)((u >> 8) & 0xff);
         buf[1] = (char)(u & 0xff);
         return 2;
-    } else if (u < 0x110000) {
+    }
+    if (u < 0x110000) {
         Unicode uu;
 
         /* using surrogate pair */
@@ -84,7 +87,6 @@ int mapUTF16(Unicode u, char *buf, int bufSize)
         buf[2] = (char)((uu >> 8) & 0xff);
         buf[3] = (char)(uu & 0xff);
         return 4;
-    } else {
-        return 0;
     }
+    return 0;
 }

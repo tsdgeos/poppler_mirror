@@ -286,10 +286,9 @@ static std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCert
         firstTime = false;
         if (!nssPassword.empty()) {
             return strdup(nssPassword.c_str());
-        } else {
-            passwordNeeded = true;
-            return nullptr;
         }
+        passwordNeeded = true;
+        return nullptr;
     };
     NSSSignatureConfiguration::setNSSPasswordCallback(passwordCallback);
 #endif
@@ -417,18 +416,18 @@ int main(int argc, char *argv[])
         const std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = getAvailableSigningCertificates(&getCertsError);
         if (getCertsError) {
             return 2;
+        }
+        if (vCerts.empty()) {
+            printf("There are no certificates available.\n");
         } else {
-            if (vCerts.empty()) {
-                printf("There are no certificates available.\n");
-            } else {
-                printf("Certificate nicknames available:\n");
-                for (auto &cert : vCerts) {
-                    const GooString &nick = cert->getNickName();
-                    const auto location = locationToString(cert->getKeyLocation());
-                    printf("%s %s %s %s\n", nick.c_str(), (cert->isQualified() ? "(*)" : "   "), location.c_str(), allowPgp ? typeToString(cert->getCertificateType()) : "");
-                }
+            printf("Certificate nicknames available:\n");
+            for (auto &cert : vCerts) {
+                const GooString &nick = cert->getNickName();
+                const auto location = locationToString(cert->getKeyLocation());
+                printf("%s %s %s %s\n", nick.c_str(), (cert->isQualified() ? "(*)" : "   "), location.c_str(), allowPgp ? typeToString(cert->getCertificateType()) : "");
             }
         }
+
         return 0;
     }
 
@@ -635,9 +634,9 @@ int main(int argc, char *argv[])
                 }
             }
             return 0;
-        } else {
-            printf("Digital Signature Info of: %s\n", fileName->c_str());
         }
+        printf("Digital Signature Info of: %s\n", fileName->c_str());
+
     } else {
         printf("File '%s' does not contain any signatures\n", fileName->c_str());
         return 2;
@@ -770,7 +769,6 @@ int main(int argc, char *argv[])
             }
         }
         return 0;
-    } else {
-        return 1;
     }
+    return 1;
 }

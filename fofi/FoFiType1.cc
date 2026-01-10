@@ -198,10 +198,9 @@ public:
                 std::string_view token = stringView.substr(currentPos, tokenLength);
                 currentPos = length;
                 return token;
-            } else {
-                currentPos = length;
-                return {};
             }
+            currentPos = length;
+            return {};
         }
 
         std::string_view token = stringView.substr(currentPos, pos - currentPos);

@@ -169,11 +169,10 @@ bool PDFConverter::sign(const NewSignatureData &data)
             break;
         }
         return false;
-    } else {
-        d->lastSigningErrorDetails = {};
-        d->lastSigningResult = SigningSuccess;
-        return true;
     }
+    d->lastSigningErrorDetails = {};
+    d->lastSigningResult = SigningSuccess;
+    return true;
 }
 
 ErrorString PDFConverter::lastSigningErrorDetails() const

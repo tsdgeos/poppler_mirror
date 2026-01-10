@@ -204,15 +204,14 @@ int main(int argc, char **argv)
         test.show(); // show it
 
         return QApplication::exec(); // start event loop
-    } else {
-        Poppler::Page *page = doc->page(0);
-
-        QLabel *l = new QLabel(page->text(QRectF()), nullptr);
-        l->show();
-        delete page;
-        delete doc;
-        return QApplication::exec();
     }
+    Poppler::Page *page = doc->page(0);
+
+    QLabel *l = new QLabel(page->text(QRectF()), nullptr);
+    l->show();
+    delete page;
+    delete doc;
+    return QApplication::exec();
 }
 
 #include "test-poppler-qt5.moc"

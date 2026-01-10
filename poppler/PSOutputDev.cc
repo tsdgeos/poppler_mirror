@@ -4418,33 +4418,32 @@ bool PSOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, dou
     dy = y1 - y0;
     if (fabs(dx) < 0.01 && fabs(dy) < 0.01) {
         return true;
-    } else {
-        mul = 1 / (dx * dx + dy * dy);
-        tMin = tMax = ((xMin - x0) * dx + (yMin - y0) * dy) * mul;
-        t = ((xMin - x0) * dx + (yMax - y0) * dy) * mul;
-        if (t < tMin) {
-            tMin = t;
-        } else if (t > tMax) {
-            tMax = t;
-        }
-        t = ((xMax - x0) * dx + (yMin - y0) * dy) * mul;
-        if (t < tMin) {
-            tMin = t;
-        } else if (t > tMax) {
-            tMax = t;
-        }
-        t = ((xMax - x0) * dx + (yMax - y0) * dy) * mul;
-        if (t < tMin) {
-            tMin = t;
-        } else if (t > tMax) {
-            tMax = t;
-        }
-        if (tMin < 0 && !shading->getExtend0()) {
-            tMin = 0;
-        }
-        if (tMax > 1 && !shading->getExtend1()) {
-            tMax = 1;
-        }
+    }
+    mul = 1 / (dx * dx + dy * dy);
+    tMin = tMax = ((xMin - x0) * dx + (yMin - y0) * dy) * mul;
+    t = ((xMin - x0) * dx + (yMax - y0) * dy) * mul;
+    if (t < tMin) {
+        tMin = t;
+    } else if (t > tMax) {
+        tMax = t;
+    }
+    t = ((xMax - x0) * dx + (yMin - y0) * dy) * mul;
+    if (t < tMin) {
+        tMin = t;
+    } else if (t > tMax) {
+        tMax = t;
+    }
+    t = ((xMax - x0) * dx + (yMax - y0) * dy) * mul;
+    if (t < tMin) {
+        tMin = t;
+    } else if (t > tMax) {
+        tMax = t;
+    }
+    if (tMin < 0 && !shading->getExtend0()) {
+        tMin = 0;
+    }
+    if (tMax > 1 && !shading->getExtend1()) {
+        tMax = 1;
     }
 
     // get the function domain
@@ -4825,7 +4824,8 @@ void PSOutputDev::doPath(const GfxPath *path)
             if (x0 == x1 && x2 == x3 && y0 == y3 && y1 == y2) {
                 writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} re\n", x0 < x2 ? x0 : x2, y0 < y1 ? y0 : y1, fabs(x2 - x0), fabs(y1 - y0));
                 return;
-            } else if (x0 == x3 && x1 == x2 && y0 == y1 && y2 == y3) {
+            }
+            if (x0 == x3 && x1 == x2 && y0 == y1 && y2 == y3) {
                 writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} re\n", x0 < x1 ? x0 : x1, y0 < y2 ? y0 : y2, fabs(x1 - x0), fabs(y2 - y0));
                 return;
             }

@@ -734,9 +734,8 @@ HashAlgorithm NSSSignatureVerification::getHashAlgorithm() const
 {
     if (hashContext) {
         return hashContext->getHashAlgorithm();
-    } else {
-        return HashAlgorithm::Unknown;
     }
+    return HashAlgorithm::Unknown;
 }
 
 void NSSSignatureVerification::addData(unsigned char *data_block, int data_len)
@@ -784,9 +783,8 @@ static NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item)
                                             nullptr, nullptr /*Password callback*/
                                             ,
                                             nullptr, nullptr /*Decrypt callback*/);
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
@@ -820,9 +818,8 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
             signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);
         }
         return signedData;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
@@ -831,9 +828,8 @@ static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
     if (!signerInfo) {
         printf("Error in NSS_CMSSignedData_GetSignerInfo()\n");
         return nullptr;
-    } else {
-        return signerInfo;
     }
+    return signerInfo;
 }
 
 static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
@@ -905,9 +901,8 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
 
     if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, nullptr) != SECSuccess) {
         return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
-    } else {
-        return SIGNATURE_VALID;
     }
+    return SIGNATURE_VALID;
 }
 
 void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback)

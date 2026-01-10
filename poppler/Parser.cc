@@ -174,12 +174,10 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         if (buf2.isCmd("stream")) {
             if (allowStreams && (str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict))) {
                 return Object(std::unique_ptr<Stream>(str));
-            } else {
-                return Object::error();
             }
-        } else {
-            shift();
+            return Object::error();
         }
+        shift();
 
         // indirect reference or integer
     } else if (buf1.isInt()) {
@@ -198,9 +196,8 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
             r.num = num;
             r.gen = gen;
             return Object(r);
-        } else {
-            return Object(num);
         }
+        return Object(num);
 
         // string
     } else if (decryptString && buf1.isString() && fileKey) {

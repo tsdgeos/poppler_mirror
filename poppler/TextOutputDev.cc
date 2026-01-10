@@ -922,19 +922,21 @@ void TextPool::sort()
     const auto PosCmp = [](const TextWord &a, const TextWord &b) -> bool {
         if (a.rot == 0) {
             return ((a.xMin + a.xMax) <= (b.xMin + b.xMax));
-        } else if (a.rot == 1) {
-            return ((a.yMin + a.yMax) <= (b.yMin + b.yMax));
-        } else if (a.rot == 2) {
-            return ((b.xMin + b.xMax) <= (a.xMin + a.xMax));
-        } else {
-            return ((b.yMin + b.yMax) <= (a.yMin + a.yMax));
         }
+        if (a.rot == 1) {
+            return ((a.yMin + a.yMax) <= (b.yMin + b.yMax));
+        }
+        if (a.rot == 2) {
+            return ((b.xMin + b.xMax) <= (a.xMin + a.xMax));
+        }
+        return ((b.yMin + b.yMax) <= (a.yMin + a.yMax));
     };
 
     const auto SortedMerge = [PosCmp](TextWord *a, TextWord *b) {
         if (!a) {
             return b;
-        } else if (!b) {
+        }
+        if (!b) {
             return a;
         }
 
@@ -1669,9 +1671,9 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                 auto matchBaseTop = [secDelta](const TextWord &iw0, const TextWord &iw1) -> bool { //
                     if ((iw0.rot == 0) || (iw0.rot == 2)) {
                         return (fabs(iw0.yMin - iw1.yMin) < secDelta && fabs(iw0.yMax - iw1.yMax) < secDelta);
-                    } else {
-                        return (fabs(iw0.xMin - iw1.xMin) < secDelta && fabs(iw0.xMax - iw1.xMax) < secDelta);
                     }
+                    return (fabs(iw0.xMin - iw1.xMin) < secDelta && fabs(iw0.xMax - iw1.xMax) < secDelta);
+
                 };
 
                 // Check if bounding boxes overlap, if not, keep both words
@@ -1684,10 +1686,10 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                     if (matchEdges(w0, w1, w0.len()) && matchBaseTop(w0, w1)) {
                         // Discard w1
                         return { 0, 0 };
-                    } else {
-                        return { 0, w1.len() };
                     }
-                } else if (w0.len() < w1.len() && equalText(w0, w1, w0.len())) {
+                    return { 0, w1.len() };
+                }
+                if (w0.len() < w1.len() && equalText(w0, w1, w0.len())) {
                     // w0 is the prefix of w1 (e.g. if the bold word ends with a non-bold colon)
                     if (matchEdges(w0, w1, w0.len()) && matchBaseTop(w0, w1)) {
                         return { w0.len(), w1.len() };
@@ -1849,14 +1851,13 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch)
                         if (delta < minCharSpacing * fontSize) {
                             overlap = true;
                             break;
-                        } else {
-                            if (delta < wordSpacing && (!bestWord1 || word1->primaryCmp(bestWord1) < 0)) {
-                                bestWordBaseIdx = baseIdx;
-                                bestWord0 = word0;
-                                bestWord1 = word1;
-                            }
-                            break;
                         }
+                        if (delta < wordSpacing && (!bestWord1 || word1->primaryCmp(bestWord1) < 0)) {
+                            bestWordBaseIdx = baseIdx;
+                            bestWord0 = word0;
+                            bestWord1 = word1;
+                        }
+                        break;
                     }
                 }
             }
@@ -2685,7 +2686,8 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
         charPos += nBytes;
         endWord();
         return;
-    } else if (uLen == 1 && u[0] == (Unicode)0x0) {
+    }
+    if (uLen == 1 && u[0] == (Unicode)0x0) {
         // ignore null characters
         charPos += nBytes;
         return;
@@ -3194,10 +3196,9 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                                 }
                                 found = true;
                                 break;
-                            } else {
-                                word0 = word1;
-                                word1 = word1->next;
                             }
+                            word0 = word1;
+                            word1 = word1->next;
                         }
                     }
                 }
@@ -3242,10 +3243,9 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
                                 }
                                 found = true;
                                 break;
-                            } else {
-                                word0 = word1;
-                                word1 = word1->next;
                             }
+                            word0 = word1;
+                            word1 = word1->next;
                         }
                     }
                 }
@@ -5136,7 +5136,8 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
 
     if (clipped.isEmpty()) {
         return { 0, 0 };
-    } else if (bBox == clipped) {
+    }
+    if (bBox == clipped) {
         return { 0, len };
     }
 
@@ -5172,13 +5173,12 @@ std::pair<int, int> TextLine::getLineBounds(const PDFRectangle &area) const
         int l = findEdge(0, edge1, [](double a, double b) { return a > b; });
         int u = findEdge(l, edge2, [](double a, double b) { return a > b; });
         return { l, u - l };
-    } else {
-        auto edge1 = (rot == 2) ? clipped.x2 : clipped.y2;
-        auto edge2 = (rot == 2) ? clipped.x1 : clipped.y1;
-        int l = findEdge(0, edge1, [](double a, double b) { return a < b; });
-        int u = findEdge(l, edge2, [](double a, double b) { return a < b; });
-        return { l, u - l };
     }
+    auto edge1 = (rot == 2) ? clipped.x2 : clipped.y2;
+    auto edge2 = (rot == 2) ? clipped.x1 : clipped.y1;
+    int l = findEdge(0, edge1, [](double a, double b) { return a < b; });
+    int u = findEdge(l, edge2, [](double a, double b) { return a < b; });
+    return { l, u - l };
 }
 
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayout, EndOfLineKind textEOL, bool pageBreaks, bool suppressLastEol, std::optional<PDFRectangle> area) const
@@ -5455,20 +5455,19 @@ int TextPage::dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap,
 {
     if (uMap->isUnicode()) {
         return reorderText(text, len, uMap, primaryLR, s, nullptr);
-    } else {
-        int nCols = 0;
-
-        char buf[8];
-        int buflen = 0;
-
-        for (int i = 0; i < len; ++i) {
-            buflen = uMap->mapUnicode(text[i], buf, sizeof(buf));
-            s->append(buf, buflen);
-            nCols += buflen;
-        }
-
-        return nCols;
     }
+    int nCols = 0;
+
+    char buf[8];
+    int buflen = 0;
+
+    for (int i = 0; i < len; ++i) {
+        buflen = uMap->mapUnicode(text[i], buf, sizeof(buf));
+        s->append(buf, buflen);
+        nCols += buflen;
+    }
+
+    return nCols;
 }
 
 std::unique_ptr<TextWordList> TextPage::makeWordList(bool physLayout)

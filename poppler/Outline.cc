@@ -196,9 +196,8 @@ static void removeChildHelper(unsigned int pos, XRef *xref, std::vector<OutlineI
     if (pos >= items.size()) {
         // position is out of range, do nothing
         return;
-    } else {
-        it = items.begin() + pos;
     }
+    it = items.begin() + pos;
 
     //  relink around this node
     Object itemObject = xref->fetch((*it)->getRef());
@@ -572,7 +571,6 @@ const std::vector<OutlineItem *> *OutlineItem::getKids()
 
     if (!kids || kids->empty()) {
         return nullptr;
-    } else {
-        return kids;
     }
+    return kids;
 }

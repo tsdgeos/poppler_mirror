@@ -475,9 +475,8 @@ static AnnotMovie *find_annot_movie_for_action(PopplerDocument *document, const 
                 }
                 if (found) {
                     break;
-                } else {
-                    annotObj.setToNull();
                 }
+                annotObj.setToNull();
             }
         }
     }

@@ -124,7 +124,8 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
             }
         }
         return;
-    } else if (!kids.isNull()) {
+    }
+    if (!kids.isNull()) {
         error(errSyntaxError, -1, "Kids object is wrong type ({0:s})", kids.getTypeName());
     }
 
