@@ -36,7 +36,7 @@
 class StreamBitReader
 {
 public:
-    explicit StreamBitReader(Stream *strA) : str(strA), inputBits(0), isAtEof(false) { }
+    explicit StreamBitReader(Stream *strA) : str(strA) { }
 
     void resetInputBits() { inputBits = 0; }
 
@@ -92,9 +92,9 @@ public:
 
 private:
     Stream *str;
-    int inputBits;
+    int inputBits = 0;
     char bitsBuffer;
-    bool isAtEof;
+    bool isAtEof = false;
 };
 
 //------------------------------------------------------------------------

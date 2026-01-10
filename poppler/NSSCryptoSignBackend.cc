@@ -93,9 +93,7 @@ struct ESSCertIDv2
  */
 struct SigningCertificateV2
 {
-    ESSCertIDv2 **certs;
-
-    SigningCertificateV2() : certs(nullptr) { }
+    ESSCertIDv2 **certs = nullptr;
 };
 
 /**
@@ -700,7 +698,7 @@ void NSSSignatureConfiguration::setNSSPasswordCallback(const std::function<char 
     PasswordFunction = f;
 }
 
-NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter) : p7(std::move(p7data)), type(subfilter), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
+NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter) : p7(std::move(p7data)), type(subfilter)
 {
     NSSSignatureConfiguration::setNSSDir({});
     CMSitem.data = p7.data();
@@ -726,7 +724,7 @@ NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&
     }
 }
 
-NSSSignatureCreation::NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag)), signing_cert(nullptr)
+NSSSignatureCreation::NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag))
 {
     NSSSignatureConfiguration::setNSSDir({});
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());

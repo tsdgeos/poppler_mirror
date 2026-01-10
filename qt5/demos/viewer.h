@@ -59,7 +59,7 @@ private:
     int page() const;
     void xrefReconstructedHandler(Poppler::Document *doc);
 
-    int m_currentPage;
+    int m_currentPage = 0;
     bool xrefReconstructed;
 
     QAction *m_fileOpenAct;
@@ -70,7 +70,7 @@ private:
 
     QList<DocumentObserver *> m_observers;
 
-    Poppler::Document *m_doc;
+    Poppler::Document *m_doc = nullptr;
 };
 
 #endif

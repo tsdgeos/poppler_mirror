@@ -106,7 +106,7 @@ NetPBMWriter::Format pnm_format(poppler::image::format_enum format)
 
 using namespace poppler;
 
-image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : ref(1), data(nullptr), width(iwidth), height(iheight), bytes_per_row(0), bytes_num(0), format(iformat), own_data(true) { }
+image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : width(iwidth), height(iheight), format(iformat) { }
 
 image_private::~image_private()
 {

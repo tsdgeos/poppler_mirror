@@ -424,8 +424,8 @@ private:
     char *bufPtr;
     char *bufEnd;
     Goffset bufPos;
-    Goffset savePos;
-    bool saved;
+    Goffset savePos = 0;
+    bool saved = false;
 };
 
 //------------------------------------------------------------------------

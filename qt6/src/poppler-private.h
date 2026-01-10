@@ -241,13 +241,13 @@ public:
 class TextBoxData
 {
 public:
-    TextBoxData() : nextWord(nullptr), hasSpaceAfter(false) { }
+    TextBoxData() = default;
 
     QString text;
     QRectF bBox;
-    TextBox *nextWord;
+    TextBox *nextWord = nullptr;
     QVector<QRectF> charBBoxes; // the boundingRect of each character
-    bool hasSpaceAfter;
+    bool hasSpaceAfter = false;
 };
 
 inline Poppler::ErrorStringType fromPopplerCore(::ErrorStringType type)

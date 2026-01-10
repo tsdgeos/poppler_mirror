@@ -471,10 +471,7 @@ BaseStream::~BaseStream() = default;
 // BaseStream
 //------------------------------------------------------------------------
 
-BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
-    : BaseStream(std::move(dictA), lengthA), start(startA), limited(limitedA), bufPtr(buf), bufEnd(buf), bufPos(start), savePos(0), saved(false)
-{
-}
+BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA), start(startA), limited(limitedA), bufPtr(buf), bufEnd(buf), bufPos(start) { }
 
 BaseSeekInputStream::~BaseSeekInputStream() = default;
 

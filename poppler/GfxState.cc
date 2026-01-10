@@ -6339,7 +6339,7 @@ GfxXYZ2DisplayTransforms::GfxXYZ2DisplayTransforms(const GfxLCMSProfilePtr &disp
 //------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
-GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *pathA) : path(pathA), subPathOff(0), coordOff(0), numCoords(0), curSubPath(nullptr)
+GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *pathA) : path(pathA)
 {
     if (path->getNumSubpaths()) {
         curSubPath = path->getSubpath(subPathOff);

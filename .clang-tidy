@@ -44,7 +44,6 @@ Checks:  >
     -modernize-use-auto,
     -modernize-use-designated-initializers,
     -modernize-avoid-c-arrays,
-    -modernize-use-default-member-init,
     -modernize-use-std-print,
     -modernize-return-braced-init-list,
     -modernize-pass-by-value,
@@ -63,5 +62,7 @@ FormatStyle:     none
 User:            user
 CheckOptions:
   - key:             modernize-use-using.IgnoreExternC
+    value:           '1'
+  - key:             modernize-use-default-member-init.UseAssignment
     value:           '1'
 ...

@@ -44,8 +44,8 @@ public:
 
 private:
     QLabel *m_imageLabel;
-    qreal m_zoom;
-    int m_rotation;
+    qreal m_zoom = 1.0;
+    int m_rotation = 0;
     int m_dpiX;
     int m_dpiY;
 };

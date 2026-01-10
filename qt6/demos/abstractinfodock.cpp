@@ -18,7 +18,7 @@
 
 #include "fonts.h"
 
-AbstractInfoDock::AbstractInfoDock(QWidget *parent) : QDockWidget(parent), m_filled(false)
+AbstractInfoDock::AbstractInfoDock(QWidget *parent) : QDockWidget(parent)
 {
     connect(this, &AbstractInfoDock::visibilityChanged, this, &AbstractInfoDock::slotVisibilityChanged);
 }

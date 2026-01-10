@@ -763,7 +763,7 @@ Object LinkJavaScript::createObject(XRef *xref, const std::string &js)
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
+LinkOCGState::LinkOCGState(const Object *obj)
 {
     Object obj1 = obj->dictLookup("State");
     if (obj1.isArray()) {

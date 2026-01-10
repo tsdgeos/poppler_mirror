@@ -167,9 +167,9 @@ private:
 
     // endTransparencyGroup removes a QPicture from the stack, but stores
     // it here for later use in paintTransparencyGroup.
-    QPicture *m_lastTransparencyGroupPicture;
+    QPicture *m_lastTransparencyGroupPicture = nullptr;
 
-    QFont::HintingPreference m_hintingPreference;
+    QFont::HintingPreference m_hintingPreference = QFont::PreferDefaultHinting;
 
     QPen m_currentPen;
     // The various stacks are used to implement the 'saveState' and 'restoreState' methods

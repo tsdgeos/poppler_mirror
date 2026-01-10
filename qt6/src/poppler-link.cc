@@ -144,10 +144,10 @@ public:
     bool sync : 1;
     bool repeat : 1;
     bool mix : 1;
-    SoundObject *sound;
+    SoundObject *sound = nullptr;
 };
 
-LinkSoundPrivate::LinkSoundPrivate(const QRectF &area) : LinkPrivate(area), sound(nullptr) { }
+LinkSoundPrivate::LinkSoundPrivate(const QRectF &area) : LinkPrivate(area) { }
 
 LinkSoundPrivate::~LinkSoundPrivate()
 {
@@ -161,13 +161,13 @@ public:
     ~LinkRenditionPrivate() override;
 
     std::unique_ptr<MediaRendition> rendition;
-    LinkRendition::RenditionAction action;
+    LinkRendition::RenditionAction action = LinkRendition::PlayRendition;
     QString script;
     Ref annotationReference;
 };
 
 LinkRenditionPrivate::LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref ref)
-    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), action(LinkRendition::PlayRendition), script(javaScript), annotationReference(ref)
+    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), script(javaScript), annotationReference(ref)
 {
     switch (operation) {
     case ::LinkRendition::NoRendition:

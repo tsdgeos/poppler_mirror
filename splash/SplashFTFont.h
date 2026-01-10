@@ -59,11 +59,11 @@ private:
     FT_Size sizeObj;
     FT_Matrix matrix;
     FT_Matrix textMatrix;
-    SplashCoord textScale;
+    SplashCoord textScale = 0;
     int size;
     bool enableFreeTypeHinting;
     bool enableSlightHinting;
-    bool isOk;
+    bool isOk = false;
 };
 
 #endif

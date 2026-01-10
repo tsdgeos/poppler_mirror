@@ -47,24 +47,21 @@ public:
 
     QList<int> pageList;
     QString title;
-    double hDPI;
-    double vDPI;
-    int rotate;
-    int paperWidth;
-    int paperHeight;
-    int marginRight;
-    int marginBottom;
-    int marginLeft;
-    int marginTop;
+    double hDPI = 72;
+    double vDPI = 72;
+    int rotate = 0;
+    int paperWidth = -1;
+    int paperHeight = -1;
+    int marginRight = 0;
+    int marginBottom = 0;
+    int marginLeft = 0;
+    int marginTop = 0;
     PSConverter::PSOptions opts;
-    void (*pageConvertedCallback)(int page, void *payload);
-    void *pageConvertedPayload;
+    void (*pageConvertedCallback)(int page, void *payload) = nullptr;
+    void *pageConvertedPayload = nullptr;
 };
 
-PSConverterPrivate::PSConverterPrivate()
-    : hDPI(72), vDPI(72), rotate(0), paperWidth(-1), paperHeight(-1), marginRight(0), marginBottom(0), marginLeft(0), marginTop(0), opts(PSConverter::Printing), pageConvertedCallback(nullptr), pageConvertedPayload(nullptr)
-{
-}
+PSConverterPrivate::PSConverterPrivate() : opts(PSConverter::Printing) { }
 
 PSConverterPrivate::~PSConverterPrivate() = default;
 

@@ -92,9 +92,9 @@ public:
 private:
     std::vector<unsigned char> p7;
     CryptoSign::SignatureType type;
-    NSSCMSMessage *CMSMessage;
-    NSSCMSSignedData *CMSSignedData;
-    NSSCMSSignerInfo *CMSSignerInfo;
+    NSSCMSMessage *CMSMessage = nullptr;
+    NSSCMSSignedData *CMSSignedData = nullptr;
+    NSSCMSSignerInfo *CMSSignerInfo = nullptr;
     SECItem CMSitem;
     std::unique_ptr<HashContext> hashContext;
     HashAlgorithm innerHashAlgorithm;
@@ -117,7 +117,7 @@ public:
 
 private:
     std::unique_ptr<HashContext> hashContext;
-    CERTCertificate *signing_cert;
+    CERTCertificate *signing_cert = nullptr;
 };
 
 class POPPLER_PRIVATE_EXPORT NSSSignatureConfiguration

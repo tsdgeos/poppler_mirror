@@ -42,10 +42,10 @@ public:
     QIODevice *openDevice();
     void closeDevice();
 
-    DocumentData *document;
+    DocumentData *document = nullptr;
     QString outputFileName;
-    QIODevice *iodev;
-    bool ownIodev : 1;
+    QIODevice *iodev = nullptr;
+    bool ownIodev : 1 = true;
     BaseConverter::Error lastError;
     PDFConverter::SigningResult lastSigningResult;
     Poppler::ErrorString lastSigningErrorDetails;

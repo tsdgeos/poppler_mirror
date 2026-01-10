@@ -659,7 +659,7 @@ private:
     void parseInfo();
     void hashSignedDataBlock(CryptoSign::VerificationInterface *handler, Goffset block_len);
 
-    CryptoSign::SignatureType signature_type;
+    CryptoSign::SignatureType signature_type = CryptoSign::SignatureType::unsigned_signature_field;
     Object byte_range;
     std::vector<unsigned char> signature;
     SignatureInfo *signature_info;

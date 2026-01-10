@@ -31,7 +31,7 @@ public:
 class GpgSignatureCreation : public CryptoSign::SigningInterface
 {
 public:
-    GpgSignatureCreation(const std::string &certId);
+    explicit GpgSignatureCreation(const std::string &certId);
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
     std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> signDetached(const std::string &password) final;
@@ -47,7 +47,7 @@ private:
 class GpgSignatureVerification : public CryptoSign::VerificationInterface
 {
 public:
-    explicit GpgSignatureVerification(const std::vector<unsigned char> &pkcs7data, GpgME::Protocol protocol);
+    explicit GpgSignatureVerification(const std::vector<unsigned char> &p7data, GpgME::Protocol protocol);
     SignatureValidationStatus validateSignature() final;
     void addData(unsigned char *dataBlock, int dataLen) final;
     std::chrono::system_clock::time_point getSigningTime() const final;
@@ -55,7 +55,7 @@ public:
     std::string getSignerSubjectDN() const final;
     HashAlgorithm getHashAlgorithm() const final;
     CertificateValidationStatus validateCertificateResult() final;
-    void validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback) final;
+    void validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneFunction) final;
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const final;
 
 private:

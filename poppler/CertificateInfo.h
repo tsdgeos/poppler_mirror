@@ -105,10 +105,8 @@ public:
 
     struct Validity
     {
-        Validity() : notBefore(0), notAfter(0) { }
-
-        time_t notBefore;
-        time_t notAfter;
+        time_t notBefore = 0;
+        time_t notAfter = 0;
     };
 
     /* GETTERS */
@@ -149,11 +147,11 @@ private:
     GooString cert_serial;
     GooString cert_der;
     GooString cert_nick;
-    unsigned int ku_extensions;
-    int cert_version;
-    bool is_qualified;
-    bool is_self_signed;
-    KeyLocation keyLocation;
+    unsigned int ku_extensions = KU_NONE;
+    int cert_version = -1;
+    bool is_qualified = false;
+    bool is_self_signed = false;
+    KeyLocation keyLocation = KeyLocation::Unknown;
     CertificateType certificate_type = CertificateType::X509;
 };
 

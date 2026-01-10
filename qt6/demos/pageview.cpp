@@ -29,7 +29,7 @@
 #include <QtGui/QPixmap>
 #include <QDebug>
 
-PageView::PageView(QWidget *parent) : QScrollArea(parent), m_zoom(1.0), m_rotation(0), m_dpiX(physicalDpiX()), m_dpiY(physicalDpiY())
+PageView::PageView(QWidget *parent) : QScrollArea(parent), m_dpiX(physicalDpiX()), m_dpiY(physicalDpiY())
 {
     m_imageLabel = new QLabel(this);
     m_imageLabel->resize(0, 0);

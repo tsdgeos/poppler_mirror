@@ -36,14 +36,14 @@ public:
     static image_private *create_data(int width, int height, image::format_enum format);
     static image_private *create_data(char *data, int width, int height, image::format_enum format);
 
-    int ref;
-    char *data;
+    int ref = 1;
+    char *data = nullptr;
     int width;
     int height;
-    int bytes_per_row;
-    int bytes_num;
+    int bytes_per_row = 0;
+    int bytes_num = 0;
     image::format_enum format;
-    bool own_data : 1;
+    bool own_data : 1 = true;
 };
 
 }

@@ -42,7 +42,7 @@ protected:
 private:
     void slotVisibilityChanged(bool visible);
 
-    bool m_filled;
+    bool m_filled = false;
 };
 
 #endif

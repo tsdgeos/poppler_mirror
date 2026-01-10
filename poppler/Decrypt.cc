@@ -733,7 +733,7 @@ static inline void invShiftRows(unsigned char *state)
 // {02} \cdot s
 struct Mul02Table
 {
-    constexpr Mul02Table() : values()
+    constexpr Mul02Table()
     {
         for (int s = 0; s < 256; s++) {
             values[s] = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -742,7 +742,7 @@ struct Mul02Table
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul02Table mul02;
@@ -750,7 +750,7 @@ static constexpr Mul02Table mul02;
 // {03} \cdot s
 struct Mul03Table
 {
-    constexpr Mul03Table() : values()
+    constexpr Mul03Table()
     {
         for (int s = 0; s < 256; s++) {
             const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -760,7 +760,7 @@ struct Mul03Table
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul03Table mul03;
@@ -768,7 +768,7 @@ static constexpr Mul03Table mul03;
 // {09} \cdot s
 struct Mul09Table
 {
-    constexpr Mul09Table() : values()
+    constexpr Mul09Table()
     {
         for (int s = 0; s < 256; s++) {
             const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -780,7 +780,7 @@ struct Mul09Table
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul09Table mul09;
@@ -788,7 +788,7 @@ static constexpr Mul09Table mul09;
 // {0b} \cdot s
 struct Mul0bTable
 {
-    constexpr Mul0bTable() : values()
+    constexpr Mul0bTable()
     {
         for (int s = 0; s < 256; s++) {
             const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -800,7 +800,7 @@ struct Mul0bTable
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul0bTable mul0b;
@@ -808,7 +808,7 @@ static constexpr Mul0bTable mul0b;
 // {0d} \cdot s
 struct Mul0dTable
 {
-    constexpr Mul0dTable() : values()
+    constexpr Mul0dTable()
     {
         for (int s = 0; s < 256; s++) {
             const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -820,7 +820,7 @@ struct Mul0dTable
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul0dTable mul0d;
@@ -828,7 +828,7 @@ static constexpr Mul0dTable mul0d;
 // {0e} \cdot s
 struct Mul0eTable
 {
-    constexpr Mul0eTable() : values()
+    constexpr Mul0eTable()
     {
         for (int s = 0; s < 256; s++) {
             const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
@@ -840,7 +840,7 @@ struct Mul0eTable
 
     constexpr unsigned char operator()(uint8_t i) const { return values[i]; }
 
-    unsigned char values[256];
+    unsigned char values[256] = {};
 };
 
 static constexpr Mul0eTable mul0e;

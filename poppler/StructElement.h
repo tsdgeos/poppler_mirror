@@ -358,7 +358,7 @@ private:
         std::unique_ptr<GooString> title;
         std::unique_ptr<GooString> expandedAbbr;
         std::unique_ptr<GooString> language;
-        unsigned int revision;
+        unsigned int revision = 0;
         ElemPtrArray elements;
         AttrPtrArray attributes;
 

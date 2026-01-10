@@ -1512,12 +1512,12 @@ public:
 
     private:
         GfxPath *path;
-        int subPathOff;
+        int subPathOff = 0;
 
-        int coordOff;
-        int numCoords;
+        int coordOff = 0;
+        int numCoords = 0;
 
-        GfxSubpath *curSubPath;
+        GfxSubpath *curSubPath = nullptr;
     };
 
     enum LineJoinStyle

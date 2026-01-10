@@ -91,7 +91,7 @@ struct Job
 class JobQueue
 {
 public:
-    JobQueue() : shutdownFlag(false) { }
+    JobQueue() = default;
 
     void pushJob(std::unique_ptr<Job> &job)
     {
@@ -133,7 +133,7 @@ private:
     std::deque<std::unique_ptr<Job>> queue;
     std::mutex mutex;
     std::condition_variable condition;
-    bool shutdownFlag;
+    bool shutdownFlag = false;
 };
 
 static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)

@@ -43,12 +43,12 @@ public:
     document_private *doc;
     Page *page;
     int index;
-    page_transition *transition;
+    page_transition *transition = nullptr;
 
     static inline page_private *get(const poppler::page *p) { return const_cast<poppler::page *>(p)->d; }
 
     std::vector<font_info> font_info_cache;
-    bool font_info_cache_initialized;
+    bool font_info_cache_initialized = false;
     void init_font_info_cache();
 };
 

@@ -72,7 +72,7 @@ public:
     void redraw(int srcX, int srcY, cairo_t *cr, int width, int height);
 
 private:
-    int incrementalUpdate;
+    int incrementalUpdate = 1;
     void (*redrawCbk)(void *data);
     void *redrawCbkData;
 };
@@ -96,7 +96,7 @@ struct View
 // GDKSplashOutputDev
 //------------------------------------------------------------------------
 
-GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc), incrementalUpdate(1)
+GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc)
 {
     redrawCbk = redrawCbkA;
     redrawCbkData = redrawCbkDataA;

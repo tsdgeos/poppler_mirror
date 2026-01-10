@@ -40,7 +40,7 @@
 //------------------------------------------------------------------------
 
 SplashXPathScanner::SplashXPathScanner(const SplashXPath &xPath, bool eoA, int clipYMin, int clipYMax) //
-    : eo(eoA), xMin(1), yMin(1), xMax(0), yMax(0)
+    : eo(eoA)
 {
     // compute the bbox
     if (xPath.length == 0) {
@@ -198,8 +198,7 @@ bool SplashXPathScanIterator::getNextSpan(int *x0, int *x1)
     return true;
 }
 
-SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scanner, int y)
-    : line((y < scanner.yMin || y > scanner.yMax) ? scanner.allIntersections[0] : scanner.allIntersections[y - scanner.yMin]), interIdx(0), interCount(0), eo(scanner.eo)
+SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scanner, int y) : line((y < scanner.yMin || y > scanner.yMax) ? scanner.allIntersections[0] : scanner.allIntersections[y - scanner.yMin]), eo(scanner.eo)
 {
     if (y < scanner.yMin || y > scanner.yMax) {
         // set index to line end

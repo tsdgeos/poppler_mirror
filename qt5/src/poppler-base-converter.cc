@@ -25,7 +25,7 @@
 
 namespace Poppler {
 
-BaseConverterPrivate::BaseConverterPrivate() : document(nullptr), iodev(nullptr), ownIodev(true) { }
+BaseConverterPrivate::BaseConverterPrivate() = default;
 
 BaseConverterPrivate::~BaseConverterPrivate() = default;
 

@@ -48,7 +48,7 @@
 
 #include <functional>
 
-PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
+PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_doc(nullptr)
 {
     setWindowTitle(tr("Poppler-Qt6 Demo"));
 

@@ -106,9 +106,9 @@ private:
     int mcid;
     std::vector<int> mcidStack;
     std::vector<Ref> formStack;
-    double pageWidth;
-    double pageHeight;
-    const UnicodeMap *unicodeMap;
+    double pageWidth = 0.0;
+    double pageHeight = 0.0;
+    const UnicodeMap *unicodeMap = nullptr;
     Object stmRef;
 };
 

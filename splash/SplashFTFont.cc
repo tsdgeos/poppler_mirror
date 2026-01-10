@@ -54,7 +54,7 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, cons
 //------------------------------------------------------------------------
 
 SplashFTFont::SplashFTFont(const std::shared_ptr<SplashFTFontFile> &fontFileA, const std::array<SplashCoord, 4> &matA, const std::array<SplashCoord, 4> &textMatA)
-    : SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), textScale(0), enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting), enableSlightHinting(fontFileA->engine->enableSlightHinting), isOk(false)
+    : SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting), enableSlightHinting(fontFileA->engine->enableSlightHinting)
 {
     FT_Face face;
     int div;

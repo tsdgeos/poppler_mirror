@@ -30,7 +30,7 @@ namespace Poppler {
 class SoundData
 {
 public:
-    SoundData() : m_soundObj(nullptr) { }
+    SoundData() = default;
 
     ~SoundData() { delete m_soundObj; }
 
@@ -38,7 +38,7 @@ public:
     SoundData &operator=(const SoundData &) = delete;
 
     SoundObject::SoundType m_type;
-    Sound *m_soundObj;
+    Sound *m_soundObj = nullptr;
 };
 
 SoundObject::SoundObject(Sound *popplersound)

@@ -675,7 +675,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
 // StructElement
 //------------------------------------------------------------------------
 
-StructElement::StructData::StructData() : altText(nullptr), actualText(nullptr), id(nullptr), title(nullptr), expandedAbbr(nullptr), language(nullptr), revision(0) { }
+StructElement::StructData::StructData() : altText(nullptr), actualText(nullptr), id(nullptr), title(nullptr), expandedAbbr(nullptr), language(nullptr) { }
 
 StructElement::StructData::~StructData()
 {

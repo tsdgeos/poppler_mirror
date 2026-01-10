@@ -22,7 +22,7 @@
 #include <cmath>
 #include <vector>
 
-MarkedContentOutputDev::MarkedContentOutputDev(int mcidA, const Object &stmObj) : currentFont(nullptr), currentText(nullptr), mcid(mcidA), pageWidth(0.0), pageHeight(0.0), unicodeMap(nullptr)
+MarkedContentOutputDev::MarkedContentOutputDev(int mcidA, const Object &stmObj) : currentFont(nullptr), currentText(nullptr), mcid(mcidA)
 {
     stmRef = stmObj.copy();
     currentColor.r = currentColor.g = currentColor.b = 0;

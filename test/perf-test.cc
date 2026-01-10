@@ -83,11 +83,11 @@ public:
     SplashOutputDev *outputDevice();
 
 private:
-    char *_fileName;
-    int _pageCount;
+    char *_fileName = nullptr;
+    int _pageCount = INVALID_PAGE_NO;
 
-    PDFDoc *_pdfDoc;
-    SplashOutputDev *_outputDev;
+    PDFDoc *_pdfDoc = nullptr;
+    SplashOutputDev *_outputDev = nullptr;
 };
 
 struct StrList
@@ -324,7 +324,7 @@ static void SplashColorsInit()
     splashColorSet(SPLASH_COL_WHITE_PTR, 0xff, 0xff, 0xff);
 }
 
-PdfEnginePoppler::PdfEnginePoppler() : _fileName(nullptr), _pageCount(INVALID_PAGE_NO), _pdfDoc(nullptr), _outputDev(nullptr) { }
+PdfEnginePoppler::PdfEnginePoppler() = default;
 
 PdfEnginePoppler::~PdfEnginePoppler()
 {
