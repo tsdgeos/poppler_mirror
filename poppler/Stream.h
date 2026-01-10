@@ -134,7 +134,7 @@ public:
     // Close down the stream.
     virtual void close();
 
-    inline int doGetChars(int nChars, unsigned char *buffer)
+    int doGetChars(int nChars, unsigned char *buffer)
     {
         if (hasGetChars()) {
             return getChars(nChars, buffer);
@@ -151,7 +151,7 @@ public:
         }
     }
 
-    inline void fillString(std::string &s)
+    void fillString(std::string &s)
     {
         unsigned char readBuf[4096];
         int readChars;
@@ -164,9 +164,9 @@ public:
         }
     }
 
-    inline void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
+    void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
 
-    inline std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
+    std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
         std::vector<unsigned char> buf(initialSize);
 
@@ -909,7 +909,7 @@ private:
     bool hasGetChars() override { return true; }
     int getChars(int nChars, unsigned char *buffer) override;
 
-    inline int doGetRawChar()
+    int doGetRawChar()
     {
         if (eof) {
             return EOF;
@@ -1199,7 +1199,7 @@ public:
 
 private:
     [[nodiscard]] bool flateRewind(bool unfiltered);
-    inline int doGetRawChar()
+    int doGetRawChar()
     {
         int c;
 

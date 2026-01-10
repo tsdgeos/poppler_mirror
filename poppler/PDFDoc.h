@@ -368,11 +368,11 @@ private:
     static Goffset writeObjectHeader(Ref *ref, OutStream *outStr);
     static void writeObjectFooter(OutStream *outStr);
 
-    inline void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
+    void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
     {
         writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, { objNum, objGen });
     }
-    inline void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref) { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
+    void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref) { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
     static void writeStream(Stream *str, OutStream *outStr);
     static void writeRawStream(Stream *str, OutStream *outStr);
     void writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeAllEntries, int uxrefSize, OutStream *outStr, bool incrUpdate);

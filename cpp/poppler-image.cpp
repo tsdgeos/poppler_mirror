@@ -52,11 +52,11 @@ namespace {
 
 struct FileCloser
 {
-    inline explicit FileCloser(FILE *ff) : f(ff) { }
-    inline ~FileCloser() { (void)close(); }
+    explicit FileCloser(FILE *ff) : f(ff) { }
+    ~FileCloser() { (void)close(); }
     FileCloser(const FileCloser &) = delete;
     FileCloser &operator=(const FileCloser &) = delete;
-    inline bool close()
+    bool close()
     {
         if (f) {
             const int c = fclose(f);

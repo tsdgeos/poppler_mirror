@@ -45,7 +45,7 @@ public:
     int index;
     page_transition *transition = nullptr;
 
-    static inline page_private *get(const poppler::page *p) { return const_cast<poppler::page *>(p)->d; }
+    static page_private *get(const poppler::page *p) { return const_cast<poppler::page *>(p)->d; }
 
     std::vector<font_info> font_info_cache;
     bool font_info_cache_initialized = false;
