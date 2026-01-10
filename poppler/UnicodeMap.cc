@@ -185,13 +185,14 @@ int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const
                     }
                     for (const UnicodeMapExt &ext : eMaps) {
                         if (ext.u == u) {
-                            if (int(ext.code.size()) >= bufSize) {
+                            const int codeSize = ext.code.size();
+                            if (codeSize > bufSize) {
                                 return 0;
                             }
-                            for (int j = 0; j < std::min(int(ext.code.size()), bufSize); ++j) {
+                            for (int j = 0; j < codeSize; ++j) {
                                 buf[j] = ext.code[j];
                             }
-                            return int(ext.code.size());
+                            return codeSize;
                         }
                     }
                     return 0;
