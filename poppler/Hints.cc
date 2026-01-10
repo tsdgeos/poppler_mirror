@@ -76,14 +76,14 @@ public:
         }
 
         bit = readBit();
-        if (bit == (unsigned int)-1) {
+        if (isAtEof) {
             return -1;
         }
 
         bit = bit << (n - 1);
 
         bits = readBits(n - 1);
-        if (bits == (unsigned int)-1) {
+        if (isAtEof) {
             return -1;
         }
 
