@@ -4607,7 +4607,7 @@ std::unique_ptr<GfxGouraudTriangleShading> GfxGouraudTriangleShading::parse(GfxR
         for (i = 0; 5 + 2 * i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
             cMin[i] = obj1.arrayGet(4 + 2 * i).getNum(&decodeOk);
             cMax[i] = obj1.arrayGet(5 + 2 * i).getNum(&decodeOk);
-            cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
+            cMul[i] = (cMax[i] - cMin[i]) / (double)((1U << compBits) - 1);
         }
         nComps = i;
 
@@ -4934,7 +4934,7 @@ std::unique_ptr<GfxPatchMeshShading> GfxPatchMeshShading::parse(GfxResources *re
         for (i = 0; 5 + 2 * i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
             cMin[i] = obj1.arrayGet(4 + 2 * i).getNum(&decodeOk);
             cMax[i] = obj1.arrayGet(5 + 2 * i).getNum(&decodeOk);
-            cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
+            cMul[i] = (cMax[i] - cMin[i]) / (double)((1U << compBits) - 1);
         }
         nComps = i;
 

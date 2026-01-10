@@ -100,7 +100,7 @@ void TestGooString::testFormat()
     }
     {
         const std::string gooD(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1., .012));
-        const std::string gooF(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1.f, .012f));
+        const std::string gooF(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1.F, .012f));
         QCOMPARE(gooD.c_str(), "1.0 1 1 | 0.0 0 0.01");
         QCOMPARE(gooF.c_str(), "1.0 1 1 | 0.0 0 0.01");
     }

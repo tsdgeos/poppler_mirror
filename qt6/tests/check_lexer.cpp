@@ -43,7 +43,7 @@ void TestLexer::testNumbers()
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
-    QCOMPARE(obj.getInt64(), 2147483648ll);
+    QCOMPARE(obj.getInt64(), 2147483648LL);
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt);
@@ -51,11 +51,11 @@ void TestLexer::testNumbers()
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
-    QCOMPARE(obj.getInt64(), 4294967297ll);
+    QCOMPARE(obj.getInt64(), 4294967297LL);
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
-    QCOMPARE(obj.getInt64(), -2147483649ll);
+    QCOMPARE(obj.getInt64(), -2147483649LL);
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objReal);
@@ -95,7 +95,7 @@ void TestLexer::testNumbers()
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objInt64);
-    QCOMPARE(obj.getInt64(), 9223372036854775807ll);
+    QCOMPARE(obj.getInt64(), 9223372036854775807LL);
 
     obj = lexer->getObj();
     QCOMPARE(obj.getType(), objReal);

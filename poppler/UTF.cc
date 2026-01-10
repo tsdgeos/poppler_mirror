@@ -198,7 +198,7 @@ inline uint32_t decodeUtf8(uint32_t *state, uint32_t *codep, char byte)
     uint32_t b = (unsigned char)byte;
     uint32_t type = decodeUtf8Table[b];
 
-    *codep = (*state != UTF8_ACCEPT) ? (b & 0x3fu) | (*codep << 6) : (0xff >> type) & (b);
+    *codep = (*state != UTF8_ACCEPT) ? (b & 0x3fU) | (*codep << 6) : (0xff >> type) & (b);
 
     *state = decodeUtf8Table[256 + *state + type];
     return *state;

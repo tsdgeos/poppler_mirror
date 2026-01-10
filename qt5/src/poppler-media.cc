@@ -144,7 +144,7 @@ float MediaRendition::repeatCount() const
     }
     qDebug("No BE or MH parameters to reference!");
 
-    return 1.f;
+    return 1.F;
 }
 
 QSize MediaRendition::size() const

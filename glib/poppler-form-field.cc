@@ -1566,7 +1566,7 @@ void poppler_signing_data_set_font_size(PopplerSigningData *signing_data, gdoubl
  **/
 gdouble poppler_signing_data_get_font_size(const PopplerSigningData *signing_data)
 {
-    g_return_val_if_fail(signing_data != nullptr, 20.0f);
+    g_return_val_if_fail(signing_data != nullptr, 20.0F);
     return signing_data->font_size;
 }
 

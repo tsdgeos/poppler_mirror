@@ -2524,7 +2524,7 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[3] = -2;
 
     unsigned int grayMaxPlusOne;
-    if (unlikely(checkedAdd(grayMax, 1u, &grayMaxPlusOne))) {
+    if (unlikely(checkedAdd(grayMax, 1U, &grayMaxPlusOne))) {
         return;
     }
     unsigned int bitmapW;

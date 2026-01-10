@@ -109,7 +109,7 @@ PopplerMedia *_poppler_media_new(const MediaRendition *poppler_media)
 
     media->auto_play = mp ? mp->autoPlay : false;
     media->show_controls = mp ? mp->showControls : false;
-    media->repeat_count = mp ? mp->repeatCount : 1.f;
+    media->repeat_count = mp ? mp->repeatCount : 1.F;
 
     return media;
 }
