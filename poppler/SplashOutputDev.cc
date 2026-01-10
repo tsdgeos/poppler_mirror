@@ -3873,7 +3873,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     } else if (ty >= bitmap->getHeight()) {
         ty = bitmap->getHeight() - 1;
     }
-    if (checkedSubtraction((int)ceil(xMax), tx + 1, &w)) {
+    if (checkedSubtraction((int)ceil(xMax), tx - 1, &w)) {
         w = 1;
     }
     if (tx + w > bitmap->getWidth()) {
@@ -3882,7 +3882,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     if (w < 1) {
         w = 1;
     }
-    if (checkedSubtraction((int)ceil(yMax), ty + 1, &h)) {
+    if (checkedSubtraction((int)ceil(yMax), ty - 1, &h)) {
         h = 1;
     }
     if (ty + h > bitmap->getHeight()) {
