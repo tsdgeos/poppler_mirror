@@ -47,7 +47,6 @@ Checks:  >
     -modernize-use-std-print,
     -modernize-return-braced-init-list,
     -modernize-pass-by-value,
-    -modernize-concat-nested-namespaces,
     -modernize-use-integer-sign-comparison,
     google-explicit-constructor,
     misc-non-copyable-objects,

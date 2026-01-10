@@ -35,10 +35,7 @@
 #define POPPLER_VERSION_MINOR @POPPLER_MINOR_VERSION@
 #define POPPLER_VERSION_MICRO @POPPLER_MICRO_VERSION@
 
-namespace Poppler
-{
-
-namespace Version
+namespace Poppler::Version
 {
 
 /**
@@ -64,8 +61,6 @@ POPPLER_QT5_EXPORT unsigned int minor();
  \returns the "micro" number of the version of the current poppler-qt5 library
  */
 POPPLER_QT5_EXPORT unsigned int micro();
-
-}
 
 }
 
