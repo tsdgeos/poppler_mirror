@@ -339,9 +339,9 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     cairo_pattern_destroy(stroke_pattern);
 
     fill_pattern = cairo_pattern_create_rgb(0., 0., 0.);
-    fill_color = { 0, 0, 0 };
+    fill_color = { .r = 0, .g = 0, .b = 0 };
     stroke_pattern = cairo_pattern_reference(fill_pattern);
-    stroke_color = { 0, 0, 0 };
+    stroke_color = { .r = 0, .g = 0, .b = 0 };
 
     if (textPage) {
         textPage->startPage(state);

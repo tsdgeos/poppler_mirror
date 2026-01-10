@@ -1202,7 +1202,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
 
     xrefLocker();
 
-    const Ref ref = { num, gen };
+    const Ref ref = { .num = num, .gen = gen };
 
     if (!refsBeingFetched.insert(ref)) {
         return Object::null();

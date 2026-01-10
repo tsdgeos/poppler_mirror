@@ -2432,10 +2432,10 @@ bool Splash::pathAllOutside(const SplashPath &path)
         SplashCoord y;
     };
     auto calcLowerLeft = [](_SplashPoint a, _SplashPoint b) -> _SplashPoint { //
-        return { std::min(a.x, b.x), std::min(a.y, b.y) };
+        return { .x = std::min(a.x, b.x), .y = std::min(a.y, b.y) };
     };
     auto calcUpperRight = [](_SplashPoint a, _SplashPoint b) -> _SplashPoint { //
-        return { std::max(a.x, b.x), std::max(a.y, b.y) };
+        return { .x = std::max(a.x, b.x), .y = std::max(a.y, b.y) };
     };
 
     SplashCoord x, y, x2, y2;
@@ -2454,8 +2454,8 @@ bool Splash::pathAllOutside(const SplashPath &path)
     }
 
     transform(state->matrix, path.pts[path.length / 2].x, path.pts[path.length / 2].y, &x2, &y2);
-    auto ll = calcLowerLeft({ x, y }, { x2, y2 });
-    auto ur = calcUpperRight({ x, y }, { x2, y2 });
+    auto ll = calcLowerLeft({ .x = x, .y = y }, { .x = x2, .y = y2 });
+    auto ur = calcUpperRight({ .x = x, .y = y }, { .x = x2, .y = y2 });
 
     xMinI = splashFloor(ll.x);
     yMinI = splashFloor(ll.y);
@@ -2490,20 +2490,20 @@ bool Splash::pathAllOutside(const SplashPath &path)
     }
 
     transform(state->matrix, xMin1, yMin1, &x, &y);
-    ll = { x, y };
-    ur = { x, y };
+    ll = { .x = x, .y = y };
+    ur = { .x = x, .y = y };
 
     transform(state->matrix, xMin1, yMax1, &x, &y);
-    ll = calcLowerLeft(ll, { x, y });
-    ur = calcUpperRight(ur, { x, y });
+    ll = calcLowerLeft(ll, { .x = x, .y = y });
+    ur = calcUpperRight(ur, { .x = x, .y = y });
 
     transform(state->matrix, xMax1, yMin1, &x, &y);
-    ll = calcLowerLeft(ll, { x, y });
-    ur = calcUpperRight(ur, { x, y });
+    ll = calcLowerLeft(ll, { .x = x, .y = y });
+    ur = calcUpperRight(ur, { .x = x, .y = y });
 
     transform(state->matrix, xMax1, yMax1, &x, &y);
-    ll = calcLowerLeft(ll, { x, y });
-    ur = calcUpperRight(ur, { x, y });
+    ll = calcLowerLeft(ll, { .x = x, .y = y });
+    ur = calcUpperRight(ur, { .x = x, .y = y });
 
     xMinI = splashFloor(ll.x);
     yMinI = splashFloor(ll.y);

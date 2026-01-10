@@ -179,8 +179,9 @@ struct T42Table
 // TrueType tables to be embedded in Type 42 fonts.
 // NB: the table names must be in alphabetical order here.
 #define nT42Tables 11
-static const T42Table t42Tables[nT42Tables] = { { "cvt ", true }, { "fpgm", true }, { "glyf", true }, { "head", true },  { "hhea", true }, { "hmtx", true },
-                                                { "loca", true }, { "maxp", true }, { "prep", true }, { "vhea", false }, { "vmtx", false } };
+static const T42Table t42Tables[nT42Tables] = { { .tag = "cvt ", .required = true }, { .tag = "fpgm", .required = true },  { .tag = "glyf", .required = true }, { .tag = "head", .required = true },
+                                                { .tag = "hhea", .required = true }, { .tag = "hmtx", .required = true },  { .tag = "loca", .required = true }, { .tag = "maxp", .required = true },
+                                                { .tag = "prep", .required = true }, { .tag = "vhea", .required = false }, { .tag = "vmtx", .required = false } };
 #define t42HeadTable 3
 #define t42LocaTable 6
 #define t42GlyfTable 2

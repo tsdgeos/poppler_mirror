@@ -30,9 +30,9 @@
 #include "SplashScreen.h"
 
 static const SplashScreenParams defaultParams = {
-    splashScreenDispersed, // type
-    2, // size
-    2 // dotRadius
+    .type = splashScreenDispersed, // type
+    .size = 2, // size
+    .dotRadius = 2 // dotRadius
 };
 
 //------------------------------------------------------------------------

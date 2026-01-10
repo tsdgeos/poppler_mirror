@@ -83,75 +83,75 @@ struct Base14FontMapEntry
     const char *base14Name;
 };
 
-static const Base14FontMapEntry base14FontMap[] = { { "Arial", "Helvetica" },
-                                                    { "Arial,Bold", "Helvetica-Bold" },
-                                                    { "Arial,BoldItalic", "Helvetica-BoldOblique" },
-                                                    { "Arial,Italic", "Helvetica-Oblique" },
-                                                    { "Arial-Bold", "Helvetica-Bold" },
-                                                    { "Arial-BoldItalic", "Helvetica-BoldOblique" },
-                                                    { "Arial-BoldItalicMT", "Helvetica-BoldOblique" },
-                                                    { "Arial-BoldMT", "Helvetica-Bold" },
-                                                    { "Arial-Italic", "Helvetica-Oblique" },
-                                                    { "Arial-ItalicMT", "Helvetica-Oblique" },
-                                                    { "ArialMT", "Helvetica" },
-                                                    { "Courier", "Courier" },
-                                                    { "Courier,Bold", "Courier-Bold" },
-                                                    { "Courier,BoldItalic", "Courier-BoldOblique" },
-                                                    { "Courier,Italic", "Courier-Oblique" },
-                                                    { "Courier-Bold", "Courier-Bold" },
-                                                    { "Courier-BoldOblique", "Courier-BoldOblique" },
-                                                    { "Courier-Oblique", "Courier-Oblique" },
-                                                    { "CourierNew", "Courier" },
-                                                    { "CourierNew,Bold", "Courier-Bold" },
-                                                    { "CourierNew,BoldItalic", "Courier-BoldOblique" },
-                                                    { "CourierNew,Italic", "Courier-Oblique" },
-                                                    { "CourierNew-Bold", "Courier-Bold" },
-                                                    { "CourierNew-BoldItalic", "Courier-BoldOblique" },
-                                                    { "CourierNew-Italic", "Courier-Oblique" },
-                                                    { "CourierNewPS-BoldItalicMT", "Courier-BoldOblique" },
-                                                    { "CourierNewPS-BoldMT", "Courier-Bold" },
-                                                    { "CourierNewPS-ItalicMT", "Courier-Oblique" },
-                                                    { "CourierNewPSMT", "Courier" },
-                                                    { "Helvetica", "Helvetica" },
-                                                    { "Helvetica,Bold", "Helvetica-Bold" },
-                                                    { "Helvetica,BoldItalic", "Helvetica-BoldOblique" },
-                                                    { "Helvetica,Italic", "Helvetica-Oblique" },
-                                                    { "Helvetica-Bold", "Helvetica-Bold" },
-                                                    { "Helvetica-BoldItalic", "Helvetica-BoldOblique" },
-                                                    { "Helvetica-BoldOblique", "Helvetica-BoldOblique" },
-                                                    { "Helvetica-Italic", "Helvetica-Oblique" },
-                                                    { "Helvetica-Oblique", "Helvetica-Oblique" },
-                                                    { "Symbol", "Symbol" },
-                                                    { "Symbol,Bold", "Symbol" },
-                                                    { "Symbol,BoldItalic", "Symbol" },
-                                                    { "Symbol,Italic", "Symbol" },
-                                                    { "SymbolMT", "Symbol" },
-                                                    { "SymbolMT,Bold", "Symbol" },
-                                                    { "SymbolMT,BoldItalic", "Symbol" },
-                                                    { "SymbolMT,Italic", "Symbol" },
-                                                    { "Times-Bold", "Times-Bold" },
-                                                    { "Times-BoldItalic", "Times-BoldItalic" },
-                                                    { "Times-Italic", "Times-Italic" },
-                                                    { "Times-Roman", "Times-Roman" },
-                                                    { "TimesNewRoman", "Times-Roman" },
-                                                    { "TimesNewRoman,Bold", "Times-Bold" },
-                                                    { "TimesNewRoman,BoldItalic", "Times-BoldItalic" },
-                                                    { "TimesNewRoman,Italic", "Times-Italic" },
-                                                    { "TimesNewRoman-Bold", "Times-Bold" },
-                                                    { "TimesNewRoman-BoldItalic", "Times-BoldItalic" },
-                                                    { "TimesNewRoman-Italic", "Times-Italic" },
-                                                    { "TimesNewRomanPS", "Times-Roman" },
-                                                    { "TimesNewRomanPS-Bold", "Times-Bold" },
-                                                    { "TimesNewRomanPS-BoldItalic", "Times-BoldItalic" },
-                                                    { "TimesNewRomanPS-BoldItalicMT", "Times-BoldItalic" },
-                                                    { "TimesNewRomanPS-BoldMT", "Times-Bold" },
-                                                    { "TimesNewRomanPS-Italic", "Times-Italic" },
-                                                    { "TimesNewRomanPS-ItalicMT", "Times-Italic" },
-                                                    { "TimesNewRomanPSMT", "Times-Roman" },
-                                                    { "TimesNewRomanPSMT,Bold", "Times-Bold" },
-                                                    { "TimesNewRomanPSMT,BoldItalic", "Times-BoldItalic" },
-                                                    { "TimesNewRomanPSMT,Italic", "Times-Italic" },
-                                                    { "ZapfDingbats", "ZapfDingbats" } };
+static const Base14FontMapEntry base14FontMap[] = { { .altName = "Arial", .base14Name = "Helvetica" },
+                                                    { .altName = "Arial,Bold", .base14Name = "Helvetica-Bold" },
+                                                    { .altName = "Arial,BoldItalic", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Arial,Italic", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "Arial-Bold", .base14Name = "Helvetica-Bold" },
+                                                    { .altName = "Arial-BoldItalic", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Arial-BoldItalicMT", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Arial-BoldMT", .base14Name = "Helvetica-Bold" },
+                                                    { .altName = "Arial-Italic", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "Arial-ItalicMT", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "ArialMT", .base14Name = "Helvetica" },
+                                                    { .altName = "Courier", .base14Name = "Courier" },
+                                                    { .altName = "Courier,Bold", .base14Name = "Courier-Bold" },
+                                                    { .altName = "Courier,BoldItalic", .base14Name = "Courier-BoldOblique" },
+                                                    { .altName = "Courier,Italic", .base14Name = "Courier-Oblique" },
+                                                    { .altName = "Courier-Bold", .base14Name = "Courier-Bold" },
+                                                    { .altName = "Courier-BoldOblique", .base14Name = "Courier-BoldOblique" },
+                                                    { .altName = "Courier-Oblique", .base14Name = "Courier-Oblique" },
+                                                    { .altName = "CourierNew", .base14Name = "Courier" },
+                                                    { .altName = "CourierNew,Bold", .base14Name = "Courier-Bold" },
+                                                    { .altName = "CourierNew,BoldItalic", .base14Name = "Courier-BoldOblique" },
+                                                    { .altName = "CourierNew,Italic", .base14Name = "Courier-Oblique" },
+                                                    { .altName = "CourierNew-Bold", .base14Name = "Courier-Bold" },
+                                                    { .altName = "CourierNew-BoldItalic", .base14Name = "Courier-BoldOblique" },
+                                                    { .altName = "CourierNew-Italic", .base14Name = "Courier-Oblique" },
+                                                    { .altName = "CourierNewPS-BoldItalicMT", .base14Name = "Courier-BoldOblique" },
+                                                    { .altName = "CourierNewPS-BoldMT", .base14Name = "Courier-Bold" },
+                                                    { .altName = "CourierNewPS-ItalicMT", .base14Name = "Courier-Oblique" },
+                                                    { .altName = "CourierNewPSMT", .base14Name = "Courier" },
+                                                    { .altName = "Helvetica", .base14Name = "Helvetica" },
+                                                    { .altName = "Helvetica,Bold", .base14Name = "Helvetica-Bold" },
+                                                    { .altName = "Helvetica,BoldItalic", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Helvetica,Italic", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "Helvetica-Bold", .base14Name = "Helvetica-Bold" },
+                                                    { .altName = "Helvetica-BoldItalic", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Helvetica-BoldOblique", .base14Name = "Helvetica-BoldOblique" },
+                                                    { .altName = "Helvetica-Italic", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "Helvetica-Oblique", .base14Name = "Helvetica-Oblique" },
+                                                    { .altName = "Symbol", .base14Name = "Symbol" },
+                                                    { .altName = "Symbol,Bold", .base14Name = "Symbol" },
+                                                    { .altName = "Symbol,BoldItalic", .base14Name = "Symbol" },
+                                                    { .altName = "Symbol,Italic", .base14Name = "Symbol" },
+                                                    { .altName = "SymbolMT", .base14Name = "Symbol" },
+                                                    { .altName = "SymbolMT,Bold", .base14Name = "Symbol" },
+                                                    { .altName = "SymbolMT,BoldItalic", .base14Name = "Symbol" },
+                                                    { .altName = "SymbolMT,Italic", .base14Name = "Symbol" },
+                                                    { .altName = "Times-Bold", .base14Name = "Times-Bold" },
+                                                    { .altName = "Times-BoldItalic", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "Times-Italic", .base14Name = "Times-Italic" },
+                                                    { .altName = "Times-Roman", .base14Name = "Times-Roman" },
+                                                    { .altName = "TimesNewRoman", .base14Name = "Times-Roman" },
+                                                    { .altName = "TimesNewRoman,Bold", .base14Name = "Times-Bold" },
+                                                    { .altName = "TimesNewRoman,BoldItalic", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "TimesNewRoman,Italic", .base14Name = "Times-Italic" },
+                                                    { .altName = "TimesNewRoman-Bold", .base14Name = "Times-Bold" },
+                                                    { .altName = "TimesNewRoman-BoldItalic", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "TimesNewRoman-Italic", .base14Name = "Times-Italic" },
+                                                    { .altName = "TimesNewRomanPS", .base14Name = "Times-Roman" },
+                                                    { .altName = "TimesNewRomanPS-Bold", .base14Name = "Times-Bold" },
+                                                    { .altName = "TimesNewRomanPS-BoldItalic", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "TimesNewRomanPS-BoldItalicMT", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "TimesNewRomanPS-BoldMT", .base14Name = "Times-Bold" },
+                                                    { .altName = "TimesNewRomanPS-Italic", .base14Name = "Times-Italic" },
+                                                    { .altName = "TimesNewRomanPS-ItalicMT", .base14Name = "Times-Italic" },
+                                                    { .altName = "TimesNewRomanPSMT", .base14Name = "Times-Roman" },
+                                                    { .altName = "TimesNewRomanPSMT,Bold", .base14Name = "Times-Bold" },
+                                                    { .altName = "TimesNewRomanPSMT,BoldItalic", .base14Name = "Times-BoldItalic" },
+                                                    { .altName = "TimesNewRomanPSMT,Italic", .base14Name = "Times-Italic" },
+                                                    { .altName = "ZapfDingbats", .base14Name = "ZapfDingbats" } };
 
 //------------------------------------------------------------------------
 
@@ -838,7 +838,8 @@ struct AlternateNameMap
     const char *alt;
 };
 
-static const AlternateNameMap alternateNameMap[] = { { "fi", "f_i" }, { "fl", "f_l" }, { "ff", "f_f" }, { "ffi", "f_f_i" }, { "ffl", "f_f_l" }, { nullptr, nullptr } };
+static const AlternateNameMap alternateNameMap[] = { { .name = "fi", .alt = "f_i" },    { .name = "fl", .alt = "f_l" },    { .name = "ff", .alt = "f_f" },
+                                                     { .name = "ffi", .alt = "f_f_i" }, { .name = "ffl", .alt = "f_f_l" }, { .name = nullptr, .alt = nullptr } };
 
 const char *GfxFont::getAlternateName(const char *name)
 {
@@ -1821,7 +1822,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
             if (obj2.isInt() && obj3.isInt() && i + 2 < obj1.arrayGetLength()) {
                 obj4 = obj1.arrayGet(i + 2);
                 if (obj4.isNum()) {
-                    GfxFontCIDWidthExcep excep { static_cast<CID>(obj2.getInt()), static_cast<CID>(obj3.getInt()), obj4.getNum() * 0.001 };
+                    GfxFontCIDWidthExcep excep { .first = static_cast<CID>(obj2.getInt()), .last = static_cast<CID>(obj3.getInt()), .width = obj4.getNum() * 0.001 };
                     widths.exceps.push_back(excep);
                 } else {
                     error(errSyntaxError, -1, "Bad widths array in Type 0 font");
@@ -1833,7 +1834,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
                     for (int k = 0; k < obj3.arrayGetLength(); ++k) {
                         obj4 = obj3.arrayGet(k);
                         if (obj4.isNum()) {
-                            GfxFontCIDWidthExcep excep { static_cast<CID>(j), static_cast<CID>(j), obj4.getNum() * 0.001 };
+                            GfxFontCIDWidthExcep excep { .first = static_cast<CID>(j), .last = static_cast<CID>(j), .width = obj4.getNum() * 0.001 };
                             widths.exceps.push_back(excep);
                             ++j;
                         } else {
@@ -1872,7 +1873,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
             obj3 = obj1.arrayGet(i + 1);
             if (obj2.isInt() && obj3.isInt() && i + 4 < obj1.arrayGetLength()) {
                 if ((obj4 = obj1.arrayGet(i + 2), obj4.isNum()) && (obj5 = obj1.arrayGet(i + 3), obj5.isNum()) && (obj6 = obj1.arrayGet(i + 4), obj6.isNum())) {
-                    GfxFontCIDWidthExcepV excepV { static_cast<CID>(obj2.getInt()), static_cast<CID>(obj3.getInt()), obj4.getNum() * 0.001, obj5.getNum() * 0.001, obj6.getNum() * 0.001 };
+                    GfxFontCIDWidthExcepV excepV { .first = static_cast<CID>(obj2.getInt()), .last = static_cast<CID>(obj3.getInt()), .height = obj4.getNum() * 0.001, .vx = obj5.getNum() * 0.001, .vy = obj6.getNum() * 0.001 };
                     widths.excepsV.push_back(excepV);
                 } else {
                     error(errSyntaxError, -1, "Bad widths (W2) array in Type 0 font");
@@ -1882,7 +1883,7 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
                 int j = obj2.getInt();
                 for (int k = 0; k < obj3.arrayGetLength(); k += 3) {
                     if ((obj4 = obj3.arrayGet(k), obj4.isNum()) && (obj5 = obj3.arrayGet(k + 1), obj5.isNum()) && (obj6 = obj3.arrayGet(k + 2), obj6.isNum())) {
-                        GfxFontCIDWidthExcepV excepV { static_cast<CID>(j), static_cast<CID>(j), obj4.getNum() * 0.001, obj5.getNum() * 0.001, obj6.getNum() * 0.001 };
+                        GfxFontCIDWidthExcepV excepV { .first = static_cast<CID>(j), .last = static_cast<CID>(j), .height = obj4.getNum() * 0.001, .vx = obj5.getNum() * 0.001, .vy = obj6.getNum() * 0.001 };
                         widths.excepsV.push_back(excepV);
                         if (j == std::numeric_limits<int>::max()) {
                             error(errSyntaxError, -1, "Reached limit for CID in W2 array in Type 0 font");
@@ -2021,41 +2022,41 @@ std::vector<int> GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff)
         const std::string toUnicodeMap;
         const std::array<std::string, 4> *CMaps;
     } CMapList[] = { {
-                             "Adobe-CNS1",
-                             "hani",
-                             "CHN ",
-                             "Adobe-CNS1-UCS2",
-                             &adobe_cns1_cmaps,
+                             .collection = "Adobe-CNS1",
+                             .scriptTag = "hani",
+                             .languageTag = "CHN ",
+                             .toUnicodeMap = "Adobe-CNS1-UCS2",
+                             .CMaps = &adobe_cns1_cmaps,
                      },
                      {
-                             "Adobe-GB1",
-                             "hani",
-                             "CHN ",
-                             "Adobe-GB1-UCS2",
-                             &adobe_gb1_cmaps,
+                             .collection = "Adobe-GB1",
+                             .scriptTag = "hani",
+                             .languageTag = "CHN ",
+                             .toUnicodeMap = "Adobe-GB1-UCS2",
+                             .CMaps = &adobe_gb1_cmaps,
                      },
                      {
-                             "Adobe-Japan1",
-                             "kana",
-                             "JAN ",
-                             "Adobe-Japan1-UCS2",
-                             &adobe_japan1_cmaps,
+                             .collection = "Adobe-Japan1",
+                             .scriptTag = "kana",
+                             .languageTag = "JAN ",
+                             .toUnicodeMap = "Adobe-Japan1-UCS2",
+                             .CMaps = &adobe_japan1_cmaps,
                      },
                      {
-                             "Adobe-Japan2",
-                             "kana",
-                             "JAN ",
-                             "Adobe-Japan2-UCS2",
-                             &adobe_japan2_cmaps,
+                             .collection = "Adobe-Japan2",
+                             .scriptTag = "kana",
+                             .languageTag = "JAN ",
+                             .toUnicodeMap = "Adobe-Japan2-UCS2",
+                             .CMaps = &adobe_japan2_cmaps,
                      },
                      {
-                             "Adobe-Korea1",
-                             "hang",
-                             "KOR ",
-                             "Adobe-Korea1-UCS2",
-                             &adobe_korea1_cmaps,
+                             .collection = "Adobe-Korea1",
+                             .scriptTag = "hang",
+                             .languageTag = "KOR ",
+                             .toUnicodeMap = "Adobe-Korea1-UCS2",
+                             .CMaps = &adobe_korea1_cmaps,
                      },
-                     { nullptr, {}, {}, {}, nullptr } };
+                     { .collection = nullptr, .scriptTag = {}, .languageTag = {}, .toUnicodeMap = {}, .CMaps = nullptr } };
     Unicode *humap = nullptr;
     Unicode *vumap = nullptr;
     Unicode *tumap = nullptr;

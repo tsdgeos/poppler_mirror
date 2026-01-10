@@ -73,24 +73,24 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, double hDPI, doub
         const char *compressionName; // name of the compression option from the command line
         unsigned int compressionCode; // internal libtiff code
         const char *compressionDescription; // descriptive name
-    } compressionList[] = { { "none", COMPRESSION_NONE, "no compression" },
-                            { "ccittrle", COMPRESSION_CCITTRLE, "CCITT modified Huffman RLE" },
-                            { "ccittfax3", COMPRESSION_CCITTFAX3, "CCITT Group 3 fax encoding" },
-                            { "ccittt4", COMPRESSION_CCITT_T4, "CCITT T.4 (TIFF 6 name)" },
-                            { "ccittfax4", COMPRESSION_CCITTFAX4, "CCITT Group 4 fax encoding" },
-                            { "ccittt6", COMPRESSION_CCITT_T6, "CCITT T.6 (TIFF 6 name)" },
-                            { "lzw", COMPRESSION_LZW, "Lempel-Ziv  & Welch" },
-                            { "ojpeg", COMPRESSION_OJPEG, "!6.0 JPEG" },
-                            { "jpeg", COMPRESSION_JPEG, "%JPEG DCT compression" },
-                            { "next", COMPRESSION_NEXT, "NeXT 2-bit RLE" },
-                            { "packbits", COMPRESSION_PACKBITS, "Macintosh RLE" },
-                            { "ccittrlew", COMPRESSION_CCITTRLEW, "CCITT modified Huffman RLE w/ word alignment" },
-                            { "deflate", COMPRESSION_DEFLATE, "Deflate compression" },
-                            { "adeflate", COMPRESSION_ADOBE_DEFLATE, "Deflate compression, as recognized by Adobe" },
-                            { "dcs", COMPRESSION_DCS, "Kodak DCS encoding" },
-                            { "jbig", COMPRESSION_JBIG, "ISO JBIG" },
-                            { "jp2000", COMPRESSION_JP2000, "Leadtools JPEG2000" },
-                            { nullptr, 0, nullptr } };
+    } compressionList[] = { { .compressionName = "none", .compressionCode = COMPRESSION_NONE, .compressionDescription = "no compression" },
+                            { .compressionName = "ccittrle", .compressionCode = COMPRESSION_CCITTRLE, .compressionDescription = "CCITT modified Huffman RLE" },
+                            { .compressionName = "ccittfax3", .compressionCode = COMPRESSION_CCITTFAX3, .compressionDescription = "CCITT Group 3 fax encoding" },
+                            { .compressionName = "ccittt4", .compressionCode = COMPRESSION_CCITT_T4, .compressionDescription = "CCITT T.4 (TIFF 6 name)" },
+                            { .compressionName = "ccittfax4", .compressionCode = COMPRESSION_CCITTFAX4, .compressionDescription = "CCITT Group 4 fax encoding" },
+                            { .compressionName = "ccittt6", .compressionCode = COMPRESSION_CCITT_T6, .compressionDescription = "CCITT T.6 (TIFF 6 name)" },
+                            { .compressionName = "lzw", .compressionCode = COMPRESSION_LZW, .compressionDescription = "Lempel-Ziv  & Welch" },
+                            { .compressionName = "ojpeg", .compressionCode = COMPRESSION_OJPEG, .compressionDescription = "!6.0 JPEG" },
+                            { .compressionName = "jpeg", .compressionCode = COMPRESSION_JPEG, .compressionDescription = "%JPEG DCT compression" },
+                            { .compressionName = "next", .compressionCode = COMPRESSION_NEXT, .compressionDescription = "NeXT 2-bit RLE" },
+                            { .compressionName = "packbits", .compressionCode = COMPRESSION_PACKBITS, .compressionDescription = "Macintosh RLE" },
+                            { .compressionName = "ccittrlew", .compressionCode = COMPRESSION_CCITTRLEW, .compressionDescription = "CCITT modified Huffman RLE w/ word alignment" },
+                            { .compressionName = "deflate", .compressionCode = COMPRESSION_DEFLATE, .compressionDescription = "Deflate compression" },
+                            { .compressionName = "adeflate", .compressionCode = COMPRESSION_ADOBE_DEFLATE, .compressionDescription = "Deflate compression, as recognized by Adobe" },
+                            { .compressionName = "dcs", .compressionCode = COMPRESSION_DCS, .compressionDescription = "Kodak DCS encoding" },
+                            { .compressionName = "jbig", .compressionCode = COMPRESSION_JBIG, .compressionDescription = "ISO JBIG" },
+                            { .compressionName = "jp2000", .compressionCode = COMPRESSION_JP2000, .compressionDescription = "Leadtools JPEG2000" },
+                            { .compressionName = nullptr, .compressionCode = 0, .compressionDescription = nullptr } };
 
     // Initialize
 

@@ -157,7 +157,7 @@ private:
                 }
 
                 assert(m_firstIndex.has_value());
-                ListSegment segment { m_firstIndex.value(), std::move(m_values) };
+                ListSegment segment { .first = m_firstIndex.value(), .widths = std::move(m_values) };
                 if (!savedValues.empty()) {
                     assert(m_lastIndex.has_value());
                     m_firstIndex = m_lastIndex.value() - savedValues.size() + 1;
@@ -171,7 +171,7 @@ private:
             }
             assert(m_firstIndex.has_value());
             assert(m_lastIndex.has_value());
-            auto segment = RangeSegment { m_firstIndex.value(), m_lastIndex.value(), m_values.back() };
+            auto segment = RangeSegment { .first = m_firstIndex.value(), .last = m_lastIndex.value(), .width = m_values.back() };
             m_values.clear();
             m_firstIndex = {};
             m_lastIndex = {};

@@ -4070,59 +4070,97 @@ bool DCTStream::isBinary(bool /*last*/) const
 
 const int FlateStream::codeLenCodeMap[flateMaxCodeLenCodes] = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
 
-const FlateDecode FlateStream::lengthDecode[flateMaxLitCodes - 257] = { { 0, 3 },  { 0, 4 },   { 0, 5 },   { 0, 6 },   { 0, 7 },   { 0, 8 },   { 0, 9 },   { 0, 10 },  { 1, 11 }, { 1, 13 }, { 1, 15 },
-                                                                        { 1, 17 }, { 2, 19 },  { 2, 23 },  { 2, 27 },  { 2, 31 },  { 3, 35 },  { 3, 43 },  { 3, 51 },  { 3, 59 }, { 4, 67 }, { 4, 83 },
-                                                                        { 4, 99 }, { 4, 115 }, { 5, 131 }, { 5, 163 }, { 5, 195 }, { 5, 227 }, { 0, 258 }, { 0, 258 }, { 0, 258 } };
-
-const FlateDecode FlateStream::distDecode[flateMaxDistCodes] = { { 0, 1 },    { 0, 2 },    { 0, 3 },     { 0, 4 },     { 1, 5 },     { 1, 7 },     { 2, 9 },     { 2, 13 },     { 3, 17 },     { 3, 25 },
-                                                                 { 4, 33 },   { 4, 49 },   { 5, 65 },    { 5, 97 },    { 6, 129 },   { 6, 193 },   { 7, 257 },   { 7, 385 },    { 8, 513 },    { 8, 769 },
-                                                                 { 9, 1025 }, { 9, 1537 }, { 10, 2049 }, { 10, 3073 }, { 11, 4097 }, { 11, 6145 }, { 12, 8193 }, { 12, 12289 }, { 13, 16385 }, { 13, 24577 } };
-
-static const FlateCode flateFixedLitCodeTabCodes[512] = {
-    { 7, 0x0100 }, { 8, 0x0050 }, { 8, 0x0010 }, { 8, 0x0118 }, { 7, 0x0110 }, { 8, 0x0070 }, { 8, 0x0030 }, { 9, 0x00c0 }, { 7, 0x0108 }, { 8, 0x0060 }, { 8, 0x0020 }, { 9, 0x00a0 }, { 8, 0x0000 }, { 8, 0x0080 }, { 8, 0x0040 },
-    { 9, 0x00e0 }, { 7, 0x0104 }, { 8, 0x0058 }, { 8, 0x0018 }, { 9, 0x0090 }, { 7, 0x0114 }, { 8, 0x0078 }, { 8, 0x0038 }, { 9, 0x00d0 }, { 7, 0x010c }, { 8, 0x0068 }, { 8, 0x0028 }, { 9, 0x00b0 }, { 8, 0x0008 }, { 8, 0x0088 },
-    { 8, 0x0048 }, { 9, 0x00f0 }, { 7, 0x0102 }, { 8, 0x0054 }, { 8, 0x0014 }, { 8, 0x011c }, { 7, 0x0112 }, { 8, 0x0074 }, { 8, 0x0034 }, { 9, 0x00c8 }, { 7, 0x010a }, { 8, 0x0064 }, { 8, 0x0024 }, { 9, 0x00a8 }, { 8, 0x0004 },
-    { 8, 0x0084 }, { 8, 0x0044 }, { 9, 0x00e8 }, { 7, 0x0106 }, { 8, 0x005c }, { 8, 0x001c }, { 9, 0x0098 }, { 7, 0x0116 }, { 8, 0x007c }, { 8, 0x003c }, { 9, 0x00d8 }, { 7, 0x010e }, { 8, 0x006c }, { 8, 0x002c }, { 9, 0x00b8 },
-    { 8, 0x000c }, { 8, 0x008c }, { 8, 0x004c }, { 9, 0x00f8 }, { 7, 0x0101 }, { 8, 0x0052 }, { 8, 0x0012 }, { 8, 0x011a }, { 7, 0x0111 }, { 8, 0x0072 }, { 8, 0x0032 }, { 9, 0x00c4 }, { 7, 0x0109 }, { 8, 0x0062 }, { 8, 0x0022 },
-    { 9, 0x00a4 }, { 8, 0x0002 }, { 8, 0x0082 }, { 8, 0x0042 }, { 9, 0x00e4 }, { 7, 0x0105 }, { 8, 0x005a }, { 8, 0x001a }, { 9, 0x0094 }, { 7, 0x0115 }, { 8, 0x007a }, { 8, 0x003a }, { 9, 0x00d4 }, { 7, 0x010d }, { 8, 0x006a },
-    { 8, 0x002a }, { 9, 0x00b4 }, { 8, 0x000a }, { 8, 0x008a }, { 8, 0x004a }, { 9, 0x00f4 }, { 7, 0x0103 }, { 8, 0x0056 }, { 8, 0x0016 }, { 8, 0x011e }, { 7, 0x0113 }, { 8, 0x0076 }, { 8, 0x0036 }, { 9, 0x00cc }, { 7, 0x010b },
-    { 8, 0x0066 }, { 8, 0x0026 }, { 9, 0x00ac }, { 8, 0x0006 }, { 8, 0x0086 }, { 8, 0x0046 }, { 9, 0x00ec }, { 7, 0x0107 }, { 8, 0x005e }, { 8, 0x001e }, { 9, 0x009c }, { 7, 0x0117 }, { 8, 0x007e }, { 8, 0x003e }, { 9, 0x00dc },
-    { 7, 0x010f }, { 8, 0x006e }, { 8, 0x002e }, { 9, 0x00bc }, { 8, 0x000e }, { 8, 0x008e }, { 8, 0x004e }, { 9, 0x00fc }, { 7, 0x0100 }, { 8, 0x0051 }, { 8, 0x0011 }, { 8, 0x0119 }, { 7, 0x0110 }, { 8, 0x0071 }, { 8, 0x0031 },
-    { 9, 0x00c2 }, { 7, 0x0108 }, { 8, 0x0061 }, { 8, 0x0021 }, { 9, 0x00a2 }, { 8, 0x0001 }, { 8, 0x0081 }, { 8, 0x0041 }, { 9, 0x00e2 }, { 7, 0x0104 }, { 8, 0x0059 }, { 8, 0x0019 }, { 9, 0x0092 }, { 7, 0x0114 }, { 8, 0x0079 },
-    { 8, 0x0039 }, { 9, 0x00d2 }, { 7, 0x010c }, { 8, 0x0069 }, { 8, 0x0029 }, { 9, 0x00b2 }, { 8, 0x0009 }, { 8, 0x0089 }, { 8, 0x0049 }, { 9, 0x00f2 }, { 7, 0x0102 }, { 8, 0x0055 }, { 8, 0x0015 }, { 8, 0x011d }, { 7, 0x0112 },
-    { 8, 0x0075 }, { 8, 0x0035 }, { 9, 0x00ca }, { 7, 0x010a }, { 8, 0x0065 }, { 8, 0x0025 }, { 9, 0x00aa }, { 8, 0x0005 }, { 8, 0x0085 }, { 8, 0x0045 }, { 9, 0x00ea }, { 7, 0x0106 }, { 8, 0x005d }, { 8, 0x001d }, { 9, 0x009a },
-    { 7, 0x0116 }, { 8, 0x007d }, { 8, 0x003d }, { 9, 0x00da }, { 7, 0x010e }, { 8, 0x006d }, { 8, 0x002d }, { 9, 0x00ba }, { 8, 0x000d }, { 8, 0x008d }, { 8, 0x004d }, { 9, 0x00fa }, { 7, 0x0101 }, { 8, 0x0053 }, { 8, 0x0013 },
-    { 8, 0x011b }, { 7, 0x0111 }, { 8, 0x0073 }, { 8, 0x0033 }, { 9, 0x00c6 }, { 7, 0x0109 }, { 8, 0x0063 }, { 8, 0x0023 }, { 9, 0x00a6 }, { 8, 0x0003 }, { 8, 0x0083 }, { 8, 0x0043 }, { 9, 0x00e6 }, { 7, 0x0105 }, { 8, 0x005b },
-    { 8, 0x001b }, { 9, 0x0096 }, { 7, 0x0115 }, { 8, 0x007b }, { 8, 0x003b }, { 9, 0x00d6 }, { 7, 0x010d }, { 8, 0x006b }, { 8, 0x002b }, { 9, 0x00b6 }, { 8, 0x000b }, { 8, 0x008b }, { 8, 0x004b }, { 9, 0x00f6 }, { 7, 0x0103 },
-    { 8, 0x0057 }, { 8, 0x0017 }, { 8, 0x011f }, { 7, 0x0113 }, { 8, 0x0077 }, { 8, 0x0037 }, { 9, 0x00ce }, { 7, 0x010b }, { 8, 0x0067 }, { 8, 0x0027 }, { 9, 0x00ae }, { 8, 0x0007 }, { 8, 0x0087 }, { 8, 0x0047 }, { 9, 0x00ee },
-    { 7, 0x0107 }, { 8, 0x005f }, { 8, 0x001f }, { 9, 0x009e }, { 7, 0x0117 }, { 8, 0x007f }, { 8, 0x003f }, { 9, 0x00de }, { 7, 0x010f }, { 8, 0x006f }, { 8, 0x002f }, { 9, 0x00be }, { 8, 0x000f }, { 8, 0x008f }, { 8, 0x004f },
-    { 9, 0x00fe }, { 7, 0x0100 }, { 8, 0x0050 }, { 8, 0x0010 }, { 8, 0x0118 }, { 7, 0x0110 }, { 8, 0x0070 }, { 8, 0x0030 }, { 9, 0x00c1 }, { 7, 0x0108 }, { 8, 0x0060 }, { 8, 0x0020 }, { 9, 0x00a1 }, { 8, 0x0000 }, { 8, 0x0080 },
-    { 8, 0x0040 }, { 9, 0x00e1 }, { 7, 0x0104 }, { 8, 0x0058 }, { 8, 0x0018 }, { 9, 0x0091 }, { 7, 0x0114 }, { 8, 0x0078 }, { 8, 0x0038 }, { 9, 0x00d1 }, { 7, 0x010c }, { 8, 0x0068 }, { 8, 0x0028 }, { 9, 0x00b1 }, { 8, 0x0008 },
-    { 8, 0x0088 }, { 8, 0x0048 }, { 9, 0x00f1 }, { 7, 0x0102 }, { 8, 0x0054 }, { 8, 0x0014 }, { 8, 0x011c }, { 7, 0x0112 }, { 8, 0x0074 }, { 8, 0x0034 }, { 9, 0x00c9 }, { 7, 0x010a }, { 8, 0x0064 }, { 8, 0x0024 }, { 9, 0x00a9 },
-    { 8, 0x0004 }, { 8, 0x0084 }, { 8, 0x0044 }, { 9, 0x00e9 }, { 7, 0x0106 }, { 8, 0x005c }, { 8, 0x001c }, { 9, 0x0099 }, { 7, 0x0116 }, { 8, 0x007c }, { 8, 0x003c }, { 9, 0x00d9 }, { 7, 0x010e }, { 8, 0x006c }, { 8, 0x002c },
-    { 9, 0x00b9 }, { 8, 0x000c }, { 8, 0x008c }, { 8, 0x004c }, { 9, 0x00f9 }, { 7, 0x0101 }, { 8, 0x0052 }, { 8, 0x0012 }, { 8, 0x011a }, { 7, 0x0111 }, { 8, 0x0072 }, { 8, 0x0032 }, { 9, 0x00c5 }, { 7, 0x0109 }, { 8, 0x0062 },
-    { 8, 0x0022 }, { 9, 0x00a5 }, { 8, 0x0002 }, { 8, 0x0082 }, { 8, 0x0042 }, { 9, 0x00e5 }, { 7, 0x0105 }, { 8, 0x005a }, { 8, 0x001a }, { 9, 0x0095 }, { 7, 0x0115 }, { 8, 0x007a }, { 8, 0x003a }, { 9, 0x00d5 }, { 7, 0x010d },
-    { 8, 0x006a }, { 8, 0x002a }, { 9, 0x00b5 }, { 8, 0x000a }, { 8, 0x008a }, { 8, 0x004a }, { 9, 0x00f5 }, { 7, 0x0103 }, { 8, 0x0056 }, { 8, 0x0016 }, { 8, 0x011e }, { 7, 0x0113 }, { 8, 0x0076 }, { 8, 0x0036 }, { 9, 0x00cd },
-    { 7, 0x010b }, { 8, 0x0066 }, { 8, 0x0026 }, { 9, 0x00ad }, { 8, 0x0006 }, { 8, 0x0086 }, { 8, 0x0046 }, { 9, 0x00ed }, { 7, 0x0107 }, { 8, 0x005e }, { 8, 0x001e }, { 9, 0x009d }, { 7, 0x0117 }, { 8, 0x007e }, { 8, 0x003e },
-    { 9, 0x00dd }, { 7, 0x010f }, { 8, 0x006e }, { 8, 0x002e }, { 9, 0x00bd }, { 8, 0x000e }, { 8, 0x008e }, { 8, 0x004e }, { 9, 0x00fd }, { 7, 0x0100 }, { 8, 0x0051 }, { 8, 0x0011 }, { 8, 0x0119 }, { 7, 0x0110 }, { 8, 0x0071 },
-    { 8, 0x0031 }, { 9, 0x00c3 }, { 7, 0x0108 }, { 8, 0x0061 }, { 8, 0x0021 }, { 9, 0x00a3 }, { 8, 0x0001 }, { 8, 0x0081 }, { 8, 0x0041 }, { 9, 0x00e3 }, { 7, 0x0104 }, { 8, 0x0059 }, { 8, 0x0019 }, { 9, 0x0093 }, { 7, 0x0114 },
-    { 8, 0x0079 }, { 8, 0x0039 }, { 9, 0x00d3 }, { 7, 0x010c }, { 8, 0x0069 }, { 8, 0x0029 }, { 9, 0x00b3 }, { 8, 0x0009 }, { 8, 0x0089 }, { 8, 0x0049 }, { 9, 0x00f3 }, { 7, 0x0102 }, { 8, 0x0055 }, { 8, 0x0015 }, { 8, 0x011d },
-    { 7, 0x0112 }, { 8, 0x0075 }, { 8, 0x0035 }, { 9, 0x00cb }, { 7, 0x010a }, { 8, 0x0065 }, { 8, 0x0025 }, { 9, 0x00ab }, { 8, 0x0005 }, { 8, 0x0085 }, { 8, 0x0045 }, { 9, 0x00eb }, { 7, 0x0106 }, { 8, 0x005d }, { 8, 0x001d },
-    { 9, 0x009b }, { 7, 0x0116 }, { 8, 0x007d }, { 8, 0x003d }, { 9, 0x00db }, { 7, 0x010e }, { 8, 0x006d }, { 8, 0x002d }, { 9, 0x00bb }, { 8, 0x000d }, { 8, 0x008d }, { 8, 0x004d }, { 9, 0x00fb }, { 7, 0x0101 }, { 8, 0x0053 },
-    { 8, 0x0013 }, { 8, 0x011b }, { 7, 0x0111 }, { 8, 0x0073 }, { 8, 0x0033 }, { 9, 0x00c7 }, { 7, 0x0109 }, { 8, 0x0063 }, { 8, 0x0023 }, { 9, 0x00a7 }, { 8, 0x0003 }, { 8, 0x0083 }, { 8, 0x0043 }, { 9, 0x00e7 }, { 7, 0x0105 },
-    { 8, 0x005b }, { 8, 0x001b }, { 9, 0x0097 }, { 7, 0x0115 }, { 8, 0x007b }, { 8, 0x003b }, { 9, 0x00d7 }, { 7, 0x010d }, { 8, 0x006b }, { 8, 0x002b }, { 9, 0x00b7 }, { 8, 0x000b }, { 8, 0x008b }, { 8, 0x004b }, { 9, 0x00f7 },
-    { 7, 0x0103 }, { 8, 0x0057 }, { 8, 0x0017 }, { 8, 0x011f }, { 7, 0x0113 }, { 8, 0x0077 }, { 8, 0x0037 }, { 9, 0x00cf }, { 7, 0x010b }, { 8, 0x0067 }, { 8, 0x0027 }, { 9, 0x00af }, { 8, 0x0007 }, { 8, 0x0087 }, { 8, 0x0047 },
-    { 9, 0x00ef }, { 7, 0x0107 }, { 8, 0x005f }, { 8, 0x001f }, { 9, 0x009f }, { 7, 0x0117 }, { 8, 0x007f }, { 8, 0x003f }, { 9, 0x00df }, { 7, 0x010f }, { 8, 0x006f }, { 8, 0x002f }, { 9, 0x00bf }, { 8, 0x000f }, { 8, 0x008f },
-    { 8, 0x004f }, { 9, 0x00ff }
+const FlateDecode FlateStream::lengthDecode[flateMaxLitCodes - 257] = {
+    { .bits = 0, .first = 3 },   { .bits = 0, .first = 4 },   { .bits = 0, .first = 5 },   { .bits = 0, .first = 6 },   { .bits = 0, .first = 7 },   { .bits = 0, .first = 8 },   { .bits = 0, .first = 9 },  { .bits = 0, .first = 10 },
+    { .bits = 1, .first = 11 },  { .bits = 1, .first = 13 },  { .bits = 1, .first = 15 },  { .bits = 1, .first = 17 },  { .bits = 2, .first = 19 },  { .bits = 2, .first = 23 },  { .bits = 2, .first = 27 }, { .bits = 2, .first = 31 },
+    { .bits = 3, .first = 35 },  { .bits = 3, .first = 43 },  { .bits = 3, .first = 51 },  { .bits = 3, .first = 59 },  { .bits = 4, .first = 67 },  { .bits = 4, .first = 83 },  { .bits = 4, .first = 99 }, { .bits = 4, .first = 115 },
+    { .bits = 5, .first = 131 }, { .bits = 5, .first = 163 }, { .bits = 5, .first = 195 }, { .bits = 5, .first = 227 }, { .bits = 0, .first = 258 }, { .bits = 0, .first = 258 }, { .bits = 0, .first = 258 }
 };
 
-FlateHuffmanTab FlateStream::fixedLitCodeTab = { flateFixedLitCodeTabCodes, 9 };
+const FlateDecode FlateStream::distDecode[flateMaxDistCodes] = { { .bits = 0, .first = 1 },     { .bits = 0, .first = 2 },     { .bits = 0, .first = 3 },      { .bits = 0, .first = 4 },      { .bits = 1, .first = 5 },
+                                                                 { .bits = 1, .first = 7 },     { .bits = 2, .first = 9 },     { .bits = 2, .first = 13 },     { .bits = 3, .first = 17 },     { .bits = 3, .first = 25 },
+                                                                 { .bits = 4, .first = 33 },    { .bits = 4, .first = 49 },    { .bits = 5, .first = 65 },     { .bits = 5, .first = 97 },     { .bits = 6, .first = 129 },
+                                                                 { .bits = 6, .first = 193 },   { .bits = 7, .first = 257 },   { .bits = 7, .first = 385 },    { .bits = 8, .first = 513 },    { .bits = 8, .first = 769 },
+                                                                 { .bits = 9, .first = 1025 },  { .bits = 9, .first = 1537 },  { .bits = 10, .first = 2049 },  { .bits = 10, .first = 3073 },  { .bits = 11, .first = 4097 },
+                                                                 { .bits = 11, .first = 6145 }, { .bits = 12, .first = 8193 }, { .bits = 12, .first = 12289 }, { .bits = 13, .first = 16385 }, { .bits = 13, .first = 24577 } };
 
-static const FlateCode flateFixedDistCodeTabCodes[32] = { { 5, 0x0000 }, { 5, 0x0010 }, { 5, 0x0008 }, { 5, 0x0018 }, { 5, 0x0004 }, { 5, 0x0014 }, { 5, 0x000c }, { 5, 0x001c }, { 5, 0x0002 }, { 5, 0x0012 }, { 5, 0x000a },
-                                                          { 5, 0x001a }, { 5, 0x0006 }, { 5, 0x0016 }, { 5, 0x000e }, { 0, 0x0000 }, { 5, 0x0001 }, { 5, 0x0011 }, { 5, 0x0009 }, { 5, 0x0019 }, { 5, 0x0005 }, { 5, 0x0015 },
-                                                          { 5, 0x000d }, { 5, 0x001d }, { 5, 0x0003 }, { 5, 0x0013 }, { 5, 0x000b }, { 5, 0x001b }, { 5, 0x0007 }, { 5, 0x0017 }, { 5, 0x000f }, { 0, 0x0000 } };
+static const FlateCode flateFixedLitCodeTabCodes[512] = {
+    { .len = 7, .val = 0x0100 }, { .len = 8, .val = 0x0050 }, { .len = 8, .val = 0x0010 }, { .len = 8, .val = 0x0118 }, { .len = 7, .val = 0x0110 }, { .len = 8, .val = 0x0070 }, { .len = 8, .val = 0x0030 }, { .len = 9, .val = 0x00c0 },
+    { .len = 7, .val = 0x0108 }, { .len = 8, .val = 0x0060 }, { .len = 8, .val = 0x0020 }, { .len = 9, .val = 0x00a0 }, { .len = 8, .val = 0x0000 }, { .len = 8, .val = 0x0080 }, { .len = 8, .val = 0x0040 }, { .len = 9, .val = 0x00e0 },
+    { .len = 7, .val = 0x0104 }, { .len = 8, .val = 0x0058 }, { .len = 8, .val = 0x0018 }, { .len = 9, .val = 0x0090 }, { .len = 7, .val = 0x0114 }, { .len = 8, .val = 0x0078 }, { .len = 8, .val = 0x0038 }, { .len = 9, .val = 0x00d0 },
+    { .len = 7, .val = 0x010c }, { .len = 8, .val = 0x0068 }, { .len = 8, .val = 0x0028 }, { .len = 9, .val = 0x00b0 }, { .len = 8, .val = 0x0008 }, { .len = 8, .val = 0x0088 }, { .len = 8, .val = 0x0048 }, { .len = 9, .val = 0x00f0 },
+    { .len = 7, .val = 0x0102 }, { .len = 8, .val = 0x0054 }, { .len = 8, .val = 0x0014 }, { .len = 8, .val = 0x011c }, { .len = 7, .val = 0x0112 }, { .len = 8, .val = 0x0074 }, { .len = 8, .val = 0x0034 }, { .len = 9, .val = 0x00c8 },
+    { .len = 7, .val = 0x010a }, { .len = 8, .val = 0x0064 }, { .len = 8, .val = 0x0024 }, { .len = 9, .val = 0x00a8 }, { .len = 8, .val = 0x0004 }, { .len = 8, .val = 0x0084 }, { .len = 8, .val = 0x0044 }, { .len = 9, .val = 0x00e8 },
+    { .len = 7, .val = 0x0106 }, { .len = 8, .val = 0x005c }, { .len = 8, .val = 0x001c }, { .len = 9, .val = 0x0098 }, { .len = 7, .val = 0x0116 }, { .len = 8, .val = 0x007c }, { .len = 8, .val = 0x003c }, { .len = 9, .val = 0x00d8 },
+    { .len = 7, .val = 0x010e }, { .len = 8, .val = 0x006c }, { .len = 8, .val = 0x002c }, { .len = 9, .val = 0x00b8 }, { .len = 8, .val = 0x000c }, { .len = 8, .val = 0x008c }, { .len = 8, .val = 0x004c }, { .len = 9, .val = 0x00f8 },
+    { .len = 7, .val = 0x0101 }, { .len = 8, .val = 0x0052 }, { .len = 8, .val = 0x0012 }, { .len = 8, .val = 0x011a }, { .len = 7, .val = 0x0111 }, { .len = 8, .val = 0x0072 }, { .len = 8, .val = 0x0032 }, { .len = 9, .val = 0x00c4 },
+    { .len = 7, .val = 0x0109 }, { .len = 8, .val = 0x0062 }, { .len = 8, .val = 0x0022 }, { .len = 9, .val = 0x00a4 }, { .len = 8, .val = 0x0002 }, { .len = 8, .val = 0x0082 }, { .len = 8, .val = 0x0042 }, { .len = 9, .val = 0x00e4 },
+    { .len = 7, .val = 0x0105 }, { .len = 8, .val = 0x005a }, { .len = 8, .val = 0x001a }, { .len = 9, .val = 0x0094 }, { .len = 7, .val = 0x0115 }, { .len = 8, .val = 0x007a }, { .len = 8, .val = 0x003a }, { .len = 9, .val = 0x00d4 },
+    { .len = 7, .val = 0x010d }, { .len = 8, .val = 0x006a }, { .len = 8, .val = 0x002a }, { .len = 9, .val = 0x00b4 }, { .len = 8, .val = 0x000a }, { .len = 8, .val = 0x008a }, { .len = 8, .val = 0x004a }, { .len = 9, .val = 0x00f4 },
+    { .len = 7, .val = 0x0103 }, { .len = 8, .val = 0x0056 }, { .len = 8, .val = 0x0016 }, { .len = 8, .val = 0x011e }, { .len = 7, .val = 0x0113 }, { .len = 8, .val = 0x0076 }, { .len = 8, .val = 0x0036 }, { .len = 9, .val = 0x00cc },
+    { .len = 7, .val = 0x010b }, { .len = 8, .val = 0x0066 }, { .len = 8, .val = 0x0026 }, { .len = 9, .val = 0x00ac }, { .len = 8, .val = 0x0006 }, { .len = 8, .val = 0x0086 }, { .len = 8, .val = 0x0046 }, { .len = 9, .val = 0x00ec },
+    { .len = 7, .val = 0x0107 }, { .len = 8, .val = 0x005e }, { .len = 8, .val = 0x001e }, { .len = 9, .val = 0x009c }, { .len = 7, .val = 0x0117 }, { .len = 8, .val = 0x007e }, { .len = 8, .val = 0x003e }, { .len = 9, .val = 0x00dc },
+    { .len = 7, .val = 0x010f }, { .len = 8, .val = 0x006e }, { .len = 8, .val = 0x002e }, { .len = 9, .val = 0x00bc }, { .len = 8, .val = 0x000e }, { .len = 8, .val = 0x008e }, { .len = 8, .val = 0x004e }, { .len = 9, .val = 0x00fc },
+    { .len = 7, .val = 0x0100 }, { .len = 8, .val = 0x0051 }, { .len = 8, .val = 0x0011 }, { .len = 8, .val = 0x0119 }, { .len = 7, .val = 0x0110 }, { .len = 8, .val = 0x0071 }, { .len = 8, .val = 0x0031 }, { .len = 9, .val = 0x00c2 },
+    { .len = 7, .val = 0x0108 }, { .len = 8, .val = 0x0061 }, { .len = 8, .val = 0x0021 }, { .len = 9, .val = 0x00a2 }, { .len = 8, .val = 0x0001 }, { .len = 8, .val = 0x0081 }, { .len = 8, .val = 0x0041 }, { .len = 9, .val = 0x00e2 },
+    { .len = 7, .val = 0x0104 }, { .len = 8, .val = 0x0059 }, { .len = 8, .val = 0x0019 }, { .len = 9, .val = 0x0092 }, { .len = 7, .val = 0x0114 }, { .len = 8, .val = 0x0079 }, { .len = 8, .val = 0x0039 }, { .len = 9, .val = 0x00d2 },
+    { .len = 7, .val = 0x010c }, { .len = 8, .val = 0x0069 }, { .len = 8, .val = 0x0029 }, { .len = 9, .val = 0x00b2 }, { .len = 8, .val = 0x0009 }, { .len = 8, .val = 0x0089 }, { .len = 8, .val = 0x0049 }, { .len = 9, .val = 0x00f2 },
+    { .len = 7, .val = 0x0102 }, { .len = 8, .val = 0x0055 }, { .len = 8, .val = 0x0015 }, { .len = 8, .val = 0x011d }, { .len = 7, .val = 0x0112 }, { .len = 8, .val = 0x0075 }, { .len = 8, .val = 0x0035 }, { .len = 9, .val = 0x00ca },
+    { .len = 7, .val = 0x010a }, { .len = 8, .val = 0x0065 }, { .len = 8, .val = 0x0025 }, { .len = 9, .val = 0x00aa }, { .len = 8, .val = 0x0005 }, { .len = 8, .val = 0x0085 }, { .len = 8, .val = 0x0045 }, { .len = 9, .val = 0x00ea },
+    { .len = 7, .val = 0x0106 }, { .len = 8, .val = 0x005d }, { .len = 8, .val = 0x001d }, { .len = 9, .val = 0x009a }, { .len = 7, .val = 0x0116 }, { .len = 8, .val = 0x007d }, { .len = 8, .val = 0x003d }, { .len = 9, .val = 0x00da },
+    { .len = 7, .val = 0x010e }, { .len = 8, .val = 0x006d }, { .len = 8, .val = 0x002d }, { .len = 9, .val = 0x00ba }, { .len = 8, .val = 0x000d }, { .len = 8, .val = 0x008d }, { .len = 8, .val = 0x004d }, { .len = 9, .val = 0x00fa },
+    { .len = 7, .val = 0x0101 }, { .len = 8, .val = 0x0053 }, { .len = 8, .val = 0x0013 }, { .len = 8, .val = 0x011b }, { .len = 7, .val = 0x0111 }, { .len = 8, .val = 0x0073 }, { .len = 8, .val = 0x0033 }, { .len = 9, .val = 0x00c6 },
+    { .len = 7, .val = 0x0109 }, { .len = 8, .val = 0x0063 }, { .len = 8, .val = 0x0023 }, { .len = 9, .val = 0x00a6 }, { .len = 8, .val = 0x0003 }, { .len = 8, .val = 0x0083 }, { .len = 8, .val = 0x0043 }, { .len = 9, .val = 0x00e6 },
+    { .len = 7, .val = 0x0105 }, { .len = 8, .val = 0x005b }, { .len = 8, .val = 0x001b }, { .len = 9, .val = 0x0096 }, { .len = 7, .val = 0x0115 }, { .len = 8, .val = 0x007b }, { .len = 8, .val = 0x003b }, { .len = 9, .val = 0x00d6 },
+    { .len = 7, .val = 0x010d }, { .len = 8, .val = 0x006b }, { .len = 8, .val = 0x002b }, { .len = 9, .val = 0x00b6 }, { .len = 8, .val = 0x000b }, { .len = 8, .val = 0x008b }, { .len = 8, .val = 0x004b }, { .len = 9, .val = 0x00f6 },
+    { .len = 7, .val = 0x0103 }, { .len = 8, .val = 0x0057 }, { .len = 8, .val = 0x0017 }, { .len = 8, .val = 0x011f }, { .len = 7, .val = 0x0113 }, { .len = 8, .val = 0x0077 }, { .len = 8, .val = 0x0037 }, { .len = 9, .val = 0x00ce },
+    { .len = 7, .val = 0x010b }, { .len = 8, .val = 0x0067 }, { .len = 8, .val = 0x0027 }, { .len = 9, .val = 0x00ae }, { .len = 8, .val = 0x0007 }, { .len = 8, .val = 0x0087 }, { .len = 8, .val = 0x0047 }, { .len = 9, .val = 0x00ee },
+    { .len = 7, .val = 0x0107 }, { .len = 8, .val = 0x005f }, { .len = 8, .val = 0x001f }, { .len = 9, .val = 0x009e }, { .len = 7, .val = 0x0117 }, { .len = 8, .val = 0x007f }, { .len = 8, .val = 0x003f }, { .len = 9, .val = 0x00de },
+    { .len = 7, .val = 0x010f }, { .len = 8, .val = 0x006f }, { .len = 8, .val = 0x002f }, { .len = 9, .val = 0x00be }, { .len = 8, .val = 0x000f }, { .len = 8, .val = 0x008f }, { .len = 8, .val = 0x004f }, { .len = 9, .val = 0x00fe },
+    { .len = 7, .val = 0x0100 }, { .len = 8, .val = 0x0050 }, { .len = 8, .val = 0x0010 }, { .len = 8, .val = 0x0118 }, { .len = 7, .val = 0x0110 }, { .len = 8, .val = 0x0070 }, { .len = 8, .val = 0x0030 }, { .len = 9, .val = 0x00c1 },
+    { .len = 7, .val = 0x0108 }, { .len = 8, .val = 0x0060 }, { .len = 8, .val = 0x0020 }, { .len = 9, .val = 0x00a1 }, { .len = 8, .val = 0x0000 }, { .len = 8, .val = 0x0080 }, { .len = 8, .val = 0x0040 }, { .len = 9, .val = 0x00e1 },
+    { .len = 7, .val = 0x0104 }, { .len = 8, .val = 0x0058 }, { .len = 8, .val = 0x0018 }, { .len = 9, .val = 0x0091 }, { .len = 7, .val = 0x0114 }, { .len = 8, .val = 0x0078 }, { .len = 8, .val = 0x0038 }, { .len = 9, .val = 0x00d1 },
+    { .len = 7, .val = 0x010c }, { .len = 8, .val = 0x0068 }, { .len = 8, .val = 0x0028 }, { .len = 9, .val = 0x00b1 }, { .len = 8, .val = 0x0008 }, { .len = 8, .val = 0x0088 }, { .len = 8, .val = 0x0048 }, { .len = 9, .val = 0x00f1 },
+    { .len = 7, .val = 0x0102 }, { .len = 8, .val = 0x0054 }, { .len = 8, .val = 0x0014 }, { .len = 8, .val = 0x011c }, { .len = 7, .val = 0x0112 }, { .len = 8, .val = 0x0074 }, { .len = 8, .val = 0x0034 }, { .len = 9, .val = 0x00c9 },
+    { .len = 7, .val = 0x010a }, { .len = 8, .val = 0x0064 }, { .len = 8, .val = 0x0024 }, { .len = 9, .val = 0x00a9 }, { .len = 8, .val = 0x0004 }, { .len = 8, .val = 0x0084 }, { .len = 8, .val = 0x0044 }, { .len = 9, .val = 0x00e9 },
+    { .len = 7, .val = 0x0106 }, { .len = 8, .val = 0x005c }, { .len = 8, .val = 0x001c }, { .len = 9, .val = 0x0099 }, { .len = 7, .val = 0x0116 }, { .len = 8, .val = 0x007c }, { .len = 8, .val = 0x003c }, { .len = 9, .val = 0x00d9 },
+    { .len = 7, .val = 0x010e }, { .len = 8, .val = 0x006c }, { .len = 8, .val = 0x002c }, { .len = 9, .val = 0x00b9 }, { .len = 8, .val = 0x000c }, { .len = 8, .val = 0x008c }, { .len = 8, .val = 0x004c }, { .len = 9, .val = 0x00f9 },
+    { .len = 7, .val = 0x0101 }, { .len = 8, .val = 0x0052 }, { .len = 8, .val = 0x0012 }, { .len = 8, .val = 0x011a }, { .len = 7, .val = 0x0111 }, { .len = 8, .val = 0x0072 }, { .len = 8, .val = 0x0032 }, { .len = 9, .val = 0x00c5 },
+    { .len = 7, .val = 0x0109 }, { .len = 8, .val = 0x0062 }, { .len = 8, .val = 0x0022 }, { .len = 9, .val = 0x00a5 }, { .len = 8, .val = 0x0002 }, { .len = 8, .val = 0x0082 }, { .len = 8, .val = 0x0042 }, { .len = 9, .val = 0x00e5 },
+    { .len = 7, .val = 0x0105 }, { .len = 8, .val = 0x005a }, { .len = 8, .val = 0x001a }, { .len = 9, .val = 0x0095 }, { .len = 7, .val = 0x0115 }, { .len = 8, .val = 0x007a }, { .len = 8, .val = 0x003a }, { .len = 9, .val = 0x00d5 },
+    { .len = 7, .val = 0x010d }, { .len = 8, .val = 0x006a }, { .len = 8, .val = 0x002a }, { .len = 9, .val = 0x00b5 }, { .len = 8, .val = 0x000a }, { .len = 8, .val = 0x008a }, { .len = 8, .val = 0x004a }, { .len = 9, .val = 0x00f5 },
+    { .len = 7, .val = 0x0103 }, { .len = 8, .val = 0x0056 }, { .len = 8, .val = 0x0016 }, { .len = 8, .val = 0x011e }, { .len = 7, .val = 0x0113 }, { .len = 8, .val = 0x0076 }, { .len = 8, .val = 0x0036 }, { .len = 9, .val = 0x00cd },
+    { .len = 7, .val = 0x010b }, { .len = 8, .val = 0x0066 }, { .len = 8, .val = 0x0026 }, { .len = 9, .val = 0x00ad }, { .len = 8, .val = 0x0006 }, { .len = 8, .val = 0x0086 }, { .len = 8, .val = 0x0046 }, { .len = 9, .val = 0x00ed },
+    { .len = 7, .val = 0x0107 }, { .len = 8, .val = 0x005e }, { .len = 8, .val = 0x001e }, { .len = 9, .val = 0x009d }, { .len = 7, .val = 0x0117 }, { .len = 8, .val = 0x007e }, { .len = 8, .val = 0x003e }, { .len = 9, .val = 0x00dd },
+    { .len = 7, .val = 0x010f }, { .len = 8, .val = 0x006e }, { .len = 8, .val = 0x002e }, { .len = 9, .val = 0x00bd }, { .len = 8, .val = 0x000e }, { .len = 8, .val = 0x008e }, { .len = 8, .val = 0x004e }, { .len = 9, .val = 0x00fd },
+    { .len = 7, .val = 0x0100 }, { .len = 8, .val = 0x0051 }, { .len = 8, .val = 0x0011 }, { .len = 8, .val = 0x0119 }, { .len = 7, .val = 0x0110 }, { .len = 8, .val = 0x0071 }, { .len = 8, .val = 0x0031 }, { .len = 9, .val = 0x00c3 },
+    { .len = 7, .val = 0x0108 }, { .len = 8, .val = 0x0061 }, { .len = 8, .val = 0x0021 }, { .len = 9, .val = 0x00a3 }, { .len = 8, .val = 0x0001 }, { .len = 8, .val = 0x0081 }, { .len = 8, .val = 0x0041 }, { .len = 9, .val = 0x00e3 },
+    { .len = 7, .val = 0x0104 }, { .len = 8, .val = 0x0059 }, { .len = 8, .val = 0x0019 }, { .len = 9, .val = 0x0093 }, { .len = 7, .val = 0x0114 }, { .len = 8, .val = 0x0079 }, { .len = 8, .val = 0x0039 }, { .len = 9, .val = 0x00d3 },
+    { .len = 7, .val = 0x010c }, { .len = 8, .val = 0x0069 }, { .len = 8, .val = 0x0029 }, { .len = 9, .val = 0x00b3 }, { .len = 8, .val = 0x0009 }, { .len = 8, .val = 0x0089 }, { .len = 8, .val = 0x0049 }, { .len = 9, .val = 0x00f3 },
+    { .len = 7, .val = 0x0102 }, { .len = 8, .val = 0x0055 }, { .len = 8, .val = 0x0015 }, { .len = 8, .val = 0x011d }, { .len = 7, .val = 0x0112 }, { .len = 8, .val = 0x0075 }, { .len = 8, .val = 0x0035 }, { .len = 9, .val = 0x00cb },
+    { .len = 7, .val = 0x010a }, { .len = 8, .val = 0x0065 }, { .len = 8, .val = 0x0025 }, { .len = 9, .val = 0x00ab }, { .len = 8, .val = 0x0005 }, { .len = 8, .val = 0x0085 }, { .len = 8, .val = 0x0045 }, { .len = 9, .val = 0x00eb },
+    { .len = 7, .val = 0x0106 }, { .len = 8, .val = 0x005d }, { .len = 8, .val = 0x001d }, { .len = 9, .val = 0x009b }, { .len = 7, .val = 0x0116 }, { .len = 8, .val = 0x007d }, { .len = 8, .val = 0x003d }, { .len = 9, .val = 0x00db },
+    { .len = 7, .val = 0x010e }, { .len = 8, .val = 0x006d }, { .len = 8, .val = 0x002d }, { .len = 9, .val = 0x00bb }, { .len = 8, .val = 0x000d }, { .len = 8, .val = 0x008d }, { .len = 8, .val = 0x004d }, { .len = 9, .val = 0x00fb },
+    { .len = 7, .val = 0x0101 }, { .len = 8, .val = 0x0053 }, { .len = 8, .val = 0x0013 }, { .len = 8, .val = 0x011b }, { .len = 7, .val = 0x0111 }, { .len = 8, .val = 0x0073 }, { .len = 8, .val = 0x0033 }, { .len = 9, .val = 0x00c7 },
+    { .len = 7, .val = 0x0109 }, { .len = 8, .val = 0x0063 }, { .len = 8, .val = 0x0023 }, { .len = 9, .val = 0x00a7 }, { .len = 8, .val = 0x0003 }, { .len = 8, .val = 0x0083 }, { .len = 8, .val = 0x0043 }, { .len = 9, .val = 0x00e7 },
+    { .len = 7, .val = 0x0105 }, { .len = 8, .val = 0x005b }, { .len = 8, .val = 0x001b }, { .len = 9, .val = 0x0097 }, { .len = 7, .val = 0x0115 }, { .len = 8, .val = 0x007b }, { .len = 8, .val = 0x003b }, { .len = 9, .val = 0x00d7 },
+    { .len = 7, .val = 0x010d }, { .len = 8, .val = 0x006b }, { .len = 8, .val = 0x002b }, { .len = 9, .val = 0x00b7 }, { .len = 8, .val = 0x000b }, { .len = 8, .val = 0x008b }, { .len = 8, .val = 0x004b }, { .len = 9, .val = 0x00f7 },
+    { .len = 7, .val = 0x0103 }, { .len = 8, .val = 0x0057 }, { .len = 8, .val = 0x0017 }, { .len = 8, .val = 0x011f }, { .len = 7, .val = 0x0113 }, { .len = 8, .val = 0x0077 }, { .len = 8, .val = 0x0037 }, { .len = 9, .val = 0x00cf },
+    { .len = 7, .val = 0x010b }, { .len = 8, .val = 0x0067 }, { .len = 8, .val = 0x0027 }, { .len = 9, .val = 0x00af }, { .len = 8, .val = 0x0007 }, { .len = 8, .val = 0x0087 }, { .len = 8, .val = 0x0047 }, { .len = 9, .val = 0x00ef },
+    { .len = 7, .val = 0x0107 }, { .len = 8, .val = 0x005f }, { .len = 8, .val = 0x001f }, { .len = 9, .val = 0x009f }, { .len = 7, .val = 0x0117 }, { .len = 8, .val = 0x007f }, { .len = 8, .val = 0x003f }, { .len = 9, .val = 0x00df },
+    { .len = 7, .val = 0x010f }, { .len = 8, .val = 0x006f }, { .len = 8, .val = 0x002f }, { .len = 9, .val = 0x00bf }, { .len = 8, .val = 0x000f }, { .len = 8, .val = 0x008f }, { .len = 8, .val = 0x004f }, { .len = 9, .val = 0x00ff }
+};
 
-FlateHuffmanTab FlateStream::fixedDistCodeTab = { flateFixedDistCodeTabCodes, 5 };
+FlateHuffmanTab FlateStream::fixedLitCodeTab = { .codes = flateFixedLitCodeTabCodes, .maxLen = 9 };
+
+static const FlateCode flateFixedDistCodeTabCodes[32] = { { .len = 5, .val = 0x0000 }, { .len = 5, .val = 0x0010 }, { .len = 5, .val = 0x0008 }, { .len = 5, .val = 0x0018 }, { .len = 5, .val = 0x0004 }, { .len = 5, .val = 0x0014 },
+                                                          { .len = 5, .val = 0x000c }, { .len = 5, .val = 0x001c }, { .len = 5, .val = 0x0002 }, { .len = 5, .val = 0x0012 }, { .len = 5, .val = 0x000a }, { .len = 5, .val = 0x001a },
+                                                          { .len = 5, .val = 0x0006 }, { .len = 5, .val = 0x0016 }, { .len = 5, .val = 0x000e }, { .len = 0, .val = 0x0000 }, { .len = 5, .val = 0x0001 }, { .len = 5, .val = 0x0011 },
+                                                          { .len = 5, .val = 0x0009 }, { .len = 5, .val = 0x0019 }, { .len = 5, .val = 0x0005 }, { .len = 5, .val = 0x0015 }, { .len = 5, .val = 0x000d }, { .len = 5, .val = 0x001d },
+                                                          { .len = 5, .val = 0x0003 }, { .len = 5, .val = 0x0013 }, { .len = 5, .val = 0x000b }, { .len = 5, .val = 0x001b }, { .len = 5, .val = 0x0007 }, { .len = 5, .val = 0x0017 },
+                                                          { .len = 5, .val = 0x000f }, { .len = 0, .val = 0x0000 } };
+
+FlateHuffmanTab FlateStream::fixedDistCodeTab = { .codes = flateFixedDistCodeTabCodes, .maxLen = 5 };
 
 FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, int bits) : FilterStream(strA)
 {

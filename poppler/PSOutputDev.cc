@@ -887,21 +887,21 @@ struct PSSubstFont
 };
 
 // NB: must be in same order as base14SubstFonts in GfxFont.cc
-static const PSSubstFont psBase14SubstFonts[14] = { { "Courier", 0.600 },
-                                                    { "Courier-Oblique", 0.600 },
-                                                    { "Courier-Bold", 0.600 },
-                                                    { "Courier-BoldOblique", 0.600 },
-                                                    { "Helvetica", 0.833 },
-                                                    { "Helvetica-Oblique", 0.833 },
-                                                    { "Helvetica-Bold", 0.889 },
-                                                    { "Helvetica-BoldOblique", 0.889 },
-                                                    { "Times-Roman", 0.788 },
-                                                    { "Times-Italic", 0.722 },
-                                                    { "Times-Bold", 0.833 },
-                                                    { "Times-BoldItalic", 0.778 },
+static const PSSubstFont psBase14SubstFonts[14] = { { .psName = "Courier", .mWidth = 0.600 },
+                                                    { .psName = "Courier-Oblique", .mWidth = 0.600 },
+                                                    { .psName = "Courier-Bold", .mWidth = 0.600 },
+                                                    { .psName = "Courier-BoldOblique", .mWidth = 0.600 },
+                                                    { .psName = "Helvetica", .mWidth = 0.833 },
+                                                    { .psName = "Helvetica-Oblique", .mWidth = 0.833 },
+                                                    { .psName = "Helvetica-Bold", .mWidth = 0.889 },
+                                                    { .psName = "Helvetica-BoldOblique", .mWidth = 0.889 },
+                                                    { .psName = "Times-Roman", .mWidth = 0.788 },
+                                                    { .psName = "Times-Italic", .mWidth = 0.722 },
+                                                    { .psName = "Times-Bold", .mWidth = 0.833 },
+                                                    { .psName = "Times-BoldItalic", .mWidth = 0.778 },
                                                     // the last two are never used for substitution
-                                                    { "Symbol", 0 },
-                                                    { "ZapfDingbats", 0 } };
+                                                    { .psName = "Symbol", .mWidth = 0 },
+                                                    { .psName = "ZapfDingbats", .mWidth = 0 } };
 
 // Mapping from Type 1/1C font file to PS font name.
 struct PST1FontName
@@ -1188,9 +1188,12 @@ struct StandardMedia
     int height;
 };
 
-static const StandardMedia standardMedia[] = { { "A0", 2384, 3371 },      { "A1", 1685, 2384 },      { "A2", 1190, 1684 },   { "A3", 842, 1190 },      { "A4", 595, 842 },      { "A5", 420, 595 },
-                                               { "B4", 729, 1032 },       { "B5", 516, 729 },        { "Letter", 612, 792 }, { "Tabloid", 792, 1224 }, { "Ledger", 1224, 792 }, { "Legal", 612, 1008 },
-                                               { "Statement", 396, 612 }, { "Executive", 540, 720 }, { "Folio", 612, 936 },  { "Quarto", 610, 780 },   { "10x14", 720, 1008 },  { nullptr, 0, 0 } };
+static const StandardMedia standardMedia[] = { { .name = "A0", .width = 2384, .height = 3371 },      { .name = "A1", .width = 1685, .height = 2384 },      { .name = "A2", .width = 1190, .height = 1684 },
+                                               { .name = "A3", .width = 842, .height = 1190 },       { .name = "A4", .width = 595, .height = 842 },        { .name = "A5", .width = 420, .height = 595 },
+                                               { .name = "B4", .width = 729, .height = 1032 },       { .name = "B5", .width = 516, .height = 729 },        { .name = "Letter", .width = 612, .height = 792 },
+                                               { .name = "Tabloid", .width = 792, .height = 1224 },  { .name = "Ledger", .width = 1224, .height = 792 },   { .name = "Legal", .width = 612, .height = 1008 },
+                                               { .name = "Statement", .width = 396, .height = 612 }, { .name = "Executive", .width = 540, .height = 720 }, { .name = "Folio", .width = 612, .height = 936 },
+                                               { .name = "Quarto", .width = 610, .height = 780 },    { .name = "10x14", .width = 720, .height = 1008 },    { .name = nullptr, .width = 0, .height = 0 } };
 
 /* PLRM specifies a tolerance of 5 points when matching page sizes */
 static bool pageDimensionEqual(int a, int b)

@@ -1362,7 +1362,7 @@ Goffset PDFDoc::writeObjectHeader(Ref *ref, OutStream *outStr)
 
 void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict *> *alreadyWrittenDicts)
 {
-    writeObject(obj, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, { objNum, objGen }, alreadyWrittenDicts);
+    writeObject(obj, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen }, alreadyWrittenDicts);
 }
 
 void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned int numOffset, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict *> *alreadyWrittenDicts)
@@ -1629,7 +1629,7 @@ void PDFDoc::writeXRefTableTrailer(Object &&trailerDict, XRef *uxref, bool write
 {
     uxref->writeTableToFile(outStr, writeAllEntries);
     outStr->printf("trailer\r\n");
-    writeDictionary(trailerDict.getDict(), outStr, xRef, 0, nullptr, cryptRC4, 0, { 0, 0 }, nullptr);
+    writeDictionary(trailerDict.getDict(), outStr, xRef, 0, nullptr, cryptRC4, 0, { .num = 0, .gen = 0 }, nullptr);
     outStr->printf("\r\nstartxref\r\n");
     outStr->printf("%lli\r\n", uxrefOffset);
     outStr->printf("%%%%EOF\r\n");
@@ -2197,14 +2197,14 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
                                                                                              std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const std::string &imagePath)
 {
     if (destPage == nullptr) {
-        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
+        return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
     }
 
     Ref imageResourceRef = Ref::INVALID();
     if (!imagePath.empty()) {
         imageResourceRef = ImageEmbeddingUtils::embed(xref, imagePath);
         if (imageResourceRef == Ref::INVALID()) {
-            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
+            return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::GenericError, .message = ERROR_IN_CODE_LOCATION };
         }
     }
 
@@ -2225,7 +2225,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
     if (!signatureText.empty() || !signatureTextLeft.empty()) {
         const std::string pdfFontName = form->findPdfFontNameToUseForSigning();
         if (pdfFontName.empty()) {
-            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ERROR_IN_CODE_LOCATION };
+            return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::GenericError, .message = ERROR_IN_CODE_LOCATION };
         }
 
         const DefaultAppearance da { pdfFontName, fontSize, std::move(fontColor) };
@@ -2262,7 +2262,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
     FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
     formWidget->setWidgetAnnotation(signatureAnnot);
 
-    return SignatureData { { ref.num, ref.gen }, signatureAnnot, formWidget, std::move(field) };
+    return SignatureData { .ref = { .num = ref.num, .gen = ref.gen }, .annotWidget = signatureAnnot, .formWidget = formWidget, .field = std::move(field) };
 }
 
 std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &saveFilename, const std::string &certNickname, const std::string &password, std::unique_ptr<GooString> &&partialFieldName, int page, const PDFRectangle &rect,
@@ -2272,7 +2272,7 @@ std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &s
 {
     ::Page *destPage = getPage(page);
     if (destPage == nullptr) {
-        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
+        return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
     }
 
     std::variant<SignatureData, CryptoSign::SigningErrorMessage> result =
@@ -2308,5 +2308,5 @@ std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &s
         return res;
     }
 
-    return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::InternalError, ERROR_IN_CODE_LOCATION };
+    return CryptoSign::SigningErrorMessage { .type = CryptoSign::SigningError::InternalError, .message = ERROR_IN_CODE_LOCATION };
 }

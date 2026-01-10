@@ -580,7 +580,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     if (namesObjRef != Ref::INVALID()) {
         xref->setModifiedObject(&namesObj, namesObjRef);
     } else {
-        xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+        xref->setModifiedObject(&catDict, { .num = xref->getRootNum(), .gen = xref->getRootGen() });
     }
 
     // recreate Nametree on next call that uses it
@@ -1020,7 +1020,7 @@ Object *Catalog::getCreateOutline()
 
     const Ref outlineRef = doc->getXRef()->addIndirectObject(outline);
     catDict.dictAdd("Outlines", Object(outlineRef));
-    xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+    xref->setModifiedObject(&catDict, { .num = xref->getRootNum(), .gen = xref->getRootGen() });
 
     return &outline;
 }
@@ -1092,7 +1092,7 @@ Form *Catalog::getCreateForm()
             const Ref newFormRef = xref->addIndirectObject(acroForm);
             catDict.dictSet("AcroForm", Object(newFormRef));
 
-            xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+            xref->setModifiedObject(&catDict, { .num = xref->getRootNum(), .gen = xref->getRootGen() });
         }
     }
 
@@ -1139,7 +1139,7 @@ void Catalog::setAcroFormModified()
         xref->setModifiedObject(&acroForm, acroFormRef);
     } else {
         catDict.dictSet("AcroForm", acroForm.copy());
-        xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+        xref->setModifiedObject(&catDict, { .num = xref->getRootNum(), .gen = xref->getRootGen() });
     }
 }
 

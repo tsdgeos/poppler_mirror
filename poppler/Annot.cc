@@ -3082,7 +3082,7 @@ std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const
 
 static std::unique_ptr<GfxFont> createAnnotDrawFont(XRef *xref, Dict *fontParentDict, const char *resourceName = "AnnotDrawFont", const char *fontname = "Helvetica")
 {
-    const Ref dummyRef = { -1, -1 };
+    const Ref dummyRef = { .num = -1, .gen = -1 };
 
     Dict *fontDict = new Dict(xref);
     fontDict->add("BaseFont", Object(objName, fontname));

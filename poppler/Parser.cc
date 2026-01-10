@@ -71,7 +71,7 @@ Object Parser::getObj(int recursion)
 
 static std::unique_ptr<GooString> decryptedString(const GooString *s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
-    DecryptStream decrypt(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, { objNum, objGen });
+    DecryptStream decrypt(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
     if (!decrypt.rewind()) {
         return {};
     }
@@ -317,7 +317,7 @@ Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlg
 
     // handle decryption
     if (fileKey) {
-        str = new DecryptStream(str, fileKey, encAlgorithm, keyLength, { objNum, objGen });
+        str = new DecryptStream(str, fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
     }
 
     // get filters

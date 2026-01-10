@@ -123,7 +123,8 @@ void TestAnnotations::checkHighlightFromAndToQuads()
     auto ha = std::make_unique<Poppler::HighlightAnnotation>();
     page->addAnnotation(ha.get());
 
-    const QList<Poppler::HighlightAnnotation::Quad> quads = { { { { 0, 0.1 }, { 0.2, 0.3 }, { 0.4, 0.5 }, { 0.6, 0.7 } }, false, false, 0 }, { { { 0.8, 0.9 }, { 0.1, 0.2 }, { 0.3, 0.4 }, { 0.5, 0.6 } }, true, false, 0.4 } };
+    const QList<Poppler::HighlightAnnotation::Quad> quads = { { .points = { { 0, 0.1 }, { 0.2, 0.3 }, { 0.4, 0.5 }, { 0.6, 0.7 } }, .capStart = false, .capEnd = false, .feather = 0 },
+                                                              { .points = { { 0.8, 0.9 }, { 0.1, 0.2 }, { 0.3, 0.4 }, { 0.5, 0.6 } }, .capStart = true, .capEnd = false, .feather = 0.4 } };
     ha->setHighlightQuads(quads);
     QCOMPARE(ha->highlightQuads(), quads);
 }
