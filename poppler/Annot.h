@@ -627,8 +627,8 @@ private:
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
-    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                  const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
+    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, VariableTextQuadding quadding,
+                  XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     std::unique_ptr<GooString> appearBuf;
@@ -721,7 +721,7 @@ public:
     Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
     bool isOk() { return ok; }
 
-    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, const double wMax, const double hMax, const bool forceZapfDingbats = {});
+    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, bool forceZapfDingbats = {});
 
     virtual void draw(Gfx *gfx, bool printing);
     // Get the resource dict of the appearance stream

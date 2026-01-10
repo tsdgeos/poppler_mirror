@@ -61,7 +61,7 @@ private:
 using rect = rectangle<int>;
 using rectf = rectangle<double>;
 
-POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rect r);
+POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, rect r);
 POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rectf &r);
 
 }

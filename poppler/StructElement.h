@@ -395,7 +395,7 @@ private:
 
     StructElement(Dict *elementDict, StructTreeRoot *treeRootA, StructElement *parentA, RefRecursionChecker &seen);
     StructElement(int mcid, StructTreeRoot *treeRootA, StructElement *parentA);
-    StructElement(const Ref ref, StructTreeRoot *treeRootA, StructElement *parentA);
+    StructElement(Ref ref, StructTreeRoot *treeRootA, StructElement *parentA);
 
     void parse(Dict *elementDict);
     StructElement *parseChild(const Object *ref, Object *childObj, RefRecursionChecker &seen);

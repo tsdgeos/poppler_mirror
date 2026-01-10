@@ -153,7 +153,7 @@ public:
 
     // Find a page, given its object ID.  Returns page number, or 0 if
     // not found.
-    int findPage(const Ref pageRef);
+    int findPage(Ref pageRef);
 
     // Find a named destination.  Returns the link destination, or
     // NULL if <name> is not a destination.
@@ -209,8 +209,8 @@ public:
     Object *getCreateOutline();
 
     Object *getAcroForm() { return &acroForm; }
-    void addFormToAcroForm(const Ref formRef);
-    void removeFormFromAcroForm(const Ref formRef);
+    void addFormToAcroForm(Ref formRef);
+    void removeFormFromAcroForm(Ref formRef);
     void setAcroFormModified();
 
     const OCGs *getOptContentConfig() { return optContent.get(); }
@@ -313,7 +313,7 @@ private:
     bool initPageList(); // init the page list. called by cachePageTree.
     bool cacheSubTree(); // called by cachePageTree.
     bool cachePageTree(int page); // Cache first <page> pages.
-    std::size_t cachePageTreeForRef(const Ref pageRef); // Cache until <pageRef>.
+    std::size_t cachePageTreeForRef(Ref pageRef); // Cache until <pageRef>.
     Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
     Object *getNames();

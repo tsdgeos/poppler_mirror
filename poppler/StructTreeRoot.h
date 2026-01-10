@@ -76,7 +76,7 @@ private:
 
     void parse(const Dict &rootDict);
     void parseNumberTreeNode(const Dict &node, RefRecursionChecker &usedParents);
-    void parentTreeAdd(const Ref objectRef, StructElement *element);
+    void parentTreeAdd(Ref objectRef, StructElement *element);
 
     friend class StructElement;
 };

@@ -440,7 +440,7 @@ class GfxFontDict
 {
 public:
     // Build the font dictionary, given the PDF font dictionary.
-    GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict);
+    GfxFontDict(XRef *xref, Ref fontDictRef, Dict *fontDict);
 
     GfxFontDict(const GfxFontDict &) = delete;
     GfxFontDict &operator=(const GfxFontDict &) = delete;

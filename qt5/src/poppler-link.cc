@@ -157,7 +157,7 @@ LinkSoundPrivate::~LinkSoundPrivate()
 class LinkRenditionPrivate : public LinkPrivate
 {
 public:
-    explicit LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&rendition, ::LinkRendition::RenditionOperation operation, QString script, const Ref ref);
+    explicit LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&rendition, ::LinkRendition::RenditionOperation operation, QString script, Ref ref);
     ~LinkRenditionPrivate() override;
 
     std::unique_ptr<MediaRendition> rendition;
@@ -205,7 +205,7 @@ LinkJavaScriptPrivate::~LinkJavaScriptPrivate() = default;
 class LinkMoviePrivate : public LinkPrivate
 {
 public:
-    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, QString title, const Ref reference);
+    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, QString title, Ref reference);
     ~LinkMoviePrivate() override;
 
     LinkMovie::Operation operation;

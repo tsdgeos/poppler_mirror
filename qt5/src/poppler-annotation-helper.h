@@ -44,7 +44,7 @@ class XPDFReader
 public:
     // transform from user coords to normalized ones using the matrix M
     static inline void transform(double *M, double x, double y, QPointF &res);
-    static inline void invTransform(const double *M, const QPointF p, double &x, double &y);
+    static inline void invTransform(const double *M, QPointF p, double &x, double &y);
 };
 
 void XPDFReader::transform(double *M, double x, double y, QPointF &res)

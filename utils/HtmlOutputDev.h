@@ -169,7 +169,7 @@ private:
     void setDocName(const char *fname);
     void dumpAsXML(FILE *f, int page);
     void dumpComplex(FILE *f, int page, const std::vector<std::string> &backgroundImages);
-    int dumpComplexHeaders(FILE *const file, FILE *&pageFile, int page);
+    int dumpComplexHeaders(FILE *file, FILE *&pageFile, int page);
 
     // marks the position of the fonts that belong to current page (for noframes)
     int fontsPageMarker;

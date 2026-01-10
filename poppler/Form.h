@@ -352,7 +352,7 @@ private:
 class POPPLER_PRIVATE_EXPORT FormField
 {
 public:
-    FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
+    FormField(PDFDoc *docA, Object &&aobj, Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
 
     virtual ~FormField();
 
@@ -440,7 +440,7 @@ private:
 class FormFieldButton : public FormField
 {
 public:
-    FormFieldButton(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldButton(PDFDoc *docA, Object &&dict, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     FormButtonType getButtonType() const { return btype; }
 
@@ -487,7 +487,7 @@ protected:
 class FormFieldText : public FormField
 {
 public:
-    FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldText(PDFDoc *docA, Object &&dictObj, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     const GooString *getContent() const { return content.get(); }
     const GooString *getAppearanceContent() const { return internalContent ? internalContent.get() : content.get(); }
@@ -539,7 +539,7 @@ protected:
 class FormFieldChoice : public FormField
 {
 public:
-    FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldChoice(PDFDoc *docA, Object &&aobj, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     ~FormFieldChoice() override;
 
@@ -615,7 +615,7 @@ protected:
 class POPPLER_PRIVATE_EXPORT FormFieldSignature : public FormField
 {
 public:
-    FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldSignature(PDFDoc *docA, Object &&dict, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     // Use -1 for now as validationTime
     SignatureInfo *validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback);
@@ -649,7 +649,7 @@ public:
 
     // Background image (ref to an object of type XObject). Invalid ref if not required.
     Ref getImageResource() const;
-    void setImageResource(const Ref imageResourceA);
+    void setImageResource(Ref imageResourceA);
 
     void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
 
@@ -695,7 +695,7 @@ public:
     /* Creates a new Field of the type specified in obj's dict.
        used in Form::Form , FormField::FormField and
        Page::loadStandaloneFields */
-    static std::unique_ptr<FormField> createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
+    static std::unique_ptr<FormField> createFieldFromDict(Object &&obj, PDFDoc *docA, Ref aref, FormField *parent, std::set<int> *usedParents);
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves

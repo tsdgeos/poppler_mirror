@@ -495,7 +495,7 @@ public:
      * \param script the java script code
      * \param annotationReference the object reference of the screen annotation associated with this rendition action
      */
-    [[deprecated]] LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference);
+    [[deprecated]] LinkRendition(const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, Ref annotationReference);
 
     /**
      * Create a new rendition link.
@@ -506,7 +506,7 @@ public:
      * \param script the java script code
      * \param annotationReference the object reference of the screen annotation associated with this rendition action
      */
-    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, const Ref annotationReference);
+    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, Ref annotationReference);
 
     /**
      * Destructor.
@@ -597,7 +597,7 @@ public:
      *
      * Note: This constructor is supposed to be used by Poppler::Page only.
      */
-    LinkMovie(const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref annotationReference);
+    LinkMovie(const QRectF &linkArea, Operation operation, const QString &annotationTitle, Ref annotationReference);
     /**
      * Destructor.
      */

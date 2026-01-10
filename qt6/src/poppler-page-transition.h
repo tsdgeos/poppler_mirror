@@ -84,7 +84,7 @@ public:
         Outward
     };
 
-    explicit PageTransition(const PageTransitionParams params);
+    explicit PageTransition(PageTransitionParams params);
 
     /** \brief copy constructor */
     PageTransition(const PageTransition &pt);

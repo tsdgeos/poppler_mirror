@@ -18,7 +18,6 @@ Checks:  >
     -readability-implicit-bool-conversion,
     -readability-magic-numbers,
     -readability-enum-initial-value,
-    -readability-avoid-const-params-in-decls,
     -readability-redundant-inline-specifier,
     -readability-make-member-function-const,
     -readability-avoid-nested-conditional-operator,

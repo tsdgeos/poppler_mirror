@@ -160,7 +160,7 @@ public:
     Object getCatalog();
 
     // Fetch an indirect reference.
-    Object fetch(const Ref ref, int recursion = 0);
+    Object fetch(Ref ref, int recursion = 0);
     // If endPos is not null, returns file position after parsing the object. This will
     // be a few bytes after the end of the object due to the parser reading ahead.
     // Returns -1 if object is in compressed stream.
