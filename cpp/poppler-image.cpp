@@ -381,13 +381,13 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x);
                 rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x);
                 rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x);
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }
@@ -399,13 +399,13 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 2);
                 rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 1);
                 rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x * 3);
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }
@@ -427,14 +427,14 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 const unsigned int pixel = *reinterpret_cast<unsigned int *>(hptr + x * 4);
                 rowptr[0] = (pixel >> 16) & 0xff;
                 rowptr[1] = (pixel >> 8) & 0xff;
                 rowptr[2] = pixel & 0xff;
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }

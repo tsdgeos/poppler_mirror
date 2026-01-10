@@ -128,7 +128,7 @@ static char charToHex(int x)
 static std::string out_hex_string(const poppler::byte_array &str)
 {
     std::string ret(str.size() * 2, '\0');
-    const char *str_p = &str[0];
+    const char *str_p = str.data();
     for (unsigned int i = 0; i < str.size(); ++i, ++str_p) {
         ret[i * 2] = charToHex((*str_p & 0xf0) >> 4);
         ret[i * 2 + 1] = charToHex(*str_p & 0xf);

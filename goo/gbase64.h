@@ -24,12 +24,12 @@ std::string POPPLER_PRIVATE_EXPORT gbase64Encode(const void *input, size_t len);
 
 inline std::string gbase64Encode(const std::vector<char> &input)
 {
-    return input.empty() ? std::string() : gbase64Encode(&input[0], input.size());
+    return input.empty() ? std::string() : gbase64Encode(input.data(), input.size());
 }
 
 inline std::string gbase64Encode(const std::vector<unsigned char> &input)
 {
-    return input.empty() ? std::string() : gbase64Encode(&input[0], input.size());
+    return input.empty() ? std::string() : gbase64Encode(input.data(), input.size());
 }
 
 #endif // ndef GOO_GBASE64_H

@@ -5309,7 +5309,7 @@ bool SplashBitmapCMYKEncoder::fillBuf()
         return true;
     }
 
-    bitmap->getCMYKLine(curLine, &buf[0]);
+    bitmap->getCMYKLine(curLine, buf.data());
     bufPtr = 0;
     curLine--;
     return true;

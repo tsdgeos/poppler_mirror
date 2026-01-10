@@ -115,5 +115,5 @@ std::unique_ptr<GooString> detail::ustring_to_unicode_GooString(const ustring &s
         ba[i * 2 + 2] = ((*me >> 8) & 0xff);
         ba[i * 2 + 3] = (*me & 0xff);
     }
-    return std::make_unique<GooString>(&ba[0], len);
+    return std::make_unique<GooString>(ba.data(), len);
 }

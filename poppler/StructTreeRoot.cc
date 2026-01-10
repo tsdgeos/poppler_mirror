@@ -165,7 +165,7 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
                         Ref ref = valueRef.getRef();
                         vec.resize(1);
                         vec[0].ref = ref;
-                        refToParentMap.insert(std::pair<Ref, Parent *>(ref, &vec[0]));
+                        refToParentMap.insert(std::pair<Ref, Parent *>(ref, vec.data()));
                     } else {
                         error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, valueRef.getTypeName());
                     }

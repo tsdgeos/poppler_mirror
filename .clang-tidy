@@ -33,7 +33,6 @@ Checks:  >
     -readability-redundant-casting,
     -readability-named-parameter,
     -readability-qualified-auto,
-    -readability-container-data-pointer,
     -readability-suspicious-call-argument,
     -readability-string-compare,
     modernize-*,

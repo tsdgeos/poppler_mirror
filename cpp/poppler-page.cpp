@@ -235,13 +235,13 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
 
     switch (direction) {
     case search_from_top:
-        found = text_page->findText(&u[0], len, true, true, false, false, sCase, false, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
+        found = text_page->findText(u.data(), len, true, true, false, false, sCase, false, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     case search_next_result:
-        found = text_page->findText(&u[0], len, false, true, true, false, sCase, false, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
+        found = text_page->findText(u.data(), len, false, true, true, false, sCase, false, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     case search_previous_result:
-        found = text_page->findText(&u[0], len, false, true, true, false, sCase, true, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
+        found = text_page->findText(u.data(), len, false, true, true, false, sCase, true, false, &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     }
 

@@ -2691,7 +2691,7 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
         return;
     }
 
-    state->getFontTransMat(&mat.m[0], &mat.m[1], &mat.m[2], &mat.m[3]);
+    state->getFontTransMat(mat.m.data(), &mat.m[1], &mat.m[2], &mat.m[3]);
     mat.m[0] *= state->getHorizScaling();
     mat.m[1] *= state->getHorizScaling();
     mat.m[4] = x1;
@@ -5274,7 +5274,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc, bool physLayo
             frag.computeCoords(oneRot);
         }
         if (!frags.empty() && area) {
-            assignColumns(&frags[0], frags.size(), true);
+            assignColumns(frags.data(), frags.size(), true);
         }
         if (oneRot) {
             std::ranges::sort(frags, &TextLineFrag::cmpYXLineRot);
