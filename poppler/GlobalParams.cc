@@ -62,6 +62,7 @@
 #include <cstring>
 #include <cstdio>
 #include <filesystem>
+#include <utility>
 #ifdef _WIN32
 #    include <shlobj.h>
 #    include <mbstring.h>
@@ -402,7 +403,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 // parsing
 //------------------------------------------------------------------------
 
-GlobalParams::GlobalParams(const std::string &customPopplerDataDir) : popplerDataDir(customPopplerDataDir)
+GlobalParams::GlobalParams(std::string customPopplerDataDir) : popplerDataDir(std::move(customPopplerDataDir))
 {
     // scan the encoding in reverse because we want the lowest-numbered
     // index for each char name ('space' is encoded twice)

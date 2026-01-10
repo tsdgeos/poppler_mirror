@@ -16,6 +16,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "goo/GooString.h"
@@ -45,7 +46,7 @@ enum OutputType
 class Document
 {
 public:
-    explicit Document(const std::string &filenameA) : filename(filenameA) { std::call_once(ftLibOnceFlag, FT_Init_FreeType, &ftLib); }
+    explicit Document(std::string filenameA) : filename(std::move(filenameA)) { std::call_once(ftLibOnceFlag, FT_Init_FreeType, &ftLib); }
 
     std::shared_ptr<PDFDoc> getDoc()
     {
@@ -81,7 +82,7 @@ std::once_flag Document::ftLibOnceFlag;
 
 struct Job
 {
-    Job(OutputType typeA, const std::shared_ptr<Document> &documentA, int pageNumA, const std::string &outputFileA) : type(typeA), document(documentA), pageNum(pageNumA), outputFile(outputFileA) { }
+    Job(OutputType typeA, const std::shared_ptr<Document> &documentA, int pageNumA, std::string outputFileA) : type(typeA), document(documentA), pageNum(pageNumA), outputFile(std::move(outputFileA)) { }
     OutputType type;
     std::shared_ptr<Document> document;
     int pageNum;

@@ -22,7 +22,7 @@ class CurlCachedFileLoader : public CachedFileLoader
 {
 
 public:
-    explicit CurlCachedFileLoader(const std::string &urlA);
+    explicit CurlCachedFileLoader(std::string urlA);
     ~CurlCachedFileLoader() override;
     size_t init(CachedFile *cachedFile) override;
     int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;

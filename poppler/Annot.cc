@@ -96,6 +96,7 @@
 #include "UTF.h"
 #include <cstring>
 #include <algorithm>
+#include <utility>
 
 #include "annot_stamp_approved.h"
 #include "annot_stamp_as_is.h"
@@ -821,7 +822,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-DefaultAppearance::DefaultAppearance(const std::string &fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(fontNameA), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
+DefaultAppearance::DefaultAppearance(std::string fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
 DefaultAppearance::DefaultAppearance(const GooString *da)
 {
@@ -3196,7 +3197,7 @@ public:
 
     struct Data
     {
-        Data(const std::string &t, const std::string &fName, double w, int cc) : text(t), fontName(fName), width(w), charCount(cc) { }
+        Data(std::string t, std::string fName, double w, int cc) : text(std::move(t)), fontName(std::move(fName)), width(w), charCount(cc) { }
 
         const std::string text;
         const std::string fontName;

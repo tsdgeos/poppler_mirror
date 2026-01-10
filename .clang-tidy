@@ -46,7 +46,6 @@ Checks:  >
     -modernize-avoid-c-arrays,
     -modernize-use-std-print,
     -modernize-return-braced-init-list,
-    -modernize-pass-by-value,
     -modernize-use-integer-sign-comparison,
     google-explicit-constructor,
     misc-non-copyable-objects,

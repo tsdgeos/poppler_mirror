@@ -32,6 +32,7 @@
 #include <poppler-media.h>
 
 #include <QtCore/QStringList>
+#include <utility>
 
 #include "poppler-annotation-private.h"
 
@@ -157,7 +158,7 @@ LinkSoundPrivate::~LinkSoundPrivate()
 class LinkRenditionPrivate : public LinkPrivate
 {
 public:
-    LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref);
+    LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, QString script, const Ref ref);
     ~LinkRenditionPrivate() override;
 
     std::unique_ptr<MediaRendition> rendition;
@@ -166,8 +167,8 @@ public:
     Ref annotationReference;
 };
 
-LinkRenditionPrivate::LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref ref)
-    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), script(javaScript), annotationReference(ref)
+LinkRenditionPrivate::LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, QString javaScript, const Ref ref)
+    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), script(std::move(javaScript)), annotationReference(ref)
 {
     switch (operation) {
     case ::LinkRendition::NoRendition:
@@ -206,7 +207,7 @@ LinkJavaScriptPrivate::~LinkJavaScriptPrivate() = default;
 class LinkMoviePrivate : public LinkPrivate
 {
 public:
-    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref reference);
+    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, QString title, const Ref reference);
     ~LinkMoviePrivate() override;
 
     LinkMovie::Operation operation;
@@ -214,7 +215,7 @@ public:
     Ref annotationReference;
 };
 
-LinkMoviePrivate::LinkMoviePrivate(const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref reference) : LinkPrivate(area), operation(_operation), annotationTitle(title), annotationReference(reference) { }
+LinkMoviePrivate::LinkMoviePrivate(const QRectF &area, LinkMovie::Operation _operation, QString title, const Ref reference) : LinkPrivate(area), operation(_operation), annotationTitle(std::move(title)), annotationReference(reference) { }
 
 LinkMoviePrivate::~LinkMoviePrivate() = default;
 

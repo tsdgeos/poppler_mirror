@@ -13,13 +13,15 @@
 
 #include <config.h>
 
+#include <utility>
+
 #include "CurlCachedFile.h"
 
 #include "goo/GooString.h"
 
 //------------------------------------------------------------------------
 
-CurlCachedFileLoader::CurlCachedFileLoader(const std::string &urlA) : url(urlA)
+CurlCachedFileLoader::CurlCachedFileLoader(std::string urlA) : url(std::move(urlA))
 {
     cachedFile = nullptr;
     curl = nullptr;
