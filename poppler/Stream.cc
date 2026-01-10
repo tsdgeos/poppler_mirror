@@ -601,7 +601,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA)
     }
     inputLine = (unsigned char *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
     if (nBits == 8) {
-        imgLine = (unsigned char *)inputLine;
+        imgLine = inputLine;
     } else {
         if (nBits == 1) {
             imgLineSize = (nVals + 7) & ~7;
@@ -618,7 +618,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA)
 
 ImageStream::~ImageStream()
 {
-    if (imgLine != (unsigned char *)inputLine) {
+    if (imgLine != inputLine) {
         gfree(imgLine);
     }
     gfree(inputLine);
@@ -1100,7 +1100,7 @@ void CachedFileStream::setPos(Goffset pos, int dir)
         size = (unsigned int)cc->tell();
 
         if (pos > size) {
-            pos = (unsigned int)size;
+            pos = size;
         }
 
         cc->seek(-(int)pos, SEEK_END);

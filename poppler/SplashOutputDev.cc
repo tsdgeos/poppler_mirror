@@ -804,7 +804,7 @@ static int getLum(int r, int g, int b)
     // (int)(0.3 * r + 0.59 * g + 0.11 * b) =
     // (int)(256 / 256 * 0.3 * r + 256 / 256 * 0.59 * g + 256 / 256 * 0.11 * b)
     // (int)((77 * r + 151 * g + 28 * b) / 256)  = // round!
-    return (int)((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
+    return ((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
 }
 
 static int getSat(int r, int g, int b)

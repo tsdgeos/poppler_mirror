@@ -367,7 +367,7 @@ bool FormFieldButton::state() const
 void FormFieldButton::setState(bool state)
 {
     FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
-    fwb->setState((bool)state);
+    fwb->setState(state);
 }
 
 QList<int> FormFieldButton::siblings() const

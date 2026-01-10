@@ -287,10 +287,10 @@ LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDe
             cvtUserToDev(page, left, top, &leftAux, &topAux);
             cvtUserToDev(page, right, bottom, &rightAux, &bottomAux);
 
-            d->left = leftAux / (double)page->getCropWidth();
-            d->top = topAux / (double)page->getCropHeight();
-            d->right = rightAux / (double)page->getCropWidth();
-            d->bottom = bottomAux / (double)page->getCropHeight();
+            d->left = leftAux / page->getCropWidth();
+            d->top = topAux / page->getCropHeight();
+            d->right = rightAux / page->getCropWidth();
+            d->bottom = bottomAux / page->getCropHeight();
         } else {
             d->pageNum = 0;
         }

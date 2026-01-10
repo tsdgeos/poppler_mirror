@@ -312,7 +312,7 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         const ::LinkAction *a = outlineItem->getAction();
         linkActionToTocItem(a, this, &item);
 
-        item.setAttribute(QStringLiteral("Open"), QVariant((bool)outlineItem->isOpen()).toString());
+        item.setAttribute(QStringLiteral("Open"), QVariant(outlineItem->isOpen()).toString());
 
         // 3. recursively descend over children
         outlineItem->open();

@@ -133,7 +133,7 @@ static inline unsigned char dblToByte(double x)
 
 static inline double byteToDbl(unsigned char x)
 {
-    return (double)x / (double)255.0;
+    return (double)x / 255.0;
 }
 
 static inline GfxColorComp byteToCol(unsigned char x)

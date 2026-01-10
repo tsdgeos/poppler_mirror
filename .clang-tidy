@@ -26,7 +26,6 @@ Checks:  >
     -readability-function-cognitive-complexity,
     -readability-convert-member-functions-to-static,
     -readability-avoid-unconditional-preprocessor-if,
-    -readability-redundant-casting,
     -readability-named-parameter,
     -readability-qualified-auto,
     -readability-suspicious-call-argument,

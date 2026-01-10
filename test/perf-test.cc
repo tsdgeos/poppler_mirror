@@ -72,7 +72,7 @@ public:
     void setFileName(const char *fileName)
     {
         assert(!_fileName);
-        _fileName = (char *)strdup(fileName);
+        _fileName = strdup(fileName);
     }
 
     int pageCount() const { return _pageCount; }

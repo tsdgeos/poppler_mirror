@@ -252,7 +252,7 @@ Object Lexer::getObj(int objNum)
                 return Object(xf);
             }
             if (unlikely(xll == INT_MIN)) {
-                return Object(static_cast<int>(INT_MIN));
+                return Object(INT_MIN);
             }
             return Object(xll);
         }

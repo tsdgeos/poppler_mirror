@@ -131,7 +131,7 @@ public:
     {
         m_device = nullptr;
         fileContents = data;
-        MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object::null());
+        MemStream *str = new MemStream(fileContents.data(), 0, fileContents.length(), Object::null());
         init();
         doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }

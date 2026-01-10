@@ -941,10 +941,10 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes
-    bObj.arrayAdd(Object(static_cast<long long>(0LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
+    bObj.arrayAdd(Object(0LL));
+    bObj.arrayAdd(Object(9999999999LL));
+    bObj.arrayAdd(Object(9999999999LL));
+    bObj.arrayAdd(Object(9999999999LL));
     vObj.dictAdd("ByteRange", bObj.copy());
     field->getObj()->dictSet("V", Object(vRef));
     xref->setModifiedObject(field->getObj(), field->getRef());
