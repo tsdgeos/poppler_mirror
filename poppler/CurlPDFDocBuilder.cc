@@ -38,9 +38,5 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
 
 bool CurlPDFDocBuilder::supports(const GooString &uri)
 {
-    if (uri.starts_with("http://") || uri.starts_with("https://")) {
-        return true;
-    } else {
-        return false;
-    }
+    return uri.starts_with("http://") || uri.starts_with("https://");
 }

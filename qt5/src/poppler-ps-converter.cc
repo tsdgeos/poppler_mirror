@@ -244,8 +244,8 @@ bool PSConverter::convert()
     }
 
     if (psOut->isOk()) {
-        bool isPrinting = (d->opts & Printing) ? true : false;
-        bool showAnnotations = (d->opts & HideAnnotations) ? false : true;
+        bool isPrinting = (d->opts & Printing) != 0;
+        bool showAnnotations = (d->opts & HideAnnotations) == 0;
         Q_FOREACH (int page, d->pageList) {
             d->document->doc->displayPage(psOut, page, d->hDPI, d->vDPI, d->rotate, false, true, isPrinting, nullptr, nullptr, annotDisplayDecideCbk, &showAnnotations, true);
             if (d->pageConvertedCallback) {

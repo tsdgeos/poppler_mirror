@@ -191,7 +191,7 @@ Page *Catalog::getPage(int i)
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
         bool cached = cachePageTree(i);
-        if (cached == false) {
+        if (!cached) {
             return nullptr;
         }
     }
@@ -207,7 +207,7 @@ Ref *Catalog::getPageRef(int i)
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
         bool cached = cachePageTree(i);
-        if (cached == false) {
+        if (!cached) {
             return nullptr;
         }
     }

@@ -1437,7 +1437,7 @@ void JBIG2Stream::readSegments()
         // segment data, unless this segment is marked as having an
         // unknown length (section 7.2.7 of the JBIG2 Final Committee Draft)
 
-        if (!(segType == 38 && segLength == 0xffffffff)) {
+        if (segType != 38 || segLength != 0xffffffff) {
 
             byteCounter += arithDecoder->getByteCounter();
             byteCounter += huffDecoder->getByteCounter();

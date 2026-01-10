@@ -231,7 +231,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
                     continue;
                 }
@@ -256,7 +256,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
                     continue;
                 }
@@ -314,7 +314,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
                     continue;
                 }
@@ -343,7 +343,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
                     continue;
                 }

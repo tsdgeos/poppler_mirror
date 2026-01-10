@@ -418,7 +418,7 @@ std::vector<text_box> page::text_list(int opt_flag) const
         double xMin, yMin, xMax, yMax;
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-        text_box tb { new text_box_data { ustr, { xMin, yMin, xMax - xMin, yMax - yMin }, word->getRotation(), {}, word->hasSpaceAfter() == true, nullptr } };
+        text_box tb { new text_box_data { ustr, { xMin, yMin, xMax - xMin, yMax - yMin }, word->getRotation(), {}, word->hasSpaceAfter(), nullptr } };
 
         std::unique_ptr<text_box_font_info_data> tb_font_info = nullptr;
         if (opt_flag & page::text_list_include_font) {

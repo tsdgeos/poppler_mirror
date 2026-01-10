@@ -241,7 +241,7 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY)
     if ((SplashCoord)(spanXMax + 1) <= xMin || (SplashCoord)spanXMin >= xMax || (SplashCoord)(spanY + 1) <= yMin || (SplashCoord)spanY >= yMax) {
         return splashClipAllOutside;
     }
-    if (!((SplashCoord)spanXMin >= xMin && (SplashCoord)(spanXMax + 1) <= xMax && (SplashCoord)spanY >= yMin && (SplashCoord)(spanY + 1) <= yMax)) {
+    if ((SplashCoord)spanXMin < xMin || (SplashCoord)(spanXMax + 1) > xMax || (SplashCoord)spanY < yMin || (SplashCoord)(spanY + 1) > yMax) {
         return splashClipPartial;
     }
     if (antialias) {

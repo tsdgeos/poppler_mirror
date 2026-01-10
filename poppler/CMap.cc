@@ -164,7 +164,7 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data)
                     error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && n1 >= 4 && (n1 & 1) == 0)) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || n1 < 4 || (n1 & 1) != 0) {
                     error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
                     continue;
                 }

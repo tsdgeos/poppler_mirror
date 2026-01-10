@@ -613,11 +613,7 @@ QString LinkRendition::script() const
 bool LinkRendition::isReferencedAnnotation(const ScreenAnnotation *annotation) const
 {
     Q_D(const LinkRendition);
-    if (d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference()) {
-        return true;
-    }
-
-    return false;
+    return d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference();
 }
 
 // LinkJavaScript

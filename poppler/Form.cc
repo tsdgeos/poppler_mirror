@@ -1498,10 +1498,7 @@ bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
 
     if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
         // It's button in a set, set state on parent
-        if (static_cast<FormFieldButton *>(parent)->setState(state)) {
-            return true;
-        }
-        return false;
+        return static_cast<FormFieldButton *>(parent)->setState(state);
     }
 
     bool isOn = strcmp(state, "Off") != 0;

@@ -109,7 +109,7 @@ static bool isTableScopeName(Object *value)
 
 static bool isRGBColor(Object *value)
 {
-    if (!(value->isArray() && value->arrayGetLength() == 3)) {
+    if (!value->isArray() || value->arrayGetLength() != 3) {
         return false;
     }
 

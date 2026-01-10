@@ -187,7 +187,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList)
             } else {
 
                 // parse the format string
-                if (!(*p0 >= '0' && *p0 <= '9')) {
+                if (*p0 < '0' || *p0 > '9') {
                     break;
                 }
                 idx = *p0 - '0';

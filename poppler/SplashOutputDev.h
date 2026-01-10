@@ -208,7 +208,7 @@ public:
     // Does this device use functionShadedFill(), axialShadedFill(), and
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
-    bool useShadedFills(int type) override { return (type >= 1 && type <= 5) ? true : false; }
+    bool useShadedFills(int type) override { return type >= 1 && type <= 5; }
 
     // Does this device use upside-down coordinates?
     // (Upside-down means (0,0) is the top left corner of the page.)

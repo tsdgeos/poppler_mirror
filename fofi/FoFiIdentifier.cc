@@ -191,10 +191,7 @@ bool FileReader::fillBuf(int pos, int len)
     }
     bufPos = pos;
     bufLen = (int)fread(buf, 1, sizeof(buf), f);
-    if (bufLen < len) {
-        return false;
-    }
-    return true;
+    return bufLen >= len;
 }
 
 //------------------------------------------------------------------------

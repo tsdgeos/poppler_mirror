@@ -2257,7 +2257,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
     state->transform(0, 0, &xt, &yt);
 
     // is it the first (MRU) font in the cache?
-    if (!(nT3Fonts > 0 && t3FontCache[0]->matches(fontID, ctm[0], ctm[1], ctm[2], ctm[3]))) {
+    if (nT3Fonts <= 0 || !t3FontCache[0]->matches(fontID, ctm[0], ctm[1], ctm[2], ctm[3])) {
 
         // is the font elsewhere in the cache?
         for (i = 1; i < nT3Fonts; ++i) {
@@ -2602,7 +2602,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     if (!imgMaskData.imgStr->rewind()) {
         return;
     }
-    imgMaskData.invert = invert ? false : true;
+    imgMaskData.invert = !invert;
     imgMaskData.width = width;
     imgMaskData.height = height;
     imgMaskData.y = 0;
@@ -2653,7 +2653,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     mat[3] = -ctm[3];
     mat[4] = ctm[2] + ctm[4];
     mat[5] = ctm[3] + ctm[5];
-    imgMaskData.invert = invert ? false : true;
+    imgMaskData.invert = !invert;
     imgMaskData.width = width;
     imgMaskData.height = height;
     imgMaskData.y = 0;
@@ -3334,7 +3334,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
     src = maskColors ? &alphaImageSrc : &imageSrc;
     tf = nullptr;
 #endif
-    splash->drawImage(src, tf, &imgData, srcMode, maskColors ? true : false, width, height, mat, interpolate);
+    splash->drawImage(src, tf, &imgData, srcMode, maskColors != nullptr, width, height, mat, interpolate);
     if (inlineImg) {
         while (imgData.y < height) {
             imgData.imgStr->getLine();
@@ -3501,7 +3501,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         if (!imgMaskData.imgStr->rewind()) {
             return;
         }
-        imgMaskData.invert = maskInvert ? false : true;
+        imgMaskData.invert = !maskInvert;
         imgMaskData.width = maskWidth;
         imgMaskData.height = maskHeight;
         imgMaskData.y = 0;

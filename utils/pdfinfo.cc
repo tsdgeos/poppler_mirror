@@ -990,11 +990,7 @@ int main(int argc, char *argv[])
     if (firstPage < 1) {
         firstPage = 1;
     }
-    if (lastPage == 0) {
-        multiPage = false;
-    } else {
-        multiPage = true;
-    }
+    multiPage = lastPage != 0;
     if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
     }
@@ -1039,7 +1035,7 @@ int main(int argc, char *argv[])
             fclose(f);
         }
 
-        if (multiPage == false) {
+        if (!multiPage) {
             lastPage = 1;
         }
 

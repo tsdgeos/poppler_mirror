@@ -798,10 +798,7 @@ static void ParseCommandLine(int argc, char **argv)
 
 static bool IsPdfFileName(char *path)
 {
-    if (str_endswith(path, ".pdf")) {
-        return true;
-    }
-    return false;
+    return str_endswith(path, ".pdf");
 }
 
 /* Render 'cmdLineArg', which can be:

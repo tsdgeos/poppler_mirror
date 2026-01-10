@@ -168,11 +168,7 @@ bool OCGs::optContentIsVisible(const Object *dictRef) const
                 }
             } else if (ocg.isRef()) {
                 OptionalContentGroup *oc = findOcgByRef(ocg.getRef());
-                if (oc && oc->getState() == OptionalContentGroup::Off) {
-                    result = false;
-                } else {
-                    result = true;
-                }
+                result = !oc || oc->getState() != OptionalContentGroup::Off;
             }
         }
     } else if (dictType.isName("OCG") && dictRef->isRef()) {

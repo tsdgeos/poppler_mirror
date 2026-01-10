@@ -685,7 +685,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
         } else {
             pos2 = obj2.getInt64();
         }
-        for (size_t i = 0; ok == true && i < followedXRefStm->size(); ++i) {
+        for (size_t i = 0; ok && i < followedXRefStm->size(); ++i) {
             if (followedXRefStm->at(i) == pos2) {
                 ok = false;
             }

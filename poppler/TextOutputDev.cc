@@ -3527,7 +3527,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
         if (fblk2 != nullptr && fblk3 != nullptr && fblk4 != nullptr) {
             if (((fblk3->xMin <= fblk4->xMax && fblk3->xMax >= fblk4->xMin) || (fblk2->yMin <= fblk4->yMax && fblk2->yMax >= fblk4->yMin) || (fblk2->xMin <= fblk3->xMax && fblk2->xMax >= fblk3->xMin)
                  || (fblk2->yMin <= fblk3->yMax && fblk2->yMax >= fblk3->yMin))
-                || !(fblk4->xMin <= fblk2->xMax && fblk4->xMax >= fblk2->xMin && fblk4->yMin <= fblk3->yMax && fblk4->yMax >= fblk3->yMin)) {
+                || fblk4->xMin > fblk2->xMax || fblk4->xMax < fblk2->xMin || fblk4->yMin > fblk3->yMax || fblk4->yMax < fblk3->yMin) {
                 fblk2 = nullptr;
                 fblk3 = nullptr;
                 fblk4 = nullptr;

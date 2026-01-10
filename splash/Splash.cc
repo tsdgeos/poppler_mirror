@@ -225,11 +225,7 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *patt
     pipe->knockoutOpacity = knockoutOpacity;
 
     // result alpha
-    if (aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !nonIsolatedGroup) {
-        pipe->noTransparency = true;
-    } else {
-        pipe->noTransparency = false;
-    }
+    pipe->noTransparency = aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !nonIsolatedGroup;
 
     // result color
     if (pipe->noTransparency) {

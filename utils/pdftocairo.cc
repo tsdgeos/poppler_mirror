@@ -963,11 +963,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -printdlg, -print, -svg).\n");
         exit(99);
     }
-    if (png || jpeg || tiff) {
-        printing = false;
-    } else {
-        printing = true;
-    }
+    printing = !(png || jpeg || tiff);
 
     if (printing) {
         checkInvalidPrintOption(mono, "-mono");
@@ -1070,11 +1066,7 @@ int main(int argc, char *argv[])
             exit(99);
         }
     }
-    if (origPageSizes || paperWidth < 0 || paperHeight < 0) {
-        usePDFPageSize = true;
-    } else {
-        usePDFPageSize = false;
-    }
+    usePDFPageSize = origPageSizes || paperWidth < 0 || paperHeight < 0;
 
     if (printdlg) {
         printToWin32 = true;

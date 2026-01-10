@@ -341,24 +341,19 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
 
     std::unique_ptr<ImgWriter> w;
     const int actual_dpi = dpi == -1 ? 75 : dpi;
-    if (false) {
-    }
+    if (fmt == "png") {
 #if ENABLE_LIBPNG
-    else if (fmt == "png") {
         w = std::make_unique<PNGWriter>();
-    }
 #endif
+    } else if (fmt == "jpeg" || fmt == "jpg") {
 #if ENABLE_LIBJPEG
-    else if (fmt == "jpeg" || fmt == "jpg") {
         w = std::make_unique<JpegWriter>();
-    }
 #endif
+    } else if (fmt == "tiff") {
 #if ENABLE_LIBTIFF
-    else if (fmt == "tiff") {
         w = std::make_unique<TiffWriter>();
-    }
 #endif
-    else if (fmt == "pnm") {
+    } else if (fmt == "pnm") {
         w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
     if (!w) {
@@ -444,11 +439,7 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     }
     }
 
-    if (!w->close()) {
-        return false;
-    }
-
-    return true;
+    return w->close();
 }
 
 /**

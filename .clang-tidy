@@ -23,7 +23,6 @@ Checks:  >
     -readability-use-std-min-max,
     -readability-isolate-declaration,
     -readability-math-missing-parentheses,
-    -readability-simplify-boolean-expr,
     -readability-else-after-return,
     -readability-function-cognitive-complexity,
     -readability-convert-member-functions-to-static,
@@ -59,5 +58,7 @@ CheckOptions:
   - key:             modernize-use-using.IgnoreExternC
     value:           '1'
   - key:             modernize-use-default-member-init.UseAssignment
+    value:           '1'
+  - key:             readability-simplify-boolean-expr.IgnoreMacros
     value:           '1'
 ...

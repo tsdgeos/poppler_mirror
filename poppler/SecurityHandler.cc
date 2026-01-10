@@ -221,7 +221,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
                 } else {
                     error(errSyntaxError, -1, "Weird encryption owner/user info");
                 }
-            } else if (!(encVersion == -1 && encRevision == -1)) {
+            } else if (encVersion != -1 || encRevision != -1) {
                 error(errUnimplemented, -1, "Unsupported version/revision ({0:d}/{1:d}) of Standard security handler", encVersion, encRevision);
             }
 

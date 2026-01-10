@@ -1298,11 +1298,7 @@ void PSOutputDev::postInit()
     xref = doc->getXRef();
     catalog = doc->getCatalog();
 
-    if (paperWidth < 0 || paperHeight < 0) {
-        paperMatch = true;
-    } else {
-        paperMatch = false;
-    }
+    paperMatch = paperWidth < 0 || paperHeight < 0;
 
     paperSizes.clear();
     for (const int pg : pages) {
@@ -2122,7 +2118,7 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
             error(errSyntaxError, -1, "Unexpected end of file in embedded font stream");
             goto err1;
         }
-        if (!((start[i] >= '0' && start[i] <= '9') || (start[i] >= 'A' && start[i] <= 'F') || (start[i] >= 'a' && start[i] <= 'f'))) {
+        if ((start[i] < '0' || start[i] > '9') && (start[i] < 'A' || start[i] > 'F') && (start[i] < 'a' || start[i] > 'f')) {
             binMode = true;
         }
     }
@@ -2682,7 +2678,7 @@ std::unique_ptr<GooString> PSOutputDev::makePSFontName(GfxFont *font, const Ref 
 
 void PSOutputDev::setupImages(Dict *resDict)
 {
-    if (!(mode == psModeForm || inType3Char || preloadImagesForms)) {
+    if (mode != psModeForm && !inType3Char && !preloadImagesForms) {
         return;
     }
 
@@ -4874,7 +4870,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
     CharCode maxGlyph;
 
     // for pdftohtml, output PS without text
-    if (displayText == false) {
+    if (!displayText) {
         return;
     }
 
@@ -5177,7 +5173,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap, bool invert
     }
 
     // image data
-    if (!((inType3Char || preloadImagesForms) && !colorMap)) {
+    if ((!inType3Char && !preloadImagesForms) || colorMap) {
 
         if (colorMap) {
 
@@ -5857,11 +5853,11 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                 useRLE = true;
                 useLZW = false;
             }
-            useASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
+            useASCII = mode != psModeForm && !inType3Char && !preloadImagesForms;
             useCompressed = false;
         } else {
             useLZW = useRLE = false;
-            useASCII = str->isBinary() && !(mode == psModeForm || inType3Char || preloadImagesForms);
+            useASCII = str->isBinary() && mode != psModeForm && !inType3Char && !preloadImagesForms;
             useCompressed = true;
         }
     }
@@ -6022,9 +6018,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
                 } else {
                     maskUseRLE = true;
                 }
-                maskUseASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
+                maskUseASCII = mode != psModeForm && !inType3Char && !preloadImagesForms;
             } else {
-                maskUseASCII = maskStr->isBinary() && !(mode == psModeForm || inType3Char || preloadImagesForms);
+                maskUseASCII = maskStr->isBinary() && mode != psModeForm && !inType3Char && !preloadImagesForms;
                 maskUseCompressed = true;
             }
         }
@@ -6242,9 +6238,9 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
             } else {
                 useRLE = true;
             }
-            useASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
+            useASCII = mode != psModeForm && !inType3Char && !preloadImagesForms;
         } else {
-            useASCII = str->isBinary() && !(mode == psModeForm || inType3Char || preloadImagesForms);
+            useASCII = str->isBinary() && mode != psModeForm && !inType3Char && !preloadImagesForms;
             useCompressed = true;
         }
     }
@@ -6359,7 +6355,7 @@ void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colo
 
     // close the mask stream
     if (maskStr) {
-        if (!(mode == psModeForm || inType3Char || preloadImagesForms)) {
+        if (mode != psModeForm && !inType3Char && !preloadImagesForms) {
             writePS("pdfMaskEnd\n");
         }
     }
@@ -7299,12 +7295,8 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
     GooString *label2 = new GooString();
     int labelLength = label->size();
 
-    if (labelLength == 0) {
-        isNumeric = false;
-    } else {
-        // this gets changed later if we find a non-numeric character
-        isNumeric = true;
-    }
+    // this gets changed later if we find a non-numeric character
+    isNumeric = labelLength != 0;
 
     if ((labelLength >= 2) && ((label->getChar(0) & 0xff) == 0xfe) && ((label->getChar(1) & 0xff) == 0xff)) {
         // UCS2 mode

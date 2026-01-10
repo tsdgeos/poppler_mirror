@@ -157,11 +157,7 @@ static bool compareObjects(const Object *objA, const Object *objB)
         }
     }
     case objNull: {
-        if (objB->getType() != objNull) {
-            return false;
-        } else {
-            return true;
-        }
+        return objB->getType() == objNull;
     }
     case objArray: {
         if (objB->getType() != objArray) {

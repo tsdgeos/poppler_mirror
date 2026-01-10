@@ -300,7 +300,7 @@ void PreScanOutputDev::check(GfxColorSpace *colorSpace, const GfxColor *color, d
         if (rgb.r != rgb.g || rgb.g != rgb.b || rgb.b != rgb.r) {
             mono = false;
             gray = false;
-        } else if (!((rgb.r == 0 && rgb.g == 0 && rgb.b == 0) || (rgb.r == gfxColorComp1 && rgb.g == gfxColorComp1 && rgb.b == gfxColorComp1))) {
+        } else if ((rgb.r != 0 || rgb.g != 0 || rgb.b != 0) && (rgb.r != gfxColorComp1 || rgb.g != gfxColorComp1 || rgb.b != gfxColorComp1)) {
             mono = false;
         }
     }

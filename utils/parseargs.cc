@@ -195,10 +195,7 @@ bool isInt(const char *s)
     while (isdigit(*s)) {
         ++s;
     }
-    if (*s) {
-        return false;
-    }
-    return true;
+    return *s == 0;
 }
 
 bool isFP(const char *s)

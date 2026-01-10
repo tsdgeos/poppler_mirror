@@ -71,7 +71,7 @@ void StructTreeRoot::parse(const Dict &root)
             if (obj.isDict()) {
                 StructElement *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
                 if (child->isOk()) {
-                    if (marked && !(child->getType() == StructElement::Document || child->getType() == StructElement::Part || child->getType() == StructElement::Art || child->getType() == StructElement::Div)) {
+                    if (marked && child->getType() != StructElement::Document && child->getType() != StructElement::Part && child->getType() != StructElement::Art && child->getType() != StructElement::Div) {
                         error(errSyntaxWarning, -1, "StructTreeRoot element of tagged PDF is wrong type ({0:s})", child->getTypeName());
                     }
                     appendChild(child);

@@ -1368,7 +1368,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001a: // vvcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vvcurveto", nOps);
                 }
                 if (nOps % 2 == 1) {
@@ -1396,7 +1396,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001b: // hhcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hhcurveto", nOps);
                 }
                 if (nOps % 2 == 1) {
@@ -1438,7 +1438,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 // don't clear the stack
                 break;
             case 0x001e: // vhcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vhcurveto", nOps);
                 }
                 for (k = 0; k < nOps && k != nOps - 5; k += 4) {
@@ -1478,7 +1478,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001f: // hvcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hvcurveto", nOps);
                 }
                 for (k = 0; k < nOps && k != nOps - 5; k += 4) {

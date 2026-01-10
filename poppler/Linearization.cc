@@ -34,7 +34,7 @@ Linearization::Linearization(BaseStream *str)
     linDict = parser->getObj();
     if (obj1.isInt() && obj2.isInt() && obj3.isCmd("obj") && linDict.isDict()) {
         Object obj5 = linDict.dictLookup("Linearized");
-        if (!(obj5.isNum() && obj5.getNum() > 0)) {
+        if (!obj5.isNum() || obj5.getNum() <= 0) {
             linDict.setToNull();
         }
     } else {

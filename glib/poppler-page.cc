@@ -276,10 +276,7 @@ static bool annots_display_decide_cb(Annot *annot, void *user_data)
     Annot::AnnotSubtype type = annot->getType();
     int typeMask = 1 << MAX(0, (((int)type) - 1));
 
-    if (flags & typeMask) {
-        return true;
-    }
-    return false;
+    return (flags & typeMask) != 0;
 }
 
 /**

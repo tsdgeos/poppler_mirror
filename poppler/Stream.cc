@@ -536,11 +536,7 @@ bool BaseSeekInputStream::fillBuf()
 
     n = read(buf, n);
     bufEnd = buf + n;
-    if (bufPtr >= bufEnd) {
-        return false;
-    }
-
-    return true;
+    return bufPtr < bufEnd;
 }
 
 int BaseSeekInputStream::getChars(int nChars, unsigned char *buffer)
@@ -991,10 +987,7 @@ bool FileStream::fillBuf()
     }
     offset += n;
     bufEnd = buf + n;
-    if (bufPtr >= bufEnd) {
-        return false;
-    }
-    return true;
+    return bufPtr < bufEnd;
 }
 
 void FileStream::setPos(Goffset pos, int dir)
@@ -1088,10 +1081,7 @@ bool CachedFileStream::fillBuf()
     }
     n = cc->read(buf, 1, n);
     bufEnd = buf + n;
-    if (bufPtr >= bufEnd) {
-        return false;
-    }
-    return true;
+    return bufPtr < bufEnd;
 }
 
 void CachedFileStream::setPos(Goffset pos, int dir)

@@ -546,7 +546,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
     switch (m_page->parentDoc->m_backend) {
     case Poppler::Document::SplashBackend: {
         SplashColor bgColor;
-        const bool overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
+        const bool overprintPreview = (m_page->parentDoc->m_hints & Document::OverprintPreview) != 0;
         if (overprintPreview) {
             unsigned char c, m, y, k;
 
@@ -589,9 +589,9 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
 
-        splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? true : false);
-        splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? true : false);
-        splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false, m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
+        splash_output.setFontAntialias((m_page->parentDoc->m_hints & Document::TextAntialiasing) != 0);
+        splash_output.setVectorAntialias((m_page->parentDoc->m_hints & Document::Antialiasing) != 0);
+        splash_output.setFreeTypeHinting((m_page->parentDoc->m_hints & Document::TextHinting) != 0, (m_page->parentDoc->m_hints & Document::TextSlightHinting) != 0);
 
 #if USE_CMS
         splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
@@ -715,10 +715,10 @@ QString Page::text(const QRectF &r) const
 
 bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchFlags flags, Rotation rotate) const
 {
-    const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
-    const bool sWords = flags.testFlag(WholeWords) ? true : false;
-    const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
-    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
+    const bool sCase = !flags.testFlag(IgnoreCase);
+    const bool sWords = flags.testFlag(WholeWords);
+    const bool sDiacritics = flags.testFlag(IgnoreDiacritics);
+    const bool sAcrossLines = flags.testFlag(AcrossLines);
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
@@ -730,10 +730,10 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
 
 QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rotate) const
 {
-    const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
-    const bool sWords = flags.testFlag(WholeWords) ? true : false;
-    const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
-    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
+    const bool sCase = !flags.testFlag(IgnoreCase);
+    const bool sWords = flags.testFlag(WholeWords);
+    const bool sDiacritics = flags.testFlag(IgnoreDiacritics);
+    const bool sAcrossLines = flags.testFlag(AcrossLines);
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
@@ -777,7 +777,7 @@ std::vector<std::unique_ptr<TextBox>> Page::textList(Rotation rotate, ShouldAbor
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
         auto text_box = std::make_unique<TextBox>(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
-        text_box->m_data->hasSpaceAfter = word->hasSpaceAfter() == true;
+        text_box->m_data->hasSpaceAfter = word->hasSpaceAfter();
         text_box->m_data->charBBoxes.reserve(word->getLength());
         for (int j = 0; j < word->getLength(); ++j) {
             word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);

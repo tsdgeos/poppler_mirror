@@ -1346,7 +1346,7 @@ std::unique_ptr<GooString> PostScriptFunction::getToken(Stream *str)
         while (true) {
             s.push_back((char)c);
             c = str->lookChar();
-            if (c == EOF || !(isdigit(c) || c == '.' || c == '-')) {
+            if (c == EOF || (!isdigit(c) && c != '.' && c != '-')) {
                 break;
             }
             str->getChar();
@@ -1525,7 +1525,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const
             case psOpIdiv:
                 i2 = stack->popInt();
                 i1 = stack->popInt();
-                if (likely((i2 != 0) && !(i2 == -1 && i1 == INT_MIN))) {
+                if (likely((i2 != 0) && (i2 != -1 || i1 != INT_MIN))) {
                     stack->pushInt(i1 / i2);
                 }
                 break;

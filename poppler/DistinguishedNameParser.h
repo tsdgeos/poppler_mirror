@@ -214,11 +214,7 @@ static std::pair<std::optional<std::string_view>, std::pair<std::string, std::st
                 case '\\':
                 case '"':
                 case ' ': {
-                    if (stringv.front() == ' ') {
-                        lastAddedEscapedSpace = true;
-                    } else {
-                        lastAddedEscapedSpace = false;
-                    }
+                    lastAddedEscapedSpace = stringv.front() == ' ';
                     value.push_back(stringv.front());
                     stringv.remove_prefix(1);
                     break;
