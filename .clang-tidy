@@ -53,6 +53,11 @@ Checks:  >
     -modernize-concat-nested-namespaces,
     -modernize-use-integer-sign-comparison,
     google-explicit-constructor,
+    misc-non-copyable-objects,
+    misc-redundant-expression,
+    misc-static-assert,
+    misc-unconventional-assign-operator,
+    misc-uniqueptr-reset-release,
     -clang-analyzer-*'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.'
