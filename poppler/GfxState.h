@@ -112,7 +112,7 @@ enum GfxBlendMode
 //------------------------------------------------------------------------
 
 // 16.16 fixed point color component
-typedef int GfxColorComp;
+using GfxColorComp = int;
 
 #define gfxColorComp1 0x10000
 
@@ -176,7 +176,7 @@ static inline void clearGfxColor(GfxColor *gfxColor)
 // GfxGray
 //------------------------------------------------------------------------
 
-typedef GfxColorComp GfxGray;
+using GfxGray = GfxColorComp;
 
 //------------------------------------------------------------------------
 // GfxRGB
@@ -223,7 +223,7 @@ enum GfxColorSpaceMode
 // This shall hold a cmsHPROFILE handle.
 // Only use the make_GfxLCMSProfilePtr function to construct this pointer,
 // to ensure that the resources are properly released after usage.
-typedef std::shared_ptr<void> GfxLCMSProfilePtr;
+using GfxLCMSProfilePtr = std::shared_ptr<void>;
 
 #if USE_CMS
 GfxLCMSProfilePtr POPPLER_PRIVATE_EXPORT make_GfxLCMSProfilePtr(void *profile);

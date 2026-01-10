@@ -77,14 +77,14 @@ private:
     void *redrawCbkData;
 };
 
-typedef struct
+struct View
 {
     PopplerDocument *doc;
     GtkWidget *drawing_area;
     GtkWidget *spin_button;
     cairo_surface_t *surface;
     GDKSplashOutputDev *out;
-} View;
+};
 
 //------------------------------------------------------------------------
 // Constants and macros

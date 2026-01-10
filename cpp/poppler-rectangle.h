@@ -58,8 +58,8 @@ private:
     T x1, y1, x2, y2;
 };
 
-typedef rectangle<int> rect;
-typedef rectangle<double> rectf;
+using rect = rectangle<int>;
+using rectf = rectangle<double>;
 
 POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rect r);
 POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const rectf &r);

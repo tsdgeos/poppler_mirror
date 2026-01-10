@@ -94,13 +94,13 @@ struct _PopplerPath
     gsize n_points;
 };
 
-typedef struct _Layer
+struct Layer
 {
     /*< private >*/
     GList *kids;
     gchar *label;
     OptionalContentGroup *oc;
-} Layer;
+};
 
 struct _PopplerLayer
 {
@@ -126,7 +126,7 @@ struct _PopplerStructureElement
  * The real type behind the public PopplerRectangle.
  * Must be ABI compatible to it!
  */
-typedef struct
+struct PopplerRectangleExtended
 {
     /*< private >*/
     double x1;
@@ -135,7 +135,7 @@ typedef struct
     double y2;
     bool match_continued; /* Described in poppler_rectangle_find_get_match_continued() */
     bool ignored_hyphen; /* Described in poppler_rectangle_find_get_ignored_hyphen() */
-} PopplerRectangleExtended;
+};
 
 PopplerRectangle *poppler_rectangle_new_from_pdf_rectangle(const PDFRectangle *rect);
 

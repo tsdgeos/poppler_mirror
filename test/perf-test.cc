@@ -90,11 +90,11 @@ private:
     SplashOutputDev *_outputDev;
 };
 
-typedef struct StrList
+struct StrList
 {
     struct StrList *next;
     char *str;
-} StrList;
+};
 
 /* List of all command-line arguments that are not switches.
    We assume those are:

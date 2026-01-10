@@ -65,11 +65,11 @@ private:
         chunkStateLoaded
     };
 
-    typedef struct
+    using Chunk = struct
     {
         ChunkState state;
         char data[CachedFileChunkSize];
-    } Chunk;
+    };
 
     int cache(size_t offset, size_t length);
 

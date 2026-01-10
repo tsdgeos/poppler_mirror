@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    typedef std::vector<StructElement *> ElemPtrArray;
+    using ElemPtrArray = std::vector<StructElement *>;
 
     // Structure for items in /ParentTree, it keeps a mapping of
     // object references and pointers to StructElement objects.

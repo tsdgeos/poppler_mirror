@@ -27,11 +27,11 @@
  * @title: PopplerLayer
  */
 
-typedef struct _PopplerLayerClass PopplerLayerClass;
 struct _PopplerLayerClass
 {
     GObjectClass parent_class;
 };
+using PopplerLayerClass = _PopplerLayerClass;
 
 G_DEFINE_TYPE(PopplerLayer, poppler_layer, G_TYPE_OBJECT)
 

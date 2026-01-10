@@ -10,15 +10,15 @@
 #define CHARTYPES_H
 
 // Unicode character.
-typedef unsigned int Unicode;
+using Unicode = unsigned int;
 
 // Character ID for CID character collections.
-typedef unsigned int CID;
+using CID = unsigned int;
 
 // This is large enough to hold any of the following:
 // - 8-bit char code
 // - 16-bit CID
 // - Unicode
-typedef unsigned int CharCode;
+using CharCode = unsigned int;
 
 #endif

@@ -45,10 +45,11 @@
  * #PopplerStructureElementIter methods to traverse the structure tree.
  */
 
-typedef struct _PopplerStructureElementClass
+struct _PopplerStructureElementClass
 {
     GObjectClass parent_class;
-} PopplerStructureElementClass;
+};
+using PopplerStructureElementClass = _PopplerStructureElementClass;
 
 G_DEFINE_TYPE(PopplerStructureElement, poppler_structure_element, G_TYPE_OBJECT)
 

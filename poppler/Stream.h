@@ -103,11 +103,11 @@ enum CryptAlgorithm
 
 //------------------------------------------------------------------------
 
-typedef struct _ByteRange
+struct ByteRange
 {
     size_t offset;
     unsigned int length;
-} ByteRange;
+};
 
 //------------------------------------------------------------------------
 // Stream (base class)

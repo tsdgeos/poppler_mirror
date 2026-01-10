@@ -47,7 +47,7 @@ private:
 class POPPLER_CPP_EXPORT toc_item : public poppler::noncopyable
 {
 public:
-    typedef std::vector<toc_item *>::const_iterator iterator;
+    using iterator = std::vector<toc_item *>::const_iterator;
 
     ~toc_item();
 

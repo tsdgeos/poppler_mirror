@@ -179,7 +179,7 @@ ARRAY_CHECKER(isNumberOrArrayN, isNumber, 0, true, false)
 ARRAY_CHECKER(isTableHeaders, isTextString, 0, false, false)
 
 // Type of functions used to do type-checking on attribute values
-typedef bool (*AttributeCheckFunc)(Object *);
+using AttributeCheckFunc = bool (*)(Object *);
 
 // Maps attributes to their names and whether the attribute can be inherited.
 struct AttributeMapEntry

@@ -54,11 +54,11 @@ enum
 
 static PopplerRectangleExtended *poppler_rectangle_extended_new();
 
-typedef struct _PopplerPageClass PopplerPageClass;
 struct _PopplerPageClass
 {
     GObjectClass parent_class;
 };
+using PopplerPageClass = _PopplerPageClass;
 
 G_DEFINE_TYPE(PopplerPage, poppler_page, G_TYPE_OBJECT)
 

@@ -35,9 +35,9 @@
 //------------------------------------------------------------------------
 
 #if USE_FLOAT
-typedef float SplashCoord;
+using SplashCoord = float;
 #else
-typedef double SplashCoord;
+using SplashCoord = double;
 #endif
 
 //------------------------------------------------------------------------
@@ -86,9 +86,9 @@ extern int splashColorModeNComps[];
 // max number of components in any SplashColor
 constexpr std::size_t splashMaxColorComps = SPOT_NCOMPS + 4;
 
-typedef unsigned char SplashColor[splashMaxColorComps];
-typedef unsigned char *SplashColorPtr;
-typedef const unsigned char *SplashColorConstPtr;
+using SplashColor = unsigned char[splashMaxColorComps];
+using SplashColorPtr = unsigned char *;
+using SplashColorConstPtr = const unsigned char *;
 
 // RGB8
 static inline unsigned char splashRGB8R(SplashColorPtr rgb8)
@@ -194,7 +194,7 @@ static inline bool splashColorEqual(SplashColorConstPtr dest, SplashColorConstPt
 // blend functions
 //------------------------------------------------------------------------
 
-typedef void (*SplashBlendFunc)(SplashColorPtr src, SplashColorPtr dest, SplashColorPtr blend, SplashColorMode cm);
+using SplashBlendFunc = void (*)(SplashColorPtr src, SplashColorPtr dest, SplashColorPtr blend, SplashColorMode cm);
 
 //------------------------------------------------------------------------
 // screen parameters
@@ -218,7 +218,7 @@ struct SplashScreenParams
 // error results
 //------------------------------------------------------------------------
 
-typedef int SplashError;
+using SplashError = int;
 
 //------------------------------------------------------------------------
 // image file formats

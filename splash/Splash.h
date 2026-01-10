@@ -46,15 +46,15 @@ struct SplashPipe;
 // Retrieves the next line of pixels in an image mask.  Normally,
 // fills in *<line> and returns true.  If the image stream is
 // exhausted, returns false.
-typedef bool (*SplashImageMaskSource)(void *data, SplashColorPtr pixel);
+using SplashImageMaskSource = bool (*)(void *data, SplashColorPtr pixel);
 
 // Retrieves the next line of pixels in an image.  Normally, fills in
 // *<line> and returns true.  If the image stream is exhausted,
 // returns false.
-typedef bool (*SplashImageSource)(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
+using SplashImageSource = bool (*)(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
 
 // Use ICCColorSpace to transform a bitmap
-typedef void (*SplashICCTransform)(void *data, SplashBitmap *bitmap);
+using SplashICCTransform = void (*)(void *data, SplashBitmap *bitmap);
 
 //------------------------------------------------------------------------
 

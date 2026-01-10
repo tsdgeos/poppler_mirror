@@ -41,7 +41,6 @@ Checks:  >
     -modernize-macro-to-enum,
     -modernize-use-trailing-return-type,
     -modernize-use-nodiscard,
-    -modernize-use-using,
     -modernize-use-auto,
     -modernize-use-designated-initializers,
     -modernize-avoid-c-arrays,
@@ -62,4 +61,7 @@ WarningsAsErrors: '*'
 HeaderFilterRegex: '.'
 FormatStyle:     none
 User:            user
+CheckOptions:
+  - key:             modernize-use-using.IgnoreExternC
+    value:           '1'
 ...

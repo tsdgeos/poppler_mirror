@@ -91,9 +91,9 @@ private:
     int xMin, yMin, xMax, yMax;
 
 #if USE_BOOST_HEADERS
-    typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+    using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    typedef std::vector<SplashIntersect> IntersectionLine;
+    using IntersectionLine = std::vector<SplashIntersect> IntersectionLine;
 #endif
     std::vector<IntersectionLine> allIntersections;
 
@@ -111,9 +111,9 @@ public:
 
 private:
 #if USE_BOOST_HEADERS
-    typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+    using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    typedef std::vector<SplashIntersect> IntersectionLine;
+    using IntersectionLine = typedef std::vector<SplashIntersect>;
 #endif
     const IntersectionLine &line;
 

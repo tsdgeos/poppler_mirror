@@ -191,12 +191,12 @@ static void libopenjpeg_warning_callback(const char *msg, void * /*client_data*/
     error(errSyntaxWarning, -1, "{0:s}", msg);
 }
 
-typedef struct JPXData_s
+struct JPXData
 {
     const unsigned char *data;
     int size;
     OPJ_OFF_T pos;
-} JPXData;
+};
 
 #define BUFFER_INITIAL_SIZE 4096
 

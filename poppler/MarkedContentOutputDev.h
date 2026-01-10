@@ -65,7 +65,7 @@ private:
     friend class MarkedContentOutputDev;
 };
 
-typedef std::vector<TextSpan> TextSpanArray;
+using TextSpanArray = std::vector<TextSpan>;
 
 class POPPLER_PRIVATE_EXPORT MarkedContentOutputDev : public OutputDev
 {

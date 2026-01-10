@@ -42,11 +42,11 @@
  * @title: PopplerFormField
  */
 
-typedef struct _PopplerFormFieldClass PopplerFormFieldClass;
 struct _PopplerFormFieldClass
 {
     GObjectClass parent_class;
 };
+using PopplerFormFieldClass = _PopplerFormFieldClass;
 
 G_DEFINE_TYPE(PopplerFormField, poppler_form_field, G_TYPE_OBJECT)
 
@@ -416,8 +416,6 @@ struct _PopplerCertificateInfo
     GDateTime *issued;
     GDateTime *expires;
 };
-
-typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
 
 G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_certificate_info_copy, poppler_certificate_info_free)
 
@@ -1136,8 +1134,6 @@ struct _PopplerSigningData
     char *document_owner_password;
     char *document_user_password;
 };
-
-typedef struct _PopplerSigningData PopplerSigningData;
 
 G_DEFINE_BOXED_TYPE(PopplerSigningData, poppler_signing_data, poppler_signing_data_copy, poppler_signing_data_free)
 

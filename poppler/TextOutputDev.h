@@ -66,7 +66,7 @@ class TextSelectionVisitor;
 
 //------------------------------------------------------------------------
 
-typedef void (*TextOutputFunc)(void *stream, const char *text, int len);
+using TextOutputFunc = void (*)(void *stream, const char *text, int len);
 
 enum SelectionStyle
 {

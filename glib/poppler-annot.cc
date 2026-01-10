@@ -39,25 +39,11 @@ std::unique_ptr<AnnotStampImageHelper> _poppler_convert_cairo_image_to_stamp_ima
  * @short_description: Annotations
  * @title: PopplerAnnot
  */
-
-typedef struct _PopplerAnnotClass PopplerAnnotClass;
-typedef struct _PopplerAnnotMarkupClass PopplerAnnotMarkupClass;
-typedef struct _PopplerAnnotFreeTextClass PopplerAnnotFreeTextClass;
-typedef struct _PopplerAnnotTextClass PopplerAnnotTextClass;
-typedef struct _PopplerAnnotTextMarkupClass PopplerAnnotTextMarkupClass;
-typedef struct _PopplerAnnotFileAttachmentClass PopplerAnnotFileAttachmentClass;
-typedef struct _PopplerAnnotMovieClass PopplerAnnotMovieClass;
-typedef struct _PopplerAnnotScreenClass PopplerAnnotScreenClass;
-typedef struct _PopplerAnnotLineClass PopplerAnnotLineClass;
-typedef struct _PopplerAnnotCircleClass PopplerAnnotCircleClass;
-typedef struct _PopplerAnnotSquareClass PopplerAnnotSquareClass;
-typedef struct _PopplerAnnotStampClass PopplerAnnotStampClass;
-typedef struct _PopplerAnnotInkClass PopplerAnnotInkClass;
-
 struct _PopplerAnnotClass
 {
     GObjectClass parent_class;
 };
+using PopplerAnnotClass = _PopplerAnnotClass;
 
 struct _PopplerAnnotMarkup
 {
@@ -68,6 +54,7 @@ struct _PopplerAnnotMarkupClass
 {
     PopplerAnnotClass parent_class;
 };
+using PopplerAnnotMarkupClass = _PopplerAnnotMarkupClass;
 
 struct _PopplerAnnotText
 {
@@ -78,6 +65,7 @@ struct _PopplerAnnotTextClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotTextClass = _PopplerAnnotTextClass;
 
 struct _PopplerAnnotTextMarkup
 {
@@ -88,6 +76,7 @@ struct _PopplerAnnotTextMarkupClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotTextMarkupClass = _PopplerAnnotTextMarkupClass;
 
 struct _PopplerAnnotFreeText
 {
@@ -100,6 +89,7 @@ struct _PopplerAnnotFreeTextClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotFreeTextClass = _PopplerAnnotFreeTextClass;
 
 struct _PopplerAnnotFileAttachment
 {
@@ -110,6 +100,7 @@ struct _PopplerAnnotFileAttachmentClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotFileAttachmentClass = _PopplerAnnotFileAttachmentClass;
 
 struct _PopplerAnnotMovie
 {
@@ -122,6 +113,7 @@ struct _PopplerAnnotMovieClass
 {
     PopplerAnnotClass parent_class;
 };
+using PopplerAnnotMovieClass = _PopplerAnnotMovieClass;
 
 struct _PopplerAnnotScreen
 {
@@ -134,6 +126,7 @@ struct _PopplerAnnotScreenClass
 {
     PopplerAnnotClass parent_class;
 };
+using PopplerAnnotScreenClass = _PopplerAnnotScreenClass;
 
 struct _PopplerAnnotLine
 {
@@ -144,6 +137,7 @@ struct _PopplerAnnotLineClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotLineClass = _PopplerAnnotLineClass;
 
 struct _PopplerAnnotCircle
 {
@@ -154,6 +148,7 @@ struct _PopplerAnnotCircleClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotCircleClass = _PopplerAnnotCircleClass;
 
 struct _PopplerAnnotSquare
 {
@@ -164,6 +159,8 @@ struct _PopplerAnnotSquareClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotSquareClass = _PopplerAnnotSquareClass;
+
 struct _PopplerAnnotStamp
 {
     PopplerAnnotMarkup parent_instance;
@@ -172,6 +169,7 @@ struct _PopplerAnnotStampClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+using PopplerAnnotStampClass = _PopplerAnnotStampClass;
 
 struct _PopplerAnnotInk
 {
@@ -182,6 +180,7 @@ struct _PopplerAnnotInkClass
 {
     PopplerAnnotClass parent_class;
 };
+using PopplerAnnotInkClass = _PopplerAnnotInkClass;
 
 G_DEFINE_TYPE(PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE(PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
@@ -490,7 +489,7 @@ enum FontPropType
     TYPE_NORMAL
 };
 
-typedef std::map<std::string, std::pair<FontPropType, int>> FontstyleMap;
+using FontstyleMap = std::map<std::string, std::pair<FontPropType, int>>;
 
 static const FontstyleMap string_to_fontstyle = { { "UltraCondensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_ULTRA_CONDENSED) },
                                                   { "ExtraCondensed", std::pair(TYPE_STRETCH, POPPLER_STRETCH_EXTRA_CONDENSED) },

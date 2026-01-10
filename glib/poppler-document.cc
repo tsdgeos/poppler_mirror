@@ -115,11 +115,11 @@ enum
 
 static void poppler_document_layers_free(PopplerDocument *document);
 
-typedef struct _PopplerDocumentClass PopplerDocumentClass;
 struct _PopplerDocumentClass
 {
     GObjectClass parent_class;
 };
+using PopplerDocumentClass = _PopplerDocumentClass;
 
 G_DEFINE_TYPE(PopplerDocument, poppler_document, G_TYPE_OBJECT)
 
@@ -3083,11 +3083,11 @@ static PopplerFontsIter *poppler_fonts_iter_new(std::vector<FontInfo *> &&items)
     return iter;
 }
 
-typedef struct _PopplerFontInfoClass PopplerFontInfoClass;
 struct _PopplerFontInfoClass
 {
     GObjectClass parent_class;
 };
+using PopplerFontInfoClass = _PopplerFontInfoClass;
 
 /**
  * PopplerFontInfo:
@@ -3553,11 +3553,11 @@ gboolean poppler_layers_iter_next(PopplerLayersIter *iter)
     return TRUE;
 }
 
-typedef struct _PopplerPSFileClass PopplerPSFileClass;
 struct _PopplerPSFileClass
 {
     GObjectClass parent_class;
 };
+using PopplerPSFileClass = _PopplerPSFileClass;
 
 /**
  * PopplerPsFile:

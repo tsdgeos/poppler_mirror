@@ -346,8 +346,8 @@ private:
     GooString *appendSubTreeText(GooString *string, bool recursive) const;
     const TextSpanArray &getTextSpansInternal(MarkedContentOutputDev &mcdev) const;
 
-    typedef std::vector<Attribute *> AttrPtrArray;
-    typedef std::vector<StructElement *> ElemPtrArray;
+    using AttrPtrArray = std::vector<Attribute *>;
+    using ElemPtrArray = std::vector<StructElement *>;
 
     struct StructData
     {
