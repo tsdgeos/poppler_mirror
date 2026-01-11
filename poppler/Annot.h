@@ -437,9 +437,9 @@ public:
 
     AnnotIconFitScaleWhen getScaleWhen() { return scaleWhen; }
     AnnotIconFitScale getScale() { return scale; }
-    double getLeft() { return left; }
-    double getBottom() { return bottom; }
-    bool getFullyBounds() { return fullyBounds; }
+    double getLeft() const { return left; }
+    double getBottom() const { return bottom; }
+    bool getFullyBounds() const { return fullyBounds; }
 
 protected:
     AnnotIconFitScaleWhen scaleWhen; // SW (Default A)
@@ -719,7 +719,7 @@ public:
     Annot(PDFDoc *docA, PDFRectangle *rectA);
     Annot(PDFDoc *docA, Object &&dictObject);
     Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
     static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, bool forceZapfDingbats = {});
 
@@ -771,7 +771,7 @@ public:
     AnnotColor *getColor() const { return color.get(); }
     int getTreeKey() const { return treeKey; }
 
-    int getId() { return ref.num; }
+    int getId() const { return ref.num; }
 
     // Check if point is inside the annot rectangle.
     bool inRect(double x, double y) const;
@@ -1371,7 +1371,7 @@ public:
 
     void setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths);
     void setDrawBelow(bool drawBelow);
-    bool getDrawBelow();
+    bool getDrawBelow() const;
 
     // getters
     const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }

@@ -18,7 +18,6 @@ Checks:  >
     -readability-implicit-bool-conversion,
     -readability-magic-numbers,
     -readability-enum-initial-value,
-    -readability-make-member-function-const,
     -readability-avoid-nested-conditional-operator,
     -readability-use-std-min-max,
     -readability-isolate-declaration,

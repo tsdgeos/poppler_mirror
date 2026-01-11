@@ -105,16 +105,16 @@ public:
     void clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine = false);
 
     // Get the rectangle part of the clip region.
-    SplashCoord getXMin() { return xMin; }
-    SplashCoord getXMax() { return xMax; }
-    SplashCoord getYMin() { return yMin; }
-    SplashCoord getYMax() { return yMax; }
+    SplashCoord getXMin() const { return xMin; }
+    SplashCoord getXMax() const { return xMax; }
+    SplashCoord getYMin() const { return yMin; }
+    SplashCoord getYMax() const { return yMax; }
 
     // Get the rectangle part of the clip region, in integer coordinates.
-    int getXMinI() { return xMinI; }
-    int getXMaxI() { return xMaxI; }
-    int getYMinI() { return yMinI; }
-    int getYMaxI() { return yMaxI; }
+    int getXMinI() const { return xMinI; }
+    int getXMaxI() const { return xMaxI; }
+    int getYMinI() const { return yMinI; }
+    int getYMaxI() const { return yMaxI; }
 
     // Get the number of arbitrary paths used by the clip region.
     int getNumPaths() { return scanners.size(); }

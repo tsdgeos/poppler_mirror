@@ -82,7 +82,7 @@ public:
     cairo_surface_t *getImage() const { return image; }
 
     // Get the image rectangle
-    void getRect(double *xa1, double *ya1, double *xa2, double *ya2)
+    void getRect(double *xa1, double *ya1, double *xa2, double *ya2) const
     {
         *xa1 = x1;
         *ya1 = y1;
@@ -262,14 +262,14 @@ public:
         Type3RenderColor
     };
     void setType3RenderType(Type3RenderType state) { t3_render_state = state; }
-    void getType3GlyphWidth(double *wx, double *wy)
+    void getType3GlyphWidth(double *wx, double *wy) const
     {
         *wx = t3_glyph_wx;
         *wy = t3_glyph_wy;
     }
-    bool hasType3GlyphBBox() { return t3_glyph_has_bbox; }
+    bool hasType3GlyphBBox() const { return t3_glyph_has_bbox; }
     double *getType3GlyphBBox() { return t3_glyph_bbox; }
-    bool type3GlyphHasColor() { return t3_glyph_has_color; }
+    bool type3GlyphHasColor() const { return t3_glyph_has_color; }
 
 protected:
     void doPath(cairo_t *cairo, const GfxPath *path);

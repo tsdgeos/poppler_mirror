@@ -1699,7 +1699,7 @@ public:
     GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
     void setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms);
     std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
-    int getCmsRenderingIntent();
+    int getCmsRenderingIntent() const;
     static GfxLCMSProfilePtr sRGBProfile;
 #endif
 

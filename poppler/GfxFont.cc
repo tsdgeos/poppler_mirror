@@ -2332,7 +2332,7 @@ public:
         }
     }
 
-    int get31() { return (h ^ (h >> 31)) & 0x7fffffff; }
+    int get31() const { return (h ^ (h >> 31)) & 0x7fffffff; }
 
 private:
     unsigned int h;

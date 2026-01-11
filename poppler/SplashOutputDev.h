@@ -337,7 +337,7 @@ public:
     void setVectorAntialias(bool vaa) override;
 #endif
 
-    bool getFontAntialias() { return fontAntialias; }
+    bool getFontAntialias() const { return fontAntialias; }
     void setFontAntialias(bool anti) { fontAntialias = anti; }
 
     void setFreeTypeHinting(bool enable, bool enableSlightHinting);

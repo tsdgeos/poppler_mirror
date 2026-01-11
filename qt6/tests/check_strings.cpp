@@ -43,7 +43,7 @@ public:
 
 private Q_SLOTS:
     static void initTestCase();
-    void cleanupTestCase();
+    void cleanupTestCase() const;
     static void check_unicodeToQString_data();
     static void check_unicodeToQString();
     void check_UnicodeParsedString_data();
@@ -62,7 +62,7 @@ void TestStrings::initTestCase()
     globalParams = std::make_unique<GlobalParams>();
 }
 
-void TestStrings::cleanupTestCase()
+void TestStrings::cleanupTestCase() const
 {
     qDeleteAll(m_gooStrings);
 

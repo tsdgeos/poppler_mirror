@@ -275,8 +275,8 @@ public:
     // new feature
     virtual int DevType() { return 1234; }
 
-    int getPageWidth() { return maxPageWidth; }
-    int getPageHeight() { return maxPageHeight; }
+    int getPageWidth() const { return maxPageWidth; }
+    int getPageHeight() const { return maxPageHeight; }
 
     bool dumpDocOutline(PDFDoc *doc);
 

@@ -6697,7 +6697,7 @@ void AnnotInk::setDrawBelow(bool drawBelow_)
     generateInkAppearance();
 }
 
-bool AnnotInk::getDrawBelow()
+bool AnnotInk::getDrawBelow() const
 {
     return drawBelow;
 }

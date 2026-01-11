@@ -251,7 +251,6 @@ public:
 
     // Optional element identifier.
     const GooString *getID() const { return isContent() ? nullptr : s->id.get(); }
-    GooString *getID() { return isContent() ? nullptr : s->id.get(); }
 
     // Optional ISO language name, e.g. en_US
     GooString *getLanguage()
@@ -271,7 +270,7 @@ public:
 
     // Optional revision number, defaults to zero.
     unsigned int getRevision() const { return isContent() ? 0 : s->revision; }
-    void setRevision(unsigned int revision)
+    void setRevision(unsigned int revision) const
     {
         if (isContent()) {
             s->revision = revision;
@@ -280,17 +279,14 @@ public:
 
     // Optional element title, in human-readable form.
     const GooString *getTitle() const { return isContent() ? nullptr : s->title.get(); }
-    GooString *getTitle() { return isContent() ? nullptr : s->title.get(); }
 
     // Optional element expanded abbreviation text.
     const GooString *getExpandedAbbr() const { return isContent() ? nullptr : s->expandedAbbr.get(); }
-    GooString *getExpandedAbbr() { return isContent() ? nullptr : s->expandedAbbr.get(); }
 
     unsigned getNumChildren() const { return isContent() ? 0 : s->elements.size(); }
     const StructElement *getChild(int i) const { return isContent() ? nullptr : s->elements.at(i); }
-    StructElement *getChild(int i) { return isContent() ? nullptr : s->elements.at(i); }
 
-    void appendChild(StructElement *element)
+    void appendChild(StructElement *element) const
     {
         if (!isContent() && element && element->isOk()) {
             s->elements.push_back(element);
@@ -299,9 +295,9 @@ public:
 
     unsigned getNumAttributes() const { return isContent() ? 0 : s->attributes.size(); }
     const Attribute *getAttribute(int i) const { return isContent() ? nullptr : s->attributes.at(i); }
-    Attribute *getAttribute(int i) { return isContent() ? nullptr : s->attributes.at(i); }
+    Attribute *getNonConstAttribute(int i) const { return isContent() ? nullptr : s->attributes.at(i); }
 
-    void appendAttribute(Attribute *attribute)
+    void appendAttribute(Attribute *attribute) const
     {
         if (!isContent() && attribute) {
             s->attributes.push_back(attribute);
@@ -311,10 +307,8 @@ public:
     const Attribute *findAttribute(Attribute::Type attributeType, bool inherit = false, Attribute::Owner owner = Attribute::UnknownOwner) const;
 
     const GooString *getAltText() const { return isContent() ? nullptr : s->altText.get(); }
-    GooString *getAltText() { return isContent() ? nullptr : s->altText.get(); }
 
     const GooString *getActualText() const { return isContent() ? nullptr : s->actualText.get(); }
-    GooString *getActualText() { return isContent() ? nullptr : s->actualText.get(); }
 
     // Content text referenced by the element:
     //

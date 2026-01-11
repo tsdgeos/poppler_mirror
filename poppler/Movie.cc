@@ -267,7 +267,7 @@ Movie::Movie(const Movie &other)
     }
 }
 
-void Movie::getFloatingWindowSize(int *widthA, int *heightA)
+void Movie::getFloatingWindowSize(int *widthA, int *heightA) const
 {
     *widthA = int(width * double(MA.znum) / MA.zdenum);
     *heightA = int(height * double(MA.znum) / MA.zdenum);

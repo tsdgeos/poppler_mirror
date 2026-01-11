@@ -962,7 +962,7 @@ public:
         }
         return 0;
     }
-    bool empty() { return sp == psStackSize; }
+    bool empty() const { return sp == psStackSize; }
     bool topIsInt() { return sp < psStackSize && stack[sp].type == psInt; }
     bool topTwoAreInts() { return sp < psStackSize - 1 && stack[sp].type == psInt && stack[sp + 1].type == psInt; }
     bool topIsReal() { return sp < psStackSize && stack[sp].type == psReal; }
@@ -994,7 +994,7 @@ public:
     }
 
 private:
-    bool checkOverflow(int n = 1)
+    bool checkOverflow(int n = 1) const
     {
         if (sp - n < 0) {
             error(errSyntaxError, -1, "Stack overflow in PostScript function");
@@ -1002,7 +1002,7 @@ private:
         }
         return true;
     }
-    bool checkUnderflow()
+    bool checkUnderflow() const
     {
         if (sp == psStackSize) {
             error(errSyntaxError, -1, "Stack underflow in PostScript function");

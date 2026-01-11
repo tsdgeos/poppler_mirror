@@ -56,7 +56,7 @@ public:
     std::optional<unsigned long> getGlyph(CharCode code);
     double getSubstitutionCorrection(const std::shared_ptr<GfxFont> &gfxFont);
 
-    bool isSubstitute() { return substitute; }
+    bool isSubstitute() const { return substitute; }
 
     Ref getRef() { return ref; }
 

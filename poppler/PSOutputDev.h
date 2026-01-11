@@ -394,7 +394,7 @@ private:
 
     void opiBegin20(GfxState *state, Dict *dict);
     void opiBegin13(GfxState *state, Dict *dict);
-    void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1);
+    void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1) const;
     void cvtFunction(const Function *func, bool invertPSFunction = false);
     static std::string filterPSName(const std::string &name);
 

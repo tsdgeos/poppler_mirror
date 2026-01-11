@@ -1783,7 +1783,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
     return true;
 }
 
-bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox)
+bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox) const
 {
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);

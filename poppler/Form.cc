@@ -132,7 +132,7 @@ FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormF
 
 FormWidget::~FormWidget() = default;
 
-void FormWidget::print(int indent)
+void FormWidget::print(int indent) const
 {
     printf("%*s+ (%d %d): [widget]\n", indent, "", ref.num, ref.gen);
 }

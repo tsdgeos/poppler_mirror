@@ -147,7 +147,7 @@ public:
     std::string getTextEncodingName() const;
     bool getPrintCommands();
     bool getProfileCommands();
-    bool getErrQuiet();
+    bool getErrQuiet() const;
 
     std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const std::string &collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);

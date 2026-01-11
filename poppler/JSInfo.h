@@ -46,7 +46,7 @@ public:
     void scanJS(int nPages, bool stopOnFirstJS);
 
     // return true if PDF contains JavaScript
-    bool containsJS();
+    bool containsJS() const;
 
 private:
     PDFDoc *doc;

@@ -1438,7 +1438,7 @@ bool GlobalParams::getProfileCommands()
     return profileCommands;
 }
 
-bool GlobalParams::getErrQuiet()
+bool GlobalParams::getErrQuiet() const
 {
     // no locking -- this function may get called from inside a locked
     // section

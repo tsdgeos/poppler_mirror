@@ -192,7 +192,7 @@ public:
     // Get duration, the maximum length of time, in seconds,
     // that the page is displayed before the presentation automatically
     // advances to the next page
-    double getDuration() { return duration; }
+    double getDuration() const { return duration; }
 
     // Get actions
     Object getActions() { return actions.fetch(xref); }
@@ -218,12 +218,12 @@ public:
 
     void display(Gfx *gfx);
 
-    void makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown, double sliceX, double sliceY, double sliceW, double sliceH, PDFRectangle *box, bool *crop);
+    void makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown, double sliceX, double sliceY, double sliceW, double sliceH, PDFRectangle *box, bool *crop) const;
 
     void processLinks(OutputDev *out);
 
     // Get the page's default CTM.
-    void getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown);
+    void getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown) const;
 
     bool hasStandaloneFields() const { return !standaloneFields.empty(); }
 

@@ -120,7 +120,7 @@ public:
     Catalog &operator=(const Catalog &) = delete;
 
     // Is catalog valid?
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
     // Get number of pages.
     int getNumPages();

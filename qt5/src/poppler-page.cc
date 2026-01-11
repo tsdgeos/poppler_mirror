@@ -198,7 +198,7 @@ private:
 
 QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
+Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea) const
 {
     return convertLinkActionToLink(a, parentDoc, linkArea);
 }
@@ -386,7 +386,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     return popplerLink;
 }
 
-inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u)
+inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u) const
 {
     *u = text.toUcs4();
 

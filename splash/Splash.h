@@ -238,7 +238,7 @@ public:
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
     void setInShading(bool sh) { inShading = sh; }
-    bool getVectorAntialias() { return vectorAntialias; }
+    bool getVectorAntialias() const { return vectorAntialias; }
     void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
 #endif
 

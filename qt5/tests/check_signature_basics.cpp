@@ -33,10 +33,10 @@ private Q_SLOTS:
     static void initTestCase_data();
     void initTestCase() { }
     static void cleanupTestCase();
-    void testSignatureCount();
-    void testSignatureSizes();
-    void testSignerInfo(); // names and stuff
-    void testSignedRanges();
+    void testSignatureCount() const;
+    void testSignatureSizes() const;
+    void testSignerInfo() const; // names and stuff
+    void testSignedRanges() const;
 };
 
 Q_DECLARE_METATYPE(CryptoSign::Backend::Type);
@@ -84,7 +84,7 @@ void TestSignatureBasics::cleanupTestCase()
     globalParams.reset();
 }
 
-void TestSignatureBasics::testSignatureCount()
+void TestSignatureBasics::testSignatureCount() const
 {
     QVERIFY(doc);
     auto signatureFields = doc->getSignatureFields();
@@ -96,7 +96,7 @@ void TestSignatureBasics::testSignatureCount()
     QVERIFY(signatureFields[3]->getSignature().empty());
 }
 
-void TestSignatureBasics::testSignatureSizes()
+void TestSignatureBasics::testSignatureSizes() const
 {
     auto signatureFields = doc->getSignatureFields();
     // These are not the actual signature lengths, but rather
@@ -108,7 +108,7 @@ void TestSignatureBasics::testSignatureSizes()
     QCOMPARE(signatureFields[1]->getSignature().size(), 10196); // Signature data size is 2340
 }
 
-void TestSignatureBasics::testSignerInfo()
+void TestSignatureBasics::testSignerInfo() const
 {
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields[0]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature0_B_" });
@@ -151,7 +151,7 @@ void TestSignatureBasics::testSignerInfo()
     QCOMPARE(signatureFields[3]->getSignatureType(), CryptoSign::SignatureType::unsigned_signature_field);
 }
 
-void TestSignatureBasics::testSignedRanges()
+void TestSignatureBasics::testSignedRanges() const
 {
     auto signatureFields = doc->getSignatureFields();
 

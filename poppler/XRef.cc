@@ -89,7 +89,7 @@ public:
     // generation 0.
     ObjectStream(XRef *xref, int objStrNumA, int recursion = 0);
 
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
     ~ObjectStream();
 
@@ -97,7 +97,7 @@ public:
     ObjectStream &operator=(const ObjectStream &) = delete;
 
     // Return the object number of this object stream.
-    int getObjStrNum() { return objStrNum; }
+    int getObjStrNum() const { return objStrNum; }
 
     // Get the <objIdx>th object from this stream, which should be
     // object number <objNum>, generation 0.

@@ -110,7 +110,7 @@ public:
     // Get the field bounding rect
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
 
-    unsigned getID() { return ID; }
+    unsigned getID() const { return ID; }
     void setID(unsigned int i) { ID = i; }
 
     FormField *getField() { return field; }
@@ -120,7 +120,7 @@ public:
     Ref getRef() { return ref; }
 
     void setChildNum(unsigned i) { childNum = i; }
-    unsigned getChildNum() { return childNum; }
+    unsigned getChildNum() const { return childNum; }
 
     const GooString *getPartialName() const;
     void setPartialName(const GooString &name);
@@ -148,7 +148,7 @@ public:
 
     virtual void updateWidgetAppearance() = 0;
 
-    void print(int indent = 0);
+    void print(int indent = 0) const;
 
 protected:
     FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);

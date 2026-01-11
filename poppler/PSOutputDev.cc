@@ -6911,7 +6911,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
 // Convert PDF user space coordinates to PostScript default user space
 // coordinates.  This has to account for both the PDF CTM and the
 // PSOutputDev page-fitting transform.
-void PSOutputDev::opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1)
+void PSOutputDev::opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1) const
 {
     double t;
 

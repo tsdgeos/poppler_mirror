@@ -6631,7 +6631,7 @@ std::shared_ptr<GfxColorTransform> GfxState::getXYZ2DisplayTransform()
     return transform;
 }
 
-int GfxState::getCmsRenderingIntent()
+int GfxState::getCmsRenderingIntent() const
 {
     const char *intent = getRenderingIntent();
     int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;

@@ -516,7 +516,7 @@ public:
     StreamPredictor(const StreamPredictor &) = delete;
     StreamPredictor &operator=(const StreamPredictor &) = delete;
 
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
     int lookChar();
     int getChar();
@@ -999,13 +999,13 @@ public:
 
     [[nodiscard]] bool unfilteredRewind() override;
 
-    int getEncoding() { return encoding; }
-    bool getEndOfLine() { return endOfLine; }
-    bool getEncodedByteAlign() { return byteAlign; }
-    bool getEndOfBlock() { return endOfBlock; }
-    int getColumns() { return columns; }
-    bool getBlackIs1() { return black; }
-    int getDamagedRowsBeforeError() { return damagedRowsBeforeError; }
+    int getEncoding() const { return encoding; }
+    bool getEndOfLine() const { return endOfLine; }
+    bool getEncodedByteAlign() const { return byteAlign; }
+    bool getEndOfBlock() const { return endOfBlock; }
+    int getColumns() const { return columns; }
+    bool getBlackIs1() const { return black; }
+    int getDamagedRowsBeforeError() const { return damagedRowsBeforeError; }
 
 private:
     [[nodiscard]] bool ccittRewind(bool unfiltered);

@@ -567,7 +567,7 @@ public:
     JBIG2Segment(const JBIG2Segment &) = delete;
     JBIG2Segment &operator=(const JBIG2Segment &) = delete;
     void setSegNum(unsigned int segNumA) { segNum = segNumA; }
-    unsigned int getSegNum() { return segNum; }
+    unsigned int getSegNum() const { return segNum; }
     virtual JBIG2SegmentType getType() = 0;
 
 private:
@@ -605,7 +605,7 @@ public:
     void setPixel(int x, int y) { data[y * line + (x >> 3)] |= 1 << (7 - (x & 7)); }
     void clearPixel(int x, int y) { data[y * line + (x >> 3)] &= 0x7f7f >> (x & 7); }
     void getPixelPtr(int x, int y, JBIG2BitmapPtr *ptr);
-    int nextPixel(JBIG2BitmapPtr *ptr);
+    int nextPixel(JBIG2BitmapPtr *ptr) const;
     void duplicateRow(int yDest, int ySrc);
     void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
     unsigned char *getDataPtr() { return data; }
@@ -746,7 +746,7 @@ inline void JBIG2Bitmap::getPixelPtr(int x, int y, JBIG2BitmapPtr *ptr)
     }
 }
 
-inline int JBIG2Bitmap::nextPixel(JBIG2BitmapPtr *ptr)
+inline int JBIG2Bitmap::nextPixel(JBIG2BitmapPtr *ptr) const
 {
     int pix;
 
@@ -986,7 +986,7 @@ public:
     JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2SymbolDict() override;
     JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
-    unsigned int getSize() { return size; }
+    unsigned int getSize() const { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
     bool isOk() const { return ok; }
@@ -1045,7 +1045,7 @@ public:
     JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2PatternDict() override;
     JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
-    unsigned int getSize() { return size; }
+    unsigned int getSize() const { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap)
     {
         if (likely(idx < size)) {
