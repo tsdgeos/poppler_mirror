@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -226,7 +226,14 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     bitmap->w = ((cbox.xMax - cbox.xMin) / 64) + 4;
     bitmap->h = ((cbox.yMax - cbox.yMin) / 64) + 4;
 
-    *clipRes = clip->testRect(x0 - bitmap->x, y0 - bitmap->y, x0 - bitmap->x + bitmap->w, y0 - bitmap->y + bitmap->h);
+    int rectXMin, rectYMin;
+    if (checkedSubtraction(x0, bitmap->x, &rectXMin)) {
+        return false;
+    }
+    if (checkedSubtraction(y0, bitmap->y, &rectYMin)) {
+        return false;
+    }
+    *clipRes = clip->testRect(rectXMin, rectYMin, rectXMin + bitmap->w, rectYMin + bitmap->h);
     if (*clipRes == splashClipAllOutside) {
         bitmap->freeData = false;
         return true;
