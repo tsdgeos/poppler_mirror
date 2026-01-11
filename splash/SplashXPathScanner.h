@@ -93,7 +93,7 @@ private:
 #if USE_BOOST_HEADERS
     using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    using IntersectionLine = std::vector<SplashIntersect> IntersectionLine;
+    using IntersectionLine = std::vector<SplashIntersect>;
 #endif
     std::vector<IntersectionLine> allIntersections;
 
@@ -113,7 +113,7 @@ private:
 #if USE_BOOST_HEADERS
     using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    using IntersectionLine = typedef std::vector<SplashIntersect>;
+    using IntersectionLine = std::vector<SplashIntersect>;
 #endif
     const IntersectionLine &line;
 
