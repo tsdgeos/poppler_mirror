@@ -100,7 +100,7 @@ build_ubuntu_22_04:
     - ninja
     - ctest --output-on-failure
     - cd .. && mkdir -p build_nondefault_options && cd build_nondefault_options
-    - cmake -G Ninja -DENABLE_LIBOPENJPEG=unmaintained -DENABLE_DCTDECODER=unmaintained -DENABLE_LCMS=OFF -DENABLE_LIBCURL=OFF -DENABLE_LIBTIFF=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_ZLIB_UNCOMPRESS=ON -DUSE_FLOAT=ON -DTESTDATADIR=$PWD/../test-data ..
+    - cmake -G Ninja -DENABLE_LIBOPENJPEG=unmaintained -DENABLE_DCTDECODER=unmaintained -DENABLE_LCMS=OFF -DENABLE_LIBCURL=OFF -DENABLE_LIBTIFF=OFF -DENABLE_NSS3=OFF -DENABLE_GPGME=OFF -DENABLE_ZLIB_UNCOMPRESS=ON -DUSE_FLOAT=ON -DENABLE_BOOST=OFF -DTESTDATADIR=$PWD/../test-data ..
     - ninja
     - cd .. && mkdir -p build_static && cd build_static
     - cmake -G Ninja -DENABLE_GPGME=OFF -DTESTDATADIR=$PWD/../test-data -DBUILD_SHARED_LIBS=OFF ..
