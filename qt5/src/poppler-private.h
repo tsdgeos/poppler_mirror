@@ -113,9 +113,9 @@ public:
         m_filePath = filePath;
 
 #ifdef _WIN32
-        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #else
-        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #endif
     }
 
@@ -124,16 +124,16 @@ public:
         m_device = device;
         QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     DocumentData(const QByteArray &data, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = nullptr;
         fileContents = data;
-        MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object::null());
+        MemStream *str = new MemStream(fileContents.data(), 0, fileContents.length(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     void init();
@@ -164,7 +164,7 @@ public:
      * where we'll set xrefReconstructed flag and notify users of the
      * reconstruction event
      */
-    void noitfyXRefReconstructed();
+    void notifyXRefReconstructed();
 
     static Document *checkDocument(DocumentData *doc);
 
@@ -244,13 +244,11 @@ public:
 class TextBoxData
 {
 public:
-    TextBoxData() : nextWord(nullptr), hasSpaceAfter(false) { }
-
     QString text;
     QRectF bBox;
-    TextBox *nextWord;
+    TextBox *nextWord = nullptr;
     QVector<QRectF> charBBoxes; // the boundingRect of each character
-    bool hasSpaceAfter;
+    bool hasSpaceAfter = false;
 };
 
 inline Poppler::ErrorStringType fromPopplerCore(::ErrorStringType type)

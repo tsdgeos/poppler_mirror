@@ -22,6 +22,7 @@
 #ifndef _POPPLER_LINK_PRIVATE_H_
 #define _POPPLER_LINK_PRIVATE_H_
 
+#include <utility>
 #include <vector>
 
 #include "poppler-link.h"
@@ -62,7 +63,7 @@ public:
 class LinkHidePrivate : public LinkPrivate
 {
 public:
-    LinkHidePrivate(const QRectF &area, const QString &tName, bool show) : LinkPrivate(area), targetName(tName), isShow(show) { }
+    LinkHidePrivate(const QRectF &area, QString tName, bool show) : LinkPrivate(area), targetName(std::move(tName)), isShow(show) { }
     ~LinkHidePrivate() override;
 
     QString targetName;
@@ -72,7 +73,7 @@ public:
 class LinkResetFormPrivate : public LinkPrivate
 {
 public:
-    LinkResetFormPrivate(const QRectF &area, const QStringList &fields, const bool exclude) : LinkPrivate(area), m_fields(fields), m_exclude(exclude) { }
+    LinkResetFormPrivate(const QRectF &area, QStringList fields, const bool exclude) : LinkPrivate(area), m_fields(std::move(fields)), m_exclude(exclude) { }
     ~LinkResetFormPrivate() override;
 
     QStringList m_fields;
@@ -82,7 +83,7 @@ public:
 class LinkSubmitFormPrivate : public LinkPrivate
 {
 public:
-    LinkSubmitFormPrivate(const QRectF &area, const QVector<int> &fieldIds, const QString &url, LinkSubmitForm::SubmitFormFlags flags) : LinkPrivate(area), m_fieldIds(fieldIds), m_url(url), m_flags(flags) { }
+    LinkSubmitFormPrivate(const QRectF &area, const QVector<int> &fieldIds, QString url, LinkSubmitForm::SubmitFormFlags flags) : LinkPrivate(area), m_fieldIds(fieldIds), m_url(std::move(url)), m_flags(flags) { }
     ~LinkSubmitFormPrivate() override;
 
     QVector<int> m_fieldIds;

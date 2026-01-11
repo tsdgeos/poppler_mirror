@@ -42,15 +42,15 @@ using namespace poppler;
 class poppler::page_renderer_private
 {
 public:
-    page_renderer_private() : paper_color(0xffffffff), hints(0), image_format(image::format_enum::format_argb32), line_mode(page_renderer::line_mode_enum::line_default) { }
+    page_renderer_private() = default;
 
     static bool conv_color_mode(image::format_enum mode, SplashColorMode &splash_mode);
     static bool conv_line_mode(page_renderer::line_mode_enum mode, SplashThinLineMode &splash_mode);
 
-    argb paper_color;
-    unsigned int hints;
-    image::format_enum image_format;
-    page_renderer::line_mode_enum line_mode;
+    argb paper_color = 0xffffffff;
+    unsigned int hints = 0;
+    image::format_enum image_format = image::format_enum::format_argb32;
+    page_renderer::line_mode_enum line_mode = page_renderer::line_mode_enum::line_default;
 };
 
 bool page_renderer_private::conv_color_mode(image::format_enum mode, SplashColorMode &splash_mode)
@@ -272,10 +272,10 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     bgColor[0] = d->paper_color & 0xff;
     bgColor[1] = (d->paper_color >> 8) & 0xff;
     bgColor[2] = (d->paper_color >> 16) & 0xff;
-    SplashOutputDev splashOutputDev(colorMode, 4, false, bgColor, true, lineMode);
-    splashOutputDev.setFontAntialias(d->hints & text_antialiasing ? true : false);
-    splashOutputDev.setVectorAntialias(d->hints & antialiasing ? true : false);
-    splashOutputDev.setFreeTypeHinting(d->hints & text_hinting ? true : false, false);
+    SplashOutputDev splashOutputDev(colorMode, 4, bgColor, true, lineMode);
+    splashOutputDev.setFontAntialias((d->hints & text_antialiasing) != 0);
+    splashOutputDev.setVectorAntialias((d->hints & antialiasing) != 0);
+    splashOutputDev.setFreeTypeHinting((d->hints & text_hinting) != 0, false);
     splashOutputDev.startDoc(pdfdoc);
     pdfdoc->displayPageSlice(&splashOutputDev, pp->index + 1, xres, yres, int(rotate) * 90, false, true, false, x, y, w, h, nullptr, nullptr, nullptr, nullptr, true);
 

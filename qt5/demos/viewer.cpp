@@ -47,7 +47,7 @@
 
 #include <functional>
 
-PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
+PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
 

@@ -42,7 +42,7 @@ public:
     JArithmeticDecoderStats &operator=(const JArithmeticDecoderStats &) = delete;
     JArithmeticDecoderStats *copy();
     void reset();
-    int getContextSize() { return contextSize; }
+    int getContextSize() const { return contextSize; }
     void copyFrom(JArithmeticDecoderStats *stats);
     void setEntry(unsigned int cx, int i, int mps);
     bool isValid() const { return cxTab != nullptr; }
@@ -104,7 +104,7 @@ public:
     unsigned int decodeIAID(unsigned int codeLen, JArithmeticDecoderStats *stats);
 
     void resetByteCounter() { nBytesRead = 0; }
-    unsigned int getByteCounter() { return nBytesRead; }
+    unsigned int getByteCounter() const { return nBytesRead; }
 
     bool getReadPastEndOfStream() const { return readPastEndOfStream; }
 

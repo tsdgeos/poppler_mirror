@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    typedef std::vector<StructElement *> ElemPtrArray;
+    using ElemPtrArray = std::vector<StructElement *>;
 
     // Structure for items in /ParentTree, it keeps a mapping of
     // object references and pointers to StructElement objects.
@@ -76,7 +76,7 @@ private:
 
     void parse(const Dict &rootDict);
     void parseNumberTreeNode(const Dict &node, RefRecursionChecker &usedParents);
-    void parentTreeAdd(const Ref objectRef, StructElement *element);
+    void parentTreeAdd(Ref objectRef, StructElement *element);
 
     friend class StructElement;
 };

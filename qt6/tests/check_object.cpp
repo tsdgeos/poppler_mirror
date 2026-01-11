@@ -9,9 +9,9 @@ class TestObject : public QObject
 public:
     explicit TestObject(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void benchDefaultConstructor();
-    void benchMoveConstructor();
-    void benchSetToNull();
+    static void benchDefaultConstructor();
+    static void benchMoveConstructor();
+    static void benchSetToNull();
 };
 
 void TestObject::benchDefaultConstructor()

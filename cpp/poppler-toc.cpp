@@ -53,7 +53,7 @@ toc *toc_private::load_from_outline(Outline *outline)
     return newtoc;
 }
 
-toc_item_private::toc_item_private() : is_open(false) { }
+toc_item_private::toc_item_private() = default;
 
 toc_item_private::~toc_item_private()
 {

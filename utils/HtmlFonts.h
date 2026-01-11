@@ -46,7 +46,7 @@ private:
     unsigned int g;
     unsigned int b;
     unsigned int opacity;
-    bool Ok(unsigned int xcol) { return xcol <= 255; }
+    static bool Ok(unsigned int xcol) { return xcol <= 255; }
     static std::string convtoX(unsigned int xcol);
 
 public:

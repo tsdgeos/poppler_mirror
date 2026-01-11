@@ -46,7 +46,7 @@ std::unique_ptr<FoFiType1> FoFiType1::make(std::vector<unsigned char> &&fileA)
     return std::make_unique<FoFiType1>(std::move(fileA));
 }
 
-FoFiType1::FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBase(std::move(fileA))
+FoFiType1::FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/) : FoFiBase(std::move(fileA))
 {
     encoding = nullptr;
     parsed = false;
@@ -198,10 +198,9 @@ public:
                 std::string_view token = stringView.substr(currentPos, tokenLength);
                 currentPos = length;
                 return token;
-            } else {
-                currentPos = length;
-                return {};
             }
+            currentPos = length;
+            return {};
         }
 
         std::string_view token = stringView.substr(currentPos, pos - currentPos);

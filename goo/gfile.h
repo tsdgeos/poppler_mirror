@@ -61,7 +61,7 @@ extern "C" {
 class GooString;
 
 /* Integer type for all file offsets and file sizes */
-typedef long long Goffset;
+using Goffset = long long;
 
 //------------------------------------------------------------------------
 

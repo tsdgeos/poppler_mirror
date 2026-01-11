@@ -28,7 +28,7 @@ std::string gbase64Encode(const void *input, size_t len)
     char quad[4];
     size_t pos = 0;
     std::stringstream buf;
-    auto bytes = static_cast<const unsigned char *>(input);
+    const auto *bytes = static_cast<const unsigned char *>(input);
     for (; pos + 3 <= len; pos += 3) {
         b64encodeTriplet(quad, bytes[0], bytes[1], bytes[2]);
         buf.write(&quad[0], 4);

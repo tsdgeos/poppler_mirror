@@ -931,7 +931,7 @@ public:
     void setLinkHighlightMode(HighlightMode mode);
 
     QPointF linkRegionPoint(int id) const;
-    void setLinkRegionPoint(int id, const QPointF point);
+    void setLinkRegionPoint(int id, QPointF point);
 
 private:
     LinkAnnotation();

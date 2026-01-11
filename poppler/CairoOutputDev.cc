@@ -2135,7 +2135,7 @@ static cairo_surface_t *cairo_surface_create_similar_clip(cairo_t *cairo, cairo_
     return surface;
 }
 
-void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace *blendingColorSpace, bool /*isolated*/, bool knockout, bool forSoftMask)
+void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace *blendingColorSpace, bool /*isolated*/, bool knockout, bool /*forSoftMask*/)
 {
     /* push color space */
     ColorSpaceStack *css = new ColorSpaceStack;
@@ -2167,11 +2167,11 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::arr
         /* we need to track the shape */
         cairo_push_group(cairo_shape);
     }
-    if (false && forSoftMask) {
-        cairo_push_group_with_content(cairo, CAIRO_CONTENT_ALPHA);
-    } else {
-        cairo_push_group(cairo);
-    }
+    // if (false && forSoftMask) {
+    //     cairo_push_group_with_content(cairo, CAIRO_CONTENT_ALPHA);
+    // } else {
+    cairo_push_group(cairo);
+    // }
 
     /* push_group has an implicit cairo_save() */
     if (knockout) {
@@ -3453,7 +3453,7 @@ public:
             // Case of transparent JPX images, they contain RGBA data · Issue #1486
             GfxDeviceRGBAColorSpace *rgbaCS = dynamic_cast<GfxDeviceRGBAColorSpace *>(colorMap->getColorSpace());
             if (rgbaCS) {
-                rgbaCS->getARGBPremultipliedLine(pix, row_data, width);
+                GfxDeviceRGBAColorSpace::getARGBPremultipliedLine(pix, row_data, width);
             } else {
                 error(errSyntaxWarning, -1, "CairoOutputDev: Unexpected fallback from RGBA to RGB");
                 colorMap->getRGBLine(pix, row_data, width);

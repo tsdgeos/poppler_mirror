@@ -116,8 +116,8 @@ public:
 class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
 {
 public:
-    Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
-        : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA), ignorePaperColor(ignorePaperColorA)
+    Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool ignorePaperColorA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
+        : SplashOutputDev(colorModeA, bitmapRowPadA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA), ignorePaperColor(ignorePaperColorA)
     {
     }
 
@@ -166,9 +166,8 @@ public:
                     gfree(data);
                 }
                 return i;
-            } else {
-                return QImage(data, bw, bh, brs, format).copy();
             }
+            return QImage(data, bw, bh, brs, format).copy();
         }
 
         return QImage();
@@ -199,7 +198,7 @@ private:
 
 QImageDumpingQPainterOutputDev::~QImageDumpingQPainterOutputDev() = default;
 
-Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea)
+Link *PageData::convertLinkActionToLink(::LinkAction *a, const QRectF &linkArea) const
 {
     return convertLinkActionToLink(a, parentDoc, linkArea);
 }
@@ -387,7 +386,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     return popplerLink;
 }
 
-inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u)
+inline std::unique_ptr<TextPage> PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u) const
 {
     *u = text.toUcs4();
 
@@ -406,9 +405,11 @@ inline bool PageData::performSingleTextSearch(TextPage *textPage, QVector<Unicod
 {
     if (direction == Page::FromTop) {
         return textPage->findText(u.data(), u.size(), true, true, false, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
-    } else if (direction == Page::NextResult) {
+    }
+    if (direction == Page::NextResult) {
         return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, false, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
-    } else if (direction == Page::PreviousResult) {
+    }
+    if (direction == Page::PreviousResult) {
         return textPage->findText(u.data(), u.size(), false, true, true, false, sCase, sDiacritics, sAcrossLines, true, sWords, &sLeft, &sTop, &sRight, &sBottom, nullptr, nullptr);
     }
 
@@ -546,7 +547,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
     switch (m_page->parentDoc->m_backend) {
     case Poppler::Document::SplashBackend: {
         SplashColor bgColor;
-        const bool overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
+        const bool overprintPreview = (m_page->parentDoc->m_hints & Document::OverprintPreview) != 0;
         if (overprintPreview) {
             unsigned char c, m, y, k;
 
@@ -585,13 +586,13 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
 
-        Qt5SplashOutputDev splash_output(colorMode, 4, false, ignorePaperColor, ignorePaperColor ? nullptr : bgColor, true, thinLineMode, overprintPreview);
+        Qt5SplashOutputDev splash_output(colorMode, 4, ignorePaperColor, ignorePaperColor ? nullptr : bgColor, true, thinLineMode, overprintPreview);
 
         splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
 
-        splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? true : false);
-        splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? true : false);
-        splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false, m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
+        splash_output.setFontAntialias((m_page->parentDoc->m_hints & Document::TextAntialiasing) != 0);
+        splash_output.setVectorAntialias((m_page->parentDoc->m_hints & Document::Antialiasing) != 0);
+        splash_output.setFreeTypeHinting((m_page->parentDoc->m_hints & Document::TextHinting) != 0, (m_page->parentDoc->m_hints & Document::TextSlightHinting) != 0);
 
 #if USE_CMS
         splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
@@ -715,54 +716,54 @@ QString Page::text(const QRectF &r) const
 
 bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchMode caseSensitive, Rotation rotate) const
 {
-    const bool sCase = caseSensitive == Page::CaseSensitive ? true : false;
+    const bool sCase = caseSensitive == Page::CaseSensitive;
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, false, false, false);
+    const bool found = Poppler::PageData::performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, false, false, false);
 
     return found;
 }
 
 bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchFlags flags, Rotation rotate) const
 {
-    const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
-    const bool sWords = flags.testFlag(WholeWords) ? true : false;
-    const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
-    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
+    const bool sCase = !flags.testFlag(IgnoreCase);
+    const bool sWords = flags.testFlag(WholeWords);
+    const bool sDiacritics = flags.testFlag(IgnoreDiacritics);
+    const bool sAcrossLines = flags.testFlag(AcrossLines);
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
+    const bool found = Poppler::PageData::performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
 
     return found;
 }
 
 QList<QRectF> Page::search(const QString &text, SearchMode caseSensitive, Rotation rotate) const
 {
-    const bool sCase = caseSensitive == Page::CaseSensitive ? true : false;
+    const bool sCase = caseSensitive == Page::CaseSensitive;
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage.get(), u, sCase, false, false, false);
+    const QList<QRectF> results = Poppler::PageData::performMultipleTextSearch(textPage.get(), u, sCase, false, false, false);
 
     return results;
 }
 
 QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rotate) const
 {
-    const bool sCase = flags.testFlag(IgnoreCase) ? false : true;
-    const bool sWords = flags.testFlag(WholeWords) ? true : false;
-    const bool sDiacritics = flags.testFlag(IgnoreDiacritics) ? true : false;
-    const bool sAcrossLines = flags.testFlag(AcrossLines) ? true : false;
+    const bool sCase = !flags.testFlag(IgnoreCase);
+    const bool sWords = flags.testFlag(WholeWords);
+    const bool sDiacritics = flags.testFlag(IgnoreDiacritics);
+    const bool sAcrossLines = flags.testFlag(AcrossLines);
 
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const QList<QRectF> results = m_page->performMultipleTextSearch(textPage.get(), u, sCase, sWords, sDiacritics, sAcrossLines);
+    const QList<QRectF> results = Poppler::PageData::performMultipleTextSearch(textPage.get(), u, sCase, sWords, sDiacritics, sAcrossLines);
 
     return results;
 }
@@ -801,7 +802,7 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
         TextBox *text_box = new TextBox(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
-        text_box->m_data->hasSpaceAfter = word->hasSpaceAfter() == true;
+        text_box->m_data->hasSpaceAfter = word->hasSpaceAfter();
         text_box->m_data->charBBoxes.reserve(word->getLength());
         for (int j = 0; j < word->getLength(); ++j) {
             word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
@@ -859,9 +860,8 @@ QSizeF Page::pageSizeF() const
     Page::Orientation orient = orientation();
     if ((Page::Landscape == orient) || (Page::Seascape == orient)) {
         return QSizeF(m_page->page->getCropHeight(), m_page->page->getCropWidth());
-    } else {
-        return QSizeF(m_page->page->getCropWidth(), m_page->page->getCropHeight());
     }
+    return QSizeF(m_page->page->getCropWidth(), m_page->page->getCropHeight());
 }
 
 QSize Page::pageSize() const

@@ -94,7 +94,7 @@ Dict *Dict::deepCopy() const
     Dict *dictA = new Dict(xref);
 
     dictA->entries.reserve(entries.size());
-    for (auto &entry : entries) {
+    for (const auto &entry : entries) {
         dictA->entries.emplace_back(entry.first, entry.second.deepCopy());
     }
     return dictA;

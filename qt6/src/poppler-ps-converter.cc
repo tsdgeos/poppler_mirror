@@ -47,24 +47,21 @@ public:
 
     QList<int> pageList;
     QString title;
-    double hDPI;
-    double vDPI;
-    int rotate;
-    int paperWidth;
-    int paperHeight;
-    int marginRight;
-    int marginBottom;
-    int marginLeft;
-    int marginTop;
+    double hDPI = 72;
+    double vDPI = 72;
+    int rotate = 0;
+    int paperWidth = -1;
+    int paperHeight = -1;
+    int marginRight = 0;
+    int marginBottom = 0;
+    int marginLeft = 0;
+    int marginTop = 0;
     PSConverter::PSOptions opts;
-    void (*pageConvertedCallback)(int page, void *payload);
-    void *pageConvertedPayload;
+    void (*pageConvertedCallback)(int page, void *payload) = nullptr;
+    void *pageConvertedPayload = nullptr;
 };
 
-PSConverterPrivate::PSConverterPrivate()
-    : hDPI(72), vDPI(72), rotate(0), paperWidth(-1), paperHeight(-1), marginRight(0), marginBottom(0), marginLeft(0), marginTop(0), opts(PSConverter::Printing), pageConvertedCallback(nullptr), pageConvertedPayload(nullptr)
-{
-}
+PSConverterPrivate::PSConverterPrivate() : opts(PSConverter::Printing) { }
 
 PSConverterPrivate::~PSConverterPrivate() = default;
 
@@ -195,9 +192,8 @@ static bool annotDisplayDecideCbk(Annot *annot, void *user_data)
 {
     if (annot->getType() == Annot::typeWidget) {
         return true; // Never hide forms
-    } else {
-        return *(bool *)user_data;
     }
+    return *(bool *)user_data;
 }
 
 bool PSConverter::convert()
@@ -247,8 +243,8 @@ bool PSConverter::convert()
     }
 
     if (psOut->isOk()) {
-        bool isPrinting = (d->opts & Printing) ? true : false;
-        bool showAnnotations = (d->opts & HideAnnotations) ? false : true;
+        bool isPrinting = (d->opts & Printing) != 0;
+        bool showAnnotations = (d->opts & HideAnnotations) == 0;
         Q_FOREACH (int page, d->pageList) {
             d->document->doc->displayPage(psOut, page, d->hDPI, d->vDPI, d->rotate, false, true, isPrinting, nullptr, nullptr, annotDisplayDecideCbk, &showAnnotations, true);
             if (d->pageConvertedCallback) {
@@ -258,11 +254,10 @@ bool PSConverter::convert()
         delete psOut;
         d->closeDevice();
         return true;
-    } else {
-        delete psOut;
-        d->closeDevice();
-        return false;
     }
+    delete psOut;
+    d->closeDevice();
+    return false;
 }
 
 }

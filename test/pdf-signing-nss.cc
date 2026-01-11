@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
         // usage:
         // pdf-signing-nss --sign nssdir nick input output
         return sign_file(argv[2], argv[3], argv[4], argv[5]);
-    } else if (argc == 4 && argv[1] == "--verify"s) {
+    }
+    if (argc == 4 && argv[1] == "--verify"s) {
         // usage:
         // pdf-signing-nss --verify nssdir input
         return verify_file(argv[2], argv[3]);
@@ -73,7 +74,7 @@ int verify_file(const char *nssdir, const char *input_file)
         return 1;
     }
 
-    auto ffs = signatures[0];
-    auto siginfo = ffs->validateSignatureAsync(true, false, -1, false, false, {});
+    auto *ffs = signatures[0];
+    auto *siginfo = ffs->validateSignatureAsync(true, false, -1, false, false, {});
     return siginfo->getSignatureValStatus() != SIGNATURE_VALID || ffs->validateSignatureResult() != CERTIFICATE_TRUSTED;
 }

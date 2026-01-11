@@ -974,7 +974,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     // transparency support: blend mode, fill/stroke opacity
     obj2 = obj1.dictLookup("BM");
     if (!obj2.isNull()) {
-        if (state->parseBlendMode(&obj2, &mode)) {
+        if (GfxState::parseBlendMode(&obj2, &mode)) {
             state->setBlendMode(mode);
             out->updateBlendMode(state);
         } else {
@@ -1076,11 +1076,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
             out->clearSoftMask(state);
         } else if (obj2.isDict()) {
             Object obj3 = obj2.dictLookup("S");
-            if (obj3.isName("Alpha")) {
-                alpha = true;
-            } else { // "Luminosity"
-                alpha = false;
-            }
+            alpha = obj3.isName("Alpha");
             std::unique_ptr<Function> softMaskTransferFunc = nullptr;
             obj3 = obj2.dictLookup("TR");
             if (!obj3.isNull()) {
@@ -1209,7 +1205,7 @@ void Gfx::doSoftMask(Object *str, bool alpha, GfxColorSpace *blendingColorSpace,
 
     // check form type
     obj1 = dict->lookup("FormType");
-    if (!(obj1.isNull() || (obj1.isInt() && obj1.getInt() == 1))) {
+    if (!obj1.isNull() && (!obj1.isInt() || obj1.getInt() != 1)) {
         error(errSyntaxError, getPos(), "Unknown form type");
     }
 
@@ -4663,7 +4659,7 @@ bool Gfx::checkTransparencyGroup(Dict *resDict)
             if (obj1.isDict()) {
                 Object obj2 = obj1.dictLookup("BM");
                 if (!obj2.isNull()) {
-                    if (state->parseBlendMode(&obj2, &mode)) {
+                    if (GfxState::parseBlendMode(&obj2, &mode)) {
                         if (mode != gfxBlendNormal) {
                             transpGroup = true;
                         }
@@ -4722,7 +4718,7 @@ void Gfx::doForm(Object *str)
 
     // check form type
     obj1 = dict->lookup("FormType");
-    if (!(obj1.isNull() || (obj1.isInt() && obj1.getInt() == 1))) {
+    if (!obj1.isNull() && (!obj1.isInt() || obj1.getInt() != 1)) {
         error(errSyntaxError, getPos(), "Unknown form type");
     }
 
@@ -4923,7 +4919,7 @@ void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
         // skip 'EI' tag
         c1 = str->getUndecodedStream()->getChar();
         c2 = str->getUndecodedStream()->getChar();
-        while (!(c1 == 'E' && c2 == 'I') && c2 != EOF) {
+        while ((c1 != 'E' || c2 != 'I') && c2 != EOF) {
             c1 = c2;
             c2 = str->getUndecodedStream()->getChar();
         }

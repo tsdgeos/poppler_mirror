@@ -126,7 +126,7 @@ public:
     OptContentItem *m_rootNode;
 
 private:
-    void addChild(OptContentItem *parent, OptContentItem *child);
+    static void addChild(OptContentItem *parent, OptContentItem *child);
     void parseOrderArray(OptContentItem *parentNode, const Array *orderArray);
 };
 }

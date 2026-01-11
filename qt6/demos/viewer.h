@@ -60,7 +60,7 @@ private:
     int page() const;
     void xrefReconstructedHandler();
 
-    int m_currentPage;
+    int m_currentPage = 0;
     bool xrefReconstructed;
 
     QAction *m_fileOpenAct;

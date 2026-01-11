@@ -10,7 +10,7 @@ class TestOutline : public QObject
 public:
     explicit TestOutline(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkOutline_xr02();
+    static void checkOutline_xr02();
 };
 
 void TestOutline::checkOutline_xr02()

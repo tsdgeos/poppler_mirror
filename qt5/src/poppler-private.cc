@@ -125,11 +125,10 @@ QString UnicodeParsedString(const std::string &s1)
 
     if (hasUnicodeByteOrderMark(s1) || hasUnicodeByteOrderMarkLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const ushort *>(s1.c_str()), s1.size() / 2);
-    } else {
-        std::string cString = pdfDocEncodingToUTF16(s1);
-        auto result = QString::fromUtf16(reinterpret_cast<const ushort *>(cString.c_str()), cString.size() / 2);
-        return result;
     }
+    std::string cString = pdfDocEncodingToUTF16(s1);
+    auto result = QString::fromUtf16(reinterpret_cast<const ushort *>(cString.c_str()), cString.size() / 2);
+    return result;
 }
 
 std::unique_ptr<GooString> QStringToUnicodeGooString(const QString &s)
@@ -313,7 +312,7 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
         const ::LinkAction *a = outlineItem->getAction();
         linkActionToTocItem(a, this, &item);
 
-        item.setAttribute(QStringLiteral("Open"), QVariant((bool)outlineItem->isOpen()).toString());
+        item.setAttribute(QStringLiteral("Open"), QVariant(outlineItem->isOpen()).toString());
 
         // 3. recursively descend over children
         outlineItem->open();
@@ -324,7 +323,7 @@ void DocumentData::addTocChildren(QDomDocument *docSyn, QDomNode *parent, const 
     }
 }
 
-void DocumentData::noitfyXRefReconstructed()
+void DocumentData::notifyXRefReconstructed()
 {
     if (!xrefReconstructed) {
         xrefReconstructed = true;

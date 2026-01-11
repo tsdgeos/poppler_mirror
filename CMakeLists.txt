@@ -233,11 +233,13 @@ add_definitions(-DQT_NO_KEYWORDS)
 # Check for Cairo rendering backend
 macro_optional_find_package(Cairo ${CAIRO_VERSION})
 
-find_package(Boost 1.74.0 CONFIG)
-if(Boost_FOUND)
-  set(USE_BOOST_HEADERS ON)
-elseif(ENABLE_BOOST)
-  message(FATAL_ERROR "-- Boost recommended for Splash. Use ENABLE_BOOST=OFF to skip.")
+if (ENABLE_BOOST)
+  find_package(Boost 1.74.0 CONFIG)
+  if(Boost_FOUND)
+    set(USE_BOOST_HEADERS ON)
+  else()
+    message(FATAL_ERROR "-- Boost recommended for Splash. Use ENABLE_BOOST=OFF to skip.")
+  endif()
 endif()
 
 if(CAIRO_FOUND)

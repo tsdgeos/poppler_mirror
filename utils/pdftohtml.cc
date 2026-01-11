@@ -136,8 +136,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 class SplashOutputDevNoText : public SplashOutputDev
 {
 public:
-    SplashOutputDevNoText(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true)
-        : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
+    SplashOutputDevNoText(SplashColorMode colorModeA, int bitmapRowPadA, SplashColorPtr paperColorA, bool bitmapTopDownA = true) : SplashOutputDev(colorModeA, bitmapRowPadA, paperColorA, bitmapTopDownA) { }
     ~SplashOutputDevNoText() override;
 
     void drawChar(GfxState * /*state*/, double /*x*/, double /*y*/, double /*dx*/, double /*dy*/, double /*originX*/, double /*originY*/, CharCode /*code*/, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/) override { }
@@ -336,7 +335,7 @@ int main(int argc, char *argv[])
         // If the user specified "jpg" use JPEG, otherwise PNG
         SplashImageFileFormat format = strcmp(extension, "jpg") ? splashFormatPng : splashFormatJpeg;
 
-        splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, false, color);
+        splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, color);
         splashOut->startDoc(doc.get());
 
         for (int pg = firstPage; pg <= lastPage; ++pg) {
@@ -345,7 +344,7 @@ int main(int argc, char *argv[])
             SplashBitmap *bitmap = splashOut->getBitmap();
 
             const std::string imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
-            auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName.c_str(), "wb");
+            auto *f1 = dataUrls ? imf.open("wb") : fopen(imgFileName.c_str(), "wb");
             if (!f1) {
                 fprintf(stderr, "Could not open %s\n", imgFileName.c_str());
                 continue;
@@ -446,12 +445,10 @@ static std::optional<std::string> getInfoDate(Dict *infoDict, const char *key)
             mktime(&tmStruct); // compute the tm_wday and tm_yday fields
             if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tmStruct)) {
                 return std::string(buf);
-            } else {
-                return s->toStr();
             }
-        } else {
             return s->toStr();
         }
+        return s->toStr();
     }
     return {};
 }

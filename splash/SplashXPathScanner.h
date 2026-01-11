@@ -88,12 +88,12 @@ private:
     void addIntersection(double segYMin, int y, int x0, int x1, int count);
 
     const bool eo;
-    int xMin, yMin, xMax, yMax;
+    int xMin = 1, yMin = 1, xMax = 0, yMax = 0;
 
 #if USE_BOOST_HEADERS
-    typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+    using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    typedef std::vector<SplashIntersect> IntersectionLine;
+    using IntersectionLine = std::vector<SplashIntersect>;
 #endif
     std::vector<IntersectionLine> allIntersections;
 
@@ -111,14 +111,14 @@ public:
 
 private:
 #if USE_BOOST_HEADERS
-    typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+    using IntersectionLine = boost::container::small_vector<SplashIntersect, 4>;
 #else
-    typedef std::vector<SplashIntersect> IntersectionLine;
+    using IntersectionLine = std::vector<SplashIntersect>;
 #endif
     const IntersectionLine &line;
 
-    size_t interIdx; // current index into <line>
-    int interCount; // current EO/NZWN counter
+    size_t interIdx = 0; // current index into <line>
+    int interCount = 0; // current EO/NZWN counter
     const bool eo;
 };
 

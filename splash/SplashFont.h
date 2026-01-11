@@ -88,7 +88,7 @@ public:
     virtual double getGlyphAdvance(int /*c*/) { return -1; }
 
     // Return the glyph bounding box.
-    void getBBox(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA)
+    void getBBox(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA) const
     {
         *xMinA = xMin;
         *yMinA = yMin;

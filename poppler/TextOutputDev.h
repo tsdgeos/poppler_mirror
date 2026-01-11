@@ -66,7 +66,7 @@ class TextSelectionVisitor;
 
 //------------------------------------------------------------------------
 
-typedef void (*TextOutputFunc)(void *stream, const char *text, int len);
+using TextOutputFunc = void (*)(void *stream, const char *text, int len);
 
 enum SelectionStyle
 {
@@ -164,7 +164,7 @@ public:
     // <word>.
     double primaryDelta(const TextWord *word) const;
 
-    static bool cmpYX(const TextWord *const word1, const TextWord *const word2);
+    static bool cmpYX(const TextWord *word1, const TextWord *word2);
 
     void visitSelection(TextSelectionVisitor *visitor, const PDFRectangle *selection);
 
@@ -321,7 +321,7 @@ public:
 
     int cmpYX(const TextLine *line) const;
 
-    static bool cmpXY(const TextLine *const line1, const TextLine *const line2);
+    static bool cmpXY(const TextLine *line1, const TextLine *line2);
 
     void coalesce(const UnicodeMap *uMap);
 
@@ -394,7 +394,7 @@ public:
     // Update this block's priMin and priMax values, looking at <blk>.
     void updatePriMinMax(const TextBlock *blk);
 
-    static bool cmpXYPrimaryRot(const TextBlock *const blk1, const TextBlock *const blk2);
+    static bool cmpXYPrimaryRot(const TextBlock *blk1, const TextBlock *blk2);
 
     int primaryCmp(const TextBlock *blk) const;
 
@@ -661,9 +661,9 @@ public:
 
 private:
     void clear();
-    void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
+    static void assignColumns(TextLineFrag *frags, int nFrags, bool rot);
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
-    void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
+    static void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
 
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // discard diagonal text

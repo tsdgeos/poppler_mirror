@@ -393,7 +393,7 @@ private:
 class POPPLER_PRIVATE_EXPORT DefaultAppearance
 {
 public:
-    DefaultAppearance(const std::string &fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
+    DefaultAppearance(std::string fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA);
     explicit DefaultAppearance(const GooString *da);
     void setFontName(const std::string &fontNameA);
     const std::string &getFontName() const { return fontName; }
@@ -437,9 +437,9 @@ public:
 
     AnnotIconFitScaleWhen getScaleWhen() { return scaleWhen; }
     AnnotIconFitScale getScale() { return scale; }
-    double getLeft() { return left; }
-    double getBottom() { return bottom; }
-    bool getFullyBounds() { return fullyBounds; }
+    double getLeft() const { return left; }
+    double getBottom() const { return bottom; }
+    bool getFullyBounds() const { return fullyBounds; }
 
 protected:
     AnnotIconFitScaleWhen scaleWhen; // SW (Default A)
@@ -627,8 +627,8 @@ private:
     bool drawSignatureFieldText(const FormFieldSignature *field, const Form *form, const GooString *da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict);
     void drawSignatureFieldText(const std::string &text, const Form *form, const DefaultAppearance &da, const AnnotBorder *border, const PDFRectangle *rect, XRef *xref, Dict *resourcesDict, double leftMargin, bool centerVertically,
                                 bool centerHorizontally);
-    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-                  const VariableTextQuadding quadding, XRef *xref, Dict *resourcesDict, const int flags = NoDrawTextFlags, const int nCombs = 0);
+    bool drawText(const GooString *text, const Form *form, const GooString *da, const GfxResources *resources, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, VariableTextQuadding quadding,
+                  XRef *xref, Dict *resourcesDict, int flags = NoDrawTextFlags, int nCombs = 0);
     void drawArrowPath(double x, double y, const Matrix &m, int orientation = 1);
 
     std::unique_ptr<GooString> appearBuf;
@@ -719,9 +719,9 @@ public:
     Annot(PDFDoc *docA, PDFRectangle *rectA);
     Annot(PDFDoc *docA, Object &&dictObject);
     Annot(PDFDoc *docA, Object &&dictObject, const Object *obj);
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
-    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, const double wMax, const double hMax, const bool forceZapfDingbats = {});
+    static double calculateFontSize(const Form *form, const GfxFont *font, const GooString *text, double wMax, double hMax, bool forceZapfDingbats = {});
 
     virtual void draw(Gfx *gfx, bool printing);
     // Get the resource dict of the appearance stream
@@ -771,7 +771,7 @@ public:
     AnnotColor *getColor() const { return color.get(); }
     int getTreeKey() const { return treeKey; }
 
-    int getId() { return ref.num; }
+    int getId() const { return ref.num; }
 
     // Check if point is inside the annot rectangle.
     bool inRect(double x, double y) const;
@@ -1371,7 +1371,7 @@ public:
 
     void setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths);
     void setDrawBelow(bool drawBelow);
-    bool getDrawBelow();
+    bool getDrawBelow() const;
 
     // getters
     const std::vector<std::unique_ptr<AnnotPath>> &getInkList() const { return inkList; }

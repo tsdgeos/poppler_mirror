@@ -9,11 +9,11 @@ class TestGooString : public QObject
 public:
     explicit TestGooString(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testInsertData_data();
-    void testInsertData();
-    void testInsert();
-    void testFormat();
-    void testFromNullptr();
+    static void testInsertData_data();
+    static void testInsertData();
+    static void testInsert();
+    static void testFormat();
+    static void testFromNullptr();
 };
 
 void TestGooString::testInsertData_data()
@@ -76,7 +76,7 @@ void TestGooString::testFormat()
         QCOMPARE(goo.c_str(), "-10,-a,-A,-12,-1010");
     }
     {
-        const std::string goo(GooString::format("{0:c}{1:c}{2:c}{3:c}", 'T', (char)'E', (short)'S', (int)'T'));
+        const std::string goo(GooString::format("{0:c}{1:c}{2:c}{3:c}", 'T', 'E', (short)'S', (int)'T'));
         QCOMPARE(goo.c_str(), "TEST");
 
         GooString gooGoo(goo);
@@ -100,7 +100,7 @@ void TestGooString::testFormat()
     }
     {
         const std::string gooD(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1., .012));
-        const std::string gooF(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1.f, .012f));
+        const std::string gooF(GooString::format("{0:.1f} {0:.1g} {0:.1gs} | {1:.1f} {1:.1g} {1:.1gs}", 1.F, .012f));
         QCOMPARE(gooD.c_str(), "1.0 1 1 | 0.0 0 0.01");
         QCOMPARE(gooF.c_str(), "1.0 1 1 | 0.0 0 0.01");
     }

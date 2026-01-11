@@ -36,7 +36,7 @@
 class StreamBitReader
 {
 public:
-    explicit StreamBitReader(Stream *strA) : str(strA), inputBits(0), isAtEof(false) { }
+    explicit StreamBitReader(Stream *strA) : str(strA) { }
 
     void resetInputBits() { inputBits = 0; }
 
@@ -76,14 +76,14 @@ public:
         }
 
         bit = readBit();
-        if (bit == (unsigned int)-1) {
+        if (isAtEof) {
             return -1;
         }
 
         bit = bit << (n - 1);
 
         bits = readBits(n - 1);
-        if (bits == (unsigned int)-1) {
+        if (isAtEof) {
             return -1;
         }
 
@@ -92,9 +92,9 @@ public:
 
 private:
     Stream *str;
-    int inputBits;
+    int inputBits = 0;
     char bitsBuffer;
-    bool isAtEof;
+    bool isAtEof = false;
 };
 
 //------------------------------------------------------------------------
@@ -190,7 +190,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
     }
 
     std::vector<char> buf(bufLength);
-    char *p = &buf[0];
+    char *p = buf.data();
 
     if (hintsOffset && hintsLength) {
         std::unique_ptr<Stream> s(str->makeSubStream(hintsOffset, false, hintsLength, Object::null()));
@@ -226,7 +226,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         }
     }
 
-    auto memStream = std::make_unique<MemStream>(&buf[0], 0, bufLength, Object::null());
+    auto memStream = std::make_unique<MemStream>(buf.data(), 0, bufLength, Object::null());
 
     Parser *parser = new Parser(xref, std::move(memStream), true);
 
@@ -499,11 +499,11 @@ Goffset Hints::getPageOffset(int page)
 
     if (page - 1 > pageFirst) {
         return pageOffset[page - 1];
-    } else if (page - 1 < pageFirst) {
-        return pageOffset[page];
-    } else {
-        return pageOffset[0];
     }
+    if (page - 1 < pageFirst) {
+        return pageOffset[page];
+    }
+    return pageOffset[0];
 }
 
 int Hints::getPageObjectNum(int page)
@@ -514,9 +514,9 @@ int Hints::getPageObjectNum(int page)
 
     if (page - 1 > pageFirst) {
         return pageObjectNum[page - 1];
-    } else if (page - 1 < pageFirst) {
-        return pageObjectNum[page];
-    } else {
-        return pageObjectNum[0];
     }
+    if (page - 1 < pageFirst) {
+        return pageObjectNum[page];
+    }
+    return pageObjectNum[0];
 }

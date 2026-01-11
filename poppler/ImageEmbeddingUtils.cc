@@ -139,7 +139,7 @@ class PngEmbedder : public ImageEmbedder
     };
 
 public:
-    PngEmbedder(png_structp png, png_infop info, std::unique_ptr<LibpngInputStream> stream, PrivateTag = {})
+    PngEmbedder(png_structp png, png_infop info, std::unique_ptr<LibpngInputStream> stream, PrivateTag /*unused*/ = {})
         : ImageEmbedder(png_get_image_width(png, info), png_get_image_height(png, info)),
           m_png(png),
           m_info(info),
@@ -324,7 +324,7 @@ class JpegEmbedder : public ImageEmbedder
     };
 
 public:
-    JpegEmbedder(const int width, const int height, std::vector<char> &&fileContent, PrivateTag = {}) : ImageEmbedder(width, height), m_fileContent(std::move(fileContent)) { }
+    JpegEmbedder(const int width, const int height, std::vector<char> &&fileContent, PrivateTag /*unused*/ = {}) : ImageEmbedder(width, height), m_fileContent(std::move(fileContent)) { }
 
     JpegEmbedder() = delete;
     JpegEmbedder(const JpegEmbedder &) = delete;

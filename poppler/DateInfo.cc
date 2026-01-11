@@ -118,7 +118,7 @@ std::string timeToStringWithFormat(const time_t *timeA, const char *format)
     }
     size_t bufLen = 50;
     std::string buf(bufLen, ' ');
-    while (strftime(&buf[0], buf.size(), fmt.c_str(), &localtime_tm) == 0) {
+    while (strftime(buf.data(), buf.size(), fmt.c_str(), &localtime_tm) == 0) {
         buf.resize(bufLen *= 2);
     }
     buf.resize(buf.find('\0'));

@@ -259,7 +259,7 @@ int main(int argc, char **argv)
                     const Poppler::SignatureValidationInfo::CertificateStatus certStatus = signatureForm->validateResult();
                     std::cout << "\t\t\tSignatureStatus: " << svi.signatureStatus() << std::endl;
                     std::cout << "\t\t\tCertificateStatus: " << certStatus << std::endl;
-                    if (svi.signerName().isEmpty() == false) {
+                    if (!svi.signerName().isEmpty()) {
                         std::cout << "\t\t\tSignerName: " << svi.signerName() << std::endl;
                     } else {
                         std::cout << "\t\t\tSignerName: "

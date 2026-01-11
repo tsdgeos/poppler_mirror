@@ -419,7 +419,7 @@ public:
     ~GfxCIDFont() override;
 
 private:
-    int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool wmode);
+    static int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool wmode);
     double getWidth(CID cid) const; // Get width of a character.
 
     std::unique_ptr<GooString> collection; // collection name
@@ -440,7 +440,7 @@ class GfxFontDict
 {
 public:
     // Build the font dictionary, given the PDF font dictionary.
-    GfxFontDict(XRef *xref, const Ref fontDictRef, Dict *fontDict);
+    GfxFontDict(XRef *xref, Ref fontDictRef, Dict *fontDict);
 
     GfxFontDict(const GfxFontDict &) = delete;
     GfxFontDict &operator=(const GfxFontDict &) = delete;

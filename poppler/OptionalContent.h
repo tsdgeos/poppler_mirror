@@ -42,7 +42,7 @@ public:
     bool hasOCGs() const;
     const std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> &getOCGs() const { return optionalContentGroups; }
 
-    OptionalContentGroup *findOcgByRef(const Ref ref) const;
+    OptionalContentGroup *findOcgByRef(Ref ref) const;
 
     const Array *getOrderArray() const { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
     const Array *getRBGroupsArray() const { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
@@ -94,7 +94,7 @@ public:
     const GooString *getName() const;
 
     Ref getRef() const;
-    void setRef(const Ref ref);
+    void setRef(Ref ref);
 
     State getState() const { return m_state; };
     void setState(State state) { m_state = state; };

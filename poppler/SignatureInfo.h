@@ -72,15 +72,15 @@ public:
     const X509CertificateInfo *getCertificateInfo() const;
 
     /* SETTERS */
-    void setSignatureValStatus(enum SignatureValidationStatus);
-    void setSignerName(const std::string &);
-    void setSubjectDN(const std::string &);
-    void setLocation(std::unique_ptr<GooString> &&);
-    void setReason(std::unique_ptr<GooString> &&);
-    void setHashAlgorithm(HashAlgorithm);
-    void setSigningTime(time_t);
+    void setSignatureValStatus(enum SignatureValidationStatus sig_val_status);
+    void setSignerName(const std::string &signerName);
+    void setSubjectDN(const std::string &subjectDN);
+    void setLocation(std::unique_ptr<GooString> &&loc);
+    void setReason(std::unique_ptr<GooString> &&signingReason);
+    void setHashAlgorithm(HashAlgorithm type);
+    void setSigningTime(time_t signingTime);
     void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
-    void setCertificateInfo(std::unique_ptr<X509CertificateInfo>);
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> certInfo);
 
 private:
     SignatureValidationStatus sig_status = SIGNATURE_NOT_VERIFIED;

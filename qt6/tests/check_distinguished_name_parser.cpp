@@ -19,17 +19,17 @@ public:
     explicit TestDistinguishedNameParser(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
     // The big set of input/output. Several of the helper functions can be tested independently
-    void testParser();
-    void testParser_data();
+    static void testParser();
+    static void testParser_data();
 
-    void testRemoveLeadingSpaces();
-    void testRemoveLeadingSpaces_data();
+    static void testRemoveLeadingSpaces();
+    static void testRemoveLeadingSpaces_data();
 
-    void testRemoveTrailingSpaces();
-    void testRemoveTrailingSpaces_data();
+    static void testRemoveTrailingSpaces();
+    static void testRemoveTrailingSpaces_data();
 
-    void testParseHexString();
-    void testParseHexString_data();
+    static void testParseHexString();
+    static void testParseHexString_data();
 };
 
 void TestDistinguishedNameParser::testParser()

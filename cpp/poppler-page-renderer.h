@@ -25,7 +25,7 @@
 
 namespace poppler {
 
-typedef unsigned int argb;
+using argb = unsigned int;
 
 class page;
 class page_renderer_private;

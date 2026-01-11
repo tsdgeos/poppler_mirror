@@ -236,16 +236,16 @@ byte_array ustring::to_utf8() const
     }
     const value_type *me_data = data();
     byte_array str(size() * sizeof(value_type));
-    char *str_data = &str[0];
+    char *str_data = str.data();
     size_t me_len_char = size() * sizeof(value_type);
     size_t str_len_left = str.size();
-    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
+    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting)
     if ((ir == kIconvError) && (errno == E2BIG)) {
-        const size_t delta = str_data - &str[0];
+        const size_t delta = str_data - str.data();
         str_len_left += str.size();
         str.resize(str.size() * 2);
         str_data = &str[delta];
-        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
+        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left); // NOLINT(readability-redundant-casting)
         if (ir == kIconvError) {
             return byte_array();
         }
@@ -289,17 +289,17 @@ ustring ustring::from_utf8(const char *str, int len)
 
     // +1, because iconv inserts byte order marks
     ustring ret(len + 1, 0);
-    char *ret_data = reinterpret_cast<char *>(&ret[0]);
+    char *ret_data = reinterpret_cast<char *>(ret.data());
     char *str_data = const_cast<char *>(str);
     size_t str_len_char = len;
     size_t ret_len_left = ret.size() * sizeof(ustring::value_type);
-    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
+    size_t ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting)
     if ((ir == kIconvError) && (errno == E2BIG)) {
-        const size_t delta = ret_data - reinterpret_cast<char *>(&ret[0]);
+        const size_t delta = ret_data - reinterpret_cast<char *>(ret.data());
         ret_len_left += ret.size() * sizeof(ustring::value_type);
         ret.resize(ret.size() * 2);
-        ret_data = reinterpret_cast<char *>(&ret[0]) + delta;
-        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
+        ret_data = reinterpret_cast<char *>(ret.data()) + delta;
+        ir = iconv(static_cast<iconv_t>(ic), (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left); // NOLINT(readability-redundant-casting)
         if (ir == kIconvError) {
             return ustring();
         }
@@ -338,7 +338,7 @@ std::ostream &poppler::operator<<(std::ostream &stream, const byte_array &array)
     stream << "[";
     const std::ios_base::fmtflags f = stream.flags();
     std::hex(stream);
-    const char *data = &array[0];
+    const char *data = array.data();
     const byte_array::size_type out_len = std::min<byte_array::size_type>(array.size(), 50);
     for (byte_array::size_type i = 0; i < out_len; ++i) {
         if (i != 0) {

@@ -62,6 +62,7 @@
 #include <cstring>
 #include <cstdio>
 #include <filesystem>
+#include <utility>
 #ifdef _WIN32
 #    include <shlobj.h>
 #    include <mbstring.h>
@@ -270,7 +271,7 @@ SysFontList::SysFontList() = default;
 
 SysFontList::~SysFontList()
 {
-    for (auto entry : fonts) {
+    for (auto *entry : fonts) {
         delete entry;
     }
 }
@@ -402,7 +403,7 @@ const SysFontInfo *SysFontList::find(const std::string &name, bool fixedWidth, b
 // parsing
 //------------------------------------------------------------------------
 
-GlobalParams::GlobalParams(const std::string &customPopplerDataDir) : popplerDataDir(customPopplerDataDir)
+GlobalParams::GlobalParams(std::string customPopplerDataDir) : popplerDataDir(std::move(customPopplerDataDir))
 {
     // scan the encoding in reverse because we want the lowest-numbered
     // index for each char name ('space' is encoded twice)
@@ -647,12 +648,11 @@ static bool findModifier(const std::string &name, const size_t modStart, const c
     size_t match = name.find(modifier, modStart);
     if (match == std::string::npos) {
         return false;
-    } else {
-        if (start == std::string::npos || match < start) {
-            start = match;
-        }
-        return true;
     }
+    if (start == std::string::npos || match < start) {
+        start = match;
+    }
+    return true;
 }
 
 static const char *getFontLang(const GfxFont &font)
@@ -858,8 +858,8 @@ static FcPattern *buildFcPattern(const GfxFont &font, const GooString *base14Nam
 
 std::optional<std::string> GlobalParams::findFontFile(const std::string &fontName)
 {
-    setupBaseFonts(POPPLER_FONTSDIR);
     globalParamsLocker();
+    setupBaseFonts(POPPLER_FONTSDIR);
     const auto fontFile = fontFiles.find(fontName);
     if (fontFile != fontFiles.end()) {
         return fontFile->second;
@@ -910,7 +910,7 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 */
 #if WITH_FONTCONFIGURATION_FONTCONFIG
 // not needed for fontconfig
-void GlobalParams::setupBaseFonts(const char *) { }
+void GlobalParams::setupBaseFonts(const char * /*unused*/) { }
 
 std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont &font, GooString *substituteFontName)
 {
@@ -1083,7 +1083,8 @@ fin:
     return path;
 }
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, // NOLINT(readability-convert-member-functions-to-static)
+                                                                              const std::vector<std::string> &filesToIgnore)
 {
     FcPattern *p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, fontFamily.c_str(), FC_STYLE, FcTypeString, fontStyle.c_str(), nullptr);
     FcConfigSubstitute(nullptr, p, FcMatchPattern);
@@ -1116,7 +1117,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
     return {};
 }
 
-UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate) // NOLINT(readability-convert-member-functions-to-static)
 {
     FcPattern *pattern = buildFcPattern(fontToEmulate, nullptr);
 
@@ -1437,7 +1438,7 @@ bool GlobalParams::getProfileCommands()
     return profileCommands;
 }
 
-bool GlobalParams::getErrQuiet()
+bool GlobalParams::getErrQuiet() const
 {
     // no locking -- this function may get called from inside a locked
     // section

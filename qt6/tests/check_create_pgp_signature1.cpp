@@ -53,12 +53,12 @@ public:
     }
 
 private Q_SLOTS:
-    void init();
-    void initTestCase_data();
+    static void init();
+    static void initTestCase_data();
     void initTestCase() { }
-    void cleanupTestCase();
-    void testPgpSignVerify();
-    void testKeyList();
+    static void cleanupTestCase();
+    static void testPgpSignVerify();
+    static void testKeyList();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignWithGnupgPgp::nssdir;
@@ -142,7 +142,7 @@ void TestSignWithGnupgPgp::testPgpSignVerify()
         auto signatureFields = signedDoc->getSignatureFields();
         QCOMPARE(signatureFields.size(), 1);
         QCOMPARE(signatureFields[0]->getSignatureType(), CryptoSign::SignatureType::g10c_pgp_signature_detached);
-        auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+        auto *siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
         signatureFields[0]->validateSignatureResult();
         QCOMPARE(siginfo0->getSignatureValStatus(), SignatureValidationStatus::SIGNATURE_VALID);
         QCOMPARE(siginfo0->getSignerName(), std::string { "testuser" });

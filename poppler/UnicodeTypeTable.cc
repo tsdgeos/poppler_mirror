@@ -670,22 +670,23 @@ static int decomp_compat(Unicode u, Unicode *buf, bool reverseRTL = false)
                 int offset = decomp_table[midpoint].offset;
                 if (offset == -1) {
                     break;
-                } else {
-                    int length = decomp_table[midpoint].length, i;
-                    if (buf) {
-                        for (i = 0; i < length; ++i) {
-                            if (unicodeTypeR(u) && reverseRTL) {
-                                buf[i] = decomp_expansion[offset + length - i - 1];
-                            } else {
-                                buf[i] = decomp_expansion[offset + i];
-                            }
+                }
+                int length = decomp_table[midpoint].length, i;
+                if (buf) {
+                    for (i = 0; i < length; ++i) {
+                        if (unicodeTypeR(u) && reverseRTL) {
+                            buf[i] = decomp_expansion[offset + length - i - 1];
+                        } else {
+                            buf[i] = decomp_expansion[offset + i];
                         }
                     }
-                    return length;
                 }
-            } else if (midpoint == start) {
+                return length;
+            }
+            if (midpoint == start) {
                 break;
-            } else if (u > decomp_table[midpoint].character) {
+            }
+            if (u > decomp_table[midpoint].character) {
                 start = midpoint;
             } else {
                 end = midpoint;
@@ -713,9 +714,8 @@ static bool combine(Unicode base, Unicode add, Unicode *out)
         if (compose_first_single[idx_base - COMPOSE_FIRST_SINGLE_START][0] == add) {
             *out = compose_first_single[idx_base - COMPOSE_FIRST_SINGLE_START][1];
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     idx_add = COMPOSE_INDEX(add);
@@ -723,9 +723,8 @@ static bool combine(Unicode base, Unicode add, Unicode *out)
         if (compose_second_single[idx_add - COMPOSE_SECOND_SINGLE_START][0] == base) {
             *out = compose_second_single[idx_add - COMPOSE_SECOND_SINGLE_START][1];
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     if (idx_base >= COMPOSE_FIRST_START && idx_base < COMPOSE_FIRST_SINGLE_START && idx_add >= COMPOSE_SECOND_START && idx_add < COMPOSE_SECOND_SINGLE_START) {

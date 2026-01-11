@@ -93,9 +93,7 @@ struct ESSCertIDv2
  */
 struct SigningCertificateV2
 {
-    ESSCertIDv2 **certs;
-
-    SigningCertificateV2() : certs(nullptr) { }
+    ESSCertIDv2 **certs = nullptr;
 };
 
 /**
@@ -440,7 +438,7 @@ std::string NSSSignatureVerification::getSignerName() const
         return {};
     }
 
-    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    auto *signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
         return {};
     }
@@ -460,7 +458,7 @@ std::string NSSSignatureVerification::getSignerSubjectDN() const
     if (!CMSSignerInfo) {
         return {};
     }
-    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    auto *signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
         return {};
     }
@@ -700,7 +698,7 @@ void NSSSignatureConfiguration::setNSSPasswordCallback(const std::function<char 
     PasswordFunction = f;
 }
 
-NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter) : p7(std::move(p7data)), type(subfilter), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr)
+NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&p7data, CryptoSign::SignatureType subfilter) : p7(std::move(p7data)), type(subfilter)
 {
     NSSSignatureConfiguration::setNSSDir({});
     CMSitem.data = p7.data();
@@ -726,7 +724,7 @@ NSSSignatureVerification::NSSSignatureVerification(std::vector<unsigned char> &&
     }
 }
 
-NSSSignatureCreation::NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag)), signing_cert(nullptr)
+NSSSignatureCreation::NSSSignatureCreation(const std::string &certNickname, HashAlgorithm digestAlgTag) : hashContext(HashContext::create(digestAlgTag))
 {
     NSSSignatureConfiguration::setNSSDir({});
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname.c_str());
@@ -736,9 +734,8 @@ HashAlgorithm NSSSignatureVerification::getHashAlgorithm() const
 {
     if (hashContext) {
         return hashContext->getHashAlgorithm();
-    } else {
-        return HashAlgorithm::Unknown;
     }
+    return HashAlgorithm::Unknown;
 }
 
 void NSSSignatureVerification::addData(unsigned char *data_block, int data_len)
@@ -786,9 +783,8 @@ static NSSCMSMessage *CMS_MessageCreate(SECItem *cms_item)
                                             nullptr, nullptr /*Password callback*/
                                             ,
                                             nullptr, nullptr /*Decrypt callback*/);
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
@@ -822,9 +818,8 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
             signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);
         }
         return signedData;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
@@ -833,9 +828,8 @@ static NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data)
     if (!signerInfo) {
         printf("Error in NSS_CMSSignedData_GetSignerInfo()\n");
         return nullptr;
-    } else {
-        return signerInfo;
     }
+    return signerInfo;
 }
 
 static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
@@ -907,9 +901,8 @@ SignatureValidationStatus NSSSignatureVerification::validateSignature()
 
     if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, nullptr) != SECSuccess) {
         return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
-    } else {
-        return SIGNATURE_VALID;
     }
+    return SIGNATURE_VALID;
 }
 
 void NSSSignatureVerification::validateCertificateAsync(std::chrono::system_clock::time_point validation_time, bool ocspRevocationCheck, bool useAIACertFetch, const std::function<void()> &doneCallback)
@@ -1247,7 +1240,7 @@ std::vector<unsigned char> HashContext::endHash()
     return digestBuffer;
 }
 
-HashContext::HashContext(HashAlgorithm algorithm, private_tag) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
+HashContext::HashContext(HashAlgorithm algorithm, private_tag /*unused*/) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
 
 std::unique_ptr<HashContext> HashContext::create(HashAlgorithm algorithm)
 {

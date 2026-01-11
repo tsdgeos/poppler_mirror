@@ -282,7 +282,7 @@ LinkDest::LinkDest(const Array &a)
                 changeZoom = false;
             } else if (obj2.isNum()) {
                 zoom = obj2.getNum();
-                changeZoom = (zoom == 0) ? false : true;
+                changeZoom = zoom != 0;
             } else {
                 error(errSyntaxWarning, -1, "Bad annotation destination position");
                 return;
@@ -763,7 +763,7 @@ Object LinkJavaScript::createObject(XRef *xref, const std::string &js)
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-LinkOCGState::LinkOCGState(const Object *obj) : isValid(true)
+LinkOCGState::LinkOCGState(const Object *obj)
 {
     Object obj1 = obj->dictLookup("State");
     if (obj1.isArray()) {

@@ -103,11 +103,11 @@ enum CryptAlgorithm
 
 //------------------------------------------------------------------------
 
-typedef struct _ByteRange
+struct ByteRange
 {
     size_t offset;
     unsigned int length;
-} ByteRange;
+};
 
 //------------------------------------------------------------------------
 // Stream (base class)
@@ -134,24 +134,23 @@ public:
     // Close down the stream.
     virtual void close();
 
-    inline int doGetChars(int nChars, unsigned char *buffer)
+    int doGetChars(int nChars, unsigned char *buffer)
     {
         if (hasGetChars()) {
             return getChars(nChars, buffer);
-        } else {
-            for (int i = 0; i < nChars; ++i) {
-                const int c = getChar();
-                if (likely(c != EOF)) {
-                    buffer[i] = c;
-                } else {
-                    return i;
-                }
-            }
-            return nChars;
         }
+        for (int i = 0; i < nChars; ++i) {
+            const int c = getChar();
+            if (likely(c != EOF)) {
+                buffer[i] = c;
+            } else {
+                return i;
+            }
+        }
+        return nChars;
     }
 
-    inline void fillString(std::string &s)
+    void fillString(std::string &s)
     {
         unsigned char readBuf[4096];
         int readChars;
@@ -164,9 +163,9 @@ public:
         }
     }
 
-    inline void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
+    void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
 
-    inline std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
+    std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
         std::vector<unsigned char> buf(initialSize);
 
@@ -424,8 +423,8 @@ private:
     char *bufPtr;
     char *bufEnd;
     Goffset bufPos;
-    Goffset savePos;
-    bool saved;
+    Goffset savePos = 0;
+    bool saved = false;
 };
 
 //------------------------------------------------------------------------
@@ -517,7 +516,7 @@ public:
     StreamPredictor(const StreamPredictor &) = delete;
     StreamPredictor &operator=(const StreamPredictor &) = delete;
 
-    bool isOk() { return ok; }
+    bool isOk() const { return ok; }
 
     int lookChar();
     int getChar();
@@ -909,7 +908,7 @@ private:
     bool hasGetChars() override { return true; }
     int getChars(int nChars, unsigned char *buffer) override;
 
-    inline int doGetRawChar()
+    int doGetRawChar()
     {
         if (eof) {
             return EOF;
@@ -1000,13 +999,13 @@ public:
 
     [[nodiscard]] bool unfilteredRewind() override;
 
-    int getEncoding() { return encoding; }
-    bool getEndOfLine() { return endOfLine; }
-    bool getEncodedByteAlign() { return byteAlign; }
-    bool getEndOfBlock() { return endOfBlock; }
-    int getColumns() { return columns; }
-    bool getBlackIs1() { return black; }
-    int getDamagedRowsBeforeError() { return damagedRowsBeforeError; }
+    int getEncoding() const { return encoding; }
+    bool getEndOfLine() const { return endOfLine; }
+    bool getEncodedByteAlign() const { return byteAlign; }
+    bool getEndOfBlock() const { return endOfBlock; }
+    int getColumns() const { return columns; }
+    bool getBlackIs1() const { return black; }
+    int getDamagedRowsBeforeError() const { return damagedRowsBeforeError; }
 
 private:
     [[nodiscard]] bool ccittRewind(bool unfiltered);
@@ -1199,7 +1198,7 @@ public:
 
 private:
     [[nodiscard]] bool flateRewind(bool unfiltered);
-    inline int doGetRawChar()
+    int doGetRawChar()
     {
         int c;
 
@@ -1248,7 +1247,7 @@ private:
     bool startBlock();
     void loadFixedCodes();
     bool readDynamicCodes();
-    FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
+    static FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
     int getHuffmanCodeWord(FlateHuffmanTab *tab);
     int getCodeWord(int bits);
 };

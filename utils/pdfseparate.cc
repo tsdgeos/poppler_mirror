@@ -146,9 +146,8 @@ int main(int argc, char *argv[])
         }
         if (printVersion || printHelp) {
             return 0;
-        } else {
-            return kOtherError;
         }
+        return kOtherError;
     }
     globalParams = std::make_unique<GlobalParams>();
     const bool extractOK = extractPages(argv[1], argv[2]);

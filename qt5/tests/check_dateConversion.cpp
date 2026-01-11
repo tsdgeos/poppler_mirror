@@ -12,11 +12,11 @@ public:
     explicit TestDateConv(QObject *parent = nullptr) : QObject(parent) { }
 
 private Q_SLOTS:
-    void initTestCase();
-    void checkDates_data();
-    void checkDates();
-    void checkInvalidDates_data();
-    void checkInvalidDates();
+    static void initTestCase();
+    static void checkDates_data();
+    static void checkDates();
+    static void checkInvalidDates_data();
+    static void checkInvalidDates();
 };
 
 void TestDateConv::initTestCase()

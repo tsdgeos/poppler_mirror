@@ -22,11 +22,14 @@ SignatureType signatureTypeFromString(std::string_view data)
 {
     if (data == std::string_view("ETSI.CAdES.detached")) {
         return CryptoSign::SignatureType::ETSI_CAdES_detached;
-    } else if (data == std::string_view("adbe.pkcs7.detached")) {
+    }
+    if (data == std::string_view("adbe.pkcs7.detached")) {
         return CryptoSign::SignatureType::adbe_pkcs7_detached;
-    } else if (data == std::string_view("adbe.pkcs7.sha1")) {
+    }
+    if (data == std::string_view("adbe.pkcs7.sha1")) {
         return CryptoSign::SignatureType::adbe_pkcs7_sha1;
-    } else if (data == std::string_view("g10c.pgp.signature.detached")) {
+    }
+    if (data == std::string_view("g10c.pgp.signature.detached")) {
         return CryptoSign::SignatureType::g10c_pgp_signature_detached;
     }
     return CryptoSign::SignatureType::unknown_signature_type;

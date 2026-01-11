@@ -71,7 +71,7 @@ void StructTreeRoot::parse(const Dict &root)
             if (obj.isDict()) {
                 StructElement *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
                 if (child->isOk()) {
-                    if (marked && !(child->getType() == StructElement::Document || child->getType() == StructElement::Part || child->getType() == StructElement::Art || child->getType() == StructElement::Div)) {
+                    if (marked && child->getType() != StructElement::Document && child->getType() != StructElement::Part && child->getType() != StructElement::Art && child->getType() != StructElement::Div) {
                         error(errSyntaxWarning, -1, "StructTreeRoot element of tagged PDF is wrong type ({0:s})", child->getTypeName());
                     }
                     appendChild(child);
@@ -124,7 +124,8 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
             }
         }
         return;
-    } else if (!kids.isNull()) {
+    }
+    if (!kids.isNull()) {
         error(errSyntaxError, -1, "Kids object is wrong type ({0:s})", kids.getTypeName());
     }
 
@@ -165,7 +166,7 @@ void StructTreeRoot::parseNumberTreeNode(const Dict &node, RefRecursionChecker &
                         Ref ref = valueRef.getRef();
                         vec.resize(1);
                         vec[0].ref = ref;
-                        refToParentMap.insert(std::pair<Ref, Parent *>(ref, &vec[0]));
+                        refToParentMap.insert(std::pair<Ref, Parent *>(ref, vec.data()));
                     } else {
                         error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, valueRef.getTypeName());
                     }

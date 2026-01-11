@@ -575,9 +575,8 @@ static cairo_status_t writeStream(void *closure, const unsigned char *data, unsi
 
     if (fwrite(data, length, 1, file) == 1) {
         return CAIRO_STATUS_SUCCESS;
-    } else {
-        return CAIRO_STATUS_WRITE_ERROR;
     }
+    return CAIRO_STATUS_WRITE_ERROR;
 }
 
 static void beginDocument(GooString *inputFileName, GooString *outputFileName, double w, double h)
@@ -963,11 +962,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -printdlg, -print, -svg).\n");
         exit(99);
     }
-    if (png || jpeg || tiff) {
-        printing = false;
-    } else {
-        printing = true;
-    }
+    printing = !(png || jpeg || tiff);
 
     if (printing) {
         checkInvalidPrintOption(mono, "-mono");
@@ -1070,11 +1065,7 @@ int main(int argc, char *argv[])
             exit(99);
         }
     }
-    if (origPageSizes || paperWidth < 0 || paperHeight < 0) {
-        usePDFPageSize = true;
-    } else {
-        usePDFPageSize = false;
-    }
+    usePDFPageSize = origPageSizes || paperWidth < 0 || paperHeight < 0;
 
     if (printdlg) {
         printToWin32 = true;

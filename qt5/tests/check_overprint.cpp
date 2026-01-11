@@ -10,7 +10,7 @@ class TestOverprint : public QObject
 public:
     explicit TestOverprint(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkOverprintImageRendering();
+    static void checkOverprintImageRendering();
 };
 
 void TestOverprint::checkOverprintImageRendering()

@@ -78,7 +78,7 @@ std::unique_ptr<FoFiType1C> FoFiType1C::load(const char *fileName)
     return ff;
 }
 
-FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBase(std::move(fileA))
+FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/) : FoFiBase(std::move(fileA))
 {
     encoding = nullptr;
     privateDicts = nullptr;
@@ -87,7 +87,7 @@ FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBas
     charsetLength = 0;
 }
 
-FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag) : FoFiBase(data)
+FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag /*unused*/) : FoFiBase(data)
 {
     encoding = nullptr;
     privateDicts = nullptr;
@@ -1368,7 +1368,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001a: // vvcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vvcurveto", nOps);
                 }
                 if (nOps % 2 == 1) {
@@ -1396,7 +1396,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001b: // hhcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hhcurveto", nOps);
                 }
                 if (nOps % 2 == 1) {
@@ -1438,7 +1438,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 // don't clear the stack
                 break;
             case 0x001e: // vhcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 vhcurveto", nOps);
                 }
                 for (k = 0; k < nOps && k != nOps - 5; k += 4) {
@@ -1478,7 +1478,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type
                 openPath = true;
                 break;
             case 0x001f: // hvcurveto
-                if (nOps < 4 || !(nOps % 4 == 0 || (nOps - 1) % 4 == 0)) {
+                if (nOps < 4 || (nOps % 4 != 0 && (nOps - 1) % 4 != 0)) {
                     //~ error(-1, "Wrong number of args (%d) to Type 2 hvcurveto", nOps);
                 }
                 for (k = 0; k < nOps && k != nOps - 5; k += 4) {
@@ -1681,7 +1681,7 @@ void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPriva
     charBuf->push_back((char)13);
 }
 
-void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const
+void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf)
 {
     unsigned char buf[12];
     int y, n;
@@ -1733,7 +1733,7 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const
     charBuf->append((char *)buf, n);
 }
 
-void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const
+void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
 {
     unsigned char *p;
     unsigned char x;
@@ -1755,7 +1755,7 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const
     }
 }
 
-void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n) const
+void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n)
 {
     unsigned char x;
     int i;
@@ -1778,7 +1778,7 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s
     }
 }
 
-void FoFiType1C::writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiType1C::writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream)
 {
     char buf[80];
     const char *p;
@@ -2095,7 +2095,8 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict)
                 pSize = (int)ops[0].num;
                 pOffset = (int)ops[1].num;
                 break;
-            } else if (ops[nOps - 1].op == 0x0c07) {
+            }
+            if (ops[nOps - 1].op == 0x0c07) {
                 fontMatrix[0] = ops[0].num;
                 fontMatrix[1] = ops[1].num;
                 fontMatrix[2] = ops[2].num;

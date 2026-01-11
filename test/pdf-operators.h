@@ -1,8 +1,8 @@
-typedef struct
+struct OperatorMapping
 {
     const char *op;
     const char *description;
-} OperatorMapping;
+};
 
 OperatorMapping op_mapping[] = {
     { "b", "Close, fill, and stroke path using nonzero winding number rule" },

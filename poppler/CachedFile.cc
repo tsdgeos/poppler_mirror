@@ -35,7 +35,7 @@ CachedFile::CachedFile(std::unique_ptr<CachedFileLoader> &&cacheLoader) : loader
 
 CachedFile::~CachedFile() = default;
 
-long int CachedFile::tell()
+long int CachedFile::tell() const
 {
     return streamPos;
 }

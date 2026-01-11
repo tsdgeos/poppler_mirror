@@ -132,7 +132,7 @@ FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormF
 
 FormWidget::~FormWidget() = default;
 
-void FormWidget::print(int indent)
+void FormWidget::print(int indent) const
 {
     printf("%*s+ (%d %d): [widget]\n", indent, "", ref.num, ref.gen);
 }
@@ -941,10 +941,10 @@ bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooStrin
     vObj.dictAdd("Contents", Object(objHexString, std::string(placeholderLength, '\0')));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes
-    bObj.arrayAdd(Object(static_cast<long long>(0LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
-    bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
+    bObj.arrayAdd(Object(0LL));
+    bObj.arrayAdd(Object(9999999999LL));
+    bObj.arrayAdd(Object(9999999999LL));
+    bObj.arrayAdd(Object(9999999999LL));
     vObj.dictAdd("ByteRange", bObj.copy());
     field->getObj()->dictSet("V", Object(vRef));
     xref->setModifiedObject(field->getObj(), field->getRef());
@@ -1498,10 +1498,7 @@ bool FormFieldButton::setState(const char *state, bool ignoreToggleOff)
 
     if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
         // It's button in a set, set state on parent
-        if (static_cast<FormFieldButton *>(parent)->setState(state)) {
-            return true;
-        }
-        return false;
+        return static_cast<FormFieldButton *>(parent)->setState(state);
     }
 
     bool isOn = strcmp(state, "Off") != 0;
@@ -2191,8 +2188,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(CryptoSign::SignatureType::unsigned_signature_field)
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents) : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature)
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -2525,7 +2521,8 @@ std::pair<std::optional<std::vector<unsigned char>>, int64_t> FormFieldSignature
                 return { signature, checkedFileSize };
             }
             return { {}, 0 };
-        } else if (signature[1] > 0x80) {
+        }
+        if (signature[1] > 0x80) {
             size_t lengthLength = signature[1] - 0x80;
             size_t length = 0;
             for (size_t i = 0; i < lengthLength; i++) {
@@ -2674,15 +2671,18 @@ std::unique_ptr<FormField> Form::createFieldFromDict(Object &&obj, PDFDoc *docA,
     const Object obj2 = Form::fieldLookup(obj.getDict(), "FT");
     if (obj2.isName("Btn")) {
         return std::make_unique<FormFieldButton>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Tx")) {
-        return std::make_unique<FormFieldText>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Ch")) {
-        return std::make_unique<FormFieldChoice>(docA, std::move(obj), aref, parent, usedParents);
-    } else if (obj2.isName("Sig")) {
-        return std::make_unique<FormFieldSignature>(docA, std::move(obj), aref, parent, usedParents);
-    } else { // we don't have an FT entry => non-terminal field
-        return std::make_unique<FormField>(docA, std::move(obj), aref, parent, usedParents);
     }
+    if (obj2.isName("Tx")) {
+        return std::make_unique<FormFieldText>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    if (obj2.isName("Ch")) {
+        return std::make_unique<FormFieldChoice>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    if (obj2.isName("Sig")) {
+        return std::make_unique<FormFieldSignature>(docA, std::move(obj), aref, parent, usedParents);
+    }
+    // we don't have an FT entry => non-terminal field
+    return std::make_unique<FormField>(docA, std::move(obj), aref, parent, usedParents);
 
     return {};
 }
@@ -3017,7 +3017,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         bool addFont = false;
         if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
             if (f->isCIDFont()) {
-                auto cidFont = static_cast<const GfxCIDFont *>(f.get());
+                const auto *cidFont = static_cast<const GfxCIDFont *>(f.get());
                 if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
                     const int glyph = cidFont->getCIDToGID()[c];
                     if (glyph == 0) {
@@ -3078,7 +3078,7 @@ FormWidget *Form::findWidgetByRef(Ref aref)
 
 FormField *Form::findFieldByRef(Ref aref) const
 {
-    for (auto &rootField : rootFields) {
+    for (const auto &rootField : rootFields) {
         FormField *result = rootField->findFieldByRef(aref);
         if (result) {
             return result;
@@ -3089,7 +3089,7 @@ FormField *Form::findFieldByRef(Ref aref) const
 
 FormField *Form::findFieldByFullyQualifiedName(const std::string &name) const
 {
-    for (auto &rootField : rootFields) {
+    for (const auto &rootField : rootFields) {
         FormField *result = rootField->findFieldByFullyQualifiedName(name);
         if (result) {
             return result;
@@ -3203,7 +3203,7 @@ void FormPageWidgets::addWidgets(const std::vector<std::unique_ptr<FormField>> &
         return;
     }
 
-    for (auto &frmField : addedWidgets) {
+    for (const auto &frmField : addedWidgets) {
         FormWidget *frmWidget = frmField->getWidget(0);
         frmWidget->setID(FormWidget::encodeID(page, widgets.size()));
         widgets.push_back(frmWidget);

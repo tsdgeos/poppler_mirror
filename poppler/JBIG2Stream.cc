@@ -346,9 +346,9 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
             if (bitsToShift >= intNBits) {
                 error(errSyntaxError, -1, "Failed to build table for JBIG2 stream");
                 return false;
-            } else {
-                prefix <<= bitsToShift;
             }
+            prefix <<= bitsToShift;
+
             table[i].prefix = prefix++;
         }
     }
@@ -567,7 +567,7 @@ public:
     JBIG2Segment(const JBIG2Segment &) = delete;
     JBIG2Segment &operator=(const JBIG2Segment &) = delete;
     void setSegNum(unsigned int segNumA) { segNum = segNumA; }
-    unsigned int getSegNum() { return segNum; }
+    unsigned int getSegNum() const { return segNum; }
     virtual JBIG2SegmentType getType() = 0;
 
 private:
@@ -605,7 +605,7 @@ public:
     void setPixel(int x, int y) { data[y * line + (x >> 3)] |= 1 << (7 - (x & 7)); }
     void clearPixel(int x, int y) { data[y * line + (x >> 3)] &= 0x7f7f >> (x & 7); }
     void getPixelPtr(int x, int y, JBIG2BitmapPtr *ptr);
-    int nextPixel(JBIG2BitmapPtr *ptr);
+    int nextPixel(JBIG2BitmapPtr *ptr) const;
     void duplicateRow(int yDest, int ySrc);
     void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
     unsigned char *getDataPtr() { return data; }
@@ -746,7 +746,7 @@ inline void JBIG2Bitmap::getPixelPtr(int x, int y, JBIG2BitmapPtr *ptr)
     }
 }
 
-inline int JBIG2Bitmap::nextPixel(JBIG2BitmapPtr *ptr)
+inline int JBIG2Bitmap::nextPixel(JBIG2BitmapPtr *ptr) const
 {
     int pix;
 
@@ -986,7 +986,7 @@ public:
     JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2SymbolDict() override;
     JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
-    unsigned int getSize() { return size; }
+    unsigned int getSize() const { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return bitmaps[idx]; }
     bool isOk() const { return ok; }
@@ -1045,7 +1045,7 @@ public:
     JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
     ~JBIG2PatternDict() override;
     JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
-    unsigned int getSize() { return size; }
+    unsigned int getSize() const { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap)
     {
         if (likely(idx < size)) {
@@ -1437,7 +1437,7 @@ void JBIG2Stream::readSegments()
         // segment data, unless this segment is marked as having an
         // unknown length (section 7.2.7 of the JBIG2 Final Committee Draft)
 
-        if (!(segType == 38 && segLength == 0xffffffff)) {
+        if (segType != 38 || segLength != 0xffffffff) {
 
             byteCounter += arithDecoder->getByteCounter();
             byteCounter += huffDecoder->getByteCounter();
@@ -2524,7 +2524,7 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[3] = -2;
 
     unsigned int grayMaxPlusOne;
-    if (unlikely(checkedAdd(grayMax, 1u, &grayMaxPlusOne))) {
+    if (unlikely(checkedAdd(grayMax, 1U, &grayMaxPlusOne))) {
         return;
     }
     unsigned int bitmapW;
@@ -3806,7 +3806,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
                         bitmap->clearPixel(x, y);
                         continue;
-                    } else if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
+                    }
+                    if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
                         bitmap->setPixel(x, y);
                         continue;
                     }
@@ -3880,7 +3881,8 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericRefinementRegion(int w, int
                     if (tpgrCX0 == 0 && tpgrCX1 == 0 && tpgrCX2 == 0) {
                         bitmap->clearPixel(x, y);
                         continue;
-                    } else if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
+                    }
+                    if (tpgrCX0 == 7 && tpgrCX1 == 7 && tpgrCX2 == 7) {
                         bitmap->setPixel(x, y);
                         continue;
                     }

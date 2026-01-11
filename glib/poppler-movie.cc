@@ -29,8 +29,6 @@
  * @title: PopplerMovie
  */
 
-typedef struct _PopplerMovieClass PopplerMovieClass;
-
 struct _PopplerMovie
 {
     GObject parent_instance;
@@ -53,6 +51,7 @@ struct _PopplerMovieClass
 {
     GObjectClass parent_class;
 };
+using PopplerMovieClass = _PopplerMovieClass;
 
 G_DEFINE_TYPE(PopplerMovie, poppler_movie, G_TYPE_OBJECT)
 

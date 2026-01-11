@@ -72,19 +72,19 @@ public:
     void redraw(int srcX, int srcY, cairo_t *cr, int width, int height);
 
 private:
-    int incrementalUpdate;
+    int incrementalUpdate = 1;
     void (*redrawCbk)(void *data);
     void *redrawCbkData;
 };
 
-typedef struct
+struct View
 {
     PopplerDocument *doc;
     GtkWidget *drawing_area;
     GtkWidget *spin_button;
     cairo_surface_t *surface;
     GDKSplashOutputDev *out;
-} View;
+};
 
 //------------------------------------------------------------------------
 // Constants and macros
@@ -96,7 +96,7 @@ typedef struct
 // GDKSplashOutputDev
 //------------------------------------------------------------------------
 
-GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc), incrementalUpdate(1)
+GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, sc)
 {
     redrawCbk = redrawCbkA;
     redrawCbkData = redrawCbkDataA;

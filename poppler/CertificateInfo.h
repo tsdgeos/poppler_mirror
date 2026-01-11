@@ -105,10 +105,8 @@ public:
 
     struct Validity
     {
-        Validity() : notBefore(0), notAfter(0) { }
-
-        time_t notBefore;
-        time_t notAfter;
+        time_t notBefore = 0;
+        time_t notAfter = 0;
     };
 
     /* GETTERS */
@@ -128,16 +126,16 @@ public:
     CertificateType getCertificateType() const;
 
     /* SETTERS */
-    void setVersion(int);
-    void setSerialNumber(const GooString &);
-    void setNickName(const GooString &);
-    void setIssuerInfo(EntityInfo &&);
-    void setValidity(Validity);
-    void setSubjectInfo(EntityInfo &&);
-    void setPublicKeyInfo(PublicKeyInfo &&);
-    void setKeyUsageExtensions(unsigned int);
-    void setCertificateDER(const GooString &);
-    void setIsSelfSigned(bool);
+    void setVersion(int version);
+    void setSerialNumber(const GooString &serialNumber);
+    void setNickName(const GooString &nickName);
+    void setIssuerInfo(EntityInfo &&issuerInfo);
+    void setValidity(Validity validity);
+    void setSubjectInfo(EntityInfo &&subjectInfo);
+    void setPublicKeyInfo(PublicKeyInfo &&pkInfo);
+    void setKeyUsageExtensions(unsigned int keyUsages);
+    void setCertificateDER(const GooString &certDer);
+    void setIsSelfSigned(bool isSelfSigned);
     void setKeyLocation(KeyLocation location);
     void setCertificateType(CertificateType type);
 
@@ -149,11 +147,11 @@ private:
     GooString cert_serial;
     GooString cert_der;
     GooString cert_nick;
-    unsigned int ku_extensions;
-    int cert_version;
-    bool is_qualified;
-    bool is_self_signed;
-    KeyLocation keyLocation;
+    unsigned int ku_extensions = KU_NONE;
+    int cert_version = -1;
+    bool is_qualified = false;
+    bool is_self_signed = false;
+    KeyLocation keyLocation = KeyLocation::Unknown;
     CertificateType certificate_type = CertificateType::X509;
 };
 

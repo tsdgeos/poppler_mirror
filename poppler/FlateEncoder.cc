@@ -34,7 +34,7 @@ FlateEncoder::FlateEncoder(Stream *strA) : FilterStream(strA)
     // -Wzero-as-null-pointer-constant warning.
     // For safety, check that the Z_NULL definition is equivalent to
     // 0 / null pointer.
-    static_assert(static_cast<int>(Z_NULL) == 0);
+    static_assert(static_cast<int>(Z_NULL) == 0); // NOLINT(readability-redundant-casting)
     zlib_stream.zalloc = nullptr;
     zlib_stream.zfree = nullptr;
     zlib_stream.opaque = nullptr;

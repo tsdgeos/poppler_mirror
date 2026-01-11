@@ -41,9 +41,8 @@ static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
     src->pub.bytes_in_buffer = 1;
     if (c != EOF) {
         return TRUE;
-    } else {
-        return FALSE;
     }
+    return FALSE;
 }
 
 static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
@@ -205,17 +204,14 @@ bool DCTStream::readLine()
         if (!setjmp(err.setjmp_buffer)) {
             if (!jpeg_read_scanlines(&cinfo, row_buffer, 1)) {
                 return false;
-            } else {
-                current = &row_buffer[0][0];
-                limit = &row_buffer[0][(cinfo.output_width - 1) * cinfo.output_components] + cinfo.output_components;
-                return true;
             }
-        } else {
-            return false;
+            current = &row_buffer[0][0];
+            limit = &row_buffer[0][(cinfo.output_width - 1) * cinfo.output_components] + cinfo.output_components;
+            return true;
         }
-    } else {
         return false;
     }
+    return false;
 }
 
 int DCTStream::getChar()

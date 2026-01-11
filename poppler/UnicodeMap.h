@@ -40,7 +40,7 @@
 
 //------------------------------------------------------------------------
 
-typedef int (*UnicodeMapFunc)(Unicode u, char *buf, int bufSize);
+using UnicodeMapFunc = int (*)(Unicode u, char *buf, int bufSize);
 
 struct UnicodeMapRange
 {

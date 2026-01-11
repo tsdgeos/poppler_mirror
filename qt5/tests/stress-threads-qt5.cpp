@@ -89,7 +89,7 @@ CrazyThread::CrazyThread(uint seed, Poppler::Document *document, QMutex *annotat
 
 void CrazyThread::run()
 {
-    typedef QScopedPointer<Poppler::Page> PagePointer;
+    using PagePointer = QScopedPointer<Poppler::Page>;
 
     qsrand(m_seed);
 

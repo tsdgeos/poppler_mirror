@@ -62,10 +62,9 @@ int main(int argc, char *argv[])
     if (baseImageRef == Ref::INVALID()) {
         if (fail) {
             return 0;
-        } else {
-            fprintf(stderr, "ImageEmbeddingUtils::embed() failed.\n");
-            return 1;
         }
+        fprintf(stderr, "ImageEmbeddingUtils::embed() failed.\n");
+        return 1;
     }
 
     // Save the updated PDF document.

@@ -234,7 +234,7 @@ void JSInfo::scan(int nPages)
     currentPage = lastPage;
 }
 
-bool JSInfo::containsJS()
+bool JSInfo::containsJS() const
 {
     return hasJS;
 }

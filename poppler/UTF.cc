@@ -112,18 +112,15 @@ std::vector<Unicode> TextStringToUCS4(std::string_view textStr)
                 }
             }
             return UTF16toUCS4(utf16);
-
-        } else {
-            return {};
         }
-    } else {
-        std::vector<Unicode> u;
-        u.reserve(len);
-        for (int i = 0; i < len; i++) {
-            u.push_back(pdfDocEncoding[textStr[i] & 0xff]);
-        }
-        return u;
+        return {};
     }
+    std::vector<Unicode> u;
+    u.reserve(len);
+    for (int i = 0; i < len; i++) {
+        u.push_back(pdfDocEncoding[textStr[i] & 0xff]);
+    }
+    return u;
 }
 
 bool UnicodeIsWhitespace(Unicode ucs4)
@@ -201,7 +198,7 @@ inline uint32_t decodeUtf8(uint32_t *state, uint32_t *codep, char byte)
     uint32_t b = (unsigned char)byte;
     uint32_t type = decodeUtf8Table[b];
 
-    *codep = (*state != UTF8_ACCEPT) ? (b & 0x3fu) | (*codep << 6) : (0xff >> type) & (b);
+    *codep = (*state != UTF8_ACCEPT) ? (b & 0x3fU) | (*codep << 6) : (0xff >> type) & (b);
 
     *state = decodeUtf8Table[256 + *state + type];
     return *state;
@@ -324,23 +321,21 @@ inline uint32_t decodeUtf16(uint32_t *state, uint32_t *codePoint, uint16_t codeU
         if (codeUnit >= 0xd800 && codeUnit < 0xdc00) { /* surrogate pair */
             *state = codeUnit;
             return *state;
-        } else if (codeUnit >= 0xdc00 && codeUnit < 0xe000) {
+        }
+        if (codeUnit >= 0xdc00 && codeUnit < 0xe000) {
             /* invalid low surrogate */
             return UTF16_REJECT;
-        } else {
-            *codePoint = codeUnit;
-            return UTF16_ACCEPT;
         }
-    } else {
-        if (codeUnit >= 0xdc00 && codeUnit < 0xe000) {
-            *codePoint = (((*state & 0x3ff) << 10) | (codeUnit & 0x3ff)) + 0x10000;
-            *state = 0;
-            return UTF16_ACCEPT;
-        } else {
-            /* invalid high surrogate */
-            return UTF16_REJECT;
-        }
+        *codePoint = codeUnit;
+        return UTF16_ACCEPT;
     }
+    if (codeUnit >= 0xdc00 && codeUnit < 0xe000) {
+        *codePoint = (((*state & 0x3ff) << 10) | (codeUnit & 0x3ff)) + 0x10000;
+        *state = 0;
+        return UTF16_ACCEPT;
+    }
+    /* invalid high surrogate */
+    return UTF16_REJECT;
 }
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to

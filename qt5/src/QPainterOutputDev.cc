@@ -144,7 +144,7 @@ const QPicture &QPainterOutputDevType3Font::getGlyph(int gid) const
 // QPainterOutputDev
 //------------------------------------------------------------------------
 
-QPainterOutputDev::QPainterOutputDev(QPainter *painter) : m_lastTransparencyGroupPicture(nullptr), m_hintingPreference(QFont::PreferDefaultHinting)
+QPainterOutputDev::QPainterOutputDev(QPainter *painter)
 {
     m_painter.push(painter);
     m_currentBrush = QBrush(Qt::SolidPattern);
@@ -175,7 +175,7 @@ void QPainterOutputDev::startDoc(PDFDoc *doc)
     m_codeToGID = nullptr;
 }
 
-void QPainterOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef *) { }
+void QPainterOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef * /*xref*/) { }
 
 void QPainterOutputDev::endPage() { }
 

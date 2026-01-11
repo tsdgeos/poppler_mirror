@@ -53,7 +53,7 @@ int InMemoryFile::_seek(off64_t *offset, int whence)
         iohead -= (*offset);
         break;
     }
-    (*offset) = std::min<off64_t>(std::max<off64_t>(iohead, 0l), data.size());
+    (*offset) = std::min<off64_t>(std::max<off64_t>(iohead, 0L), data.size());
     iohead = static_cast<size_t>(*offset);
     return 0;
 }

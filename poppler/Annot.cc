@@ -96,6 +96,7 @@
 #include "UTF.h"
 #include <cstring>
 #include <algorithm>
+#include <utility>
 
 #include "annot_stamp_approved.h"
 #include "annot_stamp_as_is.h"
@@ -148,25 +149,32 @@ static AnnotLineEndingStyle parseAnnotLineEndingStyle(const Object &name)
 
     if (name.isName("Square")) {
         return annotLineEndingSquare;
-    } else if (name.isName("Circle")) {
-        return annotLineEndingCircle;
-    } else if (name.isName("Diamond")) {
-        return annotLineEndingDiamond;
-    } else if (name.isName("OpenArrow")) {
-        return annotLineEndingOpenArrow;
-    } else if (name.isName("ClosedArrow")) {
-        return annotLineEndingClosedArrow;
-    } else if (name.isName("Butt")) {
-        return annotLineEndingButt;
-    } else if (name.isName("ROpenArrow")) {
-        return annotLineEndingROpenArrow;
-    } else if (name.isName("RClosedArrow")) {
-        return annotLineEndingRClosedArrow;
-    } else if (name.isName("Slash")) {
-        return annotLineEndingSlash;
-    } else {
-        return annotLineEndingNone;
     }
+    if (name.isName("Circle")) {
+        return annotLineEndingCircle;
+    }
+    if (name.isName("Diamond")) {
+        return annotLineEndingDiamond;
+    }
+    if (name.isName("OpenArrow")) {
+        return annotLineEndingOpenArrow;
+    }
+    if (name.isName("ClosedArrow")) {
+        return annotLineEndingClosedArrow;
+    }
+    if (name.isName("Butt")) {
+        return annotLineEndingButt;
+    }
+    if (name.isName("ROpenArrow")) {
+        return annotLineEndingROpenArrow;
+    }
+    if (name.isName("RClosedArrow")) {
+        return annotLineEndingRClosedArrow;
+    }
+    if (name.isName("Slash")) {
+        return annotLineEndingSlash;
+    }
+    return annotLineEndingNone;
 }
 
 static const char *convertAnnotLineEndingStyle(AnnotLineEndingStyle style)
@@ -274,11 +282,14 @@ static const char *determineFallbackFont(const std::string &tok, const char *def
     // TODO: adjust these based on other example PDFs.
     if (tok == "/ZaDb") {
         return "ZapfDingbats";
-    } else if (tok == "/Cour") {
+    }
+    if (tok == "/Cour") {
         return "Courier";
-    } else if (tok == "/TiRo") {
+    }
+    if (tok == "/TiRo") {
         return "TimesNewRoman";
-    } else if (tok == "/Helvetica-Bold") {
+    }
+    if (tok == "/Helvetica-Bold") {
         return "Helvetica-Bold";
     }
     return defaultFallback;
@@ -808,20 +819,19 @@ Object AnnotColor::writeToObject(XRef *xref) const
 {
     if (length == 0) {
         return Object::null(); // Transparent (no color)
-    } else {
-        Array *a = new Array(xref);
-        for (int i = 0; i < length; ++i) {
-            a->add(Object(values[i]));
-        }
-        return Object(a);
     }
+    Array *a = new Array(xref);
+    for (int i = 0; i < length; ++i) {
+        a->add(Object(values[i]));
+    }
+    return Object(a);
 }
 
 //------------------------------------------------------------------------
 // DefaultAppearance
 //------------------------------------------------------------------------
 
-DefaultAppearance::DefaultAppearance(const std::string &fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(fontNameA), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
+DefaultAppearance::DefaultAppearance(std::string fontNameA, double fontPtSizeA, std::unique_ptr<AnnotColor> &&fontColorA) : fontName(std::move(fontNameA)), fontPtSize(fontPtSizeA), fontColor(std::move(fontColorA)) { }
 
 DefaultAppearance::DefaultAppearance(const GooString *da)
 {
@@ -847,9 +857,9 @@ DefaultAppearance::DefaultAppearance(const GooString *da)
         while (true) {
             if (i == 0) {
                 break;
-            } else {
-                --i;
             }
+            --i;
+
             if (!fontColor) {
                 if (daToks[i] == "g" && i >= 1) {
                     fontColor = std::make_unique<AnnotColor>(gatof(daToks[i - 1].c_str()));
@@ -984,7 +994,8 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
 
     if (apData.isDict() && state) {
         return apData.dictLookupNF(state).copy();
-    } else if (apData.isRef()) {
+    }
+    if (apData.isRef()) {
         // Ref can point to 1)Stream or 2)dictionary with named streams - Issue #1558
         Object obj = apData.fetch(doc->getXRef());
         if (obj.isDict() && state) {
@@ -2033,9 +2044,8 @@ int Annot::getRotation() const
 
     if (flags & flagNoRotate) {
         return (360 - pageobj->getRotate()) % 360;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 void Annot::draw(Gfx *gfx, bool printing)
@@ -3196,7 +3206,7 @@ public:
 
     struct Data
     {
-        Data(const std::string &t, const std::string &fName, double w, int cc) : text(t), fontName(fName), width(w), charCount(cc) { }
+        Data(std::string t, std::string fName, double w, int cc) : text(std::move(t)), fontName(std::move(fName)), width(w), charCount(cc) { }
 
         const std::string text;
         const std::string fontName;
@@ -4423,7 +4433,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
                 outBuf->push_back(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
                 if (font.isCIDFont()) {
-                    auto cidFont = static_cast<const GfxCIDFont *>(&font);
+                    const auto *cidFont = static_cast<const GfxCIDFont *>(&font);
                     if (c < cidFont->getCIDToGIDLen()) {
                         const int glyph = cidFont->getCIDToGID()[c];
                         if (glyph > 0 || c == 0) {
@@ -4454,9 +4464,8 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
                     *newFontNeeded = true;
                     *i -= unicode ? 2 : 1;
                     break;
-                } else {
-                    error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
                 }
+                error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
             }
         }
 
@@ -5212,7 +5221,8 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
         if (appearState && appearState->compare("Off") != 0 && field->getState(appearState->c_str())) {
             if (caption) {
                 return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
-            } else if (appearCharacs) {
+            }
+            if (appearCharacs) {
                 const AnnotColor *aColor = appearCharacs->getBorderColor();
                 if (aColor) {
                     const double dx = rect->x2 - rect->x1;
@@ -5234,9 +5244,8 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
             if (!caption) {
                 GooString checkMark("3");
                 return drawText(&checkMark, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
-            } else {
-                return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
             }
+            return drawText(caption, form, da, resources, border, appearCharacs, rect, VariableTextQuadding::centered, xref, resourcesDict, ForceZapfDingbatsDrawTextFlag);
         }
         break;
     }
@@ -6688,7 +6697,7 @@ void AnnotInk::setDrawBelow(bool drawBelow_)
     generateInkAppearance();
 }
 
-bool AnnotInk::getDrawBelow()
+bool AnnotInk::getDrawBelow() const
 {
     return drawBelow;
 }
@@ -7575,10 +7584,9 @@ bool Annots::removeAnnot(const std::shared_ptr<Annot> &annot)
 
     if (idx == annots.end()) {
         return false;
-    } else {
-        annots.erase(idx);
-        return true;
     }
+    annots.erase(idx);
+    return true;
 }
 
 std::shared_ptr<Annot> Annots::createAnnot(Object &&dictObject, const Object *obj)

@@ -103,7 +103,7 @@ public:
     void offset(SplashCoord dx, SplashCoord dy);
 
     // Get the points on the path.
-    int getLength() { return length; }
+    int getLength() const { return length; }
     void getPoint(int i, double *x, double *y, unsigned char *f)
     {
         *x = pts[i].x;
@@ -119,9 +119,9 @@ public:
 
 protected:
     void grow(int nPts);
-    bool noCurrentPoint() { return curSubpath == length; }
-    bool onePointSubpath() { return curSubpath == length - 1; }
-    bool openSubpath() { return curSubpath < length - 1; }
+    bool noCurrentPoint() const { return curSubpath == length; }
+    bool onePointSubpath() const { return curSubpath == length - 1; }
+    bool openSubpath() const { return curSubpath < length - 1; }
 
     SplashPathPoint *pts; // array of points
     unsigned char *flags; // array of flags

@@ -52,11 +52,11 @@ namespace {
 
 struct FileCloser
 {
-    inline explicit FileCloser(FILE *ff) : f(ff) { }
-    inline ~FileCloser() { (void)close(); }
+    explicit FileCloser(FILE *ff) : f(ff) { }
+    ~FileCloser() { (void)close(); }
     FileCloser(const FileCloser &) = delete;
     FileCloser &operator=(const FileCloser &) = delete;
-    inline bool close()
+    bool close()
     {
         if (f) {
             const int c = fclose(f);
@@ -106,7 +106,7 @@ NetPBMWriter::Format pnm_format(poppler::image::format_enum format)
 
 using namespace poppler;
 
-image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : ref(1), data(nullptr), width(iwidth), height(iheight), bytes_per_row(0), bytes_num(0), format(iformat), own_data(true) { }
+image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : width(iwidth), height(iheight), format(iformat) { }
 
 image_private::~image_private()
 {
@@ -341,24 +341,19 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
 
     std::unique_ptr<ImgWriter> w;
     const int actual_dpi = dpi == -1 ? 75 : dpi;
-    if (false) {
-    }
+    if (fmt == "png") {
 #if ENABLE_LIBPNG
-    else if (fmt == "png") {
         w = std::make_unique<PNGWriter>();
-    }
 #endif
+    } else if (fmt == "jpeg" || fmt == "jpg") {
 #if ENABLE_LIBJPEG
-    else if (fmt == "jpeg" || fmt == "jpg") {
         w = std::make_unique<JpegWriter>();
-    }
 #endif
+    } else if (fmt == "tiff") {
 #if ENABLE_LIBTIFF
-    else if (fmt == "tiff") {
         w = std::make_unique<TiffWriter>();
-    }
 #endif
-    else if (fmt == "pnm") {
+    } else if (fmt == "pnm") {
         w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
     if (!w) {
@@ -381,13 +376,13 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x);
                 rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x);
                 rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x);
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }
@@ -399,13 +394,13 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 2);
                 rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 1);
                 rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x * 3);
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }
@@ -427,14 +422,14 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         std::vector<unsigned char> row(3 * d->width);
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
-            unsigned char *rowptr = &row[0];
+            unsigned char *rowptr = row.data();
             for (int x = 0; x < d->width; ++x, rowptr += 3) {
                 const unsigned int pixel = *reinterpret_cast<unsigned int *>(hptr + x * 4);
                 rowptr[0] = (pixel >> 16) & 0xff;
                 rowptr[1] = (pixel >> 8) & 0xff;
                 rowptr[2] = pixel & 0xff;
             }
-            rowptr = &row[0];
+            rowptr = row.data();
             if (!w->writeRow(&rowptr)) {
                 return false;
             }
@@ -444,11 +439,7 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     }
     }
 
-    if (!w->close()) {
-        return false;
-    }
-
-    return true;
+    return w->close();
 }
 
 /**

@@ -72,7 +72,7 @@ public:
     void setFileName(const char *fileName)
     {
         assert(!_fileName);
-        _fileName = (char *)strdup(fileName);
+        _fileName = strdup(fileName);
     }
 
     int pageCount() const { return _pageCount; }
@@ -83,18 +83,18 @@ public:
     SplashOutputDev *outputDevice();
 
 private:
-    char *_fileName;
-    int _pageCount;
+    char *_fileName = nullptr;
+    int _pageCount = INVALID_PAGE_NO;
 
-    PDFDoc *_pdfDoc;
-    SplashOutputDev *_outputDev;
+    PDFDoc *_pdfDoc = nullptr;
+    SplashOutputDev *_outputDev = nullptr;
 };
 
-typedef struct StrList
+struct StrList
 {
     struct StrList *next;
     char *str;
-} StrList;
+};
 
 /* List of all command-line arguments that are not switches.
    We assume those are:
@@ -324,7 +324,7 @@ static void SplashColorsInit()
     splashColorSet(SPLASH_COL_WHITE_PTR, 0xff, 0xff, 0xff);
 }
 
-PdfEnginePoppler::PdfEnginePoppler() : _fileName(nullptr), _pageCount(INVALID_PAGE_NO), _pdfDoc(nullptr), _outputDev(nullptr) { }
+PdfEnginePoppler::PdfEnginePoppler() = default;
 
 PdfEnginePoppler::~PdfEnginePoppler()
 {
@@ -349,7 +349,7 @@ SplashOutputDev *PdfEnginePoppler::outputDevice()
 {
     if (!_outputDev) {
         bool bitmapTopDown = true;
-        _outputDev = new SplashOutputDev(gSplashColorMode, 4, false, gBgColor, bitmapTopDown);
+        _outputDev = new SplashOutputDev(gSplashColorMode, 4, gBgColor, bitmapTopDown);
         if (_outputDev) {
             _outputDev->startDoc(_pdfDoc);
         }
@@ -455,7 +455,7 @@ static void StrList_Destroy(StrList **root)
     *root = nullptr;
 }
 
-static void my_error(ErrorCategory, Goffset /*pos*/, const char * /*msg*/)
+static void my_error(ErrorCategory /*category*/, Goffset /*pos*/, const char * /*msg*/)
 {
 #if 0
     char        buf[4096], *p = buf;
@@ -798,10 +798,7 @@ static void ParseCommandLine(int argc, char **argv)
 
 static bool IsPdfFileName(char *path)
 {
-    if (str_endswith(path, ".pdf")) {
-        return true;
-    }
-    return false;
+    return str_endswith(path, ".pdf");
 }
 
 /* Render 'cmdLineArg', which can be:

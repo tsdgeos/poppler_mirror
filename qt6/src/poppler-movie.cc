@@ -94,7 +94,7 @@ MovieObject::PlayMode MovieObject::playMode() const
 
 bool MovieObject::showPosterImage() const
 {
-    return (m_movieData->m_movieObj->getShowPoster() == true);
+    return (m_movieData->m_movieObj->getShowPoster());
 }
 
 QImage MovieObject::posterImage() const

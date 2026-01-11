@@ -225,11 +225,7 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y, SplashPattern *patt
     pipe->knockoutOpacity = knockoutOpacity;
 
     // result alpha
-    if (aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !nonIsolatedGroup) {
-        pipe->noTransparency = true;
-    } else {
-        pipe->noTransparency = false;
-    }
+    pipe->noTransparency = aInput == 255 && !state->softMask && !usesShape && !state->inNonIsolatedGroup && !nonIsolatedGroup;
 
     // result color
     if (pipe->noTransparency) {
@@ -868,7 +864,7 @@ void Splash::pipeRunAAMono1(SplashPipe *pipe)
 
     //----- result color
     // note: aDest = alpha2 = aResult = 0xff
-    cResult0 = state->grayTransfer[(unsigned char)div255((0xff - aSrc) * cDest[0] + aSrc * pipe->cSrc[0])];
+    cResult0 = state->grayTransfer[div255((0xff - aSrc) * cDest[0] + aSrc * pipe->cSrc[0])];
 
     //----- write destination pixel
     if (state->screen->test(pipe->x, pipe->y, cResult0)) {
@@ -2452,7 +2448,8 @@ bool Splash::pathAllOutside(const SplashPath &path)
         // If the first point is inside the clipping rectangle,
         // the check is sufficient
         return false;
-    } else if (path.length == 1) {
+    }
+    if (path.length == 1) {
         return true;
     }
 
@@ -2471,7 +2468,8 @@ bool Splash::pathAllOutside(const SplashPath &path)
         // clipping rectangle, the check is finished. Otherwise,
         // we have to check the remaining points.
         return false;
-    } else if (path.length == 2) {
+    }
+    if (path.length == 2) {
         return true;
     }
 

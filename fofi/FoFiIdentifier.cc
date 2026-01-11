@@ -191,10 +191,7 @@ bool FileReader::fillBuf(int pos, int len)
     }
     bufPos = pos;
     bufLen = (int)fread(buf, 1, sizeof(buf), f);
-    if (bufLen < len) {
-        return false;
-    }
-    return true;
+    return bufLen >= len;
 }
 
 //------------------------------------------------------------------------
@@ -215,7 +212,7 @@ public:
     bool getUVarBE(int pos, int size, unsigned int *val) override;
     bool cmp(int pos, const char *s) override;
 
-    StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag = {});
+    StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag /*unused*/ = {});
 
 private:
     bool fillBuf(int pos, int len);
@@ -232,7 +229,7 @@ std::unique_ptr<StreamReader> StreamReader::make(int (*getCharA)(void *data), vo
     return std::make_unique<StreamReader>(getCharA, dataA);
 }
 
-StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag)
+StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag /*unused*/)
 {
     getChar = getCharA;
     data = dataA;
@@ -522,7 +519,6 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start)
     }
     if (pos + 1 < endPos && reader->getByte(pos) == 12 && reader->getByte(pos + 1) == 30) {
         return fofiIdCFFCID;
-    } else {
-        return fofiIdCFF8Bit;
     }
+    return fofiIdCFF8Bit;
 }

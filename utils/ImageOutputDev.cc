@@ -630,7 +630,7 @@ void ImageOutputDev::writeImage(GfxState * /*state*/, Object * /*ref*/, Stream *
         // dump CCITT file
         writeRawImage(str, "ccitt");
 
-    } else if (outputPNG && !(outputTiff && colorMap && (colorMap->getColorSpace()->getMode() == csDeviceCMYK || (colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 4)))) {
+    } else if (outputPNG && (!outputTiff || !colorMap || (colorMap->getColorSpace()->getMode() != csDeviceCMYK && (colorMap->getColorSpace()->getMode() != csICCBased || colorMap->getNumPixelComps() != 4)))) {
         // output in PNG format
 
 #if ENABLE_LIBPNG

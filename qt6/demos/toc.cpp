@@ -79,9 +79,8 @@ public:
         Node *n = static_cast<Node *>(child.internalPointer());
         if (n->m_parent == nullptr) {
             return QModelIndex();
-        } else {
-            return createIndex(n->m_parent->m_row, 0, n->m_parent);
         }
+        return createIndex(n->m_parent->m_row, 0, n->m_parent);
     }
 
     int rowCount(const QModelIndex &parent) const override

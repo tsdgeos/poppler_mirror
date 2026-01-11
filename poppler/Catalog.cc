@@ -191,7 +191,7 @@ Page *Catalog::getPage(int i)
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
         bool cached = cachePageTree(i);
-        if (cached == false) {
+        if (!cached) {
             return nullptr;
         }
     }
@@ -207,7 +207,7 @@ Ref *Catalog::getPageRef(int i)
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
         bool cached = cachePageTree(i);
-        if (cached == false) {
+        if (!cached) {
             return nullptr;
         }
     }
@@ -499,12 +499,12 @@ std::unique_ptr<FileSpec> Catalog::embeddedFile(int i)
     if (obj->isRef()) {
         Object fsDict = obj->fetch(xref);
         return std::make_unique<FileSpec>(&fsDict);
-    } else if (obj->isDict()) {
-        return std::make_unique<FileSpec>(obj);
-    } else {
-        Object null;
-        return std::make_unique<FileSpec>(&null);
     }
+    if (obj->isDict()) {
+        return std::make_unique<FileSpec>(obj);
+    }
+    Object null;
+    return std::make_unique<FileSpec>(&null);
 }
 
 bool Catalog::hasEmbeddedFile(const std::string &fileName)
@@ -771,28 +771,25 @@ Object NameTree::lookup(const GooString *name)
 
     if (entry != entries.end() && (*entry)->name.compare(name->toStr()) == 0) {
         return (*entry)->value.fetch(xref);
-    } else {
-        error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
-        return Object::null();
     }
+    error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
+    return Object::null();
 }
 
 Object *NameTree::getValue(int index)
 {
     if (size_t(index) < entries.size()) {
         return &entries[index]->value;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 const GooString *NameTree::getName(int index) const
 {
     if (size_t(index) < entries.size()) {
         return &entries[index]->name;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 bool Catalog::labelToIndex(const GooString &label, int *index)
@@ -831,11 +828,10 @@ bool Catalog::indexToLabel(int index, GooString *label)
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
         return pli->indexToLabel(index, label);
-    } else {
-        snprintf(buffer, sizeof(buffer), "%d", index + 1);
-        label->append(buffer);
-        return true;
     }
+    snprintf(buffer, sizeof(buffer), "%d", index + 1);
+    label->append(buffer);
+    return true;
 }
 
 int Catalog::getNumPages()

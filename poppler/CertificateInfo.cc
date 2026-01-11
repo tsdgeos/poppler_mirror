@@ -17,7 +17,7 @@
 #include <cstring>
 #include <cstdlib>
 
-X509CertificateInfo::X509CertificateInfo() : ku_extensions(KU_NONE), cert_version(-1), is_qualified(false), is_self_signed(false), keyLocation(KeyLocation::Unknown) { }
+X509CertificateInfo::X509CertificateInfo() = default;
 
 X509CertificateInfo::~X509CertificateInfo() = default;
 

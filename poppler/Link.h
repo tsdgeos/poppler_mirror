@@ -455,7 +455,7 @@ public:
 
 private:
     std::vector<StateList> stateList;
-    bool isValid;
+    bool isValid = true;
     bool preserveRB;
 };
 

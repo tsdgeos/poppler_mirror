@@ -101,9 +101,9 @@ std::unique_ptr<Document> DocumentData::checkDocument(DocumentData *doc)
             pdoc->m_doc->fillMembers();
         }
         return pdoc;
-    } else {
-        delete doc;
     }
+    delete doc;
+
     return nullptr;
 }
 

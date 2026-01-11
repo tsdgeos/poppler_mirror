@@ -10,11 +10,11 @@ class TestAttachments : public QObject
 public:
     explicit TestAttachments(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkNoAttachments();
-    void checkAttach1();
-    void checkAttach2();
-    void checkAttach3();
-    void checkAttach4();
+    static void checkNoAttachments();
+    static void checkAttach1();
+    static void checkAttach2();
+    static void checkAttach3();
+    static void checkAttach4();
 };
 
 void TestAttachments::checkNoAttachments()

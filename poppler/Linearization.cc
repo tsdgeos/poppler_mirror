@@ -34,7 +34,7 @@ Linearization::Linearization(BaseStream *str)
     linDict = parser->getObj();
     if (obj1.isInt() && obj2.isInt() && obj3.isCmd("obj") && linDict.isDict()) {
         Object obj5 = linDict.dictLookup("Linearized");
-        if (!(obj5.isNum() && obj5.getNum() > 0)) {
+        if (!obj5.isNum() || obj5.getNum() <= 0) {
             linDict.setToNull();
         }
     } else {
@@ -54,10 +54,9 @@ unsigned int Linearization::getLength() const
     int length;
     if (linDict.getDict()->lookupInt("L", {}, &length) && length > 0) {
         return length;
-    } else {
-        error(errSyntaxWarning, -1, "Length in linearization table is invalid");
-        return 0;
     }
+    error(errSyntaxWarning, -1, "Length in linearization table is invalid");
+    return 0;
 }
 
 unsigned int Linearization::getHintsOffset() const
@@ -131,10 +130,9 @@ int Linearization::getObjectNumberFirst() const
     int objectNumberFirst = 0;
     if (linDict.isDict() && linDict.getDict()->lookupInt("O", {}, &objectNumberFirst) && objectNumberFirst > 0) {
         return objectNumberFirst;
-    } else {
-        error(errSyntaxWarning, -1, "Object number of first page in linearization table is invalid");
-        return 0;
     }
+    error(errSyntaxWarning, -1, "Object number of first page in linearization table is invalid");
+    return 0;
 }
 
 unsigned int Linearization::getEndFirst() const
@@ -142,10 +140,9 @@ unsigned int Linearization::getEndFirst() const
     int pageEndFirst = 0;
     if (linDict.isDict() && linDict.getDict()->lookupInt("E", {}, &pageEndFirst) && pageEndFirst > 0) {
         return pageEndFirst;
-    } else {
-        error(errSyntaxWarning, -1, "First page end offset in linearization table is invalid");
-        return 0;
     }
+    error(errSyntaxWarning, -1, "First page end offset in linearization table is invalid");
+    return 0;
 }
 
 int Linearization::getNumPages() const
@@ -153,10 +150,9 @@ int Linearization::getNumPages() const
     int numPages = 0;
     if (linDict.isDict() && linDict.getDict()->lookupInt("N", {}, &numPages) && numPages > 0) {
         return numPages;
-    } else {
-        error(errSyntaxWarning, -1, "Page count in linearization table is invalid");
-        return 0;
     }
+    error(errSyntaxWarning, -1, "Page count in linearization table is invalid");
+    return 0;
 }
 
 unsigned int Linearization::getMainXRefEntriesOffset() const
@@ -164,10 +160,9 @@ unsigned int Linearization::getMainXRefEntriesOffset() const
     int mainXRefEntriesOffset = 0;
     if (linDict.isDict() && linDict.getDict()->lookupInt("T", {}, &mainXRefEntriesOffset) && mainXRefEntriesOffset > 0) {
         return mainXRefEntriesOffset;
-    } else {
-        error(errSyntaxWarning, -1, "Main Xref offset in linearization table is invalid");
-        return 0;
     }
+    error(errSyntaxWarning, -1, "Main Xref offset in linearization table is invalid");
+    return 0;
 }
 
 int Linearization::getPageFirst() const

@@ -10,14 +10,14 @@ class TestFontsData : public QObject
 public:
     explicit TestFontsData(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkNoFonts();
-    void checkType1();
-    void checkType3();
-    void checkTrueType();
-    void checkFontIterator();
-    void checkSecondDocumentQuery();
-    void checkMultipleIterations();
-    void checkIteratorFonts();
+    static void checkNoFonts();
+    static void checkType1();
+    static void checkType3();
+    static void checkTrueType();
+    static void checkFontIterator();
+    static void checkSecondDocumentQuery();
+    static void checkMultipleIterations();
+    static void checkIteratorFonts();
 };
 
 static QList<Poppler::FontInfo> loadFontsViaIterator(Poppler::Document *doc, int from = 0, int count = -1)

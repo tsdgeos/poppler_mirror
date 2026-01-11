@@ -169,7 +169,7 @@ private:
     void setDocName(const char *fname);
     void dumpAsXML(FILE *f, int page);
     void dumpComplex(FILE *f, int page, const std::vector<std::string> &backgroundImages);
-    int dumpComplexHeaders(FILE *const file, FILE *&pageFile, int page);
+    int dumpComplexHeaders(FILE *file, FILE *&pageFile, int page);
 
     // marks the position of the fonts that belong to current page (for noframes)
     int fontsPageMarker;
@@ -275,8 +275,8 @@ public:
     // new feature
     virtual int DevType() { return 1234; }
 
-    int getPageWidth() { return maxPageWidth; }
-    int getPageHeight() { return maxPageHeight; }
+    int getPageWidth() const { return maxPageWidth; }
+    int getPageHeight() const { return maxPageHeight; }
 
     bool dumpDocOutline(PDFDoc *doc);
 
@@ -286,7 +286,7 @@ private:
     static std::string mapEncodingToHtml(const std::string &encoding);
     void doProcessLink(AnnotLink *link);
     std::unique_ptr<GooString> getLinkDest(AnnotLink *link);
-    void dumpMetaVars(FILE *);
+    void dumpMetaVars(FILE *file);
     void doFrame(int firstPage);
     bool newHtmlOutlineLevel(FILE *output, const std::vector<OutlineItem *> *outlines, int level = 1);
     void newXmlOutlineLevel(FILE *output, const std::vector<OutlineItem *> *outlines);

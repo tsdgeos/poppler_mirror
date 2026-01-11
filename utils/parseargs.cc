@@ -50,7 +50,8 @@ bool parseArgs(const ArgDesc *args, int *argc, char *argv[])
                 argv[j] = argv[j + 1];
             }
             break;
-        } else if ((arg = findArg(args, argv[i]))) {
+        }
+        if ((arg = findArg(args, argv[i]))) {
             if (!grabArg(arg, i, argc, argv)) {
                 ok = false;
             }
@@ -195,10 +196,7 @@ bool isInt(const char *s)
     while (isdigit(*s)) {
         ++s;
     }
-    if (*s) {
-        return false;
-    }
-    return true;
+    return *s == 0;
 }
 
 bool isFP(const char *s)

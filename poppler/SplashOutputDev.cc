@@ -409,10 +409,12 @@ bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
         if (0 <= s0 && s0 <= 1) {
             *t = t0 + dt * s0;
             return true;
-        } else if (s0 < 0 && shading->getExtend0()) {
+        }
+        if (s0 < 0 && shading->getExtend0()) {
             *t = t0;
             return true;
-        } else if (s0 > 1 && shading->getExtend1()) {
+        }
+        if (s0 > 1 && shading->getExtend1()) {
             *t = t1;
             return true;
         }
@@ -422,10 +424,12 @@ bool SplashRadialPattern::getParameter(double xs, double ys, double *t) const
         if (0 <= s1 && s1 <= 1) {
             *t = t0 + dt * s1;
             return true;
-        } else if (s1 < 0 && shading->getExtend0()) {
+        }
+        if (s1 < 0 && shading->getExtend0()) {
             *t = t0;
             return true;
-        } else if (s1 > 1 && shading->getExtend1()) {
+        }
+        if (s1 > 1 && shading->getExtend1()) {
             *t = t1;
             return true;
         }
@@ -800,7 +804,7 @@ static int getLum(int r, int g, int b)
     // (int)(0.3 * r + 0.59 * g + 0.11 * b) =
     // (int)(256 / 256 * 0.3 * r + 256 / 256 * 0.59 * g + 256 / 256 * 0.11 * b)
     // (int)((77 * r + 151 * g + 28 * b) / 256)  = // round!
-    return (int)((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
+    return ((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
 }
 
 static int getSat(int r, int g, int b)
@@ -1096,7 +1100,7 @@ public:
     ~T3FontCache();
     T3FontCache(const T3FontCache &) = delete;
     T3FontCache &operator=(const T3FontCache &) = delete;
-    bool matches(const Ref *idA, double m11A, double m12A, double m21A, double m22A) { return fontID == *idA && m11 == m11A && m12 == m12A && m21 == m21A && m22 == m22A; }
+    bool matches(const Ref *idA, double m11A, double m12A, double m21A, double m22A) const { return fontID == *idA && m11 == m11A && m12 == m12A && m21 == m21A && m22 == m22A; }
 
     Ref fontID; // PDF font ID
     double m11, m12, m21, m22; // transform matrix
@@ -1214,7 +1218,7 @@ struct SplashTransparencyGroup
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
+SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
 {
     colorMode = colorModeA;
     bitmapRowPad = bitmapRowPadA;
@@ -1226,7 +1230,6 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, 
     enableFreeTypeHinting = false;
     enableSlightHinting = false;
     setupScreenParams(72.0, 72.0);
-    reverseVideo = reverseVideoA;
     if (paperColorA != nullptr) {
         splashColorCopy(paperColor, paperColorA);
     } else {
@@ -1574,9 +1577,6 @@ SplashPattern *SplashOutputDev::getColor(GfxGray gray)
 {
     SplashColor color;
 
-    if (reverseVideo) {
-        gray = gfxColorComp1 - gray;
-    }
     color[0] = colToByte(gray);
     return new SplashSolidColor(color);
 }
@@ -1586,15 +1586,9 @@ SplashPattern *SplashOutputDev::getColor(GfxRGB *rgb)
     GfxColorComp r, g, b;
     SplashColor color;
 
-    if (reverseVideo) {
-        r = gfxColorComp1 - rgb->r;
-        g = gfxColorComp1 - rgb->g;
-        b = gfxColorComp1 - rgb->b;
-    } else {
-        r = rgb->r;
-        g = rgb->g;
-        b = rgb->b;
-    }
+    r = rgb->r;
+    g = rgb->g;
+    b = rgb->b;
     color[0] = colToByte(r);
     color[1] = colToByte(g);
     color[2] = colToByte(b);
@@ -2257,7 +2251,7 @@ bool SplashOutputDev::beginType3Char(GfxState *state, double /*x*/, double /*y*/
     state->transform(0, 0, &xt, &yt);
 
     // is it the first (MRU) font in the cache?
-    if (!(nT3Fonts > 0 && t3FontCache[0]->matches(fontID, ctm[0], ctm[1], ctm[2], ctm[3]))) {
+    if (nT3Fonts <= 0 || !t3FontCache[0]->matches(fontID, ctm[0], ctm[1], ctm[2], ctm[3])) {
 
         // is the font elsewhere in the cache?
         for (i = 1; i < nT3Fonts; ++i) {
@@ -2602,7 +2596,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *s
     if (!imgMaskData.imgStr->rewind()) {
         return;
     }
-    imgMaskData.invert = invert ? false : true;
+    imgMaskData.invert = !invert;
     imgMaskData.width = width;
     imgMaskData.height = height;
     imgMaskData.y = 0;
@@ -2653,7 +2647,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object * /*ref*/
     mat[3] = -ctm[3];
     mat[4] = ctm[2] + ctm[4];
     mat[5] = ctm[3] + ctm[5];
-    imgMaskData.invert = invert ? false : true;
+    imgMaskData.invert = !invert;
     imgMaskData.width = width;
     imgMaskData.height = height;
     imgMaskData.y = 0;
@@ -3334,7 +3328,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str, 
     src = maskColors ? &alphaImageSrc : &imageSrc;
     tf = nullptr;
 #endif
-    splash->drawImage(src, tf, &imgData, srcMode, maskColors ? true : false, width, height, mat, interpolate);
+    splash->drawImage(src, tf, &imgData, srcMode, maskColors != nullptr, width, height, mat, interpolate);
     if (inlineImg) {
         while (imgData.y < height) {
             imgData.imgStr->getLine();
@@ -3501,7 +3495,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
         if (!imgMaskData.imgStr->rewind()) {
             return;
         }
-        imgMaskData.invert = maskInvert ? false : true;
+        imgMaskData.invert = !maskInvert;
         imgMaskData.width = maskWidth;
         imgMaskData.height = maskHeight;
         imgMaskData.y = 0;
@@ -3873,7 +3867,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     } else if (ty >= bitmap->getHeight()) {
         ty = bitmap->getHeight() - 1;
     }
-    if (checkedSubtraction((int)ceil(xMax), tx + 1, &w)) {
+    if (checkedSubtraction((int)ceil(xMax), tx - 1, &w)) {
         w = 1;
     }
     if (tx + w > bitmap->getWidth()) {
@@ -3882,7 +3876,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const std::array<d
     if (w < 1) {
         w = 1;
     }
-    if (checkedSubtraction((int)ceil(yMax), ty + 1, &h)) {
+    if (checkedSubtraction((int)ceil(yMax), ty - 1, &h)) {
         h = 1;
     }
     if (ty + h > bitmap->getHeight()) {

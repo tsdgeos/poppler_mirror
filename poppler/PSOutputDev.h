@@ -111,7 +111,7 @@ enum PSForceRasterize
     psNeverRasterize // never rasterize, may produce incorrect output
 };
 
-typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut, PSOutCustomCodeLocation loc, int n, void *data);
+using PSOutCustomCodeCbk = GooString *(*)(PSOutputDev * psOut, PSOutCustomCodeLocation loc, int n, void *data);
 
 class POPPLER_PRIVATE_EXPORT PSOutputDev : public OutputDev
 {
@@ -394,7 +394,7 @@ private:
 
     void opiBegin20(GfxState *state, Dict *dict);
     void opiBegin13(GfxState *state, Dict *dict);
-    void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1);
+    void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1) const;
     void cvtFunction(const Function *func, bool invertPSFunction = false);
     static std::string filterPSName(const std::string &name);
 
@@ -407,7 +407,7 @@ private:
     void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);
-    GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
+    static GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
     void writePSTextLine(const std::string &s);
 
     PSLevel level; // PostScript level (1, 2, separation)

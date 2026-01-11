@@ -193,7 +193,7 @@ class POPPLER_PRIVATE_EXPORT SplashOutputDev : public OutputDev
 {
 public:
     // Constructor.
-    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
+    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
 
     // Destructor.
     ~SplashOutputDev() override;
@@ -208,7 +208,7 @@ public:
     // Does this device use functionShadedFill(), axialShadedFill(), and
     // radialShadedFill()?  If this returns false, these shaded fills
     // will be reduced to a series of other drawing operations.
-    bool useShadedFills(int type) override { return (type >= 1 && type <= 5) ? true : false; }
+    bool useShadedFills(int type) override { return type >= 1 && type <= 5; }
 
     // Does this device use upside-down coordinates?
     // (Upside-down means (0,0) is the top left corner of the page.)
@@ -310,9 +310,6 @@ public:
 
     void setPaperColor(SplashColorPtr paperColorA);
 
-    bool isReverseVideo() { return reverseVideo; }
-    void setReverseVideo(bool reverseVideoA) { reverseVideo = reverseVideoA; }
-
     // Get the bitmap and its size.
     SplashBitmap *getBitmap() { return bitmap; }
     int getBitmapWidth();
@@ -340,7 +337,7 @@ public:
     void setVectorAntialias(bool vaa) override;
 #endif
 
-    bool getFontAntialias() { return fontAntialias; }
+    bool getFontAntialias() const { return fontAntialias; }
     void setFontAntialias(bool anti) { fontAntialias = anti; }
 
     void setFreeTypeHinting(bool enable, bool enableSlightHinting);
@@ -353,16 +350,16 @@ private:
     bool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern);
 
     void setupScreenParams(double hDPI, double vDPI);
-    SplashPattern *getColor(GfxGray gray);
+    static SplashPattern *getColor(GfxGray gray);
     SplashPattern *getColor(GfxRGB *rgb);
-    SplashPattern *getColor(GfxCMYK *cmyk);
-    SplashPattern *getColor(GfxColor *deviceN);
+    static SplashPattern *getColor(GfxCMYK *cmyk);
+    static SplashPattern *getColor(GfxColor *deviceN);
     static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColor, SplashColor splashMatteColor);
     void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag, int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
     static SplashPath convertPath(const GfxPath *path, bool dropEmptySubpaths);
     void drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3FontCacheTag *tag, unsigned char *data);
 #if USE_CMS
-    bool useIccImageSrc(void *data);
+    static bool useIccImageSrc(void *data);
     static void iccTransform(void *data, SplashBitmap *bitmap);
     static bool iccImageSrc(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
 #endif
@@ -383,7 +380,6 @@ private:
     bool enableFreeType;
     bool enableFreeTypeHinting;
     bool enableSlightHinting;
-    bool reverseVideo; // reverse video mode
     SplashColor paperColor; // paper color
     SplashScreenParams screenParams;
     bool skipHorizText;

@@ -50,7 +50,7 @@ public:
     CachedFile &operator=(const CachedFile &) = delete;
 
     unsigned int getLength() const { return length; }
-    long int tell();
+    long int tell() const;
     int seek(long int offset, int origin);
     size_t read(void *ptr, size_t unitsize, size_t count);
     size_t write(const char *ptr, size_t size, size_t fromByte);
@@ -65,11 +65,11 @@ private:
         chunkStateLoaded
     };
 
-    typedef struct
+    using Chunk = struct
     {
         ChunkState state;
         char data[CachedFileChunkSize];
-    } Chunk;
+    };
 
     int cache(size_t offset, size_t length);
 

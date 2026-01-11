@@ -291,16 +291,15 @@ std::variant<std::vector<unsigned char>, CryptoSign::SigningErrorMessage> GpgSig
     if (!isValidResult(signingResult)) {
         if (signingResult.error().isCanceled()) {
             return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::UserCancelled, ERROR_IN_CODE_LOCATION };
-        } else {
-            switch (signingResult.error().code()) {
-            case GPG_ERR_NO_PASSPHRASE: // this is likely the user pressing enter. Let's treat it as cancelled for now
-                return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::UserCancelled, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
-            case GPG_ERR_BAD_PASSPHRASE:
-                return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::BadPassphrase, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
-            }
-            error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
-            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
         }
+        switch (signingResult.error().code()) {
+        case GPG_ERR_NO_PASSPHRASE: // this is likely the user pressing enter. Let's treat it as cancelled for now
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::UserCancelled, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
+        case GPG_ERR_BAD_PASSPHRASE:
+            return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::BadPassphrase, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
+        }
+        error(errInternal, -1, "Signing error from gpgme: '%s'", errorString(signingResult.error()).c_str());
+        return CryptoSign::SigningErrorMessage { CryptoSign::SigningError::GenericError, ErrorString { errorString(signingResult.error()), ErrorStringType::UserString } };
     }
 
     auto signatureString = signatureData.toString();
@@ -334,7 +333,8 @@ CryptoSign::SignatureType GpgSignatureCreation::signatureType() const
 {
     if (protocol == GpgME::CMS) {
         return CryptoSign::SignatureType::adbe_pkcs7_detached;
-    } else if (protocol == GpgME::OpenPGP) {
+    }
+    if (protocol == GpgME::OpenPGP) {
         return CryptoSign::SignatureType::g10c_pgp_signature_detached;
     }
     return CryptoSign::SignatureType::unknown_signature_type;
@@ -433,7 +433,8 @@ std::string GpgSignatureVerification::getSignerName() const
     if (protocol == GpgME::CMS) {
         const auto dn = DN::parseString(fromCharPtr(signature->key(true, false).userID(0).id()));
         return DN::FindFirstValue(dn, "CN").value_or("");
-    } else if (protocol == GpgME::OpenPGP) {
+    }
+    if (protocol == GpgME::OpenPGP) {
         return fromCharPtr(signature->key(true, false).userID(0).name());
     }
 

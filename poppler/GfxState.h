@@ -112,7 +112,7 @@ enum GfxBlendMode
 //------------------------------------------------------------------------
 
 // 16.16 fixed point color component
-typedef int GfxColorComp;
+using GfxColorComp = int;
 
 #define gfxColorComp1 0x10000
 
@@ -133,7 +133,7 @@ static inline unsigned char dblToByte(double x)
 
 static inline double byteToDbl(unsigned char x)
 {
-    return (double)x / (double)255.0;
+    return (double)x / 255.0;
 }
 
 static inline GfxColorComp byteToCol(unsigned char x)
@@ -176,7 +176,7 @@ static inline void clearGfxColor(GfxColor *gfxColor)
 // GfxGray
 //------------------------------------------------------------------------
 
-typedef GfxColorComp GfxGray;
+using GfxGray = GfxColorComp;
 
 //------------------------------------------------------------------------
 // GfxRGB
@@ -223,7 +223,7 @@ enum GfxColorSpaceMode
 // This shall hold a cmsHPROFILE handle.
 // Only use the make_GfxLCMSProfilePtr function to construct this pointer,
 // to ensure that the resources are properly released after usage.
-typedef std::shared_ptr<void> GfxLCMSProfilePtr;
+using GfxLCMSProfilePtr = std::shared_ptr<void>;
 
 #if USE_CMS
 GfxLCMSProfilePtr POPPLER_PRIVATE_EXPORT make_GfxLCMSProfilePtr(void *profile);
@@ -444,7 +444,7 @@ public:
     int getNComps() const override { return 4; }
 
     // GfxDeviceRGBAColorSpace-specific access
-    void getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length);
+    static void getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length);
 
 private:
 };
@@ -512,7 +512,7 @@ public:
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
     void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
-    void getRGBLine(unsigned char *, unsigned char *out, int length) override;
+    void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
     void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
     void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
     void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
@@ -567,7 +567,7 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double aMin, aMax, bMin, bMax; // range for the a and b components
-    void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
+    static void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ);
 #if USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
 #endif
@@ -720,7 +720,8 @@ public:
     GfxColorSpace *getAlt() { return alt.get(); }
     const Function *getFunc() const { return func.get(); }
 
-    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA, PrivateTag = {});
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA,
+                            PrivateTag /*unused*/ = {});
 
 private:
     const std::unique_ptr<GooString> name; // colorant name
@@ -766,7 +767,7 @@ public:
     const Function *getTintTransformFunc() const { return func.get(); }
 
     GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&alt, std::unique_ptr<Function> func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> &&sepsCSA,
-                         const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag = {});
+                         const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag /*unused*/ = {});
 
 private:
     const int nComps; // number of components
@@ -1512,12 +1513,12 @@ public:
 
     private:
         GfxPath *path;
-        int subPathOff;
+        int subPathOff = 0;
 
-        int coordOff;
-        int numCoords;
+        int coordOff = 0;
+        int numCoords = 0;
 
-        GfxSubpath *curSubPath;
+        GfxSubpath *curSubPath = nullptr;
     };
 
     enum LineJoinStyle
@@ -1698,7 +1699,7 @@ public:
     GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
     void setXYZ2DisplayTransforms(std::shared_ptr<GfxXYZ2DisplayTransforms> transforms);
     std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
-    int getCmsRenderingIntent();
+    int getCmsRenderingIntent() const;
     static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
@@ -1766,7 +1767,7 @@ public:
     bool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
 
     // Misc
-    bool parseBlendMode(Object *obj, GfxBlendMode *mode);
+    static bool parseBlendMode(Object *obj, GfxBlendMode *mode);
 
     std::unique_ptr<ReusablePathIterator> getReusablePath() { return std::make_unique<ReusablePathIterator>(path); }
 

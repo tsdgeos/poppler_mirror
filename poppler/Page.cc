@@ -745,7 +745,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
     return true;
 }
 
-void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown, double sliceX, double sliceY, double sliceW, double sliceH, PDFRectangle *box, bool *crop)
+void Page::makeBox(double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown, double sliceX, double sliceY, double sliceW, double sliceH, PDFRectangle *box, bool *crop) const
 {
     const PDFRectangle *mediaBox, *cropBox, *baseBox;
     double kx, ky;
@@ -813,7 +813,7 @@ void Page::processLinks(OutputDev *out)
     }
 }
 
-void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown)
+void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI, int rotate, bool useMediaBox, bool upsideDown) const
 {
     GfxState *state;
     int i;

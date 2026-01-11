@@ -175,7 +175,8 @@ int main(int argc, char *argv[])
             if (doc->isEncrypted()) {
                 error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
                 return -1;
-            } else if (!doc->getXRef()->getCatalog().isDict()) {
+            }
+            if (!doc->getXRef()->getCatalog().isDict()) {
                 error(errSyntaxError, -1, "XRef's Catalog is not a dictionary ('{0:s}')", argv[i]);
                 return -1;
             }

@@ -43,9 +43,8 @@ std::unique_ptr<Sound> Sound::parseSound(const Object &obj)
     Object tmp = dict->lookup("R");
     if (tmp.isNum()) {
         return std::unique_ptr<Sound>(new Sound(obj));
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 Sound::Sound(const Object &obj, bool readAttrs)

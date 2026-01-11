@@ -145,7 +145,7 @@ public:
     const double *getSamples() const { return samples; }
     int getSampleNumber() const { return nSamples; }
 
-    explicit SampledFunction(const SampledFunction *func, PrivateTag = {});
+    explicit SampledFunction(const SampledFunction *func, PrivateTag /*unused*/ = {});
 
 private:
     int // number of samples for each domain element
@@ -187,7 +187,7 @@ public:
     const double *getC1() const { return c1; }
     double getE() const { return e; }
 
-    explicit ExponentialFunction(const ExponentialFunction *func, PrivateTag = {});
+    explicit ExponentialFunction(const ExponentialFunction *func, PrivateTag /*unused*/ = {});
 
 private:
     double c0[funcMaxOutputs];
@@ -221,7 +221,7 @@ public:
     const double *getEncode() const { return encode; }
     const double *getScale() const { return scale; }
 
-    explicit StitchingFunction(const StitchingFunction *func, PrivateTag = {});
+    explicit StitchingFunction(const StitchingFunction *func, PrivateTag /*unused*/ = {});
 
 private:
     std::vector<std::unique_ptr<Function>> funcs;
@@ -251,7 +251,7 @@ public:
 
     const GooString *getCodeString() const { return codeString.get(); }
 
-    explicit PostScriptFunction(const PostScriptFunction *func, PrivateTag = {});
+    explicit PostScriptFunction(const PostScriptFunction *func, PrivateTag /*unused*/ = {});
 
 private:
     bool parseCode(Stream *str, int *codePtr, int &recursionCounter);

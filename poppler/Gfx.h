@@ -247,8 +247,8 @@ private:
 
     void go(DisplayType displayType);
     void execOp(Object *cmd, Object args[], int numArgs);
-    const Operator *findOp(const char *name);
-    bool checkArg(Object *arg, TchkType type);
+    static const Operator *findOp(const char *name);
+    static bool checkArg(Object *arg, TchkType type);
     Goffset getPos();
 
     int bottomGuard();

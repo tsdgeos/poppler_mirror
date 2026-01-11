@@ -12,12 +12,12 @@ class TestOptionalContent : public QObject
 public:
     explicit TestOptionalContent(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkVisPolicy();
-    void checkNestedLayers();
-    void checkNoOptionalContent();
-    void checkIsVisible();
-    void checkVisibilitySetting();
-    void checkRadioButtons();
+    static void checkVisPolicy();
+    static void checkNestedLayers();
+    static void checkNoOptionalContent();
+    static void checkIsVisible();
+    static void checkVisibilitySetting();
+    static void checkRadioButtons();
 };
 
 void TestOptionalContent::checkVisPolicy()

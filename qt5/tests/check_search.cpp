@@ -10,14 +10,14 @@ class TestSearch : public QObject
 public:
     explicit TestSearch(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testAcrossLinesSearch(); // leave it first
-    void testAcrossLinesSearchDoubleColumn();
-    void bug7063();
-    void testNextAndPrevious();
-    void testWholeWordsOnly();
-    void testIgnoreDiacritics();
-    void testRussianSearch(); // Issue #743
-    void testDeseretSearch(); // Issue #853
+    static void testAcrossLinesSearch(); // leave it first
+    static void testAcrossLinesSearchDoubleColumn();
+    static void bug7063();
+    static void testNextAndPrevious();
+    static void testWholeWordsOnly();
+    static void testIgnoreDiacritics();
+    static void testRussianSearch(); // Issue #743
+    static void testDeseretSearch(); // Issue #853
 };
 
 void TestSearch::bug7063()

@@ -46,15 +46,15 @@ struct SplashPipe;
 // Retrieves the next line of pixels in an image mask.  Normally,
 // fills in *<line> and returns true.  If the image stream is
 // exhausted, returns false.
-typedef bool (*SplashImageMaskSource)(void *data, SplashColorPtr pixel);
+using SplashImageMaskSource = bool (*)(void *data, SplashColorPtr pixel);
 
 // Retrieves the next line of pixels in an image.  Normally, fills in
 // *<line> and returns true.  If the image stream is exhausted,
 // returns false.
-typedef bool (*SplashImageSource)(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
+using SplashImageSource = bool (*)(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
 
 // Use ICCColorSpace to transform a bitmap
-typedef void (*SplashICCTransform)(void *data, SplashBitmap *bitmap);
+using SplashICCTransform = void (*)(void *data, SplashBitmap *bitmap);
 
 //------------------------------------------------------------------------
 
@@ -238,7 +238,7 @@ public:
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
     void setInShading(bool sh) { inShading = sh; }
-    bool getVectorAntialias() { return vectorAntialias; }
+    bool getVectorAntialias() const { return vectorAntialias; }
     void setVectorAntialias(bool vaa) { vectorAntialias = vaa; }
 #endif
 
@@ -286,11 +286,11 @@ private:
     bool pathAllOutside(const SplashPath &path);
     void fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noclip);
     void arbitraryTransformMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat, bool glyphMode);
-    std::unique_ptr<SplashBitmap> scaleMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight);
-    void scaleMaskYdownXdown(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void scaleMaskYdownXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void scaleMaskYupXdown(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
+    static std::unique_ptr<SplashBitmap> scaleMask(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight);
+    static void scaleMaskYdownXdown(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
+    static void scaleMaskYdownXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
+    static void scaleMaskYupXdown(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
+    static void scaleMaskYupXup(SplashImageMaskSource src, void *srcData, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     void blitMask(const SplashBitmap &src, int xDest, int yDest, SplashClipResult clipRes);
     SplashError arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, const std::array<SplashCoord, 6> &mat, bool interpolate,
                                         bool tilingPattern = false);
@@ -301,7 +301,7 @@ private:
     static bool scaleImageYupXdown(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     static bool scaleImageYupXup(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
     static bool scaleImageYupXupBilinear(SplashImageSource src, void *srcData, SplashColorMode srcMode, int nComps, bool srcAlpha, int srcWidth, int srcHeight, int scaledWidth, int scaledHeight, SplashBitmap *dest);
-    void vertFlipImage(SplashBitmap *img, int width, int height, int nComps);
+    static void vertFlipImage(SplashBitmap *img, int width, int height, int nComps);
     void blitImage(const SplashBitmap &src, bool srcAlpha, int xDest, int yDest, SplashClipResult clipRes);
     void blitImageClipped(const SplashBitmap &src, bool srcAlpha, int xSrc, int ySrc, int xDest, int yDest, int w, int h);
     static void dumpPath(const SplashPath &path);

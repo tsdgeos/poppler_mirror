@@ -368,7 +368,7 @@ bool FormFieldButton::state() const
 void FormFieldButton::setState(bool state)
 {
     FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
-    fwb->setState((bool)state);
+    fwb->setState(state);
 }
 
 QList<int> FormFieldButton::siblings() const
@@ -407,7 +407,8 @@ FormFieldText::TextType FormFieldText::textType() const
     FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     if (fwt->isFileSelect()) {
         return FormFieldText::FileSelect;
-    } else if (fwt->isMultiline()) {
+    }
+    if (fwt->isMultiline()) {
         return FormFieldText::Multiline;
     }
     return FormFieldText::Normal;
@@ -560,9 +561,8 @@ QString FormFieldChoice::editChoice() const
 
     if (fwc->isCombo() && fwc->hasEdit()) {
         return UnicodeParsedString(fwc->getEditChoice());
-    } else {
-        return QString();
     }
+    return QString();
 }
 
 void FormFieldChoice::setEditChoice(const QString &text)

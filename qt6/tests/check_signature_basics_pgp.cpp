@@ -132,10 +132,10 @@ public:
 #endif // ENABLE_GPGME
     }
 private Q_SLOTS:
-    void init();
-    void initTestCase_data();
+    static void init();
+    static void initTestCase_data();
     void initTestCase() { }
-    void testPgp();
+    static void testPgp();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignatureBasicsPgpSignature::tmpdir;
@@ -198,7 +198,7 @@ void TestSignatureBasicsPgpSignature::testPgp()
     QCOMPARE(ranges0[2], 102993);
     QCOMPARE(ranges0[3], 103534);
 
-    auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+    auto *siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[0]->validateSignatureResult();
     if (usedBackend == CryptoSign::Backend::Type::GPGME) {
         QCOMPARE(siginfo0->getSignerName(), std::string { "Sune Vuorela" });

@@ -56,7 +56,7 @@ public:
 
     std::vector<toc_item *> children;
     ustring title;
-    bool is_open;
+    bool is_open = false;
 };
 
 }

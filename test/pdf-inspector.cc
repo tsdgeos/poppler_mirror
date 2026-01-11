@@ -47,7 +47,7 @@ public:
     void set_file_name(const char *file_name);
     void load(const char *file_name);
     void run();
-    void error_dialog(const char *error_message);
+    static void error_dialog(const char *error_message);
     void analyze_page(int page);
 
 private:
@@ -228,7 +228,7 @@ void PdfInspector::load(const char *file_name)
     }
 
     if (doc && !doc->isOk()) {
-        this->error_dialog("Failed to load file.");
+        PdfInspector::error_dialog("Failed to load file.");
         delete doc;
         doc = nullptr;
     }

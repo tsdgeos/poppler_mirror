@@ -115,11 +115,11 @@ enum
 
 static void poppler_document_layers_free(PopplerDocument *document);
 
-typedef struct _PopplerDocumentClass PopplerDocumentClass;
 struct _PopplerDocumentClass
 {
     GObjectClass parent_class;
 };
+using PopplerDocumentClass = _PopplerDocumentClass;
 
 G_DEFINE_TYPE(PopplerDocument, poppler_document, G_TYPE_OBJECT)
 
@@ -1071,7 +1071,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     for (i = 0; i < nDests; ++i) {
         // The names of name-dict cannot contain \0,
         // so we can use strlen().
-        auto name = catalog->getDestsName(i);
+        const auto *name = catalog->getDestsName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest(i);
         if (link_dest) {
             gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name), strlen(name));
@@ -1083,7 +1083,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     // Iterate form name-tree
     const int nDestsNameTree = catalog->numDestNameTree();
     for (i = 0; i < nDestsNameTree; ++i) {
-        auto name = catalog->getDestNameTreeName(i);
+        const auto *name = catalog->getDestNameTreeName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
         if (link_dest) {
             gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->size());
@@ -2848,9 +2848,8 @@ const char *poppler_fonts_iter_get_full_name(PopplerFontsIter *iter)
     const std::optional<std::string> &name = info->getName();
     if (name) {
         return name->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2902,9 +2901,8 @@ const char *poppler_fonts_iter_get_substitute_name(PopplerFontsIter *iter)
     const std::optional<std::string> &name = info->getSubstituteName();
     if (name) {
         return name->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2925,9 +2923,8 @@ const char *poppler_fonts_iter_get_file_name(PopplerFontsIter *iter)
     const std::optional<std::string> &file = info->getFile();
     if (file) {
         return file->c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -2968,9 +2965,8 @@ const char *poppler_fonts_iter_get_encoding(PopplerFontsIter *iter)
     const std::string &encoding = info->getEncoding();
     if (!encoding.empty()) {
         return encoding.c_str();
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 /**
@@ -3064,7 +3060,7 @@ void poppler_fonts_iter_free(PopplerFontsIter *iter)
         return;
     }
 
-    for (auto entry : iter->items) {
+    for (auto *entry : iter->items) {
         delete entry;
     }
     iter->items.~vector<FontInfo *>();
@@ -3083,11 +3079,11 @@ static PopplerFontsIter *poppler_fonts_iter_new(std::vector<FontInfo *> &&items)
     return iter;
 }
 
-typedef struct _PopplerFontInfoClass PopplerFontInfoClass;
 struct _PopplerFontInfoClass
 {
     GObjectClass parent_class;
 };
+using PopplerFontInfoClass = _PopplerFontInfoClass;
 
 /**
  * PopplerFontInfo:
@@ -3183,9 +3179,8 @@ gboolean poppler_font_info_scan(PopplerFontInfo *font_info, int n_pages, Poppler
     if (items.empty()) {
         *iter = nullptr;
         return FALSE;
-    } else {
-        *iter = poppler_fonts_iter_new(std::move(items));
     }
+    *iter = poppler_fonts_iter_new(std::move(items));
 
     return TRUE;
 }
@@ -3553,11 +3548,11 @@ gboolean poppler_layers_iter_next(PopplerLayersIter *iter)
     return TRUE;
 }
 
-typedef struct _PopplerPSFileClass PopplerPSFileClass;
 struct _PopplerPSFileClass
 {
     GObjectClass parent_class;
 };
+using PopplerPSFileClass = _PopplerPSFileClass;
 
 /**
  * PopplerPsFile:

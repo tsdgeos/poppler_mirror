@@ -48,7 +48,7 @@ public:
     void setSupportJPXtransparency(bool val) { handleJPXtransparency = val; }
 
     // Does this JPX stream support transparency (alpha channel)?
-    bool supportJPXtransparency() { return handleJPXtransparency; }
+    bool supportJPXtransparency() const { return handleJPXtransparency; }
 
     int readStream(int nChars, unsigned char *buffer) { return str->doGetChars(nChars, buffer); }
 

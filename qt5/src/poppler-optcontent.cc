@@ -292,9 +292,8 @@ int OptContentModel::rowCount(const QModelIndex &parent) const
     OptContentItem *parentNode = d->nodeFromIndex(parent);
     if (!parentNode) {
         return 0;
-    } else {
-        return parentNode->childList().count();
     }
+    return parentNode->childList().count();
 }
 
 int OptContentModel::columnCount(const QModelIndex & /*parent*/) const
@@ -433,8 +432,7 @@ OptContentItem *OptContentModelPrivate::nodeFromIndex(const QModelIndex &index, 
 {
     if (index.isValid()) {
         return static_cast<OptContentItem *>(index.internalPointer());
-    } else {
-        return canBeNull ? nullptr : m_rootNode;
     }
+    return canBeNull ? nullptr : m_rootNode;
 }
 }

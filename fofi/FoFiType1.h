@@ -56,7 +56,7 @@ public:
     // Write a version of the Type 1 font file with a new encoding.
     void writeEncoded(const char **newEncoding, FoFiOutputFunc outputFunc, void *outputStream) const;
 
-    explicit FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag = {});
+    explicit FoFiType1(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/ = {});
 
 private:
     char *getNextLine(char *line) const;

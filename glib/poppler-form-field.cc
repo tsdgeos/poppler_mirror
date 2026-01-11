@@ -42,11 +42,11 @@
  * @title: PopplerFormField
  */
 
-typedef struct _PopplerFormFieldClass PopplerFormFieldClass;
 struct _PopplerFormFieldClass
 {
     GObjectClass parent_class;
 };
+using PopplerFormFieldClass = _PopplerFormFieldClass;
 
 G_DEFINE_TYPE(PopplerFormField, poppler_form_field, G_TYPE_OBJECT)
 
@@ -417,8 +417,6 @@ struct _PopplerCertificateInfo
     GDateTime *expires;
 };
 
-typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
-
 G_DEFINE_BOXED_TYPE(PopplerCertificateInfo, poppler_certificate_info, poppler_certificate_info_copy, poppler_certificate_info_free)
 
 /**
@@ -784,7 +782,8 @@ PopplerFormTextType poppler_form_field_text_get_text_type(PopplerFormField *fiel
 
     if (text_field->isMultiline()) {
         return POPPLER_FORM_TEXT_MULTILINE;
-    } else if (text_field->isFileSelect()) {
+    }
+    if (text_field->isFileSelect()) {
         return POPPLER_FORM_TEXT_FILE_SELECT;
     }
 
@@ -914,9 +913,8 @@ PopplerFormChoiceType poppler_form_field_choice_get_choice_type(PopplerFormField
 
     if (static_cast<FormWidgetChoice *>(field->widget)->isCombo()) {
         return POPPLER_FORM_CHOICE_COMBO;
-    } else {
-        return POPPLER_FORM_CHOICE_LIST;
     }
+    return POPPLER_FORM_CHOICE_LIST;
 }
 
 /**
@@ -1136,8 +1134,6 @@ struct _PopplerSigningData
     char *document_owner_password;
     char *document_user_password;
 };
-
-typedef struct _PopplerSigningData PopplerSigningData;
 
 G_DEFINE_BOXED_TYPE(PopplerSigningData, poppler_signing_data, poppler_signing_data_copy, poppler_signing_data_free)
 
@@ -1570,7 +1566,7 @@ void poppler_signing_data_set_font_size(PopplerSigningData *signing_data, gdoubl
  **/
 gdouble poppler_signing_data_get_font_size(const PopplerSigningData *signing_data)
 {
-    g_return_val_if_fail(signing_data != nullptr, 20.0f);
+    g_return_val_if_fail(signing_data != nullptr, 20.0F);
     return signing_data->font_size;
 }
 

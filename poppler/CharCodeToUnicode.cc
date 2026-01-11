@@ -231,7 +231,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
                     continue;
                 }
@@ -256,7 +256,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
                     continue;
                 }
@@ -314,7 +314,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in cidchar block in ToUnicode CMap");
                     continue;
                 }
@@ -343,7 +343,7 @@ bool CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data, int n
                     error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
                     break;
                 }
-                if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' && tok2[0] == '<' && tok2[n2 - 1] == '>')) {
+                if (tok1[0] != '<' || tok1[n1 - 1] != '>' || tok2[0] != '<' || tok2[n2 - 1] != '>') {
                     error(errSyntaxWarning, -1, "Illegal entry in cidrange block in ToUnicode CMap");
                     continue;
                 }
@@ -391,9 +391,8 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n, int offset)
         if (unlikely(code >= newLen)) {
             error(errSyntaxWarning, -1, "Illegal code value in CharCodeToUnicode::addMapping");
             return;
-        } else {
-            map.resize(newLen, 0);
         }
+        map.resize(newLen, 0);
     }
     if (n <= 4) {
         if (!parseHex(uStr, n, &u)) {
@@ -438,17 +437,17 @@ void CharCodeToUnicode::addMappingInt(CharCode code, Unicode u)
     map[code] = u;
 }
 
-CharCodeToUnicode::CharCodeToUnicode(PrivateTag)
+CharCodeToUnicode::CharCodeToUnicode(PrivateTag /*unused*/)
 {
     isIdentity = false;
 }
 
-CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, PrivateTag) : tag(tagA)
+CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, PrivateTag /*unused*/) : tag(tagA)
 {
     map.resize(256, 0);
     isIdentity = false;
 }
-CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA, PrivateTag) : tag(tagA)
+CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA, PrivateTag /*unused*/) : tag(tagA)
 {
     map = std::move(mapA);
     sMap = std::move(sMapA);
@@ -499,7 +498,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len)
 int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const
 {
     if (isIdentity) {
-        auto that = const_cast<CharCodeToUnicode *>(this);
+        auto *that = const_cast<CharCodeToUnicode *>(this);
         that->map[0] = (Unicode)c;
         *u = map.data();
         return 1;

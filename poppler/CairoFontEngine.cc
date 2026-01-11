@@ -389,16 +389,16 @@ err2:
 
 static const cairo_user_data_key_t type3_font_key = { 0 };
 
-typedef struct _type3_font_info
+struct type3_font_info_t
 {
-    _type3_font_info(const std::shared_ptr<GfxFont> &fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, CairoOutputDev *outputDevA, Gfx *gfxA) : font(fontA), doc(docA), fontEngine(fontEngineA), outputDev(outputDevA), gfx(gfxA) { }
+    type3_font_info_t(const std::shared_ptr<GfxFont> &fontA, PDFDoc *docA, CairoFontEngine *fontEngineA, CairoOutputDev *outputDevA, Gfx *gfxA) : font(fontA), doc(docA), fontEngine(fontEngineA), outputDev(outputDevA), gfx(gfxA) { }
 
     std::shared_ptr<GfxFont> font;
     PDFDoc *doc;
     CairoFontEngine *fontEngine;
     CairoOutputDev *outputDev;
     Gfx *gfx;
-} type3_font_info_t;
+};
 
 static void _free_type3_font_info(void *closure)
 {

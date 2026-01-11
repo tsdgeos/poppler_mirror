@@ -154,8 +154,6 @@ public:
     // Called to indicate that a new PDF document has been loaded.
     void startDoc(PDFDoc *doc);
 
-    bool isReverseVideo() { return false; }
-
 private:
     // The stack of QPainters is used to implement transparency groups.  When such a group
     // is opened, annew Painter that paints onto a QPicture is pushed onto the stack.
@@ -167,9 +165,9 @@ private:
 
     // endTransparencyGroup removes a QPicture from the stack, but stores
     // it here for later use in paintTransparencyGroup.
-    QPicture *m_lastTransparencyGroupPicture;
+    QPicture *m_lastTransparencyGroupPicture = nullptr;
 
-    QFont::HintingPreference m_hintingPreference;
+    QFont::HintingPreference m_hintingPreference = QFont::PreferDefaultHinting;
 
     QPen m_currentPen;
     // The various stacks are used to implement the 'saveState' and 'restoreState' methods

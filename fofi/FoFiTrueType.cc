@@ -477,7 +477,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
     return ff;
 }
 
-FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag) : FoFiBase(std::move(fileA))
+FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag /*unused*/) : FoFiBase(std::move(fileA))
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -487,7 +487,7 @@ FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, P
     parse();
 }
 
-FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
+FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag /*unused*/) : FoFiBase(data)
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -997,7 +997,7 @@ void FoFiTrueType::convertToType0(const std::string &psName, const std::vector<i
     ff->convertToType0(psName, cidMap, outputFunc, outputStream);
 }
 
-void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream)
 {
     const char *name;
     int i;
@@ -1654,7 +1654,7 @@ int FoFiTrueType::seekTable(const char *tag) const
     return -1;
 }
 
-unsigned int FoFiTrueType::charToTag(const std::string &tagName) const
+unsigned int FoFiTrueType::charToTag(const std::string &tagName)
 {
     size_t n = tagName.size();
     unsigned int tag = 0;
@@ -1769,7 +1769,8 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
             /* convert to offset from file top */
             gsubFeatureTable = ftable + gsubTable + featureList;
             return 0;
-        } else if (tag == vertTag) {
+        }
+        if (tag == vertTag) {
             ftable = getU16BE(tpos, &parsedOk);
         }
     }
@@ -1790,7 +1791,8 @@ int FoFiTrueType::setupGSUB(const std::string &scriptName, const std::string &la
             /* vrt2 is preferred, overwrite vert */
             ftable = getU16BE(pos, &parsedOk);
             break;
-        } else if (ftable == 0 && tag == vertTag) {
+        }
+        if (ftable == 0 && tag == vertTag) {
             ftable = getU16BE(pos, &parsedOk);
         }
         pos = oldPos; /* restore old position */

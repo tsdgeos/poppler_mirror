@@ -708,13 +708,11 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
 {
     if ((str->getLength()) && (getLinearization()->getLength() == str->getLength())) {
         return true;
-    } else {
-        if (tryingToReconstruct) {
-            return getLinearization()->getLength() > 0;
-        } else {
-            return false;
-        }
     }
+    if (tryingToReconstruct) {
+        return getLinearization()->getLength() > 0;
+    }
+    return false;
 }
 
 void PDFDoc::setDocInfoStringEntry(const char *key, std::unique_ptr<GooString> value)
@@ -1785,7 +1783,7 @@ bool PDFDoc::markObject(Object *obj, XRef *xRef, XRef *countRef, unsigned int nu
     return true;
 }
 
-bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox)
+bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox) const
 {
     Ref *refPage = getCatalog()->getPageRef(pageNo);
     Object page = getXRef()->fetch(*refPage);
@@ -2180,9 +2178,8 @@ Page *PDFDoc::getPage(int page)
         }
         if (pageCache[page - 1]) {
             return pageCache[page - 1].get();
-        } else {
-            error(errSyntaxWarning, -1, "Failed parsing page {0:d} using hint tables", page);
         }
+        error(errSyntaxWarning, -1, "Failed parsing page {0:d} using hint tables", page);
     }
 
     return catalog->getPage(page);
@@ -2285,7 +2282,7 @@ std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &s
         return std::get<CryptoSign::SigningErrorMessage>(result);
     }
 
-    auto sig = std::get_if<SignatureData>(&result);
+    auto *sig = std::get_if<SignatureData>(&result);
 
     sig->annotWidget->setFlags(sig->annotWidget->getFlags() | Annot::flagLocked);
 

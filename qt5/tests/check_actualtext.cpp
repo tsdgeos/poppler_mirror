@@ -10,16 +10,16 @@ class TestActualText : public QObject
 public:
     explicit TestActualText(QObject *parent = nullptr) : QObject(parent) { }
 
-    void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
+    static void checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text);
 
 private Q_SLOTS:
-    void checkActualText1();
-    void checkActualText2();
-    void checkActualText2_data();
-    void checkAllOrientations();
-    void checkAllOrientations_data();
-    void checkFakeboldText();
-    void checkFakeboldText_data();
+    static void checkActualText1();
+    static void checkActualText2();
+    static void checkActualText2_data();
+    static void checkAllOrientations();
+    static void checkAllOrientations_data();
+    static void checkFakeboldText();
+    static void checkFakeboldText_data();
 };
 
 void TestActualText::checkActualText(Poppler::Document *doc, const QRectF &area, const QString &text)

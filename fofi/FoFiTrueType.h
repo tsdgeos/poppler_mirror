@@ -160,11 +160,11 @@ public:
     // setup vert/vrt2 GSUB for specified lang
     int setupGSUB(const std::string &scriptName, const std::string &languageName);
 
-    FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
-    FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag = {});
+    FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag /*unused*/ = {});
+    FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag /*unused*/ = {});
 
 private:
-    void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;
+    static void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream);
     void cvtCharStrings(char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const;
     void cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const std::optional<std::string> &name, bool needVerticalMetrics, int *maxUsedGlyph) const;
     static void dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream);
@@ -172,7 +172,7 @@ private:
     void parse();
     void readPostTable();
     int seekTable(const char *tag) const;
-    unsigned int charToTag(const std::string &tagName) const;
+    static unsigned int charToTag(const std::string &tagName);
     unsigned int doMapToVertGID(unsigned int orgGID);
     unsigned int scanLookupList(unsigned int listIndex, unsigned int orgGID);
     unsigned int scanLookupSubTable(unsigned int subTable, unsigned int orgGID);

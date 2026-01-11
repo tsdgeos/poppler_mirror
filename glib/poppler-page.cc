@@ -54,11 +54,11 @@ enum
 
 static PopplerRectangleExtended *poppler_rectangle_extended_new();
 
-typedef struct _PopplerPageClass PopplerPageClass;
 struct _PopplerPageClass
 {
     GObjectClass parent_class;
 };
+using PopplerPageClass = _PopplerPageClass;
 
 G_DEFINE_TYPE(PopplerPage, poppler_page, G_TYPE_OBJECT)
 
@@ -276,10 +276,7 @@ static bool annots_display_decide_cb(Annot *annot, void *user_data)
     Annot::AnnotSubtype type = annot->getType();
     int typeMask = 1 << MAX(0, (((int)type) - 1));
 
-    if (flags & typeMask) {
-        return true;
-    }
-    return false;
+    return (flags & typeMask) != 0;
 }
 
 /**
@@ -1689,7 +1686,7 @@ static PopplerRectangleExtended *poppler_rectangle_extended_new()
 
 PopplerRectangle *poppler_rectangle_new_from_pdf_rectangle(const PDFRectangle *rect)
 {
-    auto r = poppler_rectangle_extended_new();
+    auto *r = poppler_rectangle_extended_new();
     r->x1 = rect->x1;
     r->y1 = rect->y1;
     r->x2 = rect->x2;
@@ -1725,7 +1722,7 @@ PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle)
 {
     g_return_val_if_fail(rectangle != nullptr, NULL);
 
-    auto ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
+    auto *ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
     return reinterpret_cast<PopplerRectangle *>(g_slice_dup(PopplerRectangleExtended, ext_rectangle));
 }
 
@@ -1741,7 +1738,7 @@ PopplerRectangle *poppler_rectangle_copy(PopplerRectangle *rectangle)
  */
 void poppler_rectangle_free(PopplerRectangle *rectangle)
 {
-    auto ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
+    auto *ext_rectangle = reinterpret_cast<PopplerRectangleExtended *>(rectangle);
     g_slice_free(PopplerRectangleExtended, ext_rectangle);
 }
 
@@ -1767,7 +1764,7 @@ gboolean poppler_rectangle_find_get_match_continued(const PopplerRectangle *rect
 {
     g_return_val_if_fail(rectangle != nullptr, false);
 
-    auto ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
+    const auto *ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
     return ext_rectangle->match_continued;
 }
 
@@ -1794,7 +1791,7 @@ gboolean poppler_rectangle_find_get_ignored_hyphen(const PopplerRectangle *recta
 {
     g_return_val_if_fail(rectangle != nullptr, false);
 
-    auto ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
+    const auto *ext_rectangle = reinterpret_cast<const PopplerRectangleExtended *>(rectangle);
     return ext_rectangle->ignored_hyphen;
 }
 

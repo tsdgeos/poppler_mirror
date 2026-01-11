@@ -8,7 +8,7 @@ class EndOfLines : public QObject
 public:
     explicit EndOfLines(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkEndOfLines();
+    static void checkEndOfLines();
 };
 
 void EndOfLines::checkEndOfLines()

@@ -17,16 +17,16 @@ class TestAnnotations : public QObject
 public:
     explicit TestAnnotations(QObject *parent = nullptr) : QObject(parent) { }
 
-    void saveAndCheck(const std::unique_ptr<Poppler::Document> &doc, const std::function<void(Poppler::Annotation *a)> &checkFunction);
+    static void saveAndCheck(const std::unique_ptr<Poppler::Document> &doc, const std::function<void(Poppler::Annotation *a)> &checkFunction);
 
 private Q_SLOTS:
-    void checkQColorPrecision();
-    void checkFontSizeAndColor();
-    void checkHighlightFromAndToQuads();
-    void checkUTF16LEAnnot();
-    void checkModificationCreationDate();
-    void checkNonMarkupAnnotations();
-    void checkDefaultAppearance();
+    static void checkQColorPrecision();
+    static void checkFontSizeAndColor();
+    static void checkHighlightFromAndToQuads();
+    static void checkUTF16LEAnnot();
+    static void checkModificationCreationDate();
+    static void checkNonMarkupAnnotations();
+    static void checkDefaultAppearance();
 };
 
 /* Is .5f sufficient for 16 bit color channel roundtrip trough save and load on all architectures? */
@@ -92,7 +92,7 @@ void TestAnnotations::checkFontSizeAndColor()
         auto &&annot = annots.cbegin();
         for (const auto &color : testColors) {
             QCOMPARE((*annot)->subType(), Poppler::Annotation::AText);
-            auto textAnnot = static_cast<Poppler::TextAnnotation *>(annot->get());
+            auto *textAnnot = static_cast<Poppler::TextAnnotation *>(annot->get());
             QCOMPARE(textAnnot->contents(), contents);
             QCOMPARE(textAnnot->textFont().pointSize(), testFont.pointSize());
             QCOMPARE(static_cast<int>(textAnnot->textColor().spec()), static_cast<int>(color.spec()));

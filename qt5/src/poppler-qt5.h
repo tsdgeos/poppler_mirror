@@ -359,7 +359,7 @@ public:
 
 private:
     Q_DISABLE_COPY(FontIterator)
-    FontIterator(int, DocumentData *dd);
+    FontIterator(int startPage, DocumentData *dd);
 
     FontIteratorData *d;
 };

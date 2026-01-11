@@ -52,7 +52,7 @@ protected:
 
 }
 
-typedef detail::noncopyable noncopyable;
+using noncopyable = detail::noncopyable;
 /// \endcond
 
 enum rotation_enum
@@ -90,7 +90,7 @@ enum case_sensitivity_enum
     case_insensitive
 };
 
-typedef std::vector<char> byte_array;
+using byte_array = std::vector<char>;
 
 // to disable warning only for this occurrence
 #ifdef _MSC_VER
@@ -126,7 +126,7 @@ POPPLER_CPP_EXPORT std::ostream &operator<<(std::ostream &stream, const byte_arr
 
 POPPLER_CPP_EXPORT bool set_data_dir(const std::string &new_data_dir);
 
-typedef void (*debug_func)(const std::string &, void *);
+using debug_func = void (*)(const std::string &, void *);
 
 POPPLER_CPP_EXPORT void set_debug_error_function(debug_func debug_function, void *closure);
 

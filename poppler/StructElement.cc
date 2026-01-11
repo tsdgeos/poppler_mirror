@@ -109,7 +109,7 @@ static bool isTableScopeName(Object *value)
 
 static bool isRGBColor(Object *value)
 {
-    if (!(value->isArray() && value->arrayGetLength() == 3)) {
+    if (!value->isArray() || value->arrayGetLength() != 3) {
         return false;
     }
 
@@ -179,7 +179,7 @@ ARRAY_CHECKER(isNumberOrArrayN, isNumber, 0, true, false)
 ARRAY_CHECKER(isTableHeaders, isTextString, 0, false, false)
 
 // Type of functions used to do type-checking on attribute values
-typedef bool (*AttributeCheckFunc)(Object *);
+using AttributeCheckFunc = bool (*)(Object *);
 
 // Maps attributes to their names and whether the attribute can be inherited.
 struct AttributeMapEntry
@@ -675,7 +675,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
 // StructElement
 //------------------------------------------------------------------------
 
-StructElement::StructData::StructData() : altText(nullptr), actualText(nullptr), id(nullptr), title(nullptr), expandedAbbr(nullptr), language(nullptr), revision(0) { }
+StructElement::StructData::StructData() : altText(nullptr), actualText(nullptr), id(nullptr), title(nullptr), expandedAbbr(nullptr), language(nullptr) { }
 
 StructElement::StructData::~StructData()
 {
@@ -1005,7 +1005,7 @@ void StructElement::parse(Dict *element)
                 const int revision = iobj.getInt();
                 // Set revision numbers for the elements previously created.
                 for (unsigned j = attrIndex; j < getNumAttributes(); j++) {
-                    getAttribute(j)->setRevision(revision);
+                    getNonConstAttribute(j)->setRevision(revision);
                 }
             } else {
                 error(errSyntaxWarning, -1, "A item is wrong type ({0:s})", iobj.getTypeName());
@@ -1033,7 +1033,7 @@ void StructElement::parse(Dict *element)
                         // Set revision numbers for the elements previously created.
                         const int revision = iobj.getInt();
                         for (unsigned j = attrIndex; j < getNumAttributes(); j++) {
-                            getAttribute(j)->setRevision(revision);
+                            getNonConstAttribute(j)->setRevision(revision);
                         }
                     } else {
                         error(errSyntaxWarning, -1, "C item is wrong type ({0:s})", iobj.getTypeName());

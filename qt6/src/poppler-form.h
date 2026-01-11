@@ -987,7 +987,7 @@ enum class CryptoSignBackendFeature
  *
  * \since 23.06
  */
-bool POPPLER_QT6_EXPORT hasCryptoSignBackendFeature(CryptoSignBackend, CryptoSignBackendFeature);
+bool POPPLER_QT6_EXPORT hasCryptoSignBackendFeature(CryptoSignBackend backend, CryptoSignBackendFeature feature);
 
 /**
   Returns is poppler was compiled with NSS support

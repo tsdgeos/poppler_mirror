@@ -293,11 +293,11 @@ public:
         const int catalogMajorVersion = catalog->getPDFMajorVersion();
         if (catalogMajorVersion > headerPdfMajorVersion) {
             return catalog->getPDFMinorVersion();
-        } else if (headerPdfMajorVersion > catalogMajorVersion) {
-            return headerPdfMinorVersion;
-        } else {
-            return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
         }
+        if (headerPdfMajorVersion > catalogMajorVersion) {
+            return headerPdfMinorVersion;
+        }
+        return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
     }
 
     // Return the PDF ID in the trailer dictionary (if any).
@@ -315,7 +315,7 @@ public:
     int saveWithoutChangesAs(OutStream *outStr);
 
     // rewrite pageDict with MediaBox, CropBox and new page CTM
-    bool replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox);
+    bool replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox) const;
     bool markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts = nullptr);
     bool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict *> *alreadyMarkedDicts = nullptr);
     void markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum);
@@ -368,11 +368,11 @@ private:
     static Goffset writeObjectHeader(Ref *ref, OutStream *outStr);
     static void writeObjectFooter(OutStream *outStr);
 
-    inline void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
+    void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen) const
     {
         writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, { objNum, objGen });
     }
-    inline void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref) { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
+    void writeObject(Object *obj, OutStream *outStr, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, Ref ref) const { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
     static void writeStream(Stream *str, OutStream *outStr);
     static void writeRawStream(Stream *str, OutStream *outStr);
     void writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeAllEntries, int uxrefSize, OutStream *outStr, bool incrUpdate);
@@ -397,7 +397,7 @@ private:
     // Get the offset of the entries in the main XRef table of a
     // linearized document (0 for non linearized documents).
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
-    long long strToLongLong(const char *s);
+    static long long strToLongLong(const char *s);
 
     std::unique_ptr<GooString> fileName;
 #ifdef _WIN32

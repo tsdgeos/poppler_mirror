@@ -32,6 +32,7 @@
 #include <poppler-media.h>
 
 #include <QtCore/QStringList>
+#include <utility>
 
 #include "poppler-annotation-private.h"
 
@@ -143,10 +144,10 @@ public:
     bool sync : 1;
     bool repeat : 1;
     bool mix : 1;
-    SoundObject *sound;
+    SoundObject *sound = nullptr;
 };
 
-LinkSoundPrivate::LinkSoundPrivate(const QRectF &area) : LinkPrivate(area), sound(nullptr) { }
+LinkSoundPrivate::LinkSoundPrivate(const QRectF &area) : LinkPrivate(area) { }
 
 LinkSoundPrivate::~LinkSoundPrivate()
 {
@@ -156,17 +157,17 @@ LinkSoundPrivate::~LinkSoundPrivate()
 class LinkRenditionPrivate : public LinkPrivate
 {
 public:
-    explicit LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref);
+    explicit LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&rendition, ::LinkRendition::RenditionOperation operation, QString script, Ref ref);
     ~LinkRenditionPrivate() override;
 
     std::unique_ptr<MediaRendition> rendition;
-    LinkRendition::RenditionAction action;
+    LinkRendition::RenditionAction action = LinkRendition::PlayRendition;
     QString script;
     Ref annotationReference;
 };
 
-LinkRenditionPrivate::LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref ref)
-    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), action(LinkRendition::PlayRendition), script(javaScript), annotationReference(ref)
+LinkRenditionPrivate::LinkRenditionPrivate(const QRectF &area, std::unique_ptr<::MediaRendition> &&r, ::LinkRendition::RenditionOperation operation, QString javaScript, const Ref ref)
+    : LinkPrivate(area), rendition(r ? new MediaRendition(std::move(r)) : nullptr), script(std::move(javaScript)), annotationReference(ref)
 {
     switch (operation) {
     case ::LinkRendition::NoRendition:
@@ -204,7 +205,7 @@ LinkJavaScriptPrivate::~LinkJavaScriptPrivate() = default;
 class LinkMoviePrivate : public LinkPrivate
 {
 public:
-    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref reference);
+    LinkMoviePrivate(const QRectF &area, LinkMovie::Operation operation, QString title, Ref reference);
     ~LinkMoviePrivate() override;
 
     LinkMovie::Operation operation;
@@ -212,7 +213,7 @@ public:
     Ref annotationReference;
 };
 
-LinkMoviePrivate::LinkMoviePrivate(const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref reference) : LinkPrivate(area), operation(_operation), annotationTitle(title), annotationReference(reference) { }
+LinkMoviePrivate::LinkMoviePrivate(const QRectF &area, LinkMovie::Operation _operation, QString title, const Ref reference) : LinkPrivate(area), operation(_operation), annotationTitle(std::move(title)), annotationReference(reference) { }
 
 LinkMoviePrivate::~LinkMoviePrivate() = default;
 
@@ -284,10 +285,10 @@ LinkDestination::LinkDestination(const LinkDestinationData &data) : d(new LinkDe
             cvtUserToDev(page, left, top, &leftAux, &topAux);
             cvtUserToDev(page, right, bottom, &rightAux, &bottomAux);
 
-            d->left = leftAux / (double)page->getCropWidth();
-            d->top = topAux / (double)page->getCropHeight();
-            d->right = rightAux / (double)page->getCropWidth();
-            d->bottom = bottomAux / (double)page->getCropHeight();
+            d->left = leftAux / page->getCropWidth();
+            d->top = topAux / page->getCropHeight();
+            d->right = rightAux / page->getCropWidth();
+            d->bottom = bottomAux / page->getCropHeight();
         } else {
             d->pageNum = 0;
         }
@@ -612,11 +613,7 @@ QString LinkRendition::script() const
 bool LinkRendition::isReferencedAnnotation(const ScreenAnnotation *annotation) const
 {
     Q_D(const LinkRendition);
-    if (d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference()) {
-        return true;
-    }
-
-    return false;
+    return d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference();
 }
 
 // LinkJavaScript
@@ -663,7 +660,8 @@ bool LinkMovie::isReferencedAnnotation(const MovieAnnotation *annotation) const
     Q_D(const LinkMovie);
     if (d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference()) {
         return true;
-    } else if (!d->annotationTitle.isNull()) {
+    }
+    if (!d->annotationTitle.isNull()) {
         return (annotation->movieTitle() == d->annotationTitle);
     }
 

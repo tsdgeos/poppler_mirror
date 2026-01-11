@@ -110,7 +110,7 @@ public:
     // Get the field bounding rect
     void getRect(double *x1, double *y1, double *x2, double *y2) const;
 
-    unsigned getID() { return ID; }
+    unsigned getID() const { return ID; }
     void setID(unsigned int i) { ID = i; }
 
     FormField *getField() { return field; }
@@ -120,7 +120,7 @@ public:
     Ref getRef() { return ref; }
 
     void setChildNum(unsigned i) { childNum = i; }
-    unsigned getChildNum() { return childNum; }
+    unsigned getChildNum() const { return childNum; }
 
     const GooString *getPartialName() const;
     void setPartialName(const GooString &name);
@@ -148,7 +148,7 @@ public:
 
     virtual void updateWidgetAppearance() = 0;
 
-    void print(int indent = 0);
+    void print(int indent = 0) const;
 
 protected:
     FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
@@ -336,10 +336,10 @@ public:
 
 private:
     bool createSignature(Object &vObj, Ref vRef, const GooString &name, int placeholderLength, const GooString *reason, const GooString *location, CryptoSign::SignatureType signatureType);
-    bool getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
-    bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
+    static bool getObjectStartEnd(const GooString &filename, int objNum, Goffset *objStart, Goffset *objEnd, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword);
+    static bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
-    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const std::vector<unsigned char> &signature);
+    static bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const std::vector<unsigned char> &signature);
 };
 
 //------------------------------------------------------------------------
@@ -352,7 +352,7 @@ private:
 class POPPLER_PRIVATE_EXPORT FormField
 {
 public:
-    FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
+    FormField(PDFDoc *docA, Object &&aobj, Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
 
     virtual ~FormField();
 
@@ -440,7 +440,7 @@ private:
 class FormFieldButton : public FormField
 {
 public:
-    FormFieldButton(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldButton(PDFDoc *docA, Object &&dict, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     FormButtonType getButtonType() const { return btype; }
 
@@ -487,7 +487,7 @@ protected:
 class FormFieldText : public FormField
 {
 public:
-    FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldText(PDFDoc *docA, Object &&dictObj, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     const GooString *getContent() const { return content.get(); }
     const GooString *getAppearanceContent() const { return internalContent ? internalContent.get() : content.get(); }
@@ -539,7 +539,7 @@ protected:
 class FormFieldChoice : public FormField
 {
 public:
-    FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldChoice(PDFDoc *docA, Object &&aobj, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     ~FormFieldChoice() override;
 
@@ -615,7 +615,7 @@ protected:
 class POPPLER_PRIVATE_EXPORT FormFieldSignature : public FormField
 {
 public:
-    FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldSignature(PDFDoc *docA, Object &&dict, Ref ref, FormField *parent, std::set<int> *usedParents);
 
     // Use -1 for now as validationTime
     SignatureInfo *validateSignatureAsync(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA, const std::function<void()> &doneCallback);
@@ -649,9 +649,9 @@ public:
 
     // Background image (ref to an object of type XObject). Invalid ref if not required.
     Ref getImageResource() const;
-    void setImageResource(const Ref imageResourceA);
+    void setImageResource(Ref imageResourceA);
 
-    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo);
 
     FormWidget *getCreateWidget();
 
@@ -659,7 +659,7 @@ private:
     void parseInfo();
     void hashSignedDataBlock(CryptoSign::VerificationInterface *handler, Goffset block_len);
 
-    CryptoSign::SignatureType signature_type;
+    CryptoSign::SignatureType signature_type = CryptoSign::SignatureType::unsigned_signature_field;
     Object byte_range;
     std::vector<unsigned char> signature;
     SignatureInfo *signature_info;
@@ -695,7 +695,7 @@ public:
     /* Creates a new Field of the type specified in obj's dict.
        used in Form::Form , FormField::FormField and
        Page::loadStandaloneFields */
-    static std::unique_ptr<FormField> createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
+    static std::unique_ptr<FormField> createFieldFromDict(Object &&obj, PDFDoc *docA, Ref aref, FormField *parent, std::set<int> *usedParents);
 
     // Finds in the default resources dictionary a font named popplerfontXXX that
     // has the given fontFamily and fontStyle. This makes us relatively sure that we added that font ourselves

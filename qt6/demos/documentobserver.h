@@ -47,7 +47,7 @@ protected:
     void reloadPage();
 
 private:
-    PdfViewer *m_viewer;
+    PdfViewer *m_viewer = nullptr;
 };
 
 #endif

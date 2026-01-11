@@ -138,8 +138,8 @@ SplashXPath::SplashXPath(const SplashPath &path, const std::array<SplashCoord, 6
                         x1 = x1 + 1;
                     }
                 }
-                adjusts[i].x0 = (SplashCoord)x0;
-                adjusts[i].x1 = (SplashCoord)x1 - 0.01;
+                adjusts[i].x0 = x0;
+                adjusts[i].x1 = x1 - 0.01;
                 adjusts[i].xm = (SplashCoord)0.5 * (adjusts[i].x0 + adjusts[i].x1);
                 adjusts[i].firstPt = hint->firstPt;
                 adjusts[i].lastPt = hint->lastPt;

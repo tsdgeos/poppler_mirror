@@ -160,7 +160,7 @@ AnnotationAppearance::~AnnotationAppearance()
 // END AnnotationAppearance implementation
 
 // BEGIN Annotation implementation
-AnnotationPrivate::AnnotationPrivate() : flags(0), revisionScope(Annotation::Root), revisionType(Annotation::None), pdfAnnot(nullptr), pdfPage(nullptr), parentDoc(nullptr) { }
+AnnotationPrivate::AnnotationPrivate() : pdfAnnot(nullptr) { }
 
 void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData)
 {
@@ -391,13 +391,15 @@ PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags
 
     if (rotationFixUp == 0) {
         return PDFRectangle(tl_x, tl_y, br_x, br_y);
-    } else if (rotationFixUp == 90) {
-        return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
-    } else if (rotationFixUp == 180) {
-        return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
-    } else { // rotationFixUp == 270
-        return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
     }
+    if (rotationFixUp == 90) {
+        return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
+    }
+    if (rotationFixUp == 180) {
+        return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
+    }
+    // rotationFixUp == 270
+    return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
 }
 
 PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
@@ -891,33 +893,33 @@ public:
     std::unique_ptr<DefaultAppearance> getDefaultAppearanceFromNative() const;
 
     // data fields
-    TextAnnotation::TextType textType;
+    TextAnnotation::TextType textType = TextAnnotation::Linked;
     QString textIcon;
     std::optional<QFont> textFont;
     QColor textColor = Qt::black;
-    int inplaceAlign; // 0:left, 1:center, 2:right
+    int inplaceAlign = 0; // 0:left, 1:center, 2:right
     QVector<QPointF> inplaceCallout;
-    TextAnnotation::InplaceIntent inplaceIntent;
+    TextAnnotation::InplaceIntent inplaceIntent = TextAnnotation::Unknown;
 };
 
 class Annotation::Style::Private : public QSharedData
 {
 public:
-    Private() : opacity(1.0), width(1.0), lineStyle(Solid), xCorners(0.0), yCorners(0.0), lineEffect(NoEffect), effectIntensity(1.0)
+    Private()
     {
         dashArray.resize(1);
         dashArray[0] = 3;
     }
 
     QColor color;
-    double opacity;
-    double width;
-    Annotation::LineStyle lineStyle;
-    double xCorners;
-    double yCorners;
+    double opacity = 1.0;
+    double width = 1.0;
+    Annotation::LineStyle lineStyle = Solid;
+    double xCorners = 0.0;
+    double yCorners = 0.0;
     QVector<double> dashArray;
-    Annotation::LineEffect lineEffect;
-    double effectIntensity;
+    Annotation::LineEffect lineEffect = NoEffect;
+    double effectIntensity = 1.0;
 };
 
 Annotation::Style::Style() : d(new Private) { }
@@ -1028,9 +1030,9 @@ void Annotation::Style::setEffectIntensity(double intens)
 class Annotation::Popup::Private : public QSharedData
 {
 public:
-    Private() : flags(-1) { }
+    Private() = default;
 
-    int flags;
+    int flags = -1;
     QRectF geometry;
     QString title;
     QString summary;
@@ -1478,9 +1480,8 @@ QDateTime Annotation::modificationDate() const
 
     if (d->pdfAnnot->getModified()) {
         return convertDate(d->pdfAnnot->getModified()->c_str());
-    } else {
-        return QDateTime();
     }
+    return QDateTime();
 }
 
 void Annotation::setModificationDate(const QDateTime &date)
@@ -1904,7 +1905,7 @@ void Annotation::setAnnotationAppearance(const AnnotationAppearance &annotationA
 
 /** TextAnnotation [Annotation] */
 
-TextAnnotationPrivate::TextAnnotationPrivate() : textType(TextAnnotation::Linked), textIcon(QStringLiteral("Note")), inplaceAlign(0), inplaceIntent(TextAnnotation::Unknown) { }
+TextAnnotationPrivate::TextAnnotationPrivate() : textIcon(QStringLiteral("Note")) { }
 
 std::unique_ptr<Annotation> TextAnnotationPrivate::makeAlias()
 {
@@ -1980,9 +1981,8 @@ std::unique_ptr<DefaultAppearance> TextAnnotationPrivate::getDefaultAppearanceFr
     if (pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText) {
         AnnotFreeText *ftextann = static_cast<AnnotFreeText *>(pdfAnnot.get());
         return ftextann->getDefaultAppearance();
-    } else {
-        return {};
     }
+    return {};
 }
 
 TextAnnotation::TextAnnotation(TextAnnotation::TextType type) : Annotation(*new TextAnnotationPrivate())
@@ -2251,9 +2251,8 @@ QPointF TextAnnotation::calloutPoint(int id) const
     const QVector<QPointF> points = calloutPoints();
     if (id < 0 || id >= points.size()) {
         return QPointF();
-    } else {
-        return points[id];
     }
+    return points[id];
 }
 
 QVector<QPointF> TextAnnotation::calloutPoints() const
@@ -2372,21 +2371,18 @@ public:
 
     // data fields (note uses border for rendering style)
     QLinkedList<QPointF> linePoints;
-    LineAnnotation::TermStyle lineStartStyle;
-    LineAnnotation::TermStyle lineEndStyle;
-    bool lineClosed : 1; // (if true draw close shape)
-    bool lineShowCaption : 1;
+    LineAnnotation::TermStyle lineStartStyle = LineAnnotation::None;
+    LineAnnotation::TermStyle lineEndStyle = LineAnnotation::None;
+    bool lineClosed : 1 = false; // (if true draw close shape)
+    bool lineShowCaption : 1 = false;
     LineAnnotation::LineType lineType;
     QColor lineInnerColor;
-    double lineLeadingFwdPt;
-    double lineLeadingBackPt;
-    LineAnnotation::LineIntent lineIntent;
+    double lineLeadingFwdPt = 0;
+    double lineLeadingBackPt = 0;
+    LineAnnotation::LineIntent lineIntent = LineAnnotation::Unknown;
 };
 
-LineAnnotationPrivate::LineAnnotationPrivate()
-    : lineStartStyle(LineAnnotation::None), lineEndStyle(LineAnnotation::None), lineClosed(false), lineShowCaption(false), lineLeadingFwdPt(0), lineLeadingBackPt(0), lineIntent(LineAnnotation::Unknown)
-{
-}
+LineAnnotationPrivate::LineAnnotationPrivate() = default;
 
 std::unique_ptr<Annotation> LineAnnotationPrivate::makeAlias()
 {
@@ -2645,10 +2641,9 @@ LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::TermStyle)lineann->getStartStyle();
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)polyann->getStartStyle();
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    return (LineAnnotation::TermStyle)polyann->getStartStyle();
 }
 
 void LineAnnotation::setLineStartStyle(LineAnnotation::TermStyle style)
@@ -2680,10 +2675,9 @@ LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::TermStyle)lineann->getEndStyle();
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        return (LineAnnotation::TermStyle)polyann->getEndStyle();
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    return (LineAnnotation::TermStyle)polyann->getEndStyle();
 }
 
 void LineAnnotation::setLineEndStyle(LineAnnotation::TermStyle style)
@@ -2887,14 +2881,13 @@ LineAnnotation::LineIntent LineAnnotation::lineIntent() const
     if (d->pdfAnnot->getType() == Annot::typeLine) {
         const AnnotLine *lineann = static_cast<const AnnotLine *>(d->pdfAnnot.get());
         return (LineAnnotation::LineIntent)(lineann->getIntent() + 1);
-    } else {
-        const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
-        if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
-            return LineAnnotation::PolygonCloud;
-        } else { // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
-            return LineAnnotation::Dimension;
-        }
     }
+    const AnnotPolygon *polyann = static_cast<const AnnotPolygon *>(d->pdfAnnot.get());
+    if (polyann->getIntent() == AnnotPolygon::polygonCloud) {
+        return LineAnnotation::PolygonCloud;
+    }
+    // AnnotPolygon::polylineDimension, AnnotPolygon::polygonDimension
+    return LineAnnotation::Dimension;
 }
 
 void LineAnnotation::setLineIntent(LineAnnotation::LineIntent intent)
@@ -2937,11 +2930,11 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields (note uses border for rendering style)
-    GeomAnnotation::GeomType geomType;
+    GeomAnnotation::GeomType geomType = GeomAnnotation::InscribedSquare;
     QColor geomInnerColor;
 };
 
-GeomAnnotationPrivate::GeomAnnotationPrivate() : geomType(GeomAnnotation::InscribedSquare) { }
+GeomAnnotationPrivate::GeomAnnotationPrivate() = default;
 
 std::unique_ptr<Annotation> GeomAnnotationPrivate::makeAlias()
 {
@@ -3038,9 +3031,9 @@ GeomAnnotation::GeomType GeomAnnotation::geomType() const
 
     if (d->pdfAnnot->getType() == Annot::typeSquare) {
         return GeomAnnotation::InscribedSquare;
-    } else { // Annot::typeCircle
-        return GeomAnnotation::InscribedCircle;
     }
+    // Annot::typeCircle
+    return GeomAnnotation::InscribedCircle;
 }
 
 void GeomAnnotation::setGeomType(GeomAnnotation::GeomType type)
@@ -3094,7 +3087,7 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    HighlightAnnotation::HighlightType highlightType;
+    HighlightAnnotation::HighlightType highlightType = HighlightAnnotation::Highlight;
     QList<HighlightAnnotation::Quad> highlightQuads; // not empty
 
     // helpers
@@ -3103,7 +3096,7 @@ public:
     AnnotQuadrilaterals *toQuadrilaterals(const QList<HighlightAnnotation::Quad> &quads) const;
 };
 
-HighlightAnnotationPrivate::HighlightAnnotationPrivate() : highlightType(HighlightAnnotation::Highlight) { }
+HighlightAnnotationPrivate::HighlightAnnotationPrivate() = default;
 
 std::unique_ptr<Annotation> HighlightAnnotationPrivate::makeAlias()
 {
@@ -3313,13 +3306,15 @@ HighlightAnnotation::HighlightType HighlightAnnotation::highlightType() const
 
     if (subType == Annot::typeHighlight) {
         return HighlightAnnotation::Highlight;
-    } else if (subType == Annot::typeUnderline) {
-        return HighlightAnnotation::Underline;
-    } else if (subType == Annot::typeSquiggly) {
-        return HighlightAnnotation::Squiggly;
-    } else { // Annot::typeStrikeOut
-        return HighlightAnnotation::StrikeOut;
     }
+    if (subType == Annot::typeUnderline) {
+        return HighlightAnnotation::Underline;
+    }
+    if (subType == Annot::typeSquiggly) {
+        return HighlightAnnotation::Squiggly;
+    }
+    // Annot::typeStrikeOut
+    return HighlightAnnotation::StrikeOut;
 }
 
 void HighlightAnnotation::setHighlightType(HighlightAnnotation::HighlightType type)
@@ -3791,12 +3786,12 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    Link *linkDestination;
-    LinkAnnotation::HighlightMode linkHLMode;
+    Link *linkDestination = nullptr;
+    LinkAnnotation::HighlightMode linkHLMode = LinkAnnotation::Invert;
     QPointF linkRegion[4];
 };
 
-LinkAnnotationPrivate::LinkAnnotationPrivate() : linkDestination(nullptr), linkHLMode(LinkAnnotation::Invert) { }
+LinkAnnotationPrivate::LinkAnnotationPrivate() = default;
 
 LinkAnnotationPrivate::~LinkAnnotationPrivate()
 {
@@ -4100,7 +4095,7 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    CaretAnnotation::CaretSymbol symbol;
+    CaretAnnotation::CaretSymbol symbol = CaretAnnotation::None;
 };
 
 static QString caretSymbolToString(CaretAnnotation::CaretSymbol symbol)
@@ -4118,13 +4113,14 @@ static CaretAnnotation::CaretSymbol caretSymbolFromString(const QString &symbol)
 {
     if (symbol == QLatin1String("None")) {
         return CaretAnnotation::None;
-    } else if (symbol == QLatin1String("P")) {
+    }
+    if (symbol == QLatin1String("P")) {
         return CaretAnnotation::P;
     }
     return CaretAnnotation::None;
 }
 
-CaretAnnotationPrivate::CaretAnnotationPrivate() : symbol(CaretAnnotation::None) { }
+CaretAnnotationPrivate::CaretAnnotationPrivate() = default;
 
 std::unique_ptr<Annotation> CaretAnnotationPrivate::makeAlias()
 {
@@ -4234,10 +4230,10 @@ public:
 
     // data fields
     QString icon;
-    EmbeddedFile *embfile;
+    EmbeddedFile *embfile = nullptr;
 };
 
-FileAttachmentAnnotationPrivate::FileAttachmentAnnotationPrivate() : icon(QStringLiteral("PushPin")), embfile(nullptr) { }
+FileAttachmentAnnotationPrivate::FileAttachmentAnnotationPrivate() : icon(QStringLiteral("PushPin")) { }
 
 FileAttachmentAnnotationPrivate::~FileAttachmentAnnotationPrivate()
 {
@@ -4326,10 +4322,10 @@ public:
 
     // data fields
     QString icon;
-    SoundObject *sound;
+    SoundObject *sound = nullptr;
 };
 
-SoundAnnotationPrivate::SoundAnnotationPrivate() : icon(QStringLiteral("Speaker")), sound(nullptr) { }
+SoundAnnotationPrivate::SoundAnnotationPrivate() : icon(QStringLiteral("Speaker")) { }
 
 SoundAnnotationPrivate::~SoundAnnotationPrivate()
 {
@@ -4417,11 +4413,11 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    MovieObject *movie;
+    MovieObject *movie = nullptr;
     QString title;
 };
 
-MovieAnnotationPrivate::MovieAnnotationPrivate() : movie(nullptr) { }
+MovieAnnotationPrivate::MovieAnnotationPrivate() = default;
 
 MovieAnnotationPrivate::~MovieAnnotationPrivate()
 {
@@ -4509,11 +4505,11 @@ public:
     std::shared_ptr<Annot> createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
     // data fields
-    LinkRendition *action;
+    LinkRendition *action = nullptr;
     QString title;
 };
 
-ScreenAnnotationPrivate::ScreenAnnotationPrivate() : action(nullptr) { }
+ScreenAnnotationPrivate::ScreenAnnotationPrivate() = default;
 
 ScreenAnnotationPrivate::~ScreenAnnotationPrivate()
 {
@@ -4652,7 +4648,7 @@ QString RichMediaAnnotation::Params::flashVars() const
 class RichMediaAnnotation::Instance::Private
 {
 public:
-    Private() : params(nullptr) { }
+    Private() = default;
 
     ~Private() { delete params; }
 
@@ -4660,7 +4656,7 @@ public:
     Private &operator=(const Private &) = delete;
 
     RichMediaAnnotation::Instance::Type type;
-    RichMediaAnnotation::Params *params;
+    RichMediaAnnotation::Params *params = nullptr;
 };
 
 RichMediaAnnotation::Instance::Instance() : d(new Private) { }
@@ -4746,7 +4742,7 @@ QList<RichMediaAnnotation::Instance *> RichMediaAnnotation::Configuration::insta
 class RichMediaAnnotation::Asset::Private
 {
 public:
-    Private() : embeddedFile(nullptr) { }
+    Private() = default;
 
     ~Private() { delete embeddedFile; }
 
@@ -4754,7 +4750,7 @@ public:
     Private &operator=(const Private &) = delete;
 
     QString name;
-    EmbeddedFile *embeddedFile;
+    EmbeddedFile *embeddedFile = nullptr;
 };
 
 RichMediaAnnotation::Asset::Asset() : d(new Private) { }
@@ -4835,9 +4831,9 @@ QList<RichMediaAnnotation::Asset *> RichMediaAnnotation::Content::assets() const
 class RichMediaAnnotation::Activation::Private
 {
 public:
-    Private() : condition(RichMediaAnnotation::Activation::UserAction) { }
+    Private() = default;
 
-    RichMediaAnnotation::Activation::Condition condition;
+    RichMediaAnnotation::Activation::Condition condition = RichMediaAnnotation::Activation::UserAction;
 };
 
 RichMediaAnnotation::Activation::Activation() : d(new Private) { }
@@ -4857,9 +4853,9 @@ RichMediaAnnotation::Activation::Condition RichMediaAnnotation::Activation::cond
 class RichMediaAnnotation::Deactivation::Private : public QSharedData
 {
 public:
-    Private() : condition(RichMediaAnnotation::Deactivation::UserAction) { }
+    Private() = default;
 
-    RichMediaAnnotation::Deactivation::Condition condition;
+    RichMediaAnnotation::Deactivation::Condition condition = RichMediaAnnotation::Deactivation::UserAction;
 };
 
 RichMediaAnnotation::Deactivation::Deactivation() : d(new Private) { }
@@ -4879,10 +4875,10 @@ RichMediaAnnotation::Deactivation::Condition RichMediaAnnotation::Deactivation::
 class RichMediaAnnotation::Settings::Private : public QSharedData
 {
 public:
-    Private() : activation(nullptr), deactivation(nullptr) { }
+    Private() = default;
 
-    RichMediaAnnotation::Activation *activation;
-    RichMediaAnnotation::Deactivation *deactivation;
+    RichMediaAnnotation::Activation *activation = nullptr;
+    RichMediaAnnotation::Deactivation *deactivation = nullptr;
 };
 
 RichMediaAnnotation::Settings::Settings() : d(new Private) { }
@@ -4914,7 +4910,7 @@ RichMediaAnnotation::Deactivation *RichMediaAnnotation::Settings::deactivation()
 class RichMediaAnnotationPrivate : public AnnotationPrivate
 {
 public:
-    RichMediaAnnotationPrivate() : settings(nullptr), content(nullptr) { }
+    RichMediaAnnotationPrivate() = default;
 
     ~RichMediaAnnotationPrivate() override;
 
@@ -4928,8 +4924,8 @@ public:
         return nullptr;
     }
 
-    RichMediaAnnotation::Settings *settings;
-    RichMediaAnnotation::Content *content;
+    RichMediaAnnotation::Settings *settings = nullptr;
+    RichMediaAnnotation::Content *content = nullptr;
 };
 
 RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()

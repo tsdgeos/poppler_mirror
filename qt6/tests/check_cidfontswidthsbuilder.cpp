@@ -17,10 +17,10 @@ class TestCIDFontsWidthsBuilder : public QObject
 public:
     using QObject::QObject;
 private Q_SLOTS:
-    void testEmpty();
-    void testSingleList();
-    void testSingleRange();
-    void testSimpleSequence();
+    static void testEmpty();
+    static void testSingleList();
+    static void testSingleRange();
+    static void testSimpleSequence();
 };
 
 void TestCIDFontsWidthsBuilder::testEmpty()

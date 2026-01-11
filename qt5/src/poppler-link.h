@@ -517,7 +517,7 @@ public:
      * \param script the java script code
      * \param annotationReference the object reference of the screen annotation associated with this rendition action
      */
-    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, const Ref annotationReference);
+    LinkRendition(const QRectF &linkArea, std::unique_ptr<::MediaRendition> &&rendition, int operation, const QString &script, Ref annotationReference);
 
     /**
      * Destructor.

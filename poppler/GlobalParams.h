@@ -50,6 +50,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <utility>
 #include <vector>
 #include <filesystem>
 
@@ -86,7 +87,7 @@ struct FamilyStyleFontSearchResult
 {
     FamilyStyleFontSearchResult() = default;
 
-    FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA, bool substitutedA) : filepath(filepathA), faceIndex(faceIndexA), substituted(substitutedA) { }
+    FamilyStyleFontSearchResult(std::string filepathA, int faceIndexA, bool substitutedA) : filepath(std::move(filepathA)), faceIndex(faceIndexA), substituted(substitutedA) { }
 
     std::string filepath;
     int faceIndex = 0;
@@ -99,7 +100,7 @@ struct UCharFontSearchResult
 {
     UCharFontSearchResult() = default;
 
-    UCharFontSearchResult(const std::string &filepathA, int faceIndexA, const std::string &familyA, const std::string &styleA) : filepath(filepathA), faceIndex(faceIndexA), family(familyA), style(styleA) { }
+    UCharFontSearchResult(std::string filepathA, int faceIndexA, std::string familyA, std::string styleA) : filepath(std::move(filepathA)), faceIndex(faceIndexA), family(std::move(familyA)), style(std::move(styleA)) { }
 
     const std::string filepath;
     const int faceIndex = 0;
@@ -113,7 +114,7 @@ class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
     // Initialize the global parameters
-    explicit GlobalParams(const std::string &customPopplerDataDir = {});
+    explicit GlobalParams(std::string customPopplerDataDir = {});
 
     ~GlobalParams();
 
@@ -146,7 +147,7 @@ public:
     std::string getTextEncodingName() const;
     bool getPrintCommands();
     bool getProfileCommands();
-    bool getErrQuiet();
+    bool getErrQuiet() const;
 
     std::shared_ptr<CharCodeToUnicode> getCIDToUnicode(const std::string &collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);

@@ -68,7 +68,7 @@ public:
     QDateTime creationDate; // before or equal to modifyDate
 
     /* properties: look/interaction related */
-    int flags;
+    int flags = 0;
     QRectF boundary;
 
     /* style and popup */
@@ -76,8 +76,8 @@ public:
     Annotation::Popup popup;
 
     /* revisions */
-    Annotation::RevScope revisionScope;
-    Annotation::RevType revisionType;
+    Annotation::RevScope revisionScope = Annotation::Root;
+    Annotation::RevType revisionType = Annotation::None;
     std::vector<std::unique_ptr<Annotation>> revisions;
 
     /* After this call, the Annotation object will behave like a wrapper for
@@ -90,8 +90,8 @@ public:
 
     /* Inited to 0 (i.e. untied annotation) */
     std::shared_ptr<Annot> pdfAnnot;
-    ::Page *pdfPage;
-    DocumentData *parentDoc;
+    ::Page *pdfPage = nullptr;
+    DocumentData *parentDoc = nullptr;
 
     /* The following helpers only work if pdfPage is set */
     void flushBaseAnnotationProperties();

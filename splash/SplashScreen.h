@@ -57,7 +57,7 @@ private:
 
     void buildDispersedMatrix(int i, int j, int val, int delta, int offset);
     void buildClusteredMatrix();
-    int distance(int x0, int y0, int x1, int y1);
+    int distance(int x0, int y0, int x1, int y1) const;
     void buildSCDMatrix(int r);
 
     const SplashScreenParams *screenParams; // params to create the other members

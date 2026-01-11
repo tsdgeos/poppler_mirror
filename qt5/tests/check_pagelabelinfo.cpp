@@ -12,12 +12,12 @@ class TestPageLabelInfo : public QObject
 public:
     explicit TestPageLabelInfo(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testFromDecimal();
-    void testFromDecimalUnicode();
-    void testToRoman();
-    void testFromRoman();
-    void testToLatin();
-    void testFromLatin();
+    static void testFromDecimal();
+    static void testFromDecimalUnicode();
+    static void testToRoman();
+    static void testFromRoman();
+    static void testToLatin();
+    static void testFromLatin();
 };
 
 void TestPageLabelInfo::testFromDecimal()

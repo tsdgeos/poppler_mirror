@@ -48,7 +48,7 @@ PDFDocFactory::PDFDocFactory(std::vector<PDFDocBuilder *> *pdfDocBuilders)
 PDFDocFactory::~PDFDocFactory()
 {
     if (builders) {
-        for (auto entry : *builders) {
+        for (auto *entry : *builders) {
             delete entry;
         }
         delete builders;

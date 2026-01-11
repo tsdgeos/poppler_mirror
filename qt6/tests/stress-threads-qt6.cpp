@@ -89,7 +89,7 @@ CrazyThread::CrazyThread(Poppler::Document *document, QMutex *annotationMutex, Q
 
 void CrazyThread::run()
 {
-    typedef std::unique_ptr<Poppler::Page> PagePointer;
+    using PagePointer = std::unique_ptr<Poppler::Page>;
 
     Q_FOREVER {
         if (QRandomGenerator::global()->bounded(2) == 0) {

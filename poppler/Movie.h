@@ -99,7 +99,7 @@ public:
     bool getShowPoster() const { return showPoster; }
 
     bool getUseFloatingWindow() const { return MA.floatingWindow; }
-    void getFloatingWindowSize(int *width, int *height);
+    void getFloatingWindowSize(int *width, int *height) const;
 
     std::unique_ptr<Movie> copy() const;
 

@@ -2,12 +2,12 @@
 
 #include "CharTypes.h"
 
-typedef struct
+struct decomposition
 {
     Unicode character;
     int length;
     int offset;
-} decomposition;
+};
 
 #define DECOMP_TABLE_LENGTH 5722
 

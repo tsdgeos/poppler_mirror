@@ -21,7 +21,7 @@
 
 #include "viewer.h"
 
-DocumentObserver::DocumentObserver() : m_viewer(nullptr) { }
+DocumentObserver::DocumentObserver() = default;
 
 DocumentObserver::~DocumentObserver() = default;
 

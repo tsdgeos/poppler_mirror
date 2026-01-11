@@ -8,11 +8,11 @@ class TestPageMode : public QObject
 public:
     explicit TestPageMode(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkNone();
-    void checkFullScreen();
-    void checkAttachments();
-    void checkThumbs();
-    void checkOC();
+    static void checkNone();
+    static void checkFullScreen();
+    static void checkAttachments();
+    static void checkThumbs();
+    static void checkOC();
 };
 
 void TestPageMode::checkNone()

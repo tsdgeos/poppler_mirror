@@ -21,9 +21,9 @@ public:
     void display();
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void keyPressEvent(QKeyEvent *) override;
-    void mousePressEvent(QMouseEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
 
 private:
     int m_currentPage;
@@ -204,15 +204,14 @@ int main(int argc, char **argv)
         test.show(); // show it
 
         return QApplication::exec(); // start event loop
-    } else {
-        Poppler::Page *page = doc->page(0);
-
-        QLabel *l = new QLabel(page->text(QRectF()), nullptr);
-        l->show();
-        delete page;
-        delete doc;
-        return QApplication::exec();
     }
+    Poppler::Page *page = doc->page(0);
+
+    QLabel *l = new QLabel(page->text(QRectF()), nullptr);
+    l->show();
+    delete page;
+    delete doc;
+    return QApplication::exec();
 }
 
 #include "test-poppler-qt5.moc"

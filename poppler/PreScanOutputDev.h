@@ -111,24 +111,24 @@ public:
 
     // Returns true if the operations performed since the last call to
     // clearStats() are all monochrome (black or white).
-    bool isMonochrome() { return mono; }
+    bool isMonochrome() const { return mono; }
 
     // Returns true if the operations performed since the last call to
     // clearStats() are all gray.
-    bool isGray() { return gray; }
+    bool isGray() const { return gray; }
 
     // Returns true if the operations performed since the last call to
     // clearStats() included any transparency.
-    bool usesTransparency() { return transparency; }
+    bool usesTransparency() const { return transparency; }
 
     // Returns true if the operations performed since the last call to
     // clearStats() are all rasterizable by GDI calls in GDIOutputDev.
-    bool isAllGDI() { return gdi; }
+    bool isAllGDI() const { return gdi; }
 
     // Returns true if the operations performed since the last call to
     // clearStats() included any image mask fills with a pattern color
     // space. (only level1!)
-    bool usesPatternImageMask() { return patternImgMask; }
+    bool usesPatternImageMask() const { return patternImgMask; }
 
     // Clear the stats used by the above functions.
     void clearStats();
