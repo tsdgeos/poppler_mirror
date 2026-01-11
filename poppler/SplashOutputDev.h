@@ -310,9 +310,6 @@ public:
 
     void setPaperColor(SplashColorPtr paperColorA);
 
-    bool isReverseVideo() { return reverseVideo; }
-    void setReverseVideo(bool reverseVideoA) { reverseVideo = reverseVideoA; }
-
     // Get the bitmap and its size.
     SplashBitmap *getBitmap() { return bitmap; }
     int getBitmapWidth();

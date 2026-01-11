@@ -154,8 +154,6 @@ public:
     // Called to indicate that a new PDF document has been loaded.
     void startDoc(PDFDoc *doc);
 
-    bool isReverseVideo() { return false; }
-
 private:
     // The stack of QPainters is used to implement transparency groups.  When such a group
     // is opened, annew Painter that paints onto a QPicture is pushed onto the stack.

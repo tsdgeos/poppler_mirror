@@ -245,8 +245,6 @@ public:
     // Called to prepare this output dev for rendering CairoType3Font.
     void startType3Render(XRef *xref);
 
-    bool isReverseVideo() { return false; }
-
     void setCairo(cairo_t *cr);
     void setTextPage(std::shared_ptr<TextPage> text);
     void setPrinting(bool printingA)
