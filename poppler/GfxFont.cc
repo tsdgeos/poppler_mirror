@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -1884,6 +1884,10 @@ GfxCIDFont::GfxCIDFont(const char *tagA, Ref idA, std::optional<std::string> &&n
                     if ((obj4 = obj3.arrayGet(k), obj4.isNum()) && (obj5 = obj3.arrayGet(k + 1), obj5.isNum()) && (obj6 = obj3.arrayGet(k + 2), obj6.isNum())) {
                         GfxFontCIDWidthExcepV excepV { static_cast<CID>(j), static_cast<CID>(j), obj4.getNum() * 0.001, obj5.getNum() * 0.001, obj6.getNum() * 0.001 };
                         widths.excepsV.push_back(excepV);
+                        if (j == std::numeric_limits<int>::max()) {
+                            error(errSyntaxError, -1, "Reached limit for CID in W2 array in Type 0 font");
+                            break;
+                        }
                         ++j;
                     } else {
                         error(errSyntaxError, -1, "Bad widths (W2) array in Type 0 font");
