@@ -207,7 +207,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     FT_Set_Transform(ff->face, &matrix, &offset);
     slot = ff->face->glyph;
 
-    if (c < int(ff->codeToGID.size()) && c >= 0) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = (FT_UInt)ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;
@@ -293,7 +293,7 @@ double SplashFTFont::getGlyphAdvance(int c)
     ff->face->size = sizeObj;
     FT_Set_Transform(ff->face, &identityMatrix, &offset);
 
-    if (c < int(ff->codeToGID.size())) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = (FT_UInt)ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;
@@ -345,7 +345,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
     ff->face->size = sizeObj;
     FT_Set_Transform(ff->face, &textMatrix, nullptr);
     slot = ff->face->glyph;
-    if (c < int(ff->codeToGID.size()) && c >= 0) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;
