@@ -92,7 +92,7 @@ void TestAnnotations::checkFontSizeAndColor()
         auto &&annot = annots.cbegin();
         for (const auto &color : testColors) {
             QCOMPARE((*annot)->subType(), Poppler::Annotation::AText);
-            auto textAnnot = static_cast<Poppler::TextAnnotation *>(annot->get());
+            auto *textAnnot = static_cast<Poppler::TextAnnotation *>(annot->get());
             QCOMPARE(textAnnot->contents(), contents);
             QCOMPARE(textAnnot->textFont().pointSize(), testFont.pointSize());
             QCOMPARE(static_cast<int>(textAnnot->textColor().spec()), static_cast<int>(color.spec()));

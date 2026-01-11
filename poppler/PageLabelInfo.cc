@@ -45,7 +45,7 @@ PageLabelInfo::Interval::Interval(const Dict &dict, int baseA)
 
     obj = dict.lookup("P");
     if (obj.isString()) {
-        const auto str = obj.getString();
+        const auto *const str = obj.getString();
         prefix.assign(str->toStr());
     }
 

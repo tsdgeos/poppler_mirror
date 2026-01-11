@@ -4433,7 +4433,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, size_t *i, cons
                 outBuf->push_back(uChar & 0xff);
             } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
                 if (font.isCIDFont()) {
-                    auto cidFont = static_cast<const GfxCIDFont *>(&font);
+                    const auto *cidFont = static_cast<const GfxCIDFont *>(&font);
                     if (c < cidFont->getCIDToGIDLen()) {
                         const int glyph = cidFont->getCIDToGID()[c];
                         if (glyph > 0 || c == 0) {

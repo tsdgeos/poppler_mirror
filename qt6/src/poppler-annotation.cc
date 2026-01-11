@@ -2919,7 +2919,7 @@ std::shared_ptr<Annot> SignatureAnnotationPrivate::createNativeAnnot(::Page *des
         return nullptr;
     }
 
-    auto sig = std::get_if<PDFDoc::SignatureData>(&result);
+    auto *sig = std::get_if<PDFDoc::SignatureData>(&result);
 
     sig->formWidget->updateWidgetAppearance();
     field = std::move(sig->field);

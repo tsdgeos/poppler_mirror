@@ -712,7 +712,7 @@ static void printCustomInfo(PDFDoc *doc, const UnicodeMap *uMap)
                     }
 
                     // print value
-                    auto val_str = obj.getString();
+                    const auto *val_str = obj.getString();
                     printTextString(val_str, uMap);
                     fputc('\n', stdout);
                 }

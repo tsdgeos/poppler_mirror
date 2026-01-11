@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
             SplashBitmap *bitmap = splashOut->getBitmap();
 
             const std::string imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
-            auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName.c_str(), "wb");
+            auto *f1 = dataUrls ? imf.open("wb") : fopen(imgFileName.c_str(), "wb");
             if (!f1) {
                 fprintf(stderr, "Could not open %s\n", imgFileName.c_str());
                 continue;

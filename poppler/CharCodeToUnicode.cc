@@ -498,7 +498,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len)
 int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const
 {
     if (isIdentity) {
-        auto that = const_cast<CharCodeToUnicode *>(this);
+        auto *that = const_cast<CharCodeToUnicode *>(this);
         that->map[0] = (Unicode)c;
         *u = map.data();
         return 1;

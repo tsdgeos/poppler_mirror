@@ -2282,7 +2282,7 @@ std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &s
         return std::get<CryptoSign::SigningErrorMessage>(result);
     }
 
-    auto sig = std::get_if<SignatureData>(&result);
+    auto *sig = std::get_if<SignatureData>(&result);
 
     sig->annotWidget->setFlags(sig->annotWidget->getFlags() | Annot::flagLocked);
 

@@ -1071,7 +1071,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     for (i = 0; i < nDests; ++i) {
         // The names of name-dict cannot contain \0,
         // so we can use strlen().
-        auto name = catalog->getDestsName(i);
+        const auto *name = catalog->getDestsName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest(i);
         if (link_dest) {
             gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name), strlen(name));
@@ -1083,7 +1083,7 @@ GTree *poppler_document_create_dests_tree(PopplerDocument *document)
     // Iterate form name-tree
     const int nDestsNameTree = catalog->numDestNameTree();
     for (i = 0; i < nDestsNameTree; ++i) {
-        auto name = catalog->getDestNameTreeName(i);
+        const auto *name = catalog->getDestNameTreeName(i);
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
         if (link_dest) {
             gchar *key = poppler_named_dest_from_bytestring(reinterpret_cast<const guint8 *>(name->c_str()), name->size());
@@ -3060,7 +3060,7 @@ void poppler_fonts_iter_free(PopplerFontsIter *iter)
         return;
     }
 
-    for (auto entry : iter->items) {
+    for (auto *entry : iter->items) {
         delete entry;
     }
     iter->items.~vector<FontInfo *>();

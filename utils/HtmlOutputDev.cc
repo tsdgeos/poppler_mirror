@@ -714,7 +714,7 @@ void HtmlPage::dumpAsXML(FILE *f, int page)
     }
 
     for (auto &ptr : imgList) {
-        auto img = static_cast<HtmlImage *>(ptr.get());
+        auto *img = static_cast<HtmlImage *>(ptr.get());
         if (!noRoundedCoordinates) {
             fprintf(f, R"(<image top="%d" left="%d" )", xoutRound(img->yMin), xoutRound(img->xMin));
             fprintf(f, R"(width="%d" height="%d" )", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
@@ -915,7 +915,7 @@ void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string> &backgr
         fprintf(f, "<a name=%d></a>", pageNum);
         // Loop over the list of image names on this page
         for (auto &ptr : imgList) {
-            auto img = static_cast<HtmlImage *>(ptr.get());
+            auto *img = static_cast<HtmlImage *>(ptr.get());
 
             // see printCSS() for class names
             const char *styles[4] = { "", " class=\"xflip\"", " class=\"yflip\"", " class=\"xyflip\"" };

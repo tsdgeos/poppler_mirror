@@ -39,12 +39,12 @@ void TestUtf8Document::checkStrings()
     QSet<QString> expectedNames { QString::fromUtf8("گچپژ"), QString::fromUtf8("Layer 1") }; // clazy:exclude=qstring-allocations
     QSet<QString> foundNames;
 
-    for (auto &[ref, group] : doc->getOptContentConfig()->getOCGs()) {
+    for (const auto &[ref, group] : doc->getOptContentConfig()->getOCGs()) {
         foundNames.insert(Poppler::UnicodeParsedString(group->getName()));
     }
     QCOMPARE(expectedNames, foundNames);
 
-    auto outlineItems = doc->getOutline()->getItems();
+    const auto *outlineItems = doc->getOutline()->getItems();
     QVERIFY(outlineItems);
     QCOMPARE(outlineItems->size(), 3);
 

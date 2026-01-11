@@ -25,7 +25,6 @@ Checks:  >
     -readability-math-missing-parentheses,
     -readability-function-cognitive-complexity,
     -readability-avoid-unconditional-preprocessor-if,
-    -readability-qualified-auto,
     -readability-suspicious-call-argument,
     -readability-string-compare,
     modernize-*,

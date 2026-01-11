@@ -3261,7 +3261,7 @@ std::unique_ptr<GfxTilingPattern> GfxTilingPattern::parse(Object *patObj, int pa
         }
     }
 
-    auto pattern = new GfxTilingPattern(paintTypeA, tilingTypeA, bboxA, xStepA, yStepA, &resDictA, matrixA, patObj, patternRefNum);
+    auto *pattern = new GfxTilingPattern(paintTypeA, tilingTypeA, bboxA, xStepA, yStepA, &resDictA, matrixA, patObj, patternRefNum);
     return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
@@ -3281,7 +3281,7 @@ GfxTilingPattern::~GfxTilingPattern() = default;
 
 std::unique_ptr<GfxPattern> GfxTilingPattern::copy() const
 {
-    auto pattern = new GfxTilingPattern(paintType, tilingType, bbox, xStep, yStep, &resDict, matrix, &contentStream, getPatternRefNum());
+    auto *pattern = new GfxTilingPattern(paintType, tilingType, bbox, xStep, yStep, &resDict, matrix, &contentStream, getPatternRefNum());
     return std::unique_ptr<GfxTilingPattern>(pattern);
 }
 
@@ -3323,7 +3323,7 @@ std::unique_ptr<GfxShadingPattern> GfxShadingPattern::parse(GfxResources *res, O
         }
     }
 
-    auto pattern = new GfxShadingPattern(std::move(shadingA), matrixA, patternRefNum);
+    auto *pattern = new GfxShadingPattern(std::move(shadingA), matrixA, patternRefNum);
     return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 
@@ -3333,7 +3333,7 @@ GfxShadingPattern::~GfxShadingPattern() = default;
 
 std::unique_ptr<GfxPattern> GfxShadingPattern::copy() const
 {
-    auto pattern = new GfxShadingPattern(shading->copy(), matrix, getPatternRefNum());
+    auto *pattern = new GfxShadingPattern(shading->copy(), matrix, getPatternRefNum());
     return std::unique_ptr<GfxShadingPattern>(pattern);
 }
 

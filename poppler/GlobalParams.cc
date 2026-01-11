@@ -271,7 +271,7 @@ SysFontList::SysFontList() = default;
 
 SysFontList::~SysFontList()
 {
-    for (auto entry : fonts) {
+    for (auto *entry : fonts) {
         delete entry;
     }
 }

@@ -190,7 +190,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         }
     }
     {
-        auto str = parser->getStream();
+        auto *str = parser->getStream();
         while (str && str->getChar() != EOF) {
             ;
         }
@@ -214,7 +214,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion)
         }
         parser = new Parser(xref, std::move(strPtr), false);
         objs[i] = parser->getObj();
-        auto str = parser->getStream();
+        auto *str = parser->getStream();
         while (str && str->getChar() != EOF) {
             ;
         }

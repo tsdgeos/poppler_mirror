@@ -74,7 +74,7 @@ int verify_file(const char *nssdir, const char *input_file)
         return 1;
     }
 
-    auto ffs = signatures[0];
-    auto siginfo = ffs->validateSignatureAsync(true, false, -1, false, false, {});
+    auto *ffs = signatures[0];
+    auto *siginfo = ffs->validateSignatureAsync(true, false, -1, false, false, {});
     return siginfo->getSignatureValStatus() != SIGNATURE_VALID || ffs->validateSignatureResult() != CERTIFICATE_TRUSTED;
 }

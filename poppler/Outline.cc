@@ -57,7 +57,7 @@ Outline::Outline(Object *outlineObjA, XRef *xrefA, PDFDoc *docA)
 Outline::~Outline()
 {
     if (items) {
-        for (auto entry : *items) {
+        for (auto *entry : *items) {
             delete entry;
         }
         delete items;
@@ -274,7 +274,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
     int itemCount = 0;
     Ref prevNodeRef = Ref::INVALID();
 
-    for (auto &node : nodeList) {
+    for (const auto &node : nodeList) {
 
         Array *a = new Array(doc->getXRef());
         Ref *pageRef = doc->getCatalog()->getPageRef(node.destPageNum);
@@ -379,7 +379,7 @@ void Outline::setOutline(const std::vector<OutlineTreeNode> &nodeList)
     // reload the outline object from the xrefs
 
     if (items) {
-        for (auto entry : *items) {
+        for (auto *entry : *items) {
             delete entry;
         }
         delete items;
@@ -444,7 +444,7 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
 OutlineItem::~OutlineItem()
 {
     if (kids) {
-        for (auto entry : *kids) {
+        for (auto *entry : *kids) {
             delete entry;
         }
         delete kids;
@@ -454,7 +454,7 @@ OutlineItem::~OutlineItem()
 
 std::vector<OutlineItem *> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA, PDFDoc *docA)
 {
-    auto items = new std::vector<OutlineItem *>();
+    auto *items = new std::vector<OutlineItem *>();
 
     RefRecursionChecker alreadyRead;
 

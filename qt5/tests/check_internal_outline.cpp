@@ -32,7 +32,7 @@ void TestInternalOutline::testCreateOutline()
     // ensure the file has no existing outline
     Outline *outline = doc->getOutline();
     QVERIFY(outline != nullptr);
-    auto *outlineItems = outline->getItems();
+    const auto *outlineItems = outline->getItems();
     QVERIFY(outlineItems == nullptr);
 
     // create an empty outline and save the file
@@ -79,7 +79,7 @@ void TestInternalOutline::testSetOutline()
     // ensure the file has no existing outline
     Outline *outline = doc->getOutline();
     QVERIFY(outline != nullptr);
-    auto *outlineItems = outline->getItems();
+    const auto *outlineItems = outline->getItems();
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
@@ -169,7 +169,7 @@ void TestInternalOutline::testInsertChild()
     // ensure the file has no existing outline
     Outline *outline = doc->getOutline();
     QVERIFY(outline != nullptr);
-    auto *outlineItems = outline->getItems();
+    const auto *outlineItems = outline->getItems();
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
@@ -271,7 +271,7 @@ void TestInternalOutline::testRemoveChild()
     // ensure the file has no existing outline
     Outline *outline = doc->getOutline();
     QVERIFY(outline != nullptr);
-    auto *outlineItems = outline->getItems();
+    const auto *outlineItems = outline->getItems();
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file
@@ -365,7 +365,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     // ensure the file has no existing outline
     Outline *outline = doc->getOutline();
     QVERIFY(outline != nullptr);
-    auto *outlineItems = outline->getItems();
+    const auto *outlineItems = outline->getItems();
     QVERIFY(outlineItems == nullptr);
 
     // create an outline and save the file

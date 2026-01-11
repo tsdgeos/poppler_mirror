@@ -3017,7 +3017,7 @@ std::vector<Form::AddFontResult> Form::ensureFontsForAllCharacters(const GooStri
         bool addFont = false;
         if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
             if (f->isCIDFont()) {
-                auto cidFont = static_cast<const GfxCIDFont *>(f.get());
+                const auto *cidFont = static_cast<const GfxCIDFont *>(f.get());
                 if (c < cidFont->getCIDToGIDLen() && c != 0 && c != '\r' && c != '\n') {
                     const int glyph = cidFont->getCIDToGID()[c];
                     if (glyph == 0) {
@@ -3078,7 +3078,7 @@ FormWidget *Form::findWidgetByRef(Ref aref)
 
 FormField *Form::findFieldByRef(Ref aref) const
 {
-    for (auto &rootField : rootFields) {
+    for (const auto &rootField : rootFields) {
         FormField *result = rootField->findFieldByRef(aref);
         if (result) {
             return result;
@@ -3089,7 +3089,7 @@ FormField *Form::findFieldByRef(Ref aref) const
 
 FormField *Form::findFieldByFullyQualifiedName(const std::string &name) const
 {
-    for (auto &rootField : rootFields) {
+    for (const auto &rootField : rootFields) {
         FormField *result = rootField->findFieldByFullyQualifiedName(name);
         if (result) {
             return result;
@@ -3203,7 +3203,7 @@ void FormPageWidgets::addWidgets(const std::vector<std::unique_ptr<FormField>> &
         return;
     }
 
-    for (auto &frmField : addedWidgets) {
+    for (const auto &frmField : addedWidgets) {
         FormWidget *frmWidget = frmField->getWidget(0);
         frmWidget->setID(FormWidget::encodeID(page, widgets.size()));
         widgets.push_back(frmWidget);

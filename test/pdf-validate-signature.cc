@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    auto ffs = signatures[0];
-    auto siginfo = ffs->validateSignatureAsync(false, false, -1, false, false, {});
+    auto *ffs = signatures[0];
+    auto *siginfo = ffs->validateSignatureAsync(false, false, -1, false, false, {});
 
     return siginfo->getSignatureValStatus() != expected_status;
 }

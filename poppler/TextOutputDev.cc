@@ -902,8 +902,8 @@ int TextPool::getBaseIdx(double base) const
 void TextPool::sort()
 {
     const auto SplitWordList = [](TextWord *list) -> TextWord * {
-        auto slow = list;
-        auto fast = list->next;
+        auto *slow = list;
+        auto *fast = list->next;
 
         // fast is advanced twice as often as slow, so when
         // fast reaches the end slow points to the midpoint.
@@ -914,7 +914,7 @@ void TextPool::sort()
                 fast = fast->next;
             }
         }
-        auto back = slow->next;
+        auto *back = slow->next;
         slow->next = nullptr;
         return back;
     };
@@ -1212,8 +1212,8 @@ void TextLine::coalesce(const UnicodeMap *uMap)
         }
 
         // merge words
-        auto word0 = words;
-        auto word1 = words->next;
+        auto *word0 = words;
+        auto *word1 = words->next;
         while (word1) {
             if (word0->primaryDelta(word1) >= space) {
                 word0->spaceAfter = true;
@@ -1237,7 +1237,7 @@ void TextLine::coalesce(const UnicodeMap *uMap)
     // build the line text
     isUnicode = uMap ? uMap->isUnicode() : false;
     len = 0;
-    for (auto word1 = words; word1; word1 = word1->next) {
+    for (auto *word1 = words; word1; word1 = word1->next) {
         len += word1->len();
         if (word1->spaceAfter) {
             ++len;
@@ -1246,7 +1246,7 @@ void TextLine::coalesce(const UnicodeMap *uMap)
     text = (Unicode *)gmallocn(len, sizeof(Unicode));
     edge = (double *)gmallocn(len + 1, sizeof(double));
     size_t i = 0;
-    for (auto word1 = words; word1; word1 = word1->next) {
+    for (auto *word1 = words; word1; word1 = word1->next) {
         for (size_t j = 0; j < word1->len(); ++j) {
             text[i] = word1->chars[j].text;
             edge[i] = word1->chars[j].edge;
@@ -4388,7 +4388,7 @@ public:
 
     std::vector<PDFRectangle *> *takeRegion()
     {
-        auto aux = list;
+        auto *aux = list;
         list = nullptr;
         return aux;
     }
@@ -4487,7 +4487,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *p, double scale, int rotati
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-    for (auto entry : *selectionList) {
+    for (auto *entry : *selectionList) {
         delete entry;
     }
     delete selectionList;

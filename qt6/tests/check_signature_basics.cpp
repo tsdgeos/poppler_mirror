@@ -74,7 +74,7 @@ void TestSignatureBasics::initTestCase_data()
 #endif
     QTest::addColumn<std::string>("filename");
 
-    for (auto document : { TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs.pdf", TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs-randompadded.pdf" }) {
+    for (const auto *document : { TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs.pdf", TESTDATADIR "/unittestcases/pdf-signature-sample-2sigs-randompadded.pdf" }) {
 #if ENABLE_SIGNATURES
 
 #    if ENABLE_NSS3
@@ -131,7 +131,7 @@ void TestSignatureBasics::testSignerInfo()
     auto signatureFields = doc->getSignatureFields();
     QCOMPARE(signatureFields[0]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature0_B_" });
     QCOMPARE(signatureFields[0]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
-    auto siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+    auto *siginfo0 = signatureFields[0]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[0]->validateSignatureResult();
 #if ENABLE_SIGNATURES
     QCOMPARE(siginfo0->getSignerName(), std::string { "Koch, Werner" });
@@ -145,7 +145,7 @@ void TestSignatureBasics::testSignerInfo()
 
     QCOMPARE(signatureFields[1]->getCreateWidget()->getField()->getFullyQualifiedName()->toStr(), std::string { "P2.AnA_Signature1_B_" });
     QCOMPARE(signatureFields[1]->getSignatureType(), CryptoSign::SignatureType::ETSI_CAdES_detached);
-    auto siginfo1 = signatureFields[1]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
+    auto *siginfo1 = signatureFields[1]->validateSignatureAsync(false, false, -1 /* now */, false, false, {});
     signatureFields[1]->validateSignatureResult();
 #if ENABLE_SIGNATURES
     QCOMPARE(siginfo1->getSignerName(), std::string { "Koch, Werner" });

@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
             printf("There are no certificates available.\n");
         } else {
             printf("Certificate nicknames available:\n");
-            for (auto &cert : vCerts) {
+            for (const auto &cert : vCerts) {
                 const GooString &nick = cert->getNickName();
                 const auto location = locationToString(cert->getKeyLocation());
                 printf("%s %s %s %s\n", nick.c_str(), (cert->isQualified() ? "(*)" : "   "), location.c_str(), allowPgp ? typeToString(cert->getCertificateType()) : "");

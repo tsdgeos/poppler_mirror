@@ -438,7 +438,7 @@ std::string NSSSignatureVerification::getSignerName() const
         return {};
     }
 
-    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    auto *signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
         return {};
     }
@@ -458,7 +458,7 @@ std::string NSSSignatureVerification::getSignerSubjectDN() const
     if (!CMSSignerInfo) {
         return {};
     }
-    auto signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    auto *signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
     if (!signing_cert) {
         return {};
     }
