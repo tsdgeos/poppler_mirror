@@ -615,7 +615,7 @@ AnnotBorderArray::AnnotBorderArray(const Array &array)
 
 std::unique_ptr<AnnotBorder> AnnotBorderArray::copy() const
 {
-    AnnotBorderArray *res = new AnnotBorderArray();
+    auto *res = new AnnotBorderArray();
     res->type = type;
     res->width = width;
     res->dash = dash;
@@ -627,13 +627,13 @@ std::unique_ptr<AnnotBorder> AnnotBorderArray::copy() const
 
 Object AnnotBorderArray::writeToObject(XRef *xref) const
 {
-    Array *borderArray = new Array(xref);
+    auto *borderArray = new Array(xref);
     borderArray->add(Object(horizontalCorner));
     borderArray->add(Object(verticalCorner));
     borderArray->add(Object(width));
 
     if (!dash.empty()) {
-        Array *a = new Array(xref);
+        auto *a = new Array(xref);
 
         for (double d : dash) {
             a->add(Object(d));
@@ -708,7 +708,7 @@ const char *AnnotBorderBS::getStyleName() const
 
 std::unique_ptr<AnnotBorder> AnnotBorderBS::copy() const
 {
-    AnnotBorderBS *res = new AnnotBorderBS();
+    auto *res = new AnnotBorderBS();
     res->type = type;
     res->width = width;
     res->dash = dash;
@@ -722,7 +722,7 @@ Object AnnotBorderBS::writeToObject(XRef *xref) const
     dict->set("W", Object(width));
     dict->set("S", Object(objName, getStyleName()));
     if (style == borderDashed && !dash.empty()) {
-        Array *a = new Array(xref);
+        auto *a = new Array(xref);
 
         for (double d : dash) {
             a->add(Object(d));
@@ -820,7 +820,7 @@ Object AnnotColor::writeToObject(XRef *xref) const
     if (length == 0) {
         return Object::null(); // Transparent (no color)
     }
-    Array *a = new Array(xref);
+    auto *a = new Array(xref);
     for (int i = 0; i < length; ++i) {
         a->add(Object(values[i]));
     }
@@ -1191,7 +1191,7 @@ AnnotAppearanceCharacs::~AnnotAppearanceCharacs() = default;
 
 std::unique_ptr<AnnotAppearanceCharacs> AnnotAppearanceCharacs::copy() const
 {
-    AnnotAppearanceCharacs *res = new AnnotAppearanceCharacs(nullptr);
+    auto *res = new AnnotAppearanceCharacs(nullptr);
     res->rotation = rotation;
     if (borderColor) {
         res->borderColor = std::make_unique<AnnotColor>(*borderColor);
@@ -1283,7 +1283,7 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA)
     flags = flagUnknown;
     type = typeUnknown;
 
-    Array *a = new Array(docA->getXRef());
+    auto *a = new Array(docA->getXRef());
     a->add(Object(rectA->x1));
     a->add(Object(rectA->y1));
     a->add(Object(rectA->x2));
@@ -1481,7 +1481,7 @@ void Annot::setRect(double x1, double y1, double x2, double y2)
         rect->y2 = y1;
     }
 
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     a->add(Object(rect->x1));
     a->add(Object(rect->y1));
     a->add(Object(rect->x2));
@@ -1961,7 +1961,7 @@ Object Annot::createForm(const GooString *appearBuf, const std::array<double, 4>
     appearDict->set("Length", Object(int(appearBuf->size())));
     appearDict->set("Subtype", Object(objName, "Form"));
 
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     a->add(Object(bbox[0]));
     a->add(Object(bbox[1]));
     a->add(Object(bbox[2]));
@@ -3047,7 +3047,7 @@ void AnnotFreeText::setCalloutLine(std::unique_ptr<AnnotCalloutLine> &&line)
         obj1.arrayAdd(Object(x2));
         obj1.arrayAdd(Object(y2));
 
-        AnnotCalloutMultiLine *mline = dynamic_cast<AnnotCalloutMultiLine *>(line.get());
+        auto *mline = dynamic_cast<AnnotCalloutMultiLine *>(line.get());
         if (mline) {
             double x3 = mline->getX3(), y3 = mline->getY3();
             obj1.arrayAdd(Object(x3));
@@ -3613,7 +3613,7 @@ void AnnotLine::setVertices(double x1, double y1, double x2, double y2)
     coord1 = std::make_unique<AnnotCoord>(x1, y1);
     coord2 = std::make_unique<AnnotCoord>(x2, y2);
 
-    Array *lArray = new Array(doc->getXRef());
+    auto *lArray = new Array(doc->getXRef());
     lArray->add(Object(x1));
     lArray->add(Object(y1));
     lArray->add(Object(x2));
@@ -3628,7 +3628,7 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
     startStyle = start;
     endStyle = end;
 
-    Array *leArray = new Array(doc->getXRef());
+    auto *leArray = new Array(doc->getXRef());
     leArray->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
     leArray->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
 
@@ -3921,7 +3921,7 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype
     }
 
     // Store dummy quadrilateral with null coordinates
-    Array *quadPoints = new Array(doc->getXRef());
+    auto *quadPoints = new Array(doc->getXRef());
     for (int i = 0; i < 4 * 2; ++i) {
         quadPoints->add(Object(0.));
     }
@@ -3993,7 +3993,7 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type)
 
 void AnnotTextMarkup::setQuadrilaterals(const AnnotQuadrilaterals &quadPoints)
 {
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
 
     for (int i = 0; i < quadPoints.getQuadrilateralsLength(); ++i) {
         a->add(Object(quadPoints.getX1(i)));
@@ -5528,7 +5528,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource)
     // fill the appearance stream dictionary
     appearDict->add("Length", Object(int(appearBuf->size())));
     appearDict->add("Subtype", Object(objName, "Form"));
-    Array *bbox = new Array(doc->getXRef());
+    auto *bbox = new Array(doc->getXRef());
     bbox->add(Object(0));
     bbox->add(Object(0));
     bbox->add(Object(rect->x2 - rect->x1));
@@ -5720,13 +5720,13 @@ void AnnotMovie::draw(Gfx *gfx, bool printing)
             formDict->set("Length", Object(int(appearBuf->size())));
             formDict->set("Subtype", Object(objName, "Form"));
             formDict->set("Name", Object(objName, "FRM"));
-            Array *bboxArray = new Array(gfx->getXRef());
+            auto *bboxArray = new Array(gfx->getXRef());
             bboxArray->add(Object(0));
             bboxArray->add(Object(0));
             bboxArray->add(Object(width));
             bboxArray->add(Object(height));
             formDict->set("BBox", Object(bboxArray));
-            Array *matrix = new Array(gfx->getXRef());
+            auto *matrix = new Array(gfx->getXRef());
             matrix->add(Object(1));
             matrix->add(Object(0));
             matrix->add(Object(0));
@@ -6219,7 +6219,7 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rectA, AnnotSubtype subTy
     }
 
     // Store dummy path with one null vertex only
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     a->add(Object(0.));
     a->add(Object(0.));
     annotObj.dictSet("Vertices", Object(a));
@@ -6331,7 +6331,7 @@ void AnnotPolygon::setType(AnnotSubtype new_type)
 
 void AnnotPolygon::setVertices(const AnnotPath &path)
 {
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     for (int i = 0; i < path.getCoordsLength(); i++) {
         a->add(Object(path.getX(i)));
         a->add(Object(path.getY(i)));
@@ -6348,7 +6348,7 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
     startStyle = start;
     endStyle = end;
 
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     a->add(Object(objName, convertAnnotLineEndingStyle(startStyle)));
     a->add(Object(objName, convertAnnotLineEndingStyle(endStyle)));
 
@@ -6589,8 +6589,8 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rectA) : AnnotMarkup(docA, rectA)
     annotObj.dictSet("Subtype", Object(objName, "Ink"));
 
     // Store dummy path with one null vertex only
-    Array *inkListArray = new Array(doc->getXRef());
-    Array *vList = new Array(doc->getXRef());
+    auto *inkListArray = new Array(doc->getXRef());
+    auto *vList = new Array(doc->getXRef());
     vList->add(Object(0.));
     vList->add(Object(0.));
     inkListArray->add(Object(vList));
@@ -6655,7 +6655,7 @@ void AnnotInk::initialize(Dict *dict)
 void AnnotInk::writeInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths, Array *dest_array)
 {
     for (const auto &path : paths) {
-        Array *a = new Array(doc->getXRef());
+        auto *a = new Array(doc->getXRef());
         for (int j = 0; j < path->getCoordsLength(); ++j) {
             a->add(Object(path->getX(j)));
             a->add(Object(path->getY(j)));
@@ -6681,7 +6681,7 @@ void AnnotInk::parseInkList(const Array &array)
 
 void AnnotInk::setInkList(const std::vector<std::unique_ptr<AnnotPath>> &paths)
 {
-    Array *a = new Array(doc->getXRef());
+    auto *a = new Array(doc->getXRef());
     writeInkList(paths, a);
 
     parseInkList(*a);

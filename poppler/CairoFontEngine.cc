@@ -162,7 +162,7 @@ struct FreeTypeFontResource
 // cairo callback for when cairo_font_face_t is destroyed
 static void _ft_done_face(void *closure)
 {
-    FreeTypeFontResource *resource = (FreeTypeFontResource *)closure;
+    auto *resource = (FreeTypeFontResource *)closure;
 
     FT_Done_Face(resource->face);
     delete resource;
@@ -175,7 +175,7 @@ CairoFreeTypeFont::~CairoFreeTypeFont() = default;
 // Create a cairo_font_face_t for the given font filename OR font data.
 std::optional<FreeTypeFontFace> CairoFreeTypeFont::createFreeTypeFontFace(FT_Library lib, const std::string &filename, std::vector<unsigned char> &&font_data)
 {
-    FreeTypeFontResource *resource = new FreeTypeFontResource;
+    auto *resource = new FreeTypeFontResource;
     FreeTypeFontFace font_face;
 
     if (font_data.empty()) {
@@ -402,7 +402,7 @@ struct type3_font_info_t
 
 static void _free_type3_font_info(void *closure)
 {
-    type3_font_info_t *info = (type3_font_info_t *)closure;
+    auto *info = (type3_font_info_t *)closure;
     delete info->gfx;
     delete info->outputDev;
     delete info;
@@ -541,7 +541,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
 #endif
     cairo_user_font_face_set_render_glyph_func(font_face, _render_type3_noncolor_glyph);
 
-    CairoOutputDev *output_dev = new CairoOutputDev();
+    auto *output_dev = new CairoOutputDev();
     output_dev->setPrinting(printing);
 
     Dict *resDict = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getResources();
@@ -553,7 +553,7 @@ CairoType3Font *CairoType3Font::create(const std::shared_ptr<GfxFont> &gfxFont, 
     box.y2 = mat[3];
     Gfx *gfx = new Gfx(doc, output_dev, resDict, &box, nullptr);
 
-    type3_font_info_t *info = new type3_font_info_t(gfxFont, doc, fontEngine, output_dev, gfx);
+    auto *info = new type3_font_info_t(gfxFont, doc, fontEngine, output_dev, gfx);
     cairo_font_face_set_user_data(font_face, &type3_font_key, (void *)info, _free_type3_font_info);
 
     char **enc = std::static_pointer_cast<Gfx8BitFont>(gfxFont)->getEncoding();

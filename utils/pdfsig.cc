@@ -597,7 +597,7 @@ int main(int argc, char *argv[])
             textdomain("pdfsig");
         }
 #endif
-        FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
+        auto *fws = static_cast<FormWidgetSignature *>(ffs->getWidget(0));
         auto backend = CryptoSign::Factory::createActive();
         auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
         std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();

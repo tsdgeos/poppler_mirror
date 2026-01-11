@@ -844,7 +844,7 @@ static NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg)
         return nullptr;
     }
 
-    NSSCMSSignedData *signedData = (NSSCMSSignedData *)NSS_CMSContentInfo_GetContent(cinfo);
+    auto *signedData = (NSSCMSSignedData *)NSS_CMSContentInfo_GetContent(cinfo);
     if (!signedData) {
         error(errInternal, 0, "CError in NSS_CMSContentInfo_GetContent()");
         return nullptr;

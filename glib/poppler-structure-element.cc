@@ -776,7 +776,7 @@ PopplerStructureElementIter *poppler_structure_element_iter_get_child(PopplerStr
     elem = parent->is_root ? parent->root->getChild(parent->index) : parent->elem->getChild(parent->index);
 
     if (elem->getNumChildren() > 0) {
-        PopplerStructureElementIter *child = g_slice_new0(PopplerStructureElementIter);
+        auto *child = g_slice_new0(PopplerStructureElementIter);
         child->document = (PopplerDocument *)g_object_ref(parent->document);
         child->elem = elem;
         return child;
@@ -810,7 +810,7 @@ enum
 
 static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
-    PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
+    auto *new_span = g_slice_new0(PopplerTextSpan);
     if (const GooString *text = span.getText()) {
         new_span->text = _poppler_goo_string_to_utf8(text);
     }
@@ -1047,7 +1047,7 @@ PopplerTextSpan **poppler_structure_element_get_text_spans(PopplerStructureEleme
     }
 
     const TextSpanArray spans(poppler_structure_element->elem->getTextSpans());
-    PopplerTextSpan **text_spans = g_new0(PopplerTextSpan *, spans.size());
+    auto **text_spans = g_new0(PopplerTextSpan *, spans.size());
 
     size_t i = 0;
     for (const TextSpan &s : spans) {
@@ -1137,7 +1137,7 @@ static inline void convert_doubles_array(const Object *object, gdouble **values,
     g_assert(values != nullptr);
 
     *n_values = object->arrayGetLength();
-    gdouble *doubles = g_new(gdouble, *n_values);
+    auto *doubles = g_new(gdouble, *n_values);
 
     for (guint i = 0; i < *n_values; i++) {
         doubles[i] = object->arrayGet(i).getNum();
@@ -1975,7 +1975,7 @@ gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *pop
     g_assert(value->isArray());
 
     const guint n_values = value->arrayGetLength();
-    gchar **result = g_new0(gchar *, n_values + 1);
+    auto **result = g_new0(gchar *, n_values + 1);
 
     for (guint i = 0; i < n_values; i++) {
         Object item = value->arrayGet(i);

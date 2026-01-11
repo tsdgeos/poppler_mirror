@@ -69,7 +69,7 @@ void StructTreeRoot::parse(const Dict &root)
             }
             Object obj = kids.arrayGet(i);
             if (obj.isDict()) {
-                StructElement *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
+                auto *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
                 if (child->isOk()) {
                     if (marked && child->getType() != StructElement::Document && child->getType() != StructElement::Part && child->getType() != StructElement::Art && child->getType() != StructElement::Div) {
                         error(errSyntaxWarning, -1, "StructTreeRoot element of tagged PDF is wrong type ({0:s})", child->getTypeName());
@@ -87,7 +87,7 @@ void StructTreeRoot::parse(const Dict &root)
             }
         }
     } else if (kids.isDict()) {
-        StructElement *child = new StructElement(kids.getDict(), this, nullptr, seenElements);
+        auto *child = new StructElement(kids.getDict(), this, nullptr, seenElements);
         if (child->isOk()) {
             appendChild(child);
             const Object &ref = root.lookupNF("K");

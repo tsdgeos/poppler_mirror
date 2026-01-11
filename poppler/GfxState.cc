@@ -1871,7 +1871,7 @@ void GfxICCBasedColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
             for (int j = 0; j < nComps; j++) {
                 key = (key << 8) + in[j];
             }
-            std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+            auto it = cmsCache.find(key);
             if (it != cmsCache.end()) {
                 unsigned int value = it->second;
                 *gray = byteToCol(value & 0xff);
@@ -1919,7 +1919,7 @@ void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
             for (int j = 0; j < nComps; j++) {
                 key = (key << 8) + in[j];
             }
-            std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+            auto it = cmsCache.find(key);
             if (it != cmsCache.end()) {
                 unsigned int value = it->second;
                 rgb->r = byteToCol(value >> 16);
@@ -1959,7 +1959,7 @@ void GfxICCBasedColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
             for (int j = 0; j < nComps; j++) {
                 key = (key << 8) + in[j];
             }
-            std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+            auto it = cmsCache.find(key);
             if (it != cmsCache.end()) {
                 unsigned int value = it->second;
                 rgb->r = byteToCol(value >> 16);
@@ -2001,7 +2001,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned int *out, int
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
         for (int i = 0; i < length; ++i) {
             unsigned char *current = tmp + (i * 3);
@@ -2020,7 +2020,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, in
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         for (int i = 0; i < length; ++i) {
@@ -2030,7 +2030,7 @@ void GfxICCBasedColorSpace::getRGBLine(unsigned char *in, unsigned char *out, in
         }
         gfree(tmp);
     } else if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
-        unsigned char *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         double c, m, y, k, c1, m1, y1, k1, r, g, b;
@@ -2061,7 +2061,7 @@ void GfxICCBasedColorSpace::getRGBXLine(unsigned char *in, unsigned char *out, i
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_RGB) {
-        unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         lineTransform->doTransform(in, tmp, length);
         unsigned char *current = tmp;
         for (int i = 0; i < length; ++i) {
@@ -2086,7 +2086,7 @@ void GfxICCBasedColorSpace::getCMYKLine(unsigned char *in, unsigned char *out, i
         transform->doTransform(in, out, length);
     } else if (lineTransform != nullptr && nComps != 4) {
         GfxColorComp c, m, y, k;
-        unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         getRGBLine(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2118,7 +2118,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
 {
 #if USE_CMS
     if (lineTransform != nullptr && lineTransform->getTransformPixelType() == PT_CMYK) {
-        unsigned char *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(4 * length, sizeof(unsigned char));
         transform->doTransform(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2132,7 +2132,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(unsigned char *in, unsigned char *out
         gfree(tmp);
     } else if (lineTransform != nullptr && nComps != 4) {
         GfxColorComp c, m, y, k;
-        unsigned char *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
+        auto *tmp = (unsigned char *)gmallocn(3 * length, sizeof(unsigned char));
         getRGBLine(in, tmp, length);
         unsigned char *p = tmp;
         for (int i = 0; i < length; i++) {
@@ -2185,7 +2185,7 @@ void GfxICCBasedColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
             for (int j = 0; j < nComps; j++) {
                 key = (key << 8) + in[j];
             }
-            std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+            auto it = cmsCache.find(key);
             if (it != cmsCache.end()) {
                 unsigned int value = it->second;
                 cmyk->c = byteToCol(value >> 24);
@@ -5539,7 +5539,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
         // Note that indexHigh may not be the same as maxPixel --
         // Distiller will remove unused palette entries, resulting in
         // indexHigh < maxPixel.
-        GfxIndexedColorSpace *indexedCS = (GfxIndexedColorSpace *)colorSpace.get();
+        auto *indexedCS = (GfxIndexedColorSpace *)colorSpace.get();
         colorSpace2 = indexedCS->getBase();
         indexHigh = indexedCS->getIndexHigh();
         nComps2 = colorSpace2->getNComps();
@@ -5569,7 +5569,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode, std::unique_ptr<Gf
         break;
     }
     case csSeparation: {
-        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)colorSpace.get();
+        auto *sepCS = (GfxSeparationColorSpace *)colorSpace.get();
         colorSpace2 = sepCS->getAlt();
         nComps2 = colorSpace2->getNComps();
         sepFunc = sepCS->getFunc();

@@ -531,9 +531,9 @@ static PopplerSignatureInfo *_poppler_form_field_signature_validate(PopplerFormF
 
 static void signature_validate_thread(GTask *task, gpointer source_object, gpointer task_data, GCancellable * /*cancellable*/)
 {
-    PopplerSignatureValidationFlags flags = (PopplerSignatureValidationFlags)GPOINTER_TO_INT(task_data);
+    auto flags = (PopplerSignatureValidationFlags)GPOINTER_TO_INT(task_data);
     PopplerSignatureInfo *signature_info;
-    PopplerFormField *field = (PopplerFormField *)source_object;
+    auto *field = (PopplerFormField *)source_object;
     GError *error = nullptr;
 
     signature_info = _poppler_form_field_signature_validate(field, flags, FALSE, &error);
@@ -1148,7 +1148,7 @@ G_DEFINE_BOXED_TYPE(PopplerSigningData, poppler_signing_data, poppler_signing_da
  **/
 PopplerSigningData *poppler_signing_data_new(void)
 {
-    PopplerSigningData *data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
+    auto *data = (PopplerSigningData *)g_malloc0(sizeof(PopplerSigningData));
 
     data->password = g_strdup("");
     data->page = 0;
@@ -2249,7 +2249,7 @@ PopplerCertificateInfo *poppler_get_certificate_info_by_id(const char *id)
     GList *list;
 
     for (list = certificate_info; list != nullptr; list = list->next) {
-        PopplerCertificateInfo *info = (PopplerCertificateInfo *)list->data;
+        auto *info = (PopplerCertificateInfo *)list->data;
 
         if (g_strcmp0(info->id, id) == 0) {
             ret = poppler_certificate_info_copy(info);

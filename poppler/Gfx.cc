@@ -4224,7 +4224,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     csMode = streamCSNone;
 #if ENABLE_LIBOPENJPEG
     if (str->getKind() == strJPX && out->supportJPXtransparency()) {
-        JPXStream *jpxStream = dynamic_cast<JPXStream *>(str);
+        auto *jpxStream = dynamic_cast<JPXStream *>(str);
         jpxStream->setSupportJPXtransparency(true);
     }
 #endif
@@ -5071,7 +5071,7 @@ void Gfx::popMarkedContent()
 
 void Gfx::pushMarkedContent()
 {
-    MarkedContentStack *mc = new MarkedContentStack();
+    auto *mc = new MarkedContentStack();
     mc->ocSuppressed = false;
     mc->kind = gfxMCOther;
     mc->next = mcStack;

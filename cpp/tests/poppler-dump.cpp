@@ -190,7 +190,7 @@ static void print_info(poppler::document *doc)
                   << ": <none>" << std::endl;
     }
     const std::vector<std::string> keys = doc->info_keys();
-    std::vector<std::string>::const_iterator key_it = keys.begin(), key_end = keys.end();
+    auto key_it = keys.begin(), key_end = keys.end();
     for (; key_it != key_end; ++key_it) {
         std::cout << std::setw(out_width) << *key_it << ": " << doc->info_key(*key_it) << std::endl;
     }
@@ -235,7 +235,7 @@ static void print_toc_item(poppler::toc_item *item, int indent)
 {
     std::cout << std::setw(indent * 2) << " "
               << "+ " << item->title() << " (" << item->is_open() << ")" << std::endl;
-    poppler::toc_item::iterator it = item->children_begin(), it_end = item->children_end();
+    auto it = item->children_begin(), it_end = item->children_end();
     for (; it != it_end; ++it) {
         print_toc_item(*it, indent + 1);
     }
@@ -257,7 +257,7 @@ static void print_fonts(poppler::document *doc)
     std::cout << "Document fonts:" << std::endl;
     std::vector<poppler::font_info> fl = doc->fonts();
     if (!fl.empty()) {
-        std::vector<poppler::font_info>::const_iterator it = fl.begin(), it_end = fl.end();
+        auto it = fl.begin(), it_end = fl.end();
         const std::ios_base::fmtflags f = std::cout.flags();
         std::left(std::cout);
         for (; it != it_end; ++it) {
@@ -276,7 +276,7 @@ static void print_embedded_files(poppler::document *doc)
     std::cout << "Document embedded files:" << std::endl;
     std::vector<poppler::embedded_file *> ef = doc->embedded_files();
     if (!ef.empty()) {
-        std::vector<poppler::embedded_file *>::const_iterator it = ef.begin(), it_end = ef.end();
+        auto it = ef.begin(), it_end = ef.end();
         const std::ios_base::fmtflags flags = std::cout.flags();
         std::left(std::cout);
         for (; it != it_end; ++it) {

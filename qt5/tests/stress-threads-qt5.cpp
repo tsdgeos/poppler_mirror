@@ -260,7 +260,7 @@ int main(int argc, char **argv)
             (new SillyThread(document))->start();
         }
 
-        QMutex *annotationMutex = new QMutex();
+        auto *annotationMutex = new QMutex();
 
         for (int i = 0; i < crazyCount; ++i) {
             (new CrazyThread(qrand(), document, annotationMutex))->start();

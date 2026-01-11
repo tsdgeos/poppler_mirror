@@ -54,7 +54,7 @@ void TestLinks::checkDests_xr01()
 
     {
         QCOMPARE(links.at(0)->linkType(), Poppler::Link::Goto);
-        Poppler::LinkGoto *link = static_cast<Poppler::LinkGoto *>(links.at(0));
+        auto *link = static_cast<Poppler::LinkGoto *>(links.at(0));
         const Poppler::LinkDestination dest = link->destination();
         QVERIFY(!isDestinationValid_pageNumber(&dest, doc));
         QVERIFY(isDestinationValid_name(&dest));
@@ -63,7 +63,7 @@ void TestLinks::checkDests_xr01()
 
     {
         QCOMPARE(links.at(1)->linkType(), Poppler::Link::Goto);
-        Poppler::LinkGoto *link = static_cast<Poppler::LinkGoto *>(links.at(1));
+        auto *link = static_cast<Poppler::LinkGoto *>(links.at(1));
         const Poppler::LinkDestination dest = link->destination();
         QVERIFY(!isDestinationValid_pageNumber(&dest, doc));
         QVERIFY(isDestinationValid_name(&dest));
@@ -108,7 +108,7 @@ void TestLinks::checkDocumentURILink()
     QCOMPARE(links.count(), 1);
 
     QCOMPARE(links.at(0)->linkType(), Poppler::Link::Browse);
-    Poppler::LinkBrowse *link = static_cast<Poppler::LinkBrowse *>(links.at(0));
+    auto *link = static_cast<Poppler::LinkBrowse *>(links.at(0));
     QCOMPARE(link->url(), QLatin1String("http://www.tcpdf.org"));
 
     qDeleteAll(links);

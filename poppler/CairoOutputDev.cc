@@ -353,7 +353,7 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
 
     if (logicalStruct && isPDF()) {
         Object obj = doc->getPage(pageNum)->getAnnotsObject(xref);
-        Annots *annots = new Annots(doc, pageNum, &obj);
+        auto *annots = new Annots(doc, pageNum, &obj);
 
         for (const std::shared_ptr<Annot> &annot : annots->getAnnots()) {
             if (annot->getType() == Annot::typeLink) {
@@ -510,7 +510,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
 
     LinkAction *action = annotLink->getAction();
     if (action->getKind() == actionGoTo) {
-        LinkGoTo *act = static_cast<LinkGoTo *>(action);
+        auto *act = static_cast<LinkGoTo *>(action);
         if (act->isOk()) {
             const GooString *namedDest = act->getNamedDest();
             const LinkDest *linkDest = act->getDest();
@@ -529,7 +529,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
             }
         }
     } else if (action->getKind() == actionGoToR) {
-        LinkGoToR *act = static_cast<LinkGoToR *>(action);
+        auto *act = static_cast<LinkGoToR *>(action);
         attrib.appendf("file='{0:t}' ", act->getFileName());
         const GooString *namedDest = act->getNamedDest();
         const LinkDest *linkDest = act->getDest();
@@ -550,7 +550,7 @@ bool CairoOutputDev::beginLinkTag(AnnotLink *annotLink)
             }
         }
     } else if (action->getKind() == actionURI) {
-        LinkURI *act = static_cast<LinkURI *>(action);
+        auto *act = static_cast<LinkURI *>(action);
         if (act->isOk()) {
             attrib.appendf("uri='{0:s}'", act->getURI().c_str());
         }
@@ -2138,7 +2138,7 @@ static cairo_surface_t *cairo_surface_create_similar_clip(cairo_t *cairo, cairo_
 void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const std::array<double, 4> & /*bbox*/, GfxColorSpace *blendingColorSpace, bool /*isolated*/, bool knockout, bool /*forSoftMask*/)
 {
     /* push color space */
-    ColorSpaceStack *css = new ColorSpaceStack;
+    auto *css = new ColorSpaceStack;
     css->cs = blendingColorSpace;
     css->knockout = knockout;
     cairo_get_matrix(cairo, &css->group_matrix);
@@ -2343,7 +2343,7 @@ void CairoOutputDev::setSoftMask(GfxState * /*state*/, const std::array<double, 
         cairo_destroy(maskCtx);
 
         /* convert to a luminocity map */
-        uint32_t *source_data = reinterpret_cast<uint32_t *>(cairo_image_surface_get_data(source));
+        auto *source_data = reinterpret_cast<uint32_t *>(cairo_image_surface_get_data(source));
         if (source_data) {
             /* get stride in units of 32 bits */
             ptrdiff_t stride = cairo_image_surface_get_stride(source) / 4;
@@ -3154,7 +3154,7 @@ static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface, const char *mim
 
 bool CairoOutputDev::setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image)
 {
-    JBIG2Stream *jb2Str = static_cast<JBIG2Stream *>(str);
+    auto *jb2Str = static_cast<JBIG2Stream *>(str);
     Object *globalsStr = jb2Str->getGlobalsStream();
     char *globalsBuffer;
     int globalsLength;
@@ -3182,7 +3182,7 @@ bool CairoOutputDev::setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *im
 
 bool CairoOutputDev::setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height)
 {
-    CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
+    auto *ccittStr = static_cast<CCITTFaxStream *>(str);
 
     GooString params;
     params.appendf("Columns={0:d}", ccittStr->getColumns());
@@ -3394,7 +3394,7 @@ public:
             buffer = cairo_image_surface_get_data(image);
             stride = cairo_image_surface_get_stride(image);
             for (int y = 0; y < height; y++) {
-                uint32_t *dest = reinterpret_cast<uint32_t *>(buffer + y * stride);
+                auto *dest = reinterpret_cast<uint32_t *>(buffer + y * stride);
                 getRow(y, dest);
             }
         } else {
@@ -3451,7 +3451,7 @@ public:
             }
         } else if (fromRGBA) {
             // Case of transparent JPX images, they contain RGBA data · Issue #1486
-            GfxDeviceRGBAColorSpace *rgbaCS = dynamic_cast<GfxDeviceRGBAColorSpace *>(colorMap->getColorSpace());
+            auto *rgbaCS = dynamic_cast<GfxDeviceRGBAColorSpace *>(colorMap->getColorSpace());
             if (rgbaCS) {
                 GfxDeviceRGBAColorSpace::getARGBPremultipliedLine(pix, row_data, width);
             } else {

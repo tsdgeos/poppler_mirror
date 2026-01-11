@@ -26,7 +26,7 @@ static void str_init_source(j_decompress_ptr /*cinfo*/) { }
 static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
 {
     int c;
-    struct str_src_mgr *src = (struct str_src_mgr *)cinfo->src;
+    auto *src = (struct str_src_mgr *)cinfo->src;
     if (src->index == 0) {
         c = 0xFF;
         src->index++;
@@ -53,7 +53,7 @@ static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
 
     size_t num_bytes = num_bytes_l;
 
-    struct str_src_mgr *src = (struct str_src_mgr *)cinfo->src;
+    auto *src = (struct str_src_mgr *)cinfo->src;
     while (num_bytes > src->pub.bytes_in_buffer) {
         num_bytes -= src->pub.bytes_in_buffer;
         str_fill_input_buffer(cinfo);
@@ -85,8 +85,8 @@ DCTStream::~DCTStream()
 
 static void exitErrorHandler(jpeg_common_struct *error)
 {
-    j_decompress_ptr cinfo = (j_decompress_ptr)error;
-    str_error_mgr *err = (struct str_error_mgr *)cinfo->err;
+    auto *cinfo = (j_decompress_ptr)error;
+    auto *err = (struct str_error_mgr *)cinfo->err;
     if (cinfo->err->msg_code == JERR_IMAGE_TOO_BIG && err->width != 0 && err->height != 0) {
         cinfo->image_height = err->height;
         cinfo->image_width = err->width;

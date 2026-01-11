@@ -225,7 +225,7 @@ PopplerAction *poppler_action_copy(PopplerAction *action)
             GList *new_list = nullptr;
 
             for (l = action->ocg_state.state_list; l; l = g_list_next(l)) {
-                PopplerActionLayer *alayer = (PopplerActionLayer *)l->data;
+                auto *alayer = (PopplerActionLayer *)l->data;
                 new_list = g_list_prepend(new_list, poppler_action_layer_copy(alayer));
             }
 
@@ -560,7 +560,7 @@ static PopplerLayer *get_layer_for_ref(PopplerDocument *document, GList *layers,
     GList *l;
 
     for (l = layers; l; l = g_list_next(l)) {
-        Layer *layer = (Layer *)l->data;
+        auto *layer = (Layer *)l->data;
 
         if (layer->oc) {
             const Ref ocgRef = layer->oc->getRef();
@@ -599,7 +599,7 @@ static void build_ocg_state(PopplerDocument *document, PopplerAction *action, co
     }
 
     for (const LinkOCGState::StateList &list : st_list) {
-        PopplerActionLayer *action_layer = g_slice_new0(PopplerActionLayer);
+        auto *action_layer = g_slice_new0(PopplerActionLayer);
 
         switch (list.st) {
         case LinkOCGState::On:

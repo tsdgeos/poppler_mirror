@@ -65,7 +65,7 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, double hDPI, doub
 {
     unsigned int compression;
     uint16_t photometric = 0;
-    uint32_t rowsperstrip = (uint32_t)-1;
+    auto rowsperstrip = (uint32_t)-1;
     int bitspersample;
     uint16_t samplesperpixel = 0;
     const struct compression_name_tag

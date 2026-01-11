@@ -207,7 +207,7 @@ int main(int argc, char **argv)
     }
     Poppler::Page *page = doc->page(0);
 
-    QLabel *l = new QLabel(page->text(QRectF()), nullptr);
+    auto *l = new QLabel(page->text(QRectF()), nullptr);
     l->show();
     delete page;
     delete doc;

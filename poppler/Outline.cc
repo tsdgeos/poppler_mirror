@@ -73,7 +73,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         it = items.begin() + pos;
     }
 
-    Array *a = new Array(xref);
+    auto *a = new Array(xref);
     Ref *pageRef = doc->getCatalog()->getPageRef(destPageNum);
     if (pageRef != nullptr) {
         a->add(Object(*pageRef));
@@ -142,7 +142,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
         }
     }
 
-    OutlineItem *item = new OutlineItem(outlineItem.getDict(), outlineItemRef, nullptr, xref, doc);
+    auto *item = new OutlineItem(outlineItem.getDict(), outlineItemRef, nullptr, xref, doc);
 
     items.insert(it, item);
 }
@@ -276,7 +276,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
 
     for (const auto &node : nodeList) {
 
-        Array *a = new Array(doc->getXRef());
+        auto *a = new Array(doc->getXRef());
         Ref *pageRef = doc->getCatalog()->getPageRef(node.destPageNum);
         if (pageRef != nullptr) {
             a->add(Object(*pageRef));
@@ -470,7 +470,7 @@ std::vector<OutlineItem *> *OutlineItem::readItemList(OutlineItem *parent, const
         if (!obj.isDict()) {
             break;
         }
-        OutlineItem *item = new OutlineItem(obj.getDict(), tempObj.getRef(), parent, xrefA, docA);
+        auto *item = new OutlineItem(obj.getDict(), tempObj.getRef(), parent, xrefA, docA);
         items->push_back(item);
         tempObj = obj.dictLookupNF("Next").copy();
     }

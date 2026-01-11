@@ -130,7 +130,7 @@ TocDock::~TocDock() = default;
 
 void TocDock::expandItemModels(const QModelIndex &parent)
 {
-    TocModel *model = static_cast<TocModel *>(m_tree->model());
+    auto *model = static_cast<TocModel *>(m_tree->model());
     for (int i = 0; i < model->rowCount(parent); ++i) {
         QModelIndex index = model->index(i, 0, parent);
         Node *n = static_cast<Node *>(index.internalPointer());
@@ -145,13 +145,13 @@ void TocDock::fillInfo()
 {
     auto outline = document()->outline();
     if (!outline.isEmpty()) {
-        TocModel *model = new TocModel(std::move(outline), this);
+        auto *model = new TocModel(std::move(outline), this);
         m_tree->setModel(model);
 
         expandItemModels(QModelIndex());
     } else {
-        QStandardItemModel *model = new QStandardItemModel(this);
-        QStandardItem *item = new QStandardItem(tr("No TOC"));
+        auto *model = new QStandardItemModel(this);
+        auto *item = new QStandardItem(tr("No TOC"));
         item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
         model->appendRow(item);
         m_tree->setModel(model);

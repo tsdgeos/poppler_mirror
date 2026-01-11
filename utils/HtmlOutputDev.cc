@@ -1340,7 +1340,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             error(errInternal, -1, "Can't rewind image stream");
             return;
         }
-        unsigned char *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
+        auto *row = (unsigned char *)gmalloc(3 * width); // 3 bytes/pixel: RGB
         unsigned char **row_pointer = &row;
 
         // Initialize the image stream
@@ -1394,7 +1394,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
             error(errInternal, -1, "failed to rewind stream");
             return;
         }
-        unsigned char *png_row = (unsigned char *)gmalloc(size);
+        auto *png_row = (unsigned char *)gmalloc(size);
 
         for (int ri = 0; ri < height; ++ri) {
             for (int i = 0; i < size; i++) {
@@ -1494,7 +1494,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
     switch (link->getAction()->getKind()) {
     case actionGoTo: {
         int destPage = 1;
-        LinkGoTo *ha = (LinkGoTo *)link->getAction();
+        auto *ha = (LinkGoTo *)link->getAction();
         std::unique_ptr<LinkDest> dest;
         if (ha->getDest() != nullptr) {
             dest = std::make_unique<LinkDest>(*ha->getDest());
@@ -1538,7 +1538,7 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
         return std::make_unique<GooString>();
     }
     case actionGoToR: {
-        LinkGoToR *ha = (LinkGoToR *)link->getAction();
+        auto *ha = (LinkGoToR *)link->getAction();
         LinkDest *dest = nullptr;
         int destPage = 1;
         std::unique_ptr<GooString> file = std::make_unique<GooString>();
@@ -1573,13 +1573,13 @@ std::unique_ptr<GooString> HtmlOutputDev::getLinkDest(AnnotLink *link)
         return file;
     }
     case actionURI: {
-        LinkURI *ha = (LinkURI *)link->getAction();
+        auto *ha = (LinkURI *)link->getAction();
         // printf("uri : %s\n",ha->getURI()->c_str());
         return std::make_unique<GooString>(ha->getURI());
     }
     case actionLaunch:
         if (printHtml) {
-            LinkLaunch *ha = (LinkLaunch *)link->getAction();
+            auto *ha = (LinkLaunch *)link->getAction();
             std::unique_ptr<GooString> file = std::make_unique<GooString>(ha->getFileName()->c_str());
             const char *p = file->c_str() + file->size() - 4;
             if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {

@@ -2355,7 +2355,7 @@ bool FoFiType1C::readCharset()
         charset = fofiType1CExpertSubsetCharset;
         charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
     } else {
-        unsigned short *customCharset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
+        auto *customCharset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
         charsetLength = nGlyphs;
         for (i = 0; i < nGlyphs; ++i) {
             customCharset[i] = 0;

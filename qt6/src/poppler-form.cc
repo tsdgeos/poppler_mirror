@@ -295,7 +295,7 @@ FormFieldButton::FormType FormFieldButton::type() const
 
 FormFieldButton::ButtonType FormFieldButton::buttonType() const
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     switch (fwb->getButtonType()) {
     case formButtonCheck:
         return FormFieldButton::CheckBox;
@@ -312,7 +312,7 @@ FormFieldButton::ButtonType FormFieldButton::buttonType() const
 
 QString FormFieldButton::caption() const
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     QString ret;
     if (fwb->getButtonType() == formButtonPush) {
         Dict *dict = m_formData->fm->getObj()->getDict();
@@ -333,10 +333,10 @@ QString FormFieldButton::caption() const
 
 FormFieldIcon FormFieldButton::icon() const
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     if (fwb->getButtonType() == formButtonPush) {
         Dict *dict = m_formData->fm->getObj()->getDict();
-        FormFieldIconData *data = new FormFieldIconData;
+        auto *data = new FormFieldIconData;
         data->icon = dict;
         return FormFieldIcon(data);
     }
@@ -349,7 +349,7 @@ void FormFieldButton::setIcon(const FormFieldIcon &icon)
         return;
     }
 
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     if (fwb->getButtonType() == formButtonPush) {
         std::shared_ptr<::AnnotWidget> w = m_formData->fm->getWidgetAnnotation();
         FormFieldIconData *data = FormFieldIconData::getData(icon);
@@ -361,27 +361,27 @@ void FormFieldButton::setIcon(const FormFieldIcon &icon)
 
 bool FormFieldButton::state() const
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     return fwb->getState();
 }
 
 void FormFieldButton::setState(bool state)
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
     fwb->setState(state);
 }
 
 QList<int> FormFieldButton::siblings() const
 {
-    FormWidgetButton *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
-    ::FormFieldButton *ffb = static_cast<::FormFieldButton *>(fwb->getField());
+    auto *fwb = static_cast<FormWidgetButton *>(m_formData->fm);
+    auto *ffb = static_cast<::FormFieldButton *>(fwb->getField());
     if (fwb->getButtonType() == formButtonPush) {
         return QList<int>();
     }
 
     QList<int> ret;
     for (int i = 0; i < ffb->getNumSiblings(); ++i) {
-        ::FormFieldButton *sibling = static_cast<::FormFieldButton *>(ffb->getSibling(i));
+        auto *sibling = static_cast<::FormFieldButton *>(ffb->getSibling(i));
         for (int j = 0; j < sibling->getNumWidgets(); ++j) {
             FormWidget *w = sibling->getWidget(j);
             if (w) {
@@ -404,7 +404,7 @@ FormField::FormType FormFieldText::type() const
 
 FormFieldText::TextType FormFieldText::textType() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     if (fwt->isFileSelect()) {
         return FormFieldText::FileSelect;
     }
@@ -422,33 +422,33 @@ QString FormFieldText::text() const
 
 void FormFieldText::setText(const QString &text)
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
     fwt->setContent(std::move(goo));
 }
 
 void FormFieldText::setAppearanceText(const QString &text)
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
     fwt->setAppearanceContent(std::move(goo));
 }
 
 bool FormFieldText::isPassword() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     return fwt->isPassword();
 }
 
 bool FormFieldText::isRichText() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     return fwt->isRichText();
 }
 
 int FormFieldText::maximumLength() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     const int maxlen = fwt->getMaxLen();
     return maxlen > 0 ? maxlen : -1;
 }
@@ -460,19 +460,19 @@ Qt::Alignment FormFieldText::textAlignment() const
 
 bool FormFieldText::canBeSpellChecked() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     return !fwt->noSpellCheck();
 }
 
 double FormFieldText::getFontSize() const
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     return fwt->getTextFontSize();
 }
 
 void FormFieldText::setFontSize(int fontSize)
 {
-    FormWidgetText *fwt = static_cast<FormWidgetText *>(m_formData->fm);
+    auto *fwt = static_cast<FormWidgetText *>(m_formData->fm);
     fwt->setTextFontSize(fontSize);
 }
 
@@ -487,7 +487,7 @@ FormFieldChoice::FormType FormFieldChoice::type() const
 
 FormFieldChoice::ChoiceType FormFieldChoice::choiceType() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     if (fwc->isCombo()) {
         return FormFieldChoice::ComboBox;
     }
@@ -496,7 +496,7 @@ FormFieldChoice::ChoiceType FormFieldChoice::choiceType() const
 
 QStringList FormFieldChoice::choices() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QStringList ret;
     int num = fwc->getNumChoices();
     ret.reserve(num);
@@ -508,7 +508,7 @@ QStringList FormFieldChoice::choices() const
 
 QVector<QPair<QString, QString>> FormFieldChoice::choicesWithExportValues() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     QVector<QPair<QString, QString>> ret;
     const int num = fwc->getNumChoices();
     ret.reserve(num);
@@ -523,19 +523,19 @@ QVector<QPair<QString, QString>> FormFieldChoice::choicesWithExportValues() cons
 
 bool FormFieldChoice::isEditable() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     return fwc->isCombo() ? fwc->hasEdit() : false;
 }
 
 bool FormFieldChoice::multiSelect() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     return !fwc->isCombo() ? fwc->isMultiSelect() : false;
 }
 
 QList<int> FormFieldChoice::currentChoices() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     int num = fwc->getNumChoices();
     QList<int> choices;
     for (int i = 0; i < num; ++i) {
@@ -548,7 +548,7 @@ QList<int> FormFieldChoice::currentChoices() const
 
 void FormFieldChoice::setCurrentChoices(const QList<int> &choice)
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     fwc->deselectAll();
     for (int i = 0; i < choice.count(); ++i) {
         fwc->select(choice.at(i));
@@ -557,7 +557,7 @@ void FormFieldChoice::setCurrentChoices(const QList<int> &choice)
 
 QString FormFieldChoice::editChoice() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
 
     if (fwc->isCombo() && fwc->hasEdit()) {
         return UnicodeParsedString(fwc->getEditChoice());
@@ -567,7 +567,7 @@ QString FormFieldChoice::editChoice() const
 
 void FormFieldChoice::setEditChoice(const QString &text)
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
 
     if (fwc->isCombo() && fwc->hasEdit()) {
         std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
@@ -582,13 +582,13 @@ Qt::Alignment FormFieldChoice::textAlignment() const
 
 bool FormFieldChoice::canBeSpellChecked() const
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     return !fwc->noSpellCheck();
 }
 
 void FormFieldChoice::setAppearanceChoiceText(const QString &text)
 {
-    FormWidgetChoice *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
+    auto *fwc = static_cast<FormWidgetChoice *>(m_formData->fm);
     std::unique_ptr<GooString> goo = QStringToUnicodeGooString(text);
     fwc->setAppearanceChoiceContent(std::move(goo));
 }
@@ -975,7 +975,7 @@ FormField::FormType FormFieldSignature::type() const
 FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
 {
     SignatureType sigType = AdbePkcs7detached;
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    auto *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     switch (fws->signatureType()) {
     case CryptoSign::SignatureType::adbe_pkcs7_sha1:
         sigType = AdbePkcs7sha1;
@@ -1034,7 +1034,7 @@ static CertificateInfo::KeyLocation fromPopplerCore(KeyLocation location)
 
 static CertificateInfoPrivate *createCertificateInfoPrivate(const X509CertificateInfo *ci)
 {
-    CertificateInfoPrivate *certPriv = new CertificateInfoPrivate;
+    auto *certPriv = new CertificateInfoPrivate;
     certPriv->is_null = true;
     if (ci) {
         certPriv->version = ci->getVersion();
@@ -1105,7 +1105,7 @@ static SignatureValidationInfo fromInternal(SignatureInfo *si, FormWidgetSignatu
     const X509CertificateInfo *ci = si->getCertificateInfo();
     CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(ci);
 
-    SignatureValidationInfoPrivate *priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
+    auto *priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
     switch (si->getSignatureValStatus()) {
     case SIGNATURE_VALID:
         priv->signature_status = SignatureValidationInfo::SignatureValid;
@@ -1171,7 +1171,7 @@ AsyncObject::~AsyncObject() = default;
 std::pair<SignatureValidationInfo, std::shared_ptr<Poppler::AsyncObject>> FormFieldSignature::validateAsync(ValidateOptions opt, const QDateTime &validationTime) const
 {
     auto object = std::make_shared<AsyncObject>();
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    auto *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
     SignatureInfo *si = fws->validateSignatureAsync(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck), opt & ValidateUseAIACertFetch,
                                                     [obj = std::weak_ptr<AsyncObject>(object)]() {
@@ -1199,7 +1199,7 @@ SignatureValidationInfo::CertificateStatus FormFieldSignature::validateResult() 
 
 FormFieldSignature::SigningResult FormFieldSignature::sign(const QString &outputFileName, const PDFConverter::NewSignatureData &data) const
 {
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    auto *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     if (fws->signatureType() != CryptoSign::SignatureType::unsigned_signature_field) {
         return FieldAlreadySigned;
     }

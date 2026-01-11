@@ -201,7 +201,7 @@ struct JPXData
 
 static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     if (unlikely(jpxData->size <= jpxData->pos)) {
         return (OPJ_SIZE_T)-1; /* End of file! */
@@ -217,7 +217,7 @@ static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *
 
 static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     jpxData->pos += (skip > jpxData->size - jpxData->pos) ? jpxData->size - jpxData->pos : skip;
     /* Always return input value to avoid "Problem with skipping JPEG2000 box, stream error" */
@@ -226,7 +226,7 @@ static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 
 static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     if (seek_pos > jpxData->size) {
         return OPJ_FALSE;
@@ -295,7 +295,7 @@ void JPXStream::init()
                 close();
                 break;
             }
-            unsigned char *cdata = (unsigned char *)priv->image->comps[component].data;
+            auto *cdata = (unsigned char *)priv->image->comps[component].data;
             int adjust = 0;
             int depth = priv->image->comps[component].prec;
             if (priv->image->comps[component].prec > 8) {

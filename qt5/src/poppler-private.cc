@@ -206,14 +206,14 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
     switch (a->getKind()) {
     case actionGoTo: {
         // page number is contained/referenced in a LinkGoTo
-        const LinkGoTo *g = static_cast<const LinkGoTo *>(a);
+        const auto *g = static_cast<const LinkGoTo *>(a);
         const LinkDest *destination = g->getDest();
         if (!destination && g->getNamedDest()) {
             // no 'destination' but an internal 'named reference'. we could
             // get the destination for the page now, but it's VERY time consuming,
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->size()];
+            auto *charArray = new QChar[s->size()];
             for (size_t i = 0; i < s->size(); ++i) {
                 charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
@@ -228,14 +228,14 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
     }
     case actionGoToR: {
         // page number is contained/referenced in a LinkGoToR
-        const LinkGoToR *g = static_cast<const LinkGoToR *>(a);
+        const auto *g = static_cast<const LinkGoToR *>(a);
         const LinkDest *destination = g->getDest();
         if (!destination && g->getNamedDest()) {
             // no 'destination' but an internal 'named reference'. we could
             // get the destination for the page now, but it's VERY time consuming,
             // so better storing the reference and provide the viewport on demand
             const GooString *s = g->getNamedDest();
-            QChar *charArray = new QChar[s->size()];
+            auto *charArray = new QChar[s->size()];
             for (size_t i = 0; i < s->size(); ++i) {
                 charArray[i] = QChar::fromLatin1(s->c_str()[i]);
             }
@@ -250,7 +250,7 @@ static void linkActionToTocItem(const ::LinkAction *a, DocumentData *doc, QDomEl
         break;
     }
     case actionURI: {
-        const LinkURI *u = static_cast<const LinkURI *>(a);
+        const auto *u = static_cast<const LinkURI *>(a);
         e->setAttribute(QStringLiteral("DestinationURI"), QString::fromStdString(u->getURI()));
     }
     default:;

@@ -429,10 +429,10 @@ static void writePageImage(GooString *filename)
         fprintf(stderr, "Error writing %s\n", filename->c_str());
         exit(2);
     }
-    unsigned char *row = (unsigned char *)gmallocn(width, 4);
+    auto *row = (unsigned char *)gmallocn(width, 4);
 
     for (int y = 0; y < height; y++) {
-        uint32_t *pixel = reinterpret_cast<uint32_t *>((data + y * stride));
+        auto *pixel = reinterpret_cast<uint32_t *>((data + y * stride));
         unsigned char *rowp = row;
         int bit = 7;
         for (int x = 0; x < width; x++, pixel++) {

@@ -118,7 +118,7 @@ bool page_transition::is_rectangular() const
 page_transition &page_transition::operator=(const page_transition &pt)
 {
     if (&pt != this) {
-        page_transition_private *new_d = new page_transition_private(*pt.d);
+        auto *new_d = new page_transition_private(*pt.d);
         delete d;
         d = new_d;
     }

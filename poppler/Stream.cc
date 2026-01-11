@@ -4572,7 +4572,7 @@ FlateCode *FlateStream::compHuffmanCodes(const int *lengths, int n, int *maxLen)
 
     // allocate the table
     const int tabSize = 1 << *maxLen;
-    FlateCode *codes = (FlateCode *)gmallocn(tabSize, sizeof(FlateCode));
+    auto *codes = (FlateCode *)gmallocn(tabSize, sizeof(FlateCode));
 
     // clear the table
     for (i = 0; i < tabSize; ++i) {

@@ -398,7 +398,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
     {
         const LinkAction *action = item->getAction();
         QVERIFY(action->getKind() == actionGoTo);
-        const LinkGoTo *gotoAction = dynamic_cast<const LinkGoTo *>(action);
+        const auto *gotoAction = dynamic_cast<const LinkGoTo *>(action);
         const LinkDest *dest = gotoAction->getDest();
         QVERIFY(dest->isPageRef() == false);
         QCOMPARE(dest->getPageNum(), 3);
@@ -426,7 +426,7 @@ void TestInternalOutline::testSetTitleAndSetPageDest()
         item = outline->getItems()->at(2);
         const LinkAction *action = item->getAction();
         QVERIFY(action->getKind() == actionGoTo);
-        const LinkGoTo *gotoAction = dynamic_cast<const LinkGoTo *>(action);
+        const auto *gotoAction = dynamic_cast<const LinkGoTo *>(action);
         const LinkDest *dest = gotoAction->getDest();
         QVERIFY(dest->isPageRef() == false);
         QCOMPARE(dest->getPageNum(), 1);

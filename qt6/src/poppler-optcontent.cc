@@ -158,7 +158,7 @@ OptContentModelPrivate::OptContentModelPrivate(OptContentModel *qq, const OCGs *
     const auto &ocgs = optContent->getOCGs();
 
     for (const auto &ocg : ocgs) {
-        OptContentItem *node = new OptContentItem(ocg.second.get());
+        auto *node = new OptContentItem(ocg.second.get());
         m_optContentItems.insert(QString::number(ocg.first.num), node);
     }
 
@@ -204,7 +204,7 @@ void OptContentModelPrivate::parseOrderArray(OptContentItem *parentNode, const A
             parseOrderArray(lastItem, orderItem.getArray());
         } else if (orderItem.isString()) {
             const GooString *label = orderItem.getString();
-            OptContentItem *header = new OptContentItem(UnicodeParsedString(label));
+            auto *header = new OptContentItem(UnicodeParsedString(label));
             m_headerOptContentItems.append(header);
             addChild(parentNode, header);
             parentNode = header;
@@ -228,7 +228,7 @@ void OptContentModelPrivate::parseRBGroupsArray(const Array *rBGroupArray)
             return;
         }
         Array *rbarray = rbObj.getArray();
-        RadioButtonGroup *rbg = new RadioButtonGroup(this, rbarray);
+        auto *rbg = new RadioButtonGroup(this, rbarray);
         m_rbgroups.append(rbg);
     }
 }

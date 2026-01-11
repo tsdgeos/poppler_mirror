@@ -78,40 +78,40 @@ void TestStrings::check_unicodeToQString_data()
 
     {
         const int l = 1;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = int('a');
         QTest::newRow("a") << u << l << QStringLiteral("a");
     }
     {
         const int l = 1;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = 0x0161;
         QTest::newRow("\u0161") << u << l << QStringLiteral("\u0161");
     }
     {
         const int l = 2;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = int('a');
         u[1] = int('b');
         QTest::newRow("ab") << u << l << QStringLiteral("ab");
     }
     {
         const int l = 2;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = int('a');
         u[1] = 0x0161;
         QTest::newRow("a\u0161") << u << l << QStringLiteral("a\u0161");
     }
     {
         const int l = 2;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = 0x5c01;
         u[1] = 0x9762;
         QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2") << u << l << QStringLiteral("封面");
     }
     {
         const int l = 3;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = 0x5c01;
         u[1] = 0x9762;
         u[2] = 0x0;
@@ -119,7 +119,7 @@ void TestStrings::check_unicodeToQString_data()
     }
     {
         const int l = 4;
-        Unicode *u = new Unicode[l];
+        auto *u = new Unicode[l];
         u[0] = 0x5c01;
         u[1] = 0x9762;
         u[2] = 0x0;
@@ -224,14 +224,14 @@ void TestStrings::check_QStringToGooString()
 
 GooString *TestStrings::newGooString(const char *s)
 {
-    GooString *goo = new GooString(s);
+    auto *goo = new GooString(s);
     m_gooStrings.append(goo);
     return goo;
 }
 
 GooString *TestStrings::newGooString(const char *s, int l)
 {
-    GooString *goo = new GooString(s, l);
+    auto *goo = new GooString(s, l);
     m_gooStrings.append(goo);
     return goo;
 }

@@ -57,7 +57,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
     if (link->getKind() == actionJavaScript) {
         hasJS = true;
         if (print) {
-            LinkJavaScript *linkjs = static_cast<LinkJavaScript *>(link);
+            auto *linkjs = static_cast<LinkJavaScript *>(link);
             if (linkjs->isOk()) {
                 const std::string &s = linkjs->getScript();
                 fprintf(file, "%s:\n", action);
@@ -68,7 +68,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action)
     }
 
     if (link->getKind() == actionRendition) {
-        LinkRendition *linkr = static_cast<LinkRendition *>(link);
+        auto *linkr = static_cast<LinkRendition *>(link);
         if (!linkr->getScript().empty()) {
             hasJS = true;
             if (print) {
@@ -189,13 +189,13 @@ void JSInfo::scan(int nPages)
         annots = page->getAnnots();
         for (const std::shared_ptr<Annot> &a : annots->getAnnots()) {
             if (a->getType() == Annot::typeLink) {
-                AnnotLink *annot = static_cast<AnnotLink *>(a.get());
+                auto *annot = static_cast<AnnotLink *>(a.get());
                 scanLinkAction(annot->getAction(), "Link Annotation Activated");
                 if (onlyFirstJS && hasJS) {
                     return;
                 }
             } else if (a->getType() == Annot::typeScreen) {
-                AnnotScreen *annot = static_cast<AnnotScreen *>(a.get());
+                auto *annot = static_cast<AnnotScreen *>(a.get());
                 scanLinkAction(annot->getAction(), "Screen Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Screen Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Screen Annotation Cursor Leave");
@@ -212,7 +212,7 @@ void JSInfo::scan(int nPages)
                     return;
                 }
             } else if (a->getType() == Annot::typeWidget) {
-                AnnotWidget *annot = static_cast<AnnotWidget *>(a.get());
+                auto *annot = static_cast<AnnotWidget *>(a.get());
                 scanLinkAction(annot->getAction(), "Widget Annotation Activated");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering).get(), "Widget Annotation Cursor Enter");
                 scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving).get(), "Widget Annotation Cursor Leave");

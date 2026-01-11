@@ -159,7 +159,7 @@ SplashFont *SplashFontEngine::getFont(std::shared_ptr<SplashFontFile> fontFile, 
     }
 
     // Try to find the font in the cache
-    std::array<SplashFont *, 16>::iterator fontIt = std::ranges::find_if(fontCache, [&](const SplashFont *font) { return font && font->matches(fontFile, mat, textMat); });
+    auto fontIt = std::ranges::find_if(fontCache, [&](const SplashFont *font) { return font && font->matches(fontFile, mat, textMat); }); // NOLINT(readability-qualified-auto) https://github.com/llvm/llvm-project/issues/175731
 
     // The requested font has been found in the cache
     if (fontIt != fontCache.end()) {

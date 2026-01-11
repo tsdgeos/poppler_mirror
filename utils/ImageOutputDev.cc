@@ -323,7 +323,7 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height, Gf
         }
     }
 
-    EmbedStream *embedStr = (EmbedStream *)(str->getBaseStream());
+    auto *embedStr = (EmbedStream *)(str->getBaseStream());
     if (!embedStr->rewind()) {
         return 0;
     }
@@ -417,7 +417,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         }
     }
 
-    unsigned char *row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
+    auto *row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
     if (!row) {
         error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
         errorCode = 99;
@@ -463,7 +463,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 
         case imgRGB48: {
             p = imgStr->getLine();
-            unsigned short *rowp16 = reinterpret_cast<unsigned short *>(row);
+            auto *rowp16 = reinterpret_cast<unsigned short *>(row);
             for (int x = 0; x < width; ++x) {
                 if (p) {
                     colorMap->getRGB(p, &rgb);
@@ -566,7 +566,7 @@ void ImageOutputDev::writeImage(GfxState * /*state*/, Object * /*ref*/, Stream *
 
     } else if (dumpJBIG2 && str->getKind() == strJBIG2 && !inlineImg) {
         // dump JBIG2 globals stream if available
-        JBIG2Stream *jb2Str = static_cast<JBIG2Stream *>(str);
+        auto *jb2Str = static_cast<JBIG2Stream *>(str);
         Object *globals = jb2Str->getGlobalsStream();
         if (globals->isStream()) {
             FILE *f;
@@ -593,7 +593,7 @@ void ImageOutputDev::writeImage(GfxState * /*state*/, Object * /*ref*/, Stream *
 
     } else if (dumpCCITT && str->getKind() == strCCITTFax) {
         // write CCITT parameters
-        CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
+        auto *ccittStr = static_cast<CCITTFaxStream *>(str);
         FILE *f;
         setFilename("params");
         if (!(f = fopen(fileName, "wb"))) {

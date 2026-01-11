@@ -138,7 +138,7 @@ HtmlLinks::~HtmlLinks() = default;
 bool HtmlLinks::inLink(double xmin, double ymin, double xmax, double ymax, size_t &p) const
 {
 
-    for (std::vector<HtmlLink>::const_iterator i = accu.begin(); i != accu.end(); ++i) {
+    for (auto i = accu.begin(); i != accu.end(); ++i) {
         if (i->inLink(xmin, ymin, xmax, ymax)) {
             p = (i - accu.begin());
             return true;

@@ -74,7 +74,7 @@ void toc_item_private::load_children(const std::vector<OutlineItem *> *items)
     for (int i = 0; i < num_items; ++i) {
         OutlineItem *item = (*items)[i];
 
-        toc_item *new_item = new toc_item();
+        auto *new_item = new toc_item();
         new_item->d->load(item);
         children[i] = new_item;
 
