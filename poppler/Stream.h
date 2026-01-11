@@ -1247,7 +1247,7 @@ private:
     bool startBlock();
     void loadFixedCodes();
     bool readDynamicCodes();
-    FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
+    static FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
     int getHuffmanCodeWord(FlateHuffmanTab *tab);
     int getCodeWord(int bits);
 };

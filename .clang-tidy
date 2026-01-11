@@ -24,7 +24,6 @@ Checks:  >
     -readability-isolate-declaration,
     -readability-math-missing-parentheses,
     -readability-function-cognitive-complexity,
-    -readability-convert-member-functions-to-static,
     -readability-avoid-unconditional-preprocessor-if,
     -readability-qualified-auto,
     -readability-suspicious-call-argument,

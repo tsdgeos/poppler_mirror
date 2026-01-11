@@ -11,11 +11,11 @@ class TestInternalOutline : public QObject
 public:
     explicit TestInternalOutline(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testCreateOutline();
-    void testSetOutline();
-    void testInsertChild();
-    void testRemoveChild();
-    void testSetTitleAndSetPageDest();
+    static void testCreateOutline();
+    static void testSetOutline();
+    static void testInsertChild();
+    static void testRemoveChild();
+    static void testSetTitleAndSetPageDest();
 };
 
 void TestInternalOutline::testCreateOutline()

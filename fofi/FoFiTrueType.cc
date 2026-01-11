@@ -997,7 +997,7 @@ void FoFiTrueType::convertToType0(const std::string &psName, const std::vector<i
     ff->convertToType0(psName, cidMap, outputFunc, outputStream);
 }
 
-void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiTrueType::cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream)
 {
     const char *name;
     int i;
@@ -1654,7 +1654,7 @@ int FoFiTrueType::seekTable(const char *tag) const
     return -1;
 }
 
-unsigned int FoFiTrueType::charToTag(const std::string &tagName) const
+unsigned int FoFiTrueType::charToTag(const std::string &tagName)
 {
     size_t n = tagName.size();
     unsigned int tag = 0;

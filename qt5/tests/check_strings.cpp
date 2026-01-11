@@ -43,16 +43,16 @@ public:
     QVector<GooString *> m_gooStrings;
 
 private Q_SLOTS:
-    void initTestCase();
+    static void initTestCase();
     void cleanupTestCase();
-    void check_unicodeToQString_data();
-    void check_unicodeToQString();
+    static void check_unicodeToQString_data();
+    static void check_unicodeToQString();
     void check_UnicodeParsedString_data();
-    void check_UnicodeParsedString();
-    void check_QStringToUnicodeGooString_data();
-    void check_QStringToUnicodeGooString();
+    static void check_UnicodeParsedString();
+    static void check_QStringToUnicodeGooString_data();
+    static void check_QStringToUnicodeGooString();
     void check_QStringToGooString_data();
-    void check_QStringToGooString();
+    static void check_QStringToGooString();
 };
 
 void TestStrings::initTestCase()

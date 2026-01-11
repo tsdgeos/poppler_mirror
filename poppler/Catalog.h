@@ -320,7 +320,7 @@ private:
     NameTree *getDestNameTree();
     NameTree *getEmbeddedFileNameTree();
     NameTree *getJSNameTree();
-    std::unique_ptr<LinkDest> createLinkDest(Object *obj);
+    static std::unique_ptr<LinkDest> createLinkDest(Object *obj);
 
     int catalogPdfMajorVersion = -1;
     int catalogPdfMinorVersion = -1;

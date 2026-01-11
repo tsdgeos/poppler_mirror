@@ -31,7 +31,7 @@ public:
     bool supports(const GooString &uri) override;
 
 private:
-    int parseFdFromUri(const std::string &uri);
+    static int parseFdFromUri(const std::string &uri);
 };
 
 #endif /* FDPDFDOCBUILDER_H */

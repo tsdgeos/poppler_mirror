@@ -53,12 +53,12 @@ public:
     }
 
 private Q_SLOTS:
-    void init();
-    void initTestCase_data();
+    static void init();
+    static void initTestCase_data();
     void initTestCase() { }
-    void cleanupTestCase();
-    void testPgpSignVerify();
-    void testKeyList();
+    static void cleanupTestCase();
+    static void testPgpSignVerify();
+    static void testKeyList();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignWithGnupgPgp::nssdir;

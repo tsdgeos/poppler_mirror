@@ -252,7 +252,7 @@ public:
         printing = printingA;
         needFontUpdate = true;
     }
-    void copyAntialias(cairo_t *cr, cairo_t *source_cr);
+    static void copyAntialias(cairo_t *cr, cairo_t *source_cr);
     void setLogicalStructure(bool logStruct) { this->logicalStruct = logStruct; }
 
     enum Type3RenderType
@@ -274,25 +274,25 @@ public:
 protected:
     void doPath(cairo_t *cairo, const GfxPath *path);
     cairo_surface_t *downscaleSurface(cairo_surface_t *orig_surface);
-    void getScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight);
+    static void getScaledSize(const cairo_matrix_t *matrix, int orig_width, int orig_height, int *scaledWidth, int *scaledHeight);
     cairo_filter_t getFilterForSurface(cairo_surface_t *image, bool interpolate);
-    bool getStreamData(Stream *str, char **buffer, int *length);
+    static bool getStreamData(Stream *str, char **buffer, int *length);
     void setMimeData(GfxState *state, Stream *str, Object *ref, GfxImageColorMap *colorMap, cairo_surface_t *image, int height);
     void fillToStrokePathClip();
     void alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y);
     AnnotLink *findLinkObject(const StructElement *elem);
-    void quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double destPageHeight, cairo_rectangle_t *rect);
+    static void quadToCairoRect(AnnotQuadrilaterals *quads, int idx, double destPageHeight, cairo_rectangle_t *rect);
     bool appendLinkDestRef(GooString *s, const LinkDest *dest);
-    void appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight);
+    static void appendLinkDestXY(GooString *s, const LinkDest *dest, double destPageHeight);
     bool beginLinkTag(AnnotLink *annotLink);
     bool beginLink(const StructElement *linkElem);
-    void getStructElemAttributeString(const StructElement *elem);
+    static void getStructElemAttributeString(const StructElement *elem);
     int getContentElementStructParents(const StructElement *element);
     bool checkIfStructElementNeeded(const StructElement *element);
     void emitStructElement(const StructElement *elem);
     void startFirstPage(XRef *xrefA);
-    bool setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image);
-    bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
+    static bool setMimeDataForJBIG2Globals(Stream *str, cairo_surface_t *image);
+    static bool setMimeDataForCCITTParams(Stream *str, cairo_surface_t *image, int height);
     static void textStringToQuotedUtf8(const GooString *text, GooString *s);
     bool isPDF();
 
@@ -514,7 +514,7 @@ public:
 
 private:
     void saveImage(CairoImage *image);
-    void getBBox(GfxState *state, int width, int height, double *x1, double *y1, double *x2, double *y2);
+    static void getBBox(GfxState *state, int width, int height, double *x1, double *y1, double *x2, double *y2);
 
     CairoImage **images;
     int numImages;

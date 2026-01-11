@@ -9,7 +9,7 @@ class TestLexer : public QObject
 public:
     explicit TestLexer(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testNumbers();
+    static void testNumbers();
 };
 
 void TestLexer::testNumbers()

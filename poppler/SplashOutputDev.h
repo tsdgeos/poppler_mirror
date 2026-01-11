@@ -350,16 +350,16 @@ private:
     bool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern);
 
     void setupScreenParams(double hDPI, double vDPI);
-    SplashPattern *getColor(GfxGray gray);
+    static SplashPattern *getColor(GfxGray gray);
     SplashPattern *getColor(GfxRGB *rgb);
-    SplashPattern *getColor(GfxCMYK *cmyk);
-    SplashPattern *getColor(GfxColor *deviceN);
+    static SplashPattern *getColor(GfxCMYK *cmyk);
+    static SplashPattern *getColor(GfxColor *deviceN);
     static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColor, SplashColor splashMatteColor);
     void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag, int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
     static SplashPath convertPath(const GfxPath *path, bool dropEmptySubpaths);
     void drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3FontCacheTag *tag, unsigned char *data);
 #if USE_CMS
-    bool useIccImageSrc(void *data);
+    static bool useIccImageSrc(void *data);
     static void iccTransform(void *data, SplashBitmap *bitmap);
     static bool iccImageSrc(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
 #endif

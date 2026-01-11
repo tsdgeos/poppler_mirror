@@ -3453,7 +3453,7 @@ public:
             // Case of transparent JPX images, they contain RGBA data · Issue #1486
             GfxDeviceRGBAColorSpace *rgbaCS = dynamic_cast<GfxDeviceRGBAColorSpace *>(colorMap->getColorSpace());
             if (rgbaCS) {
-                rgbaCS->getARGBPremultipliedLine(pix, row_data, width);
+                GfxDeviceRGBAColorSpace::getARGBPremultipliedLine(pix, row_data, width);
             } else {
                 error(errSyntaxWarning, -1, "CairoOutputDev: Unexpected fallback from RGBA to RGB");
                 colorMap->getRGBLine(pix, row_data, width);

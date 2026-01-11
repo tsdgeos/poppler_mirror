@@ -974,7 +974,7 @@ void Gfx::opSetExtGState(Object args[], int /*numArgs*/)
     // transparency support: blend mode, fill/stroke opacity
     obj2 = obj1.dictLookup("BM");
     if (!obj2.isNull()) {
-        if (state->parseBlendMode(&obj2, &mode)) {
+        if (GfxState::parseBlendMode(&obj2, &mode)) {
             state->setBlendMode(mode);
             out->updateBlendMode(state);
         } else {
@@ -4659,7 +4659,7 @@ bool Gfx::checkTransparencyGroup(Dict *resDict)
             if (obj1.isDict()) {
                 Object obj2 = obj1.dictLookup("BM");
                 if (!obj2.isNull()) {
-                    if (state->parseBlendMode(&obj2, &mode)) {
+                    if (GfxState::parseBlendMode(&obj2, &mode)) {
                         if (mode != gfxBlendNormal) {
                             transpGroup = true;
                         }

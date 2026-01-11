@@ -407,7 +407,7 @@ private:
     void writePSFmt(const char *fmt, ...) GOOSTRING_FORMAT;
     void writePSString(const std::string &s);
     void writePSName(const char *s);
-    GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
+    static GooString *filterPSLabel(GooString *label, bool *needParens = nullptr);
     void writePSTextLine(const std::string &s);
 
     PSLevel level; // PostScript level (1, 2, separation)

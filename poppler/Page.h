@@ -96,7 +96,7 @@ public:
     void clipBoxes();
 
 private:
-    bool readBox(Dict *dict, const char *key, PDFRectangle *box);
+    static bool readBox(Dict *dict, const char *key, PDFRectangle *box);
 
     PDFRectangle mediaBox;
     PDFRectangle cropBox;

@@ -52,8 +52,8 @@ public:
     static std::unique_ptr<Link> convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc, const QRectF &linkArea);
 
     std::unique_ptr<TextPage> prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
-    bool performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);
-    QList<QRectF> performMultipleTextSearch(TextPage *textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);
+    static bool performSingleTextSearch(TextPage *textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);
+    static QList<QRectF> performMultipleTextSearch(TextPage *textPage, QVector<Unicode> &u, bool sCase, bool sWords, bool sDiacritics, bool sAcrossLines);
 };
 
 }

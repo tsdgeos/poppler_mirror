@@ -1681,7 +1681,7 @@ void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPriva
     charBuf->push_back((char)13);
 }
 
-void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const
+void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf)
 {
     unsigned char buf[12];
     int y, n;
@@ -1733,7 +1733,7 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const
     charBuf->append((char *)buf, n);
 }
 
-void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const
+void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s)
 {
     unsigned char *p;
     unsigned char x;
@@ -1755,7 +1755,7 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const
     }
 }
 
-void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n) const
+void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n)
 {
     unsigned char x;
     int i;
@@ -1778,7 +1778,7 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s
     }
 }
 
-void FoFiType1C::writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream) const
+void FoFiType1C::writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream)
 {
     char buf[80];
     const char *p;

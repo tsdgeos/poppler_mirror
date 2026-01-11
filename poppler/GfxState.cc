@@ -1506,7 +1506,7 @@ void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
 
 // convert L*a*b* to media XYZ color space
 // (not multiply by the white point)
-void GfxLabColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const
+void GfxLabColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ)
 {
     double X, Y, Z;
     double t1, t2;

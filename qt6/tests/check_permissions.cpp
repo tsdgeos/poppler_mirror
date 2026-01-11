@@ -8,7 +8,7 @@ class TestPermissions : public QObject
 public:
     explicit TestPermissions(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void permissions1();
+    static void permissions1();
 };
 
 void TestPermissions::permissions1()

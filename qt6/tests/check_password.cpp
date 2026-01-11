@@ -8,15 +8,15 @@ class TestPassword : public QObject
 public:
     explicit TestPassword(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void password1();
-    void password1a();
-    void password2();
-    void password2a();
-    void password2b();
-    void password3();
-    void password4();
-    void password4b();
-    void password5();
+    static void password1();
+    static void password1a();
+    static void password2();
+    static void password2a();
+    static void password2b();
+    static void password3();
+    static void password4();
+    static void password4b();
+    static void password5();
 };
 
 // BUG:4557

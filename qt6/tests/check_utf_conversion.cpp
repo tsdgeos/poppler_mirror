@@ -15,10 +15,10 @@ class TestUTFConversion : public QObject
 public:
     explicit TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testUTF_data();
-    void testUTF();
-    void testUnicodeToAscii7();
-    void testUnicodeLittleEndian();
+    static void testUTF_data();
+    static void testUTF();
+    static void testUnicodeToAscii7();
+    static void testUnicodeLittleEndian();
 };
 
 static bool compare(const Unicode *a, const char *b, int len)

@@ -397,7 +397,7 @@ private:
     // Get the offset of the entries in the main XRef table of a
     // linearized document (0 for non linearized documents).
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
-    long long strToLongLong(const char *s);
+    static long long strToLongLong(const char *s);
 
     std::unique_ptr<GooString> fileName;
 #ifdef _WIN32

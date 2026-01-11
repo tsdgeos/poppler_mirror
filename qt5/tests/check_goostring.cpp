@@ -9,11 +9,11 @@ class TestGooString : public QObject
 public:
     explicit TestGooString(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testInsertData_data();
-    void testInsertData();
-    void testInsert();
-    void testFormat();
-    void testFromNullptr();
+    static void testInsertData_data();
+    static void testInsertData();
+    static void testInsert();
+    static void testFormat();
+    static void testFromNullptr();
 };
 
 void TestGooString::testInsertData_data()

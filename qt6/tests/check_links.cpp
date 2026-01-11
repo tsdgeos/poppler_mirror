@@ -10,10 +10,10 @@ class TestLinks : public QObject
 public:
     explicit TestLinks(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkDocumentWithNoDests();
-    void checkDests_xr01();
-    void checkDests_xr02();
-    void checkDocumentURILink();
+    static void checkDocumentWithNoDests();
+    static void checkDests_xr01();
+    static void checkDests_xr02();
+    static void checkDocumentURILink();
 };
 
 static bool isDestinationValid_pageNumber(const Poppler::LinkDestination *dest, const Poppler::Document *doc)

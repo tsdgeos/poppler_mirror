@@ -1083,7 +1083,8 @@ fin:
     return path;
 }
 
-FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore)
+FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, // NOLINT(readability-convert-member-functions-to-static)
+                                                                              const std::vector<std::string> &filesToIgnore)
 {
     FcPattern *p = FcPatternBuild(nullptr, FC_FAMILY, FcTypeString, fontFamily.c_str(), FC_STYLE, FcTypeString, fontStyle.c_str(), nullptr);
     FcConfigSubstitute(nullptr, p, FcMatchPattern);
@@ -1116,7 +1117,7 @@ FamilyStyleFontSearchResult GlobalParams::findSystemFontFileForFamilyAndStyle(co
     return {};
 }
 
-UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate)
+UCharFontSearchResult GlobalParams::findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate) // NOLINT(readability-convert-member-functions-to-static)
 {
     FcPattern *pattern = buildFcPattern(fontToEmulate, nullptr);
 

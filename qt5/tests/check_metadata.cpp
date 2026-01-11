@@ -8,22 +8,22 @@ class TestMetaData : public QObject
 public:
     explicit TestMetaData(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkStrings_data();
-    void checkStrings();
-    void checkStrings2_data();
-    void checkStrings2();
-    void checkStringKeys();
-    void checkLinearised();
-    void checkNumPages();
-    void checkDate();
-    void checkPageSize();
-    void checkPortraitOrientation();
-    void checkLandscapeOrientation();
-    void checkUpsideDownOrientation();
-    void checkSeascapeOrientation();
-    void checkVersion();
-    void checkPdfId();
-    void checkNoPdfId();
+    static void checkStrings_data();
+    static void checkStrings();
+    static void checkStrings2_data();
+    static void checkStrings2();
+    static void checkStringKeys();
+    static void checkLinearised();
+    static void checkNumPages();
+    static void checkDate();
+    static void checkPageSize();
+    static void checkPortraitOrientation();
+    static void checkLandscapeOrientation();
+    static void checkUpsideDownOrientation();
+    static void checkSeascapeOrientation();
+    static void checkVersion();
+    static void checkPdfId();
+    static void checkNoPdfId();
 };
 
 void TestMetaData::checkStrings_data()

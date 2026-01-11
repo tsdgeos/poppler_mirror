@@ -139,7 +139,7 @@ private:
     void writeImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool inlineImg);
     void writeRawImage(Stream *str, const char *ext);
     void writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext, Stream *str, int width, int height, GfxImageColorMap *colorMap);
-    long getInlineImageLength(Stream *str, int width, int height, GfxImageColorMap *colorMap);
+    static long getInlineImageLength(Stream *str, int width, int height, GfxImageColorMap *colorMap);
 
     char *fileRoot; // root of output file names
     char *fileName; // buffer for output file names

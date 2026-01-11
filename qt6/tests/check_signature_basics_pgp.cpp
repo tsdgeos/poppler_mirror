@@ -132,10 +132,10 @@ public:
 #endif // ENABLE_GPGME
     }
 private Q_SLOTS:
-    void init();
-    void initTestCase_data();
+    static void init();
+    static void initTestCase_data();
     void initTestCase() { }
-    void testPgp();
+    static void testPgp();
 };
 
 std::unique_ptr<QTemporaryDir> TestSignatureBasicsPgpSignature::tmpdir;

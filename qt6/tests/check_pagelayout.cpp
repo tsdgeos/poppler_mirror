@@ -8,9 +8,9 @@ class TestPageLayout : public QObject
 public:
     explicit TestPageLayout(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkNone();
-    void checkSingle();
-    void checkFacing();
+    static void checkNone();
+    static void checkSingle();
+    static void checkFacing();
 };
 
 void TestPageLayout::checkNone()

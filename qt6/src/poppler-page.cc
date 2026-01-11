@@ -724,7 +724,7 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    const bool found = m_page->performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
+    const bool found = Poppler::PageData::performSingleTextSearch(textPage.get(), u, sLeft, sTop, sRight, sBottom, direction, sCase, sWords, sDiacritics, sAcrossLines);
 
     return found;
 }
@@ -739,7 +739,7 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
     QVector<Unicode> u;
     std::unique_ptr<TextPage> textPage = m_page->prepareTextSearch(text, rotate, &u);
 
-    QList<QRectF> results = m_page->performMultipleTextSearch(textPage.get(), u, sCase, sWords, sDiacritics, sAcrossLines);
+    QList<QRectF> results = Poppler::PageData::performMultipleTextSearch(textPage.get(), u, sCase, sWords, sDiacritics, sAcrossLines);
 
     return results;
 }

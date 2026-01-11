@@ -124,7 +124,7 @@ private:
 
     friend class Splash;
 
-    void setJpegParams(ImgWriter *writer, WriteImgParams *params);
+    static void setJpegParams(ImgWriter *writer, WriteImgParams *params);
 };
 
 #endif

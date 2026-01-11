@@ -5370,7 +5370,7 @@ void TextPage::setMergeCombining(bool merge)
     mergeCombining = merge;
 }
 
-void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot) const
+void TextPage::assignColumns(TextLineFrag *frags, int nFrags, bool oneRot)
 {
     TextLineFrag *frag0, *frag1;
     int rot, col1, col2, i, j, k;

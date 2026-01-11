@@ -661,9 +661,9 @@ public:
 
 private:
     void clear();
-    void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
+    static void assignColumns(TextLineFrag *frags, int nFrags, bool rot);
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
-    void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
+    static void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
 
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // discard diagonal text

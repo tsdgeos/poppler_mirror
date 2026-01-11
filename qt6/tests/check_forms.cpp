@@ -11,13 +11,13 @@ class TestForms : public QObject
 public:
     explicit TestForms(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void testCheckbox(); // Test for issue #655
-    void testCheckboxIssue159(); // Test for issue #159
-    void testSetIcon(); // Test that setIcon will always be valid.
-    void testSetPrintable();
-    void testSetAppearanceText();
-    void testStandAloneWidgets(); // check for 'de facto' tooltips. Issue #34
-    void testUnicodeFieldAttributes();
+    static void testCheckbox(); // Test for issue #655
+    static void testCheckboxIssue159(); // Test for issue #159
+    static void testSetIcon(); // Test that setIcon will always be valid.
+    static void testSetPrintable();
+    static void testSetAppearanceText();
+    static void testStandAloneWidgets(); // check for 'de facto' tooltips. Issue #34
+    static void testUnicodeFieldAttributes();
 };
 
 void TestForms::testCheckbox()

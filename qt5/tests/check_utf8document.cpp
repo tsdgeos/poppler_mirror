@@ -12,7 +12,7 @@ class TestUtf8Document : public QObject
 public:
     explicit TestUtf8Document(QObject *parent = nullptr) : QObject(parent) { }
 private Q_SLOTS:
-    void checkStrings();
+    static void checkStrings();
 };
 
 inline QString outlineItemTitle(OutlineItem *item)

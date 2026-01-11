@@ -444,7 +444,7 @@ public:
     int getNComps() const override { return 4; }
 
     // GfxDeviceRGBAColorSpace-specific access
-    void getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length);
+    static void getARGBPremultipliedLine(unsigned char *in, unsigned int *out, int length);
 
 private:
 };
@@ -567,7 +567,7 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double aMin, aMax, bMin, bMax; // range for the a and b components
-    void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
+    static void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ);
 #if USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
 #endif
@@ -1767,7 +1767,7 @@ public:
     bool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
 
     // Misc
-    bool parseBlendMode(Object *obj, GfxBlendMode *mode);
+    static bool parseBlendMode(Object *obj, GfxBlendMode *mode);
 
     std::unique_ptr<ReusablePathIterator> getReusablePath() { return std::make_unique<ReusablePathIterator>(path); }
 

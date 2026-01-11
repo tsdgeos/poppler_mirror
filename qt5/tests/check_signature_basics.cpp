@@ -30,9 +30,9 @@ public:
 
 private Q_SLOTS:
     void init();
-    void initTestCase_data();
+    static void initTestCase_data();
     void initTestCase() { }
-    void cleanupTestCase();
+    static void cleanupTestCase();
     void testSignatureCount();
     void testSignatureSizes();
     void testSignerInfo(); // names and stuff
