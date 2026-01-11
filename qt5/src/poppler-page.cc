@@ -116,8 +116,8 @@ public:
 class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
 {
 public:
-    Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
-        : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA), ignorePaperColor(ignorePaperColorA)
+    Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool ignorePaperColorA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
+        : SplashOutputDev(colorModeA, bitmapRowPadA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA), ignorePaperColor(ignorePaperColorA)
     {
     }
 
@@ -586,7 +586,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
         const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
 
-        Qt5SplashOutputDev splash_output(colorMode, 4, false, ignorePaperColor, ignorePaperColor ? nullptr : bgColor, true, thinLineMode, overprintPreview);
+        Qt5SplashOutputDev splash_output(colorMode, 4, ignorePaperColor, ignorePaperColor ? nullptr : bgColor, true, thinLineMode, overprintPreview);
 
         splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
 

@@ -3071,7 +3071,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     }
-    splashOut = new SplashOutputDev(internalColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
+    splashOut = new SplashOutputDev(internalColorFormat, 1, paperColor, false, splashThinLineDefault, overprint);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
 #if USE_CMS

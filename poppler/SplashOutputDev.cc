@@ -1218,7 +1218,7 @@ struct SplashTransparencyGroup
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
+SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, SplashColorPtr paperColorA, bool bitmapTopDownA, SplashThinLineMode thinLineMode, bool overprintPreviewA)
 {
     colorMode = colorModeA;
     bitmapRowPad = bitmapRowPadA;
@@ -1230,7 +1230,6 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, 
     enableFreeTypeHinting = false;
     enableSlightHinting = false;
     setupScreenParams(72.0, 72.0);
-    reverseVideo = reverseVideoA;
     if (paperColorA != nullptr) {
         splashColorCopy(paperColor, paperColorA);
     } else {
@@ -1578,9 +1577,6 @@ SplashPattern *SplashOutputDev::getColor(GfxGray gray)
 {
     SplashColor color;
 
-    if (reverseVideo) {
-        gray = gfxColorComp1 - gray;
-    }
     color[0] = colToByte(gray);
     return new SplashSolidColor(color);
 }
@@ -1590,15 +1586,9 @@ SplashPattern *SplashOutputDev::getColor(GfxRGB *rgb)
     GfxColorComp r, g, b;
     SplashColor color;
 
-    if (reverseVideo) {
-        r = gfxColorComp1 - rgb->r;
-        g = gfxColorComp1 - rgb->g;
-        b = gfxColorComp1 - rgb->b;
-    } else {
-        r = rgb->r;
-        g = rgb->g;
-        b = rgb->b;
-    }
+    r = rgb->r;
+    g = rgb->g;
+    b = rgb->b;
     color[0] = colToByte(r);
     color[1] = colToByte(g);
     color[2] = colToByte(b);

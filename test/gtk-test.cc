@@ -96,7 +96,7 @@ struct View
 // GDKSplashOutputDev
 //------------------------------------------------------------------------
 
-GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, false, sc)
+GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen * /*screen*/, void (*redrawCbkA)(void *data), void *redrawCbkDataA, SplashColor sc) : SplashOutputDev(splashModeRGB8, 4, sc)
 {
     redrawCbk = redrawCbkA;
     redrawCbkData = redrawCbkDataA;

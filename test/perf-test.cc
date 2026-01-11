@@ -349,7 +349,7 @@ SplashOutputDev *PdfEnginePoppler::outputDevice()
 {
     if (!_outputDev) {
         bool bitmapTopDown = true;
-        _outputDev = new SplashOutputDev(gSplashColorMode, 4, false, gBgColor, bitmapTopDown);
+        _outputDev = new SplashOutputDev(gSplashColorMode, 4, gBgColor, bitmapTopDown);
         if (_outputDev) {
             _outputDev->startDoc(_pdfDoc);
         }

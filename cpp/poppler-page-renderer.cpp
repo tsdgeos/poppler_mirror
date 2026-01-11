@@ -272,7 +272,7 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     bgColor[0] = d->paper_color & 0xff;
     bgColor[1] = (d->paper_color >> 8) & 0xff;
     bgColor[2] = (d->paper_color >> 16) & 0xff;
-    SplashOutputDev splashOutputDev(colorMode, 4, false, bgColor, true, lineMode);
+    SplashOutputDev splashOutputDev(colorMode, 4, bgColor, true, lineMode);
     splashOutputDev.setFontAntialias((d->hints & text_antialiasing) != 0);
     splashOutputDev.setVectorAntialias((d->hints & antialiasing) != 0);
     splashOutputDev.setFreeTypeHinting((d->hints & text_hinting) != 0, false);

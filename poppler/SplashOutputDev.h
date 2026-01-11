@@ -193,7 +193,7 @@ class POPPLER_PRIVATE_EXPORT SplashOutputDev : public OutputDev
 {
 public:
     // Constructor.
-    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
+    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
 
     // Destructor.
     ~SplashOutputDev() override;
@@ -380,7 +380,6 @@ private:
     bool enableFreeType;
     bool enableFreeTypeHinting;
     bool enableSlightHinting;
-    bool reverseVideo; // reverse video mode
     SplashColor paperColor; // paper color
     SplashScreenParams screenParams;
     bool skipHorizText;
