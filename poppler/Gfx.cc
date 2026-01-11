@@ -3297,7 +3297,14 @@ void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1,
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        if (abs(color0->c[i] - color1->c[i]) > gouraudColorDelta || abs(color1->c[i] - color2->c[i]) > gouraudColorDelta) {
+        int color01Delta, color12Delta;
+        if (checkedSubtraction(color0->c[i], color1->c[i], &color01Delta)) {
+            break;
+        }
+        if (checkedSubtraction(color1->c[i], color2->c[i], &color12Delta)) {
+            break;
+        }
+        if (abs(color01Delta) > gouraudColorDelta || abs(color12Delta) > gouraudColorDelta) {
             break;
         }
     }
