@@ -38,7 +38,7 @@
 // Copyright (C) 2021, 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2023 Khaled Hosny <khaled@aliftype.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 G B <glen.browman@veeva.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>

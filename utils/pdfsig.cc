@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -18,7 +18,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2022 Felix Jung <fxjung@posteo.de>
 // Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
-// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025 Blair Bonnett <blair.bonnett@gmail.com>
 //
 //========================================================================

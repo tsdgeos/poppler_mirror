@@ -43,10 +43,10 @@
 // Copyright (C) 2019, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Kai Pastor <dg0yt@darc.de>
 // Copyright (C) 2021, 2022 Stefan Löffler <st.loeffler@gmail.com>
-// Copyright (C) 2021 sunderme <sunderme@gmx.de>
+// Copyright (C) 2021, 2026 Jan Sundermeyer <sunderme@gmx.de>
 // Copyright (C) 2022 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2022 Claes Nästén <pekdon@gmail.com>
-// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
 // Copyright (C) 2024 Keyu Tao <me@taoky.moe>
 // Copyright (C) 2025 Volker Krause <vkrause@kde.org>

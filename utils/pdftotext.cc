@@ -33,7 +33,7 @@
 // Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2021 William Bader <williambader@hotmail.com>
 // Copyright (C) 2022 kVdNi <kVdNi@waqa.eu>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Hagen Möbius <hagen.moebius@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that

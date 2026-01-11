@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2007-2008, 2018, 2019, 2024, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

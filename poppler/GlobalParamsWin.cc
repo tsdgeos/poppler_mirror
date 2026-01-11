@@ -9,13 +9,13 @@
    // Copyright (C) 2013, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
-   // Copyright (C) 2017, 2018, 2020-2025 Albert Astals Cid <aacid@kde.org>
+   // Copyright (C) 2017, 2018, 2020-2026 Albert Astals Cid <aacid@kde.org>
    // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
    // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
    // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    // Copyright (C) 2021 Stefan Löffler <st.loeffler@gmail.com>
    // Copyright (C) 2021 sunderme <sunderme@gmx.de>
-   // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+   // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font

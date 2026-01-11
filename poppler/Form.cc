@@ -35,7 +35,7 @@
 // Copyright 2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright 2022 Alexander Sulfrian <asulfrian@zedat.fu-berlin.de>
 // Copyright 2022, 2024 Erich E. Hoover <erich.e.hoover@gmail.com>
-// Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2024 Pratham Gandhi <ppg.1382@gmail.com>
 // Copyright 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright 2025 Juraj Šarinay <juraj@sarinay.com>

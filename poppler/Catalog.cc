@@ -42,7 +42,7 @@
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
 // Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
 // Copyright (C) 2024 Hubert Figuiere <hub@figuiere.net>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Aaron Nguyen <aaron.nguyen@veeva.com>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 //

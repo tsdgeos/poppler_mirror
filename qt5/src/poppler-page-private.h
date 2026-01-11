@@ -4,6 +4,7 @@
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

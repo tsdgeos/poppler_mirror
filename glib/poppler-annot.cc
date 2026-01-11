@@ -3,7 +3,7 @@
  * Copyright (C) 2007 Inigo Martinez <inigomartinez@gmail.com>
  * Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2013 German Poo-Caamano <gpoo@gnome.org>
- * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2025 Markus Göllnitz <camelcasenick@bewares.it>
  * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>

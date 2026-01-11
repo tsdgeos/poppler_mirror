@@ -3,7 +3,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2019, Julián Unrrein <junrrein@gmail.com>
- * Copyright (C) 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021, Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
