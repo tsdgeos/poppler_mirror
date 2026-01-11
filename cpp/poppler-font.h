@@ -82,7 +82,7 @@ public:
     int current_page() const;
 
 private:
-    font_iterator(int, document_private *dd);
+    font_iterator(int start_page, document_private *dd);
 
     font_iterator_private *d;
     friend class document;

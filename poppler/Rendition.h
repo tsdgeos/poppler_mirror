@@ -138,7 +138,7 @@ public:
     Stream *getEmbbededStream() const { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
     const Object *getEmbbededStreamObject() const { return isEmbedded ? &embeddedStreamObject : nullptr; }
     // write embedded stream to file
-    void outputToFile(FILE *);
+    void outputToFile(FILE *fp);
 
     std::unique_ptr<MediaRendition> copy() const;
 

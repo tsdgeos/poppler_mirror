@@ -212,7 +212,7 @@ public:
     bool getUVarBE(int pos, int size, unsigned int *val) override;
     bool cmp(int pos, const char *s) override;
 
-    StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag = {});
+    StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag /*unused*/ = {});
 
 private:
     bool fillBuf(int pos, int len);
@@ -229,7 +229,7 @@ std::unique_ptr<StreamReader> StreamReader::make(int (*getCharA)(void *data), vo
     return std::make_unique<StreamReader>(getCharA, dataA);
 }
 
-StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag)
+StreamReader::StreamReader(int (*getCharA)(void *data), void *dataA, PrivateTag /*unused*/)
 {
     getChar = getCharA;
     data = dataA;

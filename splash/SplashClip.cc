@@ -58,7 +58,7 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0, SplashCoord x1, SplashCoo
     yMaxI = splashCeil(yMax) - 1;
 }
 
-SplashClip::SplashClip(const SplashClip *clip, PrivateTag)
+SplashClip::SplashClip(const SplashClip *clip, PrivateTag /*unused*/)
 {
     antialias = clip->antialias;
     xMin = clip->xMin;

@@ -78,7 +78,7 @@ std::unique_ptr<FoFiType1C> FoFiType1C::load(const char *fileName)
     return ff;
 }
 
-FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBase(std::move(fileA))
+FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/) : FoFiBase(std::move(fileA))
 {
     encoding = nullptr;
     privateDicts = nullptr;
@@ -87,7 +87,7 @@ FoFiType1C::FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag) : FoFiBas
     charsetLength = 0;
 }
 
-FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag) : FoFiBase(data)
+FoFiType1C::FoFiType1C(std::span<const unsigned char> data, PrivateTag /*unused*/) : FoFiBase(data)
 {
     encoding = nullptr;
     privateDicts = nullptr;

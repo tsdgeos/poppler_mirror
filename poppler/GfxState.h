@@ -512,7 +512,7 @@ public:
     void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
     void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
     void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
-    void getRGBLine(unsigned char *, unsigned char *out, int length) override;
+    void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
     void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
     void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
     void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
@@ -720,7 +720,8 @@ public:
     GfxColorSpace *getAlt() { return alt.get(); }
     const Function *getFunc() const { return func.get(); }
 
-    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA, PrivateTag = {});
+    GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA,
+                            PrivateTag /*unused*/ = {});
 
 private:
     const std::unique_ptr<GooString> name; // colorant name
@@ -766,7 +767,7 @@ public:
     const Function *getTintTransformFunc() const { return func.get(); }
 
     GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&alt, std::unique_ptr<Function> func, std::vector<std::unique_ptr<GfxSeparationColorSpace>> &&sepsCSA,
-                         const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag = {});
+                         const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag /*unused*/ = {});
 
 private:
     const int nComps; // number of components

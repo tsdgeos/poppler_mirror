@@ -175,7 +175,7 @@ void QPainterOutputDev::startDoc(PDFDoc *doc)
     m_codeToGID = nullptr;
 }
 
-void QPainterOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef *) { }
+void QPainterOutputDev::startPage(int /*pageNum*/, GfxState * /*state*/, XRef * /*xref*/) { }
 
 void QPainterOutputDev::endPage() { }
 

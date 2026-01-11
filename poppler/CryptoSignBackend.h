@@ -124,7 +124,7 @@ public:
     static std::optional<Backend::Type> getActive();
     static std::vector<Backend::Type> getAvailable();
     static std::unique_ptr<Backend> createActive();
-    static std::unique_ptr<Backend> create(Backend::Type);
+    static std::unique_ptr<Backend> create(Backend::Type backend);
     static std::optional<Backend::Type> typeFromString(std::string_view string);
     Factory() = delete;
     /// backend specific settings

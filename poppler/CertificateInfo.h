@@ -126,16 +126,16 @@ public:
     CertificateType getCertificateType() const;
 
     /* SETTERS */
-    void setVersion(int);
-    void setSerialNumber(const GooString &);
-    void setNickName(const GooString &);
-    void setIssuerInfo(EntityInfo &&);
-    void setValidity(Validity);
-    void setSubjectInfo(EntityInfo &&);
-    void setPublicKeyInfo(PublicKeyInfo &&);
-    void setKeyUsageExtensions(unsigned int);
-    void setCertificateDER(const GooString &);
-    void setIsSelfSigned(bool);
+    void setVersion(int version);
+    void setSerialNumber(const GooString &serialNumber);
+    void setNickName(const GooString &nickName);
+    void setIssuerInfo(EntityInfo &&issuerInfo);
+    void setValidity(Validity validity);
+    void setSubjectInfo(EntityInfo &&subjectInfo);
+    void setPublicKeyInfo(PublicKeyInfo &&pkInfo);
+    void setKeyUsageExtensions(unsigned int keyUsages);
+    void setCertificateDER(const GooString &certDer);
+    void setIsSelfSigned(bool isSelfSigned);
     void setKeyLocation(KeyLocation location);
     void setCertificateType(CertificateType type);
 

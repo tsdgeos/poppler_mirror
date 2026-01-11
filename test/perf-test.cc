@@ -455,7 +455,7 @@ static void StrList_Destroy(StrList **root)
     *root = nullptr;
 }
 
-static void my_error(ErrorCategory, Goffset /*pos*/, const char * /*msg*/)
+static void my_error(ErrorCategory /*category*/, Goffset /*pos*/, const char * /*msg*/)
 {
 #if 0
     char        buf[4096], *p = buf;

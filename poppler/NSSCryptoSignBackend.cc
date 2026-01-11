@@ -1240,7 +1240,7 @@ std::vector<unsigned char> HashContext::endHash()
     return digestBuffer;
 }
 
-HashContext::HashContext(HashAlgorithm algorithm, private_tag) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
+HashContext::HashContext(HashAlgorithm algorithm, private_tag /*unused*/) : hash_context { HASH_Create(HASH_GetHashTypeByOidTag(ConvertHashAlgorithmToNss(algorithm))) }, digest_alg_tag(algorithm) { }
 
 std::unique_ptr<HashContext> HashContext::create(HashAlgorithm algorithm)
 {

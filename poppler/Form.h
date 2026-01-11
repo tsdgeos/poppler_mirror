@@ -651,7 +651,7 @@ public:
     Ref getImageResource() const;
     void setImageResource(Ref imageResourceA);
 
-    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo);
 
     FormWidget *getCreateWidget();
 

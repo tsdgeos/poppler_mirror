@@ -21,9 +21,9 @@ public:
     void display();
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void keyPressEvent(QKeyEvent *) override;
-    void mousePressEvent(QMouseEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
 
 private:
     int m_currentPage;

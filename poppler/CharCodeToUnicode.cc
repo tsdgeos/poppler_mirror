@@ -437,17 +437,17 @@ void CharCodeToUnicode::addMappingInt(CharCode code, Unicode u)
     map[code] = u;
 }
 
-CharCodeToUnicode::CharCodeToUnicode(PrivateTag)
+CharCodeToUnicode::CharCodeToUnicode(PrivateTag /*unused*/)
 {
     isIdentity = false;
 }
 
-CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, PrivateTag) : tag(tagA)
+CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, PrivateTag /*unused*/) : tag(tagA)
 {
     map.resize(256, 0);
     isIdentity = false;
 }
-CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA, PrivateTag) : tag(tagA)
+CharCodeToUnicode::CharCodeToUnicode(const std::optional<std::string> &tagA, std::vector<Unicode> &&mapA, std::vector<CharCodeToUnicodeString> &&sMapA, PrivateTag /*unused*/) : tag(tagA)
 {
     map = std::move(mapA);
     sMap = std::move(sMapA);

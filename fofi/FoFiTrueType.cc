@@ -477,7 +477,7 @@ std::unique_ptr<FoFiTrueType> FoFiTrueType::load(const char *fileName, int faceI
     return ff;
 }
 
-FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag) : FoFiBase(std::move(fileA))
+FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag /*unused*/) : FoFiBase(std::move(fileA))
 {
     parsedOk = false;
     faceIndex = faceIndexA;
@@ -487,7 +487,7 @@ FoFiTrueType::FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, P
     parse();
 }
 
-FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag) : FoFiBase(data)
+FoFiTrueType::FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag /*unused*/) : FoFiBase(data)
 {
     parsedOk = false;
     faceIndex = faceIndexA;

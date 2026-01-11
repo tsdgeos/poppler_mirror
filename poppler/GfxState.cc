@@ -2598,7 +2598,7 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&na
 }
 
 GfxSeparationColorSpace::GfxSeparationColorSpace(std::unique_ptr<GooString> &&nameA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, bool nonMarkingA, unsigned int overprintMaskA, const std::vector<int> &mappingA,
-                                                 PrivateTag)
+                                                 PrivateTag /*unused*/)
     : name(std::move(nameA)), alt(std::move(altA))
 {
     func = std::move(funcA);
@@ -2835,7 +2835,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA, std::vector<std::string>
 }
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA, std::unique_ptr<GfxColorSpace> &&altA, std::unique_ptr<Function> funcA, std::vector<std::unique_ptr<GfxSeparationColorSpace>> &&sepsCSA,
-                                           const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag)
+                                           const std::vector<int> &mappingA, bool nonMarkingA, unsigned int overprintMaskA, PrivateTag /*unused*/)
     : nComps(nCompsA), names(namesA), alt(std::move(altA))
 {
     func = std::move(funcA);

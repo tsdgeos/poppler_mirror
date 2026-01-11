@@ -119,7 +119,7 @@ public:
     // Get the number of arbitrary paths used by the clip region.
     int getNumPaths() { return scanners.size(); }
 
-    explicit SplashClip(const SplashClip *clip, PrivateTag = {});
+    explicit SplashClip(const SplashClip *clip, PrivateTag /*unused*/ = {});
 
 protected:
     bool testClipPaths(int x, int y) const;

@@ -217,8 +217,8 @@ public:
     //     the identity CID-to-GID mapping is used
     void convertToType0(const std::string &psName, const std::vector<int> &codeMap, FoFiOutputFunc outputFunc, void *outputStream);
 
-    explicit FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag = {});
-    explicit FoFiType1C(std::span<const unsigned char> data, PrivateTag = {});
+    explicit FoFiType1C(std::vector<unsigned char> &&fileA, PrivateTag /*unused*/ = {});
+    explicit FoFiType1C(std::span<const unsigned char> data, PrivateTag /*unused*/ = {});
 
 private:
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);

@@ -101,7 +101,7 @@ std::shared_ptr<SplashFontFile> SplashFTFontFile::loadTrueTypeFont(SplashFTFontE
     return std::make_shared<SplashFTFontFile>(engineA, std::move(idA), std::move(src), faceA, std::move(codeToGIDA), true, false);
 }
 
-SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A, PrivateTag)
+SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA, std::unique_ptr<SplashFontFileID> idA, std::unique_ptr<SplashFontSrc> srcA, FT_Face faceA, std::vector<int> &&codeToGIDA, bool trueTypeA, bool type1A, PrivateTag /*unused*/)
     : SplashFontFile(std::move(idA), std::move(srcA))
 {
     engine = engineA;

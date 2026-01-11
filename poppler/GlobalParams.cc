@@ -910,7 +910,7 @@ static bool supportedFontForEmbedding(Unicode uChar, const char *filepath, int f
 */
 #if WITH_FONTCONFIGURATION_FONTCONFIG
 // not needed for fontconfig
-void GlobalParams::setupBaseFonts(const char *) { }
+void GlobalParams::setupBaseFonts(const char * /*unused*/) { }
 
 std::optional<std::string> GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont &font, GooString *substituteFontName)
 {

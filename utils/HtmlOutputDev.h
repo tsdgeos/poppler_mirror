@@ -286,7 +286,7 @@ private:
     static std::string mapEncodingToHtml(const std::string &encoding);
     void doProcessLink(AnnotLink *link);
     std::unique_ptr<GooString> getLinkDest(AnnotLink *link);
-    void dumpMetaVars(FILE *);
+    void dumpMetaVars(FILE *file);
     void doFrame(int firstPage);
     bool newHtmlOutlineLevel(FILE *output, const std::vector<OutlineItem *> *outlines, int level = 1);
     void newXmlOutlineLevel(FILE *output, const std::vector<OutlineItem *> *outlines);

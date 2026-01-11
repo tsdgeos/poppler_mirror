@@ -15,8 +15,8 @@ public:
     ~PDFDisplay() override;
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void keyPressEvent(QKeyEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void display();

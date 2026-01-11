@@ -160,8 +160,8 @@ public:
     // setup vert/vrt2 GSUB for specified lang
     int setupGSUB(const std::string &scriptName, const std::string &languageName);
 
-    FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag = {});
-    FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag = {});
+    FoFiTrueType(std::vector<unsigned char> &&fileA, int faceIndexA, PrivateTag /*unused*/ = {});
+    FoFiTrueType(std::span<const unsigned char> data, int faceIndexA, PrivateTag /*unused*/ = {});
 
 private:
     void cvtEncoding(char **encoding, FoFiOutputFunc outputFunc, void *outputStream) const;

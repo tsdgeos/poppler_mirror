@@ -26,7 +26,6 @@ Checks:  >
     -readability-function-cognitive-complexity,
     -readability-convert-member-functions-to-static,
     -readability-avoid-unconditional-preprocessor-if,
-    -readability-named-parameter,
     -readability-qualified-auto,
     -readability-suspicious-call-argument,
     -readability-string-compare,
@@ -57,5 +56,7 @@ CheckOptions:
   - key:             modernize-use-default-member-init.UseAssignment
     value:           '1'
   - key:             readability-simplify-boolean-expr.IgnoreMacros
+    value:           '1'
+  - key:             readability-named-parameter.InsertPlainNamesInForwardDecls
     value:           '1'
 ...
