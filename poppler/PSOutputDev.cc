@@ -6629,22 +6629,22 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace, b
     }
 }
 
-void PSOutputDev::opiBegin(GfxState *state, Dict *opiDict)
+void PSOutputDev::opiBegin(GfxState *state, const Dict &opiDict)
 {
     if (generateOPI) {
-        Object dict = opiDict->lookup("2.0");
+        Object dict = opiDict.lookup("2.0");
         if (dict.isDict()) {
-            opiBegin20(state, dict.getDict());
+            opiBegin20(state, *dict.getDict());
         } else {
-            dict = opiDict->lookup("1.3");
+            dict = opiDict.lookup("1.3");
             if (dict.isDict()) {
-                opiBegin13(state, dict.getDict());
+                opiBegin13(state, *dict.getDict());
             }
         }
     }
 }
 
-void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
+void PSOutputDev::opiBegin20(GfxState * /*state*/, const Dict &dict)
 {
     double width, height, left, right, top, bottom;
     int w, h;
@@ -6652,13 +6652,13 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
     writePS("%%BeginOPI: 2.0\n");
     writePS("%%Distilled\n");
 
-    Object obj1 = dict->lookup("F");
+    Object obj1 = dict.lookup("F");
     Object obj2 = getFileSpecName(&obj1);
     if (obj2.isString()) {
         writePSFmt("%%ImageFileName: {0:t}\n", obj2.getString());
     }
 
-    obj1 = dict->lookup("MainImage");
+    obj1 = dict.lookup("MainImage");
     if (obj1.isString()) {
         writePSFmt("%%MainImage: {0:t}\n", obj1.getString());
     }
@@ -6666,7 +6666,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
     //~ ignoring 'Tags' entry
     //~ need to use writePSString() and deal with >255-char lines
 
-    obj1 = dict->lookup("Size");
+    obj1 = dict.lookup("Size");
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         obj2 = obj1.arrayGet(0);
         width = obj2.getNum();
@@ -6675,7 +6675,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
         writePSFmt("%%ImageDimensions: {0:.6g} {1:.6g}\n", width, height);
     }
 
-    obj1 = dict->lookup("CropRect");
+    obj1 = dict.lookup("CropRect");
     if (obj1.isArray() && obj1.arrayGetLength() == 4) {
         obj2 = obj1.arrayGet(0);
         left = obj2.getNum();
@@ -6688,12 +6688,12 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
         writePSFmt("%%ImageCropRect: {0:.6g} {1:.6g} {2:.6g} {3:.6g}\n", left, top, right, bottom);
     }
 
-    obj1 = dict->lookup("Overprint");
+    obj1 = dict.lookup("Overprint");
     if (obj1.isBool()) {
         writePSFmt("%%ImageOverprint: {0:s}\n", obj1.getBool() ? "true" : "false");
     }
 
-    obj1 = dict->lookup("Inks");
+    obj1 = dict.lookup("Inks");
     if (obj1.isName()) {
         writePSFmt("%%ImageInks: {0:s}\n", obj1.getName());
     } else if (obj1.isArray() && obj1.arrayGetLength() >= 1) {
@@ -6717,7 +6717,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
 
     writePS("%%BeginIncludedImage\n");
 
-    obj1 = dict->lookup("IncludedImageDimensions");
+    obj1 = dict.lookup("IncludedImageDimensions");
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         obj2 = obj1.arrayGet(0);
         w = obj2.getInt();
@@ -6726,7 +6726,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
         writePSFmt("%%IncludedImageDimensions: {0:d} {1:d}\n", w, h);
     }
 
-    obj1 = dict->lookup("IncludedImageQuality");
+    obj1 = dict.lookup("IncludedImageQuality");
     if (obj1.isNum()) {
         writePSFmt("%%IncludedImageQuality: {0:.6g}\n", obj1.getNum());
     }
@@ -6734,7 +6734,7 @@ void PSOutputDev::opiBegin20(GfxState * /*state*/, Dict *dict)
     ++opi20Nest;
 }
 
-void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
+void PSOutputDev::opiBegin13(GfxState *state, const Dict &dict)
 {
     int left, right, top, bottom, samples, bits, width, height;
     double c, m, y, k;
@@ -6747,13 +6747,13 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
     writePS("/opiMatrix2 matrix currentmatrix def\n");
     writePS("opiMatrix setmatrix\n");
 
-    Object obj1 = dict->lookup("F");
+    Object obj1 = dict.lookup("F");
     Object obj2 = getFileSpecName(&obj1);
     if (obj2.isString()) {
         writePSFmt("%ALDImageFileName: {0:t}\n", obj2.getString());
     }
 
-    obj1 = dict->lookup("CropRect");
+    obj1 = dict.lookup("CropRect");
     if (obj1.isArray() && obj1.arrayGetLength() == 4) {
         obj2 = obj1.arrayGet(0);
         left = obj2.getInt();
@@ -6766,7 +6766,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePSFmt("%ALDImageCropRect: {0:d} {1:d} {2:d} {3:d}\n", left, top, right, bottom);
     }
 
-    obj1 = dict->lookup("Color");
+    obj1 = dict.lookup("Color");
     if (obj1.isArray() && obj1.arrayGetLength() == 5) {
         obj2 = obj1.arrayGet(0);
         c = obj2.getNum();
@@ -6784,7 +6784,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         }
     }
 
-    obj1 = dict->lookup("ColorType");
+    obj1 = dict.lookup("ColorType");
     if (obj1.isName()) {
         writePSFmt("%ALDImageColorType: {0:s}\n", obj1.getName());
     }
@@ -6792,7 +6792,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
     //~ ignores 'Comments' entry
     //~ need to handle multiple lines
 
-    obj1 = dict->lookup("CropFixed");
+    obj1 = dict.lookup("CropFixed");
     if (obj1.isArray()) {
         obj2 = obj1.arrayGet(0);
         ulx = obj2.getNum();
@@ -6805,7 +6805,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePSFmt("%ALDImageCropFixed: {0:.6g} {1:.6g} {2:.6g} {3:.6g}\n", ulx, uly, lrx, lry);
     }
 
-    obj1 = dict->lookup("GrayMap");
+    obj1 = dict.lookup("GrayMap");
     if (obj1.isArray()) {
         writePS("%ALDImageGrayMap:");
         for (i = 0; i < obj1.arrayGetLength(); i += 16) {
@@ -6820,12 +6820,12 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePS("\n");
     }
 
-    obj1 = dict->lookup("ID");
+    obj1 = dict.lookup("ID");
     if (obj1.isString()) {
         writePSFmt("%ALDImageID: {0:t}\n", obj1.getString());
     }
 
-    obj1 = dict->lookup("ImageType");
+    obj1 = dict.lookup("ImageType");
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         obj2 = obj1.arrayGet(0);
         samples = obj2.getInt();
@@ -6834,12 +6834,12 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePSFmt("%ALDImageType: {0:d} {1:d}\n", samples, bits);
     }
 
-    dict->lookup("Overprint");
+    dict.lookup("Overprint");
     if (obj1.isBool()) {
         writePSFmt("%ALDImageOverprint: {0:s}\n", obj1.getBool() ? "true" : "false");
     }
 
-    obj1 = dict->lookup("Position");
+    obj1 = dict.lookup("Position");
     if (obj1.isArray() && obj1.arrayGetLength() == 8) {
         obj2 = obj1.arrayGet(0);
         llx = obj2.getNum();
@@ -6864,7 +6864,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePSFmt("%ALDImagePosition: {0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g} {6:.6g} {7:.6g}\n", tllx, tlly, tulx, tuly, turx, tury, tlrx, tlry);
     }
 
-    obj1 = dict->lookup("Resolution");
+    obj1 = dict.lookup("Resolution");
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         obj2 = obj1.arrayGet(0);
         horiz = obj2.getNum();
@@ -6873,7 +6873,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
         writePSFmt("%ALDImageResoution: {0:.6g} {1:.6g}\n", horiz, vert);
     }
 
-    obj1 = dict->lookup("Size");
+    obj1 = dict.lookup("Size");
     if (obj1.isArray() && obj1.arrayGetLength() == 2) {
         obj2 = obj1.arrayGet(0);
         width = obj2.getInt();
@@ -6885,12 +6885,12 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict)
     //~ ignoring 'Tags' entry
     //~ need to use writePSString() and deal with >255-char lines
 
-    obj1 = dict->lookup("Tint");
+    obj1 = dict.lookup("Tint");
     if (obj1.isNum()) {
         writePSFmt("%ALDImageTint: {0:.6g}\n", obj1.getNum());
     }
 
-    obj1 = dict->lookup("Transparency");
+    obj1 = dict.lookup("Transparency");
     if (obj1.isBool()) {
         writePSFmt("%ALDImageTransparency: {0:s}\n", obj1.getBool() ? "true" : "false");
     }
@@ -6926,17 +6926,17 @@ void PSOutputDev::opiTransform(GfxState *state, double x0, double y0, double *x1
     *y1 *= yScale;
 }
 
-void PSOutputDev::opiEnd(GfxState * /*state*/, Dict *opiDict)
+void PSOutputDev::opiEnd(GfxState * /*state*/, const Dict &opiDict)
 {
     if (generateOPI) {
-        Object dict = opiDict->lookup("2.0");
+        Object dict = opiDict.lookup("2.0");
         if (dict.isDict()) {
             writePS("%%EndIncludedImage\n");
             writePS("%%EndOPI\n");
             writePS("grestore\n");
             --opi20Nest;
         } else {
-            dict = opiDict->lookup("1.3");
+            dict = opiDict.lookup("1.3");
             if (dict.isDict()) {
                 writePS("%%EndObject\n");
                 writePS("restore\n");

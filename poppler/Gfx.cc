@@ -4117,7 +4117,7 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
 
     Object opiDict = obj1.streamGetDict()->lookup("OPI");
     if (opiDict.isDict()) {
-        out->opiBegin(state, opiDict.getDict());
+        out->opiBegin(state, *opiDict.getDict());
     }
     Object obj2 = obj1.streamGetDict()->lookup("Subtype");
     if (obj2.isName("Image")) {
@@ -4159,7 +4159,7 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
         error(errSyntaxError, getPos(), "XObject subtype is missing or wrong type");
     }
     if (opiDict.isDict()) {
-        out->opiEnd(state, opiDict.getDict());
+        out->opiEnd(state, *opiDict.getDict());
     }
 }
 
