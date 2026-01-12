@@ -53,6 +53,7 @@
 
 #include <config.h>
 
+#include <climits>
 #include <cstring>
 #include <cmath>
 #include <vector>
