@@ -1287,7 +1287,7 @@ void PSOutputDev::postInit()
 {
     Catalog *catalog;
     PDFRectangle *box;
-    int w, h, i;
+    int w, h;
 
     if (postInitDone || !ok) {
         return;
@@ -1335,13 +1335,14 @@ void PSOutputDev::postInit()
         if (h > paperHeight) {
             paperHeight = h;
         }
-        for (i = 0; i < (int)paperSizes.size(); ++i) {
-            const PSOutPaperSize &size = paperSizes[i];
+        size_t paperSizeI = 0;
+        for (paperSizeI = 0; paperSizeI < paperSizes.size(); ++paperSizeI) {
+            const PSOutPaperSize &size = paperSizes[paperSizeI];
             if (pageDimensionEqual(w, size.w) && pageDimensionEqual(h, size.h)) {
                 break;
             }
         }
-        if (i == (int)paperSizes.size()) {
+        if (paperSizeI == paperSizes.size()) {
             const StandardMedia *media = standardMedia;
             std::string name;
             while (media->name) {
@@ -1358,7 +1359,7 @@ void PSOutputDev::postInit()
             }
             paperSizes.emplace_back(std::move(name), w, h);
         }
-        pagePaperSize.insert(std::pair<int, int>(pg, i));
+        pagePaperSize.insert(std::pair<int, size_t>(pg, paperSizeI));
         if (!paperMatch) {
             break; // we only need one entry when all pages are the same size
         }
@@ -1378,8 +1379,8 @@ void PSOutputDev::postInit()
     // initialize fontIDs, fontFileIDs, and fontFileNames lists
     fontIDs.reserve(64);
     fontIDs.resize(0);
-    for (i = 0; i < 14; ++i) {
-        fontNames.emplace(psBase14SubstFonts[i].psName);
+    for (const PSSubstFont &pSSubstFont : psBase14SubstFonts) {
+        fontNames.emplace(pSSubstFont.psName);
     }
     font16EncLen = 0;
     font16EncSize = 0;

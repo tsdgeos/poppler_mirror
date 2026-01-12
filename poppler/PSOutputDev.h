@@ -461,7 +461,7 @@ private:
 
     std::vector<PSOutPaperSize> paperSizes; // list of used paper sizes, if paperMatch
                                             //   is true
-    std::map<int, int> pagePaperSize; // page num to paperSize entry mapping
+    std::map<int, size_t> pagePaperSize; // page num to paperSize entry mapping
     double tx0, ty0; // global translation
     double xScale0, yScale0; // global scaling
     int rotate0; // rotation angle (0, 90, 180, 270)
