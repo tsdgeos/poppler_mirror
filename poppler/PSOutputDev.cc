@@ -5547,7 +5547,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
     GfxColor color;
     GfxCMYK cmyk;
     int c;
-    int col, i, j, x0, x1, y;
+    int col, j, x0, x1, y;
     char dataBuf[4096];
 
     rectsOutLen = 0;
@@ -5570,7 +5570,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             if (!(line = imgStr.getLine())) {
                 break;
             }
-            i = 0;
+            int i = 0;
             rects1Len = 0;
             for (x0 = 0; x0 < width; ++x0) {
                 for (j = 0; j < numComps; ++j) {
@@ -5664,7 +5664,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             rects0Len = rects1Len;
             rects1Len = i;
         }
-        for (i = 0; i < rects0Len; ++i) {
+        for (int i = 0; i < rects0Len; ++i) {
             if (rectsOutLen == rectsOutSize) {
                 rectsOutSize *= 2;
                 rectsOut = (PSOutImgClipRect *)greallocn(rectsOut, rectsOutSize, sizeof(PSOutImgClipRect));
@@ -5677,7 +5677,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
         }
         if (rectsOutLen < 65536 / 4) {
             writePSFmt("{0:d} array 0\n", rectsOutLen * 4);
-            for (i = 0; i < rectsOutLen; ++i) {
+            for (int i = 0; i < rectsOutLen; ++i) {
                 writePSFmt("[{0:d} {1:d} {2:d} {3:d}] pr\n", rectsOut[i].x0, rectsOut[i].y0, rectsOut[i].x1 - rectsOut[i].x0, rectsOut[i].y1 - rectsOut[i].y0);
             }
             writePSFmt("pop {0:d} {1:d} pdfImClip\n", width, height);
@@ -5685,7 +5685,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             //  would be over the limit of array size.
             //  make each rectangle path and clip.
             writePS("gsave newpath\n");
-            for (i = 0; i < rectsOutLen; ++i) {
+            for (int i = 0; i < rectsOutLen; ++i) {
                 writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} re\n", ((double)rectsOut[i].x0) / width, ((double)rectsOut[i].y0) / height, ((double)(rectsOut[i].x1 - rectsOut[i].x0)) / width,
                            ((double)(rectsOut[i].y1 - rectsOut[i].y0)) / height);
             }
@@ -5740,7 +5740,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
                 } else {
                     writePSChar(c);
                     ++col;
-                    for (i = 1; i <= (useASCIIHex ? 1 : 4); ++i) {
+                    for (int i = 1; i <= (useASCIIHex ? 1 : 4); ++i) {
                         do {
                             c = str2->getChar();
                         } while (c == '\n' || c == '\r');
@@ -5797,7 +5797,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             writePSFmt("{0:.4g} {1:.4g}", colorMap->getDecodeLow(0) * n, colorMap->getDecodeHigh(0) * n);
         } else if (colorMap->getColorSpace()->getMode() == csDeviceN) {
             numComps = ((GfxDeviceNColorSpace *)colorMap->getColorSpace())->getAlt()->getNComps();
-            for (i = 0; i < numComps; ++i) {
+            for (int i = 0; i < numComps; ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
@@ -5805,7 +5805,7 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
             }
         } else {
             numComps = colorMap->getNumPixelComps();
-            for (i = 0; i < numComps; ++i) {
+            for (int i = 0; i < numComps; ++i) {
                 if (i > 0) {
                     writePS(" ");
                 }
@@ -5938,10 +5938,10 @@ void PSOutputDev::doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colo
 
         // copy the stream data
         if (str->rewind()) {
-            i = 0;
+            size_t i = 0;
             while ((c = str->getChar()) != EOF) {
                 dataBuf[i++] = c;
-                if (i >= (int)sizeof(dataBuf)) {
+                if (i >= sizeof(dataBuf)) {
                     writePSBuf(dataBuf, i);
                     i = 0;
                 }
