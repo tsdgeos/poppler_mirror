@@ -472,7 +472,7 @@ private:
     double epsX1, epsY1, // EPS bounding box (unrotated)
             epsX2, epsY2;
 
-    GooString *embFontList; // resource comments for embedded fonts
+    std::string embFontList; // resource comments for embedded fonts
 
     int processColors; // used process colors
     PSOutCustomColor // used custom colors

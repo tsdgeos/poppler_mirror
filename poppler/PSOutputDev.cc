@@ -1085,7 +1085,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA, char *psTitleA, con
 
     font16Enc = nullptr;
     formIDs = nullptr;
-    embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
     t3String = nullptr;
@@ -1139,7 +1138,6 @@ PSOutputDev::PSOutputDev(int fdA, PDFDoc *docA, char *psTitleA, const std::vecto
 
     font16Enc = nullptr;
     formIDs = nullptr;
-    embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
     t3String = nullptr;
@@ -1174,7 +1172,6 @@ PSOutputDev::PSOutputDev(FoFiOutputFunc outputFuncA, void *outputStreamA, char *
 
     font16Enc = nullptr;
     formIDs = nullptr;
-    embFontList = nullptr;
     customColors = nullptr;
     haveTextClip = false;
     t3String = nullptr;
@@ -1445,9 +1442,6 @@ void PSOutputDev::postInit()
     }
 #endif
 
-    // initialize embedded font resource comment list
-    embFontList = new GooString();
-
     if (!manualCtrl) {
         Page *page;
         // this check is needed in case the document has zero pages
@@ -1501,7 +1495,6 @@ PSOutputDev::~PSOutputDev()
         }
 #endif
     }
-    delete embFontList;
     if (font16Enc) {
         for (i = 0; i < font16EncLen; ++i) {
             delete font16Enc[i].enc;
@@ -1746,7 +1739,7 @@ void PSOutputDev::writeTrailer()
     } else {
         writePS("end\n");
         writePS("%%DocumentSuppliedResources:\n");
-        writePS(embFontList->c_str());
+        writePS(embFontList.c_str());
         if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
             writePS("%%DocumentProcessColors:");
             if (processColors & psProcessCyan) {
@@ -2091,9 +2084,9 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName)
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     if (strObj.streamGetChar() == 0x80 && strObj.streamGetChar() == 1) {
         // PFB format
@@ -2232,9 +2225,9 @@ void PSOutputDev::setupExternalType1Font(const std::string &fileName, GooString 
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // copy the font file
     if (!(fontFile = openFile(fileName.c_str(), "rb"))) {
@@ -2307,9 +2300,9 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psN
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 1 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2337,9 +2330,9 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 1 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2359,9 +2352,9 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, GooString *psName, in
 {
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 42 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2383,9 +2376,9 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, const std::string &fi
 {
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 42 font
     if (std::unique_ptr<FoFiTrueType> ffTT = FoFiTrueType::load(fileName.c_str(), faceIndex)) {
@@ -2417,9 +2410,9 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, const std::string 
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 0 font
     //~ this should use fontNum to load the correct font
@@ -2467,9 +2460,9 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *p
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 0 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2493,9 +2486,9 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, GooString *psName,
 {
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 0 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2531,9 +2524,9 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // convert it to a Type 0 font
     std::optional<std::vector<unsigned char>> fontBuf = font->readEmbFontFile(xref);
@@ -2574,9 +2567,9 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName, Dict *parentR
 
     // beginning comment
     writePSFmt("%%BeginResource: font {0:t}\n", psName);
-    embFontList->append("%%+ font ");
-    embFontList->append(psName->c_str());
-    embFontList->append("\n");
+    embFontList.append("%%+ font ");
+    embFontList.append(psName->c_str());
+    embFontList.append("\n");
 
     // font dictionary
     writePS("8 dict begin\n");
