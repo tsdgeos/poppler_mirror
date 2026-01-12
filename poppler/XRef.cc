@@ -1227,7 +1227,11 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
         if (e->gen != gen || e->offset < 0) {
             goto err;
         }
-        Parser parser { this, str->makeSubStream(start + e->offset, false, 0, Object::null()), true };
+        Goffset subStreamOffset;
+        if (checkedAdd(start, e->offset, &subStreamOffset)) {
+            goto err;
+        }
+        Parser parser { this, str->makeSubStream(subStreamOffset, false, 0, Object::null()), true };
         obj1 = parser.getObj(recursion);
         obj2 = parser.getObj(recursion);
         obj3 = parser.getObj(recursion);
