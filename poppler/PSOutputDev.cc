@@ -1286,7 +1286,6 @@ void PSOutputDev::init(FoFiOutputFunc outputFuncA, void *outputStreamA, PSFileTy
 void PSOutputDev::postInit()
 {
     Catalog *catalog;
-    PDFRectangle *box;
     int w, h;
 
     if (postInitDone || !ok) {
@@ -1456,9 +1455,8 @@ void PSOutputDev::postInit()
             writeHeader(pageList.size(), page->getMediaBox(), page->getCropBox(), page->getRotate(), psTitle);
         } else {
             error(errSyntaxError, -1, "Invalid page {0:d}", pageList[0]);
-            box = new PDFRectangle(0, 0, 1, 1);
-            writeHeader(pageList.size(), box, box, 0, psTitle);
-            delete box;
+            const PDFRectangle box(0, 0, 1, 1);
+            writeHeader(pageList.size(), &box, &box, 0, psTitle);
         }
         if (mode != psModeForm) {
             writePS("%%BeginProlog\n");
