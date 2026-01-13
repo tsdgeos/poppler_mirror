@@ -446,7 +446,7 @@ TextWord::~TextWord() = default;
 
 void TextWord::addChar(TextFontInfo *fontA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA)
 {
-    chars.push_back(CharInfo { u, c, charPosA, 0.0, fontA, textMatA });
+    chars.push_back(CharInfo { .text = u, .charcode = c, .charPos = charPosA, .edge = 0.0, .font = fontA, .textMat = textMatA });
     charPosEnd = charPosA + charLen;
 
     if (len() == 1) {
@@ -592,18 +592,18 @@ struct CombiningTable
 };
 
 static const struct CombiningTable combiningTable[] = {
-    { 0x0060, 0x0300 }, // grave
-    { 0x00a8, 0x0308 }, // dieresis
-    { 0x00af, 0x0304 }, // macron
-    { 0x00b4, 0x0301 }, // acute
-    { 0x00b8, 0x0327 }, // cedilla
-    { 0x02c6, 0x0302 }, // circumflex
-    { 0x02c7, 0x030c }, // caron
-    { 0x02d8, 0x0306 }, // breve
-    { 0x02d9, 0x0307 }, // dotaccent
-    { 0x02da, 0x030a }, // ring
-    { 0x02dc, 0x0303 }, // tilde
-    { 0x02dd, 0x030b } // hungarumlaut (double acute accent)
+    { .base = 0x0060, .comb = 0x0300 }, // grave
+    { .base = 0x00a8, .comb = 0x0308 }, // dieresis
+    { .base = 0x00af, .comb = 0x0304 }, // macron
+    { .base = 0x00b4, .comb = 0x0301 }, // acute
+    { .base = 0x00b8, .comb = 0x0327 }, // cedilla
+    { .base = 0x02c6, .comb = 0x0302 }, // circumflex
+    { .base = 0x02c7, .comb = 0x030c }, // caron
+    { .base = 0x02d8, .comb = 0x0306 }, // breve
+    { .base = 0x02d9, .comb = 0x0307 }, // dotaccent
+    { .base = 0x02da, .comb = 0x030a }, // ring
+    { .base = 0x02dc, .comb = 0x0303 }, // tilde
+    { .base = 0x02dd, .comb = 0x030b } // hungarumlaut (double acute accent)
 };
 
 // returning combining versions of characters
@@ -647,7 +647,7 @@ bool TextWord::addCombining(TextFontInfo *fontA, double fontSizeA, double x, dou
 
         // Add character, but don't adjust edge / bounding box because
         // combining character's positioning could be odd.
-        chars.emplace_back(CharInfo { cCurrent, c, charPosA, edgeMid, fontA, textMatA });
+        chars.emplace_back(CharInfo { .text = cCurrent, .charcode = c, .charPos = charPosA, .edge = edgeMid, .font = fontA, .textMat = textMatA });
         charPosEnd = charPosA + charLen;
 
         return true;
@@ -677,7 +677,7 @@ bool TextWord::addCombining(TextFontInfo *fontA, double fontSizeA, double x, dou
 
         fontSize = fontSizeA;
         // move combining character to after base character
-        chars.emplace_back(CharInfo { cPrev, chars.back().charcode, charPosA, edgeMid, chars.back().font, chars.back().textMat });
+        chars.emplace_back(CharInfo { .text = cPrev, .charcode = chars.back().charcode, .charPos = charPosA, .edge = edgeMid, .font = chars.back().font, .textMat = chars.back().textMat });
 
         auto &lastChar = chars[chars.size() - 2];
 

@@ -42,7 +42,7 @@
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Jonathan Hähne <jonathan.haehne@hotmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
@@ -339,9 +339,9 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     cairo_pattern_destroy(stroke_pattern);
 
     fill_pattern = cairo_pattern_create_rgb(0., 0., 0.);
-    fill_color = { 0, 0, 0 };
+    fill_color = { .r = 0, .g = 0, .b = 0 };
     stroke_pattern = cairo_pattern_reference(fill_pattern);
-    stroke_color = { 0, 0, 0 };
+    stroke_color = { .r = 0, .g = 0, .b = 0 };
 
     if (textPage) {
         textPage->startPage(state);

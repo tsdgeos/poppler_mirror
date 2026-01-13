@@ -569,7 +569,7 @@ void Document::getPdfVersion(int *major, int *minor) const
 
 Document::PdfVersion Document::getPdfVersion() const
 {
-    return PdfVersion { m_doc->doc->getPDFMajorVersion(), m_doc->doc->getPDFMinorVersion() };
+    return PdfVersion { .major = m_doc->doc->getPDFMajorVersion(), .minor = m_doc->doc->getPDFMinorVersion() };
 }
 
 Page *Document::page(const QString &label) const

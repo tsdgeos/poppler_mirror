@@ -184,7 +184,7 @@ public:
     // Return the catalog object reference.
     int getRootNum() const { return rootNum; }
     int getRootGen() const { return rootGen; }
-    Ref getRoot() const { return { rootNum, rootGen }; }
+    Ref getRoot() const { return { .num = rootNum, .gen = rootGen }; }
 
     // Get end position for a stream in a damaged file.
     // Returns false if unknown or file is not damaged.

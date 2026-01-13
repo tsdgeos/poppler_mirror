@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2022 Zachary Travis <ztravis@everlaw.com>
 // Copyright (C) 2022, 2024 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -179,8 +179,9 @@ struct T42Table
 // TrueType tables to be embedded in Type 42 fonts.
 // NB: the table names must be in alphabetical order here.
 #define nT42Tables 11
-static const T42Table t42Tables[nT42Tables] = { { "cvt ", true }, { "fpgm", true }, { "glyf", true }, { "head", true },  { "hhea", true }, { "hmtx", true },
-                                                { "loca", true }, { "maxp", true }, { "prep", true }, { "vhea", false }, { "vmtx", false } };
+static const T42Table t42Tables[nT42Tables] = { { .tag = "cvt ", .required = true }, { .tag = "fpgm", .required = true },  { .tag = "glyf", .required = true }, { .tag = "head", .required = true },
+                                                { .tag = "hhea", .required = true }, { .tag = "hmtx", .required = true },  { .tag = "loca", .required = true }, { .tag = "maxp", .required = true },
+                                                { .tag = "prep", .required = true }, { .tag = "vhea", .required = false }, { .tag = "vmtx", .required = false } };
 #define t42HeadTable 3
 #define t42LocaTable 6
 #define t42GlyfTable 2

@@ -143,87 +143,87 @@
 //------------------------------------------------------------------------
 
 const Operator Gfx::opTab[] = {
-    { "\"", 3, { tchkNum, tchkNum, tchkString }, &Gfx::opMoveSetShowText },
-    { "'", 1, { tchkString }, &Gfx::opMoveShowText },
-    { "B", 0, { tchkNone }, &Gfx::opFillStroke },
-    { "B*", 0, { tchkNone }, &Gfx::opEOFillStroke },
-    { "BDC", 2, { tchkName, tchkProps }, &Gfx::opBeginMarkedContent },
-    { "BI", 0, { tchkNone }, &Gfx::opBeginImage },
-    { "BMC", 1, { tchkName }, &Gfx::opBeginMarkedContent },
-    { "BT", 0, { tchkNone }, &Gfx::opBeginText },
-    { "BX", 0, { tchkNone }, &Gfx::opBeginIgnoreUndef },
-    { "CS", 1, { tchkName }, &Gfx::opSetStrokeColorSpace },
-    { "DP", 2, { tchkName, tchkProps }, &Gfx::opMarkPoint },
-    { "Do", 1, { tchkName }, &Gfx::opXObject },
-    { "EI", 0, { tchkNone }, &Gfx::opEndImage },
-    { "EMC", 0, { tchkNone }, &Gfx::opEndMarkedContent },
-    { "ET", 0, { tchkNone }, &Gfx::opEndText },
-    { "EX", 0, { tchkNone }, &Gfx::opEndIgnoreUndef },
-    { "F", 0, { tchkNone }, &Gfx::opFill },
-    { "G", 1, { tchkNum }, &Gfx::opSetStrokeGray },
-    { "ID", 0, { tchkNone }, &Gfx::opImageData },
-    { "J", 1, { tchkInt }, &Gfx::opSetLineCap },
-    { "K", 4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetStrokeCMYKColor },
-    { "M", 1, { tchkNum }, &Gfx::opSetMiterLimit },
-    { "MP", 1, { tchkName }, &Gfx::opMarkPoint },
-    { "Q", 0, { tchkNone }, &Gfx::opRestore },
-    { "RG", 3, { tchkNum, tchkNum, tchkNum }, &Gfx::opSetStrokeRGBColor },
-    { "S", 0, { tchkNone }, &Gfx::opStroke },
-    { "SC", -4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetStrokeColor },
-    { "SCN",
-      -33,
-      { tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN,
-        tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN },
-      &Gfx::opSetStrokeColorN },
-    { "T*", 0, { tchkNone }, &Gfx::opTextNextLine },
-    { "TD", 2, { tchkNum, tchkNum }, &Gfx::opTextMoveSet },
-    { "TJ", 1, { tchkArray }, &Gfx::opShowSpaceText },
-    { "TL", 1, { tchkNum }, &Gfx::opSetTextLeading },
-    { "Tc", 1, { tchkNum }, &Gfx::opSetCharSpacing },
-    { "Td", 2, { tchkNum, tchkNum }, &Gfx::opTextMove },
-    { "Tf", 2, { tchkName, tchkNum }, &Gfx::opSetFont },
-    { "Tj", 1, { tchkString }, &Gfx::opShowText },
-    { "Tm", 6, { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetTextMatrix },
-    { "Tr", 1, { tchkInt }, &Gfx::opSetTextRender },
-    { "Ts", 1, { tchkNum }, &Gfx::opSetTextRise },
-    { "Tw", 1, { tchkNum }, &Gfx::opSetWordSpacing },
-    { "Tz", 1, { tchkNum }, &Gfx::opSetHorizScaling },
-    { "W", 0, { tchkNone }, &Gfx::opClip },
-    { "W*", 0, { tchkNone }, &Gfx::opEOClip },
-    { "b", 0, { tchkNone }, &Gfx::opCloseFillStroke },
-    { "b*", 0, { tchkNone }, &Gfx::opCloseEOFillStroke },
-    { "c", 6, { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opCurveTo },
-    { "cm", 6, { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opConcat },
-    { "cs", 1, { tchkName }, &Gfx::opSetFillColorSpace },
-    { "d", 2, { tchkArray, tchkNum }, &Gfx::opSetDash },
-    { "d0", 2, { tchkNum, tchkNum }, &Gfx::opSetCharWidth },
-    { "d1", 6, { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetCacheDevice },
-    { "f", 0, { tchkNone }, &Gfx::opFill },
-    { "f*", 0, { tchkNone }, &Gfx::opEOFill },
-    { "g", 1, { tchkNum }, &Gfx::opSetFillGray },
-    { "gs", 1, { tchkName }, &Gfx::opSetExtGState },
-    { "h", 0, { tchkNone }, &Gfx::opClosePath },
-    { "i", 1, { tchkNum }, &Gfx::opSetFlat },
-    { "j", 1, { tchkInt }, &Gfx::opSetLineJoin },
-    { "k", 4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetFillCMYKColor },
-    { "l", 2, { tchkNum, tchkNum }, &Gfx::opLineTo },
-    { "m", 2, { tchkNum, tchkNum }, &Gfx::opMoveTo },
-    { "n", 0, { tchkNone }, &Gfx::opEndPath },
-    { "q", 0, { tchkNone }, &Gfx::opSave },
-    { "re", 4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opRectangle },
-    { "rg", 3, { tchkNum, tchkNum, tchkNum }, &Gfx::opSetFillRGBColor },
-    { "ri", 1, { tchkName }, &Gfx::opSetRenderingIntent },
-    { "s", 0, { tchkNone }, &Gfx::opCloseStroke },
-    { "sc", -4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opSetFillColor },
-    { "scn",
-      -33,
-      { tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN,
-        tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN },
-      &Gfx::opSetFillColorN },
-    { "sh", 1, { tchkName }, &Gfx::opShFill },
-    { "v", 4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opCurveTo1 },
-    { "w", 1, { tchkNum }, &Gfx::opSetLineWidth },
-    { "y", 4, { tchkNum, tchkNum, tchkNum, tchkNum }, &Gfx::opCurveTo2 },
+    { .name = "\"", .numArgs = 3, .tchk = { tchkNum, tchkNum, tchkString }, .func = &Gfx::opMoveSetShowText },
+    { .name = "'", .numArgs = 1, .tchk = { tchkString }, .func = &Gfx::opMoveShowText },
+    { .name = "B", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opFillStroke },
+    { .name = "B*", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEOFillStroke },
+    { .name = "BDC", .numArgs = 2, .tchk = { tchkName, tchkProps }, .func = &Gfx::opBeginMarkedContent },
+    { .name = "BI", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opBeginImage },
+    { .name = "BMC", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opBeginMarkedContent },
+    { .name = "BT", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opBeginText },
+    { .name = "BX", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opBeginIgnoreUndef },
+    { .name = "CS", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opSetStrokeColorSpace },
+    { .name = "DP", .numArgs = 2, .tchk = { tchkName, tchkProps }, .func = &Gfx::opMarkPoint },
+    { .name = "Do", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opXObject },
+    { .name = "EI", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEndImage },
+    { .name = "EMC", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEndMarkedContent },
+    { .name = "ET", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEndText },
+    { .name = "EX", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEndIgnoreUndef },
+    { .name = "F", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opFill },
+    { .name = "G", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetStrokeGray },
+    { .name = "ID", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opImageData },
+    { .name = "J", .numArgs = 1, .tchk = { tchkInt }, .func = &Gfx::opSetLineCap },
+    { .name = "K", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetStrokeCMYKColor },
+    { .name = "M", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetMiterLimit },
+    { .name = "MP", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opMarkPoint },
+    { .name = "Q", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opRestore },
+    { .name = "RG", .numArgs = 3, .tchk = { tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetStrokeRGBColor },
+    { .name = "S", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opStroke },
+    { .name = "SC", .numArgs = -4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetStrokeColor },
+    { .name = "SCN",
+      .numArgs = -33,
+      .tchk = { tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN,
+                tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN },
+      .func = &Gfx::opSetStrokeColorN },
+    { .name = "T*", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opTextNextLine },
+    { .name = "TD", .numArgs = 2, .tchk = { tchkNum, tchkNum }, .func = &Gfx::opTextMoveSet },
+    { .name = "TJ", .numArgs = 1, .tchk = { tchkArray }, .func = &Gfx::opShowSpaceText },
+    { .name = "TL", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetTextLeading },
+    { .name = "Tc", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetCharSpacing },
+    { .name = "Td", .numArgs = 2, .tchk = { tchkNum, tchkNum }, .func = &Gfx::opTextMove },
+    { .name = "Tf", .numArgs = 2, .tchk = { tchkName, tchkNum }, .func = &Gfx::opSetFont },
+    { .name = "Tj", .numArgs = 1, .tchk = { tchkString }, .func = &Gfx::opShowText },
+    { .name = "Tm", .numArgs = 6, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetTextMatrix },
+    { .name = "Tr", .numArgs = 1, .tchk = { tchkInt }, .func = &Gfx::opSetTextRender },
+    { .name = "Ts", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetTextRise },
+    { .name = "Tw", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetWordSpacing },
+    { .name = "Tz", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetHorizScaling },
+    { .name = "W", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opClip },
+    { .name = "W*", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEOClip },
+    { .name = "b", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opCloseFillStroke },
+    { .name = "b*", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opCloseEOFillStroke },
+    { .name = "c", .numArgs = 6, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opCurveTo },
+    { .name = "cm", .numArgs = 6, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opConcat },
+    { .name = "cs", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opSetFillColorSpace },
+    { .name = "d", .numArgs = 2, .tchk = { tchkArray, tchkNum }, .func = &Gfx::opSetDash },
+    { .name = "d0", .numArgs = 2, .tchk = { tchkNum, tchkNum }, .func = &Gfx::opSetCharWidth },
+    { .name = "d1", .numArgs = 6, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetCacheDevice },
+    { .name = "f", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opFill },
+    { .name = "f*", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEOFill },
+    { .name = "g", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetFillGray },
+    { .name = "gs", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opSetExtGState },
+    { .name = "h", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opClosePath },
+    { .name = "i", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetFlat },
+    { .name = "j", .numArgs = 1, .tchk = { tchkInt }, .func = &Gfx::opSetLineJoin },
+    { .name = "k", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetFillCMYKColor },
+    { .name = "l", .numArgs = 2, .tchk = { tchkNum, tchkNum }, .func = &Gfx::opLineTo },
+    { .name = "m", .numArgs = 2, .tchk = { tchkNum, tchkNum }, .func = &Gfx::opMoveTo },
+    { .name = "n", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opEndPath },
+    { .name = "q", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opSave },
+    { .name = "re", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opRectangle },
+    { .name = "rg", .numArgs = 3, .tchk = { tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetFillRGBColor },
+    { .name = "ri", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opSetRenderingIntent },
+    { .name = "s", .numArgs = 0, .tchk = { tchkNone }, .func = &Gfx::opCloseStroke },
+    { .name = "sc", .numArgs = -4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opSetFillColor },
+    { .name = "scn",
+      .numArgs = -33,
+      .tchk = { tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN,
+                tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN, tchkSCN },
+      .func = &Gfx::opSetFillColorN },
+    { .name = "sh", .numArgs = 1, .tchk = { tchkName }, .func = &Gfx::opShFill },
+    { .name = "v", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opCurveTo1 },
+    { .name = "w", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetLineWidth },
+    { .name = "y", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opCurveTo2 },
 };
 
 #define numOps (sizeof(opTab) / sizeof(Operator))
@@ -3297,7 +3297,14 @@ void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0, double x1,
     int i;
 
     for (i = 0; i < nComps; ++i) {
-        if (abs(color0->c[i] - color1->c[i]) > gouraudColorDelta || abs(color1->c[i] - color2->c[i]) > gouraudColorDelta) {
+        int color01Delta, color12Delta;
+        if (checkedSubtraction(color0->c[i], color1->c[i], &color01Delta)) {
+            break;
+        }
+        if (checkedSubtraction(color1->c[i], color2->c[i], &color12Delta)) {
+            break;
+        }
+        if (abs(color01Delta) > gouraudColorDelta || abs(color12Delta) > gouraudColorDelta) {
             break;
         }
     }
@@ -4110,7 +4117,7 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
 
     Object opiDict = obj1.streamGetDict()->lookup("OPI");
     if (opiDict.isDict()) {
-        out->opiBegin(state, opiDict.getDict());
+        out->opiBegin(state, *opiDict.getDict());
     }
     Object obj2 = obj1.streamGetDict()->lookup("Subtype");
     if (obj2.isName("Image")) {
@@ -4152,7 +4159,7 @@ void Gfx::opXObject(Object args[], int /*numArgs*/)
         error(errSyntaxError, getPos(), "XObject subtype is missing or wrong type");
     }
     if (opiDict.isDict()) {
-        out->opiEnd(state, opiDict.getDict());
+        out->opiEnd(state, *opiDict.getDict());
     }
 }
 

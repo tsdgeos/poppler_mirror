@@ -227,60 +227,77 @@ struct EnumNameValue
     template<>                                                                                                                                                                                                                                 \
     const EnumNameValue<E> EnumNameValue<E>::values[] =
 
-ENUM_VALUES(PopplerStructurePlacement, Placement) { { "Block", POPPLER_STRUCTURE_PLACEMENT_BLOCK }, { "Inline", POPPLER_STRUCTURE_PLACEMENT_INLINE }, { "Before", POPPLER_STRUCTURE_PLACEMENT_BEFORE },
-                                                    { "Start", POPPLER_STRUCTURE_PLACEMENT_START }, { "End", POPPLER_STRUCTURE_PLACEMENT_END },       {} };
+ENUM_VALUES(PopplerStructurePlacement, Placement) { { .name = "Block", .value = POPPLER_STRUCTURE_PLACEMENT_BLOCK },   { .name = "Inline", .value = POPPLER_STRUCTURE_PLACEMENT_INLINE },
+                                                    { .name = "Before", .value = POPPLER_STRUCTURE_PLACEMENT_BEFORE }, { .name = "Start", .value = POPPLER_STRUCTURE_PLACEMENT_START },
+                                                    { .name = "End", .value = POPPLER_STRUCTURE_PLACEMENT_END },       {} };
 
-ENUM_VALUES(PopplerStructureWritingMode, WritingMode) { { "LrTb", POPPLER_STRUCTURE_WRITING_MODE_LR_TB }, { "RlTb", POPPLER_STRUCTURE_WRITING_MODE_RL_TB }, { "TbRl", POPPLER_STRUCTURE_WRITING_MODE_TB_RL }, {} };
+ENUM_VALUES(PopplerStructureWritingMode,
+            WritingMode) { { .name = "LrTb", .value = POPPLER_STRUCTURE_WRITING_MODE_LR_TB }, { .name = "RlTb", .value = POPPLER_STRUCTURE_WRITING_MODE_RL_TB }, { .name = "TbRl", .value = POPPLER_STRUCTURE_WRITING_MODE_TB_RL }, {} };
 
-ENUM_VALUES(PopplerStructureBorderStyle, BorderStyle) { { "None", POPPLER_STRUCTURE_BORDER_STYLE_NONE },     { "Hidden", POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN },
-                                                        { "Dotted", POPPLER_STRUCTURE_BORDER_STYLE_DOTTED }, { "Dashed", POPPLER_STRUCTURE_BORDER_STYLE_DASHED },
-                                                        { "Solid", POPPLER_STRUCTURE_BORDER_STYLE_SOLID },   { "Double", POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE },
-                                                        { "Groove", POPPLER_STRUCTURE_BORDER_STYLE_GROOVE }, { "Inset", POPPLER_STRUCTURE_BORDER_STYLE_INSET },
-                                                        { "Outset", POPPLER_STRUCTURE_BORDER_STYLE_OUTSET }, {} };
+ENUM_VALUES(PopplerStructureBorderStyle, BorderStyle) { { .name = "None", .value = POPPLER_STRUCTURE_BORDER_STYLE_NONE },     { .name = "Hidden", .value = POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN },
+                                                        { .name = "Dotted", .value = POPPLER_STRUCTURE_BORDER_STYLE_DOTTED }, { .name = "Dashed", .value = POPPLER_STRUCTURE_BORDER_STYLE_DASHED },
+                                                        { .name = "Solid", .value = POPPLER_STRUCTURE_BORDER_STYLE_SOLID },   { .name = "Double", .value = POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE },
+                                                        { .name = "Groove", .value = POPPLER_STRUCTURE_BORDER_STYLE_GROOVE }, { .name = "Inset", .value = POPPLER_STRUCTURE_BORDER_STYLE_INSET },
+                                                        { .name = "Outset", .value = POPPLER_STRUCTURE_BORDER_STYLE_OUTSET }, {} };
 
-ENUM_VALUES(PopplerStructureTextAlign,
-            TextAlign) { { "Start", POPPLER_STRUCTURE_TEXT_ALIGN_START }, { "Center", POPPLER_STRUCTURE_TEXT_ALIGN_CENTER }, { "End", POPPLER_STRUCTURE_TEXT_ALIGN_END }, { "Justify", POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY }, {} };
+ENUM_VALUES(PopplerStructureTextAlign, TextAlign) { { .name = "Start", .value = POPPLER_STRUCTURE_TEXT_ALIGN_START },
+                                                    { .name = "Center", .value = POPPLER_STRUCTURE_TEXT_ALIGN_CENTER },
+                                                    { .name = "End", .value = POPPLER_STRUCTURE_TEXT_ALIGN_END },
+                                                    { .name = "Justify", .value = POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY },
+                                                    {} };
 
-ENUM_VALUES(PopplerStructureBlockAlign,
-            BlockAlign) { { "Before", POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE }, { "Middle", POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE }, { "After", POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER }, { "Justify", POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY }, {} };
+ENUM_VALUES(PopplerStructureBlockAlign, BlockAlign) { { .name = "Before", .value = POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE },
+                                                      { .name = "Middle", .value = POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE },
+                                                      { .name = "After", .value = POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER },
+                                                      { .name = "Justify", .value = POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY },
+                                                      {} };
 
-ENUM_VALUES(PopplerStructureInlineAlign, InlineAlign) { { "Start", POPPLER_STRUCTURE_INLINE_ALIGN_START }, { "Center", POPPLER_STRUCTURE_INLINE_ALIGN_CENTER }, { "End", POPPLER_STRUCTURE_INLINE_ALIGN_END }, {} };
+ENUM_VALUES(PopplerStructureInlineAlign,
+            InlineAlign) { { .name = "Start", .value = POPPLER_STRUCTURE_INLINE_ALIGN_START }, { .name = "Center", .value = POPPLER_STRUCTURE_INLINE_ALIGN_CENTER }, { .name = "End", .value = POPPLER_STRUCTURE_INLINE_ALIGN_END }, {} };
 
-ENUM_VALUES(PopplerStructureTextDecoration, TextDecorationType) { { "None", POPPLER_STRUCTURE_TEXT_DECORATION_NONE },
-                                                                  { "Underline", POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE },
-                                                                  { "Overline", POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE },
-                                                                  { "LineThrough", POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
+ENUM_VALUES(PopplerStructureTextDecoration, TextDecorationType) { { .name = "None", .value = POPPLER_STRUCTURE_TEXT_DECORATION_NONE },
+                                                                  { .name = "Underline", .value = POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE },
+                                                                  { .name = "Overline", .value = POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE },
+                                                                  { .name = "LineThrough", .value = POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
                                                                   {} };
 
-ENUM_VALUES(PopplerStructureRubyAlign, RubyAlign) { { "Start", POPPLER_STRUCTURE_RUBY_ALIGN_START },     { "Center", POPPLER_STRUCTURE_RUBY_ALIGN_CENTER },         { "End", POPPLER_STRUCTURE_RUBY_ALIGN_END },
-                                                    { "Justify", POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY }, { "Distribute", POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE }, {} };
+ENUM_VALUES(PopplerStructureRubyAlign,
+            RubyAlign) { { .name = "Start", .value = POPPLER_STRUCTURE_RUBY_ALIGN_START },     { .name = "Center", .value = POPPLER_STRUCTURE_RUBY_ALIGN_CENTER },         { .name = "End", .value = POPPLER_STRUCTURE_RUBY_ALIGN_END },
+                         { .name = "Justify", .value = POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY }, { .name = "Distribute", .value = POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE }, {} };
 
-ENUM_VALUES(PopplerStructureRubyPosition, RubyPosition) {
-    { "Before", POPPLER_STRUCTURE_RUBY_POSITION_BEFORE }, { "After", POPPLER_STRUCTURE_RUBY_POSITION_AFTER }, { "Warichu", POPPLER_STRUCTURE_RUBY_POSITION_WARICHU }, { "Inline", POPPLER_STRUCTURE_RUBY_POSITION_INLINE }, {}
-};
+ENUM_VALUES(PopplerStructureRubyPosition, RubyPosition) { { .name = "Before", .value = POPPLER_STRUCTURE_RUBY_POSITION_BEFORE },
+                                                          { .name = "After", .value = POPPLER_STRUCTURE_RUBY_POSITION_AFTER },
+                                                          { .name = "Warichu", .value = POPPLER_STRUCTURE_RUBY_POSITION_WARICHU },
+                                                          { .name = "Inline", .value = POPPLER_STRUCTURE_RUBY_POSITION_INLINE },
+                                                          {} };
 
-ENUM_VALUES(PopplerStructureGlyphOrientation, GlyphOrientationVertical) { { "Auto", POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO }, { "90", POPPLER_STRUCTURE_GLYPH_ORIENTATION_90 },
-                                                                          { "180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },   { "270", POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
-                                                                          { "360", POPPLER_STRUCTURE_GLYPH_ORIENTATION_0 },     { "-90", POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
-                                                                          { "-180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },  {} };
+ENUM_VALUES(PopplerStructureGlyphOrientation, GlyphOrientationVertical) { { .name = "Auto", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO }, { .name = "90", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_90 },
+                                                                          { .name = "180", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },   { .name = "270", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
+                                                                          { .name = "360", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_0 },     { .name = "-90", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_270 },
+                                                                          { .name = "-180", .value = POPPLER_STRUCTURE_GLYPH_ORIENTATION_180 },  {} };
 
-ENUM_VALUES(PopplerStructureListNumbering, ListNumbering) { { "None", POPPLER_STRUCTURE_LIST_NUMBERING_NONE },
-                                                            { "Disc", POPPLER_STRUCTURE_LIST_NUMBERING_DISC },
-                                                            { "Circle", POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE },
-                                                            { "Square", POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE },
-                                                            { "Decimal", POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL },
-                                                            { "UpperRoman", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN },
-                                                            { "LowerRoman", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
-                                                            { "UpperAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
-                                                            { "LowerAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
+ENUM_VALUES(PopplerStructureListNumbering, ListNumbering) { { .name = "None", .value = POPPLER_STRUCTURE_LIST_NUMBERING_NONE },
+                                                            { .name = "Disc", .value = POPPLER_STRUCTURE_LIST_NUMBERING_DISC },
+                                                            { .name = "Circle", .value = POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE },
+                                                            { .name = "Square", .value = POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE },
+                                                            { .name = "Decimal", .value = POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL },
+                                                            { .name = "UpperRoman", .value = POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN },
+                                                            { .name = "LowerRoman", .value = POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
+                                                            { .name = "UpperAlpha", .value = POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
+                                                            { .name = "LowerAlpha", .value = POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
                                                             {} };
 
-ENUM_VALUES(PopplerStructureFormRole,
-            Role) { { "rb", POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON }, { "cb", POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX }, { "pb", POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON }, { "tv", POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE }, {} };
+ENUM_VALUES(PopplerStructureFormRole, Role) { { .name = "rb", .value = POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON },
+                                              { .name = "cb", .value = POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX },
+                                              { .name = "pb", .value = POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON },
+                                              { .name = "tv", .value = POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE },
+                                              {} };
 
-ENUM_VALUES(PopplerStructureFormState, checked) { { "on", POPPLER_STRUCTURE_FORM_STATE_ON }, { "off", POPPLER_STRUCTURE_FORM_STATE_OFF }, { "neutral", POPPLER_STRUCTURE_FORM_STATE_NEUTRAL }, {} };
+ENUM_VALUES(PopplerStructureFormState,
+            checked) { { .name = "on", .value = POPPLER_STRUCTURE_FORM_STATE_ON }, { .name = "off", .value = POPPLER_STRUCTURE_FORM_STATE_OFF }, { .name = "neutral", .value = POPPLER_STRUCTURE_FORM_STATE_NEUTRAL }, {} };
 
-ENUM_VALUES(PopplerStructureTableScope, Scope) { { "Row", POPPLER_STRUCTURE_TABLE_SCOPE_ROW }, { "Column", POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN }, { "Both", POPPLER_STRUCTURE_TABLE_SCOPE_BOTH }, {} };
+ENUM_VALUES(PopplerStructureTableScope,
+            Scope) { { .name = "Row", .value = POPPLER_STRUCTURE_TABLE_SCOPE_ROW }, { .name = "Column", .value = POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN }, { .name = "Both", .value = POPPLER_STRUCTURE_TABLE_SCOPE_BOTH }, {} };
 
 #undef ENUM_VALUES
 

@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -19,7 +19,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -207,7 +207,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     FT_Set_Transform(ff->face, &matrix, &offset);
     slot = ff->face->glyph;
 
-    if (c < int(ff->codeToGID.size()) && c >= 0) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = (FT_UInt)ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;
@@ -226,7 +226,14 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int /*yFrac*/, SplashGlyphBitmap 
     bitmap->w = ((cbox.xMax - cbox.xMin) / 64) + 4;
     bitmap->h = ((cbox.yMax - cbox.yMin) / 64) + 4;
 
-    *clipRes = clip->testRect(x0 - bitmap->x, y0 - bitmap->y, x0 - bitmap->x + bitmap->w, y0 - bitmap->y + bitmap->h);
+    int rectXMin, rectYMin;
+    if (checkedSubtraction(x0, bitmap->x, &rectXMin)) {
+        return false;
+    }
+    if (checkedSubtraction(y0, bitmap->y, &rectYMin)) {
+        return false;
+    }
+    *clipRes = clip->testRect(rectXMin, rectYMin, rectXMin + bitmap->w, rectYMin + bitmap->h);
     if (*clipRes == splashClipAllOutside) {
         bitmap->freeData = false;
         return true;
@@ -286,7 +293,7 @@ double SplashFTFont::getGlyphAdvance(int c)
     ff->face->size = sizeObj;
     FT_Set_Transform(ff->face, &identityMatrix, &offset);
 
-    if (c < int(ff->codeToGID.size())) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = (FT_UInt)ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;
@@ -338,7 +345,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
     ff->face->size = sizeObj;
     FT_Set_Transform(ff->face, &textMatrix, nullptr);
     slot = ff->face->glyph;
-    if (c < int(ff->codeToGID.size()) && c >= 0) {
+    if (c >= 0 && size_t(c) < ff->codeToGID.size()) {
         gid = ff->codeToGID[c];
     } else {
         gid = (FT_UInt)c;

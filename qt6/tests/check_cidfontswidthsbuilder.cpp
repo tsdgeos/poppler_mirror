@@ -55,7 +55,7 @@ void TestCIDFontsWidthsBuilder::testSingleList()
     b.addWidth(0, 10);
     auto segments = b.takeSegments();
     QCOMPARE(segments.size(), 1);
-    auto segment0 = CIDFontsWidthsBuilder::ListSegment { 0, { 10 } };
+    auto segment0 = CIDFontsWidthsBuilder::ListSegment { .first = 0, .widths = { 10 } };
     QVERIFY(compare(segments[0], segment0));
 }
 
@@ -69,7 +69,7 @@ void TestCIDFontsWidthsBuilder::testSingleRange()
     b.addWidth(4, 10);
     auto segments = b.takeSegments();
     QCOMPARE(segments.size(), 1);
-    auto segment0 = CIDFontsWidthsBuilder::RangeSegment { 0, 4, 10 };
+    auto segment0 = CIDFontsWidthsBuilder::RangeSegment { .first = 0, .last = 4, .width = 10 };
     QVERIFY(compare(segments[0], segment0));
 }
 
@@ -98,15 +98,15 @@ void TestCIDFontsWidthsBuilder::testSimpleSequence()
         b.addWidth(19, 20);
         auto segments = b.takeSegments();
         QCOMPARE(segments.size(), 5);
-        auto segment0 = CIDFontsWidthsBuilder::RangeSegment { 0, 4, 10 };
+        auto segment0 = CIDFontsWidthsBuilder::RangeSegment { .first = 0, .last = 4, .width = 10 };
         QVERIFY(compare(segments[0], segment0));
-        auto segment1 = CIDFontsWidthsBuilder::ListSegment { 5, { 20, 21, 21, 20 } };
+        auto segment1 = CIDFontsWidthsBuilder::ListSegment { .first = 5, .widths = { 20, 21, 21, 20 } };
         QVERIFY(compare(segments[1], segment1));
-        auto segment2 = CIDFontsWidthsBuilder::RangeSegment { 9, 13, 10 };
+        auto segment2 = CIDFontsWidthsBuilder::RangeSegment { .first = 9, .last = 13, .width = 10 };
         QVERIFY(compare(segments[2], segment2));
-        auto segment3 = CIDFontsWidthsBuilder::ListSegment { 14, { 20, 21, 21, 20 } };
+        auto segment3 = CIDFontsWidthsBuilder::ListSegment { .first = 14, .widths = { 20, 21, 21, 20 } };
         QVERIFY(compare(segments[3], segment3));
-        auto segment4 = CIDFontsWidthsBuilder::ListSegment { 19, { 20 } };
+        auto segment4 = CIDFontsWidthsBuilder::ListSegment { .first = 19, .widths = { 20 } };
         QVERIFY(compare(segments[4], segment4));
     }
 }

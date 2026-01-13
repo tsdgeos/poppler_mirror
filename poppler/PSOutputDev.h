@@ -258,8 +258,8 @@ public:
     void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
 
     //----- OPI functions
-    void opiBegin(GfxState *state, Dict *opiDict) override;
-    void opiEnd(GfxState *state, Dict *opiDict) override;
+    void opiBegin(GfxState *state, const Dict &opiDict) override;
+    void opiEnd(GfxState *state, const Dict &opiDict) override;
 
     //----- Type 3 font operators
     void type3D0(GfxState *state, double wx, double wy) override;
@@ -392,8 +392,8 @@ private:
     bool tilingPatternFillL1(Object *str, int paintType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, int x0, int y0, int x1, int y1, double xStep, double yStep);
     bool tilingPatternFillL2(Object *str, int paintType, int tilingType, Dict *resDict, const std::array<double, 6> &mat, const std::array<double, 4> &bbox, double xStep, double yStep);
 
-    void opiBegin20(GfxState *state, Dict *dict);
-    void opiBegin13(GfxState *state, Dict *dict);
+    void opiBegin20(GfxState *state, const Dict &dict);
+    void opiBegin13(GfxState *state, const Dict &dict);
     void opiTransform(GfxState *state, double x0, double y0, double *x1, double *y1) const;
     void cvtFunction(const Function *func, bool invertPSFunction = false);
     static std::string filterPSName(const std::string &name);
@@ -461,7 +461,7 @@ private:
 
     std::vector<PSOutPaperSize> paperSizes; // list of used paper sizes, if paperMatch
                                             //   is true
-    std::map<int, int> pagePaperSize; // page num to paperSize entry mapping
+    std::map<int, size_t> pagePaperSize; // page num to paperSize entry mapping
     double tx0, ty0; // global translation
     double xScale0, yScale0; // global scaling
     int rotate0; // rotation angle (0, 90, 180, 270)
@@ -472,7 +472,7 @@ private:
     double epsX1, epsY1, // EPS bounding box (unrotated)
             epsX2, epsY2;
 
-    GooString *embFontList; // resource comments for embedded fonts
+    std::string embFontList; // resource comments for embedded fonts
 
     int processColors; // used process colors
     PSOutCustomColor // used custom colors

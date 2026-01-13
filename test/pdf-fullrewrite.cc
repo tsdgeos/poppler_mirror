@@ -5,7 +5,7 @@
 // Copyright 2007 Julien Rebetez
 // Copyright 2012 Fabio D'Urso
 // Copyright 2022, 2025 Albert Astals Cid <aacid@kde.org>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================

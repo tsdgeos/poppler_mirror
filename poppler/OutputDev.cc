@@ -145,9 +145,9 @@ void OutputDev::markPoint(const char * /*name*/) { }
 
 void OutputDev::markPoint(const char * /*name*/, Dict * /*properties*/) { }
 
-void OutputDev::opiBegin(GfxState * /*state*/, Dict * /*opiDict*/) { }
+void OutputDev::opiBegin(GfxState * /*state*/, const Dict & /*opiDict*/) { }
 
-void OutputDev::opiEnd(GfxState * /*state*/, Dict * /*opiDict*/) { }
+void OutputDev::opiEnd(GfxState * /*state*/, const Dict & /*opiDict*/) { }
 
 void OutputDev::startProfile()
 {

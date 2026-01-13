@@ -42,7 +42,7 @@
 // Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 // Copyright (C) 2025 Masamichi Hosoda <trueroad@trueroad.jp>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -257,8 +257,8 @@ struct AntialiasOption
 };
 
 static const AntialiasOption antialiasOptions[] = {
-    { "default", CAIRO_ANTIALIAS_DEFAULT }, { "none", CAIRO_ANTIALIAS_NONE }, { "gray", CAIRO_ANTIALIAS_GRAY }, { "subpixel", CAIRO_ANTIALIAS_SUBPIXEL },
-    { "fast", CAIRO_ANTIALIAS_FAST },       { "good", CAIRO_ANTIALIAS_GOOD }, { "best", CAIRO_ANTIALIAS_BEST }, { nullptr, CAIRO_ANTIALIAS_DEFAULT },
+    { .name = "default", .value = CAIRO_ANTIALIAS_DEFAULT }, { .name = "none", .value = CAIRO_ANTIALIAS_NONE }, { .name = "gray", .value = CAIRO_ANTIALIAS_GRAY }, { .name = "subpixel", .value = CAIRO_ANTIALIAS_SUBPIXEL },
+    { .name = "fast", .value = CAIRO_ANTIALIAS_FAST },       { .name = "good", .value = CAIRO_ANTIALIAS_GOOD }, { .name = "best", .value = CAIRO_ANTIALIAS_BEST }, { .name = nullptr, .value = CAIRO_ANTIALIAS_DEFAULT },
 };
 
 static bool parseAntialiasOption()

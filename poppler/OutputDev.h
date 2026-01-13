@@ -314,8 +314,8 @@ public:
     virtual void markPoint(const char *name, Dict *properties);
 
     //----- OPI functions
-    virtual void opiBegin(GfxState *state, Dict *opiDict);
-    virtual void opiEnd(GfxState *state, Dict *opiDict);
+    virtual void opiBegin(GfxState *state, const Dict &opiDict);
+    virtual void opiEnd(GfxState *state, const Dict &opiDict);
 
     //----- Type 3 font operators
     virtual void type3D0(GfxState * /*state*/, double /*wx*/, double /*wy*/) { }

@@ -38,7 +38,7 @@
 // Copyright (C) 2020 Lluís Batlle i Rossell <viric@viric.name>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
@@ -146,15 +146,15 @@ struct GfxBlendModeInfo
     GfxBlendMode mode;
 };
 
-static const GfxBlendModeInfo gfxBlendModeNames[] = { { "Normal", gfxBlendNormal },         { "Compatible", gfxBlendNormal },
-                                                      { "Multiply", gfxBlendMultiply },     { "Screen", gfxBlendScreen },
-                                                      { "Overlay", gfxBlendOverlay },       { "Darken", gfxBlendDarken },
-                                                      { "Lighten", gfxBlendLighten },       { "ColorDodge", gfxBlendColorDodge },
-                                                      { "ColorBurn", gfxBlendColorBurn },   { "HardLight", gfxBlendHardLight },
-                                                      { "SoftLight", gfxBlendSoftLight },   { "Difference", gfxBlendDifference },
-                                                      { "Exclusion", gfxBlendExclusion },   { "Hue", gfxBlendHue },
-                                                      { "Saturation", gfxBlendSaturation }, { "Color", gfxBlendColor },
-                                                      { "Luminosity", gfxBlendLuminosity } };
+static const GfxBlendModeInfo gfxBlendModeNames[] = { { .name = "Normal", .mode = gfxBlendNormal },         { .name = "Compatible", .mode = gfxBlendNormal },
+                                                      { .name = "Multiply", .mode = gfxBlendMultiply },     { .name = "Screen", .mode = gfxBlendScreen },
+                                                      { .name = "Overlay", .mode = gfxBlendOverlay },       { .name = "Darken", .mode = gfxBlendDarken },
+                                                      { .name = "Lighten", .mode = gfxBlendLighten },       { .name = "ColorDodge", .mode = gfxBlendColorDodge },
+                                                      { .name = "ColorBurn", .mode = gfxBlendColorBurn },   { .name = "HardLight", .mode = gfxBlendHardLight },
+                                                      { .name = "SoftLight", .mode = gfxBlendSoftLight },   { .name = "Difference", .mode = gfxBlendDifference },
+                                                      { .name = "Exclusion", .mode = gfxBlendExclusion },   { .name = "Hue", .mode = gfxBlendHue },
+                                                      { .name = "Saturation", .mode = gfxBlendSaturation }, { .name = "Color", .mode = gfxBlendColor },
+                                                      { .name = "Luminosity", .mode = gfxBlendLuminosity } };
 
 #define nGfxBlendModeNames ((int)((sizeof(gfxBlendModeNames) / sizeof(GfxBlendModeInfo))))
 

@@ -95,7 +95,7 @@ struct Ref
     int num; // object number
     int gen; // generation number
 
-    static constexpr Ref INVALID() { return { -1, -1 }; };
+    static constexpr Ref INVALID() { return { .num = -1, .gen = -1 }; };
 };
 
 inline bool operator==(const Ref lhs, const Ref rhs) noexcept
