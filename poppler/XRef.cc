@@ -245,7 +245,7 @@ Object ObjectStream::getObject(int objIdx, int objNum)
 
 #define xrefLocker() const std::scoped_lock locker(mutex)
 
-XRef::XRef() : objStrs { 5000 }
+XRef::XRef() : objStrs { 5 }
 {
     ok = true;
     errCode = errNone;
