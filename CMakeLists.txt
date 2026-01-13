@@ -74,8 +74,8 @@ option(ENABLE_GOBJECT_INTROSPECTION "Whether to generate GObject introspection."
 option(ENABLE_GTK_DOC "Whether to generate glib API documentation." OFF)
 option(ENABLE_QT5 "Compile poppler qt5 wrapper." ON)
 option(ENABLE_QT6 "Compile poppler qt6 wrapper." ON)
-set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams. Possible values: openjpeg2, unmaintained, none. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no JPX decoder at all. Default: openjpeg2")
-set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, unmaintained, none. will use libjpeg if available or fail if not. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
+set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams. Possible values: openjpeg2, UnmaintainedWillBeRemovedInJuly2026, none. 'UnmaintainedWillBeRemovedInJuly2026' gives you the internal unmaintained decoder. Use at your own risk. The internal unmaintained decoder will be removed in july 2026. 'none' compiles no JPX decoder at all. Default: openjpeg2")
+set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, UnmaintainedWillBeRemovedInJuly2026, none. will use libjpeg if available or fail if not. 'UnmaintainedWillBeRemovedInJuly2026' gives you the internal unmaintained decoder. The internal unmaintained decoder will be removed in july 2026. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
 option(ENABLE_LCMS "Use LCMS for color management." ON)
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
 option(ENABLE_LIBTIFF "Build code to write images as TIFF (pdfimages/pdftocairo/etc)." ON)
@@ -188,21 +188,21 @@ if(ENABLE_DCTDECODER STREQUAL "libjpeg")
 
     if(NOT HAVE_JPEG_MEM_SRC)
       message(FATAL_ERROR "Your libjpeg is too old. Poppler needs one that provides jpeg_mem_src. That is provided in libjpeg >= 8 or libjpeg-turbo >= 1.1.0. You can \
-also decide to use the internal unmaintained DCT decoder or none at all.\n\
+also decide to use the internal unmaintained DCT decoder or none at all. The internal unmaintained decoder will be removed in july 2026\n\
 Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
--DENABLE_DCTDECODER=unmaintained")
+-DENABLE_DCTDECODER=UnmaintainedWillBeRemovedInJuly2026")
     endif()
 
     set(ENABLE_LIBJPEG ${JPEG_FOUND})
   else()
     message(STATUS "Could NOT find libjpeg.")
     message(FATAL_ERROR "Install libjpeg before trying to build poppler. You can \
-also decide to use the internal unmaintained DCT decoder or none at all.\n\
+also decide to use the internal unmaintained DCT decoder or none at all. The internal unmaintained decoder will be removed in july 2026\n\
 Possible options are: -DENABLE_DCTDECODER=libjpeg, -DENABLE_DCTDECODER=none, \
--DENABLE_DCTDECODER=unmaintained")
+-DENABLE_DCTDECODER=UnmaintainedWillBeRemovedInJuly2026")
   endif()
   set(HAVE_DCT_DECODER ON)
-elseif(ENABLE_DCTDECODER STREQUAL "unmaintained")
+elseif(ENABLE_DCTDECODER STREQUAL "UnmaintainedWillBeRemovedInJuly2026")
   set(ENABLE_LIBJPEG OFF)
   set(HAVE_DCT_DECODER ON)
 elseif(ENABLE_DCTDECODER STREQUAL "none")
@@ -313,12 +313,12 @@ if(ENABLE_LIBOPENJPEG STREQUAL "openjpeg2")
   if(NOT OpenJPEG_FOUND OR OPENJPEG_MAJOR_VERSION VERSION_LESS 2)
     message(STATUS "Could NOT find openjpeg2.")
     message(FATAL_ERROR "Install libopenjpeg2 before trying to build poppler. You \
-can also decide to use the internal unmaintained JPX decoder or none at all.\n\
+can also decide to use the internal unmaintained JPX decoder or none at all. The internal decoder will be removed in july 2026.\n\
 Possible options are: -DENABLE_LIBOPENJPEG=openjpeg2, -DENABLE_LIBOPENJPEG=none, \
--DENABLE_LIBOPENJPEG=unmaintained,")
+-DENABLE_LIBOPENJPEG=UnmaintainedWillBeRemovedInJuly2026,")
   endif()
   set(HAVE_JPX_DECODER ON)
-elseif(ENABLE_LIBOPENJPEG STREQUAL "unmaintained")
+elseif(ENABLE_LIBOPENJPEG STREQUAL "UnmaintainedWillBeRemovedInJuly2026")
   set(WITH_OPENJPEG OFF)
   set(HAVE_JPX_DECODER ON)
 elseif(ENABLE_LIBOPENJPEG STREQUAL "none")
@@ -945,7 +945,7 @@ show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
 
 if(NOT ENABLE_LIBJPEG AND HAVE_DCT_DECODER)
-  message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained.")
+  message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained and will be removed in july 2026.")
 endif()
 
 if(NOT HAVE_DCT_DECODER)
@@ -957,7 +957,7 @@ if(ENABLE_ZLIB_UNCOMPRESS)
 endif()
 
 if(NOT WITH_OPENJPEG AND HAVE_JPX_DECODER)
-  message("Warning: Using libopenjpeg2 is recommended. The internal JPX decoder is unmaintained.")
+  message("Warning: Using libopenjpeg2 is recommended. The internal JPX decoder is unmaintained and will be removed in july 2026.")
 endif()
 
 if(NOT HAVE_JPX_DECODER)
