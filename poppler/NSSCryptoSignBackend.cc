@@ -20,7 +20,7 @@
 // Copyright 2023 Tobias Deiminger <tobias.deiminger@posteo.de>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright 2023 Ingo Klöcker <kloecker@kde.org>
-// Copyright 2025 Juraj Šarinay <juraj@sarinay.com>
+// Copyright 2025, 2026 Juraj Šarinay <juraj@sarinay.com>
 //
 //========================================================================
 
