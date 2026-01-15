@@ -517,7 +517,8 @@ int FoFiTrueType::getCmapEncoding(int i) const
 
 int FoFiTrueType::findCmap(int platform, int encoding) const
 {
-    for (int i = 0; i < (int)cmaps.size(); ++i) {
+    const int nCmaps = cmaps.size();
+    for (int i = 0; i < nCmaps; ++i) {
         if (cmaps[i].platform == platform && cmaps[i].encoding == encoding) {
             return i;
         }
