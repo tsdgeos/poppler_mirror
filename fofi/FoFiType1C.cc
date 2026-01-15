@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2017-2022, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2022, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
@@ -430,10 +430,9 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     int *charStringOffsets;
     Type1CIndex subrIdx;
     Type1CIndexVal val;
-    int gdBytes;
     char buf2[256];
     bool ok;
-    int gid, offset, n, j, k;
+    int gid, offset, n, k;
 
     // compute the CID count and build the CID-to-GID mapping
     if (!codeMap.empty()) {
@@ -487,16 +486,19 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     // (offset size needs to account for the charstring offset table,
     // with a worst case of five bytes per entry, plus the charstrings
     // themselves)
-    int i = (cidMap.size() + 1) * 5 + charStrings.size();
-    if (i < 0x100) {
-        gdBytes = 1;
-    } else if (i < 0x10000) {
-        gdBytes = 2;
-    } else if (i < 0x1000000) {
-        gdBytes = 3;
-    } else {
-        gdBytes = 4;
-    }
+    const int gdBytes = [&cidMap, &charStrings] {
+        const int i = (cidMap.size() + 1) * 5 + charStrings.size();
+        if (i < 0x100) {
+            return 1;
+        }
+        if (i < 0x10000) {
+            return 2;
+        }
+        if (i < 0x1000000) {
+            return 3;
+        }
+        return 4;
+    }();
 
     // begin the font dictionary
     (*outputFunc)(outputStream, "/CIDInit /ProcSet findresource begin\n", 37);
@@ -560,7 +562,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     // FDArray entry
     buf = GooString::format("/FDArray {0:d} array\n", nFDs);
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
-    for (i = 0; i < nFDs; ++i) {
+    for (int i = 0; i < nFDs; ++i) {
         buf = GooString::format("dup {0:d} 10 dict begin\n", i);
         (*outputFunc)(outputStream, buf.c_str(), buf.size());
         (*outputFunc)(outputStream, "/FontType 1 def\n", 16);
@@ -576,7 +578,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         (*outputFunc)(outputStream, "/Private 32 dict begin\n", 23);
         if (privateDicts[i].nBlueValues) {
             (*outputFunc)(outputStream, "/BlueValues [", 13);
-            for (j = 0; j < privateDicts[i].nBlueValues; ++j) {
+            for (int j = 0; j < privateDicts[i].nBlueValues; ++j) {
                 buf = GooString::format("{0:s}{1:d}", j > 0 ? " " : "", privateDicts[i].blueValues[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -584,7 +586,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         }
         if (privateDicts[i].nOtherBlues) {
             (*outputFunc)(outputStream, "/OtherBlues [", 13);
-            for (j = 0; j < privateDicts[i].nOtherBlues; ++j) {
+            for (int j = 0; j < privateDicts[i].nOtherBlues; ++j) {
                 buf = GooString::format("{0:s}{1:d}", j > 0 ? " " : "", privateDicts[i].otherBlues[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -592,7 +594,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         }
         if (privateDicts[i].nFamilyBlues) {
             (*outputFunc)(outputStream, "/FamilyBlues [", 14);
-            for (j = 0; j < privateDicts[i].nFamilyBlues; ++j) {
+            for (int j = 0; j < privateDicts[i].nFamilyBlues; ++j) {
                 buf = GooString::format("{0:s}{1:d}", j > 0 ? " " : "", privateDicts[i].familyBlues[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -600,7 +602,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         }
         if (privateDicts[i].nFamilyOtherBlues) {
             (*outputFunc)(outputStream, "/FamilyOtherBlues [", 19);
-            for (j = 0; j < privateDicts[i].nFamilyOtherBlues; ++j) {
+            for (int j = 0; j < privateDicts[i].nFamilyOtherBlues; ++j) {
                 buf = GooString::format("{0:s}{1:d}", j > 0 ? " " : "", privateDicts[i].familyOtherBlues[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -628,7 +630,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         }
         if (privateDicts[i].nStemSnapH) {
             (*outputFunc)(outputStream, "/StemSnapH [", 12);
-            for (j = 0; j < privateDicts[i].nStemSnapH; ++j) {
+            for (int j = 0; j < privateDicts[i].nStemSnapH; ++j) {
                 buf = GooString::format("{0:s}{1:.4g}", j > 0 ? " " : "", privateDicts[i].stemSnapH[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -636,7 +638,7 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
         }
         if (privateDicts[i].nStemSnapV) {
             (*outputFunc)(outputStream, "/StemSnapV [", 12);
-            for (j = 0; j < privateDicts[i].nStemSnapV; ++j) {
+            for (int j = 0; j < privateDicts[i].nStemSnapV; ++j) {
                 buf = GooString::format("{0:s}{1:.4g}", j > 0 ? " " : "", privateDicts[i].stemSnapV[j]);
                 (*outputFunc)(outputStream, buf.c_str(), buf.size());
             }
@@ -669,9 +671,9 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
     (*outputFunc)(outputStream, buf.c_str(), buf.size());
 
     // write the charstring offset (CIDMap) table
-    for (i = 0; i <= int(cidMap.size()); i += 6) {
-        for (j = 0; j < 6 && i + j <= int(cidMap.size()); ++j) {
-            if (i + j < int(cidMap.size()) && cidMap[i + j] >= 0 && fdSelect) {
+    for (size_t i = 0; i <= cidMap.size(); i += 6) {
+        for (size_t j = 0; j < 6 && i + j <= cidMap.size(); ++j) {
+            if (i + j < cidMap.size() && cidMap[i + j] >= 0 && fdSelect) {
                 buf2[0] = (char)fdSelect[cidMap[i + j]];
             } else {
                 buf2[0] = (char)0;
@@ -691,8 +693,8 @@ void FoFiType1C::convertToCIDType0(const std::string &psName, const std::vector<
 
     // write the charstring data
     n = charStrings.size();
-    for (i = 0; i < n; i += 32) {
-        for (j = 0; j < 32 && i + j < n; ++j) {
+    for (int i = 0; i < n; i += 32) {
+        for (int j = 0; j < 32 && i + j < n; ++j) {
             buf = GooString::format("{0:02x}", charStrings.getChar(i + j) & 0xff);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
