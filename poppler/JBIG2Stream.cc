@@ -2616,7 +2616,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     unsigned int flags, mmr, templ, enableSkip, combOp;
     unsigned int gridW, gridH, stepX, stepY, patW, patH;
     int atx[4], aty[4];
-    int gridX, gridY, xx, yy, bit, j;
+    int gridX, gridY, xx, yy, j;
     unsigned int bpp, m, n, i;
 
     // region segment info field
@@ -2721,11 +2721,15 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     atx[3] = -2;
     aty[3] = -2;
     for (j = bpp - 1; j >= 0; --j) {
-        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
+        const std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
+        if (!grayBitmap) {
+            gfree(grayImg);
+            return;
+        }
         i = 0;
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
-                bit = grayBitmap->getPixel(n, m) ^ (grayImg[i] & 1);
+                const int bit = grayBitmap->getPixel(n, m) ^ (grayImg[i] & 1);
                 grayImg[i] = (grayImg[i] << 1) | bit;
                 ++i;
             }
