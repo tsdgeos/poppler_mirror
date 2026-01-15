@@ -2284,10 +2284,10 @@ eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
 }
 
-std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
-                                                         unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
-                                                         const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
-                                                         const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
+std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
+                                                         JBIG2Bitmap **syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
+                                                         const JBIG2HuffmanTable *huffDSTable, const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable,
+                                                         const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {
     JBIG2Bitmap *symbolBitmap;
     unsigned int strips;
@@ -2374,7 +2374,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                 symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
             }
 
-            if (symID >= (unsigned int)numSyms) {
+            if (symID >= numSyms) {
                 error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
                 if (unlikely(numInstances - inst > 0x800)) {
                     // don't loop too often with damaged JBIg2 streams

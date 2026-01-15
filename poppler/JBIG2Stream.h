@@ -18,7 +18,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
-// Copyright (C) 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
@@ -68,7 +68,7 @@ private:
     void readSegments();
     bool readSymbolDictSeg(unsigned int segNum, unsigned int *refSegs, unsigned int nRefSegs);
     void readTextRegionSeg(unsigned int segNum, bool imm, unsigned int *refSegs, unsigned int nRefSegs);
-    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
+    std::unique_ptr<JBIG2Bitmap> readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
                                                 unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
                                                 const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
                                                 const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty);
