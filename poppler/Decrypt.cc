@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2016-2021, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2016-2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -301,7 +301,7 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
 
     switch (algo) {
     case cryptRC4:
-        if (likely(keyLength < static_cast<int>(sizeof(objKey) - 4))) {
+        if (likely(static_cast<size_t>(keyLength) < sizeof(objKey) - 4)) {
             objKey[keyLength] = refA.num & 0xff;
             objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
             objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
