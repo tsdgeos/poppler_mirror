@@ -1371,14 +1371,14 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
 void FoFiTrueType::dumpString(std::span<const unsigned char> s, FoFiOutputFunc outputFunc, void *outputStream)
 {
     (*outputFunc)(outputStream, "<", 1);
-    for (int i = 0; i < (int)s.size(); i += 32) {
-        for (int j = 0; j < 32 && i + j < (int)s.size(); ++j) {
+    for (size_t i = 0; i < s.size(); i += 32) {
+        for (size_t j = 0; j < 32 && i + j < s.size(); ++j) {
             const std::string buf = GooString::format("{0:02x}", s[i + j] & 0xff);
             (*outputFunc)(outputStream, buf.c_str(), buf.size());
         }
         if (i % (65536 - 32) == 65536 - 64) {
             (*outputFunc)(outputStream, ">\n<", 3);
-        } else if (i + 32 < (int)s.size()) {
+        } else if (i + 32 < s.size()) {
             (*outputFunc)(outputStream, "\n", 1);
         }
     }
