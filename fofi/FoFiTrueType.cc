@@ -535,7 +535,7 @@ int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const
     unsigned int high, low, idx;
     bool ok;
 
-    if (i < 0 || i >= (int)cmaps.size()) {
+    if (i < 0 || static_cast<size_t>(i) >= cmaps.size()) {
         return 0;
     }
     ok = true;
@@ -1095,7 +1095,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
 
     // construct the 'head' table, zero out the font checksum
     int i = seekTable("head");
-    if (i < 0 || i >= (int)tables.size()) {
+    if (i < 0 || static_cast<size_t>(i) >= tables.size()) {
         return;
     }
     int pos = tables[i].offset;
@@ -1349,13 +1349,13 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
                 if ((j = seekTable(t42Tables[i].tag)) >= 0 && checkRegion(tables[j].offset, tables[j].len)) {
                     dumpString(std::span(file.data() + tables[j].offset, tables[j].len), outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VheaTable) {
-                    if (unlikely(length > (int)sizeof(vheaTab))) {
+                    if (unlikely(static_cast<size_t>(length) > sizeof(vheaTab))) {
                         error(errSyntaxWarning, -1, "length bigger than vheaTab size");
                         length = sizeof(vheaTab);
                     }
                     dumpString(vheaTab, outputFunc, outputStream);
                 } else if (needVerticalMetrics && i == t42VmtxTable) {
-                    if (unlikely(length > (int)vmtxTab.size())) {
+                    if (unlikely(static_cast<size_t>(length) > vmtxTab.size())) {
                         error(errSyntaxWarning, -1, "length bigger than vmtxTab size");
                     }
                     dumpString(vmtxTab, outputFunc, outputStream);
