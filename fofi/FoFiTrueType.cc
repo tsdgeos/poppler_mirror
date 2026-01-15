@@ -1631,10 +1631,9 @@ err:
 
 int FoFiTrueType::seekTable(const char *tag) const
 {
-    unsigned int tagI;
-
-    tagI = ((tag[0] & 0xff) << 24) | ((tag[1] & 0xff) << 16) | ((tag[2] & 0xff) << 8) | (tag[3] & 0xff);
-    for (int i = 0; i < (int)tables.size(); ++i) {
+    const unsigned int tagI = ((tag[0] & 0xff) << 24) | ((tag[1] & 0xff) << 16) | ((tag[2] & 0xff) << 8) | (tag[3] & 0xff);
+    const int nTables = tables.size();
+    for (int i = 0; i < nTables; ++i) {
         if (tables[i].tag == tagI) {
             return i;
         }
