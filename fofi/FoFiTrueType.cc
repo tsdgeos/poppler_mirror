@@ -705,20 +705,6 @@ int FoFiTrueType::getEmbeddingRights() const
     return 3;
 }
 
-void FoFiTrueType::getFontMatrix(double *mat) const
-{
-    auto cffBlock = getCFFBlock();
-
-    if (!cffBlock) {
-        return;
-    }
-    auto ff = FoFiType1C::make(cffBlock.value());
-    if (!ff) {
-        return;
-    }
-    ff->getFontMatrix(mat);
-}
-
 void FoFiTrueType::convertToType42(const char *psName, char **encoding, const std::vector<int> &codeToGID, FoFiOutputFunc outputFunc, void *outputStream) const
 {
     int maxUsedGlyph;
