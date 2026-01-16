@@ -755,14 +755,13 @@ std::unique_ptr<GfxColorSpace> GfxCalGrayColorSpace::parse(const Array &arr, Gfx
 }
 
 // convert CalGray to media XYZ color space
-// (not multiply by the white point)
 void GfxCalGrayColorSpace::getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const
 {
     const double A = colToDbl(color->c[0]);
     const double xyzColor = pow(A, gamma);
-    *pX = xyzColor;
-    *pY = xyzColor;
-    *pZ = xyzColor;
+    *pX = whiteX * xyzColor;
+    *pY = whiteY * xyzColor;
+    *pZ = whiteZ * xyzColor;
 }
 
 void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
