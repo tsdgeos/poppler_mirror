@@ -245,7 +245,7 @@ Object ObjectStream::getObject(int objIdx, int objNum)
 
 #define xrefLocker() const std::scoped_lock locker(mutex)
 
-XRef::XRef() : objStrs { 5 }
+XRef::XRef()
 {
     ok = true;
     errCode = errNone;
@@ -1273,8 +1273,10 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
             goto err;
         }
 
-        ObjectStream *objStr = objStrs.lookup(e->offset);
-        if (!objStr) {
+        ObjectStream *objStr = nullptr;
+        if (const auto it = objStrs.find(e->offset); it != objStrs.end()) {
+            objStr = it->second.get();
+        } else {
             objStr = new ObjectStream(this, static_cast<int>(e->offset), recursion + 1);
             if (!objStr->isOk()) {
                 delete objStr;
@@ -1283,7 +1285,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
             } else {
                 // XRef could be reconstructed in constructor of ObjectStream:
                 e = getEntry(num);
-                objStrs.put(e->offset, objStr);
+                objStrs.emplace(e->offset, std::unique_ptr<ObjectStream>(objStr));
             }
         }
         if (endPos) {

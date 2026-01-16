@@ -249,7 +249,7 @@ private:
     Goffset *streamEnds; // 'endstream' positions - only used in
                          //   damaged files
     int streamEndsLen; // number of valid entries in streamEnds
-    PopplerCache<Goffset, ObjectStream> objStrs; // cached object streams
+    std::unordered_map<Goffset, std::unique_ptr<ObjectStream>> objStrs; // object streams map
     bool encrypted; // true if file is encrypted
     int encRevision;
     int encVersion; // encryption algorithm
