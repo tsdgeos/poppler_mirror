@@ -28,6 +28,14 @@ macro(QT6_ADD_QTEST exe source)
     target_link_libraries(${exe} poppler-qt6 Qt6::Widgets Qt6::Test Qt6::Gui)
 endmacro()
 
+macro(QT_ADD_FUZZER exe)
+  string(REPLACE "-" "" test_name ${exe})
+  set(${test_name}_SOURCES
+    ${ARGN}
+  )
+  poppler_add_test(${exe} BUILD_QT6_TESTS ${${test_name}_SOURCES})
+  target_link_libraries(${exe} poppler-qt6 Qt6::Widgets Qt6::Test Qt6::Core Qt6::Gui)
+endmacro(QT_ADD_FUZZER)
 
 qt6_add_simpletest(test-poppler-qt6 test-poppler-qt6.cpp)
 qt6_add_simpletest(test-password-qt6 test-password-qt6.cpp)
@@ -82,3 +90,11 @@ if (NOT WIN32)
   qt6_add_qtest(check_qt6_pagelabelinfo check_pagelabelinfo.cpp)
   qt6_add_qtest(check_qt6_strings check_strings.cpp)
 endif ()
+
+if(ENABLE_FUZZER)
+    qt_add_fuzzer(qt_annot_fuzzer ./fuzzing/qt_annot_fuzzer.cc)
+    qt_add_fuzzer(qt_pdf_fuzzer ./fuzzing/qt_pdf_fuzzer.cc)
+    qt_add_fuzzer(qt_label_fuzzer ./fuzzing/qt_label_fuzzer.cc)
+    qt_add_fuzzer(qt_search_fuzzer ./fuzzing/qt_search_fuzzer.cc)
+    qt_add_fuzzer(qt_textbox_fuzzer ./fuzzing/qt_textbox_fuzzer.cc)
+endif()
