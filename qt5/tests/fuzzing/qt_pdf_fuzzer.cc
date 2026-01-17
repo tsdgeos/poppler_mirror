@@ -30,6 +30,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         const Poppler::SignatureValidationInfo svi = signature->validateAsync(Poppler::FormFieldSignature::ValidateVerifyCertificate).first;
         signature->validateResult();
     }
+    qDeleteAll(signatures);
 
     if (doc->numPages() > 0) {
         QList<int> pageList;
