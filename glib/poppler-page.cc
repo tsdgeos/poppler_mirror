@@ -82,6 +82,7 @@ static void poppler_page_finalize(GObject *object)
 
     g_object_unref(page->document);
     page->document = nullptr;
+    page->text.reset();
 
     /* page->page is owned by the document */
 
