@@ -70,6 +70,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         cairo_destroy(cr);
         if (annot) {
             g_object_unref(annot);
+            annot = nullptr;
         }
         g_object_unref(page);
     }
