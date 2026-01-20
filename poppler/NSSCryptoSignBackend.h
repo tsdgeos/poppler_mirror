@@ -15,6 +15,7 @@
 // Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 // Copyright 2021 Marek Kasik <mkasik@redhat.com>
 // Copyright 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2026 Juraj Šarinay <juraj@sarinay.com>
 //
 //========================================================================
 
@@ -100,6 +101,7 @@ private:
     HashAlgorithm innerHashAlgorithm;
     std::future<CertificateValidationStatus> validationStatus;
     std::optional<CertificateValidationStatus> cachedValidationStatus;
+    bool signingCertificateAvailable();
 };
 
 class NSSSignatureCreation final : public CryptoSign::SigningInterface

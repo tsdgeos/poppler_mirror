@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -32,12 +32,13 @@
 // Copyright (C) 2010 William Bader <william@newspapersystems.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2023, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023, 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
 // Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024 Vincent Lefevre <vincent@vinc17.net>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -245,7 +246,7 @@ Object ObjectStream::getObject(int objIdx, int objNum)
 
 #define xrefLocker() const std::scoped_lock locker(mutex)
 
-XRef::XRef() : objStrs { 5 }
+XRef::XRef()
 {
     ok = true;
     errCode = errNone;
@@ -263,7 +264,6 @@ XRef::XRef() : objStrs { 5 }
     ownerPasswordOk = false;
     rootNum = -1;
     rootGen = -1;
-    strOwner = false;
     xrefReconstructed = false;
     encAlgorithm = cryptNone;
     keyLength = 0;
@@ -362,16 +362,13 @@ XRef::~XRef()
     if (streamEnds) {
         gfree(streamEnds);
     }
-    if (strOwner) {
-        delete str;
-    }
 }
 
 XRef *XRef::copy() const
 {
     XRef *xref = new XRef();
-    xref->str = str->copy();
-    xref->strOwner = true;
+    xref->strOwner = str->copy();
+    xref->str = xref->strOwner.get();
     xref->encrypted = encrypted;
     xref->permFlags = permFlags;
     xref->ownerPasswordOk = ownerPasswordOk;
@@ -1273,8 +1270,10 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
             goto err;
         }
 
-        ObjectStream *objStr = objStrs.lookup(e->offset);
-        if (!objStr) {
+        ObjectStream *objStr = nullptr;
+        if (const auto it = objStrs.find(e->offset); it != objStrs.end()) {
+            objStr = it->second.get();
+        } else {
             objStr = new ObjectStream(this, static_cast<int>(e->offset), recursion + 1);
             if (!objStr->isOk()) {
                 delete objStr;
@@ -1283,7 +1282,7 @@ Object XRef::fetch(int num, int gen, int recursion, Goffset *endPos)
             } else {
                 // XRef could be reconstructed in constructor of ObjectStream:
                 e = getEntry(num);
-                objStrs.put(e->offset, objStr);
+                objStrs.emplace(e->offset, std::unique_ptr<ObjectStream>(objStr));
             }
         }
         if (endPos) {

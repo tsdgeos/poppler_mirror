@@ -27,7 +27,8 @@
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2023-2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Ojas Maheshwari <workonlyojas@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -249,7 +250,7 @@ private:
     Goffset *streamEnds; // 'endstream' positions - only used in
                          //   damaged files
     int streamEndsLen; // number of valid entries in streamEnds
-    PopplerCache<Goffset, ObjectStream> objStrs; // cached object streams
+    std::unordered_map<Goffset, std::unique_ptr<ObjectStream>> objStrs; // object streams map
     bool encrypted; // true if file is encrypted
     int encRevision;
     int encVersion; // encryption algorithm
@@ -263,7 +264,7 @@ private:
     bool xRefStream; // true if last XRef section is a stream
     Goffset mainXRefOffset; // position of the main XRef table/stream
     bool scannedSpecialFlags; // true if scanSpecialFlags has been called
-    bool strOwner; // true if str is owned by the instance
+    std::unique_ptr<BaseStream> strOwner; // ownership if any of str (can be null if others own the stream)
     mutable std::recursive_mutex mutex;
     std::function<void()> xrefReconstructedCb;
 

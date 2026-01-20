@@ -5,7 +5,7 @@
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
- * Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Nathanael d. Noblet <nathanael@noblet.ca>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,22 +54,22 @@ using namespace poppler;
 
 document_private::document_private(std::unique_ptr<GooString> &&file_path, const std::string &owner_password, const std::string &user_password) : document_private()
 {
-    doc = new PDFDoc(std::move(file_path), GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    doc = std::make_unique<PDFDoc>(std::move(file_path), GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private(byte_array *file_data, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     file_data->swap(doc_data);
-    MemStream *memstr = new MemStream(doc_data.data(), 0, doc_data.size(), Object::null());
-    doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    auto memstr = std::make_unique<MemStream>(doc_data.data(), 0, doc_data.size(), Object::null());
+    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private(const char *file_data, int file_data_length, const std::string &owner_password, const std::string &user_password) : document_private()
 {
     raw_doc_data = file_data;
     raw_doc_data_length = file_data_length;
-    MemStream *memstr = new MemStream(raw_doc_data, 0, raw_doc_data_length, Object::null());
-    doc = new PDFDoc(memstr, GooString(owner_password.c_str()), GooString(user_password.c_str()));
+    auto memstr = std::make_unique<MemStream>(raw_doc_data, 0, raw_doc_data_length, Object::null());
+    doc = std::make_unique<PDFDoc>(std::move(memstr), GooString(owner_password.c_str()), GooString(user_password.c_str()));
 }
 
 document_private::document_private() : GlobalParamsIniter(detail::error_function), doc(nullptr), raw_doc_data(nullptr), raw_doc_data_length(0), is_locked(false) { }
@@ -77,8 +77,6 @@ document_private::document_private() : GlobalParamsIniter(detail::error_function
 document_private::~document_private()
 {
     delete_all(embedded_files);
-
-    delete doc;
 }
 
 document *document_private::check_document(document_private *doc, byte_array *file_data)
@@ -989,7 +987,7 @@ std::map<std::string, destination> document::create_destination_map() const
         std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest(i);
 
         if (link_dest) {
-            destination dest(new destination_private(link_dest.get(), d->doc));
+            destination dest(new destination_private(link_dest.get(), d->doc.get()));
 
             m.emplace(std::move(key), std::move(dest));
         }
@@ -1002,7 +1000,7 @@ std::map<std::string, destination> document::create_destination_map() const
         std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest(i);
 
         if (link_dest) {
-            destination dest(new destination_private(link_dest.get(), d->doc));
+            destination dest(new destination_private(link_dest.get(), d->doc.get()));
 
             m.emplace(std::move(key), std::move(dest));
         }

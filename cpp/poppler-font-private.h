@@ -3,6 +3,7 @@
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2021, 2024, 2025, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +62,7 @@ public:
 class poppler::font_iterator_private
 {
 public:
-    font_iterator_private(int start_page, document_private *dd) : font_info_scanner(dd->doc, start_page), total_pages(dd->doc->getNumPages()), current_page((std::max)(start_page, 0)) { }
+    font_iterator_private(int start_page, document_private *dd) : font_info_scanner(dd->doc.get(), start_page), total_pages(dd->doc->getNumPages()), current_page((std::max)(start_page, 0)) { }
     ~font_iterator_private() = default;
 
     FontInfoScanner font_info_scanner;

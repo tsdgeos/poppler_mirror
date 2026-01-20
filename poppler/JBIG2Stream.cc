@@ -1219,12 +1219,12 @@ bool JBIG2Stream::rewind()
 {
     segments.resize(0);
     globalSegments.resize(0);
-    bool innerReset = true;
+    bool rewindSuccess = true;
 
     // read the globals stream
     if (globalsStream.isStream()) {
         curStr = globalsStream.getStream();
-        innerReset = innerReset && curStr->rewind();
+        rewindSuccess = curStr->rewind();
         arithDecoder->setStream(curStr);
         huffDecoder->setStream(curStr);
         mmrDecoder->setStream(curStr);
@@ -1236,7 +1236,7 @@ bool JBIG2Stream::rewind()
 
     // read the main stream
     curStr = str;
-    innerReset = innerReset && curStr->rewind();
+    rewindSuccess = curStr->rewind() && rewindSuccess;
     arithDecoder->setStream(curStr);
     huffDecoder->setStream(curStr);
     mmrDecoder->setStream(curStr);
@@ -1249,7 +1249,7 @@ bool JBIG2Stream::rewind()
         dataPtr = dataEnd = nullptr;
     }
 
-    return innerReset;
+    return rewindSuccess;
 }
 
 void JBIG2Stream::close()
@@ -2284,10 +2284,10 @@ eofError:
     error(errSyntaxError, curStr->getPos(), "Unexpected EOF in JBIG2 stream");
 }
 
-std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen, JBIG2Bitmap **syms,
-                                                         unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable, const JBIG2HuffmanTable *huffDSTable,
-                                                         const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable, const JBIG2HuffmanTable *huffRDXTable,
-                                                         const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
+std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine, int w, int h, unsigned int numInstances, unsigned int logStrips, unsigned int numSyms, const JBIG2HuffmanTable *symCodeTab, unsigned int symCodeLen,
+                                                         JBIG2Bitmap **syms, unsigned int defPixel, unsigned int combOp, unsigned int transposed, unsigned int refCorner, int sOffset, const JBIG2HuffmanTable *huffFSTable,
+                                                         const JBIG2HuffmanTable *huffDSTable, const JBIG2HuffmanTable *huffDTTable, const JBIG2HuffmanTable *huffRDWTable, const JBIG2HuffmanTable *huffRDHTable,
+                                                         const JBIG2HuffmanTable *huffRDXTable, const JBIG2HuffmanTable *huffRDYTable, const JBIG2HuffmanTable *huffRSizeTable, unsigned int templ, int *atx, int *aty)
 {
     JBIG2Bitmap *symbolBitmap;
     unsigned int strips;
@@ -2374,7 +2374,7 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                 symID = arithDecoder->decodeIAID(symCodeLen, iaidStats);
             }
 
-            if (symID >= (unsigned int)numSyms) {
+            if (symID >= numSyms) {
                 error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
                 if (unlikely(numInstances - inst > 0x800)) {
                     // don't loop too often with damaged JBIg2 streams
@@ -2616,7 +2616,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     unsigned int flags, mmr, templ, enableSkip, combOp;
     unsigned int gridW, gridH, stepX, stepY, patW, patH;
     int atx[4], aty[4];
-    int gridX, gridY, xx, yy, bit, j;
+    int gridX, gridY, xx, yy, j;
     unsigned int bpp, m, n, i;
 
     // region segment info field
@@ -2721,11 +2721,15 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, unsigned 
     atx[3] = -2;
     aty[3] = -2;
     for (j = bpp - 1; j >= 0; --j) {
-        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
+        const std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
+        if (!grayBitmap) {
+            gfree(grayImg);
+            return;
+        }
         i = 0;
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
-                bit = grayBitmap->getPixel(n, m) ^ (grayImg[i] & 1);
+                const int bit = grayBitmap->getPixel(n, m) ^ (grayImg[i] & 1);
                 grayImg[i] = (grayImg[i] << 1) | bit;
                 ++i;
             }

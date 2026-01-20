@@ -41,7 +41,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Martin Emrich <dev@martinemrich.me>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
@@ -937,9 +937,9 @@ FileStream::~FileStream()
     close();
 }
 
-BaseStream *FileStream::copy()
+std::unique_ptr<BaseStream> FileStream::copy()
 {
-    return new FileStream(file, start, limited, length, dict.copy());
+    return std::make_unique<FileStream>(file, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> FileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
@@ -1034,9 +1034,9 @@ CachedFileStream::~CachedFileStream()
     close();
 }
 
-BaseStream *CachedFileStream::copy()
+std::unique_ptr<BaseStream> CachedFileStream::copy()
 {
-    return new CachedFileStream(cc, start, limited, length, dict.copy());
+    return std::make_unique<CachedFileStream>(cc, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
@@ -1172,7 +1172,7 @@ bool EmbedStream::rewind()
     return false;
 }
 
-BaseStream *EmbedStream::copy()
+std::unique_ptr<BaseStream> EmbedStream::copy()
 {
     error(errInternal, -1, "Called copy() on EmbedStream");
     return nullptr;

@@ -5,6 +5,7 @@
  * Copyright (C) 2019, Julián Unrrein <junrrein@gmail.com>
  * Copyright (C) 2020, 2026, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2021, Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2026, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -259,7 +260,7 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     }
 
     page_private *pp = page_private::get(p);
-    PDFDoc *pdfdoc = pp->doc->doc;
+    PDFDoc *pdfdoc = pp->doc->doc.get();
 
     SplashColorMode colorMode;
     SplashThinLineMode lineMode;

@@ -3,7 +3,7 @@
  * Copyright (C) 2025 Lucas Baudin <lucas.baudin@ensae.fr>
  * Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  * Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
- * Copyright (C) 2025 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2025, 2026 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ static void poppler_page_finalize(GObject *object)
 
     g_object_unref(page->document);
     page->document = nullptr;
+    page->text.reset();
 
     /* page->page is owned by the document */
 
@@ -1089,10 +1090,10 @@ void poppler_page_render_to_ps(PopplerPage *page, PopplerPSFile *ps_file)
             pages.push_back(i);
         }
         if (ps_file->fd != -1) {
-            ps_file->out =
-                    new PSOutputDev(ps_file->fd, ps_file->document->doc, nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false, nullptr, nullptr);
+            ps_file->out = new PSOutputDev(ps_file->fd, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
+                                           nullptr, nullptr);
         } else {
-            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc, nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
+            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
                                            nullptr, nullptr);
         }
     }

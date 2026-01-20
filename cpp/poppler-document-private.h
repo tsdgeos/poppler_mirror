@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, 2020, 2022, 2025, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2024, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+ * Copyright (C) 2024, 2026, g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public:
 
     static document *check_document(document_private *doc, byte_array *file_data);
 
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     byte_array doc_data;
     const char *raw_doc_data;
     int raw_doc_data_length;

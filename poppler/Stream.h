@@ -33,7 +33,7 @@
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 // Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2024 Fernando Herrera <fherrera@onirica.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
@@ -353,7 +353,7 @@ class POPPLER_PRIVATE_EXPORT BaseStream : public Stream
 public:
     BaseStream(Object &&dictA, Goffset lengthA);
     ~BaseStream() override;
-    virtual BaseStream *copy() = 0;
+    virtual std::unique_ptr<BaseStream> copy() = 0;
     virtual std::unique_ptr<Stream> makeSubStream(Goffset start, bool limited, Goffset length, Object &&dict) = 0;
     void setPos(Goffset pos, int dir = 0) override = 0;
     bool isBinary(bool last = true) const override { return last; }
@@ -549,7 +549,7 @@ class POPPLER_PRIVATE_EXPORT FileStream : public BaseStream
 public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~FileStream() override;
-    BaseStream *copy() override;
+    std::unique_ptr<BaseStream> copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return strFile; }
     [[nodiscard]] bool rewind() override;
@@ -618,7 +618,7 @@ class POPPLER_PRIVATE_EXPORT CachedFileStream : public BaseStream
 public:
     CachedFileStream(std::shared_ptr<CachedFile> ccA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~CachedFileStream() override;
-    BaseStream *copy() override;
+    std::unique_ptr<BaseStream> copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return strCachedFile; }
     [[nodiscard]] bool rewind() override;
@@ -664,7 +664,7 @@ public:
         bufPtr = buf + start;
     }
 
-    BaseStream *copy() override { return new BaseMemStream(buf, start, length, dict.copy()); }
+    std::unique_ptr<BaseStream> copy() override { return std::make_unique<BaseMemStream>(buf, start, length, dict.copy()); }
 
     std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limited, Goffset lengthA, Object &&dictA) override
     {
@@ -803,7 +803,7 @@ class POPPLER_PRIVATE_EXPORT EmbedStream : public BaseStream
 public:
     EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA = false);
     ~EmbedStream() override;
-    BaseStream *copy() override;
+    std::unique_ptr<BaseStream> copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA) override;
     StreamKind getKind() const override { return str->getKind(); }
     [[nodiscard]] bool rewind() override;

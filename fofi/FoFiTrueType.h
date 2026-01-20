@@ -106,10 +106,6 @@ public:
     // * 0: restricted license embedding
     int getEmbeddingRights() const;
 
-    // Return the font matrix as an array of six numbers.  (Only useful
-    // for OpenType CFF fonts.)
-    void getFontMatrix(double *mat) const;
-
     // Convert to a Type 42 font, suitable for embedding in a PostScript
     // file.  <psName> will be used as the PostScript font name (so we
     // don't need to depend on the 'name' table in the font).  The

@@ -33,6 +33,7 @@
 
 #include <config.h>
 
+#include <climits>
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"

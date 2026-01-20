@@ -7,7 +7,7 @@
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2017, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -31,9 +31,9 @@ std::unique_ptr<PDFDoc> CurlPDFDocBuilder::buildPDFDoc(const GooString &uri, con
         return PDFDoc::ErrorPDFDoc(errOpenFile, uri.copy());
     }
 
-    BaseStream *str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
+    auto str = std::make_unique<CachedFileStream>(cachedFile, 0, false, cachedFile->getLength(), Object::null());
 
-    return std::make_unique<PDFDoc>(str, ownerPassword, userPassword);
+    return std::make_unique<PDFDoc>(std::move(str), ownerPassword, userPassword);
 }
 
 bool CurlPDFDocBuilder::supports(const GooString &uri)

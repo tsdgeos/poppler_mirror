@@ -163,7 +163,7 @@ PDFDoc::PDFDoc(std::unique_ptr<GooString> &&fileNameA, const std::optional<GooSt
     }
 
     // create stream
-    str = new FileStream(file.get(), 0, false, file->size(), Object::null());
+    str = std::make_unique<FileStream>(file.get(), 0, false, file->size(), Object::null());
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
@@ -197,13 +197,13 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooStrin
     }
 
     // create stream
-    str = new FileStream(file.get(), 0, false, file->size(), Object::null());
+    str = std::make_unique<FileStream>(file.get(), 0, false, file->size(), Object::null());
 
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback)
+PDFDoc::PDFDoc(std::unique_ptr<BaseStream> strA, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword, const std::function<void()> &xrefReconstructedCallback)
 {
     if (strA->getFileName()) {
         fileName = strA->getFileName()->copy();
@@ -214,7 +214,7 @@ PDFDoc::PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword, 
         }
 #endif
     }
-    str = strA;
+    str = std::move(strA);
     ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
@@ -251,12 +251,12 @@ bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::opt
     bool wasReconstructed = false;
 
     // read xref table
-    xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed, false, xrefReconstructedCallback);
+    xref = new XRef(str.get(), getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed, false, xrefReconstructedCallback);
     if (!xref->isOk()) {
         if (wasReconstructed) {
             delete xref;
             startXRefPos = -1;
-            xref = new XRef(str, getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed, false, xrefReconstructedCallback);
+            xref = new XRef(str.get(), getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed, false, xrefReconstructedCallback);
         }
         if (!xref->isOk()) {
             error(errSyntaxError, -1, "Couldn't read xref table");
@@ -278,7 +278,7 @@ bool PDFDoc::setup(const std::optional<GooString> &ownerPassword, const std::opt
             // try one more time to construct the Catalog, maybe the problem is damaged XRef
             delete catalog;
             delete xref;
-            xref = new XRef(str, 0, 0, nullptr, true, xrefReconstructedCallback);
+            xref = new XRef(str.get(), 0, 0, nullptr, true, xrefReconstructedCallback);
             catalog = new Catalog(this);
         }
 
@@ -304,7 +304,6 @@ PDFDoc::~PDFDoc()
     delete xref;
     delete hints;
     delete linearization;
-    delete str;
 }
 
 // Check for a %%EOF at the end of this stream
@@ -654,7 +653,7 @@ void PDFDoc::processLinks(OutputDev *out, int page)
 Linearization *PDFDoc::getLinearization()
 {
     if (!linearization) {
-        linearization = new Linearization(str);
+        linearization = new Linearization(str.get());
         linearizationState = 0;
     }
     return linearization;
@@ -672,7 +671,7 @@ bool PDFDoc::checkLinearization()
         return false;
     }
     if (!hints) {
-        hints = new Hints(str, linearization, getXRef(), secHdlr);
+        hints = new Hints(str.get(), linearization, getXRef(), secHdlr);
     }
     if (!hints->isOk()) {
         linearizationState = 2;
@@ -814,7 +813,7 @@ bool PDFDoc::getID(GooString *permanent_id, GooString *update_id) const
 Hints *PDFDoc::getHints()
 {
     if (!hints && isLinearized()) {
-        hints = new Hints(str, getLinearization(), getXRef(), secHdlr);
+        hints = new Hints(str.get(), getLinearization(), getXRef(), secHdlr);
     }
 
     return hints;

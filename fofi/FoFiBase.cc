@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
 // Copyright (C) 2011 Jim Meyering <jim@meyering.net>
-// Copyright (C) 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018, 2020, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -57,7 +57,7 @@ std::optional<std::vector<unsigned char>> FoFiBase::readFile(const char *fileNam
         fclose(f);
         return std::nullopt;
     }
-    int n = (int)ftell(f);
+    const int n = (int)ftell(f);
     if (n < 0) {
         error(errIO, -1, "Cannot determine length of '{0:s}'", fileName);
         fclose(f);
@@ -68,9 +68,10 @@ std::optional<std::vector<unsigned char>> FoFiBase::readFile(const char *fileNam
         fclose(f);
         return std::nullopt;
     }
+    const size_t nToRead = n;
     std::vector<unsigned char> buf;
-    buf.resize(n);
-    if ((int)fread(buf.data(), 1, n, f) != n) {
+    buf.resize(nToRead);
+    if (fread(buf.data(), 1, nToRead, f) != nToRead) {
         fclose(f);
         return std::nullopt;
     }
@@ -82,7 +83,7 @@ int FoFiBase::getS8(int pos, bool *ok) const
 {
     int x;
 
-    if (pos < 0 || pos >= int(file.size())) {
+    if (pos < 0 || static_cast<size_t>(pos) >= file.size()) {
         *ok = false;
         return 0;
     }
@@ -95,7 +96,7 @@ int FoFiBase::getS8(int pos, bool *ok) const
 
 int FoFiBase::getU8(int pos, bool *ok) const
 {
-    if (pos < 0 || pos >= int(file.size())) {
+    if (pos < 0 || static_cast<size_t>(pos) >= file.size()) {
         *ok = false;
         return 0;
     }
