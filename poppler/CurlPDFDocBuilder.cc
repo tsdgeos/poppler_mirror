@@ -7,7 +7,7 @@
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2017, 2022, 2024 Albert Astals Cid <aacid@kde.org>
 // Copyright 2021 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 

@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Mojca Miklavec <mojca@macports.org>
 // Copyright (C) 2019, 2021 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2026 Kleis Auke Wolthuizen <github@kleisauke.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

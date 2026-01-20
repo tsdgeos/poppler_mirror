@@ -34,7 +34,7 @@
 // Copyright (C) 2018 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2020, 2021, 2026 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2020 Lluís Batlle i Rossell <viric@viric.name>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
