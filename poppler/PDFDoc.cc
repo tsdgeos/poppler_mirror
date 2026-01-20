@@ -1305,7 +1305,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     // Encrypt string if encryption is enabled
     std::unique_ptr<GooString> sEnc = nullptr;
     if (fileKey) {
-        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
+        EncryptStream *enc = new EncryptStream(std::make_unique<MemStream>(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
         sEnc = std::make_unique<GooString>();
         int c;
         if (!enc->rewind()) {
@@ -1459,9 +1459,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                 removeFilter = false;
             }
             if (addEncryptstream) {
-                encStream = std::make_unique<EncryptStream>(stream, fileKey, encAlgorithm, keyLength, ref);
-                encStream->setAutoDelete(false);
-                stream = encStream.get();
+                encStream = std::make_unique<EncryptStream>(*stream, fileKey, encAlgorithm, keyLength, ref);
             }
 
             if (!stream->rewind()) {
@@ -1487,8 +1485,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             writeDictionary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(stream, outStr);
         } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream *>(stream)->getNeedsEncryptionOnSave()) {
-            EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
-            encStream->setAutoDelete(false);
+            EncryptStream *encStream = new EncryptStream(*stream, fileKey, encAlgorithm, keyLength, ref);
             writeDictionary(encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(encStream, outStr);
             delete encStream;

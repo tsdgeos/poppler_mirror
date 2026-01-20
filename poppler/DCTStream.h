@@ -45,10 +45,10 @@ struct str_error_mgr
     int height;
 };
 
-class DCTStream : public FilterStream
+class DCTStream : public OwnedFilterStream
 {
 public:
-    DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
+    DCTStream(std::unique_ptr<Stream> strA, int colorXformA, Dict *dict, int recursion);
     ~DCTStream() override;
     StreamKind getKind() const override { return strDCT; }
     [[nodiscard]] bool rewind() override;

@@ -357,7 +357,7 @@ private:
 
     // in-line image operators
     void opBeginImage(Object args[], int numArgs);
-    Stream *buildImageStream();
+    std::unique_ptr<Stream> buildImageStream();
     void opImageData(Object args[], int numArgs);
     void opEndImage(Object args[], int numArgs);
 

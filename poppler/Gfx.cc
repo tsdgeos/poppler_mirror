@@ -4948,18 +4948,17 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
 
 void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
 {
-    Stream *str;
     int c1, c2;
 
     // NB: this function is run even if ocState is false -- doImage() is
     // responsible for skipping over the inline image data
 
     // build dict/stream
-    str = buildImageStream();
+    auto str = buildImageStream();
 
     // display the image
     if (str) {
-        doImage(nullptr, str, true);
+        doImage(nullptr, str.get(), true);
 
         // skip 'EI' tag
         c1 = str->getUndecodedStream()->getChar();
@@ -4968,14 +4967,11 @@ void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
             c1 = c2;
             c2 = str->getUndecodedStream()->getChar();
         }
-        delete str;
     }
 }
 
-Stream *Gfx::buildImageStream()
+std::unique_ptr<Stream> Gfx::buildImageStream()
 {
-    Stream *str;
-
     // build dictionary
     Object dict(new Dict(xref));
     Object obj = parser->getObj();
@@ -4998,13 +4994,11 @@ Stream *Gfx::buildImageStream()
 
     // make stream
     if (parser->getStream()) {
-        str = new EmbedStream(parser->getStream(), std::move(dict), false, 0, true);
-        str = str->addFilters(str->getDict());
-    } else {
-        str = nullptr;
+        auto str = std::make_unique<EmbedStream>(parser->getStream(), std::move(dict), false, 0, true);
+        auto *filterDict = str->getDict();
+        return Stream::addFilters(std::move(str), filterDict);
     }
-
-    return str;
+    return nullptr;
 }
 
 void Gfx::opImageData(Object /*args*/[], int /*numArgs*/)

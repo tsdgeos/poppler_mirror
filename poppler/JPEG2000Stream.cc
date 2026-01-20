@@ -69,7 +69,7 @@ static inline int doGetChar(JPXStreamPrivate *priv)
     return result;
 }
 
-JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
+JPXStream::JPXStream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA))
 {
     priv = new JPXStreamPrivate;
     handleJPXtransparency = false;
@@ -77,7 +77,6 @@ JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 
 JPXStream::~JPXStream()
 {
-    delete str;
     close();
     delete priv;
 }

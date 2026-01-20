@@ -242,9 +242,9 @@ JPXCover jpxCover(150);
 
 //------------------------------------------------------------------------
 
-JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
+JPXStream::JPXStream(std::unique_ptr<Stream> strA) : FilterStream(strA.get())
 {
-    bufStr = new BufStream(str, 2);
+    bufStr = std::make_unique<BufStream>(std::move(strA), 2);
 
     nComps = 0;
     bpc = nullptr;
@@ -268,7 +268,6 @@ JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 JPXStream::~JPXStream()
 {
     close();
-    delete bufStr;
 }
 
 bool JPXStream::rewind()
@@ -2170,7 +2169,7 @@ bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsig
     } else {
         cover(64);
         cb->arithDecoder = new JArithmeticDecoder();
-        cb->arithDecoder->setStream(bufStr, cb->dataLen[0]);
+        cb->arithDecoder->setStream(bufStr.get(), cb->dataLen[0]);
         cb->arithDecoder->start();
         cb->stats = new JArithmeticDecoderStats(jpxNContexts);
         cb->stats->setEntry(jpxContextSigProp, 4, 0);
@@ -2180,7 +2179,7 @@ bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsig
 
     for (i = 0; i < cb->nCodingPasses; ++i) {
         if ((tileComp->codeBlockStyle & 0x04) && i > 0) {
-            cb->arithDecoder->setStream(bufStr, cb->dataLen[i]);
+            cb->arithDecoder->setStream(bufStr.get(), cb->dataLen[i]);
             cb->arithDecoder->start();
         }
 

@@ -25,10 +25,10 @@
 
 struct JPXStreamPrivate;
 
-class JPXStream : public FilterStream
+class JPXStream : public OwnedFilterStream
 {
 public:
-    explicit JPXStream(Stream *strA);
+    explicit JPXStream(std::unique_ptr<Stream> strA);
     ~JPXStream() override;
 
     JPXStream(const JPXStream &other) = delete;

@@ -23,10 +23,10 @@ extern "C" {
 #include <zlib.h>
 }
 
-class FlateStream : public FilterStream
+class FlateStream : public OwnedFilterStream
 {
 public:
-    FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
+    FlateStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits);
     virtual ~FlateStream();
     StreamKind getKind() const override { return strFlate; }
     [[nodiscard]] bool rewind() override;

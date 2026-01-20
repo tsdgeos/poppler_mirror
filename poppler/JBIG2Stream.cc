@@ -1155,7 +1155,7 @@ JBIG2CodeTable::~JBIG2CodeTable()
 // JBIG2Stream
 //------------------------------------------------------------------------
 
-JBIG2Stream::JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA) : FilterStream(strA)
+JBIG2Stream::JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, Object *globalsStreamRefA) : OwnedFilterStream(std::move(strA))
 {
     pageBitmap = nullptr;
 
@@ -1212,7 +1212,6 @@ JBIG2Stream::~JBIG2Stream()
     delete iaidStats;
     delete huffDecoder;
     delete mmrDecoder;
-    delete str;
 }
 
 bool JBIG2Stream::rewind()

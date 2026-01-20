@@ -21,7 +21,7 @@
 
 #    include "FlateStream.h"
 
-FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, int bits) : FilterStream(strA)
+FlateStream::FlateStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits) : OwnedFilterStream(std::move(strA))
 {
     if (predictor != 1) {
         pred = new StreamPredictor(this, predictor, columns, colors, bits);
@@ -41,7 +41,6 @@ FlateStream::~FlateStream()
 {
     inflateEnd(&d_stream);
     delete pred;
-    delete str;
 }
 
 bool FlateStream::rewind()

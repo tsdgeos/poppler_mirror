@@ -69,7 +69,7 @@ private:
     Object buf1, buf2; // next two tokens
     int inlineImg; // set when inline image data is encountered
 
-    Stream *makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict);
+    std::unique_ptr<Stream> makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict);
     void shift(int objNum = -1);
     void shift(const char *cmdA, int objNum);
 };

@@ -94,7 +94,8 @@ struct DecryptAES256State
 class BaseCryptStream : public FilterStream
 {
 public:
-    BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    BaseCryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    BaseCryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~BaseCryptStream() override;
     StreamKind getKind() const override { return strCrypt; }
     [[nodiscard]] bool rewind() override;
@@ -103,7 +104,6 @@ public:
     Goffset getPos() override;
     bool isBinary(bool last) const override;
     Stream *getUndecodedStream() override { return this; }
-    void setAutoDelete(bool val);
 
 protected:
     CryptAlgorithm algo;
@@ -111,7 +111,7 @@ protected:
     unsigned char objKey[32];
     Goffset charactersRead; // so that getPos() can be correct
     int nextCharBuff; // EOF means not read yet
-    bool autoDelete;
+    std::unique_ptr<Stream> ownedStream;
 
     union {
         DecryptRC4State rc4;
@@ -127,16 +127,21 @@ protected:
 class EncryptStream : public BaseCryptStream
 {
 public:
-    EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    EncryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    EncryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~EncryptStream() override;
     [[nodiscard]] bool rewind() override;
     int lookChar() override;
+
+private:
+    void init();
 };
 
 class DecryptStream : public BaseCryptStream
 {
 public:
-    DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    DecryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    DecryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~DecryptStream() override;
     [[nodiscard]] bool rewind() override;
     int lookChar() override;

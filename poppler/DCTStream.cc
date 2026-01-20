@@ -64,7 +64,7 @@ static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
 
 static void str_term_source(j_decompress_ptr /*cinfo*/) { }
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) : FilterStream(strA)
+DCTStream::DCTStream(std::unique_ptr<Stream> strA, int colorXformA, Dict *dict, int recursion) : OwnedFilterStream(std::move(strA))
 {
     colorXform = colorXformA;
     if (dict != nullptr) {
@@ -81,7 +81,6 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) :
 DCTStream::~DCTStream()
 {
     jpeg_destroy_decompress(&cinfo);
-    delete str;
 }
 
 static void exitErrorHandler(jpeg_common_struct *error)

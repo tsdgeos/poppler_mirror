@@ -287,7 +287,7 @@ struct JPXImage
 class JPXStream : public FilterStream
 {
 public:
-    JPXStream(Stream *strA);
+    JPXStream(std::unique_ptr<Stream> strA);
     virtual ~JPXStream();
     StreamKind getKind() const override { return strJPX; }
     [[nodiscard]] bool rewind() override;
@@ -324,7 +324,7 @@ private:
     void skipEPH();
     unsigned int finishBitBuf();
 
-    BufStream *bufStr; // buffered stream (for lookahead)
+    std::unique_ptr<BufStream> bufStr; // buffered stream (for lookahead)
 
     unsigned int nComps; // number of components
     unsigned int *bpc; // bits per component, for each component

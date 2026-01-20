@@ -45,10 +45,10 @@ class JBIG2MMRDecoder;
 
 //------------------------------------------------------------------------
 
-class JBIG2Stream : public FilterStream
+class JBIG2Stream : public OwnedFilterStream
 {
 public:
-    JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
+    JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, Object *globalsStreamRefA);
     ~JBIG2Stream() override;
     StreamKind getKind() const override { return strJBIG2; }
     [[nodiscard]] bool rewind() override;

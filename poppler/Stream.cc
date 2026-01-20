@@ -167,23 +167,21 @@ std::optional<std::string> Stream::getPSFilter(int /*psLevel*/, const char * /*i
     return std::string {};
 }
 
-static Stream *wrapEOFStream(Stream *str)
+static std::unique_ptr<Stream> wrapEOFStream(std::unique_ptr<Stream> str)
 {
-    if (dynamic_cast<EOFStream *>(str)) {
+    if (dynamic_cast<EOFStream *>(str.get())) {
         // str is already a EOFStream, no need to wrap it in another EOFStream
         return str;
     }
-    return new EOFStream(str);
+    return std::make_unique<EOFStream>(std::move(str));
 }
 
-Stream *Stream::addFilters(Dict *dict, int recursion)
+std::unique_ptr<Stream> Stream::addFilters(std::unique_ptr<Stream> str, Dict *dict, int recursion)
 {
     Object obj, obj2;
     Object params, params2;
-    Stream *str;
     int i;
 
-    str = this;
     obj = dict->lookup("Filter", recursion);
     if (obj.isNull()) {
         obj = dict->lookup("F", recursion);
@@ -193,7 +191,7 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
         params = dict->lookup("DP", recursion);
     }
     if (obj.isName()) {
-        str = makeFilter(obj.getName(), str, &params, recursion, dict);
+        str = makeFilter(obj.getName(), std::move(str), &params, recursion, dict);
     } else if (obj.isArray()) {
         for (i = 0; i < obj.arrayGetLength(); ++i) {
             obj2 = obj.arrayGet(i, recursion);
@@ -203,14 +201,14 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
                 params2.setToNull();
             }
             if (obj2.isName()) {
-                str = makeFilter(obj2.getName(), str, &params2, recursion);
+                str = makeFilter(obj2.getName(), std::move(str), &params2, recursion);
             } else {
-                error(errSyntaxError, getPos(), "Bad filter name");
-                str = wrapEOFStream(str);
+                error(errSyntaxError, -1, "Bad filter name");
+                str = wrapEOFStream(std::move(str));
             }
         }
     } else if (!obj.isNull()) {
-        error(errSyntaxError, getPos(), "Bad 'Filter' attribute in stream");
+        error(errSyntaxError, -1, "Bad 'Filter' attribute in stream");
     }
 
     return str;
@@ -229,7 +227,7 @@ bool Stream::isEncrypted() const
 class BaseStreamStream : public Stream
 {
 public:
-    explicit BaseStreamStream(Stream *strA) : str(strA) { }
+    explicit BaseStreamStream(std::unique_ptr<Stream> strA) : str(std::move(strA)) { }
     ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
@@ -252,7 +250,7 @@ private:
 
 BaseStreamStream::~BaseStreamStream() = default;
 
-Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int recursion, Dict *dict)
+std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion, Dict *dict)
 {
     int pred; // parameters
     int colors;
@@ -264,9 +262,9 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
     Object obj;
 
     if (!strcmp(name, "ASCIIHexDecode") || !strcmp(name, "AHx")) {
-        str = new ASCIIHexStream(str);
+        str = std::make_unique<ASCIIHexStream>(std::move(str));
     } else if (!strcmp(name, "ASCII85Decode") || !strcmp(name, "A85")) {
-        str = new ASCII85Stream(str);
+        str = std::make_unique<ASCII85Stream>(std::move(str));
     } else if (!strcmp(name, "LZWDecode") || !strcmp(name, "LZW")) {
         pred = 1;
         columns = 1;
@@ -295,9 +293,9 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
                 early = obj.getInt();
             }
         }
-        str = new LZWStream(str, pred, columns, colors, bits, early);
+        str = std::make_unique<LZWStream>(std::move(str), pred, columns, colors, bits, early);
     } else if (!strcmp(name, "RunLengthDecode") || !strcmp(name, "RL")) {
-        str = new RunLengthStream(str);
+        str = std::make_unique<RunLengthStream>(std::move(str));
     } else if (!strcmp(name, "CCITTFaxDecode") || !strcmp(name, "CCF")) {
         encoding = 0;
         endOfLine = false;
@@ -341,7 +339,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
                 damagedRowsBeforeError = obj.getInt();
             }
         }
-        str = new CCITTFaxStream(str, encoding, endOfLine, byteAlign, columns, rows, endOfBlock, black, damagedRowsBeforeError);
+        str = std::make_unique<CCITTFaxStream>(std::move(str), encoding, endOfLine, byteAlign, columns, rows, endOfBlock, black, damagedRowsBeforeError);
     } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
 #if HAVE_DCT_DECODER
         int colorXform = -1;
@@ -351,7 +349,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
                 colorXform = obj.getInt();
             }
         }
-        str = new DCTStream(str, colorXform, dict, recursion);
+        str = std::make_unique<DCTStream>(std::move(str), colorXform, dict, recursion);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
         str = wrapEOFStream(str);
@@ -379,7 +377,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
                 bits = obj.getInt();
             }
         }
-        str = new FlateStream(str, pred, columns, colors, bits);
+        str = std::make_unique<FlateStream>(std::move(str), pred, columns, colors, bits);
     } else if (!strcmp(name, "JBIG2Decode")) {
         Object globals;
         if (params->isDict()) {
@@ -387,23 +385,23 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
             obj = params->dictLookupNF("JBIG2Globals").copy();
             globals = obj.fetch(xref, recursion);
         }
-        str = new JBIG2Stream(str, std::move(globals), &obj);
+        str = std::make_unique<JBIG2Stream>(std::move(str), std::move(globals), &obj);
     } else if (!strcmp(name, "JPXDecode")) {
 #if HAVE_JPX_DECODER
-        str = new JPXStream(str);
+        str = std::make_unique<JPXStream>(std::move(str));
 #else
-        error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = wrapEOFStream(str);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        str = wrapEOFStream(std::move(str));
 #endif
     } else if (!strcmp(name, "Crypt")) {
         if (str->getKind() == strCrypt) {
-            str = new BaseStreamStream(str);
+            str = std::make_unique<BaseStreamStream>(std::move(str));
         } else {
-            error(errSyntaxError, getPos(), "Can't revert non decrypt streams");
+            error(errSyntaxError, str->getPos(), "Can't revert non decrypt streams");
         }
     } else {
-        error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = wrapEOFStream(str);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        str = wrapEOFStream(std::move(str));
     }
     return str;
 }
@@ -559,6 +557,10 @@ int BaseSeekInputStream::getChars(int nChars, unsigned char *buffer)
     }
     return n;
 }
+
+OwnedFilterStream::OwnedFilterStream(std::unique_ptr<Stream> strA) : FilterStream(strA.get()), ownedStream(std::move(strA)) { }
+
+OwnedFilterStream::~OwnedFilterStream() = default;
 
 //------------------------------------------------------------------------
 // FilterStream
@@ -1287,16 +1289,13 @@ void EmbedStream::moveStart(Goffset /*delta*/)
 // ASCIIHexStream
 //------------------------------------------------------------------------
 
-ASCIIHexStream::ASCIIHexStream(Stream *strA) : FilterStream(strA)
+ASCIIHexStream::ASCIIHexStream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA))
 {
     buf = EOF;
     eof = false;
 }
 
-ASCIIHexStream::~ASCIIHexStream()
-{
-    delete str;
-}
+ASCIIHexStream::~ASCIIHexStream() = default;
 
 bool ASCIIHexStream::rewind()
 {
@@ -1384,16 +1383,13 @@ bool ASCIIHexStream::isBinary(bool /*last*/) const
 // ASCII85Stream
 //------------------------------------------------------------------------
 
-ASCII85Stream::ASCII85Stream(Stream *strA) : FilterStream(strA)
+ASCII85Stream::ASCII85Stream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA))
 {
     index = n = 0;
     eof = false;
 }
 
-ASCII85Stream::~ASCII85Stream()
-{
-    delete str;
-}
+ASCII85Stream::~ASCII85Stream() = default;
 
 bool ASCII85Stream::rewind()
 {
@@ -1476,7 +1472,7 @@ bool ASCII85Stream::isBinary(bool /*last*/) const
 // LZWStream
 //------------------------------------------------------------------------
 
-LZWStream::LZWStream(Stream *strA, int predictor, int columns, int colors, int bits, int earlyA) : FilterStream(strA)
+LZWStream::LZWStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits, int earlyA) : OwnedFilterStream(std::move(strA))
 {
     if (predictor != 1) {
         pred = new StreamPredictor(this, predictor, columns, colors, bits);
@@ -1496,7 +1492,6 @@ LZWStream::LZWStream(Stream *strA, int predictor, int columns, int colors, int b
 LZWStream::~LZWStream()
 {
     delete pred;
-    delete str;
 }
 
 int LZWStream::getChar()
@@ -1703,16 +1698,13 @@ bool LZWStream::isBinary(bool /*last*/) const
 // RunLengthStream
 //------------------------------------------------------------------------
 
-RunLengthStream::RunLengthStream(Stream *strA) : FilterStream(strA)
+RunLengthStream::RunLengthStream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA))
 {
     bufPtr = bufEnd = buf;
     eof = false;
 }
 
-RunLengthStream::~RunLengthStream()
-{
-    delete str;
-}
+RunLengthStream::~RunLengthStream() = default;
 
 bool RunLengthStream::rewind()
 {
@@ -1797,7 +1789,7 @@ bool RunLengthStream::fillBuf()
 // CCITTFaxStream
 //------------------------------------------------------------------------
 
-CCITTFaxStream::CCITTFaxStream(Stream *strA, int encodingA, bool endOfLineA, bool byteAlignA, int columnsA, int rowsA, bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA) : FilterStream(strA)
+CCITTFaxStream::CCITTFaxStream(std::unique_ptr<Stream> strA, int encodingA, bool endOfLineA, bool byteAlignA, int columnsA, int rowsA, bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA) : OwnedFilterStream(std::move(strA))
 {
     encoding = encodingA;
     endOfLine = endOfLineA;
@@ -1836,7 +1828,6 @@ CCITTFaxStream::CCITTFaxStream(Stream *strA, int encodingA, bool endOfLineA, boo
 
 CCITTFaxStream::~CCITTFaxStream()
 {
-    delete str;
     gfree(refLine);
     gfree(codingLine);
 }
@@ -2624,7 +2615,7 @@ static int dctClipInit = 0;
 static const int dctZigZag[64] = { 0,  1,  8,  16, 9,  2,  3,  10, 17, 24, 32, 25, 18, 11, 4,  5,  12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6,  7,  14, 21, 28,
                                    35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Dict * /*dict*/, int /*recursion*/) : FilterStream(strA)
+DCTStream::DCTStream(std::unique_ptr<Stream> strA, int colorXformA, Dict * /*dict*/, int /*recursion*/) : OwnedFilterStream(std::move(strA))
 {
     int i, j;
 
@@ -2656,7 +2647,6 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict * /*dict*/, int /*recur
 DCTStream::~DCTStream()
 {
     close();
-    delete str;
 }
 
 bool DCTStream::dctRewind(bool unfiltered)
@@ -4162,7 +4152,7 @@ static const FlateCode flateFixedDistCodeTabCodes[32] = { { .len = 5, .val = 0x0
 
 FlateHuffmanTab FlateStream::fixedDistCodeTab = { .codes = flateFixedDistCodeTabCodes, .maxLen = 5 };
 
-FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, int bits) : FilterStream(strA)
+FlateStream::FlateStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits) : OwnedFilterStream(std::move(strA))
 {
     if (predictor != 1) {
         pred = new StreamPredictor(this, predictor, columns, colors, bits);
@@ -4187,7 +4177,6 @@ FlateStream::~FlateStream()
         gfree(const_cast<FlateCode *>(distCodeTab.codes));
     }
     delete pred;
-    delete str;
 }
 
 bool FlateStream::flateRewind(bool unfiltered)
@@ -4661,18 +4650,15 @@ int FlateStream::getCodeWord(int bits)
 // EOFStream
 //------------------------------------------------------------------------
 
-EOFStream::EOFStream(Stream *strA) : FilterStream(strA) { }
+EOFStream::EOFStream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA)) { }
 
-EOFStream::~EOFStream()
-{
-    delete str;
-}
+EOFStream::~EOFStream() = default;
 
 //------------------------------------------------------------------------
 // BufStream
 //------------------------------------------------------------------------
 
-BufStream::BufStream(Stream *strA, int bufSizeA) : FilterStream(strA)
+BufStream::BufStream(std::unique_ptr<Stream> strA, int bufSizeA) : OwnedFilterStream(std::move(strA))
 {
     bufSize = bufSizeA;
     buf = (int *)gmallocn(bufSize, sizeof(int));
@@ -4681,7 +4667,6 @@ BufStream::BufStream(Stream *strA, int bufSizeA) : FilterStream(strA)
 BufStream::~BufStream()
 {
     gfree(buf);
-    delete str;
 }
 
 bool BufStream::rewind()
