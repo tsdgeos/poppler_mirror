@@ -127,22 +127,6 @@ char **FoFiType1C::getEncoding() const
     return encoding;
 }
 
-GooString *FoFiType1C::getGlyphName(int gid) const
-{
-    char buf[256];
-    bool ok;
-
-    ok = true;
-    if (gid < 0 || gid >= charsetLength) {
-        return nullptr;
-    }
-    getString(charset[gid], buf, &ok);
-    if (!ok) {
-        return nullptr;
-    }
-    return new GooString(buf);
-}
-
 std::vector<int> FoFiType1C::getCIDToGIDMap() const
 {
     int n, i;

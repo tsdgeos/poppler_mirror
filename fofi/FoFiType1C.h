@@ -177,10 +177,6 @@ public:
     // be NULL).  This is only useful with 8-bit fonts.
     char **getEncoding() const;
 
-    // Get the glyph names.
-    int getNumGlyphs() const { return nGlyphs; }
-    GooString *getGlyphName(int gid) const;
-
     // Return the mapping from CIDs to GIDs, and return the number of
     // CIDs in *<nCIDs>.  This is only useful for CID fonts.
     std::vector<int> getCIDToGIDMap() const;
