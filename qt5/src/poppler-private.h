@@ -113,27 +113,27 @@ public:
         m_filePath = filePath;
 
 #ifdef _WIN32
-        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
+        doc = std::make_unique<PDFDoc>((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #else
-        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
+        doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
 #endif
     }
 
     DocumentData(QIODevice *device, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = device;
-        QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object::null());
+        auto str = std::make_unique<QIODeviceInStream>(device, 0, false, device->size(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
+        doc = std::make_unique<PDFDoc>(std::move(str), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     DocumentData(const QByteArray &data, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = nullptr;
         fileContents = data;
-        MemStream *str = new MemStream(fileContents.data(), 0, fileContents.length(), Object::null());
+        auto str = std::make_unique<MemStream>(fileContents.data(), 0, fileContents.length(), Object::null());
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
+        doc = std::make_unique<PDFDoc>(std::move(str), ownerPassword, userPassword, [this] { notifyXRefReconstructed(); });
     }
 
     void init();
@@ -168,7 +168,7 @@ public:
 
     static Document *checkDocument(DocumentData *doc);
 
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     QString m_filePath;
     QIODevice *m_device;
     QByteArray fileContents;
@@ -232,7 +232,7 @@ public:
 class FontIteratorData
 {
 public:
-    FontIteratorData(int startPage, DocumentData *dd) : fontInfoScanner(dd->doc, startPage), totalPages(dd->doc->getNumPages()), currentPage(qMax(startPage, 0) - 1) { }
+    FontIteratorData(int startPage, DocumentData *dd) : fontInfoScanner(dd->doc.get(), startPage), totalPages(dd->doc->getNumPages()), currentPage(qMax(startPage, 0) - 1) { }
 
     ~FontIteratorData() = default;
 

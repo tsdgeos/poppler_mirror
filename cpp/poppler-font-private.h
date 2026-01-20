@@ -61,7 +61,7 @@ public:
 class poppler::font_iterator_private
 {
 public:
-    font_iterator_private(int start_page, document_private *dd) : font_info_scanner(dd->doc, start_page), total_pages(dd->doc->getNumPages()), current_page((std::max)(start_page, 0)) { }
+    font_iterator_private(int start_page, document_private *dd) : font_info_scanner(dd->doc.get(), start_page), total_pages(dd->doc->getNumPages()), current_page((std::max)(start_page, 0)) { }
     ~font_iterator_private() = default;
 
     FontInfoScanner font_info_scanner;

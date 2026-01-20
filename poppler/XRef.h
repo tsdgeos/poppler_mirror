@@ -263,7 +263,7 @@ private:
     bool xRefStream; // true if last XRef section is a stream
     Goffset mainXRefOffset; // position of the main XRef table/stream
     bool scannedSpecialFlags; // true if scanSpecialFlags has been called
-    bool strOwner; // true if str is owned by the instance
+    std::unique_ptr<BaseStream> strOwner; // ownership if any of str (can be null if others own the stream)
     mutable std::recursive_mutex mutex;
     std::function<void()> xrefReconstructedCb;
 

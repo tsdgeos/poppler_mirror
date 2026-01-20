@@ -1090,10 +1090,10 @@ void poppler_page_render_to_ps(PopplerPage *page, PopplerPSFile *ps_file)
             pages.push_back(i);
         }
         if (ps_file->fd != -1) {
-            ps_file->out =
-                    new PSOutputDev(ps_file->fd, ps_file->document->doc, nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false, nullptr, nullptr);
+            ps_file->out = new PSOutputDev(ps_file->fd, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
+                                           nullptr, nullptr);
         } else {
-            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc, nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
+            ps_file->out = new PSOutputDev(ps_file->filename, ps_file->document->doc.get(), nullptr, pages, psModePS, (int)ps_file->paper_width, (int)ps_file->paper_height, false, ps_file->duplex, 0, 0, 0, 0, psRasterizeWhenNeeded, false,
                                            nullptr, nullptr);
         }
     }

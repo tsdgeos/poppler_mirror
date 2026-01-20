@@ -45,7 +45,7 @@ public:
 
     static document *check_document(document_private *doc, byte_array *file_data);
 
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     byte_array doc_data;
     const char *raw_doc_data;
     int raw_doc_data_length;

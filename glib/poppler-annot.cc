@@ -261,7 +261,7 @@ PopplerAnnot *poppler_annot_text_new(PopplerDocument *doc, PopplerRectangle *rec
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotText>(doc->doc, &pdf_rect);
+    auto annot = std::make_shared<AnnotText>(doc->doc.get(), &pdf_rect);
 
     return _poppler_annot_text_new(annot);
 }
@@ -341,7 +341,7 @@ PopplerAnnot *poppler_annot_text_markup_new_highlight(PopplerDocument *doc, Popp
     PopplerAnnot *poppler_annot;
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeHighlight);
+    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc.get(), &pdf_rect, Annot::typeHighlight);
 
     poppler_annot = _poppler_annot_text_markup_new(annot);
     poppler_annot_text_markup_set_quadrilaterals(POPPLER_ANNOT_TEXT_MARKUP(poppler_annot), quadrilaterals);
@@ -369,7 +369,7 @@ PopplerAnnot *poppler_annot_text_markup_new_squiggly(PopplerDocument *doc, Poppl
 
     g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
 
-    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeSquiggly);
+    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc.get(), &pdf_rect, Annot::typeSquiggly);
 
     poppler_annot = _poppler_annot_text_markup_new(annot);
     poppler_annot_text_markup_set_quadrilaterals(POPPLER_ANNOT_TEXT_MARKUP(poppler_annot), quadrilaterals);
@@ -397,7 +397,7 @@ PopplerAnnot *poppler_annot_text_markup_new_strikeout(PopplerDocument *doc, Popp
 
     g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
 
-    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeStrikeOut);
+    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc.get(), &pdf_rect, Annot::typeStrikeOut);
 
     poppler_annot = _poppler_annot_text_markup_new(annot);
     poppler_annot_text_markup_set_quadrilaterals(POPPLER_ANNOT_TEXT_MARKUP(poppler_annot), quadrilaterals);
@@ -425,7 +425,7 @@ PopplerAnnot *poppler_annot_text_markup_new_underline(PopplerDocument *doc, Popp
 
     g_return_val_if_fail(quadrilaterals != nullptr && quadrilaterals->len > 0, NULL);
 
-    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc, &pdf_rect, Annot::typeUnderline);
+    auto annot = std::make_shared<AnnotTextMarkup>(doc->doc.get(), &pdf_rect, Annot::typeUnderline);
 
     poppler_annot = _poppler_annot_text_markup_new(annot);
     poppler_annot_text_markup_set_quadrilaterals(POPPLER_ANNOT_TEXT_MARKUP(poppler_annot), quadrilaterals);
@@ -625,7 +625,7 @@ PopplerAnnot *poppler_annot_free_text_new(PopplerDocument *doc, PopplerRectangle
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotFreeText>(doc->doc, &pdf_rect);
+    auto annot = std::make_shared<AnnotFreeText>(doc->doc.get(), &pdf_rect);
 
     PopplerAnnot *poppler_annot = _poppler_annot_free_text_new(annot);
 
@@ -740,7 +740,7 @@ PopplerAnnot *poppler_annot_line_new(PopplerDocument *doc, PopplerRectangle *rec
     PopplerAnnot *poppler_annot;
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotLine>(doc->doc, &pdf_rect);
+    auto annot = std::make_shared<AnnotLine>(doc->doc.get(), &pdf_rect);
 
     poppler_annot = _poppler_annot_line_new(annot);
     poppler_annot_line_set_vertices(POPPLER_ANNOT_LINE(poppler_annot), start, end);
@@ -773,7 +773,7 @@ PopplerAnnot *poppler_annot_circle_new(PopplerDocument *doc, PopplerRectangle *r
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotGeometry>(doc->doc, &pdf_rect, Annot::typeCircle);
+    auto annot = std::make_shared<AnnotGeometry>(doc->doc.get(), &pdf_rect, Annot::typeCircle);
 
     return _poppler_annot_circle_new(annot);
 }
@@ -804,7 +804,7 @@ PopplerAnnot *poppler_annot_square_new(PopplerDocument *doc, PopplerRectangle *r
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotGeometry>(doc->doc, &pdf_rect, Annot::typeSquare);
+    auto annot = std::make_shared<AnnotGeometry>(doc->doc.get(), &pdf_rect, Annot::typeSquare);
 
     return _poppler_annot_square_new(annot);
 }
@@ -849,7 +849,7 @@ PopplerAnnot *poppler_annot_stamp_new(PopplerDocument *doc, PopplerRectangle *re
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotStamp>(doc->doc, &pdf_rect);
+    auto annot = std::make_shared<AnnotStamp>(doc->doc.get(), &pdf_rect);
 
     return _poppler_annot_stamp_new(annot);
 }
@@ -2877,7 +2877,7 @@ PopplerAnnot *poppler_annot_ink_new(PopplerDocument *doc, PopplerRectangle *rect
 {
     PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
 
-    auto annot = std::make_shared<AnnotInk>(doc->doc, &pdf_rect);
+    auto annot = std::make_shared<AnnotInk>(doc->doc.get(), &pdf_rect);
 
     return _poppler_annot_ink_new(annot);
 }

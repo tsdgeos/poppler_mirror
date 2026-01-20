@@ -937,9 +937,9 @@ FileStream::~FileStream()
     close();
 }
 
-BaseStream *FileStream::copy()
+std::unique_ptr<BaseStream> FileStream::copy()
 {
-    return new FileStream(file, start, limited, length, dict.copy());
+    return std::make_unique<FileStream>(file, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> FileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
@@ -1034,9 +1034,9 @@ CachedFileStream::~CachedFileStream()
     close();
 }
 
-BaseStream *CachedFileStream::copy()
+std::unique_ptr<BaseStream> CachedFileStream::copy()
 {
-    return new CachedFileStream(cc, start, limited, length, dict.copy());
+    return std::make_unique<CachedFileStream>(cc, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> CachedFileStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
@@ -1172,7 +1172,7 @@ bool EmbedStream::rewind()
     return false;
 }
 
-BaseStream *EmbedStream::copy()
+std::unique_ptr<BaseStream> EmbedStream::copy()
 {
     error(errInternal, -1, "Called copy() on EmbedStream");
     return nullptr;

@@ -123,7 +123,7 @@ using PopplerDocumentClass = _PopplerDocumentClass;
 
 G_DEFINE_TYPE(PopplerDocument, poppler_document, G_TYPE_OBJECT)
 
-static PopplerDocument *_poppler_document_new_from_pdfdoc(std::unique_ptr<GlobalParamsIniter> &&initer, PDFDoc *newDoc, GError **error)
+static PopplerDocument *_poppler_document_new_from_pdfdoc(std::unique_ptr<GlobalParamsIniter> &&initer, std::unique_ptr<PDFDoc> &&newDoc, GError **error)
 {
     PopplerDocument *document;
 
@@ -151,16 +151,15 @@ static PopplerDocument *_poppler_document_new_from_pdfdoc(std::unique_ptr<Global
             g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Failed to load document");
         }
 
-        delete newDoc;
         return nullptr;
     }
 
     document = (PopplerDocument *)g_object_new(POPPLER_TYPE_DOCUMENT, nullptr);
     document->initer = std::move(initer);
-    document->doc = newDoc;
+    document->doc = std::move(newDoc);
 
     document->output_dev = new CairoOutputDev();
-    document->output_dev->startDoc(document->doc);
+    document->output_dev->startDoc(document->doc.get());
 
     return document;
 }
@@ -194,7 +193,7 @@ static std::optional<GooString> poppler_password_to_latin1(const gchar *password
  **/
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error)
 {
-    PDFDoc *newDoc;
+    std::unique_ptr<PDFDoc> newDoc;
     char *filename;
 
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
@@ -218,24 +217,22 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
 
     length = MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, length);
 
-    newDoc = new PDFDoc(filenameW, length, password_g, password_g);
+    newDoc = std::make_unique<PDFDoc>(filenameW, length, password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        delete newDoc;
-        newDoc = new PDFDoc(filenameW, length, GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(filenameW, length, GooString(password), GooString(password));
     }
     delete[] filenameW;
 #else
-    newDoc = new PDFDoc(std::make_unique<GooString>(filename), password_g, password_g);
+    newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(filename), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        delete newDoc;
-        newDoc = new PDFDoc(std::make_unique<GooString>(filename), GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(std::make_unique<GooString>(filename), GooString(password), GooString(password));
     }
 #endif
     g_free(filename);
 
-    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+    return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
 }
 
 /**
@@ -260,24 +257,20 @@ PopplerDocument *poppler_document_new_from_file(const char *uri, const char *pas
  **/
 PopplerDocument *poppler_document_new_from_data(char *data, int length, const char *password, GError **error)
 {
-    PDFDoc *newDoc;
-    MemStream *str;
-
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new MemStream(data, 0, length, Object::null());
+    auto str = std::make_unique<MemStream>(data, 0, length, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
-    newDoc = new PDFDoc(str, password_g, password_g);
+    auto newDoc = std::make_unique<PDFDoc>(std::move(str), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        str = dynamic_cast<MemStream *>(str->copy());
-        delete newDoc;
-        newDoc = new PDFDoc(str, GooString(password), GooString(password));
+        str = std::make_unique<MemStream>(data, 0, length, Object::null());
+        newDoc = std::make_unique<PDFDoc>(std::move(str), GooString(password), GooString(password));
     }
 
-    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+    return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
 }
 
 class BytesStream : public MemStream
@@ -322,27 +315,23 @@ OwningFileStream::~OwningFileStream() = default;
  **/
 PopplerDocument *poppler_document_new_from_bytes(GBytes *bytes, const char *password, GError **error)
 {
-    PDFDoc *newDoc;
-    BytesStream *str;
-
     g_return_val_if_fail(bytes != nullptr, nullptr);
     g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
 
     auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
     // create stream
-    str = new BytesStream(bytes, Object::null());
+    auto str = std::make_unique<BytesStream>(bytes, Object::null());
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
-    newDoc = new PDFDoc(str, password_g, password_g);
+    auto newDoc = std::make_unique<PDFDoc>(std::move(str), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        str = dynamic_cast<BytesStream *>(str->copy());
-        delete newDoc;
-        newDoc = new PDFDoc(str, GooString(password), GooString(password));
+        str = std::make_unique<BytesStream>(bytes, Object::null());
+        newDoc = std::make_unique<PDFDoc>(std::move(str), GooString(password), GooString(password));
     }
 
-    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+    return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
 }
 
 static inline gboolean stream_is_memory_buffer_or_local_file(GInputStream *stream)
@@ -370,8 +359,7 @@ static inline gboolean stream_is_memory_buffer_or_local_file(GInputStream *strea
  */
 PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset length, const char *password, GCancellable *cancellable, GError **error)
 {
-    PDFDoc *newDoc;
-    BaseStream *str;
+    std::unique_ptr<BaseStream> str;
 
     g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
     g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
@@ -391,22 +379,20 @@ PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset 
             }
             length = g_seekable_tell(G_SEEKABLE(stream));
         }
-        str = new PopplerInputStream(stream, cancellable, 0, false, length, Object::null());
+        str = std::make_unique<PopplerInputStream>(stream, cancellable, 0, false, length, Object::null());
     } else {
         auto cachedFile = std::make_shared<CachedFile>(std::make_unique<PopplerCachedFileLoader>(stream, cancellable, length));
-        str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
+        str = std::make_unique<CachedFileStream>(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
-    newDoc = new PDFDoc(str, password_g, password_g);
+    auto newDoc = std::make_unique<PDFDoc>(std::move(str), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        str = str->copy();
-        delete newDoc;
-        newDoc = new PDFDoc(str, GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), GooString(password), GooString(password));
     }
 
-    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+    return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
 }
 
 /**
@@ -476,8 +462,7 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
 {
     struct stat statbuf;
     int flags;
-    BaseStream *stream;
-    PDFDoc *newDoc;
+    std::unique_ptr<BaseStream> stream;
 
     g_return_val_if_fail(fd != -1, nullptr);
 
@@ -516,21 +501,19 @@ PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GErr
         }
 
         auto cachedFile = std::make_shared<CachedFile>(std::make_unique<FILECacheLoader>(file));
-        stream = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null());
+        stream = std::make_unique<CachedFileStream>(cachedFile, 0, false, cachedFile->getLength(), Object::null());
     } else {
-        stream = new OwningFileStream(GooFile::open(fd), Object::null());
+        stream = std::make_unique<OwningFileStream>(GooFile::open(fd), Object::null());
     }
 
     const std::optional<GooString> password_g = poppler_password_to_latin1(password);
-    newDoc = new PDFDoc(stream, password_g, password_g);
+    auto newDoc = std::make_unique<PDFDoc>(std::move(stream), password_g, password_g);
     if (!newDoc->isOk() && newDoc->getErrorCode() == errEncrypted && password) {
         /* Try again with original password (which comes from GTK in UTF8) Issue #824 */
-        stream = stream->copy();
-        delete newDoc;
-        newDoc = new PDFDoc(stream, GooString(password), GooString(password));
+        newDoc = std::make_unique<PDFDoc>(newDoc->getBaseStream()->copy(), GooString(password), GooString(password));
     }
 
-    return _poppler_document_new_from_pdfdoc(std::move(initer), newDoc, error);
+    return _poppler_document_new_from_pdfdoc(std::move(initer), std::move(newDoc), error);
 }
 
 #endif /* !G_OS_WIN32 */
@@ -680,7 +663,6 @@ static void poppler_document_finalize(GObject *object)
 
     poppler_document_layers_free(document);
     delete document->output_dev;
-    delete document->doc;
     document->initer.reset();
 
     G_OBJECT_CLASS(poppler_document_parent_class)->finalize(object);
@@ -3135,7 +3117,7 @@ PopplerFontInfo *poppler_font_info_new(PopplerDocument *document)
 
     font_info = (PopplerFontInfo *)g_object_new(POPPLER_TYPE_FONT_INFO, nullptr);
     font_info->document = (PopplerDocument *)g_object_ref(document);
-    font_info->scanner = new FontInfoScanner(document->doc);
+    font_info->scanner = new FontInfoScanner(document->doc.get());
 
     return font_info;
 }

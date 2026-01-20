@@ -28,7 +28,7 @@ struct _PopplerDocument
     /*< private >*/
     GObject parent_instance;
     std::unique_ptr<GlobalParamsIniter> initer;
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
 
     GList *layers;
     GList *layers_rbgroups;

@@ -32,7 +32,7 @@ class PopplerInputStream : public BaseSeekInputStream
 public:
     PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~PopplerInputStream() override;
-    BaseStream *copy() override;
+    std::unique_ptr<BaseStream> copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset start, bool limited, Goffset lengthA, Object &&dictA) override;
 
 private:

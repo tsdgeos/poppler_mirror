@@ -261,7 +261,6 @@ DocumentData::~DocumentData()
 {
     qDeleteAll(m_embeddedFiles);
     delete (OptContentModel *)m_optContentModel;
-    delete doc;
 }
 
 void DocumentData::init()

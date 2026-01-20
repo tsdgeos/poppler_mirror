@@ -2401,9 +2401,9 @@ std::shared_ptr<Annot> LineAnnotationPrivate::createNativeAnnot(::Page *destPage
     // Set pdfAnnot
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (lineType == LineAnnotation::StraightLine) {
-        pdfAnnot = std::make_shared<AnnotLine>(doc->doc, &rect);
+        pdfAnnot = std::make_shared<AnnotLine>(doc->doc.get(), &rect);
     } else {
-        pdfAnnot = std::make_shared<AnnotPolygon>(doc->doc, &rect, lineClosed ? Annot::typePolygon : Annot::typePolyLine);
+        pdfAnnot = std::make_shared<AnnotPolygon>(doc->doc.get(), &rect, lineClosed ? Annot::typePolygon : Annot::typePolyLine);
     }
 
     // Set properties
@@ -3483,10 +3483,10 @@ std::unique_ptr<AnnotStampImageHelper> StampAnnotationPrivate::convertQImageToAn
     std::unique_ptr<AnnotStampImageHelper> annotImg;
 
     if (sMaskData.count() > 0) {
-        AnnotStampImageHelper sMask(parentDoc->doc, width, height, ColorSpace::DeviceGray, 8, sMaskData.data(), sMaskData.count());
-        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc, width, height, colorSpace, bitsPerComponent, data.data(), data.count(), sMask.getRef());
+        AnnotStampImageHelper sMask(parentDoc->doc.get(), width, height, ColorSpace::DeviceGray, 8, sMaskData.data(), sMaskData.count());
+        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, data.data(), data.count(), sMask.getRef());
     } else {
-        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc, width, height, colorSpace, bitsPerComponent, data.data(), data.count());
+        annotImg = std::make_unique<AnnotStampImageHelper>(parentDoc->doc.get(), width, height, colorSpace, bitsPerComponent, data.data(), data.count());
     }
 
     return annotImg;

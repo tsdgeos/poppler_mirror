@@ -259,7 +259,7 @@ image page_renderer::render_page(const page *p, double xres, double yres, int x,
     }
 
     page_private *pp = page_private::get(p);
-    PDFDoc *pdfdoc = pp->doc->doc;
+    PDFDoc *pdfdoc = pp->doc->doc.get();
 
     SplashColorMode colorMode;
     SplashThinLineMode lineMode;

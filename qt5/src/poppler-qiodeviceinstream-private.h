@@ -33,7 +33,7 @@ public:
     QIODeviceInStream(QIODevice *device, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
     ~QIODeviceInStream() override;
 
-    BaseStream *copy() override;
+    std::unique_ptr<BaseStream> copy() override;
     std::unique_ptr<Stream> makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA) override;
 
 private:

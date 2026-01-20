@@ -31,9 +31,9 @@ QIODeviceInStream::~QIODeviceInStream()
     close();
 }
 
-BaseStream *QIODeviceInStream::copy()
+std::unique_ptr<BaseStream> QIODeviceInStream::copy()
 {
-    return new QIODeviceInStream(m_device, start, limited, length, dict.copy());
+    return std::make_unique<QIODeviceInStream>(m_device, start, limited, length, dict.copy());
 }
 
 std::unique_ptr<Stream> QIODeviceInStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)

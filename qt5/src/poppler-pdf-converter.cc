@@ -132,7 +132,7 @@ bool PDFConverter::sign(const NewSignatureData &data)
         return false;
     }
 
-    ::PDFDoc *doc = d->document->doc;
+    ::PDFDoc *doc = d->document->doc.get();
     ::Page *destPage = doc->getPage(data.page() + 1);
     std::unique_ptr<GooString> gSignatureText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureText()));
     std::unique_ptr<GooString> gSignatureLeftText = std::unique_ptr<GooString>(QStringToUnicodeGooString(data.signatureLeftText()));

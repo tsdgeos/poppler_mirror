@@ -53,7 +53,7 @@ std::unique_ptr<PDFDoc> FileDescriptorPDFDocBuilder::buildPDFDoc(const GooString
     }
 
     auto cachedFile = std::make_shared<CachedFile>(std::make_unique<FILECacheLoader>(file));
-    return std::make_unique<PDFDoc>(new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object::null()), ownerPassword, userPassword);
+    return std::make_unique<PDFDoc>(std::make_unique<CachedFileStream>(cachedFile, 0, false, cachedFile->getLength(), Object::null()), ownerPassword, userPassword);
 }
 
 bool FileDescriptorPDFDocBuilder::supports(const GooString &uri)

@@ -503,7 +503,7 @@ static bool renderToQPainter(QImageDumpingQPainterOutputDev *qpainter_output, QP
     }
     painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
 
-    qpainter_output->startDoc(page->parentDoc->doc);
+    qpainter_output->startDoc(page->parentDoc->doc.get());
 
     const bool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
 
@@ -598,7 +598,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
 #endif
 
-        splash_output.startDoc(m_page->parentDoc->doc);
+        splash_output.startDoc(m_page->parentDoc->doc.get());
 
         const bool hideAnnotations = m_page->parentDoc->m_hints & Document::HideAnnotations;
 

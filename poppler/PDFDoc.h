@@ -138,7 +138,7 @@ public:
     PDFDoc(wchar_t *fileNameA, int fileNameLen, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const std::function<void()> &xrefReconstructedCallback = {});
 #endif
 
-    explicit PDFDoc(BaseStream *strA, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const std::function<void()> &xrefReconstructedCallback = {});
+    explicit PDFDoc(std::unique_ptr<BaseStream> strA, const std::optional<GooString> &ownerPassword = {}, const std::optional<GooString> &userPassword = {}, const std::function<void()> &xrefReconstructedCallback = {});
     ~PDFDoc();
 
     PDFDoc(const PDFDoc &) = delete;
@@ -176,7 +176,7 @@ public:
     const OCGs *getOptContentConfig() const { return catalog->getOptContentConfig(); }
 
     // Get base stream.
-    BaseStream *getBaseStream() const { return str; }
+    BaseStream *getBaseStream() const { return str.get(); }
 
     // Get page parameters.
     double getPageMediaWidth(int page) { return getPage(page) ? getPage(page)->getMediaWidth() : 0.0; }
@@ -404,7 +404,7 @@ private:
     std::wstring fileNameU;
 #endif
     std::unique_ptr<GooFile> file;
-    BaseStream *str = nullptr;
+    std::unique_ptr<BaseStream> str;
     int headerPdfMajorVersion;
     int headerPdfMinorVersion;
     PDFSubtype pdfSubtype;

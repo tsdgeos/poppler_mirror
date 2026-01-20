@@ -311,7 +311,7 @@ static View *view_new(PopplerDocument *doc)
         SplashColor sc = { 255, 255, 255 };
 
         view->out = new GDKSplashOutputDev(gtk_widget_get_screen(window), redraw_callback, (void *)view, sc);
-        view->out->startDoc(view->doc->doc);
+        view->out->startDoc(view->doc->doc.get());
     }
 
     g_signal_connect(view->drawing_area, "draw", G_CALLBACK(drawing_area_draw), view);

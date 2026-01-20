@@ -229,7 +229,7 @@ bool PSConverter::convert()
         pages.push_back(page);
     }
 
-    PSOutputDev *psOut = new PSOutputDev(outputToQIODevice, dev, pstitlechar, d->document->doc, pages, (d->opts & PrintToEPS) ? psModeEPS : psModePS, d->paperWidth, d->paperHeight, false, false, d->marginLeft, d->marginBottom,
+    PSOutputDev *psOut = new PSOutputDev(outputToQIODevice, dev, pstitlechar, d->document->doc.get(), pages, (d->opts & PrintToEPS) ? psModeEPS : psModePS, d->paperWidth, d->paperHeight, false, false, d->marginLeft, d->marginBottom,
                                          d->paperWidth - d->marginRight, d->paperHeight - d->marginTop, (d->opts & ForceRasterization) ? psAlwaysRasterize : psRasterizeWhenNeeded);
     if (d->opts & ForceOverprintPreview) {
         psOut->setForceRasterize(psAlwaysRasterize);

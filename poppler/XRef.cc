@@ -263,7 +263,6 @@ XRef::XRef()
     ownerPasswordOk = false;
     rootNum = -1;
     rootGen = -1;
-    strOwner = false;
     xrefReconstructed = false;
     encAlgorithm = cryptNone;
     keyLength = 0;
@@ -362,16 +361,13 @@ XRef::~XRef()
     if (streamEnds) {
         gfree(streamEnds);
     }
-    if (strOwner) {
-        delete str;
-    }
 }
 
 XRef *XRef::copy() const
 {
     XRef *xref = new XRef();
-    xref->str = str->copy();
-    xref->strOwner = true;
+    xref->strOwner = str->copy();
+    xref->str = xref->strOwner.get();
     xref->encrypted = encrypted;
     xref->permFlags = permFlags;
     xref->ownerPasswordOk = ownerPasswordOk;
