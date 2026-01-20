@@ -879,9 +879,27 @@ void Gfx::opSetFlat(Object args[], int /*numArgs*/)
     out->updateFlatness(state);
 }
 
+static std::optional<GfxState::LineJoinStyle> intToLineJoinStyle(int value)
+{
+    switch (value) {
+    case GfxState::LineJoinMitre:
+    case GfxState::LineJoinRound:
+    case GfxState::LineJoinBevel:
+        return static_cast<GfxState::LineJoinStyle>(value);
+        break;
+    }
+    return {};
+}
+
 void Gfx::opSetLineJoin(Object args[], int /*numArgs*/)
 {
-    state->setLineJoin(args[0].getInt());
+    const int value = args[0].getInt();
+    const std::optional<GfxState::LineJoinStyle> lineJoinStyle = intToLineJoinStyle(value);
+    if (!lineJoinStyle) {
+        error(errSyntaxError, getPos(), "Wrong line join style value '{0:d}'", value);
+        return;
+    }
+    state->setLineJoin(*lineJoinStyle);
     out->updateLineJoin(state);
 }
 
