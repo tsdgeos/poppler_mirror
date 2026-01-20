@@ -187,8 +187,8 @@ FILE *openFile(const char *path, const char *mode)
 {
 #ifdef _WIN32
     OSVERSIONINFO version;
-    wchar_t wPath[_MAX_PATH + 1];
-    char nPath[_MAX_PATH + 1];
+    wchar_t wPath[MAX_PATH + 1];
+    char nPath[MAX_PATH + 1];
     wchar_t wMode[8];
     const char *p;
     size_t i;
@@ -197,7 +197,7 @@ FILE *openFile(const char *path, const char *mode)
     version.dwOSVersionInfoSize = sizeof(version);
     GetVersionEx(&version);
     if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-        for (p = path, i = 0; *p && i < _MAX_PATH; ++i) {
+        for (p = path, i = 0; *p && i < MAX_PATH; ++i) {
             if ((p[0] & 0xe0) == 0xc0 && p[1] && (p[1] & 0xc0) == 0x80) {
                 wPath[i] = (wchar_t)(((p[0] & 0x1f) << 6) | (p[1] & 0x3f));
                 p += 2;
@@ -216,7 +216,7 @@ FILE *openFile(const char *path, const char *mode)
         wMode[i] = (wchar_t)0;
         return _wfopen(wPath, wMode);
     } else {
-        for (p = path, i = 0; *p && i < _MAX_PATH; ++i) {
+        for (p = path, i = 0; *p && i < MAX_PATH; ++i) {
             if ((p[0] & 0xe0) == 0xc0 && p[1] && (p[1] & 0xc0) == 0x80) {
                 nPath[i] = (char)(((p[0] & 0x1f) << 6) | (p[1] & 0x3f));
                 p += 2;
