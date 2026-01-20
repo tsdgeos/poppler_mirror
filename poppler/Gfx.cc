@@ -903,9 +903,28 @@ void Gfx::opSetLineJoin(Object args[], int /*numArgs*/)
     out->updateLineJoin(state);
 }
 
+static std::optional<GfxState::LineCapStyle> intToLineCapStyle(int value)
+{
+    switch (value) {
+    case GfxState::LineCapButt:
+    case GfxState::LineCapRound:
+    case GfxState::LineCapProjecting:
+        return static_cast<GfxState::LineCapStyle>(value);
+        break;
+    }
+    return {};
+}
+
 void Gfx::opSetLineCap(Object args[], int /*numArgs*/)
 {
-    state->setLineCap(args[0].getInt());
+    const int value = args[0].getInt();
+    const std::optional<GfxState::LineCapStyle> lineCapStyle = intToLineCapStyle(value);
+    if (!lineCapStyle) {
+        error(errSyntaxError, getPos(), "Wrong line cap style value '{0:d}'", value);
+        return;
+    }
+
+    state->setLineCap(*lineCapStyle);
     out->updateLineCap(state);
 }
 
