@@ -2,6 +2,7 @@
 #include <poppler-destination.h>
 #include <poppler-document.h>
 #include <poppler-global.h>
+#include "fuzzer_init.h"
 #include <poppler-page.h>
 #include <poppler-page-renderer.h>
 
@@ -9,6 +10,7 @@ static void dummy_error_function(const std::string &, void *) { }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    initialize_poppler_data_dir();
     poppler::set_debug_error_function(dummy_error_function, nullptr);
 
     poppler::document *doc = poppler::document::load_from_raw_data((const char *)data, size);
