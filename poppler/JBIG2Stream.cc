@@ -2417,8 +2417,15 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                         if (checkedAdd(((rdh >= 0) ? rdh : rdh - 1) / 2, rdy, &refDY)) {
                             return nullptr;
                         }
+                        int refinementSectionW, refinementSectionH;
+                        if (checkedAdd(rdw, syms[symID]->getWidth(), &refinementSectionW)) {
+                            return nullptr;
+                        }
+                        if (checkedAdd(rdh, syms[symID]->getHeight(), &refinementSectionH)) {
+                            return nullptr;
+                        }
 
-                        symbolBitmap = readGenericRefinementRegion(rdw + syms[symID]->getWidth(), rdh + syms[symID]->getHeight(), templ, false, syms[symID], refDX, refDY, atx, aty).release();
+                        symbolBitmap = readGenericRefinementRegion(refinementSectionW, refinementSectionH, templ, false, syms[symID], refDX, refDY, atx, aty).release();
                     }
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {
