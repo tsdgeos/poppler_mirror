@@ -351,8 +351,8 @@ std::unique_ptr<Stream> Stream::makeFilter(const char *name, std::unique_ptr<Str
         }
         str = std::make_unique<DCTStream>(std::move(str), colorXform, dict, recursion);
 #else
-        error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = wrapEOFStream(str);
+        error(errSyntaxError, str->getPos(), "Unknown filter '{0:s}'", name);
+        str = wrapEOFStream(std::move(str));
 #endif
     } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
         pred = 1;
