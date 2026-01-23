@@ -2008,10 +2008,11 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict)
 
     // generate PostScript code to set up the font
     if (font->isCIDFont()) {
+        const int fontWMode = font->getWMode() == GfxFont::WritingMode::Horizontal ? 0 : 1;
         if (level == psLevel3 || level == psLevel3Sep) {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16L3\n", font->getID()->num, font->getID()->gen, psName.get(), fontWMode);
         } else {
-            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName.get(), font->getWMode());
+            writePSFmt("/F{0:d}_{1:d} /{2:t} {3:d} pdfMakeFont16\n", font->getID()->num, font->getID()->gen, psName.get(), fontWMode);
         }
     } else {
         writePSFmt("/F{0:d}_{1:d} /{2:t} {3:.6g} {4:.6g}\n", font->getID()->num, font->getID()->gen, psName.get(), xs, ys);
@@ -4131,7 +4132,7 @@ void PSOutputDev::updateTextPos(GfxState *state)
 
 void PSOutputDev::updateTextShift(GfxState *state, double shift)
 {
-    if (state->getFont()->getWMode()) {
+    if (state->getFont()->getWMode() == GfxFont::WritingMode::Vertical) {
         writePSFmt("{0:.6g} TJmV\n", shift);
     } else {
         writePSFmt("{0:.6g} TJm\n", shift);
@@ -4846,7 +4847,6 @@ void PSOutputDev::doPath(const GfxPath *path)
 void PSOutputDev::drawString(GfxState *state, const GooString *s)
 {
     std::shared_ptr<GfxFont> font;
-    int wMode;
     std::vector<int> codeToGID;
     GooString *s2;
     double dx, dy, originX, originY;
@@ -4885,7 +4885,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
         maxGlyphInt = 0;
     }
     maxGlyph = (CharCode)maxGlyphInt;
-    wMode = font->getWMode();
+    const GfxFont::WritingMode wMode = font->getWMode();
 
     // check for a subtitute 16-bit font
     uMap = nullptr;
@@ -4922,7 +4922,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s)
         n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
         dx *= state->getFontSize();
         dy *= state->getFontSize();
-        if (wMode) {
+        if (wMode == GfxFont::WritingMode::Vertical) {
             dy += state->getCharSpace();
             if (n == 1 && *p == ' ') {
                 dy += state->getWordSpace();

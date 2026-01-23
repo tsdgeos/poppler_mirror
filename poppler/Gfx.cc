@@ -3824,7 +3824,6 @@ void Gfx::opMoveSetShowText(Object args[], int /*numArgs*/)
 void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
 {
     Array *a;
-    int wMode;
     int i;
 
     if (!state->getFont()) {
@@ -3836,14 +3835,14 @@ void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
         fontChanged = false;
     }
     out->beginStringOp(state);
-    wMode = state->getFont()->getWMode();
+    const GfxFont::WritingMode wMode = state->getFont()->getWMode();
     a = args[0].getArray();
     for (i = 0; i < a->getLength(); ++i) {
         Object obj = a->get(i);
         if (obj.isNum()) {
             // this uses the absolute value of the font size to match
             // Acrobat's behavior
-            if (wMode) {
+            if (wMode == GfxFont::WritingMode::Vertical) {
                 state->textShift(0, -obj.getNum() * 0.001 * state->getFontSize());
             } else {
                 state->textShift(-obj.getNum() * 0.001 * state->getFontSize() * state->getHorizScaling(), 0);
@@ -3869,7 +3868,6 @@ void Gfx::opShowSpaceText(Object args[], int /*numArgs*/)
 
 void Gfx::doShowText(const GooString *s)
 {
-    int wMode;
     double riseX, riseY;
     CharCode code;
     const Unicode *u = nullptr;
@@ -3886,7 +3884,7 @@ void Gfx::doShowText(const GooString *s)
     int len, n, uLen, nChars, nSpaces;
 
     GfxFont *const font = state->getFont().get();
-    wMode = font->getWMode();
+    const GfxFont::WritingMode wMode = font->getWMode();
 
     if (out->useDrawChar()) {
         out->beginString(state, s);
@@ -4017,7 +4015,7 @@ void Gfx::doShowText(const GooString *s)
         len = s->size();
         while (len > 0) {
             n = font->getNextChar(p, len, &code, &u, &uLen, &dx, &dy, &originX, &originY);
-            if (wMode) {
+            if (wMode == GfxFont::WritingMode::Vertical) {
                 dx *= state->getFontSize();
                 dy = dy * state->getFontSize() + state->getCharSpace();
                 if (n == 1 && *p == ' ') {
@@ -4058,7 +4056,7 @@ void Gfx::doShowText(const GooString *s)
             p += n;
             len -= n;
         }
-        if (wMode) {
+        if (wMode == GfxFont::WritingMode::Vertical) {
             dx *= state->getFontSize();
             dy = dy * state->getFontSize() + nChars * state->getCharSpace() + nSpaces * state->getWordSpace();
         } else {

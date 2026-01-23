@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -265,8 +265,14 @@ public:
     double getAscent() const { return ascent; }
     double getDescent() const { return descent; }
 
-    // Return the writing mode (0=horizontal, 1=vertical).
-    virtual int getWMode() const { return 0; }
+    enum class WritingMode
+    {
+        Horizontal,
+        Vertical
+    };
+
+    // Return the writing mode
+    virtual WritingMode getWMode() const { return WritingMode::Horizontal; }
 
     // Locate the font file for this font.  If <ps> is not null, includes PS
     // printer-resident fonts.  Returns std::optional without a value on failure.
@@ -399,7 +405,7 @@ public:
     int getNextChar(const char *s, int len, CharCode *code, Unicode const **u, int *uLen, double *dx, double *dy, double *ox, double *oy) const override;
 
     // Return the writing mode (0=horizontal, 1=vertical).
-    int getWMode() const override;
+    WritingMode getWMode() const override;
 
     // Return the Unicode map.
     const CharCodeToUnicode *getToUnicode() const override;
@@ -419,7 +425,7 @@ public:
     ~GfxCIDFont() override;
 
 private:
-    static int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, bool wmode);
+    static int mapCodeToGID(FoFiTrueType *ff, int cmapi, Unicode unicode, GfxFont::WritingMode wmode);
     double getWidth(CID cid) const; // Get width of a character.
 
     std::unique_ptr<GooString> collection; // collection name

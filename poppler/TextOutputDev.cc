@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010-2012, 2014-2022, 2024, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012, 2014-2022, 2024-2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -410,9 +410,9 @@ double TextFontInfo::getDescent() const
     return gfxFont ? gfxFont->getDescent() : -0.35;
 }
 
-int TextFontInfo::getWMode() const
+GfxFont::WritingMode TextFontInfo::getWMode() const
 {
-    return gfxFont ? gfxFont->getWMode() : 0;
+    return gfxFont ? gfxFont->getWMode() : GfxFont::WritingMode::Horizontal;
 }
 
 //------------------------------------------------------------------------
@@ -453,7 +453,7 @@ void TextWord::addChar(TextFontInfo *fontA, double x, double y, double dx, doubl
         setInitialBounds(fontA, x, y);
     }
 
-    if (wMode) { // vertical writing mode
+    if (wMode == GfxFont::WritingMode::Vertical) { // vertical writing mode
         // NB: the rotation value has been incremented by 1 (in
         // TextPage::beginWord()) for vertical writing mode
         switch (rot) {
@@ -502,7 +502,7 @@ void TextWord::setInitialBounds(TextFontInfo *fontA, double x, double y)
     double descent = fontA->getDescent() * fontSize;
     wMode = fontA->getWMode();
 
-    if (wMode) { // vertical writing mode
+    if (wMode == GfxFont::WritingMode::Vertical) { // vertical writing mode
         // NB: the rotation value has been incremented by 1 (in
         // TextPage::beginWord()) for vertical writing mode
         switch (rot) {
@@ -619,7 +619,7 @@ static Unicode getCombiningChar(Unicode u)
 
 bool TextWord::addCombining(TextFontInfo *fontA, double fontSizeA, double x, double y, double dx, double dy, int charPosA, int charLen, CharCode c, Unicode u, const Matrix &textMatA)
 {
-    if (chars.empty() || wMode != 0 || fontA->getWMode() != 0) {
+    if (chars.empty() || wMode != GfxFont::WritingMode::Horizontal || fontA->getWMode() != GfxFont::WritingMode::Horizontal) {
         return false;
     }
 
@@ -693,7 +693,7 @@ bool TextWord::addCombining(TextFontInfo *fontA, double fontSizeA, double x, dou
 
         // Updated edges / bounding box because we changed the base
         // character.
-        if (wMode) {
+        if (wMode == GfxFont::WritingMode::Vertical) {
             // FIXME unreachable, wMode == 0
             switch (rot) {
             case 0:
@@ -2640,7 +2640,7 @@ void TextPage::beginWord(const GfxState *state)
 
     // for vertical writing mode, the lines are effectively rotated 90
     // degrees
-    if (gfxFont && gfxFont->getWMode()) {
+    if (gfxFont && gfxFont->getWMode() == GfxFont::WritingMode::Vertical) {
         rot = (rot + 1) & 3;
     }
 
@@ -2652,7 +2652,6 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
     double x1, y1, w1, h1, dx2, dy2, base, sp, delta;
     bool overlap;
     int i;
-    int wMode;
     Matrix mat;
 
     // subtract char and word spacing from the dx,dy values
@@ -2739,7 +2738,7 @@ void TextPage::addChar(const GfxState *state, double x, double y, double dx, dou
             break;
         }
         overlap = fabs(delta) < dupMaxPriDelta * curWord->fontSize && fabs(base - curWord->base) < dupMaxSecDelta * curWord->fontSize;
-        wMode = curFont->getWMode();
+        const GfxFont::WritingMode wMode = curFont->getWMode();
         if (overlap || lastCharOverlap || sp < -minDupBreakOverlap * curWord->fontSize || sp > minWordBreakSpace * curWord->fontSize || fabs(base - curWord->base) > 0.5 || curFontSize != curWord->fontSize || wMode != curWord->wMode) {
             endWord();
         }

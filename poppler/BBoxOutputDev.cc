@@ -14,8 +14,6 @@
 #include <BBoxOutputDev.h>
 #include <GfxFont.h>
 
-constexpr int writingModeHorizontal = 0;
-
 BBoxOutputDev::BBoxOutputDev() : BBoxOutputDev(true, true, true) { }
 
 BBoxOutputDev::BBoxOutputDev(bool textA, bool vectorA, bool rasterA) : BBoxOutputDev(textA, vectorA, rasterA, true) { }
@@ -115,7 +113,7 @@ void BBoxOutputDev::drawChar(GfxState *state, double x, double y, double dx, dou
     fontSize = state->getFontSize();
 
     const std::array<double, 4> &fb = font->getFontBBox();
-    if (font->getWMode() == writingModeHorizontal) {
+    if (font->getWMode() == GfxFont::WritingMode::Horizontal) {
         leftent = 0;
         rightent = 0;
         ascent = font->getAscent();

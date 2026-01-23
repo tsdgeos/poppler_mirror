@@ -444,16 +444,13 @@ std::vector<text_box> page::text_list(int opt_flag) const
             for (int j = 0; j < word->getLength(); j++) {
                 const TextFontInfo *cur_text_font_info = word->getFontInfo(j);
 
-                // filter-out the invalid WMode value here.
                 switch (cur_text_font_info->getWMode()) {
-                case 0:
+                case GfxFont::WritingMode::Horizontal:
                     tb_font_info->wmodes.push_back(text_box::horizontal_wmode);
                     break;
-                case 1:
+                case GfxFont::WritingMode::Vertical:
                     tb_font_info->wmodes.push_back(text_box::vertical_wmode);
                     break;
-                default:
-                    tb_font_info->wmodes.push_back(text_box::invalid_wmode);
                 };
 
                 tb_font_info->glyph_to_cache_index.push_back(-1);
