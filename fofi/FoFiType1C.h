@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018-2020, 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
@@ -91,21 +91,17 @@ struct Type1CTopDict
     int fdSelectOffset;
 };
 
-#define type1CMaxBlueValues 14
-#define type1CMaxOtherBlues 10
-#define type1CMaxStemSnap 12
-
 struct Type1CPrivateDict
 {
     double fontMatrix[6];
     bool hasFontMatrix;
-    int blueValues[type1CMaxBlueValues];
+    std::array<int, 14> blueValues;
     int nBlueValues;
-    int otherBlues[type1CMaxOtherBlues];
+    std::array<int, 10> otherBlues;
     int nOtherBlues;
-    int familyBlues[type1CMaxBlueValues];
+    std::array<int, 14> familyBlues;
     int nFamilyBlues;
-    int familyOtherBlues[type1CMaxOtherBlues];
+    std::array<int, 10> familyOtherBlues;
     int nFamilyOtherBlues;
     double blueScale;
     int blueShift;
@@ -114,9 +110,9 @@ struct Type1CPrivateDict
     bool hasStdHW;
     double stdVW;
     bool hasStdVW;
-    double stemSnapH[type1CMaxStemSnap];
+    std::array<double, 12> stemSnapH;
     int nStemSnapH;
-    double stemSnapV[type1CMaxStemSnap];
+    std::array<double, 12> stemSnapV;
     int nStemSnapV;
     bool forceBold;
     bool hasForceBold;
@@ -229,8 +225,8 @@ private:
     void buildEncoding();
     bool readCharset();
     int getOp(int pos, bool charstring, bool *ok);
-    int getDeltaIntArray(int *arr, int maxLen) const;
-    int getDeltaFPArray(double *arr, int maxLen) const;
+    int getDeltaIntArray(std::span<int> arr) const;
+    int getDeltaFPArray(std::span<double> arr) const;
     void getIndex(int pos, Type1CIndex *idx, bool *ok) const;
     void getIndexVal(const Type1CIndex &idx, int i, Type1CIndexVal *val, bool *ok) const;
     char *getString(int sid, char *buf, bool *ok) const;

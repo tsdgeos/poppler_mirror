@@ -2128,16 +2128,16 @@ void FoFiType1C::readPrivateDict(int offset, int length, Type1CPrivateDict *pDic
             --nOps; // drop the operator
             switch (ops[nOps].op) {
             case 0x0006:
-                pDict->nBlueValues = getDeltaIntArray(pDict->blueValues, type1CMaxBlueValues);
+                pDict->nBlueValues = getDeltaIntArray(pDict->blueValues);
                 break;
             case 0x0007:
-                pDict->nOtherBlues = getDeltaIntArray(pDict->otherBlues, type1CMaxOtherBlues);
+                pDict->nOtherBlues = getDeltaIntArray(pDict->otherBlues);
                 break;
             case 0x0008:
-                pDict->nFamilyBlues = getDeltaIntArray(pDict->familyBlues, type1CMaxBlueValues);
+                pDict->nFamilyBlues = getDeltaIntArray(pDict->familyBlues);
                 break;
             case 0x0009:
-                pDict->nFamilyOtherBlues = getDeltaIntArray(pDict->familyOtherBlues, type1CMaxOtherBlues);
+                pDict->nFamilyOtherBlues = getDeltaIntArray(pDict->familyOtherBlues);
                 break;
             case 0x0c09:
                 pDict->blueScale = ops[0].num;
@@ -2157,10 +2157,10 @@ void FoFiType1C::readPrivateDict(int offset, int length, Type1CPrivateDict *pDic
                 pDict->hasStdVW = true;
                 break;
             case 0x0c0c:
-                pDict->nStemSnapH = getDeltaFPArray(pDict->stemSnapH, type1CMaxStemSnap);
+                pDict->nStemSnapH = getDeltaFPArray(pDict->stemSnapH);
                 break;
             case 0x0c0d:
-                pDict->nStemSnapV = getDeltaFPArray(pDict->stemSnapV, type1CMaxStemSnap);
+                pDict->nStemSnapV = getDeltaFPArray(pDict->stemSnapV);
                 break;
             case 0x0c0e:
                 pDict->forceBold = ops[0].num != 0;
@@ -2507,10 +2507,11 @@ int FoFiType1C::getOp(int pos, bool charstring, bool *ok)
 }
 
 // Convert the delta-encoded ops array to an array of ints.
-int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) const
+int FoFiType1C::getDeltaIntArray(std::span<int> arr) const
 {
     int x;
     int n, i;
+    const int maxLen = arr.size();
 
     if ((n = nOps) > maxLen) {
         n = maxLen;
@@ -2531,10 +2532,11 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) const
 }
 
 // Convert the delta-encoded ops array to an array of doubles.
-int FoFiType1C::getDeltaFPArray(double *arr, int maxLen) const
+int FoFiType1C::getDeltaFPArray(std::span<double> arr) const
 {
     double x;
     int n, i;
+    const int maxLen = arr.size();
 
     if ((n = nOps) > maxLen) {
         n = maxLen;
