@@ -35,7 +35,7 @@ void TestForms::testCheckbox()
     Poppler::FormField *form = forms.at(0).get();
     QCOMPARE(form->type(), Poppler::FormField::FormButton);
 
-    Poppler::FormFieldButton *chkFormFieldButton = static_cast<Poppler::FormFieldButton *>(form);
+    auto *chkFormFieldButton = static_cast<Poppler::FormFieldButton *>(form);
 
     // Test this is actually a Checkbox
     QCOMPARE(chkFormFieldButton->buttonType(), Poppler::FormFieldButton::CheckBox);
@@ -64,7 +64,7 @@ void TestForms::testStandAloneWidgets()
     for (const std::unique_ptr<Poppler::FormField> &field : forms) {
         QCOMPARE(field->type(), Poppler::FormField::FormButton);
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
+        auto *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         QCOMPARE(fieldButton->buttonType(), Poppler::FormFieldButton::Push);
 
         FormField *ff = Poppler::FormFieldData::getFormWidget(fieldButton)->getField();
@@ -97,7 +97,7 @@ void TestForms::testCheckboxIssue159()
             continue;
         }
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
+        auto *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (fieldButton->buttonType() != Poppler::FormFieldButton::Radio) {
             continue;
         }
@@ -144,7 +144,7 @@ void TestForms::testSetIcon()
             continue;
         }
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
+        auto *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (field->name() == QStringLiteral("anm0")) {
             anmButton = fieldButton;
         }
@@ -160,7 +160,7 @@ void TestForms::testSetIcon()
             continue;
         }
 
-        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
+        auto *fieldButton = static_cast<Poppler::FormFieldButton *>(field.get());
         if (field->name() == QStringLiteral("anm0")) {
             continue;
         }
@@ -224,7 +224,7 @@ void TestForms::testSetAppearanceText()
 
         nTextForms++;
 
-        Poppler::FormFieldText *fft = static_cast<Poppler::FormFieldText *>(field.get());
+        auto *fft = static_cast<Poppler::FormFieldText *>(field.get());
 
         const QString textToSet = QStringLiteral("HOLA") + fft->name();
         fft->setAppearanceText(textToSet);

@@ -9,7 +9,7 @@
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // Licensed under GPLv2 or later
@@ -25,10 +25,10 @@
 
 struct JPXStreamPrivate;
 
-class JPXStream : public FilterStream
+class JPXStream : public OwnedFilterStream
 {
 public:
-    explicit JPXStream(Stream *strA);
+    explicit JPXStream(std::unique_ptr<Stream> strA);
     ~JPXStream() override;
 
     JPXStream(const JPXStream &other) = delete;

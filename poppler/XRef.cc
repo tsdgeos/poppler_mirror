@@ -1660,7 +1660,7 @@ void XRef::XRefPreScanWriter::writeEntry(Goffset offset, int /*gen*/, XRefEntryT
 
 void XRef::writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref)
 {
-    Array *index = new Array(xref);
+    auto *index = new Array(xref);
     stmBuf->clear();
 
     // First pass: determine whether all offsets fit in 4 bytes or not
@@ -1674,7 +1674,7 @@ void XRef::writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref)
 
     xrefDict->set("Type", Object(objName, "XRef"));
     xrefDict->set("Index", Object(index));
-    Array *wArray = new Array(xref);
+    auto *wArray = new Array(xref);
     wArray->add(Object(1));
     wArray->add(Object(offsetSize));
     wArray->add(Object(2));

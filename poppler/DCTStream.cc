@@ -14,7 +14,7 @@
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2020 Lluís Batlle i Rossell <viric@viric.name>
 // Copyright 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 //========================================================================
@@ -26,7 +26,7 @@ static void str_init_source(j_decompress_ptr /*cinfo*/) { }
 static boolean str_fill_input_buffer(j_decompress_ptr cinfo)
 {
     int c;
-    struct str_src_mgr *src = (struct str_src_mgr *)cinfo->src;
+    auto *src = (struct str_src_mgr *)cinfo->src;
     if (src->index == 0) {
         c = 0xFF;
         src->index++;
@@ -53,7 +53,7 @@ static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
 
     size_t num_bytes = num_bytes_l;
 
-    struct str_src_mgr *src = (struct str_src_mgr *)cinfo->src;
+    auto *src = (struct str_src_mgr *)cinfo->src;
     while (num_bytes > src->pub.bytes_in_buffer) {
         num_bytes -= src->pub.bytes_in_buffer;
         str_fill_input_buffer(cinfo);
@@ -64,7 +64,7 @@ static void str_skip_input_data(j_decompress_ptr cinfo, long num_bytes_l)
 
 static void str_term_source(j_decompress_ptr /*cinfo*/) { }
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) : FilterStream(strA)
+DCTStream::DCTStream(std::unique_ptr<Stream> strA, int colorXformA, Dict *dict, int recursion) : OwnedFilterStream(std::move(strA))
 {
     colorXform = colorXformA;
     if (dict != nullptr) {
@@ -81,13 +81,12 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) :
 DCTStream::~DCTStream()
 {
     jpeg_destroy_decompress(&cinfo);
-    delete str;
 }
 
 static void exitErrorHandler(jpeg_common_struct *error)
 {
-    j_decompress_ptr cinfo = (j_decompress_ptr)error;
-    str_error_mgr *err = (struct str_error_mgr *)cinfo->err;
+    auto *cinfo = (j_decompress_ptr)error;
+    auto *err = (struct str_error_mgr *)cinfo->err;
     if (cinfo->err->msg_code == JERR_IMAGE_TOO_BIG && err->width != 0 && err->height != 0) {
         cinfo->image_height = err->height;
         cinfo->image_width = err->width;

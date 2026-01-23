@@ -109,7 +109,7 @@ Stream *Sound::getStream()
 
 Sound *Sound::copy() const
 {
-    Sound *newsound = new Sound(streamObj, false);
+    auto *newsound = new Sound(streamObj, false);
 
     newsound->kind = kind;
     newsound->fileName = fileName;

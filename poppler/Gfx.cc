@@ -49,7 +49,7 @@
 // Copyright (C) 2023 Anton Thomasson <antonthomasson@gmail.com>
 // Copyright (C) 2024 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2024 Athul Raj Kollareth <krathul3152@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Trystan Mata <trystan.mata@tytanium.xyz>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
@@ -879,15 +879,52 @@ void Gfx::opSetFlat(Object args[], int /*numArgs*/)
     out->updateFlatness(state);
 }
 
+static std::optional<GfxState::LineJoinStyle> intToLineJoinStyle(int value)
+{
+    switch (value) {
+    case GfxState::LineJoinMitre:
+    case GfxState::LineJoinRound:
+    case GfxState::LineJoinBevel:
+        return static_cast<GfxState::LineJoinStyle>(value);
+        break;
+    }
+    return {};
+}
+
 void Gfx::opSetLineJoin(Object args[], int /*numArgs*/)
 {
-    state->setLineJoin(args[0].getInt());
+    const int value = args[0].getInt();
+    const std::optional<GfxState::LineJoinStyle> lineJoinStyle = intToLineJoinStyle(value);
+    if (!lineJoinStyle) {
+        error(errSyntaxError, getPos(), "Wrong line join style value '{0:d}'", value);
+        return;
+    }
+    state->setLineJoin(*lineJoinStyle);
     out->updateLineJoin(state);
+}
+
+static std::optional<GfxState::LineCapStyle> intToLineCapStyle(int value)
+{
+    switch (value) {
+    case GfxState::LineCapButt:
+    case GfxState::LineCapRound:
+    case GfxState::LineCapProjecting:
+        return static_cast<GfxState::LineCapStyle>(value);
+        break;
+    }
+    return {};
 }
 
 void Gfx::opSetLineCap(Object args[], int /*numArgs*/)
 {
-    state->setLineCap(args[0].getInt());
+    const int value = args[0].getInt();
+    const std::optional<GfxState::LineCapStyle> lineCapStyle = intToLineCapStyle(value);
+    if (!lineCapStyle) {
+        error(errSyntaxError, getPos(), "Wrong line cap style value '{0:d}'", value);
+        return;
+    }
+
+    state->setLineCap(*lineCapStyle);
     out->updateLineCap(state);
 }
 
@@ -4187,7 +4224,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg)
     csMode = streamCSNone;
 #if ENABLE_LIBOPENJPEG
     if (str->getKind() == strJPX && out->supportJPXtransparency()) {
-        JPXStream *jpxStream = dynamic_cast<JPXStream *>(str);
+        auto *jpxStream = dynamic_cast<JPXStream *>(str);
         jpxStream->setSupportJPXtransparency(true);
     }
 #endif
@@ -4911,18 +4948,17 @@ void Gfx::drawForm(Object *str, Dict *resDict, const std::array<double, 6> &matr
 
 void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
 {
-    Stream *str;
     int c1, c2;
 
     // NB: this function is run even if ocState is false -- doImage() is
     // responsible for skipping over the inline image data
 
     // build dict/stream
-    str = buildImageStream();
+    auto str = buildImageStream();
 
     // display the image
     if (str) {
-        doImage(nullptr, str, true);
+        doImage(nullptr, str.get(), true);
 
         // skip 'EI' tag
         c1 = str->getUndecodedStream()->getChar();
@@ -4931,14 +4967,11 @@ void Gfx::opBeginImage(Object /*args*/[], int /*numArgs*/)
             c1 = c2;
             c2 = str->getUndecodedStream()->getChar();
         }
-        delete str;
     }
 }
 
-Stream *Gfx::buildImageStream()
+std::unique_ptr<Stream> Gfx::buildImageStream()
 {
-    Stream *str;
-
     // build dictionary
     Object dict(new Dict(xref));
     Object obj = parser->getObj();
@@ -4961,13 +4994,11 @@ Stream *Gfx::buildImageStream()
 
     // make stream
     if (parser->getStream()) {
-        str = new EmbedStream(parser->getStream(), std::move(dict), false, 0, true);
-        str = str->addFilters(str->getDict());
-    } else {
-        str = nullptr;
+        auto str = std::make_unique<EmbedStream>(parser->getStream(), std::move(dict), false, 0, true);
+        auto *filterDict = str->getDict();
+        return Stream::addFilters(std::move(str), filterDict);
     }
-
-    return str;
+    return nullptr;
 }
 
 void Gfx::opImageData(Object /*args*/[], int /*numArgs*/)
@@ -5040,7 +5071,7 @@ void Gfx::popMarkedContent()
 
 void Gfx::pushMarkedContent()
 {
-    MarkedContentStack *mc = new MarkedContentStack();
+    auto *mc = new MarkedContentStack();
     mc->ocSuppressed = false;
     mc->kind = gfxMCOther;
     mc->next = mcStack;

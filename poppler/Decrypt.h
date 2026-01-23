@@ -20,7 +20,7 @@
 // Copyright (C) 2013, 2018, 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -94,7 +94,8 @@ struct DecryptAES256State
 class BaseCryptStream : public FilterStream
 {
 public:
-    BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    BaseCryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    BaseCryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~BaseCryptStream() override;
     StreamKind getKind() const override { return strCrypt; }
     [[nodiscard]] bool rewind() override;
@@ -103,7 +104,6 @@ public:
     Goffset getPos() override;
     bool isBinary(bool last) const override;
     Stream *getUndecodedStream() override { return this; }
-    void setAutoDelete(bool val);
 
 protected:
     CryptAlgorithm algo;
@@ -111,7 +111,7 @@ protected:
     unsigned char objKey[32];
     Goffset charactersRead; // so that getPos() can be correct
     int nextCharBuff; // EOF means not read yet
-    bool autoDelete;
+    std::unique_ptr<Stream> ownedStream;
 
     union {
         DecryptRC4State rc4;
@@ -127,16 +127,21 @@ protected:
 class EncryptStream : public BaseCryptStream
 {
 public:
-    EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    EncryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    EncryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~EncryptStream() override;
     [[nodiscard]] bool rewind() override;
     int lookChar() override;
+
+private:
+    void init();
 };
 
 class DecryptStream : public BaseCryptStream
 {
 public:
-    DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    DecryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
+    DecryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref ref);
     ~DecryptStream() override;
     [[nodiscard]] bool rewind() override;
     int lookChar() override;

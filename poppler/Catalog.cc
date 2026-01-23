@@ -542,7 +542,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     Object embeddedFilesObj = Object(new Dict(xref));
     const Ref embeddedFilesRef = xref->addIndirectObject(embeddedFilesObj);
 
-    Array *embeddedFilesNamesArray = new Array(xref);
+    auto *embeddedFilesNamesArray = new Array(xref);
 
     // This flattens out the existing EmbeddedFiles nametree (if any), should not be a problem
     NameTree *ef = getEmbeddedFileNameTree();

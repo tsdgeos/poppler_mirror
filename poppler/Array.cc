@@ -50,7 +50,7 @@ Array::~Array() = default;
 Array *Array::copy(XRef *xrefA) const
 {
     arrayLocker();
-    Array *a = new Array(xrefA);
+    auto *a = new Array(xrefA);
     a->elems.reserve(elems.size());
     for (const auto &elem : elems) {
         a->elems.push_back(elem.copy());
@@ -61,7 +61,7 @@ Array *Array::copy(XRef *xrefA) const
 Array *Array::deepCopy() const
 {
     arrayLocker();
-    Array *a = new Array(xref);
+    auto *a = new Array(xref);
     a->elems.reserve(elems.size());
     for (const auto &elem : elems) {
         a->elems.push_back(elem.deepCopy());

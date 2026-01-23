@@ -72,7 +72,7 @@ Object Parser::getObj(int recursion)
 
 static std::unique_ptr<GooString> decryptedString(const GooString *s, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
-    DecryptStream decrypt(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
+    DecryptStream decrypt(std::make_unique<MemStream>(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
     if (!decrypt.rewind()) {
         return {};
     }
@@ -87,7 +87,6 @@ static std::unique_ptr<GooString> decryptedString(const GooString *s, const unsi
 Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict, bool decryptString)
 {
     Object obj;
-    Stream *str;
 
     // refill buffer after inline image data
     if (inlineImg == 2) {
@@ -173,8 +172,10 @@ Object Parser::getObj(bool simpleOnly, const unsigned char *fileKey, CryptAlgori
         // stream objects are not allowed inside content streams or
         // object streams
         if (buf2.isCmd("stream")) {
-            if (allowStreams && (str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict))) {
-                return Object(std::unique_ptr<Stream>(str));
+            if (allowStreams) {
+                if (auto str = makeStream(std::move(obj), fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1, strict)) {
+                    return Object(std::move(str));
+                }
             }
             return Object::error();
         }
@@ -221,10 +222,9 @@ err:
     return Object::error();
 }
 
-Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict)
+std::unique_ptr<Stream> Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, int recursion, bool strict)
 {
     BaseStream *baseStr;
-    Stream *str;
     Goffset length;
     Goffset pos, endPos;
 
@@ -242,10 +242,11 @@ Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlg
 
     // get stream start position
     lexer.skipToNextLine();
-    if (!(str = lexer.getStream())) {
+    Stream *lexerStream;
+    if (!(lexerStream = lexer.getStream())) {
         return nullptr;
     }
-    pos = str->getPos();
+    pos = lexerStream->getPos();
 
     // get length
     Object obj = dict.dictLookup("Length", recursion);
@@ -314,15 +315,16 @@ Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey, CryptAlg
     }
 
     // make base stream
-    str = baseStr->makeSubStream(pos, true, length, std::move(dict)).release();
+    auto str = baseStr->makeSubStream(pos, true, length, std::move(dict));
 
     // handle decryption
     if (fileKey) {
-        str = new DecryptStream(str, fileKey, encAlgorithm, keyLength, { .num = objNum, .gen = objGen });
+        str = std::make_unique<DecryptStream>(std::move(str), fileKey, encAlgorithm, keyLength, Ref { .num = objNum, .gen = objGen });
     }
 
     // get filters
-    str = str->addFilters(str->getDict(), recursion);
+    Dict *streamDict = str->getDict();
+    str = Stream::addFilters(std::move(str), streamDict, recursion);
 
     if (XRef *xref = lexer.getXRef()) {
         // Don't try to reuse the entry from the block at the start

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2019, 2021, 2025 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -287,7 +287,7 @@ struct JPXImage
 class JPXStream : public FilterStream
 {
 public:
-    JPXStream(Stream *strA);
+    JPXStream(std::unique_ptr<Stream> strA);
     virtual ~JPXStream();
     StreamKind getKind() const override { return strJPX; }
     [[nodiscard]] bool rewind() override;
@@ -324,7 +324,7 @@ private:
     void skipEPH();
     unsigned int finishBitBuf();
 
-    BufStream *bufStr; // buffered stream (for lookahead)
+    std::unique_ptr<BufStream> bufStr; // buffered stream (for lookahead)
 
     unsigned int nComps; // number of components
     unsigned int *bpc; // bits per component, for each component

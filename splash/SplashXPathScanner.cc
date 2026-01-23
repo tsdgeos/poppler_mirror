@@ -445,7 +445,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const in
                 if (xx < xx0) {
                     SplashColorPtr p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);
                     if (xx & 7) {
-                        unsigned char mask = (unsigned char)(0xff00 >> (xx & 7));
+                        auto mask = (unsigned char)(0xff00 >> (xx & 7));
                         if ((xx & ~7) == (xx0 & ~7)) {
                             mask |= 0xff >> (xx0 & 7);
                         }
@@ -472,7 +472,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf, const int *x0, const in
         if (xx < xx0 && xx >= 0) {
             SplashColorPtr p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);
             if (xx & 7) {
-                unsigned char mask = (unsigned char)(0xff00 >> (xx & 7));
+                auto mask = (unsigned char)(0xff00 >> (xx & 7));
                 if ((xx & ~7) == (xx0 & ~7)) {
                     mask &= 0xff >> (xx0 & 7);
                 }

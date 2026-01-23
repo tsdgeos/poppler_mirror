@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
         }
         return 99;
     }
-    GooString *fileName = new GooString(argv[1]);
+    auto *fileName = new GooString(argv[1]);
     if (!listImages) {
         imgRoot = argv[2];
     }
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     }
 
     // write image files
-    ImageOutputDev *imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
+    auto *imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
     if (imgOut->isOk()) {
         if (allFormats) {
             imgOut->enablePNG(true);

@@ -12,7 +12,7 @@
 // Copyright 2015 Jakub Wilk <jwilk@jwilk.net>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // Licensed under GPLv2 or later
@@ -69,7 +69,7 @@ static inline int doGetChar(JPXStreamPrivate *priv)
     return result;
 }
 
-JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
+JPXStream::JPXStream(std::unique_ptr<Stream> strA) : OwnedFilterStream(std::move(strA))
 {
     priv = new JPXStreamPrivate;
     handleJPXtransparency = false;
@@ -77,7 +77,6 @@ JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 
 JPXStream::~JPXStream()
 {
-    delete str;
     close();
     delete priv;
 }
@@ -202,7 +201,7 @@ struct JPXData
 
 static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     if (unlikely(jpxData->size <= jpxData->pos)) {
         return (OPJ_SIZE_T)-1; /* End of file! */
@@ -218,7 +217,7 @@ static OPJ_SIZE_T jpxRead_callback(void *p_buffer, OPJ_SIZE_T p_nb_bytes, void *
 
 static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     jpxData->pos += (skip > jpxData->size - jpxData->pos) ? jpxData->size - jpxData->pos : skip;
     /* Always return input value to avoid "Problem with skipping JPEG2000 box, stream error" */
@@ -227,7 +226,7 @@ static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void *p_user_data)
 
 static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void *p_user_data)
 {
-    JPXData *jpxData = (JPXData *)p_user_data;
+    auto *jpxData = (JPXData *)p_user_data;
 
     if (seek_pos > jpxData->size) {
         return OPJ_FALSE;
@@ -296,7 +295,7 @@ void JPXStream::init()
                 close();
                 break;
             }
-            unsigned char *cdata = (unsigned char *)priv->image->comps[component].data;
+            auto *cdata = (unsigned char *)priv->image->comps[component].data;
             int adjust = 0;
             int depth = priv->image->comps[component].prec;
             if (priv->image->comps[component].prec > 8) {

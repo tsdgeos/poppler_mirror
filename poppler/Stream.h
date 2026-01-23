@@ -264,9 +264,9 @@ public:
     // Return the next stream in the "stack".
     virtual Stream *getNextStream() const { return nullptr; }
 
-    // Add filters to this stream according to the parameters in <dict>.
+    // Add filters to the stream according to the parameters in <dict>.
     // Returns the new stream.
-    Stream *addFilters(Dict *dict, int recursion = 0);
+    static std::unique_ptr<Stream> addFilters(std::unique_ptr<Stream> stream, Dict *dict, int recursion = 0);
 
     // Returns true if this stream includes a crypt filter.
     bool isEncrypted() const;
@@ -281,7 +281,7 @@ private:
     virtual bool hasGetChars() { return false; }
     virtual int getChars(int nChars, unsigned char *buffer);
 
-    Stream *makeFilter(const char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
+    static std::unique_ptr<Stream> makeFilter(const char *name, std::unique_ptr<Stream> str, Object *params, int recursion = 0, Dict *dict = nullptr);
 
     std::atomic_int ref; // reference count
 };
@@ -452,6 +452,16 @@ public:
 
 protected:
     Stream *str;
+};
+
+class OwnedFilterStream : public FilterStream
+{
+public:
+    explicit OwnedFilterStream(std::unique_ptr<Stream> strA);
+    ~OwnedFilterStream() override;
+
+private:
+    std::unique_ptr<Stream> ownedStream;
 };
 
 //------------------------------------------------------------------------
@@ -836,10 +846,10 @@ private:
 // ASCIIHexStream
 //------------------------------------------------------------------------
 
-class ASCIIHexStream : public FilterStream
+class ASCIIHexStream : public OwnedFilterStream
 {
 public:
-    explicit ASCIIHexStream(Stream *strA);
+    explicit ASCIIHexStream(std::unique_ptr<Stream> strA);
     ~ASCIIHexStream() override;
     StreamKind getKind() const override { return strASCIIHex; }
     [[nodiscard]] bool rewind() override;
@@ -862,10 +872,10 @@ private:
 // ASCII85Stream
 //------------------------------------------------------------------------
 
-class ASCII85Stream : public FilterStream
+class ASCII85Stream : public OwnedFilterStream
 {
 public:
-    explicit ASCII85Stream(Stream *strA);
+    explicit ASCII85Stream(std::unique_ptr<Stream> strA);
     ~ASCII85Stream() override;
     StreamKind getKind() const override { return strASCII85; }
     [[nodiscard]] bool rewind() override;
@@ -890,10 +900,10 @@ private:
 // LZWStream
 //------------------------------------------------------------------------
 
-class LZWStream : public FilterStream
+class LZWStream : public OwnedFilterStream
 {
 public:
-    LZWStream(Stream *strA, int predictor, int columns, int colors, int bits, int earlyA);
+    LZWStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits, int earlyA);
     ~LZWStream() override;
     StreamKind getKind() const override { return strLZW; }
     [[nodiscard]] bool rewind() override;
@@ -950,10 +960,10 @@ private:
 // RunLengthStream
 //------------------------------------------------------------------------
 
-class RunLengthStream : public FilterStream
+class RunLengthStream : public OwnedFilterStream
 {
 public:
-    explicit RunLengthStream(Stream *strA);
+    explicit RunLengthStream(std::unique_ptr<Stream> strA);
     ~RunLengthStream() override;
     StreamKind getKind() const override { return strRunLength; }
     [[nodiscard]] bool rewind() override;
@@ -980,10 +990,10 @@ private:
 
 struct CCITTCodeTable;
 
-class CCITTFaxStream : public FilterStream
+class CCITTFaxStream : public OwnedFilterStream
 {
 public:
-    CCITTFaxStream(Stream *strA, int encodingA, bool endOfLineA, bool byteAlignA, int columnsA, int rowsA, bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA);
+    CCITTFaxStream(std::unique_ptr<Stream> strA, int encodingA, bool endOfLineA, bool byteAlignA, int columnsA, int rowsA, bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA);
     ~CCITTFaxStream() override;
     StreamKind getKind() const override { return strCCITTFax; }
     [[nodiscard]] bool rewind() override;
@@ -1077,10 +1087,10 @@ struct DCTHuffTable
     unsigned char sym[256]; // symbols
 };
 
-class DCTStream : public FilterStream
+class DCTStream : public OwnedFilterStream
 {
 public:
-    DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
+    DCTStream(std::unique_ptr<Stream> strA, int colorXformA, Dict *dict, int recursion);
     ~DCTStream() override;
     StreamKind getKind() const override { return strDCT; }
     [[nodiscard]] bool rewind() override;
@@ -1181,10 +1191,10 @@ struct FlateDecode
     int first; // first length/distance
 };
 
-class FlateStream : public FilterStream
+class FlateStream : public OwnedFilterStream
 {
 public:
-    FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
+    FlateStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits);
     ~FlateStream() override;
     StreamKind getKind() const override { return strFlate; }
     [[nodiscard]] bool rewind() override;
@@ -1257,10 +1267,10 @@ private:
 // EOFStream
 //------------------------------------------------------------------------
 
-class EOFStream : public FilterStream
+class EOFStream : public OwnedFilterStream
 {
 public:
-    explicit EOFStream(Stream *strA);
+    explicit EOFStream(std::unique_ptr<Stream> strA);
     ~EOFStream() override;
     StreamKind getKind() const override { return strWeird; }
     [[nodiscard]] bool rewind() override { return true; }
@@ -1274,10 +1284,10 @@ public:
 // BufStream
 //------------------------------------------------------------------------
 
-class BufStream : public FilterStream
+class BufStream : public OwnedFilterStream
 {
 public:
-    BufStream(Stream *strA, int bufSizeA);
+    BufStream(std::unique_ptr<Stream> strA, int bufSizeA);
     ~BufStream() override;
     StreamKind getKind() const override { return strWeird; }
     [[nodiscard]] bool rewind() override;

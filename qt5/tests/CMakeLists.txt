@@ -28,15 +28,6 @@ macro(QT5_ADD_QTEST exe source)
   endif ()
 endmacro(QT5_ADD_QTEST)
 
-macro(QT_ADD_FUZZER exe)
-  string(REPLACE "-" "" test_name ${exe})
-  set(${test_name}_SOURCES
-    ${ARGN}
-  )
-  poppler_add_test(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
-  target_link_libraries(${exe} poppler-qt5 Qt5::Widgets Qt5::Test Qt5::Core Qt5::Gui)
-endmacro(QT_ADD_FUZZER)
-
 qt5_add_simpletest(test-poppler-qt5 test-poppler-qt5.cpp)
 qt5_add_simpletest(test-password-qt5 test-password-qt5.cpp)
 qt5_add_simpletest(test-render-to-file-qt5 test-render-to-file.cpp)
@@ -80,10 +71,3 @@ if (NOT WIN32)
   qt5_add_qtest(check_qt5_strings check_strings.cpp)
 endif ()
 
-if(ENABLE_FUZZER)
-    qt_add_fuzzer(qt_annot_fuzzer ./fuzzing/qt_annot_fuzzer.cc)
-    qt_add_fuzzer(qt_pdf_fuzzer ./fuzzing/qt_pdf_fuzzer.cc)
-    qt_add_fuzzer(qt_label_fuzzer ./fuzzing/qt_label_fuzzer.cc)
-    qt_add_fuzzer(qt_search_fuzzer ./fuzzing/qt_search_fuzzer.cc)
-    qt_add_fuzzer(qt_textbox_fuzzer ./fuzzing/qt_textbox_fuzzer.cc)
-endif()

@@ -1670,8 +1670,8 @@ public:
     void setLineWidth(double width) { lineWidth = width; }
     void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
-    void setLineJoin(int lineJoin1) { lineJoin = static_cast<LineJoinStyle>(lineJoin1); }
-    void setLineCap(int lineCap1) { lineCap = static_cast<LineCapStyle>(lineCap1); }
+    void setLineJoin(LineJoinStyle lineJoin1) { lineJoin = lineJoin1; }
+    void setLineCap(LineCapStyle lineCap1) { lineCap = lineCap1; }
     void setMiterLimit(double limit) { miterLimit = limit; }
     void setStrokeAdjust(bool sa) { strokeAdjust = sa; }
     void setAlphaIsShape(bool ais) { alphaIsShape = ais; }

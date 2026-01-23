@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <poppler-document.h>
 #include <poppler-global.h>
+#include "fuzzer_init.h"
 
 #include "FuzzedDataProvider.h"
 
@@ -11,6 +12,7 @@ static void dummy_error_function(const std::string &, void *) { }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    initialize_poppler_data_dir();
     if (size < input_size * count) {
         return 0;
     }

@@ -30,7 +30,6 @@ Checks:  >
     -modernize-macro-to-enum,
     -modernize-use-trailing-return-type,
     -modernize-use-nodiscard,
-    -modernize-use-auto,
     -modernize-avoid-c-arrays,
     -modernize-use-std-print,
     -modernize-return-braced-init-list,

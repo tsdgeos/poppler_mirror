@@ -44,7 +44,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 static bool extractPages(const char *srcFileName, const char *destFileName)
 {
     char pathName[4096];
-    PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(srcFileName));
+    auto *doc = new PDFDoc(std::make_unique<GooString>(srcFileName));
 
     if (!doc->isOk()) {
         error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
@@ -117,7 +117,7 @@ static bool extractPages(const char *srcFileName, const char *destFileName)
 
     for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
         snprintf(pathName, sizeof(pathName) - 1, destFileName, pageNo);
-        PDFDoc *pagedoc = new PDFDoc(std::make_unique<GooString>(srcFileName));
+        auto *pagedoc = new PDFDoc(std::make_unique<GooString>(srcFileName));
         int errCode = pagedoc->savePageAs(pathName, pageNo);
         if (errCode != errNone) {
             delete doc;

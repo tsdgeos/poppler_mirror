@@ -73,20 +73,20 @@ namespace Poppler {
 
 std::unique_ptr<Document> Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 std::unique_ptr<Document> Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 std::unique_ptr<Document> Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     // create stream
-    DocumentData *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 

@@ -372,7 +372,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c)
 
 static int glyphPathMoveTo(const FT_Vector *pt, void *path)
 {
-    SplashFTFontPath *p = (SplashFTFontPath *)path;
+    auto *p = (SplashFTFontPath *)path;
 
     if (p->needClose) {
         p->path->close();
@@ -384,7 +384,7 @@ static int glyphPathMoveTo(const FT_Vector *pt, void *path)
 
 static int glyphPathLineTo(const FT_Vector *pt, void *path)
 {
-    SplashFTFontPath *p = (SplashFTFontPath *)path;
+    auto *p = (SplashFTFontPath *)path;
 
     p->path->lineTo((SplashCoord)pt->x * p->textScale / 64.0, (SplashCoord)pt->y * p->textScale / 64.0);
     p->needClose = true;
@@ -393,7 +393,7 @@ static int glyphPathLineTo(const FT_Vector *pt, void *path)
 
 static int glyphPathConicTo(const FT_Vector *ctrl, const FT_Vector *pt, void *path)
 {
-    SplashFTFontPath *p = (SplashFTFontPath *)path;
+    auto *p = (SplashFTFontPath *)path;
     SplashCoord x0, y0, x1, y1, x2, y2, x3, y3, xc, yc;
 
     if (!p->path->getCurPt(&x0, &y0)) {
@@ -432,7 +432,7 @@ static int glyphPathConicTo(const FT_Vector *ctrl, const FT_Vector *pt, void *pa
 
 static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2, const FT_Vector *pt, void *path)
 {
-    SplashFTFontPath *p = (SplashFTFontPath *)path;
+    auto *p = (SplashFTFontPath *)path;
 
     p->path->curveTo((SplashCoord)ctrl1->x * p->textScale / 64.0, (SplashCoord)ctrl1->y * p->textScale / 64.0, (SplashCoord)ctrl2->x * p->textScale / 64.0, (SplashCoord)ctrl2->y * p->textScale / 64.0,
                      (SplashCoord)pt->x * p->textScale / 64.0, (SplashCoord)pt->y * p->textScale / 64.0);

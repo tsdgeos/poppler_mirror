@@ -592,7 +592,7 @@ std::vector<FormFieldSignature *> PDFDoc::getSignatureFields()
                 FormWidget *fw = pw->getWidget(i);
                 if (fw->getType() == formSignature) {
                     assert(fw->getField()->getType() == formSignature);
-                    FormFieldSignature *ffs = static_cast<FormFieldSignature *>(fw->getField());
+                    auto *ffs = static_cast<FormFieldSignature *>(fw->getField());
                     if (std::ranges::find(res, ffs) == res.end()) {
                         res.push_back(ffs);
                     }
@@ -1305,7 +1305,7 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
     // Encrypt string if encryption is enabled
     std::unique_ptr<GooString> sEnc = nullptr;
     if (fileKey) {
-        EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
+        auto *enc = new EncryptStream(std::make_unique<MemStream>(s->c_str(), 0, s->size(), Object::null()), fileKey, encAlgorithm, keyLength, ref);
         sEnc = std::make_unique<GooString>();
         int c;
         if (!enc->rewind()) {
@@ -1459,9 +1459,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
                 removeFilter = false;
             }
             if (addEncryptstream) {
-                encStream = std::make_unique<EncryptStream>(stream, fileKey, encAlgorithm, keyLength, ref);
-                encStream->setAutoDelete(false);
-                stream = encStream.get();
+                encStream = std::make_unique<EncryptStream>(*stream, fileKey, encAlgorithm, keyLength, ref);
             }
 
             if (!stream->rewind()) {
@@ -1475,7 +1473,7 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             stream->getDict()->set("Length", Object(tmp));
 
             // Remove Stream encoding
-            AutoFreeMemStream *internalStream = dynamic_cast<AutoFreeMemStream *>(stream);
+            auto *internalStream = dynamic_cast<AutoFreeMemStream *>(stream);
             if (internalStream && internalStream->isFilterRemovalForbidden()) {
                 removeFilter = false;
             }
@@ -1487,14 +1485,13 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
             writeDictionary(stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(stream, outStr);
         } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream *>(stream)->getNeedsEncryptionOnSave()) {
-            EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
-            encStream->setAutoDelete(false);
+            auto *encStream = new EncryptStream(*stream, fileKey, encAlgorithm, keyLength, ref);
             writeDictionary(encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
             writeStream(encStream, outStr);
             delete encStream;
         } else {
             // raw stream copy
-            FilterStream *fs = dynamic_cast<FilterStream *>(stream);
+            auto *fs = dynamic_cast<FilterStream *>(stream);
             if (fs) {
                 BaseStream *bs = fs->getBaseStream();
                 if (bs) {
@@ -1594,7 +1591,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
                 error(errSyntaxWarning, -1, "PDFDoc::createTrailerDict original file's ID entry isn't an array. Trying to continue");
             }
         } else {
-            Array *array = new Array(xRef);
+            auto *array = new Array(xRef);
             // Get the first part of the ID
             array->add(obj4.arrayGet(0));
             array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
@@ -1602,7 +1599,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
         }
     } else {
         // new file => same values for the two identifiers
-        Array *array = new Array(xRef);
+        auto *array = new Array(xRef);
         array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
         array->add(Object(std::make_unique<GooString>((const char *)digest, 16)));
         trailerDict->set("ID", Object(array));
@@ -1797,7 +1794,7 @@ bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     pageDict->remove("BleedBox");
     pageDict->remove("TrimBox");
     pageDict->remove("Rotate");
-    Array *mediaBoxArray = new Array(getXRef());
+    auto *mediaBoxArray = new Array(getXRef());
     mediaBoxArray->add(Object(mediaBox->x1));
     mediaBoxArray->add(Object(mediaBox->y1));
     mediaBoxArray->add(Object(mediaBox->x2));
@@ -1806,7 +1803,7 @@ bool PDFDoc::replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBo
     Object trimBoxObject = mediaBoxObject.copy();
     pageDict->add("MediaBox", std::move(mediaBoxObject));
     if (cropBox != nullptr) {
-        Array *cropBoxArray = new Array(getXRef());
+        auto *cropBoxArray = new Array(getXRef());
         cropBoxArray->add(Object(cropBox->x1));
         cropBoxArray->add(Object(cropBox->y1));
         cropBoxArray->add(Object(cropBox->x2));
@@ -2014,7 +2011,7 @@ Outline *PDFDoc::getOutline()
 std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, std::unique_ptr<GooString> &&fileNameA)
 {
     // We cannot call std::make_unique here because the PDFDoc constructor is private
-    PDFDoc *doc = new PDFDoc();
+    auto *doc = new PDFDoc();
     doc->errCode = errorCode;
     doc->fileName = std::move(fileNameA);
 
@@ -2214,7 +2211,7 @@ std::variant<PDFDoc::SignatureData, CryptoSign::SigningErrorMessage> PDFDoc::cre
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
     annotObj.dictSet("FT", Object(objName, "Sig"));
     annotObj.dictSet("T", Object(std::move(partialFieldName)));
-    Array *rectArray = new Array(getXRef());
+    auto *rectArray = new Array(getXRef());
     rectArray->add(Object(rect.x1));
     rectArray->add(Object(rect.y1));
     rectArray->add(Object(rect.x2));
@@ -2290,7 +2287,7 @@ std::optional<CryptoSign::SigningErrorMessage> PDFDoc::sign(const std::string &s
 
     destPage->addAnnot(sig->annotWidget);
 
-    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(sig->formWidget);
+    auto *fws = dynamic_cast<FormWidgetSignature *>(sig->formWidget);
     if (fws) {
         const auto res = fws->signDocument(saveFilename, certNickname, password, reason, location, ownerPassword, userPassword);
 

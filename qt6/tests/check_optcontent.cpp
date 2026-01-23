@@ -80,7 +80,7 @@ void TestOptionalContent::checkNoOptionalContent()
 void TestOptionalContent::checkIsVisible()
 {
     globalParams = std::make_unique<GlobalParams>();
-    PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
+    auto *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
     QVERIFY(doc);
 
     const OCGs *ocgs = doc->getOptContentConfig();
@@ -152,7 +152,7 @@ void TestOptionalContent::checkIsVisible()
 void TestOptionalContent::checkVisibilitySetting()
 {
     globalParams = std::make_unique<GlobalParams>();
-    PDFDoc *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
+    auto *doc = new PDFDoc(std::make_unique<GooString>(TESTDATADIR "/unittestcases/vis_policy_test.pdf"));
     QVERIFY(doc);
 
     const OCGs *ocgs = doc->getOptContentConfig();

@@ -521,7 +521,7 @@ const std::map<std::string, std::string> fallback_fonts = {
 
 static bool update_font_desc_with_word(PopplerFontDescription &font_desc, std::string &word)
 {
-    FontstyleMap::const_iterator a = string_to_fontstyle.find(word);
+    auto a = string_to_fontstyle.find(word);
     if (a != string_to_fontstyle.end()) {
         std::pair<FontPropType, int> elt = a->second;
         switch (elt.first) {
@@ -588,7 +588,7 @@ PopplerAnnot *_poppler_annot_free_text_new(const std::shared_ptr<Annot> &annot)
             }
         }
 
-        std::map<std::string, std::string>::const_iterator fallback_font = fallback_fonts.find(std::string(desc->font_name));
+        auto fallback_font = fallback_fonts.find(std::string(desc->font_name));
         if (fallback_font != fallback_fonts.end()) {
             desc->font_name = g_strdup(fallback_font->second.c_str());
         }
@@ -1947,7 +1947,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
 
     if ((line = annot->getCalloutLine())) {
         AnnotCalloutMultiLine *multiline;
-        PopplerAnnotCalloutLine *callout = g_new0(PopplerAnnotCalloutLine, 1);
+        auto *callout = g_new0(PopplerAnnotCalloutLine, 1);
 
         callout->x1 = line->getX1();
         callout->y1 = line->getY1();
@@ -2108,7 +2108,7 @@ void poppler_annot_free_text_set_font_color(PopplerAnnotFreeText *poppler_annot,
  **/
 PopplerColor *poppler_annot_free_text_get_font_color(PopplerAnnotFreeText *poppler_annot)
 {
-    PopplerColor *color = g_new(PopplerColor, 1);
+    auto *color = g_new(PopplerColor, 1);
     *color = poppler_annot->font_color;
     return color;
 }
@@ -2591,7 +2591,7 @@ G_DEFINE_BOXED_TYPE(PopplerFontDescription, poppler_font_description, poppler_fo
  */
 PopplerFontDescription *poppler_font_description_new(const char *font_name)
 {
-    PopplerFontDescription *font_desc = (PopplerFontDescription *)g_new0(PopplerFontDescription, 1);
+    auto *font_desc = (PopplerFontDescription *)g_new0(PopplerFontDescription, 1);
     font_desc->font_name = g_strdup(font_name);
     font_desc->size_pt = 11.;
     font_desc->stretch = POPPLER_STRETCH_NORMAL;
@@ -2651,7 +2651,7 @@ G_DEFINE_BOXED_TYPE(PopplerPath, poppler_path, poppler_path_copy, poppler_path_f
  */
 PopplerPath *poppler_path_new_from_array(PopplerPoint *points, gsize n_points)
 {
-    PopplerPath *path = (PopplerPath *)g_new(PopplerPath, 1);
+    auto *path = (PopplerPath *)g_new(PopplerPath, 1);
     path->points = points;
     path->n_points = n_points;
     return path;
@@ -2737,7 +2737,7 @@ void poppler_annot_ink_set_ink_list(PopplerAnnotInk *annot, PopplerPath **ink_li
     const PDFRectangle *crop_box;
     const PDFRectangle zerobox = PDFRectangle();
     Page *page = nullptr;
-    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+    auto *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
     std::vector<std::unique_ptr<AnnotPath>> paths;
     poppler_annot_get_border_width(POPPLER_ANNOT(annot), &border_width);
 
@@ -2801,7 +2801,7 @@ PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_pa
     Page *page = nullptr;
     int i = 0;
 
-    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+    auto *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
     const std::vector<std::unique_ptr<AnnotPath>> &paths = ink_annot->getInkList();
 
     *n_paths = paths.size();
@@ -2813,7 +2813,7 @@ PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_pa
     }
 
     for (const std::unique_ptr<AnnotPath> &path : paths) {
-        PopplerPoint *points = g_new(PopplerPoint, path->getCoordsLength());
+        auto *points = g_new(PopplerPoint, path->getCoordsLength());
 
         for (int j = 0; j < path->getCoordsLength(); ++j) {
             points[j].x = path->getX(j) - crop_box->x1;
@@ -2841,7 +2841,7 @@ PopplerPath **poppler_annot_ink_get_ink_list(PopplerAnnotInk *annot, gsize *n_pa
  */
 void poppler_annot_ink_set_draw_below(PopplerAnnotInk *annot, gboolean draw_below)
 {
-    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+    auto *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
 
     ink_annot->setDrawBelow(draw_below);
 }
@@ -2856,7 +2856,7 @@ void poppler_annot_ink_set_draw_below(PopplerAnnotInk *annot, gboolean draw_belo
  */
 gboolean poppler_annot_ink_get_draw_below(PopplerAnnotInk *annot)
 {
-    AnnotInk *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
+    auto *ink_annot = static_cast<AnnotInk *>(POPPLER_ANNOT(annot)->annot.get());
     return ink_annot->getDrawBelow();
 }
 

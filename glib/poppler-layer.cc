@@ -141,7 +141,7 @@ void poppler_layer_show(PopplerLayer *poppler_layer)
     layer->oc->setState(OptionalContentGroup::On);
 
     for (l = poppler_layer->rbgroup; l && l->data; l = g_list_next(l)) {
-        OptionalContentGroup *oc = (OptionalContentGroup *)l->data;
+        auto *oc = (OptionalContentGroup *)l->data;
 
         if (oc != layer->oc) {
             oc->setState(OptionalContentGroup::Off);

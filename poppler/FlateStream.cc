@@ -8,6 +8,7 @@
 // Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
+// Copyright (C) 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // This file is under the GPLv2 or later license
 //
@@ -21,7 +22,7 @@
 
 #    include "FlateStream.h"
 
-FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, int bits) : FilterStream(strA)
+FlateStream::FlateStream(std::unique_ptr<Stream> strA, int predictor, int columns, int colors, int bits) : OwnedFilterStream(std::move(strA))
 {
     if (predictor != 1) {
         pred = new StreamPredictor(this, predictor, columns, colors, bits);
@@ -41,7 +42,6 @@ FlateStream::~FlateStream()
 {
     inflateEnd(&d_stream);
     delete pred;
-    delete str;
 }
 
 bool FlateStream::rewind()

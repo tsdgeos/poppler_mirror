@@ -113,7 +113,7 @@ class PngEmbedder : public ImageEmbedder
         // Pass this static function to png_set_read_fn().
         static void readCallback(png_structp png, png_bytep out, png_size_t size)
         {
-            LibpngInputStream *stream = (LibpngInputStream *)png_get_io_ptr(png);
+            auto *stream = (LibpngInputStream *)png_get_io_ptr(png);
             if (stream) {
                 stream->read(out, size);
             }
@@ -159,7 +159,7 @@ private:
     {
         // Read pixels from m_png.
         const int rowSize = png_get_rowbytes(m_png, m_info);
-        png_bytepp pixels = new png_bytep[m_height];
+        auto *pixels = new png_bytep[m_height];
         for (int y = 0; y < m_height; y++) {
             pixels[y] = new png_byte[rowSize];
         }
@@ -308,7 +308,7 @@ struct JpegErrorManager
 // Note: an address of pub is equal to an address of a JpegErrorManager instance.
 static void jpegExitErrorHandler(j_common_ptr info)
 {
-    JpegErrorManager *errorManager = (JpegErrorManager *)info->err;
+    auto *errorManager = (JpegErrorManager *)info->err;
     (*errorManager->pub.output_message)(info);
     // Jump to the setjmp point.
     longjmp(errorManager->setjmpBuffer, 1);

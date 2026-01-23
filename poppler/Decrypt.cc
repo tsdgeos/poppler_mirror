@@ -23,7 +23,7 @@
 // Copyright (C) 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -287,7 +287,7 @@ bool Decrypt::makeFileKey2(int encRevision, int keyLength, const GooString *owne
 // BaseCryptStream
 //------------------------------------------------------------------------
 
-BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : FilterStream(strA)
+BaseCryptStream::BaseCryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : FilterStream(&strA)
 {
     algo = algoA;
 
@@ -337,15 +337,14 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
 
     charactersRead = 0;
     nextCharBuff = EOF;
-    autoDelete = true;
 }
 
-BaseCryptStream::~BaseCryptStream()
+BaseCryptStream::BaseCryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(*strA, fileKey, algoA, keyLength, refA)
 {
-    if (autoDelete) {
-        delete str;
-    }
+    ownedStream = std::move(strA);
 }
+
+BaseCryptStream::~BaseCryptStream() = default;
 
 bool BaseCryptStream::rewind()
 {
@@ -376,16 +375,21 @@ bool BaseCryptStream::isBinary(bool last) const
     return str->isBinary(last);
 }
 
-void BaseCryptStream::setAutoDelete(bool val)
-{
-    autoDelete = val;
-}
-
 //------------------------------------------------------------------------
 // EncryptStream
 //------------------------------------------------------------------------
 
-EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
+EncryptStream::EncryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
+{
+    init();
+}
+
+EncryptStream::EncryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(std::move(strA), fileKey, algoA, keyLength, refA)
+{
+    init();
+}
+
+void EncryptStream::init()
 {
     // Fill the CBC initialization vector for AES and AES-256
     switch (algo) {
@@ -479,7 +483,8 @@ int EncryptStream::lookChar()
 // DecryptStream
 //------------------------------------------------------------------------
 
-DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(strA, fileKey, algoA, keyLength, refA) { }
+DecryptStream::DecryptStream(Stream &strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(strA, fileKey, algoA, keyLength, refA) { }
+DecryptStream::DecryptStream(std::unique_ptr<Stream> strA, const unsigned char *fileKey, CryptAlgorithm algoA, int keyLength, Ref refA) : BaseCryptStream(std::move(strA), fileKey, algoA, keyLength, refA) { }
 
 DecryptStream::~DecryptStream() = default;
 

@@ -273,7 +273,7 @@ static TextPage *poppler_page_get_text_page(PopplerPage *page)
 
 static bool annots_display_decide_cb(Annot *annot, void *user_data)
 {
-    PopplerRenderAnnotsFlags flags = (PopplerRenderAnnotsFlags)GPOINTER_TO_UINT(user_data);
+    auto flags = (PopplerRenderAnnotsFlags)GPOINTER_TO_UINT(user_data);
     Annot::AnnotSubtype type = annot->getType();
     int typeMask = 1 << MAX(0, (((int)type) - 1));
 
@@ -1634,7 +1634,7 @@ void poppler_page_add_annot(PopplerPage *page, PopplerAnnot *annot)
 
     annot->annot->setRect(x1 + page_crop_box->x1, y1 + page_crop_box->y1, x2 + page_crop_box->x1, y2 + page_crop_box->y1);
 
-    AnnotTextMarkup *annot_markup = dynamic_cast<AnnotTextMarkup *>(annot->annot.get());
+    auto *annot_markup = dynamic_cast<AnnotTextMarkup *>(annot->annot.get());
     if (annot_markup) {
         crop_box = _poppler_annot_get_cropbox(annot);
         if (crop_box) {

@@ -29,7 +29,7 @@
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019-2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -1155,7 +1155,7 @@ JBIG2CodeTable::~JBIG2CodeTable()
 // JBIG2Stream
 //------------------------------------------------------------------------
 
-JBIG2Stream::JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA) : FilterStream(strA)
+JBIG2Stream::JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, Object *globalsStreamRefA) : OwnedFilterStream(std::move(strA))
 {
     pageBitmap = nullptr;
 
@@ -1212,7 +1212,6 @@ JBIG2Stream::~JBIG2Stream()
     delete iaidStats;
     delete huffDecoder;
     delete mmrDecoder;
-    delete str;
 }
 
 bool JBIG2Stream::rewind()
@@ -2417,8 +2416,15 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readTextRegion(bool huff, bool refine,
                         if (checkedAdd(((rdh >= 0) ? rdh : rdh - 1) / 2, rdy, &refDY)) {
                             return nullptr;
                         }
+                        int refinementSectionW, refinementSectionH;
+                        if (checkedAdd(rdw, syms[symID]->getWidth(), &refinementSectionW)) {
+                            return nullptr;
+                        }
+                        if (checkedAdd(rdh, syms[symID]->getHeight(), &refinementSectionH)) {
+                            return nullptr;
+                        }
 
-                        symbolBitmap = readGenericRefinementRegion(rdw + syms[symID]->getWidth(), rdh + syms[symID]->getHeight(), templ, false, syms[symID], refDX, refDY, atx, aty).release();
+                        symbolBitmap = readGenericRefinementRegion(refinementSectionW, refinementSectionH, templ, false, syms[symID], refDX, refDY, atx, aty).release();
                     }
                     //~ do we need to use the bmSize value here (in Huffman mode)?
                 } else {

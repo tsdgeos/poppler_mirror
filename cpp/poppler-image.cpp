@@ -149,7 +149,7 @@ image_private *image_private::create_data(char *data, int width, int height, ima
         return nullptr;
     }
 
-    image_private *d = new image_private(width, height, format);
+    auto *d = new image_private(width, height, format);
     d->bytes_num = bpr * height;
     d->data = data;
     d->own_data = false;

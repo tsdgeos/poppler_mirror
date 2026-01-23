@@ -548,7 +548,7 @@ static void RenderPdfAsText(const char *fileName)
 
     LogInfo("started: %s\n", fileName);
 
-    TextOutputDev *textOut = new TextOutputDev(nullptr, true, 0, false, false);
+    auto *textOut = new TextOutputDev(nullptr, true, 0, false, false);
     if (!textOut->isOk()) {
         delete textOut;
         return;

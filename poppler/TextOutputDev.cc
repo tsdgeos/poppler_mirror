@@ -3627,8 +3627,8 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML, double 
      *  (we need to process whole table size when comparing it
      *   with regular text blocks)
      */
-    PDFRectangle *envelopes = new PDFRectangle[numTables];
-    TextBlock **ending_blocks = new TextBlock *[numTables];
+    auto *envelopes = new PDFRectangle[numTables];
+    auto **ending_blocks = new TextBlock *[numTables];
 
     for (int i = 0; i < numTables; i++) {
         envelopes[i].x1 = DBL_MAX;
@@ -4207,7 +4207,7 @@ bool TextPage::findText(const Unicode *s, int len, bool startAtTop, bool stopAtB
 GooString TextPage::getText(const std::optional<PDFRectangle> &area, EndOfLineKind textEOL, bool physLayout) const
 {
     TextOutputFunc dumpToString = [](void *stream, const char *text, int len) {
-        GooString *s = static_cast<GooString *>(stream);
+        auto *s = static_cast<GooString *>(stream);
         s->append(text, len);
     };
 

@@ -263,7 +263,7 @@ std::unique_ptr<GooString> HtmlFontAccu::CSStyle(int i, int j)
 {
     auto tmp = std::make_unique<GooString>();
 
-    std::vector<HtmlFont>::iterator g = accu.begin();
+    auto g = accu.begin();
     g += i;
     HtmlFont font = *g;
     std::string colorStr = font.getColor().toString();

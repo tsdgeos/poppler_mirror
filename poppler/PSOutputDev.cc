@@ -5342,7 +5342,7 @@ void PSOutputDev::doImageL1Sep(GfxImageColorMap *colorMap, Stream *str, int widt
         }
     } else {
         // allocate a line buffer
-        unsigned char *lineBuf = (unsigned char *)gmallocn(width, 4);
+        auto *lineBuf = (unsigned char *)gmallocn(width, 4);
 
         for (y = 0; y < height; ++y) {
 
@@ -7287,7 +7287,7 @@ GooString *PSOutputDev::filterPSLabel(GooString *label, bool *needParens)
     // - lines are limited to 255 chars (we limit to 200 here to allow
     //   for the keyword, which was emitted by the caller)
 
-    GooString *label2 = new GooString();
+    auto *label2 = new GooString();
     int labelLength = label->size();
 
     // this gets changed later if we find a non-numeric character

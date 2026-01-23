@@ -92,7 +92,7 @@ bool PDFConverter::convert()
     }
 
     bool deleteFile = false;
-    if (QFile *file = qobject_cast<QFile *>(dev)) {
+    if (auto *file = qobject_cast<QFile *>(dev)) {
         deleteFile = !file->exists();
     }
 

@@ -18,7 +18,7 @@
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
 // Copyright (C) 2024, 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2024, 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2024-2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -242,9 +242,9 @@ JPXCover jpxCover(150);
 
 //------------------------------------------------------------------------
 
-JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
+JPXStream::JPXStream(std::unique_ptr<Stream> strA) : FilterStream(strA.get())
 {
-    bufStr = new BufStream(str, 2);
+    bufStr = std::make_unique<BufStream>(std::move(strA), 2);
 
     nComps = 0;
     bpc = nullptr;
@@ -268,7 +268,6 @@ JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 JPXStream::~JPXStream()
 {
     close();
-    delete bufStr;
 }
 
 bool JPXStream::rewind()
@@ -2170,7 +2169,7 @@ bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsig
     } else {
         cover(64);
         cb->arithDecoder = new JArithmeticDecoder();
-        cb->arithDecoder->setStream(bufStr, cb->dataLen[0]);
+        cb->arithDecoder->setStream(bufStr.get(), cb->dataLen[0]);
         cb->arithDecoder->start();
         cb->stats = new JArithmeticDecoderStats(jpxNContexts);
         cb->stats->setEntry(jpxContextSigProp, 4, 0);
@@ -2180,7 +2179,7 @@ bool JPXStream::readCodeBlockData(JPXTileComp *tileComp, unsigned int res, unsig
 
     for (i = 0; i < cb->nCodingPasses; ++i) {
         if ((tileComp->codeBlockStyle & 0x04) && i > 0) {
-            cb->arithDecoder->setStream(bufStr, cb->dataLen[i]);
+            cb->arithDecoder->setStream(bufStr.get(), cb->dataLen[i]);
             cb->arithDecoder->start();
         }
 

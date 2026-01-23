@@ -212,14 +212,14 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     Link *popplerLink = nullptr;
     switch (a->getKind()) {
     case actionGoTo: {
-        LinkGoTo *g = (LinkGoTo *)a;
+        auto *g = (LinkGoTo *)a;
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, false);
         // create link: no ext file, namedDest, object pointer
         popplerLink = new LinkGoto(linkArea, QString(), LinkDestination(ldd));
     } break;
 
     case actionGoToR: {
-        LinkGoToR *g = (LinkGoToR *)a;
+        auto *g = (LinkGoToR *)a;
         // copy link file
         const QString fileName = UnicodeParsedString(g->getFileName());
         const LinkDestinationData ldd(g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty());
@@ -228,7 +228,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionLaunch: {
-        LinkLaunch *e = (LinkLaunch *)a;
+        auto *e = (LinkLaunch *)a;
         const GooString *p = e->getParams();
         popplerLink = new LinkExecute(linkArea, UnicodeParsedString(e->getFileName()), p ? QString::fromStdString(p->toStr()) : QString {});
     } break;
@@ -274,17 +274,17 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionSound: {
-        ::LinkSound *ls = (::LinkSound *)a;
+        auto *ls = (::LinkSound *)a;
         popplerLink = new LinkSound(linkArea, ls->getVolume(), ls->getSynchronous(), ls->getRepeat(), ls->getMix(), new SoundObject(ls->getSound()));
     } break;
 
     case actionJavaScript: {
-        ::LinkJavaScript *ljs = (::LinkJavaScript *)a;
+        auto *ljs = (::LinkJavaScript *)a;
         popplerLink = new LinkJavaScript(linkArea, UnicodeParsedString(ljs->getScript()));
     } break;
 
     case actionMovie: {
-        ::LinkMovie *lm = (::LinkMovie *)a;
+        auto *lm = (::LinkMovie *)a;
 
         const QString title = (lm->hasAnnotTitle() ? UnicodeParsedString(lm->getAnnotTitle()) : QString());
 
@@ -313,7 +313,7 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionRendition: {
-        ::LinkRendition *lrn = (::LinkRendition *)a;
+        auto *lrn = (::LinkRendition *)a;
 
         Ref reference = Ref::INVALID();
         if (lrn->hasScreenAnnot()) {
@@ -324,31 +324,31 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
     } break;
 
     case actionOCGState: {
-        ::LinkOCGState *plocg = (::LinkOCGState *)a;
+        auto *plocg = (::LinkOCGState *)a;
 
-        LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
+        auto *locgp = new LinkOCGStatePrivate(linkArea, plocg->getStateList(), plocg->getPreserveRB());
         popplerLink = new LinkOCGState(locgp);
     } break;
 
     case actionHide: {
-        ::LinkHide *lh = (::LinkHide *)a;
+        auto *lh = (::LinkHide *)a;
 
-        LinkHidePrivate *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
+        auto *lhp = new LinkHidePrivate(linkArea, lh->hasTargetName() ? UnicodeParsedString(lh->getTargetName()) : QString(), lh->isShowAction());
         popplerLink = new LinkHide(lhp);
     } break;
 
     case actionResetForm: {
-        ::LinkResetForm *lrf = (::LinkResetForm *)a;
+        auto *lrf = (::LinkResetForm *)a;
         std::vector<std::string> stdStringFields = lrf->getFields();
         QStringList qStringFields;
         for (const std::string &str : stdStringFields) {
             qStringFields << QString::fromStdString(str);
         }
-        LinkResetFormPrivate *lrfp = new LinkResetFormPrivate(linkArea, qStringFields, lrf->getExclude());
+        auto *lrfp = new LinkResetFormPrivate(linkArea, qStringFields, lrf->getExclude());
         popplerLink = new LinkResetForm(lrfp);
     } break;
     case actionSubmitForm: {
-        ::LinkSubmitForm *lsf = (::LinkSubmitForm *)a;
+        auto *lsf = (::LinkSubmitForm *)a;
         const std::vector<std::string> &stdStringFields = lsf->getFields();
         QVector<int> fieldIds;
         fieldIds.reserve(stdStringFields.size());
@@ -366,8 +366,8 @@ Link *PageData::convertLinkActionToLink(::LinkAction *a, DocumentData *parentDoc
             }
         }
         QString qStringUrl = QString::fromStdString(lsf->getUrl());
-        LinkSubmitForm::SubmitFormFlags qFlags = static_cast<LinkSubmitForm::SubmitFormFlags>(lsf->getFlags());
-        LinkSubmitFormPrivate *lsfp = new LinkSubmitFormPrivate(linkArea, fieldIds, qStringUrl, qFlags);
+        auto qFlags = static_cast<LinkSubmitForm::SubmitFormFlags>(lsf->getFlags());
+        auto *lsfp = new LinkSubmitFormPrivate(linkArea, fieldIds, qStringUrl, qFlags);
         popplerLink = new LinkSubmitForm(lsfp);
     } break;
 
@@ -476,12 +476,12 @@ static auto annotDisplayDecideCbk = [](Annot *annot, void * /*user_data*/) {
 static bool (*nullAnnotCallBack)(Annot *annot, void *user_data) = nullptr;
 
 static auto shouldAbortRenderInternalCallback = [](void *user_data) {
-    OutputDevCallbackHelper *helper = reinterpret_cast<OutputDevCallbackHelper *>(user_data);
+    auto *helper = reinterpret_cast<OutputDevCallbackHelper *>(user_data);
     return helper->shouldAbortRenderCallback(helper->payload);
 };
 
 static auto shouldAbortExtractionInternalCallback = [](void *user_data) {
-    TextExtractionAbortHelper *helper = reinterpret_cast<TextExtractionAbortHelper *>(user_data);
+    auto *helper = reinterpret_cast<TextExtractionAbortHelper *>(user_data);
     return helper->shouldAbortExtractionCallback(helper->payload);
 };
 
@@ -801,7 +801,7 @@ QList<TextBox *> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbor
         double xMin, yMin, xMax, yMax;
         word->getBBox(&xMin, &yMin, &xMax, &yMax);
 
-        TextBox *text_box = new TextBox(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
+        auto *text_box = new TextBox(string, QRectF(xMin, yMin, xMax - xMin, yMax - yMin));
         text_box->m_data->hasSpaceAfter = word->hasSpaceAfter();
         text_box->m_data->charBBoxes.reserve(word->getLength());
         for (int j = 0; j < word->getLength(); ++j) {

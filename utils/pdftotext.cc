@@ -581,7 +581,7 @@ void printTSVBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
 
                     double lxMin = 1E+37, lyMin = 1E+37;
                     double lxMax = 0, lyMax = 0;
-                    GooString *lineWordsBuffer = new GooString();
+                    auto *lineWordsBuffer = new GooString();
 
                     for (word = line->getWords(); word; word = word->getNext()) {
                         word->getBBox(&xMin, &yMin, &xMax, &yMax);

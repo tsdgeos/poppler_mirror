@@ -31,7 +31,7 @@ QIODevice *BaseConverterPrivate::openDevice()
 {
     if (!iodev) {
         Q_ASSERT(!outputFileName.isEmpty());
-        QFile *f = new QFile(outputFileName);
+        auto *f = new QFile(outputFileName);
         iodev = f;
         ownIodev = true;
     }

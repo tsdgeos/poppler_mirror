@@ -333,7 +333,7 @@ void FormWidgetButton::setState(bool astate)
         }
 
         if (found_related) {
-            FormFieldButton *ffb = static_cast<FormFieldButton *>(wid->getField());
+            auto *ffb = static_cast<FormFieldButton *>(wid->getField());
             if (ffb == nullptr) {
                 error(errInternal, -1, "FormWidgetButton::setState : FormFieldButton expected");
                 continue;
@@ -589,7 +589,7 @@ static bool hashFileRange(FILE *f, CryptoSign::SigningInterface *handler, Goffse
     }
     const int BUF_SIZE = 65536;
 
-    unsigned char *buf = new unsigned char[BUF_SIZE];
+    auto *buf = new unsigned char[BUF_SIZE];
 
     while (start < end) {
         if (Gfseek(f, start, SEEK_SET) != 0) {
@@ -625,7 +625,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
 
     auto sigHandler = backend->createSigningHandler(certNickname, HashAlgorithm::Sha256);
 
-    FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
+    auto *signatureField = static_cast<FormFieldSignature *>(field);
     std::unique_ptr<X509CertificateInfo> certInfo = sigHandler->getCertificateInfo();
     if (!certInfo) {
         error(errInternal, -1, "signDocument: error getting signature info");
@@ -774,7 +774,7 @@ std::optional<CryptoSign::SigningErrorMessage> FormWidgetSignature::signDocument
     getWidgetAnnotation()->generateFieldAppearance();
     getWidgetAnnotation()->updateAppearanceStream();
 
-    ::FormFieldSignature *ffs = static_cast<::FormFieldSignature *>(getField());
+    auto *ffs = static_cast<::FormFieldSignature *>(getField());
     ffs->setCustomAppearanceContent(signatureText);
     ffs->setCustomAppearanceLeftContent(signatureTextLeft);
     ffs->setCustomAppearanceLeftFontSize(leftFontSize);
@@ -849,7 +849,7 @@ bool FormWidgetSignature::updateOffsets(FILE *f, Goffset objStart, Goffset objEn
         return false;
     }
 
-    const size_t bufSize = static_cast<size_t>(objEnd - objStart);
+    const auto bufSize = static_cast<size_t>(objEnd - objStart);
     if (Gfseek(f, objStart, SEEK_SET) != 0) {
         return false;
     }
@@ -1077,7 +1077,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
     obj1 = Form::fieldLookup(dict, "Q");
     if (obj1.isInt()) {
-        const VariableTextQuadding aux = static_cast<VariableTextQuadding>(obj1.getInt());
+        const auto aux = static_cast<VariableTextQuadding>(obj1.getInt());
         hasQuadding = aux == VariableTextQuadding::leftJustified || aux == VariableTextQuadding::centered || aux == VariableTextQuadding::rightJustified;
         if (likely(hasQuadding)) {
             quadding = static_cast<VariableTextQuadding>(aux);
@@ -1464,12 +1464,12 @@ void FormFieldButton::fillChildrenSiblingsID()
     if (!terminal) {
         int numChildren = int(children.size());
         for (int i = 0; i < numChildren; i++) {
-            FormFieldButton *child = dynamic_cast<FormFieldButton *>(children[i].get());
+            auto *child = dynamic_cast<FormFieldButton *>(children[i].get());
             if (child != nullptr) {
                 // Fill the siblings of this node childs
                 child->setNumSiblings(numChildren - 1);
                 for (int j = 0, counter = 0; j < numChildren; j++) {
-                    FormFieldButton *otherChild = dynamic_cast<FormFieldButton *>(children[j].get());
+                    auto *otherChild = dynamic_cast<FormFieldButton *>(children[j].get());
                     if (i == j) {
                         continue;
                     }
@@ -2568,7 +2568,7 @@ Form::Form(PDFDoc *docA) : doc(docA)
 
     obj1 = acroForm->dictLookup("Q");
     if (obj1.isInt()) {
-        const VariableTextQuadding aux = static_cast<VariableTextQuadding>(obj1.getInt());
+        const auto aux = static_cast<VariableTextQuadding>(obj1.getInt());
         if (aux == VariableTextQuadding::leftJustified || aux == VariableTextQuadding::centered || aux == VariableTextQuadding::rightJustified) {
             quadding = static_cast<VariableTextQuadding>(aux);
         }
@@ -2814,7 +2814,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                 fontDescriptor->set("Flags", Object(0)); // Sans Serif
             }
 
-            Array *fontBBox = new Array(xref);
+            auto *fontBBox = new Array(xref);
             fontBBox->add(Object(static_cast<int>(face->bbox.xMin)));
             fontBBox->add(Object(static_cast<int>(face->bbox.yMin)));
             fontBBox->add(Object(static_cast<int>(face->bbox.xMax)));
@@ -2889,7 +2889,7 @@ Form::AddFontResult Form::addFontToDefaultResources(const std::string &filepath,
                     fontsWidths.addWidth(code, static_cast<int>(face->glyph->metrics.horiAdvance));
                 }
             }
-            Array *widths = new Array(xref);
+            auto *widths = new Array(xref);
             for (const auto &segment : fontsWidths.takeSegments()) {
                 std::visit(
                         [&widths, &xref](auto &&s) {

@@ -21,7 +21,7 @@
 // Copyright (C) 2019, 2021, 2025, 2026 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019, 2020 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2025 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2025 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2025, 2026 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 // Copyright (C) 2025 Arnav V <arnav0872@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -45,10 +45,10 @@ class JBIG2MMRDecoder;
 
 //------------------------------------------------------------------------
 
-class JBIG2Stream : public FilterStream
+class JBIG2Stream : public OwnedFilterStream
 {
 public:
-    JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
+    JBIG2Stream(std::unique_ptr<Stream> strA, Object &&globalsStreamA, Object *globalsStreamRefA);
     ~JBIG2Stream() override;
     StreamKind getKind() const override { return strJBIG2; }
     [[nodiscard]] bool rewind() override;

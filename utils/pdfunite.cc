@@ -38,7 +38,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     Object mergeNameArray = mergeNameTree->lookup("Names");
     Object srcNameArray = srcNameTree->lookup("Names");
     if (mergeNameArray.isArray() && srcNameArray.isArray()) {
-        Array *newNameArray = new Array(srcXRef);
+        auto *newNameArray = new Array(srcXRef);
         int j = 0;
         for (int i = 0; i < srcNameArray.arrayGetLength() - 1; i += 2) {
             const Object &key = srcNameArray.arrayGetNF(i);
@@ -77,7 +77,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
         srcNameTree->set("Names", Object(newNameArray));
         doc->markPageObjects(mergeNameTree, srcXRef, countRef, numOffset, oldRefNum, newRefNum);
     } else if (srcNameArray.isNull() && mergeNameArray.isArray()) {
-        Array *newNameArray = new Array(srcXRef);
+        auto *newNameArray = new Array(srcXRef);
         for (int i = 0; i < mergeNameArray.arrayGetLength() - 1; i += 2) {
             const Object &key = mergeNameArray.arrayGetNF(i);
             const Object &value = mergeNameArray.arrayGetNF(i + 1);

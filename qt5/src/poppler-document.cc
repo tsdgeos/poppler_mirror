@@ -73,20 +73,20 @@ namespace Poppler {
 
 Document *Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     // create stream
-    DocumentData *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
+    auto *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
@@ -604,7 +604,7 @@ QDomDocument *Document::toc() const
         return nullptr;
     }
 
-    QDomDocument *toc = new QDomDocument();
+    auto *toc = new QDomDocument();
     m_doc->addTocChildren(toc, toc, items);
 
     return toc;
@@ -629,7 +629,7 @@ LinkDestination *Document::linkDestination(const QString &name)
 {
     const std::unique_ptr<GooString> namedDest = QStringToGooString(name);
     LinkDestinationData ldd(nullptr, namedDest.get(), m_doc, false);
-    LinkDestination *ld = new LinkDestination(ldd);
+    auto *ld = new LinkDestination(ldd);
     return ld;
 }
 

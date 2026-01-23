@@ -16,7 +16,7 @@ void TestLexer::testNumbers()
 {
     char data[] = "0 1 -1 2147483647 -2147483647 2147483648 -2147483648 4294967297 -2147483649 0.1 1.1 -1.1 2147483647.1 -2147483647.1 2147483648.1 -2147483648.1 4294967297.1 -2147483649.1 9223372036854775807 18446744073709551615";
     auto stream = std::make_unique<MemStream>(data, 0, strlen(data), Object::null());
-    Lexer *lexer = new Lexer(nullptr, std::move(stream));
+    auto *lexer = new Lexer(nullptr, std::move(stream));
     QVERIFY(lexer);
 
     Object obj;

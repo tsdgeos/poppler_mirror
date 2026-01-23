@@ -465,7 +465,7 @@ bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
         // page doesn't have annots array,
         // we have to create it
 
-        Array *annotsArray = new Array(xref);
+        auto *annotsArray = new Array(xref);
         annotsArray->add(Object(annotRef));
 
         annotsRef = xref->addIndirectObject(Object(annotsArray));
@@ -492,7 +492,7 @@ bool Page::addAnnot(const std::shared_ptr<Annot> &annot)
     }
     annot->setPage(num, true);
 
-    AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup *>(annot.get());
+    auto *annotMarkup = dynamic_cast<AnnotMarkup *>(annot.get());
     if (annotMarkup) {
         std::shared_ptr<AnnotPopup> annotPopup = annotMarkup->getPopup();
         if (annotPopup) {
@@ -714,7 +714,7 @@ bool Page::loadThumb(unsigned char **data_out, int *width_out, int *height_out, 
         if (!imgstr.rewind()) {
             return false;
         }
-        unsigned char *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
+        auto *pixbufdata = (unsigned char *)gmalloc(pixbufdatasize);
         unsigned char *p = pixbufdata;
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {

@@ -423,7 +423,7 @@ static void printUrlList(PDFDoc *doc)
             for (const std::shared_ptr<AnnotLink> &annot : links->getLinks()) {
                 LinkAction *action = annot->getAction();
                 if (action && action->getKind() == actionURI) {
-                    LinkURI *linkUri = dynamic_cast<LinkURI *>(action);
+                    auto *linkUri = dynamic_cast<LinkURI *>(action);
                     std::string uri = linkUri->getURI();
                     printf("%4d  Annotation    %s\n", pg, uri.c_str());
                 }

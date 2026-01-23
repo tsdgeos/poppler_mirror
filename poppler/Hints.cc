@@ -228,7 +228,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
     auto memStream = std::make_unique<MemStream>(buf.data(), 0, bufLength, Object::null());
 
-    Parser *parser = new Parser(xref, std::move(memStream), true);
+    auto *parser = new Parser(xref, std::move(memStream), true);
 
     int num, gen;
     Object obj;

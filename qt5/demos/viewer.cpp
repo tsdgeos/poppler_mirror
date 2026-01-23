@@ -90,57 +90,57 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent)
     act = helpMenu->addAction(tr("&About"), this, &PdfViewer::slotAbout);
     act = helpMenu->addAction(tr("About &Qt"), this, &PdfViewer::slotAboutQt);
 
-    NavigationToolBar *navbar = new NavigationToolBar(this);
+    auto *navbar = new NavigationToolBar(this);
     addToolBar(navbar);
     m_observers.append(navbar);
 
-    PageView *view = new PageView(this);
+    auto *view = new PageView(this);
     setCentralWidget(view);
     m_observers.append(view);
 
-    InfoDock *infoDock = new InfoDock(this);
+    auto *infoDock = new InfoDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, infoDock);
     infoDock->hide();
     viewMenu->addAction(infoDock->toggleViewAction());
     m_observers.append(infoDock);
 
-    TocDock *tocDock = new TocDock(this);
+    auto *tocDock = new TocDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, tocDock);
     tocDock->hide();
     viewMenu->addAction(tocDock->toggleViewAction());
     m_observers.append(tocDock);
 
-    FontsDock *fontsDock = new FontsDock(this);
+    auto *fontsDock = new FontsDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, fontsDock);
     fontsDock->hide();
     viewMenu->addAction(fontsDock->toggleViewAction());
     m_observers.append(fontsDock);
 
-    PermissionsDock *permissionsDock = new PermissionsDock(this);
+    auto *permissionsDock = new PermissionsDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, permissionsDock);
     permissionsDock->hide();
     viewMenu->addAction(permissionsDock->toggleViewAction());
     m_observers.append(permissionsDock);
 
-    ThumbnailsDock *thumbnailsDock = new ThumbnailsDock(this);
+    auto *thumbnailsDock = new ThumbnailsDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, thumbnailsDock);
     thumbnailsDock->hide();
     viewMenu->addAction(thumbnailsDock->toggleViewAction());
     m_observers.append(thumbnailsDock);
 
-    EmbeddedFilesDock *embfilesDock = new EmbeddedFilesDock(this);
+    auto *embfilesDock = new EmbeddedFilesDock(this);
     addDockWidget(Qt::BottomDockWidgetArea, embfilesDock);
     embfilesDock->hide();
     viewMenu->addAction(embfilesDock->toggleViewAction());
     m_observers.append(embfilesDock);
 
-    MetadataDock *metadataDock = new MetadataDock(this);
+    auto *metadataDock = new MetadataDock(this);
     addDockWidget(Qt::BottomDockWidgetArea, metadataDock);
     metadataDock->hide();
     viewMenu->addAction(metadataDock->toggleViewAction());
     m_observers.append(metadataDock);
 
-    OptContentDock *optContentDock = new OptContentDock(this);
+    auto *optContentDock = new OptContentDock(this);
     addDockWidget(Qt::LeftDockWidgetArea, optContentDock);
     optContentDock->hide();
     viewMenu->addAction(optContentDock->toggleViewAction());

@@ -1046,7 +1046,7 @@ bool document::save_a_copy(const std::string &file_name) const
  */
 document *document::load_from_file(const std::string &file_name, const std::string &owner_password, const std::string &user_password)
 {
-    document_private *doc = new document_private(std::make_unique<GooString>(file_name.c_str()), owner_password, user_password);
+    auto *doc = new document_private(std::make_unique<GooString>(file_name.c_str()), owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }
 
@@ -1066,7 +1066,7 @@ document *document::load_from_data(byte_array *file_data, const std::string &own
         return nullptr;
     }
 
-    document_private *doc = new document_private(file_data, owner_password, user_password);
+    auto *doc = new document_private(file_data, owner_password, user_password);
     return document_private::check_document(doc, file_data);
 }
 
@@ -1090,6 +1090,6 @@ document *document::load_from_raw_data(const char *file_data, int file_data_leng
         return nullptr;
     }
 
-    document_private *doc = new document_private(file_data, file_data_length, owner_password, user_password);
+    auto *doc = new document_private(file_data, file_data_length, owner_password, user_password);
     return document_private::check_document(doc, nullptr);
 }

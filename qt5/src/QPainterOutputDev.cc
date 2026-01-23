@@ -973,7 +973,7 @@ void QPainterOutputDev::drawImageMask(GfxState * /*state*/, Object * /*ref*/, St
 
     // TODO: Would using QImage::Format_Mono be more efficient here?
     QImage image(width, height, QImage::Format_ARGB32);
-    unsigned int *data = reinterpret_cast<unsigned int *>(image.bits());
+    auto *data = reinterpret_cast<unsigned int *>(image.bits());
     int stride = image.bytesPerLine() / 4;
 
     QRgb fillColor = m_currentBrush.color().rgb();
@@ -1082,7 +1082,7 @@ void QPainterOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream
     }
 
     QImage image(width, height, QImage::Format_ARGB32);
-    unsigned int *data = reinterpret_cast<unsigned int *>(image.bits());
+    auto *data = reinterpret_cast<unsigned int *>(image.bits());
     int stride = image.bytesPerLine() / 4;
 
     std::vector<unsigned char> maskLine(maskWidth);

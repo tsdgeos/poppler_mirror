@@ -653,7 +653,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
         return nullptr;
     }
 
-    Attribute *attribute = new Attribute(std::move(name), &value);
+    auto *attribute = new Attribute(std::move(name), &value);
     obj = property->lookup("F");
     if (obj.isString()) {
         attribute->setFormattedValue(obj.getString());
@@ -1188,7 +1188,7 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
                     if (t != Attribute::Unknown) {
                         Object value = attributes->getVal(i);
                         bool typeCheckOk = true;
-                        Attribute *attribute = new Attribute(t, &value);
+                        auto *attribute = new Attribute(t, &value);
 
                         if (attribute->isOk() && (typeCheckOk = attribute->checkType(this))) {
                             appendAttribute(attribute);
