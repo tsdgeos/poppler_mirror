@@ -113,10 +113,6 @@
 #include "annot_stamp_for_public_release.h"
 #include "annot_stamp_draft.h"
 
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
-
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
@@ -1830,7 +1826,7 @@ void AnnotAppearanceBuilder::drawLineEndDiamond(double x, double y, double size,
 
 void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix &m)
 {
-    const double alpha { M_PI / 6. };
+    const double alpha { std::numbers::pi / 6. };
     const double xOffs { orientation * size };
     const double yOffs { tan(alpha) * size };
     double tx, ty;
@@ -1852,7 +1848,7 @@ void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, i
 void AnnotAppearanceBuilder::drawLineEndSlash(double x, double y, double size, const Matrix &m)
 {
     const double halfSize { size / 2. };
-    const double xOffs { cos(M_PI / 3.) * halfSize };
+    const double xOffs { cos(std::numbers::pi / 3.) * halfSize };
     double tx, ty;
 
     m.transform(x - xOffs, y - halfSize, &tx, &ty);
@@ -1923,7 +1919,7 @@ double AnnotAppearanceBuilder::lineEndingXExtendBBox(AnnotLineEndingStyle ending
     case annotLineEndingROpenArrow:
         return size;
     case annotLineEndingSlash:
-        return cos(M_PI / 3.) * size / 2.;
+        return cos(std::numbers::pi / 3.) * size / 2.;
     default:
         break;
     }

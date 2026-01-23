@@ -66,6 +66,7 @@
 #include <cstring>
 #include <cmath>
 #include <memory>
+#include <numbers>
 #include "goo/GooTimer.h"
 #include "GlobalParams.h"
 #include "CharTypes.h"
@@ -88,11 +89,6 @@
 #include "OptionalContent.h"
 #if ENABLE_LIBOPENJPEG
 #    include "JPEG2000Stream.h"
-#endif
-
-// the MSVC math.h doesn't define this
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
 #endif
 
 //------------------------------------------------------------------------
@@ -3065,7 +3061,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
         if (unlikely(tmp == 1)) {
             n = 200;
         } else {
-            n = (int)(M_PI / acos(tmp));
+            n = (int)(std::numbers::pi / acos(tmp));
         }
         if (n < 3) {
             n = 3;
@@ -3144,7 +3140,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct path for first circle (counterclockwise)
                 state->moveTo(xa + ra, ya);
                 for (k = 1; k < n; ++k) {
-                    angle = ((double)k / (double)n) * 2 * M_PI;
+                    angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3152,31 +3148,31 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
                 // construct and append path for second circle (clockwise)
                 state->moveTo(xb + rb, yb);
                 for (k = 1; k < n; ++k) {
-                    angle = -((double)k / (double)n) * 2 * M_PI;
+                    angle = -((double)k / (double)n) * 2 * std::numbers::pi;
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 state->closePath();
             } else {
                 // construct the first subpath (clockwise)
-                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * M_PI), ya + ra * sin(alpha + theta + 0.5 * M_PI));
+                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * M_PI - ((double)k / (double)n) * (2 * theta + M_PI);
+                    angle = alpha + theta + 0.5 * std::numbers::pi - ((double)k / (double)n) * (2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * M_PI + ((double)k / (double)n) * (2 * theta - M_PI);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta - std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
 
                 // construct the second subpath (counterclockwise)
-                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * M_PI), ya + ra * sin(alpha + theta + 0.5 * M_PI));
+                state->moveTo(xa + ra * cos(alpha + theta + 0.5 * std::numbers::pi), ya + ra * sin(alpha + theta + 0.5 * std::numbers::pi));
                 for (k = 0; k < n; ++k) {
-                    angle = alpha + theta + 0.5 * M_PI + ((double)k / (double)n) * (-2 * theta + M_PI);
+                    angle = alpha + theta + 0.5 * std::numbers::pi + ((double)k / (double)n) * (-2 * theta + std::numbers::pi);
                     state->lineTo(xb + rb * cos(angle), yb + rb * sin(angle));
                 }
                 for (k = 0; k < n; ++k) {
-                    angle = alpha - theta - 0.5 * M_PI + ((double)k / (double)n) * (2 * theta + M_PI);
+                    angle = alpha - theta - 0.5 * std::numbers::pi + ((double)k / (double)n) * (2 * theta + std::numbers::pi);
                     state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
                 }
                 state->closePath();
@@ -3238,7 +3234,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             out->updateFillColor(state);
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * M_PI;
+                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -3269,7 +3265,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading)
             state->closePath();
             state->moveTo(xa + ra, ya);
             for (k = 1; k < n; ++k) {
-                angle = ((double)k / (double)n) * 2 * M_PI;
+                angle = ((double)k / (double)n) * 2 * std::numbers::pi;
                 state->lineTo(xa + ra * cos(angle), ya + ra * sin(angle));
             }
             state->closePath();
@@ -5227,7 +5223,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor, double
 
     // Rotation around the topleft corner (for the NoRotate flag)
     if (rotate != 0) {
-        const double angle_rad = rotate * M_PI / 180;
+        const double angle_rad = rotate * std::numbers::pi / 180;
         const double c = cos(angle_rad);
         const double s = sin(angle_rad);
 

@@ -38,6 +38,7 @@
 #include <climits>
 #include <cassert>
 #include <cmath>
+#include <numbers>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "poppler/GfxState.h"
@@ -55,11 +56,6 @@
 #include "SplashGlyphBitmap.h"
 #include "Splash.h"
 #include <algorithm>
-
-// the MSVC math.h doesn't define this
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
 
 //------------------------------------------------------------------------
 
@@ -6110,9 +6106,9 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
                     SplashCoord angle = atan2((double)dx, (double)-dy);
                     SplashCoord angleNext = atan2((double)dxNext, (double)-dyNext);
                     if (angle < angleNext) {
-                        angle += 2 * M_PI;
+                        angle += 2 * std::numbers::pi;
                     }
-                    SplashCoord dAngle = (angle - angleNext) / M_PI;
+                    SplashCoord dAngle = (angle - angleNext) / std::numbers::pi;
                     if (dAngle < 0.501) {
                         // span angle is <= 90 degrees -> draw a single arc
                         SplashCoord kappa = dAngle * bezierCircle * w;
@@ -6152,9 +6148,9 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
                     SplashCoord angle = atan2((double)-dx, (double)dy);
                     SplashCoord angleNext = atan2((double)-dxNext, (double)dyNext);
                     if (angleNext < angle) {
-                        angleNext += 2 * M_PI;
+                        angleNext += 2 * std::numbers::pi;
                     }
-                    SplashCoord dAngle = (angleNext - angle) / M_PI;
+                    SplashCoord dAngle = (angleNext - angle) / std::numbers::pi;
                     if (dAngle < 0.501) {
                         // span angle is <= 90 degrees -> draw a single arc
                         SplashCoord kappa = dAngle * bezierCircle * w;

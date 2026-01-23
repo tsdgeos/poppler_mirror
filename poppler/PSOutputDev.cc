@@ -57,6 +57,7 @@
 #include <climits>
 #include <algorithm>
 #include <array>
+#include <numbers>
 #include "goo/GooString.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
@@ -91,11 +92,6 @@
 
 #if USE_CMS
 #    include <lcms2.h>
-#endif
-
-// the MSVC math.h doesn't define this
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
 #endif
 
 //------------------------------------------------------------------------
@@ -4531,8 +4527,8 @@ bool PSOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, d
         a2 = 360;
     } else {
         alpha = atan2(y1 - y0, x1 - x0);
-        a1 = (180 / M_PI) * (alpha + theta) + 90;
-        a2 = (180 / M_PI) * (alpha - theta) - 90;
+        a1 = (180 / std::numbers::pi) * (alpha + theta) + 90;
+        a2 = (180 / std::numbers::pi) * (alpha - theta) - 90;
         while (a2 < a1) {
             a2 += 360;
         }
