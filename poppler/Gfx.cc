@@ -96,44 +96,44 @@
 //------------------------------------------------------------------------
 
 // Max recursive depth for a function shading fill.
-#define functionMaxDepth 6
+constexpr int functionMaxDepth = 6;
 
 // Max delta allowed in any color component for a function shading fill.
-#define functionColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp functionColorDelta = dblToCol(1 / 256.0);
 
 // Max number of splits along the t axis for an axial shading fill.
-#define axialMaxSplits 256
+constexpr int axialMaxSplits = 256;
 
 // Max delta allowed in any color component for an axial shading fill.
-#define axialColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp axialColorDelta = dblToCol(1 / 256.0);
 
 // Max number of splits along the t axis for a radial shading fill.
-#define radialMaxSplits 256
+constexpr int radialMaxSplits = 256;
 
 // Max delta allowed in any color component for a radial shading fill.
-#define radialColorDelta (dblToCol(1 / 256.0))
+constexpr GfxColorComp radialColorDelta = dblToCol(1 / 256.0);
 
 // Max recursive depth for a Gouraud triangle shading fill.
 //
 // Triangles will be split at most gouraudMaxDepth times (each time into 4
 // smaller ones). That makes pow(4,gouraudMaxDepth) many triangles for
 // every triangle.
-#define gouraudMaxDepth 6
+constexpr int gouraudMaxDepth = 6;
 
 // Max delta allowed in any color component for a Gouraud triangle
 // shading fill.
-#define gouraudColorDelta (dblToCol(3. / 256.0))
+constexpr GfxColorComp gouraudColorDelta = dblToCol(3. / 256.0);
 
 // Gouraud triangle: if the three color parameters differ by at more than this percend of
 // the total color parameter range, the triangle will be refined
-#define gouraudParameterizedColorDelta 5e-3
+constexpr double gouraudParameterizedColorDelta = 5e-3;
 
 // Max recursive depth for a patch mesh shading fill.
-#define patchMaxDepth 6
+constexpr int patchMaxDepth = 6;
 
 // Max delta allowed in any color component for a patch mesh shading
 // fill.
-#define patchColorDelta (dblToCol((3. / 256.0)))
+constexpr GfxColorComp patchColorDelta = dblToCol((3. / 256.0));
 
 //------------------------------------------------------------------------
 // Operator table
@@ -222,8 +222,6 @@ const Operator Gfx::opTab[] = {
     { .name = "w", .numArgs = 1, .tchk = { tchkNum }, .func = &Gfx::opSetLineWidth },
     { .name = "y", .numArgs = 4, .tchk = { tchkNum, tchkNum, tchkNum, tchkNum }, .func = &Gfx::opCurveTo2 },
 };
-
-#define numOps (sizeof(opTab) / sizeof(Operator))
 
 static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, unsigned int nComps, double delta)
 {
@@ -783,6 +781,8 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs)
 
 const Operator *Gfx::findOp(const char *name)
 {
+    constexpr int numOps = sizeof(opTab) / sizeof(Operator);
+
     int a, b, m, cmp;
 
     a = -1;

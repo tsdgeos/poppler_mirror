@@ -116,7 +116,7 @@ using GfxColorComp = int;
 
 #define gfxColorComp1 0x10000
 
-static inline GfxColorComp dblToCol(double x)
+static constexpr GfxColorComp dblToCol(double x)
 {
     return (GfxColorComp)(x * gfxColorComp1);
 }

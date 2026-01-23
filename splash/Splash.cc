@@ -136,8 +136,6 @@ struct ImageSection
 // SplashPipe
 //------------------------------------------------------------------------
 
-#define splashPipeMaxStages 9
-
 struct SplashPipe
 {
     // pixel coordinates

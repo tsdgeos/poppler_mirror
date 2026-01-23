@@ -488,9 +488,9 @@ bool SplashAxialPattern::getParameter(double xc, double yc, double *t) const
 
 //------------------------------------------------------------------------
 // Type 3 font cache size parameters
-#define type3FontCacheAssoc 8
-#define type3FontCacheMaxSets 8
-#define type3FontCacheSize (128 * 1024)
+constexpr int type3FontCacheAssoc = 8;
+constexpr int type3FontCacheMaxSets = 8;
+constexpr int type3FontCacheSize = 128 * 1024;
 
 //------------------------------------------------------------------------
 // Divide a 16-bit value (in [0, 255*255]) by 255, returning an 8-bit result.

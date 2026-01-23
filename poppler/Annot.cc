@@ -114,8 +114,9 @@
 #include "annot_stamp_draft.h"
 
 // distance of Bezier control point from center for circle approximation
-// = (4 * (sqrt(2) - 1) / 3) * r
-#define bezierCircle 0.55228475
+// TODO uncomment when we can depend on C++26
+// constexpr double bezierCircle = (4 * (sqrt(2) - 1) / 3);
+constexpr double bezierCircle = 0.55228475;
 
 static AnnotLineEndingStyle parseAnnotLineEndingStyle(const Object &name)
 {

@@ -6,7 +6,7 @@
 //
 // Copyright 2020 sgerwk <sgerwk@aol.com>
 // Copyright 2022 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright 2025 Albert Astals Cid <aacid@kde.org>
+// Copyright 2025, 2026 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -14,8 +14,7 @@
 #include <BBoxOutputDev.h>
 #include <GfxFont.h>
 
-#define writingModeHorizontal 0
-#define writingModeVertical 1
+constexpr int writingModeHorizontal = 0;
 
 BBoxOutputDev::BBoxOutputDev() : BBoxOutputDev(true, true, true) { }
 
