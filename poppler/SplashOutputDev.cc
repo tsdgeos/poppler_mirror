@@ -1381,8 +1381,8 @@ void SplashOutputDev::startPage(int /*pageNum*/, GfxState *state, XRef *xrefA)
     }
     splash->setStrokePattern(new SplashSolidColor(color));
     splash->setFillPattern(new SplashSolidColor(color));
-    splash->setLineCap(splashLineCapButt);
-    splash->setLineJoin(splashLineJoinMiter);
+    splash->setLineCap(SplashLineCap::Butt);
+    splash->setLineJoin(SplashLineJoin::Miter);
     splash->setLineDash({}, 0);
     splash->setMiterLimit(10);
     splash->setFlatness(1);
@@ -1474,12 +1474,18 @@ void SplashOutputDev::updateFlatness(GfxState * /*state*/)
 
 void SplashOutputDev::updateLineJoin(GfxState *state)
 {
-    splash->setLineJoin(state->getLineJoin());
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinMitre) == SplashLineJoin::Miter);
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinRound) == SplashLineJoin::Round);
+    static_assert(static_cast<SplashLineJoin>(GfxState::LineJoinBevel) == SplashLineJoin::Bevel);
+    splash->setLineJoin(static_cast<SplashLineJoin>(state->getLineJoin()));
 }
 
 void SplashOutputDev::updateLineCap(GfxState *state)
 {
-    splash->setLineCap(state->getLineCap());
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapButt) == SplashLineCap::Butt);
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapRound) == SplashLineCap::Round);
+    static_assert(static_cast<SplashLineCap>(GfxState::LineCapProjecting) == SplashLineCap::Projecting);
+    splash->setLineCap(static_cast<SplashLineCap>(state->getLineCap()));
 }
 
 void SplashOutputDev::updateMiterLimit(GfxState *state)

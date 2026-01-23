@@ -1518,12 +1518,12 @@ SplashCoord Splash::getLineWidth()
     return state->lineWidth;
 }
 
-int Splash::getLineCap()
+SplashLineCap Splash::getLineCap()
 {
     return state->lineCap;
 }
 
-int Splash::getLineJoin()
+SplashLineJoin Splash::getLineJoin()
 {
     return state->lineJoin;
 }
@@ -1631,12 +1631,12 @@ void Splash::setLineWidth(SplashCoord lineWidth)
     state->lineWidth = lineWidth;
 }
 
-void Splash::setLineCap(int lineCap)
+void Splash::setLineCap(SplashLineCap lineCap)
 {
     state->lineCap = lineCap;
 }
 
-void Splash::setLineJoin(int lineJoin)
+void Splash::setLineJoin(SplashLineJoin lineJoin)
 {
     state->lineJoin = lineJoin;
 }
@@ -5967,7 +5967,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
             j1 = j0;
         }
         if (pathIn->flags[i1] & splashPathLast) {
-            if (first && state->lineCap == splashLineCapRound) {
+            if (first && state->lineCap == SplashLineCap::Round) {
                 // special case: zero-length subpath with round line caps -->
                 // draw a circle
                 pathOut->moveTo(pathIn->pts[i0].x + (SplashCoord)0.5 * w, pathIn->pts[i0].y);
@@ -6011,16 +6011,16 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
         }
         if (first && !closed) {
             switch (state->lineCap) {
-            case splashLineCapButt:
+            case SplashLineCap::Butt:
                 pathOut->lineTo(pathIn->pts[i0].x + wdy, pathIn->pts[i0].y - wdx);
                 break;
-            case splashLineCapRound:
+            case SplashLineCap::Round:
                 pathOut->curveTo(pathIn->pts[i0].x - wdy - bezierCircle * wdx, pathIn->pts[i0].y + wdx - bezierCircle * wdy, pathIn->pts[i0].x - wdx - bezierCircle * wdy, pathIn->pts[i0].y - wdy + bezierCircle * wdx,
                                  pathIn->pts[i0].x - wdx, pathIn->pts[i0].y - wdy);
                 pathOut->curveTo(pathIn->pts[i0].x - wdx + bezierCircle * wdy, pathIn->pts[i0].y - wdy - bezierCircle * wdx, pathIn->pts[i0].x + wdy - bezierCircle * wdx, pathIn->pts[i0].y - wdx - bezierCircle * wdy,
                                  pathIn->pts[i0].x + wdy, pathIn->pts[i0].y - wdx);
                 break;
-            case splashLineCapProjecting:
+            case SplashLineCap::Projecting:
                 pathOut->lineTo(pathIn->pts[i0].x - wdx - wdy, pathIn->pts[i0].y + wdx - wdy);
                 pathOut->lineTo(pathIn->pts[i0].x - wdx + wdy, pathIn->pts[i0].y - wdx - wdy);
                 pathOut->lineTo(pathIn->pts[i0].x + wdy, pathIn->pts[i0].y - wdx);
@@ -6037,16 +6037,16 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
         // draw the end cap
         if (last && !closed) {
             switch (state->lineCap) {
-            case splashLineCapButt:
+            case SplashLineCap::Butt:
                 pathOut->lineTo(pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
                 break;
-            case splashLineCapRound:
+            case SplashLineCap::Round:
                 pathOut->curveTo(pathIn->pts[j0].x + wdy + bezierCircle * wdx, pathIn->pts[j0].y - wdx + bezierCircle * wdy, pathIn->pts[j0].x + wdx + bezierCircle * wdy, pathIn->pts[j0].y + wdy - bezierCircle * wdx,
                                  pathIn->pts[j0].x + wdx, pathIn->pts[j0].y + wdy);
                 pathOut->curveTo(pathIn->pts[j0].x + wdx - bezierCircle * wdy, pathIn->pts[j0].y + wdy + bezierCircle * wdx, pathIn->pts[j0].x - wdy + bezierCircle * wdx, pathIn->pts[j0].y + wdx + bezierCircle * wdy,
                                  pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
                 break;
-            case splashLineCapProjecting:
+            case SplashLineCap::Projecting:
                 pathOut->lineTo(pathIn->pts[j0].x + wdy + wdx, pathIn->pts[j0].y - wdx + wdy);
                 pathOut->lineTo(pathIn->pts[j0].x - wdy + wdx, pathIn->pts[j0].y + wdx + wdy);
                 pathOut->lineTo(pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
@@ -6098,7 +6098,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
             // hasangle == false means that the current and and the next segment
             // are parallel.  In that case no join needs to be drawn.
             // round join
-            if (hasangle && state->lineJoin == splashLineJoinRound) {
+            if (hasangle && state->lineJoin == SplashLineJoin::Round) {
                 // join angle < 180
                 if (crossprod < 0) {
                     SplashCoord angle = atan2((double)dx, (double)-dy);
@@ -6191,7 +6191,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
                 if (crossprod < 0) {
                     pathOut->lineTo(pathIn->pts[j0].x - wdyNext, pathIn->pts[j0].y + wdxNext);
                     // miter join inside limit
-                    if (state->lineJoin == splashLineJoinMiter && splashSqrt(miter) <= state->miterLimit) {
+                    if (state->lineJoin == SplashLineJoin::Miter && splashSqrt(miter) <= state->miterLimit) {
                         pathOut->lineTo(pathIn->pts[j0].x - wdy + wdx * m, pathIn->pts[j0].y + wdx + wdy * m);
                         pathOut->lineTo(pathIn->pts[j0].x - wdy, pathIn->pts[j0].y + wdx);
                         // bevel join or miter join outside limit
@@ -6203,7 +6203,7 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
                 } else {
                     pathOut->lineTo(pathIn->pts[j0].x + wdy, pathIn->pts[j0].y - wdx);
                     // miter join inside limit
-                    if (state->lineJoin == splashLineJoinMiter && splashSqrt(miter) <= state->miterLimit) {
+                    if (state->lineJoin == SplashLineJoin::Miter && splashSqrt(miter) <= state->miterLimit) {
                         pathOut->lineTo(pathIn->pts[j0].x + wdy + wdx * m, pathIn->pts[j0].y - wdx + wdy * m);
                         pathOut->lineTo(pathIn->pts[j0].x + wdyNext, pathIn->pts[j0].y - wdxNext);
                         // bevel join or miter join outside limit
@@ -6219,12 +6219,12 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
         // add stroke adjustment hints
         if (state->strokeAdjust) {
             if (seg == 0 && !closed) {
-                if (state->lineCap == splashLineCapButt) {
+                if (state->lineCap == SplashLineCap::Butt) {
                     pathOut->addStrokeAdjustHint(firstPt, left2 + 1, firstPt, firstPt + 1);
                     if (last) {
                         pathOut->addStrokeAdjustHint(firstPt, left2 + 1, left2 + 1, left2 + 2);
                     }
-                } else if (state->lineCap == splashLineCapProjecting) {
+                } else if (state->lineCap == SplashLineCap::Projecting) {
                     if (last) {
                         pathOut->addStrokeAdjustHint(firstPt + 1, left2 + 2, firstPt + 1, firstPt + 2);
                         pathOut->addStrokeAdjustHint(firstPt + 1, left2 + 2, left2 + 2, left2 + 3);
@@ -6266,9 +6266,9 @@ std::unique_ptr<SplashPath> Splash::makeStrokePath(const SplashPath &path, Splas
                     pathOut->addStrokeAdjustHint(leftFirst, rightFirst, join1, pathOut->length - 1);
                 }
                 if (!closed && seg > 0) {
-                    if (state->lineCap == splashLineCapButt) {
+                    if (state->lineCap == SplashLineCap::Butt) {
                         pathOut->addStrokeAdjustHint(left1 - 1, left1 + 1, left1 + 1, left1 + 2);
-                    } else if (state->lineCap == splashLineCapProjecting) {
+                    } else if (state->lineCap == SplashLineCap::Projecting) {
                         pathOut->addStrokeAdjustHint(left1 - 1, left1 + 2, left1 + 2, left1 + 3);
                     }
                 }
