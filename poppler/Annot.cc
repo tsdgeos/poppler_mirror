@@ -117,26 +117,6 @@
 #    define M_PI 3.14159265358979323846
 #endif
 
-#define fieldFlagReadOnly 0x00000001
-#define fieldFlagRequired 0x00000002
-#define fieldFlagNoExport 0x00000004
-#define fieldFlagMultiline 0x00001000
-#define fieldFlagPassword 0x00002000
-#define fieldFlagNoToggleToOff 0x00004000
-#define fieldFlagRadio 0x00008000
-#define fieldFlagPushbutton 0x00010000
-#define fieldFlagCombo 0x00020000
-#define fieldFlagEdit 0x00040000
-#define fieldFlagSort 0x00080000
-#define fieldFlagFileSelect 0x00100000
-#define fieldFlagMultiSelect 0x00200000
-#define fieldFlagDoNotSpellCheck 0x00400000
-#define fieldFlagDoNotScroll 0x00800000
-#define fieldFlagComb 0x01000000
-#define fieldFlagRichText 0x02000000
-#define fieldFlagRadiosInUnison 0x02000000
-#define fieldFlagCommitOnSelChange 0x04000000
-
 // distance of Bezier control point from center for circle approximation
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
