@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
- * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, 2026 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2024 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -173,8 +173,8 @@ QVector<OutlineItem> OutlineItem::children() const
     if (::OutlineItem *data = m_data->data) {
         data->open();
         if (const std::vector<::OutlineItem *> *kids = data->getKids()) {
-            for (void *kid : *kids) {
-                result.push_back(OutlineItem { new OutlineItemData { static_cast<::OutlineItem *>(kid), m_data->documentData } });
+            for (::OutlineItem *kid : *kids) {
+                result.push_back(OutlineItem { new OutlineItemData { kid, m_data->documentData } });
             }
         }
     }
